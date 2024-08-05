@@ -945,6 +945,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         urlnum = state->urlnum;
 
       if(state->up < state->infilenum) {
+        char ssl_ver[80] = "no ssl";
         struct per_transfer *per = NULL;
         struct OutStruct *outs;
         struct OutStruct *heads;
@@ -1654,6 +1655,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             my_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
         }
 
+        {
+          /* get current SSL backend, chop off multissl */
+          const char *v = curl_version_info(CURLVERSION_NOW)->ssl_version;
+          if(v)
+            msnprintf(ssl_ver, sizeof(ssl_ver),
+                      "%.*s", (int) strcspn(v, " "), v);
+        }
+
         if(config->cacert)
           my_setopt_str(curl, CURLOPT_CAINFO, config->cacert);
         if(config->proxy_cacert)
@@ -1662,9 +1671,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->capath) {
           result = res_setopt_str(curl, CURLOPT_CAPATH, config->capath);
           if(result == CURLE_NOT_BUILT_IN) {
-            warnf(global, "ignoring %s, not supported by libcurl",
-                  capath_from_env?
-                  "SSL_CERT_DIR environment variable":"--capath");
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  capath_from_env ?
+                  "SSL_CERT_DIR environment variable" : "--capath",
+                  ssl_ver);
           }
           else if(result)
             break;
@@ -1679,8 +1689,10 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           if((result == CURLE_NOT_BUILT_IN) ||
              (result == CURLE_UNKNOWN_OPTION)) {
             if(config->proxy_capath) {
-              warnf(global,
-                    "ignoring --proxy-capath, not supported by libcurl");
+              warnf(global, "ignoring %s, not supported by libcurl with %s",
+                    config->proxy_capath ?
+                    "--proxy-capath" : "--capath",
+                    ssl_ver);
             }
           }
           else if(result)
@@ -1698,8 +1710,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                 blob.len);
           result = curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
           if(result == CURLE_NOT_BUILT_IN) {
-            warnf(global,
-                  "ignoring embedded CA bundle, not supported by libcurl");
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "embedded CA bundle", ssl_ver);
           }
         }
         if(!config->proxy_cacert && !config->proxy_capath) {
@@ -1712,8 +1724,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                 blob.len);
           result = curl_easy_setopt(curl, CURLOPT_PROXY_CAINFO_BLOB, &blob);
           if(result == CURLE_NOT_BUILT_IN) {
-            warnf(global,
-                  "ignoring embedded CA bundle, not supported by libcurl");
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "embedded CA bundle", ssl_ver);
           }
         }
 #endif
@@ -1725,8 +1737,13 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         else if(config->crlfile) /* CURLOPT_PROXY_CRLFILE default is crlfile */
           my_setopt_str(curl, CURLOPT_PROXY_CRLFILE, config->crlfile);
 
-        if(config->pinnedpubkey)
-          my_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY, config->pinnedpubkey);
+        if(config->pinnedpubkey) {
+          result = res_setopt_str(curl, CURLOPT_PINNEDPUBLICKEY,
+                                  config->pinnedpubkey);
+          if(result == CURLE_NOT_BUILT_IN)
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "--pinnedpubkey", ssl_ver);
+        }
 
         if(config->ssl_ec_curves)
           my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
@@ -2043,19 +2060,34 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->doh_url)
           my_setopt_str(curl, CURLOPT_DOH_URL, config->doh_url);
 
-        if(config->cipher_list)
-          my_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST, config->cipher_list);
-
-        if(config->proxy_cipher_list)
-          my_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
-                        config->proxy_cipher_list);
-
-        if(config->cipher13_list)
-          my_setopt_str(curl, CURLOPT_TLS13_CIPHERS, config->cipher13_list);
-
-        if(config->proxy_cipher13_list)
-          my_setopt_str(curl, CURLOPT_PROXY_TLS13_CIPHERS,
-                        config->proxy_cipher13_list);
+        if(config->cipher_list) {
+          result = res_setopt_str(curl, CURLOPT_SSL_CIPHER_LIST,
+                                  config->cipher_list);
+          if(result == CURLE_NOT_BUILT_IN)
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "--ciphers", ssl_ver);
+        }
+        if(config->proxy_cipher_list) {
+          result = res_setopt_str(curl, CURLOPT_PROXY_SSL_CIPHER_LIST,
+                                  config->proxy_cipher_list);
+          if(result == CURLE_NOT_BUILT_IN)
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "--proxy-ciphers", ssl_ver);
+        }
+        if(config->cipher13_list) {
+          result = res_setopt_str(curl, CURLOPT_TLS13_CIPHERS,
+                                  config->cipher13_list);
+          if(result == CURLE_NOT_BUILT_IN)
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "--tls13-ciphers", ssl_ver);
+        }
+        if(config->proxy_cipher13_list) {
+          result = res_setopt_str(curl, CURLOPT_PROXY_TLS13_CIPHERS,
+                                  config->proxy_cipher13_list);
+          if(result == CURLE_NOT_BUILT_IN)
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "--proxy-tls13-ciphers", ssl_ver);
+        }
 
         /* new in libcurl 7.9.2: */
         if(config->disable_epsv)
