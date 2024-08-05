@@ -37,7 +37,7 @@
 /* curl stuff */
 #include <curl/curl.h>
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 

@@ -36,7 +36,7 @@
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #define snprintf _snprintf
 #endif
 
