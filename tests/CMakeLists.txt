@@ -24,6 +24,9 @@
 set(CMAKE_UNITY_BUILD OFF)
 
 find_program(TEST_NGHTTPX "nghttpx")
+if(NOT TEST_NGHTTPX_FOUND)
+  set(TEST_NGHTTPX "nghttpx")
+endif()
 # TEST_NGHTTPX
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
