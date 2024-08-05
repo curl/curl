@@ -25,13 +25,13 @@
  * TLS session reuse
  * </DESC>
  */
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 /* #include <error.h> */
 #include <errno.h>
-
-#include <curl/curl.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf

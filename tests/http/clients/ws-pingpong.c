@@ -25,13 +25,13 @@
  * Websockets pingpong
  * </DESC>
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /* curl stuff */
 #include "curl_setup.h"
 #include <curl/curl.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN

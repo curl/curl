@@ -25,13 +25,13 @@
  * Websockets data echos
  * </DESC>
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 /* curl stuff */
 #include "curl_setup.h"
 #include <curl/curl.h>
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 #ifdef USE_WEBSOCKETS
 

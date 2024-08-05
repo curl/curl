@@ -27,6 +27,8 @@
  */
 /* This is based on the PoC client of issue #11982
  */
+#include <curl/curl.h>
+
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
@@ -36,8 +38,6 @@
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
 #endif
-
-#include <curl/curl.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf

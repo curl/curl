@@ -25,12 +25,12 @@
  * HTTP/2 Upgrade test
  * </DESC>
  */
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 /* #include <error.h> */
 #include <errno.h>
-
-#include <curl/curl.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf

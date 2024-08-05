@@ -25,6 +25,9 @@
  * HTTP/2 server push
  * </DESC>
  */
+/* curl stuff */
+#include <curl/curl.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,9 +36,6 @@
 /* somewhat Unix-specific */
 #include <unistd.h>  /* getopt() */
 #endif
-
-/* curl stuff */
-#include <curl/curl.h>
 
 #ifdef _MSC_VER
 #define snprintf _snprintf
