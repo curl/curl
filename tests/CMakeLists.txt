@@ -31,11 +31,11 @@ endif()
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
 add_custom_target(testdeps)
-add_subdirectory(libtest)
-add_subdirectory(server)
-add_subdirectory(unit)
 add_subdirectory(http)
 add_subdirectory(http/clients)
+add_subdirectory(server)
+add_subdirectory(libtest)
+add_subdirectory(unit)
 
 function(add_runtests targetname test_flags)
   # Use a special '$TFLAGS' placeholder as last argument which will be
