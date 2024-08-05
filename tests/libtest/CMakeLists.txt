@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(TARGET_LABEL_PREFIX "Test ")
+set(_target_label_prefix "Test ")
 
 function(setup_test test_name)  # ARGN are the files in the test
 
@@ -48,7 +48,7 @@ function(setup_test test_name)  # ARGN are the files in the test
   set_target_properties(${test_name}
     PROPERTIES COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
   set_target_properties(${test_name}
-    PROPERTIES PROJECT_LABEL "${TARGET_LABEL_PREFIX}${test_name}")
+    PROPERTIES PROJECT_LABEL "${_target_label_prefix}${test_name}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES' variables
