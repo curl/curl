@@ -2763,7 +2763,7 @@ case $host_os in
     AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
     AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
       [OPT_IDN=$withval])
-    if test "x$want_idn" != "xno"; then
+    if test "x$want_idn" != "xno" -a "x$OPT_IDN" != "xyes"; then
       want_appleidn="no"
     else
       case "$OPT_IDN" in
