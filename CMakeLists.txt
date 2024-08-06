@@ -449,7 +449,7 @@ count_true(_enabled_ssl_options_count
   CURL_USE_WOLFSSL
   CURL_USE_GNUTLS
 )
-if(_enabled_ssl_options_count GREATER "1")
+if(_enabled_ssl_options_count GREATER 1)
   set(CURL_WITH_MULTI_SSL ON)
 endif()
 
