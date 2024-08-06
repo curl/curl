@@ -46,6 +46,14 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
+set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
+include(Utilities)
+include(Macros)
+include(CMakeDependentOption)
+include(CheckCCompilerFlag)
+
+project(CURL C)
+
 set(_flags)
 if(APPLE)
   set(_flags "${_flags} APPLE")
@@ -72,14 +80,6 @@ if(MSVC)
   set(_flags "${_flags} MSVC")
 endif()
 message(STATUS "CMake platform flags:${_flags}")
-
-set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
-include(Utilities)
-include(Macros)
-include(CMakeDependentOption)
-include(CheckCCompilerFlag)
-
-project(CURL C)
 
 file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
 string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
