@@ -30,7 +30,7 @@ function(setup_test test_name)  # ARGN are the files in the test
 
   add_executable(${test_name} EXCLUDE_FROM_ALL ${ARGN})
   add_dependencies(testdeps ${test_name})
-  string(TOUPPER ${test_name} UPPER_TEST_NAME)
+  string(TOUPPER ${test_name} _upper_test_name)
 
   include_directories(
     "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
@@ -44,7 +44,7 @@ function(setup_test test_name)  # ARGN are the files in the test
   target_link_libraries(${test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
   set_target_properties(${test_name} PROPERTIES
-    COMPILE_DEFINITIONS ${UPPER_TEST_NAME}
+    COMPILE_DEFINITIONS ${_upper_test_name}
     PROJECT_LABEL "Test ${test_name}")
 endfunction()
 
