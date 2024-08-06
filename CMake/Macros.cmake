@@ -50,8 +50,9 @@ macro(curl_internal_test curl_test)
     try_compile(${curl_test}
       ${CMAKE_BINARY_DIR}
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
-      CMAKE_FLAGS "-DCOMPILE_DEFINITIONS:STRING=${_macro_check_function_definitions}"
-      "${_curl_test_add_libraries}"
+      CMAKE_FLAGS
+        "-DCOMPILE_DEFINITIONS:STRING=${_macro_check_function_definitions}"
+        "${_curl_test_add_libraries}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
     if(${curl_test})
       set(${curl_test} 1 CACHE INTERNAL "Curl test")
