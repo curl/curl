@@ -47,6 +47,14 @@ option in each function call.
 
 **deprecated** See CURLMOPT_CONTENT_LENGTH_PENALTY_SIZE(3)
 
+## CURLMOPT_DEBUGDATA
+
+User data for debug function. See CURLMOPT_DEBUGDATA(3)
+
+## CURLMOPT_DEBUGFUNCTION
+
+A callback for multi related tracing. See CURLMOPT_DEBUGFUNCTION(3)
+
 ## CURLMOPT_MAXCONNECTS
 
 Size of connection cache. See CURLMOPT_MAXCONNECTS(3)
@@ -103,6 +111,10 @@ Custom pointer to pass to timer callback. See CURLMOPT_TIMERDATA(3)
 ## CURLMOPT_TIMERFUNCTION
 
 Callback to receive timeout values. See CURLMOPT_TIMERFUNCTION(3)
+
+## CURLMOPT_VERBOSE
+
+On/off value to dis-/enable tracing. See CURLMOPT_VERBOSE(3)
 
 # %PROTOCOLS%
 

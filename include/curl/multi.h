@@ -318,6 +318,25 @@ typedef int (*curl_multi_timer_callback)(CURLM *multi,    /* multi handle */
                                          void *userp);    /* private callback
                                                              pointer */
 
+/*
+ * Name:    curl_multi_debug_callback
+ *
+ * Desc:    Called by libcurl for emitting debug output on VERBOSE multi
+ *          handles. The easy handle might be the handle of the transfer
+ *          involved or NULL for tracing unrelated to a specific transfer.
+ *          The parameters `type`, `data` and `size`are the same as for
+ *          `curl_debug_callback`. The `userptr` is the value installed
+ *          at the multi via `CURLMOPT_DEBUGDATA`.
+ *
+ * Returns: The callback should return zero.
+ */
+typedef int (*curl_multi_debug_callback)(CURLM *multi, /* multi handle */
+                                         CURL *easy, /* easy handle or NULL */
+                                         curl_infotype type, /* kind of data */
+                                         char *data, /* the data */
+                                         size_t size, /* size of data */
+                                         void *userptr); /* user supplied */
+
 CURL_EXTERN CURLMcode CURL_DEPRECATED(7.19.5, "Use curl_multi_socket_action()")
 curl_multi_socket(CURLM *multi_handle, curl_socket_t s, int *running_handles);
 
@@ -398,6 +417,15 @@ typedef enum {
 
   /* maximum number of concurrent streams to support on a connection */
   CURLOPT(CURLMOPT_MAX_CONCURRENT_STREAMS, CURLOPTTYPE_LONG, 16),
+
+  /* talk a lot */
+  CURLOPT(CURLMOPT_VERBOSE, CURLOPTTYPE_LONG, 17),
+
+  /* set the debug function */
+  CURLOPT(CURLMOPT_DEBUGFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 18),
+
+  /* set the data for the debug function */
+  CURLOPT(CURLMOPT_DEBUGDATA, CURLOPTTYPE_CBPOINT, 19),
 
   CURLMOPT_LASTENTRY /* the last unused */
 } CURLMoption;

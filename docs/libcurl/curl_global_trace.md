@@ -109,6 +109,10 @@ Traces reading of upload data from the application in order to send it to the se
 
 Traces writing of download data, received from the server, to the application.
 
+## `multi`
+
+Traces about transfer operations: state changes, connection management, etc.
+
 # TRACE GROUPS
 
 Besides the specific component names there are the following group names

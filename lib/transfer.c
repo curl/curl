@@ -261,7 +261,7 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
         return -1;
       }
     }
-    DEBUGF(infof(data, "readwrite_data: we are done"));
+    CURL_TRC_M(data, "readwrite_data: we are done");
   }
   DEBUGASSERT(nread >= 0);
   return nread;
@@ -334,9 +334,9 @@ static CURLcode readwrite_data(struct Curl_easy *data,
       /* if we receive 0 or less here, either the data transfer is done or the
          server closed the connection and we bail out from this! */
       if(is_multiplex)
-        DEBUGF(infof(data, "nread == 0, stream closed, bailing"));
+        CURL_TRC_M(data, "nread == 0, stream closed, bailing");
       else
-        DEBUGF(infof(data, "nread <= 0, server closed connection, bailing"));
+        CURL_TRC_M(data, "nread <= 0, server closed connection, bailing");
       result = Curl_req_stop_send_recv(data);
       if(result)
         goto out;
@@ -380,8 +380,6 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 
 out:
   Curl_multi_xfer_buf_release(data, xfer_buf);
-  if(result)
-    DEBUGF(infof(data, "readwrite_data() -> %d", result));
   return result;
 }
 
@@ -437,7 +435,7 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
     if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      DEBUGF(infof(data, "readwrite, select_bits, early return on PAUSED"));
+      CURL_TRC_M(data, "readwrite, select_bits, early return on PAUSED");
       result = CURLE_OK;
       goto out;
     }
@@ -446,12 +444,12 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
   }
   else if(((k->keepon & KEEP_RECVBITS) == KEEP_RECV) &&
           xfer_recv_shutdown_started(data)) {
-    DEBUGF(infof(data, "readwrite, recv for finishing shutdown"));
+    CURL_TRC_M(data, "readwrite, recv for finishing shutdown");
     select_bits = CURL_CSELECT_IN;
   }
   else if(((k->keepon & KEEP_SENDBITS) == KEEP_SEND) &&
           xfer_send_shutdown_started(data)) {
-    DEBUGF(infof(data, "readwrite, send for finishing shutdown"));
+    CURL_TRC_M(data, "readwrite, send for finishing shutdown");
     select_bits = CURL_CSELECT_OUT;
   }
   else {
@@ -573,7 +571,7 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
 
 out:
   if(result)
-    DEBUGF(infof(data, "Curl_readwrite() -> %d", result));
+    CURL_TRC_M(data, "Curl_readwrite() -> %d", result);
   return result;
 }
 
@@ -1304,8 +1302,8 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   else if(!result && *pnwritten)
     data->info.request_size += *pnwritten;
 
-  DEBUGF(infof(data, "Curl_xfer_send(len=%zu) -> %d, %zu",
-               blen, result, *pnwritten));
+  CURL_TRC_M(data, "Curl_xfer_send(len=%zu, eos=%d) -> %d, %zu",
+             blen, eos, result, *pnwritten);
   return result;
 }
 
