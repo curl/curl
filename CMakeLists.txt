@@ -1607,7 +1607,7 @@ if(MSVC)
 endif()
 
 if(CURL_WERROR)
-  if(MSVC_VERSION)
+  if(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /WX")
   else()
     # This assumes clang or gcc style options
