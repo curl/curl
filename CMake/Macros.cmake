@@ -64,10 +64,10 @@ macro(curl_internal_test curl_test)
 endmacro()
 
 macro(optional_dependency dependency)
-  set(CURL_${dependency} AUTO CACHE STRING "Build curl with ${dependency} support (AUTO, ON or OFF)")
-  set_property(CACHE CURL_${dependency} PROPERTY STRINGS AUTO ON OFF)
+  set(CURL_${dependency} "AUTO" CACHE STRING "Build curl with ${dependency} support (AUTO, ON or OFF)")
+  set_property(CACHE CURL_${dependency} PROPERTY STRINGS "AUTO" "ON" "OFF")
 
-  if(CURL_${dependency} STREQUAL AUTO)
+  if(CURL_${dependency} STREQUAL "AUTO")
     find_package(${dependency})
   elseif(CURL_${dependency})
     find_package(${dependency} REQUIRED)
