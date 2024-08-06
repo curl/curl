@@ -484,6 +484,16 @@ if ($git) {
   else {
     logit "autoreconf -fi was successful (dummy message)";
   }
+
+} else {
+    # Show snapshot git commit when available
+    if (open (my $f, '<', "docs/tarball-commit.txt")) {
+      my $commit = <$f>;
+      chomp $commit;
+      logit "The most recent curl git commits:";
+      logit "  $commit";
+      close($f);
+    }
 }
 
 # Set timestamp to the one in curlver.h if this isn't a git test build.
