@@ -21,8 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(_target_label_prefix "Test server ")
-
 function(setup_executable test_name)  # ARGN are the files in the test
   add_executable(${test_name} EXCLUDE_FROM_ALL ${ARGN})
   add_dependencies(testdeps ${test_name})
@@ -47,7 +45,7 @@ function(setup_executable test_name)  # ARGN are the files in the test
   set_target_properties(${test_name} PROPERTIES
     COMPILE_DEFINITIONS "CURL_STATICLIB")
   set_target_properties(${test_name} PROPERTIES
-    PROJECT_LABEL "${_target_label_prefix}${test_name}")
+    PROJECT_LABEL "Test server ${test_name}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
