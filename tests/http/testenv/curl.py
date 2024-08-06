@@ -824,6 +824,9 @@ class CurlClient:
             urls = [urls]
 
         args = [self._curl, "-s", "--path-as-is"]
+        if 'CURL_TEST_EVENT' in os.environ:
+            args.append('--test-event')
+
         if with_headers:
             args.extend(["-D", self._headerfile])
         if def_tracing is not False and not self._silent:

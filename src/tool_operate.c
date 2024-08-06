@@ -2496,6 +2496,9 @@ struct parastate {
 };
 
 #if defined(DEBUGBUILD) && defined(USE_LIBUV)
+
+#define DEBUG_UV    0
+
 /* object to pass to the callbacks */
 struct datauv {
   uv_timer_t timeout;
@@ -2511,9 +2514,24 @@ struct contextuv {
 
 static CURLcode check_finished(struct parastate *s);
 
-static void check_multi_info(struct contextuv *context)
+static void check_multi_info(struct datauv *uv)
 {
-  (void)check_finished(context->uv->s);
+  CURLcode result;
+
+  result = check_finished(uv->s);
+  if(result && !uv->s->result)
+    uv->s->result = result;
+
+  if(uv->s->more_transfers) {
+    result = add_parallel_transfers(uv->s->global, uv->s->multi,
+                                    uv->s->share,
+                                    &uv->s->more_transfers,
+                                    &uv->s->added_transfers);
+    if(result && !uv->s->result)
+      uv->s->result = result;
+    if(result)
+      uv_stop(uv->loop);
+  }
 }
 
 /* callback from libuv on socket activity */
@@ -2529,17 +2547,19 @@ static void on_uv_socket(uv_poll_t *req, int status, int events)
 
   curl_multi_socket_action(c->uv->s->multi, c->sockfd, flags,
                            &c->uv->s->still_running);
-  check_multi_info(c);
 }
 
 /* callback from libuv when timeout expires */
 static void on_uv_timeout(uv_timer_t *req)
 {
-  struct contextuv *c = (struct contextuv *) req->data;
-  if(c) {
-    curl_multi_socket_action(c->uv->s->multi, CURL_SOCKET_TIMEOUT, 0,
-                             &c->uv->s->still_running);
-    check_multi_info(c);
+  struct datauv *uv = (struct datauv *) req->data;
+#if DEBUG_UV
+  fprintf(tool_stderr, "parallel_event: on_uv_timeout\n");
+#endif
+  if(uv && uv->s) {
+    curl_multi_socket_action(uv->s->multi, CURL_SOCKET_TIMEOUT, 0,
+                             &uv->s->still_running);
+    check_multi_info(uv);
   }
 }
 
@@ -2548,6 +2568,9 @@ static int cb_timeout(CURLM *multi, long timeout_ms,
                       struct datauv *uv)
 {
   (void)multi;
+#if DEBUG_UV
+  fprintf(tool_stderr, "parallel_event: cb_timeout=%ld\n", timeout_ms);
+#endif
   if(timeout_ms < 0)
     uv_timer_stop(&uv->timeout);
   else {
@@ -2618,6 +2641,8 @@ static int cb_socket(CURL *easy, curl_socket_t s, int action,
       uv_poll_stop(&c->poll_handle);
       destroy_context(c);
       curl_multi_assign(uv->s->multi, s, NULL);
+      /* check if we can do more now */
+      check_multi_info(uv);
     }
     break;
   default:
@@ -2632,9 +2657,11 @@ static CURLcode parallel_event(struct parastate *s)
   CURLcode result = CURLE_OK;
   struct datauv uv = { 0 };
 
+  s->result = CURLE_OK;
+  uv.s = s;
   uv.loop = uv_default_loop();
   uv_timer_init(uv.loop, &uv.timeout);
-  uv.s = s;
+  uv.timeout.data = &uv;
 
   /* setup event callbacks */
   curl_multi_setopt(s->multi, CURLMOPT_SOCKETFUNCTION, cb_socket);
@@ -2644,10 +2671,49 @@ static CURLcode parallel_event(struct parastate *s)
 
   /* kickstart the thing */
   curl_multi_socket_action(s->multi, CURL_SOCKET_TIMEOUT, 0,
-                           &uv.s->still_running);
-  uv_run(uv.loop, UV_RUN_DEFAULT);
+                           &s->still_running);
 
-  return result;
+  while(!s->mcode && (s->still_running || s->more_transfers)) {
+#if DEBUG_UV
+    fprintf(tool_stderr, "parallel_event: uv_run(), mcode=%d, %d running, "
+            "%d more\n", s->mcode, uv.s->still_running, s->more_transfers);
+#endif
+    uv_run(uv.loop, UV_RUN_DEFAULT);
+#if DEBUG_UV
+    fprintf(tool_stderr, "parallel_event: uv_run() returned\n");
+#endif
+
+    result = check_finished(s);
+    if(result && !s->result)
+      s->result = result;
+
+    /* early exit called */
+    if(s->wrapitup) {
+      if(s->still_running && !s->wrapitup_processed) {
+        struct per_transfer *per;
+        for(per = transfers; per; per = per->next) {
+          if(per->added)
+            per->abort = TRUE;
+        }
+        s->wrapitup_processed = TRUE;
+      }
+      break;
+    }
+
+    if(s->more_transfers) {
+      result = add_parallel_transfers(s->global, s->multi, s->share,
+                                      &s->more_transfers, &s->added_transfers);
+      if(result && !s->result)
+        s->result = result;
+    }
+  }
+
+#if DEBUG_UV
+  fprintf(tool_stderr, "DONE parallel_event -> %d, mcode=%d, %d running, "
+          "%d more\n",
+          s->result, s->mcode, uv.s->still_running, s->more_transfers);
+#endif
+  return s->result;
 }
 
 #endif
@@ -2660,6 +2726,9 @@ static CURLcode check_finished(struct parastate *s)
   bool checkmore = FALSE;
   struct GlobalConfig *global = s->global;
   progress_meter(global, &s->start, FALSE);
+#if DEBUG_UV
+  fprintf(tool_stderr, "parallel_event: check_finished\n");
+#endif
   do {
     msg = curl_multi_info_read(s->multi, &rc);
     if(msg) {

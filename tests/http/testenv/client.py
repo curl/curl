@@ -50,7 +50,7 @@ class LocalClient:
         self.name = name
         self.path = os.path.join(env.project_dir, f'tests/http/clients/{name}')
         self.env = env
-        self._run_env= run_env
+        self._run_env = run_env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
         self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, name)
@@ -92,12 +92,18 @@ class LocalClient:
         exception = None
         myargs = [self.path]
         myargs.extend(args)
+        run_env = None
+        if self._run_env:
+            run_env = self._run_env.copy()
+            for key in ['CURL_DEBUG']:
+                if key in os.environ and key not in run_env:
+                    run_env[key] = os.environ[key]
         try:
             with open(self._stdoutfile, 'w') as cout:
                 with open(self._stderrfile, 'w') as cerr:
                     p = subprocess.run(myargs, stderr=cerr, stdout=cout,
                                        cwd=self._run_dir, shell=False,
-                                       input=None, env=self._run_env,
+                                       input=None, env=run_env,
                                        timeout=self._timeout)
                     exitcode = p.returncode
         except subprocess.TimeoutExpired:
