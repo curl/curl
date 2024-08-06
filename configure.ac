@@ -2776,11 +2776,11 @@ case $host_os in
           AC_CHECK_LIB(icucore, uidna_openUTS46,
           [
             AC_CHECK_HEADERS(unicode/uidna.h,
-               curl_idn_msg="enabled (AppleIDN)"
-               AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-               AC_SUBST(USE_APPLE_IDN, [1])
-               AC_SUBST([IDN_ENABLED], [1])
-               LIBS="-licucore $LIBS"
+              curl_idn_msg="enabled (AppleIDN)"
+              AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+              AC_SUBST(USE_APPLE_IDN, [1])
+              AC_SUBST([IDN_ENABLED], [1])
+              LIBS="-licucore $LIBS"
             )
           ])
           ;;
