@@ -26,7 +26,7 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: check
-        run: ./.github/scripts/badwords.pl < .github/scripts/badwords.txt docs/*.md docs/libcurl/*.md docs/libcurl/opts/*.md docs/cmdline-opts/*.md docs/TODO docs/KNOWN_BUGS
+        run: ./.github/scripts/badwords.pl < .github/scripts/badwords.txt docs/*.md docs/libcurl/*.md docs/libcurl/opts/*.md docs/cmdline-opts/*.md docs/TODO docs/KNOWN_BUGS tests/*.md
 
   source:
     runs-on: ubuntu-latest
