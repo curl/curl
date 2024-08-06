@@ -44,8 +44,7 @@ function(setup_test test_name)  # ARGN are the files in the test
   target_link_libraries(${test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
   set_target_properties(${test_name} PROPERTIES
-    COMPILE_DEFINITIONS ${UPPER_TEST_NAME})
-  set_target_properties(${test_name} PROPERTIES
+    COMPILE_DEFINITIONS ${UPPER_TEST_NAME}
     PROJECT_LABEL "Test ${test_name}")
 endfunction()
 
