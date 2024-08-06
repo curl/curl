@@ -147,6 +147,12 @@ struct Curl_multi {
   long max_shutdown_connections; /* if >0, a fixed limit of the maximum number
                                  of connections in shutdown handling */
 
+  curl_multi_debug_callback debug_cb; /* function for tracing */
+  void *debug_userp;              /* user supplied value using in debug_cb */
+  /* In a multi_easy multi that lives as long as the easy, we can use
+   * the easy's `fdebug` function. NULL otherwise. */
+  curl_debug_callback easy_debug_cb;
+
   /* timer callback and user data pointer for the *socket() API */
   curl_multi_timer_callback timer_cb;
   void *timer_userp;
@@ -179,6 +185,7 @@ struct Curl_multi {
                 burn */
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
+  BIT(verbose);                /* true if tracing enabled for multi */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif

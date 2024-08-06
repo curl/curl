@@ -120,7 +120,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(Curl_conncache_init(&share->conn_cache, NULL, 103))
+      if(Curl_conncache_init(&share->conn_cache, NULL, share, 103))
         res = CURLSHE_NOMEM;
       break;
 
@@ -196,6 +196,19 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   case CURLSHOPT_USERDATA:
     ptr = va_arg(param, void *);
     share->clientdata = ptr;
+    break;
+
+  case CURLSHOPT_VERBOSE:
+    share->verbose = (0 != va_arg(param, long));
+    break;
+
+  case CURLSHOPT_DEBUGFUNCTION:
+    share->debug_cb = va_arg(param, curl_share_debug_callback);
+    break;
+
+  case CURLSHOPT_DEBUGDATA:
+    ptr = va_arg(param, void *);
+    share->debug_userp = ptr;
     break;
 
   default:

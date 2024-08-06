@@ -54,6 +54,7 @@ struct conncache {
   /* handle used for closing cached connections */
   struct Curl_easy *closure_handle;
   struct Curl_multi *multi; /* Optional, set if cache belongs to multi */
+  struct Curl_share *share; /* Optional, set if cache belongs to a share */
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -99,6 +100,7 @@ struct connectbundle {
  */
 int Curl_conncache_init(struct conncache *,
                         struct Curl_multi *multi,
+                        struct Curl_share *share,
                         size_t size);
 void Curl_conncache_destroy(struct conncache *connc);
 

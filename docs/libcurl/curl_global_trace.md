@@ -113,6 +113,10 @@ Traces writing of download data, received from the server, to the application.
 
 Tracing of WebSocket operations when this protocol is enabled in your build.
 
+## `multi`
+
+Traces about transfer operations: state changes, connection management, etc.
+
 # TRACE GROUPS
 
 Besides the specific component names there are the following group names

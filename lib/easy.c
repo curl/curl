@@ -759,6 +759,18 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   /* Copy the MAXCONNECTS option to the multi handle */
   curl_multi_setopt(multi, CURLMOPT_MAXCONNECTS, (long)data->set.maxconnects);
 
+  /* inherit verbosity and debug related settings for multi_easy. This
+   * is safe as the easy handle will outlive the multi handle. */
+  curl_multi_setopt(multi, CURLMOPT_VERBOSE, (long)data->set.verbose);
+  if(data->set.fdebug) {
+    multi->easy_debug_cb = data->set.fdebug;
+    multi->debug_userp = data->set.debugdata;
+  }
+  else {
+    multi->easy_debug_cb = NULL;
+    multi->debug_userp = NULL;
+  }
+
   data->multi_easy = NULL; /* pretend it does not exist */
   mcode = curl_multi_add_handle(multi, data);
   if(mcode) {

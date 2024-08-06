@@ -145,6 +145,16 @@ static int debug_cb(CURL *handle, curl_infotype type,
   return 0;
 }
 
+static int mdebug_cb(CURLM *multi, CURL *handle, curl_infotype type,
+                     char *data, size_t size,
+                     void *userdata)
+{
+  if(handle)
+    return debug_cb(handle, type, data, size, userdata);
+  (void)multi;
+  return 0;
+}
+
 struct transfer {
   int idx;
   CURL *easy;
@@ -359,6 +369,8 @@ int main(int argc, char *argv[])
 
   multi_handle = curl_multi_init();
   curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
+  curl_multi_setopt(multi_handle, CURLMOPT_VERBOSE, 1L);
+  curl_multi_setopt(multi_handle, CURLMOPT_DEBUGFUNCTION, mdebug_cb);
 
   active_transfers = 0;
   for(i = 0; i < transfer_count; ++i) {

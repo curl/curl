@@ -200,8 +200,6 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   *done = FALSE;
   now = Curl_now();
   if(!Curl_shutdown_started(data, sockindex)) {
-    DEBUGF(infof(data, "shutdown start on%s connection",
-           sockindex? " secondary" : ""));
     Curl_shutdown_start(data, sockindex, &now);
   }
   else {

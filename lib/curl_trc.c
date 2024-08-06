@@ -32,6 +32,7 @@
 #include "cfilters.h"
 #include "timeval.h"
 #include "multiif.h"
+#include "share.h"
 #include "strcase.h"
 
 #include "cf-socket.h"
@@ -57,29 +58,50 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
+static void trc_msg(FILE *err, curl_infotype type, char *ptr, size_t size)
+{
+  static const char s_infotype[CURLINFO_END][3] = {
+    "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
+  switch(type) {
+  case CURLINFO_TEXT:
+  case CURLINFO_HEADER_OUT:
+  case CURLINFO_HEADER_IN:
+    fwrite(s_infotype[type], 2, 1, err);
+    fwrite(ptr, size, 1, err);
+    break;
+  default: /* nada */
+    break;
+  }
+}
+
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
                 char *ptr, size_t size)
 {
   if(data->set.verbose) {
-    static const char s_infotype[CURLINFO_END][3] = {
-      "* ", "< ", "> ", "{ ", "} ", "{ ", "} " };
+    /* Use data's debug settings if there. Otherwise, if there is a multi,
+     * use that one's settings if possible. */
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
       Curl_set_in_callback(data, true);
       (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
     }
-    else {
-      switch(type) {
-      case CURLINFO_TEXT:
-      case CURLINFO_HEADER_OUT:
-      case CURLINFO_HEADER_IN:
-        fwrite(s_infotype[type], 2, 1, data->set.err);
-        fwrite(ptr, size, 1, data->set.err);
-        break;
-      default: /* nada */
-        break;
-      }
+    else if(data->multi && data->multi->verbose && data->multi->debug_cb) {
+      bool inCallback = Curl_is_in_callback(data);
+      Curl_set_in_callback(data, true);
+      (void)(*data->multi->debug_cb)(data->multi, data, type, ptr, size,
+                                     data->multi->debug_userp);
+      Curl_set_in_callback(data, inCallback);
+    }
+    else if(data->share && data->share->verbose && data->share->debug_cb) {
+      bool inCallback = Curl_is_in_callback(data);
+      Curl_set_in_callback(data, true);
+      (void)(*data->share->debug_cb)(data->share, data, type, ptr, size,
+                                     data->share->debug_userp);
+      Curl_set_in_callback(data, inCallback);
+    }
+    else if(data->set.err) {
+      trc_msg(data->set.err, type, ptr, size);
     }
   }
 }
@@ -180,6 +202,10 @@ struct curl_trc_feat Curl_trc_feat_write = {
   "WRITE",
   CURL_LOG_LVL_NONE,
 };
+struct curl_trc_feat Curl_trc_feat_multi = {
+  "MULTI",
+  CURL_LOG_LVL_NONE,
+};
 
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
@@ -199,6 +225,17 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_write, fmt, ap);
+    va_end(ap);
+  }
+}
+
+void Curl_trc_multi(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_multi)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_multi, fmt, ap);
     va_end(ap);
   }
 }
@@ -252,6 +289,7 @@ struct trc_feat_def {
 static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
+  { &Curl_trc_feat_multi,     TRC_CT_NONE },
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif

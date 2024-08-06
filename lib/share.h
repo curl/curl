@@ -45,6 +45,8 @@ struct Curl_share {
   void *clientdata;
   struct conncache conn_cache;
   struct Curl_hash hostcache;
+  curl_share_debug_callback debug_cb; /* function for tracing */
+  void *debug_userp;              /* user supplied value using in debug_cb */
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   struct CookieInfo *cookies;
 #endif
@@ -59,6 +61,7 @@ struct Curl_share {
   size_t max_ssl_sessions;
   long sessionage;
 #endif
+  BIT(verbose);
 };
 
 CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,

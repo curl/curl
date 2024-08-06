@@ -30,6 +30,16 @@ Set the *option* to *parameter* for the given *share*.
 
 # OPTIONS
 
+## CURLSHOPT_DEBUGDATA
+
+User data for debug function. See CURLSHOPT_DEBUGDATA(3)
+
+## CURLSHOPT_DEBUGFUNCTION
+
+A callback for share related tracing. See CURLSHOPT_DEBUGFUNCTION(3)
+
+See CURLSHOPT_LOCKFUNC(3).
+
 ## CURLSHOPT_LOCKFUNC
 
 See CURLSHOPT_LOCKFUNC(3).
@@ -49,6 +59,10 @@ See CURLSHOPT_UNSHARE(3).
 ## CURLSHOPT_USERDATA
 
 See CURLSHOPT_USERDATA(3).
+
+## CURLSHOPT_VERBOSE
+
+On/off value to dis-/enable tracing. See CURLSHOPT_VERBOSE(3)
 
 # %PROTOCOLS%
 

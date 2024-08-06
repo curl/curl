@@ -98,7 +98,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
 static void process_pending_handles(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
 
-#ifdef DEBUGBUILD
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static const char * const multi_statename[]={
   "INIT",
   "PENDING",
@@ -180,15 +180,18 @@ static void mstate(struct Curl_easy *data, CURLMstate state
 
   data->mstate = state;
 
+  if(data->mstate >= MSTATE_PENDING && data->mstate < MSTATE_COMPLETED) {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  if(data->mstate >= MSTATE_PENDING &&
-     data->mstate < MSTATE_COMPLETED) {
-    infof(data,
-          "STATE: %s => %s handle %p; line %d",
-          multi_statename[oldstate], multi_statename[data->mstate],
-          (void *)data, lineno);
-  }
+    CURL_TRC_M(data, "[STATE] [%s] => [%s] (line %d)",
+               multi_statename[oldstate], multi_statename[data->mstate],
+               lineno);
+#elif !defined(CURL_DISABLE_VERBOSE_STRINGS)
+    CURL_TRC_M(data, "[STATE] [%s] => [%s]",
+               multi_statename[oldstate], multi_statename[data->mstate]);
+#else
+    CURL_TRC_M(data, "[STATE] [%d] => [%d]", oldstate, data->mstate);
 #endif
+  }
 
   if(state == MSTATE_COMPLETED) {
     /* changing to COMPLETED means there is one less easy handle 'alive' */
@@ -410,7 +413,7 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
-  if(Curl_conncache_init(&multi->conn_cache, multi, chashsize))
+  if(Curl_conncache_init(&multi->conn_cache, multi, NULL, chashsize))
     goto error;
 
   Curl_llist_init(&multi->msglist, NULL);
@@ -626,13 +629,13 @@ static CURLcode multi_done(struct Curl_easy *data,
   CURLcode result, r2;
   struct connectdata *conn = data->conn;
 
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-  DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
-               multi_statename[data->mstate],
-               (int)status, (int)premature, data->state.done));
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
+  CURL_TRC_M(data, "multi_done[%s]: status: %d prem: %d done: %d",
+             multi_statename[data->mstate],
+             (int)status, (int)premature, data->state.done);
 #else
-  DEBUGF(infof(data, "multi_done: status: %d prem: %d done: %d",
-               (int)status, (int)premature, data->state.done));
+  CURL_TRC_M(data, "multi_done[%d]: status: %d prem: %d done: %d",
+             data->mstate, (int)status, (int)premature, data->state.done);
 #endif
 
   if(data->state.done)
@@ -692,9 +695,8 @@ static CURLcode multi_done(struct Curl_easy *data,
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
     CONNCACHE_UNLOCK(data);
-    DEBUGF(infof(data, "Connection still in use %zu, "
-                 "no more multi_done now!",
-                 Curl_llist_count(&conn->easyq)));
+    CURL_TRC_M(data, "Connection still in use %zu, no more multi_done now!",
+               Curl_llist_count(&conn->easyq));
     return CURLE_OK;
   }
 
@@ -731,12 +733,12 @@ static CURLcode multi_done(struct Curl_easy *data,
 #endif
      ) || conn->bits.close
        || (premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
-    DEBUGF(infof(data, "multi_done, not reusing connection=%"
-                       CURL_FORMAT_CURL_OFF_T ", forbid=%d"
-                       ", close=%d, premature=%d, conn_multiplex=%d",
-                 conn->connection_id,
-                 data->set.reuse_forbid, conn->bits.close, premature,
-                 Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
+    CURL_TRC_M(data, "multi_done, not reusing connection=%"
+                     CURL_FORMAT_CURL_OFF_T ", forbid=%d"
+                     ", close=%d, premature=%d, conn_multiplex=%d",
+              conn->connection_id,
+              data->set.reuse_forbid, conn->bits.close, premature,
+              Curl_conn_is_multiplex(conn, FIRSTSOCKET));
     connclose(conn, "disconnecting");
     Curl_conncache_remove_conn(data, conn, FALSE);
     CONNCACHE_UNLOCK(data);
@@ -1874,7 +1876,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     rc = CURLM_OK;
 
     if(multi_ischanged(multi, TRUE)) {
-      DEBUGF(infof(data, "multi changed, check CONNECT_PEND queue"));
+      CURL_TRC_M(data, "multi changed, check CONNECT_PEND queue");
       process_pending_handles(multi); /* multiplexed */
     }
 
@@ -3329,6 +3331,17 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
       multi->max_concurrent_streams = (unsigned int)streams;
     }
     break;
+  case CURLMOPT_VERBOSE:
+    multi->verbose = (0 != va_arg(param, long));
+    if(multi->conn_cache.closure_handle)
+      multi->conn_cache.closure_handle->set.verbose = multi->verbose;
+    break;
+  case CURLMOPT_DEBUGFUNCTION:
+    multi->debug_cb = va_arg(param, curl_multi_debug_callback);
+    break;
+  case CURLMOPT_DEBUGDATA:
+    multi->debug_userp = va_arg(param, void *);
+    break;
   default:
     res = CURLM_UNKNOWN_OPTION;
     break;
@@ -3646,9 +3659,7 @@ void Curl_expire_clear(struct Curl_easy *data)
     /* clear the timeout list too */
     Curl_llist_destroy(list, NULL);
 
-#ifdef DEBUGBUILD
-    infof(data, "Expire cleared");
-#endif
+    CURL_TRC_M(data, "Expire cleared");
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
   }
