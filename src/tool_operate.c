@@ -2726,9 +2726,6 @@ static CURLcode check_finished(struct parastate *s)
   bool checkmore = FALSE;
   struct GlobalConfig *global = s->global;
   progress_meter(global, &s->start, FALSE);
-#if DEBUG_UV
-  fprintf(tool_stderr, "parallel_event: check_finished\n");
-#endif
   do {
     msg = curl_multi_info_read(s->multi, &rc);
     if(msg) {
