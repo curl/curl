@@ -665,7 +665,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     result = rustls_root_cert_store_builder_build(roots_builder, &roots);
     rustls_root_cert_store_builder_free(roots_builder);
     if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to load trusted certificates");
+      failf(data, "rustls: failed to build trusted root certificate store");
       rustls_client_config_builder_free(config_builder);
       return CURLE_SSL_CACERT_BADFILE;
     }
@@ -699,7 +699,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       verifier_builder, &server_cert_verifier);
     rustls_web_pki_server_cert_verifier_builder_free(verifier_builder);
     if(result != RUSTLS_RESULT_OK) {
-      failf(data, "rustls: failed to load trusted certificates");
+      failf(data, "rustls: failed to build certificate verifier");
       rustls_server_cert_verifier_free(server_cert_verifier);
       rustls_client_config_builder_free(config_builder);
       return CURLE_SSL_CACERT_BADFILE;
