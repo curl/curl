@@ -304,9 +304,6 @@
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
-/* Define to 1 if you have the `idna_strerror' function. */
-#cmakedefine HAVE_IDNA_STRERROR 1
-
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 
