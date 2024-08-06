@@ -53,8 +53,8 @@ set(_GSS_ROOT_HINTS
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
   if(UNIX)
     find_package(PkgConfig QUIET)
-    pkg_search_module(_GSS_PKG ${_MIT_MODNAME} ${_HEIMDAL_MODNAME})
-    list(APPEND _GSS_ROOT_HINTS "${_GSS_PKG_PREFIX}")
+    pkg_search_module(_GSS ${_MIT_MODNAME} ${_HEIMDAL_MODNAME})
+    list(APPEND _GSS_ROOT_HINTS "${_GSS_PREFIX}")
   elseif(WIN32)
     list(APPEND _GSS_ROOT_HINTS "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos;InstallDir]")
   endif()
@@ -250,12 +250,16 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     endif()
   endif()
 else()
-  if(_GSS_PKG_${_MIT_MODNAME}_VERSION)
+  if(_GSS_MODULE_NAME STREQUAL _MIT_MODNAME OR _GSS_${_MIT_MODNAME}_VERSION)  # _GSS_MODULE_NAME set since CMake 3.16
     set(GSS_FLAVOUR "MIT")
-    set(_GSS_VERSION _GSS_PKG_${_MIT_MODNAME}_VERSION)
+    if(NOT _GSS_VERSION)  # for old CMake versions?
+      set(_GSS_VERSION _GSS_${_MIT_MODNAME}_VERSION)
+    endif()
   else()
     set(GSS_FLAVOUR "Heimdal")
-    set(_GSS_VERSION _GSS_PKG_${_HEIMDAL_MODNAME}_VERSION)
+    if(NOT _GSS_VERSION)  # for old CMake versions?
+      set(_GSS_VERSION _GSS_${_HEIMDAL_MODNAME}_VERSION)
+    endif()
   endif()
 endif()
 
