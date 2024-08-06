@@ -213,12 +213,18 @@ bool helpscan(unsigned char *buf, size_t len, struct scan_ctx *ctx)
 
     if(buf[i] == '\n') {
       DEBUGASSERT(ctx->olen < sizeof(ctx->obuf));
+      if(ctx->olen == sizeof(ctx->obuf))
+        return FALSE; /* bail out */
       ctx->obuf[ctx->olen++] = 0;
       ctx->olen = 0;
       puts(ctx->obuf);
     }
-    else
+    else {
+      DEBUGASSERT(ctx->olen < sizeof(ctx->obuf));
+      if(ctx->olen == sizeof(ctx->obuf))
+        return FALSE; /* bail out */
       ctx->obuf[ctx->olen++] = buf[i];
+    }
   }
   return TRUE;
 }
