@@ -28,8 +28,8 @@ test suite. It is often called from the root Makefile of the curl package with
 Specify which test(s) to run by specifying test numbers or keywords.
 
 If no test number or keyword is given, all existing tests that the script can
-find will be considered for running. You can specify single test cases to run
-by specifying test numbers space-separated, like `1 3 5 7 11`, and you can
+find are considered for running. You can specify single test cases to run by
+specifying test numbers space-separated, like `1 3 5 7 11`, and you can
 specify a range of tests like `45 to 67`.
 
 Specify tests to not run with a leading exclamation point, like `!66`, which
@@ -41,17 +41,17 @@ It is also possible to specify tests based on a keyword describing the test(s)
 to run, like `FTPS`. The keywords are strings used in the individual tests.
 
 You can also specify keywords with a leading exclamation point and the keyword
-or phrase, like "!HTTP NTLM auth" to run all tests **except** those using
-this keyword. Remember that the exclamation marks and spaces will need to be
-quoted somehow when entered at many command shells.
+or phrase, like "!HTTP NTLM auth" to run all tests **except** those using this
+keyword. Remember that the exclamation marks and spaces need to be quoted
+somehow when entered at many command shells.
 
 Prefix a keyword with a tilde (~) to still run it, but ignore the results.
 
 # OUTPUT
 
 When running without `-s` (short output), for instance when running
-runtests.pl directly rather than via make, each test will emits a pair of
-lines like this:
+runtests.pl directly rather than via make, each test emits a pair of lines
+like this:
 
     Test 0045...[simple HTTP Location: without protocol in initial URL]
     --pd---e-v- OK (45  out of 1427, remaining: 16:08, took 6.188s, duration: 00:31)
@@ -99,8 +99,8 @@ curl executable in the build tree.
 ## `-d`
 
 Enable protocol debug: have the servers display protocol output. If used in
-conjunction with parallel testing, it will be difficult to associate the logs
-with the test being run.
+conjunction with parallel testing, it is difficult to associate the logs with
+the specific test being run.
 
 ## `-E \<exclude_file\>`
 
@@ -115,8 +115,8 @@ the reason why matching tests should be skipped. The exclusion types are
 
 ## `-e`
 
-Run the test event-based (if possible). This will make runtests invoke curl
-with --test-event option. This option only works if both curl and libcurl were
+Run the test event-based (if possible). This makes runtests invoke curl with
+--test-event option. This option only works if both curl and libcurl were
 built debug-enabled.
 
 ## `-f`
@@ -222,7 +222,7 @@ the **Sysinternals** `handle[64].exe` to be on PATH)
 ## `--repeat=[num]`
 
 This repeats the given set of test numbers this many times. If no test numbers
-are given, it will repeat ALL tests this many times. It adds the new repeated
+are given, it repeats ALL tests this many times. It adds the new repeated
 sequence at the end of the initially given one.
 
 If **-R** option is also used, the scrambling is done after the repeats have
@@ -234,16 +234,16 @@ Shorter output. Speaks less than default.
 
 ## `--seed=[num]`
 
-When using *--shallow* or *-R* that randomize certain aspects of the
-behavior, this option can set the initial seed. If not set, the random seed
-will be set based on the currently set local year and month and the first line
-of the "curl -V" output.
+When using *--shallow* or *-R* that randomize certain aspects of the behavior,
+this option can set the initial seed. If not set, the random seed is set based
+on the currently set local year and month and the first line of the "curl -V"
+output.
 
 ## `--shallow=[num]`
 
 Used together with **-t**. This limits the number of tests to fail in torture
 mode to no more than **num** per test case. If this reduces the amount, the
-script will randomly discard entries to fail until the amount is **num**.
+script randomly discards entries to fail until the amount is **num**.
 
 The random seed initially set for this is fixed per month and can be set with
 *--seed*.
@@ -264,9 +264,9 @@ Error instead of warning on server unexpectedly alive.
 
 ## `-v`
 
-Enable verbose output. Speaks more than by default. If used in conjunction with
-parallel testing, it will be difficult to associate the logs with the test
-being run.
+Enable verbose output. Speaks more than by default. If used in conjunction
+with parallel testing, it is difficult to associate the logs with the specific
+test being run.
 
 ## `-vc \<curl\>`
 
@@ -283,7 +283,7 @@ use.
 
 The test script checks most of these by itself to determine when it is safe to
 attempt to run each test. Those which cannot be run due to failed requirements
-will simply be skipped and listed at the completion of all test cases. In some
+are simply skipped and listed at the completion of all test cases. In some
 unusual configurations, the test script cannot make the correct determination
 for all tests. In these cases, the problematic tests can be skipped using the
 "!keyword" skip feature documented earlier.
