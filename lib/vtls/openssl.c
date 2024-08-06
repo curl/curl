@@ -5135,8 +5135,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   /* No X509_get_signature_nid support */
   (void)data; /* unused */
   (void)sockindex; /* unused */
-  *binding = NULL;
-  *len = 0;
+  (void)binding; /* unused */
   return CURLE_OK;
 #endif
 }
