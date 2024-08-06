@@ -2622,6 +2622,10 @@ sub disabledtests {
             }
         }
     }
+    else {
+        print STDERR "Cannot open $file, exiting\n";
+        exit 3;
+    }
 }
 
 #######################################################################
