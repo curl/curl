@@ -39,5 +39,8 @@ foreach(_client IN LISTS check_PROGRAMS)
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
     set_property(TARGET ${_client_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
-  set_target_properties(${_client_target} PROPERTIES OUTPUT_NAME "${_client}" UNITY_BUILD OFF)
+  set_target_properties(${_client_target} PROPERTIES
+    UNITY_BUILD OFF
+    OUTPUT_NAME "${_client}"
+    PROJECT_LABEL "Test client ${_client_target}")
 endforeach()
