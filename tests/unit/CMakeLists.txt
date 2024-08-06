@@ -29,8 +29,8 @@ include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
 include_directories(
   "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
   "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
-  "${CURL_SOURCE_DIR}/tests/libtest"
   "${CURL_SOURCE_DIR}/src"
+  "${CURL_SOURCE_DIR}/tests/libtest"
 )
 
 foreach(_testfile IN LISTS UNITPROGS)
