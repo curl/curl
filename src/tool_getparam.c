@@ -1029,6 +1029,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   time_t now;
   bool longopt = FALSE;
   bool singleopt = FALSE; /* when true means '-o foo' used '-ofoo' */
+  size_t nopts = 0; /* options processed in `flag`*/
   ParameterError err = PARAM_OK;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
@@ -2490,8 +2491,27 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       cleanarg(clearthis);
       break;
     case C_VERBOSE: /* --verbose */
-      if(toggle) {
-        /* the '%' thing here will cause the trace get sent to stderr */
+      /* This option is a super-boolean with side effect when applied
+       * more than once in the same argument flag, like `-vvv`. */
+      if(!toggle) {
+        global->verbosity = 0;
+        if(set_trace_config(global, "-all"))
+          err = PARAM_NO_MEM;
+        global->tracetype = TRACE_NONE;
+        break;
+      }
+      else if(!nopts) {
+        /* fist `-v` in an argument resets to base verbosity */
+        global->verbosity = 0;
+        if(set_trace_config(global, "-all")) {
+          err = PARAM_NO_MEM;
+          break;
+        }
+      }
+      /* the '%' thing here will cause the trace get sent to stderr */
+      switch(global->verbosity) {
+      case 0:
+        global->verbosity = 1;
         Curl_safefree(global->trace_dump);
         global->trace_dump = strdup("%");
         if(!global->trace_dump)
@@ -2499,13 +2519,30 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else {
           if(global->tracetype && (global->tracetype != TRACE_PLAIN))
             warnf(global,
-                  "-v, --verbose overrides an earlier trace/verbose option");
+                  "-v, --verbose overrides an earlier trace option");
           global->tracetype = TRACE_PLAIN;
         }
+        break;
+      case 1:
+        global->verbosity = 2;
+        if(set_trace_config(global, "ids,time,protocol"))
+          err = PARAM_NO_MEM;
+        break;
+      case 2:
+        global->verbosity = 3;
+        global->tracetype = TRACE_ASCII;
+        if(set_trace_config(global, "ssl,read,write"))
+          err = PARAM_NO_MEM;
+        break;
+      case 3:
+        global->verbosity = 4;
+        if(set_trace_config(global, "network"))
+          err = PARAM_NO_MEM;
+        break;
+      default:
+        /* no effect for now */
+        break;
       }
-      else
-        /* verbose is disabled here */
-        global->tracetype = TRACE_NONE;
       break;
     case C_VERSION: /* --version */
       if(toggle)    /* --no-version yields no output! */
@@ -2634,7 +2671,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     }
     a = NULL;
-
+    ++nopts; /* processed one option from `flag` input, loop for more */
   } while(!longopt && !singleopt && *++parse && !*usedarg && !err);
 
 error:
