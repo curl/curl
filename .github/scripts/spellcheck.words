@@ -44,6 +44,7 @@ Autoconf
 autoconf
 Automake
 automake
+autoreconf
 Autotools
 autotools
 AVR
@@ -78,7 +79,6 @@ bugfix
 bugfixes
 buildable
 buildbot
-buildconf
 Caddy
 calloc
 CAPA
