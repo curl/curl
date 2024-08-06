@@ -14,6 +14,7 @@ See-also:
   - silent
   - trace
   - trace-ascii
+  - trace-config
 Example:
   - --verbose $URL
 ---
@@ -29,7 +30,7 @@ If you only want HTTP headers in the output, --include or --dump-header might
 be more suitable options.
 
 If you think this option still does not give you enough details, consider using
---trace or --trace-ascii instead.
+--trace, --trace-ascii or --trace-config instead.
 
 Note that verbose output of curl activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
