@@ -87,18 +87,19 @@ class TestDownload:
         r.check_response(http_status=200, count=100, connect_count=1)
 
     # download 100 files parallel
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_02_04_download_100_parallel(self, env: Env,
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_04_download_20_parallel(self, env: Env,
                                          httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        max_parallel = 50
+        count = 20
+        max_parallel = 10
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-99]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel', '--parallel-max', f'{max_parallel}'
         ])
-        r.check_response(http_status=200, count=100)
+        r.check_response(http_status=200, count=count)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
             assert r.total_connects > 1, r.dump_logs()
