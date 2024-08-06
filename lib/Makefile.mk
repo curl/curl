@@ -239,7 +239,7 @@ endif
 
 ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
-  CPPFLAGS += -DUSE_LIBIDN2
+  CPPFLAGS += -DHAVE_LIBIDN2 -DHAVE_IDN2_H
   CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2
