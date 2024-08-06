@@ -307,7 +307,7 @@ sub prepro {
     for my $s (@entiretest) {
         my $f = $s;
         $line++;
-        if($s =~ /^ *%if (.*)/) {
+        if($s =~ /^ *%if ([A-Za-z0-9!_-]*)/) {
             my $cond = $1;
             my $rev = 0;
 
