@@ -21,14 +21,11 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Find c-ares
-# Find the c-ares includes and library
-# This module defines
-#  CARES_INCLUDE_DIR, where to find ares.h, etc.
-#  CARES_LIBRARIES, the libraries needed to use c-ares.
-#  CARES_FOUND, If false, do not try to use c-ares.
-# also defined, but not for general use are
-# CARES_LIBRARY, where to find the c-ares library.
+# Find the c-ares library
+#
+# CARES_FOUND        System has c-ares
+# CARES_INCLUDE_DIR  The c-ares include directory
+# CARES_LIBRARY      The c-ares library name
 
 find_path(CARES_INCLUDE_DIR "ares.h")
 
