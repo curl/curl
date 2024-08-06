@@ -118,7 +118,7 @@ source_group("curl source files" FILES ${CURL_CFILES})
 source_group("curl header files" FILES ${CURL_HFILES})
 
 include_directories(
-  "${CURL_SOURCE_DIR}/lib"  # for "curl_setup_once.h"
+  "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
   "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
   # This is needed as tool_hugehelp.c is generated in the binary dir
   "${CURL_SOURCE_DIR}/src"  # for "tool_hugehelp.h"
