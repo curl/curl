@@ -141,13 +141,13 @@ SPDX-License-Identifier: curl
 
 ### Memory test
 
-  The test script will check that all allocated memory is freed properly IF
-  curl has been built with the `CURLDEBUG` define set. The script will
-  automatically detect if that is the case, and it will use the
-  `memanalyze.pl` script to analyze the memory debugging output.
+  The test script checks that all allocated memory is freed properly IF curl
+  has been built with the `CURLDEBUG` define set. The script automatically
+  detects if that is the case, and it uses the `memanalyze.pl` script to
+  analyze the memory debugging output.
 
-  Also, if you run tests on a machine where valgrind is found, the script will
-  use valgrind to run the test with (unless you use `-n`) to further verify
+  Also, if you run tests on a machine where valgrind is found, the script uses
+  valgrind to run the test with (unless you use `-n`) to further verify
   correctness.
 
   The `runtests.pl` `-t` option enables torture testing mode. It runs each
@@ -183,7 +183,7 @@ SPDX-License-Identifier: curl
 
     CURL_DEBUG=ssl curl -v https://curl.se
 
-  will make the `ssl` connection filter log more details. One may do that for
+  makes the `ssl` connection filter log more details. One may do that for
   every filter type and also use a combination of names, separated by `,` or
   space.
 

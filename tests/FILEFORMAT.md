@@ -300,7 +300,7 @@ The contents of numbered `datacheck` sections are appended to the non-numbered
 one.
 
 ### `<size>`
-number to return on a ftp SIZE command (set to -1 to make this command fail)
+number to return on an ftp SIZE command (set to -1 to make this command fail)
 
 ### `<mdtm>`
 what to send back if the client sends a (FTP) `MDTM` command, set to -1 to
@@ -448,7 +448,7 @@ Features testable here are:
 - `IPv6`
 - `Kerberos`
 - `Largefile`
-- `large-time` (time_t is larger than 32 bit)
+- `large-time` (time_t is larger than 32-bit)
 - `ld_preload`
 - `libssh2`
 - `libssh`
