@@ -106,7 +106,7 @@ with the test being run.
 
 Load the **exclude_file** with additional reasons why certain tests should be
 skipped. Useful when testing with external HTTP proxies in which case some of
-the tests aren't appropriate.
+the tests are not appropriate.
 
 The file contains colon-delimited lines. The first field contains the type of
 exclusion, the second field contains a pattern and the final field contains
@@ -183,13 +183,13 @@ etc not able to use this functionality.
 ## `-o \<variablename=value\>`
 
 Overwrite the specified internal **variable** with **value**. Useful to change
-variables that didn't get a dedicated flag to change them. Check the source to
+variables that did not get a dedicated flag to change them. Check the source to
 see which variables are available.
 
 ## `-P \<proxy\>`
 
 Use the specified HTTP proxy when executing tests, even if the tests
-themselves don't specify a proxy. This option allows one to test external
+themselves do not specify a proxy. This option allows one to test external
 proxies using curl's regression test suite.
 
 ## `-p`
@@ -291,5 +291,5 @@ for all tests. In these cases, the problematic tests can be skipped using the
 # WRITING TESTS
 
 The simplest way to write test cases is to start with a similar existing test,
-save it with a new number and then adjust it to fit. There's an attempt to
+save it with a new number and then adjust it to fit. There is an attempt to
 document the test case file format in **tests/FILEFORMAT.md**.

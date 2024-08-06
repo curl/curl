@@ -34,7 +34,7 @@ https://curl.se/dev/builds.html
 make *testcurl* skip the *autoreconf* stage and thus it removes the dependency
 on automake, autoconf, libtool, GNU m4 and possibly a few other things.
 
-*testcurl* runs `autoreconf -fi` (or similar), configure, builds curl and libcurl
+*testcurl* runs `autoreconf` (or similar), configure, builds curl and libcurl
 in a separate build directory and then runs `make test` to test the fresh
 build.
 
@@ -67,24 +67,24 @@ Set name to report as. Displayed in the build summary on the site.
 
 ## `--nobuildconf`
 
-Don't run autoreconf -fi. Useful when many builds use the same source tree, as
+Do not run autoreconf. Useful when many builds use the same source tree, as
 then only one need to do this. Also, if multiple processes run tests
 simultaneously on the same source tree (like several hosts on a NFS mounted
 dir), simultaneous autoreconf invokes may cause problems. (Added in 7.14.1)
 
 ## `--nogitpull`
 
-Don't update from git even though it is a git tree. Useful to still be able to
-test even though your network is down, or similar.
+Do not update from git even though it is a git tree. Useful to still be able
+to test even though your network is down, or similar.
 
 ## `--runtestopts=[options]`
 
 Options that is passed to the runtests script. Useful for disabling valgrind
 by force, and similar.
 
-## `--setup=[file name]`
+## `--setup=[filename]`
 
-File name to read setup from (deprecated). The old style of providing info.
+filename to read setup from (deprecated). The old style of providing info.
 If info is missing when *testcurl* is started, it will prompt you and then
 store the info in a 'setup' file, which it will look for on each invoke. Use
 *--name*, *--email*, *--configure* and *--desc* instead.
