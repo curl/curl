@@ -6,8 +6,8 @@ SPDX-License-Identifier: curl
 
 # Continuous Integration for curl
 
-Curl runs in many different environments, so every change is run against a large
-number of test suites.
+Curl runs in many different environments, so every change is run against a
+large number of test suites.
 
 Every pull request is verified for each of the following:
 
@@ -22,10 +22,10 @@ Every pull request is verified for each of the following:
  - ... code coverage does not shrink drastically
  - ... different TLS backends still compile and pass tests
 
-If the pull-request fails one of these tests, it will show up as a red X and
-you are expected to fix the problem. If you do not understand when the issue is
-or have other problems to fix the complaint, just ask and other project
-members will likely be able to help out.
+If the pull-request fails one of these tests, it shows up as a red X and you
+are expected to fix the problem. If you do not understand when the issue is or
+have other problems to fix the complaint, just ask and other project members
+can likely help out.
 
 Consider the following table while looking at pull request failures:
 

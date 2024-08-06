@@ -29,7 +29,7 @@ SPDX-License-Identifier: curl
   When you run tests via make, the flags `-a` and `-s` are passed, meaning
   to continue running tests even after one fails, and to emit short output.
 
-  If you'd like to not use those flags, you can run 'runtests.pl' directly.
+  If you would like to not use those flags, you can run 'runtests.pl' directly.
   You must `chdir` into the tests directory, then you can run it like so:
 
     ./runtests.pl 303 410
@@ -201,7 +201,7 @@ SPDX-License-Identifier: curl
 ### Test input files
 
   All test cases are put in the `data/` subdirectory. Each test is stored in
-  the file named according to the test number.
+  the filenamed according to the test number.
 
   See [`FILEFORMAT`](FILEFORMAT.md) for a description of the test case file
   format.
@@ -221,7 +221,7 @@ SPDX-License-Identifier: curl
 
     ggcov -r lib src
 
-  The text mode tool `gcov` may also be used, but it doesn't handle object
+  The text mode tool `gcov` may also be used, but it does not handle object
   files in more than one directory correctly.
 
 ### Remote testing
@@ -272,7 +272,7 @@ SPDX-License-Identifier: curl
 
 ### unit tests
 
-  Unit tests are placed in `tests/unit`. There's a tests/unit/README
+  Unit tests are placed in `tests/unit`. There is a tests/unit/README
   describing the specific set of checks and macros that may be used when
   writing tests that verify behaviors of specific individual functions.
 
