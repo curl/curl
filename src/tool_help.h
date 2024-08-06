@@ -37,7 +37,7 @@ struct scan_ctx {
   size_t elen;
   size_t olen;
   char rbuf[40];
-  char obuf[80];
+  char obuf[160];
   unsigned char show; /* start as at 0.
                          trigger match moves it to 1
                          arg match moves it to 2
