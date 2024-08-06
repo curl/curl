@@ -2773,7 +2773,7 @@ case $host_os in
           ;;
         *)
           AC_MSG_RESULT([yes, check])
-          AC_CHECK_LIB(icucore, uidna_nameToASCII_UTF8,
+          AC_CHECK_LIB(icucore, uidna_openUTS46,
           [
             AC_CHECK_HEADERS(unicode/uidna.h,
                curl_idn_msg="enabled (AppleIDN)"
