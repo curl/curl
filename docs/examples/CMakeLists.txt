@@ -31,9 +31,8 @@ foreach(_example IN LISTS check_PROGRAMS)
   set(_example_target "curl-example-${_example}")
   add_executable(${_example_target} "${_example}.c")
   target_include_directories(${_example_target} PRIVATE
-    "${CURL_SOURCE_DIR}/lib"      # for "curl_setup_once.h"
-    "${CURL_BINARY_DIR}/lib"      # for "curl_config.h"
-    "${CURL_BINARY_DIR}/include"  # for "curl/curl.h"
+    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup_once.h"
+    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
   )
   target_link_libraries(${_example_target} ${LIB_SELECTED} ${CURL_LIBS})
   target_compile_definitions(${_example_target} PRIVATE "CURL_NO_OLDIES")
