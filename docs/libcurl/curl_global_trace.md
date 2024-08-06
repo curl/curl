@@ -109,6 +109,27 @@ Traces reading of upload data from the application in order to send it to the se
 
 Traces writing of download data, received from the server, to the application.
 
+# TRACE GROUPS
+
+Besides the specific component names there are the following group names
+defined:
+
+## `all`
+
+## `network`
+
+All components involved in bare network I/O, including the SSL layer.
+
+All components that your libcurl is built with.
+
+## `protocol`
+
+All components involved in transfer protocols, such as 'ftp' and 'http/2'.
+
+## `proxy`
+
+All components involved in use of proxies.
+
 # %PROTOCOLS%
 
 # EXAMPLE

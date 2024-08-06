@@ -53,6 +53,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
 
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
                 char *ptr, size_t size)
@@ -218,58 +221,102 @@ void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* !CURL_DISABLE_FTP */
 
-static struct curl_trc_feat *trc_feats[] = {
-  &Curl_trc_feat_read,
-  &Curl_trc_feat_write,
-#ifndef CURL_DISABLE_FTP
-  &Curl_trc_feat_ftp,
-#endif
-#ifndef CURL_DISABLE_DOH
-  &Curl_doh_trc,
-#endif
-  NULL,
+#define TRC_CT_NONE        (0)
+#define TRC_CT_PROTOCOL    (1<<(0))
+#define TRC_CT_NETWORK     (1<<(1))
+#define TRC_CT_PROXY       (1<<(2))
+
+struct trc_feat_def {
+  struct curl_trc_feat *feat;
+  unsigned int category;
 };
 
-static struct Curl_cftype *cf_types[] = {
-  &Curl_cft_tcp,
-  &Curl_cft_udp,
-  &Curl_cft_unix,
-  &Curl_cft_tcp_accept,
-  &Curl_cft_happy_eyeballs,
-  &Curl_cft_setup,
+static struct trc_feat_def trc_feats[] = {
+  { &Curl_trc_feat_read,      TRC_CT_NONE },
+  { &Curl_trc_feat_write,     TRC_CT_NONE },
+#ifndef CURL_DISABLE_FTP
+  { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
+#endif
+#ifndef CURL_DISABLE_DOH
+  { &Curl_doh_trc,            TRC_CT_NETWORK },
+#endif
+};
+
+struct trc_cft_def {
+  struct Curl_cftype *cft;
+  unsigned int category;
+};
+
+static struct trc_cft_def trc_cfts[] = {
+  { &Curl_cft_tcp,            TRC_CT_NETWORK },
+  { &Curl_cft_udp,            TRC_CT_NETWORK },
+  { &Curl_cft_unix,           TRC_CT_NETWORK },
+  { &Curl_cft_tcp_accept,     TRC_CT_NETWORK },
+  { &Curl_cft_happy_eyeballs, TRC_CT_NETWORK },
+  { &Curl_cft_setup,          TRC_CT_PROTOCOL },
 #ifdef USE_NGHTTP2
-  &Curl_cft_nghttp2,
+  { &Curl_cft_nghttp2,        TRC_CT_PROTOCOL },
 #endif
 #ifdef USE_SSL
-  &Curl_cft_ssl,
+  { &Curl_cft_ssl,            TRC_CT_NETWORK },
 #ifndef CURL_DISABLE_PROXY
-  &Curl_cft_ssl_proxy,
+  { &Curl_cft_ssl_proxy,      TRC_CT_PROXY },
 #endif
 #endif
 #if !defined(CURL_DISABLE_PROXY)
 #if !defined(CURL_DISABLE_HTTP)
-  &Curl_cft_h1_proxy,
+  { &Curl_cft_h1_proxy,       TRC_CT_PROXY },
 #ifdef USE_NGHTTP2
-  &Curl_cft_h2_proxy,
+  { &Curl_cft_h2_proxy,       TRC_CT_PROXY },
 #endif
-  &Curl_cft_http_proxy,
+  { &Curl_cft_http_proxy,     TRC_CT_PROXY },
 #endif /* !CURL_DISABLE_HTTP */
-  &Curl_cft_haproxy,
-  &Curl_cft_socks_proxy,
+  { &Curl_cft_haproxy,        TRC_CT_PROXY },
+  { &Curl_cft_socks_proxy,    TRC_CT_PROXY },
 #endif /* !CURL_DISABLE_PROXY */
 #ifdef USE_HTTP3
-  &Curl_cft_http3,
+  { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
 #if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
-  &Curl_cft_http_connect,
+  { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
-  NULL,
 };
+
+static void trc_apply_level_by_name(const char * const token, int lvl)
+{
+  size_t i;
+
+  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
+    if(strcasecompare(token, trc_cfts[i].cft->name)) {
+      trc_cfts[i].cft->log_level = lvl;
+      break;
+    }
+  }
+  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
+    if(strcasecompare(token, trc_feats[i].feat->name)) {
+      trc_feats[i].feat->log_level = lvl;
+      break;
+    }
+  }
+}
+
+static void trc_apply_level_by_category(int category, int lvl)
+{
+  size_t i;
+
+  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
+    if(!category || (trc_cfts[i].category & category))
+      trc_cfts[i].cft->log_level = lvl;
+  }
+  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
+    if(!category || (trc_feats[i].category & category))
+      trc_feats[i].feat->log_level = lvl;
+  }
+}
 
 CURLcode Curl_trc_opt(const char *config)
 {
   char *token, *tok_buf, *tmp;
-  size_t i;
   int lvl;
 
   tmp = strdup(config);
@@ -291,24 +338,17 @@ CURLcode Curl_trc_opt(const char *config)
         lvl = CURL_LOG_LVL_INFO;
         break;
     }
-    for(i = 0; cf_types[i]; ++i) {
-      if(strcasecompare(token, "all")) {
-        cf_types[i]->log_level = lvl;
-      }
-      else if(strcasecompare(token, cf_types[i]->name)) {
-        cf_types[i]->log_level = lvl;
-        break;
-      }
-    }
-    for(i = 0; trc_feats[i]; ++i) {
-      if(strcasecompare(token, "all")) {
-        trc_feats[i]->log_level = lvl;
-      }
-      else if(strcasecompare(token, trc_feats[i]->name)) {
-        trc_feats[i]->log_level = lvl;
-        break;
-      }
-    }
+    if(strcasecompare(token, "all"))
+      trc_apply_level_by_category(TRC_CT_NONE, lvl);
+    else if(strcasecompare(token, "protocol"))
+      trc_apply_level_by_category(TRC_CT_PROTOCOL, lvl);
+    else if(strcasecompare(token, "network"))
+      trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
+    else if(strcasecompare(token, "proxy"))
+      trc_apply_level_by_category(TRC_CT_PROXY, lvl);
+    else
+      trc_apply_level_by_name(token, lvl);
+
     token = strtok_r(NULL, ", ", &tok_buf);
   }
   free(tmp);
