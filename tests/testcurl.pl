@@ -51,7 +51,7 @@
 # --notes=[notes]          More human-readable information about this configuration
 # --nocvsup                Don't pull from git even though it is a git tree
 # --nogitpull              Don't pull from git even though it is a git tree
-# --nobuildconf            Don't run buildconf
+# --nobuildconf            Don't run autoreconf -fi
 # --noconfigure            Don't run configure
 # --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
@@ -460,7 +460,7 @@ if ($git) {
   }
 
   if($nobuildconf) {
-    logit "told to not run buildconf";
+    logit "told to not run autoreconf -fi";
   }
   elsif ($configurebuild) {
     # remove possible left-overs from the past
@@ -479,10 +479,10 @@ if ($git) {
     close($f);
     close($log);
 
-    logit "buildconf was successful";
+    logit "autoreconf -fi was successful";
   }
   else {
-    logit "buildconf was successful (dummy message)";
+    logit "autoreconf -fi was successful (dummy message)";
   }
 }
 

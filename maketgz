@@ -1,6 +1,6 @@
 #!/bin/sh
 # Script to build release-archives with. Note that this requires a checkout
-# from git and you should first run ./buildconf and build curl once.
+# from git and you should first run autoreconf -fi and build curl once.
 #
 #***************************************************************************
 #                                  _   _ ____  _

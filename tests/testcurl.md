@@ -31,10 +31,11 @@ https://curl.se/dev/builds.html
 *options* may be omitted. See *--setup* for what happens then.
 
 *dir* is a curl source dir, possibly a daily snapshot one. Using this will
-make *testcurl* skip the 'buildconf' stage and thus it removes the dependency
-on automake, autoconf, libtool, GNU m4 and possibly a few other things.
+make *testcurl* skip the 'autoreconf -fi' stage and thus it removes the
+dependency on automake, autoconf, libtool, GNU m4 and possibly a few other
+things.
 
-*testcurl* runs `buildconf` (or similar), configure, builds curl and libcurl
+*testcurl* runs `autoreconf -fi` (or similar), configure, builds curl and libcurl
 in a separate build directory and then runs `make test` to test the fresh
 build.
 
@@ -67,10 +68,11 @@ Set name to report as. Displayed in the build summary on the site.
 
 ## `--nobuildconf`
 
-Don't run buildconf. Useful when many builds use the same source tree, as then
-only one need to do this. Also, if multiple processes run tests simultaneously
-on the same source tree (like several hosts on a NFS mounted dir),
-simultaneous buildconf invokes may cause problems. (Added in 7.14.1)
+Don't run autoreconf -fi. Useful when many builds use the same source tree, as
+then only one need to do this. Also, if multiple processes run tests
+simultaneously on the same source tree (like several hosts on a NFS mounted
+dir), simultaneous autoreconf -fi invokes may cause problems. (Added in
+7.14.1)
 
 ## `--nogitpull`
 
