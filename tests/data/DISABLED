@@ -97,6 +97,7 @@
 1034
 1035
 %endif
+# WinIDN gives unexpected hostname conversions
 %if WinIDN
 165
 %endif
