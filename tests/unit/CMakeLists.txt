@@ -37,4 +37,6 @@ foreach(_testfile IN LISTS UNITPROGS)
   add_executable(${_testfile} EXCLUDE_FROM_ALL "${_testfile}.c" ${UNITFILES})
   add_dependencies(testdeps ${_testfile})
   target_link_libraries(${_testfile} curltool curlu)
+  set_target_properties(${_testfile} PROPERTIES
+    PROJECT_LABEL "Test unit ${_testfile}")
 endforeach()
