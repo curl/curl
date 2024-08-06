@@ -21,21 +21,23 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Try to find the GSS Kerberos library
-# Once done this defines
+# Find the GSS Kerberos library
 #
-#  GSS_ROOT_DIR - Set this variable to the root installation of GSS
+# Input variables:
 #
-# Read-Only variables:
-#  GSS_FOUND - system has the Heimdal library
-#  GSS_FLAVOUR - "MIT" or "Heimdal" if anything found.
-#  GSS_INCLUDE_DIR - the Heimdal include directory
-#  GSS_LIBRARIES - The libraries needed to use GSS
-#  GSS_LINK_DIRECTORIES - Directories to add to linker search path
-#  GSS_LINKER_FLAGS - Additional linker flags
-#  GSS_COMPILER_FLAGS - Additional compiler flags
-#  GSS_VERSION - This is set to version advertised by pkg-config or read from manifest.
-#                In case the library is found but no version info available it is set to "unknown"
+# GSS_ROOT_DIR          Set this variable to the root installation of GSS
+#
+# Result Variables:
+#
+# GSS_FOUND             System has the Heimdal library
+# GSS_FLAVOUR           "MIT" or "Heimdal" if anything found
+# GSS_INCLUDE_DIR       the Heimdal include directory
+# GSS_LIBRARIES         The libraries needed to use GSS
+# GSS_LINK_DIRECTORIES  Directories to add to linker search path
+# GSS_LINKER_FLAGS      Additional linker flags
+# GSS_COMPILER_FLAGS    Additional compiler flags
+# GSS_VERSION           This is set to version advertised by pkg-config or read from manifest.
+#                       In case the library is found but no version info available it is set to "unknown"
 
 set(_MIT_MODNAME mit-krb5-gssapi)
 set(_HEIMDAL_MODNAME heimdal-gssapi)

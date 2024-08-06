@@ -23,10 +23,12 @@
 ###########################################################################
 # Find the zstd library
 #
-# Result Variables
+# Result Variables:
+#
 # Zstd_FOUND         System has zstd
-# Zstd_INCLUDE_DIRS  The zstd include directories.
+# Zstd_INCLUDE_DIRS  The zstd include directories
 # Zstd_LIBRARIES     The libraries needed to use zstd
+# Zstd_VERSION       Version of zstd
 
 if(UNIX)
   find_package(PkgConfig QUIET)

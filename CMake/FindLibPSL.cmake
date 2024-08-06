@@ -21,12 +21,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Try to find the libpsl library
-# Once done this defines
+# Find the libpsl library
 #
-# LIBPSL_FOUND - system has the libpsl library
-# LIBPSL_INCLUDE_DIR - the libpsl include directory
-# LIBPSL_LIBRARY - the libpsl library name
+# Result Variables:
+#
+# LIBPSL_FOUND        System has libpsl
+# LIBPSL_INCLUDE_DIR  The libpsl include directory
+# LIBPSL_LIBRARY      The libpsl library name
+# LIBPSL_VERSION      Version of libpsl
 
 find_path(LIBPSL_INCLUDE_DIR "libpsl.h")
 

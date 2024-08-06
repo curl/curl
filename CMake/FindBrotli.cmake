@@ -21,6 +21,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the brotli library
+#
+# Result Variables:
+#
+# BROTLI_FOUND         System has brotli
+# BROTLI_INCLUDE_DIRS  The brotli include directories
+# BROTLI_LIBRARIES     The brotli library names
+
 include(FindPackageHandleStandardArgs)
 
 find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")

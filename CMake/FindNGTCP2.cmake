@@ -32,10 +32,11 @@
 #  GnuTLS:             Use libngtcp2_crypto_gnutls
 #
 # Result Variables:
+#
 # NGTCP2_FOUND         System has ngtcp2
-# NGTCP2_INCLUDE_DIRS  The ngtcp2 include directories.
+# NGTCP2_INCLUDE_DIRS  The ngtcp2 include directories
 # NGTCP2_LIBRARIES     The libraries needed to use ngtcp2
-# NGTCP2_VERSION       version of ngtcp2.
+# NGTCP2_VERSION       Version of ngtcp2
 
 if(UNIX)
   find_package(PkgConfig QUIET)

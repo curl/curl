@@ -21,6 +21,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the bearssl library
+#
+# Result Variables:
+#
+# BEARSSL_FOUND         System has bearssl
+# BEARSSL_INCLUDE_DIRS  The bearssl include directories
+# BEARSSL_LIBRARIES     The bearssl library names
+
 find_path(BEARSSL_INCLUDE_DIRS "bearssl.h")
 
 find_library(BEARSSL_LIBRARY "bearssl")

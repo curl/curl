@@ -21,12 +21,14 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# - Try to find the libssh2 library
-# Once done this defines
+# Find the libssh2 library
 #
-# LIBSSH2_FOUND - system has the libssh2 library
-# LIBSSH2_INCLUDE_DIR - the libssh2 include directory
-# LIBSSH2_LIBRARY - the libssh2 library name
+# Result Variables:
+#
+# LIBSSH2_FOUND        System has libssh2
+# LIBSSH2_INCLUDE_DIR  The libssh2 include directory
+# LIBSSH2_LIBRARY      The libssh2 library name
+# LIBSSH2_VERSION      Version of libssh2
 
 find_path(LIBSSH2_INCLUDE_DIR "libssh2.h")
 
