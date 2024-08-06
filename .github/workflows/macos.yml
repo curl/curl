@@ -80,9 +80,9 @@ jobs:
             compiler: clang
             configure: --enable-debug --without-ssl --enable-websockets
             macos-version-min: '10.9'
-          - name: '!ssl libssh2'
+          - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --enable-websockets
+            configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --with-apple-idn --enable-websockets
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
