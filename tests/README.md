@@ -201,7 +201,7 @@ SPDX-License-Identifier: curl
 ### Test input files
 
   All test cases are put in the `data/` subdirectory. Each test is stored in
-  the filenamed according to the test number.
+  the file named according to the test number.
 
   See [`FILEFORMAT`](FILEFORMAT.md) for a description of the test case file
   format.
