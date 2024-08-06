@@ -31,9 +31,8 @@ foreach(_client IN LISTS check_PROGRAMS)
   add_executable(${_client_target} "${_client}.c")
   add_dependencies(testdeps ${_client_target})
   target_include_directories(${_client_target} PRIVATE
-    "${CURL_SOURCE_DIR}/lib"      # for "curl_setup_once.h"
-    "${CURL_BINARY_DIR}/lib"      # for "curl_config.h"
-    "${CURL_BINARY_DIR}/include"  # for "curl/curl.h"
+    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
   )
   target_link_libraries(${_client_target} ${LIB_SELECTED} ${CURL_LIBS})
   target_compile_definitions(${_client_target} PRIVATE "CURL_NO_OLDIES")

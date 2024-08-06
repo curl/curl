@@ -98,7 +98,7 @@ else()
   set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
-include_directories(${CURL_SOURCE_DIR}/include)
+include_directories("${CURL_SOURCE_DIR}/include")
 
 set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
 

@@ -40,12 +40,8 @@ list(APPEND HHEADERS ${CMAKE_CURRENT_BINARY_DIR}/curl_config.h)
 # The rest of the build
 
 include_directories(
-  ${CMAKE_CURRENT_BINARY_DIR}/../include
-  ${CMAKE_CURRENT_SOURCE_DIR}/..
-  ${CMAKE_CURRENT_SOURCE_DIR}/../include
-  ${CMAKE_CURRENT_BINARY_DIR}/..
-  ${CMAKE_CURRENT_SOURCE_DIR}
-  ${CMAKE_CURRENT_BINARY_DIR}
+  "${CMAKE_CURRENT_BINARY_DIR}"
+  "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 if(USE_ARES)
   include_directories(${CARES_INCLUDE_DIR})

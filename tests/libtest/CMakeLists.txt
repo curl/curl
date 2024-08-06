@@ -35,10 +35,9 @@ function(setup_test test_name)  # ARGN are the files in the test
   string(TOUPPER ${test_name} UPPER_TEST_NAME)
 
   include_directories(
-    ${CURL_SOURCE_DIR}/lib            # for "curl_setup_once.h"
-    ${CURL_BINARY_DIR}/lib            # for "curl_config.h"
-    ${CURL_BINARY_DIR}/include        # for "curl/curl.h"
-    ${CURL_SOURCE_DIR}/tests/libtest  # to be able to build generated tests
+    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
   if(USE_ARES)
     include_directories(${CARES_INCLUDE_DIR})
