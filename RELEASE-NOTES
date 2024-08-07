@@ -4,7 +4,7 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3215
+ Contributors:                 3218
 
 This release includes the following changes:
 
@@ -15,31 +15,46 @@ This release includes the following changes:
  o curl: make --show-headers the same as --include [6]
  o curl: support --dump-header % to direct to stderr [31]
  o curl: support embedding a CA bundle and --dump-ca-embed [20]
+ o curl: support repeated use of the verbose option; -vv etc [35]
+ o curl: use libuv for parallel transfers with --test-event [82]
+ o mbedtls: add CURLOPT_TLS13_CIPHERS support [78]
  o vtls: stop offering alpn http/1.1 for http2-prior-knowledge [53]
+ o wolfssl: add CURLOPT_TLS13_CIPHERS support [76]
  o wolfssl: add support for ssl cert blob / ssl key blob options [50]
 
 This release includes the following bugfixes:
 
  o autotools: fix typo in tests/data target [30]
+ o aws_sigv4: fix canon order for headers with same prefix [74]
  o bearssl: improve shutdown handling [45]
  o cfilters: send flush [13]
  o CHANGES: rename to CHANGES.md, no longer generated [40]
  o CI: enable parallel testing in CI builds [18]
  o ci: Update actions/upload-artifact digest to 89ef406 [24]
+ o cmake: add Linux CI job, fix pytest with cmake [71]
+ o cmake: add math library when using wolfssl and ngtcp2 [66]
  o cmake: add support for versioned symbols option [51]
+ o cmake: cleanup header paths [59]
  o cmake: detect `nghttp2` via `pkg-config`, enable by default [21]
  o cmake: distcheck for files in CMake subdir [9]
  o cmake: drop custom `CMakeOutput.log`/`CMakeError.log` logs [27]
  o cmake: drop no-op `tests/data/CMakeLists.txt` [26]
  o cmake: drop reference to undefined variable [25]
+ o cmake: drop unused `HAVE_IDNA_STRERROR` [62]
  o cmake: drop unused internal variable [22]
+ o cmake: fix `GSS_VERSION` for Heimdal found via pkg-config [77]
+ o cmake: show CMake platform/compiler flags [63]
+ o cmake: use numeric comparison for `HAVE_WIN32_WINNT` [69]
+ o configure: detect AppleIDN [70]
  o configure: fail if PSL is not disabled but not found [46]
  o curl: allow 500MB data URL encode strings [38]
  o Curl_rand_bytes to control env override [17]
  o dist: add missing `docs/examples/CMakeLists.txt` [58]
  o dist: add missing `FindNettle.cmake` [11]
+ o dist: drop buildconf [65]
  o dist: fix reproducible build from release tarball [36]
  o dmaketgz: only run 'make distclean' if Makefile exists
+ o docs: mention "@-" in more places [67]
  o doh-url.md: point out DOH server IP pinning [37]
  o easy: fix curl_easy_upkeep for shared connection caches [52]
  o escape: allow curl_easy_escape to generate 3*input length output [39]
@@ -48,16 +63,21 @@ This release includes the following bugfixes:
  o http2: improve rate limiting of downloads [33]
  o http2: improved upload eos handling [41]
  o INSTALL.md: MultiSSL and QUIC are mutually exclusive [7]
+ o KNOWN_BUGS: "special characers" in URL works with aws-sigv4 [81]
  o lib: add eos flag to send methods [14]
  o lib: convert some debugf()s into traces [8]
  o libcurl.pc: add `Cflags.private` [10]
+ o Makefile.mk: fixup enabling libidn2 [61]
  o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
  o maketgz: accept option to include latest commit hash [5]
+ o ngtcp2: use NGHTTP3 prefix instead of NGTCP2 for errors in h3 callbacks [79]
  o openssl: improve shutdown handling [44]
  o progress: ratelimit/progress tweaks [32]
  o pytests: add tests for HEAD requests in all HTTP versions [42]
+ o runtests: if DISABLED cannot be read, error out [56]
  o rustls: make all tests pass [1]
  o sigpipe: init the struct so that first apply ignores [49]
+ o tests/runner: only allow [!A-Za-z0-9_-] in %if feature names [55]
  o tests: provide docs as curldown, not nroff [12]
  o tidy-up: OS names [57]
  o tool_operhlp: fix  "potentially uninitialized local variable 'pc' used" [48]
@@ -85,12 +105,13 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Snast, Antoine du Hamel, Christoph Reiter, Dan Fandrich,
-  Daniel Stenberg, David Sardari, Jan Venekamp, Joe Birr-Pixton,
-  kit-ty-kate on github, Matt Jolly, Rasmus Thomsen, Ray Satiro, renovate[bot],
-  Ryan Carsten Schmidt, Sergio Durigan Junior, Stefan Eissing, Tal Regev,
-  Viktor Szakats
-  (18 contributors)
+  Alex Snast, Antoine du Hamel, Austin Moore, Christoph Reiter, Dan Fandrich,
+  Daniel Stenberg, David Sardari, dependabot[bot], Jan Venekamp,
+  Joe Birr-Pixton, kit-ty-kate on github, Matt Jolly, Moritz Buhl,
+  Rasmus Thomsen, Ray Satiro, renovate[bot], Ryan Carsten Schmidt,
+  Sergio Durigan Junior, Slaven Rezić, Stefan Eissing, Tal Regev,
+  Viktor Szakats, Yedaya Katsman
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -128,6 +149,7 @@ References to bug reports and discussions on issues:
  [32] = https://curl.se/bug/?i=14335
  [33] = https://curl.se/bug/?i=14326
  [34] = https://curl.se/bug/?i=13988
+ [35] = https://curl.se/bug/?i=13977
  [36] = https://curl.se/bug/?i=14336
  [37] = https://curl.se/bug/?i=14377
  [38] = https://curl.se/bug/?i=14337
@@ -146,5 +168,24 @@ References to bug reports and discussions on issues:
  [52] = https://curl.se/bug/?i=12677
  [53] = https://curl.se/bug/?i=9963
  [54] = https://curl.se/bug/?i=13993
+ [55] = https://curl.se/bug/?i=14403
+ [56] = https://curl.se/bug/?i=14411
  [57] = https://curl.se/bug/?i=14360
  [58] = https://curl.se/bug/?i=14380
+ [59] = https://curl.se/bug/?i=14416
+ [61] = https://curl.se/bug/?i=14421
+ [62] = https://curl.se/bug/?i=14420
+ [63] = https://curl.se/bug/?i=14417
+ [65] = https://curl.se/bug/?i=14412
+ [66] = https://curl.se/bug/?i=14343
+ [67] = https://curl.se/bug/?i=14402
+ [69] = https://curl.se/bug/?i=14409
+ [70] = https://curl.se/bug/?i=14401
+ [71] = https://curl.se/bug/?i=14382
+ [74] = https://curl.se/bug/?i=14370
+ [76] = https://curl.se/bug/?i=14385
+ [77] = https://curl.se/bug/?i=14393
+ [78] = https://curl.se/bug/?i=14384
+ [79] = https://curl.se/bug/?i=14394
+ [81] = https://curl.se/bug/?i=13754
+ [82] = https://curl.se/bug/?i=14298
