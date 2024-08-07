@@ -368,7 +368,7 @@ endif()
 
 # If we are on AIX, do the _ALL_SOURCE magic
 if(CMAKE_SYSTEM_NAME MATCHES "AIX")
-  set(_ALL_SOURCE 1)
+  add_definitions("-D_ALL_SOURCE")
 endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
