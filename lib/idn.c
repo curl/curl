@@ -53,30 +53,70 @@
 /* for macOS and iOS targets */
 #if defined(USE_APPLE_IDN)
 #include <unicode/uidna.h>
+#include <iconv.h>
+#include <langinfo.h>
 
 #define MAX_HOST_LENGTH 512
+
+static CURLcode iconv_to_utf8(const char *in, size_t inlen,
+                              char **out, size_t *outlen)
+{
+  iconv_t cd = iconv_open("UTF-8", nl_langinfo(CODESET));
+  if(cd != (iconv_t)-1) {
+    size_t iconv_outlen = *outlen;
+    char *iconv_in = (char *)in;
+    size_t iconv_inlen = inlen;
+    size_t iconv_result = iconv(cd, &iconv_in, &iconv_inlen,
+                                out, &iconv_outlen);
+    *outlen -= iconv_outlen;
+    iconv_close(cd);
+    if(iconv_result == (size_t)-1) {
+      if(errno == ENOMEM)
+        return CURLE_OUT_OF_MEMORY;
+      else
+        return CURLE_URL_MALFORMAT;
+    }
+
+    return CURLE_OK;
+  }
+  else {
+    if(errno == ENOMEM)
+      return CURLE_OUT_OF_MEMORY;
+    else
+      return CURLE_FAILED_INIT;
+  }
+}
 
 static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
   size_t inlen = strlen(in);
   if(inlen < MAX_HOST_LENGTH) {
-    UErrorCode err = U_ZERO_ERROR;
-    UIDNA* idna = uidna_openUTS46(
-      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
-    if(!U_FAILURE(err)) {
-      UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-      char buffer[MAX_HOST_LENGTH] = {0};
-      (void)uidna_nameToASCII_UTF8(idna, in, -1, buffer,
-                                   sizeof(buffer) - 1, &info, &err);
-      uidna_close(idna);
+    char iconv_buffer[MAX_HOST_LENGTH] = {0};
+    char *iconv_outptr = iconv_buffer;
+    size_t iconv_outlen = sizeof(iconv_buffer);
+    CURLcode iconv_result = iconv_to_utf8(in, inlen,
+                                          &iconv_outptr, &iconv_outlen);
+    if(!iconv_result) {
+      UErrorCode err = U_ZERO_ERROR;
+      UIDNA* idna = uidna_openUTS46(
+        UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
       if(!U_FAILURE(err)) {
-        *out = strdup(buffer);
-        if(*out)
-          return CURLE_OK;
-        else
-          return CURLE_OUT_OF_MEMORY;
+        UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+        char buffer[MAX_HOST_LENGTH] = {0};
+        (void)uidna_nameToASCII_UTF8(idna, iconv_buffer, (int)iconv_outlen,
+                                     buffer, sizeof(buffer) - 1, &info, &err);
+        uidna_close(idna);
+        if(!U_FAILURE(err)) {
+          *out = strdup(buffer);
+          if(*out)
+            return CURLE_OK;
+          else
+            return CURLE_OUT_OF_MEMORY;
+        }
       }
     }
+    else
+      return iconv_result;
   }
   return CURLE_URL_MALFORMAT;
 }
