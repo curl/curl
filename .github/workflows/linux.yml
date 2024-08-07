@@ -441,6 +441,10 @@ jobs:
         if: ${{ matrix.build.generate }}
         name: 'configure (cmake)'
 
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
       - name: 'test configs'
         run: |
           cat tests/config || true
