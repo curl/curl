@@ -82,6 +82,13 @@ endif()
 message(STATUS "CMake platform flags:${_flags}")
 set(_flags)
 
+function(curl_dumpvars)  # Dump all defined variables with their values
+  get_cmake_property(_vars VARIABLES)
+  foreach(_var ${_vars})
+    message("${_var} = ${${_var}}")
+  endforeach()
+endfunction()
+
 file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
 string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
   CURL_VERSION ${_curl_version_h_contents})
