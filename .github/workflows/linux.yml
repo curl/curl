@@ -126,10 +126,16 @@ jobs:
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-clang
-            install_packages: zlib1g-dev clang
+          - name: openssl3-clang krb5
+            install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug --enable-websockets
+            singleuse: --unit
+
+          - name: openssl3-clang krb5
+            install_packages: zlib1g-dev libkrb5-dev clang
+            install_steps: openssl3
+            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DENABLE_WEBSOCKETS=ON
             singleuse: --unit
 
           - name: address-sanitizer
@@ -434,6 +440,10 @@ jobs:
             ${{ matrix.build.generate }}
         if: ${{ matrix.build.generate }}
         name: 'configure (cmake)'
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: 'test configs'
         run: |

@@ -291,9 +291,9 @@ jobs:
             install: wolfssl
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
-          - name: 'GnuTLS !ldap'
-            install: gnutls nettle
-            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+          - name: 'GnuTLS !ldap krb5'
+            install: gnutls nettle krb5
+            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
