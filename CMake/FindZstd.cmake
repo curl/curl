@@ -56,14 +56,15 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Zstd
   REQUIRED_VARS
-    Zstd_LIBRARY
     Zstd_INCLUDE_DIR
-  VERSION_VAR Zstd_VERSION
+    Zstd_LIBRARY
+  VERSION_VAR
+    Zstd_VERSION
 )
 
 if(Zstd_FOUND)
-  set(Zstd_LIBRARIES    ${Zstd_LIBRARY})
   set(Zstd_INCLUDE_DIRS ${Zstd_INCLUDE_DIR})
+  set(Zstd_LIBRARIES    ${Zstd_LIBRARY})
 endif()
 
 mark_as_advanced(Zstd_INCLUDE_DIRS Zstd_LIBRARIES)

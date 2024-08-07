@@ -37,6 +37,9 @@ find_library(CARES_LIBRARY
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CARES
-  REQUIRED_VARS CARES_LIBRARY CARES_INCLUDE_DIR)
+  REQUIRED_VARS
+    CARES_INCLUDE_DIR
+    CARES_LIBRARY
+)
 
 mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)

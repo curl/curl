@@ -49,13 +49,13 @@ find_library(QUICHE_LIBRARY NAMES "quiche"
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(QUICHE
   REQUIRED_VARS
-    QUICHE_LIBRARY
     QUICHE_INCLUDE_DIR
+    QUICHE_LIBRARY
 )
 
 if(QUICHE_FOUND)
-  set(QUICHE_LIBRARIES    ${QUICHE_LIBRARY})
   set(QUICHE_INCLUDE_DIRS ${QUICHE_INCLUDE_DIR})
+  set(QUICHE_LIBRARIES    ${QUICHE_LIBRARY})
 endif()
 
 mark_as_advanced(QUICHE_INCLUDE_DIRS QUICHE_LIBRARIES)

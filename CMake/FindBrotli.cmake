@@ -40,9 +40,9 @@ find_package_handle_standard_args(Brotli
   FOUND_VAR
     BROTLI_FOUND
   REQUIRED_VARS
+    BROTLI_INCLUDE_DIR
     BROTLIDEC_LIBRARY
     BROTLICOMMON_LIBRARY
-    BROTLI_INCLUDE_DIR
   FAIL_MESSAGE
     "Could NOT find Brotli"
 )

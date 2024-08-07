@@ -49,13 +49,13 @@ find_library(MSH3_LIBRARY NAMES "msh3"
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MSH3
   REQUIRED_VARS
-    MSH3_LIBRARY
     MSH3_INCLUDE_DIR
+    MSH3_LIBRARY
 )
 
 if(MSH3_FOUND)
-  set(MSH3_LIBRARIES    ${MSH3_LIBRARY})
   set(MSH3_INCLUDE_DIRS ${MSH3_INCLUDE_DIR})
+  set(MSH3_LIBRARIES    ${MSH3_LIBRARY})
 endif()
 
 mark_as_advanced(MSH3_INCLUDE_DIRS MSH3_LIBRARIES)

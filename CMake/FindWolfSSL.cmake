@@ -57,7 +57,8 @@ find_package_handle_standard_args(WolfSSL
   REQUIRED_VARS
     WolfSSL_INCLUDE_DIR
     WolfSSL_LIBRARY
-  VERSION_VAR WolfSSL_VERSION
+  VERSION_VAR
+    WolfSSL_VERSION
 )
 
 if(WolfSSL_FOUND)
