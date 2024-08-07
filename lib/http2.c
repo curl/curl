@@ -207,8 +207,6 @@ struct h2_stream_ctx {
   BIT(reset);  /* TRUE on stream reset */
   BIT(close_handled); /* TRUE if stream closure is handled by libcurl */
   BIT(bodystarted);
-  BIT(send_closed); /* transfer is done sending, we might have still
-                       buffered data in stream->sendbuf to upload. */
   BIT(body_eos);    /* the complete body has been added to `sendbuf` and
                      * is being/has been processed from there. */
 };
@@ -347,10 +345,10 @@ static void drain_stream(struct Curl_cfilter *cf,
 
   (void)cf;
   bits = CURL_CSELECT_IN;
-  if(!stream->send_closed &&
+  if(!stream->closed &&
      (!stream->body_eos || !Curl_bufq_is_empty(&stream->sendbuf)))
     bits |= CURL_CSELECT_OUT;
-  if(data->state.select_bits != bits) {
+  if(stream->closed || (data->state.select_bits != bits)) {
     CURL_TRC_CF(data, cf, "[%d] DRAIN select_bits=%x",
                 stream->id, bits);
     data->state.select_bits = bits;
@@ -406,7 +404,6 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
                   stream->id);
       stream->closed = TRUE;
       stream->reset = TRUE;
-      stream->send_closed = TRUE;
       nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
                                 stream->id, NGHTTP2_STREAM_CLOSED);
       flush_egress = TRUE;
@@ -1164,7 +1161,6 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     if(frame->rst_stream.error_code) {
       stream->reset = TRUE;
     }
-    stream->send_closed = TRUE;
     drain_stream(cf, data, stream);
     break;
   case NGHTTP2_WINDOW_UPDATE:
@@ -1430,7 +1426,6 @@ static int on_stream_close(nghttp2_session *session, int32_t stream_id,
   stream->error = error_code;
   if(stream->error) {
     stream->reset = TRUE;
-    stream->send_closed = TRUE;
   }
 
   if(stream->error)
@@ -1739,35 +1734,6 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
 
   k->upgr101 = UPGR101_H2;
 
-  return result;
-}
-
-static CURLcode http2_data_done_send(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data)
-{
-  struct cf_h2_ctx *ctx = cf->ctx;
-  CURLcode result = CURLE_OK;
-  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
-
-  if(!ctx || !ctx->h2 || !stream)
-    goto out;
-
-  CURL_TRC_CF(data, cf, "[%d] data done send", stream->id);
-  if(!stream->send_closed) {
-    stream->send_closed = TRUE;
-    if(!Curl_bufq_is_empty(&stream->sendbuf)) {
-      /* TODO: if we had not seen EOS on send(), it seems the request
-       * is now aborted? */
-      /* we now know that everything that is buffered is all there is. */
-      stream->body_eos = TRUE;
-      /* resume sending here to trigger the callback to get called again so
-         that it can signal EOF to nghttp2 */
-      (void)nghttp2_session_resume_data(ctx->h2, stream->id);
-      drain_stream(cf, data, stream);
-    }
-  }
-
-out:
   return result;
 }
 
@@ -2339,18 +2305,6 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     nwritten = -1;
     goto out;
   }
-  else if(stream && stream->body_eos &&
-          (!Curl_bufq_is_empty(&stream->sendbuf) ||
-           !Curl_bufq_is_empty(&ctx->outbufq))) {
-    /* We added the last send chunk to stream->sendbuf, but were unable
-     * to send it all off. Either the socket EAGAINed or the HTTP/2 flow
-     * control prevents it. This should be a call with `eos` set and
-     * we CURLE_AGAIN it until we flushed everything. */
-    CURL_TRC_CF(data, cf, "[%d] could not flush last send chunk -> EAGAIN",
-                stream->id);
-    *err = CURLE_AGAIN;
-    nwritten = -1;
-  }
 
   if(should_close_session(ctx)) {
     /* nghttp2 thinks this session is done. If the stream has not been
@@ -2649,9 +2603,6 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_FLUSH:
     result = cf_h2_flush(cf, data);
-    break;
-  case CF_CTRL_DATA_DONE_SEND:
-    result = http2_data_done_send(cf, data);
     break;
   case CF_CTRL_DATA_DETACH:
     http2_data_done(cf, data);

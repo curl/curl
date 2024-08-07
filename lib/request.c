@@ -182,16 +182,17 @@ static CURLcode xfer_send(struct Curl_easy *data,
   bool eos = FALSE;
 
   *pnwritten = 0;
+  DEBUGASSERT(hds_len <= blen);
 #ifdef DEBUGBUILD
   {
     /* Allow debug builds to override this logic to force short initial
-       sends
-     */
+       sends */
+    size_t body_len = blen - hds_len;
     char *p = getenv("CURL_SMALLREQSEND");
     if(p) {
-      size_t altsize = (size_t)strtoul(p, NULL, 10);
-      if(altsize && altsize < blen)
-        blen = altsize;
+      size_t body_small = (size_t)strtoul(p, NULL, 10);
+      if(body_small && body_small < body_len)
+        blen = hds_len + body_small;
     }
   }
 #endif
@@ -267,10 +268,12 @@ static CURLcode req_set_upload_done(struct Curl_easy *data)
   else if(data->req.writebytecount)
     infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
           " bytes", data->req.writebytecount);
-  else if(!data->req.download_done)
+  else if(!data->req.download_done) {
+    DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
     infof(data, Curl_creader_total_length(data)?
                 "We are completely uploaded and fine" :
                 "Request completely sent off");
+  }
 
   return Curl_xfer_send_close(data);
 }
