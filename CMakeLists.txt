@@ -1114,6 +1114,8 @@ if(CURL_USE_GSSAPI)
     list(APPEND CURL_LIBS ${GSS_LIBRARIES})
     if(GSS_FLAVOUR STREQUAL "MIT")
       list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "mit-krb5-gssapi")
+    else()  # Heimdal
+      list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "heimdal-gssapi")
     endif()
   else()
     message(WARNING "GSSAPI support has been requested but no supporting libraries found. Skipping.")
