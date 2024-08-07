@@ -27,3 +27,5 @@ When negotiating a TLS or SSL connection, the server sends a certificate
 indicating its identity. A public key is extracted from this certificate and
 if it does not exactly match the public key provided to this option, curl
 aborts the connection before sending or receiving any data.
+
+Before curl 8.10.0 this option did not work due to a bug.
