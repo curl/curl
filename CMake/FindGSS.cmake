@@ -303,11 +303,9 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 
-set(_gss_required_vars GSS_LIBRARIES GSS_FLAVOUR)
-
 find_package_handle_standard_args(GSS
   REQUIRED_VARS
-    ${_gss_required_vars}
+    GSS_LIBRARIES GSS_FLAVOUR
   VERSION_VAR
     GSS_VERSION
   FAIL_MESSAGE
