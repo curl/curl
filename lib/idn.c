@@ -106,7 +106,7 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
         (void)uidna_nameToASCII_UTF8(idna, iconv_buffer, (int)iconv_outlen,
                                      buffer, sizeof(buffer) - 1, &info, &err);
         uidna_close(idna);
-        if(!U_FAILURE(err)) {
+        if(!U_FAILURE(err) && !info.errors) {
           *out = strdup(buffer);
           if(*out)
             return CURLE_OK;
