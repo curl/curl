@@ -336,17 +336,20 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
         }
 
         _gssresp.value = NULL; /* make sure it is initialized */
+        _gssresp.length = 0;
         p += 4; /* over '789 ' */
         p = strstr(p, "ADAT=");
         if(p) {
-          result = Curl_base64_decode(p + 5,
-                                      (unsigned char **)&_gssresp.value,
-                                      &_gssresp.length);
+          unsigned char *outptr;
+          size_t outlen;
+          result = Curl_base64_decode(p + 5, &outptr, &outlen);
           if(result) {
             failf(data, "base64-decoding: %s", curl_easy_strerror(result));
             ret = AUTH_CONTINUE;
             break;
           }
+          _gssresp.value = outptr;
+          _gssresp.length = outlen;
         }
 
         gssresp = &_gssresp;
