@@ -1754,10 +1754,10 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Helper to populate a list (_items) with a label when conditions
   # (the remaining args) are satisfied
-  macro(_add_if label)
+  macro(_add_if _label)
     # Needs to be a macro to allow this indirection
     if(${ARGN})
-      set(_items ${_items} "${label}")
+      set(_items ${_items} "${_label}")
     endif()
   endmacro()
 
