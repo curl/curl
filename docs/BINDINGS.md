@@ -144,3 +144,5 @@ Ruby: [curb](https://github.com/taf2/curb) written by Ross Bamford,
 [XBLite](https://web.archive.org/web/20060426150418/perso.wanadoo.fr/xblite/libraries.html) Written by David Szafranski
 
 [Xojo](https://github.com/charonn0/RB-libcURL) Written by Andrew Lambert
+
+[Zig](https://github.com/jiacai2050/zig-curl) Written by Jiacai Liu, both easy and multi API are supported.
