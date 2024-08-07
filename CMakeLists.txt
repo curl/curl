@@ -1672,8 +1672,8 @@ endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
-function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
-  file(STRINGS "${INPUT_FILE}" _makefile_inc_lines)
+function(transform_makefile_inc _input_file _output_file)
+  file(STRINGS "${_input_file}" _makefile_inc_lines)
   set(_makefile_inc_text "")
   foreach(_line IN LISTS _makefile_inc_lines)
     if(_line MATCHES "### USE SIMPLE LIST ASSIGMENTS ABOVE THIS LINE ###")
@@ -1691,8 +1691,8 @@ function(transform_makefile_inc INPUT_FILE OUTPUT_FILE)
 
   string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})  # Replace $() with ${}
   string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})  # Replace @@ with ${}, even if that may not be read by CMake scripts.
-  file(WRITE ${OUTPUT_FILE} ${_makefile_inc_text})
-  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${INPUT_FILE}")
+  file(WRITE ${_output_file} ${_makefile_inc_text})
+  set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_input_file}")
 endfunction()
 
 include(GNUInstallDirs)
