@@ -1260,9 +1260,7 @@ if(WIN32)
   set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "windows.h")
-endif()
 
-if(WIN32)
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
   curl_internal_test(HAVE_WIN32_WINNT)
   if(HAVE_WIN32_WINNT)
