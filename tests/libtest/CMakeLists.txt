@@ -21,16 +21,16 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-function(setup_test test_name)  # ARGN are the files in the test
+function(setup_test _test_name)  # ARGN are the files in the test
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
     list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
   endif()
 
-  add_executable(${test_name} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${test_name})
-  string(TOUPPER ${test_name} _upper_test_name)
+  add_executable(${_test_name} EXCLUDE_FROM_ALL ${ARGN})
+  add_dependencies(testdeps ${_test_name})
+  string(TOUPPER ${_test_name} _upper_test_name)
 
   include_directories(
     "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
@@ -41,11 +41,11 @@ function(setup_test test_name)  # ARGN are the files in the test
     include_directories(${CARES_INCLUDE_DIR})
   endif()
 
-  target_link_libraries(${test_name} ${LIB_SELECTED} ${CURL_LIBS})
+  target_link_libraries(${_test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
-  set_target_properties(${test_name} PROPERTIES
+  set_target_properties(${_test_name} PROPERTIES
     COMPILE_DEFINITIONS ${_upper_test_name}
-    PROJECT_LABEL "Test ${test_name}")
+    PROJECT_LABEL "Test ${_test_name}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES' variables
