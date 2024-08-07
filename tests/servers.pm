@@ -2432,8 +2432,9 @@ sub startservers {
             }
         }
         elsif($what eq "http") {
-            if($torture && $run{'http'} &&
+            if($run{'http'} &&
                !responsive_http_server("http", $verbose, 0, protoport('http'))) {
+                logmsg "* restarting unresponsive HTTP server\n";
                 if(stopserver('http')) {
                     return ("failed stopping unresponsive HTTP server", 3);
                 }

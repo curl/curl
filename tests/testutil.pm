@@ -40,6 +40,8 @@ BEGIN {
         shell_quote
         subbase64
         subnewlines
+        subsha256base64file
+        substrippemfile
     );
 
     our @EXPORT_OK = qw(
@@ -48,6 +50,7 @@ BEGIN {
     );
 }
 
+use Digest::SHA qw(sha256);
 use MIME::Base64;
 
 use globalconfig qw(
@@ -215,4 +218,41 @@ sub shell_quote {
     return $s;
 }
 
+sub get_sha256_base64 {
+    my ($file_path) = @_;
+    return encode_base64(sha256(do { local $/; open my $fh, '<:raw', $file_path or die $!; <$fh> }), "");
+}
+
+sub subsha256base64file {
+    my ($thing) = @_;
+
+    # SHA-256 base64
+    while ($$thing =~ s/%sha256b64file\[(.*?)\]sha256b64file%/%%SHA256B64FILE%%/i) {
+        my $file_path = $1;
+        $file_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        my $hash_b64 = get_sha256_base64($file_path);
+        $$thing =~ s/%%SHA256B64FILE%%/$hash_b64/;
+    }
+}
+
+sub get_file_content {
+    my ($file_path) = @_;
+    my $content = do { local $/; open my $fh, '<', $file_path or die $!; <$fh> };
+    $content =~ s/(^|-----END .*?-----[\r\n]?)(.*?)(-----BEGIN .*?-----|$)/$1$3/gs;
+    $content =~ s/\r\n/\n/g;
+    chomp($content);
+    return $content;
+}
+
+sub substrippemfile {
+    my ($thing) = @_;
+
+    # File content substitution
+    while ($$thing =~ s/%strippemfile\[(.*?)\]strippemfile%/%%FILE%%/i) {
+        my $file_path = $1;
+        $file_path =~ s/%([0-9A-Fa-f]{2})/chr(hex($1))/eg;
+        my $file_content = get_file_content($file_path);
+        $$thing =~ s/%%FILE%%/$file_content/;
+    }
+}
 1;
