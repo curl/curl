@@ -373,7 +373,7 @@ endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
 if(CMAKE_SYSTEM_NAME MATCHES "Haiku")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lnetwork")
+  list(APPEND CURL_LIBS "network")
 endif()
 
 # Include all the necessary files for macros
