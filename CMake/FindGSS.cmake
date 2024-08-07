@@ -89,7 +89,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message(STATUS "CFLAGS: ${_GSS_CFLAGS}")
+    message(STATUS "FindGSS CFLAGS: ${_GSS_CFLAGS}")
     if(NOT _gss_configure_failed)  # 0 means success
       # Should also work in an odd case when multiple directories are given
       string(STRIP "${_GSS_CFLAGS}" _GSS_CFLAGS)
@@ -112,7 +112,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message(STATUS "LDFLAGS: ${_gss_lib_flags}")
+    message(STATUS "FindGSS LDFLAGS: ${_gss_lib_flags}")
 
     if(NOT _gss_configure_failed)  # 0 means success
       # This script gives us libraries and link directories. Blah. We have to deal with it.
