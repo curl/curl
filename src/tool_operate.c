@@ -1750,6 +1750,13 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             warnf(global, "ignoring %s, not supported by libcurl with %s",
                   "--pinnedpubkey", ssl_ver);
         }
+        if(config->proxy_pinnedpubkey) {
+          result = res_setopt_str(curl, CURLOPT_PROXY_PINNEDPUBLICKEY,
+                                  config->proxy_pinnedpubkey);
+          if(result == CURLE_NOT_BUILT_IN)
+            warnf(global, "ignoring %s, not supported by libcurl with %s",
+                  "--proxy-pinnedpubkey", ssl_ver);
+        }
 
         if(config->ssl_ec_curves)
           my_setopt_str(curl, CURLOPT_SSL_EC_CURVES, config->ssl_ec_curves);
