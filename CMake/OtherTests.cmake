@@ -25,10 +25,10 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
-macro(add_header_include check header)
-  if(${check})
+macro(add_header_include _check _header)
+  if(${_check})
     set(_source_epilogue "${_source_epilogue}
-      #include <${header}>")
+      #include <${_header}>")
   endif()
 endmacro()
 
