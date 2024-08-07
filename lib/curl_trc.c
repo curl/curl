@@ -314,7 +314,7 @@ static void trc_apply_level_by_category(int category, int lvl)
   }
 }
 
-CURLcode Curl_trc_opt(const char *config)
+static CURLcode trc_opt(const char *config)
 {
   char *token, *tok_buf, *tmp;
   int lvl;
@@ -355,18 +355,29 @@ CURLcode Curl_trc_opt(const char *config)
   return CURLE_OK;
 }
 
+CURLcode Curl_trc_opt(const char *config)
+{
+  CURLcode result = config? trc_opt(config) : CURLE_OK;
+#ifdef DEBUGBUILD
+  /* CURL_DEBUG can override anything */
+  if(!result) {
+    const char *dbg_config = getenv("CURL_DEBUG");
+    if(dbg_config)
+      result = trc_opt(dbg_config);
+  }
+#endif /* DEBUGBUILD */
+  return result;
+}
+
 CURLcode Curl_trc_init(void)
 {
 #ifdef DEBUGBUILD
-  /* WIP: we use the auto-init from an env var only in DEBUG builds for
-   * convenience. */
-  const char *config = getenv("CURL_DEBUG");
-  if(config) {
-    return Curl_trc_opt(config);
-  }
-#endif /* DEBUGBUILD */
+  return Curl_trc_opt(NULL);
+#else
   return CURLE_OK;
+#endif
 }
+
 #else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
 
 CURLcode Curl_trc_init(void)
