@@ -348,10 +348,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
             ret = AUTH_CONTINUE;
             break;
           }
-          else {
-            _gssresp.value = outptr;
-            _gssresp.length = outlen;
-          }
+          _gssresp.value = outptr;
+          _gssresp.length = outlen;
         }
 
         gssresp = &_gssresp;
