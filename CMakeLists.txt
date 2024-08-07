@@ -123,19 +123,33 @@ option(CURL_DISABLE_INSTALL "Set to ON to disable installation targets" OFF)
 
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
+
   option(ENABLE_UNICODE "Set to ON to use the Unicode version of the Windows API functions" OFF)
-  set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
-  if(CURL_TARGET_WINDOWS_VERSION)
-    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-  endif()
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
       add_compile_options(-municode)
     endif()
   endif()
+
+  set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
+  if(CURL_TARGET_WINDOWS_VERSION)
+    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+  endif()
+
+  # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  curl_internal_test(HAVE_WIN32_WINNT)
+  if(HAVE_WIN32_WINNT)
+    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX REPLACE ".*_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
+    string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
+    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
+  endif()
+  # Avoid storing HAVE_WIN32_WINNT in CMake cache
+  unset(HAVE_WIN32_WINNT CACHE)
 endif()
 option(CURL_LTO "Turn on compiler Link Time Optimizations" OFF)
 
@@ -370,13 +384,13 @@ if(BORLAND)
 endif()
 
 # If we are on AIX, do the _ALL_SOURCE magic
-if(${CMAKE_SYSTEM_NAME} MATCHES AIX)
-  set(_ALL_SOURCE 1)
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
+  add_definitions("-D_ALL_SOURCE")
 endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
-if(${CMAKE_SYSTEM_NAME} MATCHES Haiku)
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -lnetwork")
+if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
+  list(APPEND CURL_LIBS "network")
 endif()
 
 # Include all the necessary files for macros
@@ -401,7 +415,7 @@ if(ENABLE_THREADED_RESOLVER)
     find_package(Threads REQUIRED)
     set(USE_THREADS_POSIX ${CMAKE_USE_PTHREADS_INIT})
     set(HAVE_PTHREAD_H ${CMAKE_USE_PTHREADS_INIT})
-    set(CURL_LIBS ${CURL_LIBS} ${CMAKE_THREAD_LIBS_INIT})
+    list(APPEND CURL_LIBS ${CMAKE_THREAD_LIBS_INIT})
   endif()
 endif()
 
@@ -505,15 +519,9 @@ if(CURL_USE_OPENSSL)
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
 
-  # Depend on OpenSSL via imported targets if supported by the running
-  # version of CMake. This allows our dependents to get our dependencies
-  # transitively.
-  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-    list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  else()
-    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
-    include_directories(${OPENSSL_INCLUDE_DIR})
-  endif()
+  # Depend on OpenSSL via imported targets. This allows our dependents to
+  # get our dependencies transitively.
+  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
@@ -608,15 +616,9 @@ if(ZLIB_FOUND)
   set(HAVE_LIBZ ON)
   set(USE_ZLIB ON)
 
-  # Depend on ZLIB via imported targets if supported by the running
-  # version of CMake.  This allows our dependents to get our dependencies
-  # transitively.
-  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-    list(APPEND CURL_LIBS ZLIB::ZLIB)
-  else()
-    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIRS})
-  endif()
+  # Depend on ZLIB via imported targets. This allows our dependents to
+  # get our dependencies transitively.
+  list(APPEND CURL_LIBS ZLIB::ZLIB)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
   list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
 endif()
@@ -673,9 +675,7 @@ macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
-  if(NOT _extra_libs STREQUAL "")
-    list(APPEND CMAKE_REQUIRED_LIBRARIES "${_extra_libs}")
-  endif()
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${_extra_libs}")
   check_symbol_exists("${_symbol}" "${_files}" "${_variable}")
   cmake_pop_check_state()
 endmacro()
@@ -1266,20 +1266,6 @@ if(WIN32)
   set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "windows.h")
-endif()
-
-if(WIN32)
-  # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
-  curl_internal_test(HAVE_WIN32_WINNT)
-  if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE ".*_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
-    string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
-    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
-  endif()
-  # Avoid storing HAVE_WIN32_WINNT in CMake cache
-  unset(HAVE_WIN32_WINNT CACHE)
 
   if(HAVE_WIN32_WINNT)
     if(HAVE_WIN32_WINNT LESS 0x0501)
@@ -1817,8 +1803,8 @@ if(NOT CURL_DISABLE_INSTALL)
     list(SORT _items)
   endif()
   string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
-  string(TOLOWER "${SUPPORT_PROTOCOLS}" SUPPORT_PROTOCOLS_LOWER)
-  message("Protocols: ${SUPPORT_PROTOCOLS_LOWER}")
+  string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
+  message("Protocols: ${_support_protocols_lower}")
 
   # Clear list and try to detect available features
   set(_items)
@@ -2070,7 +2056,6 @@ if(NOT CURL_DISABLE_INSTALL)
       IMMEDIATE @ONLY)
 
     add_custom_target(curl_uninstall
-      COMMAND ${CMAKE_COMMAND} -P
-      "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
+      COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
 endif()

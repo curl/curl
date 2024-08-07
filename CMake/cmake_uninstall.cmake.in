@@ -39,7 +39,7 @@ foreach(_file ${_files})
       "@CMAKE_COMMAND@" ARGS "-E remove \"$ENV{DESTDIR}${_file}\""
       OUTPUT_VARIABLE rm_out
       RETURN_VALUE rm_retval
-      )
+    )
     if(NOT "${rm_retval}" STREQUAL 0)
       message(FATAL_ERROR "Problem when removing $ENV{DESTDIR}${_file}")
     endif()
