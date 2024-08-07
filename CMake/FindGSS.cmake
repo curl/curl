@@ -284,8 +284,7 @@ if(GSS_FLAVOUR)
       file(STRINGS "${GSS_INCLUDE_DIR}/${_heimdal_manifest_file}" _heimdal_version_str
         REGEX "^.*version=\"[0-9]\\.[^\"]+\".*$")
 
-      string(REGEX MATCH "[0-9]\\.[^\"]+"
-        GSS_VERSION "${_heimdal_version_str}")
+      string(REGEX MATCH "[0-9]\\.[^\"]+" GSS_VERSION "${_heimdal_version_str}")
     endif()
 
     if(NOT GSS_VERSION)
