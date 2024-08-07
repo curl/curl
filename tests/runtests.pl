@@ -1477,6 +1477,8 @@ sub singletest_check {
         }
         for my $line (@upload) {
             subbase64(\$line);
+            subsha256base64file(\$line);
+            substrippemfile(\$line);
         }
 
         # verify uploaded data
