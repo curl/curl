@@ -255,12 +255,12 @@ else()
   if(_GSS_MODULE_NAME STREQUAL _mit_modname OR _GSS_${_mit_modname}_VERSION)  # _GSS_MODULE_NAME set since CMake 3.16
     set(GSS_FLAVOUR "MIT")
     if(NOT _GSS_VERSION)  # for old CMake versions?
-      set(_GSS_VERSION _GSS_${_mit_modname}_VERSION)
+      set(_GSS_VERSION ${_GSS_${_mit_modname}_VERSION})
     endif()
   else()
     set(GSS_FLAVOUR "Heimdal")
     if(NOT _GSS_VERSION)  # for old CMake versions?
-      set(_GSS_VERSION _GSS_${_heimdal_modname}_VERSION)
+      set(_GSS_VERSION ${_GSS_${_heimdal_modname}_VERSION})
     endif()
   endif()
 endif()
