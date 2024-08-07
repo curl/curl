@@ -38,7 +38,7 @@ function(add_manual_pages _listname)
   set(_eol "_EOL_")
   foreach(_file IN LISTS ${_listname} _eol)
     math(EXPR _file_count "${_file_count} + 1")
-    if(NOT _file_count LESS ${_files_per_batch} OR _file STREQUAL "_EOL_")
+    if(_file_count GREATER_EQUAL _files_per_batch OR _file STREQUAL "_EOL_")
       add_custom_command(OUTPUT ${_rofffiles}
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" -k -d "${CMAKE_CURRENT_BINARY_DIR}" ${_mdfiles}

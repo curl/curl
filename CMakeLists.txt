@@ -1526,7 +1526,7 @@ set(CMAKE_REQUIRED_FLAGS)
 option(ENABLE_WEBSOCKETS "Set to ON to enable EXPERIMENTAL websockets" OFF)
 
 if(ENABLE_WEBSOCKETS)
-  if(${SIZEOF_CURL_OFF_T} GREATER "4")
+  if(SIZEOF_CURL_OFF_T GREATER 4)
     set(USE_WEBSOCKETS ON)
   else()
     message(WARNING "curl_off_t is too small to enable WebSockets")
