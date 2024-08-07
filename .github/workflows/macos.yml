@@ -189,7 +189,7 @@ jobs:
             grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
-          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
@@ -215,8 +215,8 @@ jobs:
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
           if [ '${{ matrix.compiler }}' != 'clang' ]; then
-            options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
-            CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
+            options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+            CFLAGS+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
           mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
             --disable-dependency-tracking \
@@ -323,7 +323,7 @@ jobs:
             grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
-          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
@@ -460,7 +460,7 @@ jobs:
             grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
-          xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
+          xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
@@ -574,8 +574,8 @@ jobs:
               CC+=" --target=$(uname -m)-apple-darwin"
             fi
             if [ '${{ matrix.compiler }}' != 'clang' ]; then
-              options+=" --with-sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
-              CFLAGS+=" --sysroot=$(xcrun -sdk macosx --show-sdk-path 2>/dev/null)"
+              options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+              CFLAGS+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
             fi
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
