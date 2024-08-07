@@ -191,7 +191,7 @@ jobs:
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -325,7 +325,7 @@ jobs:
           xcodebuild -version || true
           xcrun -sdk macosx --show-sdk-path 2>/dev/null || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
-          echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - name: 'cmake configure'
         run: |
