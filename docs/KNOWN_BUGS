@@ -530,7 +530,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 11.7 AppleIDN test failures
 
- Test 1034 and 1035 fail on macOS when built to use AppleIDN.
+ Test 1035 fail on macOS when built to use AppleIDN.
 
  See https://github.com/curl/curl/issues/14176
 
