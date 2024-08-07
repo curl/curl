@@ -78,16 +78,16 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
 
-          - name: libressl
-            install_packages: zlib1g-dev valgrind
+          - name: libressl heimdal
+            install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
-            configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+            configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
             singleuse: --unit
 
-          - name: libressl
-            install_packages: zlib1g-dev valgrind
+          - name: libressl heimdal
+            install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
-            generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+            generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
             singleuse: --unit
 
           - name: libressl-clang
@@ -468,10 +468,13 @@ jobs:
         if: ${{ matrix.build.generate }}
         name: 'make tests (cmake)'
 
-      - run: make V=1 VERBOSE=1 test-ci
-        name: 'run tests'
-        env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+      - name: 'run tests'
+        run: |
+          export TFLAGS='${{ matrix.build.tflags }}'
+          if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
+            TFLAGS+=' ~2077 ~2078'  # valgrind errors
+          fi
+          make V=1 VERBOSE=1 test-ci
 
       - if: contains(matrix.build.install_steps, 'pytest')
         # run for `tests` directory, so pytest does not pick up any other
