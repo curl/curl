@@ -596,7 +596,10 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->native_ca_store;
 
   cached_store = cache_criteria_met ? get_cached_x509_store(cf, data) : NULL;
-  if(cached_store && wolfSSL_X509_STORE_up_ref(cached_store)) {
+  if(cached_store && wolfSSL_CTX_get_cert_store(wssl->ctx) == cached_store) {
+    /* The cached store is already in use, do nothing. */
+  }
+  else if(cached_store && wolfSSL_X509_STORE_up_ref(cached_store)) {
     wolfSSL_CTX_set_cert_store(wssl->ctx, cached_store);
   }
   else if(cache_criteria_met) {
