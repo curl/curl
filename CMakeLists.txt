@@ -976,7 +976,12 @@ else()
 endif()
 
 if(WIN32)
-  option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
+  if(HAVE_WIN32_WINNT LESS 0x0600)
+    set(_use_win32_idn_default OFF)
+  else()
+    set(_use_win32_idn_default ON)  # Windows Vista / Server 2008 or newer
+  endif()
+  option(USE_WIN32_IDN "Use WinIDN for IDN support" ${_use_win32_idn_default})
   if(USE_WIN32_IDN)
     list(APPEND CURL_LIBS "normaliz")
   endif()
