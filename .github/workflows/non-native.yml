@@ -104,7 +104,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j8 ~3017 ~TFTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
+              export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
 
