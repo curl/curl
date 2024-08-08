@@ -1811,8 +1811,8 @@ if(NOT CURL_DISABLE_INSTALL)
     list(SORT _items)
   endif()
   string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
-  string(TOLOWER "${SUPPORT_PROTOCOLS}" SUPPORT_PROTOCOLS_LOWER)
-  message("Protocols: ${SUPPORT_PROTOCOLS_LOWER}")
+  string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
+  message("Protocols: ${_support_protocols_lower}")
 
   # Clear list and try to detect available features
   set(_items)
