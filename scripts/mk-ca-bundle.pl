@@ -408,7 +408,7 @@ print CRT <<EOT;
 ##
 ## Certificate data from Mozilla ${datesrc}: ${currentdate} GMT
 ##
-## Find the updated versions here: https://curl.se/docs/caextract.html
+## Find updated versions here: https://curl.se/docs/caextract.html
 ##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
