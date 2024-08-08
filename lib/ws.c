@@ -1022,6 +1022,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     while(Curl_bufq_peek(&ws->sendbuf, &out, &outlen)) {
       if(blocking) {
         result = ws_send_raw_blocking(data, ws, (char *)out, outlen);
+        n = result? 0 : outlen;
       }
       else if(data->set.connect_only)
         result = Curl_senddata(data, out, outlen, &n);
