@@ -398,6 +398,7 @@ int Curl_pp_getsock(struct Curl_easy *data,
 bool Curl_pp_needs_flush(struct Curl_easy *data,
                          struct pingpong *pp)
 {
+  (void)data;
   return pp->sendleft > 0;
 }
 
