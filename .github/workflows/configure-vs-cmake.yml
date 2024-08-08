@@ -12,7 +12,7 @@ on:
       - '**/*.m4'
       - '**/CMakeLists.txt'
       - 'lib/curl_config.h.cmake'
-      - 'scripts/cmp-config.pl'
+      - '.github/scripts/cmp-config.pl'
 
   pull_request:
     branches:
@@ -22,7 +22,7 @@ on:
       - '**/*.m4'
       - '**/CMakeLists.txt'
       - 'lib/curl_config.h.cmake'
-      - 'scripts/cmp-config.pl'
+      - '.github/scripts/cmp-config.pl'
 
 permissions: {}
 
@@ -42,4 +42,4 @@ jobs:
            mkdir build && cd build && cmake ..
 
       - name: compare generated curl_config.h files
-        run: ./scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
+        run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h

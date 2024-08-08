@@ -41,7 +41,7 @@ gitonly="\.git.+
 ^docs/examples/adddocsref\.pl
 ^docs/THANKS-filter
 ^projects/Windows/.+
-^scripts/(ciconfig|cijobs|cmp-config|release-notes|singleuse)\.pl
+^scripts/(ciconfig|cijobs|release-notes|singleuse)\.pl
 ^scripts/(contributors|contrithanks|installcheck)\.sh
 ^scripts/delta
 ^src/tool_hugehelp\.c\.cvs
