@@ -122,15 +122,19 @@ jobs:
           make -C build -j5
         name: 'verify out-of-tree cmake build'
 
-  verify-cmake-test-dist:
+  missing-files:
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: 'cmake test dist'
-        run: |
-          cmake -B build -DENABLE_DIST_TEST=ON
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'detect files missing from release tarball'
+        run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
 
   reproducible-releases:
     runs-on: ubuntu-latest

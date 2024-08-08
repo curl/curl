@@ -1665,15 +1665,7 @@ endif()
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
 function(transform_makefile_inc _input_file _output_file)
-  file(STRINGS "${_input_file}" _makefile_inc_lines)
-  set(_makefile_inc_text "")
-  foreach(_line IN LISTS _makefile_inc_lines)
-    if(_line MATCHES "### USE SIMPLE LIST ASSIGMENTS ABOVE THIS LINE ###")
-      break()
-    endif()
-    set(_makefile_inc_text "${_makefile_inc_text}${_line}\n")
-  endforeach()
-
+  file(READ ${_input_file} _makefile_inc_text)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
@@ -1716,23 +1708,6 @@ endif()
 
 if(BUILD_TESTING)
   add_subdirectory(tests)
-endif()
-
-# Verify if all CMake include/input files are listed as distributable
-if(ENABLE_DIST_TEST)
-  # Get 'CMAKE_DIST' variable
-  transform_makefile_inc("Makefile.am" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake")
-  include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.am.cmake")
-
-  file(GLOB_RECURSE _curl_cmake_files_found RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}"
-    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.cmake"
-    "${CMAKE_CURRENT_SOURCE_DIR}/CMake/*.in")
-
-  foreach(_item IN LISTS _curl_cmake_files_found)
-    if(NOT _item IN_LIST CMAKE_DIST)
-      message(FATAL_ERROR "Source file missing from the Makefile.am CMAKE_DIST list: ${_item}")
-    endif()
-  endforeach()
 endif()
 
 if(NOT CURL_DISABLE_INSTALL)
