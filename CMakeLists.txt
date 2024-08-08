@@ -1985,10 +1985,26 @@ if(NOT CURL_DISABLE_INSTALL)
   # SUPPORT_PROTOCOLS
   set(VERSIONNUM "${CURL_VERSION_NUM}")
 
-  # Finally generate a "curl-config" matching this config
-  # Use:
-  # * ENABLE_SHARED
-  # * ENABLE_STATIC
+  # Finally generate a "curl-config" matching this config.
+  # Consumed variables:
+  #   CC
+  #   CONFIGURE_OPTIONS
+  #   CPPFLAG_CURL_STATICLIB
+  #   CURLVERSION
+  #   CURL_CA_BUNDLE
+  #   ENABLE_SHARED
+  #   ENABLE_STATIC
+  #   exec_prefix
+  #   includedir
+  #   LDFLAGS
+  #   LIBCURL_LIBS
+  #   libdir
+  #   libext
+  #   prefix
+  #   SSL_BACKENDS
+  #   SUPPORT_FEATURES
+  #   SUPPORT_PROTOCOLS
+  #   VERSIONNUM
   configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                  "${CURL_BINARY_DIR}/curl-config" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/curl-config"
@@ -1999,6 +2015,20 @@ if(NOT CURL_DISABLE_INSTALL)
       WORLD_READ WORLD_EXECUTE)
 
   # Finally generate a pkg-config file matching this config
+  # Consumed variables:
+  #   CPPFLAG_CURL_STATICLIB
+  #   CURLVERSION
+  #   exec_prefix
+  #   includedir
+  #   LIBCURL_LIBS
+  #   LIBCURL_NO_SHARED
+  #   LIBCURL_PC_CFLAGS_PRIVATE
+  #   LIBCURL_PC_REQUIRES
+  #   LIBCURL_PC_REQUIRES_PRIVATE
+  #   libdir
+  #   prefix
+  #   SUPPORT_FEATURES
+  #   SUPPORT_PROTOCOLS
   configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                  "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
