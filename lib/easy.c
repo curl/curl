@@ -605,7 +605,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
           int act = poll2cselect(fds[i].revents); /* convert */
           infof(multi->easyp,
                 "call curl_multi_socket_action(socket "
-                "%" CURL_FORMAT_SOCKET_T ")", fds[i].fd);
+                "%" CURL_FORMAT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
           mcode = curl_multi_socket_action(multi, fds[i].fd, act,
                                            &ev->running_handles);
         }
