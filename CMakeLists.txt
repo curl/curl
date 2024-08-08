@@ -128,7 +128,7 @@ if(WIN32)
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
-      add_compile_options(-municode)
+      add_compile_options("-municode")
     endif()
   endif()
 
@@ -331,9 +331,9 @@ option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
 if(ENABLE_IPV6 AND NOT WIN32)
   include(CheckStructHasMember)
-  check_struct_has_member("struct sockaddr_in6" sin6_addr "netinet/in.h"
+  check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h"
                           HAVE_SOCKADDR_IN6_SIN6_ADDR)
-  check_struct_has_member("struct sockaddr_in6" sin6_scope_id "netinet/in.h"
+  check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "netinet/in.h"
                           HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
     message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
@@ -471,7 +471,7 @@ if(_enabled_ssl_options_count GREATER 1)
 endif()
 
 if(CURL_USE_SCHANNEL)
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_SCHANNEL ON)  # Windows native SSL/TLS support
   set(USE_WINDOWS_SSPI ON)  # CURL_USE_SCHANNEL implies CURL_WINDOWS_SSPI
 
@@ -491,7 +491,7 @@ if(CURL_USE_SECTRANSP)
     message(FATAL_ERROR "Security framework not found")
   endif()
 
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_SECTRANSP ON)
   list(APPEND CURL_LIBS "-framework Security")
 
@@ -516,7 +516,7 @@ endif()
 
 if(CURL_USE_OPENSSL)
   find_package(OpenSSL REQUIRED)
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_OPENSSL ON)
 
   # Depend on OpenSSL via imported targets. This allows our dependents to
@@ -540,7 +540,7 @@ endif()
 
 if(CURL_USE_MBEDTLS)
   find_package(MbedTLS REQUIRED)
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_MBEDTLS ON)
   list(APPEND CURL_LIBS ${MBEDTLS_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "mbedtls")
@@ -554,7 +554,7 @@ endif()
 
 if(CURL_USE_BEARSSL)
   find_package(BearSSL REQUIRED)
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_BEARSSL ON)
   list(APPEND CURL_LIBS ${BEARSSL_LIBRARY})
   include_directories(${BEARSSL_INCLUDE_DIRS})
@@ -567,7 +567,7 @@ endif()
 
 if(CURL_USE_WOLFSSL)
   find_package(WolfSSL REQUIRED)
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_WOLFSSL ON)
   list(APPEND CURL_LIBS ${WolfSSL_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "wolfssl")
@@ -582,7 +582,7 @@ endif()
 if(CURL_USE_GNUTLS)
   find_package(GnuTLS REQUIRED)
   find_package(nettle REQUIRED)
-  set(SSL_ENABLED ON)
+  set(_ssl_enabled ON)
   set(USE_GNUTLS ON)
   list(APPEND CURL_LIBS ${GNUTLS_LIBRARIES} ${NETTLE_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "gnutls" "nettle")
@@ -1169,7 +1169,7 @@ if(ENABLE_UNIX_SOCKETS)
   if(WIN32)
     set(USE_UNIX_SOCKETS ON)
   else()
-    check_struct_has_member("struct sockaddr_un" sun_path "sys/un.h" USE_UNIX_SOCKETS)
+    check_struct_has_member("struct sockaddr_un" "sun_path" "sys/un.h" USE_UNIX_SOCKETS)
   endif()
 else()
   unset(USE_UNIX_SOCKETS CACHE)
@@ -1760,7 +1760,7 @@ if(NOT CURL_DISABLE_INSTALL)
       USE_SECTRANSP OR
       USE_WIN32_CRYPTO OR
       (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
-    set(use_curl_ntlm_core ON)
+    set(_use_curl_ntlm_core ON)
   endif()
 
   # Clear list and try to detect available protocols
@@ -1768,37 +1768,37 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
   _add_if("IPFS"          NOT CURL_DISABLE_HTTP)
   _add_if("IPNS"          NOT CURL_DISABLE_HTTP)
-  _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND SSL_ENABLED)
+  _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
   _add_if("FTP"           NOT CURL_DISABLE_FTP)
-  _add_if("FTPS"          NOT CURL_DISABLE_FTP AND SSL_ENABLED)
+  _add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
   _add_if("FILE"          NOT CURL_DISABLE_FILE)
   _add_if("TELNET"        NOT CURL_DISABLE_TELNET)
   _add_if("LDAP"          NOT CURL_DISABLE_LDAP)
   # CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
   _add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
-                          ((USE_OPENLDAP AND SSL_ENABLED) OR
+                          ((USE_OPENLDAP AND _ssl_enabled) OR
                           (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
   _add_if("DICT"          NOT CURL_DISABLE_DICT)
   _add_if("TFTP"          NOT CURL_DISABLE_TFTP)
   _add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
-  _add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND SSL_ENABLED)
+  _add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
   _add_if("POP3"          NOT CURL_DISABLE_POP3)
-  _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND SSL_ENABLED)
+  _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
   _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
-  _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
+  _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
   _add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                          use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-  _add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND
-                          use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+                          _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+  _add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
+                          _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
   _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
-  _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
+  _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
   _add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
   _add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH)
   _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
   _add_if("RTMP"          USE_LIBRTMP)
   _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
   _add_if("WS"            USE_WEBSOCKETS)
-  _add_if("WSS"           USE_WEBSOCKETS AND SSL_ENABLED)
+  _add_if("WSS"           USE_WEBSOCKETS AND _ssl_enabled)
   if(_items)
     list(SORT _items)
   endif()
@@ -1808,7 +1808,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Clear list and try to detect available features
   set(_items)
-  _add_if("SSL"           SSL_ENABLED)
+  _add_if("SSL"           _ssl_enabled)
   _add_if("IPv6"          ENABLE_IPV6)
   _add_if("UnixSockets"   USE_UNIX_SOCKETS)
   _add_if("libz"          HAVE_LIBZ)
@@ -1830,12 +1830,12 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
   _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                          (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
+                          (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
   _add_if("TLS-SRP"       USE_TLS_SRP)
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
   _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-  _add_if("HTTPS-proxy"   SSL_ENABLED AND (USE_OPENSSL OR USE_GNUTLS
+  _add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                           OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                           USE_MBEDTLS OR USE_SECTRANSP OR
                           (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
@@ -1845,7 +1845,7 @@ if(NOT CURL_DISABLE_INSTALL)
                           (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
   _add_if("Debug"         ENABLE_DEBUG)
   _add_if("TrackMemory"   ENABLE_CURLDEBUG)
-  _add_if("ECH"           SSL_ENABLED AND HAVE_ECH)
+  _add_if("ECH"           _ssl_enabled AND HAVE_ECH)
   _add_if("PSL"           USE_LIBPSL)
   _add_if("CAcert"        CURL_CA_EMBED_SET)
   if(_items)
@@ -1860,13 +1860,13 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Clear list and collect SSL backends
   set(_items)
-  _add_if("Schannel"         SSL_ENABLED AND USE_SCHANNEL)
-  _add_if("OpenSSL"          SSL_ENABLED AND USE_OPENSSL)
-  _add_if("Secure Transport" SSL_ENABLED AND USE_SECTRANSP)
-  _add_if("mbedTLS"          SSL_ENABLED AND USE_MBEDTLS)
-  _add_if("BearSSL"          SSL_ENABLED AND USE_BEARSSL)
-  _add_if("wolfSSL"          SSL_ENABLED AND USE_WOLFSSL)
-  _add_if("GnuTLS"           SSL_ENABLED AND USE_GNUTLS)
+  _add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
+  _add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL)
+  _add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
+  _add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
+  _add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
+  _add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
+  _add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
 
   if(_items)
     if(NOT CMAKE_VERSION VERSION_LESS 3.13)
@@ -1981,14 +1981,28 @@ if(NOT CURL_DISABLE_INSTALL)
   set(prefix "${CMAKE_INSTALL_PREFIX}")
   # Set this to "yes" to append all libraries on which -lcurl is dependent
   set(REQUIRE_LIB_DEPS "no")
-  # SUPPORT_FEATURES
-  # SUPPORT_PROTOCOLS
   set(VERSIONNUM "${CURL_VERSION_NUM}")
 
-  # Finally generate a "curl-config" matching this config
-  # Use:
-  # * ENABLE_SHARED
-  # * ENABLE_STATIC
+  # Finally generate a "curl-config" matching this config.
+  # Consumed variables:
+  #   CC
+  #   CONFIGURE_OPTIONS
+  #   CPPFLAG_CURL_STATICLIB
+  #   CURLVERSION
+  #   CURL_CA_BUNDLE
+  #   ENABLE_SHARED
+  #   ENABLE_STATIC
+  #   exec_prefix
+  #   includedir
+  #   LDFLAGS
+  #   LIBCURL_LIBS
+  #   libdir
+  #   libext
+  #   prefix
+  #   SSL_BACKENDS
+  #   SUPPORT_FEATURES
+  #   SUPPORT_PROTOCOLS
+  #   VERSIONNUM
   configure_file("${CURL_SOURCE_DIR}/curl-config.in"
                  "${CURL_BINARY_DIR}/curl-config" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/curl-config"
@@ -1999,6 +2013,20 @@ if(NOT CURL_DISABLE_INSTALL)
       WORLD_READ WORLD_EXECUTE)
 
   # Finally generate a pkg-config file matching this config
+  # Consumed variables:
+  #   CPPFLAG_CURL_STATICLIB
+  #   CURLVERSION
+  #   exec_prefix
+  #   includedir
+  #   LIBCURL_LIBS
+  #   LIBCURL_NO_SHARED
+  #   LIBCURL_PC_CFLAGS_PRIVATE
+  #   LIBCURL_PC_REQUIRES
+  #   LIBCURL_PC_REQUIRES_PRIVATE
+  #   libdir
+  #   prefix
+  #   SUPPORT_FEATURES
+  #   SUPPORT_PROTOCOLS
   configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
                  "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"

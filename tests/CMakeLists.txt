@@ -27,7 +27,7 @@ find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
   set(TEST_NGHTTPX "nghttpx")
 endif()
-# TEST_NGHTTPX
+# Consumed variables: TEST_NGHTTPX
 configure_file("config.in" "${CMAKE_CURRENT_BINARY_DIR}/config" @ONLY)
 
 add_custom_target(testdeps)
