@@ -115,11 +115,17 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
 #define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#undef malloc
 #define malloc(size) curl_dbg_malloc(size, __LINE__, __FILE__)
+#undef calloc
 #define calloc(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#undef realloc
 #define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#undef free
 #define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
+#undef send
 #define send(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
+#undef recv
 #define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
