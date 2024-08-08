@@ -57,7 +57,7 @@ static int progress_callback(void *clientp, double dltotal, double dlnow,
   (void)dltotal; /* UNUSED */
   (void)dlnow; /* UNUSED */
 
-  if(started && ulnow == 0.0 && last_ul) {
+  if(started && ulnow <= 0.0 && last_ul) {
     progress_final_report();
   }
 
