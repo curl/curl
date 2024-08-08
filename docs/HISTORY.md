@@ -426,7 +426,7 @@ April: added the cyassl backend (later renamed to wolfSSL)
 2022
 ----
 
- March: added --json, removed mesalink support
+March: added --json, removed mesalink support
 
     Public curl releases:         206
     Command line options:         245
@@ -437,7 +437,34 @@ April: added the cyassl backend (later renamed to wolfSSL)
  The curl.se website serves 16,500 GB/month over 462M requests, the
  official docker image has been pulled 4,098,015,431 times.
 
+October: initial WebSocket support
+
 2023
 ----
 
+March: remove support for curl_off_t < 8 bytes
+
+March 31: we started working on a new command line tool for URL parsing and
+manipulations: trurl.
+
+May: added support for HTTP/2 over HTTPS proxy. Refuse to resolve .onion.
+
 August: Dropped support for the NSS library
+
+September: added "variable" support in the command line tool. Dropped support
+for the gskit TLS library.
+
+October: added support for IPFS via HTTP gateway
+
+December: HTTP/3 support with ngtcp2 is no longer experimental
+
+2024
+----
+
+January: switched to "curldown" for all documentation
+
+April 24: the curl container has been pulled more than six billion times
+
+May: experimental support for ECH
+
+August 9: we adopted the wcurl tool into the curl organization
