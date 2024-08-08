@@ -331,9 +331,9 @@ option(ENABLE_IPV6 "Define if you want to enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
 if(ENABLE_IPV6 AND NOT WIN32)
   include(CheckStructHasMember)
-  check_struct_has_member("struct sockaddr_in6" sin6_addr "netinet/in.h"
+  check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h"
                           HAVE_SOCKADDR_IN6_SIN6_ADDR)
-  check_struct_has_member("struct sockaddr_in6" sin6_scope_id "netinet/in.h"
+  check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "netinet/in.h"
                           HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
     message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
@@ -1169,7 +1169,7 @@ if(ENABLE_UNIX_SOCKETS)
   if(WIN32)
     set(USE_UNIX_SOCKETS ON)
   else()
-    check_struct_has_member("struct sockaddr_un" sun_path "sys/un.h" USE_UNIX_SOCKETS)
+    check_struct_has_member("struct sockaddr_un" "sun_path" "sys/un.h" USE_UNIX_SOCKETS)
   endif()
 else()
   unset(USE_UNIX_SOCKETS CACHE)
