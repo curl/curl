@@ -128,7 +128,7 @@ if(WIN32)
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
-      add_compile_options(-municode)
+      add_compile_options("-municode")
     endif()
   endif()
 
@@ -1760,7 +1760,7 @@ if(NOT CURL_DISABLE_INSTALL)
       USE_SECTRANSP OR
       USE_WIN32_CRYPTO OR
       (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
-    set(use_curl_ntlm_core ON)
+    set(_use_curl_ntlm_core ON)
   endif()
 
   # Clear list and try to detect available protocols
@@ -1787,9 +1787,9 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
   _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND SSL_ENABLED)
   _add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                          use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+                          _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
   _add_if("SMBS"          NOT CURL_DISABLE_SMB AND SSL_ENABLED AND
-                          use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+                          _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
   _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
   _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND SSL_ENABLED)
   _add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH)
@@ -1830,7 +1830,7 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
                           (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
   _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                          (use_curl_ntlm_core OR USE_WINDOWS_SSPI))
+                          (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
   _add_if("TLS-SRP"       USE_TLS_SRP)
   _add_if("HTTP2"         USE_NGHTTP2)
   _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
