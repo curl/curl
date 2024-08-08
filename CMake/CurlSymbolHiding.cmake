@@ -58,7 +58,7 @@ if(CURL_HIDDEN_SYMBOLS)
     set(_symbol_extern "__attribute__ ((__visibility__ (\"default\")))")
     set(_cflag_symbols_hide "-fvisibility=hidden")
     check_c_source_compiles("#include <stdio.h>
-      int main (void) { printf(\"icc fvisibility bug test\"); return 0; }" _no_bug)
+      int main(void) { printf(\"icc fvisibility bug test\"); return 0; }" _no_bug)
     if(NOT _no_bug)
       set(_supports_symbol_hiding FALSE)
       set(_symbol_extern "")
