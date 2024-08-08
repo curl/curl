@@ -480,10 +480,11 @@ jobs:
         timeout-minutes: 12
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP !FTP ${{ matrix.tflags }}'
-          if [[ '${{ matrix.config }}' = *'-DUSE_LIBIDN2=ON'* ]]; then
-            TFLAGS+=' ~1448 ~2046 ~2047 ~165'
-          elif [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
-            TFLAGS+=' ~1448 ~2046 ~2047'  # WinIDN tests failing without Unicode
+          if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
+            TFLAGS+=' ~1448 ~2046 ~2047'  # IDN tests failing without Unicode
+            if [[ '${{ matrix.config }}' = *'-DUSE_LIBIDN2=ON'* ]]; then
+              TFLAGS+=' ~165'
+            fi
           fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
