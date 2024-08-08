@@ -395,12 +395,22 @@ int Curl_pp_getsock(struct Curl_easy *data,
   return GETSOCK_READSOCK(0);
 }
 
+bool Curl_pp_needs_flush(struct Curl_easy *data,
+                         struct pingpong *pp)
+{
+  (void)data;
+  return pp->sendleft > 0;
+}
+
 CURLcode Curl_pp_flushsend(struct Curl_easy *data,
                            struct pingpong *pp)
 {
   /* we have a piece of a command still left to send */
   size_t written;
   CURLcode result;
+
+  if(!Curl_pp_needs_flush(data, pp))
+    return CURLE_OK;
 
   result = Curl_conn_send(data, FIRSTSOCKET,
                           pp->sendthis + pp->sendsize - pp->sendleft,
