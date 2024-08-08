@@ -479,6 +479,8 @@
 
  - curl_multi_remove_handle for any of the above. See section 2.3.
 
+ - Calling curl_ws_send() from a callback
+
 2.2 Better support for same name resolves
 
  If a name resolve has been initiated for name NN and a second easy handle
