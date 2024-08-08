@@ -33,12 +33,10 @@
 #include <curl/curl.h>
 #include "functypes.h"
 
-#if defined(__GNUC__) && __GNUC__ >= 3 && !(defined(_AIX) && defined(malloc))
-/* ibm-clang defines _LINUX_SOURCE_COMPAT which in turn defines a macro named
-  'malloc', which breaks the line below */
-#  define ALLOC_FUNC __attribute__((malloc))
-#  define ALLOC_SIZE(s) __attribute__((alloc_size(s)))
-#  define ALLOC_SIZE2(n, s) __attribute__((alloc_size(n, s)))
+#if defined(__GNUC__) && __GNUC__ >= 3
+#  define ALLOC_FUNC __attribute__((__malloc__))
+#  define ALLOC_SIZE(s) __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s) __attribute__((__alloc_size__(n, s)))
 #elif defined(_MSC_VER)
 #  define ALLOC_FUNC __declspec(restrict)
 #  define ALLOC_SIZE(s)
