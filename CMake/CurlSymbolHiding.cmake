@@ -69,15 +69,10 @@ if(CURL_HIDDEN_SYMBOLS)
   endif()
 
   set(HIDES_CURL_PRIVATE_SYMBOLS ${_supports_symbol_hiding})
-elseif(MSVC)
-  if(NOT CMAKE_VERSION VERSION_LESS 3.7)
-    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE) #present since 3.4.3 but broken
-    set(HIDES_CURL_PRIVATE_SYMBOLS FALSE)
-  else()
-    message(WARNING "Hiding private symbols regardless CURL_HIDDEN_SYMBOLS being disabled.")
-    set(HIDES_CURL_PRIVATE_SYMBOLS TRUE)
-  endif()
 else()
+  if(MSVC)
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  endif()
   set(HIDES_CURL_PRIVATE_SYMBOLS FALSE)
 endif()
 

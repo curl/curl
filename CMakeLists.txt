@@ -516,15 +516,9 @@ if(CURL_USE_OPENSSL)
   set(SSL_ENABLED ON)
   set(USE_OPENSSL ON)
 
-  # Depend on OpenSSL via imported targets if supported by the running
-  # version of CMake. This allows our dependents to get our dependencies
-  # transitively.
-  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-    list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  else()
-    list(APPEND CURL_LIBS ${OPENSSL_LIBRARIES})
-    include_directories(${OPENSSL_INCLUDE_DIR})
-  endif()
+  # Depend on OpenSSL via imported targets. This allows our dependents to
+  # get our dependencies transitively.
+  list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
@@ -619,15 +613,9 @@ if(ZLIB_FOUND)
   set(HAVE_LIBZ ON)
   set(USE_ZLIB ON)
 
-  # Depend on ZLIB via imported targets if supported by the running
-  # version of CMake.  This allows our dependents to get our dependencies
-  # transitively.
-  if(NOT CMAKE_VERSION VERSION_LESS 3.4)
-    list(APPEND CURL_LIBS ZLIB::ZLIB)
-  else()
-    list(APPEND CURL_LIBS ${ZLIB_LIBRARIES})
-    include_directories(${ZLIB_INCLUDE_DIRS})
-  endif()
+  # Depend on ZLIB via imported targets. This allows our dependents to
+  # get our dependencies transitively.
+  list(APPEND CURL_LIBS ZLIB::ZLIB)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "zlib")
   list(APPEND CMAKE_REQUIRED_INCLUDES ${ZLIB_INCLUDE_DIRS})
 endif()
