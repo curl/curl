@@ -408,6 +408,8 @@ print CRT <<EOT;
 ##
 ## Certificate data from Mozilla ${datesrc}: ${currentdate} GMT
 ##
+## Find updated versions here: https://curl.se/docs/caextract.html
+##
 ## This is a bundle of X.509 certificates of public Certificate Authorities
 ## (CA). These were automatically extracted from Mozilla's root certificates
 ## file (certdata.txt).  This file can be found in the mozilla source tree:
