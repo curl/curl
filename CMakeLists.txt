@@ -1981,8 +1981,6 @@ if(NOT CURL_DISABLE_INSTALL)
   set(prefix "${CMAKE_INSTALL_PREFIX}")
   # Set this to "yes" to append all libraries on which -lcurl is dependent
   set(REQUIRE_LIB_DEPS "no")
-  # SUPPORT_FEATURES
-  # SUPPORT_PROTOCOLS
   set(VERSIONNUM "${CURL_VERSION_NUM}")
 
   # Finally generate a "curl-config" matching this config.
