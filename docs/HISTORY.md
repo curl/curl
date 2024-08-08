@@ -456,7 +456,7 @@ for the gskit TLS library.
 
 October: added support for IPFS via HTTP gateway
 
-December: HTTP/3 support with ngtpc2 is no longer experimental
+December: HTTP/3 support with ngtcp2 is no longer experimental
 
 2024
 ----

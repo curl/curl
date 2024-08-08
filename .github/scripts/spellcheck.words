@@ -137,6 +137,7 @@ CPUs
 CR
 CRL
 CRLF
+crontab
 crt
 crypto
 cryptographic
@@ -451,6 +452,7 @@ libz
 libzstd
 LineageOS
 linux
+lldb
 ln
 localhost
 LOGDIR
@@ -829,6 +831,7 @@ TCP
 tcpdump
 Tekniska
 testability
+testcurl
 TFTP
 tftp
 threadsafe
@@ -847,6 +850,7 @@ TPF
 TrackMemory
 transcode
 Tru
+trurl
 trustless
 Tse
 Tsujikawa
@@ -923,6 +927,7 @@ Warta
 watchOS
 WAV
 WB
+wcurl
 web page
 WebDAV
 WebOS
@@ -962,6 +967,3 @@ zsh
 zstd
 Zuul
 zuul
-crontab
-testcurl
-lldb
