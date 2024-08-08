@@ -47,11 +47,5 @@ if(NOT HTTPD_NGHTTPX)
   set(HTTPD_NGHTTPX "")
 endif()
 
-# Consumed variables:
-#   APACHECTL
-#   APXS
-#   CADDY
-#   HTTPD
-#   HTTPD_NGHTTPX
-#   VSFTPD
+# Consumed variables: APACHECTL, APXS, CADDY, HTTPD, HTTPD_NGHTTPX, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)
