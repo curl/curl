@@ -33,7 +33,8 @@
 #include <curl/curl.h>
 #include "functypes.h"
 
-#if defined(__GNUC__) && __GNUC__ >= 3
+#if defined(__GNUC__) && __GNUC__ >= 3 && !defined(_AIX)
+/* AIX defines a macro named 'malloc', which breaks the line below */
 #  define ALLOC_FUNC __attribute__((malloc))
 #  define ALLOC_SIZE(s) __attribute__((alloc_size(s)))
 #  define ALLOC_SIZE2(n, s) __attribute__((alloc_size(n, s)))
