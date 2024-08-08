@@ -819,6 +819,8 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   int cache_skip = 0;
   int value_to_be_ignored = 0;
 
+  CURL_TRC_FTP(data, "getFTPResponse start");
+
   if(ftpcode)
     *ftpcode = 0; /* 0 for errors */
   else
@@ -864,21 +866,27 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
        */
     }
     else if(!Curl_conn_data_pending(data, FIRSTSOCKET)) {
-      switch(SOCKET_READABLE(sockfd, interval_ms)) {
-      case -1: /* select() error, stop reading */
+      curl_socket_t wsock = Curl_pp_needs_flush(data, pp)?
+                            sockfd : CURL_SOCKET_BAD;
+      int ev = Curl_socket_check(sockfd, CURL_SOCKET_BAD, wsock, interval_ms);
+      if(ev < 0) {
         failf(data, "FTP response aborted due to select/poll error: %d",
               SOCKERRNO);
         return CURLE_RECV_ERROR;
-
-      case 0: /* timeout */
+      }
+      else if(ev == 0) {
         if(Curl_pgrsUpdate(data))
           return CURLE_ABORTED_BY_CALLBACK;
         continue; /* just continue in our loop for the timeout duration */
-
-      default: /* for clarity */
-        break;
       }
     }
+
+    if(Curl_pp_needs_flush(data, pp)) {
+      result = Curl_pp_flushsend(data, pp);
+      if(result)
+        break;
+    }
+
     result = ftp_readresp(data, FIRSTSOCKET, pp, ftpcode, &nread);
     if(result)
       break;
@@ -897,6 +905,8 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   } /* while there is buffer left and loop is requested */
 
   pp->pending_resp = FALSE;
+  CURL_TRC_FTP(data, "getFTPResponse -> result=%d, nread=%zd, ftpcode=%d",
+               result, *nreadp, *ftpcode);
 
   return result;
 }
