@@ -34,8 +34,9 @@
 #include "functypes.h"
 
 #if defined(__GNUC__) && __GNUC__ >= 3 && \
-  !(defined(_AIX) && defined(__clang__))
-/* ibm-clang defines a macro named 'malloc', which breaks the line below */
+  !(defined(_AIX) && defined(_LINUX_SOURCE_COMPAT))
+/* ibm-clang defines _LINUX_SOURCE_COMPAT which in turn defines a macro named
+  'malloc', which breaks the line below */
 #  define ALLOC_FUNC __attribute__((malloc))
 #  define ALLOC_SIZE(s) __attribute__((alloc_size(s)))
 #  define ALLOC_SIZE2(n, s) __attribute__((alloc_size(n, s)))
