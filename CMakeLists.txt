@@ -120,19 +120,33 @@ option(CURL_DISABLE_INSTALL "Set to ON to disable installation targets" OFF)
 
 if(WIN32)
   option(CURL_STATIC_CRT "Set to ON to build libcurl with static CRT on Windows (/MT)." OFF)
+
   option(ENABLE_UNICODE "Set to ON to use the Unicode version of the Windows API functions" OFF)
-  set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
-  if(CURL_TARGET_WINDOWS_VERSION)
-    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-  endif()
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
       add_compile_options(-municode)
     endif()
   endif()
+
+  set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
+  if(CURL_TARGET_WINDOWS_VERSION)
+    add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+  endif()
+
+  # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
+  curl_internal_test(HAVE_WIN32_WINNT)
+  if(HAVE_WIN32_WINNT)
+    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX REPLACE ".*_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
+    string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
+    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
+  endif()
+  # Avoid storing HAVE_WIN32_WINNT in CMake cache
+  unset(HAVE_WIN32_WINNT CACHE)
 endif()
 option(CURL_LTO "Turn on compiler Link Time Optimizations" OFF)
 
@@ -1260,18 +1274,6 @@ if(WIN32)
   set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
   set(CURL_INCLUDES ${CURL_INCLUDES} "windows.h")
-
-  # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
-  curl_internal_test(HAVE_WIN32_WINNT)
-  if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE ".*_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
-    string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
-    message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
-  endif()
-  # Avoid storing HAVE_WIN32_WINNT in CMake cache
-  unset(HAVE_WIN32_WINNT CACHE)
 
   if(HAVE_WIN32_WINNT)
     if(HAVE_WIN32_WINNT LESS 0x0501)
