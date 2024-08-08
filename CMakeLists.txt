@@ -367,12 +367,12 @@ if(BORLAND)
 endif()
 
 # If we are on AIX, do the _ALL_SOURCE magic
-if(CMAKE_SYSTEM_NAME MATCHES "AIX")
+if(CMAKE_SYSTEM_NAME STREQUAL "AIX")
   add_definitions("-D_ALL_SOURCE")
 endif()
 
 # If we are on Haiku, make sure that the network library is brought in.
-if(CMAKE_SYSTEM_NAME MATCHES "Haiku")
+if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
   list(APPEND CURL_LIBS "network")
 endif()
 
