@@ -142,6 +142,8 @@ jobs:
 
   missing-files:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
