@@ -28,7 +28,8 @@ Makefile.in
 ^lib/curl_config.h.in
 ^m4/libtool.m4
 ^m4/lt*.m4
-^src/(tool_ca_embed|tool_hugehelp).c"
+^src/tool_ca_embed.c
+^src/tool_hugehelp.c"
 
 gitonly=".git*
 ^.*
@@ -36,13 +37,20 @@ gitonly=".git*
 ^buildconf
 ^renovate.json
 ^REUSE.toml
-^(GIT-INFO|README|SECURITY).md
+^GIT-INFO.md
+^README.md
+^SECURITY.md
 ^LICENSES/*
 ^docs/examples/adddocsref.pl
 ^docs/THANKS-filter
 ^projects/Windows/*
-^scripts/(ciconfig|cijobs|release-notes|singleuse).pl
-^scripts/(contributors|contrithanks|installcheck).sh
+^scripts/ciconfig.pl
+^scripts/cijobs.pl
+^scripts/release-notes.pl
+^scripts/singleuse.pl
+^scripts/contributors.sh
+^scripts/contrithanks.sh
+^scripts/installcheck.sh
 ^scripts/delta
 ^src/tool_hugehelp.c.cvs
 ^tests/CI.md"
