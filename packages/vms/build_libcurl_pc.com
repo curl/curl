@@ -178,7 +178,7 @@ $ then
 $    write pco "Version: ''curl_version'"
 $    goto pc_file_loop
 $ endif
-$ if f$locate("@LIBCURL_LIBS@", line_in) .lt line_in_len
+$ if f$locate("@LIBCURL_PC_LIBS_PRIVATE@", line_in) .lt line_in_len
 $ then
 $    if arch_name .eqs. "VAX"
 $    then
@@ -188,7 +188,7 @@ $        write pco "Libs.private: -lssl -lcrypto -lgssapi -lz"
 $    endif
 $    goto pc_file_loop
 $ endif
-$ if f$locate("@CPPFLAG_CURL_STATICLIB@", line_in) .lt line_in_len
+$ if f$locate("@LIBCURL_PC_CFLAGS@", line_in) .lt line_in_len
 $ then
 $    write pco "Cflags: -I${includedir} -DCURL_STATICLIB"
 $    goto pc_file_loop

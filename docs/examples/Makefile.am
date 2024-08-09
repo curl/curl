@@ -51,7 +51,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
 if USE_EXPLICIT_LIB_DEPS
-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_LIBS@
+LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 else
 LDADD = $(LIBDIR)/libcurl.la
 endif
