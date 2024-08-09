@@ -2815,8 +2815,11 @@ AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
 AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
       [OPT_IDN=$withval])
     case "$OPT_IDN" in
-      yes)
-        dnl --with-apple-idn option used
+      no)
+        dnl --without-apple-idn option used
+        AC_MSG_RESULT([no])
+        ;;
+      *)
         AC_MSG_RESULT([yes, check])
         AC_CHECK_LIB(icucore, uidna_openUTS46,
         [
@@ -2829,9 +2832,6 @@ AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
             tst_links_appleidn='yes'
           )
         ])
-        ;;
-      *)
-        AC_MSG_RESULT([no])
         ;;
     esac
     ;;
