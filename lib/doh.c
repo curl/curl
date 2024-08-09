@@ -428,6 +428,10 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   if(!dohp)
     return NULL;
 
+  for(i = 0; i < DOH_PROBE_SLOTS; ++i) {
+    dohp->probe[i].easy_id = -1;
+  }
+
   conn->bits.doh = TRUE;
   dohp->host = hostname;
   dohp->port = port;
@@ -436,10 +440,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
                       "Content-Type: application/dns-message");
   if(!dohp->headers)
     goto error;
-
-  for(i = 0; i < DOH_PROBE_SLOTS; ++i) {
-    dohp->probe[i].easy_id = -1;
-  }
 
   /* create IPv4 DoH request */
   result = dohprobe(data, &dohp->probe[DOH_PROBE_SLOT_IPADDR_V4],
@@ -1424,6 +1424,9 @@ void Curl_doh_close(struct Curl_easy *data)
     struct Curl_easy *probe_data;
     size_t slot;
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
+      if(doh->probe[slot].easy_id < 0)
+        continue;
+      DEBUGASSERT(data->multi);
       probe_data = Curl_multi_get_handle(data->multi,
                                          doh->probe[slot].easy_id);
       DEBUGF(infof(data, "Curl_doh_close: xfer for %" CURL_FORMAT_CURL_OFF_T
@@ -1432,8 +1435,7 @@ void Curl_doh_close(struct Curl_easy *data)
       if(!probe_data)
         continue;
       /* data->multi might already be reset at this time */
-      if(probe_data->multi)
-        curl_multi_remove_handle(probe_data->multi, probe_data);
+      curl_multi_remove_handle(data->multi, probe_data);
       Curl_close(&probe_data);
     }
   }
