@@ -1988,6 +1988,15 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_connect_data *connssl = cf->ctx;
   struct ossl_ctx *octx = (struct ossl_ctx *)connssl->backend;
 
+#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
+  if (data->conn->channel_bindings)
+  {
+      Curl_safefree(data->conn->channel_bindings->Bindings);
+      Curl_safefree(data->conn->channel_bindings);
+  }
+#endif
+
+
   (void)data;
   DEBUGASSERT(octx);
 
@@ -4085,6 +4094,93 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
 
 #endif
 
+#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
+typedef enum {
+  SIG_ALG_SHA256,
+  SIG_ALG_SHA384,
+  SIG_ALG_SHA512
+} CertSignatureAlgorithm;
+
+CertSignatureAlgorithm get_signature_algorithm(const X509* cert) {
+  if(cert == NULL) {
+    return SIG_ALG_SHA256;
+  }
+  const X509_ALGOR* sig_alg = X509_get0_tbs_sigalg(cert);
+  if(sig_alg == NULL) {
+    return SIG_ALG_SHA256;
+  }
+  int pkey_nid = OBJ_obj2nid(sig_alg->algorithm);
+  if(pkey_nid == NID_undef) {
+    return SIG_ALG_SHA256;
+  }
+  if(pkey_nid == NID_sha256WithRSAEncryption ||
+    pkey_nid == NID_ecdsa_with_SHA256) {
+    return SIG_ALG_SHA256;
+  }
+  else if(pkey_nid == NID_sha384WithRSAEncryption ||
+    pkey_nid == NID_ecdsa_with_SHA384) {
+    return SIG_ALG_SHA384;
+  }
+  else if(pkey_nid == NID_sha512WithRSAEncryption ||
+    pkey_nid == NID_ecdsa_with_SHA512) {
+    return SIG_ALG_SHA512;
+  }
+  return SIG_ALG_SHA256;
+}
+
+#define TLS_SERVER_END_POINT    "tls-server-end-point:"
+
+SecPkgContext_Bindings* tls_get_channel_bindings(X509* cert)
+{
+  int prefix_length;
+  BYTE certificate_hash[128];
+  UINT32 certificate_hash_length;
+  BYTE* channel_binding_token;
+  UINT32 channel_binding_token_length;
+  SEC_CHANNEL_BINDINGS* channel_bindings;
+  SecPkgContext_Bindings* context_bindings;
+
+  CertSignatureAlgorithm cert_sign_alg = get_signature_algorithm(cert);
+
+  ZeroMemory(certificate_hash, sizeof(certificate_hash));
+  switch (cert_sign_alg)
+  {
+  case SIG_ALG_SHA256:
+    X509_digest(cert, EVP_sha256(), certificate_hash, &certificate_hash_length);
+    break;
+  case SIG_ALG_SHA384:
+    X509_digest(cert, EVP_sha384(), certificate_hash, &certificate_hash_length);
+    break;
+  case SIG_ALG_SHA512:
+    X509_digest(cert, EVP_sha512(), certificate_hash, &certificate_hash_length);
+    break;
+  default:
+    X509_digest(cert, EVP_sha256(), certificate_hash, &certificate_hash_length);
+    break;
+  }
+
+  prefix_length = strlen(TLS_SERVER_END_POINT);
+  channel_binding_token_length = prefix_length + certificate_hash_length;
+
+  context_bindings = (SecPkgContext_Bindings*)malloc(sizeof(SecPkgContext_Bindings));
+  ZeroMemory(context_bindings, sizeof(SecPkgContext_Bindings));
+
+  context_bindings->BindingsLength = sizeof(SEC_CHANNEL_BINDINGS) + channel_binding_token_length;
+  channel_bindings = (SEC_CHANNEL_BINDINGS*)malloc(context_bindings->BindingsLength);
+  ZeroMemory(channel_bindings, context_bindings->BindingsLength);
+  context_bindings->Bindings = channel_bindings;
+
+  channel_bindings->cbApplicationDataLength = channel_binding_token_length;
+  channel_bindings->dwApplicationDataOffset = sizeof(SEC_CHANNEL_BINDINGS);
+  channel_binding_token = &((BYTE*)channel_bindings)[channel_bindings->dwApplicationDataOffset];
+
+  strcpy((char*)channel_binding_token, TLS_SERVER_END_POINT);
+  CopyMemory(&channel_binding_token[prefix_length], certificate_hash, certificate_hash_length);
+
+  return context_bindings;
+}
+#endif
+
 static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
 {
@@ -4108,6 +4204,19 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       return result;
     octx->x509_store_setup = TRUE;
   }
+
+#if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
+  if(!cf->conn->Bindings)
+  {
+    X509* server_cert = SSL_get_peer_certificate(backend->handle);
+    if(server_cert)
+    {
+      cf->conn->channel_bindings = tls_get_channel_bindings(server_cert);
+      X509_free(server_cert);
+    }
+  }
+
+#endif
 
 #ifndef HAVE_KEYLOG_CALLBACK
   /* If key logging is enabled, wait for the handshake to complete and then
