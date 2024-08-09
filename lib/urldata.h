@@ -1910,13 +1910,8 @@ struct Curl_easy {
      has no uniqueness guarantee for very large processings. */
   curl_off_t id;
 
-  /* first, two fields for the linked list of these */
-  struct Curl_easy *next;
-  struct Curl_easy *prev;
-
   struct connectdata *conn;
-  struct Curl_llist_element connect_queue; /* for the pending and msgsent
-                                              lists */
+  struct Curl_llist_element multi_queue; /* for multihandle list management */
   struct Curl_llist_element conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
