@@ -13,23 +13,7 @@ gitfiles="$(mktemp)"
 
 taronly="/
 ^
-Makefile.in
-^aclocal.m4
-^compile
-^configure
-^config.*
-^depcomp
-^install-sh
-^ltmain.sh
-^missing
-^docs/libcurl/libcurl-symbols.md
-^docs/RELEASE-TOOLS.md
-^docs/tarball-commit.txt
-^lib/curl_config.h.in
-^m4/libtool.m4
-^m4/lt*.m4
-^src/tool_ca_embed.c
-^src/tool_hugehelp.c"
+Makefile.in"
 
 gitonly=".git*
 ^.*
@@ -64,7 +48,14 @@ git ls-files \
   | grep -v -E "($(printf '%s' "${gitonly}" | tr $'\n' '|' | sed -e 's|\.|\\.|g' -e 's|\*|.+|g'))$" \
   | sort > "${gitfiles}"
 
-diff -u "${tarfiles}" "${gitfiles}"
+dif="$(diff -u "${tarfiles}" "${gitfiles}" | tail -n +3 || true)"
+
+echo 'Only in tarball:'
+echo "${dif}" | grep '^-'
+echo
+
+echo 'Missing from tarball:'
+echo "${dif}" | grep '^+'
 res=$?
 
 rm -rf "${tarfiles:?}" "${gitfiles:?}"
