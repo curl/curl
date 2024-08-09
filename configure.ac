@@ -600,6 +600,7 @@ CURL_CHECK_WIN32_LARGEFILE
 CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
+
 case $host_os in
   darwin*)
     CURL_SUPPORTS_BUILTIN_AVAILABLE
@@ -2754,7 +2755,6 @@ dnl **********************************************************************
 dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
-CURL_DARWIN_CFLAGS
 case $host_os in
   darwin*)
     AC_MSG_CHECKING([whether to build with Apple IDN])
