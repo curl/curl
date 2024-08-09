@@ -2882,7 +2882,9 @@ if test X"$want_nghttp2" != Xno; then
       LDFLAGS=$CLEANLDFLAGS
       CPPFLAGS=$CLEANCPPFLAGS
       LIBS=$CLEANLIBS
+      LIB_H2=
   )
+  AC_SUBST(LIB_H2)
 fi
 
 dnl **********************************************************************
