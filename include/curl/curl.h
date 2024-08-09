@@ -3017,6 +3017,24 @@ typedef void (*curl_unlock_function)(CURL *handle,
                                      curl_lock_data data,
                                      void *userptr);
 
+/*
+ * Name:    curl_share_debug_callback
+ *
+ * Desc:    Called by libcurl for emitting debug output on VERBOSE shares.
+ *          The easy handle might be the handle of the transfer
+ *          involved or NULL for tracing unrelated to a specific transfer.
+ *          The parameters `type`, `data` and `size`are the same as for
+ *          `curl_debug_callback`. The `userptr` is the value installed
+ *          at the share via `CURLSHOPT_DEBUGDATA`.
+ *
+ * Returns: The callback should return zero.
+ */
+typedef int (*curl_share_debug_callback)(CURLSH *share, /* share handle */
+                                         CURL *easy, /* easy handle or NULL */
+                                         curl_infotype type, /* kind of data */
+                                         char *data, /* the data */
+                                         size_t size, /* size of data */
+                                         void *userptr); /* user supplied */
 
 typedef enum {
   CURLSHE_OK,  /* all is fine */
@@ -3036,6 +3054,9 @@ typedef enum {
   CURLSHOPT_UNLOCKFUNC, /* pass in a 'curl_unlock_function' pointer */
   CURLSHOPT_USERDATA,   /* pass in a user data pointer used in the lock/unlock
                            callback functions */
+  CURLSHOPT_VERBOSE, /* pass in a long to en-/disable trace output */
+  CURLSHOPT_DEBUGFUNCTION, /* pass in a 'curl_share_debug_callback' pointer */
+  CURLSHOPT_DEBUGDATA, /* pass in user data for the debug function */
   CURLSHOPT_LAST  /* never use */
 } CURLSHoption;
 

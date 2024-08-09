@@ -40,7 +40,7 @@ Using it twice, e.g. `-vv`, outputs time (--trace-time) and transfer ids
 protocol).
 
 Adding a third verbose outputs transfer content (--trace-ascii %) and enable
-tracing of more components (--trace-config read,write,ssl).
+tracing of more components (--trace-config multi,read,write,ssl).
 
 A forth time adds tracing of all network components. (--trace-config network).
 

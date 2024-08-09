@@ -3240,7 +3240,7 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
   }
   else if(k->httpversion == 20 ||
           (k->upgr101 == UPGR101_H2 && k->httpcode == 101)) {
-    DEBUGF(infof(data, "HTTP/2 found, allow multiplexing"));
+    CURL_TRC_M(data, "HTTP/2 found, allow multiplexing");
     /* HTTP/2 cannot avoid multiplexing since it is a core functionality
        of the protocol */
     conn->bundle->multiuse = BUNDLE_MULTIPLEX;

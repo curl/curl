@@ -33,4 +33,12 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
                   char *data, size_t size,
                   void *userdata);
 
+int tool_mdebug_cb(CURLM *multi, CURL *handle, curl_infotype type,
+                   char *data, size_t size,
+                   void *userdata);
+
+int tool_shdebug_cb(CURLSH *share, CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userdata);
+
 #endif /* HEADER_CURL_TOOL_CB_DBG_H */

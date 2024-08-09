@@ -63,7 +63,7 @@ class TestShutdown:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
-            '--parallel'
+            '--parallel', '--no-verbose'
         ])
         r.check_response(http_status=200, count=2)
         assert r.tcpdump
@@ -95,13 +95,13 @@ class TestShutdown:
         count = 10
         curl = CurlClient(env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl'
+            'CURL_DEBUG': 'ssl,multi'
         })
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak/?'\
             f'id=[0-{count-1}]&with_cl&close'
         r = curl.http_download(urls=[url], alpn_proto=proto)
         r.check_response(http_status=200, count=count)
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        shutdowns = [l for l in r.trace_lines if re.match(r'.*\[CONN-CACHE\] all filters shutdown complete', l)]
         assert len(shutdowns) == count, f'{shutdowns}'
 
     # run downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
@@ -115,7 +115,7 @@ class TestShutdown:
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='h2-download', env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl'
+            'CURL_DEBUG': 'ssl,multi'
         })
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -123,7 +123,7 @@ class TestShutdown:
              '-n', f'{count}', '-f', '-V', proto, url
         ])
         r.check_exit_code(0)
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        shutdowns = [l for l in r.trace_lines if re.match(r'.*\[CONN-CACHE\] all filters shutdown complete', l)]
         assert len(shutdowns) == count, f'{shutdowns}'
 
     # run event-based downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
@@ -138,7 +138,7 @@ class TestShutdown:
             'CURL_FORBID_REUSE': '1',
             # make socket receives block 50% of the time to delay shutdown
             'CURL_DBG_SOCK_RBLOCK': '50',
-            'CURL_DEBUG': 'ssl'
+            'CURL_DEBUG': 'ssl,multi'
         })
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/tweak/?'\
             f'id=[0-{count-1}]&with_cl&'
@@ -147,7 +147,7 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=count)
         # check that we closed all connections
-        closings = [l for l in r.trace_lines if re.match(r'.*CCACHE\] closing #\d+', l)]
+        closings = [l for l in r.trace_lines if re.match(r'.*\[CONN-CACHE\] closing connection', l)]
         assert len(closings) == count, f'{closings}'
         # check that all connection sockets were removed from event
         removes = [l for l in r.trace_lines if re.match(r'.*socket cb: socket \d+ REMOVED', l)]
@@ -170,5 +170,5 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=2)
         # check connection cache closings
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        shutdowns = [l for l in r.trace_lines if re.match(r'.*\[CONN-CACHE\] all filters shutdown complete', l)]
         assert len(shutdowns) == 1, f'{shutdowns}'

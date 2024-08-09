@@ -207,7 +207,6 @@ static CURLcode xfer_send(struct Curl_easy *data,
   if(data->req.eos_read &&
     (Curl_bufq_is_empty(&data->req.sendbuf) ||
      Curl_bufq_len(&data->req.sendbuf) == blen)) {
-    DEBUGF(infof(data, "sending last upload chunk of %zu bytes", blen));
     eos = TRUE;
   }
   result = Curl_xfer_send(data, buf, blen, eos, pnwritten);

@@ -2531,7 +2531,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       case 2:
         global->verbosity = 3;
         global->tracetype = TRACE_ASCII;
-        if(set_trace_config(global, "ssl,read,write"))
+        if(set_trace_config(global, "multi,ssl,read,write"))
           err = PARAM_NO_MEM;
         break;
       case 3:

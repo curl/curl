@@ -84,6 +84,7 @@ static void log_line_start(FILE *log, const char *timebuf,
 }
 
 #define TRC_IDS_FORMAT_IDS_1  "[%" CURL_FORMAT_CURL_OFF_T "-x] "
+#define TRC_IDS_FORMAT_IDS_1b "[x-%" CURL_FORMAT_CURL_OFF_T "] "
 #define TRC_IDS_FORMAT_IDS_2  "[%" CURL_FORMAT_CURL_OFF_T "-%" \
                                    CURL_FORMAT_CURL_OFF_T "] "
 /*
@@ -118,15 +119,20 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
     timebuf[0] = 0;
 
   if(handle && config->traceids &&
-     !curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
-    if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
-        conn_id >= 0) {
+     !curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) &&
+     !curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id)) {
+    if(xfer_id >= 0 && conn_id >= 0) {
       msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2,
                 xfer_id, conn_id);
     }
-    else {
+    else if(xfer_id >= 0) {
       msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
+    else if(conn_id >= 0) {
+      msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1b, conn_id);
+    }
+    else
+      idsbuf[0] = 0;
   }
   else
     idsbuf[0] = 0;
@@ -297,4 +303,30 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
     fputc('\n', stream); /* newline */
   }
   fflush(stream);
+}
+
+int tool_mdebug_cb(CURLM *multi, CURL *handle, curl_infotype type,
+                  char *data, size_t size,
+                  void *userdata)
+{
+  struct GlobalConfig *global = userdata;
+  struct OperationConfig ops;
+
+  (void)multi;
+  memset(&ops, 0, sizeof(ops));
+  ops.global = global;
+  return tool_debug_cb(handle, type, data, size, &ops);
+}
+
+int tool_shdebug_cb(CURLSH *share, CURL *handle, curl_infotype type,
+                    char *data, size_t size,
+                    void *userdata)
+{
+  struct GlobalConfig *global = userdata;
+  struct OperationConfig ops;
+
+  (void)share;
+  memset(&ops, 0, sizeof(ops));
+  ops.global = global;
+  return tool_debug_cb(handle, type, data, size, &ops);
 }
