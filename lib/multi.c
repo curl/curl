@@ -1224,7 +1224,7 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
   struct curl_waitfds cwfds;
   struct easy_pollset ps;
   CURLMcode result = CURLM_OK;
-  struct Curl_llist_element *e = multi->msgsent.head;
+  struct Curl_llist_element *e;
 
   if(!ufds)
     return CURLM_BAD_FUNCTION_ARGUMENT;
@@ -1237,14 +1237,13 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
 
   Curl_waitfds_init(&cwfds, ufds, size);
   memset(&ps, 0, sizeof(ps));
-  while(e) {
+  for(e = multi->process.head; e; e = e->next) {
     struct Curl_easy *data = e->ptr;
     multi_getsock(data, &ps);
     if(Curl_waitfds_add_ps(&cwfds, &ps)) {
       result = CURLM_OUT_OF_MEMORY;
       goto out;
     }
-    e = e->next;
   }
 
   if(Curl_conncache_add_waitfds(&multi->conn_cache, &cwfds)) {
