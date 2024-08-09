@@ -70,7 +70,6 @@ class TestSSLUse:
             if tls_max == '1.3':
                 exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('wolfssl'):
-            xargs = ['--sessionid', f'--tlsv{tls_max}']
             if tls_max == '1.3':
                 exp_resumed = 'Initial'  # 1.2 works in wolfSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
@@ -221,10 +220,6 @@ class TestSSLUse:
             # test setting TLSv1.2 ciphers
             if env.curl_uses_lib('schannel'):
                 pytest.skip('Schannel does not support setting TLSv1.2 ciphers by name')
-            elif env.curl_uses_lib('wolfssl'):
-                # setting tls version is botched with wolfssl: setting max (--tls-max)
-                # is not supported, setting min (--tlsv1.*) actually also sets max
-                extra_args = ['--tlsv1.2', '--ciphers', ':'.join(cipher_names)]
             else:
                 # the server supports TLSv1.3, so to test TLSv1.2 ciphers we set tls-max
                 extra_args = ['--tls-max', '1.2', '--ciphers', ':'.join(cipher_names)]
