@@ -3917,10 +3917,11 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
 struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
                                         curl_off_t id)
 {
-  struct Curl_easy *data = multi->easyp;
-  struct Curl_llist_element *e;
 
   if(id >= 0) {
+    struct Curl_easy *data = multi->easyp;
+    struct Curl_llist_element *e;
+
     for(data = multi->easyp; data; data = data->next) {
       if(data->id == id)
         return data;
