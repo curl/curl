@@ -153,4 +153,10 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
  */
 void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
 
+/**
+ * Get the transfer handle for the given id. Returns NULL if not found.
+ */
+struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
+                                        curl_off_t id);
+
 #endif /* HEADER_CURL_MULTIIF_H */
