@@ -1181,8 +1181,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
      and then we must make sure that is done. */
   int this_max_fd = -1;
   struct easy_pollset ps;
-  unsigned int i;
-  struct Curl_llist_element *e = multi->process.head;
+  struct Curl_llist_element *e;
   (void)exc_fd_set; /* not used */
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -1192,8 +1191,9 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
     return CURLM_RECURSIVE_API_CALL;
 
   memset(&ps, 0, sizeof(ps));
-  while(e) {
+  for(e = multi->process.head; e; e = e->next) {
     struct Curl_easy *data = e->ptr;
+    unsigned int i;
 
     multi_getsock(data, &ps);
 
@@ -1208,7 +1208,6 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
       if((int)ps.sockets[i] > this_max_fd)
         this_max_fd = (int)ps.sockets[i];
     }
-    e = e->next;
   }
 
   *max_fd = this_max_fd;
