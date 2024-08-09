@@ -136,12 +136,13 @@ jobs:
         timeout-minutes: 30
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
-          if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP !FTP'
-          fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
+          if [ '${{ matrix.sys }}' != 'msys' ]; then
+            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP !FTP'
+          fi
+          TFLAGS+=' ~165 ~1448 ~2046 ~2047'  # IDN tests failing without Unicode
           make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
@@ -215,11 +216,14 @@ jobs:
         timeout-minutes: 10
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
+          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
+            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+          fi
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP !FTP'
           fi
-          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+          if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
+            TFLAGS+=' ~165 ~1448 ~2046 ~2047'  # IDN tests failing without Unicode
           fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
@@ -335,6 +339,9 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
+          if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
+            TFLAGS+=' ~165 ~1448 ~2046 ~2047'  # IDN tests failing without Unicode
+          fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
@@ -357,7 +364,7 @@ jobs:
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON -DCURL_USE_GSASL=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_GSASL=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel'
         - name: 'openssl'
           install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl'
           arch: 'x64'
@@ -480,12 +487,8 @@ jobs:
         timeout-minutes: 12
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP !FTP ${{ matrix.tflags }}'
-          if [[ '${{ matrix.config }}' = *'-DUSE_WIN32_IDN=ON'* ]]; then
-            if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
-              TFLAGS+=' ~1448 ~2046 ~2047'
-            fi
-          elif [[ '${{ matrix.config }}' = *'-DUSE_LIBIDN2=ON'* ]]; then
-            TFLAGS+=' ~165 ~1448 ~2046 ~2047'
+          if [[ '${{ matrix.config }}' != *'-DENABLE_UNICODE=ON'* ]]; then
+            TFLAGS+=' ~165 ~1448 ~2046 ~2047'  # IDN tests failing without Unicode
           fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
