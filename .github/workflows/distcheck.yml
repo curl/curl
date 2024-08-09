@@ -152,7 +152,7 @@ jobs:
           make -j5
 
       - name: 'maketgz'
-        run: ./maketgz 9.10.11
+        run: ./maketgz 99.98.97
 
       - name: 'detect files missing from release tarball'
-        run: .github/scripts/distfiles.sh curl-9.10.11.tar.gz
+        run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
