@@ -50,6 +50,7 @@ EXTRA_DIST =                                    \
  BUGS.md                                        \
  CHECKSRC.md                                    \
  CIPHERS.md                                     \
+ CIPHERS-TLS12.md                               \
  CMakeLists.txt                                 \
  CODE_OF_CONDUCT.md                             \
  CODE_REVIEW.md                                 \
