@@ -1024,7 +1024,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
         result = ws_send_raw_blocking(data, ws, (char *)out, outlen);
         n = result? 0 : outlen;
       }
-      else if(data->set.connect_only)
+      else if(data->set.connect_only || Curl_is_in_callback(data))
         result = Curl_senddata(data, out, outlen, &n);
       else {
         result = Curl_xfer_send(data, out, outlen, FALSE, &n);
@@ -1104,14 +1104,23 @@ static CURLcode ws_send_raw(CURL *data, const void *buffer,
   if(!buflen)
     return CURLE_OK;
 
-  /* When invoked from inside callbacks, we do a blocking send as the
-   * callback will probably not implement partial writes that may then
-   * mess up the ws framing subsequently.
-   * TODO: an additional parameter to curl_ws_send() might help */
-  if(Curl_is_in_callback(data))
+  if(Curl_is_in_callback(data)) {
+    /* When invoked from inside callbacks, we do a blocking send as the
+     * callback will probably not implement partial writes that may then
+     * mess up the ws framing subsequently.
+     * We need any pending data to be flushed before sending. */
+    result = ws_flush(data, ws, TRUE);
+    if(result)
+      return result;
     result = ws_send_raw_blocking(data, ws, buffer, buflen);
-  else
+  }
+  else {
+    /* We need any pending data to be sent or EAGAIN this call. */
+    result = ws_flush(data, ws, FALSE);
+    if(result)
+      return result;
     result = Curl_senddata(data, buffer, buflen, pnwritten);
+  }
 
   CURL_TRC_WS(data, "ws_send_raw(len=%zu) -> %d, %zu",
               buflen, result, *pnwritten);
@@ -1125,7 +1134,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
 {
   struct websocket *ws;
   ssize_t n;
-  size_t space;
+  size_t space, sblen_before, net_added, payload_added;
   CURLcode result;
 
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" CURL_FORMAT_CURL_OFF_T
@@ -1135,23 +1144,24 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   if(!data->conn && data->set.connect_only) {
     result = Curl_connect_only_attach(data);
     if(result)
-      return result;
+      goto out;
   }
   if(!data->conn) {
     failf(data, "No associated connection");
-    return CURLE_SEND_ERROR;
+    result = CURLE_SEND_ERROR;
+    goto out;
   }
   if(!data->conn->proto.ws) {
     failf(data, "Not a websocket transfer");
-    return CURLE_SEND_ERROR;
+    result = CURLE_SEND_ERROR;
+    goto out;
   }
   ws = data->conn->proto.ws;
 
-  /* in raw mode, we need the flush to be complete, as we otherwise
-   * might mix new content into partially written one. */
-  result = ws_flush(data, ws, data->set.ws_raw_mode);
+  /* try flushing any content still waiting to be sent. */
+  result = ws_flush(data, ws, FALSE);
   if(result)
-    return result;
+    goto out;
 
   if(data->set.ws_raw_mode) {
     /* In raw mode, we write directly to the connection */
@@ -1159,17 +1169,19 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
       failf(data, "ws_send, raw mode: fragsize and flags cannot be non-zero");
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
-    return ws_send_raw(data, buffer, buflen, sent);
+    result = ws_send_raw(data, buffer, buflen, sent);
+    goto out;
   }
 
   /* Not RAW mode, buf we do the frame encoding */
-  /* TODO: the current design does not allow partial writes, afaict.
-   * It is not clear how the application is supposed to react. */
+  sblen_before = Curl_bufq_len(&ws->sendbuf);
   space = Curl_bufq_space(&ws->sendbuf);
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu), sendbuf len=%zu space %zu",
+  CURL_TRC_WS(data, "curl_ws_send(len=%zu), sendbuf=%zu space_left=%zu",
               buflen, Curl_bufq_len(&ws->sendbuf), space);
-  if(space < 14)
-    return CURLE_AGAIN;
+  if(space < 14) {
+    result = CURLE_AGAIN;
+    goto out;
+  }
 
   if(flags & CURLWS_OFFSET) {
     if(fragsize) {
@@ -1177,7 +1189,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
       n = ws_enc_write_head(data, &ws->enc, flags, fragsize,
                             &ws->sendbuf, &result);
       if(n < 0)
-        return result;
+        goto out;
     }
     else {
       if((curl_off_t)buflen > ws->enc.payload_remain) {
@@ -1191,16 +1203,69 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     n = ws_enc_write_head(data, &ws->enc, flags, (curl_off_t)buflen,
                           &ws->sendbuf, &result);
     if(n < 0)
-      return result;
+      goto out;
   }
 
   n = ws_enc_write_payload(&ws->enc, data,
                            buffer, buflen, &ws->sendbuf, &result);
   if(n < 0)
-    return result;
+    goto out;
+  payload_added = (size_t)n;
+  DEBUGASSERT(Curl_bufq_len(&ws->sendbuf) >= sblen_before);
+  net_added = Curl_bufq_len(&ws->sendbuf) - sblen_before;
+  DEBUGASSERT(net_added >= payload_added);
 
-  *sent = (size_t)n;
-  return ws_flush(data, ws, TRUE);
+  while(!result && (buflen || !Curl_bufq_is_empty(&ws->sendbuf))) {
+    /* flush, blocking when in callback */
+    result = ws_flush(data, ws, Curl_is_in_callback(data));
+    if(!result) {
+      DEBUGASSERT(payload_added <= buflen);
+      /* all buffered data sent. Try sending the rest if there is any. */
+      *sent += payload_added;
+      buffer = (const char *)buffer + payload_added;
+      buflen -= payload_added;
+      payload_added = 0;
+      if(buflen) {
+        n = ws_enc_write_payload(&ws->enc, data,
+                                 buffer, buflen, &ws->sendbuf, &result);
+        if(n < 0)
+          goto out;
+        payload_added = Curl_bufq_len(&ws->sendbuf);
+      }
+    }
+    else if(result == CURLE_AGAIN) {
+      /* partially sent. how much of the call data has been part of it? what
+      * should we report to out caller so it can retry/send the rest? */
+      if(payload_added < buflen) {
+        /* We did not add everything the caller wanted. Return just
+         * the partial write to our buffer. */
+        *sent = payload_added;
+        result = CURLE_OK;
+        goto out;
+      }
+      else if(!buflen) {
+        /* We have no payload to report a partial write. EAGAIN would make
+         * the caller repeat this and add the frame again.
+         * Flush blocking seems the only way out of this. */
+        *sent = (size_t)n;
+        result = ws_flush(data, ws, TRUE);
+        goto out;
+      }
+      /* We added the complete data to our sendbuf. Report one byte less as
+       * sent. This parital sucess should make the caller invoke us again
+       * with the last byte. */
+      *sent = payload_added - 1;
+      result = Curl_bufq_unwrite(&ws->sendbuf, 1);
+      if(!result)
+        result = CURLE_AGAIN;
+    }
+  }
+
+out:
+  CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" CURL_FORMAT_CURL_OFF_T
+              ", flags=%x, raw=%d) -> %d, %zu",
+              buflen, fragsize, flags, data->set.ws_raw_mode, result, *sent);
+  return result;
 }
 
 static void ws_free(struct connectdata *conn)
