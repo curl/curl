@@ -217,6 +217,8 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
   struct Curl_easy *data;
 
   data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_id);
+  DEBUGF(infof(doh, "doh_done: xfer for %" CURL_FORMAT_CURL_OFF_T
+               " is %p", doh->set.dohfor_id, (void *)data));
   if(data) {
     struct dohdata *dohp = data->req.doh;
     /* one of the DoH request done for the 'data' transfer is now complete! */

@@ -3931,6 +3931,12 @@ struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
       if(data->id == id)
         return data;
     }
+    /* may be in pending queue? */
+    for(e = multi->pending.head; e; e = e->next) {
+      data = e->ptr;
+      if(data->id == id)
+        return data;
+    }
   }
   return NULL;
 }
