@@ -1134,7 +1134,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
 {
   struct websocket *ws;
   ssize_t n;
-  size_t space, sblen_before, net_added, payload_added;
+  size_t space, sblen_before, payload_added;
   CURLcode result;
 
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" CURL_FORMAT_CURL_OFF_T
@@ -1211,9 +1211,6 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   if(n < 0)
     goto out;
   payload_added = (size_t)n;
-  DEBUGASSERT(Curl_bufq_len(&ws->sendbuf) >= sblen_before);
-  net_added = Curl_bufq_len(&ws->sendbuf) - sblen_before;
-  DEBUGASSERT(net_added >= payload_added);
 
   while(!result && (buflen || !Curl_bufq_is_empty(&ws->sendbuf))) {
     /* flush, blocking when in callback */
@@ -1252,7 +1249,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
         goto out;
       }
       /* We added the complete data to our sendbuf. Report one byte less as
-       * sent. This parital sucess should make the caller invoke us again
+       * sent. This parital success should make the caller invoke us again
        * with the last byte. */
       *sent = payload_added - 1;
       result = Curl_bufq_unwrite(&ws->sendbuf, 1);
