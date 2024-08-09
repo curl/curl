@@ -850,6 +850,10 @@ static ParameterError set_data(cmdline_t cmd,
   FILE *file;
   size_t size = 0;
   ParameterError err = PARAM_OK;
+  char *ptr_range;
+  int have_valid_range;
+  size_t offset_start = 0;
+  size_t offset_end;
 
   if(cmd == C_DATA_URLENCODE) { /* --data-urlencode */
     err = data_urlencode(global, nextarg, &postdata, &size);
@@ -867,9 +871,60 @@ static ParameterError set_data(cmdline_t cmd,
         set_binmode(stdin);
     }
     else {
+        ptr_range = nextarg + strlen(nextarg) - 1;
+        have_valid_range = 1; /* range is valid until proven otherwise */
+        while(ptr_range > nextarg) {
+
+          /* if syntax is not respected, the '!' is probably part
+              of the Filename. */
+          if(!strchr("0123456789-!", *ptr_range)) {
+            have_valid_range = 0;
+            break;
+          }
+
+          /* --data '@file[start]-' makes no sense. */
+          if(*ptr_range == '-' && *(ptr_range + 1) == '\0') {
+            have_valid_range = 0;
+            break;
+          }
+          else if(*ptr_range == '-' && !(have_valid_range & 2)) {
+            offset_end = strtol(ptr_range + 1, NULL, 0);
+            have_valid_range |= 2;
+          }
+          else if(*ptr_range == '-') { /* only ONE '-' allowed */
+            have_valid_range = 0;
+            break;
+          }
+
+          if(*ptr_range == '!' && *(ptr_range + 1) == '-') {
+            have_valid_range = 0;
+            break;
+          }
+          else if(*ptr_range == '!') {
+            offset_start = strtol(ptr_range + 1, NULL, 0);
+            *ptr_range = '\0';
+            break;
+          }
+
+          ptr_range--;
+        }
+
+        if(have_valid_range >= 2 && offset_start >= offset_end) {
+
+          errorf(global, "The 'end' of the range must "
+                  "be larger than the 'start'");
+
+          return PARAM_BAD_USE;
+        }
+
       file = fopen(nextarg, "rb");
       if(!file) {
         errorf(global, "Failed to open %s", nextarg);
+        return PARAM_READ_ERROR;
+      }
+      if(have_valid_range && fseek(file, offset_start, SEEK_SET)) {
+        errorf(global, "%s: %s", nextarg, strerror(errno));
+        fclose(file);
         return PARAM_READ_ERROR;
       }
     }
@@ -882,6 +937,24 @@ static ParameterError set_data(cmdline_t cmd,
       err = file2string(&postdata, file);
       if(postdata)
         size = strlen(postdata);
+    }
+
+    /* --data @file![offset_start]: */
+    if(have_valid_range == 1) {
+      offset_end = size + offset_start;
+    }
+    if(have_valid_range & 1) {
+      if(offset_end > (size + offset_start) ||
+          (offset_start >= offset_end && have_valid_range >= 2)) {
+
+        errorf(global, "The specified limits exceed the actual file size.");
+        err = PARAM_BAD_USE;
+      }
+
+      /* --data @file![offset_start]-[offset_end]: */
+      if(have_valid_range >= 2) {
+        size = offset_end - offset_start;
+      }
     }
 
     if(file && (file != stdin))
