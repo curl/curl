@@ -86,20 +86,16 @@ struct Curl_multi {
      this multi handle with an easy handle. Set this to CURL_MULTI_HANDLE. */
   unsigned int magic;
 
-  /* We have a doubly-linked list with easy handles */
-  struct Curl_easy *easyp;
-  struct Curl_easy *easylp; /* last node */
-
   unsigned int num_easy; /* amount of entries in the linked list above. */
   unsigned int num_alive; /* amount of easy handles that are added but have
                              not yet reached COMPLETE state */
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
-  struct Curl_llist pending; /* Curl_easys that are in the
-                                MSTATE_PENDING state */
-  struct Curl_llist msgsent; /* Curl_easys that are in the
-                                MSTATE_MSGSENT state */
+  /* Each added easy handle is in ONE of these three lists */
+  struct Curl_llist process; /* not in PENDING or MSGSENT */
+  struct Curl_llist pending; /* in PENDING */
+  struct Curl_llist msgsent; /* in MSGSENT */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;

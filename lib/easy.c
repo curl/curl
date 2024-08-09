@@ -597,14 +597,20 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
     }
     else {
       /* here pollrc is > 0 */
+      struct Curl_llist_element *e = multi->process.head;
+      struct Curl_easy *data;
+      DEBUGASSERT(e);
+      data = e->ptr;
+      DEBUGASSERT(data);
 
       /* loop over the monitored sockets to see which ones had activity */
       for(i = 0; i< numfds; i++) {
         if(fds[i].revents) {
           /* socket activity, tell libcurl */
           int act = poll2cselect(fds[i].revents); /* convert */
-          infof(multi->easyp,
-                "call curl_multi_socket_action(socket "
+
+          /* sending infof "randomly" to the first easy handle */
+          infof(data, "call curl_multi_socket_action(socket "
                 "%" CURL_FORMAT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
           mcode = curl_multi_socket_action(multi, fds[i].fd, act,
                                            &ev->running_handles);

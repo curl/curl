@@ -265,7 +265,6 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
                                          struct h3_stream_ctx **pstream)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct Curl_easy *sdata;
   struct h3_stream_ctx *stream;
 
   (void)cf;
@@ -275,8 +274,10 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
     return data;
   }
   else {
+    struct Curl_llist_element *e;
     DEBUGASSERT(data->multi);
-    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    for(e = data->multi->process.head; e; e = e->next) {
+      struct Curl_easy *sdata = e->ptr;
       if(sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);

@@ -655,7 +655,6 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  struct Curl_easy *sdata;
 
   if(stream && stream->s.id == stream_id) {
     return &stream->s;
@@ -670,8 +669,10 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
     return &ctx->h3.s_qpack_dec;
   }
   else {
+    struct Curl_llist_element *e;
     DEBUGASSERT(data->multi);
-    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    for(e = data->multi->process.head; e; e = e->next) {
+      struct Curl_easy *sdata = e->ptr;
       if(sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);
@@ -1422,11 +1423,12 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   }
 
   if(ctx->h3.conn) {
-    struct Curl_easy *sdata;
+    struct Curl_llist_element *e;
     struct h3_stream_ctx *stream;
     /* PULL all open streams */
     DEBUGASSERT(data->multi);
-    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    for(e = data->multi->process.head; e; e = e->next) {
+      struct Curl_easy *sdata = e->ptr;
       if(sdata->conn == data->conn && CURL_WANT_RECV(sdata)) {
         stream = H3_STREAM_CTX(ctx, sdata);
         if(stream && !stream->closed &&
@@ -1449,11 +1451,12 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
                                            struct Curl_easy *data)
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
-  struct Curl_easy *sdata;
   struct h3_stream_ctx *stream;
 
   if(ctx->h3.conn) {
-    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    struct Curl_llist_element *e;
+    for(e = data->multi->process.head; e; e = e->next) {
+      struct Curl_easy *sdata = e->ptr;
       if(sdata->conn == data->conn) {
         stream = H3_STREAM_CTX(ctx, sdata);
         if(stream && stream->s.ssl && stream->s.send_blocked &&
