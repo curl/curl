@@ -3937,3 +3937,31 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
   multi->xfer_ulbuf_len = 0;
   multi->xfer_ulbuf_borrowed = FALSE;
 }
+
+struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
+                                        curl_off_t id)
+{
+
+  if(id >= 0) {
+    struct Curl_easy *data;
+    struct Curl_llist_element *e;
+
+    for(data = multi->easyp; data; data = data->next) {
+      if(data->id == id)
+        return data;
+    }
+    /* may be in msgsent queue? */
+    for(e = multi->msgsent.head; e; e = e->next) {
+      data = e->ptr;
+      if(data->id == id)
+        return data;
+    }
+    /* may be in pending queue? */
+    for(e = multi->pending.head; e; e = e->next) {
+      data = e->ptr;
+      if(data->id == id)
+        return data;
+    }
+  }
+  return NULL;
+}
