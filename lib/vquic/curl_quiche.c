@@ -177,13 +177,13 @@ static void check_resumes(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct Curl_easy *sdata;
-  struct stream_ctx *stream;
+  struct Curl_llist_element *e;
 
   DEBUGASSERT(data->multi);
-  for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+  for(e = data->multi->process.head; e; e = e->next) {
+    struct Curl_easy *sdata = e->ptr;
     if(sdata->conn == data->conn) {
-      stream = H3_STREAM_CTX(ctx, sdata);
+      struct stream_ctx *stream = H3_STREAM_CTX(ctx, sdata);
       if(stream && stream->quic_flow_blocked) {
         stream->quic_flow_blocked = FALSE;
         Curl_expire(data, 0, EXPIRE_RUN_NOW);
@@ -268,7 +268,6 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
                                          struct stream_ctx **pstream)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct Curl_easy *sdata;
   struct stream_ctx *stream;
 
   (void)cf;
@@ -278,8 +277,10 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
     return data;
   }
   else {
+    struct Curl_llist_element *e;
     DEBUGASSERT(data->multi);
-    for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+    for(e = data->multi->process.head; e; e = e->next) {
+      struct Curl_easy *sdata = e->ptr;
       if(sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);
@@ -296,11 +297,12 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
 static void cf_quiche_expire_conn_closed(struct Curl_cfilter *cf,
                                          struct Curl_easy *data)
 {
-  struct Curl_easy *sdata;
+  struct Curl_llist_element *e;
 
   DEBUGASSERT(data->multi);
   CURL_TRC_CF(data, cf, "conn closed, expire all transfers");
-  for(sdata = data->multi->easyp; sdata; sdata = sdata->next) {
+  for(e = data->multi->process.head; e; e = e->next) {
+    struct Curl_easy *sdata = e->ptr;
     if(sdata == data || sdata->conn != data->conn)
       continue;
     CURL_TRC_CF(sdata, cf, "conn closed, expire transfer");
