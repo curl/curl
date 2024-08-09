@@ -46,14 +46,13 @@ git ls-files \
 
 dif="$(diff -u "${tarfiles}" "${gitfiles}" | tail -n +3 || true)"
 
+rm -rf "${tarfiles:?}" "${gitfiles:?}"
+
 echo 'Only in tarball:'
-echo "${dif}" | grep '^-'
+echo "${dif}" | grep '^-' || true
 echo
 
 echo 'Missing from tarball:'
-echo "${dif}" | grep '^+'
-res=$?
-
-rm -rf "${tarfiles:?}" "${gitfiles:?}"
-
-exit "$res"
+if echo "${dif}" | grep '^+'; then
+  exit 1
+fi
