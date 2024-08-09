@@ -951,7 +951,8 @@ if(CURL_DISABLE_LDAP)
 endif()
 
 if(WIN32)
-  if(HAVE_WIN32_WINNT LESS 0x0600)
+  # MSVC 2008 does not have the necessary symbols in the normaliz library.
+  if(HAVE_WIN32_WINNT LESS 0x0600 OR (MSVC AND MSVC_VERSION LESS_EQUAL 1500))
     set(_use_win32_idn_default OFF)
   else()
     set(_use_win32_idn_default ON)  # Windows Vista / Server 2008 or newer
