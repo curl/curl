@@ -1948,11 +1948,10 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         /* There was no connection available. We will go to the pending
            state and wait for an available connection. */
         multistate(data, MSTATE_PENDING);
-
-        /* add this handle to the list of connect-pending handles */
-        Curl_llist_append(&multi->pending, data, &data->multi_queue);
-        /* unlink from the process list */
+        /* unlink from process list */
         unlink_easy(multi, data);
+        /* add handle to pending list */
+        Curl_llist_append(&multi->pending, data, &data->multi_queue);
         result = CURLE_OK;
         break;
       }
@@ -2663,10 +2662,10 @@ statemachine_end:
       }
       multistate(data, MSTATE_MSGSENT);
 
-      /* add this handle to the list of msgsent handles */
-      Curl_llist_append(&multi->msgsent, data, &data->multi_queue);
       /* unlink from the main list */
       unlink_easy(multi, data);
+      /* add this handle to the list of msgsent handles */
+      Curl_llist_append(&multi->msgsent, data, &data->multi_queue);
       return CURLM_OK;
     }
   } while((rc == CURLM_CALL_MULTI_PERFORM) || multi_ischanged(multi, FALSE));
