@@ -183,6 +183,12 @@ CURLcode Curl_bufq_cwrite(struct bufq *q,
                          size_t *pnwritten);
 
 /**
+ * Remove `len` bytes from the end of the buffer queue again.
+ * Returns CURLE_AGAIN if less than `len` bytes were in the queue.
+ */
+CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len);
+
+/**
  * Read buf from the start of the buffer queue. The buf is copied
  * and the amount of copied bytes is returned.
  * A return code of -1 indicates an error, setting `err` to the
