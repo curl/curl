@@ -3919,7 +3919,7 @@ struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
 {
 
   if(id >= 0) {
-    struct Curl_easy *data = multi->easyp;
+    struct Curl_easy *data;
     struct Curl_llist_element *e;
 
     for(data = multi->easyp; data; data = data->next) {
