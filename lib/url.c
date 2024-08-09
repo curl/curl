@@ -537,6 +537,9 @@ CURLcode Curl_open(struct Curl_easy **curl)
     data->state.recent_conn_id = -1;
     /* and not assigned an id yet */
     data->id = -1;
+#ifndef CURL_DISABLE_DOH
+    data->set.dohfor_id = -1;
+#endif
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
@@ -3580,7 +3583,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         Curl_disconnect(data, conn_candidate, FALSE);
       else
 #ifndef CURL_DISABLE_DOH
-        if(data->set.dohfor)
+        if(data->set.dohfor_id >= 0)
           infof(data, "Allowing DoH to override max connection limit");
         else
 #endif
