@@ -2539,7 +2539,6 @@ if test "$curl_cv_native_windows" = "yes"; then
     yes)
       CPPFLAGS="${CPPFLAGS} -Dmain=wmain"
       CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
-      LDFLAGS="${LDFLAGS} -municode"
       want_winuni="yes"
       AC_MSG_RESULT([yes])
       ;;
@@ -2548,6 +2547,8 @@ if test "$curl_cv_native_windows" = "yes"; then
       ;;
   esac
 fi
+
+AM_CONDITIONAL([USE_UNICODE], [test "$want_winuni" = "yes"])
 
 dnl -------------------------------------------------
 dnl check winidn option before other IDN libraries
