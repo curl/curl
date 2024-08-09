@@ -50,6 +50,11 @@ AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 AM_CPPFLAGS += -DBUILDING_CURL
 
+AM_LDFLAGS =
+if USE_UNICODE
+AM_LDFLAGS += -municode
+endif
+
 include Makefile.inc
 
 # CURL_FILES comes from Makefile.inc
