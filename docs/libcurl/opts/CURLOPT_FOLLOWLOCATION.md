@@ -61,7 +61,7 @@ to change that behavior.
 
 Due to the way HTTP works, almost any header can be made to contain data a
 client may not want to pass on to other servers than the initially intended
-host and for all other headers than the few mentioned above, there is no
+host and for all other headers than the two mentioned above, there is no
 protection from this happening when libcurl is told to follow redirects.
 
 # NOTE
