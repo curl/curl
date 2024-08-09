@@ -1964,12 +1964,12 @@ if(NOT CURL_DISABLE_INSTALL)
     set(ENABLE_SHARED          "yes")
     set(LIBCURL_PC_REQUIRES    "")
     set(LIBCURL_PC_LIBS        "")
-    set(CPPFLAG_CURL_STATICLIB "")
+    set(LIBCURL_PC_CFLAGS      "")
   else()
     set(ENABLE_SHARED          "no")
     set(LIBCURL_PC_REQUIRES    "${LIBCURL_PC_REQUIRES_PRIVATE}")
     set(LIBCURL_PC_LIBS        "${LIBCURL_PC_LIBS_PRIVATE}")
-    set(CPPFLAG_CURL_STATICLIB "${LIBCURL_PC_CFLAGS_PRIVATE}")
+    set(LIBCURL_PC_CFLAGS      "${LIBCURL_PC_CFLAGS_PRIVATE}")
   endif()
   if(BUILD_STATIC_LIBS)
     set(ENABLE_STATIC "yes")
@@ -1987,7 +1987,6 @@ if(NOT CURL_DISABLE_INSTALL)
   # Consumed variables:
   #   CC
   #   CONFIGURE_OPTIONS
-  #   CPPFLAG_CURL_STATICLIB
   #   CURLVERSION
   #   CURL_CA_BUNDLE
   #   ENABLE_SHARED
@@ -1995,6 +1994,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   exec_prefix
   #   includedir
   #   LDFLAGS
+  #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_LIBS_PRIVATE
   #   libdir
   #   libext
@@ -2014,10 +2014,10 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Finally generate a pkg-config file matching this config
   # Consumed variables:
-  #   CPPFLAG_CURL_STATICLIB
   #   CURLVERSION
   #   exec_prefix
   #   includedir
+  #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_CFLAGS_PRIVATE
   #   LIBCURL_PC_LIBS
   #   LIBCURL_PC_LIBS_PRIVATE

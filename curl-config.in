@@ -31,7 +31,7 @@ prefix="@prefix@"
 exec_prefix=@exec_prefix@
 # shellcheck disable=SC2034
 includedir=@includedir@
-cppflag_curl_staticlib=@CPPFLAG_CURL_STATICLIB@
+cppflag_curl_staticlib=@LIBCURL_PC_CFLAGS@
 
 usage()
 {
@@ -143,14 +143,14 @@ while test "$#" -gt 0; do
 
   --cflags)
     if test "X$cppflag_curl_staticlib" = "X-DCURL_STATICLIB"; then
-      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB "
+      LIBCURL_PC_CFLAGS="-DCURL_STATICLIB "
     else
-      CPPFLAG_CURL_STATICLIB=""
+      LIBCURL_PC_CFLAGS=""
     fi
     if test "X@includedir@" = "X/usr/include"; then
-      echo "${CPPFLAG_CURL_STATICLIB}"
+      echo "${LIBCURL_PC_CFLAGS}"
     else
-      echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
+      echo "${LIBCURL_PC_CFLAGS}-I@includedir@"
     fi
     ;;
 
