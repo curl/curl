@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: location-trusted
-Help: As --location, but send auth to other hosts
+Help: As --location, but send secrets to other hosts
 Protocols: HTTP
 Category: http auth
 Added: 7.10.4
@@ -11,11 +11,16 @@ See-also:
   - user
 Example:
   - --location-trusted -u user:password $URL
+  - --location-trusted -H "Cookie: session=abc" $URL
 ---
 
 # `--location-trusted`
 
-Like --location, but allows sending the name + password to all hosts that the
-site may redirect to. This may or may not introduce a security breach if the
-site redirects you to a site to which you send your authentication info (which
-is clear-text in the case of HTTP Basic authentication).
+Instructs curl to like --location follow HTTP redirects, but permits it to
+send credentials and other secrets along to other hosts than the initial one.
+
+This may or may not introduce a security breach if the site redirects you to a
+site to which you send this sensitive data to. Another host means that one or
+more of hostname, protocol scheme or port number changed.
+
+This option also allows curl to pass long cookies set explicitly with --header.
