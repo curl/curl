@@ -807,8 +807,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   struct Curl_llist_element *e;
   CURLMcode rc;
 
-  DEBUGF(infof(data, "curl_multi_remove_handle(xfer=%" CURL_FORMAT_CURL_OFF_T
-               ")", data->id));
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
