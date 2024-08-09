@@ -2523,29 +2523,31 @@ AC_SUBST([CURL_LT_SHLIB_VERSIONED_FLAVOUR],
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "x$versioned_symbols" = 'xyes'])
 
-dnl --------------------
-dnl check Unicode option
-dnl --------------------
+dnl ----------------------------
+dnl check Windows Unicode option
+dnl ----------------------------
 
-AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
-OPT_WINUNI="default"
-AC_ARG_WITH(windows-unicode,
-AS_HELP_STRING([--with-windows-unicode],[enable Windows Unicode])
-AS_HELP_STRING([--without-windows-unicode], [disable Windows Unicode (default)]),
-  OPT_WINUNI=$withval)
-case "$OPT_WINUNI" in
-  yes)
-    CPPFLAGS="${CPPFLAGS} -Dmain=wmain"
-    CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
-    LDFLAGS="${LDFLAGS} -municode"
-    want_winuni="yes"
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    want_winuni="no"
-    AC_MSG_RESULT([no])
-    ;;
-esac
+if test "$curl_cv_native_windows" = "yes"; then
+  AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
+  OPT_WINUNI="default"
+  AC_ARG_WITH(windows-unicode,
+  AS_HELP_STRING([--with-windows-unicode],[enable Windows Unicode])
+  AS_HELP_STRING([--without-windows-unicode], [disable Windows Unicode (default)]),
+    OPT_WINUNI=$withval)
+  case "$OPT_WINUNI" in
+    yes)
+      CPPFLAGS="${CPPFLAGS} -Dmain=wmain"
+      CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
+      LDFLAGS="${LDFLAGS} -municode"
+      want_winuni="yes"
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      want_winuni="no"
+      AC_MSG_RESULT([no])
+      ;;
+  esac
+fi
 
 dnl -------------------------------------------------
 dnl check winidn option before other IDN libraries
