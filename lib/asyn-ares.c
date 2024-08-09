@@ -329,8 +329,15 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
   int i;
   int num = 0;
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4996)
+#endif
   bitmask = ares_getsock((ares_channel)data->state.async.resolver, socks,
                          ARES_GETSOCK_MAXNUM);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
   for(i = 0; i < ARES_GETSOCK_MAXNUM; i++) {
     pfd[i].events = 0;
