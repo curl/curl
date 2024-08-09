@@ -13,47 +13,47 @@ gitfiles="$(mktemp)"
 
 taronly="/
 ^
-Makefile\.in
+Makefile.in
 ^aclocal.m4
 ^compile
 ^configure
-^config\..+
+^config.*
 ^depcomp
 ^install-sh
-^ltmain\.sh
+^ltmain.sh
 ^missing
-^docs/libcurl/libcurl-symbols\.md
-^docs/RELEASE-TOOLS\.md
-^docs/tarball-commit\.txt
-^lib/curl_config\.h\.in
-^m4/libtool\.m4
-^m4/lt.+\.m4
-^src/(tool_ca_embed|tool_hugehelp)\.c"
+^docs/libcurl/libcurl-symbols.md
+^docs/RELEASE-TOOLS.md
+^docs/tarball-commit.txt
+^lib/curl_config.h.in
+^m4/libtool.m4
+^m4/lt*.m4
+^src/(tool_ca_embed|tool_hugehelp).c"
 
-gitonly="\.git.+
-^\..+
-^appveyor\..+
+gitonly=".git*
+^.*
+^appveyor.*
 ^buildconf
-^renovate\.json
-^REUSE\.toml
-^(GIT-INFO|README|SECURITY)\.md
-^LICENSES/.+
-^docs/examples/adddocsref\.pl
+^renovate.json
+^REUSE.toml
+^(GIT-INFO|README|SECURITY).md
+^LICENSES/*
+^docs/examples/adddocsref.pl
 ^docs/THANKS-filter
-^projects/Windows/.+
-^scripts/(ciconfig|cijobs|release-notes|singleuse)\.pl
-^scripts/(contributors|contrithanks|installcheck)\.sh
+^projects/Windows/*
+^scripts/(ciconfig|cijobs|release-notes|singleuse).pl
+^scripts/(contributors|contrithanks|installcheck).sh
 ^scripts/delta
-^src/tool_hugehelp\.c\.cvs
-^tests/CI\.md"
+^src/tool_hugehelp.c.cvs
+^tests/CI.md"
 
 tar -tf "$1" \
   | sed -E 's|^[^/]+/||g' \
-  | grep -v -E "($(printf '%s' "${taronly}" | tr $'\n' '|'))$" \
+  | grep -v -E "($(printf '%s' "${taronly}" | tr $'\n' '|' | sed -e 's|\.|\\.|g' -e 's|\*|.+|g'))$" \
   | sort > "${tarfiles}"
 
 git ls-files \
-  | grep -v -E "($(printf '%s' "${gitonly}" | tr $'\n' '|'))$" \
+  | grep -v -E "($(printf '%s' "${gitonly}" | tr $'\n' '|' | sed -e 's|\.|\\.|g' -e 's|\*|.+|g'))$" \
   | sort > "${gitfiles}"
 
 diff -u "${tarfiles}" "${gitfiles}"
