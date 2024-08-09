@@ -1398,7 +1398,7 @@ typedef enum {
      operation. Set filename to "-" (dash) to make it go to stdout. */
   CURLOPT(CURLOPT_COOKIEJAR, CURLOPTTYPE_STRINGPOINT, 82),
 
-  /* Specify which SSL ciphers to use */
+  /* Specify which TLS 1.2 (1.1, 1.0) ciphers to use */
   CURLOPT(CURLOPT_SSL_CIPHER_LIST, CURLOPTTYPE_STRINGPOINT, 83),
 
   /* Specify which HTTP version to use! This must be set to one of the
@@ -2022,7 +2022,7 @@ typedef enum {
   /* password for the SSL private key for proxy */
   CURLOPT(CURLOPT_PROXY_KEYPASSWD, CURLOPTTYPE_STRINGPOINT, 258),
 
-  /* Specify which SSL ciphers to use for proxy */
+  /* Specify which TLS 1.2 (1.1, 1.0) ciphers to use for proxy */
   CURLOPT(CURLOPT_PROXY_SSL_CIPHER_LIST, CURLOPTTYPE_STRINGPOINT, 259),
 
   /* CRL file for proxy */
