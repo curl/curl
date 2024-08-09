@@ -91,6 +91,8 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+  gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
+  struct gss_channel_bindings_struct chan;
 
   (void) user;
   (void) password;
@@ -148,13 +150,21 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     input_token.length = chlglen;
   }
 
+  /* Set channel binding data if available */
+  if(nego->channel_binding_data.leng > 0) {
+    memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
+    chan.application_data.length = nego->channel_binding_data.leng;
+    chan.application_data.value = nego->channel_binding_data.bufr;
+    chan_bindings = &chan;
+  }
+
   /* Generate our challenge-response message */
   major_status = Curl_gss_init_sec_context(data,
                                            &minor_status,
                                            &nego->context,
                                            nego->spn,
                                            &Curl_spnego_mech_oid,
-                                           GSS_C_NO_CHANNEL_BINDINGS,
+                                           chan_bindings,
                                            &input_token,
                                            &output_token,
                                            TRUE,

@@ -183,6 +183,25 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(struct Curl_easy *data);
 
+/* The maximum size of the SSL channel binding is 85 bytes, as defined in
+ * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
+ * and SHA-512 is the longest supported hash algorithm, with a digest length of
+ * 64 bytes.
+ * The maximum size of the channel binding is therefore 21 + 64 = 85 bytes.
+ */
+#define SSL_CB_MAX_SIZE 85
+
+/* Return the tls-server-end-point channel binding, including the
+ * 'tls-server-end-point:' prefix.
+ * If successful, the data is written to the dynbuf, and CURLE_OK is returned.
+ * The dynbuf MUST HAVE a minimum toobig size of SSL_CB_MAX_SIZE.
+ * If the dynbuf is too small, CURLE_OUT_OF_MEMORY is returned.
+ * If channel binding is not supported, binding stays empty and CURLE_OK is
+ * returned.
+ */
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                       struct dynbuf *binding);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,

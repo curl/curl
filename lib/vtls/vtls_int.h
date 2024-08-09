@@ -158,6 +158,9 @@ struct Curl_ssl {
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *mem, size_t len, CURLcode *code);
 
+  CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
+                                  struct dynbuf *binding);
+
 };
 
 extern const struct Curl_ssl *Curl_ssl;

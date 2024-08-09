@@ -873,6 +873,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   NULL,                            /* disassociate_connection */
   cr_recv,                         /* recv decrypted data */
   cr_send,                         /* send data to encrypt */
+  NULL,                            /* get_channel_binding */
 };
 
 #endif /* USE_RUSTLS */
