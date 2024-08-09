@@ -1134,7 +1134,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
 {
   struct websocket *ws;
   ssize_t n;
-  size_t space, sblen_before, payload_added;
+  size_t space, payload_added;
   CURLcode result;
 
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" CURL_FORMAT_CURL_OFF_T
@@ -1174,7 +1174,6 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   }
 
   /* Not RAW mode, buf we do the frame encoding */
-  sblen_before = Curl_bufq_len(&ws->sendbuf);
   space = Curl_bufq_space(&ws->sendbuf);
   CURL_TRC_WS(data, "curl_ws_send(len=%zu), sendbuf=%zu space_left=%zu",
               buflen, Curl_bufq_len(&ws->sendbuf), space);
