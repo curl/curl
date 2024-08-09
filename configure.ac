@@ -2529,7 +2529,7 @@ dnl ----------------------------
 
 want_winuni="no"
 if test "$curl_cv_native_windows" = "yes"; then
-  AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
+  AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
   OPT_WINUNI="default"
   AC_ARG_WITH(windows-unicode,
   AS_HELP_STRING([--with-windows-unicode],[enable Windows Unicode])
