@@ -145,10 +145,14 @@ jobs:
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - name: 'detect files missing from release tarball'
+      - name: 'build'
         run: |
           autoreconf -fi
           ./configure --without-ssl --without-libpsl
           make -j5
-          ./maketgz 9.10.11
-          .github/scripts/distfiles.sh curl-9.10.11.tar.gz
+
+      - name: 'maketgz'
+        run: ./maketgz 9.10.11
+
+      - name: 'detect files missing from release tarball'
+        run: .github/scripts/distfiles.sh curl-9.10.11.tar.gz
