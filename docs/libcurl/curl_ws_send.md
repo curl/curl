@@ -53,6 +53,16 @@ If **CURLWS_RAW_MODE** is enabled in CURLOPT_WS_OPTIONS(3), the
 To send a message consisting of multiple frames, set the *CURLWS_CONT* bit
 in all frames except the final one.
 
+The call returns **CURLE_AGAIN** if it is not possible to send data right now
+- the socket is used in non-blocking mode internally. When **CURLE_AGAIN**
+is returned, use your operating system facilities like *select(2)* to wait
+until the socket is writable. The socket may be obtained using
+curl_easy_getinfo(3) with CURLINFO_ACTIVESOCKET(3).
+
+Furthermore if you wait on the socket and it tells you it is writable,
+curl_ws_send(3) may return **CURLE_AGAIN** if the only data that was sent
+was for internal SSL processing, and no other data could be sent.
+
 # FLAGS
 
 ## CURLWS_TEXT
@@ -121,3 +131,6 @@ int main(void)
 *CURLE_OK* (zero) means that the data was sent properly, non-zero means an
 error occurred as *\<curl/curl.h\>* defines. See the libcurl-errors(3) man
 page for the full list with descriptions.
+
+This function may return **CURLE_AGAIN**. In this case, use your operating
+system facilities to wait until the socket is writable, and retry.
