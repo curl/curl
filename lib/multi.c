@@ -859,7 +859,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   Curl_expire_clear(data);
 
   if(data->multi_queue.ptr) {
-    /* the handle is in a lists, remove it from the right one */
+    /* the handle is in a list, remove it from the right one */
     if(data->mstate == MSTATE_PENDING)
       Curl_llist_remove(&multi->pending, &data->multi_queue, NULL);
     else if(data->mstate == MSTATE_MSGSENT)
