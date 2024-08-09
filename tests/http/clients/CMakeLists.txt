@@ -28,7 +28,7 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_test_name IN LISTS check_PROGRAMS)
   set(_test_target "curl-test-client-${_test_name}")
-  add_executable(${_test_target} "${_test_name}.c")
+  add_executable(${_test_target} EXCLUDE_FROM_ALL "${_test_name}.c")
   add_dependencies(testdeps ${_test_target})
   target_include_directories(${_test_target} PRIVATE
     "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
