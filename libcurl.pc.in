@@ -35,7 +35,7 @@ Description: Library to transfer files with ftp, http, etc.
 Version: @CURLVERSION@
 Requires: @LIBCURL_PC_REQUIRES@
 Requires.private: @LIBCURL_PC_REQUIRES_PRIVATE@
-Libs: -L${libdir} -lcurl @LIBCURL_NO_SHARED@
-Libs.private: @LIBCURL_LIBS@
-Cflags: -I${includedir} @CPPFLAG_CURL_STATICLIB@
+Libs: -L${libdir} -lcurl @LIBCURL_PC_LIBS@
+Libs.private: @LIBCURL_PC_LIBS_PRIVATE@
+Cflags: -I${includedir} @LIBCURL_PC_CFLAGS@
 Cflags.private: @LIBCURL_PC_CFLAGS_PRIVATE@

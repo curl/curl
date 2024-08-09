@@ -73,7 +73,7 @@ CFLAGS += @CURL_CFLAG_EXTRAS@
 LIBS = $(BLANK_AT_MAKETIME)
 
 if USE_EXPLICIT_LIB_DEPS
-curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
+curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 else
 curl_LDADD = $(top_builddir)/lib/libcurl.la @SSL_LIBS@ @ZLIB_LIBS@ @CURL_NETWORK_AND_TIME_LIBS@
 endif

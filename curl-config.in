@@ -31,7 +31,7 @@ prefix="@prefix@"
 exec_prefix=@exec_prefix@
 # shellcheck disable=SC2034
 includedir=@includedir@
-cppflag_curl_staticlib=@CPPFLAG_CURL_STATICLIB@
+cppflag_curl_staticlib=@LIBCURL_PC_CFLAGS@
 
 usage()
 {
@@ -161,7 +161,7 @@ while test "$#" -gt 0; do
       CURLLIBDIR=""
     fi
     if test "X@ENABLE_SHARED@" = "Xno"; then
-      echo "${CURLLIBDIR}-lcurl @LIBCURL_LIBS@"
+      echo "${CURLLIBDIR}-lcurl @LIBCURL_PC_LIBS_PRIVATE@"
     else
       echo "${CURLLIBDIR}-lcurl"
     fi
@@ -173,7 +173,7 @@ while test "$#" -gt 0; do
 
   --static-libs)
     if test "X@ENABLE_STATIC@" != "Xno" ; then
-      echo "@libdir@/libcurl.@libext@" @LDFLAGS@ @LIBCURL_LIBS@
+      echo "@libdir@/libcurl.@libext@" @LDFLAGS@ @LIBCURL_PC_LIBS_PRIVATE@
     else
       echo 'curl was built with static libraries disabled' >&2
       exit 1

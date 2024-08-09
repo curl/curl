@@ -49,8 +49,8 @@ CLEANFILES = lib1521.c
 LIBS = $(BLANK_AT_MAKETIME)
 
 if USE_EXPLICIT_LIB_DEPS
-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_LIBS@
+SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 else
 SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_LIBS@
 TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_AND_TIME_LIBS@

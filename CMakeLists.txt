@@ -1866,7 +1866,7 @@ if(NOT CURL_DISABLE_INSTALL)
   set(exec_prefix             "\${prefix}")
   set(includedir              "\${prefix}/include")
   set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
-  set(LIBCURL_LIBS            "")
+  set(LIBCURL_PC_LIBS_PRIVATE "")
   set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
 
   # For processing full path libraries into -L and -l ld options,
@@ -1908,7 +1908,7 @@ if(NOT CURL_DISABLE_INSTALL)
       endif()
     endif()
     if(_lib MATCHES "^-")
-      set(LIBCURL_LIBS "${LIBCURL_LIBS} ${_lib}")
+      set(LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE} ${_lib}")
     elseif(_lib MATCHES ".*/.*")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
@@ -1918,15 +1918,15 @@ if(NOT CURL_DISABLE_INSTALL)
         list(FIND _libcurl_libs_dirs "${_libdir}" _libdir_index)
         if(_libdir_index LESS 0)
           list(APPEND _libcurl_libs_dirs "${_libdir}")
-          set(LIBCURL_LIBS "${LIBCURL_LIBS} -L${_libdir}")
+          set(LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE} -L${_libdir}")
         endif()
         string(REGEX REPLACE "^lib" "" _libname "${_libname}")
-        set(LIBCURL_LIBS "${LIBCURL_LIBS} -l${_libname}")
+        set(LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE} -l${_libname}")
       else()
-        set(LIBCURL_LIBS "${LIBCURL_LIBS} ${_lib}")
+        set(LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE} ${_lib}")
       endif()
     else()
-      set(LIBCURL_LIBS "${LIBCURL_LIBS} -l${_lib}")
+      set(LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE} -l${_lib}")
     endif()
   endforeach()
 
@@ -1940,13 +1940,13 @@ if(NOT CURL_DISABLE_INSTALL)
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED          "yes")
     set(LIBCURL_PC_REQUIRES    "")
-    set(LIBCURL_NO_SHARED      "")
-    set(CPPFLAG_CURL_STATICLIB "")
+    set(LIBCURL_PC_LIBS        "")
+    set(LIBCURL_PC_CFLAGS      "")
   else()
     set(ENABLE_SHARED          "no")
     set(LIBCURL_PC_REQUIRES    "${LIBCURL_PC_REQUIRES_PRIVATE}")
-    set(LIBCURL_NO_SHARED      "${LIBCURL_LIBS}")
-    set(CPPFLAG_CURL_STATICLIB "${LIBCURL_PC_CFLAGS_PRIVATE}")
+    set(LIBCURL_PC_LIBS        "${LIBCURL_PC_LIBS_PRIVATE}")
+    set(LIBCURL_PC_CFLAGS      "${LIBCURL_PC_CFLAGS_PRIVATE}")
   endif()
   if(BUILD_STATIC_LIBS)
     set(ENABLE_STATIC "yes")
@@ -1964,7 +1964,6 @@ if(NOT CURL_DISABLE_INSTALL)
   # Consumed variables:
   #   CC
   #   CONFIGURE_OPTIONS
-  #   CPPFLAG_CURL_STATICLIB
   #   CURLVERSION
   #   CURL_CA_BUNDLE
   #   ENABLE_SHARED
@@ -1972,7 +1971,8 @@ if(NOT CURL_DISABLE_INSTALL)
   #   exec_prefix
   #   includedir
   #   LDFLAGS
-  #   LIBCURL_LIBS
+  #   LIBCURL_PC_CFLAGS
+  #   LIBCURL_PC_LIBS_PRIVATE
   #   libdir
   #   libext
   #   prefix
@@ -1991,13 +1991,13 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Finally generate a pkg-config file matching this config
   # Consumed variables:
-  #   CPPFLAG_CURL_STATICLIB
   #   CURLVERSION
   #   exec_prefix
   #   includedir
-  #   LIBCURL_LIBS
-  #   LIBCURL_NO_SHARED
+  #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_CFLAGS_PRIVATE
+  #   LIBCURL_PC_LIBS
+  #   LIBCURL_PC_LIBS_PRIVATE
   #   LIBCURL_PC_REQUIRES
   #   LIBCURL_PC_REQUIRES_PRIVATE
   #   libdir
