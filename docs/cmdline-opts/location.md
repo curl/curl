@@ -22,9 +22,10 @@ location (indicated with a Location: header and a 3XX response code), this
 option makes curl redo the request on the new place. If used together with
 --show-headers or --head, headers from all requested pages are shown.
 
-When authentication is used, curl only sends its credentials to the initial
-host. If a redirect takes curl to a different host, it does not get the
-user+password pass on. See also --location-trusted on how to change this.
+When authentication is used, or send cookie with `-H Cookie:`, curl only sends
+its credentials to the initial host. If a redirect takes curl to a different
+host, it does not get the credentials pass on. See also--location-trusted on
+how to change this.
 
 Limit the amount of redirects to follow by using the --max-redirs option.
 

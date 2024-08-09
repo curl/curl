@@ -357,7 +357,7 @@ const struct helptxt helptext[] = {
    "Follow redirects",
    CURLHELP_HTTP},
   {"    --location-trusted",
-   "As --location, but send auth to other hosts",
+   "As --location, but send secrets to other hosts",
    CURLHELP_HTTP | CURLHELP_AUTH},
   {"    --login-options <options>",
    "Server login options",
