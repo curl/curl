@@ -8,13 +8,6 @@
 
 set -eu
 
-tarfiles="$(mktemp)"
-gitfiles="$(mktemp)"
-
-taronly="/
-^
-Makefile.in"
-
 gitonly=".git*
 ^.*
 ^appveyor.*
@@ -39,9 +32,12 @@ gitonly=".git*
 ^src/tool_hugehelp.c.cvs
 ^tests/CI.md"
 
+tarfiles="$(mktemp)"
+gitfiles="$(mktemp)"
+
 tar -tf "$1" \
   | sed -E 's|^[^/]+/||g' \
-  | grep -v -E "($(printf '%s' "${taronly}" | tr $'\n' '|' | sed -e 's|\.|\\.|g' -e 's|\*|.+|g'))$" \
+  | grep -v -E '(/|^)$' \
   | sort > "${tarfiles}"
 
 git ls-files \
