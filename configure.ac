@@ -2537,7 +2537,6 @@ if test "$curl_cv_native_windows" = "yes"; then
     OPT_WINUNI=$withval)
   case "$OPT_WINUNI" in
     yes)
-      CPPFLAGS="${CPPFLAGS} -Dmain=wmain"
       CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
       want_winuni="yes"
       AC_MSG_RESULT([yes])
@@ -4827,10 +4826,6 @@ BLANK_AT_MAKETIME=
 AC_SUBST(BLANK_AT_MAKETIME)
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
-
-if test "x$want_winuni" = "xyes"; then
-  CPPFLAGS=`echo "$CPPFLAGS" | $SED 's/ -Dmain=wmain//g'`
-fi
 
 dnl yes or no
 ENABLE_SHARED="$enable_shared"
