@@ -2527,6 +2527,7 @@ dnl ----------------------------
 dnl check Windows Unicode option
 dnl ----------------------------
 
+want_winuni="no"
 if test "$curl_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
   OPT_WINUNI="default"
@@ -2543,7 +2544,6 @@ if test "$curl_cv_native_windows" = "yes"; then
       AC_MSG_RESULT([yes])
       ;;
     *)
-      want_winuni="no"
       AC_MSG_RESULT([no])
       ;;
   esac
@@ -5015,6 +5015,9 @@ else
   ])
 fi
 
+if test "x$want_winuni" = "xyes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES Unicode"
+fi
 if test "x$want_debug" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES Debug"
 fi
