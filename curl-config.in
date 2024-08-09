@@ -143,14 +143,14 @@ while test "$#" -gt 0; do
 
   --cflags)
     if test "X$cppflag_curl_staticlib" = "X-DCURL_STATICLIB"; then
-      LIBCURL_PC_CFLAGS="-DCURL_STATICLIB "
+      CPPFLAG_CURL_STATICLIB="-DCURL_STATICLIB "
     else
-      LIBCURL_PC_CFLAGS=""
+      CPPFLAG_CURL_STATICLIB=""
     fi
     if test "X@includedir@" = "X/usr/include"; then
-      echo "${LIBCURL_PC_CFLAGS}"
+      echo "${CPPFLAG_CURL_STATICLIB}"
     else
-      echo "${LIBCURL_PC_CFLAGS}-I@includedir@"
+      echo "${CPPFLAG_CURL_STATICLIB}-I@includedir@"
     fi
     ;;
 
