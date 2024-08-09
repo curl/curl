@@ -85,6 +85,12 @@ endif()
 message(STATUS "CMake platform flags:${_flags}")
 set(_flags)
 
+foreach(_env IN ITEMS PKG_CONFIG_PATH PKG_CONFIG_LIBDIR PKG_CONFIG_SYSROOT_DIR)
+  if(DEFINED ENV{${_env}})
+    message(STATUS "pkg-config ${_env}: '$ENV{${_env}}'")
+  endif()
+endforeach()
+
 function(curl_dumpvars)  # Dump all defined variables with their values
   get_cmake_property(_vars VARIABLES)
   foreach(_var ${_vars})
