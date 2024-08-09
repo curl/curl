@@ -4827,6 +4827,10 @@ AC_SUBST(BLANK_AT_MAKETIME)
 
 AM_CONDITIONAL(CROSSCOMPILING, test x$cross_compiling = xyes)
 
+if test "x$want_winuni" = "xyes"; then
+  CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/ -Dmain=wmain//'`
+fi
+
 dnl yes or no
 ENABLE_SHARED="$enable_shared"
 AC_SUBST(ENABLE_SHARED)
