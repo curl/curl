@@ -1708,7 +1708,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     connssl->handshake_done = Curl_now();
-    DEBUGASSERT(connssl->state == ssl_connection_complete);
+    /* Connection can be deferred when sending early data */
+    DEBUGASSERT(connssl->state == ssl_connection_complete ||
+                connssl->state == ssl_connection_deferred);
   }
 out:
   CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);

@@ -50,7 +50,6 @@ struct ossl_ctx {
   bool keylog_done;
 #endif
   BIT(x509_store_setup);            /* x509 store has been set up */
-  BIT(reused_session);              /* session-ID was reused for this */
 };
 
 typedef CURLcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,

@@ -656,6 +656,48 @@ wssl_get_default_ciphers(bool tls13, char *buf, size_t size)
 }
 #endif
 
+static void wolfssl_session_free(void *sessionid, size_t idsize);
+
+static CURLcode Curl_wolfssl_add_session(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         const struct ssl_peer *peer,
+                                         WOLFSSL_SESSION *session)
+{
+  const struct ssl_config_data *config;
+  CURLcode result = CURLE_OK;
+
+  if(!cf || !data)
+    goto out;
+
+  config = Curl_ssl_cf_get_config(cf, data);
+  if(config->primary.cache_session) {
+
+    Curl_ssl_sessionid_lock(data);
+    result = Curl_ssl_set_sessionid(cf, data, peer, session, 0,
+                                    wolfssl_session_free);
+    session = NULL; /* call has taken ownership */
+    Curl_ssl_sessionid_unlock(data);
+  }
+
+out:
+  if(session)
+    wolfssl_session_free(session, 0);
+  return result;
+}
+
+static int wolfssl_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *ssl_sessionid)
+{
+  struct Curl_cfilter *cf;
+  struct Curl_easy *data;
+  struct ssl_connect_data *connssl;
+
+  cf = (struct Curl_cfilter*) wolfSSL_get_app_data(ssl);
+  DEBUGASSERT(cf != NULL);
+  connssl = cf? cf->ctx : NULL;
+  data = connssl? CF_DATA_CURRENT(cf) : NULL;
+  Curl_wolfssl_add_session(cf, data, &connssl->peer, ssl_sessionid);
+  return 1;
+}
 /*
  * This function loads all the client/CA certificates and CRLs. Setup the TLS
  * layer and do all necessary magic.
@@ -999,6 +1041,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "SSL: could not create a handle");
     return CURLE_OUT_OF_MEMORY;
   }
+  wolfSSL_set_app_data(backend->handle, cf);
 
 #ifdef WOLFSSL_HAVE_KYBER
   if(pqkem) {
@@ -1043,7 +1086,10 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
+  wolfSSL_CTX_sess_set_new_cb(backend->ctx, wolfssl_new_session_cb);
+
   /* Check if there is a cached ID we can/should use here! */
+  connssl->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
     void *ssl_sessionid = NULL;
 
@@ -1055,8 +1101,10 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
         Curl_ssl_delsessionid(data, ssl_sessionid);
         infof(data, "cannot use session ID, going on without");
       }
-      else
+      else {
         infof(data, "SSL reusing session ID");
+        connssl->reused_session = TRUE;
+      }
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -1427,36 +1475,43 @@ wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
-  struct wolfssl_ctx *backend =
-    (struct wolfssl_ctx *)connssl->backend;
-  const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+
+  (void)data;
 
   DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
-  DEBUGASSERT(backend);
-
-  if(ssl_config->primary.cache_session) {
-    /* wolfSSL_get1_session allocates memory that has to be freed. */
-    WOLFSSL_SESSION *our_ssl_sessionid = wolfSSL_get1_session(backend->handle);
-
-    if(our_ssl_sessionid) {
-      Curl_ssl_sessionid_lock(data);
-      /* call takes ownership of `our_ssl_sessionid` */
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
-                                      our_ssl_sessionid, 0,
-                                      wolfssl_session_free);
-      Curl_ssl_sessionid_unlock(data);
-      if(result) {
-        failf(data, "failed to store ssl session");
-        return result;
-      }
-    }
-  }
 
   connssl->connecting_state = ssl_connect_done;
 
   return result;
 }
 
+
+static CURLcode wolfssl_connect(struct Curl_cfilter *cf,
+                                struct Curl_easy *data);
+
+#ifdef WOLFSSL_EARLY_DATA
+static const char *wolfssl_get_early_data_status(const WOLFSSL *ssl)
+{
+  switch(wolfSSL_get_early_data_status(ssl)) {
+  case WOLFSSL_EARLY_DATA_NOT_SENT:
+    return "Not sent";
+  case WOLFSSL_EARLY_DATA_REJECTED:
+    return "Rejected";
+  case WOLFSSL_EARLY_DATA_ACCEPTED:
+    return "Accepted";
+  default:
+    return "Unknown";
+  }
+}
+#endif
+
+typedef int wolfssl_writer_func(WOLFSSL *, const void *, int, int *);
+
+static int wolfSSL_write_ex(WOLFSSL * ssl, const void *mem,
+                            int len, int *written) {
+  *written = wolfSSL_write(ssl, mem, (int)len);
+  return (int)*written;
+}
 
 static ssize_t wolfssl_send(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
@@ -1466,15 +1521,42 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct wolfssl_ctx *backend =
-    (struct wolfssl_ctx *)connssl->backend;
+      (struct wolfssl_ctx *)connssl->backend;
   int memlen = (len > (size_t)INT_MAX) ? INT_MAX : (int)len;
   int rc;
+  int written;
+  bool write_early_data =
+      ssl_connection_deferred == connssl->state;
+  wolfssl_writer_func *wolfssl_writer =
+#ifdef WOLFSSL_EARLY_DATA
+      write_early_data ? wolfSSL_write_early_data :
+#endif
+                       wolfSSL_write_ex;
+  const char *ssl_writer_str =
+      write_early_data ? "wolfSSL_write_early_data" : "wolfSSL_write_ex";
+
+  connssl->connecting_state = ssl_connect_1_esending;
+
+#ifdef WOLFSSL_EARLY_DATA
+  if(write_early_data &&
+      (int)wolfSSL_SESSION_get_max_early_data(
+          wolfSSL_get_session(backend->handle))
+          < memlen) {
+    connssl->connecting_state = ssl_connect_2;
+    *curlcode = wolfssl_connect(cf, data);
+    if(*curlcode) {
+      return -1;
+    }
+    wolfssl_writer = wolfSSL_write_ex;
+    write_early_data = FALSE;
+  }
+#endif
 
   DEBUGASSERT(backend);
 
   wolfSSL_ERR_clear_error();
 
-  rc = wolfSSL_write(backend->handle, mem, memlen);
+  rc = wolfssl_writer(backend->handle, mem, memlen, &written);
   if(rc <= 0) {
     int err = wolfSSL_get_error(backend->handle, rc);
 
@@ -1494,7 +1576,7 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d", len, rc, err);
       {
         char error_buffer[256];
-        failf(data, "SSL write: %s, errno %d",
+        failf(data, "%s: %s, errno %d", ssl_writer_str,
               wolfssl_strerror((unsigned long)err, error_buffer,
                                sizeof(error_buffer)),
               SOCKERRNO);
@@ -1503,8 +1585,29 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       return -1;
     }
   }
+
+#ifdef WOLFSSL_EARLY_DATA
+  if(write_early_data) {
+    /* The handshake was deferred until now to send early data */
+    connssl->connecting_state = ssl_connect_2;
+    *curlcode = wolfssl_connect(cf, data);
+    DEBUGASSERT(connssl->state == ssl_connection_complete);
+
+    infof(data, "Early data status: %s",
+          wolfssl_get_early_data_status(backend->handle));
+
+    if(!*curlcode &&
+        wolfSSL_get_early_data_status(backend->handle)
+            == WOLFSSL_EARLY_DATA_REJECTED) {
+      *curlcode = CURLE_AGAIN;
+      return -1;
+    }
+  }
+#endif
+
   CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d", len, rc);
-  return rc;
+
+  return (ssize_t)written;
 }
 
 static CURLcode wolfssl_shutdown(struct Curl_cfilter *cf,
@@ -1644,6 +1747,8 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
   int nread;
 
   DEBUGASSERT(backend);
+  /* Cannot call receive without first sending Client Hello */
+  DEBUGASSERT(connssl->connecting_state != ssl_connect_1_epending);
 
   wolfSSL_ERR_clear_error();
   *curlcode = CURLE_OK;
@@ -1746,6 +1851,9 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
   struct ssl_connect_data *connssl = cf->ctx;
   curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
   int what;
+#ifdef WOLFSSL_EARLY_DATA
+  struct wolfssl_ctx *backend = connssl->backend;
+#endif
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
@@ -1766,6 +1874,21 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
     result = wolfssl_connect_step1(cf, data);
     if(result)
       return result;
+
+#ifdef WOLFSSL_EARLY_DATA
+    if(data->set.ssl.earlydata &&
+        wolfSSL_version(backend->handle) == TLS1_3_VERSION &&
+        connssl->reused_session &&
+        wolfSSL_SESSION_get_max_early_data(wolfSSL_get_session(
+            backend->handle))) {
+      /* we want to send early data, finish the connection in ossl_send */
+      infof(data, "Sending early data");
+      *done = TRUE;
+      connssl->state = ssl_connection_deferred;
+      connssl->connecting_state = ssl_connect_1_epending;
+      return result;
+    }
+#endif
   }
 
   while(ssl_connect_2 == connssl->connecting_state) {

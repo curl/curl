@@ -86,6 +86,16 @@ certificate that supports client authentication in the OS certificate store it
 could be a privacy violation and unexpected.
 (Added in 7.77.0)
 
+## CURLSSLOPT_EARLYDATA
+
+Tell libcurl to try sending application data as TLS1.3 early data. This option
+is only supported for OpenSSL, WolfSSL, MbedTLS and GnuTLS. This option works
+on a best effort basis, in cases when it wasn't possible to send early
+data the request is resent normally post-handshake.
+This option does not work when using QUIC or HTTP/2, it only works when using
+HTTP/1.1 without a proxy, otherwise its a no-op.
+(Added in 8.10.0)
+
 # DEFAULT
 
 0
