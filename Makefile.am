@@ -92,8 +92,6 @@ DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
 
-### USE SIMPLE LIST ASSIGMENTS ABOVE THIS LINE ### DO NOT DELETE
-
 # List of files required to generate VC IDE .dsp, .vcproj and .vcxproj files
 include lib/Makefile.inc
 include src/Makefile.inc
