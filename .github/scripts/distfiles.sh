@@ -40,7 +40,7 @@ tar -tf "$1" \
   | grep -v -E '(/|^)$' \
   | sort > "${tarfiles}"
 
-git ls-files \
+git -C "${2:-.}" ls-files \
   | grep -v -E "($(printf '%s' "${gitonly}" | tr $'\n' '|' | sed -e 's|\.|\\.|g' -e 's|\*|.+|g'))$" \
   | sort > "${gitfiles}"
 
