@@ -35,10 +35,10 @@ gitonly=".git*
 ^.*
 ^appveyor.*
 ^buildconf
-^renovate.json
-^REUSE.toml
 ^GIT-INFO.md
 ^README.md
+^renovate.json
+^REUSE.toml
 ^SECURITY.md
 ^LICENSES/*
 ^docs/examples/adddocsref.pl
@@ -46,12 +46,12 @@ gitonly=".git*
 ^projects/Windows/*
 ^scripts/ciconfig.pl
 ^scripts/cijobs.pl
-^scripts/release-notes.pl
-^scripts/singleuse.pl
 ^scripts/contributors.sh
 ^scripts/contrithanks.sh
-^scripts/installcheck.sh
 ^scripts/delta
+^scripts/installcheck.sh
+^scripts/release-notes.pl
+^scripts/singleuse.pl
 ^src/tool_hugehelp.c.cvs
 ^tests/CI.md"
 
