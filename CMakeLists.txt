@@ -1963,12 +1963,12 @@ if(NOT CURL_DISABLE_INSTALL)
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED          "yes")
     set(LIBCURL_PC_REQUIRES    "")
-    set(LIBCURL_NO_SHARED      "")
+    set(LIBCURL_PC_LIBS        "")
     set(CPPFLAG_CURL_STATICLIB "")
   else()
     set(ENABLE_SHARED          "no")
     set(LIBCURL_PC_REQUIRES    "${LIBCURL_PC_REQUIRES_PRIVATE}")
-    set(LIBCURL_NO_SHARED      "${LIBCURL_LIBS}")
+    set(LIBCURL_PC_LIBS        "${LIBCURL_LIBS}")
     set(CPPFLAG_CURL_STATICLIB "${LIBCURL_PC_CFLAGS_PRIVATE}")
   endif()
   if(BUILD_STATIC_LIBS)
@@ -2019,8 +2019,8 @@ if(NOT CURL_DISABLE_INSTALL)
   #   exec_prefix
   #   includedir
   #   LIBCURL_LIBS
-  #   LIBCURL_NO_SHARED
   #   LIBCURL_PC_CFLAGS_PRIVATE
+  #   LIBCURL_PC_LIBS
   #   LIBCURL_PC_REQUIRES
   #   LIBCURL_PC_REQUIRES_PRIVATE
   #   libdir
