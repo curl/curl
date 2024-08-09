@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_POSTREDIR (3)
   - CURLOPT_PROTOCOLS_STR (3)
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
+  - CURLOPT_UNRESTRICTED_AUTH (3)
 Protocol:
   - HTTP
 Added-in: 7.1
@@ -34,9 +35,9 @@ redirects that an HTTP server sends in a 30x response. The Location: header
 can specify a relative or an absolute URL to follow.
 
 libcurl issues another request for the new URL and follows subsequent new
-Location: redirects all the way until no more such headers are returned or the
-maximum limit is reached. CURLOPT_MAXREDIRS(3) is used to limit the
-number of redirects libcurl follows.
+`Location:` redirects all the way until no more such headers are returned or
+the maximum limit is reached. CURLOPT_MAXREDIRS(3) is used to limit the number
+of redirects libcurl follows.
 
 libcurl restricts what protocols it automatically follow redirects to. The
 accepted target protocols are set with CURLOPT_REDIR_PROTOCOLS_STR(3). By
@@ -44,23 +45,32 @@ default libcurl allows HTTP, HTTPS, FTP and FTPS on redirects.
 
 When following a redirect, the specific 30x response code also dictates which
 request method libcurl uses in the subsequent request: For 301, 302 and 303
-responses libcurl switches method from POST to GET unless
-CURLOPT_POSTREDIR(3) instructs libcurl otherwise. All other redirect
-response codes make libcurl use the same method again.
+responses libcurl switches method from POST to GET unless CURLOPT_POSTREDIR(3)
+instructs libcurl otherwise. All other redirect response codes make libcurl
+use the same method again.
 
 For users who think the existing location following is too naive, too simple
 or just lacks features, it is easy to instead implement your own redirect
-follow logic with the use of curl_easy_getinfo(3)'s
-CURLINFO_REDIRECT_URL(3) option instead of using
-CURLOPT_FOLLOWLOCATION(3).
+follow logic with the use of curl_easy_getinfo(3)'s CURLINFO_REDIRECT_URL(3)
+option instead of using CURLOPT_FOLLOWLOCATION(3).
+
+By default, libcurl only sends `Authentication:` or explicitly set `Cookie:`
+headers to the initial host given in the original URL, to avoid leaking
+username + password to other sites. CURLOPT_UNRESTRICTED_AUTH(3) is provided
+to change that behavior.
+
+Due to the way HTTP works, almost any header can be made to contain data a
+client may not want to pass on to other servers than the initially intended
+host and for all other headers than the two mentioned above, there is no
+protection from this happening when libcurl is told to follow redirects.
 
 # NOTE
 
 Since libcurl changes method or not based on the specific HTTP response code,
-setting CURLOPT_CUSTOMREQUEST(3) while following redirects may change
-what libcurl would otherwise do and if not that carefully may even make it
-misbehave since CURLOPT_CUSTOMREQUEST(3) overrides the method libcurl
-would otherwise select internally.
+setting CURLOPT_CUSTOMREQUEST(3) while following redirects may change what
+libcurl would otherwise do and if not that carefully may even make it
+misbehave since CURLOPT_CUSTOMREQUEST(3) overrides the method libcurl would
+otherwise select internally.
 
 # DEFAULT
 
