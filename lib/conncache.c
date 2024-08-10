@@ -99,17 +99,15 @@ static void bundle_add_conn(struct connectbundle *bundle,
 static int bundle_remove_conn(struct connectbundle *bundle,
                               struct connectdata *conn)
 {
-  struct Curl_llist_element *curr;
-
-  curr = bundle->conn_list.head;
+  struct Curl_llist_node *curr = Curl_llist_head(&bundle->conn_list);
   while(curr) {
-    if(curr->ptr == conn) {
-      Curl_llist_remove(&bundle->conn_list, curr, NULL);
+    if(Curl_node_elem(curr) == conn) {
+      Curl_node_remove(curr);
       bundle->num_connections--;
       conn->bundle = NULL;
       return 1; /* we removed a handle */
     }
-    curr = curr->next;
+    curr = Curl_node_next(curr);
   }
   DEBUGASSERT(0);
   return 0;
@@ -149,7 +147,6 @@ void Curl_conncache_destroy(struct conncache *connc)
   if(connc) {
     Curl_hash_destroy(&connc->hash);
     connc->multi = NULL;
-    DEBUGASSERT(!Curl_llist_count(&connc->shutdowns.conn_list));
   }
 }
 
@@ -341,7 +338,6 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
                                         struct connectdata *conn, void *param))
 {
   struct Curl_hash_iterator iter;
-  struct Curl_llist_element *curr;
   struct Curl_hash_element *he;
 
   if(!connc)
@@ -352,17 +348,16 @@ bool Curl_conncache_foreach(struct Curl_easy *data,
 
   he = Curl_hash_next_element(&iter);
   while(he) {
-    struct connectbundle *bundle;
-
-    bundle = he->ptr;
+    struct Curl_llist_node *curr;
+    struct connectbundle *bundle = he->ptr;
     he = Curl_hash_next_element(&iter);
 
-    curr = bundle->conn_list.head;
+    curr = Curl_llist_head(&bundle->conn_list);
     while(curr) {
       /* Yes, we need to update curr before calling func(), because func()
          might decide to remove the connection */
-      struct connectdata *conn = curr->ptr;
-      curr = curr->next;
+      struct connectdata *conn = Curl_node_elem(curr);
+      curr = Curl_node_next(curr);
 
       if(1 == func(data, conn, param)) {
         CONNCACHE_UNLOCK(data);
@@ -391,12 +386,12 @@ connc_find_first_connection(struct conncache *connc)
 
   he = Curl_hash_next_element(&iter);
   while(he) {
-    struct Curl_llist_element *curr;
+    struct Curl_llist_node *curr;
     bundle = he->ptr;
 
-    curr = bundle->conn_list.head;
+    curr = Curl_llist_head(&bundle->conn_list);
     if(curr) {
-      return curr->ptr;
+      return Curl_node_elem(curr);
     }
 
     he = Curl_hash_next_element(&iter);
@@ -451,7 +446,7 @@ struct connectdata *
 Curl_conncache_extract_bundle(struct Curl_easy *data,
                               struct connectbundle *bundle)
 {
-  struct Curl_llist_element *curr;
+  struct Curl_llist_node *curr;
   timediff_t highscore = -1;
   timediff_t score;
   struct curltime now;
@@ -462,9 +457,9 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
 
   now = Curl_now();
 
-  curr = bundle->conn_list.head;
+  curr = Curl_llist_head(&bundle->conn_list);
   while(curr) {
-    conn = curr->ptr;
+    conn = Curl_node_elem(curr);
 
     if(!CONN_INUSE(conn)) {
       /* Set higher score for the age passed since the connection was used */
@@ -475,7 +470,7 @@ Curl_conncache_extract_bundle(struct Curl_easy *data,
         conn_candidate = conn;
       }
     }
-    curr = curr->next;
+    curr = Curl_node_next(curr);
   }
   if(conn_candidate) {
     /* remove it to prevent another thread from nicking it */
@@ -499,7 +494,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
 {
   struct conncache *connc = data->state.conn_cache;
   struct Curl_hash_iterator iter;
-  struct Curl_llist_element *curr;
+  struct Curl_llist_node *curr;
   struct Curl_hash_element *he;
   timediff_t highscore =- 1;
   timediff_t score;
@@ -519,9 +514,9 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
 
     bundle = he->ptr;
 
-    curr = bundle->conn_list.head;
+    curr = Curl_llist_head(&bundle->conn_list);
     while(curr) {
-      conn = curr->ptr;
+      conn = Curl_node_elem(curr);
 
       if(!CONN_INUSE(conn) && !conn->bits.close &&
          !conn->connect_only) {
@@ -534,7 +529,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
           bundle_candidate = bundle;
         }
       }
-      curr = curr->next;
+      curr = Curl_node_next(curr);
     }
 
     he = Curl_hash_next_element(&iter);
@@ -553,7 +548,7 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
 
 static void connc_shutdown_discard_all(struct conncache *connc)
 {
-  struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+  struct Curl_llist_node *e = Curl_llist_head(&connc->shutdowns.conn_list);
   struct connectdata *conn;
 
   if(!e)
@@ -563,12 +558,12 @@ static void connc_shutdown_discard_all(struct conncache *connc)
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   connc->shutdowns.iter_locked = TRUE;
   while(e) {
-    conn = e->ptr;
-    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    conn = Curl_node_elem(e);
+    Curl_node_remove(e);
     DEBUGF(infof(connc->closure_handle, "discard connection #%"
                  CURL_FORMAT_CURL_OFF_T, conn->connection_id));
     connc_disconnect(NULL, conn, connc, FALSE);
-    e = connc->shutdowns.conn_list.head;
+    e = Curl_llist_head(&connc->shutdowns.conn_list);
   }
   connc->shutdowns.iter_locked = FALSE;
 }
@@ -626,18 +621,18 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 
 static void connc_shutdown_discard_oldest(struct conncache *connc)
 {
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
   struct connectdata *conn;
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   if(connc->shutdowns.iter_locked)
     return;
 
-  e = connc->shutdowns.conn_list.head;
+  e = Curl_llist_head(&connc->shutdowns.conn_list);
   if(e) {
     SIGPIPE_VARIABLE(pipe_st);
-    conn = e->ptr;
-    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    conn = Curl_node_elem(e);
+    Curl_node_remove(e);
     sigpipe_init(&pipe_st);
     sigpipe_apply(connc->closure_handle, &pipe_st);
     connc_disconnect(NULL, conn, connc, FALSE);
@@ -840,13 +835,14 @@ CURLcode Curl_conncache_add_pollfds(struct conncache *connc,
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   connc->shutdowns.iter_locked = TRUE;
-  if(connc->shutdowns.conn_list.head) {
-    struct Curl_llist_element *e;
+  if(Curl_llist_head(&connc->shutdowns.conn_list)) {
+    struct Curl_llist_node *e;
     struct easy_pollset ps;
     struct connectdata *conn;
 
-    for(e = connc->shutdowns.conn_list.head; e; e = e->next) {
-      conn = e->ptr;
+    for(e = Curl_llist_head(&connc->shutdowns.conn_list); e;
+        e = Curl_node_next(e)) {
+      conn = Curl_node_elem(e);
       memset(&ps, 0, sizeof(ps));
       Curl_attach_connection(connc->closure_handle, conn);
       Curl_conn_adjust_pollset(connc->closure_handle, &ps);
@@ -871,13 +867,14 @@ CURLcode Curl_conncache_add_waitfds(struct conncache *connc,
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
   connc->shutdowns.iter_locked = TRUE;
-  if(connc->shutdowns.conn_list.head) {
-    struct Curl_llist_element *e;
+  if(Curl_llist_head(&connc->shutdowns.conn_list)) {
+    struct Curl_llist_node *e;
     struct easy_pollset ps;
     struct connectdata *conn;
 
-    for(e = connc->shutdowns.conn_list.head; e; e = e->next) {
-      conn = e->ptr;
+    for(e = Curl_llist_head(&connc->shutdowns.conn_list); e;
+        e = Curl_node_next(e)) {
+      conn = Curl_node_elem(e);
       memset(&ps, 0, sizeof(ps));
       Curl_attach_connection(connc->closure_handle, conn);
       Curl_conn_adjust_pollset(connc->closure_handle, &ps);
@@ -896,8 +893,8 @@ out:
 static void connc_perform(struct conncache *connc)
 {
   struct Curl_easy *data = connc->closure_handle;
-  struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
-  struct Curl_llist_element *enext;
+  struct Curl_llist_node *e = Curl_llist_head(&connc->shutdowns.conn_list);
+  struct Curl_llist_node *enext;
   struct connectdata *conn;
   struct curltime *nowp = NULL;
   struct curltime now;
@@ -913,15 +910,15 @@ static void connc_perform(struct conncache *connc)
                Curl_llist_count(&connc->shutdowns.conn_list)));
   connc->shutdowns.iter_locked = TRUE;
   while(e) {
-    enext = e->next;
-    conn = e->ptr;
+    enext = Curl_node_next(e);
+    conn = Curl_node_elem(e);
     Curl_attach_connection(data, conn);
     connc_run_conn_shutdown(data, conn, &done);
     DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
                  ", done=%d", conn->connection_id, done));
     Curl_detach_connection(data);
     if(done) {
-      Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+      Curl_node_remove(e);
       connc_disconnect(NULL, conn, connc, FALSE);
     }
     else {
@@ -1039,7 +1036,7 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
 {
   struct conncache *connc = &multi->conn_cache;
   struct Curl_easy *data = connc->closure_handle;
-  struct Curl_llist_element *e = connc->shutdowns.conn_list.head;
+  struct Curl_llist_node *e = Curl_llist_head(&connc->shutdowns.conn_list);
   struct connectdata *conn;
   bool done;
 
@@ -1050,7 +1047,7 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
 
   connc->shutdowns.iter_locked = TRUE;
   while(e) {
-    conn = e->ptr;
+    conn = Curl_node_elem(e);
     if(s == conn->sock[FIRSTSOCKET] || s == conn->sock[SECONDARYSOCKET]) {
       Curl_attach_connection(data, conn);
       connc_run_conn_shutdown(data, conn, &done);
@@ -1058,12 +1055,12 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
                    ", done=%d", conn->connection_id, done));
       Curl_detach_connection(data);
       if(done || connc_update_shutdown_ev(multi, data, conn)) {
-        Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+        Curl_node_remove(e);
         connc_disconnect(NULL, conn, connc, FALSE);
       }
       break;
     }
-    e = e->next;
+    e = Curl_node_next(e);
   }
   connc->shutdowns.iter_locked = FALSE;
 }
@@ -1119,13 +1116,13 @@ static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
   }
 
   DEBUGASSERT(!connc->shutdowns.iter_locked);
-  while(connc->shutdowns.conn_list.head) {
+  while(Curl_llist_head(&connc->shutdowns.conn_list)) {
     timediff_t timespent;
     int remain_ms;
 
     connc_perform(connc);
 
-    if(!connc->shutdowns.conn_list.head) {
+    if(!Curl_llist_head(&connc->shutdowns.conn_list)) {
       DEBUGF(infof(data, "conncache shutdown ok"));
       break;
     }
@@ -1154,7 +1151,7 @@ static void connc_shutdown_all(struct conncache *connc, int timeout_ms)
 void Curl_conncache_print(struct conncache *connc)
 {
   struct Curl_hash_iterator iter;
-  struct Curl_llist_element *curr;
+  struct Curl_llist_node *curr;
   struct Curl_hash_element *he;
 
   if(!connc)
@@ -1172,12 +1169,12 @@ void Curl_conncache_print(struct conncache *connc)
     bundle = he->ptr;
 
     fprintf(stderr, "%s -", he->key);
-    curr = bundle->conn_list->head;
+    curr = Curl_llist_head(bundle->conn_list);
     while(curr) {
-      conn = curr->ptr;
+      conn = Curl_node_elem(curr);
 
       fprintf(stderr, " [%p %d]", (void *)conn, conn->refcount);
-      curr = curr->next;
+      curr = Curl_node_next(curr);
     }
     fprintf(stderr, "\n");
 

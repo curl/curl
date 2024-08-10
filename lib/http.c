@@ -3118,7 +3118,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
 #ifdef DEBUGBUILD
       else
         infof(data, "Parsed STS header fine (%zu entries)",
-              data->hsts->list.size);
+              Curl_llist_count(&data->hsts->list));
 #endif
     }
 #endif

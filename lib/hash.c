@@ -102,7 +102,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor)
 {
   struct Curl_hash_element  *he;
-  struct Curl_llist_element *le;
+  struct Curl_llist_node *le;
   struct Curl_llist *l;
 
   DEBUGASSERT(h);
@@ -118,10 +118,10 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
 
   l = FETCH_LIST(h, key, key_len);
 
-  for(le = l->head; le; le = le->next) {
-    he = (struct Curl_hash_element *) le->ptr;
+  for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
+    he = (struct Curl_hash_element *) Curl_node_elem(le);
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      Curl_llist_remove(l, le, (void *)h);
+      Curl_node_uremove(le, (void *)h);
       --h->size;
       break;
     }
@@ -158,18 +158,16 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
  */
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
   if(h->table) {
-    l = FETCH_LIST(h, key, key_len);
+    struct Curl_llist_node *le;
+    struct Curl_llist *l = FETCH_LIST(h, key, key_len);
 
-    for(le = l->head; le; le = le->next) {
-      struct Curl_hash_element *he = le->ptr;
+    for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
+      struct Curl_hash_element *he = Curl_node_elem(le);
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
-        Curl_llist_remove(l, le, (void *) h);
+        Curl_node_uremove(le, (void *) h);
         --h->size;
         return 0;
       }
@@ -185,15 +183,14 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 void *
 Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
   DEBUGASSERT(h);
   if(h->table) {
+    struct Curl_llist_node *le;
+    struct Curl_llist *l;
     DEBUGASSERT(h->slots);
     l = FETCH_LIST(h, key, key_len);
-    for(le = l->head; le; le = le->next) {
-      struct Curl_hash_element *he = le->ptr;
+    for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
+      struct Curl_hash_element *he = Curl_node_elem(le);
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
         return he->ptr;
       }
@@ -239,23 +236,21 @@ void
 Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                int (*comp)(void *, void *))
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist_element *lnext;
-  struct Curl_llist *list;
   size_t i;
 
   if(!h || !h->table)
     return;
 
   for(i = 0; i < h->slots; ++i) {
-    list = &h->table[i];
-    le = list->head; /* get first list entry */
+    struct Curl_llist *list = &h->table[i];
+    struct Curl_llist_node *le =
+      Curl_llist_head(list); /* get first list entry */
     while(le) {
-      struct Curl_hash_element *he = le->ptr;
-      lnext = le->next;
+      struct Curl_hash_element *he = Curl_node_elem(le);
+      struct Curl_llist_node *lnext = Curl_node_next(le);
       /* ask the callback function if we shall remove this entry or not */
       if(!comp || comp(user, he->ptr)) {
-        Curl_llist_remove(list, le, (void *) h);
+        Curl_node_uremove(le, (void *) h);
         --h->size; /* one less entry in the hash now */
       }
       le = lnext;
@@ -305,14 +300,14 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
 
   /* Get the next element in the current list, if any */
   if(iter->current_element)
-    iter->current_element = iter->current_element->next;
+    iter->current_element = Curl_node_next(iter->current_element);
 
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
     size_t i;
     for(i = iter->slot_index; i < h->slots; i++) {
-      if(h->table[i].head) {
-        iter->current_element = h->table[i].head;
+      if(Curl_llist_head(&h->table[i])) {
+        iter->current_element = Curl_llist_head(&h->table[i]);
         iter->slot_index = i + 1;
         break;
       }
@@ -320,7 +315,7 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
   }
 
   if(iter->current_element) {
-    struct Curl_hash_element *he = iter->current_element->ptr;
+    struct Curl_hash_element *he = Curl_node_elem(iter->current_element);
     return he;
   }
   return NULL;

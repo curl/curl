@@ -467,21 +467,6 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 #define multi_warn_debug(x,y) Curl_nop_stmt
 #endif
 
-static void link_easy(struct Curl_multi *multi,
-                      struct Curl_easy *data)
-{
-  /* add the easy handle to the process list */
-  Curl_llist_append(&multi->process, data, &data->multi_queue);
-}
-
-/* unlink the given easy handle from the process list */
-static void unlink_easy(struct Curl_multi *multi,
-                        struct Curl_easy *data)
-{
-  Curl_llist_remove(&multi->process, &data->multi_queue, NULL);
-}
-
-
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
                                 struct Curl_easy *data)
 {
@@ -557,8 +542,10 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   memset(&multi->timer_lastcall, 0, sizeof(multi->timer_lastcall));
 
   rc = Curl_update_timer(multi);
-  if(rc)
+  if(rc) {
+    data->multi = NULL; /* not anymore */
     return rc;
+  }
 
   /* set the easy handle */
   multistate(data, MSTATE_INIT);
@@ -586,7 +573,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->psl = &multi->psl;
 #endif
 
-  link_easy(multi, data);
+  /* add the easy handle to the process list */
+  Curl_llist_append(&multi->process, data, &data->multi_queue);
 
   /* increase the node-counter */
   multi->num_easy++;
@@ -706,7 +694,7 @@ static CURLcode multi_done(struct Curl_easy *data,
     CONNCACHE_UNLOCK(data);
     DEBUGF(infof(data, "Connection still in use %zu, "
                  "no more multi_done now!",
-                 conn->easyq.size));
+                 Curl_llist_count(&conn->easyq)));
     return CURLE_OK;
   }
 
@@ -804,7 +792,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 {
   struct Curl_easy *easy = data;
   bool premature;
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
   CURLMcode rc;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
@@ -812,7 +800,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     return CURLM_BAD_HANDLE;
 
   /* Verify that we got a somewhat good easy handle too */
-  if(!GOOD_EASY_HANDLE(data))
+  if(!GOOD_EASY_HANDLE(data) || !multi->num_easy)
     return CURLM_BAD_EASY_HANDLE;
 
   /* Prevent users from trying to remove same easy handle more than once */
@@ -858,15 +846,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      called. Do it after multi_done() in case that sets another time! */
   Curl_expire_clear(data);
 
-  if(data->multi_queue.ptr) {
-    /* the handle is in a list, remove it from the right one */
-    if(data->mstate == MSTATE_PENDING)
-      Curl_llist_remove(&multi->pending, &data->multi_queue, NULL);
-    else if(data->mstate == MSTATE_MSGSENT)
-      Curl_llist_remove(&multi->msgsent, &data->multi_queue, NULL);
-    else
-      Curl_llist_remove(&multi->process, &data->multi_queue, NULL);
-  }
+  /* the handle is in a list, remove it from whichever it is */
+  Curl_node_remove(&data->multi_queue);
 
   if(data->dns.hostcachetype == HCACHE_MULTI) {
     /* stop using the multi handle's DNS cache, *after* the possible
@@ -927,11 +908,11 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 
   /* make sure there is no pending message in the queue sent from this easy
      handle */
-  for(e = multi->msglist.head; e; e = e->next) {
-    struct Curl_message *msg = e->ptr;
+  for(e = Curl_llist_head(&multi->msglist); e; e = Curl_node_next(e)) {
+    struct Curl_message *msg = Curl_node_elem(e);
 
     if(msg->extmsg.easy_handle == easy) {
-      Curl_llist_remove(&multi->msglist, e, NULL);
+      Curl_node_remove(e);
       /* there can only be one from this specific handle */
       break;
     }
@@ -966,7 +947,7 @@ void Curl_detach_connection(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   if(conn) {
     Curl_conn_ev_data_detach(conn, data);
-    Curl_llist_remove(&conn->easyq, &data->conn_queue, NULL);
+    Curl_node_remove(&data->conn_queue);
   }
   data->conn = NULL;
 }
@@ -1181,7 +1162,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
      and then we must make sure that is done. */
   int this_max_fd = -1;
   struct easy_pollset ps;
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
   (void)exc_fd_set; /* not used */
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -1191,8 +1172,8 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
     return CURLM_RECURSIVE_API_CALL;
 
   memset(&ps, 0, sizeof(ps));
-  for(e = multi->process.head; e; e = e->next) {
-    struct Curl_easy *data = e->ptr;
+  for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
+    struct Curl_easy *data = Curl_node_elem(e);
     unsigned int i;
 
     multi_getsock(data, &ps);
@@ -1223,7 +1204,7 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
   struct curl_waitfds cwfds;
   struct easy_pollset ps;
   CURLMcode result = CURLM_OK;
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
 
   if(!ufds)
     return CURLM_BAD_FUNCTION_ARGUMENT;
@@ -1236,8 +1217,8 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
 
   Curl_waitfds_init(&cwfds, ufds, size);
   memset(&ps, 0, sizeof(ps));
-  for(e = multi->process.head; e; e = e->next) {
-    struct Curl_easy *data = e->ptr;
+  for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
+    struct Curl_easy *data = Curl_node_elem(e);
     multi_getsock(data, &ps);
     if(Curl_waitfds_add_ps(&cwfds, &ps)) {
       result = CURLM_OUT_OF_MEMORY;
@@ -1290,7 +1271,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   struct curl_pollfds cpfds;
   unsigned int curl_nfds = 0; /* how many pfds are for curl transfers */
   CURLMcode result = CURLM_OK;
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
 
 #ifdef USE_WINSOCK
   WSANETWORKEVENTS wsa_events;
@@ -1313,8 +1294,8 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   memset(&ps, 0, sizeof(ps));
 
   /* Add the curl handles to our pollfds first */
-  for(e = multi->process.head; e; e = e->next) {
-    struct Curl_easy *data = e->ptr;
+  for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
+    struct Curl_easy *data = Curl_node_elem(e);
 
     multi_getsock(data, &ps);
     if(Curl_pollfds_add_ps(&cpfds, &ps)) {
@@ -1453,8 +1434,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
       /* Count up all our own sockets that had activity,
          and remove them from the event. */
       if(curl_nfds) {
-        for(e = multi->process.head; e && !result; e = e->next) {
-          struct Curl_easy *data = e->ptr;
+        for(e = Curl_llist_head(&multi->process); e && !result;
+            e = Curl_node_next(e)) {
+          struct Curl_easy *data = Curl_node_elem(e);
           multi_getsock(data, &ps);
 
           for(i = 0; i < ps.num; i++) {
@@ -1948,7 +1930,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            state and wait for an available connection. */
         multistate(data, MSTATE_PENDING);
         /* unlink from process list */
-        unlink_easy(multi, data);
+        Curl_node_remove(&data->multi_queue);
         /* add handle to pending list */
         Curl_llist_append(&multi->pending, data, &data->multi_queue);
         result = CURLE_OK;
@@ -2661,9 +2643,9 @@ statemachine_end:
       }
       multistate(data, MSTATE_MSGSENT);
 
-      /* unlink from the main list */
-      unlink_easy(multi, data);
-      /* add this handle to the list of msgsent handles */
+      /* unlink from the process list */
+      Curl_node_remove(&data->multi_queue);
+      /* add this handle msgsent list */
       Curl_llist_append(&multi->msgsent, data, &data->multi_queue);
       return CURLM_OK;
     }
@@ -2679,8 +2661,8 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
   CURLMcode returncode = CURLM_OK;
   struct Curl_tree *t;
   struct curltime now = Curl_now();
-  struct Curl_llist_element *e;
-  struct Curl_llist_element *n = NULL;
+  struct Curl_llist_node *e;
+  struct Curl_llist_node *n = NULL;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -2690,15 +2672,15 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     return CURLM_RECURSIVE_API_CALL;
 
   sigpipe_init(&pipe_st);
-  for(e = multi->process.head; e; e = n) {
-    struct Curl_easy *data = e->ptr;
+  for(e = Curl_llist_head(&multi->process); e; e = n) {
+    struct Curl_easy *data = Curl_node_elem(e);
     CURLMcode result;
     /* Do the loop and only alter the signal ignore state if the next handle
        has a different NO_SIGNAL state than the previous */
 
     /* the current node might be unlinked in multi_runsingle(), get the next
        pointer now */
-    n = e->next;
+    n = Curl_node_next(e);
 
     if(data != multi->conn_cache.closure_handle) {
       /* connection cache handle is processed below */
@@ -2755,14 +2737,14 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
    the process list */
 static void unlink_all_msgsent_handles(struct Curl_multi *multi)
 {
-  struct Curl_llist_element *e;
-  for(e = multi->msgsent.head; e; e = e->next) {
-    struct Curl_easy *data = e->ptr;
+  struct Curl_llist_node *e;
+  for(e = Curl_llist_head(&multi->msgsent); e; e = Curl_node_next(e)) {
+    struct Curl_easy *data = Curl_node_elem(e);
     if(data) {
       DEBUGASSERT(data->mstate == MSTATE_MSGSENT);
-      Curl_llist_remove(&multi->msgsent, &data->multi_queue, NULL);
+      Curl_node_remove(&data->multi_queue);
       /* put it into the process list */
-      link_easy(multi, data);
+      Curl_llist_append(&multi->process, data, &data->multi_queue);
     }
   }
 }
@@ -2770,8 +2752,8 @@ static void unlink_all_msgsent_handles(struct Curl_multi *multi)
 CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 {
   if(GOOD_MULTI_HANDLE(multi)) {
-    struct Curl_llist_element *e;
-    struct Curl_llist_element *n;
+    struct Curl_llist_node *e;
+    struct Curl_llist_node *n;
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
 
@@ -2783,13 +2765,13 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     process_pending_handles(multi);
 
     /* First remove all remaining easy handles */
-    for(e = multi->process.head; e; e = n) {
-      struct Curl_easy *data = e->ptr;
+    for(e = Curl_llist_head(&multi->process); e; e = n) {
+      struct Curl_easy *data = Curl_node_elem(e);
 
       if(!GOOD_EASY_HANDLE(data))
         return CURLM_BAD_HANDLE;
 
-      n = e->next;
+      n = Curl_node_next(e);
       if(!data->state.done && data->conn)
         /* if DONE was never called for this handle */
         (void)multi_done(data, CURLE_OK, TRUE);
@@ -2858,15 +2840,15 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
      !multi->in_callback &&
      Curl_llist_count(&multi->msglist)) {
     /* there is one or more messages in the list */
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
 
     /* extract the head of the list to return */
-    e = multi->msglist.head;
+    e = Curl_llist_head(&multi->msglist);
 
-    msg = e->ptr;
+    msg = Curl_node_elem(e);
 
     /* remove the extracted entry */
-    Curl_llist_remove(&multi->msglist, e, NULL);
+    Curl_node_remove(e);
 
     *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
 
@@ -3110,26 +3092,24 @@ static CURLMcode add_next_timeout(struct curltime now,
 {
   struct curltime *tv = &d->state.expiretime;
   struct Curl_llist *list = &d->state.timeoutlist;
-  struct Curl_llist_element *e;
-  struct time_node *node = NULL;
+  struct Curl_llist_node *e;
 
   /* move over the timeout list for this specific handle and remove all
      timeouts that are now passed tense and store the next pending
      timeout in *tv */
-  for(e = list->head; e;) {
-    struct Curl_llist_element *n = e->next;
-    timediff_t diff;
-    node = (struct time_node *)e->ptr;
-    diff = Curl_timediff_us(node->time, now);
+  for(e = Curl_llist_head(list); e;) {
+    struct Curl_llist_node *n = Curl_node_next(e);
+    struct time_node *node = Curl_node_elem(e);
+    timediff_t diff = Curl_timediff_us(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
-      Curl_llist_remove(list, e, NULL);
+      Curl_node_remove(e);
     else
       /* the list is sorted so get out on the first mismatch */
       break;
     e = n;
   }
-  e = list->head;
+  e = Curl_llist_head(list);
   if(!e) {
     /* clear the expire times within the handles that we remove from the
        splay tree */
@@ -3137,6 +3117,7 @@ static CURLMcode add_next_timeout(struct curltime now,
     tv->tv_usec = 0;
   }
   else {
+    struct time_node *node = Curl_node_elem(e);
     /* copy the first entry to 'tv' */
     memcpy(tv, &node->time, sizeof(*tv));
 
@@ -3162,15 +3143,16 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   SIGPIPE_VARIABLE(pipe_st);
 
   if(checkall) {
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
     /* *perform() deals with running_handles on its own */
     result = curl_multi_perform(multi, running_handles);
 
     /* walk through each easy handle and do the socket state change magic
        and callbacks */
     if(result != CURLM_BAD_HANDLE) {
-      for(e = multi->process.head; e && !result; e = e->next) {
-        result = singlesocket(multi, e->ptr);
+      for(e = Curl_llist_head(&multi->process); e && !result;
+          e = Curl_node_next(e)) {
+        result = singlesocket(multi, Curl_node_elem(e));
       }
     }
 
@@ -3499,13 +3481,13 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
 static void
 multi_deltimeout(struct Curl_easy *data, expire_id eid)
 {
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
   struct Curl_llist *timeoutlist = &data->state.timeoutlist;
   /* find and remove the specific node from the list */
-  for(e = timeoutlist->head; e; e = e->next) {
-    struct time_node *n = (struct time_node *)e->ptr;
+  for(e = Curl_llist_head(timeoutlist); e; e = Curl_node_next(e)) {
+    struct time_node *n = Curl_node_elem(e);
     if(n->eid == eid) {
-      Curl_llist_remove(timeoutlist, e, NULL);
+      Curl_node_remove(e);
       return;
     }
   }
@@ -3523,9 +3505,9 @@ multi_addtimeout(struct Curl_easy *data,
                  struct curltime *stamp,
                  expire_id eid)
 {
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
   struct time_node *node;
-  struct Curl_llist_element *prev = NULL;
+  struct Curl_llist_node *prev = NULL;
   size_t n;
   struct Curl_llist *timeoutlist = &data->state.timeoutlist;
 
@@ -3538,8 +3520,8 @@ multi_addtimeout(struct Curl_easy *data,
   n = Curl_llist_count(timeoutlist);
   if(n) {
     /* find the correct spot in the list */
-    for(e = timeoutlist->head; e; e = e->next) {
-      struct time_node *check = (struct time_node *)e->ptr;
+    for(e = Curl_llist_head(timeoutlist); e; e = Curl_node_next(e)) {
+      struct time_node *check = Curl_node_elem(e);
       timediff_t diff = Curl_timediff(check->time, node->time);
       if(diff > 0)
         break;
@@ -3661,10 +3643,8 @@ void Curl_expire_clear(struct Curl_easy *data)
     if(rc)
       infof(data, "Internal error clearing splay node = %d", rc);
 
-    /* flush the timeout list too */
-    while(list->size > 0) {
-      Curl_llist_remove(list, list->tail, NULL);
-    }
+    /* clear the timeout list too */
+    Curl_llist_destroy(list, NULL);
 
 #ifdef DEBUGBUILD
     infof(data, "Expire cleared");
@@ -3726,10 +3706,10 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   DEBUGASSERT(data->mstate == MSTATE_PENDING);
 
   /* Remove this node from the pending list */
-  Curl_llist_remove(&multi->pending, &data->multi_queue, NULL);
+  Curl_node_remove(&data->multi_queue);
 
   /* put it into the process list */
-  link_easy(multi, data);
+  Curl_llist_append(&multi->process, data, &data->multi_queue);
 
   multistate(data, MSTATE_CONNECT);
 
@@ -3737,7 +3717,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   Curl_expire(data, 0, EXPIRE_RUN_NOW);
 }
 
-/* process_pending_handles() moves a handle from PENDING back into the main
+/* process_pending_handles() moves a handle from PENDING back into the process
    list and change state to CONNECT.
 
    We do not move all transfers because that can be a significant amount.
@@ -3753,9 +3733,9 @@ static void move_pending_to_connect(struct Curl_multi *multi,
 */
 static void process_pending_handles(struct Curl_multi *multi)
 {
-  struct Curl_llist_element *e = multi->pending.head;
+  struct Curl_llist_node *e = Curl_llist_head(&multi->pending);
   if(e) {
-    struct Curl_easy *data = e->ptr;
+    struct Curl_easy *data = Curl_node_elem(e);
     move_pending_to_connect(multi, data);
   }
 }
@@ -3783,9 +3763,9 @@ struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
                                 (multi->num_easy + 1));
   if(a) {
     unsigned int i = 0;
-    struct Curl_llist_element *e;
-    for(e = multi->process.head; e; e = e->next) {
-      struct Curl_easy *data = e->ptr;
+    struct Curl_llist_node *e;
+    for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
+      struct Curl_easy *data = Curl_node_elem(e);
       DEBUGASSERT(i < multi->num_easy);
       if(!data->state.internal)
         a[i++] = data;

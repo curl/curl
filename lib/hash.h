@@ -61,7 +61,7 @@ struct Curl_hash {
 typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
 
 struct Curl_hash_element {
-  struct Curl_llist_element list;
+  struct Curl_llist_node list;
   void   *ptr;
   Curl_hash_elem_dtor dtor;
   size_t key_len;
@@ -71,7 +71,7 @@ struct Curl_hash_element {
 struct Curl_hash_iterator {
   struct Curl_hash *hash;
   size_t slot_index;
-  struct Curl_llist_element *current_element;
+  struct Curl_llist_node *current_element;
 };
 
 void Curl_hash_init(struct Curl_hash *h,

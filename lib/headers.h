@@ -28,7 +28,7 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_HEADERS_API)
 
 struct Curl_header_store {
-  struct Curl_llist_element node;
+  struct Curl_llist_node node;
   char *name; /* points into 'buffer' */
   char *value; /* points into 'buffer */
   int request; /* 0 is the first request, then 1.. 2.. */

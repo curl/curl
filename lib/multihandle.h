@@ -33,7 +33,7 @@
 struct connectdata;
 
 struct Curl_message {
-  struct Curl_llist_element list;
+  struct Curl_llist_node list;
   /* the 'CURLMsg' is the part that is visible to the external user */
   struct CURLMsg extmsg;
 };
@@ -92,7 +92,7 @@ struct Curl_multi {
 
   struct Curl_llist msglist; /* a list of messages from completed transfers */
 
-  /* Each added easy handle is in ONE of these three lists */
+  /* Each added easy handle is added to ONE of these three lists */
   struct Curl_llist process; /* not in PENDING or MSGSENT */
   struct Curl_llist pending; /* in PENDING */
   struct Curl_llist msgsent; /* in MSGSENT */
