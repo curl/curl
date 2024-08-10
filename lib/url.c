@@ -540,6 +540,9 @@ CURLcode Curl_open(struct Curl_easy **curl)
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
+#ifndef CURL_DISABLE_HTTP
+    Curl_llist_init(&data->state.httphdrs, NULL);
+#endif
   }
 
   if(result) {
@@ -552,7 +555,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
   else
     *curl = data;
-
   return result;
 }
 
@@ -896,7 +898,7 @@ ConnectionExists(struct Curl_easy *data,
   bool foundPendingCandidate = FALSE;
   bool canmultiplex = FALSE;
   struct connectbundle *bundle;
-  struct Curl_llist_element *curr;
+  struct Curl_llist_node *curr;
 
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) &&
@@ -953,12 +955,12 @@ ConnectionExists(struct Curl_easy *data,
     }
   }
 
-  curr = bundle->conn_list.head;
+  curr = Curl_llist_head(&bundle->conn_list);
   while(curr) {
-    struct connectdata *check = curr->ptr;
+    struct connectdata *check = Curl_node_elem(curr);
     /* Get next node now. We might remove a dead `check` connection which
      * would invalidate `curr` as well. */
-    curr = curr->next;
+    curr = Curl_node_next(curr);
 
     /* Note that if we use an HTTP proxy in normal mode (no tunneling), we
      * check connections to that proxy and not to the actual remote server.
@@ -988,8 +990,8 @@ ConnectionExists(struct Curl_easy *data,
       }
       else {
         /* Could multiplex, but not when check belongs to another multi */
-        struct Curl_llist_element *e = check->easyq.head;
-        struct Curl_easy *entry = e->ptr;
+        struct Curl_llist_node *e = Curl_llist_head(&check->easyq);
+        struct Curl_easy *entry = Curl_node_elem(e);
         if(entry->multi != data->multi)
           continue;
       }

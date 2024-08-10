@@ -274,10 +274,10 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
     return data;
   }
   else {
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
     DEBUGASSERT(data->multi);
-    for(e = data->multi->process.head; e; e = e->next) {
-      struct Curl_easy *sdata = e->ptr;
+    for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+      struct Curl_easy *sdata = Curl_node_elem(e);
       if(sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);

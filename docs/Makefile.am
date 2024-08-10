@@ -81,6 +81,7 @@ EXTRA_DIST =                                    \
  INSTALL.md                                     \
  INTERNALS.md                                   \
  IPFS.md                                        \
+ LLIST.md                                       \
  KNOWN_BUGS                                     \
  MAIL-ETIQUETTE.md                              \
  MANUAL.md                                      \

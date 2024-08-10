@@ -177,11 +177,11 @@ static void check_resumes(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
 
   DEBUGASSERT(data->multi);
-  for(e = data->multi->process.head; e; e = e->next) {
-    struct Curl_easy *sdata = e->ptr;
+  for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+    struct Curl_easy *sdata = Curl_node_elem(e);
     if(sdata->conn == data->conn) {
       struct stream_ctx *stream = H3_STREAM_CTX(ctx, sdata);
       if(stream && stream->quic_flow_blocked) {
@@ -277,10 +277,10 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
     return data;
   }
   else {
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
     DEBUGASSERT(data->multi);
-    for(e = data->multi->process.head; e; e = e->next) {
-      struct Curl_easy *sdata = e->ptr;
+    for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+      struct Curl_easy *sdata = Curl_node_elem(e);
       if(sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);
@@ -297,12 +297,12 @@ static struct Curl_easy *get_stream_easy(struct Curl_cfilter *cf,
 static void cf_quiche_expire_conn_closed(struct Curl_cfilter *cf,
                                          struct Curl_easy *data)
 {
-  struct Curl_llist_element *e;
+  struct Curl_llist_node *e;
 
   DEBUGASSERT(data->multi);
   CURL_TRC_CF(data, cf, "conn closed, expire all transfers");
-  for(e = data->multi->process.head; e; e = e->next) {
-    struct Curl_easy *sdata = e->ptr;
+  for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+    struct Curl_easy *sdata = Curl_node_elem(e);
     if(sdata == data || sdata->conn != data->conn)
       continue;
     CURL_TRC_CF(sdata, cf, "conn closed, expire transfer");

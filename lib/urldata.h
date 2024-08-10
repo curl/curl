@@ -797,7 +797,7 @@ struct ldapconninfo;
  * unique for an entire connection.
  */
 struct connectdata {
-  struct Curl_llist_element bundle_node; /* conncache */
+  struct Curl_llist_node bundle_node; /* conncache */
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
@@ -806,7 +806,7 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) ((c)->easyq.size)
+#define CONN_INUSE(c) Curl_llist_count(&(c)->easyq)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -1194,7 +1194,7 @@ typedef enum {
  * One instance for each timeout an easy handle can set.
  */
 struct time_node {
-  struct Curl_llist_element list;
+  struct Curl_llist_node list;
   struct curltime time;
   expire_id eid;
 };
@@ -1911,8 +1911,8 @@ struct Curl_easy {
   curl_off_t id;
 
   struct connectdata *conn;
-  struct Curl_llist_element multi_queue; /* for multihandle list management */
-  struct Curl_llist_element conn_queue; /* list per connectdata */
+  struct Curl_llist_node multi_queue; /* for multihandle list management */
+  struct Curl_llist_node conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */
