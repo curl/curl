@@ -29,7 +29,7 @@
 # MSH3_INCLUDE_DIRS  The msh3 include directories
 # MSH3_LIBRARIES     The libraries needed to use msh3
 
-if(UNIX)
+if(NOT MSVC OR VCPKG_TOOLCHAIN)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_MSH3 "libmsh3")
 endif()

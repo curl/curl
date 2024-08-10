@@ -30,7 +30,7 @@
 # Zstd_LIBRARIES     The libraries needed to use zstd
 # Zstd_VERSION       Version of zstd
 
-if(UNIX)
+if(NOT MSVC OR VCPKG_TOOLCHAIN)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_Zstd "libzstd")
 endif()

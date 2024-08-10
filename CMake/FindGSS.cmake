@@ -53,11 +53,12 @@ set(_gss_root_hints
 
 # Try to find library using system pkg-config if user did not specify root dir
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
-  if(UNIX)
+  if(NOT MSVC OR VCPKG_TOOLCHAIN)
     find_package(PkgConfig QUIET)
     pkg_search_module(_GSS ${_mit_modname} ${_heimdal_modname})
     list(APPEND _gss_root_hints "${_GSS_PREFIX}")
-  elseif(WIN32)
+  endif()
+  if(WIN32)
     list(APPEND _gss_root_hints "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos;InstallDir]")
   endif()
 endif()
