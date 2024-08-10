@@ -30,8 +30,10 @@
 # WolfSSL_LIBRARIES     The wolfssl library names
 # WolfSSL_VERSION       Version of wolfssl
 
-find_package(PkgConfig QUIET)
-pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
+if(NOT MSVC OR VCPKG_TOOLCHAIN)
+  find_package(PkgConfig QUIET)
+  pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
+endif()
 
 find_path(WolfSSL_INCLUDE_DIR
   NAMES "wolfssl/ssl.h"

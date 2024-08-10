@@ -30,7 +30,7 @@
 # NETTLE_LIBRARIES     The nettle library names
 # NETTLE_VERSION       Version of nettle
 
-if(UNIX)
+if(NOT MSVC OR VCPKG_TOOLCHAIN)
   find_package(PkgConfig QUIET)
   pkg_search_module(NETTLE "nettle")
 endif()
