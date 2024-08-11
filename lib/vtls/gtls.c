@@ -350,7 +350,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
   }
 }
 
-static gnutls_x509_crt_fmt_t do_file_type(const char *type)
+static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return GNUTLS_X509_FMT_PEM;
@@ -939,7 +939,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
            gtls->shared_creds->creds,
            config->clientcert,
            ssl_config->key ? ssl_config->key : config->clientcert,
-           do_file_type(ssl_config->cert_type),
+           gnutls_do_file_type(ssl_config->cert_type),
            ssl_config->key_passwd,
            supported_key_encryption_algorithms);
       if(rc != GNUTLS_E_SUCCESS) {
@@ -954,7 +954,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
            gtls->shared_creds->creds,
            config->clientcert,
            ssl_config->key ? ssl_config->key : config->clientcert,
-           do_file_type(ssl_config->cert_type) ) !=
+           gnutls_do_file_type(ssl_config->cert_type) ) !=
          GNUTLS_E_SUCCESS) {
         failf(data, "error reading X.509 key or certificate file");
         return CURLE_SSL_CONNECT_ERROR;
