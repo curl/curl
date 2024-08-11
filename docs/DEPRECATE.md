@@ -38,7 +38,7 @@ support have remained disabled with hyper. For these reasons, hyper support
 has remained tagged EXPERIMENTAL.
 
 It is undoubtedly hard work to fix these remaining problems, as they typically
-require both rust and C knowledge in adding to deep HTTP familiarity. There
+require both rust and C knowledge in addition to deep HTTP familiarity. There
 does not seem to be that many persons interested or available for this
 challenge. Meanwhile, there is little if any demand for hyper from existing
 (lib)curl users.
