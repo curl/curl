@@ -247,7 +247,7 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
   unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == SHA256_DIGEST_LENGTH)
+  if(length == CURL_SHA256_DIGEST_LENGTH)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
 
   if(ctx->hHash)
