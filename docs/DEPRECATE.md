@@ -48,10 +48,10 @@ maintain and develop a lot of functionality and tests twice to make sure
 libcurl works identically using either HTTP backend.
 
 The only way to keep hyper support in curl is to give it a good polish by
-somone with time, skill and energy to spend on this task.
+someone with time, skill and energy to spend on this task.
 
-Unless a significant overhaul has proven to be in progress, hyper support will
-be removed from curl after February 2025.
+Unless a significant overhaul has proven to be in progress, hyper support is
+removed from curl after February 2025.
 
 ## Past removals
 
