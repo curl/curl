@@ -715,6 +715,11 @@
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+#if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
+/* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
+#define NO_OLD_WC_NAMES
+#endif
+
 /* Single point where USE_SPNEGO definition might be defined */
 #if !defined(CURL_DISABLE_NEGOTIATE_AUTH) && \
     (defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI))
