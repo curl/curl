@@ -368,11 +368,11 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 #define GNUTLS_SRP "+SRP"
 
 static CURLcode
-set_ssl_version_min_max(struct Curl_easy *data,
-                        struct ssl_peer *peer,
-                        struct ssl_primary_config *conn_config,
-                        const char **prioritylist,
-                        const char *tls13support)
+gnutls_set_ssl_version_min_max(struct Curl_easy *data,
+                               struct ssl_peer *peer,
+                               struct ssl_primary_config *conn_config,
+                               const char **prioritylist,
+                               const char *tls13support)
 {
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
@@ -890,8 +890,8 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   }
 
   /* At this point we know we have a supported TLS version, so set it */
-  result = set_ssl_version_min_max(data, peer,
-                                   config, &prioritylist, tls13support);
+  result = gnutls_set_ssl_version_min_max(data, peer,
+                                          config, &prioritylist, tls13support);
   if(result)
     return result;
 

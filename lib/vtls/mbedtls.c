@@ -314,7 +314,8 @@ static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
 #endif
 
 static CURLcode
-set_ssl_version_min_max(struct Curl_cfilter *cf, struct Curl_easy *data)
+mbedtls_set_ssl_version_min_max(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
@@ -834,7 +835,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   case CURL_SSLVERSION_TLSv1_2:
   case CURL_SSLVERSION_TLSv1_3:
     {
-      CURLcode result = set_ssl_version_min_max(cf, data);
+      CURLcode result = mbedtls_set_ssl_version_min_max(cf, data);
       if(result != CURLE_OK)
         return result;
       break;
