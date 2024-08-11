@@ -63,7 +63,6 @@
 
  4. FTP
  4.1 HOST
- 4.2 Alter passive/active on failure and retry
  4.4 Support CURLOPT_PREQUOTE for directories listings
  4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
@@ -556,13 +555,6 @@
 
  https://datatracker.ietf.org/doc/html/rfc7151
 
-4.2 Alter passive/active on failure and retry
-
- When trying to connect passively to a server which only supports active
- connections, libcurl returns CURLE_FTP_WEIRD_PASV_REPLY and closes the
- connection. There could be a way to fallback to an active connection (and
- vice versa). https://curl.se/bug/feature.cgi?id=1754793
-
 4.4 Support CURLOPT_PREQUOTE for directions listings
 
  The lack of support is mostly an oversight and requires the FTP state machine
@@ -824,8 +816,6 @@
  By changing the order of TLS extensions provided in the TLS handshake, it is
  sometimes possible to circumvent TLS fingerprinting by servers. The TLS
  extension order is of course not the only way to fingerprint a client.
-
- See https://github.com/curl/curl/issues/8119
 
 13.5 Export session ids
 
