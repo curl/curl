@@ -100,10 +100,10 @@
 
 #if defined(USE_OPENSSL_SHA256)
 
-struct sha256_ctx {
+struct ossl_sha256_ctx {
   EVP_MD_CTX *openssl_ctx;
 };
-typedef struct sha256_ctx my_sha256_ctx;
+typedef struct ossl_sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(my_sha256_ctx *ctx)
 {
