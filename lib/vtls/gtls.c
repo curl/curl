@@ -350,7 +350,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
   }
 }
 
-static gnutls_x509_crt_fmt_t do_file_type(const char *type)
+static gnutls_x509_crt_fmt_t gnutls_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return GNUTLS_X509_FMT_PEM;
@@ -368,11 +368,11 @@ static gnutls_x509_crt_fmt_t do_file_type(const char *type)
 #define GNUTLS_SRP "+SRP"
 
 static CURLcode
-set_ssl_version_min_max(struct Curl_easy *data,
-                        struct ssl_peer *peer,
-                        struct ssl_primary_config *conn_config,
-                        const char **prioritylist,
-                        const char *tls13support)
+gnutls_set_ssl_version_min_max(struct Curl_easy *data,
+                               struct ssl_peer *peer,
+                               struct ssl_primary_config *conn_config,
+                               const char **prioritylist,
+                               const char *tls13support)
 {
   long ssl_version = conn_config->version;
   long ssl_version_max = conn_config->version_max;
@@ -890,8 +890,8 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
   }
 
   /* At this point we know we have a supported TLS version, so set it */
-  result = set_ssl_version_min_max(data, peer,
-                                   config, &prioritylist, tls13support);
+  result = gnutls_set_ssl_version_min_max(data, peer,
+                                          config, &prioritylist, tls13support);
   if(result)
     return result;
 
@@ -939,7 +939,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
            gtls->shared_creds->creds,
            config->clientcert,
            ssl_config->key ? ssl_config->key : config->clientcert,
-           do_file_type(ssl_config->cert_type),
+           gnutls_do_file_type(ssl_config->cert_type),
            ssl_config->key_passwd,
            supported_key_encryption_algorithms);
       if(rc != GNUTLS_E_SUCCESS) {
@@ -954,7 +954,7 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
            gtls->shared_creds->creds,
            config->clientcert,
            ssl_config->key ? ssl_config->key : config->clientcert,
-           do_file_type(ssl_config->cert_type) ) !=
+           gnutls_do_file_type(ssl_config->cert_type) ) !=
          GNUTLS_E_SUCCESS) {
         failf(data, "error reading X.509 key or certificate file");
         return CURLE_SSL_CONNECT_ERROR;

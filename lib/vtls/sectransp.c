@@ -748,8 +748,8 @@ static CURLcode sectransp_version_from_curl(SSLProtocol *darwinver,
 }
 #endif
 
-static CURLcode set_ssl_version_min_max(struct Curl_cfilter *cf,
-                                        struct Curl_easy *data)
+static CURLcode sectransp_set_ssl_version_min_max(struct Curl_cfilter *cf,
+                                                  struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct st_ssl_backend_data *backend =
@@ -1156,7 +1156,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
-      result = set_ssl_version_min_max(cf, data);
+      result = sectransp_set_ssl_version_min_max(cf, data);
       if(result != CURLE_OK)
         return result;
       break;
@@ -1191,7 +1191,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
     case CURL_SSLVERSION_TLSv1_3:
-      result = set_ssl_version_min_max(cf, data);
+      result = sectransp_set_ssl_version_min_max(cf, data);
       if(result != CURLE_OK)
         return result;
       break;

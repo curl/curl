@@ -1050,7 +1050,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
 #ifndef SSL_FILETYPE_PKCS12
 #define SSL_FILETYPE_PKCS12 43
 #endif
-static int do_file_type(const char *type)
+static int ossl_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return SSL_FILETYPE_PEM;
@@ -1272,7 +1272,7 @@ int cert_stuff(struct Curl_easy *data,
   char error_buffer[256];
   bool check_privkey = TRUE;
 
-  int file_type = do_file_type(cert_type);
+  int file_type = ossl_do_file_type(cert_type);
 
   if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE)) {
     SSL *ssl;
@@ -1513,7 +1513,7 @@ fail:
       key_blob = cert_blob;
     }
     else
-      file_type = do_file_type(key_type);
+      file_type = ossl_do_file_type(key_type);
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:

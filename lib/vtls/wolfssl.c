@@ -205,7 +205,7 @@ wolfssl_log_tls12_secret(SSL *ssl)
 }
 #endif /* OPENSSL_EXTRA */
 
-static int do_file_type(const char *type)
+static int wolfssl_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return SSL_FILETYPE_PEM;
@@ -872,7 +872,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     const char *key_file = ssl_config->key;
     const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;
     const struct curl_blob *key_blob = ssl_config->key_blob;
-    int file_type = do_file_type(ssl_config->cert_type);
+    int file_type = wolfssl_do_file_type(ssl_config->cert_type);
     int rc;
 
     switch(file_type) {
@@ -903,7 +903,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       key_file = cert_file;
     }
     else
-      file_type = do_file_type(ssl_config->key_type);
+      file_type = wolfssl_do_file_type(ssl_config->key_type);
 
     rc = key_blob ?
       wolfSSL_CTX_use_PrivateKey_buffer(backend->ctx, key_blob->data,
@@ -918,7 +918,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->primary.cert_blob) {
     const struct curl_blob *cert_blob = ssl_config->primary.cert_blob;
     const struct curl_blob *key_blob = ssl_config->key_blob;
-    int file_type = do_file_type(ssl_config->cert_type);
+    int file_type = wolfssl_do_file_type(ssl_config->cert_type);
     int rc;
 
     switch(file_type) {
@@ -943,7 +943,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(!key_blob)
       key_blob = cert_blob;
     else
-      file_type = do_file_type(ssl_config->key_type);
+      file_type = wolfssl_do_file_type(ssl_config->key_type);
 
     if(wolfSSL_CTX_use_PrivateKey_buffer(backend->ctx, key_blob->data,
                                          (long)key_blob->len,
