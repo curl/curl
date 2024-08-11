@@ -501,18 +501,6 @@ sub stopserver {
     my $result = 0;
     foreach my $server (@killservers) {
         my $pidfile = $serverpidfile{$server};
-        my $pid = processexists($pidfile);
-        if($pid > 0) {
-            if($err_unexpected) {
-                logmsg "ERROR: ";
-                $result = -1;
-            }
-            else {
-                logmsg "Warning: ";
-            }
-            logmsg "$server server unexpectedly alive\n";
-            killpid($verbose, $pid);
-        }
         unlink($pidfile) if(-f $pidfile);
     }
 
