@@ -293,12 +293,24 @@ struct cf_osslq_ctx {
   struct Curl_hash streams;          /* hash `data->id` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
+  BIT(initialized);
   BIT(got_first_byte);               /* if first byte was received */
   BIT(x509_store_setup);             /* if x509 store has been set up */
   BIT(protocol_shutdown);            /* QUIC connection is shut down */
   BIT(need_recv);                    /* QUIC connection needs to receive */
   BIT(need_send);                    /* QUIC connection needs to send */
 };
+
+static void h3_stream_hash_free(void *stream);
+
+static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
+{
+  DEBUGASSERT(!ctx->initialized);
+  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+                  H3_STREAM_POOL_SPARES);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->initialized = TRUE;
+}
 
 static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
 {
@@ -307,12 +319,13 @@ static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
   cf_osslq_h3conn_cleanup(&ctx->h3);
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
-  Curl_bufcp_free(&ctx->stream_bufcp);
-  Curl_hash_clean(&ctx->streams);
-  Curl_hash_destroy(&ctx->streams);
-  Curl_ssl_peer_cleanup(&ctx->peer);
-
-  memset(ctx, 0, sizeof(*ctx));
+  if(ctx->initialized) {
+    Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+    memset(ctx, 0, sizeof(*ctx));
+  }
   ctx->call_data = save;
 }
 
@@ -1148,9 +1161,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
 
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
-                  H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  DEBUGASSERT(ctx->initialized);
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     goto out;
@@ -2330,7 +2341,7 @@ CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_osslq_ctx_clear(ctx);
+  cf_osslq_ctx_init(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)

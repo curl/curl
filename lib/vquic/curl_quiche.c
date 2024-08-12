@@ -100,18 +100,39 @@ struct cf_quiche_ctx {
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct Curl_hash streams;          /* hash `data->id` to `stream_ctx` */
   curl_off_t data_recvd;
+  BIT(initialized);
   BIT(goaway);                       /* got GOAWAY from server */
   BIT(x509_store_setup);             /* if x509 store has been set up */
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
 #ifdef DEBUG_QUICHE
+/* initialize debug log callback only once */
+static int debug_log_init = 0;
 static void quiche_debug_log(const char *line, void *argp)
 {
   (void)argp;
   fprintf(stderr, "%s\n", line);
 }
 #endif
+
+static void h3_stream_hash_free(void *stream);
+
+static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
+{
+  DEBUGASSERT(!ctx->initialized);
+#ifdef DEBUG_QUICHE
+  if(!debug_log_init) {
+    quiche_enable_debug_logging(quiche_debug_log, NULL);
+    debug_log_init = 1;
+  }
+#endif
+  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+                  H3_STREAM_POOL_SPARES);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->data_recvd = 0;
+  ctx->initialized = TRUE;
+}
 
 static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
 {
@@ -124,16 +145,17 @@ static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
       quiche_conn_free(ctx->qconn);
     if(ctx->cfg)
       quiche_config_free(ctx->cfg);
-    /* quiche just freed it */
-    ctx->tls.ossl.ssl = NULL;
-    Curl_vquic_tls_cleanup(&ctx->tls);
-    Curl_ssl_peer_cleanup(&ctx->peer);
-    vquic_ctx_free(&ctx->q);
-    Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_clean(&ctx->streams);
-    Curl_hash_destroy(&ctx->streams);
-
-    memset(ctx, 0, sizeof(*ctx));
+    if(ctx->initialized) {
+      /* quiche just freed it */
+      ctx->tls.ossl.ssl = NULL;
+      Curl_vquic_tls_cleanup(&ctx->tls);
+      Curl_ssl_peer_cleanup(&ctx->peer);
+      vquic_ctx_free(&ctx->q);
+      Curl_bufcp_free(&ctx->stream_bufcp);
+      Curl_hash_clean(&ctx->streams);
+      Curl_hash_destroy(&ctx->streams);
+      memset(ctx, 0, sizeof(*ctx));
+    }
   }
 }
 
@@ -1240,8 +1262,8 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode cf_connect_start(struct Curl_cfilter *cf,
-                                 struct Curl_easy *data)
+static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   int rv;
@@ -1249,19 +1271,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *sockaddr;
 
   DEBUGASSERT(ctx->q.sockfd != CURL_SOCKET_BAD);
-
-#ifdef DEBUG_QUICHE
-  /* initialize debug log callback only once */
-  static int debug_log_init = 0;
-  if(!debug_log_init) {
-    quiche_enable_debug_logging(quiche_debug_log, NULL);
-    debug_log_init = 1;
-  }
-#endif
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
-                  H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
-  ctx->data_recvd = 0;
+  DEBUGASSERT(ctx->initialized);
 
   result = vquic_ctx_init(&ctx->q);
   if(result)
@@ -1403,7 +1413,7 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
   }
 
   if(!ctx->qconn) {
-    result = cf_connect_start(cf, data);
+    result = cf_quiche_ctx_open(cf, data);
     if(result)
       goto out;
     ctx->started_at = ctx->q.last_op;
@@ -1652,6 +1662,7 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
+  cf_quiche_ctx_init(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)

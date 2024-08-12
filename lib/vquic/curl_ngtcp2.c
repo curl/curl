@@ -138,6 +138,7 @@ struct cf_ngtcp2_ctx {
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   int qlogfd;
+  BIT(initialized);
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
@@ -1963,10 +1964,26 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
   return result;
 }
 
+static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
+{
+  DEBUGASSERT(!ctx->initialized);
+  ctx->qlogfd = -1;
+  ctx->version = NGTCP2_PROTO_VER_MAX;
+  ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
+  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
+  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+                  H3_STREAM_POOL_SPARES);
+  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->initialized = TRUE;
+}
+
 static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
 {
   struct cf_call_data save = ctx->call_data;
 
+  if(!ctx->initialized)
+    return;
   if(ctx->qlogfd != -1) {
     close(ctx->qlogfd);
   }
@@ -2190,14 +2207,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
 
-  ctx->version = NGTCP2_PROTO_VER_MAX;
-  ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
-  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
-                  H3_STREAM_POOL_SPARES);
-  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
-
+  DEBUGASSERT(ctx->initialized);
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     return result;
@@ -2512,8 +2522,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  ctx->qlogfd = -1;
-  cf_ngtcp2_ctx_clear(ctx);
+  cf_ngtcp2_ctx_init(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
