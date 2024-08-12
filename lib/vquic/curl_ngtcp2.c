@@ -138,6 +138,7 @@ struct cf_ngtcp2_ctx {
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   int qlogfd;
+  BIT(initialized);
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
@@ -145,6 +146,34 @@ struct cf_ngtcp2_ctx {
 #undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_ngtcp2_ctx *)(cf)->ctx)->call_data
+
+static void h3_stream_hash_free(void *stream);
+
+static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
+{
+  DEBUGASSERT(!ctx->initialized);
+  ctx->qlogfd = -1;
+  ctx->version = NGTCP2_PROTO_VER_MAX;
+  ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
+  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
+  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+                  H3_STREAM_POOL_SPARES);
+  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->initialized = TRUE;
+}
+
+static void cf_ngtcp2_ctx_free(struct cf_ngtcp2_ctx *ctx)
+{
+  if(ctx && ctx->initialized) {
+    Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_dyn_free(&ctx->scratch);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+  }
+  free(ctx);
+}
 
 struct pkt_io_ctx;
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
@@ -1963,27 +1992,22 @@ static CURLcode cf_ngtcp2_data_event(struct Curl_cfilter *cf,
   return result;
 }
 
-static void cf_ngtcp2_ctx_clear(struct cf_ngtcp2_ctx *ctx)
+static void cf_ngtcp2_ctx_close(struct cf_ngtcp2_ctx *ctx)
 {
   struct cf_call_data save = ctx->call_data;
 
+  if(!ctx->initialized)
+    return;
   if(ctx->qlogfd != -1) {
     close(ctx->qlogfd);
   }
+  ctx->qlogfd = -1;
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
   if(ctx->h3conn)
     nghttp3_conn_del(ctx->h3conn);
   if(ctx->qconn)
     ngtcp2_conn_del(ctx->qconn);
-  Curl_bufcp_free(&ctx->stream_bufcp);
-  Curl_dyn_free(&ctx->scratch);
-  Curl_hash_clean(&ctx->streams);
-  Curl_hash_destroy(&ctx->streams);
-  Curl_ssl_peer_cleanup(&ctx->peer);
-
-  memset(ctx, 0, sizeof(*ctx));
-  ctx->qlogfd = -1;
   ctx->call_data = save;
 }
 
@@ -2088,7 +2112,7 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_SAVE(save, cf, data);
   if(ctx && ctx->qconn) {
     cf_ngtcp2_conn_close(cf, data);
-    cf_ngtcp2_ctx_clear(ctx);
+    cf_ngtcp2_ctx_close(ctx);
     CURL_TRC_CF(data, cf, "close");
   }
   cf->connected = FALSE;
@@ -2097,18 +2121,11 @@ static void cf_ngtcp2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static void cf_ngtcp2_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
   CURL_TRC_CF(data, cf, "destroy");
-  if(ctx) {
-    cf_ngtcp2_ctx_clear(ctx);
-    free(ctx);
+  if(cf->ctx) {
+    cf_ngtcp2_ctx_free(cf->ctx);
+    cf->ctx = NULL;
   }
-  cf->ctx = NULL;
-  /* No CF_DATA_RESTORE(cf, save) possible */
-  (void)save;
 }
 
 #ifdef USE_OPENSSL
@@ -2190,14 +2207,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   const struct Curl_sockaddr_ex *sockaddr = NULL;
   int qfd;
 
-  ctx->version = NGTCP2_PROTO_VER_MAX;
-  ctx->max_stream_window = H3_STREAM_WINDOW_SIZE;
-  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
-                  H3_STREAM_POOL_SPARES);
-  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
-
+  DEBUGASSERT(ctx->initialized);
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     return result;
@@ -2512,8 +2522,7 @@ CURLcode Curl_cf_ngtcp2_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  ctx->qlogfd = -1;
-  cf_ngtcp2_ctx_clear(ctx);
+  cf_ngtcp2_ctx_init(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
@@ -2534,7 +2543,7 @@ out:
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
     Curl_safefree(cf);
-    Curl_safefree(ctx);
+    cf_ngtcp2_ctx_free(ctx);
   }
   return result;
 }
