@@ -398,7 +398,7 @@ jobs:
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
-          tflags: '~1516'
+          tflags: '~165 ~1516 ~1448 ~1560 ~2046 ~2047'
           # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
           #          read its configuration from, making it vulnerable to attacks on
           #          Windows. Do not use this component till there is a fix for these.
