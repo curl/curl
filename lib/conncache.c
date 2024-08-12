@@ -123,6 +123,9 @@ static void free_bundle_hash_entry(void *freethis)
 int Curl_conncache_init(struct conncache *connc,
                         struct Curl_multi *multi, size_t size)
 {
+  Curl_hash_init(&connc->hash, size, Curl_hash_str,
+                 Curl_str_key_compare, free_bundle_hash_entry);
+
   /* allocate a new easy handle to use when closing cached connections */
   connc->closure_handle = curl_easy_init();
   if(!connc->closure_handle)
@@ -133,8 +136,6 @@ int Curl_conncache_init(struct conncache *connc,
     connc->closure_handle->set.verbose = true;
 #endif
 
-  Curl_hash_init(&connc->hash, size, Curl_hash_str,
-                 Curl_str_key_compare, free_bundle_hash_entry);
   connc->closure_handle->state.conn_cache = connc;
   connc->multi = multi;
   Curl_llist_init(&connc->shutdowns.conn_list, NULL);

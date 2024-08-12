@@ -257,7 +257,8 @@ void Curl_hostcache_prune(struct Curl_easy *data)
 
     /* if the cache size is still too big, use the oldest age as new
        prune limit */
-  } while(timeout && (data->dns.hostcache->size > MAX_DNS_CACHE_SIZE));
+  } while(timeout &&
+          (Curl_hash_count(data->dns.hostcache) > MAX_DNS_CACHE_SIZE));
 
   if(data->share)
     Curl_share_unlock(data, CURL_LOCK_DATA_DNS);

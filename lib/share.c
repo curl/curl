@@ -224,8 +224,11 @@ curl_share_cleanup(struct Curl_share *share)
     return CURLSHE_IN_USE;
   }
 
-  Curl_conncache_close_all_connections(&share->conn_cache);
-  Curl_conncache_destroy(&share->conn_cache);
+  if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
+    /* avoid the hash if it was never initialized */
+    Curl_conncache_close_all_connections(&share->conn_cache);
+    Curl_conncache_destroy(&share->conn_cache);
+  }
   Curl_hash_destroy(&share->hostcache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)

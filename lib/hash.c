@@ -33,6 +33,10 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* random patterns for API verification */
+#define HASHINIT 0x7017e781
+#define ITERINIT 0x5FEDCBA9
+
 static void
 hash_element_dtor(void *user, void *element)
 {
@@ -77,6 +81,9 @@ Curl_hash_init(struct Curl_hash *h,
   h->dtor = dtor;
   h->size = 0;
   h->slots = slots;
+#ifdef DEBUGBUILD
+  h->init = HASHINIT;
+#endif
 }
 
 static struct Curl_hash_element *
@@ -107,6 +114,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
 
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
+  DEBUGASSERT(h->init == HASHINIT);
   if(!h->table) {
     size_t i;
     h->table = malloc(h->slots * sizeof(struct Curl_llist));
@@ -160,6 +168,7 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 {
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
     struct Curl_llist_node *le;
     struct Curl_llist *l = FETCH_LIST(h, key, key_len);
@@ -184,6 +193,7 @@ void *
 Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 {
   DEBUGASSERT(h);
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
     struct Curl_llist_node *le;
     struct Curl_llist *l;
@@ -210,6 +220,7 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 void
 Curl_hash_destroy(struct Curl_hash *h)
 {
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
     size_t i;
     for(i = 0; i < h->slots; ++i) {
@@ -231,6 +242,12 @@ Curl_hash_clean(struct Curl_hash *h)
   Curl_hash_clean_with_criterium(h, NULL, NULL);
 }
 
+size_t Curl_hash_count(struct Curl_hash *h)
+{
+  DEBUGASSERT(h->init == HASHINIT);
+  return h->size;
+}
+
 /* Cleans all entries that pass the comp function criteria. */
 void
 Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
@@ -241,6 +258,7 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
   if(!h || !h->table)
     return;
 
+  DEBUGASSERT(h->init == HASHINIT);
   for(i = 0; i < h->slots; ++i) {
     struct Curl_llist *list = &h->table[i];
     struct Curl_llist_node *le =
@@ -285,16 +303,21 @@ size_t Curl_str_key_compare(void *k1, size_t key1_len,
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter)
 {
+  DEBUGASSERT(hash->init == HASHINIT);
   iter->hash = hash;
   iter->slot_index = 0;
   iter->current_element = NULL;
+#ifdef DEBUGBUILD
+  iter->init = ITERINIT;
+#endif
 }
 
 struct Curl_hash_element *
 Curl_hash_next_element(struct Curl_hash_iterator *iter)
 {
-  struct Curl_hash *h = iter->hash;
-
+  struct Curl_hash *h;
+  DEBUGASSERT(iter->init == ITERINIT);
+  h = iter->hash;
   if(!h->table)
     return NULL; /* empty hash, nothing to return */
 
