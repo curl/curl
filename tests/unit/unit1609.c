@@ -200,7 +200,6 @@ UNITTEST_START
 
     curl_easy_cleanup(easy);
     easy = NULL;
-    Curl_hash_destroy(&multi->hostcache);
     curl_multi_cleanup(multi);
     multi = NULL;
     curl_slist_free_all(list);

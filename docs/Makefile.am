@@ -70,6 +70,7 @@ EXTRA_DIST =                                    \
  FAQ                                            \
  FEATURES.md                                    \
  GOVERNANCE.md                                  \
+ HASH.md                                        \
  HELP-US.md                                     \
  HISTORY.md                                     \
  HSTS.md                                        \
