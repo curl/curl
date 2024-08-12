@@ -65,8 +65,6 @@ See also `Curl_llist_insert_next`.
 ## Remove a node
 
 Remove a node again from a linked list, by calling `Curl_llist_remove()`.
-Identify the `node` and pass in a custom `user` pointer that is sent along
-unmodified to the destructor (`dtor`) function, if one is used for the list.
 
 ## Iterate
 
@@ -153,14 +151,25 @@ struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list);
 
 Returns a pointer to the first node of the `list`, or a NULL if empty.
 
-## `Curl_node_remove`
+## `Curl_node_uremove`
 
 ~~~c
-void Curl_node_remove(struct Curl_llist_node *node, void *user);
+void Curl_node_uremove(struct Curl_llist_node *node, void *user);
 ~~~
 
 Removes the `node` the list it was previously added to. Passes the `user`
 pointer to the list's destructor function if one was setup.
+
+The function is infallible.
+
+## `Curl_node_remove`
+
+~~~c
+void Curl_node_remove(struct Curl_llist_node *node);
+~~~
+
+Removes the `node` the list it was previously added to. Passes a NULL pointer
+to the list's destructor function if one was setup.
 
 The function is infallible.
 

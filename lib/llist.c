@@ -140,7 +140,7 @@ Curl_llist_append(struct Curl_llist *list, const void *p,
  * @unittest: 1300
  */
 void
-Curl_node_remove(struct Curl_llist_node *e, void *user)
+Curl_node_uremove(struct Curl_llist_node *e, void *user)
 {
   void *ptr;
   struct Curl_llist *list;
@@ -186,13 +186,18 @@ Curl_node_remove(struct Curl_llist_node *e, void *user)
     list->_dtor(user, ptr);
 }
 
+void Curl_node_remove(struct Curl_llist_node *e)
+{
+  Curl_node_uremove(e, NULL);
+}
+
 void
 Curl_llist_destroy(struct Curl_llist *list, void *user)
 {
   if(list) {
     DEBUGASSERT(list->_init == LLISTINIT);
     while(list->_size > 0)
-      Curl_node_remove(list->_tail, user);
+      Curl_node_uremove(list->_tail, user);
   }
 }
 

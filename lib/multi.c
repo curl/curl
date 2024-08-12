@@ -847,7 +847,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   Curl_expire_clear(data);
 
   /* the handle is in a list, remove it from whichever it is */
-  Curl_node_remove(&data->multi_queue, NULL);
+  Curl_node_remove(&data->multi_queue);
 
   if(data->dns.hostcachetype == HCACHE_MULTI) {
     /* stop using the multi handle's DNS cache, *after* the possible
@@ -912,7 +912,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     struct Curl_message *msg = Curl_node_elem(e);
 
     if(msg->extmsg.easy_handle == easy) {
-      Curl_node_remove(e, NULL);
+      Curl_node_remove(e);
       /* there can only be one from this specific handle */
       break;
     }
@@ -947,7 +947,7 @@ void Curl_detach_connection(struct Curl_easy *data)
   struct connectdata *conn = data->conn;
   if(conn) {
     Curl_conn_ev_data_detach(conn, data);
-    Curl_node_remove(&data->conn_queue, NULL);
+    Curl_node_remove(&data->conn_queue);
   }
   data->conn = NULL;
 }
@@ -1930,7 +1930,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
            state and wait for an available connection. */
         multistate(data, MSTATE_PENDING);
         /* unlink from process list */
-        Curl_node_remove(&data->multi_queue, NULL);
+        Curl_node_remove(&data->multi_queue);
         /* add handle to pending list */
         Curl_llist_append(&multi->pending, data, &data->multi_queue);
         result = CURLE_OK;
@@ -2644,7 +2644,7 @@ statemachine_end:
       multistate(data, MSTATE_MSGSENT);
 
       /* unlink from the process list */
-      Curl_node_remove(&data->multi_queue, NULL);
+      Curl_node_remove(&data->multi_queue);
       /* add this handle msgsent list */
       Curl_llist_append(&multi->msgsent, data, &data->multi_queue);
       return CURLM_OK;
@@ -2742,7 +2742,7 @@ static void unlink_all_msgsent_handles(struct Curl_multi *multi)
     struct Curl_easy *data = Curl_node_elem(e);
     if(data) {
       DEBUGASSERT(data->mstate == MSTATE_MSGSENT);
-      Curl_node_remove(&data->multi_queue, NULL);
+      Curl_node_remove(&data->multi_queue);
       /* put it into the process list */
       Curl_llist_append(&multi->process, data, &data->multi_queue);
     }
@@ -2848,7 +2848,7 @@ CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
     msg = Curl_node_elem(e);
 
     /* remove the extracted entry */
-    Curl_node_remove(e, NULL);
+    Curl_node_remove(e);
 
     *msgs_in_queue = curlx_uztosi(Curl_llist_count(&multi->msglist));
 
@@ -3103,7 +3103,7 @@ static CURLMcode add_next_timeout(struct curltime now,
     timediff_t diff = Curl_timediff_us(node->time, now);
     if(diff <= 0)
       /* remove outdated entry */
-      Curl_node_remove(e, NULL);
+      Curl_node_remove(e);
     else
       /* the list is sorted so get out on the first mismatch */
       break;
@@ -3487,7 +3487,7 @@ multi_deltimeout(struct Curl_easy *data, expire_id eid)
   for(e = Curl_llist_head(timeoutlist); e; e = Curl_node_next(e)) {
     struct time_node *n = Curl_node_elem(e);
     if(n->eid == eid) {
-      Curl_node_remove(e, NULL);
+      Curl_node_remove(e);
       return;
     }
   }
@@ -3706,7 +3706,7 @@ static void move_pending_to_connect(struct Curl_multi *multi,
   DEBUGASSERT(data->mstate == MSTATE_PENDING);
 
   /* Remove this node from the pending list */
-  Curl_node_remove(&data->multi_queue, NULL);
+  Curl_node_remove(&data->multi_queue);
 
   /* put it into the process list */
   Curl_llist_append(&multi->process, data, &data->multi_queue);

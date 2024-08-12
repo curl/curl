@@ -215,7 +215,7 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
     /* remove the entry if present verbatim (without subdomain match) */
     sts = Curl_hsts(h, hostname, FALSE);
     if(sts) {
-      Curl_node_remove(&sts->node, NULL);
+      Curl_node_remove(&sts->node);
       hsts_free(sts);
     }
     return CURLE_OK;
@@ -270,7 +270,7 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
       n = Curl_node_next(e);
       if(sts->expires <= now) {
         /* remove expired entries */
-        Curl_node_remove(&sts->node, NULL);
+        Curl_node_remove(&sts->node);
         hsts_free(sts);
         continue;
       }

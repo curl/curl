@@ -121,7 +121,7 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
   for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
     he = (struct Curl_hash_element *) Curl_node_elem(le);
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      Curl_node_remove(le, (void *)h);
+      Curl_node_uremove(le, (void *)h);
       --h->size;
       break;
     }
@@ -167,7 +167,7 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
     for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
       struct Curl_hash_element *he = Curl_node_elem(le);
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
-        Curl_node_remove(le, (void *) h);
+        Curl_node_uremove(le, (void *) h);
         --h->size;
         return 0;
       }
@@ -250,7 +250,7 @@ Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
       struct Curl_llist_node *lnext = Curl_node_next(le);
       /* ask the callback function if we shall remove this entry or not */
       if(!comp || comp(user, he->ptr)) {
-        Curl_node_remove(le, (void *) h);
+        Curl_node_uremove(le, (void *) h);
         --h->size; /* one less entry in the hash now */
       }
       le = lnext;
