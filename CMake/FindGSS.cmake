@@ -53,7 +53,7 @@ set(_gss_root_hints
 
 # Try to find library using system pkg-config if user did not specify root dir
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
-  if(NOT MSVC OR VCPKG_TOOLCHAIN)
+  if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_search_module(_GSS ${_mit_modname} ${_heimdal_modname})
     list(APPEND _gss_root_hints "${_GSS_PREFIX}")

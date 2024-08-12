@@ -30,7 +30,7 @@
 # NGHTTP3_LIBRARIES     The libraries needed to use nghttp3
 # NGHTTP3_VERSION       Version of nghttp3
 
-if(NOT MSVC OR VCPKG_TOOLCHAIN)
+if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_NGHTTP3 "libnghttp3")
 endif()

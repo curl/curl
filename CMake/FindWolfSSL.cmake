@@ -30,7 +30,7 @@
 # WolfSSL_LIBRARIES     The wolfssl library names
 # WolfSSL_VERSION       Version of wolfssl
 
-if(NOT MSVC OR VCPKG_TOOLCHAIN)
+if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
 endif()
