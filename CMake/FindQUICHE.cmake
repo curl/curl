@@ -29,7 +29,7 @@
 # QUICHE_INCLUDE_DIRS  The quiche include directories
 # QUICHE_LIBRARIES     The libraries needed to use quiche
 
-if(NOT MSVC OR VCPKG_TOOLCHAIN)
+if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_QUICHE "quiche")
 endif()

@@ -30,7 +30,7 @@
 # NGHTTP2_LIBRARIES     The libraries needed to use nghttp2
 # NGHTTP2_VERSION       Version of nghttp2
 
-if(NOT MSVC OR VCPKG_TOOLCHAIN)
+if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_NGHTTP2 "libnghttp2")
 endif()

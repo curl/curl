@@ -23,6 +23,14 @@
 ###########################################################################
 @PACKAGE_INIT@
 
+if(NOT DEFINED CURL_USE_PKGCONFIG)
+  if(NOT MSVC OR VCPKG_TOOLCHAIN)
+    set(CURL_USE_PKGCONFIG ON)
+  else()
+    set(CURL_USE_PKGCONFIG OFF)
+  endif()
+endif()
+
 include(CMakeFindDependencyMacro)
 if(@USE_OPENSSL@)
   find_dependency(OpenSSL @OPENSSL_VERSION_MAJOR@)
