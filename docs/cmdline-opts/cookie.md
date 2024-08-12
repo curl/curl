@@ -21,7 +21,7 @@ Example:
 
 # `--cookie`
 
-This option has two separate functionalities.
+This option has two separate functions.
 
 Either: pass the exact data to send to the HTTP server in the Cookie header.
 It is supposedly data previously received from the server in a `Set-Cookie:`
