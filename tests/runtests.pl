@@ -599,6 +599,9 @@ sub checksystemfeatures {
             if ($libcurl =~ /WinIDN/) {
                 $feature{"WinIDN"} = 1;
             }
+            if ($libcurl =~ /libidn2/) {
+                $feature{"libidn2"} = 1;
+            }
             if ($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
             }
