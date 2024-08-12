@@ -735,6 +735,11 @@ static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_encryption_level level,
   return 0;
 }
 
+#if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(push)
+#  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
+#endif
+
 static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
@@ -777,6 +782,10 @@ static ngtcp2_callbacks ng_callbacks = {
   NULL, /* recv_tx_key */
   NULL, /* early_data_rejected */
 };
+
+#if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(pop)
+#endif
 
 /**
  * Connection maintenance like timeouts on packet ACKs etc. are done by us, not
