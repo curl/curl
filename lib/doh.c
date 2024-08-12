@@ -216,10 +216,13 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
 {
   struct Curl_easy *data;
 
-  data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_id);
-  DEBUGF(infof(doh, "doh_done: xfer for %" CURL_FORMAT_CURL_OFF_T
-               " is %p", doh->set.dohfor_id, (void *)data));
-  if(data) {
+  data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_mid);
+  if(!data) {
+    DEBUGF(infof(doh, "doh_done: xfer for mid=%" CURL_FORMAT_CURL_OFF_T
+                 " not found", doh->set.dohfor_mid));
+    DEBUGASSERT(0);
+  }
+  else {
     struct dohdata *dohp = data->req.doh;
     /* one of the DoH request done for the 'data' transfer is now complete! */
     dohp->pending--;
@@ -374,7 +377,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     }
 
     doh->set.fmultidone = doh_done;
-    doh->set.dohfor_id = data->id; /* for which transfer this is done */
+    doh->set.dohfor_mid = data->mid; /* for which transfer this is done */
 
     /* DoH handles must not inherit private_data. The handles may be passed to
        the user via callbacks and the user will be able to identify them as
@@ -385,7 +388,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     if(curl_multi_add_handle(multi, doh))
       goto error;
 
-    p->easy_id = doh->id;
+    p->easy_mid = doh->mid;
   }
   else
     goto error;
@@ -429,7 +432,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
     return NULL;
 
   for(i = 0; i < DOH_PROBE_SLOTS; ++i) {
-    dohp->probe[i].easy_id = -1;
+    dohp->probe[i].easy_mid = -1;
   }
 
   conn->bits.doh = TRUE;
@@ -1311,8 +1314,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
-  if(dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy_id < 0 &&
-     dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy_id < 0) {
+  if(dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy_mid < 0 &&
+     dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy_mid < 0) {
     failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
     return CONN_IS_PROXIED(data->conn)?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
@@ -1424,16 +1427,18 @@ void Curl_doh_close(struct Curl_easy *data)
     struct Curl_easy *probe_data;
     size_t slot;
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
-      if(doh->probe[slot].easy_id < 0)
+      if(doh->probe[slot].easy_mid < 0)
         continue;
       DEBUGASSERT(data->multi);
       probe_data = Curl_multi_get_handle(data->multi,
-                                         doh->probe[slot].easy_id);
-      DEBUGF(infof(data, "Curl_doh_close: xfer for %" CURL_FORMAT_CURL_OFF_T
-                   " is %p", doh->probe[slot].easy_id, (void *)probe_data));
-      doh->probe[slot].easy_id = -1;
-      if(!probe_data)
+                                         doh->probe[slot].easy_mid);
+      if(!probe_data) {
+        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%"
+                     CURL_FORMAT_CURL_OFF_T " not found!",
+                     doh->probe[slot].easy_mid));
+        doh->probe[slot].easy_mid = -1;
         continue;
+      }
       /* data->multi might already be reset at this time */
       curl_multi_remove_handle(data->multi, probe_data);
       Curl_close(&probe_data);

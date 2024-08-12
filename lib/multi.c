@@ -604,9 +604,16 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->set.server_response_timeout;
   data->state.conn_cache->closure_handle->set.no_signal =
     data->set.no_signal;
+
+  /* the identifier inside the connection cache */
   data->id = data->state.conn_cache->next_easy_id++;
   if(data->state.conn_cache->next_easy_id <= 0)
     data->state.conn_cache->next_easy_id = 0;
+  /* the identifier inside the multi instance */
+  data->mid = multi->next_easy_mid++;
+  if(multi->next_easy_mid <= 0)
+    multi->next_easy_mid = 0;
+
   CONNCACHE_UNLOCK(data);
 
   multi_warn_debug(multi, data);
@@ -923,8 +930,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      since we are not part of that multi handle anymore */
   data->state.conn_cache = NULL;
 
-  data->multi = NULL; /* clear the association to this multi handle */
-
   /* make sure there is no pending message in the queue sent from this easy
      handle */
   for(e = multi->msglist.head; e; e = e->next) {
@@ -936,6 +941,9 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
       break;
     }
   }
+
+  data->multi = NULL; /* clear the association to this multi handle */
+  data->mid = -1;
 
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
@@ -3913,27 +3921,28 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
 }
 
 struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
-                                        curl_off_t id)
+                                        curl_off_t mid)
 {
 
-  if(id >= 0) {
+  if(mid >= 0) {
     struct Curl_easy *data;
     struct Curl_llist_element *e;
 
-    for(data = multi->easyp; data; data = data->next) {
-      if(data->id == id)
+    for(e = multi->process.head; e; e = e->next) {
+      data = e->ptr;
+      if(data->mid == mid)
         return data;
     }
     /* may be in msgsent queue? */
     for(e = multi->msgsent.head; e; e = e->next) {
       data = e->ptr;
-      if(data->id == id)
+      if(data->mid == mid)
         return data;
     }
     /* may be in pending queue? */
     for(e = multi->pending.head; e; e = e->next) {
       data = e->ptr;
-      if(data->id == id)
+      if(data->mid == mid)
         return data;
     }
   }
