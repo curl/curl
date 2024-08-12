@@ -1423,20 +1423,22 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 void Curl_doh_close(struct Curl_easy *data)
 {
   struct dohdata *doh = data->req.doh;
-  if(doh) {
+  if(doh && data->multi) {
     struct Curl_easy *probe_data;
+    curl_off_t mid;
     size_t slot;
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
-      if(doh->probe[slot].easy_mid < 0)
+      mid = doh->probe[slot].easy_mid;
+      if(mid < 0)
         continue;
+      doh->probe[slot].easy_mid = -1;
+      /* should have been called before data is removed from multi handle */
       DEBUGASSERT(data->multi);
-      probe_data = Curl_multi_get_handle(data->multi,
-                                         doh->probe[slot].easy_mid);
+      probe_data = data->multi? Curl_multi_get_handle(data->multi, mid) : NULL;
       if(!probe_data) {
         DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%"
                      CURL_FORMAT_CURL_OFF_T " not found!",
                      doh->probe[slot].easy_mid));
-        doh->probe[slot].easy_mid = -1;
         continue;
       }
       /* data->multi might already be reset at this time */
