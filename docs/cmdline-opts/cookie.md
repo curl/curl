@@ -25,11 +25,11 @@ This option has two separate functionalities.
 
 Either: pass the exact data to send to the HTTP server in the Cookie header.
 It is supposedly data previously received from the server in a `Set-Cookie:`
-line. The data should be in the format `NAME1=VALUE1; NAME2=VALUE2` or as a
-single filename. When given a set of specific cookies and not a filename, it
-makes curl use the cookie header with this content explicitly in all outgoing
-request(s). If multiple requests are done due to authentication, followed
-redirects or similar, they all get this cookie header passed on.
+line. The data should be in the format `NAME1=VALUE1; NAME2=VALUE2`. When
+given a set of specific cookies, curl populats its cookie header with this
+content explicitly in all outgoing request(s). If multiple requests are done
+due to authentication, followed redirects or similar, they all get this cookie
+header passed on.
 
 Or: If no `=` symbol is used in the argument, it is instead treated as a
 filename to read previously stored cookie from. This option also activates the
