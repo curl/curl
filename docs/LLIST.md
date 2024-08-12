@@ -145,17 +145,6 @@ the previous list `node`.
 
 The function is infallible.
 
-## `Curl_llist_remove`
-
-~~~c
-void Curl_llist_remove(struct Curl_llist_node *node, void *user);
-~~~
-
-Removes the `node` the list it was previously added to. Passes the `user`
-pointer to the list's destructor function if one was setup.
-
-The function is infallible.
-
 ## `Curl_llist_head`
 
 ~~~c
@@ -163,6 +152,17 @@ struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list);
 ~~~
 
 Returns a pointer to the first node of the `list`, or a NULL if empty.
+
+## `Curl_node_remove`
+
+~~~c
+void Curl_node_remove(struct Curl_llist_node *node, void *user);
+~~~
+
+Removes the `node` the list it was previously added to. Passes the `user`
+pointer to the list's destructor function if one was setup.
+
+The function is infallible.
 
 ## `Curl_node_elem`
 
