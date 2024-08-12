@@ -134,29 +134,31 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
   ctx->initialized = TRUE;
 }
 
-static void cf_quiche_ctx_clear(struct cf_quiche_ctx *ctx)
+static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
 {
-  if(ctx) {
-    if(ctx->h3c)
-      quiche_h3_conn_free(ctx->h3c);
-    if(ctx->h3config)
-      quiche_h3_config_free(ctx->h3config);
-    if(ctx->qconn)
-      quiche_conn_free(ctx->qconn);
-    if(ctx->cfg)
-      quiche_config_free(ctx->cfg);
-    if(ctx->initialized) {
-      /* quiche just freed it */
-      ctx->tls.ossl.ssl = NULL;
-      Curl_vquic_tls_cleanup(&ctx->tls);
-      Curl_ssl_peer_cleanup(&ctx->peer);
-      vquic_ctx_free(&ctx->q);
-      Curl_bufcp_free(&ctx->stream_bufcp);
-      Curl_hash_clean(&ctx->streams);
-      Curl_hash_destroy(&ctx->streams);
-      memset(ctx, 0, sizeof(*ctx));
-    }
+  if(ctx->initialized) {
+    /* quiche just freed it */
+    ctx->tls.ossl.ssl = NULL;
+    Curl_vquic_tls_cleanup(&ctx->tls);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+    vquic_ctx_free(&ctx->q);
+    Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
   }
+  free(ctx);
+}
+
+static void cf_quiche_ctx_close(struct cf_quiche_ctx *ctx)
+{
+  if(ctx->h3c)
+    quiche_h3_conn_free(ctx->h3c);
+  if(ctx->h3config)
+    quiche_h3_config_free(ctx->h3config);
+  if(ctx->qconn)
+    quiche_conn_free(ctx->qconn);
+  if(ctx->cfg)
+    quiche_config_free(ctx->cfg);
 }
 
 static CURLcode cf_flush_egress(struct Curl_cfilter *cf,
@@ -1525,23 +1527,20 @@ out:
 
 static void cf_quiche_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_quiche_ctx *ctx = cf->ctx;
-
-  if(ctx) {
+  if(cf->ctx) {
     bool done;
     (void)cf_quiche_shutdown(cf, data, &done);
-    cf_quiche_ctx_clear(ctx);
+    cf_quiche_ctx_close(cf->ctx);
   }
 }
 
 static void cf_quiche_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_quiche_ctx *ctx = cf->ctx;
-
   (void)data;
-  cf_quiche_ctx_clear(ctx);
-  free(ctx);
-  cf->ctx = NULL;
+  if(cf->ctx) {
+    cf_quiche_ctx_free(cf->ctx);
+    cf->ctx = NULL;
+  }
 }
 
 static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
@@ -1682,7 +1681,7 @@ out:
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
     Curl_safefree(cf);
-    Curl_safefree(ctx);
+    cf_quiche_ctx_free(ctx);
   }
 
   return result;

@@ -143,12 +143,12 @@ static void cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
   ctx->initialized = TRUE;
 }
 
-static void cf_msh3_ctx_clear(struct cf_msh3_ctx *ctx)
+static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
 {
   if(ctx->initialized) {
     Curl_hash_destroy(&ctx->streams);
-    memset(ctx, 0, sizeof(*ctx));
   }
+  free(ctx);
 }
 
 static struct cf_msh3_ctx *h3_get_msh3_ctx(struct Curl_easy *data);
@@ -985,11 +985,11 @@ static void cf_msh3_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   CF_DATA_SAVE(save, cf, data);
   cf_msh3_close(cf, data);
-  cf_msh3_ctx_clear(cf->ctx);
-  free(cf->ctx);
-  cf->ctx = NULL;
+  if(cf->ctx) {
+    cf_msh3_ctx_free(cf->ctx);
+    cf->ctx = NULL;
+  }
   /* no CF_DATA_RESTORE(cf, save); its gone */
-
 }
 
 static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
@@ -1096,7 +1096,7 @@ out:
   *pcf = (!result)? cf : NULL;
   if(result) {
     Curl_safefree(cf);
-    Curl_safefree(ctx);
+    cf_msh3_ctx_free(ctx);
   }
 
   return result;
