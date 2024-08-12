@@ -172,7 +172,7 @@ static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
 
 static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
 {
-  if(ctx->initialized) {
+  if(ctx && ctx->initialized) {
     Curl_bufq_free(&ctx->inbufq);
     Curl_bufq_free(&ctx->outbufq);
     Curl_bufcp_free(&ctx->stream_bufcp);

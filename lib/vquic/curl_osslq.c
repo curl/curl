@@ -312,20 +312,24 @@ static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
   ctx->initialized = TRUE;
 }
 
-static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
+static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
+{
+  if(ctx && ctx->initialized) {
+    Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+  }
+  free(ctx);
+}
+
+static void cf_osslq_ctx_close(struct cf_osslq_ctx *ctx)
 {
   struct cf_call_data save = ctx->call_data;
 
   cf_osslq_h3conn_cleanup(&ctx->h3);
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
-  if(ctx->initialized) {
-    Curl_bufcp_free(&ctx->stream_bufcp);
-    Curl_hash_clean(&ctx->streams);
-    Curl_hash_destroy(&ctx->streams);
-    Curl_ssl_peer_cleanup(&ctx->peer);
-    memset(ctx, 0, sizeof(*ctx));
-  }
   ctx->call_data = save;
 }
 
@@ -414,7 +418,7 @@ static void cf_osslq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
                       (SSL_SHUTDOWN_FLAG_NO_BLOCK | SSL_SHUTDOWN_FLAG_RAPID),
                       NULL, 0);
     }
-    cf_osslq_ctx_clear(ctx);
+    cf_osslq_ctx_close(ctx);
   }
 
   cf->connected = FALSE;
@@ -430,8 +434,7 @@ static void cf_osslq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   CURL_TRC_CF(data, cf, "destroy");
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_osslq_destroy()");
-    cf_osslq_ctx_clear(ctx);
-    free(ctx);
+    cf_osslq_ctx_free(ctx);
   }
   cf->ctx = NULL;
   /* No CF_DATA_RESTORE(cf, save) possible */
@@ -2362,7 +2365,7 @@ out:
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
     Curl_safefree(cf);
-    Curl_safefree(ctx);
+    cf_osslq_ctx_free(ctx);
   }
   return result;
 }

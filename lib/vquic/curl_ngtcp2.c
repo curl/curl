@@ -165,7 +165,7 @@ static void cf_ngtcp2_ctx_init(struct cf_ngtcp2_ctx *ctx)
 
 static void cf_ngtcp2_ctx_free(struct cf_ngtcp2_ctx *ctx)
 {
-  if(ctx->initialized) {
+  if(ctx && ctx->initialized) {
     Curl_bufcp_free(&ctx->stream_bufcp);
     Curl_dyn_free(&ctx->scratch);
     Curl_hash_clean(&ctx->streams);

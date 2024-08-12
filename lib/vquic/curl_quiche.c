@@ -136,7 +136,7 @@ static void cf_quiche_ctx_init(struct cf_quiche_ctx *ctx)
 
 static void cf_quiche_ctx_free(struct cf_quiche_ctx *ctx)
 {
-  if(ctx->initialized) {
+  if(ctx && ctx->initialized) {
     /* quiche just freed it */
     ctx->tls.ossl.ssl = NULL;
     Curl_vquic_tls_cleanup(&ctx->tls);

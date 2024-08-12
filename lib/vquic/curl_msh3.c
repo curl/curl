@@ -145,7 +145,7 @@ static void cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
 
 static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
 {
-  if(ctx->initialized) {
+  if(ctx && ctx->initialized) {
     Curl_hash_destroy(&ctx->streams);
   }
   free(ctx);
