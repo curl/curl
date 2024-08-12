@@ -44,7 +44,13 @@ class TestSSLUse:
     def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
-        httpd.clear_extra_configs()
+        httpd.set_extra_config('base', [
+            f'SSLCipherSuite SSL'\
+            f' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'\
+            f':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
+            f'SSLCipherSuite TLSv1.3'\
+            f' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
+        ])
         httpd.reload()
 
     def test_17_01_sslinfo_plain(self, env: Env, httpd, nghttpx, repeat):
@@ -173,10 +179,10 @@ class TestSSLUse:
         if proto != 'h3':  # we proxy h3
             assert r.json['SSL_TLS_SNI'] == domain, f'{r.json}'
 
-    # test setting cipher suites, the AES 128 ciphers are disabled in the test server
+    # test setting cipher suites, the AES 256 ciphers are disabled in the test server
     @pytest.mark.parametrize("ciphers, succeed", [
-        [[0x1301], False],
-        [[0x1302], True],
+        [[0x1301], True],
+        [[0x1302], False],
         [[0x1303], True],
         [[0x1302, 0x1303], True],
         [[0xC02B, 0xC02F], True],
