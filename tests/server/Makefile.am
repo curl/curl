@@ -49,7 +49,7 @@ endif
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = base64.pl Makefile.inc CMakeLists.txt
+EXTRA_DIST = base64.pl CMakeLists.txt
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;

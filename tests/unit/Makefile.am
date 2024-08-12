@@ -38,7 +38,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest
 
-EXTRA_DIST = Makefile.inc CMakeLists.txt README.md
+EXTRA_DIST = CMakeLists.txt README.md
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
