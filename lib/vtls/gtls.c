@@ -340,7 +340,7 @@ static CURLcode handshake(struct Curl_cfilter *cf,
       if(!strerr)
         strerr = gnutls_strerror(rc);
 
-      failf(data, "gnutls_handshake() failed: %s", strerr);
+      failf(data, "GnuTLS, handshake failed: %s", strerr);
       return CURLE_SSL_CONNECT_ERROR;
     }
 
@@ -1295,9 +1295,18 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     /* verify_status is a bitmask of gnutls_certificate_status bits */
     if(verify_status & GNUTLS_CERT_INVALID) {
       if(config->verifypeer) {
-        failf(data, "server certificate verification failed. CAfile: %s "
-              "CRLfile: %s", config->CAfile ? config->CAfile:
-              "none",
+        const char *cause = "certificate error, no details available";
+        if(verify_status & GNUTLS_CERT_EXPIRED)
+          cause = "certificate has expired";
+        else if(verify_status & GNUTLS_CERT_SIGNER_NOT_FOUND)
+          cause = "certificate signer not trusted";
+        else if(verify_status & GNUTLS_CERT_INSECURE_ALGORITHM)
+          cause = "certificate uses insecure algorithm";
+        else if(verify_status & GNUTLS_CERT_INVALID_OCSP_STATUS)
+          cause = "attached OCSP status response is invalid";
+        failf(data, "server verification failed: %s. (CAfile: %s "
+              "CRLfile: %s)", cause,
+              config->CAfile ? config->CAfile: "none",
               ssl_config->primary.CRLfile ?
               ssl_config->primary.CRLfile : "none");
         return CURLE_PEER_FAILED_VERIFICATION;

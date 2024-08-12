@@ -1306,6 +1306,14 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
                     "continuing anyway");
       }
     }
+    else if(ASN_AFTER_DATE_E == detail) {
+      failf(data, "server verification failed: certificate has expired.");
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
+    else if(ASN_BEFORE_DATE_E == detail) {
+      failf(data, "server verification failed: certificate not valid yet.");
+      return CURLE_PEER_FAILED_VERIFICATION;
+    }
 #ifdef USE_ECH
     else if(-1 == detail) {
       /* try access a retry_config ECHConfigList for tracing */
