@@ -257,13 +257,6 @@ class Httpd:
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
                 f'SSLSessionCache "shmcb:ssl_gcache_data(32000)"',
-                (f'SSLCipherSuite SSL'
-                 f' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
-                 f':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305'
-                ),
-                (f'SSLCipherSuite TLSv1.3'
-                 f' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256'
-                ),
             ]
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])
