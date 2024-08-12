@@ -417,6 +417,7 @@ jobs:
         build: [autotools, cmake]
         exclude:
           # Combinations uncovered by runner images:
+          - { image: macos-12, compiler: 'gcc-11' }  # since macos-12 version 20240811.1
           - { image: macos-12, xcode: '14.3.1' }
           - { image: macos-12, xcode: '15.0.1' }
           - { image: macos-12, xcode: '15.1'   }
