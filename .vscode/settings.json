@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "*.cu": "cuda-cpp",
+        "curl_setup.h": "c"
+    }
+}

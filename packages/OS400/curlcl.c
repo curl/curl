@@ -153,7 +153,8 @@ main(int argsc, struct arguments *args)
 
   if(!exitcode) {
     /* Allocate space for parsed arguments. */
-    argv = (char **) malloc((argc + 1) * sizeof(*argv) + argsize);
+    // argv = (char **) malloc((argc + 1) * sizeof(*argv) + argsize);
+    argv = std::make_unique<char*>((argc + 1) + argsize);
     if(!argv) {
       fputs("Memory allocation error\n", stderr);
       exitcode = -2;
@@ -169,7 +170,7 @@ main(int argsc, struct arguments *args)
       _CALLPGMV((void *) &pgmptr, argv, argc);
       exitcode = luwrka->LU_RC;
 
-      free(argv);
+      // free(argv);
     }
   }
 

@@ -88,7 +88,8 @@ int main(int argc, char **argv)
    }
 
   /* Allocate memory for the ASCII arguments and vector. */
-  argv = (char **) malloc((argc + 1) * sizeof(*argv) + bytecount);
+  // argv = (char **) malloc((argc + 1) * sizeof(*argv) + bytecount);
+  argv = std::make_unique<char *>((argc + 1) + bytecount);
 
   /* Build the vector and convert argument encoding. */
   outbuf = (char *) (argv + argc + 1);
@@ -112,7 +113,7 @@ int main(int argc, char **argv)
   i = main_a(argc, argv);
 
   /* Clean-up allocated items. */
-  free((char *) argv);
+  // free((char *) argv);
   QadrtFreeConversionTable();
   QadrtFreeEnviron();
 

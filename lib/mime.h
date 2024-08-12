@@ -25,6 +25,8 @@
  ***************************************************************************/
 
 #include "curl_setup.h"
+#include <memory>
+#include <iostream>
 
 #define MIME_BOUNDARY_DASHES            24  /* leading boundary dashes */
 #define MIME_RAND_BOUNDARY_CHARS        22  /* Nb. of random boundary chars. */

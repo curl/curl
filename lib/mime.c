@@ -1281,9 +1281,10 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
 /* Create a mime handle. */
 curl_mime *curl_mime_init(struct Curl_easy *easy)
 {
-  curl_mime *mime;
+  // curl_mime *mime;
 
-  mime = (curl_mime *) malloc(sizeof(*mime));
+  // mime = (curl_mime *) malloc(sizeof(*mime));
+  std::unique_ptr<curl_mime> mime = std::make_unique<curl_mime>(1);
 
   if(mime) {
     mime->parent = NULL;
@@ -1295,7 +1296,7 @@ curl_mime *curl_mime_init(struct Curl_easy *easy)
                        (unsigned char *) &mime->boundary[MIME_BOUNDARY_DASHES],
                        MIME_RAND_BOUNDARY_CHARS + 1)) {
       /* failed to get random separator, bail out */
-      free(mime);
+      // free(mime);
       return NULL;
     }
     mimesetstate(&mime->state, MIMESTATE_BEGIN, NULL);
@@ -1315,12 +1316,13 @@ void Curl_mime_initpart(curl_mimepart *part)
 /* Create a mime part and append it to a mime handle's part list. */
 curl_mimepart *curl_mime_addpart(curl_mime *mime)
 {
-  curl_mimepart *part;
+  // curl_mimepart *part;
 
   if(!mime)
     return NULL;
 
-  part = (curl_mimepart *) malloc(sizeof(*part));
+  // part = (curl_mimepart *) malloc(sizeof(*part));
+  std::unique_ptr<curl_mimepart> part = std::make_unique<curl_mimepart>(1);
 
   if(part) {
     Curl_mime_initpart(part);
