@@ -266,7 +266,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
   Curl_safefree(data->state.first_host);
-  Curl_safefree(data->state.scratch);
   Curl_ssl_free_certinfo(data);
 
   if(data->state.referer_alloc) {
