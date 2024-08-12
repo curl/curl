@@ -4,10 +4,11 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3220
+ Contributors:                 3221
 
 This release includes the following changes:
 
+ o autotools: add `--with-windows-unicode` option [103]
  o curl: --help [option] displays documentation for given cmdline option [19]
  o curl: add --skip-existing [54]
  o curl: for -O, use "default" as filename when the URL has none [34]
@@ -45,19 +46,26 @@ This release includes the following bugfixes:
  o cmake: drop reference to undefined variable [25]
  o cmake: drop unused `HAVE_IDNA_STRERROR` [62]
  o cmake: drop unused internal variable [22]
+ o cmake: exclude tests/http/clients builds by default [110]
  o cmake: fix `GSS_VERSION` for Heimdal found via pkg-config [77]
  o cmake: fix `pkg-config`-based detection in `FindGSS.cmake` [94]
+ o cmake: limit libidn2 `pkg-config` detection to `UNIX` [109]
  o cmake: more small tidy-ups and fixes [80]
  o cmake: show CMake platform/compiler flags [63]
  o cmake: use numeric comparison for `HAVE_WIN32_WINNT` [69]
+ o configure: delete unused `m4/xc-translit.m4` [114]
  o configure: detect AppleIDN [70]
  o configure: fail if PSL is not disabled but not found [46]
+ o configure: replace nonportable grep -o with awk [111]
+ o cookie.md: try to articulate the two different uses this option has [92]
  o curl: allow 500MB data URL encode strings [38]
  o curl: fix --proxy-pinnedpubkey [91]
  o curl: warn on unsupported SSL options [106]
  o Curl_rand_bytes to control env override [17]
+ o DEPRECATE.md: remove hyper after February 2025 [89]
  o dist: add missing `docs/examples/CMakeLists.txt` [58]
  o dist: add missing `FindNettle.cmake` [11]
+ o dist: add missing `lib/optiontable.pl` [115]
  o dist: add missing `test_*.py` scripts [102]
  o dist: drop buildconf [65]
  o dist: fix reproducible build from release tarball [36]
@@ -80,13 +88,17 @@ This release includes the following bugfixes:
  o krb5: fix `-Wcast-align` [95]
  o lib: add eos flag to send methods [14]
  o lib: convert some debugf()s into traces [8]
+ o lib: fix AIX build issues [112]
  o libcurl.pc: add `Cflags.private` [10]
+ o libcurl/docs: expand on redirect following and secrets to other hosts [85]
+ o llist: remove direct struct accesses, use only functions [72]
  o Makefile.mk: fixup enabling libidn2 [61]
  o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
  o maketgz: accept option to include latest commit hash [5]
  o manpage: ensure a maximum width for the text version [75]
  o max-filesize.md: mention zero disables the limit [93]
  o mk-ca-bundle.pl: include a link to the caextract webpage [68]
+ o multi: make the "general" list of easy handles a Curl_llist [97]
  o ngtcp2: use NGHTTP3 prefix instead of NGTCP2 for errors in h3 callbacks [79]
  o openssl: improve shutdown handling [44]
  o progress: ratelimit/progress tweaks [32]
@@ -103,6 +115,7 @@ This release includes the following bugfixes:
  o tidy-up: OS names [57]
  o tool_operhlp: fix  "potentially uninitialized local variable 'pc' used" [48]
  o url: dns_entry related improvements [16]
+ o urldata: remove 'scratch' from the UrlState struct [86]
  o verify-release: shell script that verifies a release tarball [29]
  o vtls: add SSLSUPP_CIPHER_LIST [107]
  o vtls: fix MSVC 'cast truncates constant value' warning [23]
@@ -132,11 +145,11 @@ advice from friends like these:
   Alex Snast, Antoine du Hamel, Austin Moore, Bo Anderson, Christoph Reiter,
   Dan Fandrich, Daniel Stenberg, David Sardari, dependabot[bot], Jan Venekamp,
   Jiacai Liu, Joe Birr-Pixton, John Haugabook, kit-ty-kate on github,
-  MasterInQuestion on github, Matt Jolly, Moritz Buhl, Pete Cordell,
-  Rasmus Thomsen, Ray Satiro, renovate[bot], Ryan Carsten Schmidt,
-  Sergio Durigan Junior, Slaven Rezić, Stefan Eissing, Tal Regev,
-  Viktor Szakats, Yedaya Katsman
-  (28 contributors)
+  MasterInQuestion on github, Matt Jolly, Micah Snyder, Moritz Buhl,
+  Pete Cordell, Rasmus Thomsen, Ray Satiro, renovate[bot],
+  Ryan Carsten Schmidt, Sergio Durigan Junior, Slaven Rezić, Stefan Eissing,
+  Tal Regev, Viktor Szakats, Yedaya Katsman
+  (29 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -211,6 +224,7 @@ References to bug reports and discussions on issues:
  [69] = https://curl.se/bug/?i=14409
  [70] = https://curl.se/bug/?i=14401
  [71] = https://curl.se/bug/?i=14382
+ [72] = https://curl.se/bug/?i=14485
  [73] = https://curl.se/bug/?i=14452
  [74] = https://curl.se/bug/?i=14370
  [75] = https://curl.se/bug/?i=14423
@@ -223,18 +237,30 @@ References to bug reports and discussions on issues:
  [82] = https://curl.se/bug/?i=14298
  [83] = https://curl.se/bug/?i=14447
  [84] = https://curl.se/bug/?i=14451
+ [85] = https://curl.se/bug/?i=14472
+ [86] = https://curl.se/bug/?i=14500
  [88] = https://curl.se/bug/?i=14442
+ [89] = https://curl.se/bug/?i=14492
  [90] = https://curl.se/bug/?i=14435
  [91] = https://curl.se/bug/?i=14438
+ [92] = https://curl.se/bug/?i=14491
  [93] = https://curl.se/bug/?i=14440
  [94] = https://curl.se/bug/?i=14430
  [95] = https://curl.se/bug/?i=14433
+ [97] = https://curl.se/bug/?i=14474
  [98] = https://curl.se/bug/?i=14431
  [99] = https://curl.se/bug/?i=14431
  [100] = https://curl.se/bug/?i=14437
  [101] = https://curl.se/bug/?i=14428
  [102] = https://curl.se/bug/?i=14427
+ [103] = https://curl.se/bug/?i=7229
  [104] = https://curl.se/bug/?i=14397
  [106] = https://curl.se/bug/?i=14406
  [107] = https://curl.se/bug/?i=14406
  [108] = https://curl.se/bug/?i=14404
+ [109] = https://curl.se/bug/?i=14405
+ [110] = https://curl.se/bug/?i=14477
+ [111] = https://curl.se/bug/?i=14469
+ [112] = https://curl.se/bug/?i=14464
+ [114] = https://curl.se/bug/?i=14459
+ [115] = https://curl.se/bug/?i=14467
