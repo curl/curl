@@ -425,7 +425,9 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
+if(NOT APPLE)
 check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
+endif()
 if(HAVE_LIBSOCKET)
   set(CURL_LIBS "socket;${CURL_LIBS}")
 endif()
@@ -1369,7 +1371,7 @@ endif()
 # Check for some functions that are used
 if(WIN32)
   set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
-elseif(HAVE_LIBSOCKET)
+elseif(HAVE_LIBSOCKET AND NOT APPLE)
   set(CMAKE_REQUIRED_LIBRARIES "socket")
 endif()
 
