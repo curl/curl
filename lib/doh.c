@@ -214,19 +214,28 @@ static void local_print_buf(struct Curl_easy *data,
 /* called from multi.c when this DoH transfer is complete */
 static int doh_done(struct Curl_easy *doh, CURLcode result)
 {
-  struct Curl_easy *data = doh->set.dohfor;
-  struct dohdata *dohp = data->req.doh;
-  /* so one of the DoH request done for the 'data' transfer is now complete! */
-  dohp->pending--;
-  infof(doh, "a DoH request is completed, %u to go", dohp->pending);
-  if(result)
-    infof(doh, "DoH request %s", curl_easy_strerror(result));
+  struct Curl_easy *data;
 
-  if(!dohp->pending) {
-    /* DoH completed */
-    curl_slist_free_all(dohp->headers);
-    dohp->headers = NULL;
-    Curl_expire(data, 0, EXPIRE_RUN_NOW);
+  data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_mid);
+  if(!data) {
+    DEBUGF(infof(doh, "doh_done: xfer for mid=%" CURL_FORMAT_CURL_OFF_T
+                 " not found", doh->set.dohfor_mid));
+    DEBUGASSERT(0);
+  }
+  else {
+    struct dohdata *dohp = data->req.doh;
+    /* one of the DoH request done for the 'data' transfer is now complete! */
+    dohp->pending--;
+    infof(doh, "a DoH request is completed, %u to go", dohp->pending);
+    if(result)
+      infof(doh, "DoH request %s", curl_easy_strerror(result));
+
+    if(!dohp->pending) {
+      /* DoH completed */
+      curl_slist_free_all(dohp->headers);
+      dohp->headers = NULL;
+      Curl_expire(data, 0, EXPIRE_RUN_NOW);
+    }
   }
   return 0;
 }
@@ -368,8 +377,7 @@ static CURLcode dohprobe(struct Curl_easy *data,
     }
 
     doh->set.fmultidone = doh_done;
-    doh->set.dohfor = data; /* identify for which transfer this is done */
-    p->easy = doh;
+    doh->set.dohfor_mid = data->mid; /* for which transfer this is done */
 
     /* DoH handles must not inherit private_data. The handles may be passed to
        the user via callbacks and the user will be able to identify them as
@@ -379,6 +387,8 @@ static CURLcode dohprobe(struct Curl_easy *data,
 
     if(curl_multi_add_handle(multi, doh))
       goto error;
+
+    p->easy_mid = doh->mid;
   }
   else
     goto error;
@@ -402,6 +412,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct dohdata *dohp;
   struct connectdata *conn = data->conn;
+  size_t i;
 #ifdef USE_HTTPSRR
   /* for now, this is only used when ECH is enabled */
 # ifdef USE_ECH
@@ -419,6 +430,10 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   dohp = data->req.doh = calloc(1, sizeof(struct dohdata));
   if(!dohp)
     return NULL;
+
+  for(i = 0; i < DOH_PROBE_SLOTS; ++i) {
+    dohp->probe[i].easy_mid = -1;
+  }
 
   conn->bits.doh = TRUE;
   dohp->host = hostname;
@@ -1299,8 +1314,8 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   if(!dohp)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy &&
-     !dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy) {
+  if(dohp->probe[DOH_PROBE_SLOT_IPADDR_V4].easy_mid < 0 &&
+     dohp->probe[DOH_PROBE_SLOT_IPADDR_V6].easy_mid < 0) {
     failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
     return CONN_IS_PROXIED(data->conn)?CURLE_COULDNT_RESOLVE_PROXY:
       CURLE_COULDNT_RESOLVE_HOST;
@@ -1408,16 +1423,27 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
 void Curl_doh_close(struct Curl_easy *data)
 {
   struct dohdata *doh = data->req.doh;
-  if(doh) {
+  if(doh && data->multi) {
+    struct Curl_easy *probe_data;
+    curl_off_t mid;
     size_t slot;
     for(slot = 0; slot < DOH_PROBE_SLOTS; slot++) {
-      if(!doh->probe[slot].easy)
+      mid = doh->probe[slot].easy_mid;
+      if(mid < 0)
         continue;
+      doh->probe[slot].easy_mid = -1;
+      /* should have been called before data is removed from multi handle */
+      DEBUGASSERT(data->multi);
+      probe_data = data->multi? Curl_multi_get_handle(data->multi, mid) : NULL;
+      if(!probe_data) {
+        DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%"
+                     CURL_FORMAT_CURL_OFF_T " not found!",
+                     doh->probe[slot].easy_mid));
+        continue;
+      }
       /* data->multi might already be reset at this time */
-      if(doh->probe[slot].easy->multi)
-        curl_multi_remove_handle(doh->probe[slot].easy->multi,
-                                 doh->probe[slot].easy);
-      Curl_close(&doh->probe[slot].easy);
+      curl_multi_remove_handle(data->multi, probe_data);
+      Curl_close(&probe_data);
     }
   }
 }

@@ -136,7 +136,7 @@ struct cf_h2_ctx {
   struct bufc_pool stream_bufcp; /* spares for stream buffers */
   struct dynbuf scratch;        /* scratch buffer for temp use */
 
-  struct Curl_hash streams; /* hash of `data->id` to `h2_stream_ctx` */
+  struct Curl_hash streams; /* hash of `data->mid` to `h2_stream_ctx` */
   size_t drain_total; /* sum of all stream's UrlState drain */
   uint32_t max_concurrent_streams;
   uint32_t goaway_error;        /* goaway error code from server */
@@ -224,7 +224,7 @@ struct h2_stream_ctx {
 };
 
 #define H2_STREAM_CTX(ctx,data)   ((struct h2_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
+            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 {
@@ -387,7 +387,7 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->id, stream)) {
+  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
     h2_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -425,7 +425,7 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       nghttp2_session_send(ctx->h2);
   }
 
-  Curl_hash_offt_remove(&ctx->streams, data->id);
+  Curl_hash_offt_remove(&ctx->streams, data->mid);
 }
 
 static int h2_client_new(struct Curl_cfilter *cf,
@@ -2010,9 +2010,8 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
      * (unlikely) or the transfer has been done, cleaned up its resources, but
      * a read() is called anyway. It is not clear what the calling sequence
      * is for such a case. */
-    failf(data, "[%zd-%zd], http/2 recv on a transfer never opened "
-          "or already cleared", (ssize_t)data->id,
-          (ssize_t)cf->conn->connection_id);
+    failf(data, "http/2 recv on a transfer never opened "
+          "or already cleared, mid=%" CURL_FORMAT_CURL_OFF_T, data->mid);
     *err = CURLE_HTTP2;
     return -1;
   }

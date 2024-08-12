@@ -96,6 +96,7 @@ struct Curl_multi {
   struct Curl_llist process; /* not in PENDING or MSGSENT */
   struct Curl_llist pending; /* in PENDING */
   struct Curl_llist msgsent; /* in MSGSENT */
+  curl_off_t next_easy_mid; /* next multi-id for easy handle added */
 
   /* callback function and user data pointer for the *socket() API */
   curl_socket_callback socket_cb;

@@ -119,7 +119,7 @@ struct cf_msh3_ctx {
   struct cf_call_data call_data;
   struct curltime connect_started;   /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct Curl_hash streams;          /* hash `data->id` to `stream_ctx` */
+  struct Curl_hash streams;          /* hash `data->mid` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
@@ -180,7 +180,7 @@ struct stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)((data && ctx)? \
-                Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
+                Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct stream_ctx *stream)
 {
@@ -213,7 +213,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   CURL_TRC_CF(data, cf, "data setup");
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->id, stream)) {
+  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -229,7 +229,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "easy handle is done");
-    Curl_hash_offt_remove(&ctx->streams, data->id);
+    Curl_hash_offt_remove(&ctx->streams, data->mid);
   }
 }
 
