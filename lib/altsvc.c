@@ -448,7 +448,7 @@ static void altsvc_flush(struct altsvcinfo *asi, enum alpnid srcalpnid,
     if((srcalpnid == as->src.alpnid) &&
        (srcport == as->src.port) &&
        hostcompare(srchost, as->src.host)) {
-      Curl_llist_remove(&asi->list, e, NULL);
+      Curl_llist_remove(e, NULL);
       altsvc_free(as);
     }
   }
@@ -689,7 +689,7 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
     n = Curl_node_next(e);
     if(as->expires < now) {
       /* an expired entry, remove */
-      Curl_llist_remove(&asi->list, e, NULL);
+      Curl_llist_remove(e, NULL);
       altsvc_free(as);
       continue;
     }

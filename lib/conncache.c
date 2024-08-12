@@ -102,7 +102,7 @@ static int bundle_remove_conn(struct connectbundle *bundle,
   struct Curl_llist_node *curr = Curl_llist_head(&bundle->conn_list);
   while(curr) {
     if(Curl_node_elem(curr) == conn) {
-      Curl_llist_remove(&bundle->conn_list, curr, NULL);
+      Curl_llist_remove(curr, NULL);
       bundle->num_connections--;
       conn->bundle = NULL;
       return 1; /* we removed a handle */
@@ -559,7 +559,7 @@ static void connc_shutdown_discard_all(struct conncache *connc)
   connc->shutdowns.iter_locked = TRUE;
   while(e) {
     conn = Curl_node_elem(e);
-    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    Curl_llist_remove(e, NULL);
     DEBUGF(infof(connc->closure_handle, "discard connection #%"
                  CURL_FORMAT_CURL_OFF_T, conn->connection_id));
     connc_disconnect(NULL, conn, connc, FALSE);
@@ -632,7 +632,7 @@ static void connc_shutdown_discard_oldest(struct conncache *connc)
   if(e) {
     SIGPIPE_VARIABLE(pipe_st);
     conn = Curl_node_elem(e);
-    Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+    Curl_llist_remove(e, NULL);
     sigpipe_init(&pipe_st);
     sigpipe_apply(connc->closure_handle, &pipe_st);
     connc_disconnect(NULL, conn, connc, FALSE);
@@ -918,7 +918,7 @@ static void connc_perform(struct conncache *connc)
                  ", done=%d", conn->connection_id, done));
     Curl_detach_connection(data);
     if(done) {
-      Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+      Curl_llist_remove(e, NULL);
       connc_disconnect(NULL, conn, connc, FALSE);
     }
     else {
@@ -1055,7 +1055,7 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
                    ", done=%d", conn->connection_id, done));
       Curl_detach_connection(data);
       if(done || connc_update_shutdown_ev(multi, data, conn)) {
-        Curl_llist_remove(&connc->shutdowns.conn_list, e, NULL);
+        Curl_llist_remove(e, NULL);
         connc_disconnect(NULL, conn, connc, FALSE);
       }
       break;

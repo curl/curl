@@ -31,14 +31,6 @@ typedef void (*Curl_llist_dtor)(void *user, void *elem);
 
 /* none of these struct members should be referenced directly, use the
    dedicated functions */
-struct Curl_llist_node {
-  void *_ptr;
-  struct Curl_llist_node *_prev;
-  struct Curl_llist_node *_next;
-#ifdef DEBUGBUILD
-  int _init;      /* detect API usage mistakes */
-#endif
-};
 
 struct Curl_llist {
   struct Curl_llist_node *_head;
@@ -50,13 +42,22 @@ struct Curl_llist {
 #endif
 };
 
+struct Curl_llist_node {
+  struct Curl_llist *_list; /* the list where this belongs */
+  void *_ptr;
+  struct Curl_llist_node *_prev;
+  struct Curl_llist_node *_next;
+#ifdef DEBUGBUILD
+  int _init;      /* detect API usage mistakes */
+#endif
+};
+
 void Curl_llist_init(struct Curl_llist *, Curl_llist_dtor);
 void Curl_llist_insert_next(struct Curl_llist *, struct Curl_llist_node *,
                             const void *, struct Curl_llist_node *node);
 void Curl_llist_append(struct Curl_llist *,
                        const void *, struct Curl_llist_node *node);
-void Curl_llist_remove(struct Curl_llist *, struct Curl_llist_node *,
-                       void *);
+void Curl_llist_remove(struct Curl_llist_node *, void *);
 void Curl_llist_destroy(struct Curl_llist *, void *);
 
 /* Curl_llist_head() returns the first 'struct Curl_llist_node *', which

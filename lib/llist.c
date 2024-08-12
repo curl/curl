@@ -89,6 +89,7 @@ Curl_llist_insert_next(struct Curl_llist *list,
   ne->_init = NODEINIT;
 #endif
   ne->_ptr = (void *) p;
+  ne->_list = list;
   if(list->_size == 0) {
     list->_head = ne;
     list->_head->_prev = NULL;
@@ -139,15 +140,16 @@ Curl_llist_append(struct Curl_llist *list, const void *p,
  * @unittest: 1300
  */
 void
-Curl_llist_remove(struct Curl_llist *list, struct Curl_llist_node *e,
-                  void *user)
+Curl_llist_remove(struct Curl_llist_node *e, void *user)
 {
   void *ptr;
-  DEBUGASSERT(list);
-  DEBUGASSERT(list->_init == LLISTINIT);
+  struct Curl_llist *list;
   if(!e)
     return;
 
+  list = e->_list;
+  DEBUGASSERT(list);
+  DEBUGASSERT(list->_init == LLISTINIT);
   DEBUGASSERT(list->_size);
   DEBUGASSERT(e->_init == NODEINIT);
   if(e == list->_head) {
@@ -190,7 +192,7 @@ Curl_llist_destroy(struct Curl_llist *list, void *user)
   if(list) {
     DEBUGASSERT(list->_init == LLISTINIT);
     while(list->_size > 0)
-      Curl_llist_remove(list, list->_tail, user);
+      Curl_llist_remove(list->_tail, user);
   }
 }
 

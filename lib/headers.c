@@ -247,7 +247,7 @@ static CURLcode unfold_value(struct Curl_easy *data, const char *value,
   /* since this header block might move in the realloc below, it needs to
      first be unlinked from the list and then re-added again after the
      realloc */
-  Curl_llist_remove(&data->state.httphdrs, &hs->node, NULL);
+  Curl_llist_remove(&hs->node, NULL);
 
   /* new size = struct + new value length + old name+value length */
   newhs = Curl_saferealloc(hs, sizeof(*hs) + vlen + oalloc + 1);

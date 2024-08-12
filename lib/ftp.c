@@ -4092,8 +4092,7 @@ static CURLcode wc_statemach(struct Curl_easy *data)
         return result;
 
       /* we do not need the Curl_fileinfo of first file anymore */
-      Curl_llist_remove(&wildcard->filelist,
-                        Curl_llist_head(&wildcard->filelist), NULL);
+      Curl_llist_remove(Curl_llist_head(&wildcard->filelist), NULL);
 
       if(Curl_llist_count(&wildcard->filelist) == 0) {
         /* remains only one file to down. */
@@ -4111,8 +4110,7 @@ static CURLcode wc_statemach(struct Curl_easy *data)
         data->set.chunk_end(data->set.wildcardptr);
         Curl_set_in_callback(data, false);
       }
-      Curl_llist_remove(&wildcard->filelist,
-                        Curl_llist_head(&wildcard->filelist), NULL);
+      Curl_llist_remove(Curl_llist_head(&wildcard->filelist), NULL);
       wildcard->state = (Curl_llist_count(&wildcard->filelist) == 0) ?
         CURLWC_CLEAN : CURLWC_DOWNLOADING;
       continue;

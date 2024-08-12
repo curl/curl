@@ -149,7 +149,7 @@ UNITTEST_START
   element_next = Curl_node_next(head);
   llist_size = Curl_llist_count(&llist);
 
-  Curl_llist_remove(&llist, Curl_llist_head(&llist), NULL);
+  Curl_llist_remove(Curl_llist_head(&llist), NULL);
 
   fail_unless(Curl_llist_count(&llist) ==  (llist_size-1),
               "llist size not decremented as expected");
@@ -178,7 +178,7 @@ UNITTEST_START
   abort_unless(to_remove, "to_remove is NULL");
   element_next = Curl_node_next(to_remove);
   element_prev = Curl_node_prev(to_remove);
-  Curl_llist_remove(&llist, to_remove, NULL);
+  Curl_llist_remove(to_remove, NULL);
   fail_unless(Curl_node_next(element_prev) == element_next,
               "element previous->next is not being adjusted");
   abort_unless(element_next, "element_next is NULL");
@@ -197,7 +197,7 @@ UNITTEST_START
 
   to_remove = Curl_llist_tail(&llist);
   element_prev = Curl_node_prev(to_remove);
-  Curl_llist_remove(&llist, to_remove, NULL);
+  Curl_llist_remove(to_remove, NULL);
   fail_unless(Curl_llist_tail(&llist) == element_prev,
               "llist tail is not being adjusted when removing tail");
 
@@ -211,7 +211,7 @@ UNITTEST_START
    */
 
   to_remove = Curl_llist_head(&llist);
-  Curl_llist_remove(&llist, to_remove, NULL);
+  Curl_llist_remove(to_remove, NULL);
   fail_unless(Curl_llist_head(&llist) == NULL,
               "llist head is not NULL while the llist is empty");
   fail_unless(Curl_llist_tail(&llist) == NULL,
