@@ -393,7 +393,7 @@ jobs:
       fail-fast: false
       matrix:
         config: [SecureTransport]  # also: OpenSSL
-        compiler: [gcc-11, gcc-12, gcc-13, gcc-14, llvm@15, clang]
+        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1,*14.2
@@ -440,8 +440,6 @@ jobs:
           - { image: macos-14, xcode: '14.1'   }
           - { image: macos-14, xcode: '14.2'   }
           # Reduce build combinations, by dropping less interesting ones
-          - { compiler: gcc-11, build: autotools }
-          - { compiler: gcc-11, image: macos-14 }
           - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, build: cmake }
           - { compiler: gcc-13, image: macos-13 }
@@ -521,7 +519,7 @@ jobs:
           # broken in 8 out of 12 combinations (66%) have an SDK mismatch,
           # and 9 fail to build (75%). These are the 3 lucky default
           # combinations that worked to build curl:
-          #   macos-14 + Xcode 15.0.1 + gcc-11, gcc-12, gcc-14
+          #   macos-14 + Xcode 15.0.1 + gcc-12, gcc-14
           #
           # Of all possible valid GHA runner, gcc, manually selected Xcode
           # combinations, 40% are broken.
@@ -538,14 +536,14 @@ jobs:
           #
           # Errors seen in available CI combinations:
           #   error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
-          #     gcc-11, gcc-13 + macos-14 + Xcode 14.3.1
+          #     gcc-13 + macos-14 + Xcode 14.3.1
           #   error: two or more data types in declaration specifiers
           #     gcc-13 + macos-12 + Xcode 14.1, 14.2
           #     gcc-13 + Xcode 15.0.1, 15.1, 5.2
           #   error: expected ';' before 'extern'
-          #     gcc-11, gcc-12, gcc-14 + macos-12 + Xcode 14.1, 14.2
+          #     gcc-12, gcc-14 + macos-12 + Xcode 14.1, 14.2
           #   error: unknown type name 'dispatch_queue_t'
-          #     gcc-11, gcc-12 + macos-13 + Xcode 15.0.1, 15.1, 15.2
+          #     gcc-12 + macos-13 + Xcode 15.0.1, 15.1, 15.2
           #   error: type defaults to 'int' in declaration of 'DISPATCH_DECL_FACTORY_CLASS_SWIFT' [-Wimplicit-int]
           #     gcc-14 macos-13 Xcode 15.0.1, 15.1, 15.2
           #   error: unknown type name 'FILE'
