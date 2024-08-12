@@ -1751,7 +1751,7 @@ struct UserDefined {
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   multidone_func fmultidone;
 #ifndef CURL_DISABLE_DOH
-  struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
+  curl_off_t dohfor_mid; /* this is a DoH request for that transfer */
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
@@ -1907,8 +1907,14 @@ struct Curl_easy {
      other using the same cache. For easier tracking
      in log output.
      This may wrap around after LONG_MAX to 0 again, so it
-     has no uniqueness guarantee for very large processings. */
+     has no uniqueness guarantee for very large processings.
+     Note: it has no uniqueness either IFF more than one connection cache
+     is used by the libcurl application. */
   curl_off_t id;
+  /* once an easy handle is added to a multi, either explicitly by the
+   * libcurl application or implicitly during `curl_easy_perform()`,
+   * a unique identifier inside this one multi instance. */
+  curl_off_t mid;
 
   struct connectdata *conn;
   struct Curl_llist_node multi_queue; /* for multihandle list management */

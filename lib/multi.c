@@ -592,9 +592,16 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->set.server_response_timeout;
   data->state.conn_cache->closure_handle->set.no_signal =
     data->set.no_signal;
+
+  /* the identifier inside the connection cache */
   data->id = data->state.conn_cache->next_easy_id++;
   if(data->state.conn_cache->next_easy_id <= 0)
     data->state.conn_cache->next_easy_id = 0;
+  /* the identifier inside the multi instance */
+  data->mid = multi->next_easy_mid++;
+  if(multi->next_easy_mid <= 0)
+    multi->next_easy_mid = 0;
+
   CONNCACHE_UNLOCK(data);
 
   multi_warn_debug(multi, data);
@@ -904,8 +911,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
      since we are not part of that multi handle anymore */
   data->state.conn_cache = NULL;
 
-  data->multi = NULL; /* clear the association to this multi handle */
-
   /* make sure there is no pending message in the queue sent from this easy
      handle */
   for(e = Curl_llist_head(&multi->msglist); e; e = Curl_node_next(e)) {
@@ -917,6 +922,9 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
       break;
     }
   }
+
+  data->multi = NULL; /* clear the association to this multi handle */
+  data->mid = -1;
 
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
@@ -3890,4 +3898,33 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
   Curl_safefree(multi->xfer_ulbuf);
   multi->xfer_ulbuf_len = 0;
   multi->xfer_ulbuf_borrowed = FALSE;
+}
+
+struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
+                                        curl_off_t mid)
+{
+
+  if(mid >= 0) {
+    struct Curl_easy *data;
+    struct Curl_llist_node *e;
+
+    for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
+      data = Curl_node_elem(e);
+      if(data->mid == mid)
+        return data;
+    }
+    /* may be in msgsent queue */
+    for(e = Curl_llist_head(&multi->msgsent); e; e = Curl_node_next(e)) {
+      data = Curl_node_elem(e);
+      if(data->mid == mid)
+        return data;
+    }
+    /* may be in pending queue */
+    for(e = Curl_llist_head(&multi->pending); e; e = Curl_node_next(e)) {
+      data = Curl_node_elem(e);
+      if(data->mid == mid)
+        return data;
+    }
+  }
+  return NULL;
 }
