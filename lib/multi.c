@@ -3906,22 +3906,22 @@ struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
 
   if(mid >= 0) {
     struct Curl_easy *data;
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
 
-    for(e = multi->process.head; e; e = e->next) {
-      data = e->ptr;
+    for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
+      data = Curl_node_elem(e);
       if(data->mid == mid)
         return data;
     }
-    /* may be in msgsent queue? */
-    for(e = multi->msgsent.head; e; e = e->next) {
-      data = e->ptr;
+    /* may be in msgsent queue */
+    for(e = Curl_llist_head(&multi->msgsent); e; e = Curl_node_next(e)) {
+      data = Curl_node_elem(e);
       if(data->mid == mid)
         return data;
     }
-    /* may be in pending queue? */
-    for(e = multi->pending.head; e; e = e->next) {
-      data = e->ptr;
+    /* may be in pending queue */
+    for(e = Curl_llist_head(&multi->pending); e; e = Curl_node_next(e)) {
+      data = Curl_node_elem(e);
       if(data->mid == mid)
         return data;
     }
