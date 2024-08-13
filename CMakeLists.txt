@@ -1575,9 +1575,9 @@ endif()
 
 # Some other minor tests
 
-if(NOT HAVE_IN_ADDR_T)
-  set(in_addr_t "unsigned long")
-endif()
+#if(NOT HAVE_IN_ADDR_T)
+#  set(in_addr_t "unsigned long")
+#endif()
 
 # Check for nonblocking
 set(HAVE_DISABLED_NONBLOCKING 1)
