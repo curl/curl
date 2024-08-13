@@ -47,6 +47,7 @@ CMAKE_DIST =                                    \
  CMake/FindQUICHE.cmake                         \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
+ CMake/Findrustls.cmake                         \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/PickyWarnings.cmake                      \

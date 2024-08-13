@@ -458,6 +458,7 @@ cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_EN
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_RUSTLS "Enable rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(_openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
@@ -474,6 +475,7 @@ count_true(_enabled_ssl_options_count
   CURL_USE_BEARSSL
   CURL_USE_WOLFSSL
   CURL_USE_GNUTLS
+  CURL_USE_RUSTLS
 )
 if(_enabled_ssl_options_count GREATER 1)
   set(CURL_WITH_MULTI_SSL ON)
@@ -612,6 +614,20 @@ if(CURL_USE_GNUTLS)
     check_symbol_exists("gnutls_srp_verifier" "gnutls/gnutls.h" HAVE_GNUTLS_SRP)
     cmake_pop_check_state()
   endif()
+endif()
+
+if(CURL_USE_RUSTLS)
+  find_package(rustls REQUIRED)
+  set(_ssl_enabled ON)
+  set(USE_RUSTLS ON)
+  list(APPEND CURL_LIBS ${RUSTLS_LIBRARIES})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "rustls")
+  include_directories(${RUSTLS_INCLUDE_DIRS})
+
+  if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "rustls")
+    set(valid_default_ssl_backend TRUE)
+  endif()
+  set(curl_ca_bundle_supported TRUE)
 endif()
 
 if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
@@ -1866,6 +1882,7 @@ if(NOT CURL_DISABLE_INSTALL)
   _add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
   _add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
   _add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
+  _add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
 
   if(_items)
     if(NOT CMAKE_VERSION VERSION_LESS 3.13)
