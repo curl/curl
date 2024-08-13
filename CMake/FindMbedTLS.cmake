@@ -27,7 +27,7 @@
 #
 # MBEDTLS_FOUND         System has mbedtls
 # MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
-# MBEDTLS_LIBRARIES     The libraries needed to use mbedtls
+# MBEDTLS_LIBRARIES     The mbedtls library names
 
 find_path(MBEDTLS_INCLUDE_DIRS "mbedtls/ssl.h")
 
