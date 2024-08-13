@@ -37,11 +37,13 @@ endif()
 
 find_path(WolfSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h"
   HINTS
+    ${PC_WOLFSSL_INCLUDEDIR}
     ${PC_WOLFSSL_INCLUDE_DIRS}
 )
 
 find_library(WolfSSL_LIBRARY NAMES "wolfssl"
   HINTS
+    ${PC_WOLFSSL_LIBDIR}
     ${PC_WOLFSSL_LIBRARY_DIRS}
 )
 
