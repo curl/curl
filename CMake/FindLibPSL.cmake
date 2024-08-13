@@ -47,7 +47,9 @@ find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl"
     ${PC_LIBPSL_LIBRARY_DIRS}
 )
 
-if(LIBPSL_INCLUDE_DIR)
+if(PC_LIBPSL_VERSION)
+  set(LIBPSL_VERSION ${PC_LIBPSL_VERSION})
+elseif(LIBPSL_INCLUDE_DIR)
   file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _libpsl_version_str REGEX "^#define[\t ]+PSL_VERSION[\t ]+\"(.*)\"")
   string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" LIBPSL_VERSION "${_libpsl_version_str}")
   unset(_libpsl_version_str)

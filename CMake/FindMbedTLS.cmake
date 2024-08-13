@@ -65,6 +65,23 @@ find_library(MBEDCRYPTO_LIBRARY "mbedcrypto"
 
 if(PC_MBEDTLS_VERSION)
   set(MBEDTLS_VERSION ${PC_MBEDTLS_VERSION})
+elseif(MBEDTLS_INCLUDE_DIR)
+  if(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")  # 3.x
+    set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
+  elseif(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")  # 2.x
+    set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")
+  else()
+    unset(_version_header)
+  endif()
+  if(_version_header)
+    set(_version_regex "#[\t ]*define[\t ]+MBEDTLS_VERSION_STRING[\t ]+\"([0-9.]+)\"")
+    file(STRINGS "${_version_header}" _version_str REGEX "${_version_regex}")
+    string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+    set(MBEDTLS_VERSION "${_version_str}")
+    unset(_version_regex)
+    unset(_version_str)
+    unset(_version_header)
+  endif()
 endif()
 
 include(FindPackageHandleStandardArgs)
