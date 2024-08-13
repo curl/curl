@@ -53,8 +53,6 @@ endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(NGHTTP2
-  FOUND_VAR
-    NGHTTP2_FOUND
   REQUIRED_VARS
     NGHTTP2_INCLUDE_DIR
     NGHTTP2_LIBRARY
