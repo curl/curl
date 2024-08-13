@@ -41,7 +41,7 @@ jobs:
 
       - name: run cmake
         run: |
-          cmake -B build
+          cmake -B build -DCURL_USE_LIBPSL=OFF
 
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
@@ -62,7 +62,7 @@ jobs:
 
       - name: run cmake
         run: |
-          cmake -B build \
+          cmake -B build -DCURL_USE_LIBPSL=OFF \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             -DCURL_USE_LIBSSH2=OFF
 
