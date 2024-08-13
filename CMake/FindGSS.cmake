@@ -176,17 +176,17 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     if(_GSS_INCLUDE_DIRS)  # jay, we have found something
       set(CMAKE_REQUIRED_INCLUDES "${_GSS_INCLUDE_DIRS}")
-      check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _GSS_HAVE_MIT_HEADERS)
+      check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _gss_have_mit_headers)
 
-      if(_GSS_HAVE_MIT_HEADERS)
+      if(_gss_have_mit_headers)
         set(GSS_FLAVOUR "MIT")
       else()
         # Prevent compiling the header - just check if we can include it
         list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D__ROKEN_H__")
-        check_include_file("roken.h" _GSS_HAVE_ROKEN_H)
+        check_include_file("roken.h" _gss_have_roken_h)
 
-        check_include_file("heimdal/roken.h" _GSS_HAVE_HEIMDAL_ROKEN_H)
-        if(_GSS_HAVE_ROKEN_H OR _GSS_HAVE_HEIMDAL_ROKEN_H)
+        check_include_file("heimdal/roken.h" _gss_have_heimdal_roken_h)
+        if(_gss_have_roken_h OR _gss_have_heimdal_roken_h)
           set(GSS_FLAVOUR "Heimdal")
         endif()
         list(REMOVE_ITEM CMAKE_REQUIRED_DEFINITIONS "-D__ROKEN_H__")
