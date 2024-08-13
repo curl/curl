@@ -28,11 +28,33 @@
 # BROTLI_FOUND         System has brotli
 # BROTLI_INCLUDE_DIRS  The brotli include directories
 # BROTLI_LIBRARIES     The brotli library names
+# BROTLI_VERSION       Version of brotli
 
-find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_search_module(PC_BROTLI "libbrotlidec")
+endif()
 
-find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
-find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
+find_path(BROTLI_INCLUDE_DIR "brotli/decode.h"
+  HINTS
+    ${PC_BROTLI_INCLUDEDIR}
+    ${PC_BROTLI_INCLUDE_DIRS}
+)
+
+find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon"
+  HINTS
+    ${PC_BROTLI_LIBDIR}
+    ${PC_BROTLI_LIBRARY_DIRS}
+)
+find_library(BROTLIDEC_LIBRARY NAMES "brotlidec"
+  HINTS
+    ${PC_BROTLI_LIBDIR}
+    ${PC_BROTLI_LIBRARY_DIRS}
+)
+
+if(PC_BROTLI_VERSION)
+  set(BROTLI_VERSION ${PC_BROTLI_VERSION})
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Brotli
@@ -40,6 +62,8 @@ find_package_handle_standard_args(Brotli
     BROTLI_INCLUDE_DIR
     BROTLIDEC_LIBRARY
     BROTLICOMMON_LIBRARY
+  VERSION_VAR
+    BROTLI_VERSION
 )
 
 if(BROTLI_FOUND)
