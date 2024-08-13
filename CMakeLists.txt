@@ -1042,13 +1042,15 @@ mark_as_advanced(CURL_USE_LIBPSL)
 set(USE_LIBPSL OFF)
 
 if(CURL_USE_LIBPSL)
-  find_package(LibPSL)
+  find_package(LibPSL)  # TODO: add REQUIRED to match autotools
   if(LIBPSL_FOUND)
     list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
     list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libpsl")
     list(APPEND CMAKE_REQUIRED_INCLUDES "${LIBPSL_INCLUDE_DIRS}")
     include_directories(${LIBPSL_INCLUDE_DIRS})
     set(USE_LIBPSL ON)
+  else()
+    message(WARNING "libpsl is enabled, but not found.")
   endif()
 endif()
 
