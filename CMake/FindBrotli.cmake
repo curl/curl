@@ -29,13 +29,12 @@
 # BROTLI_INCLUDE_DIRS  The brotli include directories
 # BROTLI_LIBRARIES     The brotli library names
 
-include(FindPackageHandleStandardArgs)
-
 find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
 
 find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
 find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
 
+include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Brotli
   FOUND_VAR
     BROTLI_FOUND

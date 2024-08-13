@@ -302,7 +302,6 @@ if(GSS_FLAVOUR)
 endif()
 
 include(FindPackageHandleStandardArgs)
-
 find_package_handle_standard_args(GSS
   REQUIRED_VARS
     GSS_LIBRARIES GSS_FLAVOUR
