@@ -65,4 +65,4 @@ if(MSH3_FOUND)
   set(MSH3_LIBRARIES    ${MSH3_LIBRARY})
 endif()
 
-mark_as_advanced(MSH3_INCLUDE_DIRS MSH3_LIBRARIES)
+mark_as_advanced(MSH3_INCLUDE_DIR MSH3_LIBRARY)

@@ -69,4 +69,4 @@ if(Zstd_FOUND)
   set(Zstd_LIBRARIES    ${Zstd_LIBRARY})
 endif()
 
-mark_as_advanced(Zstd_INCLUDE_DIRS Zstd_LIBRARIES)
+mark_as_advanced(Zstd_INCLUDE_DIR Zstd_LIBRARY)
