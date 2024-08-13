@@ -31,8 +31,8 @@
 #
 # GSS_FOUND             System has the Heimdal library
 # GSS_FLAVOUR           "MIT" or "Heimdal" if anything found
-# GSS_INCLUDE_DIR       the Heimdal include directory
-# GSS_LIBRARIES         The libraries needed to use GSS
+# GSS_INCLUDE_DIR       The GSS include directory
+# GSS_LIBRARIES         The GSS library names
 # GSS_LINK_DIRECTORIES  Directories to add to linker search path
 # GSS_LINKER_FLAGS      Additional linker flags
 # GSS_COMPILER_FLAGS    Additional compiler flags
@@ -166,9 +166,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
   else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
 
-    find_path(_GSS_INCLUDE_DIRS
-      NAMES
-        "gssapi/gssapi.h"
+    find_path(_GSS_INCLUDE_DIRS NAMES "gssapi/gssapi.h"
       HINTS
         ${_gss_root_hints}
       PATH_SUFFIXES
@@ -178,26 +176,24 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
     if(_GSS_INCLUDE_DIRS)  # jay, we have found something
       set(CMAKE_REQUIRED_INCLUDES "${_GSS_INCLUDE_DIRS}")
-      check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _GSS_HAVE_MIT_HEADERS)
+      check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _gss_have_mit_headers)
 
-      if(_GSS_HAVE_MIT_HEADERS)
+      if(_gss_have_mit_headers)
         set(GSS_FLAVOUR "MIT")
       else()
         # Prevent compiling the header - just check if we can include it
         list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D__ROKEN_H__")
-        check_include_file("roken.h" _GSS_HAVE_ROKEN_H)
+        check_include_file("roken.h" _gss_have_roken_h)
 
-        check_include_file("heimdal/roken.h" _GSS_HAVE_HEIMDAL_ROKEN_H)
-        if(_GSS_HAVE_ROKEN_H OR _GSS_HAVE_HEIMDAL_ROKEN_H)
+        check_include_file("heimdal/roken.h" _gss_have_heimdal_roken_h)
+        if(_gss_have_roken_h OR _gss_have_heimdal_roken_h)
           set(GSS_FLAVOUR "Heimdal")
         endif()
         list(REMOVE_ITEM CMAKE_REQUIRED_DEFINITIONS "-D__ROKEN_H__")
       endif()
     else()
       # I am not convinced if this is the right way but this is what autotools do at the moment
-      find_path(_GSS_INCLUDE_DIRS
-        NAMES
-          "gssapi.h"
+      find_path(_GSS_INCLUDE_DIRS NAMES "gssapi.h"
         HINTS
           ${_gss_root_hints}
         PATH_SUFFIXES
@@ -242,9 +238,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         endif()
       endif()
 
-      find_library(_GSS_LIBRARIES
-        NAMES
-          ${_gss_libname}
+      find_library(_GSS_LIBRARIES NAMES ${_gss_libname}
         HINTS
           ${_gss_libdir_hints}
         PATH_SUFFIXES
@@ -302,7 +296,6 @@ if(GSS_FLAVOUR)
 endif()
 
 include(FindPackageHandleStandardArgs)
-
 find_package_handle_standard_args(GSS
   REQUIRED_VARS
     GSS_LIBRARIES GSS_FLAVOUR

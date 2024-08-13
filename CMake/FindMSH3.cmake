@@ -27,7 +27,7 @@
 #
 # MSH3_FOUND         System has msh3
 # MSH3_INCLUDE_DIRS  The msh3 include directories
-# MSH3_LIBRARIES     The libraries needed to use msh3
+# MSH3_LIBRARIES     The msh3 library names
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

@@ -45,10 +45,8 @@ else()
     if(EXISTS "${NETTLE_INCLUDE_DIR}/nettle/version.h")
       set(_version_regex_major "^#define[ \t]+NETTLE_VERSION_MAJOR[ \t]+([0-9]+).*")
       set(_version_regex_minor "^#define[ \t]+NETTLE_VERSION_MINOR[ \t]+([0-9]+).*")
-      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h"
-        _version_major REGEX "${_version_regex_major}")
-      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h"
-        _version_minor REGEX "${_version_regex_minor}")
+      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h" _version_major REGEX "${_version_regex_major}")
+      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h" _version_minor REGEX "${_version_regex_minor}")
       string(REGEX REPLACE "${_version_regex_major}" "\\1" _version_major "${_version_major}")
       string(REGEX REPLACE "${_version_regex_minor}" "\\1" _version_minor "${_version_minor}")
       unset(_version_regex_major)

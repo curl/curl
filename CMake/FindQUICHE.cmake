@@ -27,7 +27,7 @@
 #
 # QUICHE_FOUND         System has quiche
 # QUICHE_INCLUDE_DIRS  The quiche include directories
-# QUICHE_LIBRARIES     The libraries needed to use quiche
+# QUICHE_LIBRARIES     The quiche library names
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

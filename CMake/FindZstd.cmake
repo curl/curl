@@ -27,7 +27,7 @@
 #
 # Zstd_FOUND         System has zstd
 # Zstd_INCLUDE_DIRS  The zstd include directories
-# Zstd_LIBRARIES     The libraries needed to use zstd
+# Zstd_LIBRARIES     The zstd library names
 # Zstd_VERSION       Version of zstd
 
 if(CURL_USE_PKGCONFIG)

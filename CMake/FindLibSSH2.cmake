@@ -36,7 +36,7 @@ find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
 
 if(LIBSSH2_INCLUDE_DIR)
   file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBSSH2_VERSION "${_libssh2_version_str}")
+  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" LIBSSH2_VERSION "${_libssh2_version_str}")
 endif()
 
 include(FindPackageHandleStandardArgs)
