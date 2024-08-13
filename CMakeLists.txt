@@ -2044,9 +2044,11 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
     ${_generated_version_config}")
 
-  # Use:
-  # * TARGETS_EXPORT_NAME
-  # * PROJECT_NAME
+  # Consumed custom variables:
+  #   LIB_SELECTED
+  #   TARGETS_EXPORT_NAME
+  #   USE_OPENSSL
+  #   USE_ZLIB
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
