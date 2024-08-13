@@ -585,7 +585,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
-              --without-nghttp2 --without-libidn2 \
+              --without-nghttp2 --without-libidn2 --without-apple-idn \
               --without-libpsl \
               ${options}
           else
