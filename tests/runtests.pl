@@ -835,7 +835,9 @@ sub checksystemfeatures {
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
+    chomp $hostname;
     my $hosttype=join(' ', runclientoutput("uname -a"));
+    chomp $hosttype;
     my $hostos=$^O;
 
     # display summary information about curl and the test host
@@ -844,8 +846,8 @@ sub checksystemfeatures {
             "* $libcurl\n",
             "* Features: $feat\n",
             "* Disabled: $dis\n",
-            "* Host: $hostname",
-            "* System: $hosttype",
+            "* Host: $hostname\n",
+            "* System: $hosttype\n",
             "* OS: $hostos\n");
 
     if($jobs) {
