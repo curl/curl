@@ -1089,7 +1089,7 @@ if(CURL_USE_GSSAPI)
 
     message(STATUS "Found ${GSS_FLAVOUR} GSSAPI version: \"${GSS_VERSION}\"")
 
-    list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIR})
+    list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIRS})
 
     string(REPLACE ";" " " GSS_COMPILER_FLAGS "${GSS_COMPILER_FLAGS}")
     string(REPLACE ";" " " GSS_LINKER_FLAGS "${GSS_LINKER_FLAGS}")
@@ -1125,7 +1125,7 @@ if(CURL_USE_GSSAPI)
       endif()
     endif()
 
-    include_directories(${GSS_INCLUDE_DIR})
+    include_directories(${GSS_INCLUDE_DIRS})
     link_directories(${GSS_LINK_DIRECTORIES})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_COMPILER_FLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LINKER_FLAGS}")
