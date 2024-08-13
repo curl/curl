@@ -208,8 +208,6 @@ class TestSSLUse:
         extra_args = []
         if env.curl_uses_lib('gnutls'):
             pytest.skip('GnuTLS does not support setting ciphers by name')
-        if env.curl_uses_lib('rustls-ffi'):
-            pytest.skip('rustls-ffi does not support setting ciphers')
         if ciphers[0] & 0xFF00 == 0x1300:
             # test setting TLSv1.3 ciphers
             if env.curl_uses_lib('bearssl'):
