@@ -35,13 +35,11 @@ if(CURL_USE_PKGCONFIG)
   pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
 endif()
 
-find_path(WolfSSL_INCLUDE_DIR
-  NAMES "wolfssl/ssl.h"
+find_path(WolfSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h"
   HINTS ${PC_WOLFSSL_INCLUDE_DIRS}
 )
 
-find_library(WolfSSL_LIBRARY
-  NAMES "wolfssl"
+find_library(WolfSSL_LIBRARY NAMES "wolfssl"
   HINTS ${PC_WOLFSSL_LIBRARY_DIRS}
 )
 

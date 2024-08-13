@@ -166,9 +166,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
   else()  # Either there is no config script or we are on a platform that does not provide one (Windows?)
 
-    find_path(_GSS_INCLUDE_DIRS
-      NAMES
-        "gssapi/gssapi.h"
+    find_path(_GSS_INCLUDE_DIRS NAMES "gssapi/gssapi.h"
       HINTS
         ${_gss_root_hints}
       PATH_SUFFIXES
@@ -195,9 +193,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       endif()
     else()
       # I am not convinced if this is the right way but this is what autotools do at the moment
-      find_path(_GSS_INCLUDE_DIRS
-        NAMES
-          "gssapi.h"
+      find_path(_GSS_INCLUDE_DIRS NAMES "gssapi.h"
         HINTS
           ${_gss_root_hints}
         PATH_SUFFIXES
@@ -242,9 +238,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         endif()
       endif()
 
-      find_library(_GSS_LIBRARIES
-        NAMES
-          ${_gss_libname}
+      find_library(_GSS_LIBRARIES NAMES ${_gss_libname}
         HINTS
           ${_gss_libdir_hints}
         PATH_SUFFIXES

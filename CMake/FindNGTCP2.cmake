@@ -75,9 +75,7 @@ if(NGTCP2_FIND_COMPONENTS)
     if(CURL_USE_PKGCONFIG)
       pkg_search_module(PC_${_crypto_library} "lib${_crypto_library}")
     endif()
-    find_library(${_crypto_library}_LIBRARY
-      NAMES
-        ${_crypto_library}
+    find_library(${_crypto_library}_LIBRARY NAMES ${_crypto_library}
       HINTS
         ${PC_${_crypto_library}_LIBDIR}
         ${PC_${_crypto_library}_LIBRARY_DIRS}

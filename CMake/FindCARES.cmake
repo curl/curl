@@ -31,9 +31,7 @@
 
 find_path(CARES_INCLUDE_DIR "ares.h")
 
-find_library(CARES_LIBRARY
-  NAMES ${CARES_NAMES} "cares"
-)
+find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CARES
