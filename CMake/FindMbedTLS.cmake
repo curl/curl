@@ -28,12 +28,38 @@
 # MBEDTLS_FOUND         System has mbedtls
 # MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
 # MBEDTLS_LIBRARIES     The mbedtls library names
+# MBEDTLS_VERSION       Version of mbedtls
 
-find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h")
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_search_module(PC_MBEDTLS "mbedtls")
+endif()
 
-find_library(MBEDTLS_LIBRARY "mbedtls")
-find_library(MBEDX509_LIBRARY "mbedx509")
-find_library(MBEDCRYPTO_LIBRARY "mbedcrypto")
+find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h"
+  HINTS
+    ${PC_MBEDTLS_INCLUDEDIR}
+    ${PC_MBEDTLS_INCLUDE_DIRS}
+)
+
+find_library(MBEDTLS_LIBRARY "mbedtls"
+  HINTS
+    ${PC_MBEDTLS_LIBDIR}
+    ${PC_MBEDTLS_LIBRARY_DIRS}
+)
+find_library(MBEDX509_LIBRARY "mbedx509"
+  HINTS
+    ${PC_MBEDTLS_LIBDIR}
+    ${PC_MBEDTLS_LIBRARY_DIRS}
+)
+find_library(MBEDCRYPTO_LIBRARY "mbedcrypto"
+  HINTS
+    ${PC_MBEDTLS_LIBDIR}
+    ${PC_MBEDTLS_LIBRARY_DIRS}
+)
+
+if(PC_MBEDTLS_VERSION)
+  set(MBEDTLS_VERSION ${PC_MBEDTLS_VERSION})
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MbedTLS
@@ -42,6 +68,8 @@ find_package_handle_standard_args(MbedTLS
     MBEDTLS_LIBRARY
     MBEDX509_LIBRARY
     MBEDCRYPTO_LIBRARY
+  VERSION_VAR
+    MBEDTLS_VERSION
 )
 
 if(MBEDTLS_FOUND)
