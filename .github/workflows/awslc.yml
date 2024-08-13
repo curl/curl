@@ -114,7 +114,7 @@ jobs:
       - run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
-          sudo apt-get install cmake stunnel4
+          sudo apt-get install cmake stunnel4 libpsl-dev
           # ensure we don't pick up openssl in this build
           sudo apt remove --yes libssl-dev
           sudo python3 -m pip install impacket

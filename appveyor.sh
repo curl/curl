@@ -60,7 +60,8 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     "-DENABLE_DEBUG=${DEBUG}" \
     "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
-    "-DCMAKE_BUILD_TYPE=${PRJ_CFG}"
+    "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
+    '-DCURL_USE_LIBPSL=OFF'
   # shellcheck disable=SC2086
   if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
     if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
