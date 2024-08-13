@@ -28,6 +28,7 @@
 # MSH3_FOUND         System has msh3
 # MSH3_INCLUDE_DIRS  The msh3 include directories
 # MSH3_LIBRARIES     The msh3 library names
+# MSH3_VERSION       Version of msh3
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
@@ -46,11 +47,17 @@ find_library(MSH3_LIBRARY NAMES "msh3"
     ${PC_MSH3_LIBRARY_DIRS}
 )
 
+if(PC_MSH3_VERSION)
+  set(MSH3_VERSION ${PC_MSH3_VERSION})
+endif()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MSH3
   REQUIRED_VARS
     MSH3_INCLUDE_DIR
     MSH3_LIBRARY
+  VERSION_VAR
+    MSH3_VERSION
 )
 
 if(MSH3_FOUND)
