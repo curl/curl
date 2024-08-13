@@ -114,7 +114,7 @@ set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
 
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
-option(BUILD_CURL_EXE "Set to ON to build curl executable." ON)
+option(BUILD_CURL_EXE "Set to ON to build curl executable." OFF)
 if(APPLE)
   option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
   option(BUILD_STATIC_LIBS "Build static libraries" ON)
