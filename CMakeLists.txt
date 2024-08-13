@@ -588,7 +588,7 @@ if(CURL_USE_WOLFSSL)
 endif()
 
 if(CURL_USE_GNUTLS)
-  if(NOT MSVC OR VCPKG_TOOLCHAIN)
+  if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
     pkg_search_module(GNUTLS "gnutls")
     if(GNUTLS_FOUND)
