@@ -288,7 +288,7 @@ static CURLcode smtp_get_message(struct Curl_easy *data, struct bufref *out)
 static void smtp_state(struct Curl_easy *data, smtpstate newstate)
 {
   struct smtp_conn *smtpc = &data->conn->proto.smtpc;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   /* for debug purposes */
   static const char * const names[] = {
     "STOP",
@@ -308,8 +308,8 @@ static void smtp_state(struct Curl_easy *data, smtpstate newstate)
   };
 
   if(smtpc->state != newstate)
-    infof(data, "SMTP %p state change from %s to %s",
-          (void *)smtpc, names[smtpc->state], names[newstate]);
+    CURL_TRC_SMTP(data, "state change from %s to %s",
+                  names[smtpc->state], names[newstate]);
 #endif
 
   smtpc->state = newstate;
@@ -1422,7 +1422,8 @@ static CURLcode smtp_done(struct Curl_easy *data, CURLcode status,
 
   /* Clear the transfer mode for the next request */
   smtp->transfer = PPTRANSFER_BODY;
-
+  CURL_TRC_SMTP(data, "smtp_done(status=%d, premature=%d) -> %d",
+                status, premature, result);
   return result;
 }
 
@@ -1440,7 +1441,7 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
   CURLcode result = CURLE_OK;
   struct SMTP *smtp = data->req.p.smtp;
 
-  DEBUGF(infof(data, "DO phase starts"));
+  CURL_TRC_SMTP(data, "smtp_perform(), start");
 
   if(data->req.no_body) {
     /* Requested no body means no transfer */
@@ -1472,16 +1473,16 @@ static CURLcode smtp_perform(struct Curl_easy *data, bool *connected,
     result = smtp_perform_command(data);
 
   if(result)
-    return result;
+    goto out;
 
   /* Run the state-machine */
   result = smtp_multi_statemach(data, dophase_done);
 
   *connected = Curl_conn_is_connected(data->conn, FIRSTSOCKET);
 
-  if(*dophase_done)
-    DEBUGF(infof(data, "DO phase is complete"));
-
+out:
+  CURL_TRC_SMTP(data, "smtp_perform() -> %d, connected=%d, done=%d",
+                result, *connected, *dophase_done);
   return result;
 }
 
@@ -1507,7 +1508,7 @@ static CURLcode smtp_do(struct Curl_easy *data, bool *done)
     return result;
 
   result = smtp_regular_transfer(data, done);
-
+  CURL_TRC_SMTP(data, "smtp_do() -> %d, done=%d", result, *done);
   return result;
 }
 
@@ -1542,6 +1543,7 @@ static CURLcode smtp_disconnect(struct Curl_easy *data,
 
   /* Cleanup our connection based variables */
   Curl_safefree(smtpc->domain);
+  CURL_TRC_SMTP(data, "smtp_disconnect(), finished");
 
   return CURLE_OK;
 }
@@ -1573,6 +1575,7 @@ static CURLcode smtp_doing(struct Curl_easy *data, bool *dophase_done)
     DEBUGF(infof(data, "DO phase is complete"));
   }
 
+  CURL_TRC_SMTP(data, "smtp_doing() -> %d, done=%d", result, *dophase_done);
   return result;
 }
 
@@ -1607,6 +1610,8 @@ static CURLcode smtp_regular_transfer(struct Curl_easy *data,
   if(!result && *dophase_done)
     result = smtp_dophase_done(data, connected);
 
+  CURL_TRC_SMTP(data, "smtp_regular_transfer() -> %d, done=%d",
+                result, *dophase_done);
   return result;
 }
 
@@ -1620,10 +1625,8 @@ static CURLcode smtp_setup_connection(struct Curl_easy *data,
 
   /* Initialise the SMTP layer */
   result = smtp_init(data);
-  if(result)
-    return result;
-
-  return CURLE_OK;
+  CURL_TRC_SMTP(data, "smtp_setup_connection() -> %d", result);
+  return result;
 }
 
 /***********************************************************************
