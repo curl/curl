@@ -27,7 +27,7 @@
 #
 # NGHTTP2_FOUND         System has nghttp2
 # NGHTTP2_INCLUDE_DIRS  The nghttp2 include directories
-# NGHTTP2_LIBRARIES     The libraries needed to use nghttp2
+# NGHTTP2_LIBRARIES     The nghttp2 library names
 # NGHTTP2_VERSION       Version of nghttp2
 
 if(CURL_USE_PKGCONFIG)

@@ -31,8 +31,8 @@
 #
 # GSS_FOUND             System has the Heimdal library
 # GSS_FLAVOUR           "MIT" or "Heimdal" if anything found
-# GSS_INCLUDE_DIR       the Heimdal include directory
-# GSS_LIBRARIES         The libraries needed to use GSS
+# GSS_INCLUDE_DIR       The GSS include directory
+# GSS_LIBRARIES         The GSS library names
 # GSS_LINK_DIRECTORIES  Directories to add to linker search path
 # GSS_LINKER_FLAGS      Additional linker flags
 # GSS_COMPILER_FLAGS    Additional compiler flags
