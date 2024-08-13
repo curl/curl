@@ -236,7 +236,7 @@ TLS:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{CMake/FindBearSSL.cmake,CMake/FindMbedTLS.cmake,CMake/FindWolfSSL.cmake,docs/examples/ssl*,docs/examples/*ssl.*,docs/examples/*tls.*,docs/SSL*,docs/libcurl/curl_global_sslset*,docs/libcurl/opts/CURLINFO_CA*,docs/libcurl/opts/CURLINFO_CERT*,docs/libcurl/opts/CURLINFO_SSL*,docs/libcurl/opts/CURLINFO_TLS*,docs/libcurl/opts/CURLOPT_CA*,docs/libcurl/opts/CURLOPT_CERT*,docs/libcurl/opts/CURLOPT_PINNEDPUBLICKEY*,docs/libcurl/opts/CURLOPT_SSL*,docs/libcurl/opts/CURLOPT_TLS*,docs/libcurl/opts/CURLOPT_USE_SSL*,lib/vtls/**,m4/curl-bearssl.m4,m4/curl-gnutls.m4,m4/curl-mbedtls.m4,m4/curl-openssl.m4,m4/curl-rustls.m4,m4/curl-schannel.m4,m4/curl-sectransp.m4,m4/curl-wolfssl.m4}'
+              - '{CMake/FindBearSSL.cmake,CMake/FindMbedTLS.cmake,CMake/FindWolfSSL.cmake,CMake/Findrustls.cmake,docs/examples/ssl*,docs/examples/*ssl.*,docs/examples/*tls.*,docs/SSL*,docs/libcurl/curl_global_sslset*,docs/libcurl/opts/CURLINFO_CA*,docs/libcurl/opts/CURLINFO_CERT*,docs/libcurl/opts/CURLINFO_SSL*,docs/libcurl/opts/CURLINFO_TLS*,docs/libcurl/opts/CURLOPT_CA*,docs/libcurl/opts/CURLOPT_CERT*,docs/libcurl/opts/CURLOPT_PINNEDPUBLICKEY*,docs/libcurl/opts/CURLOPT_SSL*,docs/libcurl/opts/CURLOPT_TLS*,docs/libcurl/opts/CURLOPT_USE_SSL*,lib/vtls/**,m4/curl-bearssl.m4,m4/curl-gnutls.m4,m4/curl-mbedtls.m4,m4/curl-openssl.m4,m4/curl-rustls.m4,m4/curl-schannel.m4,m4/curl-sectransp.m4,m4/curl-wolfssl.m4}'
 
 URL:
   - all:
