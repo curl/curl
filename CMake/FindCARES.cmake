@@ -28,16 +28,36 @@
 # CARES_FOUND         System has c-ares
 # CARES_INCLUDE_DIRS  The c-ares include directories
 # CARES_LIBRARIES     The c-ares library names
+# CARES_VERSION       Version of c-ares
 
-find_path(CARES_INCLUDE_DIR "ares.h")
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_search_module(PC_CARES "libcares")
+endif()
 
-find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
+find_path(CARES_INCLUDE_DIR "ares.h"
+  HINTS
+    ${PC_CARES_INCLUDEDIR}
+    ${PC_CARES_INCLUDE_DIRS}
+)
+
+find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares"
+  HINTS
+    ${PC_CARES_LIBDIR}
+    ${PC_CARES_LIBRARY_DIRS}
+)
+
+if(PC_CARES_VERSION)
+  set(CARES_VERSION ${PC_CARES_VERSION})
+endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CARES
   REQUIRED_VARS
     CARES_INCLUDE_DIR
     CARES_LIBRARY
+  VERSION_VAR
+    CARES_VERSION
 )
 
 if(CARES_FOUND)
