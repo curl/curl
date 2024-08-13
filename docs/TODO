@@ -189,9 +189,13 @@
  21. MQTT
  21.1 Support rate-limiting
  21.2 Support MQTTS
+ 21.3 Handle network blocks
 
  22. TFTP
  22.1 TFTP does not convert LF to CRLF for mode=netascii
+
+ 23. Gopher
+ 23.1 Handle network blocks
 
 ==============================================================================
 
@@ -1348,6 +1352,12 @@
 
 21.2 Support MQTTS
 
+21.3 Handle network blocks
+
+  Running test suite with
+  `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a mqtt` makes several
+  MQTT test cases fail where they should not.
+
 22. TFTP
 
 22.1 TFTP does not convert LF to CRLF for mode=netascii
@@ -1358,3 +1368,11 @@
  for them.
 
  See https://github.com/curl/curl/issues/12655
+
+23. Gopher
+
+23.1 Handle network blocks
+
+  Running test suite with
+  `CURL_DBG_SOCK_WBLOCK=90 ./runtests.pl -a 1200 to 1300` makes several
+  Gopher test cases fail where they should not.
