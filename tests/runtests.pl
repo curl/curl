@@ -3080,8 +3080,10 @@ sub testnumdetails {
 if($total) {
     if($passedign) {
         my $sorted = numsortwords($passedign);
+        logmsg "::group::Passed Ignored Test details\n";
         testnumdetails("PASSED-IGNORED", $sorted);
         logmsg "IGNORED: passed tests: $sorted\n";
+        logmsg "::endgroup::\n";
     }
 
     if($failedign) {
