@@ -34,7 +34,8 @@ static void unit_stop(void)
 {
 }
 
-#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_BEARSSL)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
+    defined(USE_BEARSSL) || defined(USE_RUSTLS)
 
 struct test_cs_entry {
   uint16_t id;
@@ -42,6 +43,31 @@ struct test_cs_entry {
   const char *openssl;
 };
 static const struct test_cs_entry test_cs_list[] = {
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+  { 0x1301, "TLS_AES_128_GCM_SHA256",
+            NULL },
+  { 0x1302, "TLS_AES_256_GCM_SHA384",
+            NULL },
+  { 0x1303, "TLS_CHACHA20_POLY1305_SHA256",
+            NULL },
+  { 0x1304, "TLS_AES_128_CCM_SHA256",
+            NULL },
+  { 0x1305, "TLS_AES_128_CCM_8_SHA256",
+            NULL },
+#endif
+  { 0xC02B, "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
+            "ECDHE-ECDSA-AES128-GCM-SHA256" },
+  { 0xC02C, "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
+            "ECDHE-ECDSA-AES256-GCM-SHA384" },
+  { 0xC02F, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+            "ECDHE-RSA-AES128-GCM-SHA256" },
+  { 0xC030, "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
+            "ECDHE-RSA-AES256-GCM-SHA384" },
+  { 0xCCA8, "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
+            "ECDHE-RSA-CHACHA20-POLY1305" },
+  { 0xCCA9, "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
+            "ECDHE-ECDSA-CHACHA20-POLY1305" },
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_BEARSSL)
   { 0x002F, "TLS_RSA_WITH_AES_128_CBC_SHA",
             "AES128-SHA" },
   { 0x0035, "TLS_RSA_WITH_AES_256_CBC_SHA",
@@ -86,26 +112,15 @@ static const struct test_cs_entry test_cs_list[] = {
             "ECDH-RSA-AES128-SHA256" },
   { 0xC02A, "TLS_ECDH_RSA_WITH_AES_256_CBC_SHA384",
             "ECDH-RSA-AES256-SHA384" },
-  { 0xC02B, "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256",
-            "ECDHE-ECDSA-AES128-GCM-SHA256" },
-  { 0xC02C, "TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384",
-            "ECDHE-ECDSA-AES256-GCM-SHA384" },
   { 0xC02D, "TLS_ECDH_ECDSA_WITH_AES_128_GCM_SHA256",
             "ECDH-ECDSA-AES128-GCM-SHA256" },
   { 0xC02E, "TLS_ECDH_ECDSA_WITH_AES_256_GCM_SHA384",
             "ECDH-ECDSA-AES256-GCM-SHA384" },
-  { 0xC02F, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-            "ECDHE-RSA-AES128-GCM-SHA256" },
-  { 0xC030, "TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384",
-            "ECDHE-RSA-AES256-GCM-SHA384" },
   { 0xC031, "TLS_ECDH_RSA_WITH_AES_128_GCM_SHA256",
             "ECDH-RSA-AES128-GCM-SHA256" },
   { 0xC032, "TLS_ECDH_RSA_WITH_AES_256_GCM_SHA384",
             "ECDH-RSA-AES256-GCM-SHA384" },
-  { 0xCCA8, "TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256",
-            "ECDHE-RSA-CHACHA20-POLY1305" },
-  { 0xCCA9, "TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256",
-            "ECDHE-ECDSA-CHACHA20-POLY1305" },
+#endif
 #if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   { 0x0001, "TLS_RSA_WITH_NULL_MD5",
             "NULL-MD5" },
@@ -179,16 +194,6 @@ static const struct test_cs_entry test_cs_list[] = {
             "RSA-PSK-NULL-SHA256" },
   { 0x00B9, "TLS_RSA_PSK_WITH_NULL_SHA384",
             "RSA-PSK-NULL-SHA384" },
-  { 0x1301, "TLS_AES_128_GCM_SHA256",
-            NULL },
-  { 0x1302, "TLS_AES_256_GCM_SHA384",
-            NULL },
-  { 0x1303, "TLS_CHACHA20_POLY1305_SHA256",
-            NULL },
-  { 0x1304, "TLS_AES_128_CCM_SHA256",
-            NULL },
-  { 0x1305, "TLS_AES_128_CCM_8_SHA256",
-            NULL },
   { 0xC001, "TLS_ECDH_ECDSA_WITH_NULL_SHA",
             "ECDH-ECDSA-NULL-SHA" },
   { 0xC006, "TLS_ECDHE_ECDSA_WITH_NULL_SHA",
@@ -604,7 +609,7 @@ struct test_str_entry {
   const char *str;
 };
 static const struct test_str_entry test_str_list[] = {
-#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
   { 0x1301, "TLS_AES_128_GCM_SHA256"},
   { 0x1302, "TLS_AES_256_GCM_SHA384"},
   { 0x1303, "TLS_CHACHA20_POLY1305_SHA256"},
@@ -631,6 +636,7 @@ static const struct test_str_entry test_str_list[] = {
 #else
   { 0x0000, "DHE-RSA-CHACHA20-POLY1305"},
 #endif
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_BEARSSL)
   { 0xC023, "ECDHE-ECDSA-AES128-SHA256" },
   { 0xC027, "ECDHE-RSA-AES128-SHA256" },
   { 0xC009, "ECDHE-ECDSA-AES128-SHA" },
@@ -639,6 +645,16 @@ static const struct test_str_entry test_str_list[] = {
   { 0xC028, "ECDHE-RSA-AES256-SHA384" },
   { 0xC00A, "ECDHE-ECDSA-AES256-SHA" },
   { 0xC014, "ECDHE-RSA-AES256-SHA" },
+#else
+  { 0x0000, "ECDHE-ECDSA-AES128-SHA256" },
+  { 0x0000, "ECDHE-RSA-AES128-SHA256" },
+  { 0x0000, "ECDHE-ECDSA-AES128-SHA" },
+  { 0x0000, "ECDHE-RSA-AES128-SHA" },
+  { 0x0000, "ECDHE-ECDSA-AES256-SHA384" },
+  { 0x0000, "ECDHE-RSA-AES256-SHA384" },
+  { 0x0000, "ECDHE-ECDSA-AES256-SHA" },
+  { 0x0000, "ECDHE-RSA-AES256-SHA" },
+#endif
 #if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   { 0x0067, "DHE-RSA-AES128-SHA256" },
   { 0x006B, "DHE-RSA-AES256-SHA256" },
@@ -646,12 +662,21 @@ static const struct test_str_entry test_str_list[] = {
   { 0x0000, "DHE-RSA-AES128-SHA256" },
   { 0x0000, "DHE-RSA-AES256-SHA256" },
 #endif
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_BEARSSL)
   { 0x009C, "AES128-GCM-SHA256" },
   { 0x009D, "AES256-GCM-SHA384" },
   { 0x003C, "AES128-SHA256" },
   { 0x003D, "AES256-SHA256" },
   { 0x002F, "AES128-SHA" },
   { 0x0035, "AES256-SHA" },
+#else
+  { 0x0000, "AES128-GCM-SHA256" },
+  { 0x0000, "AES256-GCM-SHA384" },
+  { 0x0000, "AES128-SHA256" },
+  { 0x0000, "AES256-SHA256" },
+  { 0x0000, "AES128-SHA" },
+  { 0x0000, "AES256-SHA" },
+#endif
 #if defined(USE_SECTRANSP) || defined(USE_BEARSSL)
   { 0x000A, "DES-CBC3-SHA" },
 #else
@@ -769,4 +794,4 @@ UNITTEST_START
 UNITTEST_STOP
 
 #endif /* defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
-          defined(USE_BEARSSL) */
+          defined(USE_BEARSSL) || defined(USE_RUSTLS) */

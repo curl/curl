@@ -41,6 +41,7 @@
 #include "strerror.h"
 #include "multiif.h"
 #include "connect.h" /* for the connect timeout */
+#include "cipher_suite.h"
 
 struct rustls_ssl_backend_data
 {
@@ -426,6 +427,101 @@ read_file_into(const char *filename,
   return fclose(f) == 0;
 }
 
+static void
+cr_get_selected_ciphers(struct Curl_easy *data,
+                        const char *ciphers12,
+                        const char *ciphers13,
+                        const struct rustls_supported_ciphersuite **selected,
+                        size_t *selected_size)
+{
+  size_t supported_len = *selected_size;
+  size_t default_len = rustls_default_ciphersuites_len();
+  const struct rustls_supported_ciphersuite *entry;
+  const char *ciphers = ciphers12;
+  size_t count = 0, default13_count = 0, i, j;
+  const char *ptr, *end;
+
+  DEBUGASSERT(default_len <= supported_len);
+
+  if(!ciphers13) {
+    /* Add default TLSv1.3 ciphers to selection */
+    for(j = 0; j < default_len; j++) {
+      struct rustls_str s;
+      entry = rustls_default_ciphersuites_get_entry(j);
+      s = rustls_supported_ciphersuite_get_name(entry);
+      if(s.len < 5 || strncmp(s.data, "TLS13", 5) != 0)
+        continue;
+
+      selected[count++] = entry;
+    }
+
+    default13_count = count;
+
+    if(!ciphers)
+      ciphers = "";
+  }
+  else
+    ciphers = ciphers13;
+
+add_ciphers:
+  for(ptr = ciphers; ptr[0] != '\0' && count < supported_len; ptr = end) {
+    uint16_t id = Curl_cipher_suite_walk_str(&ptr, &end);
+
+    /* Check if cipher is supported */
+    if(id) {
+      for(i = 0; i < supported_len; i++) {
+        entry = rustls_all_ciphersuites_get_entry(i);
+        if(rustls_supported_ciphersuite_get_suite(entry) == id)
+          break;
+      }
+      if(i == supported_len)
+        id = 0;
+    }
+    if(!id) {
+      if(ptr[0] != '\0')
+        infof(data, "rustls: unknown cipher in list: \"%.*s\"",
+              (int) (end - ptr), ptr);
+      continue;
+    }
+
+    /* No duplicates allowed (so selected cannot overflow) */
+    for(i = 0; i < count && selected[i] != entry; i++);
+    if(i < count) {
+      if(i >= default13_count)
+        infof(data, "rustls: duplicate cipher in list: \"%.*s\"",
+              (int) (end - ptr), ptr);
+      continue;
+    }
+
+    selected[count++] = entry;
+  }
+
+  if(ciphers == ciphers13 && ciphers12) {
+    ciphers = ciphers12;
+    goto add_ciphers;
+  }
+
+  if(!ciphers12) {
+    /* Add default TLSv1.2 ciphers to selection */
+    for(j = 0; j < default_len; j++) {
+      struct rustls_str s;
+      entry = rustls_default_ciphersuites_get_entry(j);
+      s = rustls_supported_ciphersuite_get_name(entry);
+      if(s.len < 5 || strncmp(s.data, "TLS13", 5) == 0)
+        continue;
+
+      /* No duplicates allowed (so selected cannot overflow) */
+      for(i = 0; i < count && selected[i] != entry; i++);
+      if(i < count)
+        continue;
+
+      selected[count++] = entry;
+    }
+  }
+
+  *selected_size = count;
+}
+
 static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
@@ -450,7 +546,74 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(backend);
   rconn = backend->conn;
 
-  config_builder = rustls_client_config_builder_new();
+  {
+    uint16_t tls_versions[2] = {
+        RUSTLS_TLS_VERSION_TLSV1_2,
+        RUSTLS_TLS_VERSION_TLSV1_3,
+    };
+    size_t tls_versions_len = 2;
+    const struct rustls_supported_ciphersuite **cipher_suites;
+    size_t cipher_suites_len = rustls_default_ciphersuites_len();
+
+    switch(conn_config->version) {
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+    case CURL_SSLVERSION_TLSv1_1:
+    case CURL_SSLVERSION_TLSv1_2:
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+      tls_versions[0] = RUSTLS_TLS_VERSION_TLSV1_3;
+      tls_versions_len = 1;
+      break;
+    default:
+      failf(data, "rustls: unrecognized minimum TLS version value");
+      return CURLE_SSL_ENGINE_INITFAILED;
+    }
+
+    switch(conn_config->version_max) {
+    case CURL_SSLVERSION_MAX_DEFAULT:
+    case CURL_SSLVERSION_MAX_NONE:
+    case CURL_SSLVERSION_MAX_TLSv1_3:
+      break;
+    case CURL_SSLVERSION_MAX_TLSv1_2:
+      if(tls_versions[0] == RUSTLS_TLS_VERSION_TLSV1_2) {
+        tls_versions_len = 1;
+        break;
+      }
+      FALLTHROUGH();
+    case CURL_SSLVERSION_MAX_TLSv1_1:
+    case CURL_SSLVERSION_MAX_TLSv1_0:
+    default:
+      failf(data, "rustls: unsupported maximum TLS version value");
+      return CURLE_SSL_ENGINE_INITFAILED;
+    }
+
+    cipher_suites = malloc(sizeof(cipher_suites) * (cipher_suites_len));
+    if(!cipher_suites)
+      return CURLE_OUT_OF_MEMORY;
+
+    cr_get_selected_ciphers(data,
+                            conn_config->cipher_list,
+                            conn_config->cipher_list13,
+                            cipher_suites, &cipher_suites_len);
+    if(cipher_suites_len == 0) {
+      failf(data, "rustls: no supported cipher in list");
+      free(cipher_suites);
+      return CURLE_SSL_CIPHER;
+    }
+
+    result = rustls_client_config_builder_new_custom(cipher_suites,
+                                                     cipher_suites_len,
+                                                     tls_versions,
+                                                     tls_versions_len,
+                                                     &config_builder);
+    free(cipher_suites);
+    if(result != RUSTLS_RESULT_OK) {
+      failf(data, "rustls: failed to create client config");
+      return CURLE_SSL_ENGINE_INITFAILED;
+    }
+  }
+
   if(connssl->alpn) {
     struct alpn_proto_buf proto;
     rustls_slice_bytes alpn[ALPN_ENTRIES_MAX];
@@ -629,7 +792,6 @@ cr_connect_common(struct Curl_cfilter *cf,
     */
     connssl->io_need = CURL_SSL_IO_NEED_NONE;
     if(!rustls_connection_is_handshaking(rconn)) {
-      infof(data, "Done handshaking");
       /* rustls claims it is no longer handshaking *before* it has
        * send its FINISHED message off. We attempt to let it write
        * one more time. Oh my.
@@ -644,6 +806,22 @@ cr_connect_common(struct Curl_cfilter *cf,
         return tmperr;
       }
       /* REALLY Done with the handshake. */
+      {
+        uint16_t proto = rustls_connection_get_protocol_version(rconn);
+        const rustls_supported_ciphersuite *rcipher =
+            rustls_connection_get_negotiated_ciphersuite(rconn);
+        uint16_t cipher = rcipher ?
+                          rustls_supported_ciphersuite_get_suite(rcipher) : 0;
+        char buf[64] = "";
+        const char *ver = "TLS version unknown";
+        if(proto == RUSTLS_TLS_VERSION_TLSV1_3)
+          ver = "TLSv1.3";
+        if(proto == RUSTLS_TLS_VERSION_TLSV1_2)
+          ver = "TLSv1.2";
+        Curl_cipher_suite_get_str(cipher, buf, sizeof(buf), true);
+        infof(data, "rustls: handshake complete, %s, cipher: %s",
+              ver, buf);
+      }
       connssl->state = ssl_connection_complete;
       *done = TRUE;
       return CURLE_OK;
@@ -847,7 +1025,9 @@ static size_t cr_version(char *buffer, size_t size)
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
-  SSLSUPP_HTTPS_PROXY,
+  SSLSUPP_HTTPS_PROXY |
+  SSLSUPP_CIPHER_LIST |
+  SSLSUPP_TLS13_CIPHERSUITES,
   sizeof(struct rustls_ssl_backend_data),
 
   Curl_none_init,                  /* init */
