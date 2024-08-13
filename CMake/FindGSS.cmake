@@ -305,4 +305,4 @@ find_package_handle_standard_args(GSS
     "Could NOT find GSS, try to set the path to GSS root folder in the system variable GSS_ROOT_DIR"
 )
 
-mark_as_advanced(GSS_INCLUDE_DIR GSS_LIBRARIES)
+mark_as_advanced(_GSS_CFLAGS _GSS_FOUND _GSS_INCLUDE_DIRS _GSS_LDFLAGS _GSS_LIBRARIES _GSS_LIBRARY_DIRS _GSS_MODULE_NAME _GSS_PREFIX _GSS_VERSION)
