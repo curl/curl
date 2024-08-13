@@ -30,6 +30,11 @@
 # MBEDTLS_LIBRARIES     The mbedtls library names
 # MBEDTLS_VERSION       Version of mbedtls
 
+# for compatibility. Configuration via MBEDTLS_INCLUDE_DIRS is deprecated.
+if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
+  set(MBEDTLS_INCLUDE_DIR "${MBEDTLS_INCLUDE_DIRS}")
+endif()
+
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_search_module(PC_MBEDTLS "mbedtls")
