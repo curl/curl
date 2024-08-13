@@ -36,7 +36,7 @@ find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
 
 if(LIBPSL_INCLUDE_DIR)
   file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _libpsl_version_str REGEX "^#define[\t ]+PSL_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBPSL_VERSION "${_libpsl_version_str}")
+  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" LIBPSL_VERSION "${_libpsl_version_str}")
 endif()
 
 include(FindPackageHandleStandardArgs)
