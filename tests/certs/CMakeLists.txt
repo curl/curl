@@ -21,10 +21,10 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Get 'CERTCONFIGS', 'GENERATEDCERTS', 'SRPFILES' variables
 find_program(SH_EXECUTABLE "sh")
 mark_as_advanced(SH_EXECUTABLE)
 if(SH_EXECUTABLE)
+  # Get 'CERTCONFIGS', 'GENERATEDCERTS', 'SRPFILES' variables
   transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
   include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
