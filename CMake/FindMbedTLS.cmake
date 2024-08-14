@@ -32,6 +32,7 @@
 # for compatibility. Configuration via MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   set(MBEDTLS_INCLUDE_DIR "${MBEDTLS_INCLUDE_DIRS}")
+  unset(MBEDTLS_INCLUDE_DIRS)
 endif()
 
 find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h")
