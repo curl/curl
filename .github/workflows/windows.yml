@@ -364,7 +364,7 @@ jobs:
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
-          tflags: '~2301 ~2302 ~2303 ~2307'
+          tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
           config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON -DENABLE_ARES=ON'
         - name: 'openssl'
           install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
