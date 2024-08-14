@@ -46,6 +46,14 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
+# Config OpenSSL
+set(OPENSSL_ROOT_DIR ../openssl)
+set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
+set(OPENSSL_SSL_LIBRARY ssl)
+set(OPENSSL_CRYPTO_LIBRARY crypto)
+add_library(OpenSSL::SSL ALIAS ssl)
+add_library(OpenSSL::Crypto ALIAS crypto)
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
