@@ -29,7 +29,7 @@
 # BEARSSL_INCLUDE_DIRS  The bearssl include directories
 # BEARSSL_LIBRARIES     The bearssl library names
 
-find_path(BEARSSL_INCLUDE_DIRS "bearssl.h")
+find_path(BEARSSL_INCLUDE_DIR "bearssl.h")
 
 find_library(BEARSSL_LIBRARY "bearssl")
 
@@ -40,4 +40,9 @@ find_package_handle_standard_args(BEARSSL
     BEARSSL_LIBRARY
 )
 
-mark_as_advanced(BEARSSL_INCLUDE_DIRS BEARSSL_LIBRARY)
+if(BEARSSL_FOUND)
+  set(BEARSSL_INCLUDE_DIRS ${BEARSSL_INCLUDE_DIR})
+  set(BEARSSL_LIBRARIES    ${BEARSSL_LIBRARY})
+endif()
+
+mark_as_advanced(BEARSSL_INCLUDE_DIR BEARSSL_LIBRARY)
