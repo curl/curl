@@ -29,21 +29,24 @@
 # MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
 # MBEDTLS_LIBRARIES     The mbedtls library names
 
-find_path(MBEDTLS_INCLUDE_DIRS "mbedtls/ssl.h")
+find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h")
 
 find_library(MBEDTLS_LIBRARY "mbedtls")
 find_library(MBEDX509_LIBRARY "mbedx509")
 find_library(MBEDCRYPTO_LIBRARY "mbedcrypto")
 
-set(MBEDTLS_LIBRARIES "${MBEDTLS_LIBRARY}" "${MBEDX509_LIBRARY}" "${MBEDCRYPTO_LIBRARY}")
-
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MbedTLS
   REQUIRED_VARS
-    MBEDTLS_INCLUDE_DIRS
+    MBEDTLS_INCLUDE_DIR
     MBEDTLS_LIBRARY
     MBEDX509_LIBRARY
     MBEDCRYPTO_LIBRARY
 )
+
+if(MBEDTLS_FOUND)
+  set(MBEDTLS_INCLUDE_DIRS ${MBEDTLS_INCLUDE_DIR})
+  set(MBEDTLS_LIBRARIES    ${MBEDTLS_LIBRARY} ${MBEDX509_LIBRARY} ${MBEDCRYPTO_LIBRARY})
+endif()
 
 mark_as_advanced(MBEDTLS_INCLUDE_DIRS MBEDTLS_LIBRARY MBEDX509_LIBRARY MBEDCRYPTO_LIBRARY)
