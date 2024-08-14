@@ -851,9 +851,9 @@ static ParameterError set_data(cmdline_t cmd,
   size_t size = 0;
   ParameterError err = PARAM_OK;
   char *ptr_range;
-  int have_valid_range;
+  int have_valid_range = 1; /* range is valid until proven otherwise */
   size_t offset_start = 0;
-  size_t offset_end;
+  size_t offset_end = 0;
 
   if(cmd == C_DATA_URLENCODE) { /* --data-urlencode */
     err = data_urlencode(global, nextarg, &postdata, &size);
@@ -872,7 +872,6 @@ static ParameterError set_data(cmdline_t cmd,
     }
     else {
         ptr_range = nextarg + strlen(nextarg) - 1;
-        have_valid_range = 1; /* range is valid until proven otherwise */
         while(ptr_range > nextarg) {
 
           /* if syntax is not respected, the '!' is probably part
@@ -922,7 +921,7 @@ static ParameterError set_data(cmdline_t cmd,
         errorf(global, "Failed to open %s", nextarg);
         return PARAM_READ_ERROR;
       }
-      if(have_valid_range && fseek(file, offset_start, SEEK_SET)) {
+      if(have_valid_range && fseek(file, (long)offset_start, SEEK_SET)) {
         errorf(global, "%s: %s", nextarg, strerror(errno));
         fclose(file);
         return PARAM_READ_ERROR;
