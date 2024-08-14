@@ -25,10 +25,10 @@
 #
 # Result Variables:
 #
-# LIBSSH2_FOUND        System has libssh2
-# LIBSSH2_INCLUDE_DIR  The libssh2 include directory
-# LIBSSH2_LIBRARY      The libssh2 library name
-# LIBSSH2_VERSION      Version of libssh2
+# LIBSSH2_FOUND         System has libssh2
+# LIBSSH2_INCLUDE_DIRS  The libssh2 include directories
+# LIBSSH2_LIBRARIES     The libssh2 library names
+# LIBSSH2_VERSION       Version of libssh2
 
 find_path(LIBSSH2_INCLUDE_DIR "libssh2.h")
 
@@ -47,5 +47,10 @@ find_package_handle_standard_args(LibSSH2
   VERSION_VAR
     LIBSSH2_VERSION
 )
+
+if(LIBSSH2_FOUND)
+  set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
+  set(LIBSSH2_LIBRARIES    ${LIBSSH2_LIBRARY})
+endif()
 
 mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)
