@@ -1059,7 +1059,7 @@ static int perform_getsock(struct Curl_easy *data, curl_socket_t *sock)
       sock[sockindex] = conn->sockfd;
     }
 
-    if(Curl_req_want_send(data)) {
+    if(Curl_req_want_send(data, FALSE)) {
       if((conn->sockfd != conn->writesockfd) ||
          bitmap == GETSOCK_BLANK) {
         /* only if they are not the same socket and we have a readable
@@ -1169,7 +1169,6 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
      Some easy handles may not have connected to the remote host yet,
      and then we must make sure that is done. */
   int this_max_fd = -1;
-  struct easy_pollset ps;
   struct Curl_llist_node *e;
   (void)exc_fd_set; /* not used */
 
@@ -1179,23 +1178,22 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  memset(&ps, 0, sizeof(ps));
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
     unsigned int i;
 
-    multi_getsock(data, &ps);
+    multi_getsock(data, &data->last_poll);
 
-    for(i = 0; i < ps.num; i++) {
-      if(!FDSET_SOCK(ps.sockets[i]))
+    for(i = 0; i < data->last_poll.num; i++) {
+      if(!FDSET_SOCK(data->last_poll.sockets[i]))
         /* pretend it does not exist */
         continue;
-      if(ps.actions[i] & CURL_POLL_IN)
-        FD_SET(ps.sockets[i], read_fd_set);
-      if(ps.actions[i] & CURL_POLL_OUT)
-        FD_SET(ps.sockets[i], write_fd_set);
-      if((int)ps.sockets[i] > this_max_fd)
-        this_max_fd = (int)ps.sockets[i];
+      if(data->last_poll.actions[i] & CURL_POLL_IN)
+        FD_SET(data->last_poll.sockets[i], read_fd_set);
+      if(data->last_poll.actions[i] & CURL_POLL_OUT)
+        FD_SET(data->last_poll.sockets[i], write_fd_set);
+      if((int)data->last_poll.sockets[i] > this_max_fd)
+        this_max_fd = (int)data->last_poll.sockets[i];
     }
   }
 
@@ -1210,7 +1208,6 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
                              unsigned int *fd_count)
 {
   struct curl_waitfds cwfds;
-  struct easy_pollset ps;
   CURLMcode result = CURLM_OK;
   struct Curl_llist_node *e;
 
@@ -1224,11 +1221,10 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
     return CURLM_RECURSIVE_API_CALL;
 
   Curl_waitfds_init(&cwfds, ufds, size);
-  memset(&ps, 0, sizeof(ps));
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
-    multi_getsock(data, &ps);
-    if(Curl_waitfds_add_ps(&cwfds, &ps)) {
+    multi_getsock(data, &data->last_poll);
+    if(Curl_waitfds_add_ps(&cwfds, &data->last_poll)) {
       result = CURLM_OUT_OF_MEMORY;
       goto out;
     }
@@ -1271,7 +1267,6 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
                             bool extrawait, /* when no socket, wait */
                             bool use_wakeup)
 {
-  struct easy_pollset ps;
   size_t i;
   long timeout_internal;
   int retcode = 0;
@@ -1299,14 +1294,13 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     return CURLM_BAD_FUNCTION_ARGUMENT;
 
   Curl_pollfds_init(&cpfds, a_few_on_stack, NUM_POLLS_ON_STACK);
-  memset(&ps, 0, sizeof(ps));
 
   /* Add the curl handles to our pollfds first */
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
 
-    multi_getsock(data, &ps);
-    if(Curl_pollfds_add_ps(&cpfds, &ps)) {
+    multi_getsock(data, &data->last_poll);
+    if(Curl_pollfds_add_ps(&cpfds, &data->last_poll)) {
       result = CURLM_OUT_OF_MEMORY;
       goto out;
     }
@@ -1445,16 +1439,15 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         for(e = Curl_llist_head(&multi->process); e && !result;
             e = Curl_node_next(e)) {
           struct Curl_easy *data = Curl_node_elem(e);
-          multi_getsock(data, &ps);
 
-          for(i = 0; i < ps.num; i++) {
+          for(i = 0; i < data->last_poll.num; i++) {
             wsa_events.lNetworkEvents = 0;
-            if(WSAEnumNetworkEvents(ps.sockets[i], NULL,
+            if(WSAEnumNetworkEvents(data->last_poll.sockets[i], NULL,
                                     &wsa_events) == 0) {
               if(ret && !pollrc && wsa_events.lNetworkEvents)
                 retcode++;
             }
-            WSAEventSelect(ps.sockets[i], multi->wsa_event, 0);
+            WSAEventSelect(data->last_poll.sockets[i], multi->wsa_event, 0);
           }
         }
       }
@@ -2399,7 +2392,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       }
 
       /* read/write data if it is ready to do so */
-      result = Curl_readwrite(data);
+      result = Curl_sendrecv(data, nowp);
 
       if(data->req.done || (result == CURLE_RECV_ERROR)) {
         /* If CURLE_RECV_ERROR happens early enough, we assume it was a race
@@ -3662,7 +3655,21 @@ void Curl_expire_clear(struct Curl_easy *data)
   }
 }
 
+bool Curl_has_expired(struct Curl_easy *data, struct curltime *nowp)
+{
+  struct curltime *exp = &data->state.expiretime;
+  if(exp->tv_sec || exp->tv_usec) {
+    struct curltime now;
 
+    if(!nowp) {
+      now = Curl_now();
+      nowp = &now;
+    }
+    if(Curl_timediff(*exp, *nowp) <= 0)
+      return TRUE;
+  }
+  return FALSE;
+}
 
 
 CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,

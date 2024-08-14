@@ -1121,7 +1121,7 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
                   (data->mstate == MSTATE_PERFORMING ||
                    data->mstate == MSTATE_RATELIMITING));
   /* Unpausing writes is detected on the next run in
-   * transfer.c:Curl_readwrite(). This is because this may result
+   * transfer.c:Curl_sendrecv(). This is because this may result
    * in a transfer error if the application's callbacks fail */
 
   /* Set the new keepon state, so it takes effect no matter what error

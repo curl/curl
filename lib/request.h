@@ -218,7 +218,7 @@ CURLcode Curl_req_send_more(struct Curl_easy *data);
 /**
  * TRUE iff the request wants to send, e.g. has buffered bytes.
  */
-bool Curl_req_want_send(struct Curl_easy *data);
+bool Curl_req_want_send(struct Curl_easy *data, bool timer_expired);
 
 /**
  * TRUE iff the request has no buffered bytes yet to send.

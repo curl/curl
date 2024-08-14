@@ -392,21 +392,23 @@ bool Curl_req_sendbuf_empty(struct Curl_easy *data)
   return !data->req.sendbuf_init || Curl_bufq_is_empty(&data->req.sendbuf);
 }
 
-bool Curl_req_want_send(struct Curl_easy *data)
+bool Curl_req_want_send(struct Curl_easy *data, bool timer_expired)
 {
   /* Not done and
    * - KEEP_SEND and not PAUSEd.
    * - or request has buffered data to send
-   * - or transfer connection has pending data to send */
+   * - or transfer connection has pending data to send
+   * - or a timer expired and KEEP_SEND_TIMED is set */
   return !data->req.done &&
          (((data->req.keepon & KEEP_SENDBITS) == KEEP_SEND) ||
            !Curl_req_sendbuf_empty(data) ||
-           Curl_xfer_needs_flush(data));
+           Curl_xfer_needs_flush(data) ||
+           (timer_expired && (data->req.keepon & KEEP_SEND_TIMED)));
 }
 
 bool Curl_req_done_sending(struct Curl_easy *data)
 {
-  return data->req.upload_done && !Curl_req_want_send(data);
+  return data->req.upload_done && !Curl_req_want_send(data, FALSE);
 }
 
 CURLcode Curl_req_send_more(struct Curl_easy *data)
