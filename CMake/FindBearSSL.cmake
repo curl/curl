@@ -32,6 +32,7 @@
 # for compatibility. Configuration via BEARSSL_INCLUDE_DIRS is deprecated, use BEARSSL_INCLUDE_DIR instead.
 if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
   set(BEARSSL_INCLUDE_DIR "${BEARSSL_INCLUDE_DIRS}")
+  unset(BEARSSL_INCLUDE_DIRS)
 endif()
 
 find_path(BEARSSL_INCLUDE_DIR "bearssl.h")
