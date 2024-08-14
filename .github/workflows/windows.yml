@@ -481,5 +481,11 @@ jobs:
         timeout-minutes: 12
         run: |
           export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP !FTP ${{ matrix.tflags }}'
+          # FIXME: TrackMemory fails to work with MSVC
+          if [[ '${{ matrix.config }}' = *'-DENABLE_DEBUG=ON'* || '${{ matrix.config }}' = *'-DENABLE_CURLDEBUG=ON'* ]]; then
+            if [[ '${{ matrix.config }}' = *'-DENABLE_ARES=ON'* ]]; then
+              TFLAGS+=' ~558 ~1330'
+            fi
+          fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
