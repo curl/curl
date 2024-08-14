@@ -465,6 +465,20 @@ sub render {
     return @desc;
 }
 
+sub maybespace {
+    my ($string) = @_;
+
+    if(($string =~ /(.* )(.*)/) &&
+       (length($2) <= 20)) {
+        return $1;
+    }
+    if(($string =~ /(.*:)(.*)/) &&
+       (length($2) <= 20)) {
+        return $1;
+    }
+    return $string;
+}
+
 sub single {
     my ($dir, $manpage, $f, $standalone)=@_;
     my $fh;
@@ -787,9 +801,37 @@ sub single {
         else {
             my @ex;
             push @ex, "[0q]Example$s:\n";
+            #
+            # long ASCII examples are wrapped. Preferably at the last space
+            # before the margin. Or at a colon. Otherwise it just cuts at the
+            # exact boundary.
+            #
             foreach my $e (@examples) {
                 $e =~ s!\$URL!https://example.com!g;
-                push @ex, "[0q] curl $e\n";
+                my $maxwidth = 60; # plus the "    curl " 18 col prefix
+                if(length($e) > $maxwidth) {
+                    # a long example, shorten it
+                    my $p = substr($e, 0, $maxwidth);
+                    $p = maybespace($p);
+                    push @ex, "[0q] curl ".$p."\\";
+                    $e = substr($e, length($p));
+                    do {
+                        my $r = substr($e, 0, $maxwidth);
+                        if(length($e) > $maxwidth) {
+                            $r = maybespace($r);
+                        }
+                        my $slash ="";
+                        $e = substr($e, length($r));
+                        if(length($e) > 0) {
+                            $slash = "\\";
+                        }
+
+                        push @ex, "[0q]      $r$slash" if($r);
+                    } while(length($e));
+                }
+                else {
+                    push @ex, "[0q] curl $e\n";
+                }
             }
             printdesc($manpage, 2, @ex);
         }
