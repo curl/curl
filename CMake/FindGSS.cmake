@@ -31,7 +31,7 @@
 #
 # GSS_FOUND             System has the Heimdal library
 # GSS_FLAVOUR           "MIT" or "Heimdal" if anything found
-# GSS_INCLUDE_DIR       The GSS include directory
+# GSS_INCLUDE_DIRS      The GSS include directories
 # GSS_LIBRARIES         The GSS library names
 # GSS_LINK_DIRECTORIES  Directories to add to linker search path
 # GSS_LINKER_FLAGS      Additional linker flags
@@ -260,7 +260,7 @@ else()
   endif()
 endif()
 
-set(GSS_INCLUDE_DIR ${_GSS_INCLUDE_DIRS})
+set(GSS_INCLUDE_DIRS ${_GSS_INCLUDE_DIRS})
 set(GSS_LIBRARIES ${_GSS_LIBRARIES})
 set(GSS_LINK_DIRECTORIES ${_GSS_LIBRARY_DIRS})
 set(GSS_LINKER_FLAGS ${_GSS_LDFLAGS})
@@ -275,8 +275,8 @@ if(GSS_FLAVOUR)
       set(_heimdal_manifest_file "Heimdal.Application.x86.manifest")
     endif()
 
-    if(EXISTS "${GSS_INCLUDE_DIR}/${_heimdal_manifest_file}")
-      file(STRINGS "${GSS_INCLUDE_DIR}/${_heimdal_manifest_file}" _heimdal_version_str
+    if(EXISTS "${GSS_INCLUDE_DIRS}/${_heimdal_manifest_file}")
+      file(STRINGS "${GSS_INCLUDE_DIRS}/${_heimdal_manifest_file}" _heimdal_version_str
         REGEX "^.*version=\"[0-9]\\.[^\"]+\".*$")
 
       string(REGEX MATCH "[0-9]\\.[^\"]+" GSS_VERSION "${_heimdal_version_str}")
