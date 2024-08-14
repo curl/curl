@@ -219,7 +219,7 @@ endif()
 
 include(CurlSymbolHiding)
 
-option(CURL_ENABLE_EXPORT_TARGET "to enable cmake export target" ON)
+option(CURL_ENABLE_EXPORT_TARGET "to enable cmake export target" OFF)
 mark_as_advanced(CURL_ENABLE_EXPORT_TARGET)
 
 option(CURL_DISABLE_ALTSVC "disables alt-svc support" OFF)
