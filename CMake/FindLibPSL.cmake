@@ -25,10 +25,10 @@
 #
 # Result Variables:
 #
-# LIBPSL_FOUND        System has libpsl
-# LIBPSL_INCLUDE_DIR  The libpsl include directory
-# LIBPSL_LIBRARY      The libpsl library name
-# LIBPSL_VERSION      Version of libpsl
+# LIBPSL_FOUND         System has libpsl
+# LIBPSL_INCLUDE_DIRS  The libpsl include directories
+# LIBPSL_LIBRARIES     The libpsl library names
+# LIBPSL_VERSION       Version of libpsl
 
 find_path(LIBPSL_INCLUDE_DIR "libpsl.h")
 
@@ -48,5 +48,10 @@ find_package_handle_standard_args(LibPSL
   VERSION_VAR
     LIBPSL_VERSION
 )
+
+if(LIBPSL_FOUND)
+  set(LIBPSL_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
+  set(LIBPSL_LIBRARIES    ${LIBPSL_LIBRARY})
+endif()
 
 mark_as_advanced(LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY)
