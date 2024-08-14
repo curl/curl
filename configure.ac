@@ -3262,7 +3262,7 @@ if test "x$want_openssl_quic" = "xyes"; then
   if test "$NGTCP2_ENABLED" = 1; then
     AC_MSG_ERROR([--with-openssl-quic and --with-ngtcp2 are mutually exclusive])
   fi
-  if test "$HAVE_OPENSSL_QUIC" != 1; then
+  if test "$have_openssl_quic" != 1; then
     AC_MSG_ERROR([--with-openssl-quic requires quic support and OpenSSL >= 3.3.0])
   fi
   AC_DEFINE(USE_OPENSSL_QUIC, 1, [if openssl QUIC is in use])
