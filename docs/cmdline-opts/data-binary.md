@@ -23,7 +23,7 @@ Post data exactly as specified with no extra processing whatsoever.
 If you start the data with the letter @, the rest should be a filename.
 `@-` makes curl read the data from stdin. Data is posted in a similar
 manner as --data does, except that newlines and carriage returns are
-preserved and conversions are never done.The use of the exclamation mark
+preserved and conversions are never done. The use of the exclamation mark
 and minus is also analogous to --data.
 
 Like --data the default content-type sent to the server is
