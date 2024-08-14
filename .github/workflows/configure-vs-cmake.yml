@@ -13,6 +13,7 @@ on:
       - '**/CMakeLists.txt'
       - 'lib/curl_config.h.cmake'
       - '.github/scripts/cmp-config.pl'
+      - '.github/workflows/configure-vs-cmake.yml'
 
   pull_request:
     branches:
@@ -23,6 +24,7 @@ on:
       - '**/CMakeLists.txt'
       - 'lib/curl_config.h.cmake'
       - '.github/scripts/cmp-config.pl'
+      - '.github/workflows/configure-vs-cmake.yml'
 
 permissions: {}
 
