@@ -17,7 +17,7 @@ We treat security issues with confidentiality until controlled and disclosed res
 
 ## OpenSSF Scorecard
 
-curl has earned Gold status on the OpenSSF Scorecard, reflecting its adherence to
+curl has earned Gold status on the OpenSSF Best Practices, reflecting its adherence to
 rigorous security and best practice standards. This achievement highlights curl's
 comprehensive documentation, secure development processes, effective change control
 mechanisms, and strong maintenance routines. Meeting these criteria demonstrates curl's
