@@ -1969,7 +1969,7 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     else if(remain < (curl_off_t)blen)
       blen = (size_t)remain;
   }
-  nread = 0;
+
   if(blen <= 4) {
     /* TODO: Curl_mime_read() may go into an infinite loop when reading
      * such small lengths. Returning 0 bytes read is a fix that only works
