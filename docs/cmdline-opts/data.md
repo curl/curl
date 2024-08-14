@@ -49,7 +49,7 @@ interpretation use --data-raw instead.
 If your file name ends with an exclamation mark followed by a numeric value
 <skip_bytes>, the first <skip_byes> bytes from the File are ignored. If you write two
 numeric values separated by a minus sign, this is considered a range from - to.
-For example, @notes.txt!1-2 uploads the second and third bytes of the file
+For example, @notes.txt!1-3 uploads the second and third bytes of the file
 notes.txt.
 
 The data for this option is passed on to the server exactly as provided on the
