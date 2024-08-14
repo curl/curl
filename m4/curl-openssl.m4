@@ -441,7 +441,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
     ]])
   ],[
     AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_OPENSSL_QUIC, 1, [if you have the functions OSSL_QUIC_client_method])
+    have_openssl_quic=1
   ],[
     AC_MSG_RESULT([no])
   ])
