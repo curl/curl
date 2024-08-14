@@ -29,6 +29,11 @@
 # MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
 # MBEDTLS_LIBRARIES     The mbedtls library names
 
+# for compatibility. Configuration via MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.
+if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
+  set(MBEDTLS_INCLUDE_DIR "${MBEDTLS_INCLUDE_DIRS}")
+endif()
+
 find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h")
 
 find_library(MBEDTLS_LIBRARY "mbedtls")
