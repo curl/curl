@@ -42,6 +42,7 @@ endif()
 
 if(NETTLE_FOUND)
   set(NETTLE_LIBRARIES ${NETTLE_LINK_LIBRARIES})
+  message(STATUS "Found nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (Found version \"${NETTLE_VERSION}\")")
 else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
   find_library(NETTLE_LIBRARY NAMES "nettle")
