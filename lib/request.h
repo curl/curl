@@ -237,4 +237,9 @@ CURLcode Curl_req_abort_sending(struct Curl_easy *data);
  */
 CURLcode Curl_req_stop_send_recv(struct Curl_easy *data);
 
+/**
+ * Invoked when all request data has been uploaded.
+ */
+CURLcode Curl_req_set_upload_done(struct Curl_easy *data);
+
 #endif /* HEADER_CURL_REQUEST_H */

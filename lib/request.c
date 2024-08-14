@@ -249,7 +249,7 @@ static CURLcode req_send_buffer_flush(struct Curl_easy *data)
   return result;
 }
 
-static CURLcode req_set_upload_done(struct Curl_easy *data)
+CURLcode Curl_req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
@@ -310,7 +310,7 @@ static CURLcode req_flush(struct Curl_easy *data)
       if(!done)
         return CURLE_AGAIN;
     }
-    return req_set_upload_done(data);
+    return Curl_req_set_upload_done(data);
   }
   return CURLE_OK;
 }
@@ -435,7 +435,7 @@ CURLcode Curl_req_abort_sending(struct Curl_easy *data)
     data->req.upload_aborted = TRUE;
     /* no longer KEEP_SEND and KEEP_SEND_PAUSE */
     data->req.keepon &= ~KEEP_SENDBITS;
-    return req_set_upload_done(data);
+    return Curl_req_set_upload_done(data);
   }
   return CURLE_OK;
 }
