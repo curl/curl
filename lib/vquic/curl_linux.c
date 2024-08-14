@@ -26,6 +26,7 @@
 
 #if defined(USE_LINUX_QUIC) && defined(USE_NGHTTP3)
 #include <linux/quic.h>
+#include <linux/tls.h>
 #include <netinet/quic.h>
 #include <nghttp3/nghttp3.h>
 
@@ -68,15 +69,15 @@ void Curl_linuxq_ver(char *p, size_t len)
   (void)msnprintf(p, len, "linuxq nghttp3/%s", ht3->version_str);
 }
 
+struct linuxq_conn {
+  BIT(completed);             /* TLS handshaked completed */
+};
+
 struct cf_linuxq_ctx {
   struct cf_quic_ctx q;
   struct ssl_peer peer;
   struct curl_tls_ctx tls;
-#if 0
-  struct quic_conn qconn;
-#else
-  int qconn;
-#endif
+  struct linuxq_conn *qconn;
   uint32_t version;
   uint32_t last_error;
   struct quic_transport_param transport_params;
@@ -125,6 +126,563 @@ struct h3_stream_ctx {
             data? Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
 #define H3_STREAM_CTX_ID(ctx,id)  ((struct h3_stream_ctx *)(\
             Curl_hash_offt_get(&(ctx)->streams, (id))))
+
+static int crypto_set_secret(struct cf_linuxq_ctx *ctx, uint8_t level,
+                             uint32_t type, const uint8_t *rx_secret,
+                             const uint8_t *tx_secret, size_t len)
+{
+  struct quic_crypto_secret secret = {0};
+  int rc;
+  DEBUGASSERT(len == 48);
+
+  secret.level = level;
+  secret.type = type;
+
+  if(tx_secret) {
+    secret.send = 1;
+    memcpy(secret.secret, tx_secret, len);
+    rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_CRYPTO_SECRET,
+                    &secret, sizeof(secret));
+    if(rc)
+      return -1;
+  }
+
+  if(rx_secret) {
+    secret.send = 0;
+    memcpy(secret.secret, rx_secret, len);
+    rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_CRYPTO_SECRET,
+                    &secret, sizeof(secret));
+    if(rc)
+      return -1;
+
+    if(secret.level == QUIC_CRYPTO_APP)
+      ctx->qconn->completed = 1; /* XXX: make sure tx_secret is installed */
+  }
+
+  return 0;
+}
+
+static int crypto_send(struct cf_linuxq_ctx *ctx, const uint8_t *data,
+                       uint32_t len, uint8_t level)
+{
+  struct quic_handshake_info *hsinfo;
+  struct cmsghdr *cm;
+  struct msghdr msg = {0};
+  struct iovec vec;
+  ssize_t n;
+  uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_handshake_info))];
+
+  vec.iov_base = (void *)data;
+  vec.iov_len = len;
+  msg.msg_iov = &vec;
+  msg.msg_iovlen = 1;
+  msg.msg_control = msg_ctrl;
+  msg.msg_controllen = sizeof(msg_ctrl);
+  cm = CMSG_FIRSTHDR(&msg);
+  cm->cmsg_level = IPPROTO_QUIC;
+  cm->cmsg_type = QUIC_HANDSHAKE_INFO;
+  cm->cmsg_len = CMSG_LEN(sizeof(*hsinfo));
+  hsinfo = (struct quic_handshake_info *)CMSG_DATA(cm);
+  hsinfo->crypto_level = level;
+
+  n = sendmsg(ctx->q.sockfd, &msg, 0);
+  if(n < 0)
+{ printf("sendmsg errno=%d\n", errno);
+    return -1;
+}
+
+  return 0;
+}
+
+#if defined(USE_OPENSSL)
+static uint8_t crypto_ssl_level(enum ssl_encryption_level_t level)
+{
+  switch(level) {
+  case ssl_encryption_application:
+    return QUIC_CRYPTO_APP;
+  case ssl_encryption_initial:
+    return QUIC_CRYPTO_INITIAL;
+  case ssl_encryption_handshake:
+    return QUIC_CRYPTO_HANDSHAKE;
+  case ssl_encryption_early_data:
+    return QUIC_CRYPTO_EARLY;
+  default:
+    DEBUGASSERT(0);
+    return QUIC_CRYPTO_MAX;
+  }
+}
+
+static enum ssl_encryption_level_t crypto_to_ssl_level(uint8_t level)
+{
+  switch(level) {
+  case QUIC_CRYPTO_APP:
+    return ssl_encryption_application;
+  case QUIC_CRYPTO_INITIAL:
+    return ssl_encryption_initial;
+  case QUIC_CRYPTO_HANDSHAKE:
+    return ssl_encryption_handshake;
+  case QUIC_CRYPTO_EARLY:
+    return ssl_encryption_early_data;
+  default:
+    DEBUGASSERT(0);
+    return 0;
+  }
+}
+
+static uint32_t crypto_ssl_cipher_type(uint32_t cipher)
+{
+  switch(cipher) {
+#if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+  case TLS1_3_CK_AES_128_CCM_SHA256:
+    return TLS_CIPHER_AES_CCM_128;
+#endif
+  case TLS1_3_CK_AES_128_GCM_SHA256:
+    return TLS_CIPHER_AES_GCM_128;
+  case TLS1_3_CK_AES_256_GCM_SHA384:
+    return TLS_CIPHER_AES_GCM_256;
+  case TLS1_3_CK_CHACHA20_POLY1305_SHA256:
+    return TLS_CIPHER_CHACHA20_POLY1305;
+  default:
+    DEBUGASSERT(0);
+    return 0;
+  }
+}
+
+static int crypto_ssl_set_secret(SSL *ssl,
+                                 enum ssl_encryption_level_t ssl_level,
+                                 const uint8_t *rx_secret,
+                                 const uint8_t *tx_secret, size_t len)
+{
+  struct Curl_cfilter *cf = SSL_get_app_data(ssl);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  const SSL_CIPHER *cipher = SSL_get_current_cipher(ssl);
+  uint32_t type, ssl_type;
+  int rc;
+  uint8_t level;
+
+  if(!cipher)
+    return -1;
+
+  ssl_type = SSL_CIPHER_get_id(cipher);
+  level = crypto_ssl_level(ssl_level);
+  type = crypto_ssl_cipher_type(ssl_type);
+  rc = crypto_set_secret(ctx, level, type, rx_secret, tx_secret, len);
+
+  if(!rc && ctx->qconn->completed) {
+    rc = SSL_process_quic_post_handshake(ssl);
+    if(rc != 1) {
+      rc = SSL_get_error(ssl, rc);
+    if(rc != SSL_ERROR_WANT_READ && rc != SSL_ERROR_WANT_WRITE)
+      return -1;
+  }
+  return rc;
+}
+
+static int crypto_ssl_send(SSL *ssl, enum ssl_encryption_level_t ssl_level,
+                           const uint8_t *data, size_t len)
+{
+  struct Curl_cfilter *cf = SSL_get_app_data(ssl);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  int rc;
+  uint8_t level;
+
+  level = crypto_ssl_level(ssl_level);
+  rc = crypto_send(ctx, data, len, level);
+  return rc;
+}
+
+static int crypto_ssl_flush(SSL *ssl) {
+  (void)ssl;
+  return 1;
+}
+
+static int crypto_ssl_alert(SSL *ssl,
+                            enum ssl_encryption_level_t ssl_level,
+                            uint8_t alert)
+{
+  (void)ssl;
+  (void)ssl_level;
+  (void)alert;
+  /* XXX: log, set alert */
+  return 1;
+}
+
+#if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+static int crypto_bossl_set_rx_secret(SSL *ssl,
+                                      enum ssl_encryption_level_t bossl_level,
+                                      const SSL_CIPHER *cipher,
+                                      const uint8_t *rx_secret, size_t len)
+{
+  /* XXX is cipher the same as SSL_get_current_cipher(ssl)? */
+  return crypto_ssl_set_secret(ssl, bossl_level, rx_secret, NULL, len);
+}
+
+static int crypto_bossl_set_tx_secret(SSL *ssl,
+                                      enum ssl_encryption_level_t bossl_level,
+                                      const SSL_CIPHER *cipher,
+                                      const uint8_t *tx_secret, size_t len)
+{
+  /* XXX is cipher the same as SSL_get_current_cipher(ssl)? */
+  return crypto_ssl_set_secret(ssl, bossl_level, NULL, tx_secret, len);
+}
+
+static SSL_QUIC_METHOD crypto_ssl_quic_method = {
+  crypto_bossl_set_rx_secret, crypto_bossl_set_tx_secret, crypto_ssl_send,
+  crypto_ssl_flush, crypto_ssl_alert
+};
+#else
+static SSL_QUIC_METHOD crypto_ssl_quic_method = {
+  crypto_ssl_set_secret, crypto_ssl_send, crypto_ssl_flush, crypto_ssl_alert
+#ifdef LIBRESSL_VERSION_NUMBER
+  , NULL, NULL
+#endif
+};
+#endif /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
+
+static void crypto_ssl_configure_context(SSL_CTX *ssl_ctx)
+{
+  SSL_CTX_set_max_proto_version(ssl_ctx, TLS1_3_VERSION);
+  SSL_CTX_set_min_proto_version(ssl_ctx, TLS1_3_VERSION);
+  SSL_CTX_set_quic_method(ssl_ctx, &crypto_ssl_quic_method);
+}
+
+static CURLcode crypto_ssl_do_handshake(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data, uint8_t level,
+                                        const uint8_t *buf, size_t len)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  SSL_CTX *ssl_ctx = ctx->ossl.ssl_ctx;
+  int rc;
+
+  if(len > 0) {
+    ssl_level = crypto_to_ssl_level(level);
+    rc = SSL_provide_quic_data(ssl, ssl_level, buf, len);
+    if(rc != 1) {
+      failf(data, "SSL_provide_quic_data failed");
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
+  }
+
+  rc = SSL_do_handshake(ssl);
+  if(rc <= 0) {
+      rc = SSL_get_error(ssl, rc);
+      if(rc != SSL_ERROR_WANT_READ && rc != SSL_ERROR_WANT_WRITE)
+        failf(data, "SSL_do_handshake failed");
+        return CURLE_QUIC_CONNECT_ERROR;
+      }
+  }
+
+  return CURLE_OK;
+}
+
+#elif defined(USE_GNUTLS)
+static int crypto_gtls_alert(gnutls_session_t session,
+                             gnutls_record_encryption_level_t gtls_level,
+                             gnutls_alert_level_t alert_level,
+                             gnutls_alert_description_t alert)
+{
+printf("crypto_gtls_alert alert_level:%d, alert:%d\n", alert_level, alert);
+  (void)session;
+  (void)gtls_level;
+  (void)alert_level;
+  (void)alert;
+  /* XXX: log, set alert */
+  return 0;
+}
+
+static uint8_t crypto_gtls_level(gnutls_record_encryption_level_t level)
+{
+  switch(level) {
+  case GNUTLS_ENCRYPTION_LEVEL_APPLICATION:
+    return QUIC_CRYPTO_APP;
+  case GNUTLS_ENCRYPTION_LEVEL_INITIAL:
+    return QUIC_CRYPTO_INITIAL;
+  case GNUTLS_ENCRYPTION_LEVEL_HANDSHAKE:
+    return QUIC_CRYPTO_HANDSHAKE;
+  case GNUTLS_ENCRYPTION_LEVEL_EARLY:
+    return QUIC_CRYPTO_EARLY;
+  default:
+    DEBUGASSERT(0);
+    return QUIC_CRYPTO_MAX;
+  }
+}
+
+static gnutls_record_encryption_level_t crypto_to_gtls_level(uint8_t level)
+{
+  switch(level) {
+  case QUIC_CRYPTO_APP:
+    return GNUTLS_ENCRYPTION_LEVEL_APPLICATION;
+  case QUIC_CRYPTO_INITIAL:
+    return GNUTLS_ENCRYPTION_LEVEL_INITIAL;
+  case QUIC_CRYPTO_HANDSHAKE:
+    return GNUTLS_ENCRYPTION_LEVEL_HANDSHAKE;
+  case QUIC_CRYPTO_EARLY:
+    return GNUTLS_ENCRYPTION_LEVEL_EARLY;
+  default:
+    DEBUGASSERT(0);
+    return 0;
+  }
+}
+
+static int crypto_gtls_send(gnutls_session_t session,
+                            gnutls_record_encryption_level_t gtls_level,
+                            gnutls_handshake_description_t htype,
+                            const void *data, size_t len)
+{
+  struct Curl_cfilter *cf = gnutls_session_get_ptr(session);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  int rc;
+  uint8_t level;
+printf("crypto_gtls_send htype:%d\n", htype);
+
+  if(htype == GNUTLS_HANDSHAKE_KEY_UPDATE ||
+      htype == GNUTLS_HANDSHAKE_CHANGE_CIPHER_SPEC)
+    return 0;
+
+  level = crypto_gtls_level(gtls_level);
+  rc = crypto_send(ctx, data, len, level);
+printf("crypto_gtls_send rc:%d\n", rc);
+  return rc;
+}
+
+static uint32_t crypto_gtls_cipher_type(gnutls_cipher_algorithm_t cipher)
+{
+  switch(cipher) {
+  case GNUTLS_CIPHER_AES_128_CCM:
+    return TLS_CIPHER_AES_CCM_128;
+  case GNUTLS_CIPHER_AES_128_GCM:
+    return TLS_CIPHER_AES_GCM_128;
+  case GNUTLS_CIPHER_AES_256_GCM:
+    return TLS_CIPHER_AES_GCM_256;
+  case GNUTLS_CIPHER_CHACHA20_POLY1305:
+    return TLS_CIPHER_CHACHA20_POLY1305;
+  default:
+    DEBUGASSERT(0);
+    return 0;
+  }
+}
+
+static int crypto_gtls_set_secret(gnutls_session_t session,
+                                  gnutls_record_encryption_level_t gtls_level,
+                                  const void *rx_secret, const void *tx_secret,
+                                  size_t len)
+{
+  struct Curl_cfilter *cf = gnutls_session_get_ptr(session);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  gnutls_cipher_algorithm_t gtls_type = gnutls_cipher_get(session);
+  uint32_t type;
+  int rc;
+  uint8_t level;
+printf("crypto_gtls_set_secret\n");
+
+  if(ctx->qconn->completed)
+    return 0;
+
+  if(gtls_level == GNUTLS_ENCRYPTION_LEVEL_EARLY)
+    gtls_type = gnutls_early_cipher_get(session);
+
+  level = crypto_gtls_level(gtls_level);
+  type = crypto_gtls_cipher_type(gtls_type);
+  rc = crypto_set_secret(ctx, level, type, rx_secret, tx_secret, len);
+  return rc;
+}
+
+static int crypto_gtls_tp_tx(gnutls_session_t session, gnutls_buffer_t data)
+{
+  struct Curl_cfilter *cf = gnutls_session_get_ptr(session);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  uint8_t buf[256];
+  socklen_t len = sizeof(buf);
+  int rc;
+
+  rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
+                  buf, &len);
+printf("crypto_gtls_tp_tx rc:%d\n", rc);
+  if(rc)
+    return -1;
+
+  rc = gnutls_buffer_append_data(data, buf, len);
+
+  return rc;
+}
+
+static int crypto_gtls_tp_rx(gnutls_session_t session, const uint8_t *data,
+                             size_t len)
+{
+  struct Curl_cfilter *cf = gnutls_session_get_ptr(session);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  int rc;
+
+  rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
+                  data, len);
+printf("crypto_gtls_tp_rx rc:%d\n", rc);
+  return rc;
+}
+
+static int crypto_gtls_configure_session(gnutls_session_t session)
+{
+  int rv;
+
+  gnutls_alert_set_read_function(session, crypto_gtls_alert);
+  gnutls_handshake_set_read_function(session, crypto_gtls_send);
+  gnutls_handshake_set_secret_function(session, crypto_gtls_set_secret);
+
+  rv = gnutls_session_ext_register(session, "QUIC Transport Parameters", 0x39,
+                                   GNUTLS_EXT_TLS, crypto_gtls_tp_rx,
+                                   crypto_gtls_tp_tx, NULL, NULL, NULL,
+                                   GNUTLS_EXT_FLAG_TLS | GNUTLS_EXT_FLAG_EE |
+                                   GNUTLS_EXT_FLAG_CLIENT_HELLO);
+  return rv;
+}
+
+static CURLcode crypto_gtls_do_handshake(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data, uint8_t level,
+                                         const uint8_t *buf, size_t len)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  gnutls_session_t session;
+  gnutls_record_encryption_level_t gtls_level;
+  int rc;
+
+infof(data, "crypto_gtls_do_handshake: len=%ld, level = %hhd", len, level);
+  session = ctx->tls.gtls.session;
+  if(len > 0) {
+    gtls_level = crypto_to_gtls_level(level);
+    rc = gnutls_handshake_write(session, gtls_level, buf, len);
+    if(rc) {
+      if(gnutls_error_is_fatal(rc)) {
+        gnutls_alert_send_appropriate(session, rc);
+        failf(data, "gnutls_handshake_write failed");
+        return CURLE_QUIC_CONNECT_ERROR;
+      } else {
+        infof(data, "gnutls_handshake_write failed");
+        return CURLE_OK;
+      }
+    }
+  }
+
+  rc = gnutls_handshake(session);
+failf(data, "gnutls_handshake rc=%d",rc);
+  if(rc < 0) {
+    if(gnutls_error_is_fatal(rc)) {
+      gnutls_alert_send_appropriate(session, rc);
+      failf(data, "gnutls_handshake failed");
+      return CURLE_QUIC_CONNECT_ERROR;
+    } else {
+      infof(data, "gnutls_handshake failed");
+    }
+  }
+  return CURLE_OK;
+}
+
+#elif defined(USE_WOLFSSL)
+#endif
+
+static CURLcode crypto_do_handshake(struct Curl_cfilter *cf,
+                                    struct Curl_easy *data, uint8_t level,
+                                    const uint8_t *buf, size_t len)
+{
+  int rc;
+#if defined(USE_OPENSSL)
+  rc = crypto_ssl_do_handshake(cf, data, level, buf, len);
+#elif defined(USE_GNUTLS)
+  rc = crypto_gtls_do_handshake(cf, data, level, buf, len);
+#elif defined(USE_WOLFSSL)
+#endif
+infof(data, "crypto_do_handshake rc: %d", rc);
+  return rc;
+}
+static ssize_t crypto_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
+                            uint8_t *level, uint8_t *buf, unsigned int len)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  struct cf_quic_ctx *qctx = &ctx->q;
+  struct quic_handshake_info hsinfo;
+  struct msghdr msg;
+  struct iovec msg_iov;
+  struct cmsghdr *cm;
+  ssize_t nread;
+  char errstr[STRERROR_LEN];
+  CURLcode result;
+  uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_stream_info))];
+  fd_set readfds;
+  int rc;
+
+  result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
+  if(result)
+    return -1;
+
+  msg_iov.iov_base = buf;
+  msg_iov.iov_len = len;
+
+  memset(&msg, 0, sizeof(msg));
+  msg.msg_iov = &msg_iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = msg_ctrl;
+  msg.msg_controllen = sizeof(msg_ctrl);
+
+  FD_ZERO(&readfds);
+  FD_SET(qctx->sockfd, &readfds);
+  rc = select(qctx->sockfd + 1, &readfds, NULL,  NULL, NULL);
+  if(rc < 0)
+    return -1;
+  nread = recvmsg(qctx->sockfd, &msg, 0);
+  if(nread == -1) {
+    if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
+      goto out;
+    if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
+      struct ip_quadruple ip;
+      Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+      failf(data, "QUIC: connection to %s port %u refused",
+            ip.remote_ip, ip.remote_port);
+      goto out;
+    }
+    Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+    failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
+                nread, SOCKERRNO, errstr);
+    goto out;
+  }
+
+  for(cm = CMSG_FIRSTHDR(&msg); cm != NULL; cm = CMSG_NXTHDR(&msg, cm))
+    if(cm->cmsg_len == CMSG_LEN(sizeof(struct quic_handshake_info)) &&
+       cm->cmsg_level == IPPROTO_QUIC && cm->cmsg_type == QUIC_HANDSHAKE_INFO)
+      break;
+  if(cm) {
+    memcpy(&hsinfo, CMSG_DATA(cm), sizeof(hsinfo));
+    *level = hsinfo.crypto_level;
+    goto out;
+  } else
+    nread = -1;
+
+  CURL_TRC_CF(data, cf, "recvd 1 packet with %zd bytes", nread);
+out:
+  return nread;
+}
+
+static CURLcode crypto_handshake(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  size_t len = 0;
+  int rc;
+  uint8_t buf[1200];
+  uint8_t level = QUIC_CRYPTO_INITIAL;
+infof(data, "crypto_handshake");
+
+  while(!ctx->qconn->completed) {
+infof(data, "crypto_handshake completed: %d", ctx->qconn->completed);
+    rc = crypto_do_handshake(cf, data, level, buf, len);
+    if(rc)
+      return rc;
+    if(ctx->qconn->completed)
+      return 0;
+    rc = crypto_recv(cf, data, &level, buf, sizeof(buf));
+    if(rc < 0)
+      return rc;
+    len = rc;
+  }
+}
+
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
@@ -343,7 +901,7 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
 }
 
 static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
-                                uint64_t datalen, void *user_data,
+                                uint64_t len, void *user_data,
                                 void *stream_user_data)
 {
   struct Curl_cfilter *cf = user_data;
@@ -352,7 +910,7 @@ static int cb_h3_acked_req_body(nghttp3_conn *conn, int64_t stream_id,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   int rv;
 
-  (void)datalen;
+  (void)len;
 
   if(!stream)
     return 0;
@@ -532,7 +1090,7 @@ static nghttp3_callbacks ngh3_callbacks = {
   cb_h3_end_stream, /* end_stream */
   cb_h3_reset_stream,
   NULL, /* shutdown */
-  /* recv_settings */ /* XXX: not available in my nghttp3 version */
+  NULL /* recv_settings */
 };
 
 static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
@@ -560,7 +1118,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
   sinfo.stream_flag = QUIC_STREAM_FLAG_UNI;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &len);
-  if(rc == -1) {
+  if(rc) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
@@ -576,7 +1134,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
   sinfo.stream_flag = QUIC_STREAM_FLAG_UNI;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &len);
-  if(rc == -1) {
+  if(rc) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
@@ -586,7 +1144,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
   sinfo.stream_flag = QUIC_STREAM_FLAG_UNI;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &len);
-  if(rc == -1) {
+  if(rc) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto fail;
   }
@@ -636,14 +1194,12 @@ static void cf_linuxq_ctx_clear(struct cf_linuxq_ctx *ctx)
 {
   struct cf_call_data save = ctx->call_data;
 
-#if 0
   Curl_vquic_tls_cleanup(&ctx->tls);
-#endif
   vquic_ctx_free(&ctx->q);
   if(ctx->h3conn)
     nghttp3_conn_del(ctx->h3conn);
   if(ctx->qconn)
-    ctx->qconn = 0; /* XXX */
+    free(ctx->qconn);
   Curl_dyn_free(&ctx->scratch);
   Curl_hash_clean(&ctx->streams);
   Curl_hash_destroy(&ctx->streams);
@@ -676,7 +1232,7 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
     memset(&cclose, 0, sizeof(cclose));
     rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_CONNECTION_CLOSE,
                     &cclose, sizeof(cclose));
-    if(rc == -1) {
+    if(rc) {
       result = CURLE_WRITE_ERROR;
       goto out;
     }
@@ -738,6 +1294,7 @@ static CURLcode cf_linuxq_data_event(struct Curl_cfilter *cf,
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
     CURL_TRC_CF(data, cf, "data idle");
     if(stream && !stream->closed) {
+      /* XXX: what to do? */
 /*
       result = check_and_set_expiry(cf, data, NULL);
       if(result)
@@ -791,6 +1348,66 @@ static void cf_linuxq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)save;
 }
 
+#ifdef USE_OPENSSL
+/* The "new session" callback must return zero if the session can be removed
+ * or non-zero if the session has been put into the session cache.
+ */
+static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
+{
+  struct Curl_cfilter *cf;
+  struct cf_ngtcp2_ctx *ctx;
+  struct Curl_easy *data;
+
+  cf = (struct Curl_cfilter *)SSL_get_app_data(ssl);
+  ctx = cf? cf->ctx : NULL;
+  data = cf? CF_DATA_CURRENT(cf) : NULL;
+  if(cf && data && ctx) {
+    Curl_ossl_add_session(cf, data, &ctx->peer, ssl_sessionid);
+    return 1;
+  }
+  return 0;
+}
+#endif /* USE_OPENSSL */
+
+static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              void *user_data)
+{
+  struct curl_tls_ctx *ctx = user_data;
+  (void)cf;
+#ifdef USE_OPENSSL
+  crypto_ssl_configure_context(ctx->ossl.ssl_ctx);
+  /* Enable the session cache because it is a prerequisite for the
+   * "new session" callback. Use the "external storage" mode to prevent
+   * OpenSSL from creating an internal session cache.
+   */
+  SSL_CTX_set_session_cache_mode(ctx->ossl.ssl_ctx,
+                                 SSL_SESS_CACHE_CLIENT |
+                                 SSL_SESS_CACHE_NO_INTERNAL);
+  SSL_CTX_sess_set_new_cb(ctx->ossl.ssl_ctx, quic_ossl_new_session_cb);
+#elif defined(USE_GNUTLS)
+  if(crypto_gtls_configure_session(ctx->gtls.session)) {
+    failf(data, "crypto_gtls_configure_session failed");
+    return CURLE_FAILED_INIT;
+  }
+#elif defined(USE_WOLFSSL)
+  if(ngtcp2_crypto_wolfssl_configure_client_context(ctx->wssl.ctx) != 0) {
+    failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
+    return CURLE_FAILED_INIT;
+  }
+#endif
+  return CURLE_OK;
+}
+
+static struct linuxq_conn *cf_conn_create(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data)
+{
+  struct linuxq_conn *ret;
+  ret = calloc(1, sizeof(*ret));
+
+  return ret;
+}
+
 /*
  * Might be called twice for happy eyeballs.
  */
@@ -806,21 +1423,19 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
   Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
 
-/*
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     return result;
-*/
 
 #define H3_ALPN "\x2h3\x5h3-29"
-#if 0
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,
-                               tls_ctx_setup, &ctx->tls, NULL);
+                               tls_ctx_setup, &ctx->tls, cf);
   if(result)
     return result;
-#else
-  (void)data;
+
+#ifdef USE_OPENSSL
+  SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
 #endif
 
   result = vquic_ctx_init(&ctx->q);
@@ -831,9 +1446,13 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(!sockaddr)
     return CURLE_QUIC_CONNECT_ERROR;
 
+  ctx->qconn = calloc(1, sizeof(*ctx->qconn));
+  if(!ctx->qconn)
+    return CURLE_OUT_OF_MEMORY;
+
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_ALPN, "h3, h3-29",
                   sizeof("h3, h3-29"));
-  if(rc == -1)
+  if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
   ctx->transport_params.max_idle_timeout = CURL_QUIC_MAX_IDLE_MS * 1000;
@@ -841,26 +1460,35 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   ctx->transport_params.grease_quic_bit = 1;
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM,
                   &ctx->transport_params, len);
-  if(rc == -1)
+  if(rc)
     return CURLE_FAILED_INIT;
 
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM,
                   &ctx->transport_params, &len);
-  if(rc == -1)
+  if(rc)
     return CURLE_FAILED_INIT;
 
   ctx->handshake_params.timeout = 15000;
-  ctx->handshake_params.peername = cf->conn->host.name; /* XXX: proxy? */
+  ctx->handshake_params.peername = ctx->peer.sni;
 
-#if 0
-  ctx->qconn = quic_conn_create(ctx->q.sockfd, &ctx->handshake_params)
+  if(!ctx->qconn)
+    ctx->qconn = cf_conn_create(cf, data);
   if(!ctx->qconn)
     return errno;
-#else
-  ctx->qconn = 1;
-#endif
 
   return CURLE_OK;
+}
+
+static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
+                                struct Curl_easy *data)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+
+  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  cf->conn->httpversion = 30;
+  cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
+
+  return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
 }
 
 static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
@@ -907,17 +1535,11 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-#ifdef USE_GNUTLS
-    /* XXX: replace this with calls to Curl_vquic_tls_... */
-    rc = quic_client_handshake_parms(ctx->q.sockfd, &ctx->handshake_params);
-    if(rc) {
-      result = CURLE_QUIC_CONNECT_ERROR;
-      goto out;
-    }
-#else
-#error quic_client_handshake only implemented for GNUTLS
-#endif
-  ctx->handshake_at = now;
+  rc = crypto_handshake(cf, data);
+  if(rc)
+    return rc;
+
+  ctx->handshake_at = now; /* XXX: move into tls code callback? */
   CURL_TRC_CF(data, cf, "handshake complete after %dms",
              (int)Curl_timediff(now, ctx->started_at));
 
@@ -930,7 +1552,7 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
     eopt.on = 1;
     rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_EVENT, &eopt,
                     sizeof(eopt));
-    if(rc == -1)
+    if(rc)
       return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -943,18 +1565,15 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   rp.remote = 1;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM, &rp,
                   &len);
-  if(rc == -1) {
+  if(rc) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto out;
   }
   ctx->max_bidi_streams = rp.max_streams_bidi;
 
-#if 0
   result = qng_verify_peer(cf, data);
-  if(!result) {
-    ; /* XXX: replace libquic */
-  }
-#endif
+  if(result)
+    goto out;
 
   CURL_TRC_CF(data, cf, "peer verified");
   cf->connected = TRUE;
@@ -1143,7 +1762,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   sinfo.stream_flag = 0;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &slen);
-  if(rc == -1) {
+  if(rc) {
     *err = CURLE_SEND_ERROR;
     nwritten = -1;
     goto out;
@@ -1211,7 +1830,8 @@ out:
 }
 
 static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              const void *buf, size_t len, CURLcode *err)
+                              const void *buf, size_t len, bool eos,
+                              CURLcode *err)
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -1225,6 +1845,7 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
 
+  (void)eos; /* TODO: use for stream EOF and block handling */
   if(!stream || stream->id < 0) {
     if(ctx->shutdown_started) {
       CURL_TRC_CF(data, cf, "cannot open stream on closed connection");
@@ -1324,30 +1945,16 @@ static bool cf_linuxq_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-#if 0
-static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
-{
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-
-  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  cf->conn->httpversion = 30;
-  cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
-
-  return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
-}
-#endif
-
 static struct cmsghdr *get_cmsg_stream_info(struct msghdr *msg)
 {
-  struct cmsghdr *cmsg = NULL;
+  struct cmsghdr *cm = NULL;
 
-  for(cmsg = CMSG_FIRSTHDR(msg); cmsg != NULL; cmsg = CMSG_NXTHDR(msg, cmsg))
-    if(cmsg->cmsg_len == CMSG_LEN(sizeof(struct quic_stream_info)) &&
-       cmsg->cmsg_level == IPPROTO_QUIC && cmsg->cmsg_type == QUIC_STREAM_INFO)
+  for(cm = CMSG_FIRSTHDR(msg); cm != NULL; cm = CMSG_NXTHDR(msg, cm))
+    if(cm->cmsg_len == CMSG_LEN(sizeof(struct quic_stream_info)) &&
+       cm->cmsg_level == IPPROTO_QUIC && cm->cmsg_type == QUIC_STREAM_INFO)
       break;
 
-  return cmsg;
+  return cm;
 }
 
 static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
@@ -1355,13 +1962,13 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
                          size_t pktlen)
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
-  struct cmsghdr *cmsg = NULL;
+  struct cmsghdr *cm = NULL;
   const unsigned char *pkt = msg->msg_iov->iov_base;
   union quic_event *qev;
   struct quic_stream_info sinfo;
   int rv;
 
-  cmsg = get_cmsg_stream_info(msg);
+  cm = get_cmsg_stream_info(msg);
 
   if(msg->msg_flags & MSG_NOTIFICATION) {
     if(pktlen < 1)
@@ -1388,9 +1995,9 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
         return CURLE_HTTP3;
       qev = (union quic_event *)&pkt[1];
 
-      if(!cmsg)
+      if(!cm)
         return CURLE_HTTP3;
-      memcpy(&sinfo, CMSG_DATA(cmsg), sizeof(sinfo));
+      memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
 
       if(!(sinfo.stream_id & QUIC_STREAM_TYPE_UNI_MASK)) {
         ctx->max_bidi_streams = qev->max_stream;
@@ -1422,10 +2029,10 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
     }
   }
 
-  if(!cmsg)
+  if(!cm)
     return CURLE_RECV_ERROR;
 
-  memcpy(&sinfo, CMSG_DATA(cmsg), sizeof(sinfo));
+  memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
 
   rv = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
                                   sinfo.stream_flag);
@@ -1493,12 +2100,6 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
 
-  /*
-  result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
-  if(result)
-    return result;
-  */
-
   result = cf_linuxq_recvmsg_packets(cf, data);
   if(!result) {
     if(!ctx->q.got_first_byte) {
@@ -1534,7 +2135,7 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
   cm = CMSG_FIRSTHDR(&msg);
   cm->cmsg_level = IPPROTO_QUIC;
   cm->cmsg_type = 0;
-  cm->cmsg_len = sizeof(msg_ctrl);
+  cm->cmsg_len = CMSG_LEN(sizeof(*sinfo));
 
   sinfo = (struct quic_stream_info *)CMSG_DATA(cm);
 
@@ -1689,7 +2290,7 @@ static bool cf_linuxq_conn_is_alive(struct Curl_cfilter *cf,
   rp.remote = 1;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM, &rp,
                   &len);
-  if(rc == -1)
+  if(rc)
     goto out;
 
   idle_ms = ctx->transport_params.max_idle_timeout;

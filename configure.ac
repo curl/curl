@@ -3337,7 +3337,6 @@ if test "x$want_linux_quic" = "xyes"; then
   fi
   AC_DEFINE(USE_LINUX_QUIC, 1, [if linux QUIC is in use])
   AC_SUBST(USE_LINUX_QUIC, [1])
-  LIBS="-lquic $LIBS" # XXX: WIP: temporary
 fi
 
 dnl **********************************************************************
