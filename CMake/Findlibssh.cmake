@@ -40,7 +40,6 @@ if(LIBSSH_FOUND)
     set(LIBSSH_LINK_LIBRARIES "ssh")  # for find_package() with broken pkg-config (e.g. linux-old CI workflow)
   endif()
   set(LIBSSH_LIBRARIES ${LIBSSH_LINK_LIBRARIES})
-  message(STATUS "Found libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (Found version \"${LIBSSH_VERSION}\")")
 else()
   find_path(LIBSSH_INCLUDE_DIR "libssh/libssh.h")
   find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
@@ -68,19 +67,17 @@ else()
     endif()
   endif()
 
-  include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args(libssh
-    REQUIRED_VARS
-      LIBSSH_INCLUDE_DIR
-      LIBSSH_LIBRARY
-    VERSION_VAR
-      LIBSSH_VERSION
-  )
-
-  if(LIBSSH_FOUND)
-    set(LIBSSH_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
-    set(LIBSSH_LIBRARIES    ${LIBSSH_LIBRARY})
-  endif()
+  set(LIBSSH_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
+  set(LIBSSH_LIBRARIES    ${LIBSSH_LIBRARY})
 
   mark_as_advanced(LIBSSH_INCLUDE_DIR LIBSSH_LIBRARY)
 endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(libssh
+  REQUIRED_VARS
+    LIBSSH_INCLUDE_DIRS
+    LIBSSH_LIBRARIES
+  VERSION_VAR
+    LIBSSH_VERSION
+)
