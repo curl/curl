@@ -25,9 +25,9 @@
 #
 # Result Variables:
 #
-# CARES_FOUND        System has c-ares
-# CARES_INCLUDE_DIR  The c-ares include directory
-# CARES_LIBRARY      The c-ares library name
+# CARES_FOUND         System has c-ares
+# CARES_INCLUDE_DIRS  The c-ares include directories
+# CARES_LIBRARIES     The c-ares library names
 
 find_path(CARES_INCLUDE_DIR "ares.h")
 
@@ -39,5 +39,10 @@ find_package_handle_standard_args(CARES
     CARES_INCLUDE_DIR
     CARES_LIBRARY
 )
+
+if(CARES_FOUND)
+  set(CARES_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
+  set(CARES_LIBRARIES    ${CARES_LIBRARY})
+endif()
 
 mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)

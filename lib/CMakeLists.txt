@@ -43,7 +43,7 @@ include_directories(
   "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 if(USE_ARES)
-  include_directories(${CARES_INCLUDE_DIR})
+  include_directories(${CARES_INCLUDE_DIRS})
 endif()
 
 if(BUILD_TESTING)
