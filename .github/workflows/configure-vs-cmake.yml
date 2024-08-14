@@ -62,7 +62,9 @@ jobs:
 
       - name: run cmake
         run: |
-          cmake -B build
+          cmake -B build \
+            "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+            -DCURL_USE_LIBSSH2=OFF
 
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
