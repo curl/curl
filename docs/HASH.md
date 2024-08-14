@@ -9,7 +9,8 @@ SPDX-License-Identifier: curl
     #include "hash.h"
 
 This is the internal module for doing hash tables. A hash table uses a hash
-function to compute an index, also called a hash code, into an array of slots.
+function to compute an index. On each index there is a separate linked list of
+entries.
 
 Create a hash table. Add items. Retrieve items. Remove items. Destroy table.
 
@@ -26,7 +27,7 @@ void Curl_hash_init(struct Curl_hash *h,
 The call initializes a `struct Curl_hash`.
 
 - `slots` is the number of entries to create in the hash table. Larger is
-  better (faster lookups) but also uses more memory
+  better (faster lookups) but also uses more memory.
 - `hfunc` is a function pointer to a function that returns a `size_t` value as
   a checksum for an entry in this hash table. Ideally, it returns a unique
   value for every entry ever added to the hash table, but hash collisions are
