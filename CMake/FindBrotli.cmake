@@ -40,8 +40,6 @@ find_package_handle_standard_args(Brotli
     BROTLI_INCLUDE_DIR
     BROTLIDEC_LIBRARY
     BROTLICOMMON_LIBRARY
-  FAIL_MESSAGE
-    "Could NOT find Brotli"
 )
 
 if(BROTLI_FOUND)
