@@ -52,9 +52,10 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver', name: 'default' }
           - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skipall'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '', name: 'default R' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no --with-windows-unicode', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --with-windows-unicode --enable-ares', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Debug', name: 'schannel U' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp', name: 'schannel R' }
@@ -79,6 +80,7 @@ jobs:
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
+            mingw-w64-${{ matrix.env }}-c-ares
 
       - name: 'autotools autoreconf'
         if: ${{ matrix.build == 'autotools' }}
@@ -359,12 +361,12 @@ jobs:
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
           config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_WIN32_IDN=ON -DCURL_USE_GSASL=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel'
         - name: 'openssl'
-          install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl'
+          install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares'
           arch: 'x64'
           plat: 'windows'
           type: 'Debug'
           tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON'
+          config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBPSL=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON -DENABLE_ARES=ON'
         - name: 'openssl'
           install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
           arch: 'x64'

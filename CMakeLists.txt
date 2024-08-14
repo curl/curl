@@ -162,6 +162,10 @@ include(PickyWarnings)
 option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" ${ENABLE_DEBUG})
 
+if(MSVC)
+  set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory fails with MSVC according to test 558 and 1330. Tested with static build, Debug mode.
+endif()
+
 if(ENABLE_DEBUG)
   set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "DEBUGBUILD")
 endif()
@@ -218,6 +222,7 @@ if(ENABLE_ARES)
   find_package(CARES REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libcares")
+  add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings
 endif()
 
 include(CurlSymbolHiding)

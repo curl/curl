@@ -283,9 +283,9 @@ jobs:
           - name: 'SecureTransport ws debug+'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
             macos-version-min: '10.8'
-          - name: 'LibreSSL !ldap heimdal'
+          - name: 'LibreSSL !ldap heimdal c-ares'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
             macos-version-min: '10.15'
           - name: 'wolfSSL !ldap'
             install: wolfssl
