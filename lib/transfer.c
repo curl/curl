@@ -445,8 +445,8 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
 #ifdef USE_HYPER
-  if(conn->datastream) {
-    result = conn->datastream(data, conn, &didwhat, select_bits);
+  if(data->conn->datastream) {
+    result = data->conn->datastream(data, data->conn, &didwhat, select_bits);
     if(result || data->req.done)
       goto out;
   }
