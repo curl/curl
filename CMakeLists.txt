@@ -218,6 +218,7 @@ if(ENABLE_ARES)
   find_package(CARES REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libcares")
+  add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings
 endif()
 
 include(CurlSymbolHiding)
