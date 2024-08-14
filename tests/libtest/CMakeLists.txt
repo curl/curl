@@ -37,9 +37,6 @@ function(setup_test _test_name)  # ARGN are the files in the test
     "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
-  if(USE_ARES)
-    include_directories(${CARES_INCLUDE_DIRS})
-  endif()
 
   target_link_libraries(${_test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
