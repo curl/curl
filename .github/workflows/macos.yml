@@ -234,7 +234,7 @@ jobs:
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'build-cert'
-        if: contains(matrix.name, 'SecureTransport')
+        if: contains(matrix.configure, '--with-secure-transport')
         run: |
           make -C bld/tests/certs clean-certs
           make -C bld/tests/certs build-certs -j1
@@ -367,7 +367,7 @@ jobs:
           cat bld/lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'build-cert'
-        if: contains(matrix.build.name, 'SecureTransport')
+        if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON')
         run: |
           make -C bld/tests/certs clean-certs
           make -C bld/tests/certs build-certs -j1
