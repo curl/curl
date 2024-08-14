@@ -14,6 +14,8 @@ See-also:
   - data-urlencode
 Example:
   - --data-ascii @file $URL
+  - --data-ascii @file!<skip_bytes> $URL
+  - --data-ascii @file!<skip_bytes>-<end_offset> $URL
 ---
 
 # `--data-ascii`
