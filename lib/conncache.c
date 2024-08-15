@@ -131,6 +131,12 @@ int Curl_conncache_init(struct conncache *connc,
   if(!connc->closure_handle)
     return 1; /* bad */
   connc->closure_handle->state.internal = true;
+  /* TODO: this is quirky. We need an internal handle for certain
+   * operations, but we do not add it to the multi (if there is one).
+   * But we give it the multi so that socket event operations can work.
+   * Probably better to have an internal handle owned by the multi that
+   * can be used for conncache operations. */
+  connc->closure_handle->multi = multi;
  #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
     connc->closure_handle->set.verbose = true;
@@ -146,6 +152,10 @@ int Curl_conncache_init(struct conncache *connc,
 void Curl_conncache_destroy(struct conncache *connc)
 {
   if(connc) {
+    if(connc->closure_handle) {
+      connc->closure_handle->multi = NULL;
+      Curl_close(&connc->closure_handle);
+    }
     Curl_hash_destroy(&connc->hash);
     connc->multi = NULL;
   }
@@ -611,7 +621,8 @@ static void connc_close_all(struct conncache *connc)
 
   sigpipe_apply(data, &pipe_st);
   Curl_hostcache_clean(data, data->dns.hostcache);
-  Curl_close(&data);
+  connc->closure_handle->multi = NULL;
+  Curl_close(&connc->closure_handle);
   sigpipe_restore(&pipe_st);
 }
 
@@ -979,14 +990,6 @@ static void connc_disconnect(struct Curl_easy *data,
   DEBUGASSERT(data && !data->conn);
 
   Curl_attach_connection(data, conn);
-
-  if(connc && connc->multi && connc->multi->socket_cb) {
-    struct easy_pollset ps;
-    /* With an empty pollset, all previously polled sockets will be removed
-     * via the multi_socket API callback. */
-    memset(&ps, 0, sizeof(ps));
-    (void)Curl_multi_pollset_ev(connc->multi, data, &ps, &conn->shutdown_poll);
-  }
 
   connc_run_conn_shutdown_handler(data, conn);
   if(do_shutdown) {
