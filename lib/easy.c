@@ -501,8 +501,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
   if(!found) {
     if(what == CURL_POLL_REMOVE) {
       /* should not happen if our logic is correct, but is no drama. */
-      DEBUGF(infof(easy, "socket cb: asked to REMOVE socket %d"
-                   "but not present!", s));
+      DEBUGF(infof(easy, "socket cb: asked to REMOVE socket %"
+                   CURL_FORMAT_SOCKET_T "but not present!", s));
       DEBUGASSERT(0);
     }
     else {
