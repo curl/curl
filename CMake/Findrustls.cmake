@@ -41,7 +41,7 @@ find_path(RUSTLS_INCLUDE_DIR "rustls.h"
     ${PC_RUSTLS_INCLUDE_DIRS}
 )
 
-find_library(RUSTLS_LIBRARY "rustls")
+find_library(RUSTLS_LIBRARY "rustls"
   HINTS
     ${PC_RUSTLS_LIBDIR}
     ${PC_RUSTLS_LIBRARY_DIRS}
