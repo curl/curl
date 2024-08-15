@@ -43,7 +43,7 @@ else()
 
   if(LIBIDN2_INCLUDE_DIR)
     if(EXISTS "${LIBIDN2_INCLUDE_DIR}/idn2.h")
-      file(STRINGS "${LIBIDN2_INCLUDE_DIR}/idn2.h" _libidn2_version_str REGEX "^#[\t ]+define[\t ]+IDN2_VERSION[\t ]+\"(.*)\"")
+      file(STRINGS "${LIBIDN2_INCLUDE_DIR}/idn2.h" _libidn2_version_str REGEX "#[\t ]*define[\t ]+IDN2_VERSION[\t ]+\"(.*)\"")
       string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" LIBIDN2_VERSION "${_libidn2_version_str}")
       unset(_libidn2_version_str)
     else()
