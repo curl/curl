@@ -2181,6 +2181,7 @@ if test $with_libgsasl != "no"; then
   AC_SEARCH_LIBS(gsasl_init, gsasl,
     [curl_gsasl_msg="enabled";
      AC_DEFINE([USE_GSASL], [1], [GSASL support enabled])
+     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libgsasl"
      ],
     [curl_gsasl_msg="no      (libgsasl not found)";
      AC_MSG_WARN([libgsasl was not found])
