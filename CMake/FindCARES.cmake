@@ -50,7 +50,7 @@ find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares"
 if(PC_CARES_VERSION)
   set(CARES_VERSION ${PC_CARES_VERSION})
 elseif(CARES_INCLUDE_DIR)
-  file(STRINGS "${CARES_INCLUDE_DIR}/ares_version.h" _cares_version_str REGEX "^#define[\t ]+ARES_VERSION_STR[\t ]+\"(.*)\"")
+  file(STRINGS "${CARES_INCLUDE_DIR}/ares_version.h" _cares_version_str REGEX "#[\t ]*define[\t ]+ARES_VERSION_STR[\t ]+\"(.*)\"")
   string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" CARES_VERSION "${_cares_version_str}")
   unset(_cares_version_str)
 endif()
