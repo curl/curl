@@ -35,6 +35,8 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(LIBSSH "libssh")
 endif()
 
+curl_dumpvars()
+
 if(LIBSSH_FOUND)
   if(NOT DEFINED LIBSSH_LINK_LIBRARIES)
     set(LIBSSH_LINK_LIBRARIES "ssh")  # for find_package() with broken pkg-config (e.g. linux-old CI workflow)
