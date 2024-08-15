@@ -869,10 +869,11 @@ if(USE_OPENSSL_QUIC)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
 endif()
 
-if(USE_MBEDTLS OR
-   USE_BEARSSL OR
-   USE_SECTRANSP)
-  message(WARNING "A selected TLS library does not support TLS 1.3.")
+if(USE_BEARSSL)
+  message(WARNING "BearSSL does not support TLS 1.3.")
+endif()
+if(USE_SECTRANSP)
+  message(WARNING "Secure Transport does not support TLS 1.3.")
 endif()
 
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
