@@ -52,7 +52,8 @@ INTERNALDOCS =                                  \
  internals/HASH.md                              \
  internals/HYPER.md                             \
  internals/LLIST.md                             \
- internals/NEW-PROTOCOL.md
+ internals/NEW-PROTOCOL.md                      \
+ internals/README.md
 
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
