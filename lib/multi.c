@@ -98,6 +98,8 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
+static void Curl_expire_ex(struct Curl_easy *data, const struct curltime *nowp,
+                           timediff_t milli, expire_id id);
 
 #ifdef DEBUGBUILD
 static const char * const multi_statename[]={
@@ -3146,6 +3148,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   bool run_conn_cache = FALSE;
   SIGPIPE_VARIABLE(pipe_st);
 
+  (void)ev_bitmask;
   if(checkall) {
     struct Curl_llist_node *e;
     /* *perform() deals with running_handles on its own */
@@ -3159,8 +3162,10 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         result = singlesocket(multi, Curl_node_elem(e));
       }
     }
+    run_conn_cache = TRUE;
     goto out;
   }
+
   if(s != CURL_SOCKET_TIMEOUT) {
     struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
@@ -3189,16 +3194,11 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         if(data == multi->conn_cache.closure_handle)
           run_conn_cache = TRUE;
         else {
-          Curl_expire(data, 0, EXPIRE_RUN_NOW);
+          /* Expire with out current now, so we will get it below when
+           * asking the splaytree for expired transfers. */
+          Curl_expire_ex(data, &now, 0, EXPIRE_RUN_NOW);
         }
       }
-
-      /* Now we fall-through and do the timer-based stuff, since we do not want
-         to force the user to have to deal with timeouts as long as at least
-         one connection in fact has traffic. */
-
-      now = Curl_now(); /* get a newer time since the multi_runsingle() loop
-                           may have taken some time */
     }
   }
 
@@ -3561,10 +3561,12 @@ multi_addtimeout(struct Curl_easy *data,
  *
  * Expire replaces a former timeout using the same id if already set.
  */
-void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
+static void Curl_expire_ex(struct Curl_easy *data,
+                           const struct curltime *nowp,
+                           timediff_t milli, expire_id id)
 {
   struct Curl_multi *multi = data->multi;
-  struct curltime *nowp = &data->state.expiretime;
+  struct curltime *curr_expire = &data->state.expiretime;
   struct curltime set;
 
   /* this is only interesting while there is still an associated multi struct
@@ -3574,7 +3576,7 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 
   DEBUGASSERT(id < EXPIRE_LAST);
 
-  set = Curl_now();
+  set = *nowp;
   set.tv_sec += (time_t)(milli/1000); /* might be a 64 to 32 bits conversion */
   set.tv_usec += (int)(milli%1000)*1000;
 
@@ -3590,11 +3592,11 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
      in case we need to recompute the minimum timer later. */
   multi_addtimeout(data, &set, id);
 
-  if(nowp->tv_sec || nowp->tv_usec) {
+  if(curr_expire->tv_sec || curr_expire->tv_usec) {
     /* This means that the struct is added as a node in the splay tree.
        Compare if the new time is earlier, and only remove-old/add-new if it
        is. */
-    timediff_t diff = Curl_timediff(set, *nowp);
+    timediff_t diff = Curl_timediff(set, *curr_expire);
     int rc;
 
     if(diff > 0) {
@@ -3613,10 +3615,16 @@ void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 
   /* Indicate that we are in the splay tree and insert the new timer expiry
      value since it is our local minimum. */
-  *nowp = set;
+  *curr_expire = set;
   Curl_splayset(&data->state.timenode, data);
-  multi->timetree = Curl_splayinsert(*nowp, multi->timetree,
+  multi->timetree = Curl_splayinsert(*curr_expire, multi->timetree,
                                      &data->state.timenode);
+}
+
+void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
+{
+  struct curltime now = Curl_now();
+  Curl_expire_ex(data, &now, milli, id);
 }
 
 /*
