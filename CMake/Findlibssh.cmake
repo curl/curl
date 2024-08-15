@@ -30,16 +30,19 @@
 # LIBSSH_LIBRARIES     The libssh library names
 # LIBSSH_VERSION       Version of libssh
 
+set(_libssh_include_dirs "LIBSSH_INCLUDE_DIRS")
+
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_check_modules(LIBSSH "libssh")
 endif()
 
-curl_dumpvars()
-
 if(LIBSSH_FOUND)
+  if(NOT LIBSSH_INCLUDE_DIRS)
+    unset(_libssh_include_dirs)  # do not require this variable if left empty (seen on Old Linux CI)
+  endif()
   if(NOT DEFINED LIBSSH_LINK_LIBRARIES)
-    set(LIBSSH_LINK_LIBRARIES "ssh")  # for find_package() with broken pkg-config (e.g. linux-old CI workflow)
+    set(LIBSSH_LINK_LIBRARIES ${LIBSSH_LIBRARIES})  # Workaround for some systems (seen on Old Linux CI)
   endif()
   set(LIBSSH_LIBRARIES ${LIBSSH_LINK_LIBRARIES})
 else()
@@ -78,7 +81,7 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(libssh
   REQUIRED_VARS
-    LIBSSH_INCLUDE_DIRS
+    ${_libssh_include_dirs}
     LIBSSH_LIBRARIES
   VERSION_VAR
     LIBSSH_VERSION
