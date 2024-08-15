@@ -60,7 +60,6 @@ INTERNALDOCS =                                  \
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
  $(INTERNALDOCS)                                \
- ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUG-BOUNTY.md                                  \
  BUGS.md                                        \
@@ -82,9 +81,7 @@ EXTRA_DIST =                                    \
  GOVERNANCE.md                                  \
  HELP-US.md                                     \
  HISTORY.md                                     \
- HSTS.md                                        \
  HTTP-COOKIES.md                                \
- HTTP2.md                                       \
  HTTP3.md                                       \
  INSTALL                                        \
  INSTALL-CMAKE.md                               \
@@ -95,7 +92,6 @@ EXTRA_DIST =                                    \
  MAIL-ETIQUETTE.md                              \
  MANUAL.md                                      \
  options-in-versions                            \
- PARALLEL-TRANSFERS.md                          \
  README.md                                      \
  RELEASE-PROCEDURE.md                           \
  RUSTLS.md                                      \
