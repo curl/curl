@@ -252,7 +252,7 @@
 1.6 thread-safe sharing
 
  Using the share interface users can share some data between easy handles but
- several of the sharing options are documented as as not safe and supported to
+ several of the sharing options are documented as not safe and supported to
  share between multiple concurrent threads. Fixing this would enable more
  users to share data in more powerful ways.
 
