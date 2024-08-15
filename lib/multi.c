@@ -3465,7 +3465,9 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
     /* We have same expire time as previously. Our relative 'timeout_ms'
      * may be different now, but the application has the timer running
      * and we do not to tell it to start this again. */
+#if DEBUG_UPDATE_TIMER
     fprintf(stderr, "Curl_update_timer(), same expire timestamp, no change\n");
+#endif
   }
 
   if(set_value) {
