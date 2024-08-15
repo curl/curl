@@ -207,7 +207,7 @@ static int get_char(char c, int base)
 #endif  /* Only present if we need strtoll, but do not have it. */
 
 /*
- * Parse a *positive* up to 64-bit number written in ascii.
+ * Parse a *positive* up to 64-bit number written in ASCII.
  */
 CURLofft curlx_strtoofft(const char *str, char **endp, int base,
                          curl_off_t *num)
