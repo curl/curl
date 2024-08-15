@@ -36,7 +36,6 @@ if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
 endif()
 
 find_path(BEARSSL_INCLUDE_DIR "bearssl.h")
-
 find_library(BEARSSL_LIBRARY "bearssl")
 
 include(FindPackageHandleStandardArgs)
