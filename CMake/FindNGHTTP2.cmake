@@ -50,7 +50,7 @@ find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static"
 if(PC_NGHTTP2_VERSION)
   set(NGHTTP2_VERSION ${PC_NGHTTP2_VERSION})
 elseif(NGHTTP2_INCLUDE_DIR)
-  file(STRINGS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2ver.h" _nghttp2_version_str REGEX "^#define[\t ]+NGHTTP2_VERSION[\t ]+\"(.*)\"")
+  file(STRINGS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2ver.h" _nghttp2_version_str REGEX "#[\t ]*define[\t ]+NGHTTP2_VERSION[\t ]+\"(.*)\"")
   string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" NGHTTP2_VERSION "${_nghttp2_version_str}")
   unset(_nghttp2_version_str)
 endif()
