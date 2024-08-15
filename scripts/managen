@@ -58,7 +58,7 @@ my $date = strftime "%Y-%m-%d", @ts;
 my $year = strftime "%Y", @ts;
 my $version = "unknown";
 my $globals;
-
+my $error = 0;
 my $indent = 4;
 
 # get the long name version, return the manpage string
@@ -193,6 +193,12 @@ sub printdesc {
                 # quoted, do not right-justify
                 chomp $l;
                 lastline($baselvl + $lvl + 1, $l);
+                my $w = ($baselvl + $lvl + 1) * $indent + length($l);
+                if ($w > $colwidth) {
+                    print STDERR "ERROR: $w columns is too long\n";
+                    print STDERR "$l\n";
+                    $error++;
+                }
             }
             else {
                 $para .= $l;
@@ -1266,3 +1272,5 @@ else {
 indexoptions($dir, @files);
 
 getargs($dir, $cmd, @files);
+
+exit $error;
