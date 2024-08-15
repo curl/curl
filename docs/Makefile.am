@@ -46,6 +46,7 @@ INTERNALDOCS =                                  \
  internals/CHECKSRC.md                          \
  internals/CLIENT-READERS.md                    \
  internals/CLIENT-WRITERS.md                    \
+ internals/CODE_STYLE.md                        \
  internals/CONNECTION-FILTERS.md                \
  internals/DYNBUF.md                            \
  internals/HASH.md                              \
@@ -65,7 +66,6 @@ EXTRA_DIST =                                    \
  CMakeLists.txt                                 \
  CODE_OF_CONDUCT.md                             \
  CODE_REVIEW.md                                 \
- CODE_STYLE.md                                  \
  CONTRIBUTE.md                                  \
  CURL-DISABLE.md                                \
  CURLDOWN.md                                    \
