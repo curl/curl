@@ -3013,17 +3013,20 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
       if(oldactions & CURL_POLL_IN)
         entry->readers--;
       if(!entry->users) {
+        bool dead = FALSE;
         if(multi->socket_cb) {
           set_in_callback(multi, TRUE);
           rc = multi->socket_cb(data, s, CURL_POLL_REMOVE,
                                 multi->socket_userp, entry->socketp);
           set_in_callback(multi, FALSE);
-          if(rc == -1) {
-            multi->dead = TRUE;
-            return CURLM_ABORTED_BY_CALLBACK;
-          }
+          if(rc == -1)
+            dead = TRUE;
         }
         sh_delentry(entry, &multi->sockhash, s);
+        if(dead) {
+          multi->dead = TRUE;
+          return CURLM_ABORTED_BY_CALLBACK;
+        }
       }
       else {
         /* still users, but remove this handle as a user of this socket */
