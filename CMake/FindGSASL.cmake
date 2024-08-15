@@ -43,7 +43,7 @@ else()
 
   if(GSASL_INCLUDE_DIR)
     if(EXISTS "${GSASL_INCLUDE_DIR}/gsasl-version.h")
-      file(STRINGS "${GSASL_INCLUDE_DIR}/gsasl-version.h" _gsasl_version_str REGEX "^#[\t ]+define[\t ]+GSASL_VERSION[\t ]+\"(.*)\"")
+      file(STRINGS "${GSASL_INCLUDE_DIR}/gsasl-version.h" _gsasl_version_str REGEX "#[\t ]*define[\t ]+GSASL_VERSION[\t ]+\"(.*)\"")
       string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" GSASL_VERSION "${_gsasl_version_str}")
       unset(_gsasl_version_str)
     else()
