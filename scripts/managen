@@ -127,7 +127,8 @@ sub justline {
 
 sub lastline {
     my ($lvl, @line) = @_;
-    prefixline($lvl * $indent);
+    $line[0] =~ s/^( +)//;
+    prefixline($lvl * $indent + length($1));
     my $prev = 0;
     for(@line) {
         printf "%s%s", $prev?" ":"", $_;
