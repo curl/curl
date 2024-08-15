@@ -425,21 +425,30 @@ class ScoreCard:
         errors = []
         profiles = []
         url = f'{url}?[0-{count - 1}]'
-        extra_args = ['--parallel', '--parallel-max', str(max_parallel)] \
-            if max_parallel > 1 else []
+        extra_args = [
+            '-w', '%{response_code},\\n',
+        ]
+        if max_parallel > 1:
+            extra_args.extend([
+               '--parallel', '--parallel-max', str(max_parallel)
+            ])
         self.info(f'{max_parallel}...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False, with_profile=True,
-                                   extra_args=extra_args)
-            err = self._check_downloads(r, count)
-            if err:
-                errors.append(err)
+                                   with_stats=False, extra_args=extra_args)
+            if r.exit_code != 0:
+                errors.append(f'exit={r.exit_code}')
             else:
-                for _ in r.stats:
-                    samples.append(count / r.duration.total_seconds())
-                profiles.append(r.profile)
+                samples.append(count / r.duration.total_seconds())
+                non_200s = 0
+                for l in r.stdout.splitlines():
+                    if not l.startswith('200,'):
+                        non_200s += 1
+                if non_200s > 0:
+                    errors.append(f'responses != 200: {non_200s}')
+            profiles.append(r.profile)
         return {
             'count': count,
             'samples': sample_size,
@@ -450,17 +459,11 @@ class ScoreCard:
 
     def requests_url(self, url: str, proto: str, count: int):
         self.info(f'  {url}: ')
-        props = {
-            '1': self.do_requests(url=url, proto=proto, count=count),
-            '6': self.do_requests(url=url, proto=proto, count=count,
-                                  max_parallel=6),
-            '25': self.do_requests(url=url, proto=proto, count=count,
-                                   max_parallel=25),
-            '50': self.do_requests(url=url, proto=proto, count=count,
-                                   max_parallel=50),
-            '100': self.do_requests(url=url, proto=proto, count=count,
-                                    max_parallel=100),
-        }
+        props = {}
+        # 300 is max in curl, see tool_main.h
+        for m in [1, 6, 25, 50, 100, 300]:
+            props[str(m)] = self.do_requests(url=url, proto=proto, count=count,
+                                             max_parallel=m)
         self.info(f'ok.\n')
         return props
 
