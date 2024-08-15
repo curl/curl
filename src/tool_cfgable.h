@@ -111,7 +111,7 @@ struct OperationConfig {
   bool sasl_ir;             /* Enable/disable SASL initial response */
   bool proxytunnel;
   bool ftp_append;          /* APPE on ftp */
-  bool use_ascii;           /* select ascii or text transfer */
+  bool use_ascii;           /* select ASCII or text transfer */
   bool autoreferer;         /* automatically set referer */
   bool failonerror;         /* fail on (HTTP) errors */
   bool failwithbody;        /* fail on (HTTP) errors but still store body */

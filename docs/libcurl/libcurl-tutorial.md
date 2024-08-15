@@ -1255,7 +1255,7 @@ curl_mime_subparts(3). Once it has been
 bound to its parent multi-part, a nth-level multi-part belongs to it and
 should not be freed explicitly.
 
-Email messages data is not supposed to be non-ascii and line length is
+Email messages data is not supposed to be non-ASCII and line length is
 limited: fortunately, some transfer encodings are defined by the standards to
 support the transmission of such incompatible data. Function
 curl_mime_encoder(3) tells a part that its source data must be encoded

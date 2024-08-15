@@ -347,7 +347,7 @@
 
 1.17 Add support for IRIs
 
- IRIs (RFC 3987) allow localized, non-ascii, names in the URL. To properly
+ IRIs (RFC 3987) allow localized, non-ASCII, names in the URL. To properly
  support this, curl/libcurl would need to translate/encode the given input
  from the input string encoding into percent encoded output "over the wire".
 
@@ -1234,7 +1234,7 @@
 
  -J/--remote-header-name does not decode %-encoded filenames. RFC 6266 details
  how it should be done. The can of worm is basically that we have no charset
- handling in curl and ascii >=128 is a challenge for us. Not to mention that
+ handling in curl and ASCII >=128 is a challenge for us. Not to mention that
  decoding also means that we need to check for nastiness that is attempted,
  like "../" sequences and the like. Probably everything to the left of any
  embedded slashes should be cut off.
