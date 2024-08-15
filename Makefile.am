@@ -35,6 +35,7 @@ CMAKE_DIST =                                    \
  CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
  CMake/FindCares.cmake                          \
+ CMake/FindGSASL.cmake                          \
  CMake/FindGSS.cmake                            \
  CMake/FindLibpsl.cmake                         \
  CMake/FindLibssh2.cmake                        \
@@ -49,6 +50,9 @@ CMAKE_DIST =                                    \
  CMake/FindWolfSSH.cmake                        \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
+ CMake/Findlibidn2.cmake                        \
+ CMake/Findlibssh.cmake                         \
+ CMake/Findlibuv.cmake                          \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/PickyWarnings.cmake                      \
