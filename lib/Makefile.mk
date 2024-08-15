@@ -27,7 +27,7 @@
 # Usage:   make -f Makefile.mk CFG=-feat1[-feat2][-feat3][...]
 # Example: make -f Makefile.mk CFG=-zlib-ssl-libssh2-ipv6
 #
-# Look for ' ?=' to find all accepted customization variables.
+# Look for ' ?=' to find accepted customization variables.
 
 # This script is reused by 'src' and 'docs/examples' Makefile.mk scripts.
 
