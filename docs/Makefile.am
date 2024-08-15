@@ -52,8 +52,10 @@ INTERNALDOCS =                                  \
  internals/HASH.md                              \
  internals/HYPER.md                             \
  internals/LLIST.md                             \
+ internals/MQTT.md                              \
  internals/NEW-PROTOCOL.md                      \
- internals/README.md
+ internals/README.md                            \
+ internals/WEBSOCKET.md
 
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
