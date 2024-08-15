@@ -169,7 +169,6 @@ jobs:
           - name: hyper
             install_steps: rust hyper valgrind
             configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
-            tflags: '!500'
             singleuse: --unit
 
           - name: rustls
