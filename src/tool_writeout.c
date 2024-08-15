@@ -200,7 +200,7 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
     char *part = NULL;
     const char *url = NULL;
 
-    if(vid >= VAR_INPUT_URLEHOST) {
+    if(vid >= VAR_INPUT_URLESCHEME) {
       if(curl_easy_getinfo(per->curl, CURLINFO_EFFECTIVE_URL, &url))
         rc = 5;
     }
