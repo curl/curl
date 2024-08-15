@@ -94,7 +94,6 @@ EXTRA_DIST =                                    \
  KNOWN_BUGS                                     \
  MAIL-ETIQUETTE.md                              \
  MANUAL.md                                      \
- MQTT.md                                        \
  options-in-versions                            \
  PARALLEL-TRANSFERS.md                          \
  README.md                                      \
@@ -109,8 +108,7 @@ EXTRA_DIST =                                    \
  TheArtOfHttpScripting.md                       \
  URL-SYNTAX.md                                  \
  VERSIONS.md                                    \
- VULN-DISCLOSURE-POLICY.md                      \
- WEBSOCKET.md
+ VULN-DISCLOSURE-POLICY.md
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
 
