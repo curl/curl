@@ -45,6 +45,7 @@ CMAKE_DIST =                                    \
  CMake/FindNGTCP2.cmake                         \
  CMake/FindNettle.cmake                         \
  CMake/FindQUICHE.cmake                         \
+ CMake/FindWolfSSH.cmake                        \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
  CMake/Findrustls.cmake                         \
