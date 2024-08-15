@@ -34,7 +34,6 @@ push @out, "     / __| | | | |_) | |\n";
 push @out, "    | (__| |_| |  _ <| |___\n";
 push @out, "     \\___|\\___/|_| \\_\\_____|\n";
 
-my $olen=0;
 while (<STDIN>) {
     my $line = $_;
     push @out, $line;
