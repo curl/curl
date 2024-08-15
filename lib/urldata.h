@@ -759,7 +759,7 @@ struct Curl_handler {
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
 #define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
-#define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ascii) in
+#define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ASCII) in
                                        username and password */
 #define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
 
@@ -1494,7 +1494,7 @@ enum dupstring {
 #ifdef USE_SSH
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
-  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
+  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ASCII hex */
   STRING_SSH_HOST_PUBLIC_KEY_SHA256, /* sha256 of host public key in base64 */
   STRING_SSH_KNOWNHOSTS,  /* filename of knownhosts file */
 #endif

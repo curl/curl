@@ -188,7 +188,7 @@ static CURLcode ftp_regular_transfer(struct Curl_easy *data, bool *done);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void ftp_pasv_verbose(struct Curl_easy *data,
                              struct Curl_addrinfo *ai,
-                             char *newhost, /* ascii version */
+                             char *newhost, /* ASCII version */
                              int port);
 #endif
 static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data);
@@ -3694,7 +3694,7 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
 static void
 ftp_pasv_verbose(struct Curl_easy *data,
                  struct Curl_addrinfo *ai,
-                 char *newhost, /* ascii version */
+                 char *newhost, /* ASCII version */
                  int port)
 {
   char buf[256];

@@ -142,7 +142,7 @@ bool Curl_auth_digest_get_pair(const char *str, char *value, char *content,
 }
 
 #if !defined(USE_WINDOWS_SSPI)
-/* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ascii string */
+/* Convert md5 chunk to RFC2617 (section 3.1.3) -suitable ASCII string */
 static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
                                      unsigned char *dest) /* 33 bytes */
 {
@@ -151,7 +151,7 @@ static void auth_digest_md5_to_ascii(unsigned char *source, /* 16 bytes */
     msnprintf((char *) &dest[i * 2], 3, "%02x", source[i]);
 }
 
-/* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ascii string */
+/* Convert sha256 or SHA-512/256 chunk to RFC7616 -suitable ASCII string */
 static void auth_digest_sha256_to_ascii(unsigned char *source, /* 32 bytes */
                                      unsigned char *dest) /* 65 bytes */
 {

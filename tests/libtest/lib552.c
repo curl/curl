@@ -174,7 +174,7 @@ CURLcode test(char *URL)
   size_t i;
   static const char fill[] = "test data";
 
-  config.trace_ascii = 1; /* enable ascii tracing */
+  config.trace_ascii = 1; /* enable ASCII tracing */
 
   global_init(CURL_GLOBAL_ALL);
   easy_init(curl);

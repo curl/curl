@@ -20,10 +20,10 @@ $!
 $!    64        Compile with 64-bit pointers.
 $!              Note, you must match the pointer size that the OpenSSL
 $!              shared image expects.
-$!              Currently curl is not building properly with 64 bit pointers
-$!              on VMS because it is trying to cast pointers to 32 bit
+$!              Currently curl is not building properly with 64-bit pointers
+$!              on VMS because it is trying to cast pointers to 32-bit
 $!              integers and some OpenVMS library routines called by curl
-$!              do not yet support 64 bit pointers.
+$!              do not yet support 64-bit pointers.
 $!    CCQUAL=x  Add "x" to the C compiler qualifiers.
 $!              Default qualifiers are:
 $!                  /standard=relaxed
@@ -638,21 +638,21 @@ $ libzshr_line = ""
 $ try_shr = "gnv$libzshr"
 $ if build_64
 $ then
-$!  First look for 64 bit
+$!  First look for 64-bit
 $   if f$search("''try_shr'64") .eqs. ""
 $   then
-$!      Second look for the J.F. Pieronne 64 bit shared image
+$!      Second look for the J.F. Pieronne 64-bit shared image
 $       try_shr = "LIBZ_SHR64"
 $       if f$search(try_shr) .eqs. "" then nozlib = 1
 $   endif
 $ else
-$!  First look for 32 bit
+$!  First look for 32-bit
 $   if f$search("''try_shr'32") .eqs. ""
 $   then
-$!      Second look for old 32 bit image
+$!      Second look for old 32-bit image
 $       if f$search(try_shr) .eqs. ""
 $       then
-$!          Third look for the J.F. Pieronne 32 bit shared image
+$!          Third look for the J.F. Pieronne 32-bit shared image
 $           try_shr = "LIBZ_SHR32"
 $           if f$search(try_shr) .eqs. "" then nozlib = 1
 $       endif

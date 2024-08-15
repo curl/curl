@@ -128,7 +128,7 @@ int main(void)
   CURLcode res;
   struct data config;
 
-  config.trace_ascii = 1; /* enable ascii tracing */
+  config.trace_ascii = 1; /* enable ASCII tracing */
 
   curl = curl_easy_init();
   if(curl) {

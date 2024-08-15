@@ -101,7 +101,7 @@ static char *vms_translate_path(const char *path)
   }
 }
 #   else
-    /* VMS translate path is actually not needed on the current 64 bit */
+    /* VMS translate path is actually not needed on the current 64-bit */
     /* VMS platforms, so instead of figuring out the pointer settings */
     /* Change it to a noop */
 #   define vms_translate_path(__path) __path

@@ -2645,7 +2645,7 @@ CURL_EXTERN char *curl_getenv(const char *variable);
  *
  * DESCRIPTION
  *
- * Returns a static ascii string of the libcurl version.
+ * Returns a static ASCII string of the libcurl version.
  */
 CURL_EXTERN char *curl_version(void);
 

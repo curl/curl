@@ -452,7 +452,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     }
     dns_w = entry->pwszDNSName;
     /* pwszDNSName is in ia5 string format and hence does not contain any
-     * non-ascii characters. */
+     * non-ASCII characters. */
     while(*dns_w != '\0') {
       *current_pos++ = (TCHAR)(*dns_w++);
     }

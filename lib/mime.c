@@ -92,7 +92,7 @@ static const char base64enc[] =
 /* Quoted-printable character class table.
  *
  * We cannot rely on ctype functions since quoted-printable input data
- * is assumed to be ascii-compatible, even on non-ascii platforms. */
+ * is assumed to be ASCII-compatible, even on non-ASCII platforms. */
 #define QP_OK           1       /* Can be represented by itself. */
 #define QP_SP           2       /* Space or tab. */
 #define QP_CR           3       /* Carriage return. */
@@ -557,7 +557,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
 
   /* On all platforms, input is supposed to be ASCII compatible: for this
      reason, we use hexadecimal ASCII codes in this function rather than
-     character constants that can be interpreted as non-ascii on some
+     character constants that can be interpreted as non-ASCII on some
      platforms. Preserve ASCII encoding on output too. */
   while(st->bufbeg < st->bufend) {
     size_t len = 1;
