@@ -40,7 +40,7 @@ MANAGEN=$(top_srcdir)/scripts/managen
 MAXLINE=$(top_srcdir)/scripts/maxline
 
 # Maximum number of columns accepted in the ASCII version of the manpage
-MAXCOLS=100
+MAXCOLS=80
 INCDIR=$(top_srcdir)/include
 
 if BUILD_DOCS
