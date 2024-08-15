@@ -59,10 +59,10 @@ http
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-anotherhost.example+/%TESTNUMBER0002+http+uuuu+pppp+2023+moo.html+
-hello2000+/%TESTNUMBER+h55p+++1+qqqq+ffff
+anotherhost.example+/4240002+http+++2023+moo.html+
+hello2000+/424+h55p+++1+qqqq+ffff
 +++++++
-anotherhost.example+/%TESTNUMBER0002+http+u22u+p22p+2023+moo.html+
+anotherhost.example+/4240002+http+++2023+moo.html+
 </stdout>
 </verify>
 </testcase>
