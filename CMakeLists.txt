@@ -515,6 +515,8 @@ if(CURL_USE_SECTRANSP)
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "secure-transport")
     set(_valid_default_ssl_backend TRUE)
   endif()
+
+  message(WARNING "Secure Transport does not support TLS 1.3.")
 endif()
 
 if(_use_core_foundation_and_core_services)
@@ -582,6 +584,8 @@ if(CURL_USE_BEARSSL)
     set(_valid_default_ssl_backend TRUE)
   endif()
   set(_curl_ca_bundle_supported TRUE)
+
+  message(WARNING "BearSSL does not support TLS 1.3.")
 endif()
 
 if(CURL_USE_WOLFSSL)
@@ -867,13 +871,6 @@ if(USE_OPENSSL_QUIC)
   include_directories(${NGHTTP3_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
-endif()
-
-if(USE_BEARSSL)
-  message(WARNING "BearSSL does not support TLS 1.3.")
-endif()
-if(USE_SECTRANSP)
-  message(WARNING "Secure Transport does not support TLS 1.3.")
 endif()
 
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
