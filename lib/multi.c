@@ -3456,7 +3456,9 @@ CURLMcode Curl_update_timer(struct Curl_multi *multi)
     /* We had a timeout before and have one now, the absolute timestamp
      * differs. The relative timeout_ms may be the same, but the starting
      * point differs. Let the application restart its timer. */
+#if DEBUG_UPDATE_TIMER
     fprintf(stderr, "Curl_update_timer(), expire timestamp changed\n");
+#endif
     set_value = TRUE;
   }
   else {
