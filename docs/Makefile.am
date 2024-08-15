@@ -55,6 +55,7 @@ INTERNALDOCS =                                  \
  internals/MQTT.md                              \
  internals/NEW-PROTOCOL.md                      \
  internals/README.md                            \
+ internals/SPLAY.md                             \
  internals/WEBSOCKET.md
 
 EXTRA_DIST =                                    \
