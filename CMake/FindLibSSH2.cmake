@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_LIBSSH2 "libssh2")
+  pkg_check_modules(PC_LIBSSH2 "libssh2")
 endif()
 
 find_path(LIBSSH2_INCLUDE_DIR "libssh2.h"

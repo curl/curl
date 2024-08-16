@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_RUSTLS "rustls")
+  pkg_check_modules(PC_RUSTLS "rustls")
 endif()
 
 find_path(RUSTLS_INCLUDE_DIR "rustls.h"

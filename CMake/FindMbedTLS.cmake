@@ -38,7 +38,7 @@ endif()
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_MBEDTLS "mbedtls")
+  pkg_check_modules(PC_MBEDTLS "mbedtls")
 endif()
 
 find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h"

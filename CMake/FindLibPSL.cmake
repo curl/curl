@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_LIBPSL "libpsl")
+  pkg_check_modules(PC_LIBPSL "libpsl")
 endif()
 
 find_path(LIBPSL_INCLUDE_DIR "libpsl.h"
