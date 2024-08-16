@@ -208,7 +208,7 @@ else()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-if(NOT MSVC OR VCPKG_TOOLCHAIN)
+if(UNIX OR (MSVC AND VCPKG_TOOLCHAIN))
   set(_curl_use_pkgconfig_default ON)
 else()
   set(_curl_use_pkgconfig_default OFF)
