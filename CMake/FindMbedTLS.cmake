@@ -67,9 +67,9 @@ if(PC_MBEDTLS_VERSION)
   set(MBEDTLS_VERSION ${PC_MBEDTLS_VERSION})
 elseif(MBEDTLS_INCLUDE_DIR)
   if(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")
-    file(READ "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h" _version_header)
+    file(READ "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h" _version_header)  # 3.x
   elseif(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h")
-    file(READ "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h" _version_header)
+    file(READ "${MBEDTLS_INCLUDE_DIR}/mbedtls/version.h" _version_header)  # 2.x
   else()
     unset(_version_header)
     set(MBEDTLS_VERSION "0.0")
