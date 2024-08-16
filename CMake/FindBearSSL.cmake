@@ -29,8 +29,8 @@
 # BEARSSL_INCLUDE_DIRS  The bearssl include directories
 # BEARSSL_LIBRARIES     The bearssl library names
 
-# for compatibility. Configuration via BEARSSL_INCLUDE_DIRS is deprecated, use BEARSSL_INCLUDE_DIR instead.
 if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
+  message(WARNING "BEARSSL_INCLUDE_DIRS is deprecated, use BEARSSL_INCLUDE_DIR instead.")
   set(BEARSSL_INCLUDE_DIR "${BEARSSL_INCLUDE_DIRS}")
   unset(BEARSSL_INCLUDE_DIRS)
 endif()

@@ -25,35 +25,46 @@
 #
 # Result Variables:
 #
-# WolfSSL_FOUND         System has wolfssl
-# WolfSSL_INCLUDE_DIRS  The wolfssl include directories
-# WolfSSL_LIBRARIES     The wolfssl library names
-# WolfSSL_VERSION       Version of wolfssl
+# WOLFSSL_FOUND         System has wolfssl
+# WOLFSSL_INCLUDE_DIRS  The wolfssl include directories
+# WOLFSSL_LIBRARIES     The wolfssl library names
+# WOLFSSL_VERSION       Version of wolfssl
+
+if(DEFINED WolfSSL_INCLUDE_DIR AND NOT DEFINED WOLFSSL_INCLUDE_DIR)
+  message(WARNING "WolfSSL_INCLUDE_DIR is deprecated, use WOLFSSL_INCLUDE_DIR instead.")
+  set(WOLFSSL_INCLUDE_DIR "${WolfSSL_INCLUDE_DIR}")
+  unset(WolfSSL_INCLUDE_DIR)
+endif()
+if(DEFINED WolfSSL_LIBRARY AND NOT DEFINED WOLFSSL_LIBRARY)
+  message(WARNING "WolfSSL_LIBRARY is deprecated, use WOLFSSL_LIBRARY instead.")
+  set(WOLFSSL_LIBRARY "${WolfSSL_LIBRARY}")
+  unset(WolfSSL_LIBRARY)
+endif()
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
 endif()
 
-find_path(WolfSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h"
+find_path(WOLFSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h"
   HINTS
     ${PC_WOLFSSL_INCLUDEDIR}
     ${PC_WOLFSSL_INCLUDE_DIRS}
 )
 
-find_library(WolfSSL_LIBRARY NAMES "wolfssl"
+find_library(WOLFSSL_LIBRARY NAMES "wolfssl"
   HINTS
     ${PC_WOLFSSL_LIBDIR}
     ${PC_WOLFSSL_LIBRARY_DIRS}
 )
 
 if(PC_WOLFSSL_VERSION)
-  set(WolfSSL_VERSION ${PC_WOLFSSL_VERSION})
-elseif(WolfSSL_INCLUDE_DIR AND EXISTS "${WolfSSL_INCLUDE_DIR}/wolfssl/version.h")
+  set(WOLFSSL_VERSION ${PC_WOLFSSL_VERSION})
+elseif(WOLFSSL_INCLUDE_DIR AND EXISTS "${WOLFSSL_INCLUDE_DIR}/wolfssl/version.h")
   set(_version_regex "#[\t ]*define[\t ]+LIBWOLFSSL_VERSION_STRING[\t ]+\"([^\"]*)\"")
-  file(STRINGS "${WolfSSL_INCLUDE_DIR}/wolfssl/version.h" _version_str REGEX "${_version_regex}")
+  file(STRINGS "${WOLFSSL_INCLUDE_DIR}/wolfssl/version.h" _version_str REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-  set(WolfSSL_VERSION "${_version_str}")
+  set(WOLFSSL_VERSION "${_version_str}")
   unset(_version_regex)
   unset(_version_str)
 endif()
@@ -61,15 +72,15 @@ endif()
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(WolfSSL
   REQUIRED_VARS
-    WolfSSL_INCLUDE_DIR
-    WolfSSL_LIBRARY
+    WOLFSSL_INCLUDE_DIR
+    WOLFSSL_LIBRARY
   VERSION_VAR
-    WolfSSL_VERSION
+    WOLFSSL_VERSION
 )
 
-if(WolfSSL_FOUND)
-  set(WolfSSL_INCLUDE_DIRS ${WolfSSL_INCLUDE_DIR})
-  set(WolfSSL_LIBRARIES    ${WolfSSL_LIBRARY})
+if(WOLFSSL_FOUND)
+  set(WOLFSSL_INCLUDE_DIRS ${WOLFSSL_INCLUDE_DIR})
+  set(WOLFSSL_LIBRARIES    ${WOLFSSL_LIBRARY})
 endif()
 
-mark_as_advanced(WolfSSL_INCLUDE_DIR WolfSSL_LIBRARY)
+mark_as_advanced(WOLFSSL_INCLUDE_DIR WOLFSSL_LIBRARY)
