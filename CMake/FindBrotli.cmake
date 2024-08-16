@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_BROTLI "libbrotlidec")
+  pkg_check_modules(PC_BROTLI "libbrotlidec")
 endif()
 
 find_path(BROTLI_INCLUDE_DIR "brotli/decode.h"

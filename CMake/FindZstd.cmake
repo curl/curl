@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_Zstd "libzstd")
+  pkg_check_modules(PC_Zstd "libzstd")
 endif()
 
 find_path(Zstd_INCLUDE_DIR "zstd.h"

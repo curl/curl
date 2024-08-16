@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_MSH3 "libmsh3")
+  pkg_check_modules(PC_MSH3 "libmsh3")
 endif()
 
 find_path(MSH3_INCLUDE_DIR "msh3.h"

@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_NGHTTP3 "libnghttp3")
+  pkg_check_modules(PC_NGHTTP3 "libnghttp3")
 endif()
 
 find_path(NGHTTP3_INCLUDE_DIR "nghttp3/nghttp3.h"

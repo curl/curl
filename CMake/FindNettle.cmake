@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(NETTLE "nettle")
+  pkg_check_modules(NETTLE "nettle")
 endif()
 
 if(NETTLE_FOUND)

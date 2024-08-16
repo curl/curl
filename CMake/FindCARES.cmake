@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_CARES "libcares")
+  pkg_check_modules(PC_CARES "libcares")
 endif()
 
 find_path(CARES_INCLUDE_DIR "ares.h"

@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_WOLFSSL QUIET "wolfssl")
+  pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
 endif()
 
 find_path(WolfSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h"

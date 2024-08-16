@@ -32,7 +32,7 @@
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_search_module(PC_QUICHE "quiche")
+  pkg_check_modules(PC_QUICHE "quiche")
 endif()
 
 find_path(QUICHE_INCLUDE_DIR "quiche.h"
