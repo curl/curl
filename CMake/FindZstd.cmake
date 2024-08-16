@@ -49,7 +49,7 @@ find_library(Zstd_LIBRARY NAMES "zstd"
 
 if(PC_Zstd_VERSION)
   set(Zstd_VERSION ${PC_Zstd_VERSION})
-elseif(Zstd_INCLUDE_DIR)
+elseif(Zstd_INCLUDE_DIR AND EXISTS "${Zstd_INCLUDE_DIR}/zstd.h")
   file(READ "${Zstd_INCLUDE_DIR}/zstd.h" _zstd_header)
   string(REGEX MATCH ".*define ZSTD_VERSION_MAJOR *([0-9]+).*define ZSTD_VERSION_MINOR *([0-9]+).*define ZSTD_VERSION_RELEASE *([0-9]+)" _zstd_ver "${_zstd_header}")
   set(Zstd_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
