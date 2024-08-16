@@ -50,9 +50,9 @@ find_library(NGHTTP3_LIBRARY NAMES "nghttp3"
 if(PC_NGHTTP3_VERSION)
   set(NGHTTP3_VERSION ${PC_NGHTTP3_VERSION})
 elseif(NGHTTP3_INCLUDE_DIR)
-  file(STRINGS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h" _nghttp3_version_str REGEX "#[\t ]*define[\t ]+NGHTTP3_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" NGHTTP3_VERSION "${_nghttp3_version_str}")
-  unset(_nghttp3_version_str)
+  file(STRINGS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h" _version_str REGEX "#[\t ]*define[\t ]+NGHTTP3_VERSION[\t ]+\"(.*)\"")
+  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" NGHTTP3_VERSION "${_version_str}")
+  unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
