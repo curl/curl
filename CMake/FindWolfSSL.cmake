@@ -30,12 +30,13 @@
 # WOLFSSL_LIBRARIES     The wolfssl library names
 # WOLFSSL_VERSION       Version of wolfssl
 
-# for compatibility. Configuration via WolfSSL_* deprecated, use WOLFSSL_* instead.
 if(DEFINED WolfSSL_INCLUDE_DIR AND NOT DEFINED WOLFSSL_INCLUDE_DIR)
+  message(WARNING "WolfSSL_INCLUDE_DIR is deprecated, use WOLFSSL_INCLUDE_DIR instead.")
   set(WOLFSSL_INCLUDE_DIR "${WolfSSL_INCLUDE_DIR}")
   unset(WolfSSL_INCLUDE_DIR)
 endif()
 if(DEFINED WolfSSL_LIBRARY AND NOT DEFINED WOLFSSL_LIBRARY)
+  message(WARNING "WolfSSL_LIBRARY is deprecated, use WOLFSSL_LIBRARY instead.")
   set(WOLFSSL_LIBRARY "${WolfSSL_LIBRARY}")
   unset(WolfSSL_LIBRARY)
 endif()
