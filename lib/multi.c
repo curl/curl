@@ -3149,6 +3149,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   SIGPIPE_VARIABLE(pipe_st);
 
   (void)ev_bitmask;
+  sigpipe_init(&pipe_st);
   if(checkall) {
     struct Curl_llist_node *e;
     /* *perform() deals with running_handles on its own */
@@ -3207,7 +3208,6 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
    * to process in the splay and 'data' will be re-assigned for every expired
    * handle we deal with.
    */
-  sigpipe_init(&pipe_st);
   do {
     if(data == multi->conn_cache.closure_handle)
       run_conn_cache = TRUE;

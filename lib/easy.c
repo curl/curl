@@ -479,7 +479,6 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         else
           ev->list = nxt;
         free(m);
-        m = nxt;
         infof(easy, "socket cb: socket %" CURL_FORMAT_SOCKET_T
               " REMOVED", s);
       }
