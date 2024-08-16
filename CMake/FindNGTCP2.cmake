@@ -58,9 +58,9 @@ find_library(NGTCP2_LIBRARY NAMES "ngtcp2"
 if(PC_NGTCP2_VERSION)
   set(NGTCP2_VERSION ${PC_NGTCP2_VERSION})
 elseif(NGTCP2_INCLUDE_DIR)
-  file(STRINGS "${NGTCP2_INCLUDE_DIR}/ngtcp2/version.h" _ngtcp2_version_str REGEX "#[\t ]*define[\t ]+NGTCP2_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" NGTCP2_VERSION "${_ngtcp2_version_str}")
-  unset(_ngtcp2_version_str)
+  file(STRINGS "${NGTCP2_INCLUDE_DIR}/ngtcp2/version.h" _version_str REGEX "#[\t ]*define[\t ]+NGTCP2_VERSION[\t ]+\"(.*)\"")
+  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" NGTCP2_VERSION "${_version_str}")
+  unset(_version_str)
 endif()
 
 if(NGTCP2_FIND_COMPONENTS)
