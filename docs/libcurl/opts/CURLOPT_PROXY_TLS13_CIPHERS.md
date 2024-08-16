@@ -17,6 +17,7 @@ TLS-backend:
   - Schannel
   - wolfSSL
   - mbedTLS
+  - rustls
 Added-in: 7.61.0
 ---
 
@@ -40,15 +41,16 @@ cipher suites to use for the TLS 1.3 connection to a proxy. The list must be
 syntactically correct, it consists of one or more cipher suite strings
 separated by colons.
 
+For setting TLS 1.2 (1.1, 1.0) ciphers see CURLOPT_PROXY_SSL_CIPHER_LIST(3).
+
+A valid example of a cipher list is:
+~~~c
+"TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256"
+~~~
+
 Find more details about cipher lists on this URL:
 
  https://curl.se/docs/ssl-ciphers.html
-
-This option is used when curl is built to use OpenSSL 1.1.1 or later,
-Schannel, wolfSSL, or mbedTLS 3.6.0 or later.
-
-Before curl 8.10.0 with mbedTLS or wolfSSL, TLS 1.3 cipher suites where set
-by using the CURLOPT_PROXY_SSL_CIPHER_LIST(3) option.
 
 The application does not have to keep the string around after setting this
 option.
@@ -78,13 +80,15 @@ int main(void)
 
 # HISTORY
 
-Added in 7.61.0 for OpenSSL. Available when built with OpenSSL \>= 1.1.1.
+OpenSSL support added in 7.61.0, available when built with OpenSSL \>= 1.1.1.
+Schannel support added in 7.87.0.
+LibreSSL support added in 8.3.0, available when built with LibreSSL \>= 3.4.1.
+wolfSSL support added in 8.10.0.
+mbedTLS support added in 8.10.0, available when built with mbedTLS \>= 3.6.0.
+rustls support added in 8.10.0.
 
-Added in 7.85.0 for Schannel.
-
-Added in 8.10.0 for wolfSSL.
-
-Added in 8.10.0 for mbedTLS. Available when built with mbedTLS \>= 3.6.0.
+Before curl 8.10.0 with mbedTLS or wolfSSL, TLS 1.3 cipher suites where set
+by using the CURLOPT_PROXY_SSL_CIPHER_LIST(3) option.
 
 # %AVAILABILITY%
 
