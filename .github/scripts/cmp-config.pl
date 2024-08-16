@@ -72,6 +72,7 @@ my %remove = (
     '#define HAVE_STDLIB_H 1' => 1,
     '#define HAVE_STRING_H 1' => 1,
     '#define HAVE_SYS_XATTR_H 1' => 1,
+    '#define HAVE_UNICODE_UIDNA_H 1' => 1,
     '#define HAVE_ZSTD 1' => 1,
     '#define HAVE_ZSTD_H 1' => 1,
     '#define LT_OBJDIR ".libs/"' => 1,
