@@ -104,8 +104,6 @@ string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
 
 message(STATUS "curl version=[${CURL_VERSION}]")
 
-curl_dumpvars()
-
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
 else()
