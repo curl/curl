@@ -30,6 +30,16 @@
 # ZSTD_LIBRARIES     The zstd library names
 # ZSTD_VERSION       Version of zstd
 
+# for compatibility. Configuration via Zstd_* deprecated, use ZSTD_* instead.
+if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
+  set(ZSTD_INCLUDE_DIR "${Zstd_INCLUDE_DIR}")
+  unset(Zstd_INCLUDE_DIR)
+endif()
+if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
+  set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
+  unset(Zstd_LIBRARY)
+endif()
+
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_check_modules(PC_ZSTD "libzstd")
