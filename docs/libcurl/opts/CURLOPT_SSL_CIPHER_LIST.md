@@ -18,8 +18,8 @@ TLS-backend:
   - Schannel
   - Secure Transport
   - wolfSSL
-  - GnuTLS
   - mbedTLS
+  - rustls
 Added-in: 7.9
 ---
 
@@ -38,25 +38,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSL_CIPHER_LIST, char *list);
 # DESCRIPTION
 
 Pass a char pointer, pointing to a null-terminated string holding the list of
-ciphers to use for the SSL connection. The list must be syntactically correct,
-it consists of one or more cipher strings separated by colons. Commas or
-spaces are also acceptable separators but colons are normally used, !, - and
-+ can be used as operators.
+cipher suites to use for the TLS 1.2 (1.1, 1.0) connection. The list must
+be syntactically correct, it consists of one or more cipher suite strings
+separated by colons.
 
-For OpenSSL and GnuTLS valid examples of cipher lists include **RC4-SHA**,
-**SHA1+DES**, **TLSv1** and **DEFAULT**. The default list is normally set when
-you compile OpenSSL.
+For setting TLS 1.3 ciphers see CURLOPT_TLS13_CIPHERS(3).
 
-For wolfSSL, valid examples of cipher lists include **ECDHE-RSA-RC4-SHA**,
-**AES256-SHA:AES256-SHA256**, etc.
-
-For mbedTLS and BearSSL, valid examples of cipher lists include
-**ECDHE-RSA-CHACHA20-POLY1305:ECDHE-RSA-AES128-GCM-SHA256**, or when using
-IANA names
-**TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256:TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256**,
-etc. With mbedTLS and BearSSL you do not add/remove ciphers. If one uses this
-option then all known ciphers are disabled and only those passed in are
-enabled.
+A valid example of a cipher list is:
+~~~c
+"ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:"
+"ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305"
+~~~
 
 For Schannel, you can use this option to set algorithms but not specific
 cipher suites. Refer to the ciphers lists document for algorithms.
@@ -83,7 +75,9 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST, "TLSv1");
+    curl_easy_setopt(curl, CURLOPT_SSL_CIPHER_LIST,
+                     "ECDHE-ECDSA-CHACHA20-POLY1305:"
+                     "ECDHE-RSA-CHACHA20-POLY1305");
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);
   }
@@ -92,11 +86,18 @@ int main(void)
 
 # HISTORY
 
-Added in 7.9, in 7.83.0 for BearSSL, in 8.8.0 for mbedTLS
+OpenSSL support added in 7.9.
+wolfSSL support added in 7.53.0.
+Schannel support added in 7.61.0.
+Secure Transport support added in 7.77.0.
+BearSSL support added in 7.83.0.
+mbedTLS support added in 8.8.0.
+rustls support added in 8.10.0.
+
+Since curl 8.10.0 returns CURLE_NOT_BUILT_IN when not supported.
 
 # %AVAILABILITY%
 
 # RETURN VALUE
 
-Returns CURLE_OK if TLS is supported, CURLE_UNKNOWN_OPTION if not, or
-CURLE_OUT_OF_MEMORY if there was insufficient heap space.
+Returns CURLE_OK if supported, CURLE_NOT_BUILT_IN otherwise.
