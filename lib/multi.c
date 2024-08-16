@@ -791,6 +791,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   bool premature;
   struct Curl_llist_node *e;
   CURLMcode rc;
+  bool removed_timer = FALSE;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -841,7 +842,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* The timer must be shut down before data->multi is set to NULL, else the
      timenode will remain in the splay tree after curl_easy_cleanup is
      called. Do it after multi_done() in case that sets another time! */
-  Curl_expire_clear(data);
+  removed_timer = Curl_expire_clear(data);
 
   /* the handle is in a list, remove it from whichever it is */
   Curl_node_remove(&data->multi_queue);
@@ -922,9 +923,11 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 
   process_pending_handles(multi);
 
-  rc = Curl_update_timer(multi);
-  if(rc)
-    return rc;
+  if(removed_timer) {
+    rc = Curl_update_timer(multi);
+    if(rc)
+      return rc;
+  }
   return CURLM_OK;
 }
 
@@ -3135,6 +3138,59 @@ static CURLMcode add_next_timeout(struct curltime now,
   return CURLM_OK;
 }
 
+struct multi_run_ctx {
+  struct Curl_multi *multi;
+  struct curltime now;
+  size_t run_xfers;
+  SIGPIPE_MEMBER(pipe_st);
+  bool run_conn_cache;
+};
+
+static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
+{
+  struct Curl_multi *multi = mrc->multi;
+  struct Curl_easy *data = NULL;
+  struct Curl_tree *t = NULL;
+  CURLMcode result = CURLM_OK;
+
+  /*
+   * The loop following here will go on as long as there are expire-times left
+   * to process (compared to mrc->now) in the splay and 'data' will be
+   * re-assigned for every expired handle we deal with.
+   */
+  while(1) {
+    /* Check if there is one (more) expired timer to deal with! This function
+       extracts a matching node if there is one */
+    multi->timetree = Curl_splaygetbest(mrc->now, multi->timetree, &t);
+    if(!t)
+      goto out;
+
+    data = Curl_splayget(t); /* assign this for next loop */
+    if(!data)
+      continue;
+
+    (void)add_next_timeout(mrc->now, multi, data);
+    if(data == multi->conn_cache.closure_handle) {
+      mrc->run_conn_cache = TRUE;
+      continue;
+    }
+
+    mrc->run_xfers++;
+    sigpipe_apply(data, &mrc->pipe_st);
+    result = multi_runsingle(multi, &mrc->now, data);
+
+    if(CURLM_OK >= result) {
+      /* get the socket(s) and check if the state has been changed since
+         last */
+      result = singlesocket(multi, data);
+      if(result)
+        goto out;
+    }
+  }
+
+out:
+  return result;
+}
 static CURLMcode multi_socket(struct Curl_multi *multi,
                               bool checkall,
                               curl_socket_t s,
@@ -3143,13 +3199,14 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
 {
   CURLMcode result = CURLM_OK;
   struct Curl_easy *data = NULL;
-  struct Curl_tree *t = NULL;
-  struct curltime now = Curl_now();
-  bool run_conn_cache = FALSE;
-  SIGPIPE_VARIABLE(pipe_st);
+  struct multi_run_ctx mrc;
 
   (void)ev_bitmask;
-  sigpipe_init(&pipe_st);
+  memset(&mrc, 0, sizeof(mrc));
+  mrc.multi = multi;
+  mrc.now = Curl_now();
+  sigpipe_init(&mrc.pipe_st);
+
   if(checkall) {
     struct Curl_llist_node *e;
     /* *perform() deals with running_handles on its own */
@@ -3163,7 +3220,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         result = singlesocket(multi, Curl_node_elem(e));
       }
     }
-    run_conn_cache = TRUE;
+    mrc.run_conn_cache = TRUE;
     goto out;
   }
 
@@ -3193,55 +3250,36 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
         if(data == multi->conn_cache.closure_handle)
-          run_conn_cache = TRUE;
+          mrc.run_conn_cache = TRUE;
         else {
           /* Expire with out current now, so we will get it below when
            * asking the splaytree for expired transfers. */
-          Curl_expire_ex(data, &now, 0, EXPIRE_RUN_NOW);
+          Curl_expire_ex(data, &mrc.now, 0, EXPIRE_RUN_NOW);
         }
       }
     }
   }
 
-  /*
-   * The loop following here will go on as long as there are expire-times left
-   * to process in the splay and 'data' will be re-assigned for every expired
-   * handle we deal with.
-   */
-  do {
-    if(data == multi->conn_cache.closure_handle)
-      run_conn_cache = TRUE;
-    /* the first loop lap 'data' can be NULL */
-    else if(data) {
-      sigpipe_apply(data, &pipe_st);
-      result = multi_runsingle(multi, &now, data);
+  result = multi_run_expired(&mrc);
+  if(result)
+    goto out;
 
-      if(CURLM_OK >= result) {
-        /* get the socket(s) and check if the state has been changed since
-           last */
-        result = singlesocket(multi, data);
-        if(result)
-          goto out;
-      }
-    }
-
-    /* Check if there is one (more) expired timer to deal with! This function
-       extracts a matching node if there is one */
-
-    multi->timetree = Curl_splaygetbest(now, multi->timetree, &t);
-    if(t) {
-      data = Curl_splayget(t); /* assign this for next loop */
-      (void)add_next_timeout(now, multi, data);
-    }
-
-  } while(t);
+  if(mrc.run_xfers) {
+    /* Running transfers takes time. With a new timestamp, we might catch
+     * other expires which are due now. Instead of telling the application
+     * to set a 0 timeout and call us again, we run them here.
+     * Do that only once or it might be unfair to transfers on other
+     * sockets. */
+    mrc.now = Curl_now();
+    result = multi_run_expired(&mrc);
+  }
 
 out:
-  if(run_conn_cache) {
-    sigpipe_apply(multi->conn_cache.closure_handle, &pipe_st);
+  if(mrc.run_conn_cache) {
+    sigpipe_apply(multi->conn_cache.closure_handle, &mrc.pipe_st);
     Curl_conncache_multi_perform(multi);
   }
-  sigpipe_restore(&pipe_st);
+  sigpipe_restore(&mrc.pipe_st);
 
   if(running_handles)
     *running_handles = (int)multi->num_alive;
@@ -3646,7 +3684,7 @@ void Curl_expire_done(struct Curl_easy *data, expire_id id)
  *
  * Clear ALL timeout values for this handle.
  */
-void Curl_expire_clear(struct Curl_easy *data)
+bool Curl_expire_clear(struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *nowp = &data->state.expiretime;
@@ -3654,7 +3692,7 @@ void Curl_expire_clear(struct Curl_easy *data)
   /* this is only interesting while there is still an associated multi struct
      remaining! */
   if(!multi)
-    return;
+    return FALSE;
 
   if(nowp->tv_sec || nowp->tv_usec) {
     /* Since this is an cleared time, we must remove the previous entry from
@@ -3675,7 +3713,9 @@ void Curl_expire_clear(struct Curl_easy *data)
 #endif
     nowp->tv_sec = 0;
     nowp->tv_usec = 0;
+    return TRUE;
   }
+  return FALSE;
 }
 
 CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,

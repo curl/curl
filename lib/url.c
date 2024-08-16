@@ -234,8 +234,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data = *datap;
   *datap = NULL;
 
-  Curl_expire_clear(data); /* shut off timers */
-
   /* Detach connection if any is left. This should not be normal, but can be
      the case for example with CONNECT_ONLY + recv/send (test 556) */
   Curl_detach_connection(data);
@@ -252,6 +250,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
       data->multi_easy = NULL;
     }
   }
+
+  Curl_expire_clear(data); /* shut off any timers left */
 
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic
