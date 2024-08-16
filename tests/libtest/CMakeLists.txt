@@ -45,7 +45,7 @@ function(setup_test _test_name)  # ARGN are the files in the test
     PROJECT_LABEL "Test ${_test_name}")
 endfunction()
 
-# Get 'noinst_PROGRAMS', '*_SOURCES' variables
+# Get 'noinst_PROGRAMS', '*_SOURCES', WARNLESS, MULTIBYTE, TIMEDIFF variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
