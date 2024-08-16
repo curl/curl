@@ -46,13 +46,18 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
-# Config OpenSSL
-set(OPENSSL_ROOT_DIR ../openssl)
-set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
-set(OPENSSL_SSL_LIBRARY ssl)
-set(OPENSSL_CRYPTO_LIBRARY crypto)
-add_library(OpenSSL::SSL ALIAS ssl)
-add_library(OpenSSL::Crypto ALIAS crypto)
+# Find OpenSSL
+# set(OPENSSL_ROOT_DIR ../openssl)
+# set(OPENSSL_INCLUDE_DIR ${OPENSSL_ROOT_DIR}/include)
+# set(OPENSSL_SSL_LIBRARY ssl)
+# set(OPENSSL_CRYPTO_LIBRARY crypto)
+# add_library(OpenSSL::SSL ALIAS ssl)
+# add_library(OpenSSL::Crypto ALIAS crypto)
+
+# Find WolfSSL
+set(WolfSSL_INCLUDE_DIR ../wolfssl)
+set(WolfSSL_LIBRARY wolfssl)
+add_library(wolfssl::wolfssl ALIAS wolfssl)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
@@ -460,9 +465,10 @@ if(WIN32)
   cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
   option(CURL_WINDOWS_SSPI "Enable SSPI on Windows" ${CURL_USE_SCHANNEL})
 endif()
+cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" ON CURL_ENABLE_SSL ON)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(_openssl_default ON)
