@@ -29,8 +29,12 @@
 #include <curl/curl.h>
 
 #include "macos.h"
-
+#if __APPLE__
+#include <TargetConditionals.h>
+#if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE))
 #include <SystemConfiguration/SCDynamicStoreCopySpecific.h>
+#endif
+#endif
 
 CURLcode Curl_macos_init(void)
 {
@@ -45,9 +49,13 @@ CURLcode Curl_macos_init(void)
      * IPv4-only builds, hence the conditions for defining
      * CURL_MACOS_CALL_COPYPROXIES in curl_setup.h.
      */
+    #if __APPLE__
+    #if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE))
     CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
     if(dict)
       CFRelease(dict);
+    #endif
+    #endif
   }
   return CURLE_OK;
 }
