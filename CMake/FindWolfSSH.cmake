@@ -33,10 +33,13 @@
 find_path(WOLFSSH_INCLUDE_DIR "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")
 
-if(WOLFSSH_INCLUDE_DIR)
-  file(STRINGS "${WOLFSSH_INCLUDE_DIR}/wolfssh/version.h" _wolfssh_version_str REGEX "#[\t ]*define[\t ]+LIBWOLFSSH_VERSION_STRING[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" WOLFSSH_VERSION "${_wolfssh_version_str}")
-  unset(_wolfssh_version_str)
+if(WOLFSSH_INCLUDE_DIR AND EXISTS "${WOLFSSH_INCLUDE_DIR}/wolfssh/version.h")
+  set(_version_regex "#[\t ]*define[\t ]+LIBWOLFSSH_VERSION_STRING[\t ]+\"([^\"]*)\"")
+  file(STRINGS "${WOLFSSH_INCLUDE_DIR}/wolfssh/version.h" _version_str REGEX "${_version_regex}")
+  string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+  set(WOLFSSH_VERSION "${_version_str}")
+  unset(_version_regex)
+  unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)

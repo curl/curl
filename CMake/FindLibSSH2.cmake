@@ -49,10 +49,13 @@ find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2"
 
 if(PC_LIBSSH2_VERSION)
   set(LIBSSH2_VERSION ${PC_LIBSSH2_VERSION})
-elseif(LIBSSH2_INCLUDE_DIR)
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" LIBSSH2_VERSION "${_libssh2_version_str}")
-  unset(_libssh2_version_str)
+elseif(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
+  set(_version_regex "#[\t ]*define[\t ]+LIBSSH2_VERSION[\t ]+\"([^\"]*)\"")
+  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _version_str REGEX "${_version_regex}")
+  string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+  set(LIBSSH2_VERSION "${_version_str}")
+  unset(_version_regex)
+  unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)

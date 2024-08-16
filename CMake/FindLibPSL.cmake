@@ -49,10 +49,13 @@ find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl"
 
 if(PC_LIBPSL_VERSION)
   set(LIBPSL_VERSION ${PC_LIBPSL_VERSION})
-elseif(LIBPSL_INCLUDE_DIR)
-  file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _libpsl_version_str REGEX "^#define[\t ]+PSL_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1" LIBPSL_VERSION "${_libpsl_version_str}")
-  unset(_libpsl_version_str)
+elseif(LIBPSL_INCLUDE_DIR AND EXISTS "${LIBPSL_INCLUDE_DIR}/libpsl.h")
+  set(_version_regex "#[\t ]*define[\t ]+PSL_VERSION[\t ]+\"([^\"]*)\"")
+  file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _version_str REGEX "${_version_regex}")
+  string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+  set(LIBPSL_VERSION "${_version_str}")
+  unset(_version_regex)
+  unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
