@@ -30,6 +30,16 @@
 # WOLFSSL_LIBRARIES     The wolfssl library names
 # WOLFSSL_VERSION       Version of wolfssl
 
+# for compatibility. Configuration via WolfSSL_* deprecated, use WOLFSSL_* instead.
+if(DEFINED WolfSSL_INCLUDE_DIR AND NOT DEFINED WOLFSSL_INCLUDE_DIR)
+  set(WOLFSSL_INCLUDE_DIR "${WolfSSL_INCLUDE_DIR}")
+  unset(WolfSSL_INCLUDE_DIR)
+endif()
+if(DEFINED WolfSSL_LIBRARY AND NOT DEFINED WOLFSSL_LIBRARY)
+  set(WOLFSSL_LIBRARY "${WolfSSL_LIBRARY}")
+  unset(WolfSSL_LIBRARY)
+endif()
+
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
   pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
