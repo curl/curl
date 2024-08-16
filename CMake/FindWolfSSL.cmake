@@ -79,6 +79,13 @@ find_package_handle_standard_args(WolfSSL
 if(WOLFSSL_FOUND)
   set(WOLFSSL_INCLUDE_DIRS ${WOLFSSL_INCLUDE_DIR})
   set(WOLFSSL_LIBRARIES    ${WOLFSSL_LIBRARY})
+
+  if(NOT WIN32)
+    find_library(_math_library "m")
+    if(_math_library)
+      list(APPEND WOLFSSL_LIBRARIES "m")  # for log and pow
+    endif()
+  endif()
 endif()
 
 mark_as_advanced(WOLFSSL_INCLUDE_DIR WOLFSSL_LIBRARY)
