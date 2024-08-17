@@ -85,7 +85,7 @@ if(WOLFSSL_FOUND)
   if(NOT WIN32)
     find_library(_math_library "m")
     if(_math_library)
-      list(APPEND WOLFSSL_LIBRARIES "m")
+      list(APPEND WOLFSSL_LIBRARIES "m")  # for log and pow
     endif()
   endif()
 endif()
