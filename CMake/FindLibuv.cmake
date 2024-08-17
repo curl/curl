@@ -67,7 +67,7 @@ else()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(libuv
+find_package_handle_standard_args(Libuv
   REQUIRED_VARS
     LIBUV_INCLUDE_DIRS
     LIBUV_LIBRARIES

@@ -37,10 +37,14 @@ CMAKE_DIST =                                    \
  CMake/FindCares.cmake                          \
  CMake/FindGSASL.cmake                          \
  CMake/FindGSS.cmake                            \
+ CMake/FindLibidn2.cmake                        \
  CMake/FindLibpsl.cmake                         \
+ CMake/FindLibssh.cmake                         \
  CMake/FindLibssh2.cmake                        \
+ CMake/FindLibuv.cmake                          \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindMSH3.cmake                           \
+ CMake/FindMbedTLS.cmake                        \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
@@ -50,9 +54,6 @@ CMAKE_DIST =                                    \
  CMake/FindWolfSSH.cmake                        \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
- CMake/Findlibidn2.cmake                        \
- CMake/Findlibssh.cmake                         \
- CMake/Findlibuv.cmake                          \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/PickyWarnings.cmake                      \

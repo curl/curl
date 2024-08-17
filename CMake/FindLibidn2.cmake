@@ -57,7 +57,7 @@ else()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(libidn2
+find_package_handle_standard_args(Libidn2
   REQUIRED_VARS
     LIBIDN2_INCLUDE_DIRS
     LIBIDN2_LIBRARIES

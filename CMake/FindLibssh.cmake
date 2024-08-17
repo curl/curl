@@ -75,7 +75,7 @@ else()
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(libssh
+find_package_handle_standard_args(Libssh
   REQUIRED_VARS
     ${_libssh_include_dirs}
     LIBSSH_LIBRARIES
