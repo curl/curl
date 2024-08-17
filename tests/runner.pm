@@ -406,6 +406,32 @@ sub logslocked {
 }
 
 #######################################################################
+# Wait log locks to be unlocked
+#
+sub waitlockunlock {
+    # If a server logs advisor read lock file exists, it is an indication
+    # that the server has not yet finished writing out all its log files,
+    # including server request log files used for protocol verification.
+    # So, if the lock file exists the script waits here a certain amount
+    # of time until the server removes it, or the given time expires.
+    my $serverlogslocktimeout = shift;
+
+    if($serverlogslocktimeout) {
+        my $lockretry = $serverlogslocktimeout * 20;
+        my @locks;
+        while((@locks = logslocked()) && $lockretry--) {
+            portable_sleep(0.05);
+        }
+        if(($lockretry < 0) &&
+           ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
+            logmsg "Warning: server logs lock timeout ",
+                   "($serverlogslocktimeout seconds) expired (locks: " .
+                   join(", ", @locks) . ")\n";
+        }
+    }
+}
+
+#######################################################################
 # Memory allocation test and failure torture testing.
 #
 sub torture {
@@ -1031,11 +1057,6 @@ sub singletest_clean {
         }
     }
 
-    # If a server logs advisor read lock file exists, it is an indication
-    # that the server has not yet finished writing out all its log files,
-    # including server request log files used for protocol verification.
-    # So, if the lock file exists the script waits here a certain amount
-    # of time until the server removes it, or the given time expires.
     my $serverlogslocktimeout = $defserverlogslocktimeout;
     my %cmdhash = getpartattr("client", "command");
     if($cmdhash{'timeout'}) {
@@ -1044,19 +1065,8 @@ sub singletest_clean {
             $serverlogslocktimeout = $1 if($1 >= 0);
         }
     }
-    if($serverlogslocktimeout) {
-        my $lockretry = $serverlogslocktimeout * 20;
-        my @locks;
-        while((@locks = logslocked()) && $lockretry--) {
-            portable_sleep(0.05);
-        }
-        if(($lockretry < 0) &&
-           ($serverlogslocktimeout >= $defserverlogslocktimeout)) {
-            logmsg "Warning: server logs lock timeout ",
-                   "($serverlogslocktimeout seconds) expired (locks: " .
-                   join(", ", @locks) . ")\n";
-        }
-    }
+
+    waitlockunlock($serverlogslocktimeout);
 
     # Test harness ssh server does not have this synchronization mechanism,
     # this implies that some ssh server based tests might need a small delay
@@ -1151,6 +1161,9 @@ sub runner_test_preprocess {
     ###################################################################
     # Start the servers needed to run this test case
     my ($why, $error) = singletest_startservers($testnum, \%testtimings);
+
+    # make sure no locks left for responsive test
+    waitlockunlock($defserverlogslocktimeout);
 
     if(!$why) {
 
