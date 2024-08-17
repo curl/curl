@@ -33,12 +33,10 @@
 if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
   message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")
   set(ZSTD_INCLUDE_DIR "${Zstd_INCLUDE_DIR}")
-  unset(Zstd_INCLUDE_DIR)
 endif()
 if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
   message(WARNING "Zstd_LIBRARY is deprecated, use ZSTD_LIBRARY instead.")
   set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
-  unset(Zstd_LIBRARY)
 endif()
 
 if(CURL_USE_PKGCONFIG)
