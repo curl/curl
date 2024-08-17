@@ -28,7 +28,7 @@
 # GSASL_INCLUDE_DIR   The gsasl include directory
 # GSASL_LIBRARY       Path to gsasl library
 #
-# Result Variables:
+# Result variables:
 #
 # GSASL_FOUND         System has gsasl
 # GSASL_INCLUDE_DIRS  The gsasl include directories
