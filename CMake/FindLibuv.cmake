@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the libuv library
 #
+# Input variables:
+#
+# LIBUV_INCLUDE_DIR   The libuv include directory
+# LIBUV_LIBRARY       Path to libuv library
+#
 # Result Variables:
 #
 # LIBUV_FOUND         System has libuv

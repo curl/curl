@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the gsasl library
 #
+# Input variables:
+#
+# GSASL_INCLUDE_DIR   The gsasl include directory
+# GSASL_LIBRARY       Path to gsasl library
+#
 # Result Variables:
 #
 # GSASL_FOUND         System has gsasl

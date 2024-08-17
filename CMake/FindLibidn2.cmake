@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the libidn2 library
 #
+# Input variables:
+#
+# LIBIDN2_INCLUDE_DIR   The libidn2 include directory
+# LIBIDN2_LIBRARY       Path to libidn2 library
+#
 # Result Variables:
 #
 # LIBIDN2_FOUND         System has libidn2

@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the libssh library
 #
+# Input variables:
+#
+# LIBSSH_INCLUDE_DIR   The libssh include directory
+# LIBSSH_LIBRARY       Path to libssh library
+#
 # Result Variables:
 #
 # LIBSSH_FOUND         System has libssh
