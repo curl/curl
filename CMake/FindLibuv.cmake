@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the libuv library
 #
-# Input variables:
+# Input variables (when CURL_USE_PKGCONFIG=OFF):
 #
 # LIBUV_INCLUDE_DIR   The libuv include directory
 # LIBUV_LIBRARY       Path to libuv library

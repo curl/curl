@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the libssh library
 #
-# Input variables:
+# Input variables (when CURL_USE_PKGCONFIG=OFF):
 #
 # LIBSSH_INCLUDE_DIR   The libssh include directory
 # LIBSSH_LIBRARY       Path to libssh library

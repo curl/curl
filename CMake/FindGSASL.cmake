@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the gsasl library
 #
-# Input variables:
+# Input variables (when CURL_USE_PKGCONFIG=OFF):
 #
 # GSASL_INCLUDE_DIR   The gsasl include directory
 # GSASL_LIBRARY       Path to gsasl library
