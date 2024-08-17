@@ -31,7 +31,7 @@
 # MBEDX509_LIBRARY      Path to mbedx509 library
 # MBEDCRYPTO_LIBRARY    Path to mbedcrypto library
 #
-# Result Variables:
+# Result variables:
 #
 # MBEDTLS_FOUND         System has mbedtls
 # MBEDTLS_INCLUDE_DIRS  The mbedtls include directories

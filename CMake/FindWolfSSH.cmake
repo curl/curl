@@ -28,7 +28,7 @@
 # WOLFSSH_INCLUDE_DIR   The wolfssh include directory
 # WOLFSSH_LIBRARY       Path to wolfssh library
 #
-# Result Variables:
+# Result variables:
 #
 # WOLFSSH_FOUND         System has wolfssh
 # WOLFSSH_INCLUDE_DIRS  The wolfssh include directories

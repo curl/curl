@@ -30,7 +30,7 @@
 # ZSTD_LIBRARY       Path to zstd library
 # Zstd_LIBRARY       Path to zstd library (deprecated)
 #
-# Result Variables:
+# Result variables:
 #
 # ZSTD_FOUND         System has zstd
 # ZSTD_INCLUDE_DIRS  The zstd include directories

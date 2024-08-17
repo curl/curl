@@ -30,7 +30,7 @@
 # WOLFSSL_LIBRARY       Path to wolfssl library
 # WolfSSL_LIBRARY       Path to wolfssl library (deprecated)
 #
-# Result Variables:
+# Result variables:
 #
 # WOLFSSL_FOUND         System has wolfssl
 # WOLFSSL_INCLUDE_DIRS  The wolfssl include directories

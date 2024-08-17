@@ -29,7 +29,7 @@
 # BEARSSL_INCLUDE_DIRS  The bearssl include directory (deprecated)
 # BEARSSL_LIBRARY       Path to bearssl library
 #
-# Result Variables:
+# Result variables:
 #
 # BEARSSL_FOUND         System has bearssl
 # BEARSSL_INCLUDE_DIRS  The bearssl include directories

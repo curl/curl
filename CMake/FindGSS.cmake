@@ -27,7 +27,7 @@
 #
 # GSS_ROOT_DIR          Set this variable to the root installation of GSS
 #
-# Result Variables:
+# Result variables:
 #
 # GSS_FOUND             System has the Heimdal library
 # GSS_FLAVOUR           "MIT" or "Heimdal" if anything found
