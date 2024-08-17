@@ -31,6 +31,11 @@
 # wolfSSL:    Use libngtcp2_crypto_wolfssl
 # GnuTLS:     Use libngtcp2_crypto_gnutls
 #
+# Input variables:
+#
+# NGTCP2_INCLUDE_DIR   The ngtcp2 include directory
+# NGTCP2_LIBRARY       Path to ngtcp2 library
+#
 # Result Variables:
 #
 # NGTCP2_FOUND         System has ngtcp2

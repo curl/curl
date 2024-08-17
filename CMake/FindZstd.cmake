@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the zstd library
 #
+# Input variables:
+#
+# ZSTD_INCLUDE_DIR   The zstd include directory
+# ZSTD_LIBRARY       Path to zstd library
+#
 # Result Variables:
 #
 # ZSTD_FOUND         System has zstd

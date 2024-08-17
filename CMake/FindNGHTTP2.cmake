@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the nghttp2 library
 #
+# Input variables:
+#
+# NGHTTP2_INCLUDE_DIR   The nghttp2 include directory
+# NGHTTP2_LIBRARY       Path to nghttp2 library
+#
 # Result Variables:
 #
 # NGHTTP2_FOUND         System has nghttp2

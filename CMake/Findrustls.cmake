@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the rustls library
 #
+# Input variables:
+#
+# RUSTLS_INCLUDE_DIR   The rustls include directory
+# RUSTLS_LIBRARY       Path to rustls library
+#
 # Result Variables:
 #
 # RUSTLS_FOUND         System has rustls

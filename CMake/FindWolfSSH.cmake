@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the wolfssh library
 #
+# Input variables:
+#
+# WOLFSSH_INCLUDE_DIR   The wolfssh include directory
+# WOLFSSH_LIBRARY       Path to wolfssh library
+#
 # Result Variables:
 #
 # WOLFSSH_FOUND         System has wolfssh

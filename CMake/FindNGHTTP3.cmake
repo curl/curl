@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the nghttp3 library
 #
+# Input variables:
+#
+# NGHTTP3_INCLUDE_DIR   The nghttp3 include directory
+# NGHTTP3_LIBRARY       Path to nghttp3 library
+#
 # Result Variables:
 #
 # NGHTTP3_FOUND         System has nghttp3

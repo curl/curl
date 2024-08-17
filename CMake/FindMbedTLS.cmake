@@ -23,6 +23,13 @@
 ###########################################################################
 # Find the mbedtls library
 #
+# Input variables:
+#
+# MBEDTLS_INCLUDE_DIR   The mbedtls include directory
+# MBEDTLS_LIBRARY       Path to mbedtls library
+# MBEDX509_LIBRARY      Path to mbedx509 library
+# MBEDCRYPTO_LIBRARY    Path to mbedcrypto library
+#
 # Result Variables:
 #
 # MBEDTLS_FOUND         System has mbedtls

@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the quiche library
 #
+# Input variables:
+#
+# QUICHE_INCLUDE_DIR   The quiche include directory
+# QUICHE_LIBRARY       Path to quiche library
+#
 # Result Variables:
 #
 # QUICHE_FOUND         System has quiche

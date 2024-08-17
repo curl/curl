@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the wolfssl library
 #
+# Input variables:
+#
+# WOLFSSL_INCLUDE_DIR   The wolfssl include directory
+# WOLFSSL_LIBRARY       Path to wolfssl library
+#
 # Result Variables:
 #
 # WOLFSSL_FOUND         System has wolfssl

@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the msh3 library
 #
+# Input variables:
+#
+# MSH3_INCLUDE_DIR   The msh3 include directory
+# MSH3_LIBRARY       Path to msh3 library
+#
 # Result Variables:
 #
 # MSH3_FOUND         System has msh3

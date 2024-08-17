@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the nettle library
 #
+# Input variables (when CURL_USE_PKGCONFIG=OFF):
+#
+# NETTLE_INCLUDE_DIR   The nettle include directory
+# NETTLE_LIBRARY       Path to nettle library
+#
 # Result Variables:
 #
 # NETTLE_FOUND         System has nettle

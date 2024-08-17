@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the bearssl library
 #
+# Input variables:
+#
+# BEARSSL_INCLUDE_DIR   The bearssl include directory
+# BEARSSL_LIBRARY       Path to bearssl library
+#
 # Result Variables:
 #
 # BEARSSL_FOUND         System has bearssl

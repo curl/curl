@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the c-ares library
 #
+# Input variables:
+#
+# CARES_INCLUDE_DIR   The c-ares include directory
+# CARES_LIBRARY       Path to c-ares library
+#
 # Result Variables:
 #
 # CARES_FOUND         System has c-ares

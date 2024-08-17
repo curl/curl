@@ -23,6 +23,12 @@
 ###########################################################################
 # Find the brotli library
 #
+# Input variables:
+#
+# BROTLI_INCLUDE_DIR   The brotli include directory
+# BROTLICOMMON_LIBRARY Path to brotlicommon library
+# BROTLIDEC_LIBRARY    Path to brotlidec library
+#
 # Result Variables:
 #
 # BROTLI_FOUND         System has brotli

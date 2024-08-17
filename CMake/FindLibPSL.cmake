@@ -23,6 +23,11 @@
 ###########################################################################
 # Find the libpsl library
 #
+# Input variables:
+#
+# LIBPSL_INCLUDE_DIR   The libpsl include directory
+# LIBPSL_LIBRARY       Path to libpsl library
+#
 # Result Variables:
 #
 # LIBPSL_FOUND         System has libpsl
