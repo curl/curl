@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the gsasl library
 #
-# Input variables (when CURL_USE_PKGCONFIG=OFF):
+# Input variables:
 #
 # GSASL_INCLUDE_DIR   The gsasl include directory
 # GSASL_LIBRARY       Path to gsasl library
@@ -35,7 +35,9 @@
 # GSASL_LIBRARIES     The gsasl library names
 # GSASL_VERSION       Version of gsasl
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED GSASL_INCLUDE_DIR AND
+   NOT DEFINED GSASL_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(GSASL "libgsasl")
 endif()

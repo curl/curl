@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the libssh library
 #
-# Input variables (when CURL_USE_PKGCONFIG=OFF):
+# Input variables:
 #
 # LIBSSH_INCLUDE_DIR   The libssh include directory
 # LIBSSH_LIBRARY       Path to libssh library
@@ -37,7 +37,9 @@
 
 set(_libssh_include_dirs "LIBSSH_INCLUDE_DIRS")
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED LIBSSH_INCLUDE_DIR AND
+   NOT DEFINED LIBSSH_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(LIBSSH "libssh")
 endif()

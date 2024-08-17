@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the libidn2 library
 #
-# Input variables (when CURL_USE_PKGCONFIG=OFF):
+# Input variables:
 #
 # LIBIDN2_INCLUDE_DIR   The libidn2 include directory
 # LIBIDN2_LIBRARY       Path to libidn2 library
@@ -35,7 +35,9 @@
 # LIBIDN2_LIBRARIES     The libidn2 library names
 # LIBIDN2_VERSION       Version of libidn2
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED LIBIDN2_INCLUDE_DIR AND
+   NOT DEFINED LIBIDN2_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(LIBIDN2 "libidn2")
 endif()

@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the libuv library
 #
-# Input variables (when CURL_USE_PKGCONFIG=OFF):
+# Input variables:
 #
 # LIBUV_INCLUDE_DIR   The libuv include directory
 # LIBUV_LIBRARY       Path to libuv library
@@ -35,7 +35,9 @@
 # LIBUV_LIBRARIES     The libuv library names
 # LIBUV_VERSION       Version of libuv
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED LIBUV_INCLUDE_DIR AND
+   NOT DEFINED LIBUV_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(LIBUV "libuv")
 endif()
