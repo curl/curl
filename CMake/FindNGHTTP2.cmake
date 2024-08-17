@@ -35,7 +35,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_NGHTTP2 "libnghttp2")
 endif()
 
-find_path(NGHTTP2_INCLUDE_DIR "nghttp2/nghttp2.h"
+find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h"
   HINTS
     ${PC_NGHTTP2_INCLUDEDIR}
     ${PC_NGHTTP2_INCLUDE_DIRS}

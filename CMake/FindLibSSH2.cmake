@@ -35,7 +35,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_LIBSSH2 "libssh2")
 endif()
 
-find_path(LIBSSH2_INCLUDE_DIR "libssh2.h"
+find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h"
   HINTS
     ${PC_LIBSSH2_INCLUDEDIR}
     ${PC_LIBSSH2_INCLUDE_DIRS}

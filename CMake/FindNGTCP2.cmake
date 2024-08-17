@@ -43,7 +43,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_NGTCP2 "libngtcp2")
 endif()
 
-find_path(NGTCP2_INCLUDE_DIR "ngtcp2/ngtcp2.h"
+find_path(NGTCP2_INCLUDE_DIR NAMES "ngtcp2/ngtcp2.h"
   HINTS
     ${PC_NGTCP2_INCLUDEDIR}
     ${PC_NGTCP2_INCLUDE_DIRS}

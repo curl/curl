@@ -35,7 +35,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_QUICHE "quiche")
 endif()
 
-find_path(QUICHE_INCLUDE_DIR "quiche.h"
+find_path(QUICHE_INCLUDE_DIR NAMES "quiche.h"
   HINTS
     ${PC_QUICHE_INCLUDEDIR}
     ${PC_QUICHE_INCLUDE_DIRS}

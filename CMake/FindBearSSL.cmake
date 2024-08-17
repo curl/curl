@@ -35,8 +35,8 @@ if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
   unset(BEARSSL_INCLUDE_DIRS)
 endif()
 
-find_path(BEARSSL_INCLUDE_DIR "bearssl.h")
-find_library(BEARSSL_LIBRARY "bearssl")
+find_path(BEARSSL_INCLUDE_DIR NAMES "bearssl.h")
+find_library(BEARSSL_LIBRARY NAMES "bearssl")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(BEARSSL

@@ -35,7 +35,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_MSH3 "libmsh3")
 endif()
 
-find_path(MSH3_INCLUDE_DIR "msh3.h"
+find_path(MSH3_INCLUDE_DIR NAMES "msh3.h"
   HINTS
     ${PC_MSH3_INCLUDEDIR}
     ${PC_MSH3_INCLUDE_DIRS}

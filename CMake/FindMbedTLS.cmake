@@ -41,23 +41,23 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_MBEDTLS "mbedtls")
 endif()
 
-find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h"
+find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h"
   HINTS
     ${PC_MBEDTLS_INCLUDEDIR}
     ${PC_MBEDTLS_INCLUDE_DIRS}
 )
 
-find_library(MBEDTLS_LIBRARY "mbedtls"
+find_library(MBEDTLS_LIBRARY NAMES "mbedtls"
   HINTS
     ${PC_MBEDTLS_LIBDIR}
     ${PC_MBEDTLS_LIBRARY_DIRS}
 )
-find_library(MBEDX509_LIBRARY "mbedx509"
+find_library(MBEDX509_LIBRARY NAMES "mbedx509"
   HINTS
     ${PC_MBEDTLS_LIBDIR}
     ${PC_MBEDTLS_LIBRARY_DIRS}
 )
-find_library(MBEDCRYPTO_LIBRARY "mbedcrypto"
+find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto"
   HINTS
     ${PC_MBEDTLS_LIBDIR}
     ${PC_MBEDTLS_LIBRARY_DIRS}

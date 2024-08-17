@@ -35,7 +35,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_LIBPSL "libpsl")
 endif()
 
-find_path(LIBPSL_INCLUDE_DIR "libpsl.h"
+find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h"
   HINTS
     ${PC_LIBPSL_INCLUDEDIR}
     ${PC_LIBPSL_INCLUDE_DIRS}

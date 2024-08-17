@@ -44,7 +44,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_ZSTD "libzstd")
 endif()
 
-find_path(ZSTD_INCLUDE_DIR "zstd.h"
+find_path(ZSTD_INCLUDE_DIR NAMES "zstd.h"
   HINTS
     ${PC_ZSTD_INCLUDEDIR}
     ${PC_ZSTD_INCLUDE_DIRS}
