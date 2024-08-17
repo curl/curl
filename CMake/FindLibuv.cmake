@@ -38,7 +38,7 @@ endif()
 if(LIBUV_FOUND)
   set(LIBUV_LIBRARIES ${LIBUV_LINK_LIBRARIES})
 else()
-  find_path(LIBUV_INCLUDE_DIR "uv.h")
+  find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")
   find_library(LIBUV_LIBRARY NAMES "uv" "libuv")
 
   if(LIBUV_INCLUDE_DIR AND EXISTS "${LIBUV_INCLUDE_DIR}/uv/version.h")

@@ -38,7 +38,7 @@ endif()
 if(GSASL_FOUND)
   set(GSASL_LIBRARIES ${GSASL_LINK_LIBRARIES})
 else()
-  find_path(GSASL_INCLUDE_DIR "gsasl.h")
+  find_path(GSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(GSASL_LIBRARY NAMES "gsasl" "libgsasl")
 
   if(GSASL_INCLUDE_DIR AND EXISTS "${GSASL_INCLUDE_DIR}/gsasl-version.h")

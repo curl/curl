@@ -38,7 +38,7 @@ endif()
 if(LIBIDN2_FOUND)
   set(LIBIDN2_LIBRARIES ${LIBIDN2_LINK_LIBRARIES})
 else()
-  find_path(LIBIDN2_INCLUDE_DIR "idn2.h")
+  find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")
   find_library(LIBIDN2_LIBRARY NAMES "idn2" "libidn2")
 
   if(LIBIDN2_INCLUDE_DIR AND EXISTS "${LIBIDN2_INCLUDE_DIR}/idn2.h")

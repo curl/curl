@@ -46,7 +46,7 @@ if(LIBSSH_FOUND)
   endif()
   set(LIBSSH_LIBRARIES ${LIBSSH_LINK_LIBRARIES})
 else()
-  find_path(LIBSSH_INCLUDE_DIR "libssh/libssh.h")
+  find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
   find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
 
   if(LIBSSH_INCLUDE_DIR AND EXISTS "${LIBSSH_INCLUDE_DIR}/libssh/libssh_version.h")
