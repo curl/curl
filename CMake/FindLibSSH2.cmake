@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the libssh2 library
 #
-# Result Variables:
+# Input variables:
+#
+# LIBSSH2_INCLUDE_DIR   The libssh2 include directory
+# LIBSSH2_LIBRARY       Path to libssh2 library
+#
+# Result variables:
 #
 # LIBSSH2_FOUND         System has libssh2
 # LIBSSH2_INCLUDE_DIRS  The libssh2 include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_LIBSSH2 "libssh2")
 endif()
 
-find_path(LIBSSH2_INCLUDE_DIR "libssh2.h"
+find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h"
   HINTS
     ${PC_LIBSSH2_INCLUDEDIR}
     ${PC_LIBSSH2_INCLUDE_DIRS}

@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the c-ares library
 #
-# Result Variables:
+# Input variables:
+#
+# CARES_INCLUDE_DIR   The c-ares include directory
+# CARES_LIBRARY       Path to c-ares library
+#
+# Result variables:
 #
 # CARES_FOUND         System has c-ares
 # CARES_INCLUDE_DIRS  The c-ares include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_CARES "libcares")
 endif()
 
-find_path(CARES_INCLUDE_DIR "ares.h"
+find_path(CARES_INCLUDE_DIR NAMES "ares.h"
   HINTS
     ${PC_CARES_INCLUDEDIR}
     ${PC_CARES_INCLUDE_DIRS}

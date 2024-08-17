@@ -23,7 +23,13 @@
 ###########################################################################
 # Find the bearssl library
 #
-# Result Variables:
+# Input variables:
+#
+# BEARSSL_INCLUDE_DIR   The bearssl include directory
+# BEARSSL_INCLUDE_DIRS  The bearssl include directory (deprecated)
+# BEARSSL_LIBRARY       Path to bearssl library
+#
+# Result variables:
 #
 # BEARSSL_FOUND         System has bearssl
 # BEARSSL_INCLUDE_DIRS  The bearssl include directories
@@ -35,8 +41,8 @@ if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
   unset(BEARSSL_INCLUDE_DIRS)
 endif()
 
-find_path(BEARSSL_INCLUDE_DIR "bearssl.h")
-find_library(BEARSSL_LIBRARY "bearssl")
+find_path(BEARSSL_INCLUDE_DIR NAMES "bearssl.h")
+find_library(BEARSSL_LIBRARY NAMES "bearssl")
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(BEARSSL

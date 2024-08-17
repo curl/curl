@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the nghttp3 library
 #
-# Result Variables:
+# Input variables:
+#
+# NGHTTP3_INCLUDE_DIR   The nghttp3 include directory
+# NGHTTP3_LIBRARY       Path to nghttp3 library
+#
+# Result variables:
 #
 # NGHTTP3_FOUND         System has nghttp3
 # NGHTTP3_INCLUDE_DIRS  The nghttp3 include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_NGHTTP3 "libnghttp3")
 endif()
 
-find_path(NGHTTP3_INCLUDE_DIR "nghttp3/nghttp3.h"
+find_path(NGHTTP3_INCLUDE_DIR NAMES "nghttp3/nghttp3.h"
   HINTS
     ${PC_NGHTTP3_INCLUDEDIR}
     ${PC_NGHTTP3_INCLUDE_DIRS}

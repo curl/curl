@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the msh3 library
 #
-# Result Variables:
+# Input variables:
+#
+# MSH3_INCLUDE_DIR   The msh3 include directory
+# MSH3_LIBRARY       Path to msh3 library
+#
+# Result variables:
 #
 # MSH3_FOUND         System has msh3
 # MSH3_INCLUDE_DIRS  The msh3 include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_MSH3 "libmsh3")
 endif()
 
-find_path(MSH3_INCLUDE_DIR "msh3.h"
+find_path(MSH3_INCLUDE_DIR NAMES "msh3.h"
   HINTS
     ${PC_MSH3_INCLUDEDIR}
     ${PC_MSH3_INCLUDE_DIRS}

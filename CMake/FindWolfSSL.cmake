@@ -23,7 +23,14 @@
 ###########################################################################
 # Find the wolfssl library
 #
-# Result Variables:
+# Input variables:
+#
+# WOLFSSL_INCLUDE_DIR   The wolfssl include directory
+# WolfSSL_INCLUDE_DIR   The wolfssl include directory (deprecated)
+# WOLFSSL_LIBRARY       Path to wolfssl library
+# WolfSSL_LIBRARY       Path to wolfssl library (deprecated)
+#
+# Result variables:
 #
 # WOLFSSL_FOUND         System has wolfssl
 # WOLFSSL_INCLUDE_DIRS  The wolfssl include directories
@@ -41,7 +48,7 @@ endif()
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_WOLFSSL QUIET "wolfssl")
+  pkg_check_modules(PC_WOLFSSL "wolfssl")
 endif()
 
 find_path(WOLFSSL_INCLUDE_DIR NAMES "wolfssl/ssl.h"

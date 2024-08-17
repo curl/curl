@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the quiche library
 #
-# Result Variables:
+# Input variables:
+#
+# QUICHE_INCLUDE_DIR   The quiche include directory
+# QUICHE_LIBRARY       Path to quiche library
+#
+# Result variables:
 #
 # QUICHE_FOUND         System has quiche
 # QUICHE_INCLUDE_DIRS  The quiche include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_QUICHE "quiche")
 endif()
 
-find_path(QUICHE_INCLUDE_DIR "quiche.h"
+find_path(QUICHE_INCLUDE_DIR NAMES "quiche.h"
   HINTS
     ${PC_QUICHE_INCLUDEDIR}
     ${PC_QUICHE_INCLUDE_DIRS}

@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the rustls library
 #
-# Result Variables:
+# Input variables:
+#
+# RUSTLS_INCLUDE_DIR   The rustls include directory
+# RUSTLS_LIBRARY       Path to rustls library
+#
+# Result variables:
 #
 # RUSTLS_FOUND         System has rustls
 # RUSTLS_INCLUDE_DIRS  The rustls include directories
@@ -35,13 +40,13 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_RUSTLS "rustls")
 endif()
 
-find_path(RUSTLS_INCLUDE_DIR "rustls.h"
+find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h"
   HINTS
     ${PC_RUSTLS_INCLUDEDIR}
     ${PC_RUSTLS_INCLUDE_DIRS}
 )
 
-find_library(RUSTLS_LIBRARY "rustls"
+find_library(RUSTLS_LIBRARY NAMES "rustls"
   HINTS
     ${PC_RUSTLS_LIBDIR}
     ${PC_RUSTLS_LIBRARY_DIRS}

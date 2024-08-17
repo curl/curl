@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the libpsl library
 #
-# Result Variables:
+# Input variables:
+#
+# LIBPSL_INCLUDE_DIR   The libpsl include directory
+# LIBPSL_LIBRARY       Path to libpsl library
+#
+# Result variables:
 #
 # LIBPSL_FOUND         System has libpsl
 # LIBPSL_INCLUDE_DIRS  The libpsl include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_LIBPSL "libpsl")
 endif()
 
-find_path(LIBPSL_INCLUDE_DIR "libpsl.h"
+find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h"
   HINTS
     ${PC_LIBPSL_INCLUDEDIR}
     ${PC_LIBPSL_INCLUDE_DIRS}

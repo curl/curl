@@ -23,14 +23,19 @@
 ###########################################################################
 # Find the wolfssh library
 #
-# Result Variables:
+# Input variables:
+#
+# WOLFSSH_INCLUDE_DIR   The wolfssh include directory
+# WOLFSSH_LIBRARY       Path to wolfssh library
+#
+# Result variables:
 #
 # WOLFSSH_FOUND         System has wolfssh
 # WOLFSSH_INCLUDE_DIRS  The wolfssh include directories
 # WOLFSSH_LIBRARIES     The wolfssh library names
 # WOLFSSH_VERSION       Version of wolfssh
 
-find_path(WOLFSSH_INCLUDE_DIR "wolfssh/ssh.h")
+find_path(WOLFSSH_INCLUDE_DIR NAMES "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")
 
 if(WOLFSSH_INCLUDE_DIR AND EXISTS "${WOLFSSH_INCLUDE_DIR}/wolfssh/version.h")

@@ -23,7 +23,15 @@
 ###########################################################################
 # Find the mbedtls library
 #
-# Result Variables:
+# Input variables:
+#
+# MBEDTLS_INCLUDE_DIR   The mbedtls include directory
+# MBEDTLS_INCLUDE_DIRS  The mbedtls include directory (deprecated)
+# MBEDTLS_LIBRARY       Path to mbedtls library
+# MBEDX509_LIBRARY      Path to mbedx509 library
+# MBEDCRYPTO_LIBRARY    Path to mbedcrypto library
+#
+# Result variables:
 #
 # MBEDTLS_FOUND         System has mbedtls
 # MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
@@ -41,23 +49,23 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_MBEDTLS "mbedtls")
 endif()
 
-find_path(MBEDTLS_INCLUDE_DIR "mbedtls/ssl.h"
+find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h"
   HINTS
     ${PC_MBEDTLS_INCLUDEDIR}
     ${PC_MBEDTLS_INCLUDE_DIRS}
 )
 
-find_library(MBEDTLS_LIBRARY "mbedtls"
+find_library(MBEDTLS_LIBRARY NAMES "mbedtls"
   HINTS
     ${PC_MBEDTLS_LIBDIR}
     ${PC_MBEDTLS_LIBRARY_DIRS}
 )
-find_library(MBEDX509_LIBRARY "mbedx509"
+find_library(MBEDX509_LIBRARY NAMES "mbedx509"
   HINTS
     ${PC_MBEDTLS_LIBDIR}
     ${PC_MBEDTLS_LIBRARY_DIRS}
 )
-find_library(MBEDCRYPTO_LIBRARY "mbedcrypto"
+find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto"
   HINTS
     ${PC_MBEDTLS_LIBDIR}
     ${PC_MBEDTLS_LIBRARY_DIRS}

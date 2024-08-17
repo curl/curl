@@ -23,7 +23,12 @@
 ###########################################################################
 # Find the nghttp2 library
 #
-# Result Variables:
+# Input variables:
+#
+# NGHTTP2_INCLUDE_DIR   The nghttp2 include directory
+# NGHTTP2_LIBRARY       Path to nghttp2 library
+#
+# Result variables:
 #
 # NGHTTP2_FOUND         System has nghttp2
 # NGHTTP2_INCLUDE_DIRS  The nghttp2 include directories
@@ -35,7 +40,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_NGHTTP2 "libnghttp2")
 endif()
 
-find_path(NGHTTP2_INCLUDE_DIR "nghttp2/nghttp2.h"
+find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h"
   HINTS
     ${PC_NGHTTP2_INCLUDEDIR}
     ${PC_NGHTTP2_INCLUDE_DIRS}

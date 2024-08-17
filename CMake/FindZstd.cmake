@@ -23,7 +23,14 @@
 ###########################################################################
 # Find the zstd library
 #
-# Result Variables:
+# Input variables:
+#
+# ZSTD_INCLUDE_DIR   The zstd include directory
+# Zstd_INCLUDE_DIR   The zstd include directory (deprecated)
+# ZSTD_LIBRARY       Path to zstd library
+# Zstd_LIBRARY       Path to zstd library (deprecated)
+#
+# Result variables:
 #
 # ZSTD_FOUND         System has zstd
 # ZSTD_INCLUDE_DIRS  The zstd include directories
@@ -44,7 +51,7 @@ if(CURL_USE_PKGCONFIG)
   pkg_check_modules(PC_ZSTD "libzstd")
 endif()
 
-find_path(ZSTD_INCLUDE_DIR "zstd.h"
+find_path(ZSTD_INCLUDE_DIR NAMES "zstd.h"
   HINTS
     ${PC_ZSTD_INCLUDEDIR}
     ${PC_ZSTD_INCLUDE_DIRS}
