@@ -239,6 +239,7 @@ sub get_file_content {
     my ($file_path) = @_;
     my $content = do { local $/; open my $fh, '<', $file_path or die $!; <$fh> };
     $content =~ s/(^|-----END .*?-----[\r\n]?)(.*?)(-----BEGIN .*?-----|$)/$1$3/gs;
+    $content =~ s/\r\n/\n/g;
     chomp($content);
     return $content;
 }
