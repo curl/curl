@@ -23,7 +23,7 @@
 ###########################################################################
 # Find the nettle library
 #
-# Input variables (when CURL_USE_PKGCONFIG=OFF):
+# Input variables:
 #
 # NETTLE_INCLUDE_DIR   The nettle include directory
 # NETTLE_LIBRARY       Path to nettle library
@@ -35,7 +35,9 @@
 # NETTLE_LIBRARIES     The nettle library names
 # NETTLE_VERSION       Version of nettle
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED NETTLE_INCLUDE_DIR AND
+   NOT DEFINED NETTLE_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(NETTLE "nettle")
 endif()
