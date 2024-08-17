@@ -28,6 +28,8 @@
 # BEARSSL_INCLUDE_DIR   The bearssl include directory
 # BEARSSL_LIBRARY       Path to bearssl library
 #
+# BEARSSL_INCLUDE_DIRS  The bearssl include directory (deprecated)
+#
 # Result Variables:
 #
 # BEARSSL_FOUND         System has bearssl
