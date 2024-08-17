@@ -24,8 +24,8 @@ option makes curl redo the request on the new place. If used together with
 
 When authentication is used, or send cookie with `-H Cookie:`, curl only sends
 its credentials to the initial host. If a redirect takes curl to a different
-host, it does not get the credentials pass on. See also--location-trusted on
-how to change this.
+host, it does not get the credentials pass on. See --location-trusted on how
+to change this.
 
 Limit the amount of redirects to follow by using the --max-redirs option.
 
