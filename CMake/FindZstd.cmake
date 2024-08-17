@@ -26,9 +26,8 @@
 # Input variables:
 #
 # ZSTD_INCLUDE_DIR   The zstd include directory
-# ZSTD_LIBRARY       Path to zstd library
-#
 # Zstd_INCLUDE_DIR   The zstd include directory (deprecated)
+# ZSTD_LIBRARY       Path to zstd library
 # Zstd_LIBRARY       Path to zstd library (deprecated)
 #
 # Result Variables:

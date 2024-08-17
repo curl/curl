@@ -26,11 +26,10 @@
 # Input variables:
 #
 # MBEDTLS_INCLUDE_DIR   The mbedtls include directory
+# MBEDTLS_INCLUDE_DIRS  The mbedtls include directory (deprecated)
 # MBEDTLS_LIBRARY       Path to mbedtls library
 # MBEDX509_LIBRARY      Path to mbedx509 library
 # MBEDCRYPTO_LIBRARY    Path to mbedcrypto library
-#
-# MBEDTLS_INCLUDE_DIRS  The mbedtls include directory (deprecated)
 #
 # Result Variables:
 #
