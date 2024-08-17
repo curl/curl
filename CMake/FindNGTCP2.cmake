@@ -107,13 +107,6 @@ find_package_handle_standard_args(NGTCP2
 if(NGTCP2_FOUND)
   set(NGTCP2_INCLUDE_DIRS ${NGTCP2_INCLUDE_DIR})
   set(NGTCP2_LIBRARIES    ${NGTCP2_LIBRARY} ${NGTCP2_CRYPTO_LIBRARY})
-
-  if(_ngtcp2_crypto_backend STREQUAL "wolfSSL" AND NOT WIN32)
-    find_library(_ngtpc2_math_library "m")
-    if(_ngtpc2_math_library)
-      list(APPEND NGTCP2_LIBRARIES "m")
-    endif()
-  endif()
 endif()
 
 mark_as_advanced(NGTCP2_INCLUDE_DIR NGTCP2_LIBRARY NGTCP2_CRYPTO_LIBRARY)
