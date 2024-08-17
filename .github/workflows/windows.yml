@@ -61,11 +61,6 @@ jobs:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp', name: 'schannel R' }
       fail-fast: false
     steps:
-      - name: 'install stunnel'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        run: choco install --yes --no-progress --limit-output --timeout 180 stunnel --force
-        shell: cmd
-
       - run: git config --global core.autocrlf input
         shell: pwsh
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -149,6 +144,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           make -C bld -j5 V=1 test-ci
 
@@ -229,6 +225,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
@@ -265,11 +262,6 @@ jobs:
             tflags: 'skiprun'
       fail-fast: false
     steps:
-      - name: 'install stunnel'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        run: choco install --yes --no-progress --limit-output --timeout 180 stunnel --force
-        shell: cmd
-
       - name: 'cache compiler (gcc ${{ matrix.env }})'
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-compiler
@@ -349,6 +341,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
@@ -481,11 +474,6 @@ jobs:
             config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_GSASL=ON -DUSE_NGTCP2=ON'
       fail-fast: false
     steps:
-      - name: 'install stunnel'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        run: choco install --yes --no-progress --limit-output --timeout 180 stunnel --force
-        shell: cmd
-
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'vcpkg cache setup'
@@ -560,5 +548,6 @@ jobs:
         timeout-minutes: 12
         run: |
           export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ${{ matrix.tflags }}'
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
