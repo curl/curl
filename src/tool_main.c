@@ -249,6 +249,9 @@ int main(int argc, char *argv[])
     errorf(&global, "(%d) Windows-specific init failed", result);
     return (int)result;
   }
+#else
+  if(argc > 0)
+    global.argv0 = argv[0];
 #endif
 
   if(main_checkfds()) {

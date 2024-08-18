@@ -59,8 +59,11 @@ char **__crt0_glob_function(char *arg);
 
 #ifdef _WIN32
 
+#if !defined(CURL_WINDOWS_UWP) && \
+  !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 CURLcode FindWin32CACert(struct OperationConfig *config,
                          const TCHAR *bundle_file);
+#endif
 struct curl_slist *GetLoadedModulePaths(void);
 CURLcode win32_init(void);
 

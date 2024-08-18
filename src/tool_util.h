@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
+#include "tool_cfgable.h"
 
 struct timeval tvnow(void);
 
@@ -38,5 +39,8 @@ long tvdiff(struct timeval t1, struct timeval t2);
 /* Case insensitive comparison support. */
 int struplocompare(const char *p1, const char *p2);
 int struplocompare4sort(const void *p1, const void *p2);
+
+FILE *Curl_execpath(struct GlobalConfig *config,
+                    const char *filename, char **pathp);
 
 #endif /* HEADER_CURL_TOOL_UTIL_H */
