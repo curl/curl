@@ -2051,8 +2051,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
-  configure_file("${CURL_SOURCE_DIR}/curl-config.in"
-                 "${CURL_BINARY_DIR}/curl-config" @ONLY)
+  configure_file(
+    "${CURL_SOURCE_DIR}/curl-config.in"
+    "${CURL_BINARY_DIR}/curl-config" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/curl-config"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     PERMISSIONS
@@ -2075,8 +2076,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   prefix
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
-  configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
-                 "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
+  configure_file(
+    "${CURL_SOURCE_DIR}/libcurl.pc.in"
+    "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 

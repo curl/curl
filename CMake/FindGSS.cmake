@@ -286,7 +286,8 @@ if(GSS_FLAVOUR)
       set(GSS_VERSION "Heimdal Unknown")
     endif()
   elseif(NOT GSS_VERSION AND GSS_FLAVOUR STREQUAL "MIT")
-    get_filename_component(_mit_version "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos\\SDK\\CurrentVersion;VersionString]" NAME CACHE)
+    get_filename_component(_mit_version "[HKEY_LOCAL_MACHINE\\SOFTWARE\\MIT\\Kerberos\\SDK\\CurrentVersion;VersionString]" NAME
+      CACHE)
     if(WIN32 AND _mit_version)
       set(GSS_VERSION "${_mit_version}")
     else()
@@ -306,4 +307,14 @@ find_package_handle_standard_args(GSS
     "Could NOT find GSS, try to set the path to GSS root folder in the system variable GSS_ROOT_DIR"
 )
 
-mark_as_advanced(_GSS_CFLAGS _GSS_FOUND _GSS_INCLUDE_DIRS _GSS_LDFLAGS _GSS_LIBRARIES _GSS_LIBRARY_DIRS _GSS_MODULE_NAME _GSS_PREFIX _GSS_VERSION)
+mark_as_advanced(
+  _GSS_CFLAGS
+  _GSS_FOUND
+  _GSS_INCLUDE_DIRS
+  _GSS_LDFLAGS
+  _GSS_LIBRARIES
+  _GSS_LIBRARY_DIRS
+  _GSS_MODULE_NAME
+  _GSS_PREFIX
+  _GSS_VERSION
+)
