@@ -65,6 +65,9 @@ cert file named `curl-ca-bundle.crt` in these directories and in this order:
   4. Windows Directory (e.g. C:\Windows)
   5. all directories along %PATH%
 
+curl 8.11.0 added a build-time option to disable this search behavior, and
+another option to restrict search to the application's directory.
+
 ### Use the native store
 
 In several environments, in particular on Windows, you can ask curl to use the

@@ -42,6 +42,10 @@ Disable support for the negotiate authentication methods.
 
 Disable **AWS-SIG4** support.
 
+## `CURL_DISABLE_CA_SEARCH`
+
+Disable unsafe CA bundle search in PATH on Windows.
+
 ## `CURL_DISABLE_DICT`
 
 Disable the DICT protocol

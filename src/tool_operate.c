@@ -3083,8 +3083,18 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
       }
 
 #ifdef _WIN32
-      if(!env)
+      if(!env) {
+#if defined(CURL_CA_SEARCH_SAFE)
+        char *cacert = NULL;
+        FILE *cafile = Curl_execpath("curl-ca-bundle.crt", &cacert);
+        if(cafile) {
+          fclose(cafile);
+          config->cacert = strdup(cacert);
+        }
+#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
         result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
+#endif
+      }
 #endif
     }
     curl_easy_cleanup(curltls);

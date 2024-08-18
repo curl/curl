@@ -31,6 +31,7 @@
 #include "tool_findfile.h"
 #include "tool_msgs.h"
 #include "tool_parsecfg.h"
+#include "tool_util.h"
 #include "dynbuf.h"
 
 #include "memdebug.h" /* keep this as LAST include */
@@ -43,37 +44,6 @@ static const char *unslashquote(const char *line, char *param);
 
 #define MAX_CONFIG_LINE_LENGTH (10*1024*1024)
 static bool my_get_line(FILE *fp, struct curlx_dynbuf *, bool *error);
-
-#ifdef _WIN32
-static FILE *execpath(const char *filename, char **pathp)
-{
-  static char filebuffer[512];
-  /* Get the filename of our executable. GetModuleFileName is already declared
-   * via inclusions done in setup header file. We assume that we are using
-   * the ASCII version here.
-   */
-  unsigned long len = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
-  if(len > 0 && len < sizeof(filebuffer)) {
-    /* We got a valid filename - get the directory part */
-    char *lastdirchar = strrchr(filebuffer, '\\');
-    if(lastdirchar) {
-      size_t remaining;
-      *lastdirchar = 0;
-      /* If we have enough space, build the RC filename */
-      remaining = sizeof(filebuffer) - strlen(filebuffer);
-      if(strlen(filename) < remaining - 1) {
-        FILE *f;
-        msnprintf(lastdirchar, remaining, "%s%s", DIR_CHAR, filename);
-        *pathp = filebuffer;
-        f = fopen(filebuffer, FOPEN_READTEXT);
-        return f;
-      }
-    }
-  }
-
-  return NULL;
-}
-#endif
 
 
 /* return 0 on everything-is-fine, and non-zero otherwise */
@@ -100,9 +70,9 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
     else {
       char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
-      file = execpath(".curlrc", &fullp);
+      file = Curl_execpath(".curlrc", &fullp);
       if(!file)
-        file = execpath("_curlrc", &fullp);
+        file = Curl_execpath("_curlrc", &fullp);
       if(file)
         /* this is the filename we read from */
         filename = fullp;

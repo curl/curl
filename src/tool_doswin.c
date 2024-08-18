@@ -600,6 +600,8 @@ char **__crt0_glob_function(char *arg)
 
 #ifdef _WIN32
 
+#if !defined(CURL_WINDOWS_UWP) && \
+  !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 /* Search and set the CA cert file for Windows.
  *
  * Do not call this function if Schannel is the selected SSL backend. We allow
@@ -623,11 +625,6 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
                          const TCHAR *bundle_file)
 {
   CURLcode result = CURLE_OK;
-
-#ifdef CURL_WINDOWS_UWP
-  (void)config;
-  (void)bundle_file;
-#else
   DWORD res_len;
   TCHAR buf[PATH_MAX];
   TCHAR *ptr = NULL;
@@ -644,11 +641,10 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
     if(!config->cacert)
       result = CURLE_OUT_OF_MEMORY;
   }
-#endif
 
   return result;
 }
-
+#endif
 
 /* Get a list of all loaded modules with full paths.
  * Returns slist on success or NULL on error.
