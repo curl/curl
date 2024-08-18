@@ -4,7 +4,7 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3225
+ Contributors:                 3228
 
 This release includes the following changes:
 
@@ -40,6 +40,7 @@ This release includes the following bugfixes:
  o cmake: add Linux CI job, fix pytest with cmake [71]
  o cmake: add math library when using wolfssl and ngtcp2 [66]
  o cmake: add missing `pkg-config` hints to Find modules [158]
+ o cmake: add missing version detection to Find modules [170]
  o cmake: add rustls [116]
  o cmake: add support for versioned symbols option [51]
  o cmake: add wolfSSH support [117]
@@ -61,6 +62,7 @@ This release includes the following bugfixes:
  o cmake: fix find rustls [148]
  o cmake: limit libidn2 `pkg-config` detection to `UNIX` [109]
  o cmake: more small tidy-ups and fixes [80]
+ o cmake: rename wolfSSL and zstd config variables to uppercase [151]
  o cmake: show CMake platform/compiler flags [63]
  o cmake: show warning if libpsl is not found [154]
  o cmake: sync up formatting in Find modules [129]
@@ -76,10 +78,10 @@ This release includes the following bugfixes:
  o curl: allow 500MB data URL encode strings [38]
  o curl: fix --proxy-pinnedpubkey [91]
  o curl: fix the -w urle.* variables [153]
+ o curl: make the progress bar detect terminal width changes [169]
  o curl: warn on unsupported SSL options [106]
  o Curl_rand_bytes to control env override [17]
  o curl_sha512_256: fix symbol collisions with nettle library [131]
- o DEPRECATE.md: remove hyper after February 2025 [89]
  o dist: add missing `docs/examples/CMakeLists.txt` [58]
  o dist: add missing `FindNettle.cmake` [11]
  o dist: add missing `lib/optiontable.pl` [115]
@@ -87,6 +89,8 @@ This release includes the following bugfixes:
  o dist: drop buildconf [65]
  o dist: fix reproducible build from release tarball [36]
  o dmaketgz: only run 'make distclean' if Makefile exists
+ o docs: add description of effect of --location-trusted on cookie [157]
+ o docs: improve cipher options documentation [159]
  o docs: mention "@-" in more places [67]
  o docs: remove ALTSVC.md, HSTS.md, HTTP2.md and PARALLEL-TRANSFERS.md [105]
  o docs: update CIPHERS.md [140]
@@ -125,6 +129,7 @@ This release includes the following bugfixes:
  o managen: wordwrap long example lines in ASCII output [143]
  o manpage: ensure a maximum width for the text version [75]
  o max-filesize.md: mention zero disables the limit [93]
+ o mbedtls: add more informative logging [162]
  o mime: avoid inifite loop in client reader [155]
  o mk-ca-bundle.pl: include a link to the caextract webpage [68]
  o multi: make the "general" list of easy handles a Curl_llist [97]
@@ -137,6 +142,7 @@ This release includes the following bugfixes:
  o runtests: log ignored but passed tests [130]
  o rustls: make all tests pass [1]
  o scorecard: tweak request measurements [139]
+ o SECURITY: mention OpenSSF best practices gold badge [161]
  o sha256: fix symbol collision between nettle (GnuTLS) and OpenSSL [135]
  o sigpipe: init the struct so that first apply ignores [49]
  o smtp: add tracing feature [120]
@@ -153,9 +159,11 @@ This release includes the following bugfixes:
  o tests: don't mangle output if hostname or type unknown
  o tests: ignore QUIT from FTP protocol comparisons [108]
  o tests: provide docs as curldown, not nroff [12]
+ o tidy-up: misc build, tests, `lib/macos.c` [172]
  o tidy-up: OS names [57]
  o tool_operhlp: fix  "potentially uninitialized local variable 'pc' used" [48]
  o tool_paramhlp: bump maximum post data size in memory to 16GB [128]
+ o transfer: Curl_sendrecv() and event related improvements [164]
  o url: dns_entry related improvements [16]
  o urldata: introduce `data->mid`, a unique identifier inside a multi [127]
  o urldata: remove 'scratch' from the UrlState struct [86]
@@ -181,6 +189,7 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
+ o Hyper support after February 2025 [89]
  o TLS libraries not supporting TLS 1.3
 
  See https://curl.se/dev/deprecate.html for details
@@ -191,12 +200,13 @@ advice from friends like these:
   Alex Snast, Antoine du Hamel, Austin Moore, Bo Anderson, Christoph Reiter,
   Dan Fandrich, Daniel Stenberg, David Sardari, dependabot[bot],
   Emanuele Torre, Gruber Glass, Jan Venekamp, Jiacai Liu, Joe Birr-Pixton,
-  John Haugabook, kit-ty-kate on github, MasterInQuestion on github,
-  Matt Jolly, Max Faxälv, Micah Snyder, Moritz Buhl, Pete Cordell,
-  Rasmus Thomsen, Ray Satiro, renovate[bot], Ryan Carsten Schmidt,
-  Sergio Durigan Junior, Slaven Rezić, Stefan Eissing, Steffen Kieß, Tal Regev,
-  Tim Yuer, Viktor Szakats, Yedaya Katsman, 罗朝辉
-  (35 contributors)
+  John Haugabook, Joshix-1 on github, Justin Maggard, kit-ty-kate on github,
+  lolbinarycat on github, MasterInQuestion on github, Matt Jolly, Max Faxälv,
+  Micah Snyder, Moritz Buhl, Pete Cordell, Rasmus Thomsen, Ray Satiro,
+  renovate[bot], Ryan Carsten Schmidt, Sergio Durigan Junior, Slaven Rezić,
+  Stefan Eissing, Steffen Kieß, Tal Regev, Tim Yuer, Viktor Petersson,
+  Viktor Szakats, XYenon, Yedaya Katsman, 罗朝辉
+  (40 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -349,8 +359,17 @@ References to bug reports and discussions on issues:
  [148] = https://curl.se/bug/?i=14567
  [149] = https://curl.se/bug/?i=14557
  [150] = https://curl.se/bug/?i=14556
+ [151] = https://curl.se/bug/?i=14574
  [153] = https://curl.se/bug/?i=14550
  [154] = https://curl.se/bug/?i=14533
  [155] = https://curl.se/bug/?i=14532
  [156] = https://curl.se/bug/?i=14541
+ [157] = https://curl.se/bug/?i=14471
  [158] = https://curl.se/bug/?i=14545
+ [159] = https://curl.se/bug/?i=14407
+ [161] = https://curl.se/bug/?i=14319
+ [162] = https://curl.se/bug/?i=14444
+ [164] = https://curl.se/bug/?i=14561
+ [169] = https://curl.se/bug/?i=14565
+ [170] = https://curl.se/bug/?i=14548
+ [172] = https://curl.se/bug/?i=14558
