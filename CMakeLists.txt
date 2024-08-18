@@ -165,7 +165,7 @@ option(ENABLE_DEBUG "Set to ON to enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Set to ON to build with TrackMemory feature enabled" ${ENABLE_DEBUG})
 
 if(MSVC)
-  set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory fails with MSVC according to test 558 and 1330. Tested with static build, Debug mode.
+  set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
 endif()
 
 if(ENABLE_DEBUG)
@@ -734,7 +734,8 @@ macro(openssl_check_quic)
     if(USE_OPENSSL)
       openssl_check_symbol_exists("SSL_CTX_set_quic_method" "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
     elseif(USE_WOLFSSL)
-      openssl_check_symbol_exists("wolfSSL_set_quic_method" "wolfssl/options.h;wolfssl/openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
+      openssl_check_symbol_exists("wolfSSL_set_quic_method" "wolfssl/options.h;wolfssl/openssl/ssl.h"
+        HAVE_SSL_CTX_SET_QUIC_METHOD "")
     endif()
   endif()
   if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
@@ -1743,8 +1744,11 @@ function(transform_makefile_inc _input_file _output_file)
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "!π!α!" "\n" _makefile_inc_text ${_makefile_inc_text})
 
-  string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})  # Replace $() with ${}
-  string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})  # Replace @@ with ${}, even if that may not be read by CMake scripts.
+  # Replace $() with ${}
+  string(REGEX REPLACE "\\$\\(([a-zA-Z_][a-zA-Z0-9_]*)\\)" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})
+  # Replace @@ with ${}, even if that may not be read by CMake scripts.
+  string(REGEX REPLACE "@([a-zA-Z_][a-zA-Z0-9_]*)@" "\${\\1}" _makefile_inc_text ${_makefile_inc_text})
+
   file(WRITE ${_output_file} ${_makefile_inc_text})
   set_property(DIRECTORY APPEND PROPERTY CMAKE_CONFIGURE_DEPENDS "${_input_file}")
 endfunction()
@@ -2051,8 +2055,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
-  configure_file("${CURL_SOURCE_DIR}/curl-config.in"
-                 "${CURL_BINARY_DIR}/curl-config" @ONLY)
+  configure_file(
+    "${CURL_SOURCE_DIR}/curl-config.in"
+    "${CURL_BINARY_DIR}/curl-config" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/curl-config"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     PERMISSIONS
@@ -2075,8 +2080,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   prefix
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
-  configure_file("${CURL_SOURCE_DIR}/libcurl.pc.in"
-                 "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
+  configure_file(
+    "${CURL_SOURCE_DIR}/libcurl.pc.in"
+    "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
   install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
