@@ -186,10 +186,10 @@ static int crypto_send(struct cf_linuxq_ctx *ctx, const uint8_t *data,
   hsinfo->crypto_level = level;
 
   n = sendmsg(ctx->q.sockfd, &msg, 0);
-  if(n < 0)
-{ printf("sendmsg errno=%d\n", errno);
+  if(n < 0) {
+    printf("sendmsg errno=%d\n", errno); /* XXX */
     return -1;
-}
+  }
 
   return 0;
 }
@@ -291,7 +291,8 @@ static int crypto_ssl_send(SSL *ssl, enum ssl_encryption_level_t ssl_level,
   return rc;
 }
 
-static int crypto_ssl_flush(SSL *ssl) {
+static int crypto_ssl_flush(SSL *ssl)
+{
   (void)ssl;
   return 1;
 }
@@ -365,11 +366,11 @@ static CURLcode crypto_ssl_do_handshake(struct Curl_cfilter *cf,
 
   rc = SSL_do_handshake(ssl);
   if(rc <= 0) {
-      rc = SSL_get_error(ssl, rc);
-      if(rc != SSL_ERROR_WANT_READ && rc != SSL_ERROR_WANT_WRITE)
-        failf(data, "SSL_do_handshake failed");
-        return CURLE_QUIC_CONNECT_ERROR;
-      }
+    rc = SSL_get_error(ssl, rc);
+    if(rc != SSL_ERROR_WANT_READ && rc != SSL_ERROR_WANT_WRITE) {
+      failf(data, "SSL_do_handshake failed");
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
   }
 
   return CURLE_OK;
@@ -381,7 +382,7 @@ static int crypto_gtls_alert(gnutls_session_t session,
                              gnutls_alert_level_t alert_level,
                              gnutls_alert_description_t alert)
 {
-printf("crypto_gtls_alert alert_level:%d, alert:%d\n", alert_level, alert);
+  printf("alert_level:%d, alert:%d\n", alert_level, alert); /* XXX */
   (void)session;
   (void)gtls_level;
   (void)alert_level;
@@ -433,7 +434,7 @@ static int crypto_gtls_send(gnutls_session_t session,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   int rc;
   uint8_t level;
-printf("crypto_gtls_send htype:%d\n", htype);
+  printf("crypto_gtls_send htype:%d\n", htype); /* XXX */
 
   if(htype == GNUTLS_HANDSHAKE_KEY_UPDATE ||
       htype == GNUTLS_HANDSHAKE_CHANGE_CIPHER_SPEC)
@@ -441,7 +442,7 @@ printf("crypto_gtls_send htype:%d\n", htype);
 
   level = crypto_gtls_level(gtls_level);
   rc = crypto_send(ctx, data, len, level);
-printf("crypto_gtls_send rc:%d\n", rc);
+  printf("crypto_gtls_send rc:%d\n", rc); /* XXX */
   return rc;
 }
 
@@ -473,7 +474,7 @@ static int crypto_gtls_set_secret(gnutls_session_t session,
   uint32_t type;
   int rc;
   uint8_t level;
-printf("crypto_gtls_set_secret\n");
+  printf("crypto_gtls_set_secret\n"); /* XXX */
 
   if(ctx->qconn->completed)
     return 0;
@@ -497,7 +498,7 @@ static int crypto_gtls_tp_tx(gnutls_session_t session, gnutls_buffer_t data)
 
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
                   buf, &len);
-printf("crypto_gtls_tp_tx rc:%d\n", rc);
+  printf("crypto_gtls_tp_tx rc:%d\n", rc); /* XXX */
   if(rc)
     return -1;
 
@@ -515,7 +516,7 @@ static int crypto_gtls_tp_rx(gnutls_session_t session, const uint8_t *data,
 
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
                   data, len);
-printf("crypto_gtls_tp_rx rc:%d\n", rc);
+  printf("crypto_gtls_tp_rx rc:%d\n", rc); /* XXX */
   return rc;
 }
 
@@ -544,7 +545,8 @@ static CURLcode crypto_gtls_do_handshake(struct Curl_cfilter *cf,
   gnutls_record_encryption_level_t gtls_level;
   int rc;
 
-infof(data, "crypto_gtls_do_handshake: len=%ld, level = %hhd", len, level);
+  /* XXX */
+  infof(data, "crypto_gtls_do_handshake: len=%ld, level = %hhd", len, level);
   session = ctx->tls.gtls.session;
   if(len > 0) {
     gtls_level = crypto_to_gtls_level(level);
@@ -554,7 +556,8 @@ infof(data, "crypto_gtls_do_handshake: len=%ld, level = %hhd", len, level);
         gnutls_alert_send_appropriate(session, rc);
         failf(data, "gnutls_handshake_write failed");
         return CURLE_QUIC_CONNECT_ERROR;
-      } else {
+      }
+      else {
         infof(data, "gnutls_handshake_write failed");
         return CURLE_OK;
       }
@@ -568,7 +571,8 @@ failf(data, "gnutls_handshake rc=%d",rc);
       gnutls_alert_send_appropriate(session, rc);
       failf(data, "gnutls_handshake failed");
       return CURLE_QUIC_CONNECT_ERROR;
-    } else {
+    }
+    else {
       infof(data, "gnutls_handshake failed");
     }
   }
@@ -651,7 +655,8 @@ static ssize_t crypto_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     memcpy(&hsinfo, CMSG_DATA(cm), sizeof(hsinfo));
     *level = hsinfo.crypto_level;
     goto out;
-  } else
+  }
+  else
     nread = -1;
 
   CURL_TRC_CF(data, cf, "recvd 1 packet with %zd bytes", nread);
@@ -670,7 +675,8 @@ static CURLcode crypto_handshake(struct Curl_cfilter *cf,
 infof(data, "crypto_handshake");
 
   while(!ctx->qconn->completed) {
-infof(data, "crypto_handshake completed: %d", ctx->qconn->completed);
+    /* XXX */
+    infof(data, "crypto_handshake completed: %d", ctx->qconn->completed);
     rc = crypto_do_handshake(cf, data, level, buf, len);
     if(rc)
       return rc;
