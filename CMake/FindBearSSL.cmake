@@ -45,7 +45,7 @@ find_path(BEARSSL_INCLUDE_DIR NAMES "bearssl.h")
 find_library(BEARSSL_LIBRARY NAMES "bearssl")
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(BEARSSL
+find_package_handle_standard_args(BearSSL
   REQUIRED_VARS
     BEARSSL_INCLUDE_DIR
     BEARSSL_LIBRARY
