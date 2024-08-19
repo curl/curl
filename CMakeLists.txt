@@ -1045,7 +1045,7 @@ mark_as_advanced(CURL_USE_LIBPSL)
 set(USE_LIBPSL OFF)
 
 if(CURL_USE_LIBPSL)
-  find_package(LibPSL)  # TODO: add REQUIRED to match autotools
+  find_package(Libpsl)  # TODO: add REQUIRED to match autotools
   if(LIBPSL_FOUND)
     list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
     list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libpsl")

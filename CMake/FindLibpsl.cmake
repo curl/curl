@@ -64,7 +64,7 @@ elseif(LIBPSL_INCLUDE_DIR AND EXISTS "${LIBPSL_INCLUDE_DIR}/libpsl.h")
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibPSL
+find_package_handle_standard_args(Libpsl
   REQUIRED_VARS
     LIBPSL_INCLUDE_DIR
     LIBPSL_LIBRARY
