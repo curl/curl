@@ -21,56 +21,56 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the gsasl library
+# Find the libgsasl library
 #
 # Input variables:
 #
-# GSASL_INCLUDE_DIR   The gsasl include directory
-# GSASL_LIBRARY       Path to gsasl library
+# LIBGSASL_INCLUDE_DIR   The libgsasl include directory
+# LIBGSASL_LIBRARY       Path to libgsasl library
 #
 # Result variables:
 #
-# GSASL_FOUND         System has gsasl
-# GSASL_INCLUDE_DIRS  The gsasl include directories
-# GSASL_LIBRARIES     The gsasl library names
-# GSASL_VERSION       Version of gsasl
+# LIBGSASL_FOUND         System has libgsasl
+# LIBGSASL_INCLUDE_DIRS  The libgsasl include directories
+# LIBGSASL_LIBRARIES     The libgsasl library names
+# LIBGSASL_VERSION       Version of libgsasl
 
 if(CURL_USE_PKGCONFIG AND
-   NOT DEFINED GSASL_INCLUDE_DIR AND
-   NOT DEFINED GSASL_LIBRARY)
+   NOT DEFINED LIBGSASL_INCLUDE_DIR AND
+   NOT DEFINED LIBGSASL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(GSASL "libgsasl")
+  pkg_check_modules(LIBGSASL "libgsasl")
 endif()
 
-if(GSASL_FOUND)
-  set(GSASL_LIBRARIES ${GSASL_LINK_LIBRARIES})
-  message(STATUS "Found GSASL (via pkg-config): ${GSASL_INCLUDE_DIRS} (Found version \"${GSASL_VERSION}\")")
+if(LIBGSASL_FOUND)
+  set(LIBGSASL_LIBRARIES ${LIBGSASL_LINK_LIBRARIES})
+  message(STATUS "Found Libgsasl (via pkg-config): ${LIBGSASL_INCLUDE_DIRS} (Found version \"${LIBGSASL_VERSION}\")")
 else()
-  find_path(GSASL_INCLUDE_DIR NAMES "gsasl.h")
-  find_library(GSASL_LIBRARY NAMES "gsasl" "libgsasl")
+  find_path(LIBGSASL_INCLUDE_DIR NAMES "gsasl.h")
+  find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
 
-  if(GSASL_INCLUDE_DIR AND EXISTS "${GSASL_INCLUDE_DIR}/gsasl-version.h")
+  if(LIBGSASL_INCLUDE_DIR AND EXISTS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h")
     set(_version_regex "#[\t ]*define[\t ]+GSASL_VERSION[\t ]+\"([^\"]*)\"")
-    file(STRINGS "${GSASL_INCLUDE_DIR}/gsasl-version.h" _version_str REGEX "${_version_regex}")
+    file(STRINGS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h" _version_str REGEX "${_version_regex}")
     string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-    set(GSASL_VERSION "${_version_str}")
+    set(LIBGSASL_VERSION "${_version_str}")
     unset(_version_regex)
     unset(_version_str)
   endif()
 
   include(FindPackageHandleStandardArgs)
-    find_package_handle_standard_args(GSASL
+    find_package_handle_standard_args(Libgsasl
     REQUIRED_VARS
-      GSASL_INCLUDE_DIR
-      GSASL_LIBRARY
+      LIBGSASL_INCLUDE_DIR
+      LIBGSASL_LIBRARY
     VERSION_VAR
-      GSASL_VERSION
+      LIBGSASL_VERSION
   )
 
-  if(GSASL_FOUND)
-    set(GSASL_INCLUDE_DIRS ${GSASL_INCLUDE_DIR})
-    set(GSASL_LIBRARIES    ${GSASL_LIBRARY})
+  if(LIBGSASL_FOUND)
+    set(LIBGSASL_INCLUDE_DIRS ${LIBGSASL_INCLUDE_DIR})
+    set(LIBGSASL_LIBRARIES    ${LIBGSASL_LIBRARY})
   endif()
 
-  mark_as_advanced(GSASL_INCLUDE_DIR GSASL_LIBRARY)
+  mark_as_advanced(LIBGSASL_INCLUDE_DIR LIBGSASL_LIBRARY)
 endif()

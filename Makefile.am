@@ -35,8 +35,8 @@ CMAKE_DIST =                                    \
  CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
  CMake/FindCares.cmake                          \
- CMake/FindGSASL.cmake                          \
  CMake/FindGSS.cmake                            \
+ CMake/FindLibgsasl.cmake                       \
  CMake/FindLibidn2.cmake                        \
  CMake/FindLibpsl.cmake                         \
  CMake/FindLibssh.cmake                         \
