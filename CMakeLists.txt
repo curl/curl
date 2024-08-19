@@ -1131,7 +1131,7 @@ if(CURL_USE_GSASL)
   endif()
 endif()
 
-option(CURL_USE_GSSAPI "Use GSSAPI implementation (right now only Heimdal is supported with CMake build)" OFF)
+option(CURL_USE_GSSAPI "Use GSSAPI implementation" OFF)
 mark_as_advanced(CURL_USE_GSSAPI)
 
 if(CURL_USE_GSSAPI)
