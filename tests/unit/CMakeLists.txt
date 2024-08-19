@@ -27,7 +27,7 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_target IN LISTS UNITPROGS)
-  set(_target_name "curl-test-${_target}")
+  set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c" ${UNITFILES})
   add_dependencies(testdeps ${_target_name})
   target_link_libraries(${_target_name} curltool curlu)

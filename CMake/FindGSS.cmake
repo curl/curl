@@ -210,7 +210,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     if(GSS_FLAVOUR)
       set(_gss_libdir_suffixes "")
       set(_gss_libdir_hints ${_gss_root_hints})
-      get_filename_component(_gss_calculated_potential_root "${_GSS_INCLUDE_DIRS}" PATH)
+      get_filename_component(_gss_calculated_potential_root "${_GSS_INCLUDE_DIRS}" DIRECTORY)
       list(APPEND _gss_libdir_hints ${_gss_calculated_potential_root})
 
       if(WIN32)
