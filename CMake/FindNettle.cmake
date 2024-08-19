@@ -64,7 +64,7 @@ else()
   endif()
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args("nettle"
+  find_package_handle_standard_args(nettle
     REQUIRED_VARS
       NETTLE_INCLUDE_DIR
       NETTLE_LIBRARY
