@@ -37,6 +37,11 @@ proxy
 <command>
 --request-target '*' -X OPTIONS --proxy http://%HOSTIP:%HTTPPORT/ -H "Testno: %TESTNUMBER" http://www.example.org/
 </command>
+<setenv>
+# Needed for MSYS2 to not treat the '*' as a POSIX path list
+# that has to be converted to Windows paths
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
 </client>
 
 <verify>

@@ -36,6 +36,11 @@ Send "OPTIONS *" with --request-target
 <command>
 --request-target '*' -X OPTIONS http://%HOSTIP:%HTTPPORT/ -H "Testno: %TESTNUMBER"
 </command>
+<setenv>
+# Needed for MSYS2 to not treat the '*' as a POSIX path list
+# that has to be converted to Windows paths
+MSYS2_ARG_CONV_EXCL=*
+</setenv>
 </client>
 
 #
