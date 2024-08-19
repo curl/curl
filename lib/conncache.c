@@ -334,6 +334,9 @@ static void connc_remove_bundle(struct conncache *connc,
   }
 }
 
+static struct connectdata *
+connc_extract_bundle(struct Curl_easy *data, struct connectbundle *bundle);
+
 bool Curl_conncache_shrink_bundle(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   size_t max_host_connections)
@@ -351,7 +354,7 @@ bool Curl_conncache_shrink_bundle(struct Curl_easy *data,
       if(bundle && (bundle->num_connections >= max_host_connections)) {
         /* The bundle is full. Extract the oldest connection that may
          * be removed now, if there is one. */
-        conn_candidate = Curl_conncache_extract_bundle(data, bundle);
+        conn_candidate = connc_extract_bundle(data, bundle);
         space_available = FALSE;
       }
       else
@@ -572,9 +575,8 @@ bool Curl_conncache_return_conn(struct Curl_easy *data,
  * Returns the pointer to the oldest idle connection, or NULL if none was
  * found.
  */
-struct connectdata *
-Curl_conncache_extract_bundle(struct Curl_easy *data,
-                              struct connectbundle *bundle)
+static struct connectdata *
+connc_extract_bundle(struct Curl_easy *data, struct connectbundle *bundle)
 {
   struct conncache *connc = Curl_get_conncache(data);
   struct Curl_llist_node *curr;

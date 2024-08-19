@@ -147,9 +147,6 @@ struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc);
 
 struct connectdata *
-Curl_conncache_extract_bundle(struct Curl_easy *data,
-                              struct connectbundle *bundle);
-struct connectdata *
 Curl_conncache_extract_oldest(struct Curl_easy *data);
 void Curl_conncache_close_all_connections(struct conncache *connc);
 void Curl_conncache_print(struct conncache *connc);
