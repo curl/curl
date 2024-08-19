@@ -1275,9 +1275,10 @@ void Curl_conncache_prune_dead(struct Curl_easy *data)
   struct ccache_reaper_ctx rctx;
   timediff_t elapsed;
 
-  DEBUGASSERT(!data->conn); /* no connection */
-  if(!connc)
+  if(!connc || !data)
     return;
+
+  DEBUGASSERT(!data->conn); /* no connection */
 
   rctx.now = Curl_now();
   CONNC_LOCK(connc);
