@@ -35,8 +35,6 @@
 # LIBSSH_LIBRARIES     The libssh library names
 # LIBSSH_VERSION       Version of libssh
 
-set(_libssh_include_dirs "LIBSSH_INCLUDE_DIRS")
-
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND
    NOT DEFINED LIBSSH_LIBRARY)
@@ -45,13 +43,11 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBSSH_FOUND)
-  if(NOT LIBSSH_INCLUDE_DIRS)
-    unset(_libssh_include_dirs)  # do not require this variable if left empty (seen on Old Linux CI)
-  endif()
   if(NOT DEFINED LIBSSH_LINK_LIBRARIES)
     set(LIBSSH_LINK_LIBRARIES ${LIBSSH_LIBRARIES})  # Workaround for some systems (seen on Old Linux CI)
   endif()
   set(LIBSSH_LIBRARIES ${LIBSSH_LINK_LIBRARIES})
+  message(STATUS "Found libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (Found version \"${LIBSSH_VERSION}\")")
 else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
   find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
@@ -75,17 +71,19 @@ else()
     unset(_version_str3)
   endif()
 
-  set(LIBSSH_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
-  set(LIBSSH_LIBRARIES    ${LIBSSH_LIBRARY})
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Libssh
+    REQUIRED_VARS
+      LIBSSH_INCLUDE_DIR
+      LIBSSH_LIBRARY
+    VERSION_VAR
+      LIBSSH_VERSION
+  )
+
+  if(LIBSSH_FOUND)
+    set(LIBSSH_INCLUDE_DIRS ${LIBSSH_INCLUDE_DIR})
+    set(LIBSSH_LIBRARIES    ${LIBSSH_LIBRARY})
+  endif()
 
   mark_as_advanced(LIBSSH_INCLUDE_DIR LIBSSH_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Libssh
-  REQUIRED_VARS
-    ${_libssh_include_dirs}
-    LIBSSH_LIBRARIES
-  VERSION_VAR
-    LIBSSH_VERSION
-)
