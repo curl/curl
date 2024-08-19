@@ -637,7 +637,7 @@ if(CURL_USE_GNUTLS)
 endif()
 
 if(CURL_USE_RUSTLS)
-  find_package(rustls REQUIRED)
+  find_package(Rustls REQUIRED)
   set(_ssl_enabled ON)
   set(USE_RUSTLS ON)
   list(APPEND CURL_LIBS ${RUSTLS_LIBRARIES})
