@@ -148,7 +148,7 @@ Since 8.10.0 wolfSSL is fully supported. Before 8.10.0 the MAX macros were not
 supported with wolfSSL and the other macros did not set a minimum, but
 restricted the TLS version to only the specified one.
 
-rustls support added in 8.10.0.
+Rustls support added in 8.10.0.
 
 # %AVAILABILITY%
 

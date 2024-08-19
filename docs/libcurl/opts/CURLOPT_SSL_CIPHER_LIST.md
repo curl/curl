@@ -92,7 +92,7 @@ Schannel support added in 7.61.0.
 Secure Transport support added in 7.77.0.
 BearSSL support added in 7.83.0.
 mbedTLS support added in 8.8.0.
-rustls support added in 8.10.0.
+Rustls support added in 8.10.0.
 
 Since curl 8.10.0 returns CURLE_NOT_BUILT_IN when not supported.
 

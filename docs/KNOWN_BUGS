@@ -16,7 +16,7 @@ problems may have been fixed or changed somewhat since this was written.
  1.5 Expect-100 meets 417
 
  2. TLS
- 2.1 IMAPS connection fails with rustls error
+ 2.1 IMAPS connection fails with Rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport does not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
@@ -143,7 +143,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 2. TLS
 
-2.1 IMAPS connection fails with rustls error
+2.1 IMAPS connection fails with Rustls error
 
  https://github.com/curl/curl/issues/10457
 

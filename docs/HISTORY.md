@@ -419,7 +419,7 @@ April: added the cyassl backend (later renamed to wolfSSL)
 
  February 3: curl 7.75.0 ships with support for Hyper as an HTTP backend
 
- March 31: curl 7.76.0 ships with support for rustls
+ March 31: curl 7.76.0 ships with support for Rustls
 
  July: HSTS is supported
 

@@ -176,14 +176,14 @@ static ssize_t tls_recv_more(struct Curl_cfilter *cf,
 
 /*
  * On each run:
- *  - Read a chunk of bytes from the socket into rustls' TLS input buffer.
- *  - Tell rustls to process any new packets.
- *  - Read out as many plaintext bytes from rustls as possible, until hitting
+ *  - Read a chunk of bytes from the socket into Rustls' TLS input buffer.
+ *  - Tell Rustls to process any new packets.
+ *  - Read out as many plaintext bytes from Rustls as possible, until hitting
  *    error, EOF, or EAGAIN/EWOULDBLOCK, or plainbuf/plainlen is filled up.
  *
  * it is okay to call this function with plainbuf == NULL and plainlen == 0. In
- * that case, it will copy bytes from the socket into rustls' TLS input
- * buffer, and process packets, but will not consume bytes from rustls'
+ * that case, it will copy bytes from the socket into Rustls' TLS input
+ * buffer, and process packets, but will not consume bytes from Rustls'
  * plaintext output buffer.
  */
 static ssize_t
@@ -307,13 +307,13 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 /*
  * On each call:
- *  - Copy `plainlen` bytes into rustls' plaintext input buffer (if > 0).
- *  - Fully drain rustls' plaintext output buffer into the socket until
+ *  - Copy `plainlen` bytes into Rustls' plaintext input buffer (if > 0).
+ *  - Fully drain Rustls' plaintext output buffer into the socket until
  *    we get either an error or EAGAIN/EWOULDBLOCK.
  *
  * it is okay to call this function with plainbuf == NULL and plainlen == 0.
- * In that case, it will not read anything into rustls' plaintext input buffer.
- * It will only drain rustls' plaintext output buffer into the socket.
+ * In that case, it will not read anything into Rustls' plaintext input buffer.
+ * It will only drain Rustls' plaintext output buffer into the socket.
  */
 static ssize_t
 cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -358,7 +358,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(blen > 0) {
-    CURL_TRC_CF(data, cf, "cf_send: adding %zu plain bytes to rustls", blen);
+    CURL_TRC_CF(data, cf, "cf_send: adding %zu plain bytes to Rustls", blen);
     rresult = rustls_connection_write(rconn, buf, blen, &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
@@ -377,9 +377,9 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(*err) {
     if(CURLE_AGAIN == *err) {
       /* The TLS bytes may have been partially written, but we fail the
-       * complete send() and remember how much we already added to rustls. */
+       * complete send() and remember how much we already added to Rustls. */
       CURL_TRC_CF(data, cf, "cf_send: EAGAIN, remember we added %zu plain"
-                  " bytes already to rustls", blen);
+                  " bytes already to Rustls", blen);
       backend->plain_out_buffered = plainwritten;
       if(nwritten) {
         *err = CURLE_OK;
@@ -396,7 +396,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   return nwritten;
 }
 
-/* A server certificate verify callback for rustls that always returns
+/* A server certificate verify callback for Rustls that always returns
    RUSTLS_RESULT_OK, or in other words disable certificate verification. */
 static uint32_t
 cr_verify_none(void *userdata UNUSED_PARAM,
@@ -788,12 +788,12 @@ cr_connect_common(struct Curl_cfilter *cf,
   /* Read/write data until the handshake is done or the socket would block. */
   for(;;) {
     /*
-    * Connection has been established according to rustls. Set send/recv
+    * Connection has been established according to Rustls. Set send/recv
     * handlers, and update the state machine.
     */
     connssl->io_need = CURL_SSL_IO_NEED_NONE;
     if(!rustls_connection_is_handshaking(rconn)) {
-      /* rustls claims it is no longer handshaking *before* it has
+      /* Rustls claims it is no longer handshaking *before* it has
        * send its FINISHED message off. We attempt to let it write
        * one more time. Oh my.
        */
@@ -855,7 +855,7 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(blocking && 0 == what) {
-      failf(data, "rustls connection timeout after %"
+      failf(data, "rustls: connection timeout after %"
         CURL_FORMAT_TIMEDIFF_T " ms", socket_check_timeout);
       return CURLE_OPERATION_TIMEDOUT;
     }
