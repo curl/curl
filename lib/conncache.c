@@ -178,7 +178,6 @@ int Curl_conncache_init(struct conncache *connc,
     connc->closure_handle->set.verbose = true;
 #endif
 
-  connc->closure_handle->state.conn_cache = connc;
   connc->closure_handle->multi = connc->multi = multi;
   connc->closure_handle->share = connc->share = share;
 
@@ -215,9 +214,6 @@ struct conncache *Curl_get_conncache(struct Curl_easy *data)
 
 void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data)
 {
-
-  DEBUGASSERT(!data->state.conn_cache);
-  data->state.conn_cache = connc;
 
   CONNC_LOCK(connc);
   /* the identifier inside the connection cache */
@@ -442,6 +438,9 @@ void Curl_conncache_remove_conn(struct Curl_easy *data,
   struct conncache *connc = Curl_get_conncache(data);
 
   DEBUGASSERT(connc);
+  if(!connc)
+    return;
+
   if(lock)
     CONNC_LOCK(connc);
   connc_remove_conn(connc, conn);

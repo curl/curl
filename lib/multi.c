@@ -900,10 +900,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     data->psl = NULL;
 #endif
 
-  /* as this was using a shared connection cache we clear the pointer to that
-     since we are not part of that multi handle anymore */
-  data->state.conn_cache = NULL;
-
   /* make sure there is no pending message in the queue sent from this easy
      handle */
   for(e = Curl_llist_head(&multi->msglist); e; e = Curl_node_next(e)) {
@@ -2779,8 +2775,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
         data->dns.hostcachetype = HCACHE_NONE;
       }
 
-      /* Clear the pointer to the connection cache */
-      data->state.conn_cache = NULL;
       data->multi = NULL; /* clear the association */
 
 #ifdef USE_LIBPSL

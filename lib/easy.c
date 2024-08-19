@@ -941,7 +941,6 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
 
   /* the connection cache is setup on demand */
-  outcurl->state.conn_cache = NULL;
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;

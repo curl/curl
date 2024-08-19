@@ -1214,8 +1214,6 @@ struct urlpieces {
 };
 
 struct UrlState {
-  /* Points to the connection cache */
-  struct conncache *conn_cache;
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 
