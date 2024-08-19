@@ -746,6 +746,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   switch(conn_config->version) {
   case CURL_SSLVERSION_DEFAULT:
   case CURL_SSLVERSION_TLSv1:
+  case CURL_SSLVERSION_TLSv1_0:
     res = wolfSSL_CTX_set_min_proto_version(backend->ctx, TLS1_VERSION);
     break;
   case CURL_SSLVERSION_TLSv1_1:
@@ -760,7 +761,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     break;
 #endif
   default:
-    failf(data, "wolfSSL: unrecognized minimum TLS version value");
+    failf(data, "wolfSSL: unsupported minimum TLS version value");
     return CURLE_SSL_CONNECT_ERROR;
   }
   if(res != WOLFSSL_SUCCESS) {
@@ -788,7 +789,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     res = WOLFSSL_SUCCESS;
     break;
   default:
-    failf(data, "wolfSSL: unrecognized maximum TLS version value");
+    failf(data, "wolfSSL: unsupported maximum TLS version value");
     return CURLE_SSL_CONNECT_ERROR;
   }
   if(res != WOLFSSL_SUCCESS) {
