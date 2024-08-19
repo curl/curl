@@ -37,7 +37,7 @@
  * * SecureTransport (Darwin)
  * * mbedTLS
  * * BearSSL
- * * rustls
+ * * Rustls
  * Skip the backend if it does not support the required algorithm */
 
 #if defined(USE_OPENSSL)

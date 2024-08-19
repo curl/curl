@@ -689,7 +689,7 @@ ${SIZEOF_TIME_T_CODE}
 /* if BearSSL is enabled */
 #cmakedefine USE_BEARSSL 1
 
-/* if rustls is enabled */
+/* if Rustls is enabled */
 #cmakedefine USE_RUSTLS 1
 
 /* if wolfSSL is enabled */

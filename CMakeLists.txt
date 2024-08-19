@@ -465,7 +465,7 @@ cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_EN
 cmake_dependent_option(CURL_USE_BEARSSL "Enable BearSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
-cmake_dependent_option(CURL_USE_RUSTLS "Enable rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+cmake_dependent_option(CURL_USE_RUSTLS "Enable Rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
 set(_openssl_default ON)
 if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)

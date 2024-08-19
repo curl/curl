@@ -79,7 +79,7 @@ class TestSSLUse:
             if tls_max == '1.3':
                 exp_resumed = 'Initial'  # 1.2 works in wolfSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
-            exp_resumed = 'Initial'  # rustls does not support sessions, TODO
+            exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('bearssl') and tls_max == '1.3':
             pytest.skip('BearSSL does not support TLSv1.3')
         if env.curl_uses_lib('mbedtls') and tls_max == '1.3':
@@ -140,7 +140,7 @@ class TestSSLUse:
             if proto != 'h3':  # we proxy h3
                 assert r.json['SSL_TLS_SNI'] == env.domain1, f'{r.json}'
             assert False, f'should not have succeeded: {r.json}'
-        # 7 - rustls rejects a servername with .. during setup
+        # 7 - Rustls rejects a servername with .. during setup
         # 35 - LibreSSL rejects setting an SNI name with trailing dot
         # 60 - peer name matching failed against certificate
         assert r.exit_code in [7, 35, 60], f'{r}'
