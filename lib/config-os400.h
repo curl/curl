@@ -232,7 +232,7 @@
 /* Define if you have the ANSI C header files. */
 #define STDC_HEADERS
 
-/* Define to enable HTTP3 support (experimental, requires NGTCP2, QUICHE or
+/* Define to enable HTTP3 support (experimental, requires NGTCP2, quiche or
    MSH3) */
 #undef USE_HTTP3
 
