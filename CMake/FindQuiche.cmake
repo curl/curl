@@ -57,7 +57,7 @@ if(PC_QUICHE_VERSION)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(QUICHE
+find_package_handle_standard_args(Quiche
   REQUIRED_VARS
     QUICHE_INCLUDE_DIR
     QUICHE_LIBRARY
