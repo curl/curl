@@ -264,139 +264,91 @@ static const mbedtls_x509_crt_profile mbedtls_x509_crt_profile_fr =
 #define PUB_DER_MAX_BYTES   (RSA_PUB_DER_MAX_BYTES > ECP_PUB_DER_MAX_BYTES ? \
                              RSA_PUB_DER_MAX_BYTES : ECP_PUB_DER_MAX_BYTES)
 
-#if MBEDTLS_VERSION_NUMBER >= 0x03020000
-static CURLcode mbedtls_version_from_curl(
-  mbedtls_ssl_protocol_version* mbedver, long version)
+static CURLcode
+mbed_set_ssl_version_min_max(struct Curl_easy *data,
+                             struct mbed_ssl_backend_data *backend,
+                             struct ssl_primary_config *conn_config)
 {
-  switch(version) {
+  /* TLS 1.0 and TLS 1.1 were dropped with mbedTLS 3.0.0 (2021). So, since
+   * then, and before the introduction of TLS 1.3 in 3.6.0 (2024), this
+   * function basically always sets TLS 1.2 as min/max, unless given
+   * unsupported option values. */
+
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
+  int ver_min = MBEDTLS_SSL_MINOR_VERSION_3; /* TLS 1.2 */
+  int ver_max = MBEDTLS_SSL_MINOR_VERSION_3; /* TLS 1.2 */
+#else
+  /* mbedTLS 3.2.0 (2022) introduced new methods for setting TLS version */
+  mbedtls_ssl_protocol_version ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
+  mbedtls_ssl_protocol_version ver_max = MBEDTLS_SSL_VERSION_TLS1_2;
+#endif
+
+  switch(conn_config->version) {
+  case CURL_SSLVERSION_DEFAULT:
+#if MBEDTLS_VERSION_NUMBER < 0x03000000
+  case CURL_SSLVERSION_TLSv1:
+  case CURL_SSLVERSION_TLSv1_0:
+    ver_min = MBEDTLS_SSL_MINOR_VERSION_1;
+    break;
+  case CURL_SSLVERSION_TLSv1_1:
+    ver_min = MBEDTLS_SSL_MINOR_VERSION_2;
+    break;
+#else
+  case CURL_SSLVERSION_TLSv1:
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1_1:
+#endif
   case CURL_SSLVERSION_TLSv1_2:
-    *mbedver = MBEDTLS_SSL_VERSION_TLS1_2;
-    return CURLE_OK;
+    /* ver_min = MBEDTLS_SSL_VERSION_TLS1_2; */
+    break;
   case CURL_SSLVERSION_TLSv1_3:
 #ifdef TLS13_SUPPORT
-    *mbedver = MBEDTLS_SSL_VERSION_TLS1_3;
-    return CURLE_OK;
-#else
+    ver_min = MBEDTLS_SSL_VERSION_TLS1_3;
     break;
 #endif
+  default:
+    failf(data, "mbedTLS: unsupported minimum TLS version value");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
-  return CURLE_SSL_CONNECT_ERROR;
-}
-#else
-static CURLcode mbedtls_version_from_curl(int *mbedver, long version)
-{
-#if MBEDTLS_VERSION_NUMBER >= 0x03000000
-  switch(version) {
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-      *mbedver = MBEDTLS_SSL_MINOR_VERSION_3;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_3:
-      break;
-  }
-#else
-  switch(version) {
-    case CURL_SSLVERSION_TLSv1_0:
-      *mbedver = MBEDTLS_SSL_MINOR_VERSION_1;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_1:
-      *mbedver = MBEDTLS_SSL_MINOR_VERSION_2;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_2:
-      *mbedver = MBEDTLS_SSL_MINOR_VERSION_3;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_3:
-      break;
-  }
-#endif
-
-  return CURLE_SSL_CONNECT_ERROR;
-}
-#endif
-
-static CURLcode
-mbedtls_set_ssl_version_min_max(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct mbed_ssl_backend_data *backend =
-    (struct mbed_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-#if MBEDTLS_VERSION_NUMBER >= 0x03020000
-  mbedtls_ssl_protocol_version mbedtls_ver_min = MBEDTLS_SSL_VERSION_TLS1_2;
+  switch(conn_config->version_max) {
+  case CURL_SSLVERSION_MAX_DEFAULT:
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_TLSv1_3:
 #ifdef TLS13_SUPPORT
-  mbedtls_ssl_protocol_version mbedtls_ver_max = MBEDTLS_SSL_VERSION_TLS1_3;
-#else
-  mbedtls_ssl_protocol_version mbedtls_ver_max = MBEDTLS_SSL_VERSION_TLS1_2;
+    ver_max = MBEDTLS_SSL_VERSION_TLS1_3;
+    break;
 #endif
-#elif MBEDTLS_VERSION_NUMBER >= 0x03000000
-  int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_3;
-  int mbedtls_ver_max = MBEDTLS_SSL_MINOR_VERSION_3;
+  case CURL_SSLVERSION_MAX_TLSv1_2:
+    /* ver_max = MBEDTLS_SSL_VERSION_TLS1_2; */
+    break;
+#if MBEDTLS_VERSION_NUMBER < 0x03000000
+  case CURL_SSLVERSION_MAX_TLSv1_1:
+    ver_max = MBEDTLS_SSL_MINOR_VERSION_2;
+    break;
+  case CURL_SSLVERSION_MAX_TLSv1_0:
+    ver_max = MBEDTLS_SSL_MINOR_VERSION_1;
+    break;
 #else
-  int mbedtls_ver_min = MBEDTLS_SSL_MINOR_VERSION_1;
-  int mbedtls_ver_max = MBEDTLS_SSL_MINOR_VERSION_1;
+  case CURL_SSLVERSION_MAX_TLSv1_1:
+  case CURL_SSLVERSION_MAX_TLSv1_0:
 #endif
-  long ssl_version = conn_config->version;
-  long ssl_version_max = conn_config->version_max;
-  CURLcode result = CURLE_OK;
-
-  DEBUGASSERT(backend);
-
-  switch(ssl_version) {
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1:
-      ssl_version = CURL_SSLVERSION_TLSv1_0;
-      break;
+  default:
+    failf(data, "mbedTLS: unsupported maximum TLS version value");
+    return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
-    case CURL_SSLVERSION_MAX_DEFAULT:
-#ifdef TLS13_SUPPORT
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_3;
-#else
-      ssl_version_max = CURL_SSLVERSION_MAX_TLSv1_2;
-#endif
-      break;
-  }
-
-  result = mbedtls_version_from_curl(&mbedtls_ver_min, ssl_version);
-  if(result) {
-    failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
-    return result;
-  }
-  result = mbedtls_version_from_curl(&mbedtls_ver_max, ssl_version_max >> 16);
-  if(result) {
-    failf(data, "unsupported max version passed via CURLOPT_SSLVERSION");
-    return result;
-  }
-
-#if MBEDTLS_VERSION_NUMBER >= 0x03020000
-  mbedtls_ssl_conf_min_tls_version(&backend->config, mbedtls_ver_min);
-  mbedtls_ssl_conf_max_tls_version(&backend->config, mbedtls_ver_max);
-#else
+#if MBEDTLS_VERSION_NUMBER < 0x03020000
   mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                               mbedtls_ver_min);
+                               ver_min);
   mbedtls_ssl_conf_max_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                               mbedtls_ver_max);
-#endif
-
-#ifdef TLS13_SUPPORT
-  if(mbedtls_ver_min == MBEDTLS_SSL_VERSION_TLS1_3) {
-    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
-  }
-  else {
-    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
-  }
+                               ver_max);
 #else
-  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
+  mbedtls_ssl_conf_min_tls_version(&backend->config, ver_min);
+  mbedtls_ssl_conf_max_tls_version(&backend->config, ver_max);
 #endif
 
-  return result;
+  return CURLE_OK;
 }
 
 /* TLS_ECJPAKE_WITH_AES_128_CCM_8 (0xC0FF) is marked experimental
@@ -893,29 +845,18 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   mbedtls_ssl_conf_cert_profile(&backend->config,
                                 &mbedtls_x509_crt_profile_fr);
 
-  switch(conn_config->version) {
-  case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_TLSv1:
-#if MBEDTLS_VERSION_NUMBER < 0x03000000
-    mbedtls_ssl_conf_min_version(&backend->config, MBEDTLS_SSL_MAJOR_VERSION_3,
-                                 MBEDTLS_SSL_MINOR_VERSION_1);
-    infof(data, "mbedTLS: Set min SSL version to TLS 1.0");
-    break;
+  ret = mbed_set_ssl_version_min_max(data, backend, conn_config);
+  if(ret != CURLE_OK)
+    return ret;
+
+#ifdef TLS13_SUPPORT
+  if(conn_config->version == CURL_SSLVERSION_TLSv1_3)
+    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
+  else
+    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
+#else
+  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
 #endif
-  case CURL_SSLVERSION_TLSv1_0:
-  case CURL_SSLVERSION_TLSv1_1:
-  case CURL_SSLVERSION_TLSv1_2:
-  case CURL_SSLVERSION_TLSv1_3:
-    {
-      CURLcode result = mbedtls_set_ssl_version_min_max(cf, data);
-      if(result != CURLE_OK)
-        return result;
-      break;
-    }
-  default:
-    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
