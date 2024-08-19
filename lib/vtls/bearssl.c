@@ -361,6 +361,56 @@ static const br_x509_class x509_vtable = {
   x509_get_pkey
 };
 
+static CURLcode
+bearssl_set_ssl_version_min_max(struct Curl_easy *data,
+                                br_ssl_engine_context *ssl_eng,
+                                struct ssl_primary_config *conn_config)
+{
+  unsigned version_min, version_max;
+
+  switch(conn_config->version) {
+  case CURL_SSLVERSION_DEFAULT:
+  case CURL_SSLVERSION_TLSv1:
+  case CURL_SSLVERSION_TLSv1_0:
+    version_min = BR_TLS10;
+    break;
+  case CURL_SSLVERSION_TLSv1_1:
+    version_min = BR_TLS11;
+    break;
+  case CURL_SSLVERSION_TLSv1_2:
+    version_min = BR_TLS12;
+    break;
+  case CURL_SSLVERSION_TLSv1_3:
+    failf(data, "BearSSL: does not support TLS 1.3");
+    return CURLE_SSL_CONNECT_ERROR;
+  default:
+    failf(data, "BearSSL: unsupported minimum TLS version value");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  switch(conn_config->version_max) {
+  case CURL_SSLVERSION_MAX_DEFAULT:
+  case CURL_SSLVERSION_MAX_NONE:
+  case CURL_SSLVERSION_MAX_TLSv1_3:
+  case CURL_SSLVERSION_MAX_TLSv1_2:
+    version_max = BR_TLS12;
+    break;
+  case CURL_SSLVERSION_MAX_TLSv1_1:
+    version_max = BR_TLS11;
+    break;
+  case CURL_SSLVERSION_MAX_TLSv1_0:
+    version_max = BR_TLS10;
+    break;
+  default:
+    failf(data, "BearSSL: unsupported maximum TLS version value");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
+  br_ssl_engine_set_versions(ssl_eng, version_min, version_max);
+
+  return CURLE_OK;
+}
+
 static const uint16_t ciphertable[] = {
   /* RFC 2246 TLS 1.0 */
   BR_TLS_RSA_WITH_3DES_EDE_CBC_SHA,                        /* 0x000A */
@@ -495,40 +545,10 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   const bool verifypeer = conn_config->verifypeer;
   const bool verifyhost = conn_config->verifyhost;
   CURLcode ret;
-  unsigned version_min, version_max;
   int session_set = 0;
 
   DEBUGASSERT(backend);
   CURL_TRC_CF(data, cf, "connect_step1");
-
-  switch(conn_config->version) {
-  case CURL_SSLVERSION_SSLv2:
-    failf(data, "BearSSL does not support SSLv2");
-    return CURLE_SSL_CONNECT_ERROR;
-  case CURL_SSLVERSION_SSLv3:
-    failf(data, "BearSSL does not support SSLv3");
-    return CURLE_SSL_CONNECT_ERROR;
-  case CURL_SSLVERSION_TLSv1_0:
-    version_min = BR_TLS10;
-    version_max = BR_TLS10;
-    break;
-  case CURL_SSLVERSION_TLSv1_1:
-    version_min = BR_TLS11;
-    version_max = BR_TLS11;
-    break;
-  case CURL_SSLVERSION_TLSv1_2:
-    version_min = BR_TLS12;
-    version_max = BR_TLS12;
-    break;
-  case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_TLSv1:
-    version_min = BR_TLS10;
-    version_max = BR_TLS12;
-    break;
-  default:
-    failf(data, "BearSSL: unknown CURLOPT_SSLVERSION");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
 
   if(verifypeer) {
     if(ca_info_blob) {
@@ -564,7 +584,11 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   /* initialize SSL context */
   br_ssl_client_init_full(&backend->ctx, &backend->x509.minimal,
                           backend->anchors, backend->anchors_len);
-  br_ssl_engine_set_versions(&backend->ctx.eng, version_min, version_max);
+
+  ret = bearssl_set_ssl_version_min_max(data, &backend->ctx.eng, conn_config);
+  if(ret != CURLE_OK)
+    return ret;
+
   br_ssl_engine_set_buffer(&backend->ctx.eng, backend->buf,
                            sizeof(backend->buf), 1);
 
@@ -689,7 +713,9 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
         failf(data, "SSL: X.509 verification: "
               "chain could not be linked to a trust anchor");
         return CURLE_PEER_FAILED_VERIFICATION;
+      default:;
       }
+      failf(data, "BearSSL: connection error 0x%04x", err);
       /* X.509 errors are documented to have the range 32..63 */
       if(err >= 32 && err < 64)
         return CURLE_PEER_FAILED_VERIFICATION;
