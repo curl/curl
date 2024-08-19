@@ -34,21 +34,21 @@ CMAKE_DIST =                                    \
  CMake/CurlTests.c                              \
  CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
- CMake/FindCARES.cmake                          \
+ CMake/FindCares.cmake                          \
  CMake/FindGSS.cmake                            \
- CMake/FindLibPSL.cmake                         \
- CMake/FindLibSSH2.cmake                        \
+ CMake/FindLibpsl.cmake                         \
+ CMake/FindLibssh2.cmake                        \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindMSH3.cmake                           \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
  CMake/FindNettle.cmake                         \
- CMake/FindQUICHE.cmake                         \
+ CMake/FindQuiche.cmake                         \
+ CMake/FindRustls.cmake                         \
  CMake/FindWolfSSH.cmake                        \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
- CMake/Findrustls.cmake                         \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/PickyWarnings.cmake                      \

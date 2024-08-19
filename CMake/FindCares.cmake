@@ -21,60 +21,60 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the libssh2 library
+# Find the c-ares library
 #
 # Input variables:
 #
-# LIBSSH2_INCLUDE_DIR   The libssh2 include directory
-# LIBSSH2_LIBRARY       Path to libssh2 library
+# CARES_INCLUDE_DIR   The c-ares include directory
+# CARES_LIBRARY       Path to c-ares library
 #
 # Result variables:
 #
-# LIBSSH2_FOUND         System has libssh2
-# LIBSSH2_INCLUDE_DIRS  The libssh2 include directories
-# LIBSSH2_LIBRARIES     The libssh2 library names
-# LIBSSH2_VERSION       Version of libssh2
+# CARES_FOUND         System has c-ares
+# CARES_INCLUDE_DIRS  The c-ares include directories
+# CARES_LIBRARIES     The c-ares library names
+# CARES_VERSION       Version of c-ares
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_LIBSSH2 "libssh2")
+  pkg_check_modules(PC_CARES "libcares")
 endif()
 
-find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h"
+find_path(CARES_INCLUDE_DIR NAMES "ares.h"
   HINTS
-    ${PC_LIBSSH2_INCLUDEDIR}
-    ${PC_LIBSSH2_INCLUDE_DIRS}
+    ${PC_CARES_INCLUDEDIR}
+    ${PC_CARES_INCLUDE_DIRS}
 )
 
-find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2"
+find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares"
   HINTS
-    ${PC_LIBSSH2_LIBDIR}
-    ${PC_LIBSSH2_LIBRARY_DIRS}
+    ${PC_CARES_LIBDIR}
+    ${PC_CARES_LIBRARY_DIRS}
 )
 
-if(PC_LIBSSH2_VERSION)
-  set(LIBSSH2_VERSION ${PC_LIBSSH2_VERSION})
-elseif(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
-  set(_version_regex "#[\t ]*define[\t ]+LIBSSH2_VERSION[\t ]+\"([^\"]*)\"")
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _version_str REGEX "${_version_regex}")
+if(PC_CARES_VERSION)
+  set(CARES_VERSION ${PC_CARES_VERSION})
+elseif(CARES_INCLUDE_DIR AND EXISTS "${CARES_INCLUDE_DIR}/ares_version.h")
+  set(_version_regex "#[\t ]*define[\t ]+ARES_VERSION_STR[\t ]+\"([^\"]*)\"")
+  file(STRINGS "${CARES_INCLUDE_DIR}/ares_version.h" _version_str REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-  set(LIBSSH2_VERSION "${_version_str}")
+  set(CARES_VERSION "${_version_str}")
   unset(_version_regex)
   unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibSSH2
+find_package_handle_standard_args(Cares
   REQUIRED_VARS
-    LIBSSH2_INCLUDE_DIR
-    LIBSSH2_LIBRARY
+    CARES_INCLUDE_DIR
+    CARES_LIBRARY
   VERSION_VAR
-    LIBSSH2_VERSION
+    CARES_VERSION
 )
 
-if(LIBSSH2_FOUND)
-  set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
-  set(LIBSSH2_LIBRARIES    ${LIBSSH2_LIBRARY})
+if(CARES_FOUND)
+  set(CARES_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
+  set(CARES_LIBRARIES    ${CARES_LIBRARY})
 endif()
 
-mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)
+mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)

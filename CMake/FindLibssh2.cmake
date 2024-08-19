@@ -21,60 +21,60 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the libpsl library
+# Find the libssh2 library
 #
 # Input variables:
 #
-# LIBPSL_INCLUDE_DIR   The libpsl include directory
-# LIBPSL_LIBRARY       Path to libpsl library
+# LIBSSH2_INCLUDE_DIR   The libssh2 include directory
+# LIBSSH2_LIBRARY       Path to libssh2 library
 #
 # Result variables:
 #
-# LIBPSL_FOUND         System has libpsl
-# LIBPSL_INCLUDE_DIRS  The libpsl include directories
-# LIBPSL_LIBRARIES     The libpsl library names
-# LIBPSL_VERSION       Version of libpsl
+# LIBSSH2_FOUND         System has libssh2
+# LIBSSH2_INCLUDE_DIRS  The libssh2 include directories
+# LIBSSH2_LIBRARIES     The libssh2 library names
+# LIBSSH2_VERSION       Version of libssh2
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_LIBPSL "libpsl")
+  pkg_check_modules(PC_LIBSSH2 "libssh2")
 endif()
 
-find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h"
+find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h"
   HINTS
-    ${PC_LIBPSL_INCLUDEDIR}
-    ${PC_LIBPSL_INCLUDE_DIRS}
+    ${PC_LIBSSH2_INCLUDEDIR}
+    ${PC_LIBSSH2_INCLUDE_DIRS}
 )
 
-find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl"
+find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2"
   HINTS
-    ${PC_LIBPSL_LIBDIR}
-    ${PC_LIBPSL_LIBRARY_DIRS}
+    ${PC_LIBSSH2_LIBDIR}
+    ${PC_LIBSSH2_LIBRARY_DIRS}
 )
 
-if(PC_LIBPSL_VERSION)
-  set(LIBPSL_VERSION ${PC_LIBPSL_VERSION})
-elseif(LIBPSL_INCLUDE_DIR AND EXISTS "${LIBPSL_INCLUDE_DIR}/libpsl.h")
-  set(_version_regex "#[\t ]*define[\t ]+PSL_VERSION[\t ]+\"([^\"]*)\"")
-  file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _version_str REGEX "${_version_regex}")
+if(PC_LIBSSH2_VERSION)
+  set(LIBSSH2_VERSION ${PC_LIBSSH2_VERSION})
+elseif(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
+  set(_version_regex "#[\t ]*define[\t ]+LIBSSH2_VERSION[\t ]+\"([^\"]*)\"")
+  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _version_str REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-  set(LIBPSL_VERSION "${_version_str}")
+  set(LIBSSH2_VERSION "${_version_str}")
   unset(_version_regex)
   unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibPSL
+find_package_handle_standard_args(Libssh2
   REQUIRED_VARS
-    LIBPSL_INCLUDE_DIR
-    LIBPSL_LIBRARY
+    LIBSSH2_INCLUDE_DIR
+    LIBSSH2_LIBRARY
   VERSION_VAR
-    LIBPSL_VERSION
+    LIBSSH2_VERSION
 )
 
-if(LIBPSL_FOUND)
-  set(LIBPSL_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
-  set(LIBPSL_LIBRARIES    ${LIBPSL_LIBRARY})
+if(LIBSSH2_FOUND)
+  set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
+  set(LIBSSH2_LIBRARIES    ${LIBSSH2_LIBRARY})
 endif()
 
-mark_as_advanced(LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY)
+mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)

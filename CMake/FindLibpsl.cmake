@@ -21,60 +21,60 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the c-ares library
+# Find the libpsl library
 #
 # Input variables:
 #
-# CARES_INCLUDE_DIR   The c-ares include directory
-# CARES_LIBRARY       Path to c-ares library
+# LIBPSL_INCLUDE_DIR   The libpsl include directory
+# LIBPSL_LIBRARY       Path to libpsl library
 #
 # Result variables:
 #
-# CARES_FOUND         System has c-ares
-# CARES_INCLUDE_DIRS  The c-ares include directories
-# CARES_LIBRARIES     The c-ares library names
-# CARES_VERSION       Version of c-ares
+# LIBPSL_FOUND         System has libpsl
+# LIBPSL_INCLUDE_DIRS  The libpsl include directories
+# LIBPSL_LIBRARIES     The libpsl library names
+# LIBPSL_VERSION       Version of libpsl
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_CARES "libcares")
+  pkg_check_modules(PC_LIBPSL "libpsl")
 endif()
 
-find_path(CARES_INCLUDE_DIR NAMES "ares.h"
+find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h"
   HINTS
-    ${PC_CARES_INCLUDEDIR}
-    ${PC_CARES_INCLUDE_DIRS}
+    ${PC_LIBPSL_INCLUDEDIR}
+    ${PC_LIBPSL_INCLUDE_DIRS}
 )
 
-find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares"
+find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl"
   HINTS
-    ${PC_CARES_LIBDIR}
-    ${PC_CARES_LIBRARY_DIRS}
+    ${PC_LIBPSL_LIBDIR}
+    ${PC_LIBPSL_LIBRARY_DIRS}
 )
 
-if(PC_CARES_VERSION)
-  set(CARES_VERSION ${PC_CARES_VERSION})
-elseif(CARES_INCLUDE_DIR AND EXISTS "${CARES_INCLUDE_DIR}/ares_version.h")
-  set(_version_regex "#[\t ]*define[\t ]+ARES_VERSION_STR[\t ]+\"([^\"]*)\"")
-  file(STRINGS "${CARES_INCLUDE_DIR}/ares_version.h" _version_str REGEX "${_version_regex}")
+if(PC_LIBPSL_VERSION)
+  set(LIBPSL_VERSION ${PC_LIBPSL_VERSION})
+elseif(LIBPSL_INCLUDE_DIR AND EXISTS "${LIBPSL_INCLUDE_DIR}/libpsl.h")
+  set(_version_regex "#[\t ]*define[\t ]+PSL_VERSION[\t ]+\"([^\"]*)\"")
+  file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _version_str REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-  set(CARES_VERSION "${_version_str}")
+  set(LIBPSL_VERSION "${_version_str}")
   unset(_version_regex)
   unset(_version_str)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(CARES
+find_package_handle_standard_args(Libpsl
   REQUIRED_VARS
-    CARES_INCLUDE_DIR
-    CARES_LIBRARY
+    LIBPSL_INCLUDE_DIR
+    LIBPSL_LIBRARY
   VERSION_VAR
-    CARES_VERSION
+    LIBPSL_VERSION
 )
 
-if(CARES_FOUND)
-  set(CARES_INCLUDE_DIRS ${CARES_INCLUDE_DIR})
-  set(CARES_LIBRARIES    ${CARES_LIBRARY})
+if(LIBPSL_FOUND)
+  set(LIBPSL_INCLUDE_DIRS ${LIBPSL_INCLUDE_DIR})
+  set(LIBPSL_LIBRARIES    ${LIBPSL_LIBRARY})
 endif()
 
-mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)
+mark_as_advanced(LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY)

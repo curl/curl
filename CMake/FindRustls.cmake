@@ -57,7 +57,7 @@ if(PC_RUSTLS_VERSION)
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(rustls
+find_package_handle_standard_args(Rustls
   REQUIRED_VARS
     RUSTLS_INCLUDE_DIR
     RUSTLS_LIBRARY
