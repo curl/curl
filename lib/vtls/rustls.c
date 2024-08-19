@@ -558,6 +558,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     switch(conn_config->version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
+    case CURL_SSLVERSION_TLSv1_0:
     case CURL_SSLVERSION_TLSv1_1:
     case CURL_SSLVERSION_TLSv1_2:
       break;
@@ -566,7 +567,7 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       tls_versions_len = 1;
       break;
     default:
-      failf(data, "rustls: unrecognized minimum TLS version value");
+      failf(data, "rustls: unsupported minimum TLS version value");
       return CURLE_SSL_ENGINE_INITFAILED;
     }
 
