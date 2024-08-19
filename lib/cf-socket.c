@@ -146,10 +146,12 @@ static void nosigpipe(struct Curl_easy *data,
 #define nosigpipe(x,y) Curl_nop_stmt
 #endif
 
-#if defined(USE_WINSOCK) && defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
-#define WINSOCK_SUPPORTS_KEEP_IDLE_INTVL_CNT
+#if defined(USE_WINSOCK)
+#if defined(TCP_KEEPIDLE)&& defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+#define WINSOCK_KEEP_SSO
 #endif
-#if (defined(USE_WINSOCK) && !defined(WINSOCK_SUPPORTS_KEEP_IDLE_INTVL_CNT)) || \
+#endif
+#if (defined(USE_WINSOCK) && !defined(WINSOCK_KEEP_SSO)) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
    (defined(__DragonFly__) && __DragonFly_version < 500702) || \
    (defined(_WIN32) && !defined(TCP_KEEPIDLE))
@@ -186,7 +188,7 @@ tcpkeepalive(struct Curl_easy *data,
   else {
 #if defined(SIO_KEEPALIVE_VALS) /* Windows */
 /* Windows 10, version 1709 (10.0.16299) and later versions */
-#if defined(WINSOCK_SUPPORTS_KEEP_IDLE_INTVL_CNT)
+#if defined(WINSOCK_KEEP_SSO)
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
