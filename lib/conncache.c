@@ -743,8 +743,6 @@ void Curl_conncache_close_all_connections(struct conncache *connc)
 
   sigpipe_apply(idata, &pipe_st);
   Curl_hostcache_clean(idata, idata->dns.hostcache);
-  idata->multi = NULL;
-  Curl_close(&connc->closure_handle);
   sigpipe_restore(&pipe_st);
 }
 
