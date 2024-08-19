@@ -1063,7 +1063,7 @@ mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 
 if(CURL_USE_LIBSSH2)
-  find_package(LibSSH2)
+  find_package(Libssh2)
   if(LIBSSH2_FOUND)
     list(APPEND CURL_LIBS ${LIBSSH2_LIBRARIES})
     list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libssh2")

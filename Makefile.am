@@ -37,7 +37,7 @@ CMAKE_DIST =                                    \
  CMake/FindCARES.cmake                          \
  CMake/FindGSS.cmake                            \
  CMake/FindLibpsl.cmake                         \
- CMake/FindLibSSH2.cmake                        \
+ CMake/FindLibssh2.cmake                        \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindMSH3.cmake                           \
  CMake/FindNGHTTP2.cmake                        \

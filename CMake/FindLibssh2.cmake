@@ -64,7 +64,7 @@ elseif(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibSSH2
+find_package_handle_standard_args(Libssh2
   REQUIRED_VARS
     LIBSSH2_INCLUDE_DIR
     LIBSSH2_LIBRARY

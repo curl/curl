@@ -200,7 +200,7 @@ SCP/SFTP:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{CMake/FindLibSSH2.cmake,docs/libcurl/opts/CURLOPT_SSH*,docs/examples/sftp*,lib/vssh/**,tests/sshhelp.pm,tests/sshserver.pl}'
+              - '{CMake/FindLibssh2.cmake,docs/libcurl/opts/CURLOPT_SSH*,docs/examples/sftp*,lib/vssh/**,tests/sshhelp.pm,tests/sshserver.pl}'
 
 script:
   - all:
