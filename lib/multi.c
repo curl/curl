@@ -574,7 +574,8 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /* Point to the shared or multi handle connection cache */
   connc = Curl_get_conncache(data);
   DEBUGASSERT(connc);
-  Curl_conncache_init_data(connc, data);
+  if(connc)
+    Curl_conncache_init_data(connc, data);
 
   multi_warn_debug(multi, data);
 

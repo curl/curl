@@ -54,7 +54,7 @@
    never doubly locked or unlocked */
 #define CONNC_LOCK(c)                                                   \
   do {                                                                  \
-    if(CURL_SHARE_KEEP_CONNECT((c)->share)) {                           \
+    if((c) && CURL_SHARE_KEEP_CONNECT((c)->share)) {                    \
       Curl_share_lock(((c)->closure_handle), CURL_LOCK_DATA_CONNECT,    \
                       CURL_LOCK_ACCESS_SINGLE);                         \
       DEBUGASSERT(!(c)->locked);                                        \
@@ -64,7 +64,7 @@
 
 #define CONNC_UNLOCK(c)                                                 \
   do {                                                                  \
-    if(CURL_SHARE_KEEP_CONNECT((c)->share)) {                           \
+    if((c) && CURL_SHARE_KEEP_CONNECT((c)->share)) {                    \
       DEBUGASSERT((c)->locked);                                         \
       (c)->locked = FALSE;                                              \
       Curl_share_unlock((c)->closure_handle, CURL_LOCK_DATA_CONNECT);   \
@@ -72,10 +72,10 @@
   } while(0)
 
 #else
-#define CONNC_LOCK(c) if(CURL_SHARE_KEEP_CONNECT((c)->share))           \
+#define CONNC_LOCK(c) if((c) && CURL_SHARE_KEEP_CONNECT((c)->share))    \
     Curl_share_lock((c)->closure_handle, CURL_LOCK_DATA_CONNECT,        \
                     CURL_LOCK_ACCESS_SINGLE)
-#define CONNC_UNLOCK(c) if(CURL_SHARE_KEEP_CONNECT((c)->share))         \
+#define CONNC_UNLOCK(c) if((c) && CURL_SHARE_KEEP_CONNECT((c)->share))  \
     Curl_share_unlock((c)->closure_handle, CURL_LOCK_DATA_CONNECT)
 #endif /* !DEBUG_BUILD */
 
@@ -214,7 +214,6 @@ struct conncache *Curl_get_conncache(struct Curl_easy *data)
 
 void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data)
 {
-
   CONNC_LOCK(connc);
   /* the identifier inside the connection cache */
   data->id = connc->next_easy_id++;
