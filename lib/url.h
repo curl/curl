@@ -74,7 +74,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
                           struct curltime *nowp);
 
 /**
- * Peform upkeep operations on the connection.
+ * Perform upkeep operations on the connection.
  */
 CURLcode Curl_conn_upkeep(struct Curl_easy *data,
                           struct connectdata *conn,

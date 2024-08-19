@@ -72,10 +72,10 @@
   } while(0)
 
 #else
-#define CONNC_LOCK(c) if((c)->share)                                    \
+#define CONNC_LOCK(c) if(CURL_SHARE_KEEP_CONNECT((c)->share))           \
     Curl_share_lock((c)->closure_handle, CURL_LOCK_DATA_CONNECT,        \
                     CURL_LOCK_ACCESS_SINGLE)
-#define CONNC_UNLOCK(c) if((c)->share)                                  \
+#define CONNC_UNLOCK(c) if(CURL_SHARE_KEEP_CONNECT((c)->share))         \
     Curl_share_unlock((c)->closure_handle, CURL_LOCK_DATA_CONNECT)
 #endif /* !DEBUG_BUILD */
 
@@ -635,6 +635,9 @@ Curl_conncache_extract_oldest(struct Curl_easy *data)
   struct connectbundle *bundle_candidate = NULL;
 
   DEBUGASSERT(connc);
+  if(!connc)
+    return NULL;
+
   now = Curl_now();
 
   CONNC_LOCK(connc);
@@ -1272,6 +1275,9 @@ void Curl_conncache_prune_dead(struct Curl_easy *data)
   timediff_t elapsed;
 
   DEBUGASSERT(!data->conn); /* no connection */
+  if(!connc)
+    return;
+
   rctx.now = Curl_now();
   CONNC_LOCK(connc);
   elapsed = Curl_timediff(rctx.now, connc->last_cleanup);
