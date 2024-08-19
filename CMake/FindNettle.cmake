@@ -44,7 +44,7 @@ endif()
 
 if(NETTLE_FOUND)
   set(NETTLE_LIBRARIES ${NETTLE_LINK_LIBRARIES})
-  message(STATUS "Found nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (Found version \"${NETTLE_VERSION}\")")
+  message(STATUS "Found Nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (Found version \"${NETTLE_VERSION}\")")
 else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
   find_library(NETTLE_LIBRARY NAMES "nettle")
@@ -64,7 +64,7 @@ else()
   endif()
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args("nettle"
+  find_package_handle_standard_args(Nettle
     REQUIRED_VARS
       NETTLE_INCLUDE_DIR
       NETTLE_LIBRARY
