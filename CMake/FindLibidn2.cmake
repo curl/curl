@@ -44,6 +44,7 @@ endif()
 
 if(LIBIDN2_FOUND)
   set(LIBIDN2_LIBRARIES ${LIBIDN2_LINK_LIBRARIES})
+  message(STATUS "Found libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (Found version \"${LIBIDN2_VERSION}\")")
 else()
   find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")
   find_library(LIBIDN2_LIBRARY NAMES "idn2" "libidn2")
@@ -57,17 +58,19 @@ else()
     unset(_version_str)
   endif()
 
-  set(LIBIDN2_INCLUDE_DIRS ${LIBIDN2_INCLUDE_DIR})
-  set(LIBIDN2_LIBRARIES    ${LIBIDN2_LIBRARY})
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Libidn2
+    REQUIRED_VARS
+      LIBIDN2_INCLUDE_DIR
+      LIBIDN2_LIBRARY
+    VERSION_VAR
+      LIBIDN2_VERSION
+  )
+
+  if(LIBIDN2_FOUND)
+    set(LIBIDN2_INCLUDE_DIRS ${LIBIDN2_INCLUDE_DIR})
+    set(LIBIDN2_LIBRARIES    ${LIBIDN2_LIBRARY})
+  endif()
 
   mark_as_advanced(LIBIDN2_INCLUDE_DIR LIBIDN2_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Libidn2
-  REQUIRED_VARS
-    LIBIDN2_INCLUDE_DIRS
-    LIBIDN2_LIBRARIES
-  VERSION_VAR
-    LIBIDN2_VERSION
-)

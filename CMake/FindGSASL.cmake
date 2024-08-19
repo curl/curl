@@ -44,6 +44,7 @@ endif()
 
 if(GSASL_FOUND)
   set(GSASL_LIBRARIES ${GSASL_LINK_LIBRARIES})
+  message(STATUS "Found GSASL (via pkg-config): ${GSASL_INCLUDE_DIRS} (Found version \"${GSASL_VERSION}\")")
 else()
   find_path(GSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(GSASL_LIBRARY NAMES "gsasl" "libgsasl")
@@ -57,17 +58,19 @@ else()
     unset(_version_str)
   endif()
 
-  set(GSASL_INCLUDE_DIRS ${GSASL_INCLUDE_DIR})
-  set(GSASL_LIBRARIES    ${GSASL_LIBRARY})
+  include(FindPackageHandleStandardArgs)
+    find_package_handle_standard_args(GSASL
+    REQUIRED_VARS
+      GSASL_INCLUDE_DIR
+      GSASL_LIBRARY
+    VERSION_VAR
+      GSASL_VERSION
+  )
+
+  if(GSASL_FOUND)
+    set(GSASL_INCLUDE_DIRS ${GSASL_INCLUDE_DIR})
+    set(GSASL_LIBRARIES    ${GSASL_LIBRARY})
+  endif()
 
   mark_as_advanced(GSASL_INCLUDE_DIR GSASL_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(GSASL
-  REQUIRED_VARS
-    GSASL_INCLUDE_DIRS
-    GSASL_LIBRARIES
-  VERSION_VAR
-    GSASL_VERSION
-)

@@ -44,6 +44,7 @@ endif()
 
 if(LIBUV_FOUND)
   set(LIBUV_LIBRARIES ${LIBUV_LINK_LIBRARIES})
+  message(STATUS "Found libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (Found version \"${LIBUV_VERSION}\")")
 else()
   find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")
   find_library(LIBUV_LIBRARY NAMES "uv" "libuv")
@@ -67,17 +68,19 @@ else()
     unset(_version_str3)
   endif()
 
-  set(LIBUV_INCLUDE_DIRS ${LIBUV_INCLUDE_DIR})
-  set(LIBUV_LIBRARIES    ${LIBUV_LIBRARY})
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Libuv
+    REQUIRED_VARS
+      LIBUV_INCLUDE_DIR
+      LIBUV_LIBRARY
+    VERSION_VAR
+      LIBUV_VERSION
+  )
+
+  if(LIBUV_FOUND)
+    set(LIBUV_INCLUDE_DIRS ${LIBUV_INCLUDE_DIR})
+    set(LIBUV_LIBRARIES    ${LIBUV_LIBRARY})
+  endif()
 
   mark_as_advanced(LIBUV_INCLUDE_DIR LIBUV_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Libuv
-  REQUIRED_VARS
-    LIBUV_INCLUDE_DIRS
-    LIBUV_LIBRARIES
-  VERSION_VAR
-    LIBUV_VERSION
-)
