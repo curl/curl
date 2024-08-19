@@ -146,7 +146,13 @@ static void nosigpipe(struct Curl_easy *data,
 #define nosigpipe(x,y) Curl_nop_stmt
 #endif
 
-#if defined(USE_WINSOCK) || \
+#if defined(USE_WINSOCK) && \
+    defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+/*  Win 10, v 1709 (10.0.16299) and later can use SetSockOpt TCP_KEEP____
+ *  so should use seconds */
+#define CURL_WINSOCK_KEEP_SSO
+#define KEEPALIVE_FACTOR(x)
+#elif defined(USE_WINSOCK) || \
    (defined(__sun) && !defined(TCP_KEEPIDLE)) || \
    (defined(__DragonFly__) && __DragonFly_version < 500702) || \
    (defined(_WIN32) && !defined(TCP_KEEPIDLE))
@@ -183,7 +189,7 @@ tcpkeepalive(struct Curl_easy *data,
   else {
 #if defined(SIO_KEEPALIVE_VALS) /* Windows */
 /* Windows 10, version 1709 (10.0.16299) and later versions */
-#if defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+#if defined(CURL_WINSOCK_KEEP_SSO)
     optval = curlx_sltosi(data->set.tcp_keepidle);
     KEEPALIVE_FACTOR(optval);
     if(setsockopt(sockfd, IPPROTO_TCP, TCP_KEEPIDLE,
