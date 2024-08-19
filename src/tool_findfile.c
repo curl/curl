@@ -51,7 +51,7 @@ struct finder {
    in the findfile() function */
 static const struct finder conf_list[] = {
   { "CURL_HOME", NULL, FALSE },
-  { "XDG_CONFIG_HOME", NULL, FALSE }, /* index == 1, used in the code */
+  { "XDG_CONFIG_HOME", NULL, TRUE },
   { "HOME", NULL, FALSE },
 #ifdef _WIN32
   { "USERPROFILE", NULL, FALSE },
@@ -102,7 +102,6 @@ static char *checkhome(const char *home, const char *fname, bool dotscore)
 char *findfile(const char *fname, int dotscore)
 {
   int i;
-  bool xdg = FALSE;
   DEBUGASSERT(fname && fname[0]);
   DEBUGASSERT((dotscore != 1) || (fname[0] == '.'));
 
@@ -114,8 +113,6 @@ char *findfile(const char *fname, int dotscore)
     if(home) {
       char *path;
       const char *filename = fname;
-      if(i == 1 /* XDG_CONFIG_HOME */)
-        xdg = TRUE;
       if(!home[0]) {
         curl_free(home);
         continue;
@@ -128,7 +125,7 @@ char *findfile(const char *fname, int dotscore)
         home = c;
       }
       if(conf_list[i].withoutdot) {
-        if(!dotscore || xdg) {
+        if(!dotscore) {
           /* this is not looking for .curlrc, or the XDG_CONFIG_HOME was
              defined so we skip the extended check */
           curl_free(home);
