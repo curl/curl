@@ -411,7 +411,7 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
-  if(Curl_conncache_init(&multi->conn_cache, multi, chashsize))
+  if(Curl_conncache_init(&multi->conn_cache, multi, NULL, chashsize))
     goto error;
 
   Curl_llist_init(&multi->msglist, NULL);
@@ -472,6 +472,7 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
                                 struct Curl_easy *data)
 {
+  struct conncache *connc;
   CURLMcode rc;
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -548,13 +549,6 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
     data->dns.hostcachetype = HCACHE_MULTI;
   }
 
-  /* Point to the shared or multi handle connection cache */
-  if(data->share && (data->share->specifier & (1<< CURL_LOCK_DATA_CONNECT)))
-    data->state.conn_cache = &data->share->conn_cache;
-  else
-    data->state.conn_cache = &multi->conn_cache;
-  data->state.lastconnect_id = -1;
-
 #ifdef USE_LIBPSL
   /* Do the same for PSL. */
   if(data->share && (data->share->specifier & (1 << CURL_LOCK_DATA_PSL)))
@@ -572,27 +566,15 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /* increase the alive-counter */
   multi->num_alive++;
 
-  CONNCACHE_LOCK(data);
-  /* The closure handle only ever has default timeouts set. To improve the
-     state somewhat we clone the timeouts from each added handle so that the
-     closure handle always has the same timeouts as the most recently added
-     easy handle. */
-  data->state.conn_cache->closure_handle->set.timeout = data->set.timeout;
-  data->state.conn_cache->closure_handle->set.server_response_timeout =
-    data->set.server_response_timeout;
-  data->state.conn_cache->closure_handle->set.no_signal =
-    data->set.no_signal;
-
-  /* the identifier inside the connection cache */
-  data->id = data->state.conn_cache->next_easy_id++;
-  if(data->state.conn_cache->next_easy_id <= 0)
-    data->state.conn_cache->next_easy_id = 0;
   /* the identifier inside the multi instance */
   data->mid = multi->next_easy_mid++;
   if(multi->next_easy_mid <= 0)
     multi->next_easy_mid = 0;
 
-  CONNCACHE_UNLOCK(data);
+  /* Point to the shared or multi handle connection cache */
+  connc = Curl_get_conncache(data);
+  DEBUGASSERT(connc);
+  Curl_conncache_init_data(connc, data);
 
   multi_warn_debug(multi, data);
 
@@ -615,6 +597,91 @@ static void debug_print_sock_hash(void *p)
 }
 #endif
 
+struct multi_done_ctx {
+  curl_off_t conn_id;
+  char buffer[256];
+  BIT(premature);
+  BIT(do_disconnect);
+  BIT(return_conn);
+};
+
+static void multi_done_locked(struct connectdata *conn,
+                              struct Curl_easy *data,
+                              void *userdata)
+{
+  struct multi_done_ctx *mdctx = userdata;
+
+  Curl_detach_connection(data);
+
+  if(CONN_INUSE(conn)) {
+    /* Stop if still used. */
+    DEBUGF(infof(data, "Connection still in use %zu, "
+                 "no more multi_done now!",
+                 Curl_llist_count(&conn->easyq)));
+    return;
+  }
+
+  data->state.done = TRUE; /* called just now! */
+
+  if(conn->dns_entry)
+    Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
+  Curl_hostcache_prune(data);
+
+  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
+     forced us to close this connection. This is ignored for requests taking
+     place in a NTLM/NEGOTIATE authentication handshake
+
+     if conn->bits.close is TRUE, it means that the connection should be
+     closed in spite of all our efforts to be nice, due to protocol
+     restrictions in our or the server's end
+
+     if premature is TRUE, it means this connection was said to be DONE before
+     the entire request operation is complete and thus we cannot know in what
+     state it is for reusing, so we are forced to close it. In a perfect world
+     we can add code that keep track of if we really must close it here or not,
+     but currently we have no such detail knowledge.
+  */
+
+  data->state.recent_conn_id = mdctx->conn_id;
+  if((data->set.reuse_forbid
+#if defined(USE_NTLM)
+      && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
+           conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
+#endif
+#if defined(USE_SPNEGO)
+      && !(conn->http_negotiate_state == GSS_AUTHRECV ||
+           conn->proxy_negotiate_state == GSS_AUTHRECV)
+#endif
+     ) || conn->bits.close
+       || (mdctx->premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
+    DEBUGF(infof(data, "multi_done, not reusing connection=%"
+                       CURL_FORMAT_CURL_OFF_T ", forbid=%d"
+                       ", close=%d, premature=%d, conn_multiplex=%d",
+                 mdctx->conn_id, data->set.reuse_forbid,
+                 conn->bits.close, mdctx->premature,
+                 Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
+    connclose(conn, "disconnecting");
+    Curl_conncache_remove_conn(data, conn, FALSE);
+    mdctx->do_disconnect = TRUE;
+  }
+  else {
+    const char *host =
+#ifndef CURL_DISABLE_PROXY
+      conn->bits.socksproxy ?
+      conn->socks_proxy.host.dispname :
+      conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+#endif
+      conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+      conn->host.dispname;
+    /* create string before returning the connection */
+    msnprintf(mdctx->buffer, sizeof(mdctx->buffer),
+              "Connection #%" CURL_FORMAT_CURL_OFF_T " to host %s left intact",
+              mdctx->conn_id, host);
+    /* the connection is no longer in use by this transfer */
+    mdctx->return_conn = TRUE;
+  }
+}
+
 static CURLcode multi_done(struct Curl_easy *data,
                            CURLcode status,  /* an error if this is called
                                                 after an error was detected */
@@ -622,6 +689,11 @@ static CURLcode multi_done(struct Curl_easy *data,
 {
   CURLcode result, r2;
   struct connectdata *conn = data->conn;
+  struct multi_done_ctx mdctx;
+
+  memset(&mdctx, 0, sizeof(mdctx));
+  mdctx.conn_id = conn->connection_id;
+  mdctx.premature = premature;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
@@ -684,83 +756,18 @@ static CURLcode multi_done(struct Curl_easy *data,
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
 
-  CONNCACHE_LOCK(data);
-  Curl_detach_connection(data);
-  if(CONN_INUSE(conn)) {
-    /* Stop if still used. */
-    CONNCACHE_UNLOCK(data);
-    DEBUGF(infof(data, "Connection still in use %zu, "
-                 "no more multi_done now!",
-                 Curl_llist_count(&conn->easyq)));
-    return CURLE_OK;
-  }
+  /* Under the potential connection cache's share lock, decide what to
+   * do with the transfer's connection. */
+  Curl_conncache_do_locked(data, data->conn, multi_done_locked, &mdctx);
 
-  data->state.done = TRUE; /* called just now! */
-
-  if(conn->dns_entry)
-    Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
-  Curl_hostcache_prune(data);
-
-  /* if data->set.reuse_forbid is TRUE, it means the libcurl client has
-     forced us to close this connection. This is ignored for requests taking
-     place in a NTLM/NEGOTIATE authentication handshake
-
-     if conn->bits.close is TRUE, it means that the connection should be
-     closed in spite of all our efforts to be nice, due to protocol
-     restrictions in our or the server's end
-
-     if premature is TRUE, it means this connection was said to be DONE before
-     the entire request operation is complete and thus we cannot know in what
-     state it is for reusing, so we are forced to close it. In a perfect world
-     we can add code that keep track of if we really must close it here or not,
-     but currently we have no such detail knowledge.
-  */
-
-  data->state.recent_conn_id = conn->connection_id;
-  if((data->set.reuse_forbid
-#if defined(USE_NTLM)
-      && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
-           conn->proxy_ntlm_state == NTLMSTATE_TYPE2)
-#endif
-#if defined(USE_SPNEGO)
-      && !(conn->http_negotiate_state == GSS_AUTHRECV ||
-           conn->proxy_negotiate_state == GSS_AUTHRECV)
-#endif
-     ) || conn->bits.close
-       || (premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
-    DEBUGF(infof(data, "multi_done, not reusing connection=%"
-                       CURL_FORMAT_CURL_OFF_T ", forbid=%d"
-                       ", close=%d, premature=%d, conn_multiplex=%d",
-                 conn->connection_id,
-                 data->set.reuse_forbid, conn->bits.close, premature,
-                 Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
-    connclose(conn, "disconnecting");
-    Curl_conncache_remove_conn(data, conn, FALSE);
-    CONNCACHE_UNLOCK(data);
+  if(mdctx.do_disconnect)
     Curl_disconnect(data, conn, premature);
-  }
-  else {
-    char buffer[256];
-    const char *host =
-#ifndef CURL_DISABLE_PROXY
-      conn->bits.socksproxy ?
-      conn->socks_proxy.host.dispname :
-      conn->bits.httpproxy ? conn->http_proxy.host.dispname :
-#endif
-      conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-      conn->host.dispname;
-    /* create string before returning the connection */
-    curl_off_t connection_id = conn->connection_id;
-    msnprintf(buffer, sizeof(buffer),
-              "Connection #%" CURL_FORMAT_CURL_OFF_T " to host %s left intact",
-              connection_id, host);
-    /* the connection is no longer in use by this transfer */
-    CONNCACHE_UNLOCK(data);
+  else if(mdctx.return_conn) {
     if(Curl_conncache_return_conn(data, conn)) {
       /* remember the most recently used connection */
-      data->state.lastconnect_id = connection_id;
-      data->state.recent_conn_id = connection_id;
-      infof(data, "%s", buffer);
+      data->state.lastconnect_id = mdctx.conn_id;
+      data->state.recent_conn_id = mdctx.conn_id;
+      infof(data, "%s", mdctx.buffer);
     }
     else
       data->state.lastconnect_id = -1;
@@ -769,19 +776,14 @@ static CURLcode multi_done(struct Curl_easy *data,
   return result;
 }
 
-static int close_connect_only(struct Curl_easy *data,
-                              struct connectdata *conn, void *param)
+static void close_connect_only(struct connectdata *conn,
+                               struct Curl_easy *data,
+                               void *userdata)
 {
-  (void)param;
-  if(data->state.lastconnect_id != conn->connection_id)
-    return 0;
-
-  if(!conn->connect_only)
-    return 1;
-
-  connclose(conn, "Removing connect-only easy handle");
-
-  return 1;
+  (void)userdata;
+  (void)data;
+  if(conn->connect_only)
+    connclose(conn, "Removing connect-only easy handle");
 }
 
 CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
@@ -888,8 +890,8 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 
   if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
-    Curl_conncache_foreach(data, data->state.conn_cache,
-                           NULL, close_connect_only);
+    Curl_conncache_do_by_id(data, data->state.lastconnect_id,
+                            close_connect_only, NULL);
   }
 
 #ifdef USE_LIBPSL
@@ -2788,7 +2790,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     /* Close all the connections in the connection cache */
-    Curl_conncache_multi_close_all(multi);
+    Curl_conncache_close_all_connections(&multi->conn_cache);
 
     sockhash_destroy(&multi->sockhash);
     Curl_hash_destroy(&multi->proto_hash);

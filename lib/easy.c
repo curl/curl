@@ -1318,47 +1318,6 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
 }
 
 /*
- * Wrapper to call functions in Curl_conncache_foreach()
- *
- * Returns always 0.
- */
-static int conn_upkeep(struct Curl_easy *data,
-                       struct connectdata *conn,
-                       void *param)
-{
-  struct curltime *now = param;
-
-  if(Curl_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
-    return 0;
-
-  /* briefly attach for action */
-  Curl_attach_connection(data, conn);
-  if(conn->handler->connection_check) {
-    /* Do a protocol-specific keepalive check on the connection. */
-    conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
-  }
-  else {
-    /* Do the generic action on the FIRSTSOCKET filter chain */
-    Curl_conn_keep_alive(data, conn, FIRSTSOCKET);
-  }
-  Curl_detach_connection(data);
-
-  conn->keepalive = *now;
-  return 0; /* continue iteration */
-}
-
-static CURLcode upkeep(struct conncache *conn_cache, void *data)
-{
-  struct curltime now = Curl_now();
-  /* Loop over every connection and make connection alive. */
-  Curl_conncache_foreach(data,
-                         conn_cache,
-                         &now,
-                         conn_upkeep);
-  return CURLE_OK;
-}
-
-/*
  * Performs connection upkeep for the given session handle.
  */
 CURLcode curl_easy_upkeep(struct Curl_easy *data)
@@ -1372,21 +1331,10 @@ CURLcode curl_easy_upkeep(struct Curl_easy *data)
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  /* determine the connection cache that will next be used by the easy handle.
-     if the easy handle is currently in a multi then data->state.conn_cache
-     should point to the in-use cache. */
-  DEBUGASSERT(!data->multi || data->state.conn_cache);
-  conn_cache =
-    data->state.conn_cache ?
-      data->state.conn_cache :
-    (data->share && (data->share->specifier & (1<< CURL_LOCK_DATA_CONNECT))) ?
-      &data->share->conn_cache :
-    data->multi_easy ?
-      &data->multi_easy->conn_cache : NULL;
-
+  conn_cache = Curl_get_conncache(data);
   if(conn_cache) {
     /* Use the common function to keep connections alive. */
-    return upkeep(conn_cache, data);
+    return Curl_conncache_upkeep(conn_cache, data);
   }
   else {
     /* No connections, so just return success */

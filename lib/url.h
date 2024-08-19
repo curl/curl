@@ -65,6 +65,21 @@ void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
                          int sockindex);
 #endif
 
+/**
+ * Return TRUE iff the given connection is considered dead.
+ * @param nowp      NULL or pointer to time being checked against.
+ */
+bool Curl_conn_seems_dead(struct connectdata *conn,
+                          struct Curl_easy *data,
+                          struct curltime *nowp);
+
+/**
+ * Peform upkeep operations on the connection.
+ */
+CURLcode Curl_conn_upkeep(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          struct curltime *now);
+
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
 void Curl_data_priority_clear_state(struct Curl_easy *data);
 #else

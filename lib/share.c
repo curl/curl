@@ -120,7 +120,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(Curl_conncache_init(&share->conn_cache, NULL, 103))
+      if(Curl_conncache_init(&share->conn_cache, NULL, share, 103))
         res = CURLSHE_NOMEM;
       break;
 

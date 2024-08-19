@@ -752,23 +752,24 @@ static bool conn_maxage(struct Curl_easy *data,
 }
 
 /*
- * This function checks if the given connection is dead and prunes it from
- * the connection cache if so.
- *
- * When this is called as a Curl_conncache_foreach() callback, the connection
- * cache lock is held!
- *
- * Returns TRUE if the connection was dead and pruned.
+ * Return TRUE iff the given connection is considered dead.
  */
-static bool prune_if_dead(struct connectdata *conn,
-                          struct Curl_easy *data)
+bool Curl_conn_seems_dead(struct connectdata *conn,
+                          struct Curl_easy *data,
+                          struct curltime *pnow)
 {
+  DEBUGASSERT(!data->conn);
   if(!CONN_INUSE(conn)) {
     /* The check for a dead socket makes sense only if the connection is not in
        use */
     bool dead;
-    struct curltime now = Curl_now();
-    if(conn_maxage(data, conn, now)) {
+    struct curltime now;
+    if(!pnow) {
+      now = Curl_now();
+      pnow = &now;
+    }
+
+    if(conn_maxage(data, conn, *pnow)) {
       /* avoid check if already too old */
       dead = TRUE;
     }
@@ -811,61 +812,37 @@ static bool prune_if_dead(struct connectdata *conn,
       /* remove connection from cache */
       infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
             conn->connection_id);
-      Curl_conncache_remove_conn(data, conn, FALSE);
       return TRUE;
     }
   }
   return FALSE;
 }
 
-/*
- * Wrapper to use prune_if_dead() function in Curl_conncache_foreach()
- *
- */
-static int call_prune_if_dead(struct Curl_easy *data,
-                              struct connectdata *conn, void *param)
+CURLcode Curl_conn_upkeep(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          struct curltime *now)
 {
-  struct connectdata **pruned = (struct connectdata **)param;
-  if(prune_if_dead(conn, data)) {
-    /* stop the iteration here, pass back the connection that was pruned */
-    *pruned = conn;
-    return 1;
+  CURLcode result = CURLE_OK;
+  if(Curl_timediff(*now, conn->keepalive) <= data->set.upkeep_interval_ms)
+    return result;
+
+  /* briefly attach for action */
+  Curl_attach_connection(data, conn);
+  if(conn->handler->connection_check) {
+    /* Do a protocol-specific keepalive check on the connection. */
+    unsigned int rc;
+    rc = conn->handler->connection_check(data, conn, CONNCHECK_KEEPALIVE);
+    if(rc & CONNRESULT_DEAD)
+      result = CURLE_RECV_ERROR;
   }
-  return 0; /* continue iteration */
-}
-
-/*
- * This function scans the connection cache for half-open/dead connections,
- * closes and removes them. The cleanup is done at most once per second.
- *
- * When called, this transfer has no connection attached.
- */
-static void prune_dead_connections(struct Curl_easy *data)
-{
-  struct curltime now = Curl_now();
-  timediff_t elapsed;
-
-  DEBUGASSERT(!data->conn); /* no connection */
-  CONNCACHE_LOCK(data);
-  elapsed =
-    Curl_timediff(now, data->state.conn_cache->last_cleanup);
-  CONNCACHE_UNLOCK(data);
-
-  if(elapsed >= 1000L) {
-    struct connectdata *pruned = NULL;
-    while(Curl_conncache_foreach(data, data->state.conn_cache, &pruned,
-                                 call_prune_if_dead)) {
-      /* unlocked */
-
-      /* connection previously removed from cache in prune_if_dead() */
-
-      /* disconnect it, do not treat as aborted */
-      Curl_disconnect(data, pruned, FALSE);
-    }
-    CONNCACHE_LOCK(data);
-    data->state.conn_cache->last_cleanup = now;
-    CONNCACHE_UNLOCK(data);
+  else {
+    /* Do the generic action on the FIRSTSOCKET filter chain */
+    result = Curl_conn_keep_alive(data, conn, FIRSTSOCKET);
   }
+  Curl_detach_connection(data);
+
+  conn->keepalive = *now;
+  return result;
 }
 
 #ifdef USE_SSH
@@ -925,7 +902,7 @@ ConnectionExists(struct Curl_easy *data,
 
   /* Look up the bundle with all the connections to this particular host.
      Locks the connection cache, beware of early returns! */
-  bundle = Curl_conncache_find_bundle(data, needle, data->state.conn_cache);
+  bundle = Curl_conncache_find_bundle(data, needle);
   if(!bundle) {
     CONNCACHE_UNLOCK(data);
     return FALSE;
@@ -1271,8 +1248,9 @@ ConnectionExists(struct Curl_easy *data,
       /* When not multiplexed, we have a match here! */
       infof(data, "Multiplexed connection found");
     }
-    else if(prune_if_dead(check, data)) {
-      /* disconnect it, do not treat as aborted */
+    else if(Curl_conn_seems_dead(check, data, NULL)) {
+      /* removed and disconnect. Do not treat as aborted. */
+      Curl_conncache_remove_conn(data, check, FALSE);
       Curl_disconnect(data, check, FALSE);
       continue;
     }
@@ -3490,7 +3468,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(result)
     goto out;
 
-  prune_dead_connections(data);
+  Curl_conncache_prune_dead(data);
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -3548,30 +3526,11 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
       connections_available = FALSE;
-    else {
-      /* this gets a lock on the conncache */
-      struct connectbundle *bundle =
-        Curl_conncache_find_bundle(data, conn, data->state.conn_cache);
-
-      if(max_host_connections > 0 && bundle &&
-         (bundle->num_connections >= max_host_connections)) {
-        struct connectdata *conn_candidate;
-
-        /* The bundle is full. Extract the oldest connection. */
-        conn_candidate = Curl_conncache_extract_bundle(data, bundle);
-        CONNCACHE_UNLOCK(data);
-
-        if(conn_candidate)
-          Curl_disconnect(data, conn_candidate, FALSE);
-        else {
-          infof(data, "No more connections allowed to host: %zu",
-                max_host_connections);
-          connections_available = FALSE;
-        }
-      }
-      else
-        CONNCACHE_UNLOCK(data);
-
+    else if((max_host_connections > 0) &&
+            !Curl_conncache_shrink_bundle(data, conn, max_host_connections)) {
+      infof(data, "No more connections allowed to host: %zu",
+            max_host_connections);
+      connections_available = FALSE;
     }
 
     if(connections_available &&

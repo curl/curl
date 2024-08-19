@@ -38,6 +38,7 @@ struct connectdata;
 struct curl_pollfds;
 struct curl_waitfds;
 struct Curl_multi;
+struct Curl_share;
 
 struct connshutdowns {
   struct Curl_llist conn_list;  /* The connectdata to shut down */
@@ -53,7 +54,11 @@ struct conncache {
   struct connshutdowns shutdowns;
   /* handle used for closing cached connections */
   struct Curl_easy *closure_handle;
-  struct Curl_multi *multi; /* Optional, set if cache belongs to multi */
+  struct Curl_multi *multi; /* != NULL iff cache belongs to multi */
+  struct Curl_share *share; /* != NULL iff cache belongs to share */
+#ifdef DEBUGBUILD
+  BIT(locked);
+#endif
 };
 
 #define BUNDLE_NO_MULTIUSE -1
@@ -65,19 +70,21 @@ struct conncache {
    never doubly locked or unlocked */
 #define CONNCACHE_LOCK(x)                                               \
   do {                                                                  \
-    if((x)->share) {                                                    \
+    if(CURL_SHARE_KEEP_CONNECT((x)->share)) {                           \
+      struct conncache *connc = Curl_get_conncache(x);                  \
       Curl_share_lock((x), CURL_LOCK_DATA_CONNECT,                      \
                       CURL_LOCK_ACCESS_SINGLE);                         \
-      DEBUGASSERT(!(x)->state.conncache_lock);                          \
-      (x)->state.conncache_lock = TRUE;                                 \
+      DEBUGASSERT(!connc->locked);                                      \
+      connc->locked = TRUE;                                             \
     }                                                                   \
   } while(0)
 
 #define CONNCACHE_UNLOCK(x)                                             \
   do {                                                                  \
-    if((x)->share) {                                                    \
-      DEBUGASSERT((x)->state.conncache_lock);                           \
-      (x)->state.conncache_lock = FALSE;                                \
+    if(CURL_SHARE_KEEP_CONNECT((x)->share)) {                           \
+      struct conncache *connc = Curl_get_conncache(x);                  \
+      DEBUGASSERT(connc->locked);                                       \
+      connc->locked = FALSE;                                            \
       Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                   \
     }                                                                   \
   } while(0)
@@ -99,13 +106,33 @@ struct connectbundle {
  */
 int Curl_conncache_init(struct conncache *,
                         struct Curl_multi *multi,
+                        struct Curl_share *share,
                         size_t size);
 void Curl_conncache_destroy(struct conncache *connc);
 
+/* Init the transfer to be used with the conncache.
+ * Assigns `data->id`.
+ */
+void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data);
+
+/* Return the conncache instance used by `data`.
+ * May return NULL for transfers without share or multi handles.
+ */
+struct conncache *Curl_get_conncache(struct Curl_easy *data);
+
 /* return the correct bundle, to a host or a proxy */
 struct connectbundle *Curl_conncache_find_bundle(struct Curl_easy *data,
-                                                 struct connectdata *conn,
-                                                 struct conncache *connc);
+                                                 struct connectdata *conn);
+
+/* Shrink the cache's bundle for `conn` to have less than
+ * `max_host_connections` (if the bundle exists).
+ * Returns FALSE iff the limit could not be enforced, e.g. there is a
+ * bundle and none of its connections could be discarded.
+ */
+bool Curl_conncache_shrink_bundle(struct Curl_easy *data,
+                                  struct connectdata *conn,
+                                  size_t max_host_connections);
+
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
 
@@ -115,12 +142,6 @@ CURLcode Curl_conncache_add_conn(struct Curl_easy *data) WARN_UNUSED_RESULT;
 void Curl_conncache_remove_conn(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool lock);
-bool Curl_conncache_foreach(struct Curl_easy *data,
-                            struct conncache *connc,
-                            void *param,
-                            int (*func)(struct Curl_easy *data,
-                                        struct connectdata *conn,
-                                        void *param));
 
 struct connectdata *
 Curl_conncache_find_first_connection(struct conncache *connc);
@@ -159,6 +180,48 @@ void Curl_conncache_multi_perform(struct Curl_multi *multi);
 
 void Curl_conncache_multi_socket(struct Curl_multi *multi,
                                  curl_socket_t s, int ev_bitmask);
-void Curl_conncache_multi_close_all(struct Curl_multi *multi);
+
+/**
+ * Get the connection with the given id.
+ * WARNING: this is not safe in shared connection caches.
+ */
+struct connectdata *Curl_conncache_get_conn(struct conncache *connc,
+                                            curl_off_t conn_id);
+
+/**
+ * This function scans the data's connection cache for half-open/dead
+ * connections, closes and removes them.
+ * The cleanup is done at most once per second.
+ *
+ * When called, this transfer has no connection attached.
+ */
+void Curl_conncache_prune_dead(struct Curl_easy *data);
+
+/**
+ * Perform upkeep actions on connections in the cache.
+ */
+CURLcode Curl_conncache_upkeep(struct conncache *conn_cache, void *data);
+
+typedef void Curl_conncache_conn_do_cb(struct connectdata *conn,
+                                       struct Curl_easy *data,
+                                       void *cbdata);
+
+/**
+ * Invoke the callback on the data's cached connection with the
+ * given connection id (if it exists).
+ */
+void Curl_conncache_do_by_id(struct Curl_easy *data,
+                             curl_off_t conn_id,
+                             Curl_conncache_conn_do_cb *cb, void *cbdata);
+
+/**
+ * Invoked the callback for the given data + connection under the
+ * connection cache's lock.
+ * The callback is always invoked, even if the transfer has no connection
+ * cache associated.
+ */
+void Curl_conncache_do_locked(struct Curl_easy *data,
+                              struct connectdata *conn,
+                              Curl_conncache_conn_do_cb *cb, void *cbdata);
 
 #endif /* HEADER_CURL_CONNCACHE_H */
