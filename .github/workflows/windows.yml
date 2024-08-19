@@ -139,7 +139,7 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP !FTP'
+            TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -218,7 +218,7 @@ jobs:
         run: |
           export TFLAGS='-j14 ${{ matrix.tflags }}'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' !TFTP !MQTT !WebSockets !SMTP !FTP'
+            TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -334,7 +334,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          export TFLAGS='-j14 !TFTP !MQTT !WebSockets !FTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~FTP ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -482,6 +482,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 12
         run: |
-          export TFLAGS='-j14 !TFTP !MQTT !WebSockets !SMTP !FTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ${{ matrix.tflags }}'
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
