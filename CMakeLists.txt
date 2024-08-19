@@ -54,7 +54,7 @@ include(CheckCCompilerFlag)
 
 project(CURL C)
 
-set(_flags)
+unset(_flags)
 if(APPLE)
   set(_flags "${_flags} APPLE")
 endif()
@@ -83,7 +83,7 @@ if(VCPKG_TOOLCHAIN)
   set(_flags "${_flags} VCPKG")
 endif()
 message(STATUS "CMake platform flags:${_flags}")
-set(_flags)
+unset(_flags)
 
 if(CMAKE_CROSSCOMPILING)
   message(STATUS "Cross-compiling: ${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> ${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
@@ -940,7 +940,7 @@ if(NOT CURL_DISABLE_LDAP)
         include_directories(${CMAKE_LDAP_INCLUDE_DIR})
       endif()
       set(NEED_LBER_H ON)
-      set(_header_list)
+      unset(_header_list)
       if(WIN32)
         list(APPEND _header_list "windows.h")
       endif()
@@ -1584,7 +1584,7 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
     }" HAVE_WRITABLE_ARGV)
 endif()
 
-set(CMAKE_REQUIRED_FLAGS)
+unset(CMAKE_REQUIRED_FLAGS)
 
 option(ENABLE_WEBSOCKETS "Enable WebSockets (experimental)" OFF)
 
@@ -1649,7 +1649,7 @@ if(HAVE_FIONBIO OR
    HAVE_IOCTLSOCKET OR
    HAVE_IOCTLSOCKET_CASE OR
    HAVE_O_NONBLOCK)
-  set(HAVE_DISABLED_NONBLOCKING)
+  unset(HAVE_DISABLED_NONBLOCKING)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
@@ -1815,7 +1815,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endif()
 
   # Clear list and try to detect available protocols
-  set(_items)
+  unset(_items)
   _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
   _add_if("IPFS"          NOT CURL_DISABLE_HTTP)
   _add_if("IPNS"          NOT CURL_DISABLE_HTTP)
@@ -1858,7 +1858,7 @@ if(NOT CURL_DISABLE_INSTALL)
   message("Protocols: ${_support_protocols_lower}")
 
   # Clear list and try to detect available features
-  set(_items)
+  unset(_items)
   _add_if("SSL"           _ssl_enabled)
   _add_if("IPv6"          ENABLE_IPV6)
   _add_if("UnixSockets"   USE_UNIX_SOCKETS)
@@ -1910,7 +1910,7 @@ if(NOT CURL_DISABLE_INSTALL)
   message("Features: ${SUPPORT_FEATURES}")
 
   # Clear list and collect SSL backends
-  set(_items)
+  unset(_items)
   _add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
   _add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL)
   _add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
@@ -1947,7 +1947,7 @@ if(NOT CURL_DISABLE_INSTALL)
   # For processing full path libraries into -L and -l ld options,
   # the directories that go with the -L option are cached, so they
   # only get added once per such directory.
-  set(_libcurl_libs_dirs)
+  unset(_libcurl_libs_dirs)
   # To avoid getting unnecessary -L options for known system directories,
   # _libcurl_libs_dirs is seeded with them.
   foreach(_libdir IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
