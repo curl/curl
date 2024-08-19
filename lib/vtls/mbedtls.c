@@ -541,12 +541,20 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
       mbed_extract_certinfo(data, crt);
   }
 
-  /* we clear any faults the mbedtls' own verification found if needed.
-   * See <https://github.com/Mbed-TLS/mbedtls/issues/9210> */
   if(!conn_config->verifypeer)
     *flags = 0;
   else if(!conn_config->verifyhost)
     *flags &= ~MBEDTLS_X509_BADCERT_CN_MISMATCH;
+
+  if(*flags) {
+#if MBEDTLS_VERSION_NUMBER < 0x03000000 || !defined(MBEDTLS_X509_REMOVE_INFO)
+    char buf[128];
+    mbedtls_x509_crt_verify_info(buf, sizeof(buf), "", *flags);
+    failf(data, "mbedTLS: %s", buf);
+#else
+    failf(data, "mbedTLS: cerificate verification error 0x%08x", *flags);
+#endif
+  }
 
   return 0;
 }
@@ -808,7 +816,11 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
+  /* Always let mbedTLS verify certificates, if verifypeer or verifyhost are
+   * disabled we clear the corresponding error flags in the verify callback
+   * function. That is also where we log verification errors. */
   mbedtls_ssl_conf_verify(&backend->config, mbed_verify_cb, cf);
+  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
 
   mbedtls_ssl_init(&backend->ssl);
   backend->initialized = TRUE;
@@ -820,15 +832,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   ret = mbed_set_ssl_version_min_max(data, backend, conn_config);
   if(ret != CURLE_OK)
     return ret;
-
-#ifdef TLS13_SUPPORT
-  if(conn_config->version == CURL_SSLVERSION_TLSv1_3)
-    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_REQUIRED);
-  else
-    mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
-#else
-  mbedtls_ssl_conf_authmode(&backend->config, MBEDTLS_SSL_VERIFY_OPTIONAL);
-#endif
 
   mbedtls_ssl_conf_rng(&backend->config, mbedtls_ctr_drbg_random,
                        &backend->ctr_drbg);
@@ -992,8 +995,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_OK;
   }
   else if(ret == MBEDTLS_ERR_X509_CERT_VERIFY_FAILED) {
-    infof(data, "peer certificate could not be verified");
-    /* fall through to flag checking below for better error messages */
+    failf(data, "peer certificate could not be verified");
+    return CURLE_PEER_FAILED_VERIFICATION;
   }
   else if(ret) {
     char errorbuf[128];
@@ -1021,29 +1024,6 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   infof(data, "mbedTLS: %s Handshake complete",
         mbedtls_ssl_get_version(&backend->ssl));
 #endif
-  ret = mbedtls_ssl_get_verify_result(&backend->ssl);
-
-  if(ret) {
-    if(ret & MBEDTLS_X509_BADCERT_EXPIRED)
-      failf(data, "Cert verify failed: BADCERT_EXPIRED");
-
-    else if(ret & MBEDTLS_X509_BADCERT_REVOKED)
-      failf(data, "Cert verify failed: BADCERT_REVOKED");
-
-    else if(ret & MBEDTLS_X509_BADCERT_CN_MISMATCH)
-      failf(data, "Cert verify failed: BADCERT_CN_MISMATCH");
-
-    else if(ret & MBEDTLS_X509_BADCERT_NOT_TRUSTED)
-      failf(data, "Cert verify failed: BADCERT_NOT_TRUSTED");
-
-    else if(ret & MBEDTLS_X509_BADCERT_FUTURE)
-      failf(data, "Cert verify failed: BADCERT_FUTURE");
-
-    else
-      failf(data, "peer certificate could not be verified");
-
-    return CURLE_PEER_FAILED_VERIFICATION;
-  }
 
   if(pinnedpubkey) {
     int size;
