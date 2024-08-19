@@ -120,7 +120,7 @@ HTTP/2:
   - all:
       - changed-files:
           - any-glob-to-all-files:
-              - '{CMake/FindNGHTTP2.cmake,CMake/FindQUICHE.cmake,docs/HTTP2.md,docs/libcurl/opts/CURLOPT_STREAM*,docs/examples/http2*,lib/http2*,tests/http2-server.pl}'
+              - '{CMake/FindNGHTTP2.cmake,CMake/FindQuiche.cmake,docs/HTTP2.md,docs/libcurl/opts/CURLOPT_STREAM*,docs/examples/http2*,lib/http2*,tests/http2-server.pl}'
 
 HTTP/3:
   - all:
