@@ -34,7 +34,7 @@ CMAKE_DIST =                                    \
  CMake/CurlTests.c                              \
  CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
- CMake/FindCARES.cmake                          \
+ CMake/FindCares.cmake                          \
  CMake/FindGSS.cmake                            \
  CMake/FindLibpsl.cmake                         \
  CMake/FindLibssh2.cmake                        \

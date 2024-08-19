@@ -221,7 +221,7 @@ set(LIBCURL_PC_REQUIRES_PRIVATE "")
 
 if(ENABLE_ARES)
   set(USE_ARES 1)
-  find_package(CARES REQUIRED)
+  find_package(Cares REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libcares")
   add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings

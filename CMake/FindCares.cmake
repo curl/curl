@@ -64,7 +64,7 @@ elseif(CARES_INCLUDE_DIR AND EXISTS "${CARES_INCLUDE_DIR}/ares_version.h")
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(CARES
+find_package_handle_standard_args(Cares
   REQUIRED_VARS
     CARES_INCLUDE_DIR
     CARES_LIBRARY
