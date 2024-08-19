@@ -55,6 +55,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.5 NTLM does not support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
+ 6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -366,6 +367,13 @@ problems may have been fixed or changed somewhat since this was written.
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
+
+6.8 Heimdal memory leaks
+
+ Running test 2077 and 2078 with curl built to do GSS with Heimdal causes
+ valgrind errors (memory leak).
+
+ https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 
