@@ -18,9 +18,9 @@ Every trusted server certificate is digitally signed by a Certificate
 Authority, a CA.
 
 In your local CA store you have a collection of certificates from *trusted*
-CAs that TLS clients like curl use to verify servers' certificates.
+certificate authorities that TLS clients like curl use to verify servers.
 
-curl does certificate verification by default. This is done by verifing the
+curl does certificate verification by default. This is done by verifying the
 signature and making sure the certificate was crafted for the server name
 provided in the URL.
 
