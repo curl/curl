@@ -79,7 +79,7 @@ server, do one of the following:
 
     If neither of the two options is specified, configure tries to auto-detect
     a setting. It's also possible to explicitly not set any default store but
-    rely on the built in default the crypto library may provide instead. You
+    rely on the built-in default the crypto library may provide instead. You
     can achieve that by passing both `--without-ca-bundle` and
     `--without-ca-path` to the configure script.
 
