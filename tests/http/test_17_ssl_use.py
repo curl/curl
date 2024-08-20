@@ -266,3 +266,44 @@ class TestSSLUse:
         ])
         # CURLE_SSL_INVALIDCERTSTATUS, our certs have no OCSP info
         assert r.exit_code == 91, f'{r}'
+
+    @staticmethod
+    def gen_test_17_09_list():
+        ret = []
+        for tls_proto in ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']:
+            for max_ver in range(0, 5):
+                for min_ver in range(-2, 4):
+                    ret.append([tls_proto, max_ver, min_ver])
+        return ret
+
+    @pytest.mark.parametrize("tls_proto, max_ver, min_ver", gen_test_17_09_list())
+    def test_17_09_ssl_min_max(self, env: Env, httpd, tls_proto, max_ver, min_ver):
+        httpd.set_extra_config('base', [
+            f'SSLProtocol {tls_proto}',
+            'SSLCipherSuite ALL:@SECLEVEL=0',
+        ])
+        httpd.reload_if_config_changed()
+        proto = 'http/1.1'
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        # SSL backend specifics
+        if env.curl_uses_lib('bearssl'):
+            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', None]
+        elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
+            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', None]
+        elif env.curl_uses_lib('gnutls'):
+            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+        elif env.curl_uses_lib('quiche'):
+            supported = ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+        else:  # most SSL backends dropped support for TLSv1.0, TLSv1.1
+            supported = [None, None, 'TLSv1.2', 'TLSv1.3']
+        # test
+        extra_args = [[], ['--tlsv1'], ['--tlsv1.0'], ['--tlsv1.1'], ['--tlsv1.2'], ['--tlsv1.3']][min_ver+2] + \
+            [['--tls-max', '1.0'], ['--tls-max', '1.1'], ['--tls-max', '1.2'], ['--tls-max', '1.3'], []][max_ver]
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
+        if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
+            assert r.exit_code == 0 , r.dump_logs()
+            assert r.json['HTTPS'] == 'on', r.dump_logs()
+            assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
+        else:
+            assert r.exit_code != 0, r.dump_logs()
