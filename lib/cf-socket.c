@@ -147,7 +147,9 @@ static void nosigpipe(struct Curl_easy *data,
 #endif
 
 #if defined(USE_WINSOCK) && \
-	defined(TCP_KEEPIDLE)&& defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+    defined(TCP_KEEPIDLE) && defined(TCP_KEEPINTVL) && defined(TCP_KEEPCNT)
+/*  Win 10, v 1709 (10.0.16299) and later can use SetSockOpt TCP_KEEP____
+ *  so should use seconds */
 #define CURL_WINSOCK_KEEP_SSO
 #define KEEPALIVE_FACTOR(x)
 #elif defined(USE_WINSOCK) || \
