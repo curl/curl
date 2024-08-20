@@ -41,19 +41,17 @@ log = logging.getLogger(__name__)
 class TestSSLUse:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, httpd, nghttpx):
+    def _class_scope(self, env, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
-        httpd.set_extra_config('base', [
-            f'SSLCipherSuite SSL'\
-            f' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'\
-            f':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
-            f'SSLCipherSuite TLSv1.3'\
-            f' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
-        ])
-        httpd.reload()
 
-    def test_17_01_sslinfo_plain(self, env: Env, httpd, nghttpx, repeat):
+    @pytest.fixture(autouse=True, scope='function')
+    def _function_scope(self, request, env, httpd):
+        httpd.clear_extra_configs()
+        if 'httpd' not in request.node._fixtureinfo.argnames:
+            httpd.reload_if_config_changed()
+
+    def test_17_01_sslinfo_plain(self, env: Env, nghttpx, repeat):
         proto = 'http/1.1'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
@@ -64,7 +62,7 @@ class TestSSLUse:
         assert r.json['SSL_SESSION_RESUMED'] == 'Initial', f'{r.json}'
 
     @pytest.mark.parametrize("tls_max", ['1.2', '1.3'])
-    def test_17_02_sslinfo_reconnect(self, env: Env, httpd, nghttpx, tls_max, repeat):
+    def test_17_02_sslinfo_reconnect(self, env: Env, tls_max):
         proto = 'http/1.1'
         count = 3
         exp_resumed = 'Resumed'
@@ -108,7 +106,7 @@ class TestSSLUse:
 
     # use host name with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_03_trailing_dot(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_17_03_trailing_dot(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -123,7 +121,7 @@ class TestSSLUse:
 
     # use host name with double trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_04_double_dot(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_17_04_double_dot(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('wolfssl'):
@@ -147,7 +145,7 @@ class TestSSLUse:
 
     # use ip address for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_05_ip_addr(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_17_05_ip_addr(self, env: Env, proto):
         if env.curl_uses_lib('bearssl'):
             pytest.skip("BearSSL does not support cert verification with IP addresses")
         if env.curl_uses_lib('mbedtls'):
@@ -166,7 +164,7 @@ class TestSSLUse:
 
     # use localhost for connect
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_06_localhost(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_17_06_localhost(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -178,66 +176,82 @@ class TestSSLUse:
         if proto != 'h3':  # we proxy h3
             assert r.json['SSL_TLS_SNI'] == domain, f'{r.json}'
 
-    # test setting cipher suites, the AES 256 ciphers are disabled in the test server
-    @pytest.mark.parametrize("ciphers, succeed", [
-        [[0x1301], True],
-        [[0x1302], False],
-        [[0x1303], True],
-        [[0x1302, 0x1303], True],
-        [[0xC02B, 0xC02F], True],
-        [[0xC02C, 0xC030], False],
-        [[0xCCA9, 0xCCA8], True],
-        [[0xC02C, 0xC030, 0xCCA9, 0xCCA8], True],
-    ])
-    def test_17_07_ssl_ciphers(self, env: Env, httpd, nghttpx, ciphers, succeed, repeat):
-        cipher_table = {
-           0x1301: 'TLS_AES_128_GCM_SHA256',
-           0x1302: 'TLS_AES_256_GCM_SHA384',
-           0x1303: 'TLS_CHACHA20_POLY1305_SHA256',
-           0xC02B: 'ECDHE-ECDSA-AES128-GCM-SHA256',
-           0xC02F: 'ECDHE-RSA-AES128-GCM-SHA256',
-           0xC02C: 'ECDHE-ECDSA-AES256-GCM-SHA384',
-           0xC030: 'ECDHE-RSA-AES256-GCM-SHA384',
-           0xCCA9: 'ECDHE-ECDSA-CHACHA20-POLY1305',
-           0xCCA8: 'ECDHE-RSA-CHACHA20-POLY1305',
-        }
-        cipher_names = list(map(cipher_table.get, ciphers))
+    @staticmethod
+    def gen_test_17_07_list():
+        tls13_tests = [
+            [None, True],
+            [['TLS_AES_128_GCM_SHA256'], True],
+            [['TLS_AES_256_GCM_SHA384'], False],
+            [['TLS_CHACHA20_POLY1305_SHA256'], True],
+            [['TLS_AES_256_GCM_SHA384',
+              'TLS_CHACHA20_POLY1305_SHA256'], True],
+        ]
+        tls12_tests = [
+            [None, True],
+            [['ECDHE-ECDSA-AES128-GCM-SHA256', 'ECDHE-RSA-AES128-GCM-SHA256'], True],
+            [['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384'], False],
+            [['ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
+            [['ECDHE-ECDSA-AES256-GCM-SHA384', 'ECDHE-RSA-AES256-GCM-SHA384',
+              'ECDHE-ECDSA-CHACHA20-POLY1305', 'ECDHE-RSA-CHACHA20-POLY1305'], True],
+        ]
+        ret = []
+        for tls_proto in ['TLSv1.3 +TLSv1.2', 'TLSv1.3', 'TLSv1.2']:
+            for [ciphers13, succeed13] in tls13_tests:
+                for [ciphers12, succeed12] in tls12_tests:
+                    ret.append([tls_proto, ciphers13, ciphers12, succeed13, succeed12])
+        return ret
+
+    @pytest.mark.parametrize("tls_proto, ciphers13, ciphers12, succeed13, succeed12", gen_test_17_07_list())
+    def test_17_07_ssl_ciphers(self, env: Env, httpd, tls_proto, ciphers13, ciphers12, succeed13, succeed12):
+        # to test setting cipher suites, the AES 256 ciphers are disabled in the test server
+        httpd.set_extra_config('base', [
+            'SSLCipherSuite SSL'
+                ' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
+                ':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305',
+            'SSLCipherSuite TLSv1.3'
+                ' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256',
+            f'SSLProtocol {tls_proto}'
+        ])
+        httpd.reload_if_config_changed()
         proto = 'http/1.1'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
-        extra_args = []
+        # SSL backend specifics
         if env.curl_uses_lib('gnutls'):
-            pytest.skip('GnuTLS does not support setting ciphers by name')
-        if ciphers[0] & 0xFF00 == 0x1300:
-            # test setting TLSv1.3 ciphers
-            if env.curl_uses_lib('bearssl'):
-                pytest.skip('BearSSL does not support TLSv1.3')
-            elif env.curl_uses_lib('sectransp'):
-                pytest.skip('SecureTransport does not support TLSv1.3')
-            elif env.curl_uses_lib('boringssl'):
+            pytest.skip('GnuTLS does not support setting ciphers')
+        elif env.curl_uses_lib('boringssl'):
+            if ciphers13 is not None:
                 pytest.skip('BoringSSL does not support setting TLSv1.3 ciphers')
-            elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
-                pytest.skip('mbedTLS TLSv1.3 support requires at least 3.6.0')
-            else:
-                extra_args = ['--tls13-ciphers', ':'.join(cipher_names)]
-        else:
-            # test setting TLSv1.2 ciphers
-            if env.curl_uses_lib('schannel'):
+        elif env.curl_uses_lib('schannel'):  # not in CI, so untested
+            if ciphers12 is not None:
                 pytest.skip('Schannel does not support setting TLSv1.2 ciphers by name')
-            else:
-                # the server supports TLSv1.3, so to test TLSv1.2 ciphers we set tls-max
-                extra_args = ['--tls-max', '1.2', '--ciphers', ':'.join(cipher_names)]
+        elif env.curl_uses_lib('bearssl'):
+            if tls_proto == 'TLSv1.3':
+                pytest.skip('BearSSL does not support TLSv1.3')
+            tls_proto = 'TLSv1.2'
+        elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
+            if tls_proto == 'TLSv1.3':
+                pytest.skip('SecureTransport does not support TLSv1.3')
+            tls_proto = 'TLSv1.2'
+        # test
+        extra_args = ['--tls13-ciphers', ':'.join(ciphers13)] if ciphers13 else []
+        extra_args += ['--ciphers', ':'.join(ciphers12)] if ciphers12 else []
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
-        if succeed:
-            assert r.exit_code == 0, f'{r}'
-            assert r.json['HTTPS'] == 'on', f'{r.json}'
-            assert 'SSL_CIPHER' in r.json, f'{r.json}'
-            assert r.json['SSL_CIPHER'] in cipher_names, f'{r.json}'
+        if tls_proto != 'TLSv1.2' and succeed13:
+            assert r.exit_code == 0, r.dump_logs()
+            assert r.json['HTTPS'] == 'on', r.dump_logs()
+            assert r.json['SSL_PROTOCOL'] == 'TLSv1.3', r.dump_logs()
+            assert ciphers13 is None or r.json['SSL_CIPHER'] in ciphers13, r.dump_logs()
+        elif tls_proto == 'TLSv1.2' and succeed12:
+            assert r.exit_code == 0, r.dump_logs()
+            assert r.json['HTTPS'] == 'on', r.dump_logs()
+            assert r.json['SSL_PROTOCOL'] == 'TLSv1.2', r.dump_logs()
+            assert ciphers12 is None or r.json['SSL_CIPHER'] in ciphers12, r.dump_logs()
         else:
-            assert r.exit_code != 0, f'{r}'
+            assert r.exit_code != 0, r.dump_logs()
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_17_08_cert_status(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_17_08_cert_status(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_uses_lib('openssl') and \
