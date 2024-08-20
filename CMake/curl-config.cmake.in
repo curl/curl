@@ -24,7 +24,7 @@
 @PACKAGE_INIT@
 
 if(NOT DEFINED CURL_USE_PKGCONFIG)
-  if(UNIX OR (MSVC AND VCPKG_TOOLCHAIN))  # Keep this in sync with root CMakeLists.txt
+  if(UNIX OR (MSVC AND VCPKG_TOOLCHAIN))  # Keep in sync with root CMakeLists.txt
     set(CURL_USE_PKGCONFIG ON)
   else()
     set(CURL_USE_PKGCONFIG OFF)
