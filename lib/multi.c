@@ -603,7 +603,7 @@ struct multi_done_ctx {
   char buffer[256];
   BIT(premature);
   BIT(do_disconnect);
-  BIT(return_conn);
+  BIT(now_idle);
 };
 
 static void multi_done_locked(struct connectdata *conn,
@@ -679,7 +679,7 @@ static void multi_done_locked(struct connectdata *conn,
               "Connection #%" CURL_FORMAT_CURL_OFF_T " to host %s left intact",
               mdctx->conn_id, host);
     /* the connection is no longer in use by this transfer */
-    mdctx->return_conn = TRUE;
+    mdctx->now_idle = TRUE;
   }
 }
 
@@ -763,15 +763,17 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   if(mdctx.do_disconnect)
     Curl_disconnect(data, conn, premature);
-  else if(mdctx.return_conn) {
-    if(Curl_conncache_return_conn(data, conn)) {
-      /* remember the most recently used connection */
+  else if(mdctx.now_idle) {
+    if(Curl_conncache_conn_is_idle(data, conn)) {
+      /* connection kept in the cache */
       data->state.lastconnect_id = mdctx.conn_id;
       data->state.recent_conn_id = mdctx.conn_id;
       infof(data, "%s", mdctx.buffer);
     }
-    else
+    else {
+      /* connection was removed from the cache and destroyed. */
       data->state.lastconnect_id = -1;
+    }
   }
 
   return result;
@@ -2784,12 +2786,10 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 #endif
     }
 
-    /* Close all the connections in the connection cache */
-    Curl_conncache_close_all_connections(&multi->conn_cache);
+    Curl_conncache_destroy(&multi->conn_cache);
 
     sockhash_destroy(&multi->sockhash);
     Curl_hash_destroy(&multi->proto_hash);
-    Curl_conncache_destroy(&multi->conn_cache);
     Curl_hash_destroy(&multi->hostcache);
     Curl_psl_destroy(&multi->psl);
 

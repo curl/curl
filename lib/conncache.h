@@ -45,8 +45,17 @@ struct connshutdowns {
   BIT(iter_locked);  /* TRUE while iterating the list */
 };
 
+/* A list of connection to the similar hosts, with similar meaning the
+ * first n chars of interface+port+hostname are the same. */
+struct connectbundle {
+  int multiuse;                 /* some conns in bundle support multi-use */
+  size_t num_connections;       /* Number of connections in the bundle */
+  struct Curl_llist conn_list;  /* The connectdata members of the bundle */
+};
+
 struct conncache {
-  struct Curl_hash hash;
+   /* the live connections, aggregated by bundle, hostname+port+etc as key */
+  struct Curl_hash key2bundle;
   size_t num_conn;
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
@@ -65,42 +74,6 @@ struct conncache {
 #define BUNDLE_UNKNOWN     0  /* initial value */
 #define BUNDLE_MULTIPLEX   2
 
-#ifdef DEBUGBUILD
-/* the debug versions of these macros make extra certain that the lock is
-   never doubly locked or unlocked */
-#define CONNCACHE_LOCK(x)                                               \
-  do {                                                                  \
-    if(CURL_SHARE_KEEP_CONNECT((x)->share)) {                           \
-      struct conncache *connc = Curl_get_conncache(x);                  \
-      Curl_share_lock((x), CURL_LOCK_DATA_CONNECT,                      \
-                      CURL_LOCK_ACCESS_SINGLE);                         \
-      DEBUGASSERT(!connc->locked);                                      \
-      connc->locked = TRUE;                                             \
-    }                                                                   \
-  } while(0)
-
-#define CONNCACHE_UNLOCK(x)                                             \
-  do {                                                                  \
-    if(CURL_SHARE_KEEP_CONNECT((x)->share)) {                           \
-      struct conncache *connc = Curl_get_conncache(x);                  \
-      DEBUGASSERT(connc->locked);                                       \
-      connc->locked = FALSE;                                            \
-      Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT);                   \
-    }                                                                   \
-  } while(0)
-#else
-#define CONNCACHE_LOCK(x) if((x)->share)                                \
-    Curl_share_lock((x), CURL_LOCK_DATA_CONNECT, CURL_LOCK_ACCESS_SINGLE)
-#define CONNCACHE_UNLOCK(x) if((x)->share)              \
-    Curl_share_unlock((x), CURL_LOCK_DATA_CONNECT)
-#endif
-
-struct connectbundle {
-  int multiuse;                 /* supports multi-use */
-  size_t num_connections;       /* Number of connections in the bundle */
-  struct Curl_llist conn_list;  /* The connectdata members of the bundle */
-};
-
 /* Init the cache, pass multi only if cache is owned by it.
  * returns 1 on error, 0 is fine.
  */
@@ -111,8 +84,7 @@ int Curl_conncache_init(struct conncache *,
 void Curl_conncache_destroy(struct conncache *connc);
 
 /* Init the transfer to be used with the conncache.
- * Assigns `data->id`.
- */
+ * Assigns `data->id`. */
 void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data);
 
 /* Return the conncache instance used by `data`.
@@ -120,9 +92,39 @@ void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data);
  */
 struct conncache *Curl_get_conncache(struct Curl_easy *data);
 
-/* return the correct bundle, to a host or a proxy */
-struct connectbundle *Curl_conncache_find_bundle(struct Curl_easy *data,
-                                                 struct connectdata *conn);
+/* returns number of connections currently held in the connection cache */
+size_t Curl_conncache_size(struct Curl_easy *data);
+
+/* Return if bundle with `muliuse` (see BUNDLE_* defines) is suitable */
+typedef bool Curl_conncache_bundle_match_cb(const char *key,
+                                            int multiuse, void *userdata);
+
+/* Return of conn is suitable. If so, stops iteration. */
+typedef bool Curl_conncache_conn_match_cb(struct connectdata *conn,
+                                          void *userdata);
+
+/* Act on the result of the find, may override it. */
+typedef bool Curl_conncache_done_match_cb(bool result, void *userdata);
+
+/**
+ * Find a connection in the cache. All callbacks are invoked while the
+ * cache's lock is held.
+ * @param data        current transfer
+ * @param needle      determines which connection bundle to inspect.
+ * @param bundle_db   if not NULL, determines if bundle's multiuse is ok
+ * @param conn_cb     must be present, called for each connection in the
+ *                    bundle until it returns TRUE
+ * @param result_cb   if not NULL, is called at the end with the result
+ *                    of the `conn_cb` or FALSE if never called.
+ * @return combined result of last conn_db and result_cb or FALSE if no
+                      connections were present.
+ */
+bool Curl_conncache_find_conn(struct Curl_easy *data,
+                              struct connectdata *needle,
+                              Curl_conncache_bundle_match_cb *bundle_cb,
+                              Curl_conncache_conn_match_cb *conn_cb,
+                              Curl_conncache_done_match_cb *done_cb,
+                              void *userdata);
 
 /* Shrink the cache's bundle for `conn` to have less than
  * `max_host_connections` (if the bundle exists).
@@ -133,23 +135,27 @@ bool Curl_conncache_shrink_bundle(struct Curl_easy *data,
                                   struct connectdata *conn,
                                   size_t max_host_connections);
 
-/* returns number of connections currently held in the connection cache */
-size_t Curl_conncache_size(struct Curl_easy *data);
+/*
+ * A connection (already in the cache) has become idle. Do any
+ * cleanups in regard to the cache's limits.
+ *
+ * Return TRUE if idle connection kept in cache, FALSE if closed.
+ */
+bool Curl_conncache_conn_is_idle(struct Curl_easy *data,
+                                 struct connectdata *conn);
 
-bool Curl_conncache_return_conn(struct Curl_easy *data,
-                                struct connectdata *conn);
-CURLcode Curl_conncache_add_conn(struct Curl_easy *data) WARN_UNUSED_RESULT;
+CURLcode Curl_conncache_add_conn(struct Curl_easy *data,
+                                 struct connectdata *conn) WARN_UNUSED_RESULT;
+
 void Curl_conncache_remove_conn(struct Curl_easy *data,
                                 struct connectdata *conn,
                                 bool lock);
 
-struct connectdata *
-Curl_conncache_find_first_connection(struct conncache *connc);
-
-struct connectdata *
-Curl_conncache_extract_oldest(struct Curl_easy *data);
-void Curl_conncache_close_all_connections(struct conncache *connc);
-void Curl_conncache_print(struct conncache *connc);
+/**
+ * Remove the oldest, idle connection from the cache, if there is any.
+ * Returns the connection removed or NULL.
+ */
+struct connectdata *Curl_conncache_remove_oldest_idle(struct Curl_easy *data);
 
 /**
  * Tear down the connection. If `aborted` is FALSE, the connection
@@ -180,7 +186,8 @@ void Curl_conncache_multi_socket(struct Curl_multi *multi,
 
 /**
  * Get the connection with the given id.
- * WARNING: this is not safe in shared connection caches.
+ * WARNING: this is not safe in shared connection caches, as the
+ * connection may be discarded by other actions.
  */
 struct connectdata *Curl_conncache_get_conn(struct conncache *connc,
                                             curl_off_t conn_id);

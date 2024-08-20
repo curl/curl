@@ -967,7 +967,7 @@ struct connectdata {
     unsigned int unused:1; /* avoids empty union */
   } proto;
 
-  struct connectbundle *bundle; /* The bundle we are member of */
+  struct connectbundle *bundle; /* The conn_cache bundle we are member of */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif
