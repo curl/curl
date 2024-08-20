@@ -23,13 +23,12 @@
 ###########################################################################
 @PACKAGE_INIT@
 
-if(NOT DEFINED CURL_USE_PKGCONFIG)
-  if(UNIX OR (MSVC AND VCPKG_TOOLCHAIN))  # Keep in sync with root CMakeLists.txt
-    set(CURL_USE_PKGCONFIG ON)
-  else()
-    set(CURL_USE_PKGCONFIG OFF)
-  endif()
+if(UNIX OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))  # Keep in sync with root CMakeLists.txt
+  set(_curl_use_pkgconfig_default ON)
+else()
+  set(_curl_use_pkgconfig_default OFF)
 endif()
+option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependencies" ${_curl_use_pkgconfig_default})
 
 include(CMakeFindDependencyMacro)
 if(@USE_OPENSSL@)
