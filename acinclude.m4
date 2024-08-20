@@ -1338,10 +1338,10 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
     AC_MSG_RESULT([no])
   fi
 
-  AC_MSG_CHECKING([whether to use builtin CA store of SSL library])
+  AC_MSG_CHECKING([whether to use built-in CA store of SSL library])
   AC_ARG_WITH(ca-fallback,
-AS_HELP_STRING([--with-ca-fallback], [Use the built in CA store of the SSL library])
-AS_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the SSL library]),
+AS_HELP_STRING([--with-ca-fallback], [Use the built-in CA store of the SSL library])
+AS_HELP_STRING([--without-ca-fallback], [Don't use the built-in CA store of the SSL library]),
   [
     if test "x$with_ca_fallback" != "xyes" -a "x$with_ca_fallback" != "xno"; then
       AC_MSG_ERROR([--with-ca-fallback only allows yes or no as parameter])
@@ -1353,7 +1353,7 @@ AS_HELP_STRING([--without-ca-fallback], [Don't use the built in CA store of the 
     if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1"; then
       AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL or GnuTLS])
     fi
-    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built in CA store of SSL library ])
+    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built-in CA store of SSL library ])
   fi
 ])
 

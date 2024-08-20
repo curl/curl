@@ -31,7 +31,7 @@
  * changed.
  *
  * In order to differentiate between platforms/compilers/architectures use
- * only compiler built in predefined preprocessor symbols.
+ * only compiler built-in predefined preprocessor symbols.
  *
  * curl_off_t
  * ----------
