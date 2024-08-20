@@ -68,9 +68,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: '!ssl !debug'
+          - name: '!ssl !debug brotli zstd'
             compiler: clang
-            configure: --without-ssl --enable-websockets
+            install: brotli zstd
+            configure: --without-ssl --enable-websockets --with-brotli --with-zstd
             macos-version-min: '10.9'
           - name: '!ssl !debug'
             compiler: gcc-12
@@ -287,9 +288,9 @@ jobs:
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
             macos-version-min: '10.15'
-          - name: 'wolfSSL !ldap'
-            install: wolfssl
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+          - name: 'wolfSSL !ldap brotli zstd'
+            install: brotli wolfssl zstd
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
