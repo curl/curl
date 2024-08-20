@@ -581,7 +581,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   int features = 0;
 
 #if defined(USE_SSH)
-  static char ssh_buffer[80];
+  static char ssh_buf[80];  /* 'ssh_buffer' clashes with libssh/libssh.h */
 #endif
 #ifdef USE_SSL
 #ifdef CURL_WITH_MULTI_SSL
@@ -622,8 +622,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif
 
 #if defined(USE_SSH)
-  Curl_ssh_version(ssh_buffer, sizeof(ssh_buffer));
-  version_info.libssh_version = ssh_buffer;
+  Curl_ssh_version(ssh_buf, sizeof(ssh_buf));
+  version_info.libssh_version = ssh_buf;
 #endif
 
 #ifdef HAVE_BROTLI
