@@ -488,7 +488,7 @@ add_ciphers:
 static void
 mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
 {
-#if !defined(CURL_DISABLE_VERBOSE_STRINGS) || \
+#if defined(CURL_DISABLE_VERBOSE_STRINGS) || \
     (MBEDTLS_VERSION_NUMBER >= 0x03000000 && defined(MBEDTLS_X509_REMOVE_INFO))
   (void) data, (void) crt;
 #else
@@ -497,7 +497,7 @@ mbed_dump_cert_info(struct Curl_easy *data, const mbedtls_x509_crt *crt)
 
   if(buffer && mbedtls_x509_crt_info(buffer, bufsize, " ", crt) > 0) {
     infof(data, "Server certificate:");
-    for(p = buffer; *p; *p && p++) {
+    for(p = buffer; *p; p += *p != '\0') {
       size_t s = strcspn(p, "\n");
       infof(data, "%.*s", (int) s, p);
       p += s;
