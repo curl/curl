@@ -28,8 +28,6 @@
 
 #include <limits.h>
 
-#include <wolfssh/ssh.h>
-#include <wolfssh/wolfsftp.h>
 #include "urldata.h"
 #include "cfilters.h"
 #include "connect.h"

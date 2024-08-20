@@ -30,9 +30,6 @@
 
 #include <limits.h>
 
-#include <libssh2.h>
-#include <libssh2_sftp.h>
-
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
