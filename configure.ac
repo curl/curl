@@ -2348,6 +2348,10 @@ elif test X"$OPT_LIBSSH" != Xno; then
   fi
 
   if test "$LIBSSH_ENABLED" = "1"; then
+    if test "$curl_cv_native_windows" = "yes"; then
+      dnl for if_nametoindex
+      LIBS="-liphlpapi $LIBS"
+    fi
     if test -n "$DIR_SSH"; then
        dnl when the libssh shared libs were found in a path that the run-time
        dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH

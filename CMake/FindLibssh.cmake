@@ -87,3 +87,7 @@ else()
 
   mark_as_advanced(LIBSSH_INCLUDE_DIR LIBSSH_LIBRARY)
 endif()
+
+if(LIBSSH_FOUND AND WIN32)
+  list(APPEND LIBSSH_LIBRARIES "iphlpapi")  # for if_nametoindex
+endif()
