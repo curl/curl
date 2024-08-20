@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #***************************************************************************
 #                                  _   _ ____  _
@@ -33,6 +32,7 @@ from datetime import timedelta, datetime
 from json import JSONEncoder
 import time
 from typing import List, Union, Optional
+import copy
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -79,6 +79,7 @@ class Httpd:
         self._auth_digest = True
         self._proxy_auth_basic = proxy_auth
         self._extra_configs = {}
+        self._loaded_extra_configs = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
                            capture_output=True, text=True)
@@ -152,10 +153,12 @@ class Httpd:
         if r.exit_code != 0:
             log.error(f'failed to start httpd: {r}')
             return False
+        self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def stop(self):
         r = self._apachectl('stop')
+        self._loaded_extra_configs = None
         if r.exit_code == 0:
             return self.wait_dead(timeout=timedelta(seconds=5))
         log.fatal(f'stopping httpd failed: {r}')
@@ -168,9 +171,16 @@ class Httpd:
     def reload(self):
         self._write_config()
         r = self._apachectl("graceful")
+        self._loaded_extra_configs = None
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
+        self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
         return self.wait_live(timeout=timedelta(seconds=5))
+
+    def reload_if_config_changed(self):
+        if self._loaded_extra_configs == self._extra_configs:
+            return True
+        return self.reload()
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
