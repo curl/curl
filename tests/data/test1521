@@ -26,5 +26,8 @@ unused
 #
 # Verify data after the test has been "shot"
 <verify>
+<stdout>
+ok
+</stdout>
 </verify>
 </testcase>

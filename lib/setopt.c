@@ -2700,17 +2700,27 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
   case CURLOPT_PROTOCOLS_STR: {
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &data->set.allowed_protocols);
-    if(result)
-      return result;
+    if(argptr) {
+      result = protocol2num(argptr, &data->set.allowed_protocols);
+      if(result)
+        return result;
+    }
+    else
+      /* make a NULL argument reset to default */
+      data->set.allowed_protocols = (curl_prot_t) CURLPROTO_ALL;
     break;
   }
 
   case CURLOPT_REDIR_PROTOCOLS_STR: {
     argptr = va_arg(param, char *);
-    result = protocol2num(argptr, &data->set.redir_protocols);
-    if(result)
-      return result;
+    if(argptr) {
+      result = protocol2num(argptr, &data->set.redir_protocols);
+      if(result)
+        return result;
+    }
+    else
+      /* make a NULL argument reset to default */
+      data->set.redir_protocols = (curl_prot_t) CURLPROTO_REDIR;
     break;
   }
 
