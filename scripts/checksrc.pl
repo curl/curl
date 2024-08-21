@@ -115,9 +115,20 @@ sub readskiplist {
 # and since that's already handled via !checksrc! commands there is probably
 # little use to add it.
 sub readlocalfile {
+    my ($file) = @_;
     my $i = 0;
+    my $rcfile;
 
-    open(my $rcfile, "<", "$dir/.checksrc") or return;
+    if(($dir eq ".") && $file =~ /\//) {
+        my $ldir;
+        if($file =~ /(.*)\//) {
+            $ldir = $1;
+            open($rcfile, "<", "$dir/$ldir/.checksrc") or return;
+        }
+    }
+    else {
+        open($rcfile, "<", "$dir/.checksrc") or return;
+    }
 
     while(<$rcfile>) {
         $windows_os ? $_ =~ s/\r?\n$// : chomp;
@@ -264,7 +275,7 @@ if(!$file) {
 }
 
 readskiplist();
-readlocalfile();
+readlocalfile($file);
 
 do {
     if("$wlist" !~ / $file /) {
