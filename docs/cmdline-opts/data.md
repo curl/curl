@@ -49,7 +49,7 @@ interpretation use --data-raw instead.
 
 If you enter an exclamation mark after the filename followed by one or two
 numbers separated by a minus sign, only the bytes from the file that are
-within the limits of those numbers will be sent. The notation is the same as
+within the limits of those numbers is sent. The notation is the same as
 that used by the '--range' option.
 
 The data for this option is passed on to the server exactly as provided on the

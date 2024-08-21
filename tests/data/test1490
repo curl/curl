@@ -3,13 +3,14 @@
 <keywords>
 HTTP
 HTTP POST
-HTTP/1.0
+--data @file
+Only a part of a file
 </keywords>
 </info>
 
 <reply>
 <data>
-HTTP/1.0 200 OK swsclose
+HTTP/1.1 200 OK swsclose
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 
@@ -24,10 +25,10 @@ blablabla
 http
 </server>
 <name>
-HTTP 1.0 POST
+POST only a part of --data
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!0-499 --http1.0
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!0-499
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
 %repeat[249 x xy]%
@@ -39,7 +40,7 @@ repeat[500 x test]%
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-POST /we/want/%TESTNUMBER HTTP/1.0
+POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
