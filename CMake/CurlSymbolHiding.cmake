@@ -23,7 +23,7 @@
 ###########################################################################
 include(CheckCSourceCompiles)
 
-option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that are not officially external)." ON)
+option(CURL_HIDDEN_SYMBOLS "Hide libcurl internal symbols (=hide all symbols that are not officially external)" ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
 if(WIN32 AND (ENABLE_DEBUG OR ENABLE_CURLDEBUG))
