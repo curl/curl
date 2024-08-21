@@ -96,8 +96,7 @@ struct conncache *Curl_get_conncache(struct Curl_easy *data);
 size_t Curl_conncache_size(struct Curl_easy *data);
 
 /* Return if bundle with `muliuse` (see BUNDLE_* defines) is suitable */
-typedef bool Curl_conncache_bundle_match_cb(const char *key,
-                                            int multiuse, void *userdata);
+typedef bool Curl_conncache_bundle_match_cb(int multiuse, void *userdata);
 
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_conncache_conn_match_cb(struct connectdata *conn,
@@ -107,10 +106,11 @@ typedef bool Curl_conncache_conn_match_cb(struct connectdata *conn,
 typedef bool Curl_conncache_done_match_cb(bool result, void *userdata);
 
 /**
- * Find a connection in the cache. All callbacks are invoked while the
- * cache's lock is held.
+ * Find a connection in the cache matching `destination`.
+ * All callbacks are invoked while the cache's lock is held.
  * @param data        current transfer
- * @param needle      determines which connection bundle to inspect.
+ * @param destination match agaonst `conn->destination` in cache
+ * @param dest_len    destination length, including terminating NUL
  * @param bundle_db   if not NULL, determines if bundle's multiuse is ok
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
@@ -120,7 +120,7 @@ typedef bool Curl_conncache_done_match_cb(bool result, void *userdata);
                       connections were present.
  */
 bool Curl_conncache_find_conn(struct Curl_easy *data,
-                              struct connectdata *needle,
+                              const char *destination, size_t dest_len,
                               Curl_conncache_bundle_match_cb *bundle_cb,
                               Curl_conncache_conn_match_cb *conn_cb,
                               Curl_conncache_done_match_cb *done_cb,

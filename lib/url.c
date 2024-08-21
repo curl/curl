@@ -598,6 +598,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 #ifdef USE_UNIX_SOCKETS
   Curl_safefree(conn->unix_domain_socket);
 #endif
+  Curl_safefree(conn->destination);
 
   free(conn); /* free all the connection oriented data */
 }
@@ -867,18 +868,18 @@ struct url_conn_match {
   BIT(seen_pending_candidate);
 };
 
-static bool url_match_bundle(const char *key, int multiuse, void *userdata)
+static bool url_match_bundle(int multiuse, void *userdata)
 {
   struct url_conn_match *match = userdata;
   struct Curl_easy *data = match->data;
-  struct connectdata *needle = match->needle;
 
-  infof(data, "Found bundle for host: %s [%s]",
-        key, (multiuse == BUNDLE_MULTIPLEX ? "multiplexed" : "serial"));
+  infof(data, "Found bundle for destination: %s [%s]",
+        match->needle->destination,
+        (multiuse == BUNDLE_MULTIPLEX ? "multiplexed" : "serial"));
 
   /* We can only multiplex iff the transfer allows it AND we know
    * that the server we want to talk to supports it as well. */
-  if(Curl_xfer_may_multiplex(data, needle)) {
+  if(match->may_multiplex) {
     if(multiuse == BUNDLE_UNKNOWN) {
       if(data->set.pipewait) {
         infof(data, "Server does not support multiplex yet, wait");
@@ -886,13 +887,6 @@ static bool url_match_bundle(const char *key, int multiuse, void *userdata)
         match->wait_pipe = TRUE;
         return FALSE; /* stop searching, we wait for this bundle */
       }
-      infof(data, "Server does not support multiplex (yet)");
-    }
-    else if(multiuse == BUNDLE_MULTIPLEX) {
-      match->may_multiplex = TRUE;
-    }
-    else if(multiuse == BUNDLE_NO_MULTIUSE) {
-      infof(data, "Can not multiplex, even if we wanted to");
     }
   }
   return TRUE;
@@ -904,9 +898,8 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   struct Curl_easy *data = match->data;
   struct connectdata *needle = match->needle;
 
-  /* Note that if we use an HTTP proxy in normal mode (no tunneling), we
-   * check connections to that proxy and not to the actual remote server.
-   */
+  /* Check if `conn` can be used for transfer `data` */
+
   if(conn->connect_only || conn->bits.close)
     /* connect-only or to-be-closed connections will not be reused */
     return FALSE;
@@ -917,41 +910,66 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
   }
 
-  if(!match->may_multiplex) {
-    if(Curl_resolver_asynch() &&
-       /* remote_ip[0] is NUL only if the resolving of the name has not
-          completed yet and until then we do not reuse this connection */
-       !conn->primary.remote_ip[0])
+  if(needle->localdev || needle->localport) {
+    /* If we are bound to a specific local end (IP+port), we must not
+       reuse a random other one, although if we did not ask for a
+       particular one we can reuse one that was bound.
+
+       This comparison is a bit rough and too strict. Since the input
+       parameters can be specified in numerous ways and still end up the
+       same it would take a lot of processing to make it really accurate.
+       Instead, this matching will assume that reuses of bound connections
+       will most likely also reuse the exact same binding parameters and
+       missing out a few edge cases should not hurt anyone very much.
+    */
+    if((conn->localport != needle->localport) ||
+       (conn->localportrange != needle->localportrange) ||
+       (needle->localdev &&
+        (!conn->localdev || strcmp(conn->localdev, needle->localdev))))
       return FALSE;
   }
 
-  if(CONN_INUSE(conn)) {
-    if(!match->may_multiplex) {
-      /* transfer cannot be multiplexed and conn is not idle */
-      return FALSE;
+  if(needle->bits.conn_to_host != conn->bits.conn_to_host)
+    /* do not mix connections that use the "connect to host" feature and
+     * connections that do not use this feature */
+    return FALSE;
+
+  if(needle->bits.conn_to_port != conn->bits.conn_to_port)
+    /* do not mix connections that use the "connect to port" feature and
+     * connections that do not use this feature */
+    return FALSE;
+
+  if(!Curl_conn_is_connected(conn, FIRSTSOCKET)) {
+    if(match->may_multiplex) {
+      match->seen_pending_candidate = TRUE;
+      /* Do not pick a connection that has not connected yet */
+      infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
+            " is not open enough, cannot reuse", conn->connection_id);
     }
+    /* Do not pick a connection that has not connected yet */
+    return FALSE;
+  }
+  /* `conn` is connected. If it has tranfers, can we add ours to it? */
+
+  if(CONN_INUSE(conn)) {
+    if(!conn->bits.multiplex)
+      /* conn busy and conn cannot take more transfers */
+      return FALSE;
+    if(!match->may_multiplex)
+      /* conn busy and transfer cannot be multiplexed */
+      return FALSE;
     else {
-      /* Could multiplex, but not when conn belongs to another multi */
+      /* transfer and conn multiplex. Are they on the same multi? */
       struct Curl_llist_node *e = Curl_llist_head(&conn->easyq);
       struct Curl_easy *entry = Curl_node_elem(e);
       if(entry->multi != data->multi)
         return FALSE;
     }
   }
+  /* `conn` is connected and we could add the transfer to it, if
+   * all the other criteria do match. */
 
-  if(!Curl_conn_is_connected(conn, FIRSTSOCKET)) {
-    match->seen_pending_candidate = TRUE;
-    /* Do not pick a connection that has not connected yet */
-    infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
-          " is not open enough, cannot reuse", conn->connection_id);
-    return FALSE;
-  }
-
-  /* `conn` is connected. if it is in use and does not support multiplex,
-   * we cannot use it. */
-  if(!conn->bits.multiplex && CONN_INUSE(conn))
-    return FALSE;
-
+  /* Does `conn` use the correct protocol? */
 #ifdef USE_UNIX_SOCKETS
   if(needle->unix_domain_socket) {
     if(!conn->unix_domain_socket)
@@ -972,16 +990,6 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
        needle->handler->protocol || !conn->bits.tls_upgraded)
       /* except protocols that have been upgraded via TLS */
       return FALSE;
-
-  if(needle->bits.conn_to_host != conn->bits.conn_to_host)
-    /* do not mix connections that use the "connect to host" feature and
-     * connections that do not use this feature */
-    return FALSE;
-
-  if(needle->bits.conn_to_port != conn->bits.conn_to_port)
-    /* do not mix connections that use the "connect to port" feature and
-     * connections that do not use this feature */
-    return FALSE;
 
 #ifndef CURL_DISABLE_PROXY
   if(needle->bits.httpproxy != conn->bits.httpproxy ||
@@ -1018,9 +1026,10 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   }
 #endif
 
-  if((data->state.httpwant == CURL_HTTP_VERSION_2_0) &&
+  if(match->may_multiplex &&
+     (data->state.httpwant == CURL_HTTP_VERSION_2_0) &&
      (needle->handler->protocol & CURLPROTO_HTTP) &&
-     !conn->httpversion && match->may_multiplex) {
+     !conn->httpversion) {
     if(data->set.pipewait) {
       infof(data, "Server upgrade does not support multiplex yet, wait");
       match->found = NULL;
@@ -1029,25 +1038,6 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     }
     infof(data, "Server upgrade cannot be used");
     return FALSE;
-  }
-
-  if(needle->localdev || needle->localport) {
-    /* If we are bound to a specific local end (IP+port), we must not
-       reuse a random other one, although if we did not ask for a
-       particular one we can reuse one that was bound.
-
-       This comparison is a bit rough and too strict. Since the input
-       parameters can be specified in numerous ways and still end up the
-       same it would take a lot of processing to make it really accurate.
-       Instead, this matching will assume that reuses of bound connections
-       will most likely also reuse the exact same binding parameters and
-       missing out a few edge cases should not hurt anyone very much.
-    */
-    if((conn->localport != needle->localport) ||
-       (conn->localportrange != needle->localportrange) ||
-       (needle->localdev &&
-        (!conn->localdev || strcmp(conn->localdev, needle->localdev))))
-      return FALSE;
   }
 
   if(!(needle->handler->flags & PROTOPT_CREDSPERREQUEST)) {
@@ -1266,6 +1256,7 @@ ConnectionExists(struct Curl_easy *data,
   memset(&match, 0, sizeof(match));
   match.data = data;
   match.needle = needle;
+  match.may_multiplex = Curl_xfer_may_multiplex(data, needle);
 
 #ifdef USE_NTLM
   match.want_ntlm_http = ((data->state.authhost.want & CURLAUTH_NTLM) &&
@@ -1280,7 +1271,8 @@ ConnectionExists(struct Curl_easy *data,
 
   /* Find a connection in the cache that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
-  result = Curl_conncache_find_conn(data, needle,
+  result = Curl_conncache_find_conn(data, needle->destination,
+                                    needle->destination_len,
                                     url_match_bundle, url_match_conn,
                                     url_match_result, &match);
 
@@ -1994,6 +1986,8 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
                                            struct connectdata *conn)
 {
   const struct Curl_handler *p;
+  const char *hostname;
+  int port;
   CURLcode result;
 
   /* Perform setup complement if some. */
@@ -2012,6 +2006,34 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
     /* we check for -1 here since if proxy was detected already, this
        was very likely already set to the proxy port */
     conn->primary.remote_port = p->defport;
+
+  /* Now create the destination name */
+#ifndef CURL_DISABLE_PROXY
+  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+    hostname = conn->http_proxy.host.name;
+    port = conn->primary.remote_port;
+  }
+  else
+#endif
+  {
+    port = conn->remote_port;
+    if(conn->bits.conn_to_host)
+      hostname = conn->conn_to_host.name;
+    else
+      hostname = conn->host.name;
+  }
+
+#ifdef USE_IPV6
+  conn->destination = aprintf("%u/%d/%s", conn->scope_id, port, hostname);
+#else
+  conn->destination = aprintf("%d/%s", port, hostname);
+#endif
+  if(!conn->destination)
+    return CURLE_OUT_OF_MEMORY;
+
+  conn->destination_len = strlen(conn->destination) + 1;
+  Curl_strntolower(conn->destination, conn->destination,
+                   conn->destination_len - 1);
 
   return CURLE_OK;
 }

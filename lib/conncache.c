@@ -47,7 +47,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#define CONNC_BUNDLE_KEY_SIZE 128
 
 #ifdef DEBUGBUILD
 /* the debug versions of these macros make extra certain that the lock is
@@ -235,33 +234,6 @@ void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data)
   CONNC_UNLOCK(connc);
 }
 
-/* creates a key to find a bundle for this connection */
-static void bundle_key(struct connectdata *conn, char *buf, size_t len)
-{
-  const char *hostname;
-  long port = conn->remote_port;
-  DEBUGASSERT(len >= CONNC_BUNDLE_KEY_SIZE);
-#ifndef CURL_DISABLE_PROXY
-  if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
-    hostname = conn->http_proxy.host.name;
-    port = conn->primary.remote_port;
-  }
-  else
-#endif
-    if(conn->bits.conn_to_host)
-      hostname = conn->conn_to_host.name;
-  else
-    hostname = conn->host.name;
-
-  /* put the numbers first so that the hostname gets cut off if too long */
-#ifdef USE_IPV6
-  msnprintf(buf, len, "%u/%ld/%s", conn->scope_id, port, hostname);
-#else
-  msnprintf(buf, len, "%ld/%s", port, hostname);
-#endif
-  Curl_strntolower(buf, buf, len);
-}
-
 /* Returns number of connections currently held in the connection cache.
    Locks/unlocks the cache itself!
 */
@@ -280,22 +252,20 @@ size_t Curl_conncache_size(struct Curl_easy *data)
 static struct connectbundle *connc_find_bundle(struct conncache *connc,
                                                struct connectdata *conn)
 {
-  char key[CONNC_BUNDLE_KEY_SIZE];
-  bundle_key(conn, key, sizeof(key));
-  return Curl_hash_pick(&connc->key2bundle, key, strlen(key));
+  return Curl_hash_pick(&connc->key2bundle,
+                        conn->destination, conn->destination_len);
 }
 
 static struct connectbundle *
 connc_add_bundle(struct conncache *connc, struct connectdata *conn)
 {
-  char key[CONNC_BUNDLE_KEY_SIZE];
   struct connectbundle *bundle = NULL;
 
   if(bundle_create(&bundle))
     return NULL;
 
-  bundle_key(conn, key, sizeof(key));
-  if(!Curl_hash_add(&connc->key2bundle, key, strlen(key), bundle)) {
+  if(!Curl_hash_add(&connc->key2bundle, conn->destination,
+                    conn->destination_len, bundle)) {
     bundle_destroy(bundle);
     return NULL;
   }
@@ -671,7 +641,7 @@ Curl_conncache_remove_oldest_idle(struct Curl_easy *data)
 }
 
 bool Curl_conncache_find_conn(struct Curl_easy *data,
-                              struct connectdata *needle,
+                              const char *destination, size_t dest_len,
                               Curl_conncache_bundle_match_cb *bundle_cb,
                               Curl_conncache_conn_match_cb *conn_cb,
                               Curl_conncache_done_match_cb *done_cb,
@@ -679,7 +649,6 @@ bool Curl_conncache_find_conn(struct Curl_easy *data,
 {
   struct conncache *connc = Curl_get_conncache(data);
   struct connectbundle *bundle;
-  char key[CONNC_BUNDLE_KEY_SIZE];
   bool result = FALSE;
 
   DEBUGASSERT(connc);
@@ -687,14 +656,12 @@ bool Curl_conncache_find_conn(struct Curl_easy *data,
   if(!connc)
     return FALSE;
 
-  bundle_key(needle, key, sizeof(key));
-
   CONNC_LOCK(connc);
-  bundle = Curl_hash_pick(&connc->key2bundle, key, strlen(key));
+  bundle = Curl_hash_pick(&connc->key2bundle, destination, dest_len);
   if(!bundle)
     goto out;
 
-  if(!bundle_cb || bundle_cb(key, bundle->multiuse, userdata)) {
+  if(!bundle_cb || bundle_cb(bundle->multiuse, userdata)) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conn_list);
     while(curr) {
       struct connectdata *conn = Curl_node_elem(curr);

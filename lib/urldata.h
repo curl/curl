@@ -812,6 +812,8 @@ struct connectdata {
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
                                track the connections in the log output */
+  char *destination; /* string carrying normalized hostname+port+scope */
+  size_t destination_len; /* strlen(destination) + 1 */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
