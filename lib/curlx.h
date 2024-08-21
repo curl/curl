@@ -112,6 +112,7 @@
 # define mvsnprintf curlx_mvsnprintf
 # define aprintf curlx_maprintf
 # define vaprintf curlx_mvaprintf
+# define vsprintf curlx_mvsprintf
 #endif /* ENABLE_CURLX_PRINTF */
 
 #endif /* HEADER_CURL_CURLX_H */

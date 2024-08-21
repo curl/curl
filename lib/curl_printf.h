@@ -40,7 +40,6 @@
 # undef msnprintf
 # undef vprintf
 # undef vfprintf
-# undef vsnprintf
 # undef mvsnprintf
 # undef aprintf
 # undef vaprintf
