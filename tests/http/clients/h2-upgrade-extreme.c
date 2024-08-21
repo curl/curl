@@ -32,10 +32,6 @@
 /* #include <error.h> */
 #include <errno.h>
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
-
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
   /*
@@ -73,10 +69,11 @@ static int debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
         conn_id >= 0) {
-      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id, conn_id);
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
+                     conn_id);
     }
     else {
-      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
@@ -181,7 +178,11 @@ int main(int argc, char *argv[])
       curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
       curl_easy_setopt(easy, CURLOPT_WRITEDATA, NULL);
       curl_easy_setopt(easy, CURLOPT_HTTPGET, 1L);
-      snprintf(range, sizeof(range), "%d-%d", 0, 16384);
+      curl_msnprintf(range, sizeof(range),
+                     "%" CURL_FORMAT_CURL_OFF_TU "-"
+                     "%" CURL_FORMAT_CURL_OFF_TU,
+                     (curl_off_t)0,
+                     (curl_off_t)16384);
       curl_easy_setopt(easy, CURLOPT_RANGE, range);
 
       mc = curl_multi_add_handle(multi, easy);
