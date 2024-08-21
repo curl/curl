@@ -98,7 +98,6 @@
 # undef msnprintf
 # undef vprintf
 # undef vfprintf
-# undef vsprintf
 # undef mvsnprintf
 # undef aprintf
 # undef vaprintf
