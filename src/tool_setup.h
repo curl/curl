@@ -25,6 +25,8 @@
  ***************************************************************************/
 
 #define CURL_NO_OLDIES
+/* use our own printf() functions from curlx.h */
+#define ENABLE_CURLX_PRINTF
 
 /*
  * curl_setup.h may define preprocessor macros such as _FILE_OFFSET_BITS and
