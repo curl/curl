@@ -48,7 +48,6 @@ struct connshutdowns {
 /* A list of connection to the similar hosts, with similar meaning the
  * first n chars of interface+port+hostname are the same. */
 struct connectbundle {
-  int multiuse;                 /* some conns in bundle support multi-use */
   size_t num_connections;       /* Number of connections in the bundle */
   struct Curl_llist conn_list;  /* The connectdata members of the bundle */
 };
@@ -69,10 +68,6 @@ struct conncache {
   BIT(locked);
 #endif
 };
-
-#define BUNDLE_NO_MULTIUSE -1
-#define BUNDLE_UNKNOWN     0  /* initial value */
-#define BUNDLE_MULTIPLEX   2
 
 /* Init the cache, pass multi only if cache is owned by it.
  * returns 1 on error, 0 is fine.
@@ -95,9 +90,6 @@ struct conncache *Curl_get_conncache(struct Curl_easy *data);
 /* returns number of connections currently held in the connection cache */
 size_t Curl_conncache_size(struct Curl_easy *data);
 
-/* Return if bundle with `muliuse` (see BUNDLE_* defines) is suitable */
-typedef bool Curl_conncache_bundle_match_cb(int multiuse, void *userdata);
-
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_conncache_conn_match_cb(struct connectdata *conn,
                                           void *userdata);
@@ -111,7 +103,6 @@ typedef bool Curl_conncache_done_match_cb(bool result, void *userdata);
  * @param data        current transfer
  * @param destination match agaonst `conn->destination` in cache
  * @param dest_len    destination length, including terminating NUL
- * @param bundle_db   if not NULL, determines if bundle's multiuse is ok
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
  * @param result_cb   if not NULL, is called at the end with the result
@@ -121,7 +112,6 @@ typedef bool Curl_conncache_done_match_cb(bool result, void *userdata);
  */
 bool Curl_conncache_find_conn(struct Curl_easy *data,
                               const char *destination, size_t dest_len,
-                              Curl_conncache_bundle_match_cb *bundle_cb,
                               Curl_conncache_conn_match_cb *conn_cb,
                               Curl_conncache_done_match_cb *done_cb,
                               void *userdata);

@@ -921,7 +921,6 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   /* NOTE NOTE NOTE
      We do not touch the easy handle here! */
   multi->num_easy--; /* one less to care about now */
-
   process_pending_handles(multi);
 
   if(removed_timer) {
@@ -1946,8 +1945,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
              WAITDO or DO! */
           rc = CURLM_CALL_MULTI_PERFORM;
 
-          if(connected)
+          if(connected) {
+            if(!data->conn->bits.reuse &&
+               Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
+              /* new connection, can multiplex, wake pending handles */
+              process_pending_handles(data->multi);
+            }
             multistate(data, MSTATE_PROTOCONNECT);
+          }
           else {
             multistate(data, MSTATE_CONNECTING);
           }
@@ -2056,6 +2061,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       DEBUGASSERT(data->conn);
       result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &connected);
       if(connected && !result) {
+        if(!data->conn->bits.reuse &&
+           Curl_conn_is_multiplex(data->conn, FIRSTSOCKET)) {
+          /* new connection, can multiplex, wake pending handles */
+          process_pending_handles(data->multi);
+        }
         rc = CURLM_CALL_MULTI_PERFORM;
         multistate(data, MSTATE_PROTOCONNECT);
       }
@@ -2511,10 +2521,6 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
 
       if(data->conn) {
         CURLcode res;
-
-        if(data->conn->bits.multiplex)
-          /* Check if we can move pending requests to connection */
-          process_pending_handles(multi); /* multiplexing */
 
         /* post-transfer command */
         res = multi_done(data, result, FALSE);
@@ -3738,24 +3744,6 @@ size_t Curl_multi_max_host_connections(struct Curl_multi *multi)
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi)
 {
   return multi ? (size_t)multi->max_total_connections : 0;
-}
-
-/*
- * When information about a connection has appeared, call this!
- */
-
-void Curl_multiuse_state(struct Curl_easy *data,
-                         int bundlestate) /* use BUNDLE_* defines */
-{
-  struct connectdata *conn;
-  DEBUGASSERT(data);
-  DEBUGASSERT(data->multi);
-  conn = data->conn;
-  DEBUGASSERT(conn);
-  DEBUGASSERT(conn->bundle);
-
-  conn->bundle->multiuse = bundlestate;
-  process_pending_handles(data->multi);
 }
 
 static void move_pending_to_connect(struct Curl_multi *multi,

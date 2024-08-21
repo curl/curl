@@ -106,8 +106,6 @@ static CURLcode bundle_create(struct connectbundle **bundlep)
     return CURLE_OUT_OF_MEMORY;
 
   (*bundlep)->num_connections = 0;
-  (*bundlep)->multiuse = BUNDLE_UNKNOWN;
-
   Curl_llist_init(&(*bundlep)->conn_list, NULL);
   return CURLE_OK;
 }
@@ -122,8 +120,8 @@ static void bundle_destroy(struct connectbundle *bundle)
 static void bundle_add_conn(struct connectbundle *bundle,
                             struct connectdata *conn)
 {
-  Curl_llist_append(&bundle->conn_list, conn, &conn->bundle_node);
-  conn->bundle = bundle;
+  Curl_llist_append(&bundle->conn_list, conn, &conn->conncache_node);
+  conn->bits.in_conncache = TRUE;
   bundle->num_connections++;
 }
 
@@ -136,7 +134,7 @@ static int bundle_remove_conn(struct connectbundle *bundle,
     if(Curl_node_elem(curr) == conn) {
       Curl_node_remove(curr);
       bundle->num_connections--;
-      conn->bundle = NULL;
+      conn->bits.in_conncache = FALSE;
       return 1; /* we removed a handle */
     }
     curr = Curl_node_next(curr);
@@ -369,17 +367,19 @@ out:
 static void connc_remove_conn(struct conncache *connc,
                               struct connectdata *conn)
 {
-  struct connectbundle *bundle = conn->bundle;
-
-  /* The bundle pointer can be NULL, since this function can be called
-     due to a failed connection attempt, before being added to a bundle */
-  if(bundle) {
-    bundle_remove_conn(bundle, conn);
-    if(connc && bundle->num_connections == 0)
-      connc_remove_bundle(connc, bundle);
-    conn->bundle = NULL; /* removed from it */
-    if(connc)
-      connc->num_conn--;
+  if(conn->bits.in_conncache) {
+    /* if the connection is marked, the bundle MUST exist. */
+    struct connectbundle *bundle = connc_find_bundle(connc, conn);
+    DEBUGASSERT(bundle);
+    if(bundle) {
+      DEBUGASSERT(conn->bits.in_conncache);
+      bundle_remove_conn(bundle, conn);
+      if(connc && bundle->num_connections == 0)
+        connc_remove_bundle(connc, bundle);
+      conn->bits.in_conncache = FALSE;
+      if(connc)
+        connc->num_conn--;
+    }
   }
 }
 
@@ -642,7 +642,6 @@ Curl_conncache_remove_oldest_idle(struct Curl_easy *data)
 
 bool Curl_conncache_find_conn(struct Curl_easy *data,
                               const char *destination, size_t dest_len,
-                              Curl_conncache_bundle_match_cb *bundle_cb,
                               Curl_conncache_conn_match_cb *conn_cb,
                               Curl_conncache_done_match_cb *done_cb,
                               void *userdata)
@@ -657,11 +656,8 @@ bool Curl_conncache_find_conn(struct Curl_easy *data,
     return FALSE;
 
   CONNC_LOCK(connc);
-  bundle = Curl_hash_pick(&connc->key2bundle, destination, dest_len);
-  if(!bundle)
-    goto out;
-
-  if(!bundle_cb || bundle_cb(bundle->multiuse, userdata)) {
+  bundle = Curl_hash_pick(&connc->key2bundle, (void *)destination, dest_len);
+  if(bundle) {
     struct Curl_llist_node *curr = Curl_llist_head(&bundle->conn_list);
     while(curr) {
       struct connectdata *conn = Curl_node_elem(curr);
@@ -676,7 +672,6 @@ bool Curl_conncache_find_conn(struct Curl_easy *data,
     }
   }
 
-out:
   if(done_cb) {
     result = done_cb(result, userdata);
   }
@@ -785,7 +780,7 @@ static void connc_discard_conn(struct conncache *connc,
 
   DEBUGASSERT(data);
   DEBUGASSERT(connc);
-  DEBUGASSERT(!conn->bundle);
+  DEBUGASSERT(!conn->bits.in_conncache);
 
   /*
    * If this connection is not marked to force-close, leave it open if there
@@ -858,7 +853,7 @@ static void connc_discard_conn(struct conncache *connc,
     }
   }
 
-  Curl_llist_append(&connc->shutdowns.conn_list, conn, &conn->bundle_node);
+  Curl_llist_append(&connc->shutdowns.conn_list, conn, &conn->conncache_node);
   DEBUGF(infof(data, "[CCACHE] added #%" CURL_FORMAT_CURL_OFF_T
                      " to shutdown list of length %zu", conn->connection_id,
                      Curl_llist_count(&connc->shutdowns.conn_list)));
@@ -870,7 +865,7 @@ void Curl_conncache_disconnect(struct Curl_easy *data,
 {
   DEBUGASSERT(data);
   /* Connection must no longer be in and connection cache */
-  DEBUGASSERT(!conn->bundle);
+  DEBUGASSERT(!conn->bits.in_conncache);
 
   if(data->multi) {
     /* Add it to the multi's conncache for shutdown handling */
@@ -882,7 +877,7 @@ void Curl_conncache_disconnect(struct Curl_easy *data,
     /* No multi available. Make a best-effort shutdown + close */
     infof(data, "closing connection #%" CURL_FORMAT_CURL_OFF_T,
           conn->connection_id);
-    DEBUGASSERT(!conn->bundle);
+    DEBUGASSERT(!conn->bits.in_conncache);
     connc_run_conn_shutdown_handler(data, conn);
     connc_close_and_destroy(NULL, conn, data, !aborted);
   }
@@ -1084,7 +1079,7 @@ static void connc_close_and_destroy(struct conncache *connc,
   /* there must be a connection to close */
   DEBUGASSERT(conn);
   /* it must be removed from the connection cache */
-  DEBUGASSERT(!conn->bundle);
+  DEBUGASSERT(!conn->bits.in_conncache);
   /* there must be an associated transfer */
   DEBUGASSERT(data || connc);
   if(!data)

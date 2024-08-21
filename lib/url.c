@@ -622,7 +622,7 @@ void Curl_disconnect(struct Curl_easy *data,
   DEBUGASSERT(conn);
 
   /* it must be removed from the connection cache */
-  DEBUGASSERT(!conn->bundle);
+  DEBUGASSERT(!conn->bits.in_conncache);
 
   /* there must be an associated transfer */
   DEBUGASSERT(data);
@@ -867,30 +867,6 @@ struct url_conn_match {
   BIT(force_reuse);
   BIT(seen_pending_candidate);
 };
-
-static bool url_match_bundle(int multiuse, void *userdata)
-{
-  struct url_conn_match *match = userdata;
-  struct Curl_easy *data = match->data;
-
-  infof(data, "Found bundle for destination: %s [%s]",
-        match->needle->destination,
-        (multiuse == BUNDLE_MULTIPLEX ? "multiplexed" : "serial"));
-
-  /* We can only multiplex iff the transfer allows it AND we know
-   * that the server we want to talk to supports it as well. */
-  if(match->may_multiplex) {
-    if(multiuse == BUNDLE_UNKNOWN) {
-      if(data->set.pipewait) {
-        infof(data, "Server does not support multiplex yet, wait");
-        match->found = NULL;
-        match->wait_pipe = TRUE;
-        return FALSE; /* stop searching, we wait for this bundle */
-      }
-    }
-  }
-  return TRUE;
-}
 
 static bool url_match_conn(struct connectdata *conn, void *userdata)
 {
@@ -1273,7 +1249,7 @@ ConnectionExists(struct Curl_easy *data,
    * requires. If a suitable candidate is found, it is attached to "data". */
   result = Curl_conncache_find_conn(data, needle->destination,
                                     needle->destination_len,
-                                    url_match_bundle, url_match_conn,
+                                    url_match_conn,
                                     url_match_result, &match);
 
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There

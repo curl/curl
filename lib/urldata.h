@@ -551,6 +551,7 @@ struct ConnectBits {
   BIT(aborted); /* connection was aborted, e.g. in unclean state */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
+  BIT(in_conncache);     /* connection is kept in a connection cache */
 };
 
 struct hostname {
@@ -798,7 +799,7 @@ struct ldapconninfo;
  * unique for an entire connection.
  */
 struct connectdata {
-  struct Curl_llist_node bundle_node; /* conncache */
+  struct Curl_llist_node conncache_node; /* conncache lists */
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
@@ -969,7 +970,6 @@ struct connectdata {
     unsigned int unused:1; /* avoids empty union */
   } proto;
 
-  struct connectbundle *bundle; /* The conn_cache bundle we are member of */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif

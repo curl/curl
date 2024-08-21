@@ -69,9 +69,6 @@ size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
 /* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
 size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
 
-void Curl_multiuse_state(struct Curl_easy *data,
-                         int bundlestate); /* use BUNDLE_* defines */
-
 /*
  * Curl_multi_closed()
  *

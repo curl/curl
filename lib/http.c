@@ -3241,9 +3241,6 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
   else if(k->httpversion == 20 ||
           (k->upgr101 == UPGR101_H2 && k->httpcode == 101)) {
     DEBUGF(infof(data, "HTTP/2 found, allow multiplexing"));
-    /* HTTP/2 cannot avoid multiplexing since it is a core functionality
-       of the protocol */
-    conn->bundle->multiuse = BUNDLE_MULTIPLEX;
   }
 
   k->http_bodyless = k->httpcode >= 100 && k->httpcode < 200;
@@ -3392,9 +3389,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
     /* supposedly upgraded to http2 now */
     if(conn->httpversion != 20)
       infof(data, "Lying server, not serving HTTP/2");
-  }
-  if(conn->httpversion < 20) {
-    conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
   }
 
   if(k->httpcode < 200 && last_hd) {
