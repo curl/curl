@@ -511,16 +511,19 @@ void Curl_sndbuf_init(curl_socket_t sockfd)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_parse_interface(const char *input, size_t len,
+CURLcode Curl_parse_interface(const char *input,
                               char **dev, char **iface, char **host)
 {
   static const char if_prefix[] = "if!";
   static const char host_prefix[] = "host!";
   static const char if_host_prefix[] = "ifhost!";
+  size_t len;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(iface);
   DEBUGASSERT(host);
+
+  len = strlen(input);
 
   if(strncmp(if_prefix, input, strlen(if_prefix)) == 0) {
     input += strlen(if_prefix);
