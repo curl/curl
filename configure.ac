@@ -1346,12 +1346,17 @@ else
       dnl people have it in the default path
 
       AC_CHECK_LIB(z, inflateEnd,
-                   dnl libz found, set the variable
-                   [HAVE_LIBZ="1"
-                    ZLIB_LIBS="-lz"
-                    LIBS="$ZLIB_LIBS $LIBS"],
-                   dnl if no lib found, try /usr/local
-                   [OPT_ZLIB="/usr/local"])
+        dnl libz found, set the variable
+        [
+          HAVE_LIBZ="1"
+          ZLIB_LIBS="-lz"
+          LIBS="$ZLIB_LIBS $LIBS"
+        ],
+        dnl if no lib found, try /usr/local
+        [
+          OPT_ZLIB="/usr/local"
+        ]
+      )
     fi
   fi
 
@@ -1363,20 +1368,23 @@ else
 
   AC_CHECK_HEADER(zlib.h,
     [
-    dnl zlib.h was found
-    HAVE_ZLIB_H="1"
-    dnl if the lib wasn't found already, try again with the new paths
-    if test "$HAVE_LIBZ" != "1"; then
-      AC_CHECK_LIB(z, gzread,
-                   [
-                   dnl the lib was found!
-                   HAVE_LIBZ="1"
-                   ZLIB_LIBS="-lz"
-                   LIBS="$ZLIB_LIBS $LIBS"
-                   ],
-                   [ CPPFLAGS=$clean_CPPFLAGS
-                   LDFLAGS=$clean_LDFLAGS])
-    fi
+      dnl zlib.h was found
+      HAVE_ZLIB_H="1"
+      dnl if the lib wasn't found already, try again with the new paths
+      if test "$HAVE_LIBZ" != "1"; then
+        AC_CHECK_LIB(z, gzread,
+          [
+            dnl the lib was found!
+            HAVE_LIBZ="1"
+            ZLIB_LIBS="-lz"
+            LIBS="$ZLIB_LIBS $LIBS"
+          ],
+          [
+            CPPFLAGS=$clean_CPPFLAGS
+            LDFLAGS=$clean_LDFLAGS
+          ]
+        )
+      fi
     ],
     [
       dnl zlib.h was not found, restore the flags
