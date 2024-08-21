@@ -607,6 +607,19 @@ case $host_os in
     ;;
 esac
 
+have_mingw='no'
+case $host_os in
+  mingw*)
+    have_mingw='yes'
+    ;;
+esac
+
+AM_CONDITIONAL([HAVE_MINGW],
+  [test "$have_mingw" = "yes"])
+
+AM_CONDITIONAL([HAVE_WINDOWS],
+  [test "$curl_cv_native_windows" = "yes"])
+
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
 
