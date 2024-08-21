@@ -181,8 +181,8 @@ int main(int argc, char *argv[])
       curl_msnprintf(range, sizeof(range),
                      "%" CURL_FORMAT_CURL_OFF_TU "-"
                      "%" CURL_FORMAT_CURL_OFF_TU,
-                     UINT64_C(0),
-                     UINT64_C(16384));
+                     (curl_off_t)0,
+                     (curl_off_t)16384);
       curl_easy_setopt(easy, CURLOPT_RANGE, range);
 
       mc = curl_multi_add_handle(multi, easy);
