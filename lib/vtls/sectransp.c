@@ -718,134 +718,89 @@ CF_INLINE bool is_file(const char *filename)
   return false;
 }
 
-#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-static CURLcode sectransp_version_from_curl(SSLProtocol *darwinver,
-                                            long ssl_version)
+static CURLcode
+sectransp_set_ssl_version_min_max(struct Curl_easy *data,
+                                  struct st_ssl_backend_data *backend,
+                                  struct ssl_primary_config *conn_config)
 {
-  switch(ssl_version) {
-    case CURL_SSLVERSION_TLSv1_0:
-      *darwinver = kTLSProtocol1;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_1:
-      *darwinver = kTLSProtocol11;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_2:
-      *darwinver = kTLSProtocol12;
-      return CURLE_OK;
-    case CURL_SSLVERSION_TLSv1_3:
-      /* TLS 1.3 support first appeared in iOS 11 and macOS 10.13 */
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
-    defined(HAVE_BUILTIN_AVAILABLE)
-      if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
-        *darwinver = kTLSProtocol13;
-        return CURLE_OK;
-      }
-#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
-          defined(HAVE_BUILTIN_AVAILABLE) */
-      break;
-  }
-  return CURLE_SSL_CONNECT_ERROR;
-}
+#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
+  OSStatus err;
+  SSLProtocol ver_min;
+  SSLProtocol ver_max;
+
+#if CURL_SUPPORT_MAC_10_7
+  if(!&SSLSetProtocolVersionMax)
+    goto legacy;
 #endif
 
-static CURLcode sectransp_set_ssl_version_min_max(struct Curl_cfilter *cf,
-                                                  struct Curl_easy *data)
-{
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct st_ssl_backend_data *backend =
-    (struct st_ssl_backend_data *)connssl->backend;
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  long ssl_version = conn_config->version;
-  long ssl_version_max = conn_config->version_max;
-  long max_supported_version_by_os;
-
-  DEBUGASSERT(backend);
-
-  /* macOS 10.5-10.7 supported TLS 1.0 only.
-     macOS 10.8 and later, and iOS 5 and later, added TLS 1.1 and 1.2.
-     macOS 10.13 and later, and iOS 11 and later, added TLS 1.3. */
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
-    defined(HAVE_BUILTIN_AVAILABLE)
-  if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
-    max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_3;
-  }
-  else {
-    max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
-  }
-#else
-  max_supported_version_by_os = CURL_SSLVERSION_MAX_TLSv1_2;
-#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
-          defined(HAVE_BUILTIN_AVAILABLE) */
-
-  switch(ssl_version) {
+  switch(conn_config->version) {
     case CURL_SSLVERSION_DEFAULT:
     case CURL_SSLVERSION_TLSv1:
-      ssl_version = CURL_SSLVERSION_TLSv1_0;
+    case CURL_SSLVERSION_TLSv1_0:
+      ver_min = kTLSProtocol1;
       break;
+    case CURL_SSLVERSION_TLSv1_1:
+      ver_min = kTLSProtocol11;
+      break;
+    case CURL_SSLVERSION_TLSv1_2:
+      ver_min = kTLSProtocol12;
+      break;
+    case CURL_SSLVERSION_TLSv1_3:
+    default:
+      failf(data, "SSL: unsupported minimum TLS version value");
+      return CURLE_SSL_CONNECT_ERROR;
   }
 
-  switch(ssl_version_max) {
-    case CURL_SSLVERSION_MAX_NONE:
+  switch(conn_config->version_max) {
     case CURL_SSLVERSION_MAX_DEFAULT:
-      ssl_version_max = max_supported_version_by_os;
+    case CURL_SSLVERSION_MAX_NONE:
+    case CURL_SSLVERSION_MAX_TLSv1_3:
+    case CURL_SSLVERSION_MAX_TLSv1_2:
+      ver_max = kTLSProtocol12;
       break;
+    case CURL_SSLVERSION_MAX_TLSv1_1:
+      ver_max = kTLSProtocol11;
+      break;
+    case CURL_SSLVERSION_MAX_TLSv1_0:
+      ver_max = kTLSProtocol1;
+      break;
+    default:
+      failf(data, "SSL: unsupported maximum TLS version value");
+      return CURLE_SSL_CONNECT_ERROR;
   }
 
-#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(&SSLSetProtocolVersionMax) {
-    SSLProtocol darwin_ver_min = kTLSProtocol1;
-    SSLProtocol darwin_ver_max = kTLSProtocol1;
-    CURLcode result = sectransp_version_from_curl(&darwin_ver_min,
-                                                  ssl_version);
-    if(result) {
-      failf(data, "unsupported min version passed via CURLOPT_SSLVERSION");
-      return result;
-    }
-    result = sectransp_version_from_curl(&darwin_ver_max,
-                                         ssl_version_max >> 16);
-    if(result) {
-      failf(data, "unsupported max version passed via CURLOPT_SSLVERSION");
-      return result;
-    }
+  err = SSLSetProtocolVersionMin(backend->ssl_ctx, ver_min);
+  if(err != noErr) {
+    failf(data, "SSL: failed to set minimum TLS version");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+  err = SSLSetProtocolVersionMax(backend->ssl_ctx, ver_max);
+  if(err != noErr) {
+    failf(data, "SSL: failed to set maximum TLS version");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
 
-    (void)SSLSetProtocolVersionMin(backend->ssl_ctx, darwin_ver_min);
-    (void)SSLSetProtocolVersionMax(backend->ssl_ctx, darwin_ver_max);
-    return result;
+  return CURLE_OK;
+#endif
+#if CURL_SUPPORT_MAC_10_7
+  goto legacy;
+legacy:
+  switch(conn_config->version) {
+    case CURL_SSLVERSION_DEFAULT:
+    case CURL_SSLVERSION_TLSv1:
+    case CURL_SSLVERSION_TLSv1_0:
+      break;
+    default:
+      failf(data, "SSL: unsupported minimum TLS version value");
+      return CURLE_SSL_CONNECT_ERROR;
   }
-  else {
-#if CURL_SUPPORT_MAC_10_8
-    long i = ssl_version;
-    (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                       kSSLProtocolAll,
-                                       false);
-    for(; i <= (ssl_version_max >> 16); i++) {
-      switch(i) {
-        case CURL_SSLVERSION_TLSv1_0:
-          (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                            kTLSProtocol1,
-                                            true);
-          break;
-        case CURL_SSLVERSION_TLSv1_1:
-          (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                            kTLSProtocol11,
-                                            true);
-          break;
-        case CURL_SSLVERSION_TLSv1_2:
-          (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                            kTLSProtocol12,
-                                            true);
-          break;
-        case CURL_SSLVERSION_TLSv1_3:
-          failf(data, "Your version of the OS does not support TLSv1.3");
-          return CURLE_SSL_CONNECT_ERROR;
-      }
-    }
-    return CURLE_OK;
-#endif  /* CURL_SUPPORT_MAC_10_8 */
-  }
-#endif  /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
-  failf(data, "Secure Transport: cannot set SSL protocol");
-  return CURLE_SSL_CONNECT_ERROR;
+
+  /* only TLS 1.0 is supported, disable SSL 3.0 and SSL 2.0 */
+  SSLSetProtocolVersionEnabled(backend->ssl_ctx, kSSLProtocolAll, false);
+  SSLSetProtocolVersionEnabled(backend->ssl_ctx, kTLSProtocol1, true);
+
+  return CURLE_OK;
+#endif
 }
 
 static int sectransp_cipher_suite_get_str(uint16_t id, char *buf,
@@ -1132,112 +1087,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
   backend->ssl_write_buffered_length = 0UL; /* reset buffered write length */
 
-  /* check to see if we have been told to use an explicit SSL/TLS version */
-#if CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS
-  if(&SSLSetProtocolVersionMax) {
-    switch(conn_config->version) {
-    case CURL_SSLVERSION_TLSv1:
-      (void)SSLSetProtocolVersionMin(backend->ssl_ctx, kTLSProtocol1);
-#if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
-    defined(HAVE_BUILTIN_AVAILABLE)
-      if(__builtin_available(macOS 10.13, iOS 11.0, *)) {
-        (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kTLSProtocol13);
-      }
-      else {
-        (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kTLSProtocol12);
-      }
-#else
-      (void)SSLSetProtocolVersionMax(backend->ssl_ctx, kTLSProtocol12);
-#endif /* (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) &&
-          defined(HAVE_BUILTIN_AVAILABLE) */
-      break;
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-    case CURL_SSLVERSION_TLSv1_3:
-      result = sectransp_set_ssl_version_min_max(cf, data);
-      if(result != CURLE_OK)
-        return result;
-      break;
-    case CURL_SSLVERSION_SSLv3:
-    case CURL_SSLVERSION_SSLv2:
-      failf(data, "SSL versions not supported");
-      return CURLE_NOT_BUILT_IN;
-    default:
-      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-  else {
-#if CURL_SUPPORT_MAC_10_8
-    (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                       kSSLProtocolAll,
-                                       false);
-    switch(conn_config->version) {
-    case CURL_SSLVERSION_DEFAULT:
-    case CURL_SSLVERSION_TLSv1:
-      (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                         kTLSProtocol1,
-                                         true);
-      (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                         kTLSProtocol11,
-                                         true);
-      (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                         kTLSProtocol12,
-                                         true);
-      break;
-    case CURL_SSLVERSION_TLSv1_0:
-    case CURL_SSLVERSION_TLSv1_1:
-    case CURL_SSLVERSION_TLSv1_2:
-    case CURL_SSLVERSION_TLSv1_3:
-      result = sectransp_set_ssl_version_min_max(cf, data);
-      if(result != CURLE_OK)
-        return result;
-      break;
-    case CURL_SSLVERSION_SSLv3:
-    case CURL_SSLVERSION_SSLv2:
-      failf(data, "SSL versions not supported");
-      return CURLE_NOT_BUILT_IN;
-    default:
-      failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-#endif  /* CURL_SUPPORT_MAC_10_8 */
-  }
-#else
-  if(conn_config->version_max != CURL_SSLVERSION_MAX_NONE) {
-    failf(data, "Your version of the OS does not support to set maximum"
-                " SSL/TLS version");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-  (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx, kSSLProtocolAll, false);
-  switch(conn_config->version) {
-  case CURL_SSLVERSION_DEFAULT:
-  case CURL_SSLVERSION_TLSv1:
-  case CURL_SSLVERSION_TLSv1_0:
-    (void)SSLSetProtocolVersionEnabled(backend->ssl_ctx,
-                                       kTLSProtocol1,
-                                       true);
-    break;
-  case CURL_SSLVERSION_TLSv1_1:
-    failf(data, "Your version of the OS does not support TLSv1.1");
-    return CURLE_SSL_CONNECT_ERROR;
-  case CURL_SSLVERSION_TLSv1_2:
-    failf(data, "Your version of the OS does not support TLSv1.2");
-    return CURLE_SSL_CONNECT_ERROR;
-  case CURL_SSLVERSION_TLSv1_3:
-    failf(data, "Your version of the OS does not support TLSv1.3");
-    return CURLE_SSL_CONNECT_ERROR;
-  case CURL_SSLVERSION_SSLv2:
-  case CURL_SSLVERSION_SSLv3:
-    failf(data, "SSL versions not supported");
-    return CURLE_NOT_BUILT_IN;
-  default:
-    failf(data, "Unrecognized parameter passed via CURLOPT_SSLVERSION");
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-#endif /* CURL_BUILD_MAC_10_8 || CURL_BUILD_IOS */
+  result = sectransp_set_ssl_version_min_max(data, backend, conn_config);
+  if(result != CURLE_OK)
+    return result;
 
 #if (CURL_BUILD_MAC_10_13 || CURL_BUILD_IOS_11) && \
     defined(HAVE_BUILTIN_AVAILABLE)
