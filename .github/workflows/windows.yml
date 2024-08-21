@@ -275,7 +275,7 @@ jobs:
             env: '7.3.0-x86_64'
             dir: 'mingw64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_C_FLAGS=-D__USE_MINGW_ANSI_STDIO=1'
             type: 'Release'
             tflags: '~2301 ~2302 ~3027'
           - name: 'schannel !unity'
