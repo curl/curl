@@ -57,7 +57,7 @@ struct Curl_sockaddr_ex {
 /*
  * Parse interface option, and return the interface name and the host part.
 */
-CURLcode Curl_parse_interface(const char *input, size_t len,
+CURLcode Curl_parse_interface(const char *input,
                               char **dev, char **iface, char **host);
 
 /*

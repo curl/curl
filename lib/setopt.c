@@ -139,30 +139,24 @@ static CURLcode setstropt_userpwd(char *option, char **userp, char **passwdp)
   return CURLE_OK;
 }
 
-static CURLcode setstropt_interface(
-  char *option, char **devp, char **ifacep, char **hostp)
+static CURLcode setstropt_interface(char *option, char **devp,
+                                    char **ifacep, char **hostp)
 {
   char *dev = NULL;
   char *iface = NULL;
   char *host = NULL;
-  size_t len;
   CURLcode result;
 
   DEBUGASSERT(devp);
   DEBUGASSERT(ifacep);
   DEBUGASSERT(hostp);
 
-  /* Parse the interface details */
-  if(!option || !*option)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-  len = strlen(option);
-  if(len > 255)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  result = Curl_parse_interface(option, len, &dev, &iface, &host);
-  if(result)
-    return result;
-
+  if(option) {
+    /* Parse the interface details if set, otherwise clear them all */
+    result = Curl_parse_interface(option, &dev, &iface, &host);
+    if(result)
+      return result;
+  }
   free(*devp);
   *devp = dev;
 

@@ -511,32 +511,37 @@ void Curl_sndbuf_init(curl_socket_t sockfd)
  *
  * Returns CURLE_OK on success.
  */
-CURLcode Curl_parse_interface(const char *input, size_t len,
+CURLcode Curl_parse_interface(const char *input,
                               char **dev, char **iface, char **host)
 {
   static const char if_prefix[] = "if!";
   static const char host_prefix[] = "host!";
   static const char if_host_prefix[] = "ifhost!";
+  size_t len;
 
   DEBUGASSERT(dev);
   DEBUGASSERT(iface);
   DEBUGASSERT(host);
 
-  if(strncmp(if_prefix, input, strlen(if_prefix)) == 0) {
+  len = strlen(input);
+  if(len > 512)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  if(!strncmp(if_prefix, input, strlen(if_prefix))) {
     input += strlen(if_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     *iface = Curl_memdup0(input, len - strlen(if_prefix));
     return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
-  if(strncmp(host_prefix, input, strlen(host_prefix)) == 0) {
+  else if(!strncmp(host_prefix, input, strlen(host_prefix))) {
     input += strlen(host_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     *host = Curl_memdup0(input, len - strlen(host_prefix));
     return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
-  if(strncmp(if_host_prefix, input, strlen(if_host_prefix)) == 0) {
+  else if(!strncmp(if_host_prefix, input, strlen(if_host_prefix))) {
     const char *host_part;
     input += strlen(if_host_prefix);
     len -= strlen(if_host_prefix);
