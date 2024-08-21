@@ -178,7 +178,11 @@ int main(int argc, char *argv[])
       curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
       curl_easy_setopt(easy, CURLOPT_WRITEDATA, NULL);
       curl_easy_setopt(easy, CURLOPT_HTTPGET, 1L);
-      curl_msnprintf(range, sizeof(range), "%d-%d", 0, 16384);
+      curl_msnprintf(range, sizeof(range),
+                     "%" CURL_FORMAT_CURL_OFF_TU "-"
+                     "%" CURL_FORMAT_CURL_OFF_TU,
+                     UINT64_C(0),
+                     UINT64_C(16384));
       curl_easy_setopt(easy, CURLOPT_RANGE, range);
 
       mc = curl_multi_add_handle(multi, easy);
