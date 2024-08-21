@@ -1739,7 +1739,7 @@ function(transform_makefile_inc _input_file _output_file)
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
   string(REGEX REPLACE "\\\\\n" "!π!α!" _makefile_inc_text ${_makefile_inc_text})
-  string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "SET(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
+  string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "set(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "!π!α!" "\n" _makefile_inc_text ${_makefile_inc_text})
 
   # Replace $() with ${}
