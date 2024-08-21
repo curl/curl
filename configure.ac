@@ -1119,30 +1119,39 @@ CURL_CHECK_LIB_XNET
 
 dnl gethostbyname without lib or in the nsl lib?
 AC_CHECK_FUNC(gethostbyname,
-              [HAVE_GETHOSTBYNAME="1"
-              ],
-              [ AC_CHECK_LIB(nsl, gethostbyname,
-                             [HAVE_GETHOSTBYNAME="1"
-                             LIBS="-lnsl $LIBS"
-                             ])
-              ])
+  [
+    HAVE_GETHOSTBYNAME="1"
+  ],
+  [
+    AC_CHECK_LIB(nsl, gethostbyname,
+      [
+        HAVE_GETHOSTBYNAME="1"
+        LIBS="-lnsl $LIBS"
+      ]
+    )
+  ]
+)
 
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
   dnl gethostbyname in the socket lib?
   AC_CHECK_LIB(socket, gethostbyname,
-               [HAVE_GETHOSTBYNAME="1"
-               LIBS="-lsocket $LIBS"
-               ])
+    [
+      HAVE_GETHOSTBYNAME="1"
+      LIBS="-lsocket $LIBS"
+    ]
+  )
 fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
   dnl gethostbyname in the watt lib?
   AC_CHECK_LIB(watt, gethostbyname,
-               [HAVE_GETHOSTBYNAME="1"
-               CPPFLAGS="-I/dev/env/WATT_ROOT/inc"
-               LDFLAGS="-L/dev/env/WATT_ROOT/lib"
-               LIBS="-lwatt $LIBS"
-               ])
+    [
+      HAVE_GETHOSTBYNAME="1"
+      CPPFLAGS="-I/dev/env/WATT_ROOT/inc"
+      LDFLAGS="-L/dev/env/WATT_ROOT/lib"
+      LIBS="-lwatt $LIBS"
+    ]
+  )
 fi
 
 dnl At least one system has been identified to require BOTH nsl and socket
@@ -1261,9 +1270,11 @@ fi
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
   dnl gethostbyname in the network lib - for Haiku OS
   AC_CHECK_LIB(network, gethostbyname,
-               [HAVE_GETHOSTBYNAME="1"
-               LIBS="-lnetwork $LIBS"
-               ])
+    [
+      HAVE_GETHOSTBYNAME="1"
+      LIBS="-lnetwork $LIBS"
+    ]
+  )
 fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
@@ -1304,7 +1315,7 @@ ZLIB_LIBS=""
 AC_ARG_WITH(zlib,
 AS_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
 AS_HELP_STRING([--without-zlib],[disable use of zlib]),
-               [OPT_ZLIB="$withval"])
+  [OPT_ZLIB="$withval"])
 
 if test "$OPT_ZLIB" = "no"; then
   AC_MSG_WARN([zlib disabled])
@@ -1474,15 +1485,15 @@ if test X"$OPT_BROTLI" != Xno; then
 
   if test "$HAVE_BROTLI" = "1"; then
     if test -n "$DIR_BROTLI"; then
-       dnl when the brotli shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
-       dnl to prevent further configure tests to fail due to this
+      dnl when the brotli shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl to prevent further configure tests to fail due to this
 
-       if test "x$cross_compiling" != "xyes"; then
-         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_BROTLI"
-         export CURL_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
-       fi
+      if test "x$cross_compiling" != "xyes"; then
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_BROTLI"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_BROTLI to CURL_LIBRARY_PATH])
+      fi
     fi
     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libbrotlidec"
   else
@@ -2176,10 +2187,10 @@ dnl Check for libgsasl
 dnl **********************************************************************
 
 AC_ARG_WITH(libgsasl,
-           AS_HELP_STRING([--without-libgsasl],
-           [disable libgsasl support for SCRAM]),
-           with_libgsasl=$withval,
-           with_libgsasl=yes)
+  AS_HELP_STRING([--without-libgsasl],
+  [disable libgsasl support for SCRAM]),
+  with_libgsasl=$withval,
+  with_libgsasl=yes)
 if test $with_libgsasl != "no"; then
   AC_SEARCH_LIBS(gsasl_init, gsasl,
     [curl_gsasl_msg="enabled";
@@ -3463,24 +3474,24 @@ if test X"$want_quiche" != Xno; then
     fi
     AC_CHECK_LIB(quiche, quiche_conn_send_ack_eliciting,
       [
-       AC_CHECK_HEADERS(quiche.h,
-         experimental="$experimental HTTP3"
-         AC_MSG_NOTICE([HTTP3 support is experimental])
-         curl_h3_msg="enabled (quiche)"
-         QUICHE_ENABLED=1
-         AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
-         AC_SUBST(USE_QUICHE, [1])
-         AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
-         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
-         export CURL_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH])
-         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE quiche",
-         [],
-         [
+        AC_CHECK_HEADERS(quiche.h,
+          experimental="$experimental HTTP3"
+          AC_MSG_NOTICE([HTTP3 support is experimental])
+          curl_h3_msg="enabled (quiche)"
+          QUICHE_ENABLED=1
+          AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
+          AC_SUBST(USE_QUICHE, [1])
+          AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
+          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
+          export CURL_LIBRARY_PATH
+          AC_MSG_NOTICE([Added $DIR_QUICHE to CURL_LIBRARY_PATH])
+          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE quiche",
+          [],
+          [
 AC_INCLUDES_DEFAULT
 #include <sys/socket.h>
-         ]
-       )
+          ]
+        )
       ],
         dnl not found, revert back to clean variables
         AC_MSG_ERROR([couldn't use quiche])
@@ -3563,15 +3574,15 @@ if test X"$want_msh3" != Xno; then
   AC_CHECK_LIB(msh3, MsH3ApiOpen,
     [
       AC_CHECK_HEADERS(msh3.h,
-         curl_h3_msg="enabled (msh3)"
-         MSH3_ENABLED=1
-         AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
-         AC_SUBST(USE_MSH3, [1])
-         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
-         export CURL_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
-         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libmsh3"
-         experimental="$experimental HTTP3"
+        curl_h3_msg="enabled (msh3)"
+        MSH3_ENABLED=1
+        AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
+        AC_SUBST(USE_MSH3, [1])
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libmsh3"
+        experimental="$experimental HTTP3"
       )
     ],
       dnl not found, revert back to clean variables
@@ -3996,10 +4007,10 @@ dnl On Android, the only way to know if fseeko can be used is to see if it is
 dnl declared or not (for this API level), as the symbol always exists in the
 dnl lib.
 AC_CHECK_DECL([fseeko],
-              [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
-               [Define to 1 if you have the fseeko declaration])],
-              [],
-              [[#include <stdio.h>]])
+  [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
+   [Define to 1 if you have the fseeko declaration])],
+  [],
+  [[#include <stdio.h>]])
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
@@ -4052,7 +4063,7 @@ dnl
 AC_MSG_CHECKING([whether to use POSIX threads for threaded resolver])
 AC_ARG_ENABLE(pthreads,
 AS_HELP_STRING([--enable-pthreads],
-               [Enable POSIX threads (default for threaded resolver)])
+  [Enable POSIX threads (default for threaded resolver)])
 AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
 [ case "$enableval" in
   no)
