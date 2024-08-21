@@ -15,13 +15,15 @@ libcurl, report it on [HackerOne](https://hackerone.com/curl).
 
 We treat security issues with confidentiality until controlled and disclosed responsibly.
 
-## OpenSSF Scorecard
+## OpenSSF Best Practices
 
-curl has earned Gold status on the OpenSSF Best Practices, reflecting its adherence to
-rigorous security and best practice standards. This achievement highlights curl's
-comprehensive documentation, secure development processes, effective change control
-mechanisms, and strong maintenance routines. Meeting these criteria demonstrates curl's
-commitment to security and reliability, ensuring the project's sustainability and
-trustworthiness. This recognition by OpenSSF underscores curl's role as a leader in
-open-source software practices. More information can be found on
-their [OpenSSF page](https://www.bestpractices.dev/projects/63).
+curl has achieved Gold status on the Open Source Security Foundation (OpenSSF)
+[Best Practices](https://bestpractices.dev/) (formerly Core Infrastructure
+Initiative Best Practices), reflecting its adherence to rigorous
+security and best practice standards. This achievement highlights curl's
+comprehensive documentation, secure development processes, effective change
+control mechanisms, and strong maintenance routines. Meeting these criteria
+demonstrates curl's commitment to security and reliability, ensuring the
+project's sustainability and trustworthiness. This underscores curl's role as
+a leader in open-source software practices. More information can be found on
+[curl's OpenSSF Best Practices project page](https://www.bestpractices.dev/projects/63).
