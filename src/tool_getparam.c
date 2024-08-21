@@ -943,10 +943,8 @@ static ParameterError set_data(cmdline_t cmd,
         size = strlen(postdata);
     }
 
-    if(have_valid_range == 3) {
-      if((offset_start + size) > offset_end) { /*// XXX zusammenfassen?*/
-        size = offset_end - offset_start + 1;
-      }
+    if(have_valid_range == 3 && (offset_start + size) > offset_end) {
+      size = offset_end - offset_start + 1;
     }
 
     if(file && (file != stdin))
