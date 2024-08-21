@@ -1443,26 +1443,26 @@ if test X"$OPT_BROTLI" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_BROTLI" in
-  yes)
-    dnl --with-brotli (without path) used
-    CURL_CHECK_PKGCONFIG(libbrotlidec)
+    yes)
+      dnl --with-brotli (without path) used
+      CURL_CHECK_PKGCONFIG(libbrotlidec)
 
-    if test "$PKGCONFIG" != "no"; then
-      LIB_BROTLI=`$PKGCONFIG --libs-only-l libbrotlidec`
-      LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
-      CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
-      version=`$PKGCONFIG --modversion libbrotlidec`
-      DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/^-L//'`
-    fi
+      if test "$PKGCONFIG" != "no"; then
+        LIB_BROTLI=`$PKGCONFIG --libs-only-l libbrotlidec`
+        LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
+        CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
+        version=`$PKGCONFIG --modversion libbrotlidec`
+        DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/^-L//'`
+      fi
 
-    ;;
-  off)
-    dnl no --with-brotli option given, just check default places
-    ;;
-  *)
-    dnl use the given --with-brotli spot
-    PREFIX_BROTLI=$OPT_BROTLI
-    ;;
+      ;;
+    off)
+      dnl no --with-brotli option given, just check default places
+      ;;
+    *)
+      dnl use the given --with-brotli spot
+      PREFIX_BROTLI=$OPT_BROTLI
+      ;;
   esac
 
   dnl if given with a prefix, we set -L and -I based on that
@@ -1530,26 +1530,26 @@ if test X"$OPT_ZSTD" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_ZSTD" in
-  yes)
-    dnl --with-zstd (without path) used
-    CURL_CHECK_PKGCONFIG(libzstd)
+    yes)
+      dnl --with-zstd (without path) used
+      CURL_CHECK_PKGCONFIG(libzstd)
 
-    if test "$PKGCONFIG" != "no"; then
-      LIB_ZSTD=`$PKGCONFIG --libs-only-l libzstd`
-      LD_ZSTD=`$PKGCONFIG --libs-only-L libzstd`
-      CPP_ZSTD=`$PKGCONFIG --cflags-only-I libzstd`
-      version=`$PKGCONFIG --modversion libzstd`
-      DIR_ZSTD=`echo $LD_ZSTD | $SED -e 's/-L//'`
-    fi
+      if test "$PKGCONFIG" != "no"; then
+        LIB_ZSTD=`$PKGCONFIG --libs-only-l libzstd`
+        LD_ZSTD=`$PKGCONFIG --libs-only-L libzstd`
+        CPP_ZSTD=`$PKGCONFIG --cflags-only-I libzstd`
+        version=`$PKGCONFIG --modversion libzstd`
+        DIR_ZSTD=`echo $LD_ZSTD | $SED -e 's/-L//'`
+      fi
 
-    ;;
-  off)
-    dnl no --with-zstd option given, just check default places
-    ;;
-  *)
-    dnl use the given --with-zstd spot
-    PREFIX_ZSTD=$OPT_ZSTD
-    ;;
+      ;;
+    off)
+      dnl no --with-zstd option given, just check default places
+      ;;
+    *)
+      dnl use the given --with-zstd spot
+      PREFIX_ZSTD=$OPT_ZSTD
+      ;;
   esac
 
   dnl if given with a prefix, we set -L and -I based on that
@@ -1942,56 +1942,56 @@ if test x"$want_gss" = xyes; then
     LIBS="-lgss $LIBS"
   elif test -z "$GSSAPI_LIB_DIR"; then
     case $host in
-    *-*-darwin*)
-      LIBS="-lgssapi_krb5 -lresolv $LIBS"
-      ;;
-    *)
-      if test $GSSAPI_ROOT != "/usr"; then
-        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
-      else
-        CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
-      fi
-      if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
-        dnl into LIBS
-        gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
-        LIBS="$gss_libs $LIBS"
-      elif test "$PKGCONFIG" != "no"; then
-        gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
-        LIBS="$gss_libs $LIBS"
-      elif test -f "$KRB5CONFIG"; then
-        dnl krb5-config doesn't have --libs-only-L or similar, put everything
-        dnl into LIBS
-        gss_libs=`$KRB5CONFIG --libs gssapi`
-        LIBS="$gss_libs $LIBS"
-      else
-        case $host in
-        *-hp-hpux*)
-          gss_libname="gss"
-          ;;
-        *)
-          gss_libname="gssapi"
-          ;;
-        esac
-
-        if test "$GSSAPI_ROOT" != "yes"; then
-          LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
-          LIBS="-l$gss_libname $LIBS"
+      *-*-darwin*)
+        LIBS="-lgssapi_krb5 -lresolv $LIBS"
+        ;;
+      *)
+        if test $GSSAPI_ROOT != "/usr"; then
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi, $GSSAPI_ROOT/lib/pkgconfig)
         else
-          LIBS="-l$gss_libname $LIBS"
+          CURL_CHECK_PKGCONFIG(mit-krb5-gssapi)
         fi
-      fi
-      ;;
+        if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
+          dnl krb5-config doesn't have --libs-only-L or similar, put everything
+          dnl into LIBS
+          gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
+          LIBS="$gss_libs $LIBS"
+        elif test "$PKGCONFIG" != "no"; then
+          gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
+          LIBS="$gss_libs $LIBS"
+        elif test -f "$KRB5CONFIG"; then
+          dnl krb5-config doesn't have --libs-only-L or similar, put everything
+          dnl into LIBS
+          gss_libs=`$KRB5CONFIG --libs gssapi`
+          LIBS="$gss_libs $LIBS"
+        else
+          case $host in
+            *-hp-hpux*)
+              gss_libname="gss"
+              ;;
+            *)
+              gss_libname="gssapi"
+              ;;
+          esac
+
+          if test "$GSSAPI_ROOT" != "yes"; then
+            LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+            LIBS="-l$gss_libname $LIBS"
+          else
+            LIBS="-l$gss_libname $LIBS"
+          fi
+        fi
+        ;;
     esac
   else
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
     case $host in
-    *-hp-hpux*)
-      LIBS="-lgss $LIBS"
-      ;;
-    *)
-      LIBS="-lgssapi $LIBS"
-      ;;
+      *-hp-hpux*)
+        LIBS="-lgss $LIBS"
+        ;;
+      *)
+        LIBS="-lgssapi $LIBS"
+        ;;
     esac
   fi
 else
@@ -2064,33 +2064,33 @@ if test "x$curl_cv_native_windows" = "xyes"; then
 fi
 
 case "x$SSL_DISABLED$OPENSSL_ENABLED$GNUTLS_ENABLED$MBEDTLS_ENABLED$WOLFSSL_ENABLED$SCHANNEL_ENABLED$SECURETRANSPORT_ENABLED$BEARSSL_ENABLED$RUSTLS_ENABLED" in
-x)
-  AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
+  x)
+    AC_MSG_ERROR([TLS not detected, you will not be able to use HTTPS, FTPS, NTLM and more.
 Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl or --with-rustls to address this.])
-  ;;
-x1)
-  # one SSL backend is enabled
-  AC_SUBST(SSL_ENABLED)
-  SSL_ENABLED="1"
-  AC_MSG_NOTICE([built with one SSL backend])
-  ;;
-xD)
-  # explicitly built without TLS
-  ;;
-xD*)
-  AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
+    ;;
+  x1)
+    # one SSL backend is enabled
+    AC_SUBST(SSL_ENABLED)
+    SSL_ENABLED="1"
+    AC_MSG_NOTICE([built with one SSL backend])
+    ;;
+  xD)
+    # explicitly built without TLS
+    ;;
+  xD*)
+    AC_MSG_ERROR([--without-ssl has been set together with an explicit option to use an ssl library
 (e.g. --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schannel, --with-secure-transport, --with-amissl, --with-bearssl, --with-rustls).
 Since these are conflicting parameters, verify which is the desired one and drop the other.])
-  ;;
-*)
-  # more than one SSL backend is enabled
-  AC_SUBST(SSL_ENABLED)
-  SSL_ENABLED="1"
-  AC_SUBST(CURL_WITH_MULTI_SSL)
-  CURL_WITH_MULTI_SSL="1"
-  AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
-  AC_MSG_NOTICE([built with multiple SSL backends])
-  ;;
+    ;;
+  *)
+    # more than one SSL backend is enabled
+    AC_SUBST(SSL_ENABLED)
+    SSL_ENABLED="1"
+    AC_SUBST(CURL_WITH_MULTI_SSL)
+    CURL_WITH_MULTI_SSL="1"
+    AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
+    AC_MSG_NOTICE([built with multiple SSL backends])
+    ;;
 esac
 
 if test -n "$ssl_backends"; then
@@ -2136,25 +2136,25 @@ if test X"$OPT_LIBPSL" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_LIBPSL" in
-  yes|off)
-    dnl --with-libpsl (without path) used
-    CURL_CHECK_PKGCONFIG(libpsl)
+    yes|off)
+      dnl --with-libpsl (without path) used
+      CURL_CHECK_PKGCONFIG(libpsl)
 
-    if test "$PKGCONFIG" != "no"; then
-      LIB_PSL=`$PKGCONFIG --libs-only-l libpsl`
-      LD_PSL=`$PKGCONFIG --libs-only-L libpsl`
-      CPP_PSL=`$PKGCONFIG --cflags-only-I libpsl`
-    else
-      dnl no libpsl pkg-config found
+      if test "$PKGCONFIG" != "no"; then
+        LIB_PSL=`$PKGCONFIG --libs-only-l libpsl`
+        LD_PSL=`$PKGCONFIG --libs-only-L libpsl`
+        CPP_PSL=`$PKGCONFIG --cflags-only-I libpsl`
+      else
+        dnl no libpsl pkg-config found
+        LIB_PSL="-lpsl"
+      fi
+
+      ;;
+    *)
+      dnl use the given --with-libpsl spot
       LIB_PSL="-lpsl"
-    fi
-
-    ;;
-  *)
-    dnl use the given --with-libpsl spot
-    LIB_PSL="-lpsl"
-    PREFIX_PSL=$OPT_LIBPSL
-    ;;
+      PREFIX_PSL=$OPT_LIBPSL
+      ;;
   esac
 
   dnl if given with a prefix, we set -L and -I based on that
@@ -2246,26 +2246,26 @@ if test X"$OPT_LIBSSH2" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_LIBSSH2" in
-  yes)
-    dnl --with-libssh2 (without path) used
-    CURL_CHECK_PKGCONFIG(libssh2)
+    yes)
+      dnl --with-libssh2 (without path) used
+      CURL_CHECK_PKGCONFIG(libssh2)
 
-    if test "$PKGCONFIG" != "no"; then
-      LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
-      LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
-      CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
-      version=`$PKGCONFIG --modversion libssh2`
-      DIR_SSH2=`echo $LD_SSH2 | $SED -e 's/^-L//'`
-    fi
+      if test "$PKGCONFIG" != "no"; then
+        LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
+        LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
+        CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
+        version=`$PKGCONFIG --modversion libssh2`
+        DIR_SSH2=`echo $LD_SSH2 | $SED -e 's/^-L//'`
+      fi
 
-    ;;
-  off)
-    dnl no --with-libssh2 option given, just check default places
-    ;;
-  *)
-    dnl use the given --with-libssh2 spot
-    PREFIX_SSH2=$OPT_LIBSSH2
-    ;;
+      ;;
+    off)
+      dnl no --with-libssh2 option given, just check default places
+      ;;
+    *)
+      dnl use the given --with-libssh2 spot
+      PREFIX_SSH2=$OPT_LIBSSH2
+      ;;
   esac
 
   dnl if given with a prefix, we set -L and -I based on that
@@ -2321,26 +2321,26 @@ elif test X"$OPT_LIBSSH" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_LIBSSH" in
-  yes)
-    dnl --with-libssh (without path) used
-    CURL_CHECK_PKGCONFIG(libssh)
+    yes)
+      dnl --with-libssh (without path) used
+      CURL_CHECK_PKGCONFIG(libssh)
 
-    if test "$PKGCONFIG" != "no"; then
-      LIB_SSH=`$PKGCONFIG --libs-only-l libssh`
-      LD_SSH=`$PKGCONFIG --libs-only-L libssh`
-      CPP_SSH=`$PKGCONFIG --cflags-only-I libssh`
-      version=`$PKGCONFIG --modversion libssh`
-      DIR_SSH=`echo $LD_SSH | $SED -e 's/^-L//'`
-    fi
+      if test "$PKGCONFIG" != "no"; then
+        LIB_SSH=`$PKGCONFIG --libs-only-l libssh`
+        LD_SSH=`$PKGCONFIG --libs-only-L libssh`
+        CPP_SSH=`$PKGCONFIG --cflags-only-I libssh`
+        version=`$PKGCONFIG --modversion libssh`
+        DIR_SSH=`echo $LD_SSH | $SED -e 's/^-L//'`
+      fi
 
-    ;;
-  off)
-    dnl no --with-libssh option given, just check default places
-    ;;
-  *)
-    dnl use the given --with-libssh spot
-    PREFIX_SSH=$OPT_LIBSSH
-    ;;
+      ;;
+    off)
+      dnl no --with-libssh option given, just check default places
+      ;;
+    *)
+      dnl use the given --with-libssh spot
+      PREFIX_SSH=$OPT_LIBSSH
+      ;;
   esac
 
   dnl if given with a prefix, we set -L and -I based on that
@@ -2432,32 +2432,32 @@ if test X"$OPT_LIBRTMP" != Xno; then
   CLEANLIBS="$LIBS"
 
   case "$OPT_LIBRTMP" in
-  yes)
-    dnl --with-librtmp (without path) used
-    CURL_CHECK_PKGCONFIG(librtmp)
+    yes)
+      dnl --with-librtmp (without path) used
+      CURL_CHECK_PKGCONFIG(librtmp)
 
-    if test "$PKGCONFIG" != "no"; then
-      LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
-      LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
-      CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
-      version=`$PKGCONFIG --modversion librtmp`
-      DIR_RTMP=`echo $LD_RTMP | $SED -e 's/^-L//'`
-    else
-      dnl To avoid link errors, we do not allow --librtmp without
-      dnl a pkgconfig file
-      AC_MSG_ERROR([--librtmp was specified but could not find librtmp pkgconfig file.])
-    fi
+      if test "$PKGCONFIG" != "no"; then
+        LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
+        LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
+        CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
+        version=`$PKGCONFIG --modversion librtmp`
+        DIR_RTMP=`echo $LD_RTMP | $SED -e 's/^-L//'`
+      else
+        dnl To avoid link errors, we do not allow --librtmp without
+        dnl a pkgconfig file
+        AC_MSG_ERROR([--librtmp was specified but could not find librtmp pkgconfig file.])
+      fi
 
-    ;;
-  off)
-    dnl no --with-librtmp option given, just check default places
-    LIB_RTMP="-lrtmp"
-    ;;
-  *)
-    dnl use the given --with-librtmp spot
-    LIB_RTMP="-lrtmp"
-    PREFIX_RTMP=$OPT_LIBRTMP
-    ;;
+      ;;
+    off)
+      dnl no --with-librtmp option given, just check default places
+      LIB_RTMP="-lrtmp"
+      ;;
+    *)
+      dnl use the given --with-librtmp spot
+      LIB_RTMP="-lrtmp"
+      PREFIX_RTMP=$OPT_LIBRTMP
+      ;;
   esac
 
   dnl if given with a prefix, we set -L and -I based on that
@@ -4126,12 +4126,12 @@ if test "$want_pthreads" != "no"; then
 
       dnl on HP-UX, life is more complicated...
       case $host in
-      *-hp-hpux*)
-        dnl it doesn't actually work without -lpthread
-        USE_THREADS_POSIX=""
-        ;;
-      *)
-        ;;
+        *-hp-hpux*)
+          dnl it doesn't actually work without -lpthread
+          USE_THREADS_POSIX=""
+          ;;
+        *)
+          ;;
       esac
 
       dnl if it wasn't found without lib, search for it in pthread lib
@@ -4140,22 +4140,22 @@ if test "$want_pthreads" != "no"; then
         PTHREAD=" -pthread"
 
         case $host in
-        *-ibm-aix*)
-          dnl Check if compiler is xlC
-          COMPILER_VERSION=`"$CC" -qversion 2>/dev/null`
-          if test x"$COMPILER_VERSION" = "x"; then
+          *-ibm-aix*)
+            dnl Check if compiler is xlC
+            COMPILER_VERSION=`"$CC" -qversion 2>/dev/null`
+            if test x"$COMPILER_VERSION" = "x"; then
+              CFLAGS="$CFLAGS -pthread"
+            else
+              CFLAGS="$CFLAGS -qthreaded"
+            fi
+            ;;
+          powerpc-*amigaos*)
+            dnl No -pthread option, but link with -lpthread
+            PTHREAD=" -lpthread"
+            ;;
+          *)
             CFLAGS="$CFLAGS -pthread"
-          else
-            CFLAGS="$CFLAGS -qthreaded"
-          fi
-          ;;
-        powerpc-*amigaos*)
-          dnl No -pthread option, but link with -lpthread
-          PTHREAD=" -lpthread"
-          ;;
-        *)
-          CFLAGS="$CFLAGS -pthread"
-          ;;
+            ;;
         esac
         AC_CHECK_LIB(pthread, pthread_create,
                      [USE_THREADS_POSIX=1],
