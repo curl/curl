@@ -305,7 +305,7 @@ TEST_NGHTTPX=nghttpx
 AC_ARG_WITH(test-nghttpx,dnl
 AS_HELP_STRING([--with-test-nghttpx=PATH],[where to find nghttpx for testing]),
   TEST_NGHTTPX=$withval
-  if test X"$OPT_TEST_NGHTTPX" = "Xno" ; then
+  if test X"$OPT_TEST_NGHTTPX" = "Xno"; then
     TEST_NGHTTPX=""
   fi
 )
@@ -315,7 +315,7 @@ CADDY=/usr/bin/caddy
 AC_ARG_WITH(test-caddy,dnl
 AS_HELP_STRING([--with-test-caddy=PATH],[where to find caddy for testing]),
   CADDY=$withval
-  if test X"$OPT_CADDY" = "Xno" ; then
+  if test X"$OPT_CADDY" = "Xno"; then
     CADDY=""
   fi
 )
@@ -325,7 +325,7 @@ VSFTPD=/usr/sbin/vsftpd
 AC_ARG_WITH(test-vsftpd,dnl
 AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
   VSFTPD=$withval
-  if test X"$OPT_VSFTPD" = "Xno" ; then
+  if test X"$OPT_VSFTPD" = "Xno"; then
     VSFTPD=""
   fi
 )
@@ -708,7 +708,7 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
     AC_SUBST(CURL_DISABLE_LDAPS, [1])
     ;;
   *)
-    if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+    if test "x$CURL_DISABLE_LDAP" = "x1"; then
       AC_MSG_RESULT(LDAP needs to be enabled to support LDAPS)
       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
       AC_SUBST(CURL_DISABLE_LDAPS, [1])
@@ -719,7 +719,7 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
     fi
     ;;
   esac ],[
-    if test "x$CURL_DISABLE_LDAP" = "x1" ; then
+    if test "x$CURL_DISABLE_LDAP" = "x1"; then
       AC_MSG_RESULT(no)
       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
       AC_SUBST(CURL_DISABLE_LDAPS, [1])
@@ -769,7 +769,7 @@ if test X"$want_hyper" != Xno; then
 
   CURL_CHECK_PKGCONFIG(hyper, $want_hyper_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
       $PKGCONFIG --libs-only-l hyper`
     CPP_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path]) dnl
@@ -839,7 +839,7 @@ AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
       AC_SUBST(CURL_DISABLE_RTSP, [1])
       ;;
     *)
-      if test x$CURL_DISABLE_HTTP = x1 ; then
+      if test x$CURL_DISABLE_HTTP = x1; then
         AC_MSG_ERROR(HTTP support needs to be enabled in order to enable RTSP support!)
       else
         AC_MSG_RESULT(yes)
@@ -1306,17 +1306,17 @@ AS_HELP_STRING([--with-zlib=PATH],[search for zlib in PATH])
 AS_HELP_STRING([--without-zlib],[disable use of zlib]),
                [OPT_ZLIB="$withval"])
 
-if test "$OPT_ZLIB" = "no" ; then
+if test "$OPT_ZLIB" = "no"; then
   AC_MSG_WARN([zlib disabled])
 else
-  if test "$OPT_ZLIB" = "yes" ; then
+  if test "$OPT_ZLIB" = "yes"; then
     OPT_ZLIB=""
   fi
 
-  if test -z "$OPT_ZLIB" ; then
+  if test -z "$OPT_ZLIB"; then
     CURL_CHECK_PKGCONFIG(zlib)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       ZLIB_LIBS="`$PKGCONFIG --libs-only-l zlib`"
       if test -n "$ZLIB_LIBS"; then
         LDFLAGS="$LDFLAGS `$PKGCONFIG --libs-only-L zlib`"
@@ -1428,7 +1428,7 @@ if test X"$OPT_BROTLI" != Xno; then
     dnl --with-brotli (without path) used
     CURL_CHECK_PKGCONFIG(libbrotlidec)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       LIB_BROTLI=`$PKGCONFIG --libs-only-l libbrotlidec`
       LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
       CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
@@ -1515,7 +1515,7 @@ if test X"$OPT_ZSTD" != Xno; then
     dnl --with-zstd (without path) used
     CURL_CHECK_PKGCONFIG(libzstd)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       LIB_ZSTD=`$PKGCONFIG --libs-only-l libzstd`
       LD_ZSTD=`$PKGCONFIG --libs-only-L libzstd`
       CPP_ZSTD=`$PKGCONFIG --cflags-only-I libzstd`
@@ -1595,13 +1595,13 @@ AC_ARG_WITH(lber-lib,
 AS_HELP_STRING([--with-lber-lib=libname],[Specify name of lber lib file]),
   [LBERLIBNAME="$withval"])
 
-if test x$CURL_DISABLE_LDAP != x1 ; then
+if test x$CURL_DISABLE_LDAP != x1; then
 
   CURL_CHECK_HEADER_LBER
   CURL_CHECK_HEADER_LDAP
   CURL_CHECK_HEADER_LDAP_SSL
 
-  if test -z "$LDAPLIBNAME" ; then
+  if test -z "$LDAPLIBNAME"; then
     if test "$curl_cv_native_windows" = "yes"; then
       dnl Windows uses a single and unique LDAP library name
       LDAPLIBNAME="wldap32"
@@ -1609,7 +1609,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
     fi
   fi
 
-  if test "$LDAPLIBNAME" ; then
+  if test "$LDAPLIBNAME"; then
     AC_CHECK_LIB("$LDAPLIBNAME", ldap_init,, [
       if test -n "$ldap_askedfor"; then
         AC_MSG_ERROR([couldn't detect the LDAP libraries])
@@ -1637,12 +1637,12 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   fi
 fi
 
-if test x$CURL_DISABLE_LDAP != x1 ; then
+if test x$CURL_DISABLE_LDAP != x1; then
 
-  if test "$LBERLIBNAME" ; then
+  if test "$LBERLIBNAME"; then
     dnl If name is "no" then don't define this library at all
     dnl (it's only needed if libldap.so's dependencies are broken).
-    if test "$LBERLIBNAME" != "no" ; then
+    if test "$LBERLIBNAME" != "no"; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
         AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
@@ -1653,7 +1653,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   fi
 fi
 
-if test x$CURL_DISABLE_LDAP != x1 ; then
+if test x$CURL_DISABLE_LDAP != x1; then
   AC_CHECK_FUNCS([ldap_url_parse \
                   ldap_init_fd])
 
@@ -1671,7 +1671,7 @@ if test x$CURL_DISABLE_LDAP != x1 ; then
   fi
 fi
 
-if test x$CURL_DISABLE_LDAPS != x1 ; then
+if test x$CURL_DISABLE_LDAPS != x1; then
   curl_ldaps_msg="enabled"
 fi
 
@@ -1843,7 +1843,7 @@ if test x"$want_gss" = xyes; then
   if test -z "$GSSAPI_INCS"; then
     if test -n "$host_alias" -a -f "$GSSAPI_ROOT/bin/$host_alias-krb5-config"; then
       GSSAPI_INCS=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --cflags gssapi`
-    elif test "$PKGCONFIG" != "no" ; then
+    elif test "$PKGCONFIG" != "no"; then
       GSSAPI_INCS=`$PKGCONFIG --cflags mit-krb5-gssapi`
     elif test -f "$KRB5CONFIG"; then
       GSSAPI_INCS=`$KRB5CONFIG --cflags gssapi`
@@ -1937,7 +1937,7 @@ if test x"$want_gss" = xyes; then
         dnl into LIBS
         gss_libs=`$GSSAPI_ROOT/bin/$host_alias-krb5-config --libs gssapi`
         LIBS="$gss_libs $LIBS"
-      elif test "$PKGCONFIG" != "no" ; then
+      elif test "$PKGCONFIG" != "no"; then
         gss_libs=`$PKGCONFIG --libs mit-krb5-gssapi`
         LIBS="$gss_libs $LIBS"
       elif test -f "$KRB5CONFIG"; then
@@ -2121,7 +2121,7 @@ if test X"$OPT_LIBPSL" != Xno; then
     dnl --with-libpsl (without path) used
     CURL_CHECK_PKGCONFIG(libpsl)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       LIB_PSL=`$PKGCONFIG --libs-only-l libpsl`
       LD_PSL=`$PKGCONFIG --libs-only-L libpsl`
       CPP_PSL=`$PKGCONFIG --cflags-only-I libpsl`
@@ -2231,7 +2231,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
     dnl --with-libssh2 (without path) used
     CURL_CHECK_PKGCONFIG(libssh2)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       LIB_SSH2=`$PKGCONFIG --libs-only-l libssh2`
       LD_SSH2=`$PKGCONFIG --libs-only-L libssh2`
       CPP_SSH2=`$PKGCONFIG --cflags-only-I libssh2`
@@ -2306,7 +2306,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
     dnl --with-libssh (without path) used
     CURL_CHECK_PKGCONFIG(libssh)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       LIB_SSH=`$PKGCONFIG --libs-only-l libssh`
       LD_SSH=`$PKGCONFIG --libs-only-L libssh`
       CPP_SSH=`$PKGCONFIG --cflags-only-I libssh`
@@ -2417,7 +2417,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
     dnl --with-librtmp (without path) used
     CURL_CHECK_PKGCONFIG(librtmp)
 
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       LIB_RTMP=`$PKGCONFIG --libs-only-l librtmp`
       LD_RTMP=`$PKGCONFIG --libs-only-L librtmp`
       CPP_RTMP=`$PKGCONFIG --cflags-only-I librtmp`
@@ -2863,7 +2863,7 @@ if test X"$want_nghttp2" != Xno; then
 
   CURL_CHECK_PKGCONFIG(libnghttp2, $want_nghttp2_pkg_config_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_H2=`CURL_EXPORT_PCDIR([$want_nghttp2_pkg_config_path])
       $PKGCONFIG --libs-only-l libnghttp2`
     AC_MSG_NOTICE([-l is $LIB_H2])
@@ -2963,7 +2963,7 @@ if test X"$want_tcp2" != Xno; then
 
   CURL_CHECK_PKGCONFIG(libngtcp2, $want_tcp2_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_TCP2=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2`
     AC_MSG_NOTICE([-l is $LIB_TCP2])
@@ -3019,7 +3019,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
 
   CURL_CHECK_PKGCONFIG(libngtcp2_crypto_quictls, $want_tcp2_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_NGTCP2_CRYPTO_QUICTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_quictls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_QUICTLS])
@@ -3075,7 +3075,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
 
   CURL_CHECK_PKGCONFIG(libngtcp2_crypto_boringssl, $want_tcp2_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_NGTCP2_CRYPTO_BORINGSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_boringssl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_BORINGSSL])
@@ -3131,7 +3131,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
 
   CURL_CHECK_PKGCONFIG(libngtcp2_crypto_gnutls, $want_tcp2_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_NGTCP2_CRYPTO_GNUTLS=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_gnutls`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_GNUTLS])
@@ -3187,7 +3187,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
 
   CURL_CHECK_PKGCONFIG(libngtcp2_crypto_wolfssl, $want_tcp2_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_NGTCP2_CRYPTO_WOLFSSL=`CURL_EXPORT_PCDIR([$want_tcp2_path])
       $PKGCONFIG --libs-only-l libngtcp2_crypto_wolfssl`
     AC_MSG_NOTICE([-l is $LIB_NGTCP2_CRYPTO_WOLFSSL])
@@ -3322,7 +3322,7 @@ if test X"$want_nghttp3" != Xno; then
 
   CURL_CHECK_PKGCONFIG(libnghttp3, $want_nghttp3_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_NGHTTP3=`CURL_EXPORT_PCDIR([$want_nghttp3_path])
       $PKGCONFIG --libs-only-l libnghttp3`
     AC_MSG_NOTICE([-l is $LIB_NGHTTP3])
@@ -3441,7 +3441,7 @@ if test X"$want_quiche" != Xno; then
 
   CURL_CHECK_PKGCONFIG(quiche, $want_quiche_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_QUICHE=`CURL_EXPORT_PCDIR([$want_quiche_path])
       $PKGCONFIG --libs-only-l quiche`
     AC_MSG_NOTICE([-l is $LIB_QUICHE])
@@ -3619,7 +3619,7 @@ if test X"$want_libuv" != Xno; then
 
   CURL_CHECK_PKGCONFIG(libuv, $want_libuv_path)
 
-  if test "$PKGCONFIG" != "no" ; then
+  if test "$PKGCONFIG" != "no"; then
     LIB_LIBUV=`CURL_EXPORT_PCDIR([$want_libuv_path])
       $PKGCONFIG --libs-only-l libuv`
     AC_MSG_NOTICE([-l is $LIB_LIBUV])
@@ -3710,7 +3710,7 @@ case "$OPT_FISH_FPATH" in
   yes)
     dnl --with-fish-functions-dir option used without path
     CURL_CHECK_PKGCONFIG(fish)
-    if test "$PKGCONFIG" != "no" ; then
+    if test "$PKGCONFIG" != "no"; then
       FISH_FUNCTIONS_DIR=`$PKGCONFIG --variable completionsdir fish`
     else
       FISH_FUNCTIONS_DIR="$datarootdir/fish/vendor_completions.d"
@@ -4390,7 +4390,7 @@ AS_HELP_STRING([--disable-tls-srp],[Disable TLS-SRP authentication]),
     want_tls_srp=yes
 )
 
-if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$HAVE_OPENSSL_SRP" = "x1") ; then
+if test "$want_tls_srp" = "yes" && ( test "x$HAVE_GNUTLS_SRP" = "x1" || test "x$HAVE_OPENSSL_SRP" = "x1"); then
   AC_DEFINE(USE_TLS_SRP, 1, [Use TLS-SRP authentication])
   USE_TLS_SRP=1
   curl_tls_srp_msg="enabled"
