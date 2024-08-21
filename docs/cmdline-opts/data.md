@@ -18,8 +18,9 @@ Example:
   - -d "name=curl" $URL
   - -d "name=curl" -d "tool=cmdline" $URL
   - -d @filename $URL
-  - -d @filename!<skip_bytes> $URL
-  - -d @filename!<skip_bytes>-<end_offset> $URL
+  - --data-binary @filename!500-999 $URL
+  - --data-binary @filename!-500 $URL
+  - --data-binary @filename!9500- $URL
 ---
 
 # `--data`
@@ -46,11 +47,10 @@ is told to read from a file like that, carriage returns, newlines and null
 bytes are stripped out. If you do not want the @ character to have a special
 interpretation use --data-raw instead.
 
-If your filename ends with an exclamation mark followed by a numeric value
-<skip_bytes>, the first <skip_byes> bytes from the File are ignored. If you write two
-numeric values separated by a minus sign, this is considered a range from - to.
-For example, @notes.txt!1-3 uploads the second and third bytes of the file
-notes.txt.
+If you enter an exclamation mark after the filename followed by one or two
+numbers separated by a minus sign, only the bytes from the file that are
+within the limits of those numbers will be sent. The notation is the same as
+that used by the '--range' option.
 
 The data for this option is passed on to the server exactly as provided on the
 command line. curl does not convert, change or improve it. It is up to the

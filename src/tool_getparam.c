@@ -851,7 +851,7 @@ static ParameterError set_data(cmdline_t cmd,
   size_t size = 0;
   ParameterError err = PARAM_OK;
   char *ptr_range;
-  int have_valid_range = 1; /* range is valid until proven otherwise */
+  int have_valid_range = 0;
   size_t offset_start = 0;
   size_t offset_end = 0;
 
@@ -881,37 +881,36 @@ static ParameterError set_data(cmdline_t cmd,
             break;
           }
 
-          /* --data '@file[start]-' makes no sense. */
-          if(*ptr_range == '-' && *(ptr_range + 1) == '\0') {
-            have_valid_range = 0;
-            break;
-          }
-          else if(*ptr_range == '-' && !(have_valid_range & 2)) {
-            offset_end = strtol(ptr_range + 1, NULL, 0);
-            have_valid_range |= 2;
-          }
-          else if(*ptr_range == '-') { /* only ONE '-' allowed */
-            have_valid_range = 0;
+          if(*ptr_range == '!') {
+            *ptr_range = '\0';
+            if(*(ptr_range + 1) != '-') {
+              have_valid_range = have_valid_range | 2;
+              offset_start = strtol(ptr_range + 1, NULL, 0);
+            }
             break;
           }
 
-          if(*ptr_range == '!' && *(ptr_range + 1) == '-') {
+          /* --data @filename!<start>- */
+          else if(*ptr_range == '-' && *(ptr_range + 1) == '\0')
+            have_valid_range = 0;
+
+          /* --data @file![...]-[...]-[...] makes no sense. */
+          else if(*ptr_range == '-' && strchr(ptr_range + 1, '-')) {
             have_valid_range = 0;
             break;
           }
-          else if(*ptr_range == '!') {
-            offset_start = strtol(ptr_range + 1, NULL, 0);
-            *ptr_range = '\0';
-            break;
+          else if(*ptr_range == '-') {
+            have_valid_range = 1;
+            offset_end = strtol(ptr_range + 1, NULL, 0);
           }
 
           ptr_range--;
         }
 
-        if(have_valid_range >= 2 && offset_start >= offset_end) {
+        if(have_valid_range == 3 && offset_start > offset_end) {
 
           errorf(global, "The 'end' of the range must "
-                  "be larger than the 'start'");
+                  "be larger or equal than the 'start'");
 
           return PARAM_BAD_USE;
         }
@@ -921,7 +920,13 @@ static ParameterError set_data(cmdline_t cmd,
         errorf(global, "Failed to open %s", nextarg);
         return PARAM_READ_ERROR;
       }
-      if(have_valid_range && fseek(file, (long)offset_start, SEEK_SET)) {
+      if((have_valid_range & 2) && fseek(file, (long)offset_start, SEEK_SET)) {
+        errorf(global, "%s: %s", nextarg, strerror(errno));
+        fclose(file);
+        return PARAM_READ_ERROR;
+      }
+      else if(have_valid_range == 1 &&
+              fseek(file, (long)-offset_end, SEEK_END)) {
         errorf(global, "%s: %s", nextarg, strerror(errno));
         fclose(file);
         return PARAM_READ_ERROR;
@@ -938,21 +943,9 @@ static ParameterError set_data(cmdline_t cmd,
         size = strlen(postdata);
     }
 
-    /* --data @file![offset_start]: */
-    if(have_valid_range == 1) {
-      offset_end = size + offset_start;
-    }
-    if(have_valid_range & 1) {
-      if(offset_end > (size + offset_start) ||
-          (offset_start >= offset_end && have_valid_range >= 2)) {
-
-        errorf(global, "The specified limits exceed the actual file size.");
-        err = PARAM_BAD_USE;
-      }
-
-      /* --data @file![offset_start]-[offset_end]: */
-      if(have_valid_range >= 2) {
-        size = offset_end - offset_start;
+    if(have_valid_range == 3) {
+      if((offset_start + size) > offset_end) { /*// XXX zusammenfassen?*/
+        size = offset_end - offset_start + 1;
       }
     }
 
