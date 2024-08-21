@@ -73,9 +73,12 @@ UNITTEST_START
    * 4: list dtor will be NULL
   */
 
-  fail_unless(Curl_llist_count(&llist) == 0, "list initial size should be zero");
-  fail_unless(Curl_llist_head(&llist) == NULL, "list head should initiate to NULL");
-  fail_unless(Curl_llist_tail(&llist) == NULL, "list tail should initiate to NULL");
+  fail_unless(Curl_llist_count(&llist) == 0,
+              "list initial size should be zero");
+  fail_unless(Curl_llist_head(&llist) == NULL,
+              "list head should initiate to NULL");
+  fail_unless(Curl_llist_tail(&llist) == NULL,
+              "list tail should initiate to NULL");
 
   /**
    * testing Curl_llist_insert_next
@@ -87,7 +90,8 @@ UNITTEST_START
    * 3: list tail will be the same as list head
    */
 
-  Curl_llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case1, &case1_list);
+  Curl_llist_insert_next(&llist, Curl_llist_head(&llist), &unusedData_case1,
+                         &case1_list);
 
   fail_unless(Curl_llist_count(&llist) == 1,
               "List size should be 1 after adding a new element");
