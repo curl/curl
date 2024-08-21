@@ -160,10 +160,10 @@ dnl We require GnuTLS with SRP support.
 dnl ---
 if test "$GNUTLS_ENABLED" = "1"; then
   AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
-   [
-     AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
-     AC_SUBST(HAVE_GNUTLS_SRP, [1])
-   ])
+    [
+      AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
+      AC_SUBST(HAVE_GNUTLS_SRP, [1])
+    ])
 fi
 
 ])

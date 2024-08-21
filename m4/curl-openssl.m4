@@ -207,18 +207,18 @@ if test "x$OPT_OPENSSL" != xno; then
     AC_CHECK_LIB(ssl, SSL_connect)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-        dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
-        AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
-        OLIBS=$LIBS
-        LIBS="-lRSAglue -lrsaref $LIBS"
-        AC_CHECK_LIB(ssl, SSL_connect)
-        if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-            dnl still no SSL_connect
-            AC_MSG_RESULT(no)
-            LIBS=$OLIBS
-        else
-            AC_MSG_RESULT(yes)
-        fi
+      dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
+      AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
+      OLIBS=$LIBS
+      LIBS="-lRSAglue -lrsaref $LIBS"
+      AC_CHECK_LIB(ssl, SSL_connect)
+      if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
+        dnl still no SSL_connect
+        AC_MSG_RESULT(no)
+        LIBS=$OLIBS
+      else
+        AC_MSG_RESULT(yes)
+      fi
 
     else
 
@@ -247,7 +247,7 @@ if test "x$OPT_OPENSSL" != xno; then
     fi
 
     if test X"$OPENSSL_ENABLED" != X"1"; then
-       LIBS="$CLEANLIBS"
+      LIBS="$CLEANLIBS"
     fi
 
     if test X"$OPT_OPENSSL" != Xoff &&
@@ -261,36 +261,36 @@ if test "x$OPT_OPENSSL" != xno; then
 
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-                #include <openssl/base.h>
-                ]],[[
-                #ifndef OPENSSL_IS_BORINGSSL
-                #error not boringssl
-                #endif
-       ]])
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_BORINGSSL
+        #error not boringssl
+        #endif
+      ]])
     ],[
-        AC_MSG_RESULT([yes])
-        ssl_msg="BoringSSL"
-        OPENSSL_IS_BORINGSSL=1
+      AC_MSG_RESULT([yes])
+      ssl_msg="BoringSSL"
+      OPENSSL_IS_BORINGSSL=1
     ],[
-        AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no])
     ])
 
     AC_MSG_CHECKING([for AWS-LC])
     AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-                #include <openssl/base.h>
-                ]],[[
-                #ifndef OPENSSL_IS_AWSLC
-                #error not AWS-LC
-                #endif
-       ]])
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_AWSLC
+        #error not AWS-LC
+        #endif
+     ]])
     ],[
-        AC_MSG_RESULT([yes])
-        ssl_msg="AWS-LC"
-        OPENSSL_IS_BORINGSSL=1
+      AC_MSG_RESULT([yes])
+      ssl_msg="AWS-LC"
+      OPENSSL_IS_BORINGSSL=1
     ],[
-        AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no])
     ])
 
     AC_MSG_CHECKING([for LibreSSL])
@@ -373,20 +373,20 @@ if test X"$OPENSSL_ENABLED" = X"1"; then
   AC_ARG_WITH(random,
   AS_HELP_STRING([--with-random=FILE],
                  [read randomness from FILE (default=/dev/urandom)]),
-      [ RANDOM_FILE="$withval" ],
-      [
-          if test x$cross_compiling != xyes; then
-            dnl Check for random device
-            AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
-          else
-            AC_MSG_WARN([skipped the /dev/urandom detection when cross-compiling])
-          fi
-      ]
+    [ RANDOM_FILE="$withval" ],
+    [
+      if test x$cross_compiling != xyes; then
+        dnl Check for random device
+        AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
+      else
+        AC_MSG_WARN([skipped the /dev/urandom detection when cross-compiling])
+      fi
+    ]
   )
-  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
-          AC_SUBST(RANDOM_FILE)
-          AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
-          [a suitable file to read random data from])
+  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno; then
+    AC_SUBST(RANDOM_FILE)
+    AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
+    [a suitable file to read random data from])
   fi
 fi
 
