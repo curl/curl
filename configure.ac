@@ -1746,11 +1746,11 @@ if test "$ipv6" = yes; then
   struct sockaddr_in6 s;
   s.sin6_scope_id = 0;
 ]])], [
-  AC_MSG_RESULT([yes])
-  AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
- ], [
-   AC_MSG_RESULT([no])
- ])
+    AC_MSG_RESULT([yes])
+    AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
+  ], [
+    AC_MSG_RESULT([no])
+  ])
 fi
 
 dnl **********************************************************************
@@ -2150,13 +2150,13 @@ if test X"$OPT_LIBPSL" != Xno; then
 
   AC_CHECK_LIB(psl, psl_builtin,
     [
-     AC_CHECK_HEADERS(libpsl.h,
-       curl_psl_msg="enabled"
-       LIBPSL_ENABLED=1
-       AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
-       AC_SUBST(USE_LIBPSL, [1])
-       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libpsl"
-     )
+      AC_CHECK_HEADERS(libpsl.h,
+        curl_psl_msg="enabled"
+        LIBPSL_ENABLED=1
+        AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
+        AC_SUBST(USE_LIBPSL, [1])
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libpsl"
+      )
     ],
       dnl not found, revert back to clean variables
       LDFLAGS=$CLEANLDFLAGS
@@ -3823,7 +3823,7 @@ CPPFLAGS=$o
 
 AC_CHECK_TYPE(long long,
   [AC_DEFINE(HAVE_LONGLONG, 1,
-     [Define to 1 if the compiler supports the 'long long' data type.])]
+    [Define to 1 if the compiler supports the 'long long' data type.])]
   longlong="yes"
 )
 
@@ -3856,7 +3856,7 @@ AC_CHECK_TYPE(sa_family_t,
   AC_CHECK_TYPE(ADDRESS_FAMILY,
     AC_DEFINE(CURL_SA_FAMILY_T, ADDRESS_FAMILY, [IP address type in sockaddr]),
     AC_DEFINE(CURL_SA_FAMILY_T, unsigned short, [IP address type in sockaddr]),
-   [
+    [
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -3866,7 +3866,7 @@ AC_CHECK_TYPE(sa_family_t,
 #ifdef HAVE_SYS_SOCKET_H
 #include <sys/socket.h>
 #endif
-   ])
+    ])
   ],
 [
 #ifdef HAVE_SYS_SOCKET_H
@@ -5040,7 +5040,7 @@ else
       #endif
     ]])
   ],[
-     SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
+    SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
   ],[
   ])
 fi
@@ -5275,13 +5275,13 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
 # grep -o would simplify this, but is nonportable
 [non13=`echo "$TLSCHOICE" | $AWK '{split("bearssl secure-transport", a); for (i in a) if(match(tolower($0), a[i])) print a[i];}'`]
 if test -n "$non13"; then
- for a in $non13; do
-   AC_MSG_WARN([$a is enabled for TLS but it does not support TLS 1.3])
- done
+  for a in $non13; do
+    AC_MSG_WARN([$a is enabled for TLS but it does not support TLS 1.3])
+  done
 fi
 
 if test -n "$experimental"; then
- for a in $experimental; do
-   AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])
- done
+  for a in $experimental; do
+    AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])
+  done
 fi
