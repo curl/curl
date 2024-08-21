@@ -25,9 +25,6 @@
 
 #include "getpart.h"
 
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
 #include "curlx.h" /* from the private lib dir */
 
 /* just to please curl_base64.h we create a fake struct */
