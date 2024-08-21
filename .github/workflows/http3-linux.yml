@@ -470,7 +470,7 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
 
-      - run: pytest -v tests
+      - run: pytest -v tests/http
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"

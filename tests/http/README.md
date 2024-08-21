@@ -13,7 +13,7 @@ This is an additional test suite using a combination of Apache httpd and nghttpx
 The test cases and necessary files are in `tests/http`. You can invoke `pytest` from there or from the top level curl checkout and it will find all tests.
 
 ```
-curl> pytest
+curl> pytest test/http
 platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
 rootdir: /Users/sei/projects/curl
 collected 5 items
@@ -24,7 +24,7 @@ tests/http/test_01_basic.py .....
 Pytest takes arguments. `-v` increases its verbosity and can be used several times. `-k <expr>` can be used to run only matching test cases. The `expr` can be something resembling a python test or just a string that needs to match test cases in their names.
 
 ```
-curl> pytest -vv -k test_01_02
+curl/tests/http> pytest -vv -k test_01_02
 ```
 
 runs all test cases that have `test_01_02` in their name. This does not have to be the start of the name.
@@ -54,10 +54,10 @@ Via curl's `configure` script you may specify:
 Several test cases are parameterized, for example with the HTTP version to use. If you want to run a test with a particular protocol only, use a command line like:
 
 ```
-curl> pytest -k "test_02_06 and h2"
+curl/tests/http> pytest -k "test_02_06 and h2"
 ```
 
-Several test cases can be repeated, they all have the `repeat` parameter (install `pytest-repeat` module). To make this work, you have to start `pytest` in the test directory itself (for some unknown reason). Like in:
+Test cases can be repeated, with the `pytest-repeat` module (`pip install pytest-repeat`). Like in:
 
 ```
 curl/tests/http> pytest -k "test_02_06 and h2" --count=100
