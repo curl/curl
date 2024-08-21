@@ -98,7 +98,6 @@
 # undef msnprintf
 # undef vprintf
 # undef vfprintf
-# undef vsprintf
 # undef mvsnprintf
 # undef aprintf
 # undef vaprintf
@@ -112,7 +111,6 @@
 # define mvsnprintf curlx_mvsnprintf
 # define aprintf curlx_maprintf
 # define vaprintf curlx_mvaprintf
-# define vsprintf curlx_mvsprintf
 #endif /* ENABLE_CURLX_PRINTF */
 
 #endif /* HEADER_CURL_CURLX_H */
