@@ -39,7 +39,7 @@ find_path(WOLFSSH_INCLUDE_DIR NAMES "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")
 
 if(WOLFSSH_INCLUDE_DIR AND EXISTS "${WOLFSSH_INCLUDE_DIR}/wolfssh/version.h")
-  set(_version_regex "#[\t ]*define[\t ]+LIBWOLFSSH_VERSION_STRING[\t ]+\"([^\"]*)\"")
+  set(_version_regex "#[\t ]*define[\t ]+LIBWOLFSSH_VERSION_STRING[\t ]+\"([^\"]*)")
   file(STRINGS "${WOLFSSH_INCLUDE_DIR}/wolfssh/version.h" _version_str REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
   set(WOLFSSH_VERSION "${_version_str}")

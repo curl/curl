@@ -66,7 +66,7 @@ find_library(WOLFSSL_LIBRARY NAMES "wolfssl"
 if(PC_WOLFSSL_VERSION)
   set(WOLFSSL_VERSION ${PC_WOLFSSL_VERSION})
 elseif(WOLFSSL_INCLUDE_DIR AND EXISTS "${WOLFSSL_INCLUDE_DIR}/wolfssl/version.h")
-  set(_version_regex "#[\t ]*define[\t ]+LIBWOLFSSL_VERSION_STRING[\t ]+\"([^\"]*)\"")
+  set(_version_regex "#[\t ]*define[\t ]+LIBWOLFSSL_VERSION_STRING[\t ]+\"([^\"]*)")
   file(STRINGS "${WOLFSSL_INCLUDE_DIR}/wolfssl/version.h" _version_str REGEX "${_version_regex}")
   string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
   set(WOLFSSL_VERSION "${_version_str}")
