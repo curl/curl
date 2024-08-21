@@ -1250,8 +1250,7 @@ typedef enum {
   /* send linked-list of post-transfer QUOTE commands */
   CURLOPT(CURLOPT_POSTQUOTE, CURLOPTTYPE_SLISTPOINT, 39),
 
-   /* OBSOLETE, do not use! */
-  CURLOPT(CURLOPT_OBSOLETE40, CURLOPTTYPE_OBJECTPOINT, 40),
+  /* 40 is not used */
 
   /* talk a lot */
   CURLOPT(CURLOPT_VERBOSE, CURLOPTTYPE_LONG, 41),
@@ -1352,9 +1351,7 @@ typedef enum {
   /* Max amount of cached alive connections */
   CURLOPT(CURLOPT_MAXCONNECTS, CURLOPTTYPE_LONG, 71),
 
-  /* OBSOLETE, do not use! */
-  CURLOPT(CURLOPT_OBSOLETE72, CURLOPTTYPE_LONG, 72),
-
+  /* 72 = OBSOLETE */
   /* 73 = OBSOLETE */
 
   /* Set to explicitly use a new connection for the upcoming transfer.

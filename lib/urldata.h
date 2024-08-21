@@ -77,6 +77,10 @@ struct curl_trc_featt;
 #define CURLPROTO_WSS 0
 #endif
 
+/* the default protocols accepting a redirect to */
+#define CURLPROTO_REDIR (CURLPROTO_HTTP | CURLPROTO_HTTPS | CURLPROTO_FTP | \
+                         CURLPROTO_FTPS)
+
 /* This should be undefined once we need bit 32 or higher */
 #define PROTO_TYPE_SMALL
 
