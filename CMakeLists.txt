@@ -98,7 +98,7 @@ function(curl_dumpvars)  # Dump all defined variables with their values
   message("::endgroup::")
 endfunction()
 
-file(STRINGS ${CURL_SOURCE_DIR}/include/curl/curlver.h _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
+file(STRINGS "${CURL_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
 string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*"
   CURL_VERSION ${_curl_version_h_contents})
 string(REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
