@@ -112,7 +112,9 @@ endif()
 
 include_directories("${CURL_SOURCE_DIR}/include")
 
-set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
+if(NOT DEFINED CMAKE_UNITY_BUILD_BATCH_SIZE)
+  set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
+endif()
 
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
