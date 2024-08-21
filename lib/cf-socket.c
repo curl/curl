@@ -524,6 +524,8 @@ CURLcode Curl_parse_interface(const char *input,
   DEBUGASSERT(host);
 
   len = strlen(input);
+  if(len > 512)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
 
   if(strncmp(if_prefix, input, strlen(if_prefix)) == 0) {
     input += strlen(if_prefix);
