@@ -926,7 +926,7 @@ static ParameterError set_data(cmdline_t cmd,
         return PARAM_READ_ERROR;
       }
       else if(have_valid_range == 1 &&
-              fseek(file, (long)-offset_end, SEEK_END)) {
+              fseek(file, -((long)offset_end), SEEK_END)) {
         errorf(global, "%s: %s", nextarg, strerror(errno));
         fclose(file);
         return PARAM_READ_ERROR;
