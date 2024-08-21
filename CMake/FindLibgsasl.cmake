@@ -50,7 +50,7 @@ else()
   find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
 
   if(LIBGSASL_INCLUDE_DIR AND EXISTS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h")
-    set(_version_regex "#[\t ]*define[\t ]+GSASL_VERSION[\t ]+\"([^\"]*)")
+    set(_version_regex "#[\t ]*define[\t ]+GSASL_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h" _version_str REGEX "${_version_regex}")
     string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
     set(LIBGSASL_VERSION "${_version_str}")
