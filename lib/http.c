@@ -3535,7 +3535,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
 #endif
 
 #ifdef USE_WEBSOCKETS
-  /* All >=200 HTTP status codes are errors when wanting websockets */
+  /* All >=200 HTTP status codes are errors when wanting WebSockets */
   if(data->req.upgr101 == UPGR101_WS) {
     failf(data, "Refused WebSockets upgrade: %d", k->httpcode);
     result = CURLE_HTTP_RETURNED_ERROR;

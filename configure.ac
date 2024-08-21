@@ -4846,16 +4846,16 @@ AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
     if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
       AC_MSG_RESULT(yes)
       curl_ws_msg="enabled"
-      AC_DEFINE_UNQUOTED(USE_WEBSOCKETS, [1], [enable websockets support])
+      AC_DEFINE_UNQUOTED(USE_WEBSOCKETS, [1], [enable WebSockets support])
       SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WS"
       if test "x$SSL_ENABLED" = "x1"; then
         SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WSS"
       fi
-      experimental="$experimental Websockets"
+      experimental="$experimental WebSockets"
     else
-      dnl websockets requires >32 bit curl_off_t
+      dnl WebSockets requires >32 bit curl_off_t
       AC_MSG_RESULT(no)
-      AC_MSG_WARN([Websockets disabled due to lack of >32 bit curl_off_t])
+      AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
     fi
     ;;
   esac ],

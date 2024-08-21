@@ -22,7 +22,7 @@
  *
  ***************************************************************************/
 /* <DESC>
- * Websockets data echos
+ * WebSockets data echos
  * </DESC>
  */
 /* curl stuff */
@@ -265,7 +265,7 @@ int main(int argc, char *argv[])
 #else /* USE_WEBSOCKETS */
   (void)argc;
   (void)argv;
-  fprintf(stderr, "websockets not enabled in libcurl\n");
+  fprintf(stderr, "WebSockets not enabled in libcurl\n");
   return 1;
 #endif /* !USE_WEBSOCKETS */
 }
