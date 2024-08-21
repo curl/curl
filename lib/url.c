@@ -925,7 +925,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     /* Do not pick a connection that has not connected yet */
     return FALSE;
   }
-  /* `conn` is connected. If it has tranfers, can we add ours to it? */
+  /* `conn` is connected. If it has transfers, can we add ours to it? */
 
   if(CONN_INUSE(conn)) {
     if(!conn->bits.multiplex)
