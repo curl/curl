@@ -36,10 +36,6 @@
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
-
 static
 void dump(const char *text, unsigned char *ptr, size_t size,
           char nohex)
@@ -170,7 +166,7 @@ static int server_push_callback(CURL *parent,
   int rv;
 
   (void)parent; /* we have no use for this */
-  snprintf(filename, sizeof(filename)-1, "push%u", count++);
+  curl_msnprintf(filename, sizeof(filename)-1, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
