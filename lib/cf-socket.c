@@ -527,21 +527,21 @@ CURLcode Curl_parse_interface(const char *input,
   if(len > 512)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
-  if(strncmp(if_prefix, input, strlen(if_prefix)) == 0) {
+  if(!strncmp(if_prefix, input, strlen(if_prefix))) {
     input += strlen(if_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     *iface = Curl_memdup0(input, len - strlen(if_prefix));
     return *iface ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
-  if(strncmp(host_prefix, input, strlen(host_prefix)) == 0) {
+  else if(!strncmp(host_prefix, input, strlen(host_prefix))) {
     input += strlen(host_prefix);
     if(!*input)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     *host = Curl_memdup0(input, len - strlen(host_prefix));
     return *host ? CURLE_OK : CURLE_OUT_OF_MEMORY;
   }
-  if(strncmp(if_host_prefix, input, strlen(if_host_prefix)) == 0) {
+  else if(!strncmp(if_host_prefix, input, strlen(if_host_prefix))) {
     const char *host_part;
     input += strlen(if_host_prefix);
     len -= strlen(if_host_prefix);
