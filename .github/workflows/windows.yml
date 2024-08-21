@@ -268,7 +268,7 @@ jobs:
             env: '8.1.0-x86_64'
             dir: 'mingw64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/8.1.0/threads-win32/seh/x86_64-8.1.0-release-win32-seh-rt_v6-rev0.7z'
-            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
+            config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_C_FLAGS=-D__USE_MINGW_ANSI_STDIO=0'
             type: 'Release'
             tflags: 'skiprun'
           - name: 'schannel U'
