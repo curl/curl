@@ -61,48 +61,48 @@ if test "x$OPT_OPENSSL" != xno; then
   esac
 
   case "$OPT_OPENSSL" in
-  yes)
-    dnl --with-openssl (without path) used
-    PKGTEST="yes"
-    PREFIX_OPENSSL=
-    ;;
-  *)
-    dnl check the given --with-openssl spot
-    PKGTEST="no"
-    PREFIX_OPENSSL=$OPT_OPENSSL
-
-    dnl Try pkg-config even when cross-compiling.  Since we
-    dnl specify PKG_CONFIG_LIBDIR we're only looking where
-    dnl the user told us to look
-    OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
-    if test -f "$OPENSSL_PCDIR/openssl.pc"; then
-      AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+    yes)
+      dnl --with-openssl (without path) used
       PKGTEST="yes"
-    fi
+      PREFIX_OPENSSL=
+      ;;
+    *)
+      dnl check the given --with-openssl spot
+      PKGTEST="no"
+      PREFIX_OPENSSL=$OPT_OPENSSL
 
-    if test "$PKGTEST" != "yes"; then
-      # try lib64 instead
-      OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+      dnl Try pkg-config even when cross-compiling.  Since we
+      dnl specify PKG_CONFIG_LIBDIR we're only looking where
+      dnl the user told us to look
+      OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
       if test -f "$OPENSSL_PCDIR/openssl.pc"; then
         AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
         PKGTEST="yes"
       fi
-    fi
 
-    if test "$PKGTEST" != "yes"; then
-      if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-        AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+      if test "$PKGTEST" != "yes"; then
+        # try lib64 instead
+        OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+        if test -f "$OPENSSL_PCDIR/openssl.pc"; then
+          AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+          PKGTEST="yes"
+        fi
       fi
-    fi
 
-    dnl in case pkg-config comes up empty, use what we got
-    dnl via --with-openssl
-    LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
-    if test "$PREFIX_OPENSSL" != "/usr" ; then
-      SSL_LDFLAGS="-L$LIB_OPENSSL"
-      SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
-    fi
-    ;;
+      if test "$PKGTEST" != "yes"; then
+        if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+          AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+        fi
+      fi
+
+      dnl in case pkg-config comes up empty, use what we got
+      dnl via --with-openssl
+      LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
+      if test "$PREFIX_OPENSSL" != "/usr" ; then
+        SSL_LDFLAGS="-L$LIB_OPENSSL"
+        SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
+      fi
+      ;;
   esac
 
   if test "$PKGTEST" = "yes"; then
