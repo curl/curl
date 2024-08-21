@@ -1813,31 +1813,31 @@ dnl check for GSS-API stuff in the /usr as default
 
 GSSAPI_ROOT="/usr"
 AC_ARG_WITH(gssapi-includes,
-  AS_HELP_STRING([--with-gssapi-includes=DIR],
-                 [Specify location of GSS-API headers]),
-  [ GSSAPI_INCS="-I$withval"
-    want_gss="yes" ]
+  AS_HELP_STRING([--with-gssapi-includes=DIR], [Specify location of GSS-API headers]), [
+    GSSAPI_INCS="-I$withval"
+    want_gss="yes"
+  ]
 )
 
 AC_ARG_WITH(gssapi-libs,
-  AS_HELP_STRING([--with-gssapi-libs=DIR],
-                 [Specify location of GSS-API libs]),
-  [ GSSAPI_LIB_DIR="-L$withval"
-    want_gss="yes" ]
+  AS_HELP_STRING([--with-gssapi-libs=DIR], [Specify location of GSS-API libs]), [
+    GSSAPI_LIB_DIR="-L$withval"
+    want_gss="yes"
+  ]
 )
 
 AC_ARG_WITH(gssapi,
-  AS_HELP_STRING([--with-gssapi=DIR],
-                 [Where to look for GSS-API]), [
-  GSSAPI_ROOT="$withval"
-  if test x"$GSSAPI_ROOT" != xno; then
-    want_gss="yes"
-    if test x"$GSSAPI_ROOT" = xyes; then
-      dnl if yes, then use default root
-      GSSAPI_ROOT="/usr"
+  AS_HELP_STRING([--with-gssapi=DIR], [Where to look for GSS-API]), [
+    GSSAPI_ROOT="$withval"
+    if test x"$GSSAPI_ROOT" != xno; then
+      want_gss="yes"
+      if test x"$GSSAPI_ROOT" = xyes; then
+        dnl if yes, then use default root
+        GSSAPI_ROOT="/usr"
+      fi
     fi
-  fi
-])
+  ]
+)
 
 : ${KRB5CONFIG:="$GSSAPI_ROOT/bin/krb5-config"}
 
