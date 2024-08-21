@@ -61,48 +61,48 @@ if test "x$OPT_OPENSSL" != xno; then
   esac
 
   case "$OPT_OPENSSL" in
-  yes)
-    dnl --with-openssl (without path) used
-    PKGTEST="yes"
-    PREFIX_OPENSSL=
-    ;;
-  *)
-    dnl check the given --with-openssl spot
-    PKGTEST="no"
-    PREFIX_OPENSSL=$OPT_OPENSSL
-
-    dnl Try pkg-config even when cross-compiling.  Since we
-    dnl specify PKG_CONFIG_LIBDIR we're only looking where
-    dnl the user told us to look
-    OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
-    if test -f "$OPENSSL_PCDIR/openssl.pc"; then
-      AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+    yes)
+      dnl --with-openssl (without path) used
       PKGTEST="yes"
-    fi
+      PREFIX_OPENSSL=
+      ;;
+    *)
+      dnl check the given --with-openssl spot
+      PKGTEST="no"
+      PREFIX_OPENSSL=$OPT_OPENSSL
 
-    if test "$PKGTEST" != "yes"; then
-      # try lib64 instead
-      OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+      dnl Try pkg-config even when cross-compiling.  Since we
+      dnl specify PKG_CONFIG_LIBDIR we're only looking where
+      dnl the user told us to look
+      OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
       if test -f "$OPENSSL_PCDIR/openssl.pc"; then
         AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
         PKGTEST="yes"
       fi
-    fi
 
-    if test "$PKGTEST" != "yes"; then
-      if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-        AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+      if test "$PKGTEST" != "yes"; then
+        # try lib64 instead
+        OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+        if test -f "$OPENSSL_PCDIR/openssl.pc"; then
+          AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+          PKGTEST="yes"
+        fi
       fi
-    fi
 
-    dnl in case pkg-config comes up empty, use what we got
-    dnl via --with-openssl
-    LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
-    if test "$PREFIX_OPENSSL" != "/usr" ; then
-      SSL_LDFLAGS="-L$LIB_OPENSSL"
-      SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
-    fi
-    ;;
+      if test "$PKGTEST" != "yes"; then
+        if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+          AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+        fi
+      fi
+
+      dnl in case pkg-config comes up empty, use what we got
+      dnl via --with-openssl
+      LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
+      if test "$PREFIX_OPENSSL" != "/usr" ; then
+        SSL_LDFLAGS="-L$LIB_OPENSSL"
+        SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
+      fi
+      ;;
   esac
 
   if test "$PKGTEST" = "yes"; then
@@ -207,18 +207,18 @@ if test "x$OPT_OPENSSL" != xno; then
     AC_CHECK_LIB(ssl, SSL_connect)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-        dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
-        AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
-        OLIBS=$LIBS
-        LIBS="-lRSAglue -lrsaref $LIBS"
-        AC_CHECK_LIB(ssl, SSL_connect)
-        if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-            dnl still no SSL_connect
-            AC_MSG_RESULT(no)
-            LIBS=$OLIBS
-        else
-            AC_MSG_RESULT(yes)
-        fi
+      dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
+      AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
+      OLIBS=$LIBS
+      LIBS="-lRSAglue -lrsaref $LIBS"
+      AC_CHECK_LIB(ssl, SSL_connect)
+      if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
+        dnl still no SSL_connect
+        AC_MSG_RESULT(no)
+        LIBS=$OLIBS
+      else
+        AC_MSG_RESULT(yes)
+      fi
 
     else
 
@@ -247,7 +247,7 @@ if test "x$OPT_OPENSSL" != xno; then
     fi
 
     if test X"$OPENSSL_ENABLED" != X"1"; then
-       LIBS="$CLEANLIBS"
+      LIBS="$CLEANLIBS"
     fi
 
     if test X"$OPT_OPENSSL" != Xoff &&
@@ -261,36 +261,36 @@ if test "x$OPT_OPENSSL" != xno; then
 
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-                #include <openssl/base.h>
-                ]],[[
-                #ifndef OPENSSL_IS_BORINGSSL
-                #error not boringssl
-                #endif
-       ]])
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_BORINGSSL
+        #error not boringssl
+        #endif
+      ]])
     ],[
-        AC_MSG_RESULT([yes])
-        ssl_msg="BoringSSL"
-        OPENSSL_IS_BORINGSSL=1
+      AC_MSG_RESULT([yes])
+      ssl_msg="BoringSSL"
+      OPENSSL_IS_BORINGSSL=1
     ],[
-        AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no])
     ])
 
     AC_MSG_CHECKING([for AWS-LC])
     AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-                #include <openssl/base.h>
-                ]],[[
-                #ifndef OPENSSL_IS_AWSLC
-                #error not AWS-LC
-                #endif
-       ]])
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_AWSLC
+        #error not AWS-LC
+        #endif
+     ]])
     ],[
-        AC_MSG_RESULT([yes])
-        ssl_msg="AWS-LC"
-        OPENSSL_IS_BORINGSSL=1
+      AC_MSG_RESULT([yes])
+      ssl_msg="AWS-LC"
+      OPENSSL_IS_BORINGSSL=1
     ],[
-        AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no])
     ])
 
     AC_MSG_CHECKING([for LibreSSL])
@@ -373,20 +373,20 @@ if test X"$OPENSSL_ENABLED" = X"1"; then
   AC_ARG_WITH(random,
   AS_HELP_STRING([--with-random=FILE],
                  [read randomness from FILE (default=/dev/urandom)]),
-      [ RANDOM_FILE="$withval" ],
-      [
-          if test x$cross_compiling != xyes; then
-            dnl Check for random device
-            AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
-          else
-            AC_MSG_WARN([skipped the /dev/urandom detection when cross-compiling])
-          fi
-      ]
+    [ RANDOM_FILE="$withval" ],
+    [
+      if test x$cross_compiling != xyes; then
+        dnl Check for random device
+        AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
+      else
+        AC_MSG_WARN([skipped the /dev/urandom detection when cross-compiling])
+      fi
+    ]
   )
-  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
-          AC_SUBST(RANDOM_FILE)
-          AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
-          [a suitable file to read random data from])
+  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno; then
+    AC_SUBST(RANDOM_FILE)
+    AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
+    [a suitable file to read random data from])
   fi
 fi
 
