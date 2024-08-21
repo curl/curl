@@ -1186,7 +1186,8 @@ static CURLcode cf_h2_proxy_shutdown(struct Curl_cfilter *cf,
   if(!ctx->sent_goaway) {
     rv = nghttp2_submit_goaway(ctx->h2, NGHTTP2_FLAG_NONE,
                                0, 0,
-                               (const uint8_t *)"shutown", sizeof("shutown"));
+                               (const uint8_t *)"shutdown",
+                               sizeof("shutdown"));
     if(rv) {
       failf(data, "nghttp2_submit_goaway() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
