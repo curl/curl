@@ -1276,7 +1276,7 @@ static void ws_free(struct connectdata *conn)
 static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
-  /* websockets is 1.1 only (for now) */
+  /* WebSockets is 1.1 only (for now) */
   data->state.httpwant = CURL_HTTP_VERSION_1_1;
   return Curl_http_setup_conn(data, conn);
 }
