@@ -26,8 +26,6 @@
 #include "tool_progress.h"
 #include "tool_util.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 /* The point of this function would be to return a string of the input data,
