@@ -33,6 +33,8 @@
 # NETTLE_FOUND         System has nettle
 # NETTLE_INCLUDE_DIRS  The nettle include directories
 # NETTLE_LIBRARIES     The nettle library names
+# NETTLE_LIBRARY_DIRS  The nettle library directories
+# NETTLE_CFLAGS        Required compiler flags
 # NETTLE_VERSION       Version of nettle
 
 if(CURL_USE_PKGCONFIG AND
