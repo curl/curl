@@ -41,11 +41,6 @@ struct curl_waitfds;
 struct Curl_multi;
 struct Curl_share;
 
-struct cpool_shutdowns {
-  struct Curl_llist conns;  /* The connections being shut down */
-  BIT(iter_locked);  /* TRUE while iterating the list */
-};
-
 /**
  * Callback invoked when disconnecting connections.
  * @param data    transfer last handling the connection, not attached
@@ -65,13 +60,14 @@ struct cpool {
   curl_off_t next_connection_id;
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
-  struct cpool_shutdowns shutdowns;
+  struct Curl_llist shutdowns;  /* The connections being shut down */
   /* internal handle used for closing pooled connections */
   struct Curl_easy *idata;
   struct Curl_multi *multi; /* != NULL iff pool belongs to multi */
   struct Curl_share *share; /* != NULL iff pool belongs to share */
   Curl_cpool_disconnect_cb *disconnect_cb;
   BIT(locked);
+  BIT(iter_locked);  /* TRUE while iterating the shutdown list */
 };
 
 /* Init the pool, pass multi only if pool is owned by it.
