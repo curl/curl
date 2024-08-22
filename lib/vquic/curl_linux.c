@@ -797,7 +797,7 @@ static CURLcode cf_linuxq_recv_stream_data(struct Curl_cfilter *cf,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   curl_int64_t stream_id = (curl_int64_t)sid;
   nghttp3_ssize nconsumed;
-  int fin = (flags & QUIC_STREAM_FLAG_FIN) ? 1 : 0;
+  int fin = (flags & MSG_STREAM_FIN) ? 1 : 0;
   (void)data;
 
   nconsumed =
@@ -1121,7 +1121,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
   }
 
   sinfo.stream_id = -1;
-  sinfo.stream_flag = QUIC_STREAM_FLAG_UNI;
+  sinfo.stream_flags = MSG_STREAM_UNI;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &len);
   if(rc) {
@@ -1137,7 +1137,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
   }
 
   sinfo.stream_id = -1;
-  sinfo.stream_flag = QUIC_STREAM_FLAG_UNI;
+  sinfo.stream_flags = MSG_STREAM_UNI;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &len);
   if(rc) {
@@ -1147,7 +1147,7 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
   qpack_enc_stream_id = sinfo.stream_id;
 
   sinfo.stream_id = -1;
-  sinfo.stream_flag = QUIC_STREAM_FLAG_UNI;
+  sinfo.stream_flags = MSG_STREAM_UNI;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &len);
   if(rc) {
@@ -1765,7 +1765,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   }
 
   sinfo.stream_id = -1;
-  sinfo.stream_flag = 0;
+  sinfo.stream_flags = 0;
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_OPEN, &sinfo,
                   &slen);
   if(rc) {
@@ -2041,7 +2041,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
   memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
 
   rv = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
-                                  sinfo.stream_flag);
+                                  sinfo.stream_flags);
   if(rv) {
     CURL_TRC_CF(data, cf, "ingress, read_pkt -> %s (%d)",
                 nghttp3_strerror(rv), rv);
@@ -2168,13 +2168,13 @@ static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
       }
 
       if(fin)
-        flags |= QUIC_STREAM_FLAG_FIN;
+        flags |= MSG_STREAM_FIN;
       else if(veccnt == 0)
         goto out;
     }
 
     sinfo->stream_id = (uint64_t)stream_id;
-    sinfo->stream_flag = flags;
+    sinfo->stream_flags = flags;
     msg.msg_iovlen = veccnt;
 
     sent = sendmsg(ctx->q.sockfd, &msg, 0);
