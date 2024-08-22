@@ -33,6 +33,8 @@
 # LIBUV_FOUND         System has libuv
 # LIBUV_INCLUDE_DIRS  The libuv include directories
 # LIBUV_LIBRARIES     The libuv library names
+# LIBUV_LIBRARY_DIRS  The libuv library directories
+# LIBUV_CFLAGS        Required compiler flags
 # LIBUV_VERSION       Version of libuv
 
 if(CURL_USE_PKGCONFIG AND
