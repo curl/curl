@@ -258,6 +258,7 @@ else()
       set(_GSS_VERSION ${_GSS_${_heimdal_modname}_VERSION})
     endif()
   endif()
+  message(STATUS "Found GSS/${GSS_FLAVOUR} (via pkg-config): ${_GSS_INCLUDE_DIRS} (Found version \"${_GSS_VERSION}\")")
 endif()
 
 set(GSS_INCLUDE_DIRS ${_GSS_INCLUDE_DIRS})
