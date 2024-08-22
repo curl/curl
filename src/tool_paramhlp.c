@@ -557,13 +557,13 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* build a nice-looking prompt */
     if(!i && last)
-      curlx_msnprintf(prompt, sizeof(prompt),
-                      "Enter %s password for user '%s':",
-                      kind, *userpwd);
+      curl_msnprintf(prompt, sizeof(prompt),
+                     "Enter %s password for user '%s':",
+                     kind, *userpwd);
     else
-      curlx_msnprintf(prompt, sizeof(prompt),
-                      "Enter %s password for user '%s' on URL #%zu:",
-                      kind, *userpwd, i + 1);
+      curl_msnprintf(prompt, sizeof(prompt),
+                     "Enter %s password for user '%s' on URL #%zu:",
+                     kind, *userpwd, i + 1);
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));
