@@ -23,46 +23,48 @@
 ###########################################################################
 # Find the nettle library
 #
-# Result Variables:
+# Input variables:
+#
+# NETTLE_INCLUDE_DIR   The nettle include directory
+# NETTLE_LIBRARY       Path to nettle library
+#
+# Result variables:
 #
 # NETTLE_FOUND         System has nettle
 # NETTLE_INCLUDE_DIRS  The nettle include directories
 # NETTLE_LIBRARIES     The nettle library names
 # NETTLE_VERSION       Version of nettle
 
-if(UNIX)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED NETTLE_INCLUDE_DIR AND
+   NOT DEFINED NETTLE_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_search_module(NETTLE "nettle")
+  pkg_check_modules(NETTLE "nettle")
 endif()
 
 if(NETTLE_FOUND)
   set(NETTLE_LIBRARIES ${NETTLE_LINK_LIBRARIES})
+  message(STATUS "Found Nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (Found version \"${NETTLE_VERSION}\")")
 else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
   find_library(NETTLE_LIBRARY NAMES "nettle")
 
-  if(NETTLE_INCLUDE_DIR)
-    if(EXISTS "${NETTLE_INCLUDE_DIR}/nettle/version.h")
-      set(_version_regex_major "^#define[ \t]+NETTLE_VERSION_MAJOR[ \t]+([0-9]+).*")
-      set(_version_regex_minor "^#define[ \t]+NETTLE_VERSION_MINOR[ \t]+([0-9]+).*")
-      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h"
-        _version_major REGEX "${_version_regex_major}")
-      file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h"
-        _version_minor REGEX "${_version_regex_minor}")
-      string(REGEX REPLACE "${_version_regex_major}" "\\1" _version_major "${_version_major}")
-      string(REGEX REPLACE "${_version_regex_minor}" "\\1" _version_minor "${_version_minor}")
-      unset(_version_regex_major)
-      unset(_version_regex_minor)
-      set(NETTLE_VERSION "${_version_major}.${_version_minor}")
-      unset(_version_major)
-      unset(_version_minor)
-    else()
-      set(NETTLE_VERSION "0.0")
-    endif()
+  if(NETTLE_INCLUDE_DIR AND EXISTS "${NETTLE_INCLUDE_DIR}/nettle/version.h")
+    set(_version_regex1 "#[\t ]*define[ \t]+NETTLE_VERSION_MAJOR[ \t]+([0-9]+).*")
+    set(_version_regex2 "#[\t ]*define[ \t]+NETTLE_VERSION_MINOR[ \t]+([0-9]+).*")
+    file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h" _version_str1 REGEX "${_version_regex1}")
+    file(STRINGS "${NETTLE_INCLUDE_DIR}/nettle/version.h" _version_str2 REGEX "${_version_regex2}")
+    string(REGEX REPLACE "${_version_regex1}" "\\1" _version_str1 "${_version_str1}")
+    string(REGEX REPLACE "${_version_regex2}" "\\1" _version_str2 "${_version_str2}")
+    set(NETTLE_VERSION "${_version_str1}.${_version_str2}")
+    unset(_version_regex1)
+    unset(_version_regex2)
+    unset(_version_str1)
+    unset(_version_str2)
   endif()
 
   include(FindPackageHandleStandardArgs)
-  find_package_handle_standard_args("nettle"
+  find_package_handle_standard_args(Nettle
     REQUIRED_VARS
       NETTLE_INCLUDE_DIR
       NETTLE_LIBRARY

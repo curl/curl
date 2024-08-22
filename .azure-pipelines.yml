@@ -112,7 +112,7 @@ stages:
             displayName: 'test'
             env:
               AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-              TFLAGS: "-ac /usr/bin/curl -r $(tests)"
+              TFLAGS: "-j0 -ac /usr/bin/curl -r $(tests)"
 
   - stage: scanbuild
     dependsOn: []
@@ -244,4 +244,4 @@ stages:
             displayName: 'test'
             env:
               AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-              TFLAGS: "-ac /usr/bin/curl.exe !IDN !SCP ~612 $(tests)"
+              TFLAGS: "-j0 -ac /usr/bin/curl.exe !SCP ~612 $(tests)"

@@ -116,13 +116,13 @@ new the libcurl you are using is. You are however guaranteed to get a struct
 that you have a matching struct for in the header, as you tell libcurl your
 "age" with the input argument.
 
-*version* is just an ascii string for the libcurl version.
+*version* is just an ASCII string for the libcurl version.
 
 *version_num* is a 24 bit number created like this: \<8 bits major number\> |
 \<8 bits minor number\> | \<8 bits patch number\>. Version 7.9.8 is therefore
 returned as 0x070908.
 
-*host* is an ascii string showing what host information that this libcurl
+*host* is an ASCII string showing what host information that this libcurl
 was built for. As discovered by a configure script or set by the build
 environment.
 

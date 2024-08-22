@@ -39,6 +39,10 @@ foreach(_test_name IN LISTS check_PROGRAMS)
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
     set_property(TARGET ${_test_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
+  if(MINGW)
+    # For mingw-w64 7.0.0 and earlier to avoid '-Wformat='
+    set_property(TARGET ${_test_target} APPEND PROPERTY COMPILE_DEFINITIONS "__USE_MINGW_ANSI_STDIO=1")
+  endif()
   set_target_properties(${_test_target} PROPERTIES
     OUTPUT_NAME "${_test_name}" UNITY_BUILD OFF
     PROJECT_LABEL "Test client ${_test_target}")

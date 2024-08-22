@@ -60,7 +60,7 @@ typedef enum {
 
 /* one of these for each DoH request */
 struct dnsprobe {
-  CURL *easy;
+  curl_off_t easy_mid; /* multi id of easy handle doing the lookup */
   DNStype dnstype;
   unsigned char dohbuffer[512];
   size_t dohlen;

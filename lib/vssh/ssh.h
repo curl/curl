@@ -30,6 +30,8 @@
 #include <libssh2.h>
 #include <libssh2_sftp.h>
 #elif defined(USE_LIBSSH)
+/* in 0.10.0 or later, ignore deprecated warnings */
+#define SSH_SUPPRESS_DEPRECATED
 #include <libssh/libssh.h>
 #include <libssh/sftp.h>
 #elif defined(USE_WOLFSSH)

@@ -144,6 +144,8 @@ my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
 my %ignoretestcodes;    # if test results are to be ignored
 
+my $passedign;   # tests passed with results ignored
+
 my $timestats;   # time stamping and stats generation
 my $fullstats;   # show time stats for every single test
 my %timeprepini; # timestamp for each test preparation start
@@ -599,6 +601,9 @@ sub checksystemfeatures {
             if ($libcurl =~ /WinIDN/) {
                 $feature{"WinIDN"} = 1;
             }
+            if ($libcurl =~ /libidn2/) {
+                $feature{"libidn2"} = 1;
+            }
             if ($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
             }
@@ -832,7 +837,9 @@ sub checksystemfeatures {
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
+    chomp $hostname;
     my $hosttype=join(' ', runclientoutput("uname -a"));
+    chomp $hosttype;
     my $hostos=$^O;
 
     # display summary information about curl and the test host
@@ -841,8 +848,8 @@ sub checksystemfeatures {
             "* $libcurl\n",
             "* Features: $feat\n",
             "* Disabled: $dis\n",
-            "* Host: $hostname",
-            "* System: $hosttype",
+            "* Host: $hostname\n",
+            "* System: $hosttype\n",
             "* OS: $hostos\n");
 
     if($jobs) {
@@ -1771,6 +1778,8 @@ sub singletest_success {
     }
 
     if($errorreturncode==2) {
+        # ignored test success
+        $passedign .= "$testnum ";
         logmsg "Warning: test$testnum result is ignored, but passed!\n";
     }
 }
@@ -3074,10 +3083,18 @@ sub testnumdetails {
 }
 
 if($total) {
+    if($passedign) {
+        my $sorted = numsortwords($passedign);
+        logmsg "::group::Passed Ignored Test details\n";
+        testnumdetails("PASSED-IGNORED", $sorted);
+        logmsg "IGNORED: passed tests: $sorted\n";
+        logmsg "::endgroup::\n";
+    }
+
     if($failedign) {
-        my $failedignsorted = numsortwords($failedign);
-        testnumdetails("FAIL-IGNORED", $failedignsorted);
-        logmsg "IGNORED: failed tests: $failedignsorted\n";
+        my $sorted = numsortwords($failedign);
+        testnumdetails("FAIL-IGNORED", $sorted);
+        logmsg "IGNORED: failed tests: $sorted\n";
     }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);

@@ -1398,7 +1398,7 @@ typedef enum {
      operation. Set filename to "-" (dash) to make it go to stdout. */
   CURLOPT(CURLOPT_COOKIEJAR, CURLOPTTYPE_STRINGPOINT, 82),
 
-  /* Specify which SSL ciphers to use */
+  /* Specify which TLS 1.2 (1.1, 1.0) ciphers to use */
   CURLOPT(CURLOPT_SSL_CIPHER_LIST, CURLOPTTYPE_STRINGPOINT, 83),
 
   /* Specify which HTTP version to use! This must be set to one of the
@@ -2022,7 +2022,7 @@ typedef enum {
   /* password for the SSL private key for proxy */
   CURLOPT(CURLOPT_PROXY_KEYPASSWD, CURLOPTTYPE_STRINGPOINT, 258),
 
-  /* Specify which SSL ciphers to use for proxy */
+  /* Specify which TLS 1.2 (1.1, 1.0) ciphers to use for proxy */
   CURLOPT(CURLOPT_PROXY_SSL_CIPHER_LIST, CURLOPTTYPE_STRINGPOINT, 259),
 
   /* CRL file for proxy */
@@ -2645,7 +2645,7 @@ CURL_EXTERN char *curl_getenv(const char *variable);
  *
  * DESCRIPTION
  *
- * Returns a static ascii string of the libcurl version.
+ * Returns a static ASCII string of the libcurl version.
  */
 CURL_EXTERN char *curl_version(void);
 
@@ -2953,7 +2953,8 @@ typedef enum {
   CURLINFO_CONN_ID          = CURLINFO_OFF_T + 64,
   CURLINFO_QUEUE_TIME_T     = CURLINFO_OFF_T + 65,
   CURLINFO_USED_PROXY       = CURLINFO_LONG + 66,
-  CURLINFO_LASTONE          = 66
+  CURLINFO_POSTTRANSFER_TIME_T = CURLINFO_OFF_T + 67,
+  CURLINFO_LASTONE          = 67
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

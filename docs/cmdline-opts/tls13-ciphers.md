@@ -10,8 +10,8 @@ Added: 7.61.0
 Multi: single
 See-also:
   - ciphers
-  - curves
   - proxy-tls13-ciphers
+  - curves
 Example:
   - --tls13-ciphers TLS_AES_128_GCM_SHA256 $URL
 ---
@@ -24,6 +24,8 @@ cipher suite details on this URL:
 
 https://curl.se/docs/ssl-ciphers.html
 
-This option is currently used only when curl is built to use OpenSSL 1.1.1 or
-later, or Schannel. If you are using a different SSL backend you can try
-setting TLS 1.3 cipher suites by using the --ciphers option.
+This option is used when curl is built to use OpenSSL 1.1.1 or later,
+Schannel, wolfSSL, or mbedTLS 3.6.0 or later.
+
+Before curl 8.10.0 with mbedTLS or wolfSSL, TLS 1.3 cipher suites where set
+by using the --ciphers option.

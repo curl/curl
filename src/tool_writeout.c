@@ -22,8 +22,7 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
+
 #include "curlx.h"
 #include "tool_cfgable.h"
 #include "tool_writeout.h"
@@ -119,6 +118,8 @@ static const struct writeoutvar variables[] = {
   {"time_connect", VAR_CONNECT_TIME, CURLINFO_CONNECT_TIME_T, writeTime},
   {"time_namelookup", VAR_NAMELOOKUP_TIME, CURLINFO_NAMELOOKUP_TIME_T,
    writeTime},
+  {"time_posttransfer", VAR_POSTTRANSFER_TIME, CURLINFO_POSTTRANSFER_TIME_T,
+   writeTime},
   {"time_pretransfer", VAR_PRETRANSFER_TIME, CURLINFO_PRETRANSFER_TIME_T,
    writeTime},
   {"time_redirect", VAR_REDIRECT_TIME, CURLINFO_REDIRECT_TIME_T, writeTime},
@@ -198,7 +199,7 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
     char *part = NULL;
     const char *url = NULL;
 
-    if(vid >= VAR_INPUT_URLEHOST) {
+    if(vid >= VAR_INPUT_URLESCHEME) {
       if(curl_easy_getinfo(per->curl, CURLINFO_EFFECTIVE_URL, &url))
         rc = 5;
     }

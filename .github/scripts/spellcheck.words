@@ -33,7 +33,6 @@ archivers
 Archos
 Arntsen
 Aros
-ascii
 asynch
 AsynchDNS
 atime
@@ -666,6 +665,7 @@ ReactOS
 README
 realloc
 Realtime
+rebalances
 rebase
 RECV
 recv
@@ -715,6 +715,7 @@ runtests
 runtime
 Ruslan
 rustc
+Rustls
 rustls
 Sagula
 SanDisk

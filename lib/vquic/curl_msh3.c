@@ -119,15 +119,37 @@ struct cf_msh3_ctx {
   struct cf_call_data call_data;
   struct curltime connect_started;   /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct Curl_hash streams;          /* hash `data->id` to `stream_ctx` */
+  struct Curl_hash streams;          /* hash `data->mid` to `stream_ctx` */
   /* Flags written by msh3/msquic thread */
   bool handshake_complete;
   bool handshake_succeeded;
   bool connected;
+  BIT(initialized);
   /* Flags written by curl thread */
   BIT(verbose);
   BIT(active);
 };
+
+static void h3_stream_hash_free(void *stream);
+
+static void cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
+                             const struct Curl_addrinfo *ai)
+{
+  DEBUGASSERT(!ctx->initialized);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
+  ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
+  ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
+  ctx->initialized = TRUE;
+}
+
+static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
+{
+  if(ctx && ctx->initialized) {
+    Curl_hash_destroy(&ctx->streams);
+  }
+  free(ctx);
+}
 
 static struct cf_msh3_ctx *h3_get_msh3_ctx(struct Curl_easy *data);
 
@@ -158,7 +180,7 @@ struct stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct stream_ctx *)((data && ctx)? \
-                Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
+                Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct stream_ctx *stream)
 {
@@ -191,7 +213,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
                   H3_STREAM_RECV_CHUNKS, BUFQ_OPT_SOFT_LIMIT);
   CURL_TRC_CF(data, cf, "data setup");
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->id, stream)) {
+  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -207,7 +229,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)cf;
   if(stream) {
     CURL_TRC_CF(data, cf, "easy handle is done");
-    Curl_hash_offt_remove(&ctx->streams, data->id);
+    Curl_hash_offt_remove(&ctx->streams, data->mid);
   }
 }
 
@@ -798,7 +820,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   CURLcode result;
   bool verify;
 
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  DEBUGASSERT(ctx->initialized);
   conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!conn_config)
     return CURLE_FAILED_INIT;
@@ -925,7 +947,6 @@ static void cf_msh3_close(struct Curl_cfilter *cf, struct Curl_easy *data)
       MsH3ApiClose(ctx->api);
       ctx->api = NULL;
     }
-    Curl_hash_destroy(&ctx->streams);
 
     if(ctx->active) {
       /* We share our socket at cf->conn->sock[cf->sockindex] when active.
@@ -964,10 +985,11 @@ static void cf_msh3_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   CF_DATA_SAVE(save, cf, data);
   cf_msh3_close(cf, data);
-  free(cf->ctx);
-  cf->ctx = NULL;
+  if(cf->ctx) {
+    cf_msh3_ctx_free(cf->ctx);
+    cf->ctx = NULL;
+  }
   /* no CF_DATA_RESTORE(cf, save); its gone */
-
 }
 
 static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
@@ -1066,9 +1088,7 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
-  ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
-  ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
+  cf_msh3_ctx_init(ctx, ai);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
 
@@ -1076,7 +1096,7 @@ out:
   *pcf = (!result)? cf : NULL;
   if(result) {
     Curl_safefree(cf);
-    Curl_safefree(ctx);
+    cf_msh3_ctx_free(ctx);
   }
 
   return result;

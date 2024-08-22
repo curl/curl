@@ -48,7 +48,7 @@ HTTP Proxy. Default when no scheme or proxy type is specified.
 ## https://
 
 HTTPS Proxy. (Added in 7.52.0 for OpenSSL and GnuTLS Since 7.87.0, it
-also works for BearSSL, mbedTLS, rustls, Schannel, Secure Transport and
+also works for BearSSL, mbedTLS, Rustls, Schannel, Secure Transport and
 wolfSSL.)
 
 This uses HTTP/1 by default. Setting CURLOPT_PROXYTYPE(3) to

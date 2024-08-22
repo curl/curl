@@ -136,12 +136,14 @@ struct cf_h2_ctx {
   struct bufc_pool stream_bufcp; /* spares for stream buffers */
   struct dynbuf scratch;        /* scratch buffer for temp use */
 
-  struct Curl_hash streams; /* hash of `data->id` to `h2_stream_ctx` */
+  struct Curl_hash streams; /* hash of `data->mid` to `h2_stream_ctx` */
   size_t drain_total; /* sum of all stream's UrlState drain */
   uint32_t max_concurrent_streams;
   uint32_t goaway_error;        /* goaway error code from server */
   int32_t remote_max_sid;       /* max id processed by server */
   int32_t local_max_sid;        /* max id processed by us */
+  BIT(initialized);
+  BIT(via_h1_upgrade);
   BIT(conn_closed);
   BIT(rcvd_goaway);
   BIT(sent_goaway);
@@ -154,28 +156,38 @@ struct cf_h2_ctx {
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_h2_ctx *)(cf)->ctx)->call_data
 
-static void cf_h2_ctx_clear(struct cf_h2_ctx *ctx)
-{
-  struct cf_call_data save = ctx->call_data;
+static void h2_stream_hash_free(void *stream);
 
-  if(ctx->h2) {
-    nghttp2_session_del(ctx->h2);
-  }
-  Curl_bufq_free(&ctx->inbufq);
-  Curl_bufq_free(&ctx->outbufq);
-  Curl_bufcp_free(&ctx->stream_bufcp);
-  Curl_dyn_free(&ctx->scratch);
-  Curl_hash_clean(&ctx->streams);
-  Curl_hash_destroy(&ctx->streams);
-  memset(ctx, 0, sizeof(*ctx));
-  ctx->call_data = save;
+static void cf_h2_ctx_init(struct cf_h2_ctx *ctx, bool via_h1_upgrade)
+{
+  Curl_bufcp_init(&ctx->stream_bufcp, H2_CHUNK_SIZE, H2_STREAM_POOL_SPARES);
+  Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
+  Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
+  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
+  Curl_hash_offt_init(&ctx->streams, 63, h2_stream_hash_free);
+  ctx->remote_max_sid = 2147483647;
+  ctx->via_h1_upgrade = via_h1_upgrade;
+  ctx->initialized = TRUE;
 }
 
 static void cf_h2_ctx_free(struct cf_h2_ctx *ctx)
 {
-  if(ctx) {
-    cf_h2_ctx_clear(ctx);
-    free(ctx);
+  if(ctx && ctx->initialized) {
+    Curl_bufq_free(&ctx->inbufq);
+    Curl_bufq_free(&ctx->outbufq);
+    Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_dyn_free(&ctx->scratch);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
+    memset(ctx, 0, sizeof(*ctx));
+  }
+  free(ctx);
+}
+
+static void cf_h2_ctx_close(struct cf_h2_ctx *ctx)
+{
+  if(ctx->h2) {
+    nghttp2_session_del(ctx->h2);
   }
 }
 
@@ -212,7 +224,7 @@ struct h2_stream_ctx {
 };
 
 #define H2_STREAM_CTX(ctx,data)   ((struct h2_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
+            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
 {
@@ -375,7 +387,7 @@ static CURLcode http2_data_setup(struct Curl_cfilter *cf,
   if(!stream)
     return CURLE_OUT_OF_MEMORY;
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->id, stream)) {
+  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
     h2_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -390,7 +402,7 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
 
   DEBUGASSERT(ctx);
-  if(!stream)
+  if(!stream || !ctx->initialized)
     return;
 
   if(ctx->h2) {
@@ -413,7 +425,7 @@ static void http2_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       nghttp2_session_send(ctx->h2);
   }
 
-  Curl_hash_offt_remove(&ctx->streams, data->id);
+  Curl_hash_offt_remove(&ctx->streams, data->mid);
 }
 
 static int h2_client_new(struct Curl_cfilter *cf,
@@ -489,12 +501,8 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
 static int error_callback(nghttp2_session *session, const char *msg,
                           size_t len, void *userp);
 
-/*
- * Initialize the cfilter context
- */
-static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
-                               struct Curl_easy *data,
-                               bool via_h1_upgrade)
+static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   struct h2_stream_ctx *stream;
@@ -503,12 +511,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   nghttp2_session_callbacks *cbs = NULL;
 
   DEBUGASSERT(!ctx->h2);
-  Curl_bufcp_init(&ctx->stream_bufcp, H2_CHUNK_SIZE, H2_STREAM_POOL_SPARES);
-  Curl_bufq_initp(&ctx->inbufq, &ctx->stream_bufcp, H2_NW_RECV_CHUNKS, 0);
-  Curl_bufq_initp(&ctx->outbufq, &ctx->stream_bufcp, H2_NW_SEND_CHUNKS, 0);
-  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h2_stream_hash_free);
-  ctx->remote_max_sid = 2147483647;
+  DEBUGASSERT(ctx->initialized);
 
   rc = nghttp2_session_callbacks_new(&cbs);
   if(rc) {
@@ -537,7 +540,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   }
   ctx->max_concurrent_streams = DEFAULT_MAX_CONCURRENT_STREAMS;
 
-  if(via_h1_upgrade) {
+  if(ctx->via_h1_upgrade) {
     /* HTTP/1.1 Upgrade issued. H2 Settings have already been submitted
      * in the H1 request and we upgrade from there. This stream
      * is opened implicitly as #1. */
@@ -603,7 +606,7 @@ static CURLcode cf_h2_ctx_init(struct Curl_cfilter *cf,
   /* all set, traffic will be send on connect */
   result = CURLE_OK;
   CURL_TRC_CF(data, cf, "[0] created h2 session%s",
-              via_h1_upgrade? " (via h1 upgrade)" : "");
+              ctx->via_h1_upgrade? " (via h1 upgrade)" : "");
 
 out:
   if(cbs)
@@ -2007,9 +2010,8 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
      * (unlikely) or the transfer has been done, cleaned up its resources, but
      * a read() is called anyway. It is not clear what the calling sequence
      * is for such a case. */
-    failf(data, "[%zd-%zd], http/2 recv on a transfer never opened "
-          "or already cleared", (ssize_t)data->id,
-          (ssize_t)cf->conn->connection_id);
+    failf(data, "http/2 recv on a transfer never opened "
+          "or already cleared, mid=%" CURL_FORMAT_CURL_OFF_T, data->mid);
     *err = CURLE_HTTP2;
     return -1;
   }
@@ -2450,8 +2452,9 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   *done = FALSE;
 
   CF_DATA_SAVE(save, cf, data);
+  DEBUGASSERT(ctx->initialized);
   if(!ctx->h2) {
-    result = cf_h2_ctx_init(cf, data, FALSE);
+    result = cf_h2_ctx_open(cf, data);
     if(result)
       goto out;
   }
@@ -2486,7 +2489,7 @@ static void cf_h2_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     struct cf_call_data save;
 
     CF_DATA_SAVE(save, cf, data);
-    cf_h2_ctx_clear(ctx);
+    cf_h2_ctx_close(ctx);
     CF_DATA_RESTORE(cf, save);
     cf->connected = FALSE;
   }
@@ -2523,7 +2526,8 @@ static CURLcode cf_h2_shutdown(struct Curl_cfilter *cf,
   if(!ctx->sent_goaway) {
     rv = nghttp2_submit_goaway(ctx->h2, NGHTTP2_FLAG_NONE,
                                ctx->local_max_sid, 0,
-                               (const uint8_t *)"shutown", sizeof("shutown"));
+                               (const uint8_t *)"shutdown",
+                               sizeof("shutdown"));
     if(rv) {
       failf(data, "nghttp2_submit_goaway() failed: %s(%d)",
             nghttp2_strerror(rv), rv);
@@ -2735,6 +2739,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
   ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  cf_h2_ctx_init(ctx, via_h1_upgrade);
 
   result = Curl_cf_create(&cf, &Curl_cft_nghttp2, ctx);
   if(result)
@@ -2742,7 +2747,6 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
 
   ctx = NULL;
   Curl_conn_cf_add(data, conn, sockindex, cf);
-  result = cf_h2_ctx_init(cf, data, via_h1_upgrade);
 
 out:
   if(result)
@@ -2763,6 +2767,7 @@ static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
   ctx = calloc(1, sizeof(*ctx));
   if(!ctx)
     goto out;
+  cf_h2_ctx_init(ctx, via_h1_upgrade);
 
   result = Curl_cf_create(&cf_h2, &Curl_cft_nghttp2, ctx);
   if(result)
@@ -2770,7 +2775,6 @@ static CURLcode http2_cfilter_insert_after(struct Curl_cfilter *cf,
 
   ctx = NULL;
   Curl_conn_cf_insert_after(cf, cf_h2);
-  result = cf_h2_ctx_init(cf_h2, data, via_h1_upgrade);
 
 out:
   if(result)

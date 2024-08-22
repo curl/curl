@@ -221,6 +221,42 @@ void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* !CURL_DISABLE_FTP */
 
+#ifndef CURL_DISABLE_SMTP
+struct curl_trc_feat Curl_trc_feat_smtp = {
+  "SMTP",
+  CURL_LOG_LVL_NONE,
+};
+
+void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_smtp, fmt, ap);
+    va_end(ap);
+  }
+}
+#endif /* !CURL_DISABLE_SMTP */
+
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+struct curl_trc_feat Curl_trc_feat_ws = {
+  "WS",
+  CURL_LOG_LVL_NONE,
+};
+
+void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_ws, fmt, ap);
+    va_end(ap);
+  }
+}
+#endif /* USE_WEBSOCKETS && !CURL_DISABLE_HTTP */
+
 #define TRC_CT_NONE        (0)
 #define TRC_CT_PROTOCOL    (1<<(0))
 #define TRC_CT_NETWORK     (1<<(1))
@@ -239,6 +275,12 @@ static struct trc_feat_def trc_feats[] = {
 #endif
 #ifndef CURL_DISABLE_DOH
   { &Curl_doh_trc,            TRC_CT_NETWORK },
+#endif
+#ifndef CURL_DISABLE_SMTP
+  { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
+#endif
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+  { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },
 #endif
 };
 

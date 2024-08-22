@@ -32,7 +32,9 @@ my $errors;
 my %accepted=('curl' => 1,
               'libcurl' => 1,
               'macOS' => 1,
+              'wolfSSL' => 1,
               'mbedTLS' => 1,
+              'rustls' => 1,
               'c-ares' => 1);
 
 sub checkfile {

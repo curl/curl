@@ -58,8 +58,7 @@ static void test_parse(
   char *dev = NULL;
   char *iface = NULL;
   char *host = NULL;
-  CURLcode rc = Curl_parse_interface(
-    input, strlen(input), &dev, &iface, &host);
+  CURLcode rc = Curl_parse_interface(input, &dev, &iface, &host);
   fail_unless(rc == exp_rc, "Curl_parse_interface() failed");
 
   fail_unless(!!exp_dev == !!dev, "dev expectation failed.");

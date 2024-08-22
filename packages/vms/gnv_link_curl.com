@@ -123,7 +123,7 @@ $   endif
 $ endif
 $!
 $! Create the a new option file with special fixup for HP SSL
-$! For a shared image, we always want ZLIB and 32 bit HPSSL
+$! For a shared image, we always want ZLIB and 32-bit HPSSL
 $!
 $ if f$search("gnv$libzshr32") .eqs. ""
 $ then

@@ -291,7 +291,7 @@ class TestProxy:
         x2_args = r1.args[1:]
         x2_args.append('--next')
         x2_args.extend(proxy_args)
-        x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_128_GCM_SHA256'])
+        x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_256_GCM_SHA384'])
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)
@@ -317,7 +317,7 @@ class TestProxy:
         x2_args = r1.args[1:]
         x2_args.append('--next')
         x2_args.extend(proxy_args)
-        x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_128_GCM_SHA256'])
+        x2_args.extend(['--proxy-tls13-ciphers', 'TLS_AES_256_GCM_SHA384'])
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)
@@ -343,7 +343,7 @@ class TestProxy:
         x2_args = r1.args[1:]
         x2_args.append('--next')
         x2_args.extend(proxy_args)
-        x2_args.extend(['--tls13-ciphers', 'TLS_AES_128_GCM_SHA256'])
+        x2_args.extend(['--tls13-ciphers', 'TLS_AES_256_GCM_SHA384'])
         r2 = curl.http_download(urls=[url], alpn_proto='http/1.1', with_stats=True,
                                extra_args=x2_args)
         r2.check_response(count=2, http_status=200)

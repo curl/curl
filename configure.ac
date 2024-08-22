@@ -293,7 +293,7 @@ AS_HELP_STRING([--with-bearssl=PATH],[where to look for BearSSL, PATH points to 
 
 OPT_RUSTLS=no
 AC_ARG_WITH(rustls,dnl
-AS_HELP_STRING([--with-rustls=PATH],[where to look for rustls, PATH points to the installation root]),[
+AS_HELP_STRING([--with-rustls=PATH],[where to look for Rustls, PATH points to the installation root]),[
   OPT_RUSTLS=$withval
   if test X"$withval" != Xno; then
     TLSCHOICE="${TLSCHOICE:+$TLSCHOICE, }rustls"
@@ -494,11 +494,11 @@ AM_CONDITIONAL([USE_CPPFLAG_CURL_STATICLIB],
 LIBCURL_PC_CFLAGS_PRIVATE='-DCURL_STATICLIB'
 AC_SUBST(LIBCURL_PC_CFLAGS_PRIVATE)
 
-CPPFLAG_CURL_STATICLIB=
+LIBCURL_PC_CFLAGS=
 if test "x$xc_lt_build_static_only" = 'xyes'; then
-  CPPFLAG_CURL_STATICLIB="${LIBCURL_PC_CFLAGS_PRIVATE}"
+  LIBCURL_PC_CFLAGS="${LIBCURL_PC_CFLAGS_PRIVATE}"
 fi
-AC_SUBST([CPPFLAG_CURL_STATICLIB])
+AC_SUBST([LIBCURL_PC_CFLAGS])
 
 
 # Determine whether all dependent libraries must be specified when linking
@@ -606,6 +606,16 @@ case $host_os in
     CURL_SUPPORTS_BUILTIN_AVAILABLE
     ;;
 esac
+
+have_mingw='no'
+case $host_os in
+  mingw*)
+    have_mingw='yes'
+    ;;
+esac
+
+AM_CONDITIONAL([HAVE_MINGW],
+  [test "$curl_cv_native_windows" = 'yes' -a "$have_mingw" = 'yes'])
 
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
@@ -2181,6 +2191,7 @@ if test $with_libgsasl != "no"; then
   AC_SEARCH_LIBS(gsasl_init, gsasl,
     [curl_gsasl_msg="enabled";
      AC_DEFINE([USE_GSASL], [1], [GSASL support enabled])
+     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libgsasl"
      ],
     [curl_gsasl_msg="no      (libgsasl not found)";
      AC_MSG_WARN([libgsasl was not found])
@@ -2347,6 +2358,10 @@ elif test X"$OPT_LIBSSH" != Xno; then
   fi
 
   if test "$LIBSSH_ENABLED" = "1"; then
+    if test "$curl_cv_native_windows" = "yes"; then
+      dnl for if_nametoindex
+      LIBS="-liphlpapi $LIBS"
+    fi
     if test -n "$DIR_SSH"; then
        dnl when the libssh shared libs were found in a path that the run-time
        dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
@@ -3262,7 +3277,7 @@ if test "x$want_openssl_quic" = "xyes"; then
   if test "$NGTCP2_ENABLED" = 1; then
     AC_MSG_ERROR([--with-openssl-quic and --with-ngtcp2 are mutually exclusive])
   fi
-  if test "$HAVE_OPENSSL_QUIC" != 1; then
+  if test "$have_openssl_quic" != 1; then
     AC_MSG_ERROR([--with-openssl-quic requires quic support and OpenSSL >= 3.3.0])
   fi
   AC_DEFINE(USE_OPENSSL_QUIC, 1, [if openssl QUIC is in use])
@@ -4812,9 +4827,9 @@ CURL_CONFIGURE_SYMBOL_HIDING
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl
-LIBCURL_LIBS="$LIBS$PTHREAD"
+LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
 
-AC_SUBST(LIBCURL_LIBS)
+AC_SUBST(LIBCURL_PC_LIBS_PRIVATE)
 AC_SUBST(CURL_NETWORK_LIBS)
 AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
 
@@ -4843,13 +4858,13 @@ AC_SUBST(LIBCURL_PC_REQUIRES_PRIVATE)
 dnl Merge pkg-config private fields into public ones when static-only
 if test "x$enable_shared" = "xno"; then
   LIBCURL_PC_REQUIRES=$LIBCURL_PC_REQUIRES_PRIVATE
-  LIBCURL_NO_SHARED=$LIBCURL_LIBS
+  LIBCURL_PC_LIBS=$LIBCURL_PC_LIBS_PRIVATE
 else
   LIBCURL_PC_REQUIRES=
-  LIBCURL_NO_SHARED=
+  LIBCURL_PC_LIBS=
 fi
 AC_SUBST(LIBCURL_PC_REQUIRES)
-AC_SUBST(LIBCURL_NO_SHARED)
+AC_SUBST(LIBCURL_PC_LIBS)
 
 rm $compilersh
 
@@ -5139,7 +5154,7 @@ squeeze DEFS
 squeeze LDFLAGS
 squeeze LIBS
 
-squeeze LIBCURL_LIBS
+squeeze LIBCURL_PC_LIBS_PRIVATE
 squeeze CURL_NETWORK_LIBS
 squeeze CURL_NETWORK_AND_TIME_LIBS
 

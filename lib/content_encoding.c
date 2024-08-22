@@ -79,7 +79,7 @@
 #define GZIP_MAGIC_1 0x8b
 
 /* gzip flag byte */
-#define ASCII_FLAG   0x01 /* bit 0 set: file probably ascii text */
+#define ASCII_FLAG   0x01 /* bit 0 set: file probably ASCII text */
 #define HEAD_CRC     0x02 /* bit 1 set: header CRC present */
 #define EXTRA_FIELD  0x04 /* bit 2 set: extra field present */
 #define ORIG_NAME    0x08 /* bit 3 set: original filename present */

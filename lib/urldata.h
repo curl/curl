@@ -455,6 +455,7 @@ struct negotiatedata {
   gss_ctx_id_t context;
   gss_name_t spn;
   gss_buffer_desc output_token;
+  struct dynbuf channel_binding_data;
 #else
 #ifdef USE_WINDOWS_SSPI
 #ifdef SECPKG_ATTR_ENDPOINT_BINDINGS
@@ -758,7 +759,7 @@ struct Curl_handler {
                                          HTTP proxy as HTTP proxies may know
                                          this protocol and act as a gateway */
 #define PROTOPT_WILDCARD (1<<12) /* protocol supports wildcard matching */
-#define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ascii) in
+#define PROTOPT_USERPWDCTRL (1<<13) /* Allow "control bytes" (< 32 ASCII) in
                                        username and password */
 #define PROTOPT_NOTCPPROXY (1<<14) /* this protocol cannot proxy over TCP */
 
@@ -797,7 +798,7 @@ struct ldapconninfo;
  * unique for an entire connection.
  */
 struct connectdata {
-  struct Curl_llist_element bundle_node; /* conncache */
+  struct Curl_llist_node bundle_node; /* conncache */
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
@@ -806,7 +807,7 @@ struct connectdata {
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
-#define CONN_INUSE(c) ((c)->easyq.size)
+#define CONN_INUSE(c) Curl_llist_count(&(c)->easyq)
 
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
@@ -1090,6 +1091,7 @@ struct Progress {
   timediff_t t_connect;
   timediff_t t_appconnect;
   timediff_t t_pretransfer;
+  timediff_t t_posttransfer;
   timediff_t t_starttransfer;
   timediff_t t_redirect;
 
@@ -1194,7 +1196,7 @@ typedef enum {
  * One instance for each timeout an easy handle can set.
  */
 struct time_node {
-  struct Curl_llist_element list;
+  struct Curl_llist_node list;
   struct curltime time;
   expire_id eid;
 };
@@ -1238,7 +1240,6 @@ struct UrlState {
   struct Curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
   long sessionage;                  /* number of the most recent session */
   int os_errno;  /* filled in with errno whenever an error occurs */
-  char *scratch; /* huge buffer[set.buffer_size*2] for upload CRLF replacing */
   long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */
 #ifdef HAVE_SIGNAL
@@ -1493,7 +1494,7 @@ enum dupstring {
 #ifdef USE_SSH
   STRING_SSH_PRIVATE_KEY, /* path to the private key file for auth */
   STRING_SSH_PUBLIC_KEY,  /* path to the public key file for auth */
-  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ascii hex */
+  STRING_SSH_HOST_PUBLIC_KEY_MD5, /* md5 of host public key in ASCII hex */
   STRING_SSH_HOST_PUBLIC_KEY_SHA256, /* sha256 of host public key in base64 */
   STRING_SSH_KNOWNHOSTS,  /* filename of knownhosts file */
 #endif
@@ -1751,7 +1752,7 @@ struct UserDefined {
   long upkeep_interval_ms;      /* Time between calls for connection upkeep. */
   multidone_func fmultidone;
 #ifndef CURL_DISABLE_DOH
-  struct Curl_easy *dohfor; /* this is a DoH request for that transfer */
+  curl_off_t dohfor_mid; /* this is a DoH request for that transfer */
 #endif
   CURLU *uh; /* URL handle for the current parsed URL */
 #ifndef CURL_DISABLE_HTTP
@@ -1907,12 +1908,18 @@ struct Curl_easy {
      other using the same cache. For easier tracking
      in log output.
      This may wrap around after LONG_MAX to 0 again, so it
-     has no uniqueness guarantee for very large processings. */
+     has no uniqueness guarantee for very large processings.
+     Note: it has no uniqueness either IFF more than one connection cache
+     is used by the libcurl application. */
   curl_off_t id;
+  /* once an easy handle is added to a multi, either explicitly by the
+   * libcurl application or implicitly during `curl_easy_perform()`,
+   * a unique identifier inside this one multi instance. */
+  curl_off_t mid;
 
   struct connectdata *conn;
-  struct Curl_llist_element multi_queue; /* for multihandle list management */
-  struct Curl_llist_element conn_queue; /* list per connectdata */
+  struct Curl_llist_node multi_queue; /* for multihandle list management */
+  struct Curl_llist_node conn_queue; /* list per connectdata */
 
   CURLMstate mstate;  /* the handle's state */
   CURLcode result;   /* previous result */

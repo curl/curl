@@ -1319,7 +1319,7 @@ $                   search/out=nl: 'tfile1' -
 $                   severity = '$severity'
 $!
 $!
-$!                  Of course the 64 bit stuff is different
+$!                  Of course the 64-bit stuff is different
 $!---------------------------------------------------------
 $                   if severity .ne. 1 .and. key64
 $                   then

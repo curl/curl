@@ -42,32 +42,12 @@ It contains at least an 8-bit byte value.
 #
 # Verify data after the test has been "shot"
 <verify>
-<strippart>
-s/^--------------------------[A-Za-z0-9]*/------------------------------/
-s/boundary=------------------------[A-Za-z0-9]*/boundary=----------------------------/
-</strippart>
 <protocol>
 EHLO %TESTNUMBER
 MAIL FROM:<sender@example.com>
 RCPT TO:<recipient@example.com>
 DATA
 </protocol>
-<upload nonewline="yes">
-Content-Type: multipart/mixed; boundary=----------------------------
-Mime-Version: 1.0
-From: different
-To: another
-
-------------------------------
-Content-Transfer-Encoding: 7bit
-
-This is valid
-------------------------------
-Content-Disposition: attachment; filename="test%TESTNUMBER.txt"
-Content-Transfer-Encoding: 7bit
-
-This is an attached file (in french: pi
-</upload>
 <errorcode>
 26
 </errorcode>

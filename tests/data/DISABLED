@@ -68,6 +68,7 @@
 # 1591, 1943. See https://github.com/hyperium/hyper/issues/2699 for details.
 %if hyper
 266
+500
 579
 587
 # 1021 re-added here due to flakiness
@@ -95,4 +96,16 @@
 %endif
 %if WinIDN
 165
+%endif
+# Windows non-Unicode builds fail to receive Unicode text via the command-line
+%if win32
+%if !Unicode
+%if libidn2
+165
+1560
+%endif
+1448
+2046
+2047
+%endif
 %endif

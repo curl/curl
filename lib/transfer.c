@@ -196,18 +196,6 @@ CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
   return Curl_conn_shutdown(data, sockindex, done);
 }
 
-static bool xfer_send_shutdown_started(struct Curl_easy *data)
-{
-  int sockindex;
-
-  if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  if(data->conn->writesockfd == CURL_SOCKET_BAD)
-    return CURLE_FAILED_INIT;
-  sockindex = (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]);
-  return Curl_shutdown_started(data, sockindex);
-}
-
 /**
  * Receive raw response data for the transfer.
  * @param data         the transfer
@@ -261,7 +249,7 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
         return -1;
       }
     }
-    DEBUGF(infof(data, "readwrite_data: we are done"));
+    DEBUGF(infof(data, "sendrecv_dl: we are done"));
   }
   DEBUGASSERT(nread >= 0);
   return nread;
@@ -272,9 +260,9 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
  * the stream was rewound (in which case we have data in a
  * buffer)
  */
-static CURLcode readwrite_data(struct Curl_easy *data,
-                               struct SingleRequest *k,
-                               int *didwhat)
+static CURLcode sendrecv_dl(struct Curl_easy *data,
+                            struct SingleRequest *k,
+                            int *didwhat)
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
@@ -381,14 +369,14 @@ static CURLcode readwrite_data(struct Curl_easy *data,
 out:
   Curl_multi_xfer_buf_release(data, xfer_buf);
   if(result)
-    DEBUGF(infof(data, "readwrite_data() -> %d", result));
+    DEBUGF(infof(data, "sendrecv_dl() -> %d", result));
   return result;
 }
 
 /*
  * Send data to upload to the server, when the socket is writable.
  */
-static CURLcode readwrite_upload(struct Curl_easy *data, int *didwhat)
+static CURLcode sendrecv_ul(struct Curl_easy *data, int *didwhat)
 {
   /* We should not get here when the sending is already done. It
    * probably means that someone set `data-req.keepon |= KEEP_SEND`
@@ -421,66 +409,44 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
 }
 
 /*
- * Curl_readwrite() is the low-level function to be called when data is to
+ * Curl_sendrecv() is the low-level function to be called when data is to
  * be read and written to/from the connection.
  */
-CURLcode Curl_readwrite(struct Curl_easy *data)
+CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
 {
-  struct connectdata *conn = data->conn;
   struct SingleRequest *k = &data->req;
-  CURLcode result;
-  struct curltime now;
+  CURLcode result = CURLE_OK;
   int didwhat = 0;
-  int select_bits;
+  int select_bits = 0;
 
+  DEBUGASSERT(nowp);
   if(data->state.select_bits) {
     if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      DEBUGF(infof(data, "readwrite, select_bits, early return on PAUSED"));
+      /* DEBUGF(infof(data, "sendrecv, select_bits, early return on PAUSED"));
+      */
       result = CURLE_OK;
       goto out;
     }
-    select_bits = data->state.select_bits;
     data->state.select_bits = 0;
+    /* DEBUGF(infof(data, "sendrecv, select_bits %x, RUN", select_bits)); */
+    select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
   }
-  else if(((k->keepon & KEEP_RECVBITS) == KEEP_RECV) &&
-          xfer_recv_shutdown_started(data)) {
-    DEBUGF(infof(data, "readwrite, recv for finishing shutdown"));
-    select_bits = CURL_CSELECT_IN;
+  else if(data->last_poll.num) {
+    /* The transfer wanted something polled. Let's run all available
+     * send/receives. Worst case we EAGAIN on some. */
+    /* DEBUGF(infof(data, "sendrecv, had poll sockets, RUN")); */
+    select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
   }
-  else if(((k->keepon & KEEP_SENDBITS) == KEEP_SEND) &&
-          xfer_send_shutdown_started(data)) {
-    DEBUGF(infof(data, "readwrite, send for finishing shutdown"));
+  else if(data->req.keepon & KEEP_SEND_TIMED) {
+    /* DEBUGF(infof(data, "sendrecv, KEEP_SEND_TIMED, RUN ul")); */
     select_bits = CURL_CSELECT_OUT;
-  }
-  else {
-    curl_socket_t fd_read;
-    curl_socket_t fd_write;
-    /* only use the proper socket if the *_HOLD bit is not set simultaneously
-       as then we are in rate limiting state in that transfer direction */
-    if((k->keepon & KEEP_RECVBITS) == KEEP_RECV)
-      fd_read = conn->sockfd;
-    else
-      fd_read = CURL_SOCKET_BAD;
-
-    if(Curl_req_want_send(data))
-      fd_write = conn->writesockfd;
-    else
-      fd_write = CURL_SOCKET_BAD;
-
-    select_bits = Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write, 0);
-  }
-
-  if(select_bits == CURL_CSELECT_ERR) {
-    failf(data, "select/poll returned error");
-    result = CURLE_SEND_ERROR;
-    goto out;
   }
 
 #ifdef USE_HYPER
-  if(conn->datastream) {
-    result = conn->datastream(data, conn, &didwhat, select_bits);
+  if(data->conn->datastream) {
+    result = data->conn->datastream(data, data->conn, &didwhat, select_bits);
     if(result || data->req.done)
       goto out;
   }
@@ -490,17 +456,15 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
      the stream was rewound (in which case we have data in a
      buffer) */
   if((k->keepon & KEEP_RECV) && (select_bits & CURL_CSELECT_IN)) {
-    result = readwrite_data(data, k, &didwhat);
+    result = sendrecv_dl(data, k, &didwhat);
     if(result || data->req.done)
       goto out;
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
-  if((Curl_req_want_send(data) && (select_bits & CURL_CSELECT_OUT)) ||
-     (k->keepon & KEEP_SEND_TIMED)) {
-    /* write */
-
-    result = readwrite_upload(data, &didwhat);
+  if((Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) &&
+     (select_bits & CURL_CSELECT_OUT)) {
+    result = sendrecv_ul(data, &didwhat);
     if(result)
       goto out;
   }
@@ -508,8 +472,8 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
   }
 #endif
 
-  now = Curl_now();
-  if(!didwhat) {
+  if(select_bits && !didwhat) {
+    /* Transfer wanted to send/recv, but nothing was possible. */
     result = Curl_conn_ev_data_idle(data);
     if(result)
       goto out;
@@ -518,23 +482,23 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
   if(Curl_pgrsUpdate(data))
     result = CURLE_ABORTED_BY_CALLBACK;
   else
-    result = Curl_speedcheck(data, now);
+    result = Curl_speedcheck(data, *nowp);
   if(result)
     goto out;
 
   if(k->keepon) {
-    if(0 > Curl_timeleft(data, &now, FALSE)) {
+    if(0 > Curl_timeleft(data, nowp, FALSE)) {
       if(k->size != -1) {
         failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
               " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
               CURL_FORMAT_CURL_OFF_T " bytes received",
-              Curl_timediff(now, data->progress.t_startsingle),
+              Curl_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
         failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
               " milliseconds with %" CURL_FORMAT_CURL_OFF_T " bytes received",
-              Curl_timediff(now, data->progress.t_startsingle),
+              Curl_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount);
       }
       result = CURLE_OPERATION_TIMEDOUT;
@@ -573,7 +537,7 @@ CURLcode Curl_readwrite(struct Curl_easy *data)
 
 out:
   if(result)
-    DEBUGF(infof(data, "Curl_readwrite() -> %d", result));
+    DEBUGF(infof(data, "Curl_sendrecv() -> %d", result));
   return result;
 }
 

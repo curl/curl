@@ -13,6 +13,7 @@ on:
       - '**/CMakeLists.txt'
       - 'lib/curl_config.h.cmake'
       - '.github/scripts/cmp-config.pl'
+      - '.github/workflows/configure-vs-cmake.yml'
 
   pull_request:
     branches:
@@ -23,23 +24,47 @@ on:
       - '**/CMakeLists.txt'
       - 'lib/curl_config.h.cmake'
       - '.github/scripts/cmp-config.pl'
+      - '.github/workflows/configure-vs-cmake.yml'
 
 permissions: {}
 
 jobs:
-  check:
+  check-linux:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: run configure --with-openssl
         run: |
-           autoreconf -fi
-           ./configure --with-openssl --without-libpsl
+          autoreconf -fi
+          ./configure --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
-           mkdir build && cd build && cmake ..
+          cmake -B build -DCURL_USE_LIBPSL=OFF
+
+      - name: compare generated curl_config.h files
+        run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
+
+  check-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: install packages
+        run: |
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew install libtool autoconf automake && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+
+      - name: run configure --with-openssl
+        run: |
+          autoreconf -fi
+          ./configure --with-openssl --without-libpsl
+
+      - name: run cmake
+        run: |
+          cmake -B build -DCURL_USE_LIBPSL=OFF \
+            "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+            -DCURL_USE_LIBSSH2=OFF
 
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h

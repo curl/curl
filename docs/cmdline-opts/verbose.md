@@ -25,8 +25,8 @@ what's going on under the hood. A line starting with \> means header data sent
 by curl, \< means header data received by curl that is hidden in normal cases,
 and a line starting with * means additional info provided by curl.
 
-If you only want HTTP headers in the output, --include or --dump-header might
-be more suitable options.
+If you only want HTTP headers in the output, --show-headers or --dump-header
+might be more suitable options.
 
 Since curl 8.10, mentioning this option several times in the same argument
 increases the level of the trace output. However, as before, a single

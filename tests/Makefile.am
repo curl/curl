@@ -59,7 +59,6 @@ EXTRA_DIST =        \
  README.md          \
  appveyor.pm        \
  azure.pm           \
- conftest.py        \
  devtest.pl         \
  dictserver.py      \
  directories.pm     \

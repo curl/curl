@@ -23,7 +23,7 @@
 ###########################################################################
 include(CheckCSourceCompiles)
 
-option(CURL_HIDDEN_SYMBOLS "Set to ON to hide libcurl internal symbols (=hide all symbols that are not officially external)." ON)
+option(CURL_HIDDEN_SYMBOLS "Hide libcurl internal symbols (=hide all symbols that are not officially external)" ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
 if(WIN32 AND (ENABLE_DEBUG OR ENABLE_CURLDEBUG))
@@ -68,12 +68,12 @@ if(CURL_HIDDEN_SYMBOLS)
     set(_supports_symbol_hiding TRUE)
   endif()
 
-  set(HIDES_CURL_PRIVATE_SYMBOLS ${_supports_symbol_hiding})
+  set(CURL_HIDES_PRIVATE_SYMBOLS ${_supports_symbol_hiding})
 else()
   if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   endif()
-  set(HIDES_CURL_PRIVATE_SYMBOLS FALSE)
+  set(CURL_HIDES_PRIVATE_SYMBOLS FALSE)
 endif()
 
 set(CURL_CFLAG_SYMBOLS_HIDE ${_cflag_symbols_hide})

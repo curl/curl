@@ -371,7 +371,7 @@ query_complete(DWORD err, DWORD bytes, LPWSAOVERLAPPED overlapped)
       if(namelen) {
         size_t i;
         ca->ai_canonname = (void *)((char *)ca->ai_addr + ss_size);
-        for(i = 0; i < namelen; ++i) /* convert wide string to ascii */
+        for(i = 0; i < namelen; ++i) /* convert wide string to ASCII */
           ca->ai_canonname[i] = (char)ai->ai_canonname[i];
         ca->ai_canonname[namelen] = '\0';
       }

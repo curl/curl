@@ -68,9 +68,10 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - name: '!ssl !debug'
+          - name: '!ssl !debug brotli zstd'
             compiler: clang
-            configure: --without-ssl --enable-websockets
+            install: brotli zstd
+            configure: --without-ssl --enable-websockets --with-brotli --with-zstd
             macos-version-min: '10.9'
           - name: '!ssl !debug'
             compiler: gcc-12
@@ -277,19 +278,20 @@ jobs:
             install: gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DENABLE_WEBSOCKETS=ON
             macos-version-min: '10.9'
-          - name: 'OpenSSL +static'
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON
+          - name: 'OpenSSL +static libssh'
+            install: libssh
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
             macos-version-min: '10.9'
           - name: 'SecureTransport ws debug+'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
             macos-version-min: '10.8'
-          - name: 'LibreSSL !ldap heimdal'
+          - name: 'LibreSSL !ldap heimdal c-ares'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
             macos-version-min: '10.15'
-          - name: 'wolfSSL !ldap'
-            install: wolfssl
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+          - name: 'wolfSSL !ldap brotli zstd'
+            install: brotli wolfssl zstd
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
             macos-version-min: '10.15'
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
@@ -393,7 +395,7 @@ jobs:
       fail-fast: false
       matrix:
         config: [SecureTransport]  # also: OpenSSL
-        compiler: [gcc-11, gcc-12, gcc-13, gcc-14, llvm@15, clang]
+        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1,*14.2
@@ -440,8 +442,6 @@ jobs:
           - { image: macos-14, xcode: '14.1'   }
           - { image: macos-14, xcode: '14.2'   }
           # Reduce build combinations, by dropping less interesting ones
-          - { compiler: gcc-11, build: autotools }
-          - { compiler: gcc-11, image: macos-14 }
           - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, build: cmake }
           - { compiler: gcc-13, image: macos-13 }
@@ -521,7 +521,7 @@ jobs:
           # broken in 8 out of 12 combinations (66%) have an SDK mismatch,
           # and 9 fail to build (75%). These are the 3 lucky default
           # combinations that worked to build curl:
-          #   macos-14 + Xcode 15.0.1 + gcc-11, gcc-12, gcc-14
+          #   macos-14 + Xcode 15.0.1 + gcc-12, gcc-14
           #
           # Of all possible valid GHA runner, gcc, manually selected Xcode
           # combinations, 40% are broken.
@@ -538,14 +538,14 @@ jobs:
           #
           # Errors seen in available CI combinations:
           #   error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
-          #     gcc-11, gcc-13 + macos-14 + Xcode 14.3.1
+          #     gcc-13 + macos-14 + Xcode 14.3.1
           #   error: two or more data types in declaration specifiers
           #     gcc-13 + macos-12 + Xcode 14.1, 14.2
           #     gcc-13 + Xcode 15.0.1, 15.1, 5.2
           #   error: expected ';' before 'extern'
-          #     gcc-11, gcc-12, gcc-14 + macos-12 + Xcode 14.1, 14.2
+          #     gcc-12, gcc-14 + macos-12 + Xcode 14.1, 14.2
           #   error: unknown type name 'dispatch_queue_t'
-          #     gcc-11, gcc-12 + macos-13 + Xcode 15.0.1, 15.1, 15.2
+          #     gcc-12 + macos-13 + Xcode 15.0.1, 15.1, 15.2
           #   error: type defaults to 'int' in declaration of 'DISPATCH_DECL_FACTORY_CLASS_SWIFT' [-Wimplicit-int]
           #     gcc-14 macos-13 Xcode 15.0.1, 15.1, 15.2
           #   error: unknown type name 'FILE'
@@ -587,7 +587,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
-              --without-nghttp2 --without-libidn2 \
+              --without-nghttp2 --without-libidn2 --without-apple-idn \
               --without-libpsl \
               ${options}
           else
@@ -600,6 +600,7 @@ jobs:
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
               -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DUSE_APPLE_IDN=OFF \
+              -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
               ${options}
           fi
 

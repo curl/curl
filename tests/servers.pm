@@ -2323,7 +2323,7 @@ sub responsive_httptls_server {
 sub startservers {
     my @what = @_;
     my ($pid, $pid2);
-    my $serr;  # error while starting a server (as as the return enumerations)
+    my $serr;  # error while starting a server (as of the return enumerations)
     for(@what) {
         my (@whatlist) = split(/\s+/,$_);
         my $what = lc($whatlist[0]);

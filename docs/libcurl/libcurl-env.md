@@ -52,7 +52,7 @@ this variable's selection is used. Setting a name that is not a built-in
 alternative makes libcurl stay with the default.
 
 SSL backend names (case-insensitive): BearSSL, GnuTLS, mbedTLS,
-nss, OpenSSL, rustls, Schannel, Secure-Transport, wolfSSL
+nss, OpenSSL, Rustls, Schannel, Secure-Transport, wolfSSL
 
 ## `HOME`
 

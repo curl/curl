@@ -1050,7 +1050,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
 #ifndef SSL_FILETYPE_PKCS12
 #define SSL_FILETYPE_PKCS12 43
 #endif
-static int do_file_type(const char *type)
+static int ossl_do_file_type(const char *type)
 {
   if(!type || !type[0])
     return SSL_FILETYPE_PEM;
@@ -1272,7 +1272,7 @@ int cert_stuff(struct Curl_easy *data,
   char error_buffer[256];
   bool check_privkey = TRUE;
 
-  int file_type = do_file_type(cert_type);
+  int file_type = ossl_do_file_type(cert_type);
 
   if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE)) {
     SSL *ssl;
@@ -1513,7 +1513,7 @@ fail:
       key_blob = cert_blob;
     }
     else
-      file_type = do_file_type(key_type);
+      file_type = ossl_do_file_type(key_type);
 
     switch(file_type) {
     case SSL_FILETYPE_PEM:
@@ -5055,6 +5055,91 @@ out:
   return nread;
 }
 
+static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                         struct dynbuf *binding)
+{
+  /* required for X509_get_signature_nid support */
+#if OPENSSL_VERSION_NUMBER > 0x10100000L
+  X509 *cert;
+  int algo_nid;
+  const EVP_MD *algo_type;
+  const char *algo_name;
+  unsigned int length;
+  unsigned char buf[EVP_MAX_MD_SIZE];
+
+  const char prefix[] = "tls-server-end-point:";
+  struct connectdata *conn = data->conn;
+  struct Curl_cfilter *cf = conn->cfilter[sockindex];
+  struct ossl_ctx *octx = NULL;
+
+  do {
+    const struct Curl_cftype *cft = cf->cft;
+    struct ssl_connect_data *connssl = cf->ctx;
+
+    if(cft->name && !strcmp(cft->name, "SSL")) {
+      octx = (struct ossl_ctx *)connssl->backend;
+      break;
+    }
+
+    if(cf->next)
+      cf = cf->next;
+
+  } while(cf->next);
+
+  if(!octx) {
+    failf(data,
+          "Failed to find SSL backend for endpoint");
+    return CURLE_SSL_ENGINE_INITFAILED;
+  }
+
+  cert = SSL_get1_peer_certificate(octx->ssl);
+  if(!cert) {
+    /* No server certificate, don't do channel binding */
+    return CURLE_OK;
+  }
+
+  if(!OBJ_find_sigid_algs(X509_get_signature_nid(cert), &algo_nid, NULL)) {
+    failf(data,
+          "Unable to find digest NID for certificate signature algorithm");
+    return CURLE_SSL_INVALIDCERTSTATUS;
+  }
+
+  /* https://datatracker.ietf.org/doc/html/rfc5929#section-4.1 */
+  if(algo_nid == NID_md5 || algo_nid == NID_sha1) {
+    algo_type = EVP_sha256();
+  }
+  else {
+    algo_type = EVP_get_digestbynid(algo_nid);
+    if(!algo_type) {
+      algo_name = OBJ_nid2sn(algo_nid);
+      failf(data, "Could not find digest algorithm %s (NID %d)",
+            algo_name ? algo_name : "(null)", algo_nid);
+      return CURLE_SSL_INVALIDCERTSTATUS;
+    }
+  }
+
+  if(!X509_digest(cert, algo_type, buf, &length)) {
+    failf(data, "X509_digest() failed");
+    return CURLE_SSL_INVALIDCERTSTATUS;
+  }
+
+  /* Append "tls-server-end-point:" */
+  if(Curl_dyn_addn(binding, prefix, sizeof(prefix) - 1) != CURLE_OK)
+    return CURLE_OUT_OF_MEMORY;
+  /* Append digest */
+  if(Curl_dyn_addn(binding, buf, length))
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
+#else
+  /* No X509_get_signature_nid support */
+  (void)data; /* unused */
+  (void)sockindex; /* unused */
+  (void)binding; /* unused */
+  return CURLE_OK;
+#endif
+}
+
 static size_t ossl_version(char *buffer, size_t size)
 {
 #ifdef LIBRESSL_VERSION_NUMBER
@@ -5244,6 +5329,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   NULL,                     /* remote of data from this connection */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
+  ossl_get_channel_binding  /* get_channel_binding */
 };
 
 #endif /* USE_OPENSSL */

@@ -27,8 +27,6 @@
 #include <sys/select.h>
 #endif
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"

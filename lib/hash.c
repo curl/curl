@@ -33,6 +33,10 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
+/* random patterns for API verification */
+#define HASHINIT 0x7017e781
+#define ITERINIT 0x5FEDCBA9
+
 static void
 hash_element_dtor(void *user, void *element)
 {
@@ -77,6 +81,9 @@ Curl_hash_init(struct Curl_hash *h,
   h->dtor = dtor;
   h->size = 0;
   h->slots = slots;
+#ifdef DEBUGBUILD
+  h->init = HASHINIT;
+#endif
 }
 
 static struct Curl_hash_element *
@@ -102,11 +109,12 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor)
 {
   struct Curl_hash_element  *he;
-  struct Curl_llist_element *le;
+  struct Curl_llist_node *le;
   struct Curl_llist *l;
 
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
+  DEBUGASSERT(h->init == HASHINIT);
   if(!h->table) {
     size_t i;
     h->table = malloc(h->slots * sizeof(struct Curl_llist));
@@ -118,10 +126,10 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
 
   l = FETCH_LIST(h, key, key_len);
 
-  for(le = l->head; le; le = le->next) {
-    he = (struct Curl_hash_element *) le->ptr;
+  for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
+    he = (struct Curl_hash_element *) Curl_node_elem(le);
     if(h->comp_func(he->key, he->key_len, key, key_len)) {
-      Curl_llist_remove(l, le, (void *)h);
+      Curl_node_uremove(le, (void *)h);
       --h->size;
       break;
     }
@@ -158,18 +166,17 @@ Curl_hash_add(struct Curl_hash *h, void *key, size_t key_len, void *p)
  */
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
   DEBUGASSERT(h);
   DEBUGASSERT(h->slots);
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
-    l = FETCH_LIST(h, key, key_len);
+    struct Curl_llist_node *le;
+    struct Curl_llist *l = FETCH_LIST(h, key, key_len);
 
-    for(le = l->head; le; le = le->next) {
-      struct Curl_hash_element *he = le->ptr;
+    for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
+      struct Curl_hash_element *he = Curl_node_elem(le);
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
-        Curl_llist_remove(l, le, (void *) h);
+        Curl_node_uremove(le, (void *) h);
         --h->size;
         return 0;
       }
@@ -185,15 +192,15 @@ int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len)
 void *
 Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist *l;
-
   DEBUGASSERT(h);
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
+    struct Curl_llist_node *le;
+    struct Curl_llist *l;
     DEBUGASSERT(h->slots);
     l = FETCH_LIST(h, key, key_len);
-    for(le = l->head; le; le = le->next) {
-      struct Curl_hash_element *he = le->ptr;
+    for(le = Curl_llist_head(l); le; le = Curl_node_next(le)) {
+      struct Curl_hash_element *he = Curl_node_elem(le);
       if(h->comp_func(he->key, he->key_len, key, key_len)) {
         return he->ptr;
       }
@@ -213,6 +220,7 @@ Curl_hash_pick(struct Curl_hash *h, void *key, size_t key_len)
 void
 Curl_hash_destroy(struct Curl_hash *h)
 {
+  DEBUGASSERT(h->init == HASHINIT);
   if(h->table) {
     size_t i;
     for(i = 0; i < h->slots; ++i) {
@@ -234,28 +242,33 @@ Curl_hash_clean(struct Curl_hash *h)
   Curl_hash_clean_with_criterium(h, NULL, NULL);
 }
 
+size_t Curl_hash_count(struct Curl_hash *h)
+{
+  DEBUGASSERT(h->init == HASHINIT);
+  return h->size;
+}
+
 /* Cleans all entries that pass the comp function criteria. */
 void
 Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                int (*comp)(void *, void *))
 {
-  struct Curl_llist_element *le;
-  struct Curl_llist_element *lnext;
-  struct Curl_llist *list;
   size_t i;
 
   if(!h || !h->table)
     return;
 
+  DEBUGASSERT(h->init == HASHINIT);
   for(i = 0; i < h->slots; ++i) {
-    list = &h->table[i];
-    le = list->head; /* get first list entry */
+    struct Curl_llist *list = &h->table[i];
+    struct Curl_llist_node *le =
+      Curl_llist_head(list); /* get first list entry */
     while(le) {
-      struct Curl_hash_element *he = le->ptr;
-      lnext = le->next;
+      struct Curl_hash_element *he = Curl_node_elem(le);
+      struct Curl_llist_node *lnext = Curl_node_next(le);
       /* ask the callback function if we shall remove this entry or not */
       if(!comp || comp(user, he->ptr)) {
-        Curl_llist_remove(list, le, (void *) h);
+        Curl_node_uremove(le, (void *) h);
         --h->size; /* one less entry in the hash now */
       }
       le = lnext;
@@ -290,29 +303,34 @@ size_t Curl_str_key_compare(void *k1, size_t key1_len,
 void Curl_hash_start_iterate(struct Curl_hash *hash,
                              struct Curl_hash_iterator *iter)
 {
+  DEBUGASSERT(hash->init == HASHINIT);
   iter->hash = hash;
   iter->slot_index = 0;
   iter->current_element = NULL;
+#ifdef DEBUGBUILD
+  iter->init = ITERINIT;
+#endif
 }
 
 struct Curl_hash_element *
 Curl_hash_next_element(struct Curl_hash_iterator *iter)
 {
-  struct Curl_hash *h = iter->hash;
-
+  struct Curl_hash *h;
+  DEBUGASSERT(iter->init == ITERINIT);
+  h = iter->hash;
   if(!h->table)
     return NULL; /* empty hash, nothing to return */
 
   /* Get the next element in the current list, if any */
   if(iter->current_element)
-    iter->current_element = iter->current_element->next;
+    iter->current_element = Curl_node_next(iter->current_element);
 
   /* If we have reached the end of the list, find the next one */
   if(!iter->current_element) {
     size_t i;
     for(i = iter->slot_index; i < h->slots; i++) {
-      if(h->table[i].head) {
-        iter->current_element = h->table[i].head;
+      if(Curl_llist_head(&h->table[i])) {
+        iter->current_element = Curl_llist_head(&h->table[i]);
         iter->slot_index = i + 1;
         break;
       }
@@ -320,7 +338,7 @@ Curl_hash_next_element(struct Curl_hash_iterator *iter)
   }
 
   if(iter->current_element) {
-    struct Curl_hash_element *he = iter->current_element->ptr;
+    struct Curl_hash_element *he = Curl_node_elem(iter->current_element);
     return he;
   }
   return NULL;

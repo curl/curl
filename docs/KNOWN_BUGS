@@ -16,7 +16,7 @@ problems may have been fixed or changed somewhat since this was written.
  1.5 Expect-100 meets 417
 
  2. TLS
- 2.1 IMAPS connection fails with rustls error
+ 2.1 IMAPS connection fails with Rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
  2.4 Secure Transport does not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
@@ -55,6 +55,7 @@ problems may have been fixed or changed somewhat since this was written.
  6.5 NTLM does not support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
+ 6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -142,7 +143,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 2. TLS
 
-2.1 IMAPS connection fails with rustls error
+2.1 IMAPS connection fails with Rustls error
 
  https://github.com/curl/curl/issues/10457
 
@@ -366,6 +367,13 @@ problems may have been fixed or changed somewhat since this was written.
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
+
+6.8 Heimdal memory leaks
+
+ Running test 2077 and 2078 with curl built to do GSS with Heimdal causes
+ valgrind errors (memory leak).
+
+ https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 

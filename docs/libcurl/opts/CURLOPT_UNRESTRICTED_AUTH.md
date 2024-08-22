@@ -31,23 +31,30 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_UNRESTRICTED_AUTH,
 # DESCRIPTION
 
 Set the long *gohead* parameter to 1L to make libcurl continue to send
-authentication (user+password) credentials when following locations, even when
-hostname changed. This option is meaningful only when setting
-CURLOPT_FOLLOWLOCATION(3).
+authentication (user+password) credentials or explicitly set cookie headers
+when following locations, even when the host changes. This option is
+meaningful only when setting CURLOPT_FOLLOWLOCATION(3).
 
-Further, when this option is not used or set to **0L**, libcurl does not
-send custom nor internally generated Authentication: headers on requests done
-to other hosts than the one used for the initial URL.
+Further, when this option is not used or set to **0L**, libcurl does not send
+custom nor internally generated `Authentication:` or `Cookie:` headers on
+requests done to other hosts than the one used for the initial URL. Another
+host means that one or more of hostname, protocol scheme or port number
+changed.
 
-By default, libcurl only sends credentials and Authentication headers to the
-initial hostname as given in the original URL, to avoid leaking username +
-password to other sites.
+By default, libcurl only sends `Authentication:` or explicitly set `Cookie:`
+headers to the initial host as given in the original URL, to avoid leaking
+username + password to other sites.
 
 This option should be used with caution: when curl follows redirects it
 blindly fetches the next URL as instructed by the server. Setting
 CURLOPT_UNRESTRICTED_AUTH(3) to 1L makes curl trust the server and sends
 possibly sensitive credentials to any host the server points to, possibly
 again and again as the following hosts can keep redirecting to new hosts.
+
+Due to the way HTTP works, almost any header can be made to contain data a
+client may not want to pass on to other servers than the initially intended
+host and for all other headers than the two mentioned above, there is no
+protection from this happening when libcurl is told to follow redirects.
 
 # DEFAULT
 

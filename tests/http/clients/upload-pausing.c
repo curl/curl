@@ -38,10 +38,6 @@
 #include <unistd.h>  /* getopt() */
 #endif
 
-#ifdef _MSC_VER
-#define snprintf _snprintf
-#endif
-
 #ifndef _MSC_VER
 static void log_line_start(FILE *log, const char *idsbuf, curl_infotype type)
 {
@@ -80,10 +76,11 @@ static int debug_cb(CURL *handle, curl_infotype type,
   if(!curl_easy_getinfo(handle, CURLINFO_XFER_ID, &xfer_id) && xfer_id >= 0) {
     if(!curl_easy_getinfo(handle, CURLINFO_CONN_ID, &conn_id) &&
         conn_id >= 0) {
-      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id, conn_id);
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_2, xfer_id,
+                     conn_id);
     }
     else {
-      snprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
+      curl_msnprintf(idsbuf, sizeof(idsbuf), TRC_IDS_FORMAT_IDS_1, xfer_id);
     }
   }
   else
@@ -263,7 +260,8 @@ int main(int argc, char *argv[])
     exit(1);
   }
   memset(&resolve, 0, sizeof(resolve));
-  snprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1", host, port);
+  curl_msnprintf(resolve_buf, sizeof(resolve_buf)-1, "%s:%s:127.0.0.1",
+                 host, port);
   resolve = curl_slist_append(resolve, resolve_buf);
 
   curl = curl_easy_init();

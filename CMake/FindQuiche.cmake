@@ -21,31 +21,53 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the libssh2 library
+# Find the quiche library
 #
-# Result Variables:
+# Input variables:
 #
-# LIBSSH2_FOUND        System has libssh2
-# LIBSSH2_INCLUDE_DIR  The libssh2 include directory
-# LIBSSH2_LIBRARY      The libssh2 library name
-# LIBSSH2_VERSION      Version of libssh2
+# QUICHE_INCLUDE_DIR   The quiche include directory
+# QUICHE_LIBRARY       Path to quiche library
+#
+# Result variables:
+#
+# QUICHE_FOUND         System has quiche
+# QUICHE_INCLUDE_DIRS  The quiche include directories
+# QUICHE_LIBRARIES     The quiche library names
+# QUICHE_VERSION       Version of quiche
 
-find_path(LIBSSH2_INCLUDE_DIR "libssh2.h")
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_QUICHE "quiche")
+endif()
 
-find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
+find_path(QUICHE_INCLUDE_DIR NAMES "quiche.h"
+  HINTS
+    ${PC_QUICHE_INCLUDEDIR}
+    ${PC_QUICHE_INCLUDE_DIRS}
+)
 
-if(LIBSSH2_INCLUDE_DIR)
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _libssh2_version_str REGEX "^#define[\t ]+LIBSSH2_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBSSH2_VERSION "${_libssh2_version_str}")
+find_library(QUICHE_LIBRARY NAMES "quiche"
+  HINTS
+    ${PC_QUICHE_LIBDIR}
+    ${PC_QUICHE_LIBRARY_DIRS}
+)
+
+if(PC_QUICHE_VERSION)
+  set(QUICHE_VERSION ${PC_QUICHE_VERSION})
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibSSH2
+find_package_handle_standard_args(Quiche
   REQUIRED_VARS
-    LIBSSH2_INCLUDE_DIR
-    LIBSSH2_LIBRARY
+    QUICHE_INCLUDE_DIR
+    QUICHE_LIBRARY
   VERSION_VAR
-    LIBSSH2_VERSION
+    QUICHE_VERSION
 )
 
-mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)
+if(QUICHE_FOUND)
+  set(QUICHE_INCLUDE_DIRS ${QUICHE_INCLUDE_DIR})
+  set(QUICHE_LIBRARIES    ${QUICHE_LIBRARY})
+endif()
+
+mark_as_advanced(QUICHE_INCLUDE_DIR QUICHE_LIBRARY)

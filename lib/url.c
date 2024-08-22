@@ -234,8 +234,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   data = *datap;
   *datap = NULL;
 
-  Curl_expire_clear(data); /* shut off timers */
-
   /* Detach connection if any is left. This should not be normal, but can be
      the case for example with CONNECT_ONLY + recv/send (test 556) */
   Curl_detach_connection(data);
@@ -253,6 +251,8 @@ CURLcode Curl_close(struct Curl_easy **datap)
     }
   }
 
+  Curl_expire_clear(data); /* shut off any timers left */
+
   data->magic = 0; /* force a clear AFTER the possibly enforced removal from
                       the multi handle, since that function uses the magic
                       field! */
@@ -266,7 +266,6 @@ CURLcode Curl_close(struct Curl_easy **datap)
   /* Close down all open SSL info and sessions */
   Curl_ssl_close_all(data);
   Curl_safefree(data->state.first_host);
-  Curl_safefree(data->state.scratch);
   Curl_ssl_free_certinfo(data);
 
   if(data->state.referer_alloc) {
@@ -537,9 +536,16 @@ CURLcode Curl_open(struct Curl_easy **curl)
     data->state.recent_conn_id = -1;
     /* and not assigned an id yet */
     data->id = -1;
+    data->mid = -1;
+#ifndef CURL_DISABLE_DOH
+    data->set.dohfor_mid = -1;
+#endif
 
     data->progress.flags |= PGRS_HIDE;
     data->state.current_speed = -1; /* init to negative == impossible */
+#ifndef CURL_DISABLE_HTTP
+    Curl_llist_init(&data->state.httphdrs, NULL);
+#endif
   }
 
   if(result) {
@@ -552,7 +558,6 @@ CURLcode Curl_open(struct Curl_easy **curl)
   }
   else
     *curl = data;
-
   return result;
 }
 
@@ -896,7 +901,7 @@ ConnectionExists(struct Curl_easy *data,
   bool foundPendingCandidate = FALSE;
   bool canmultiplex = FALSE;
   struct connectbundle *bundle;
-  struct Curl_llist_element *curr;
+  struct Curl_llist_node *curr;
 
 #ifdef USE_NTLM
   bool wantNTLMhttp = ((data->state.authhost.want & CURLAUTH_NTLM) &&
@@ -953,12 +958,12 @@ ConnectionExists(struct Curl_easy *data,
     }
   }
 
-  curr = bundle->conn_list.head;
+  curr = Curl_llist_head(&bundle->conn_list);
   while(curr) {
-    struct connectdata *check = curr->ptr;
+    struct connectdata *check = Curl_node_elem(curr);
     /* Get next node now. We might remove a dead `check` connection which
      * would invalidate `curr` as well. */
-    curr = curr->next;
+    curr = Curl_node_next(curr);
 
     /* Note that if we use an HTTP proxy in normal mode (no tunneling), we
      * check connections to that proxy and not to the actual remote server.
@@ -988,8 +993,8 @@ ConnectionExists(struct Curl_easy *data,
       }
       else {
         /* Could multiplex, but not when check belongs to another multi */
-        struct Curl_llist_element *e = check->easyq.head;
-        struct Curl_easy *entry = e->ptr;
+        struct Curl_llist_node *e = Curl_llist_head(&check->easyq);
+        struct Curl_easy *entry = Curl_node_elem(e);
         if(entry->multi != data->multi)
           continue;
       }
@@ -3580,7 +3585,7 @@ static CURLcode create_conn(struct Curl_easy *data,
         Curl_disconnect(data, conn_candidate, FALSE);
       else
 #ifndef CURL_DISABLE_DOH
-        if(data->set.dohfor)
+        if(data->set.dohfor_mid >= 0)
           infof(data, "Allowing DoH to override max connection limit");
         else
 #endif

@@ -58,7 +58,7 @@ my $date = strftime "%Y-%m-%d", @ts;
 my $year = strftime "%Y", @ts;
 my $version = "unknown";
 my $globals;
-
+my $error = 0;
 my $indent = 4;
 
 # get the long name version, return the manpage string
@@ -127,7 +127,8 @@ sub justline {
 
 sub lastline {
     my ($lvl, @line) = @_;
-    prefixline($lvl * $indent);
+    $line[0] =~ s/^( +)//;
+    prefixline($lvl * $indent + length($1));
     my $prev = 0;
     for(@line) {
         printf "%s%s", $prev?" ":"", $_;
@@ -193,6 +194,12 @@ sub printdesc {
                 # quoted, do not right-justify
                 chomp $l;
                 lastline($baselvl + $lvl + 1, $l);
+                my $w = ($baselvl + $lvl + 1) * $indent + length($l);
+                if ($w > $colwidth) {
+                    print STDERR "ERROR: $w columns is too long\n";
+                    print STDERR "$l\n";
+                    $error++;
+                }
             }
             else {
                 $para .= $l;
@@ -463,6 +470,20 @@ sub render {
         push @desc, ".RE\n.IP\n" if($manpage);
     }
     return @desc;
+}
+
+sub maybespace {
+    my ($string) = @_;
+
+    if(($string =~ /(.* )(.*)/) &&
+       (length($2) <= 20)) {
+        return $1;
+    }
+    if(($string =~ /(.*:)(.*)/) &&
+       (length($2) <= 20)) {
+        return $1;
+    }
+    return $string;
 }
 
 sub single {
@@ -787,9 +808,37 @@ sub single {
         else {
             my @ex;
             push @ex, "[0q]Example$s:\n";
+            #
+            # long ASCII examples are wrapped. Preferably at the last space
+            # before the margin. Or at a colon. Otherwise it just cuts at the
+            # exact boundary.
+            #
             foreach my $e (@examples) {
                 $e =~ s!\$URL!https://example.com!g;
-                push @ex, "[0q] curl $e\n";
+                my $maxwidth = 60; # plus the "    curl " 18 col prefix
+                if(length($e) > $maxwidth) {
+                    # a long example, shorten it
+                    my $p = substr($e, 0, $maxwidth);
+                    $p = maybespace($p);
+                    push @ex, "[0q] curl ".$p."\\";
+                    $e = substr($e, length($p));
+                    do {
+                        my $r = substr($e, 0, $maxwidth);
+                        if(length($e) > $maxwidth) {
+                            $r = maybespace($r);
+                        }
+                        my $slash ="";
+                        $e = substr($e, length($r));
+                        if(length($e) > 0) {
+                            $slash = "\\";
+                        }
+
+                        push @ex, "[0q]      $r$slash" if($r);
+                    } while(length($e));
+                }
+                else {
+                    push @ex, "[0q] curl $e\n";
+                }
             }
             printdesc($manpage, 2, @ex);
         }
@@ -1224,3 +1273,5 @@ else {
 indexoptions($dir, @files);
 
 getargs($dir, $cmd, @files);
+
+exit $error;

@@ -25,8 +25,6 @@
 
 #include "strcase.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -90,12 +88,11 @@ static size_t memcrlf(char *orig,
   return total; /* no delimiter found */
 }
 
-#define MAX_FILE2STRING (256*1024*1024) /* big enough ? */
+#define MAX_FILE2STRING MAX_FILE2MEMORY
 
 ParameterError file2string(char **bufp, FILE *file)
 {
   struct curlx_dynbuf dyn;
-  DEBUGASSERT(MAX_FILE2STRING < INT_MAX); /* needs to fit in an int later */
   curlx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
     do {
@@ -133,7 +130,6 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     size_t nread;
     struct curlx_dynbuf dyn;
     /* The size needs to fit in an int later */
-    DEBUGASSERT(MAX_FILE2MEMORY < INT_MAX);
     curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];

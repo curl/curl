@@ -30,7 +30,6 @@
 #include <unixlib.h>
 #endif
 
-#define ENABLE_CURLX_PRINTF
 #include "curlx.h"
 
 #include "curlmsg_vms.h"

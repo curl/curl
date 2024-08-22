@@ -56,11 +56,13 @@ you only download data, the upload size remains 0). Many times the callback is
 called one or more times first, before it knows the data sizes so a program
 must be made to handle that.
 
+Return zero from the callback if everything is fine.
+
+Return 1 from this callback to make libcurl abort the transfer and return
+*CURLE_ABORTED_BY_CALLBACK*.
+
 If your callback function returns CURL_PROGRESSFUNC_CONTINUE it makes libcurl
 to continue executing the default progress function.
-
-Returning any other non-zero value from this callback makes libcurl abort the
-transfer and return *CURLE_ABORTED_BY_CALLBACK*.
 
 If you transfer data with the multi interface, this function is not called
 during periods of idleness unless you call the appropriate libcurl function

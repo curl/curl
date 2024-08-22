@@ -290,9 +290,10 @@ struct cf_osslq_ctx {
   struct curltime first_byte_at;     /* when first byte was recvd */
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
-  struct Curl_hash streams;          /* hash `data->id` to `h3_stream_ctx` */
+  struct Curl_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
+  BIT(initialized);
   BIT(got_first_byte);               /* if first byte was received */
   BIT(x509_store_setup);             /* if x509 store has been set up */
   BIT(protocol_shutdown);            /* QUIC connection is shut down */
@@ -300,19 +301,35 @@ struct cf_osslq_ctx {
   BIT(need_send);                    /* QUIC connection needs to send */
 };
 
-static void cf_osslq_ctx_clear(struct cf_osslq_ctx *ctx)
+static void h3_stream_hash_free(void *stream);
+
+static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
+{
+  DEBUGASSERT(!ctx->initialized);
+  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
+                  H3_STREAM_POOL_SPARES);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->initialized = TRUE;
+}
+
+static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
+{
+  if(ctx && ctx->initialized) {
+    Curl_bufcp_free(&ctx->stream_bufcp);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+  }
+  free(ctx);
+}
+
+static void cf_osslq_ctx_close(struct cf_osslq_ctx *ctx)
 {
   struct cf_call_data save = ctx->call_data;
 
   cf_osslq_h3conn_cleanup(&ctx->h3);
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
-  Curl_bufcp_free(&ctx->stream_bufcp);
-  Curl_hash_clean(&ctx->streams);
-  Curl_hash_destroy(&ctx->streams);
-  Curl_ssl_peer_cleanup(&ctx->peer);
-
-  memset(ctx, 0, sizeof(*ctx));
   ctx->call_data = save;
 }
 
@@ -401,7 +418,7 @@ static void cf_osslq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
                       (SSL_SHUTDOWN_FLAG_NO_BLOCK | SSL_SHUTDOWN_FLAG_RAPID),
                       NULL, 0);
     }
-    cf_osslq_ctx_clear(ctx);
+    cf_osslq_ctx_close(ctx);
   }
 
   cf->connected = FALSE;
@@ -417,8 +434,7 @@ static void cf_osslq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   CURL_TRC_CF(data, cf, "destroy");
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_osslq_destroy()");
-    cf_osslq_ctx_clear(ctx);
-    free(ctx);
+    cf_osslq_ctx_free(ctx);
   }
   cf->ctx = NULL;
   /* No CF_DATA_RESTORE(cf, save) possible */
@@ -573,7 +589,7 @@ struct h3_stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
+            data? Curl_hash_offt_get(&(ctx)->streams, (data)->mid) : NULL))
 
 static void h3_stream_ctx_free(struct h3_stream_ctx *stream)
 {
@@ -620,7 +636,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   stream->recv_buf_nonflow = 0;
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
 
-  if(!Curl_hash_offt_set(&ctx->streams, data->id, stream)) {
+  if(!Curl_hash_offt_set(&ctx->streams, data->mid, stream)) {
     h3_stream_ctx_free(stream);
     return CURLE_OUT_OF_MEMORY;
   }
@@ -645,7 +661,7 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
       stream->closed = TRUE;
     }
 
-    Curl_hash_offt_remove(&ctx->streams, data->id);
+    Curl_hash_offt_remove(&ctx->streams, data->mid);
   }
 }
 
@@ -669,10 +685,10 @@ static struct cf_osslq_stream *cf_osslq_get_qstream(struct Curl_cfilter *cf,
     return &ctx->h3.s_qpack_dec;
   }
   else {
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
     DEBUGASSERT(data->multi);
-    for(e = data->multi->process.head; e; e = e->next) {
-      struct Curl_easy *sdata = e->ptr;
+    for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+      struct Curl_easy *sdata = Curl_node_elem(e);
       if(sdata->conn != data->conn)
         continue;
       stream = H3_STREAM_CTX(ctx, sdata);
@@ -1148,9 +1164,7 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   BIO *bio = NULL;
   BIO_ADDR *baddr = NULL;
 
-  Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
-                  H3_STREAM_POOL_SPARES);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  DEBUGASSERT(ctx->initialized);
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     goto out;
@@ -1423,12 +1437,12 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
   }
 
   if(ctx->h3.conn) {
-    struct Curl_llist_element *e;
+    struct Curl_llist_node *e;
     struct h3_stream_ctx *stream;
     /* PULL all open streams */
     DEBUGASSERT(data->multi);
-    for(e = data->multi->process.head; e; e = e->next) {
-      struct Curl_easy *sdata = e->ptr;
+    for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+      struct Curl_easy *sdata = Curl_node_elem(e);
       if(sdata->conn == data->conn && CURL_WANT_RECV(sdata)) {
         stream = H3_STREAM_CTX(ctx, sdata);
         if(stream && !stream->closed &&
@@ -1454,9 +1468,9 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
   struct h3_stream_ctx *stream;
 
   if(ctx->h3.conn) {
-    struct Curl_llist_element *e;
-    for(e = data->multi->process.head; e; e = e->next) {
-      struct Curl_easy *sdata = e->ptr;
+    struct Curl_llist_node *e;
+    for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
+      struct Curl_easy *sdata = Curl_node_elem(e);
       if(sdata->conn == data->conn) {
         stream = H3_STREAM_CTX(ctx, sdata);
         if(stream && stream->s.ssl && stream->s.send_blocked &&
@@ -2330,7 +2344,7 @@ CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_osslq_ctx_clear(ctx);
+  cf_osslq_ctx_init(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
@@ -2351,7 +2365,7 @@ out:
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
     Curl_safefree(cf);
-    Curl_safefree(ctx);
+    cf_osslq_ctx_free(ctx);
   }
   return result;
 }

@@ -105,9 +105,17 @@ Tracing of DNS-over-HTTP operations to resolve hostnames.
 
 Traces reading of upload data from the application in order to send it to the server.
 
+## `smtp`
+
+Tracing of SMTP operations when this protocol is enabled in your build.
+
 ## `write`
 
 Traces writing of download data, received from the server, to the application.
+
+## `ws`
+
+Tracing of WebSocket operations when this protocol is enabled in your build.
 
 # TRACE GROUPS
 

@@ -188,7 +188,7 @@ static CURLcode ftp_regular_transfer(struct Curl_easy *data, bool *done);
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
 static void ftp_pasv_verbose(struct Curl_easy *data,
                              struct Curl_addrinfo *ai,
-                             char *newhost, /* ascii version */
+                             char *newhost, /* ASCII version */
                              int port);
 #endif
 static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data);
@@ -3694,7 +3694,7 @@ static CURLcode ftp_nb_type(struct Curl_easy *data,
 static void
 ftp_pasv_verbose(struct Curl_easy *data,
                  struct Curl_addrinfo *ai,
-                 char *newhost, /* ascii version */
+                 char *newhost, /* ASCII version */
                  int port)
 {
   char buf[256];
@@ -4037,7 +4037,7 @@ static CURLcode wc_statemach(struct Curl_easy *data)
         wildcard->state = CURLWC_CLEAN;
         continue;
       }
-      if(wildcard->filelist.size == 0) {
+      if(Curl_llist_count(&wildcard->filelist) == 0) {
         /* no corresponding file */
         wildcard->state = CURLWC_CLEAN;
         return CURLE_REMOTE_FILE_NOT_FOUND;
@@ -4048,7 +4048,8 @@ static CURLcode wc_statemach(struct Curl_easy *data)
     case CURLWC_DOWNLOADING: {
       /* filelist has at least one file, lets get first one */
       struct ftp_conn *ftpc = &conn->proto.ftpc;
-      struct curl_fileinfo *finfo = wildcard->filelist.head->ptr;
+      struct Curl_llist_node *head = Curl_llist_head(&wildcard->filelist);
+      struct curl_fileinfo *finfo = Curl_node_elem(head);
       struct FTP *ftp = data->req.p.ftp;
 
       char *tmp_path = aprintf("%s%s", wildcard->path, finfo->filename);
@@ -4064,7 +4065,8 @@ static CURLcode wc_statemach(struct Curl_easy *data)
         long userresponse;
         Curl_set_in_callback(data, true);
         userresponse = data->set.chunk_bgn(
-          finfo, data->set.wildcardptr, (int)wildcard->filelist.size);
+          finfo, data->set.wildcardptr,
+          (int)Curl_llist_count(&wildcard->filelist));
         Curl_set_in_callback(data, false);
         switch(userresponse) {
         case CURL_CHUNK_BGN_FUNC_SKIP:
@@ -4090,9 +4092,10 @@ static CURLcode wc_statemach(struct Curl_easy *data)
         return result;
 
       /* we do not need the Curl_fileinfo of first file anymore */
-      Curl_llist_remove(&wildcard->filelist, wildcard->filelist.head, NULL);
+      Curl_node_remove(Curl_llist_head(&wildcard->filelist));
 
-      if(wildcard->filelist.size == 0) { /* remains only one file to down. */
+      if(Curl_llist_count(&wildcard->filelist) == 0) {
+        /* remains only one file to down. */
         wildcard->state = CURLWC_CLEAN;
         /* after that will be ftp_do called once again and no transfer
            will be done because of CURLWC_CLEAN state */
@@ -4107,8 +4110,8 @@ static CURLcode wc_statemach(struct Curl_easy *data)
         data->set.chunk_end(data->set.wildcardptr);
         Curl_set_in_callback(data, false);
       }
-      Curl_llist_remove(&wildcard->filelist, wildcard->filelist.head, NULL);
-      wildcard->state = (wildcard->filelist.size == 0) ?
+      Curl_node_remove(Curl_llist_head(&wildcard->filelist));
+      wildcard->state = (Curl_llist_count(&wildcard->filelist) == 0) ?
         CURLWC_CLEAN : CURLWC_DOWNLOADING;
       continue;
     }

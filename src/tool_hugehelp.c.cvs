@@ -30,8 +30,9 @@ void hugehelp(void)
   puts("built-in manual was disabled at build-time");
 }
 
-void showhelp(const char *arg, const char *endarg)
+void showhelp(const char *trigger, const char *arg, const char *endarg)
 {
+  (void)trigger;
   (void)arg;
   (void)endarg;
   hugehelp();

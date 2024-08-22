@@ -37,9 +37,6 @@ function(setup_test _test_name)  # ARGN are the files in the test
     "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
-  if(USE_ARES)
-    include_directories(${CARES_INCLUDE_DIR})
-  endif()
 
   target_link_libraries(${_test_name} ${LIB_SELECTED} ${CURL_LIBS})
 
@@ -48,7 +45,7 @@ function(setup_test _test_name)  # ARGN are the files in the test
     PROJECT_LABEL "Test ${_test_name}")
 endfunction()
 
-# Get 'noinst_PROGRAMS', '*_SOURCES' variables
+# Get 'noinst_PROGRAMS', '*_SOURCES', WARNLESS, MULTIBYTE, TIMEDIFF variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -69,7 +66,7 @@ if(NOT WIN32)
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES
     LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.libs")
-  if(HIDES_CURL_PRIVATE_SYMBOLS)
+  if(CURL_HIDES_PRIVATE_SYMBOLS)
     set_property(TARGET hostname APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
     set_property(TARGET hostname APPEND PROPERTY COMPILE_FLAGS ${CURL_CFLAG_SYMBOLS_HIDE})
   endif()

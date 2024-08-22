@@ -162,7 +162,7 @@ static CURLcode Curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
 #ifdef CURL_CA_FALLBACK
     else {
       /* verifying the peer without any CA certificates will not work so
-         use wolfssl's built-in default as fallback */
+         use wolfSSL's built-in default as fallback */
       wolfSSL_CTX_set_default_verify_paths(ctx->wssl.ctx);
     }
 #endif

@@ -487,10 +487,10 @@ jobs:
           make V=1 VERBOSE=1 test-ci
 
       - if: contains(matrix.build.install_steps, 'pytest')
-        # run for `tests` directory, so pytest does not pick up any other
+        # run for `tests/http` directory, so pytest does not pick up any other
         # packages we might have built here
         run:
-          pytest -v tests
+          pytest -v tests/http
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"

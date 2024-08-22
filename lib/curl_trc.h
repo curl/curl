@@ -89,6 +89,16 @@ void Curl_failf(struct Curl_easy *data,
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ftp)) \
          Curl_trc_ftp(data, __VA_ARGS__); } while(0)
 #endif /* !CURL_DISABLE_FTP */
+#ifndef CURL_DISABLE_SMTP
+#define CURL_TRC_SMTP(data, ...) \
+  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) \
+         Curl_trc_smtp(data, __VA_ARGS__); } while(0)
+#endif /* !CURL_DISABLE_SMTP */
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#define CURL_TRC_WS(data, ...) \
+  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
+         Curl_trc_ws(data, __VA_ARGS__); } while(0)
+#endif /* USE_WEBSOCKETS && !CURL_DISABLE_HTTP */
 
 #else /* CURL_HAVE_C99 */
 
@@ -99,6 +109,12 @@ void Curl_failf(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_FTP
 #define CURL_TRC_FTP   Curl_trc_ftp
+#endif
+#ifndef CURL_DISABLE_SMTP
+#define CURL_TRC_SMTP  Curl_trc_smtp
+#endif
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#define CURL_TRC_WS    Curl_trc_ws
 #endif
 
 #endif /* !CURL_HAVE_C99 */
@@ -148,6 +164,16 @@ extern struct curl_trc_feat Curl_trc_feat_ftp;
 void Curl_trc_ftp(struct Curl_easy *data,
                   const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
+#ifndef CURL_DISABLE_SMTP
+extern struct curl_trc_feat Curl_trc_feat_smtp;
+void Curl_trc_smtp(struct Curl_easy *data,
+                   const char *fmt, ...) CURL_PRINTF(2, 3);
+#endif
+#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+extern struct curl_trc_feat Curl_trc_feat_ws;
+void Curl_trc_ws(struct Curl_easy *data,
+                 const char *fmt, ...) CURL_PRINTF(2, 3);
+#endif
 
 
 #else /* defined(CURL_DISABLE_VERBOSE_STRINGS) */
@@ -190,6 +216,12 @@ static void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 
 #ifndef CURL_DISABLE_FTP
 static void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+#ifndef CURL_DISABLE_SMTP
+static void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
 }

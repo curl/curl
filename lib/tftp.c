@@ -434,7 +434,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
   struct Curl_easy *data = state->data;
   CURLcode result = CURLE_OK;
 
-  /* Set ascii mode if -B flag was used */
+  /* Set ASCII mode if -B flag was used */
   if(data->state.prefer_ascii)
     mode = "netascii";
 

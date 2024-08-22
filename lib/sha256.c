@@ -100,10 +100,10 @@
 
 #if defined(USE_OPENSSL_SHA256)
 
-struct sha256_ctx {
+struct ossl_sha256_ctx {
   EVP_MD_CTX *openssl_ctx;
 };
-typedef struct sha256_ctx my_sha256_ctx;
+typedef struct ossl_sha256_ctx my_sha256_ctx;
 
 static CURLcode my_sha256_init(my_sha256_ctx *ctx)
 {
@@ -247,7 +247,7 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
   unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
-  if(length == SHA256_DIGEST_LENGTH)
+  if(length == CURL_SHA256_DIGEST_LENGTH)
     CryptGetHashParam(ctx->hHash, HP_HASHVAL, digest, &length, 0);
 
   if(ctx->hHash)

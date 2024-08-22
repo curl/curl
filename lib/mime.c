@@ -92,7 +92,7 @@ static const char base64enc[] =
 /* Quoted-printable character class table.
  *
  * We cannot rely on ctype functions since quoted-printable input data
- * is assumed to be ascii-compatible, even on non-ascii platforms. */
+ * is assumed to be ASCII-compatible, even on non-ASCII platforms. */
 #define QP_OK           1       /* Can be represented by itself. */
 #define QP_SP           2       /* Space or tab. */
 #define QP_CR           3       /* Carriage return. */
@@ -557,7 +557,7 @@ static size_t encoder_qp_read(char *buffer, size_t size, bool ateof,
 
   /* On all platforms, input is supposed to be ASCII compatible: for this
      reason, we use hexadecimal ASCII codes in this function rather than
-     character constants that can be interpreted as non-ascii on some
+     character constants that can be interpreted as non-ASCII on some
      platforms. Preserve ASCII encoding on output too. */
   while(st->bufbeg < st->bufend) {
     size_t len = 1;
@@ -1587,6 +1587,8 @@ size_t Curl_mime_read(char *buffer, size_t size, size_t nitems, void *instream)
 
   (void) size;   /* Always 1. */
 
+  /* TODO: this loop is broken. If `nitems` is <= 4, some encoders will
+   * return STOP_FILLING without adding any data and this loops infinitely. */
   do {
     hasread = FALSE;
     ret = readback_part(part, buffer, nitems, &hasread);
@@ -1944,13 +1946,17 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   struct cr_mime_ctx *ctx = reader->ctx;
   size_t nread;
 
+
   /* Once we have errored, we will return the same error forever */
   if(ctx->errored) {
+    CURL_TRC_READ(data, "cr_mime_read(len=%zu) is errored -> %d, eos=0",
+                  blen, ctx->error_result);
     *pnread = 0;
     *peos = FALSE;
     return ctx->error_result;
   }
   if(ctx->seen_eos) {
+    CURL_TRC_READ(data, "cr_mime_read(len=%zu) seen eos -> 0, eos=1", blen);
     *pnread = 0;
     *peos = TRUE;
     return CURLE_OK;
@@ -1963,10 +1969,21 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     else if(remain < (curl_off_t)blen)
       blen = (size_t)remain;
   }
-  nread = 0;
-  if(blen) {
-    nread = Curl_mime_read(buf, 1, blen, ctx->part);
+
+  if(blen <= 4) {
+    /* TODO: Curl_mime_read() may go into an infinite loop when reading
+     * such small lengths. Returning 0 bytes read is a fix that only works
+     * as request upload buffers will get flushed eventually and larger
+     * reads will happen again. */
+    CURL_TRC_READ(data, "cr_mime_read(len=%zu), too small, return", blen);
+    *pnread = 0;
+    *peos = FALSE;
+    goto out;
   }
+
+  nread = Curl_mime_read(buf, 1, blen, ctx->part);
+  CURL_TRC_READ(data, "cr_mime_read(len=%zu), mime_read() -> %zd",
+                blen, nread);
 
   switch(nread) {
   case 0:
@@ -1991,10 +2008,20 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 
   case CURL_READFUNC_PAUSE:
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
+    CURL_TRC_READ(data, "cr_mime_read(len=%zu), paused by callback", blen);
     data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
     break; /* nothing was read */
+
+  case STOP_FILLING:
+  case READ_ERROR:
+    failf(data, "read error getting mime data");
+    *pnread = 0;
+    *peos = FALSE;
+    ctx->errored = TRUE;
+    ctx->error_result = CURLE_READ_ERROR;
+    return CURLE_READ_ERROR;
 
   default:
     if(nread > blen) {
@@ -2013,9 +2040,11 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
     *peos = ctx->seen_eos;
     break;
   }
-  DEBUGF(infof(data, "cr_mime_read(len=%zu, total=%"CURL_FORMAT_CURL_OFF_T
-         ", read=%"CURL_FORMAT_CURL_OFF_T") -> %d, %zu, %d",
-         blen, ctx->total_len, ctx->read_len, CURLE_OK, *pnread, *peos));
+
+out:
+  CURL_TRC_READ(data, "cr_mime_read(len=%zu, total=%" CURL_FORMAT_CURL_OFF_T
+                ", read=%"CURL_FORMAT_CURL_OFF_T") -> %d, %zu, %d",
+                blen, ctx->total_len, ctx->read_len, CURLE_OK, *pnread, *peos);
   return CURLE_OK;
 }
 

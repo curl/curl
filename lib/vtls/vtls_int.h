@@ -158,6 +158,9 @@ struct Curl_ssl {
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         const void *mem, size_t len, CURLcode *code);
 
+  CURLcode (*get_channel_binding)(struct Curl_easy *data, int sockindex,
+                                  struct dynbuf *binding);
+
 };
 
 extern const struct Curl_ssl *Curl_ssl;
@@ -222,7 +225,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
 #include "sectransp.h"      /* SecureTransport (Darwin) version */
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "bearssl.h"        /* BearSSL versions */
-#include "rustls.h"         /* rustls versions */
+#include "rustls.h"         /* Rustls versions */
 
 #endif /* USE_SSL */
 

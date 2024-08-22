@@ -21,31 +21,53 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the libpsl library
+# Find the rustls library
 #
-# Result Variables:
+# Input variables:
 #
-# LIBPSL_FOUND        System has libpsl
-# LIBPSL_INCLUDE_DIR  The libpsl include directory
-# LIBPSL_LIBRARY      The libpsl library name
-# LIBPSL_VERSION      Version of libpsl
+# RUSTLS_INCLUDE_DIR   The rustls include directory
+# RUSTLS_LIBRARY       Path to rustls library
+#
+# Result variables:
+#
+# RUSTLS_FOUND         System has rustls
+# RUSTLS_INCLUDE_DIRS  The rustls include directories
+# RUSTLS_LIBRARIES     The rustls library names
+# RUSTLS_VERSION       Version of rustls
 
-find_path(LIBPSL_INCLUDE_DIR "libpsl.h")
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_RUSTLS "rustls")
+endif()
 
-find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
+find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h"
+  HINTS
+    ${PC_RUSTLS_INCLUDEDIR}
+    ${PC_RUSTLS_INCLUDE_DIRS}
+)
 
-if(LIBPSL_INCLUDE_DIR)
-  file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _libpsl_version_str REGEX "^#define[\t ]+PSL_VERSION[\t ]+\"(.*)\"")
-  string(REGEX REPLACE "^.*\"([^\"]+)\"" "\\1"  LIBPSL_VERSION "${_libpsl_version_str}")
+find_library(RUSTLS_LIBRARY NAMES "rustls"
+  HINTS
+    ${PC_RUSTLS_LIBDIR}
+    ${PC_RUSTLS_LIBRARY_DIRS}
+)
+
+if(PC_RUSTLS_VERSION)
+  set(RUSTLS_VERSION ${PC_RUSTLS_VERSION})
 endif()
 
 include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(LibPSL
+find_package_handle_standard_args(Rustls
   REQUIRED_VARS
-    LIBPSL_INCLUDE_DIR
-    LIBPSL_LIBRARY
+    RUSTLS_INCLUDE_DIR
+    RUSTLS_LIBRARY
   VERSION_VAR
-    LIBPSL_VERSION
+    RUSTLS_VERSION
 )
 
-mark_as_advanced(LIBPSL_INCLUDE_DIR LIBPSL_LIBRARY)
+if(RUSTLS_FOUND)
+  set(RUSTLS_INCLUDE_DIRS ${RUSTLS_INCLUDE_DIR})
+  set(RUSTLS_LIBRARIES    ${RUSTLS_LIBRARY})
+endif()
+
+mark_as_advanced(RUSTLS_INCLUDE_DIR RUSTLS_LIBRARY)

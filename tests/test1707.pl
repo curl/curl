@@ -112,8 +112,22 @@ else {
         $txtout[$i] =~ s/[\r\n]//g;
         if($curlout[$i] ne $txtout[$i]) {
             printf "Line %d\n", $i;
-            printf "-h   : %s\n", $curlout[$i];
-            printf "file : %s\n", $txtout[$i];
+            printf "-h   : %s (%d bytes)\n", $curlout[$i],
+                length($curlout[$i]);
+            printf "file : %s (%d bytes)\n", $txtout[$i],
+                length($txtout[$i]);
+
+            if(length($curlout[$i]) == length($txtout[$i])) {
+                my $l = length($curlout[$i]);
+                for my $c (0 .. $l) {
+                    my $o = substr($curlout[$i], $c, 1);
+                    my $t = substr($txtout[$i], $c, 1);
+                    if($o ne $t) {
+                        print "-h   col %d: %02x\n", $c, ord($o);
+                        print "file col %d: %02x\n", $c, ord($t);
+                    }
+                }
+            }
             $error++;
         }
     }
