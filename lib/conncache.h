@@ -45,13 +45,6 @@ struct connshutdowns {
   BIT(iter_locked);  /* TRUE while iterating the list */
 };
 
-/* A list of connection to the similar hosts, with similar meaning the
- * first n chars of interface+port+hostname are the same. */
-struct connectbundle {
-  size_t num_connections;       /* Number of connections in the bundle */
-  struct Curl_llist conn_list;  /* The connectdata members of the bundle */
-};
-
 struct conncache {
    /* the live connections, aggregated by bundle, hostname+port+etc as key */
   struct Curl_hash key2bundle;
@@ -88,7 +81,7 @@ void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data);
 struct conncache *Curl_get_conncache(struct Curl_easy *data);
 
 /* returns number of connections currently held in the connection cache */
-size_t Curl_conncache_size(struct Curl_easy *data);
+size_t Curl_conncache_get_conn_count(struct Curl_easy *data);
 
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_conncache_conn_match_cb(struct connectdata *conn,

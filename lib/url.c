@@ -3547,7 +3547,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
     if(connections_available &&
        (max_total_connections > 0) &&
-       (Curl_conncache_size(data) >= max_total_connections)) {
+       (Curl_conncache_get_conn_count(data) >= max_total_connections)) {
       struct connectdata *oldest_idle;
 
       /* The cache is full. Let's see if we can kill a connection. */
