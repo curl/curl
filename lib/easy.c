@@ -940,7 +940,7 @@ struct Curl_easy *curl_easy_duphandle(struct Curl_easy *data)
 
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
 
-  /* the connection cache is setup on demand */
+  /* the connection pool is setup on demand */
   outcurl->state.lastconnect_id = -1;
   outcurl->state.recent_conn_id = -1;
   outcurl->id = -1;
@@ -1321,7 +1321,7 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
  */
 CURLcode curl_easy_upkeep(struct Curl_easy *data)
 {
-  struct conncache *conn_cache;
+  struct cpool *cpool;
 
   /* Verify that we got an easy handle we can work with. */
   if(!GOOD_EASY_HANDLE(data))
@@ -1330,10 +1330,10 @@ CURLcode curl_easy_upkeep(struct Curl_easy *data)
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  conn_cache = Curl_get_conncache(data);
-  if(conn_cache) {
+  cpool = Curl_get_cpool(data);
+  if(cpool) {
     /* Use the common function to keep connections alive. */
-    return Curl_conncache_upkeep(conn_cache, data);
+    return Curl_cpool_upkeep(cpool, data);
   }
   else {
     /* No connections, so just return success */

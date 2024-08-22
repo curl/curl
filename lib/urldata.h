@@ -551,7 +551,7 @@ struct ConnectBits {
   BIT(aborted); /* connection was aborted, e.g. in unclean state */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
-  BIT(in_conncache);     /* connection is kept in a connection cache */
+  BIT(in_cpool);     /* connection is kept in a connection pool */
 };
 
 struct hostname {
@@ -799,12 +799,12 @@ struct ldapconninfo;
  * unique for an entire connection.
  */
 struct connectdata {
-  struct Curl_llist_node conncache_node; /* conncache lists */
+  struct Curl_llist_node cpool_node; /* conncache lists */
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
-  /* This is used by the connection cache logic. If this returns TRUE, this
+  /* This is used by the connection pool logic. If this returns TRUE, this
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
@@ -850,7 +850,7 @@ struct connectdata {
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
-  struct curltime lastused; /* when returned to the connection cache */
+  struct curltime lastused; /* when returned to the connection poolas idle */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   Curl_recv *recv[2];
@@ -1048,7 +1048,7 @@ struct PureInfo {
      even when the session handle is no longer associated with a connection,
      and also allow curl_easy_reset() to clear this information from the
      session handle without disturbing information which is still alive, and
-     that might be reused, in the connection cache. */
+     that might be reused, in the connection pool. */
   struct ip_quadruple primary;
   int conn_remote_port;  /* this is the "remote port", which is the port
                             number of the used URL, independent of proxy or
@@ -1900,13 +1900,13 @@ struct Curl_easy {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   unsigned int magic;
-  /* once an easy handle is tied to a connection cache
+  /* once an easy handle is tied to a connection pool
      a non-negative number to distinguish this transfer from
-     other using the same cache. For easier tracking
+     other using the same pool. For easier tracking
      in log output.
      This may wrap around after LONG_MAX to 0 again, so it
      has no uniqueness guarantee for very large processings.
-     Note: it has no uniqueness either IFF more than one connection cache
+     Note: it has no uniqueness either IFF more than one connection pool
      is used by the libcurl application. */
   curl_off_t id;
   /* once an easy handle is added to a multi, either explicitly by the

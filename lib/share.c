@@ -121,7 +121,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(Curl_conncache_init(&share->conn_cache, Curl_on_disconnect,
+      if(Curl_cpool_init(&share->cpool, Curl_on_disconnect,
                              NULL, share, 103))
         res = CURLSHE_NOMEM;
       break;
@@ -227,7 +227,7 @@ curl_share_cleanup(struct Curl_share *share)
   }
 
   if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
-    Curl_conncache_destroy(&share->conn_cache);
+    Curl_cpool_destroy(&share->cpool);
   }
   Curl_hash_destroy(&share->hostcache);
 

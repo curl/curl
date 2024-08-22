@@ -605,7 +605,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 
 /*
  * Disconnects the given connection. Note the connection may not be the
- * primary connection, like when freeing room in the connection cache or
+ * primary connection, like when freeing room in the connection pool or
  * killing of a dead old connection.
  *
  * A connection needs an easy handle when closing down. We support this passed
@@ -621,8 +621,8 @@ bool Curl_on_disconnect(struct Curl_easy *data,
   /* there must be a connection to close */
   DEBUGASSERT(conn);
 
-  /* it must be removed from the connection cache */
-  DEBUGASSERT(!conn->bits.in_conncache);
+  /* it must be removed from the connection pool */
+  DEBUGASSERT(!conn->bits.in_cpool);
 
   /* there must be an associated transfer */
   DEBUGASSERT(data);
@@ -799,7 +799,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
     }
 
     if(dead) {
-      /* remove connection from cache */
+      /* remove connection from cpool */
       infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
             conn->connection_id);
       return TRUE;
@@ -1170,7 +1170,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   }
   else if(Curl_conn_seems_dead(conn, data, NULL)) {
     /* removed and disconnect. Do not treat as aborted. */
-    Curl_ccache_disconnect(data, conn, FALSE);
+    Curl_cpool_disconnect(data, conn, FALSE);
     return FALSE;
   }
 
@@ -1235,12 +1235,10 @@ ConnectionExists(struct Curl_easy *data,
 #endif
 #endif
 
-  /* Find a connection in the cache that matches what "data + needle"
+  /* Find a connection in the pool that matches what "data + needle"
    * requires. If a suitable candidate is found, it is attached to "data". */
-  result = Curl_conncache_find_conn(data, needle->destination,
-                                    needle->destination_len,
-                                    url_match_conn,
-                                    url_match_result, &match);
+  result = Curl_cpool_find(data, needle->destination, needle->destination_len,
+                           url_match_conn, url_match_result, &match);
 
   /* wait_pipe is TRUE if we encounter a bundle that is undecided. There
    * is no matching connection then, yet. */
@@ -3200,7 +3198,7 @@ static void reuse_conn(struct Curl_easy *data,
   }
 #endif
 
-  /* Finding a connection for reuse in the cache matches, among other
+  /* Finding a connection for reuse in the cpool matches, among other
    * things on the "remote-relevant" hostname. This is not necessarily
    * the authority of the URL, e.g. conn->host. For example:
    * - we use a proxy (not tunneling). we want to send all requests
@@ -3434,7 +3432,7 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* Setup a "faked" transfer that will do nothing */
     if(!result) {
       Curl_attach_connection(data, conn);
-      result = Curl_conncache_add_conn(data, conn);
+      result = Curl_cpool_add_conn(data, conn);
       if(result)
         goto out;
 
@@ -3470,7 +3468,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(result)
     goto out;
 
-  Curl_conncache_prune_dead(data);
+  Curl_cpool_prune_dead(data);
 
   /*************************************************************
    * Check the current list of connections to see if we can
@@ -3528,15 +3526,15 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
       connections_available = FALSE;
-    else if(!Curl_conncache_may_add_conn(data, conn, max_host_connections)) {
+    else if(!Curl_cpool_may_add_conn(data, conn, max_host_connections)) {
       infof(data, "No more connections allowed to host: %zu",
             max_host_connections);
       connections_available = FALSE;
     }
 
     if(connections_available &&
-       !Curl_conncache_may_add(data, max_total_connections)) {
-      /* The cache is full. */
+       !Curl_cpool_may_add(data, max_total_connections)) {
+      /* The connection pool is full. */
 #ifndef CURL_DISABLE_DOH
       if(data->set.dohfor_mid >= 0)
         infof(data, "Allowing DoH to override max connection limit");
@@ -3569,7 +3567,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       }
 
       Curl_attach_connection(data, conn);
-      result = Curl_conncache_add_conn(data, conn);
+      result = Curl_cpool_add_conn(data, conn);
       if(result)
         goto out;
     }
@@ -3709,7 +3707,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
-    Curl_ccache_disconnect(data, conn, TRUE);
+    Curl_cpool_disconnect(data, conn, TRUE);
   }
 
   return result;

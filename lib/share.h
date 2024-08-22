@@ -46,7 +46,7 @@ struct Curl_share {
   curl_lock_function lockfunc;
   curl_unlock_function unlockfunc;
   void *clientdata;
-  struct conncache conn_cache;
+  struct cpool cpool;
   struct Curl_hash hostcache;
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
   struct CookieInfo *cookies;

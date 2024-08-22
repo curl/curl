@@ -138,7 +138,7 @@ struct Curl_multi {
   struct Curl_hash proto_hash;
 
   /* Shared connection cache (bundles)*/
-  struct conncache conn_cache;
+  struct cpool cpool;
 
   long max_host_connections; /* if >0, a fixed limit of the maximum number
                                 of connections per host */

@@ -411,7 +411,7 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
-  if(Curl_conncache_init(&multi->conn_cache, Curl_on_disconnect,
+  if(Curl_cpool_init(&multi->cpool, Curl_on_disconnect,
                          multi, NULL, chashsize))
     goto error;
 
@@ -444,7 +444,7 @@ error:
   sockhash_destroy(&multi->sockhash);
   Curl_hash_destroy(&multi->proto_hash);
   Curl_hash_destroy(&multi->hostcache);
-  Curl_conncache_destroy(&multi->conn_cache);
+  Curl_cpool_destroy(&multi->cpool);
   free(multi);
   return NULL;
 }
@@ -473,7 +473,7 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
                                 struct Curl_easy *data)
 {
-  struct conncache *connc;
+  struct cpool *cpool;
   CURLMcode rc;
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -513,7 +513,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   /*
    * No failure allowed in this function beyond this point. No modification of
    * easy nor multi handle allowed before this except for potential multi's
-   * connection cache growing which will not be undone in this function no
+   * connection pool growing which will not be undone in this function no
    * matter what.
    */
   if(data->set.errorbuffer)
@@ -572,11 +572,11 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   if(multi->next_easy_mid <= 0)
     multi->next_easy_mid = 0;
 
-  /* Point to the shared or multi handle connection cache */
-  connc = Curl_get_conncache(data);
-  DEBUGASSERT(connc);
-  if(connc)
-    Curl_conncache_xfer_init(connc, data);
+  /* Point to the shared or multi handle connection pool */
+  cpool = Curl_get_cpool(data);
+  DEBUGASSERT(cpool);
+  if(cpool)
+    Curl_cpool_xfer_init(cpool, data);
 
   multi_warn_debug(multi, data);
 
@@ -659,12 +659,12 @@ static void multi_done_locked(struct connectdata *conn,
                  conn->bits.close, mdctx->premature,
                  Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
     connclose(conn, "disconnecting");
-    Curl_ccache_disconnect(data, conn, mdctx->premature);
+    Curl_cpool_disconnect(data, conn, mdctx->premature);
   }
   else {
     /* the connection is no longer in use by any transfer */
-    if(Curl_conncache_conn_is_idle(data, conn)) {
-      /* connection kept in the cache */
+    if(Curl_cpool_conn_now_idle(data, conn)) {
+      /* connection kept in the cpool */
       const char *host =
 #ifndef CURL_DISABLE_PROXY
         conn->bits.socksproxy ?
@@ -678,7 +678,7 @@ static void multi_done_locked(struct connectdata *conn,
             " to host %s left intact", conn->connection_id, host);
     }
     else {
-      /* connection was removed from the cache and destroyed. */
+      /* connection was removed from the cpool and destroyed. */
       data->state.lastconnect_id = -1;
     }
   }
@@ -756,10 +756,10 @@ static CURLcode multi_done(struct Curl_easy *data,
   if(!result)
     result = Curl_req_done(&data->req, data, premature);
 
-  /* Under the potential connection cache's share lock, decide what to
+  /* Under the potential connection pool's share lock, decide what to
    * do with the transfer's connection. */
   mdctx.premature = premature;
-  Curl_conncache_do_locked(data, data->conn, multi_done_locked, &mdctx);
+  Curl_cpool_do_locked(data, data->conn, multi_done_locked, &mdctx);
 
   return result;
 }
@@ -871,13 +871,13 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     curl_socket_t s;
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_ccache_disconnect(data, c, TRUE);
+      Curl_cpool_disconnect(data, c, TRUE);
     }
   }
 
   if(data->state.lastconnect_id != -1) {
     /* Mark any connect-only connection for closure */
-    Curl_conncache_do_by_id(data, data->state.lastconnect_id,
+    Curl_cpool_do_by_id(data, data->state.lastconnect_id,
                             close_connect_only, NULL);
   }
 
@@ -1207,7 +1207,7 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
     }
   }
 
-  if(Curl_conncache_add_waitfds(&multi->conn_cache, &cwfds)) {
+  if(Curl_cpool_add_waitfds(&multi->cpool, &cwfds)) {
     result = CURLM_OUT_OF_MEMORY;
     goto out;
   }
@@ -1284,7 +1284,7 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
     }
   }
 
-  if(Curl_conncache_add_pollfds(&multi->conn_cache, &cpfds)) {
+  if(Curl_cpool_add_pollfds(&multi->cpool, &cpfds)) {
     result = CURLM_OUT_OF_MEMORY;
     goto out;
   }
@@ -2580,7 +2580,7 @@ statemachine_end:
                We do not have to do this in every case block above where a
                failure is detected */
             Curl_detach_connection(data);
-            Curl_ccache_disconnect(data, conn, dead_connection);
+            Curl_cpool_disconnect(data, conn, dead_connection);
           }
         }
         else if(data->mstate == MSTATE_CONNECT) {
@@ -2663,8 +2663,8 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
        pointer now */
     n = Curl_node_next(e);
 
-    if(data != multi->conn_cache.closure_handle) {
-      /* connection cache handle is processed below */
+    if(data != multi->cpool.idata) {
+      /* connection pool handle is processed below */
       sigpipe_apply(data, &pipe_st);
       result = multi_runsingle(multi, &now, data);
       if(result)
@@ -2672,8 +2672,8 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
     }
   }
 
-  sigpipe_apply(multi->conn_cache.closure_handle, &pipe_st);
-  Curl_conncache_multi_perform(multi);
+  sigpipe_apply(multi->cpool.idata, &pipe_st);
+  Curl_cpool_multi_perform(multi);
 
   sigpipe_restore(&pipe_st);
 
@@ -2771,7 +2771,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
 #endif
     }
 
-    Curl_conncache_destroy(&multi->conn_cache);
+    Curl_cpool_destroy(&multi->cpool);
 
     sockhash_destroy(&multi->sockhash);
     Curl_hash_destroy(&multi->proto_hash);
@@ -3125,7 +3125,7 @@ struct multi_run_ctx {
   struct curltime now;
   size_t run_xfers;
   SIGPIPE_MEMBER(pipe_st);
-  bool run_conn_cache;
+  bool run_cpool;
 };
 
 static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
@@ -3152,8 +3152,8 @@ static CURLMcode multi_run_expired(struct multi_run_ctx *mrc)
       continue;
 
     (void)add_next_timeout(mrc->now, multi, data);
-    if(data == multi->conn_cache.closure_handle) {
-      mrc->run_conn_cache = TRUE;
+    if(data == multi->cpool.idata) {
+      mrc->run_cpool = TRUE;
       continue;
     }
 
@@ -3202,7 +3202,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         result = singlesocket(multi, Curl_node_elem(e));
       }
     }
-    mrc.run_conn_cache = TRUE;
+    mrc.run_cpool = TRUE;
     goto out;
   }
 
@@ -3216,8 +3216,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
          asked to get removed, so thus we better survive stray socket actions
          and just move on. */
       /* The socket might come from a connection that is being shut down
-       * by the multi's conncache. */
-      Curl_conncache_multi_socket(multi, s, ev_bitmask);
+       * by the multi's connection pool. */
+      Curl_cpool_multi_socket(multi, s, ev_bitmask);
     }
     else {
       struct Curl_hash_iterator iter;
@@ -3231,8 +3231,8 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         DEBUGASSERT(data);
         DEBUGASSERT(data->magic == CURLEASY_MAGIC_NUMBER);
 
-        if(data == multi->conn_cache.closure_handle)
-          mrc.run_conn_cache = TRUE;
+        if(data == multi->cpool.idata)
+          mrc.run_cpool = TRUE;
         else {
           /* Expire with out current now, so we will get it below when
            * asking the splaytree for expired transfers. */
@@ -3257,9 +3257,9 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   }
 
 out:
-  if(mrc.run_conn_cache) {
-    sigpipe_apply(multi->conn_cache.closure_handle, &mrc.pipe_st);
-    Curl_conncache_multi_perform(multi);
+  if(mrc.run_cpool) {
+    sigpipe_apply(multi->cpool.idata, &mrc.pipe_st);
+    Curl_cpool_multi_perform(multi);
   }
   sigpipe_restore(&mrc.pipe_st);
 
