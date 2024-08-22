@@ -3188,8 +3188,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     argptr = va_arg(param, char *);
     if(!argptr) {
       data->set.tls_ech = CURLECH_DISABLE;
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      return result;
+      return CURLE_OK;
     }
     plen = strlen(argptr);
     if(plen > CURL_MAX_INPUT_LENGTH) {
