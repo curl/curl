@@ -45,7 +45,6 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBIDN2_FOUND)
-  set(LIBIDN2_LIBRARIES ${LIBIDN2_LINK_LIBRARIES})
   string(REPLACE ";" " " LIBIDN2_CFLAGS "${LIBIDN2_CFLAGS}")
   message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
 else()
