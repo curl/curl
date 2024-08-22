@@ -44,7 +44,7 @@ endif()
 
 if(LIBUV_FOUND)
   set(LIBUV_LIBRARIES ${LIBUV_LINK_LIBRARIES})
-  message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (Found version \"${LIBUV_VERSION}\")")
+  message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()
   find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")
   find_library(LIBUV_LIBRARY NAMES "uv" "libuv")

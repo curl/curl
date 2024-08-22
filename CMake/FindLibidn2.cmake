@@ -44,7 +44,7 @@ endif()
 
 if(LIBIDN2_FOUND)
   set(LIBIDN2_LIBRARIES ${LIBIDN2_LINK_LIBRARIES})
-  message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (Found version \"${LIBIDN2_VERSION}\")")
+  message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
 else()
   find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")
   find_library(LIBIDN2_LIBRARY NAMES "idn2" "libidn2")

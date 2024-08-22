@@ -44,7 +44,7 @@ endif()
 
 if(LIBGSASL_FOUND)
   set(LIBGSASL_LIBRARIES ${LIBGSASL_LINK_LIBRARIES})
-  message(STATUS "Found Libgsasl (via pkg-config): ${LIBGSASL_INCLUDE_DIRS} (Found version \"${LIBGSASL_VERSION}\")")
+  message(STATUS "Found Libgsasl (via pkg-config): ${LIBGSASL_INCLUDE_DIRS} (found version \"${LIBGSASL_VERSION}\")")
 else()
   find_path(LIBGSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
