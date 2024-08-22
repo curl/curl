@@ -4,7 +4,7 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3228
+ Contributors:                 3232
 
 This release includes the following changes:
 
@@ -29,9 +29,15 @@ This release includes the following bugfixes:
 
  o autotools: fix typo in tests/data target [30]
  o aws_sigv4: fix canon order for headers with same prefix [74]
+ o bearssl: fix setting tls version [203]
  o bearssl: improve shutdown handling [45]
  o BINDINGS: add zig binding [100]
+ o build: add `iphlpapi` lib for libssh on Windows [166]
+ o build: improve compiler version detection portability
  o build: silence C4232 MSVC warnings in vcpkg ngtcp2 builds [137]
+ o build: use -Wno-format-overflow [195]
+ o buildconf.bat: fix tool_hugehelp.c generation [173]
+ o cf-socket: prevent KEEPALIVE_FACTOR being set to 1000 for Windows [185]
  o cfilters: send flush [13]
  o CHANGES: rename to CHANGES.md, no longer generated [40]
  o CI: enable parallel testing in CI builds [18]
@@ -51,6 +57,7 @@ This release includes the following bugfixes:
  o cmake: detect and show VCPKG in platform flags [84]
  o cmake: distcheck for files in CMake subdir [9]
  o cmake: drop custom `CMakeOutput.log`/`CMakeError.log` logs [27]
+ o cmake: drop libssh CONFIG-style detection [167]
  o cmake: drop no-op `tests/data/CMakeLists.txt` [26]
  o cmake: drop reference to undefined variable [25]
  o cmake: drop unused `HAVE_IDNA_STRERROR` [62]
@@ -60,7 +67,11 @@ This release includes the following bugfixes:
  o cmake: fix `pkg-config`-based detection in `FindGSS.cmake` [94]
  o cmake: fix and tidy up c-ares builds, enable in more CI jobs [156]
  o cmake: fix find rustls [148]
+ o cmake: fixup linking libgsasl when detected via CMake-native
+ o cmake: honor custom `CMAKE_UNITY_BUILD_BATCH_SIZE` [163]
+ o cmake: limit `pkg-config` to UNIX and MSVC+vcpkg by default [188]
  o cmake: limit libidn2 `pkg-config` detection to `UNIX` [109]
+ o cmake: migrate dependency detections to Find modules [183]
  o cmake: more small tidy-ups and fixes [80]
  o cmake: rename wolfSSL and zstd config variables to uppercase [151]
  o cmake: show CMake platform/compiler flags [63]
@@ -76,12 +87,14 @@ This release includes the following bugfixes:
  o configure: replace nonportable grep -o with awk [111]
  o cookie.md: try to articulate the two different uses this option has [92]
  o curl: allow 500MB data URL encode strings [38]
+ o curl: find curlrc in XDG_CONFIG_HOME without leading dot [186]
  o curl: fix --proxy-pinnedpubkey [91]
  o curl: fix the -w urle.* variables [153]
  o curl: make the progress bar detect terminal width changes [169]
  o curl: warn on unsupported SSL options [106]
  o Curl_rand_bytes to control env override [17]
  o curl_sha512_256: fix symbol collisions with nettle library [131]
+ o CURLOPT_XFERINFOFUNCTION: clarify the callback return codes [141]
  o dist: add missing `docs/examples/CMakeLists.txt` [58]
  o dist: add missing `FindNettle.cmake` [11]
  o dist: add missing `lib/optiontable.pl` [115]
@@ -89,6 +102,7 @@ This release includes the following bugfixes:
  o dist: drop buildconf [65]
  o dist: fix reproducible build from release tarball [36]
  o dmaketgz: only run 'make distclean' if Makefile exists
+ o docs/SSLCERTS: rewrite [174]
  o docs: add description of effect of --location-trusted on cookie [157]
  o docs: improve cipher options documentation [159]
  o docs: mention "@-" in more places [67]
@@ -104,6 +118,7 @@ This release includes the following bugfixes:
  o hash: provide asserts to verify API use [96]
  o http/2: simplify eos/blocked handling [90]
  o http2+h3 filters: fix ctx init [142]
+ o http2: fix GOAWAY message sent to server [171]
  o http2: improve rate limiting of downloads [33]
  o http2: improved upload eos handling [41]
  o hyper: call Curl_req_set_upload_done() [126]
@@ -116,6 +131,7 @@ This release includes the following bugfixes:
  o lib: add eos flag to send methods [14]
  o lib: avoid macro collisions between wolfSSL and GnuTLS headers [133]
  o lib: convert some debugf()s into traces [8]
+ o lib: delete stray undefs for `vsnprintf`, `vsprintf` [152]
  o lib: fix AIX build issues [112]
  o lib: fix building with wolfSSL without DES support [134]
  o lib: prefer `CURL_SHA256_DIGEST_LENGTH` over the unprefixed name [132]
@@ -130,24 +146,30 @@ This release includes the following bugfixes:
  o manpage: ensure a maximum width for the text version [75]
  o max-filesize.md: mention zero disables the limit [93]
  o mbedtls: add more informative logging [162]
+ o mbedtls: fix setting tls version [200]
+ o mbedtls: no longer use MBEDTLS_SSL_VERIFY_OPTIONAL [181]
  o mime: avoid inifite loop in client reader [155]
  o mk-ca-bundle.pl: include a link to the caextract webpage [68]
  o multi: make the "general" list of easy handles a Curl_llist [97]
  o multi: on socket callback error, remove socket hash entry nonetheless [149]
  o ngtcp2: use NGHTTP3 prefix instead of NGTCP2 for errors in h3 callbacks [79]
  o openssl: improve shutdown handling [44]
+ o pingpong: drain the input buffer when reading responses [193]
  o progress: ratelimit/progress tweaks [32]
  o pytests: add tests for HEAD requests in all HTTP versions [42]
  o runtests: if DISABLED cannot be read, error out [56]
  o runtests: log ignored but passed tests [130]
+ o rustls: fix setting tls version [202]
  o rustls: make all tests pass [1]
  o scorecard: tweak request measurements [139]
  o SECURITY: mention OpenSSF best practices gold badge [161]
+ o setopt: allow CURLOPT_INTERFACE to be set to NULL [165]
  o sha256: fix symbol collision between nettle (GnuTLS) and OpenSSL [135]
  o sigpipe: init the struct so that first apply ignores [49]
  o smtp: add tracing feature [120]
  o splay: use access functions, add asserts, use Curl_timediff [121]
  o spnego_gssapi: implement TLS channel bindings for openssl [146]
+ o ssh: deduplicate SSH backend includes (and fix libssh cmake unity build) [177]
  o test httpd: tweak cipher list [124]
  o test1707: output diff more for debugging differences in CI outputs
  o test556: improve robustness [64]
@@ -168,6 +190,7 @@ This release includes the following bugfixes:
  o urldata: introduce `data->mid`, a unique identifier inside a multi [127]
  o urldata: remove 'scratch' from the UrlState struct [86]
  o verify-release: shell script that verifies a release tarball [29]
+ o version: fix shadowing a `libssh.h` symbol [176]
  o vtls: add SSLSUPP_CIPHER_LIST [107]
  o vtls: fix MSVC 'cast truncates constant value' warning [23]
  o vtls: fix static function name collisions between TLS backends [136]
@@ -175,6 +198,7 @@ This release includes the following bugfixes:
  o websocket: introduce blocking sends [145]
  o wolfssl: avoid taking cached x509 store ref if sslctx already using it [88]
  o wolfssl: fix CURLOPT_SSLVERSION [144]
+ o wolfssl: fix setting tls version [201]
  o wolfssl: improve shutdown handling [43]
  o ws: flags to opcodes should ignore CURLWS_CONT flag [104]
  o x509asn1: raise size limit for x509 certification information [28]
@@ -197,16 +221,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Alex Snast, Antoine du Hamel, Austin Moore, Bo Anderson, Christoph Reiter,
-  Dan Fandrich, Daniel Stenberg, David Sardari, dependabot[bot],
-  Emanuele Torre, Gruber Glass, Jan Venekamp, Jiacai Liu, Joe Birr-Pixton,
-  John Haugabook, Joshix-1 on github, Justin Maggard, kit-ty-kate on github,
+  Alex Snast, Antoine du Hamel, Austin Moore, Benjamin Riefenstahl Mecom,
+  Bo Anderson, Christoph Reiter, Dan Fandrich, Daniel Stenberg, David Sardari,
+  dependabot[bot], Emanuele Torre, feelingseas on github, Gruber Glass,
+  Jan Venekamp, Jiacai Liu, Joe Birr-Pixton, John Haugabook,
+  Joshix-1 on github, Justin Maggard, kit-ty-kate on github,
   lolbinarycat on github, MasterInQuestion on github, Matt Jolly, Max Faxälv,
-  Micah Snyder, Moritz Buhl, Pete Cordell, Rasmus Thomsen, Ray Satiro,
-  renovate[bot], Ryan Carsten Schmidt, Sergio Durigan Junior, Slaven Rezić,
-  Stefan Eissing, Steffen Kieß, Tal Regev, Tim Yuer, Viktor Petersson,
-  Viktor Szakats, XYenon, Yedaya Katsman, 罗朝辉
-  (40 contributors)
+  Micah Snyder, Moritz Buhl, Pete Cordell, ralfjunker on github,
+  Rasmus Thomsen, Ray Satiro, renovate[bot], Ryan Carsten Schmidt, Sam Jessup,
+  Sergio Durigan Junior, Slaven Rezić, Stefan Eissing, Steffen Kieß, Tal Regev,
+  Tim Yuer, Viktor Petersson, Viktor Szakats, XYenon, Yedaya Katsman, 罗朝辉
+  (44 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -350,6 +375,7 @@ References to bug reports and discussions on issues:
  [138] = https://curl.se/bug/?i=14504
  [139] = https://curl.se/bug/?i=14564
  [140] = https://curl.se/bug/?i=14460
+ [141] = https://curl.se/bug/?i=14627
  [142] = https://curl.se/bug/?i=14505
  [143] = https://curl.se/bug/?i=14543
  [144] = https://curl.se/bug/?i=14480
@@ -360,6 +386,7 @@ References to bug reports and discussions on issues:
  [149] = https://curl.se/bug/?i=14557
  [150] = https://curl.se/bug/?i=14556
  [151] = https://curl.se/bug/?i=14574
+ [152] = https://curl.se/bug/?i=14631
  [153] = https://curl.se/bug/?i=14550
  [154] = https://curl.se/bug/?i=14533
  [155] = https://curl.se/bug/?i=14532
@@ -369,7 +396,27 @@ References to bug reports and discussions on issues:
  [159] = https://curl.se/bug/?i=14407
  [161] = https://curl.se/bug/?i=14319
  [162] = https://curl.se/bug/?i=14444
+ [163] = https://curl.se/bug/?i=14626
  [164] = https://curl.se/bug/?i=14561
+ [165] = https://curl.se/bug/?i=14629
+ [166] = https://curl.se/bug/?i=14618
+ [167] = https://curl.se/bug/?i=14614
  [169] = https://curl.se/bug/?i=14565
  [170] = https://curl.se/bug/?i=14548
+ [171] = https://curl.se/bug/?i=14623
  [172] = https://curl.se/bug/?i=14558
+ [173] = https://curl.se/bug/?i=14622
+ [174] = https://curl.se/bug/?i=14616
+ [176] = https://curl.se/bug/?i=14617
+ [177] = https://curl.se/bug/?i=14612
+ [181] = https://curl.se/bug/?i=14591
+ [183] = https://curl.se/bug/?i=14555
+ [185] = https://curl.se/bug/?i=14368
+ [186] = https://curl.se/bug/?i=12129
+ [188] = https://curl.se/bug/?i=14575
+ [193] = https://curl.se/bug/?i=14201
+ [195] = https://curl.se/bug/?i=14168
+ [200] = https://curl.se/bug/?i=14588
+ [201] = https://curl.se/bug/?i=14587
+ [202] = https://curl.se/bug/?i=14586
+ [203] = https://curl.se/bug/?i=14585
