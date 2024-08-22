@@ -31,11 +31,6 @@
  * be.
  */
 
-#include <curl/mprintf.h>
-/* this is still a public header file that provides the curl_mprintf()
-   functions while they still are offered publicly. They will be made library-
-   private one day */
-
 /* map standard printf functions to curl implementations */
 #include "curl_printf.h"
 
