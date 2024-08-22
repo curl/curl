@@ -1122,7 +1122,7 @@ if(CURL_USE_GSSAPI)
     string(REPLACE ";" " " GSS_CFLAGS "${GSS_CFLAGS}")
     string(REPLACE ";" " " GSS_LDFLAGS "${GSS_LDFLAGS}")
 
-    foreach(_dir IN LISTS GSS_LINK_DIRECTORIES)
+    foreach(_dir IN LISTS GSS_LIBRARY_DIRS)
       set(GSS_LDFLAGS "${GSS_LDFLAGS} -L\"${_dir}\"")
     endforeach()
 
@@ -1154,7 +1154,7 @@ if(CURL_USE_GSSAPI)
     endif()
 
     include_directories(${GSS_INCLUDE_DIRS})
-    link_directories(${GSS_LINK_DIRECTORIES})
+    link_directories(${GSS_LIBRARY_DIRS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_CFLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LDFLAGS}")
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${GSS_LDFLAGS}")

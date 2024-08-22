@@ -25,19 +25,19 @@
 #
 # Input variables:
 #
-# GSS_ROOT_DIR          Set this variable to the root installation of GSS
+# GSS_ROOT_DIR      Set this variable to the root installation of GSS
 #
 # Result variables:
 #
-# GSS_FOUND             System has the Heimdal library
-# GSS_FLAVOUR           "MIT" or "Heimdal" if anything found
-# GSS_INCLUDE_DIRS      The GSS include directories
-# GSS_LIBRARIES         The GSS library names
-# GSS_LINK_DIRECTORIES  Directories to add to linker search path
-# GSS_LDFLAGS           Additional linker flags
-# GSS_CFLAGS            Additional compiler flags
-# GSS_VERSION           This is set to version advertised by pkg-config or read from manifest.
-#                       In case the library is found but no version info available it is set to "unknown"
+# GSS_FOUND         System has the Heimdal library
+# GSS_FLAVOUR       "MIT" or "Heimdal" if anything found
+# GSS_INCLUDE_DIRS  The GSS include directories
+# GSS_LIBRARIES     The GSS library names
+# GSS_LIBRARY_DIRS  Directories to add to linker search path
+# GSS_LDFLAGS       Additional linker flags
+# GSS_CFLAGS        Additional compiler flags
+# GSS_VERSION       This is set to version advertised by pkg-config or read from manifest.
+#                   In case the library is found but no version info available it is set to "unknown"
 
 set(_mit_modname "mit-krb5-gssapi")
 set(_heimdal_modname "heimdal-gssapi")
@@ -263,7 +263,7 @@ endif()
 
 set(GSS_INCLUDE_DIRS ${_GSS_INCLUDE_DIRS})
 set(GSS_LIBRARIES ${_GSS_LIBRARIES})
-set(GSS_LINK_DIRECTORIES ${_GSS_LIBRARY_DIRS})
+set(GSS_LIBRARY_DIRS ${_GSS_LIBRARY_DIRS})
 set(GSS_LDFLAGS ${_GSS_LDFLAGS})
 set(GSS_CFLAGS ${_GSS_CFLAGS})
 set(GSS_VERSION ${_GSS_VERSION})
