@@ -26,7 +26,7 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) &&     \
+#if defined(USE_CURL_NTLM_CORE) &&     \
   (defined(USE_GNUTLS) ||                                       \
    defined(USE_SECTRANSP) ||                                    \
    defined(USE_OS400CRYPTO) ||                                  \
