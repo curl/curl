@@ -19,7 +19,7 @@ We treat security issues with confidentiality until controlled and disclosed res
 
 curl has achieved Gold status on the Open Source Security Foundation (OpenSSF)
 [Best Practices](https://bestpractices.dev/) (formerly Core Infrastructure
-Initiative [CII] Best Practices), reflecting its adherence to rigorous
+Initiative Best Practices), reflecting its adherence to rigorous
 security and best practice standards. This achievement highlights curl's
 comprehensive documentation, secure development processes, effective change
 control mechanisms, and strong maintenance routines. Meeting these criteria
