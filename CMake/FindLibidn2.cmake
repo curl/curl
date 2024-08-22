@@ -33,6 +33,8 @@
 # LIBIDN2_FOUND         System has libidn2
 # LIBIDN2_INCLUDE_DIRS  The libidn2 include directories
 # LIBIDN2_LIBRARIES     The libidn2 library names
+# LIBIDN2_LIBRARY_DIRS  The libidn2 library directories
+# LIBIDN2_CFLAGS        Required compiler flags
 # LIBIDN2_VERSION       Version of libidn2
 
 if(CURL_USE_PKGCONFIG AND
@@ -43,7 +45,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBIDN2_FOUND)
-  set(LIBIDN2_LIBRARIES ${LIBIDN2_LINK_LIBRARIES})
+  string(REPLACE ";" " " LIBIDN2_CFLAGS "${LIBIDN2_CFLAGS}")
   message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
 else()
   find_path(LIBIDN2_INCLUDE_DIR NAMES "idn2.h")

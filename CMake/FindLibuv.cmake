@@ -33,6 +33,8 @@
 # LIBUV_FOUND         System has libuv
 # LIBUV_INCLUDE_DIRS  The libuv include directories
 # LIBUV_LIBRARIES     The libuv library names
+# LIBUV_LIBRARY_DIRS  The libuv library directories
+# LIBUV_CFLAGS        Required compiler flags
 # LIBUV_VERSION       Version of libuv
 
 if(CURL_USE_PKGCONFIG AND
@@ -43,7 +45,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBUV_FOUND)
-  set(LIBUV_LIBRARIES ${LIBUV_LINK_LIBRARIES})
+  string(REPLACE ";" " " LIBUV_CFLAGS "${LIBUV_CFLAGS}")
   message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()
   find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")

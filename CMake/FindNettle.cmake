@@ -33,6 +33,8 @@
 # NETTLE_FOUND         System has nettle
 # NETTLE_INCLUDE_DIRS  The nettle include directories
 # NETTLE_LIBRARIES     The nettle library names
+# NETTLE_LIBRARY_DIRS  The nettle library directories
+# NETTLE_CFLAGS        Required compiler flags
 # NETTLE_VERSION       Version of nettle
 
 if(CURL_USE_PKGCONFIG AND
@@ -43,7 +45,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NETTLE_FOUND)
-  set(NETTLE_LIBRARIES ${NETTLE_LINK_LIBRARIES})
+  string(REPLACE ";" " " NETTLE_CFLAGS "${NETTLE_CFLAGS}")
   message(STATUS "Found Nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
 else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
