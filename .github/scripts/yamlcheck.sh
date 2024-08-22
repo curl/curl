@@ -7,7 +7,7 @@ set -eu
 
 # shellcheck disable=SC2046
 yamllint \
-  --format parsable \
+  --format standard \
   --strict \
   --config-data "$(dirname "$0")/yamlcheck.yaml" \
   $(git ls-files '*.yaml' '*.yml')
