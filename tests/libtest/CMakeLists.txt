@@ -21,16 +21,16 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-function(setup_test _test_name)  # ARGN are the files in the test
+function(setup_test _target)  # ARGN are the files in the test
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
     list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
   endif()
 
-  add_executable(${_test_name} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${_test_name})
-  string(TOUPPER ${_test_name} _upper_test_name)
+  add_executable(${_target} EXCLUDE_FROM_ALL ${ARGN})
+  add_dependencies(testdeps ${_target})
+  string(TOUPPER ${_target} _upper_target)
 
   include_directories(
     "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
@@ -38,22 +38,22 @@ function(setup_test _test_name)  # ARGN are the files in the test
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
 
-  target_link_libraries(${_test_name} ${LIB_SELECTED} ${CURL_LIBS})
+  target_link_libraries(${_target} ${LIB_SELECTED} ${CURL_LIBS})
 
-  set_target_properties(${_test_name} PROPERTIES
-    COMPILE_DEFINITIONS ${_upper_test_name}
-    PROJECT_LABEL "Test ${_test_name}")
+  set_target_properties(${_target} PROPERTIES
+    COMPILE_DEFINITIONS ${_upper_target}
+    PROJECT_LABEL "Test ${_target}")
 endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES', WARNLESS, MULTIBYTE, TIMEDIFF variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-foreach(_test_name IN LISTS noinst_PROGRAMS)
-  if(DEFINED ${_test_name}_SOURCES)
-    setup_test(${_test_name} ${${_test_name}_SOURCES})
+foreach(_target IN LISTS noinst_PROGRAMS)
+  if(DEFINED ${_target}_SOURCES)
+    setup_test(${_target} ${${_target}_SOURCES})
   else()
-    setup_test(${_test_name} ${nodist_${_test_name}_SOURCES})
+    setup_test(${_target} ${nodist_${_target}_SOURCES})
   endif()
 endforeach()
 

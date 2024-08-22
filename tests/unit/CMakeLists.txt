@@ -33,10 +33,10 @@ include_directories(
   "${CURL_SOURCE_DIR}/tests/libtest"
 )
 
-foreach(_test_name IN LISTS UNITPROGS)
-  add_executable(${_test_name} EXCLUDE_FROM_ALL "${_test_name}.c" ${UNITFILES})
-  add_dependencies(testdeps ${_test_name})
-  target_link_libraries(${_test_name} curltool curlu)
-  set_target_properties(${_test_name} PROPERTIES
-    PROJECT_LABEL "Test unit ${_test_name}")
+foreach(_target IN LISTS UNITPROGS)
+  add_executable(${_target} EXCLUDE_FROM_ALL "${_target}.c" ${UNITFILES})
+  add_dependencies(testdeps ${_target})
+  target_link_libraries(${_target} curltool curlu)
+  set_target_properties(${_target} PROPERTIES
+    PROJECT_LABEL "Test unit ${_target}")
 endforeach()
