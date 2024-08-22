@@ -45,7 +45,6 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NETTLE_FOUND)
-  set(NETTLE_LIBRARIES ${NETTLE_LINK_LIBRARIES})
   string(REPLACE ";" " " NETTLE_CFLAGS "${NETTLE_CFLAGS}")
   message(STATUS "Found Nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
 else()
