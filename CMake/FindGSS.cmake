@@ -33,9 +33,9 @@
 # GSS_FLAVOUR       "MIT" or "Heimdal" if anything found
 # GSS_INCLUDE_DIRS  The GSS include directories
 # GSS_LIBRARIES     The GSS library names
-# GSS_LIBRARY_DIRS  Directories to add to linker search path
-# GSS_LDFLAGS       Additional linker flags
-# GSS_CFLAGS        Additional compiler flags
+# GSS_LIBRARY_DIRS  The GSS library directories
+# GSS_LDFLAGS       Required linker flags
+# GSS_CFLAGS        Required compiler flags
 # GSS_VERSION       This is set to version advertised by pkg-config or read from manifest.
 #                   In case the library is found but no version info available it is set to "unknown"
 
