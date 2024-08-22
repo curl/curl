@@ -4,7 +4,7 @@
 
 name: Hacktoberfest
 
-on:
+'on':
   # this must not ever run on any other branch than master
   push:
     branches:

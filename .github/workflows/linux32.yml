@@ -4,7 +4,7 @@
 
 name: Linux 32-bit
 
-on:
+'on':
   push:
     branches:
       - master

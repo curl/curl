@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: curl
 
 name: configure-vs-cmake
-on:
+'on':
   push:
     branches:
       - master

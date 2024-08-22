@@ -4,7 +4,7 @@
 
 name: Fuzzer
 
-on:
+'on':
   push:
     branches:
       - master

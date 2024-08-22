@@ -1,0 +1,36 @@
+# Copyright (C) Viktor Szakats
+#
+# SPDX-License-Identifier: curl
+
+name: yamlcheck
+
+'on':
+  push:
+    branches:
+      - master
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '.github/scripts/*'
+  pull_request:
+    branches:
+      - master
+    paths:
+      - '**/*.yaml'
+      - '**/*.yml'
+      - '.github/scripts/*'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+permissions: {}
+
+jobs:
+  yamlcheck:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - name: 'yamlcheck'
+        run: .github/scripts/yamlcheck.sh
