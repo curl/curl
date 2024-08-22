@@ -513,6 +513,17 @@
 #  define CURL_FORMAT_SOCKET_T "qd"
 #endif
 
+#if SIZEOF_SIZE_T < 8
+#  define CURL_FORMAT_SIZE_T  "u"
+#  define CURL_FORMAT_SSIZE_T "d"
+#elif defined(__MINGW32__)
+#  define CURL_FORMAT_SIZE_T  CURL_FORMAT_CURL_OFF_TU
+#  define CURL_FORMAT_SSIZE_T CURL_FORMAT_CURL_OFF_T
+#else
+#  define CURL_FORMAT_SIZE_T  "zu"
+#  define CURL_FORMAT_SSIZE_T "zd"
+#endif
+
 /*
  * Default sizeof(off_t) in case it has not been defined in config file.
  */
