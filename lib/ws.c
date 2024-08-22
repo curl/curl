@@ -281,8 +281,10 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
     Curl_bufq_skip(inraw, (size_t)nwritten);
     dec->payload_offset += (curl_off_t)nwritten;
     remain = dec->payload_len - dec->payload_offset;
-    CURL_TRC_WRITE(data, "websocket, passed %zd bytes payload, %"
-                   CURL_FORMAT_CURL_OFF_T " remain", nwritten, remain);
+    CURL_TRC_WRITE(data, "websocket"
+                         ", passed %" CURL_FORMAT_SSIZE_T " bytes payload"
+                         ", %" CURL_FORMAT_CURL_OFF_T " remain",
+                   nwritten, remain);
   }
 
   return remain? CURLE_AGAIN : CURLE_OK;
@@ -470,7 +472,8 @@ static CURLcode ws_cw_write(struct Curl_easy *data,
   }
 
   if((type & CLIENTWRITE_EOS) && !Curl_bufq_is_empty(&ctx->buf)) {
-    infof(data, "WS: decode ending with %zd frame bytes remaining",
+    infof(data, "WS: decode ending with %" CURL_FORMAT_SSIZE_T
+                " frame bytes remaining",
           Curl_bufq_len(&ctx->buf));
     return CURLE_RECV_ERROR;
   }
@@ -558,8 +561,9 @@ static ssize_t ws_enc_write_head(struct Curl_easy *data,
 
   if(enc->payload_remain > 0) {
     /* trying to write a new frame before the previous one is finished */
-    failf(data, "WS: starting new frame with %zd bytes from last one"
-                "remaining to be sent", (ssize_t)enc->payload_remain);
+    failf(data, "WS: starting new frame with %" CURL_FORMAT_SSIZE_T
+                " bytes from last one remaining to be sent",
+          (ssize_t)enc->payload_remain);
     *err = CURLE_SEND_ERROR;
     return -1;
   }
@@ -777,7 +781,8 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
       }
     }
 #endif
-    CURL_TRC_WS(data, "WS, using chunk size %zu", chunk_size);
+    CURL_TRC_WS(data, "WS, using chunk size %" CURL_FORMAT_SIZE_T,
+                chunk_size);
     Curl_bufq_init2(&ws->recvbuf, chunk_size, WS_CHUNK_COUNT,
                     BUFQ_OPT_SOFT_LIMIT);
     Curl_bufq_init2(&ws->sendbuf, chunk_size, WS_CHUNK_COUNT,
@@ -839,7 +844,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
                                nread, &result);
     if(nwritten < 0)
       return result;
-    infof(data, "%zu bytes websocket payload", nread);
+    infof(data, "%" CURL_FORMAT_SIZE_T " bytes websocket payload", nread);
   }
   else { /* !connect_only */
     /* And pass any additional data to the writers */
@@ -974,7 +979,8 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
         infof(data, "connection expectedly closed?");
         return CURLE_GOT_NOTHING;
       }
-      CURL_TRC_WS(data, "curl_ws_recv, added %zu bytes from network",
+      CURL_TRC_WS(data, "curl_ws_recv, added %" CURL_FORMAT_SIZE_T
+                        " bytes from network",
                   Curl_bufq_len(&ws->recvbuf));
     }
 
@@ -1005,8 +1011,10 @@ CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
               ctx.payload_len, ctx.bufidx);
   *metap = &ws->frame;
   *nread = ws->frame.len;
-  CURL_TRC_WS(data, "curl_ws_recv(len=%zu) -> %zu bytes (frame at %"
-               CURL_FORMAT_CURL_OFF_T ", %" CURL_FORMAT_CURL_OFF_T " left)",
+  CURL_TRC_WS(data, "curl_ws_recv(len=%" CURL_FORMAT_SIZE_T ")"
+                    " -> %" CURL_FORMAT_SIZE_T " bytes (frame at"
+                    " %" CURL_FORMAT_CURL_OFF_T ","
+                    " %" CURL_FORMAT_CURL_OFF_T " left)",
                buflen, *nread, ws->frame.offset, ws->frame.bytesleft);
   return CURLE_OK;
 }
@@ -1033,7 +1041,8 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
       }
 
       if(result == CURLE_AGAIN) {
-        CURL_TRC_WS(data, "flush EAGAIN, %zu bytes remain in buffer",
+        CURL_TRC_WS(data, "flush EAGAIN, %" CURL_FORMAT_SIZE_T
+                          " bytes remain in buffer",
                     Curl_bufq_len(&ws->sendbuf));
         return result;
       }
@@ -1042,7 +1051,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
         return result;
       }
       else {
-        infof(data, "WS: flushed %zu bytes", n);
+        infof(data, "WS: flushed %" CURL_FORMAT_SIZE_T " bytes", n);
         Curl_bufq_skip(&ws->sendbuf, n);
       }
     }
@@ -1069,7 +1078,8 @@ static CURLcode ws_send_raw_blocking(CURL *data, struct websocket *ws,
       timediff_t left_ms;
       int ev;
 
-      CURL_TRC_WS(data, "ws_send_raw_blocking() partial, %zu left to send",
+      CURL_TRC_WS(data, "ws_send_raw_blocking() partial,"
+                        " %" CURL_FORMAT_SIZE_T " left to send",
                   buflen);
       left_ms = Curl_timeleft(data, NULL, FALSE);
       if(left_ms < 0) {
@@ -1122,7 +1132,8 @@ static CURLcode ws_send_raw(CURL *data, const void *buffer,
     result = Curl_senddata(data, buffer, buflen, pnwritten);
   }
 
-  CURL_TRC_WS(data, "ws_send_raw(len=%zu) -> %d, %zu",
+  CURL_TRC_WS(data, "ws_send_raw(len=%" CURL_FORMAT_SIZE_T ")"
+                    " -> %d, %" CURL_FORMAT_SIZE_T "",
               buflen, result, *pnwritten);
   return result;
 }
@@ -1137,8 +1148,9 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   size_t space, payload_added;
   CURLcode result;
 
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" CURL_FORMAT_CURL_OFF_T
-              ", flags=%x), raw=%d",
+  CURL_TRC_WS(data, "curl_ws_send(len=%" CURL_FORMAT_SIZE_T
+                    ", fragsize=%" CURL_FORMAT_CURL_OFF_T
+                    ", flags=%x), raw=%d",
               buflen, fragsize, flags, data->set.ws_raw_mode);
   *sent = 0;
   if(!data->conn && data->set.connect_only) {
@@ -1175,7 +1187,9 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
 
   /* Not RAW mode, buf we do the frame encoding */
   space = Curl_bufq_space(&ws->sendbuf);
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu), sendbuf=%zu space_left=%zu",
+  CURL_TRC_WS(data, "curl_ws_send(len=%" CURL_FORMAT_SIZE_T ")"
+                    ", sendbuf=%" CURL_FORMAT_SIZE_T
+                    " space_left=%" CURL_FORMAT_SIZE_T,
               buflen, Curl_bufq_len(&ws->sendbuf), space);
   if(space < 14) {
     result = CURLE_AGAIN;
@@ -1192,8 +1206,9 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
     }
     else {
       if((curl_off_t)buflen > ws->enc.payload_remain) {
-        infof(data, "WS: unaligned frame size (sending %zu instead of %"
-                    CURL_FORMAT_CURL_OFF_T ")",
+        infof(data, "WS: unaligned frame size (sending "
+                    "%" CURL_FORMAT_SIZE_T " instead of "
+                    "%" CURL_FORMAT_CURL_OFF_T ")",
               buflen, ws->enc.payload_remain);
       }
     }
@@ -1258,8 +1273,9 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   }
 
 out:
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" CURL_FORMAT_CURL_OFF_T
-              ", flags=%x, raw=%d) -> %d, %zu",
+  CURL_TRC_WS(data, "curl_ws_send(len=%" CURL_FORMAT_SIZE_T
+                    ", fragsize=%" CURL_FORMAT_CURL_OFF_T
+                    ", flags=%x, raw=%d) -> %d, %" CURL_FORMAT_SIZE_T,
               buflen, fragsize, flags, data->set.ws_raw_mode, result, *sent);
   return result;
 }
