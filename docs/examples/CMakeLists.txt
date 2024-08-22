@@ -36,7 +36,7 @@ foreach(_example IN LISTS check_PROGRAMS)
   endif()
   if(MINGW)
     # For mingw-w64 7.0.0 and earlier to avoid '-Wformat='
-    set_property(TARGET ${_test_target} APPEND PROPERTY COMPILE_DEFINITIONS "__USE_MINGW_ANSI_STDIO=1")
+    set_property(TARGET ${_example_target} APPEND PROPERTY COMPILE_DEFINITIONS "__USE_MINGW_ANSI_STDIO=1")
   endif()
   set_target_properties(${_example_target} PROPERTIES
     OUTPUT_NAME "${_example}" UNITY_BUILD OFF)
