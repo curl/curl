@@ -36,6 +36,9 @@
    functions while they still are offered publicly. They will be made library-
    private one day */
 
+/* map standard printf functions to curl implementations */
+#include "curl_printf.h"
+
 #include "strcase.h"
 /* "strcase.h" provides the strcasecompare protos */
 
@@ -76,26 +79,5 @@
    curlx_strncasecompare
 
 */
-
-/* We define all "standard" printf() functions to use the curlx_* version
-   instead. It makes the source code transparent and easier to
-   understand/patch. Undefine them first. */
-# undef printf
-# undef fprintf
-# undef msnprintf
-# undef vprintf
-# undef vfprintf
-# undef mvsnprintf
-# undef aprintf
-# undef vaprintf
-
-# define printf curl_mprintf
-# define fprintf curl_mfprintf
-# define msnprintf curl_msnprintf
-# define vprintf curl_mvprintf
-# define vfprintf curl_mvfprintf
-# define mvsnprintf curl_mvsnprintf
-# define aprintf curl_maprintf
-# define vaprintf curl_mvaprintf
 
 #endif /* HEADER_CURL_CURLX_H */
