@@ -1114,9 +1114,6 @@ if(CURL_USE_GSSAPI)
 
   set(HAVE_GSSAPI ${GSS_FOUND})
   if(GSS_FOUND)
-
-    message(STATUS "Found ${GSS_FLAVOUR} GSSAPI version: \"${GSS_VERSION}\"")
-
     list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIRS})
 
     string(REPLACE ";" " " GSS_CFLAGS "${GSS_CFLAGS}")
