@@ -31,6 +31,7 @@
 #include "psl.h"
 #include "vtls/vtls.h"
 #include "hsts.h"
+#include "url.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -120,7 +121,8 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(Curl_conncache_init(&share->conn_cache, NULL, share, 103))
+      if(Curl_conncache_init(&share->conn_cache, Curl_on_disconnect,
+                             NULL, share, 103))
         res = CURLSHE_NOMEM;
       break;
 

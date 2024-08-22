@@ -615,8 +615,8 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
  * This function MUST NOT reset state in the Curl_easy struct if that
  * is not strictly bound to the life-time of *this* particular connection.
  */
-void Curl_disconnect(struct Curl_easy *data,
-                     struct connectdata *conn, bool aborted)
+bool Curl_on_disconnect(struct Curl_easy *data,
+                        struct connectdata *conn, bool aborted)
 {
   /* there must be a connection to close */
   DEBUGASSERT(conn);
@@ -634,15 +634,6 @@ void Curl_disconnect(struct Curl_easy *data,
          CURL_FORMAT_CURL_OFF_T ", aborted=%d)",
          conn->connection_id, aborted));
 
-  /*
-   * If this connection is not marked to force-close, leave it open if there
-   * are other users of it
-   */
-  if(CONN_INUSE(conn) && !aborted) {
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %zu", CONN_INUSE(conn)));
-    return;
-  }
-
   if(conn->dns_entry)
     Curl_resolv_unlink(data, &conn->dns_entry);
 
@@ -656,7 +647,7 @@ void Curl_disconnect(struct Curl_easy *data,
     /* treat the connection as aborted in CONNECT_ONLY situations */
     aborted = TRUE;
 
-  Curl_conncache_disconnect(data, conn, aborted);
+  return aborted;
 }
 
 /*
@@ -1179,8 +1170,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   }
   else if(Curl_conn_seems_dead(conn, data, NULL)) {
     /* removed and disconnect. Do not treat as aborted. */
-    Curl_conncache_remove_conn(data, conn, FALSE);
-    Curl_disconnect(data, conn, FALSE);
+    Curl_ccache_disconnect(data, conn, FALSE);
     return FALSE;
   }
 
@@ -3538,32 +3528,24 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
       connections_available = FALSE;
-    else if((max_host_connections > 0) &&
-            !Curl_conncache_shrink_bundle(data, conn, max_host_connections)) {
+    else if(!Curl_conncache_may_add_conn(data, conn, max_host_connections)) {
       infof(data, "No more connections allowed to host: %zu",
             max_host_connections);
       connections_available = FALSE;
     }
 
     if(connections_available &&
-       (max_total_connections > 0) &&
-       (Curl_conncache_get_conn_count(data) >= max_total_connections)) {
-      struct connectdata *oldest_idle;
-
-      /* The cache is full. Let's see if we can kill a connection. */
-      oldest_idle = Curl_conncache_remove_oldest_idle(data);
-      if(oldest_idle)
-        Curl_disconnect(data, oldest_idle, FALSE);
-      else
+       !Curl_conncache_may_add(data, max_total_connections)) {
+      /* The cache is full. */
 #ifndef CURL_DISABLE_DOH
-        if(data->set.dohfor_mid >= 0)
-          infof(data, "Allowing DoH to override max connection limit");
-        else
+      if(data->set.dohfor_mid >= 0)
+        infof(data, "Allowing DoH to override max connection limit");
+      else
 #endif
-        {
-          infof(data, "No connections available in cache");
-          connections_available = FALSE;
-        }
+      {
+        infof(data, "No connections available in cache");
+        connections_available = FALSE;
+      }
     }
 
     if(!connections_available) {
@@ -3727,8 +3709,7 @@ CURLcode Curl_connect(struct Curl_easy *data,
     /* We are not allowed to return failure with memory left allocated in the
        connectdata struct, free those here */
     Curl_detach_connection(data);
-    Curl_conncache_remove_conn(data, conn, TRUE);
-    Curl_disconnect(data, conn, TRUE);
+    Curl_ccache_disconnect(data, conn, TRUE);
   }
 
   return result;

@@ -411,7 +411,8 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
   Curl_hash_init(&multi->proto_hash, 23,
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
-  if(Curl_conncache_init(&multi->conn_cache, multi, NULL, chashsize))
+  if(Curl_conncache_init(&multi->conn_cache, Curl_on_disconnect,
+                         multi, NULL, chashsize))
     goto error;
 
   Curl_llist_init(&multi->msglist, NULL);
@@ -575,7 +576,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   connc = Curl_get_conncache(data);
   DEBUGASSERT(connc);
   if(connc)
-    Curl_conncache_init_data(connc, data);
+    Curl_conncache_xfer_init(connc, data);
 
   multi_warn_debug(multi, data);
 
@@ -599,11 +600,7 @@ static void debug_print_sock_hash(void *p)
 #endif
 
 struct multi_done_ctx {
-  curl_off_t conn_id;
-  char buffer[256];
   BIT(premature);
-  BIT(do_disconnect);
-  BIT(now_idle);
 };
 
 static void multi_done_locked(struct connectdata *conn,
@@ -623,6 +620,7 @@ static void multi_done_locked(struct connectdata *conn,
   }
 
   data->state.done = TRUE; /* called just now! */
+  data->state.recent_conn_id = conn->connection_id;
 
   if(conn->dns_entry)
     Curl_resolv_unlink(data, &conn->dns_entry); /* done with this */
@@ -643,7 +641,6 @@ static void multi_done_locked(struct connectdata *conn,
      but currently we have no such detail knowledge.
   */
 
-  data->state.recent_conn_id = mdctx->conn_id;
   if((data->set.reuse_forbid
 #if defined(USE_NTLM)
       && !(conn->http_ntlm_state == NTLMSTATE_TYPE2 ||
@@ -658,28 +655,32 @@ static void multi_done_locked(struct connectdata *conn,
     DEBUGF(infof(data, "multi_done, not reusing connection=%"
                        CURL_FORMAT_CURL_OFF_T ", forbid=%d"
                        ", close=%d, premature=%d, conn_multiplex=%d",
-                 mdctx->conn_id, data->set.reuse_forbid,
+                 conn->connection_id, data->set.reuse_forbid,
                  conn->bits.close, mdctx->premature,
                  Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
     connclose(conn, "disconnecting");
-    Curl_conncache_remove_conn(data, conn, FALSE);
-    mdctx->do_disconnect = TRUE;
+    Curl_ccache_disconnect(data, conn, mdctx->premature);
   }
   else {
-    const char *host =
+    /* the connection is no longer in use by any transfer */
+    if(Curl_conncache_conn_is_idle(data, conn)) {
+      /* connection kept in the cache */
+      const char *host =
 #ifndef CURL_DISABLE_PROXY
-      conn->bits.socksproxy ?
-      conn->socks_proxy.host.dispname :
-      conn->bits.httpproxy ? conn->http_proxy.host.dispname :
+        conn->bits.socksproxy ?
+        conn->socks_proxy.host.dispname :
+        conn->bits.httpproxy ? conn->http_proxy.host.dispname :
 #endif
-      conn->bits.conn_to_host ? conn->conn_to_host.dispname :
-      conn->host.dispname;
-    /* create string before returning the connection */
-    msnprintf(mdctx->buffer, sizeof(mdctx->buffer),
-              "Connection #%" CURL_FORMAT_CURL_OFF_T " to host %s left intact",
-              mdctx->conn_id, host);
-    /* the connection is no longer in use by this transfer */
-    mdctx->now_idle = TRUE;
+        conn->bits.conn_to_host ? conn->conn_to_host.dispname :
+        conn->host.dispname;
+      data->state.lastconnect_id = conn->connection_id;
+      infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
+            " to host %s left intact", conn->connection_id, host);
+    }
+    else {
+      /* connection was removed from the cache and destroyed. */
+      data->state.lastconnect_id = -1;
+    }
   }
 }
 
@@ -693,8 +694,6 @@ static CURLcode multi_done(struct Curl_easy *data,
   struct multi_done_ctx mdctx;
 
   memset(&mdctx, 0, sizeof(mdctx));
-  mdctx.conn_id = conn->connection_id;
-  mdctx.premature = premature;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
   DEBUGF(infof(data, "multi_done[%s]: status: %d prem: %d done: %d",
@@ -759,22 +758,8 @@ static CURLcode multi_done(struct Curl_easy *data,
 
   /* Under the potential connection cache's share lock, decide what to
    * do with the transfer's connection. */
+  mdctx.premature = premature;
   Curl_conncache_do_locked(data, data->conn, multi_done_locked, &mdctx);
-
-  if(mdctx.do_disconnect)
-    Curl_disconnect(data, conn, premature);
-  else if(mdctx.now_idle) {
-    if(Curl_conncache_conn_is_idle(data, conn)) {
-      /* connection kept in the cache */
-      data->state.lastconnect_id = mdctx.conn_id;
-      data->state.recent_conn_id = mdctx.conn_id;
-      infof(data, "%s", mdctx.buffer);
-    }
-    else {
-      /* connection was removed from the cache and destroyed. */
-      data->state.lastconnect_id = -1;
-    }
-  }
 
   return result;
 }
@@ -886,8 +871,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
     curl_socket_t s;
     s = Curl_getconnectinfo(data, &c);
     if((s != CURL_SOCKET_BAD) && c) {
-      Curl_conncache_remove_conn(data, c, TRUE);
-      Curl_disconnect(data, c, TRUE);
+      Curl_ccache_disconnect(data, c, TRUE);
     }
   }
 
@@ -2596,12 +2580,7 @@ statemachine_end:
                We do not have to do this in every case block above where a
                failure is detected */
             Curl_detach_connection(data);
-
-            /* remove connection from cache */
-            Curl_conncache_remove_conn(data, conn, TRUE);
-
-            /* disconnect properly */
-            Curl_disconnect(data, conn, dead_connection);
+            Curl_ccache_disconnect(data, conn, dead_connection);
           }
         }
         else if(data->mstate == MSTATE_CONNECT) {

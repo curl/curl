@@ -38,8 +38,6 @@ run 1: foobar and so on fun!
 <- Mutex unlock CONNECT
 -> Mutex lock CONNECT
 <- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
 -> Mutex lock SHARE
 <- Mutex unlock SHARE
 -> Mutex lock SHARE
@@ -55,8 +53,6 @@ run 1: foobar and so on fun!
 <- Mutex unlock CONNECT
 -> Mutex lock CONNECT
 <- Mutex unlock CONNECT
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
 -> Mutex lock SHARE
 <- Mutex unlock SHARE
 -> Mutex lock SHARE
@@ -68,8 +64,6 @@ run 1: foobar and so on fun!
 -> Mutex lock CONNECT
 <- Mutex unlock CONNECT
 run 1: foobar and so on fun!
--> Mutex lock CONNECT
-<- Mutex unlock CONNECT
 -> Mutex lock CONNECT
 <- Mutex unlock CONNECT
 -> Mutex lock CONNECT

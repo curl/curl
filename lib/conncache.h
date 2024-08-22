@@ -35,6 +35,7 @@
 #include "timeval.h"
 
 struct connectdata;
+struct Curl_easy;
 struct curl_pollfds;
 struct curl_waitfds;
 struct Curl_multi;
@@ -44,6 +45,18 @@ struct connshutdowns {
   struct Curl_llist conn_list;  /* The connectdata to shut down */
   BIT(iter_locked);  /* TRUE while iterating the list */
 };
+
+/**
+ * Callback invoked when disconnecting connections.
+ * @param data    transfer last handling the connection, not attached
+ * @param conn    the connection to discard
+ * @param aborted if the connection is being aborted
+ * @return if the connection is being aborted, e.g. should NOT perform
+ *         a shutdown and just close.
+ **/
+typedef bool Curl_conncache_disconnect_cb(struct Curl_easy *data,
+                                          struct connectdata *conn,
+                                          bool aborted);
 
 struct conncache {
    /* the live connections, aggregated by bundle, hostname+port+etc as key */
@@ -57,23 +70,24 @@ struct conncache {
   struct Curl_easy *closure_handle;
   struct Curl_multi *multi; /* != NULL iff cache belongs to multi */
   struct Curl_share *share; /* != NULL iff cache belongs to share */
-#ifdef DEBUGBUILD
+  Curl_conncache_disconnect_cb *disconnect_cb;
   BIT(locked);
-#endif
 };
 
 /* Init the cache, pass multi only if cache is owned by it.
  * returns 1 on error, 0 is fine.
  */
 int Curl_conncache_init(struct conncache *,
+                        Curl_conncache_disconnect_cb *disconnect_cb,
                         struct Curl_multi *multi,
                         struct Curl_share *share,
                         size_t size);
+/* Destroy all connections and free all members */
 void Curl_conncache_destroy(struct conncache *connc);
 
 /* Init the transfer to be used with the conncache.
  * Assigns `data->id`. */
-void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data);
+void Curl_conncache_xfer_init(struct conncache *connc, struct Curl_easy *data);
 
 /* Return the conncache instance used by `data`.
  * May return NULL for transfers without share or multi handles.
@@ -81,7 +95,42 @@ void Curl_conncache_init_data(struct conncache *connc, struct Curl_easy *data);
 struct conncache *Curl_get_conncache(struct Curl_easy *data);
 
 /* returns number of connections currently held in the connection cache */
-size_t Curl_conncache_get_conn_count(struct Curl_easy *data);
+size_t Curl_conncache_get_count(struct Curl_easy *data);
+
+/**
+ * Get the connection with the given id.
+ * WARNING: this is not safe in shared connection caches, as the
+ * connection may be discarded by other actions.
+ */
+struct connectdata *Curl_conncache_get_conn(struct conncache *connc,
+                                            curl_off_t conn_id);
+
+CURLcode Curl_conncache_add_conn(struct Curl_easy *data,
+                                 struct connectdata *conn) WARN_UNUSED_RESULT;
+
+void Curl_conncache_remove_conn(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                bool lock);
+
+/**
+ * Return if the pool can add another connection to the conn's
+ * destination, observing the limit of `max_pre_dest` (0 == no limit).
+ *
+ * If the limit is exceeded, the pool will try to discard the oldest, idle
+ * connections to make space.
+ */
+bool Curl_conncache_may_add_conn(struct Curl_easy *data,
+                                 struct connectdata *conn,
+                                 size_t max_per_dest);
+
+/**
+ * Return if the poll can add another connection, observing the
+ * overall limit of `max_total` (0 == no limit).
+ *
+ * If the limit is exceeded, the pool will try to discard oldest, idle
+ * connections to make space.
+ */
+bool Curl_conncache_may_add(struct Curl_easy *data, size_t max_total);
 
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_conncache_conn_match_cb(struct connectdata *conn,
@@ -109,15 +158,6 @@ bool Curl_conncache_find_conn(struct Curl_easy *data,
                               Curl_conncache_done_match_cb *done_cb,
                               void *userdata);
 
-/* Shrink the cache's bundle for `conn` to have less than
- * `max_host_connections` (if the bundle exists).
- * Returns FALSE iff the limit could not be enforced, e.g. there is a
- * bundle and none of its connections could be discarded.
- */
-bool Curl_conncache_shrink_bundle(struct Curl_easy *data,
-                                  struct connectdata *conn,
-                                  size_t max_host_connections);
-
 /*
  * A connection (already in the cache) has become idle. Do any
  * cleanups in regard to the cache's limits.
@@ -127,28 +167,30 @@ bool Curl_conncache_shrink_bundle(struct Curl_easy *data,
 bool Curl_conncache_conn_is_idle(struct Curl_easy *data,
                                  struct connectdata *conn);
 
-CURLcode Curl_conncache_add_conn(struct Curl_easy *data,
-                                 struct connectdata *conn) WARN_UNUSED_RESULT;
-
-void Curl_conncache_remove_conn(struct Curl_easy *data,
-                                struct connectdata *conn,
-                                bool lock);
+/**
+ * Remove the connection from the pool and tear it down.
+ * If `aborted` is FALSE, the connection will be shut down first
+ * before closing and destroying it.
+ * If the shutdown is not immediately complete, the connection
+ * will be placed into the pool's shutdown queue.
+ */
+void Curl_ccache_disconnect(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            bool aborted);
 
 /**
- * Remove the oldest, idle connection from the cache, if there is any.
- * Returns the connection removed or NULL.
+ * This function scans the data's connection cache for half-open/dead
+ * connections, closes and removes them.
+ * The cleanup is done at most once per second.
+ *
+ * When called, this transfer has no connection attached.
  */
-struct connectdata *Curl_conncache_remove_oldest_idle(struct Curl_easy *data);
+void Curl_conncache_prune_dead(struct Curl_easy *data);
 
 /**
- * Tear down the connection. If `aborted` is FALSE, the connection
- * will be shut down first before discarding. If the shutdown
- * is not immediately complete, the connection
- * will be placed into the cache is shutdown queue.
+ * Perform upkeep actions on connections in the cache.
  */
-void Curl_conncache_disconnect(struct Curl_easy *data,
-                               struct connectdata *conn,
-                               bool aborted);
+CURLcode Curl_conncache_upkeep(struct conncache *conn_cache, void *data);
 
 /**
  * Add sockets and POLLIN/OUT flags for connections handled by the cache.
@@ -166,28 +208,6 @@ void Curl_conncache_multi_perform(struct Curl_multi *multi);
 
 void Curl_conncache_multi_socket(struct Curl_multi *multi,
                                  curl_socket_t s, int ev_bitmask);
-
-/**
- * Get the connection with the given id.
- * WARNING: this is not safe in shared connection caches, as the
- * connection may be discarded by other actions.
- */
-struct connectdata *Curl_conncache_get_conn(struct conncache *connc,
-                                            curl_off_t conn_id);
-
-/**
- * This function scans the data's connection cache for half-open/dead
- * connections, closes and removes them.
- * The cleanup is done at most once per second.
- *
- * When called, this transfer has no connection attached.
- */
-void Curl_conncache_prune_dead(struct Curl_easy *data);
-
-/**
- * Perform upkeep actions on connections in the cache.
- */
-CURLcode Curl_conncache_upkeep(struct conncache *conn_cache, void *data);
 
 typedef void Curl_conncache_conn_do_cb(struct connectdata *conn,
                                        struct Curl_easy *data,
