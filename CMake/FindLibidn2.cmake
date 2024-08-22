@@ -33,6 +33,8 @@
 # LIBIDN2_FOUND         System has libidn2
 # LIBIDN2_INCLUDE_DIRS  The libidn2 include directories
 # LIBIDN2_LIBRARIES     The libidn2 library names
+# LIBIDN2_LIBRARY_DIRS  The libidn2 library directories
+# LIBIDN2_CFLAGS        Required compiler flags
 # LIBIDN2_VERSION       Version of libidn2
 
 if(CURL_USE_PKGCONFIG AND
