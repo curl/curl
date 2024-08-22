@@ -4,7 +4,7 @@
 
 name: Linux AWS-LC
 
-on:
+'on':
   push:
     branches:
       - master

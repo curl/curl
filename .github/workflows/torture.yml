@@ -4,7 +4,7 @@
 
 name: Linux torture
 
-on:
+'on':
   push:
     branches:
       - master

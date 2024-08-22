@@ -4,7 +4,7 @@
 
 name: Cygwin
 
-on:
+'on':
   push:
     branches:
       - master

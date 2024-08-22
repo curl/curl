@@ -4,7 +4,7 @@
 
 name: Windows
 
-on:
+'on':
   push:
     branches:
       - master

@@ -4,7 +4,7 @@
 
 name: Linux
 
-on:
+'on':
   push:
     branches:
       - master

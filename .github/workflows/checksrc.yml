@@ -6,7 +6,7 @@
 
 name: Source
 
-on:
+'on':
   push:
     branches:
       - master
@@ -83,6 +83,9 @@ jobs:
 
       - name: spacecheck
         run: .github/scripts/spacecheck.pl
+
+      - name: yamlcheck
+        run: .github/scripts/yamlcheck.sh
 
       - name: binarycheck
         run: .github/scripts/binarycheck.pl

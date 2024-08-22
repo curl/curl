@@ -7,7 +7,7 @@
 
 name: Docs
 
-on:
+'on':
   push:
     branches:
       - master
