@@ -26,24 +26,24 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-foreach(_test_name IN LISTS check_PROGRAMS)
-  set(_test_target "curl-test-client-${_test_name}")
-  add_executable(${_test_target} EXCLUDE_FROM_ALL "${_test_name}.c")
-  add_dependencies(testdeps ${_test_target})
-  target_include_directories(${_test_target} PRIVATE
+foreach(_target IN LISTS check_PROGRAMS)
+  set(_target_name "curl-test-client-${_target}")
+  add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c")
+  add_dependencies(testdeps ${_target_name})
+  target_include_directories(${_target_name} PRIVATE
     "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
     "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
   )
-  target_link_libraries(${_test_target} ${LIB_SELECTED} ${CURL_LIBS})
-  target_compile_definitions(${_test_target} PRIVATE "CURL_NO_OLDIES")
+  target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
+  target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES")
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
-    set_property(TARGET ${_test_target} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
   if(MINGW)
     # For mingw-w64 7.0.0 and earlier to avoid '-Wformat='
-    set_property(TARGET ${_test_target} APPEND PROPERTY COMPILE_DEFINITIONS "__USE_MINGW_ANSI_STDIO=1")
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "__USE_MINGW_ANSI_STDIO=1")
   endif()
-  set_target_properties(${_test_target} PROPERTIES
-    OUTPUT_NAME "${_test_name}" UNITY_BUILD OFF
-    PROJECT_LABEL "Test client ${_test_target}")
+  set_target_properties(${_target_name} PROPERTIES
+    OUTPUT_NAME "${_target}" UNITY_BUILD OFF
+    PROJECT_LABEL "Test client ${_target}")
 endforeach()

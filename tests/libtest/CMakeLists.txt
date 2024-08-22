@@ -21,40 +21,37 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-function(setup_test _test_name)  # ARGN are the files in the test
-
-  if(LIB_SELECTED STREQUAL LIB_STATIC)
-    # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
-  endif()
-
-  add_executable(${_test_name} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${_test_name})
-  string(TOUPPER ${_test_name} _upper_test_name)
-
-  include_directories(
-    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
-    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
-    "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
-  )
-
-  target_link_libraries(${_test_name} ${LIB_SELECTED} ${CURL_LIBS})
-
-  set_target_properties(${_test_name} PROPERTIES
-    COMPILE_DEFINITIONS ${_upper_test_name}
-    PROJECT_LABEL "Test ${_test_name}")
-endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES', WARNLESS, MULTIBYTE, TIMEDIFF variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-foreach(_test_name IN LISTS noinst_PROGRAMS)
-  if(DEFINED ${_test_name}_SOURCES)
-    setup_test(${_test_name} ${${_test_name}_SOURCES})
+foreach(_target IN LISTS noinst_PROGRAMS)
+  if(DEFINED ${_target}_SOURCES)
+    set(_sources ${${_target}_SOURCES})
   else()
-    setup_test(${_test_name} ${nodist_${_test_name}_SOURCES})
+    set(_sources ${nodist_${_target}_SOURCES})
   endif()
+
+  if(LIB_SELECTED STREQUAL LIB_STATIC)
+    # These are part of the libcurl static lib. Do not compile/link them again.
+    list(REMOVE_ITEM _sources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
+  endif()
+
+  string(TOUPPER ${_target} _upper_target)
+  set(_target_name "curl-test-${_target}")
+  add_executable(${_target_name} EXCLUDE_FROM_ALL ${_sources})
+  add_dependencies(testdeps ${_target_name})
+  target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
+  target_include_directories(${_target_name} PRIVATE
+    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
+  )
+  set_target_properties(${_target_name} PROPERTIES
+    COMPILE_DEFINITIONS ${_upper_target}
+    OUTPUT_NAME "${_target}"
+    PROJECT_LABEL "Test libtest ${_target}")
 endforeach()
 
 # Allows for hostname override to make tests machine independent.
@@ -62,6 +59,10 @@ endforeach()
 if(NOT WIN32)
   add_library(hostname MODULE EXCLUDE_FROM_ALL "sethostname.c")
   add_dependencies(testdeps hostname)
+  target_include_directories(hostname PRIVATE
+    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
+  )
   # Output to .libs for compatibility with autotools, the test data expects a
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES

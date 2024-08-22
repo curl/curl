@@ -26,17 +26,18 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-include_directories(
-  "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
-  "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
-  "${CURL_SOURCE_DIR}/src"
-  "${CURL_SOURCE_DIR}/tests/libtest"
-)
-
-foreach(_test_name IN LISTS UNITPROGS)
-  add_executable(${_test_name} EXCLUDE_FROM_ALL "${_test_name}.c" ${UNITFILES})
-  add_dependencies(testdeps ${_test_name})
-  target_link_libraries(${_test_name} curltool curlu)
-  set_target_properties(${_test_name} PROPERTIES
-    PROJECT_LABEL "Test unit ${_test_name}")
+foreach(_target IN LISTS UNITPROGS)
+  set(_target_name "curl-test-${_target}")
+  add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c" ${UNITFILES})
+  add_dependencies(testdeps ${_target_name})
+  target_link_libraries(${_target_name} curltool curlu)
+  target_include_directories(${_target_name} PRIVATE
+    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${CURL_SOURCE_DIR}/src"
+    "${CURL_SOURCE_DIR}/tests/libtest"
+  )
+  set_target_properties(${_target_name} PROPERTIES
+    OUTPUT_NAME "${_target}"
+    PROJECT_LABEL "Test unit ${_target}")
 endforeach()
