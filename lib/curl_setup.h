@@ -508,7 +508,7 @@
 #if SIZEOF_CURL_SOCKET_T < 8
 #  define CURL_FORMAT_SOCKET_T "d"
 #elif defined(__MINGW32__)
-#  define CURL_FORMAT_SOCKET_T "zd"
+#  define CURL_FORMAT_SOCKET_T CURL_FORMAT_CURL_OFF_T
 #else
 #  define CURL_FORMAT_SOCKET_T "qd"
 #endif
