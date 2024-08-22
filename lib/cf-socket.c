@@ -1483,7 +1483,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     unsigned char c = 0;
     Curl_rand_bytes(data, FALSE, &c, 1);
     if(c >= ((100-ctx->wblock_percent)*256/100)) {
-      CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE EWOULDBLOCK", orig_len);
+      CURL_TRC_CF(data, cf, "send(len=%" CURL_FORMAT_SIZE_T ") "
+                  "SIMULATE EWOULDBLOCK", orig_len);
       *err = CURLE_AGAIN;
       nwritten = -1;
       cf->conn->sock[cf->sockindex] = fdsave;
@@ -1494,7 +1495,8 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     len = len * ctx->wpartial_percent / 100;
     if(!len)
       len = 1;
-    CURL_TRC_CF(data, cf, "send(len=%zu) SIMULATE partial write of %zu bytes",
+    CURL_TRC_CF(data, cf, "send(len=%" CURL_FORMAT_SIZE_T ") "
+                "SIMULATE partial write of %" CURL_FORMAT_SIZE_T " bytes",
                 orig_len, len);
   }
 #endif
