@@ -33,6 +33,8 @@
 # LIBGSASL_FOUND         System has libgsasl
 # LIBGSASL_INCLUDE_DIRS  The libgsasl include directories
 # LIBGSASL_LIBRARIES     The libgsasl library names
+# LIBGSASL_LIBRARY_DIRS  The libgsasl library directories
+# LIBGSASL_CFLAGS        Required compiler flags
 # LIBGSASL_VERSION       Version of libgsasl
 
 if(CURL_USE_PKGCONFIG AND
