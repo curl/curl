@@ -28,10 +28,10 @@
 prefix="@prefix@"
 # Used in @libdir@
 # shellcheck disable=SC2034
-exec_prefix=@exec_prefix@
+exec_prefix="@exec_prefix@"
 # shellcheck disable=SC2034
-includedir=@includedir@
-cppflag_curl_staticlib=@LIBCURL_PC_CFLAGS@
+includedir="@includedir@"
+cppflag_curl_staticlib='@LIBCURL_PC_CFLAGS@'
 
 usage()
 {
