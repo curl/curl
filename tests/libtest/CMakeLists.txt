@@ -59,7 +59,7 @@ endforeach()
 if(NOT WIN32)
   add_library(hostname MODULE EXCLUDE_FROM_ALL "sethostname.c")
   add_dependencies(testdeps hostname)
-  target_include_directories(${_target_name} PRIVATE
+  target_include_directories(hostname PRIVATE
     "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
     "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
   )
