@@ -86,7 +86,9 @@ message(STATUS "CMake platform flags:${_flags}")
 unset(_flags)
 
 if(CMAKE_CROSSCOMPILING)
-  message(STATUS "Cross-compiling: ${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> ${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
+  message(STATUS "Cross-compiling: "
+    "${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> "
+    "${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
 endif()
 
 function(curl_dumpvars)  # Dump all defined variables with their values
