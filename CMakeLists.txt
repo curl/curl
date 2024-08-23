@@ -1953,12 +1953,8 @@ if(NOT CURL_DISABLE_INSTALL)
 
   set(LIBCURL_PC_LIBS_PRIVATE "")
 
-  # For processing full path libraries into -L and -l ld options,
-  # the directories that go with the -L option are cached, so they
-  # only get added once per such directory.
+  # Avoid getting unnecessary -L options for known system directories.
   unset(_sys_libdirs)
-  # To avoid getting unnecessary -L options for known system directories,
-  # _sys_libdirs is seeded with them.
   foreach(_libdir IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
     if(_libdir MATCHES "/$")
       set(_libdir "${_libdir}lib")
