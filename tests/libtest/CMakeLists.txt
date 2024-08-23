@@ -21,29 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-function(setup_test _target)  # ARGN are the files in the test
-
-  if(LIB_SELECTED STREQUAL LIB_STATIC)
-    # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM ARGN ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
-  endif()
-
-  add_executable(${_target} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${_target})
-  string(TOUPPER ${_target} _upper_target)
-
-  include_directories(
-    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
-    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
-    "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
-  )
-
-  target_link_libraries(${_target} ${LIB_SELECTED} ${CURL_LIBS})
-
-  set_target_properties(${_target} PROPERTIES
-    COMPILE_DEFINITIONS ${_upper_target}
-    PROJECT_LABEL "Test ${_target}")
-endfunction()
 
 # Get 'noinst_PROGRAMS', '*_SOURCES', WARNLESS, MULTIBYTE, TIMEDIFF variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
@@ -51,10 +28,30 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_target IN LISTS noinst_PROGRAMS)
   if(DEFINED ${_target}_SOURCES)
-    setup_test(${_target} ${${_target}_SOURCES})
+    set(_sources ${${_target}_SOURCES})
   else()
-    setup_test(${_target} ${nodist_${_target}_SOURCES})
+    set(_sources ${nodist_${_target}_SOURCES})
   endif()
+
+  if(LIB_SELECTED STREQUAL LIB_STATIC)
+    # These are part of the libcurl static lib. Do not compile/link them again.
+    list(REMOVE_ITEM _sources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
+  endif()
+
+  string(TOUPPER ${_target} _upper_target)
+  set(_target_name "curl-test-${_target}")
+  add_executable(${_target_name} EXCLUDE_FROM_ALL ${_sources})
+  add_dependencies(testdeps ${_target_name})
+  target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
+  include_directories(
+    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
+  )
+  set_target_properties(${_target_name} PROPERTIES
+    COMPILE_DEFINITIONS ${_upper_target}
+    OUTPUT_NAME "${_target}"
+    PROJECT_LABEL "Test ${_target}")
 endforeach()
 
 # Allows for hostname override to make tests machine independent.
