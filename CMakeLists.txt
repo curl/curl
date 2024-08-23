@@ -2000,8 +2000,8 @@ if(NOT CURL_DISABLE_INSTALL)
     elseif(_lib MATCHES ".*/.*")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
-      string(REGEX REPLACE "^(.*)/[^/]*$" "\\1" _libdir "${_lib}")
-      string(REGEX REPLACE "^.*/([^/.]*).*$" "\\1" _libname "${_lib}")
+      get_filename_component(_libdir ${_lib} DIRECTORY)
+      get_filename_component(_libname ${_lib} NAME_WE)
       if(_libname MATCHES "^lib")
         list(FIND _libcurl_libs_dirs "${_libdir}" _libdir_index)
         if(_libdir_index LESS 0)
