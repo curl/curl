@@ -20,7 +20,7 @@ manpage](https://curl.se/libcurl/c/libcurl.html) to learn how.
 
 ## Open Source
 
-curl is Open Source and distributed under an MIT-like
+curl is Open Source and is distributed under an MIT-like
 [license](https://curl.se/docs/copyright.html).
 
 ## Contact
