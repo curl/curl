@@ -1991,7 +1991,23 @@ nomem:
         /* Skip hostname check, it is allowed to be empty. */
       }
       else {
-        if(!n || hostname_check(u, (char *)newp, n)) {
+        bool bad = FALSE;
+        if(!n)
+          bad = TRUE; /* empty hostname is not okay */
+        else if(!urlencode) {
+          /* if the host name part was not URL encoded here, it was set ready
+             URL encoded so we need to decode it to check */
+          size_t dlen;
+          char *decoded = NULL;
+          CURLcode result =
+            Curl_urldecode(newp, n, &decoded, &dlen, REJECT_CTRL);
+          if(result || hostname_check(u, decoded, dlen))
+            bad = TRUE;
+          free(decoded);
+        }
+        else if(hostname_check(u, (char *)newp, n))
+          bad = TRUE;
+        if(bad) {
           Curl_dyn_free(&enc);
           return CURLUE_BAD_HOSTNAME;
         }
