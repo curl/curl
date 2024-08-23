@@ -85,6 +85,10 @@ endif()
 message(STATUS "CMake platform flags:${_flags}")
 set(_flags)
 
+if(CMAKE_CROSSCOMPILING)
+  message(STATUS "Cross-compiling: ${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> ${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
+endif()
+
 function(curl_dumpvars)  # Dump all defined variables with their values
   message("::group::CMake Variable Dump")
   get_cmake_property(_vars VARIABLES)
