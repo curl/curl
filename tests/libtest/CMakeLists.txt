@@ -51,7 +51,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   set_target_properties(${_target_name} PROPERTIES
     COMPILE_DEFINITIONS ${_upper_target}
     OUTPUT_NAME "${_target}"
-    PROJECT_LABEL "Test ${_target}")
+    PROJECT_LABEL "Test libtest ${_target}")
 endforeach()
 
 # Allows for hostname override to make tests machine independent.
