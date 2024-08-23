@@ -341,6 +341,65 @@ jobs:
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
+  linux_cross_mingw64:
+    name: 'linux -> mingw-w64'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false
+      matrix:
+        build: [autotools, cmake]
+        compiler: [gcc]
+    env:
+      TRIPLET: 'x86_64-w64-mingw32'
+    steps:
+      - name: 'install packages'
+        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: 'autotools autoreconf'
+        if: ${{ matrix.build == 'autotools' }}
+        run: autoreconf -fi
+
+      - name: 'autotools configure'
+        if: ${{ matrix.build == 'autotools' }}
+        run: |
+          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+            --host=${TRIPLET} \
+            --without-libpsl \
+            --disable-dependency-tracking
+
+      - name: 'autotools configure log'
+        if: ${{ matrix.build == 'autotools' && !cancelled() }}
+        run: cat bld/config.log 2>/dev/null || true
+
+      - name: 'autotools build'
+        if: ${{ matrix.build == 'autotools' }}
+        run: |
+          make -C bld -j5
+          make -C bld -j5 examples
+
+      - name: 'cmake configure'
+        if: ${{ matrix.build == 'cmake' }}
+        run: |
+          cmake -B bld \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
+            -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
+            -DCMAKE_UNITY_BUILD=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DCURL_USE_LIBPSL=OFF
+
+      - name: 'cmake configure log'
+        if: ${{ matrix.build == 'cmake' && !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'cmake build'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cmake --build bld --parallel 5
+
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
