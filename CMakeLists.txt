@@ -105,6 +105,7 @@ string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" CURL_VERSION ${_curl_versi
 string(REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
 string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" CURL_VERSION_NUM ${_curl_version_h_contents})
 string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
+unset(_curl_version_h_contents)
 
 message(STATUS "curl version=[${CURL_VERSION}]")
 
