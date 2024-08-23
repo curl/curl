@@ -1680,7 +1680,7 @@ CURLcode Curl_mime_add_header(struct curl_slist **slp, const char *fmt, ...)
   va_list ap;
 
   va_start(ap, fmt);
-  s = curl_mvaprintf(fmt, ap);
+  s = vaprintf(fmt, ap);
   va_end(ap);
 
   if(s) {
