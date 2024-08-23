@@ -87,7 +87,7 @@ names named after the destination connection id (in hex). Do note that these
 files can become rather large. Works with the ngtcp2 and quiche QUIC backends.
 
 ## `SHELL`
-Used on VMS when trying to detect if using a **DCL** or a **unix** shell.
+Used on VMS when trying to detect if using a **DCL** or a **Unix** shell.
 
 ## `SSL_CERT_DIR` <dir>
 If set, it is used as the --capath value. This environment variable is ignored
@@ -101,8 +101,8 @@ if Schannel is used as the TLS backend.
 If you set this environment variable to a filename, curl stores TLS secrets
 from its connections in that file when invoked to enable you to analyze the
 TLS traffic in real time using network analyzing tools such as Wireshark. This
-works with the following TLS backends: OpenSSL, libressl, BoringSSL, GnuTLS
-and wolfSSL.
+works with the following TLS backends: OpenSSL, LibreSSL (TLS 1.2 max),
+BoringSSL, GnuTLS and wolfSSL.
 
 ## `USERPROFILE` <dir>
 On Windows, this variable is used when trying to find the home directory. If

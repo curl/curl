@@ -16,9 +16,9 @@ problems may have been fixed or changed somewhat since this was written.
  1.5 Expect-100 meets 417
 
  2. TLS
- 2.1 IMAPS connection fails with rustls error
+ 2.1 IMAPS connection fails with Rustls error
  2.3 Unable to use PKCS12 certificate with Secure Transport
- 2.4 Secure Transport will not import PKCS#12 client certificates without a password
+ 2.4 Secure Transport does not import PKCS#12 client certificates without a password
  2.5 Client cert handling with Issuer DN differs between backends
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
@@ -33,14 +33,15 @@ problems may have been fixed or changed somewhat since this was written.
  3.6 POP3 issue when reading small chunks
 
  4. Command line
+ 4.1 -T /dev/stdin may upload with an incorrect content length
+ 4.2 -T - always uploads chunked
 
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
  5.3 building for old macOS fails with gcc
  5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
- 5.6 cygwin: make install installs curl-config.1 twice
- 5.9 Utilize Requires.private directives in libcurl.pc
+ 5.6 Cygwin: make install installs curl-config.1 twice
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
@@ -48,12 +49,13 @@ problems may have been fixed or changed somewhat since this was written.
  5.15 Unicode on Windows
 
  6. Authentication
- 6.1 NTLM authentication and unicode
+ 6.1 NTLM authentication and Unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with § character
  6.6 libcurl can fail to try alternatives with --proxy-any
  6.7 Do not clear digest for single realm
+ 6.8 Heimdal memory leaks
  6.9 SHA-256 digest not supported in Windows SSPI builds
  6.10 curl never completes Negotiate over HTTP
  6.11 Negotiate on Windows fails
@@ -61,12 +63,10 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
- 7.1 FTP upload fails if remembered dir is deleted
+ 7.1 FTP upload fails if remembered directory is deleted
  7.2 Implicit FTPS upload timeout
  7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
- 7.5 FTPS upload, FileZilla, GnuTLS and close_notify
- 7.11 FTPS upload data loss with TLS 1.3
  7.12 FTPS directory listing hangs on Windows with Schannel
 
  9. SFTP and SCP
@@ -74,7 +74,7 @@ problems may have been fixed or changed somewhat since this was written.
  9.2 wolfssh: publickey auth does not work
  9.3 Remote recursive folder creation with SFTP
  9.4 libssh blocking and infinite loop problem
- 9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+ 9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
  10. SOCKS
  10.3 FTPS over SOCKS
@@ -82,8 +82,11 @@ problems may have been fixed or changed somewhat since this was written.
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
  11.2 error buffer not set if connection to multiple addresses fails
+ 11.3 TFTP tests fail on OpenBSD
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
+ 11.6 test cases sometimes timeout
+ 11.8 WinIDN test failures
 
  12. LDAP
  12.1 OpenLDAP hangs after returning results
@@ -104,16 +107,19 @@ problems may have been fixed or changed somewhat since this was written.
  15.13 CMake build with MIT Kerberos does not work
 
  16. aws-sigv4
- 16.1 aws-sigv4 does not sign requests with * correctly
+ 16.2 aws-sigv4 does not handle multipart/form-data correctly
+ 16.3 aws-sigv4 has problems with particular URLs
  16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
  17. HTTP/2
  17.1 HTTP/2 prior knowledge over proxy
  17.2 HTTP/2 frames while in the connection pool kill reuse
  17.3 ENHANCE_YOUR_CALM causes infinite retries
+ 17.4 HTTP/2 + TLS spends a lot of time in recv
 
  18. HTTP/3
  18.1 connection migration does not work
+ 18.2 quiche: QUIC connection is draining
 
  19. RTSP
  19.1 Some methods do not support response bodies
@@ -137,7 +143,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 2. TLS
 
-2.1 IMAPS connection fails with rustls error
+2.1 IMAPS connection fails with Rustls error
 
  https://github.com/curl/curl/issues/10457
 
@@ -145,7 +151,7 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/5403
 
-2.4 Secure Transport will not import PKCS#12 client certificates without a password
+2.4 Secure Transport does not import PKCS#12 client certificates without a password
 
  libcurl calls SecPKCS12Import with the PKCS#12 client certificate, but that
  function rejects certificates that do not have a password.
@@ -214,6 +220,25 @@ problems may have been fixed or changed somewhat since this was written.
 
 4. Command line
 
+4.1 -T /dev/stdin may upload with an incorrect content length
+
+ -T stats the path to figure out its size in bytes to use it as Content-Length
+ if it is a regular file.
+
+ The problem with that is that, on BSDs and some other UNIXes (not Linux),
+ open(path) may not give you a file descriptor with a 0 offset from the start
+ of the file.
+
+ See https://github.com/curl/curl/issues/12177
+
+4.2 -T - always uploads chunked
+
+ When the `<` shell operator is used. curl should realise that stdin is a
+ regular file in this case, and that it can do a non-chunked upload, like it
+ would do if you used -T file.
+
+ See https://github.com/curl/curl/issues/12171
+
 5. Build and portability issues
 
 5.1 OS400 port requires deprecated IBM library
@@ -226,9 +251,9 @@ problems may have been fixed or changed somewhat since this was written.
 
 5.2 curl-config --libs contains private details
 
- "curl-config --libs" will include details set in LDFLAGS when configure is
- run that might be needed only for building libcurl. Further, curl-config
- --cflags suffers from the same effects with CFLAGS/CPPFLAGS.
+ "curl-config --libs" include details set in LDFLAGS when configure is run
+ that might be needed only for building libcurl. Further, curl-config --cflags
+ suffers from the same effects with CFLAGS/CPPFLAGS.
 
 5.3 building for old macOS fails with gcc
 
@@ -243,20 +268,16 @@ problems may have been fixed or changed somewhat since this was written.
  it can only be encoded properly in the Unicode character set. Windows uses
  UTF-16 encoding for Unicode and stores it in wide characters, however curl
  and libcurl are not equipped for that at the moment except when built with
- _UNICODE and UNICODE defined. And, except for Cygwin, Windows cannot use UTF-8
- as a locale.
+ _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as
+ a locale.
 
   https://curl.se/bug/?i=345
   https://curl.se/bug/?i=731
   https://curl.se/bug/?i=3747
 
-5.6 cygwin: make install installs curl-config.1 twice
+5.6 Cygwin: make install installs curl-config.1 twice
 
  https://github.com/curl/curl/issues/8839
-
-5.9 Utilize Requires.private directives in libcurl.pc
-
- https://github.com/curl/curl/issues/864
 
 5.11 configure --with-gssapi with Heimdal is ignored on macOS
 
@@ -295,19 +316,19 @@ problems may have been fixed or changed somewhat since this was written.
 
 5.15 Unicode on Windows
 
- Passing in a unicode filename with -o:
+ Passing in a Unicode filename with -o:
 
  https://github.com/curl/curl/issues/11461
 
- Passing in unicode character with -d:
+ Passing in Unicode character with -d:
 
  https://github.com/curl/curl/issues/12231
 
 6. Authentication
 
-6.1 NTLM authentication and unicode
+6.1 NTLM authentication and Unicode
 
- NTLM authentication involving unicode user name or password only works
+ NTLM authentication involving Unicode username or password only works
  properly if built with UNICODE defined together with the Schannel
  backend. The original problem was mentioned in:
  https://curl.se/mail/lib-2009-10/0024.html
@@ -325,8 +346,8 @@ problems may have been fixed or changed somewhat since this was written.
 6.3 NTLM in system context uses wrong name
 
  NTLM authentication using SSPI (on Windows) when (lib)curl is running in
- "system context" will make it use wrong(?) user name - at least when compared
- to what winhttp does. See https://curl.se/bug/view.cgi?id=535
+ "system context" makes it use wrong(?) username - at least when compared to
+ what winhttp does. See https://curl.se/bug/view.cgi?id=535
 
 6.5 NTLM does not support password with § character
 
@@ -335,17 +356,24 @@ problems may have been fixed or changed somewhat since this was written.
 6.6 libcurl can fail to try alternatives with --proxy-any
 
  When connecting via a proxy using --proxy-any, a failure to establish an
- authentication will cause libcurl to abort trying other options if the
- failed method has a higher preference than the alternatives. As an example,
+ authentication causes libcurl to abort trying other options if the failed
+ method has a higher preference than the alternatives. As an example,
  --proxy-any against a proxy which advertise Negotiate and NTLM, but which
- fails to set up Kerberos authentication will not proceed to try authentication
- using NTLM.
+ fails to set up Kerberos authentication does not proceed to try
+ authentication using NTLM.
 
  https://github.com/curl/curl/issues/876
 
 6.7 Do not clear digest for single realm
 
  https://github.com/curl/curl/issues/3267
+
+6.8 Heimdal memory leaks
+
+ Running test 2077 and 2078 with curl built to do GSS with Heimdal causes
+ valgrind errors (memory leak).
+
+ https://github.com/curl/curl/issues/14446
 
 6.9 SHA-256 digest not supported in Windows SSPI builds
 
@@ -382,7 +410,7 @@ problems may have been fixed or changed somewhat since this was written.
 
 7. FTP
 
-7.1 FTP upload fails if remembered dir is deleted
+7.1 FTP upload fails if remembered directory is deleted
 
  curl's FTP code assumes that the directory it entered in a previous transfer
  still exists when it comes back to do a second transfer, and does not respond
@@ -403,41 +431,16 @@ problems may have been fixed or changed somewhat since this was written.
 7.4 FTP with ACCT
 
  When doing an operation over FTP that requires the ACCT command (but not when
- logging in), the operation will fail since libcurl does not detect this and
- thus fails to issue the correct command:
- https://curl.se/bug/view.cgi?id=635
-
-7.5 FTPS upload, FileZilla, GnuTLS and close_notify
-
- An issue where curl does not send the TLS alert close_notify, which triggers
- the wrath of GnuTLS in FileZilla server, and a FTP reply 426 ECONNABORTED.
-
- https://github.com/curl/curl/issues/11383
-
-7.11 FTPS upload data loss with TLS 1.3
-
- During FTPS upload curl does not attempt to read TLS handshake messages sent
- after the initial handshake. OpenSSL servers running TLS 1.3 may send such a
- message. When curl closes the upload connection if unread data has been
- received (such as a TLS handshake message) then the TCP protocol sends an
- RST to the server, which may cause the server to discard or truncate the
- upload if it has not read all sent data yet, and then return an error to curl
- on the control channel connection.
-
- Since 7.78.0 this is mostly fixed. curl will do a single read before closing
- TLS connections (which causes the TLS library to read handshake messages),
- however there is still possibility of an RST if more messages need to be read
- or a message arrives after the read but before close (network race condition).
-
- https://github.com/curl/curl/issues/6149
+ logging in), the operation fails since libcurl does not detect this and thus
+ fails to issue the correct command: https://curl.se/bug/view.cgi?id=635
 
 7.12 FTPS server compatibility on Windows with Schannel
 
- FTPS is not widely used with the Schannel TLS backend and so there may be more
- bugs compared to other TLS backends such as OpenSSL. In the past users have
- reported hanging and failed connections. It's very likely some changes to curl
- since then fixed the issues. None of the reported issues can be reproduced any
- longer.
+ FTPS is not widely used with the Schannel TLS backend and so there may be
+ more bugs compared to other TLS backends such as OpenSSL. In the past users
+ have reported hanging and failed connections. It is likely some changes to
+ curl since then fixed the issues. None of the reported issues can be
+ reproduced any longer.
 
  If you encounter an issue connecting to your server via FTPS with the latest
  curl and Schannel then please search for open issues or file a new issue.
@@ -472,13 +475,13 @@ problems may have been fixed or changed somewhat since this was written.
 
  In the SSH_SFTP_INIT state for libssh, the ssh session working mode is set to
  blocking mode. If the network is suddenly disconnected during sftp
- transmission, curl will be stuck, even if curl is configured with a timeout.
+ transmission, curl is stuck, even if curl is configured with a timeout.
 
  https://github.com/curl/curl/issues/8632
 
-9.5 cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
+9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
- Running SCP and SFTP tests on cygwin makes this warning message appear.
+ Running SCP and SFTP tests on Cygwin makes this warning message appear.
 
  https://github.com/curl/curl/issues/11244
 
@@ -500,9 +503,16 @@ problems may have been fixed or changed somewhat since this was written.
 11.2 error buffer not set if connection to multiple addresses fails
 
  If you ask libcurl to resolve a hostname like example.com to IPv6 addresses
- only. But you only have IPv4 connectivity. libcurl will correctly fail with
- CURLE_COULDNT_CONNECT. But the error buffer set by CURLOPT_ERRORBUFFER
+ when you only have IPv4 connectivity. libcurl fails with
+ CURLE_COULDNT_CONNECT, but the error buffer set by CURLOPT_ERRORBUFFER
  remains empty. Issue: https://github.com/curl/curl/issues/544
+
+11.3 TFTP tests fail on OpenBSD
+
+ When adding an OpenBSD job with tests to GHA, some tests consistently fail
+ to run.
+
+ See https://github.com/curl/curl/issues/13623
 
 11.4 HTTP test server 'connection-monitor' problems
 
@@ -518,6 +528,16 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/1332 and
  https://github.com/curl/curl/issues/4296
+
+11.6 test cases sometimes timeout
+
+ Occasionally, one of the tests timeouts. Inexplicably.
+
+ See https://github.com/curl/curl/issues/13350
+
+11.8 WinIDN test failures
+
+ Test 165 disabled when built with WinIDN.
 
 12. LDAP
 
@@ -560,8 +580,8 @@ problems may have been fixed or changed somewhat since this was written.
 13.2 Trying local ports fails on Windows
 
  This makes '--local-port [range]' to not work since curl cannot properly
- detect if a port is already in use, so it will try the first port, use that and
- then subsequently fail anyway if that was actually in use.
+ detect if a port is already in use, so it tries the first port, uses that and
+ then subsequently fails anyway if that was actually in use.
 
  https://github.com/curl/curl/issues/8112
 
@@ -610,9 +630,13 @@ problems may have been fixed or changed somewhat since this was written.
 
 16. aws-sigv4
 
-16.1 aws-sigv4 does not sign requests with * correctly
+16.2 aws-sigv4 does not handle multipart/form-data correctly
 
- https://github.com/curl/curl/issues/7559
+ https://github.com/curl/curl/issues/13351
+
+16.3 aws-sigv4 has problems with particular URLs
+
+ https://github.com/curl/curl/issues/13058
 
 16.6 aws-sigv4 does not behave well with AWS VPC Lattice
 
@@ -627,9 +651,9 @@ problems may have been fixed or changed somewhat since this was written.
 17.2 HTTP/2 frames while in the connection pool kill reuse
 
  If the server sends HTTP/2 frames (like for example an HTTP/2 PING frame) to
- curl while the connection is held in curl's connection pool, the socket will
- be found readable when considered for reuse and that makes curl think it is
- dead and then it will be closed and a new connection gets created instead.
+ curl while the connection is held in curl's connection pool, the socket is
+ found readable when considered for reuse and that makes curl think it is dead
+ and then it is closed and a new connection gets created instead.
 
  This is *best* fixed by adding monitoring to connections while they are kept
  in the pool so that pings can be responded to appropriately.
@@ -641,18 +665,34 @@ problems may have been fixed or changed somewhat since this was written.
 
  See https://github.com/curl/curl/issues/5119
 
+17.4 HTTP/2 + TLS spends a lot of time in recv
+
+ It has been observered that by making the speed limit less accurate we could
+ improve this performance. (by reverting
+ https://github.com/curl/curl/commit/db5c9f4f9e0779b49624752b135281a0717b277b)
+ Can we find a golden middle ground?
+
+ See https://curl.se/mail/lib-2024-05/0026.html and
+ https://github.com/curl/curl/issues/13416
+
 18. HTTP/3
 
 18.1 connection migration does not work
 
  https://github.com/curl/curl/issues/7695
 
+18.2 quiche: QUIC connection is draining
+
+ The transfer ends with error "QUIC connection is draining".
+
+ https://github.com/curl/curl/issues/12037
+
 19. RTSP
 
 19.1 Some methods do not support response bodies
 
  The RTSP implementation is written to assume that a number of RTSP methods
- will always get responses without bodies, even though there seems to be no
+ always get responses without bodies, even though there seems to be no
  indication in the RFC that this is always the case.
 
  https://github.com/curl/curl/issues/12414

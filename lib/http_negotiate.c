@@ -30,6 +30,7 @@
 #include "sendf.h"
 #include "http_negotiate.h"
 #include "vauth/vauth.h"
+#include "vtls/vtls.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -95,7 +96,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
       Curl_http_auth_cleanup_negotiate(conn);
     }
     else if(state != GSS_AUTHNONE) {
-      /* The server rejected our authentication and hasn't supplied any more
+      /* The server rejected our authentication and has not supplied any more
       negotiation mechanisms */
       Curl_http_auth_cleanup_negotiate(conn);
       return CURLE_LOGIN_DENIED;
@@ -106,10 +107,26 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
 #if defined(USE_WINDOWS_SSPI) && defined(SECPKG_ATTR_ENDPOINT_BINDINGS)
   neg_ctx->sslContext = conn->sslContext;
 #endif
+  /* Check if the connection is using SSL and get the channel binding data */
+#ifdef HAVE_GSSAPI
+  if(conn->handler->flags & PROTOPT_SSL) {
+    Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE);
+    result = Curl_ssl_get_channel_binding(
+      data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
+    if(result) {
+      Curl_http_auth_cleanup_negotiate(conn);
+      return result;
+    }
+  }
+#endif
 
   /* Initialize the security context and decode our challenge */
   result = Curl_auth_decode_spnego_message(data, userp, passwdp, service,
                                            host, header, neg_ctx);
+
+#ifdef HAVE_GSSAPI
+  Curl_dyn_free(&neg_ctx->channel_binding_data);
+#endif
 
   if(result)
     Curl_http_auth_cleanup_negotiate(conn);
@@ -218,7 +235,7 @@ CURLcode Curl_output_negotiate(struct Curl_easy *data,
 
   if(*state == GSS_AUTHDONE || *state == GSS_AUTHSUCC) {
     /* connection is already authenticated,
-     * don't send a header in future requests */
+     * do not send a header in future requests */
     authp->done = TRUE;
   }
 

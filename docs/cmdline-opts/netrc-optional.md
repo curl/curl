@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: netrc-optional
 Help: Use either .netrc or URL
 Mutexed: netrc
-Category: curl
+Category: auth
 Added: 7.9.8
 Multi: boolean
 See-also:

@@ -21,20 +21,21 @@ Example:
 
 # `--cookie`
 
-Pass the data to the HTTP server in the Cookie header. It is supposedly the
-data previously received from the server in a `Set-Cookie:` line. The data
-should be in the format `NAME1=VALUE1; NAME2=VALUE2` or as a single filename.
+This option has two slightly separate cookie sending functions.
 
-When given a set of specific cookies and not a filename, it makes curl use the
-cookie header with this content explicitly in all outgoing request(s). If
-multiple requests are done due to authentication, followed redirects or
-similar, they all get this cookie header passed on.
+Either: pass the exact data to send to the HTTP server in the Cookie header.
+It is supposedly data previously received from the server in a `Set-Cookie:`
+line. The data should be in the format `NAME1=VALUE1; NAME2=VALUE2`. When
+given a set of specific cookies, curl populates its cookie header with this
+content explicitly in all outgoing request(s). If multiple requests are done
+due to authentication, followed redirects or similar, they all get this cookie
+header passed on.
 
-If no `=` symbol is used in the argument, it is instead treated as a filename
-to read previously stored cookie from. This option also activates the cookie
-engine which makes curl record incoming cookies, which may be handy if you are
-using this in combination with the --location option or do multiple URL
-transfers on the same invoke.
+Or: If no `=` symbol is used in the argument, it is instead treated as a
+filename to read previously stored cookie from. This option also activates the
+cookie engine which makes curl record incoming cookies, which may be handy if
+you are using this in combination with the --location option or do multiple
+URL transfers on the same invoke.
 
 If the filename is a single minus ("-"), curl reads the contents from stdin.
 If the filename is an empty string ("") and is the only cookie input, curl

@@ -132,7 +132,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
       size_t written;
       result = Curl_conn_send(data, cf->sockindex,
                               Curl_dyn_ptr(&ctx->data_out),
-                              len, &written);
+                              len, FALSE, &written);
       if(result == CURLE_AGAIN) {
         result = CURLE_OK;
         written = 0;
@@ -194,6 +194,7 @@ struct Curl_cftype Curl_cft_haproxy = {
   cf_haproxy_destroy,
   cf_haproxy_connect,
   cf_haproxy_close,
+  Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   cf_haproxy_adjust_pollset,
   Curl_cf_def_data_pending,

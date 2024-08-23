@@ -21,58 +21,81 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+# Find the zstd library
+#
+# Input variables:
+#
+# ZSTD_INCLUDE_DIR   The zstd include directory
+# Zstd_INCLUDE_DIR   The zstd include directory (deprecated)
+# ZSTD_LIBRARY       Path to zstd library
+# Zstd_LIBRARY       Path to zstd library (deprecated)
+#
+# Result variables:
+#
+# ZSTD_FOUND         System has zstd
+# ZSTD_INCLUDE_DIRS  The zstd include directories
+# ZSTD_LIBRARIES     The zstd library names
+# ZSTD_VERSION       Version of zstd
 
-#[=======================================================================[.rst:
-FindZstd
-----------
-
-Find the zstd library
-
-Result Variables
-^^^^^^^^^^^^^^^^
-
-``Zstd_FOUND``
-  System has zstd
-``Zstd_INCLUDE_DIRS``
-  The zstd include directories.
-``Zstd_LIBRARIES``
-  The libraries needed to use zstd
-#]=======================================================================]
-
-if(UNIX)
-  find_package(PkgConfig QUIET)
-  pkg_search_module(PC_Zstd libzstd)
+if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
+  message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")
+  set(ZSTD_INCLUDE_DIR "${Zstd_INCLUDE_DIR}")
+endif()
+if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
+  message(WARNING "Zstd_LIBRARY is deprecated, use ZSTD_LIBRARY instead.")
+  set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
 endif()
 
-find_path(Zstd_INCLUDE_DIR zstd.h
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_ZSTD "libzstd")
+endif()
+
+find_path(ZSTD_INCLUDE_DIR NAMES "zstd.h"
   HINTS
-    ${PC_Zstd_INCLUDEDIR}
-    ${PC_Zstd_INCLUDE_DIRS}
+    ${PC_ZSTD_INCLUDEDIR}
+    ${PC_ZSTD_INCLUDE_DIRS}
 )
 
-find_library(Zstd_LIBRARY NAMES zstd
+find_library(ZSTD_LIBRARY NAMES "zstd"
   HINTS
-    ${PC_Zstd_LIBDIR}
-    ${PC_Zstd_LIBRARY_DIRS}
+    ${PC_ZSTD_LIBDIR}
+    ${PC_ZSTD_LIBRARY_DIRS}
 )
 
-if(Zstd_INCLUDE_DIR)
-  file(READ "${Zstd_INCLUDE_DIR}/zstd.h" _zstd_header)
-  string(REGEX MATCH ".*define ZSTD_VERSION_MAJOR *([0-9]+).*define ZSTD_VERSION_MINOR *([0-9]+).*define ZSTD_VERSION_RELEASE *([0-9]+)" _zstd_ver "${_zstd_header}")
-  set(Zstd_VERSION "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}.${CMAKE_MATCH_3}")
+if(PC_ZSTD_VERSION)
+  set(ZSTD_VERSION ${PC_ZSTD_VERSION})
+elseif(ZSTD_INCLUDE_DIR AND EXISTS "${ZSTD_INCLUDE_DIR}/zstd.h")
+  set(_version_regex1 "#[\t ]*define[ \t]+ZSTD_VERSION_MAJOR[ \t]+([0-9]+).*")
+  set(_version_regex2 "#[\t ]*define[ \t]+ZSTD_VERSION_MINOR[ \t]+([0-9]+).*")
+  set(_version_regex3 "#[\t ]*define[ \t]+ZSTD_VERSION_RELEASE[ \t]+([0-9]+).*")
+  file(STRINGS "${ZSTD_INCLUDE_DIR}/zstd.h" _version_str1 REGEX "${_version_regex1}")
+  file(STRINGS "${ZSTD_INCLUDE_DIR}/zstd.h" _version_str2 REGEX "${_version_regex2}")
+  file(STRINGS "${ZSTD_INCLUDE_DIR}/zstd.h" _version_str3 REGEX "${_version_regex3}")
+  string(REGEX REPLACE "${_version_regex1}" "\\1" _version_str1 "${_version_str1}")
+  string(REGEX REPLACE "${_version_regex2}" "\\1" _version_str2 "${_version_str2}")
+  string(REGEX REPLACE "${_version_regex3}" "\\1" _version_str3 "${_version_str3}")
+  set(ZSTD_VERSION "${_version_str1}.${_version_str2}.${_version_str3}")
+  unset(_version_regex1)
+  unset(_version_regex2)
+  unset(_version_regex3)
+  unset(_version_str1)
+  unset(_version_str2)
+  unset(_version_str3)
 endif()
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(Zstd
   REQUIRED_VARS
-    Zstd_LIBRARY
-    Zstd_INCLUDE_DIR
-  VERSION_VAR Zstd_VERSION
+    ZSTD_INCLUDE_DIR
+    ZSTD_LIBRARY
+  VERSION_VAR
+    ZSTD_VERSION
 )
 
-if(Zstd_FOUND)
-  set(Zstd_LIBRARIES    ${Zstd_LIBRARY})
-  set(Zstd_INCLUDE_DIRS ${Zstd_INCLUDE_DIR})
+if(ZSTD_FOUND)
+  set(ZSTD_INCLUDE_DIRS ${ZSTD_INCLUDE_DIR})
+  set(ZSTD_LIBRARIES    ${ZSTD_LIBRARY})
 endif()
 
-mark_as_advanced(Zstd_INCLUDE_DIRS Zstd_LIBRARIES)
+mark_as_advanced(ZSTD_INCLUDE_DIR ZSTD_LIBRARY)

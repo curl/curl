@@ -56,7 +56,7 @@ Finally, this is the real page!
 <client>
 <features>
 NTLM_WB
-debug
+Debug
 </features>
 <server>
 http

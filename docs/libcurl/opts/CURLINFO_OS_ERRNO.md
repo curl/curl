@@ -9,6 +9,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.12.2
 ---
 
 # NAME
@@ -37,6 +38,8 @@ Since 8.8.0 libcurl clears the easy handle's saved errno before performing the
 transfer. Prior versions did not clear the saved errno, which means if a saved
 errno is retrieved it could be from a previous transfer on the same handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -59,9 +62,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.12.2
+# %AVAILABILITY%
 
 # RETURN VALUE
 

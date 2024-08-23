@@ -5,7 +5,7 @@ Long: request
 Short: X
 Arg: <method>
 Help: Specify request method to use
-Category: connection
+Category: connection pop3 ftp imap smtp
 Added: 6.0
 Multi: single
 See-also:
@@ -19,7 +19,7 @@ Example:
 
 Change the method to use when starting the transfer.
 
-curl passes on the verbatim string you give it its the request without any
+curl passes on the verbatim string you give it in the request without any
 filter or other safe guards. That includes white space and control characters.
 
 ## HTTP

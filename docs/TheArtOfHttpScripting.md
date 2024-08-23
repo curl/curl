@@ -578,12 +578,12 @@ SPDX-License-Identifier: curl
 
 ## Certificates
 
- In the HTTPS world, you use certificates to validate that you are the one
- you claim to be, as an addition to normal passwords. Curl supports client-
- side certificates. All certificates are locked with a pass phrase, which you
- need to enter before the certificate can be used by curl. The pass phrase
- can be specified on the command line or if not, entered interactively when
- curl queries for it. Use a certificate with curl on an HTTPS server like:
+ In the HTTPS world, you use certificates to validate that you are the one you
+ claim to be, as an addition to normal passwords. Curl supports client- side
+ certificates. All certificates are locked with a passphrase, which you need
+ to enter before the certificate can be used by curl. The passphrase can be
+ specified on the command line or if not, entered interactively when curl
+ queries for it. Use a certificate with curl on an HTTPS server like:
 
     curl --cert mycert.pem https://secure.example.com
 

@@ -49,14 +49,14 @@ FREEADDRINFOEXW_FN Curl_FreeAddrInfoExW = NULL;
 GETADDRINFOEXCANCEL_FN Curl_GetAddrInfoExCancel = NULL;
 GETADDRINFOEXW_FN Curl_GetAddrInfoExW = NULL;
 
-/* Curl_win32_init() performs win32 global initialization */
+/* Curl_win32_init() performs Win32 global initialization */
 CURLcode Curl_win32_init(long flags)
 {
 #ifdef USE_WINSOCK
   HMODULE ws2_32Dll;
 #endif
   /* CURL_GLOBAL_WIN32 controls the *optional* part of the initialization which
-     is just for Winsock at the moment. Any required win32 initialization
+     is just for Winsock at the moment. Any required Win32 initialization
      should take place after this block. */
   if(flags & CURL_GLOBAL_WIN32) {
 #ifdef USE_WINSOCK
@@ -68,7 +68,7 @@ CURLcode Curl_win32_init(long flags)
     res = WSAStartup(wVersionRequested, &wsaData);
 
     if(res)
-      /* Tell the user that we couldn't find a usable */
+      /* Tell the user that we could not find a usable */
       /* winsock.dll.     */
       return CURLE_FAILED_INIT;
 
@@ -80,7 +80,7 @@ CURLcode Curl_win32_init(long flags)
 
     if(LOBYTE(wsaData.wVersion) != LOBYTE(wVersionRequested) ||
        HIBYTE(wsaData.wVersion) != HIBYTE(wVersionRequested) ) {
-      /* Tell the user that we couldn't find a usable */
+      /* Tell the user that we could not find a usable */
 
       /* winsock.dll. */
       WSACleanup();
@@ -112,7 +112,11 @@ CURLcode Curl_win32_init(long flags)
   }
 
 #ifdef USE_WINSOCK
+#ifdef CURL_WINDOWS_APP
+  ws2_32Dll = Curl_load_library(TEXT("ws2_32.dll"));
+#else
   ws2_32Dll = GetModuleHandleA("ws2_32");
+#endif
   if(ws2_32Dll) {
     Curl_FreeAddrInfoExW = CURLX_FUNCTION_CAST(FREEADDRINFOEXW_FN,
       GetProcAddress(ws2_32Dll, "FreeAddrInfoExW"));
@@ -208,7 +212,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
-  /* Get a handle to kernel32 so we can access it's functions at runtime */
+  /* Get a handle to kernel32 so we can access it is functions at runtime */
   HMODULE hKernel32 = GetModuleHandle(TEXT("kernel32"));
   if(!hKernel32)
     return NULL;
@@ -219,7 +223,7 @@ HMODULE Curl_load_library(LPCTSTR filename)
     CURLX_FUNCTION_CAST(LOADLIBRARYEX_FN,
                         (GetProcAddress(hKernel32, LOADLIBARYEX)));
 
-  /* Detect if there's already a path in the filename and load the library if
+  /* Detect if there is already a path in the filename and load the library if
      there is. Note: Both back slashes and forward slashes have been supported
      since the earlier days of DOS at an API level although they are not
      supported by command prompt */
@@ -261,10 +265,22 @@ HMODULE Curl_load_library(LPCTSTR filename)
   }
   return hModule;
 #else
-  /* the Universal Windows Platform (UWP) can't do this */
+  /* the Universal Windows Platform (UWP) cannot do this */
   (void)filename;
   return NULL;
 #endif
+}
+
+bool Curl_win32_impersonating(void)
+{
+#ifndef CURL_WINDOWS_APP
+  HANDLE token = NULL;
+  if(OpenThreadToken(GetCurrentThread(), TOKEN_QUERY, TRUE, &token)) {
+    CloseHandle(token);
+    return TRUE;
+  }
+#endif
+  return FALSE;
 }
 
 #endif /* _WIN32 */

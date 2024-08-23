@@ -8,6 +8,7 @@ See-also:
   - libcurl-security (3)
 Protocol:
   - All
+Added-in: n/a
 ---
 
 # NAME
@@ -58,7 +59,7 @@ libcurl is built as a DLL and OpenSSL is linked statically to it then libcurl
 does this cleanup automatically and there is no leak (added in libcurl 8.8.0).
 
 Please review the OpenSSL documentation for a full list of circumstances:
-https://www.openssl.org/docs/man3.0/man3/OPENSSL_thread_stop.html#NOTES
+https://docs.openssl.org/3.0/man3/OPENSSL_init_crypto/#notes
 
 # Signals
 

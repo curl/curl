@@ -27,7 +27,7 @@
 import ipaddress
 import os
 import re
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 from typing import List, Any, Optional
 
 from cryptography import x509
@@ -315,10 +315,18 @@ class CertStore:
         if os.path.isfile(cert_file) and os.path.isfile(pkey_file):
             cert = self.load_pem_cert(cert_file)
             pkey = self.load_pem_pkey(pkey_file)
-            if check_valid and \
-                ((cert.not_valid_after < datetime.now()) or
-                 (cert.not_valid_before > datetime.now())):
-                return None
+            try:
+                now = datetime.now(tz=timezone.utc)
+                if check_valid and \
+                    ((cert.not_valid_after_utc < now) or
+                     (cert.not_valid_before_utc > now)):
+                    return None
+            except AttributeError:  # older python
+                now = datetime.now()
+                if check_valid and \
+                        ((cert.not_valid_after < now) or
+                         (cert.not_valid_before > now)):
+                    return None
             creds = Credentials(name=name, cert=cert, pkey=pkey, issuer=issuer)
             creds.set_store(self)
             creds.set_files(cert_file, pkey_file, comb_file)

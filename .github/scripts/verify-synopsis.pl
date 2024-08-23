@@ -46,17 +46,17 @@ sub extract {
     open(O, ">$cfile");
     while(<F>) {
         $iline++;
-        if(/^.SH SYNOPSIS/) {
+        if(/^# SYNOPSIS/) {
             $syn = 1
         }
         elsif($syn == 1) {
-            if(/^.nf/) {
+            if(/^\~\~\~/) {
                 $syn++;
                 print O "#line $iline \"$f\"\n";
             }
         }
         elsif($syn == 2) {
-            if(/^.fi/) {
+            if(/^\~\~\~/) {
                 last;
             }
             # turn the vararg argument into vararg
@@ -68,13 +68,17 @@ sub extract {
     close(F);
     close(O);
 
+    if($syn < 2) {
+        print STDERR "Found no synopsis in $f\n";
+        return 1;
+    }
+
     return 0;
 }
 
 my $error;
 for my $m (@files) {
-    print "Verify $m\n";
-    extract($m);
+    $error |= extract($m);
     $error |= testcompile($m);
 }
 exit $error;

@@ -15,6 +15,7 @@ TLS-backend:
   - GnuTLS
   - Schannel
   - Secure Transport
+Added-in: 7.19.1
 ---
 
 # NAME
@@ -49,6 +50,8 @@ which is the number of elements in the array. Each certificate's list has
 items with textual information in the format "name:content" such as
 "Subject:Foo", "Issuer:Bar", etc. The items in each list varies depending on
 the SSL backend and the certificate.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -91,13 +94,12 @@ int main(void)
 
 See also the *certinfo.c* example.
 
-# AVAILABILITY
+# HISTORY
 
-This option is only working in libcurl built with OpenSSL, GnuTLS, Schannel or
-Secure Transport. GnuTLS support added in 7.42.0. Schannel support added in
-7.50.0. Secure Transport support added in 7.79.0.
+GnuTLS support added in 7.42.0. Schannel support added in 7.50.0. Secure
+Transport support added in 7.79.0. mbedTLS support added in 8.9.0.
 
-Added in 7.19.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

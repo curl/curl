@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: pinnedpubkey
 Arg: <hashes>
-Help: FILE/HASHES Public key to verify peer against
+Help: Public key to verify peer against
 Protocols: TLS
 Category: tls
 Added: 7.39.0
@@ -33,12 +33,13 @@ together then the peer is still verified by public key.
 PEM/DER support:
 
 OpenSSL and GnuTLS (added in 7.39.0), wolfSSL (added in 7.43.0), mbedTLS
-(added in 7.47.0), Secure Transport macOS 10.7+/iOS 10+ (7.54.1), Schannel
-(7.58.1)
+(added in 7.47.0), Secure Transport macOS 10.7+/iOS 10+ (added in 7.54.1),
+Schannel (added in 7.58.1)
 
 sha256 support:
 
 OpenSSL, GnuTLS and wolfSSL (added in 7.44.0), mbedTLS (added in 7.47.0),
-Secure Transport macOS 10.7+/iOS 10+ (7.54.1), Schannel (7.58.1)
+Secure Transport macOS 10.7+/iOS 10+ (added in 7.54.1), Schannel
+(added in 7.58.1)
 
 Other SSL backends not supported.

@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_PROXYTYPE (3)
 Protocol:
   - All
+Added-in: 7.55.0
 ---
 
 # NAME
@@ -36,6 +37,8 @@ password with the CURLOPT_PROXYUSERPWD(3) option.
 
 CURLAUTH_BASIC|CURLAUTH_GSSAPI
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,9 +60,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.55.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

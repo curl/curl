@@ -116,4 +116,4 @@ my $cmdline="$nghttpx --backend=$connect ".
     "--errorlog-file=$logfile ".
     "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
-system("$cmdline 2>/dev/null");
+exec("exec $cmdline 2>/dev/null");

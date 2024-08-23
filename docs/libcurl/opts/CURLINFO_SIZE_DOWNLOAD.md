@@ -12,6 +12,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.4.1
 ---
 
 # NAME
@@ -36,6 +37,8 @@ number.
 
 CURLINFO_SIZE_DOWNLOAD_T(3) is a newer replacement that returns a more
 sensible variable type.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -62,9 +65,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.4.1. Deprecated since 7.55.0.
+Deprecated since 7.55.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

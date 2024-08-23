@@ -3,9 +3,9 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: connect-to
 Arg: <HOST1:PORT1:HOST2:PORT2>
-Help: Connect to host
+Help: Connect to host2 instead of host1
 Added: 7.49.0
-Category: connection
+Category: connection dns
 Multi: append
 See-also:
   - resolve
@@ -28,3 +28,13 @@ original hostname and port number.
 A hostname specified to this option is compared as a string, so it needs to
 match the name used in request URL. It can be either numerical such as
 `127.0.0.1` or the full host name such as `example.org`.
+
+Example: redirect connects from the example.com hostname to 127.0.0.1
+independently of port number:
+
+    curl --connect-to example.com::127.0.0.1: https://example.com/
+
+Example: redirect connects from all hostnames to 127.0.0.1 independently of
+port number:
+
+    curl --connect-to ::127.0.0.1: http://example.com/

@@ -11,11 +11,12 @@ See-also:
   - curl_easy_unescape (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
 
-curl_getdate - Convert a date string to number of seconds
+curl_getdate - convert date string to number of seconds
 
 # SYNOPSIS
 
@@ -74,6 +75,8 @@ If a decimal number of the form YYYYMMDD appears, then YYYY is read as the
 year, MM as the month number and DD as the day of the month, for the specified
 calendar date.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -113,21 +116,19 @@ RFC 1036) and ANSI C's *asctime()* format.
 
 These formats are the only ones RFC 7231 says HTTP applications may use.
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 
 This function returns -1 when it fails to parse the date string. Otherwise it
 returns the number of seconds as described.
 
-On systems with a signed 32 bit time_t: if the year is larger than 2037 or
+On systems with a signed 32-bit time_t: if the year is larger than 2037 or
 less than 1903, this function returns -1.
 
-On systems with an unsigned 32 bit time_t: if the year is larger than 2106 or
+On systems with an unsigned 32-bit time_t: if the year is larger than 2106 or
 less than 1970, this function returns -1.
 
-On systems with 64 bit time_t: if the year is less than 1583, this function
+On systems with 64-bit time_t: if the year is less than 1583, this function
 returns -1. (The Gregorian calendar was first introduced 1582 so no "real"
 dates in this way of doing dates existed before then.)

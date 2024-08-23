@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAXCONNECTS (3)
 Protocol:
   - HTTP
+Added-in: 7.67.0
 ---
 
 # NAME
@@ -37,6 +38,8 @@ value passed here would be honored based on other system resources properties.
 
 100
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -48,9 +51,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.67.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

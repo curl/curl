@@ -97,11 +97,12 @@ typedef enum {
 #define CURLU_NO_AUTHORITY (1<<10)      /* Allow empty authority when the
                                            scheme is unknown. */
 #define CURLU_ALLOW_SPACE (1<<11)       /* Allow spaces in the URL */
-#define CURLU_PUNYCODE (1<<12)          /* get the host name in punycode */
+#define CURLU_PUNYCODE (1<<12)          /* get the hostname in punycode */
 #define CURLU_PUNY2IDN (1<<13)          /* punycode => IDN conversion */
 #define CURLU_GET_EMPTY (1<<14)         /* allow empty queries and fragments
                                            when extracting the URL or the
                                            components */
+#define CURLU_NO_GUESS_SCHEME (1<<15)   /* for get, do not accept a guess */
 
 typedef struct Curl_URL CURLU;
 
@@ -142,7 +143,7 @@ CURL_EXTERN CURLUcode curl_url_set(CURLU *handle, CURLUPart what,
 
 /*
  * curl_url_strerror() turns a CURLUcode value into the equivalent human
- * readable error string.  This is useful for printing meaningful error
+ * readable error string. This is useful for printing meaningful error
  * messages.
  */
 CURL_EXTERN const char *curl_url_strerror(CURLUcode);

@@ -12,6 +12,7 @@ See-also:
   - libcurl-errors (3)
 Protocol:
   - HTTP
+Added-in: 7.83.0
 ---
 
 # NAME
@@ -136,6 +137,8 @@ response that might happen before the "real" response.
 
 The header is an HTTP/2 or HTTP/3 pseudo header
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -153,9 +156,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.83.0. Officially supported since 7.84.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

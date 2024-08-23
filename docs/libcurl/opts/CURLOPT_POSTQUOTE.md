@@ -10,6 +10,7 @@ See-also:
 Protocol:
   - FTP
   - SFTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -38,6 +39,8 @@ Disable this operation again by setting a NULL to this option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -62,9 +65,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-If support for the protocols are built-in.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -6,7 +6,7 @@ Help: Specify FILE for netrc
 Arg: <filename>
 Added: 7.21.5
 Mutexed: netrc
-Category: curl
+Category: auth
 Multi: single
 See-also:
   - netrc

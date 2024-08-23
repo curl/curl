@@ -34,9 +34,9 @@
 #include "functypes.h"
 
 #if defined(__GNUC__) && __GNUC__ >= 3
-#  define ALLOC_FUNC __attribute__((malloc))
-#  define ALLOC_SIZE(s) __attribute__((alloc_size(s)))
-#  define ALLOC_SIZE2(n, s) __attribute__((alloc_size(n, s)))
+#  define ALLOC_FUNC __attribute__((__malloc__))
+#  define ALLOC_SIZE(s) __attribute__((__alloc_size__(s)))
+#  define ALLOC_SIZE2(n, s) __attribute__((__alloc_size__(n, s)))
 #elif defined(_MSC_VER)
 #  define ALLOC_FUNC __declspec(restrict)
 #  define ALLOC_SIZE(s)
@@ -114,11 +114,17 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 /* Set this symbol on the command-line, recompile all lib-sources */
 #undef strdup
 #define strdup(ptr) curl_dbg_strdup(ptr, __LINE__, __FILE__)
+#undef malloc
 #define malloc(size) curl_dbg_malloc(size, __LINE__, __FILE__)
+#undef calloc
 #define calloc(nbelem,size) curl_dbg_calloc(nbelem, size, __LINE__, __FILE__)
+#undef realloc
 #define realloc(ptr,size) curl_dbg_realloc(ptr, size, __LINE__, __FILE__)
+#undef free
 #define free(ptr) curl_dbg_free(ptr, __LINE__, __FILE__)
+#undef send
 #define send(a,b,c,d) curl_dbg_send(a,b,c,d, __LINE__, __FILE__)
+#undef recv
 #define recv(a,b,c,d) curl_dbg_recv(a,b,c,d, __LINE__, __FILE__)
 
 #ifdef _WIN32
@@ -137,13 +143,14 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 
 #undef socket
 #define socket(domain,type,protocol)\
- curl_dbg_socket(domain, type, protocol, __LINE__, __FILE__)
+ curl_dbg_socket((int)domain, type, protocol, __LINE__, __FILE__)
 #undef accept /* for those with accept as a macro */
 #define accept(sock,addr,len)\
  curl_dbg_accept(sock, addr, len, __LINE__, __FILE__)
 #ifdef HAVE_SOCKETPAIR
 #define socketpair(domain,type,protocol,socket_vector)\
- curl_dbg_socketpair(domain, type, protocol, socket_vector, __LINE__, __FILE__)
+ curl_dbg_socketpair((int)domain, type, protocol, socket_vector, \
+                     __LINE__, __FILE__)
 #endif
 
 #ifdef HAVE_GETADDRINFO

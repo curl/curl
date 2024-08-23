@@ -16,7 +16,7 @@ Example:
 
 # `--tlspassword`
 
-Set password for use with the TLS authentication method specified with
---tlsauthtype. Requires that --tlsuser also be set.
+Set password to use with the TLS authentication method specified with
+--tlsauthtype. Requires that --tlsuser is set.
 
 This option does not work with TLS 1.3.

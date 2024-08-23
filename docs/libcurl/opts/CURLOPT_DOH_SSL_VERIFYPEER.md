@@ -16,6 +16,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.76.0
 ---
 
 # NAME
@@ -71,6 +72,8 @@ the correct end-point.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -91,11 +94,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.76.0
-
-If built TLS enabled.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

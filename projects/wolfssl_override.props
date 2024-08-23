@@ -16,7 +16,7 @@ file by using the CustomAfterMicrosoftCommonTargets property.
       -->
       <ForcedIncludeFiles>$(SolutionDir)\wolfssl\options.h;%(ForcedIncludeFiles);</ForcedIncludeFiles>
       <!--
-      Do not use the Unicode character set since their mingw config doesn't.
+      Do not use the Unicode character set since their MinGW config does not.
       Do not use their IDE\WIN\user_settings.h since we have wolfssl_options.h.
       -->
       <UndefinePreprocessorDefinitions>_UNICODE;UNICODE;WOLFSSL_USER_SETTINGS;CYASSL_USER_SETTINGS;%(UndefinePreprocessorDefinitions);</UndefinePreprocessorDefinitions>

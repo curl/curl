@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYAUTH (3)
   - CURLOPT_PROXYTYPE (3)
+Added-in: 7.19.4
 ---
 
 # NAME
@@ -60,6 +61,8 @@ the same way.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -78,9 +81,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.19.4
+# %AVAILABILITY%
 
 # RETURN VALUE
 

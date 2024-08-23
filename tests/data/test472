@@ -1,0 +1,59 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+aws-sigv4
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+Debug
+Unicode
+</features>
+<name>
+aws-sigv4 with query
+</name>
+<command>
+"http://fake.fake.fake:8000/%TESTNUMBER/a=あ" -u user:secret --aws-sigv4 "aws:amz:us-east-2:es" --connect-to fake.fake.fake:8000:%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol crlf="yes">
+GET /472/a=%e3%81%82 HTTP/1.1
+Host: fake.fake.fake:8000
+Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=c63315c199922f7ee00141869a250389405d19e205057249fb74726d940b1fc3
+X-Amz-Date: 19700101T000000Z
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

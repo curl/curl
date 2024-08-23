@@ -51,7 +51,7 @@
 # --notes=[notes]          More human-readable information about this configuration
 # --nocvsup                Don't pull from git even though it is a git tree
 # --nogitpull              Don't pull from git even though it is a git tree
-# --nobuildconf            Don't run buildconf
+# --nobuildconf            Don't run autoreconf -fi
 # --noconfigure            Don't run configure
 # --runtestopts=[options]  Options to pass to runtests.pl
 # --setup=[file name]      File name to read setup from (deprecated)
@@ -77,7 +77,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2023-03-28';
+$version='2024-08-07';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -150,7 +150,7 @@ $binext = '';
 $libext = '.la'; # .la since both libcurl and libcares are made with libtool
 if ($^O eq 'MSWin32' || $targetos) {
   if (!$targetos) {
-    # If no target defined on Win32 lets assume vc
+    # If no target defined on Windows, let's assume vc
     $targetos = 'vc';
   }
   if ($targetos =~ /vc/ || $targetos =~ /borland/) {
@@ -460,7 +460,7 @@ if ($git) {
   }
 
   if($nobuildconf) {
-    logit "told to not run buildconf";
+    logit "told to not run autoreconf -fi";
   }
   elsif ($configurebuild) {
     # remove possible left-overs from the past
@@ -479,11 +479,21 @@ if ($git) {
     close($f);
     close($log);
 
-    logit "buildconf was successful";
+    logit "autoreconf -fi was successful";
   }
   else {
-    logit "buildconf was successful (dummy message)";
+    logit "autoreconf -fi was successful (dummy message)";
   }
+
+} else {
+    # Show snapshot git commit when available
+    if (open (my $f, '<', "docs/tarball-commit.txt")) {
+      my $commit = <$f>;
+      chomp $commit;
+      logit "The most recent curl git commits:";
+      logit "  $commit";
+      close($f);
+    }
 }
 
 # Set timestamp to the one in curlver.h if this isn't a git test build.
@@ -683,7 +693,7 @@ if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
   my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
   open($f, "<", $cmd);
   while(<$f>) {
-    # strip CR from output on non-win32 platforms (wine on Linux)
+    # strip CR from output on non-Windows platforms (WINE on Linux)
     s/\r// if ($^O ne 'MSWin32');
     print;
   }

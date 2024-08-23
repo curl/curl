@@ -30,8 +30,6 @@
 
 #include <sys/stat.h>
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -75,7 +73,7 @@ bool tool_create_output_file(struct OutStruct *outs,
     int fd;
     do {
       fd = open(fname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
-      /* Keep retrying in the hope that it isn't interrupted sometime */
+      /* Keep retrying in the hope that it is not interrupted sometime */
     } while(fd == -1 && errno == EINTR);
     if(config->file_clobber_mode == CLOBBER_NEVER && fd == -1) {
       int next_num = 1;
@@ -94,15 +92,15 @@ bool tool_create_output_file(struct OutStruct *outs,
       }
       memcpy(newname, fname, len);
       newname[len] = '.';
-      while(fd == -1 && /* haven't successfully opened a file */
+      while(fd == -1 && /* have not successfully opened a file */
             (errno == EEXIST || errno == EISDIR) &&
             /* because we keep having files that already exist */
-            next_num < 100 /* and we haven't reached the retry limit */ ) {
-        curlx_msnprintf(newname + len + 1, 12, "%d", next_num);
+            next_num < 100 /* and we have not reached the retry limit */ ) {
+        curl_msnprintf(newname + len + 1, 12, "%d", next_num);
         next_num++;
         do {
           fd = open(newname, O_CREAT | O_WRONLY | O_EXCL | O_BINARY, OPENMODE);
-          /* Keep retrying in the hope that it isn't interrupted sometime */
+          /* Keep retrying in the hope that it is not interrupted sometime */
         } while(fd == -1 && errno == EINTR);
       }
       outs->filename = newname; /* remember the new one */
@@ -219,7 +217,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
 #ifdef _WIN32
   fhnd = _get_osfhandle(fileno(outs->stream));
-  /* if windows console then UTF-8 must be converted to UTF-16 */
+  /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&
      GetConsoleScreenBufferInfo((HANDLE)fhnd, &console_info)) {
     wchar_t *wc_buf;
@@ -318,7 +316,8 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
 
     if(rlen) {
       /* calculate buffer size for wide characters */
-      wc_len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, rlen, NULL, 0);
+      wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
+                                          NULL, 0);
       if(!wc_len)
         return CURL_WRITEFUNC_ERROR;
 
@@ -326,8 +325,8 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
       if(!wc_buf)
         return CURL_WRITEFUNC_ERROR;
 
-      wc_len = MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, rlen, wc_buf,
-                                   wc_len);
+      wc_len = (DWORD)MultiByteToWideChar(CP_UTF8, 0, (LPCSTR)rbuf, (int)rlen,
+                                          wc_buf, (int)wc_len);
       if(!wc_len) {
         free(wc_buf);
         return CURL_WRITEFUNC_ERROR;

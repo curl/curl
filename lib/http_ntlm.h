@@ -28,11 +28,11 @@
 
 #if !defined(CURL_DISABLE_HTTP) && defined(USE_NTLM)
 
-/* this is for ntlm header input */
+/* this is for NTLM header input */
 CURLcode Curl_input_ntlm(struct Curl_easy *data, bool proxy,
                          const char *header);
 
-/* this is for creating ntlm header output */
+/* this is for creating NTLM header output */
 CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy);
 
 void Curl_http_auth_cleanup_ntlm(struct connectdata *conn);

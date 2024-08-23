@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_RESOLVER_START_DATA (3)
 Protocol:
   - All
+Added-in: 7.59.0
 ---
 
 # NAME
@@ -52,6 +53,8 @@ resolve to fail.
 
 NULL (No callback)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -77,9 +80,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.59.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

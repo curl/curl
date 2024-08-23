@@ -11,6 +11,7 @@ See-also:
   - RFC 7540
 Protocol:
   - HTTP
+Added-in: 7.44.0
 ---
 
 # NAME
@@ -96,6 +97,8 @@ All other return codes are reserved for future use.
 
 NULL, no callback
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -137,9 +140,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.44.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

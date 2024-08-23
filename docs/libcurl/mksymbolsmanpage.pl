@@ -48,6 +48,7 @@ See-also:
   - libcurl-multi (3)
   - libcurl-security (3)
   - libcurl-thread (3)
+Added-in: n/a
 ---
 # libcurl symbols
 
@@ -60,7 +61,7 @@ since that version no new code should be written to use the symbol as it is
 marked for getting removed in a future.
 
 The last version that featured the specific symbol. Using the symbol in source
-code will make it no longer compile error-free after that specified version.
+code makes it no longer compile error-free after that specified version.
 
 This man page is automatically generated from the symbols-in-versions file.
 HEADER

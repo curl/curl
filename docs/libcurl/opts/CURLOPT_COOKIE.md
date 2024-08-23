@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -69,6 +70,8 @@ ability to stop super cookies. PSL support is identified by the
 
 NULL, no cookies
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -85,9 +88,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-If HTTP is enabled
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -921,7 +921,7 @@ static CURLcode oldap_do(struct Curl_easy *data, bool *done)
       else {
         lr->msgid = msgid;
         data->req.p.ldap = lr;
-        Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
+        Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
         *done = TRUE;
       }
     }
@@ -1152,7 +1152,7 @@ ldapsb_tls_remove(Sockbuf_IO_Desc *sbiod)
   return 0;
 }
 
-/* We don't need to do anything because libcurl does it already */
+/* We do not need to do anything because libcurl does it already */
 static int
 ldapsb_tls_close(Sockbuf_IO_Desc *sbiod)
 {
@@ -1201,7 +1201,7 @@ ldapsb_tls_write(Sockbuf_IO_Desc *sbiod, void *buf, ber_len_t len)
     if(conn) {
       struct ldapconninfo *li = conn->proto.ldapc;
       CURLcode err = CURLE_SEND_ERROR;
-      ret = (li->send)(data, FIRSTSOCKET, buf, len, &err);
+      ret = (li->send)(data, FIRSTSOCKET, buf, len, FALSE, &err);
       if(ret < 0 && err == CURLE_AGAIN) {
         SET_SOCKERRNO(EWOULDBLOCK);
       }

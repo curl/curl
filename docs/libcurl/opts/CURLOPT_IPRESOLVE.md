@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_SSLVERSION (3)
 Protocol:
   - All
+Added-in: 7.10.8
 ---
 
 # NAME
@@ -52,6 +53,8 @@ Uses only IPv6 addresses.
 
 CURL_IPRESOLVE_WHATEVER
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -72,9 +75,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

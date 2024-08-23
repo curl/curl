@@ -9,6 +9,7 @@ See-also:
   - curl_easy_reset (3)
 Protocol:
   - All
+Added-in: 7.18.0
 ---
 
 # NAME
@@ -97,6 +98,8 @@ buffering 32 megabyte of data for a paused stream.
 When such a paused stream is unpaused again, any buffered data is delivered
 first.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -105,7 +108,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     /* pause a transfer in both directions */
-    curl_easy_pause(curl, CURL_READFUNC_PAUSE | CURL_WRITEFUNC_PAUSE);
+    curl_easy_pause(curl, CURLPAUSE_RECV | CURLPAUSE_SEND);
 
   }
 }
@@ -131,9 +134,7 @@ size worth of data that curl cannot stop but instead needs to cache while the
 transfer is paused. This means that if a window size of 64 MB is used, libcurl
 might end up having to cache 64 MB of data.
 
-# AVAILABILITY
-
-Added in 7.18.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

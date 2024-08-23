@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Short: #
 Long: progress-bar
 Help: Display transfer progress as a bar
-Category: verbose
+Category: verbose global
 Added: 5.10
 Multi: boolean
 Scope: global

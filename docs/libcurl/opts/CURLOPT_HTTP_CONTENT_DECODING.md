@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_ACCEPT_ENCODING (3)
   - CURLOPT_DEBUGFUNCTION (3)
   - CURLOPT_STDERR (3)
+Added-in: 7.16.2
 ---
 
 # NAME
@@ -36,6 +37,8 @@ CURLOPT_ACCEPT_ENCODING(3) for that.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,9 +54,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.16.2
+# %AVAILABILITY%
 
 # RETURN VALUE
 

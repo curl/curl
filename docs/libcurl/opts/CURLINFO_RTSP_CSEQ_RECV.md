@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - RTSP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -31,6 +32,8 @@ server. If your application encounters a *CURLE_RTSP_CSEQ_ERROR* then you
 may wish to troubleshoot and/or fix the CSeq mismatch by peeking at this
 value.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -50,9 +53,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.20.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

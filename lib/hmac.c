@@ -42,7 +42,7 @@
  * Generic HMAC algorithm.
  *
  *   This module computes HMAC digests based on any hash function. Parameters
- * and computing procedures are set-up dynamically at HMAC computation context
+ * and computing procedures are setup dynamically at HMAC computation context
  * initialization.
  */
 

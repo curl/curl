@@ -21,23 +21,60 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-include(FindPackageHandleStandardArgs)
+# Find the brotli library
+#
+# Input variables:
+#
+# BROTLI_INCLUDE_DIR   The brotli include directory
+# BROTLICOMMON_LIBRARY Path to brotlicommon library
+# BROTLIDEC_LIBRARY    Path to brotlidec library
+#
+# Result variables:
+#
+# BROTLI_FOUND         System has brotli
+# BROTLI_INCLUDE_DIRS  The brotli include directories
+# BROTLI_LIBRARIES     The brotli library names
+# BROTLI_VERSION       Version of brotli
 
-find_path(BROTLI_INCLUDE_DIR "brotli/decode.h")
+if(CURL_USE_PKGCONFIG)
+  find_package(PkgConfig QUIET)
+  pkg_check_modules(PC_BROTLI "libbrotlidec")
+endif()
 
-find_library(BROTLICOMMON_LIBRARY NAMES brotlicommon)
-find_library(BROTLIDEC_LIBRARY NAMES brotlidec)
-
-find_package_handle_standard_args(Brotli
-    FOUND_VAR
-      BROTLI_FOUND
-    REQUIRED_VARS
-      BROTLIDEC_LIBRARY
-      BROTLICOMMON_LIBRARY
-      BROTLI_INCLUDE_DIR
-    FAIL_MESSAGE
-      "Could NOT find Brotli"
+find_path(BROTLI_INCLUDE_DIR "brotli/decode.h"
+  HINTS
+    ${PC_BROTLI_INCLUDEDIR}
+    ${PC_BROTLI_INCLUDE_DIRS}
 )
 
-set(BROTLI_INCLUDE_DIRS ${BROTLI_INCLUDE_DIR})
-set(BROTLI_LIBRARIES ${BROTLICOMMON_LIBRARY} ${BROTLIDEC_LIBRARY})
+find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon"
+  HINTS
+    ${PC_BROTLI_LIBDIR}
+    ${PC_BROTLI_LIBRARY_DIRS}
+)
+find_library(BROTLIDEC_LIBRARY NAMES "brotlidec"
+  HINTS
+    ${PC_BROTLI_LIBDIR}
+    ${PC_BROTLI_LIBRARY_DIRS}
+)
+
+if(PC_BROTLI_VERSION)
+  set(BROTLI_VERSION ${PC_BROTLI_VERSION})
+endif()
+
+include(FindPackageHandleStandardArgs)
+find_package_handle_standard_args(Brotli
+  REQUIRED_VARS
+    BROTLI_INCLUDE_DIR
+    BROTLIDEC_LIBRARY
+    BROTLICOMMON_LIBRARY
+  VERSION_VAR
+    BROTLI_VERSION
+)
+
+if(BROTLI_FOUND)
+  set(BROTLI_INCLUDE_DIRS ${BROTLI_INCLUDE_DIR})
+  set(BROTLI_LIBRARIES ${BROTLIDEC_LIBRARY} ${BROTLICOMMON_LIBRARY})
+endif()
+
+mark_as_advanced(BROTLI_INCLUDE_DIR BROTLIDEC_LIBRARY BROTLICOMMON_LIBRARY)

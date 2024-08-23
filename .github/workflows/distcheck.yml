@@ -4,7 +4,7 @@
 
 name: dist
 
-on:
+'on':
   push:
     branches:
       - master
@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
@@ -35,22 +35,14 @@ jobs:
       - run: ./configure --without-ssl --without-libpsl
         name: 'configure'
 
-      - run: make V=1 && make V=1 clean
-        name: 'make and clean'
+      - run: make V=1
+        name: 'make'
 
       - name: 'maketgz'
         run: |
           SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
 
-      - name: 'maketgz reproducibility test'
-        run: |
-          mkdir run1; mv ./curl-99.98.97.* run1/
-          make V=1 && make V=1 clean
-          SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
-          mkdir run2; cp -p ./curl-99.98.97.* run2/
-          diff run1 run2
-
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a # v4
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -60,9 +52,9 @@ jobs:
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           ./configure --prefix=$HOME/temp --without-ssl --without-libpsl
-          make -j3
-          make -j3 test-ci
-          make -j3 install
+          make -j5
+          make -j5 test-ci
+          make -j5 install
           popd
           # basic check of the installed files
           bash scripts/installcheck.sh $HOME/temp
@@ -74,7 +66,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: 'release-tgz'
 
@@ -85,8 +77,8 @@ jobs:
           mkdir build
           pushd build
           ../curl-99.98.97/configure --without-ssl --without-libpsl
-          make -j3
-          make -j3 test-ci
+          make -j5
+          make -j5 test-ci
           popd
           rm -rf build
           rm -rf curl-99.98.97
@@ -97,7 +89,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: 'release-tgz'
 
@@ -108,9 +100,9 @@ jobs:
           mkdir build
           pushd build
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
-          make -j3
-          make -j3 test-ci
-          make -j3 install
+          make -j5
+          make -j5 test-ci
+          make -j5 install
         name: 'verify out-of-tree autotools debug build'
 
   verify-out-of-tree-cmake:
@@ -118,7 +110,7 @@ jobs:
     timeout-minutes: 30
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
           name: 'release-tgz'
 
@@ -126,6 +118,38 @@ jobs:
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
-          cmake -B build -DCURL_WERROR=ON
-          make -C build -j3
+          cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
+          make -C build -j5
         name: 'verify out-of-tree cmake build'
+
+  missing-files:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    needs: maketgz-and-verify-in-tree
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
+        with:
+          name: 'release-tgz'
+
+      - name: 'detect files missing from release tarball'
+        run: .github/scripts/distfiles.sh curl-99.98.97.tar.gz
+
+  reproducible-releases:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
+        name: 'remove preinstalled curl libcurl4{-doc}'
+
+      - run: ./scripts/dmaketgz 9.10.11
+        name: 'generate release tarballs'
+
+      - name: 'verify release tarballs'
+        run: |
+          mkdir _verify
+          mv curl-9.10.11.tar.gz _verify
+          cd _verify
+          ../scripts/verify-release curl-9.10.11.tar.gz

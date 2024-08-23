@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_STREAM_WEIGHT (3)
 Protocol:
   - HTTP
+Added-in: 7.46.0
 ---
 
 # NAME
@@ -47,6 +48,8 @@ option to have an actual effect.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.46.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

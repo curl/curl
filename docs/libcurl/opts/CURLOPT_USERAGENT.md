@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_REQUEST_TARGET (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -36,7 +37,9 @@ option.
 
 # DEFAULT
 
-NULL, no User-Agent: header is used by default.
+NULL, no User-Agent: header is used.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -54,9 +57,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-As long as HTTP is supported
+# %AVAILABILITY%
 
 # RETURN VALUE
 

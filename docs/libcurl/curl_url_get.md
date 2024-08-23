@@ -13,6 +13,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
+Added-in: 7.62.0
 ---
 
 # NAME
@@ -125,6 +126,22 @@ nothing following the hash sign.
 
 (Added in curl 8.8.0)
 
+## CURLU_NO_GUESS_SCHEME
+
+When this flag is used in curl_url_get(), it treats the scheme as non-existing
+if it was set as a result of a previous guess; when CURLU_GUESS_SCHEME was
+used parsing a URL.
+
+Using this flag when getting CURLUPART_SCHEME if the scheme was set as the
+result of a guess makes curl_url_get() return CURLUE_NO_SCHEME.
+
+Using this flag when getting CURLUPART_URL if the scheme was set as the result
+of a guess makes curl_url_get() return the full URL without the scheme
+component. Such a URL can then only be parsed with curl_url_set() if
+CURLU_GUESS_SCHEME is used.
+
+(Added in curl 8.9.0)
+
 # PARTS
 
 ## CURLUPART_URL
@@ -199,6 +216,8 @@ A not-present fragment returns *part* set to NULL.
 
 A zero-length fragment returns *part* as NULL unless CURLU_GET_EMPTY is set.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -219,9 +238,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.62.0. CURLUPART_ZONEID was added in 7.65.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

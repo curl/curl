@@ -316,7 +316,7 @@ sub compareparts {
 
  # NOTE: this no longer strips off carriage returns from the arrays. Is that
  # really necessary? It ruins the testing of newlines. I believe it was once
- # added to enable tests on win32.
+ # added to enable tests on Windows.
 
  if($first ne $second) {
      return 1;
@@ -332,7 +332,7 @@ sub writearray {
     my ($filename, $arrayref)=@_;
 
     open(my $temp, ">", "$filename") || die "Failure writing file";
-    binmode($temp,":raw"); # cygwin fix by Kevin Roth
+    binmode($temp,":raw");  # Cygwin fix by Kevin Roth
     for(@$arrayref) {
         print $temp $_;
     }

@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_PROXYAUTH (3)
 Protocol:
   - HTTP
+Added-in: 7.75.0
 ---
 
 # NAME
@@ -50,23 +51,28 @@ It is extracted from the hostname specified in the URL if omitted.
 The argument is a function provided by a cloud. It is extracted from the
 hostname specified in the URL if omitted.
 
-NOTE: This call set CURLOPT_HTTPAUTH(3) to CURLAUTH_AWS_SIGV4.
-Calling CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same
-as calling this with **"aws:amz"** in parameter.
+##
+
+NOTE: This call set CURLOPT_HTTPAUTH(3) to CURLAUTH_AWS_SIGV4. Calling
+CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same as calling this with
+**"aws:amz"** in parameter.
 
 Example with "Test:Try", when curl uses the algorithm, it generates
-**"TEST-HMAC-SHA256"** for "Algorithm", **"x-try-date"** and
-**"X-Try-Date"** for "date", **"test4_request"** for "request type",
+**"TEST-HMAC-SHA256"** for "Algorithm", **"x-try-date"** and **"X-Try-Date"**
+for "date", **"test4_request"** for "request type",
 **"SignedHeaders=content-type;host;x-try-date"** for "signed headers"
 
 If you use just "test", instead of "test:try", test is used for every
 generated string.
 
+Setting CURLOPT_HTTPAUTH(3) with the CURLAUTH_AWS_SIGV4 bit set is the same as
+setting this option with a **"aws:amz"** parameter.
+
 # DEFAULT
 
-By default, the value of this parameter is NULL.
-Calling CURLOPT_HTTPAUTH(3) with CURLAUTH_AWS_SIGV4 is the same
-as calling this with **"aws:amz"** in parameter.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -91,19 +97,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.75.0
-
-# RETURN VALUE
-
-Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.
-
 # NOTES
 
 This option overrides the other auth types you might have set in
-CURLOPT_HTTPAUTH(3) which should be highlighted as this makes this auth
-method special. This method cannot be combined with other auth types.
+CURLOPT_HTTPAUTH(3) which should be highlighted as this makes this auth method
+special. This method cannot be combined with other auth types.
 
 A sha256 checksum of the request payload is used as input to the signature
 calculation. For POST requests, this is a checksum of the provided
@@ -111,6 +109,12 @@ CURLOPT_POSTFIELDS(3). Otherwise, it is the checksum of an empty buffer. For
 requests like PUT, you can provide your own checksum in an HTTP header named
 **x-provider2-content-sha256**.
 
-For **aws:s3**, a **x-amz-content-sha256** header is added to every request
-if not already present. For s3 requests with unknown payload, this header takes
+For **aws:s3**, a **x-amz-content-sha256** header is added to every request if
+not already present. For s3 requests with unknown payload, this header takes
 the special value "UNSIGNED-PAYLOAD".
+
+# %AVAILABILITY%
+
+# RETURN VALUE
+
+Returns CURLE_OK if the option is supported, and CURLE_UNKNOWN_OPTION if not.

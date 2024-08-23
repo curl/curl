@@ -1,0 +1,41 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+--skip-existing with file present
+</name>
+<command option="no-output">
+-o %LOGDIR/there http://%HOSTIP:%HTTPPORT/%TESTNUMBER --skip-existing
+</command>
+<file name="%LOGDIR/there">
+content
+</file>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+Note: skips transfer, "%LOGDIR/there" exists locally
+</stderr>
+<file name="%LOGDIR/there">
+content
+</file>
+</verify>
+</testcase>

@@ -38,9 +38,10 @@ CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
 void Curl_disconnect(struct Curl_easy *data,
-                     struct connectdata *, bool dead_connection);
+                     struct connectdata *, bool aborted);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
+void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);

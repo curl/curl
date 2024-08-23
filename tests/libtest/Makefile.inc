@@ -54,6 +54,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  lib670 lib671 lib672 lib673 lib674 lib676 lib677 lib678 \
  lib1156 \
  lib1301 \
+ lib1485 \
  lib1500 lib1501 lib1502 lib1503 lib1504 lib1505 lib1506 lib1507 lib1508 \
  lib1509 lib1510 lib1511 lib1512 lib1513 lib1514 lib1515         lib1517 \
  lib1518         lib1520 lib1521 lib1522 lib1523 \
@@ -73,7 +74,7 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  lib1945 lib1946 lib1947 lib1948 lib1955 lib1956 lib1957 lib1958 lib1959 \
  lib1960 lib1964 \
  lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 \
- lib2301 lib2302 lib2304 lib2305 lib2306 \
+ lib2301 lib2302 lib2304 lib2305 lib2306         lib2308 \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
@@ -346,6 +347,9 @@ lib678_LDADD = $(TESTUTIL_LIBS)
 lib1301_SOURCES = lib1301.c $(SUPPORTFILES) $(TESTUTIL)
 lib1301_LDADD = $(TESTUTIL_LIBS)
 
+lib1485_SOURCES = lib1485.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1485_LDADD = $(TESTUTIL_LIBS)
+
 lib1500_SOURCES = lib1500.c $(SUPPORTFILES) $(TESTUTIL)
 lib1500_LDADD = $(TESTUTIL_LIBS)
 
@@ -483,7 +487,7 @@ lib1551_SOURCES = lib1551.c $(SUPPORTFILES)
 lib1552_SOURCES = lib1552.c $(SUPPORTFILES) $(TESTUTIL)
 lib1552_LDADD = $(TESTUTIL_LIBS)
 
-lib1553_SOURCES = lib1553.c $(SUPPORTFILES) $(TESTUTIL)
+lib1553_SOURCES = lib1553.c $(SUPPORTFILES) $(TSTTRACE) $(TESTUTIL)
 lib1553_LDADD = $(TESTUTIL_LIBS)
 
 lib1554_SOURCES = lib1554.c $(SUPPORTFILES)
@@ -676,6 +680,9 @@ lib2305_LDADD = $(TESTUTIL_LIBS)
 
 lib2306_SOURCES = lib2306.c $(SUPPORTFILES)
 lib2306_LDADD = $(TESTUTIL_LIBS)
+
+lib2308_SOURCES = lib2308.c $(SUPPORTFILES)
+lib2308_LDADD = $(TESTUTIL_LIBS)
 
 lib2402_SOURCES = lib2402.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2402_LDADD = $(TESTUTIL_LIBS)

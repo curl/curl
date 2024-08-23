@@ -20,7 +20,7 @@ iMenu results		error.host	1
 # Client-side
 <client>
 <features>
-ipv6
+IPv6
 </features>
 <server>
 gopher-ipv6

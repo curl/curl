@@ -563,6 +563,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
       AC_DEFINE(CARES_NO_DEPRECATED, 1, [Ignore c-ares deprecation warnings])
       AC_SUBST([USE_ARES], [1])
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libcares"
       curl_res_msg="c-ares"
     fi
   fi
@@ -661,7 +662,6 @@ AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support]),
       dnl --enable-httpsrr option used
       want_httpsrr="yes"
       curl_httpsrr_msg="enabled (--disable-httpsrr)"
-      experimental="httpsrr"
       AC_MSG_RESULT([yes])
       ;;
   esac
@@ -697,7 +697,6 @@ AS_HELP_STRING([--disable-ech],[Disable ECH support]),
       dnl --enable-ech option used
       want_ech="yes"
       curl_ech_msg="enabled (--disable-ech)"
-      experimental="ech"
       AC_MSG_RESULT([yes])
       ;;
   esac

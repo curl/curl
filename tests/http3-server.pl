@@ -116,4 +116,4 @@ my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
     "--conf=$conf ".
     "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
-system("$cmdline 2>/dev/null");
+exec("exec $cmdline 2>/dev/null");

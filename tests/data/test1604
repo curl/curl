@@ -15,7 +15,7 @@ none
 unittest
 </features>
 <name>
-Test WIN32/MSDOS filename sanitization
+Test Windows/MS-DOS filename sanitization
 </name>
 </client>
 </testcase>

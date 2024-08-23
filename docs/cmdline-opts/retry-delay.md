@@ -5,7 +5,7 @@ Long: retry-delay
 Arg: <seconds>
 Help: Wait time between retries
 Added: 7.12.3
-Category: curl
+Category: curl timeout
 Multi: single
 See-also:
   - retry

@@ -45,8 +45,6 @@ struct OperationConfig;
 void progressbarinit(struct ProgressData *bar,
                      struct OperationConfig *config);
 
-unsigned int get_terminal_columns(void);
-
 /*
 ** callback for CURLOPT_PROGRESSFUNCTION
 */

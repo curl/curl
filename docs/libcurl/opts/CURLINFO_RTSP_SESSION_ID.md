@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - RTSP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -36,6 +37,8 @@ The **id** pointer is NULL or points to private memory. You MUST NOT free -
 it gets freed when you call curl_easy_cleanup(3) on the corresponding
 CURL handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,9 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.20.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

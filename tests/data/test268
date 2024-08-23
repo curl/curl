@@ -32,7 +32,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-JSON encoding of unicode string
+JSON encoding of Unicode string
 </name>
 <file name="%LOGDIR/junk" nonewline="yes">
 %hex[%e2%80%9c]hex%

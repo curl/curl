@@ -48,11 +48,11 @@ CC = cl.exe
 !IF "$(VC)"=="6"
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /Gm /Zi /D_DEBUG /GZ
-CFLAGS      = /I. /I../lib /I../include /nologo /W4 /GX /DWIN32 /YX /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I../lib /I../include /nologo /W4 /GX /YX /FD /c /DBUILDING_LIBCURL
 !ELSE
 CC_NODEBUG  = $(CC) /O2 /DNDEBUG
 CC_DEBUG    = $(CC) /Od /D_DEBUG /RTC1 /Z7 /LDd
-CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c /DBUILDING_LIBCURL
+CFLAGS      = /I. /I ../lib /I../include /nologo /W4 /EHsc /FD /c /DBUILDING_LIBCURL
 !ENDIF
 
 LFLAGS     = /nologo /machine:$(MACHINE)
@@ -90,7 +90,7 @@ PDB_NAME_DLL_DEBUG     = $(BASE_NAME_DEBUG).pdb
 
 # CURL Command section
 PROGRAM_NAME  = curl.exe
-CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /DWIN32 /FD /c
+CURL_CFLAGS   = /I../lib /I../include /nologo /W4 /EHsc /FD /c
 CURL_LFLAGS   = /out:$(DIRDIST)\bin\$(PROGRAM_NAME) /subsystem:console $(LFLAGS)
 CURL_RESFLAGS = /i../include
 
@@ -428,13 +428,13 @@ CFGSET = true
 # CURL_XX macros are for the curl.exe command
 
 !IF "$(DEBUG)"=="yes"
-RC_FLAGS = /dDEBUGBUILD=1 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+RC_FLAGS = /d_DEBUG /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CURL_CC       = $(CC_DEBUG) $(RTLIB_DEBUG)
-CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /dDEBUGBUILD=1 /Fo $@ $(CURL_SRC_DIR)\curl.rc
+CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /d_DEBUG /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ELSE
-RC_FLAGS = /dDEBUGBUILD=0 /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+RC_FLAGS = /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CURL_CC       = $(CC_NODEBUG) $(RTLIB)
-CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /dDEBUGBUILD=0 /Fo $@ $(CURL_SRC_DIR)\curl.rc
+CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ENDIF
 
 !IF "$(AS_DLL)" == "true"

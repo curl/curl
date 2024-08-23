@@ -8,7 +8,7 @@ Added: 7.36.0
 Mutexed:
 Requires: TLS
 Help: Disable the NPN TLS extension
-Category: tls http
+Category: deprecated
 Multi: boolean
 See-also:
   - no-alpn

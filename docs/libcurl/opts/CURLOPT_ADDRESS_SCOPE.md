@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_STDERR (3)
 Protocol:
   - All
+Added-in: 7.19.0
 ---
 
 # NAME
@@ -31,6 +32,8 @@ Pass a long specifying the scope id value to use when connecting to IPv6 address
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,9 +54,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.19.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

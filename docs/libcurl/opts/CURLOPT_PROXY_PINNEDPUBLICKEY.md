@@ -17,6 +17,7 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - wolfSSL
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -52,6 +53,8 @@ option.
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -109,7 +112,7 @@ footer:
 -----END PUBLIC KEY-----
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 PEM/DER support:
 
@@ -120,6 +123,8 @@ sha256 support:
  7.52.0: GnuTLS, OpenSSL, mbedTLS, wolfSSL
 
 Other SSL backends not supported.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

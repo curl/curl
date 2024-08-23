@@ -1,9 +1,9 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
 # SPDX-License-Identifier: curl
 #
-# Input: a cmdline docs markdown, it gets modfied *in place*
+# Input: a cmdline docs markdown, it gets modified *in place*
 #
 # The main purpose is to strip off the leading meta-data part, but also to
 # clean up whatever else the spell checker might have a problem with that we

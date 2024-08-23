@@ -11,6 +11,7 @@ See-also:
   - CURLINFO_PRIMARY_PORT (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
+Added-in: 7.21.0
 ---
 
 # NAME
@@ -29,6 +30,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_LOCAL_PORT, long *portp);
 
 Pass a pointer to a long to receive the local port number of the most recent
 connection done with this **curl** handle.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -57,9 +60,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.21.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

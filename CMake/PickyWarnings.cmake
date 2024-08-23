@@ -28,9 +28,19 @@ unset(WPICKY)
 if(CURL_WERROR AND
    ((CMAKE_COMPILER_IS_GNUCC AND
      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
-     NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # check_symbol_exists() incompatible with GCC -pedantic-errors in earlier CMake versions
+     NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
   set(WPICKY "${WPICKY} -pedantic-errors")
+endif()
+
+if(APPLE AND
+   (CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
+   (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
+  set(WPICKY "${WPICKY} -Werror=partial-availability")  # clang 3.6  appleclang 6.3
+endif()
+
+if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
+  set(WPICKY "${WPICKY} -Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
 endif()
 
 if(PICKY_COMPILER)
@@ -94,13 +104,13 @@ if(PICKY_COMPILER)
       -Wmissing-noreturn                   # clang  2.7  gcc  4.1
       -Wno-format-nonliteral               # clang  1.0  gcc  2.96 (3.0)
       -Wno-system-headers                  # clang  1.0  gcc  3.0
-    # -Wpadded                             # clang  2.9  gcc  4.1               # Not used because we cannot change public structs
+    # -Wpadded                             # clang  2.9  gcc  4.1               # Not used: We cannot change public structs
       -Wold-style-definition               # clang  2.7  gcc  3.4
       -Wredundant-decls                    # clang  2.7  gcc  4.1
       -Wsign-conversion                    # clang  2.9  gcc  4.3
         -Wno-error=sign-conversion                                              # FIXME
       -Wstrict-prototypes                  # clang  1.0  gcc  3.3
-    # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used because this basically disallows default case
+    # -Wswitch-enum                        # clang  2.7  gcc  4.1               # Not used: It basically disallows default case
       -Wtype-limits                        # clang  2.7  gcc  4.3
       -Wunreachable-code                   # clang  2.7  gcc  4.1
     # -Wunused-macros                      # clang  2.7  gcc  4.1               # Not practical
@@ -150,7 +160,7 @@ if(PICKY_COMPILER)
       if((CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 10.0) OR
          (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 12.4))
         list(APPEND WPICKY_ENABLE
-          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # we have silencing markup for clang 10.0 and above only
+          -Wimplicit-fallthrough           # clang  4.0  gcc  7.0  appleclang 12.4  # We do silencing for clang 10.0 and above only
         )
       endif()
     else()  # gcc
@@ -170,7 +180,7 @@ if(PICKY_COMPILER)
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5 AND MINGW)
         list(APPEND WPICKY_ENABLE
-          -Wno-pedantic-ms-format          #             gcc  4.5 (mingw-only)
+          -Wno-pedantic-ms-format          #             gcc  4.5 (MinGW-only)
         )
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
@@ -196,7 +206,7 @@ if(PICKY_COMPILER)
         list(APPEND WPICKY_ENABLE
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
-          -Wformat-overflow=2              #             gcc  7.0
+          -Wno-format-overflow             #             gcc  7.0
           -Wformat-truncation=2            #             gcc  7.0
           -Wimplicit-fallthrough           # clang  4.0  gcc  7.0
           -Wrestrict                       #             gcc  7.0
@@ -211,20 +221,20 @@ if(PICKY_COMPILER)
 
     #
 
-    foreach(_CCOPT IN LISTS WPICKY_ENABLE)
-      set(WPICKY "${WPICKY} ${_CCOPT}")
+    foreach(_ccopt IN LISTS WPICKY_ENABLE)
+      set(WPICKY "${WPICKY} ${_ccopt}")
     endforeach()
 
-    foreach(_CCOPT IN LISTS WPICKY_DETECT)
+    foreach(_ccopt IN LISTS WPICKY_DETECT)
       # surprisingly, CHECK_C_COMPILER_FLAG needs a new variable to store each new
       # test result in.
-      string(MAKE_C_IDENTIFIER "OPT${_CCOPT}" _optvarname)
+      string(MAKE_C_IDENTIFIER "OPT${_ccopt}" _optvarname)
       # GCC only warns about unknown -Wno- options if there are also other diagnostic messages,
       # so test for the positive form instead
-      string(REPLACE "-Wno-" "-W" _CCOPT_ON "${_CCOPT}")
-      check_c_compiler_flag(${_CCOPT_ON} ${_optvarname})
+      string(REPLACE "-Wno-" "-W" _ccopt_on "${_ccopt}")
+      check_c_compiler_flag(${_ccopt_on} ${_optvarname})
       if(${_optvarname})
-        set(WPICKY "${WPICKY} ${_CCOPT}")
+        set(WPICKY "${WPICKY} ${_ccopt}")
       endif()
     endforeach()
   endif()

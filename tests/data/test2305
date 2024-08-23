@@ -31,7 +31,7 @@ upgrade
 <client>
 # require debug for the forced CURL_ENTROPY
 <features>
-debug
+Debug
 ws
 </features>
 <server>
@@ -50,7 +50,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER %LOGDIR/save%TESTNUMBER
 
 #
 <verify>
-<file name="%LOGDIR/save%TESTNUMBER">
+<file name="%LOGDIR/save%TESTNUMBER" mode="text">
 %repeat[256 x helothisisdaniel]%
 %repeat[256 x helothisisdaniel]%
 %repeat[256 x helothisisdaniel]%

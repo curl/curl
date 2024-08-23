@@ -20,7 +20,7 @@ Example:
 Use the specified SOCKS4a proxy. If the port number is not specified, it is
 assumed at port 1080. This asks the proxy to resolve the hostname.
 
-To specify proxy on a unix domain socket, use localhost for host, e.g.
+To specify proxy on a Unix domain socket, use localhost for host, e.g.
 `socks4a://localhost/path/to/socket.sock`
 
 This option overrides any previous use of --proxy, as they are mutually

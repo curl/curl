@@ -29,6 +29,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/test%TESTNUMBER.txt --continue-at 
 </client>
 
 <verify>
+<strip>
+QUIT
+</strip>
 <upload>
 data
     to

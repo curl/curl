@@ -1,7 +1,7 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
-Title: libcurl
+Title: libcurl-url
 Section: 3
 Source: libcurl
 See-also:
@@ -14,6 +14,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
+Added-in: 7.62.0
 ---
 
 # NAME
@@ -156,9 +157,7 @@ Now the URL looks like
   https://example.com/?shoes=2&hat=1&candy=N%26N
 ~~~
 
-# AVAILABILITY
-
-The URL API was introduced in libcurl 7.62.0.
+# NOTES
 
 A URL with a literal IPv6 address can be parsed even when IPv6 support is not
 enabled.

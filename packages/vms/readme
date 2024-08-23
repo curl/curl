@@ -138,7 +138,7 @@ pcsi_product_gnv_curl.com
 readme.                 This file.
 
 report_openssl_version.c
-                        Program to check that the openssl version is new
+                        Program to check that the OpenSSL version is new
                         enough for building a shared libcurl image.
 
 setup_gnv_curl_build.com
@@ -173,7 +173,7 @@ the GNV tool kit, building a shared libcurl, and producing a PCSI kit for
 distribution.  The curl_gnv_build_steps.text is included in the release
 notes file of the PCSI kit.
 
-The building with 64 bit pointers does not currently work.
+The building with 64-bit pointers does not currently work.
 
 The build procedure will detect if HP OpenSSL, LDAP, and Kerberos are
 installed and default to building with them.

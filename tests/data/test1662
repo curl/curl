@@ -38,7 +38,7 @@ Funny-head: nono
 <client>
 <features>
 Mime
-debug
+Debug
 </features>
 <server>
 http

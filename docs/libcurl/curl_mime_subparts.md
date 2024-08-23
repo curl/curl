@@ -11,6 +11,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -40,6 +41,8 @@ subsequent calls to mime API functions.
 Setting a part's contents multiple times is valid: only the value set by the
 last call is retained. It is possible to unassign previous part's contents by
 setting *subparts* to NULL.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -78,9 +81,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

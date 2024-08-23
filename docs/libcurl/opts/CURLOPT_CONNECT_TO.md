@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_URL (3)
 Protocol:
   - All
+Added-in: 7.49.0
 ---
 
 # NAME
@@ -79,6 +80,8 @@ a transfer before you call curl_slist_free_all(3) on the list.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -103,9 +106,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.49.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

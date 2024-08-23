@@ -69,6 +69,9 @@ if [ -f "${SCRIPTDIR}/config400.override" ]
 then    . "${SCRIPTDIR}/config400.override"
 fi
 
+#       Check if perl available.
+{ [ -n "${PASEPERL}" ] && [ -x "${PASEPERL}" ]; } || PASEPERL=
+
 #       Need to get the version definitions.
 
 LIBCURL_VERSION=$(grep '^#define  *LIBCURL_VERSION '                    \

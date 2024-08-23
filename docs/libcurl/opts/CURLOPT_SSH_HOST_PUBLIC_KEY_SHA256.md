@@ -11,6 +11,7 @@ See-also:
 Protocol:
   - SFTP
   - SCP
+Added-in: 7.80.0
 ---
 
 # NAME
@@ -36,6 +37,8 @@ does not match the hash the remote host provides.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,10 +56,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.80.0
 Requires the libssh2 backend.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

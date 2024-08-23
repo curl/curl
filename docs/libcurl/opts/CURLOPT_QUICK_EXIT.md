@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_RESOLVE (3)
 Protocol:
   - All
+Added-in: 7.87.0
 ---
 
 # NAME
@@ -37,6 +38,8 @@ possible (though short-lived) leak of associated resources.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,9 +54,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.87.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

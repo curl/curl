@@ -38,6 +38,8 @@ BEGIN {
         $automakestyle
         $CURL
         $CURLVERSION
+        $CURLVERNUM
+        $DATE
         $has_shared
         $LIBDIR
         $listonly
@@ -82,12 +84,13 @@ our $run_event_based; # run curl with --test-event to test the event API
 our $automakestyle;   # use automake-like test status output format
 our $anyway;          # continue anyway, even if a test fail
 our $CURLVERSION="";  # curl's reported version number
+our $CURLVERNUM="";   # curl's reported version number (without -DEV)
 our $randseed = 0;    # random number seed
 
 # paths
 our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
-our $perl="perl -I$srcdir"; # invoke perl like this
+our $perl="perl -I. -I$srcdir"; # invoke perl like this
 our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR="./libtest";

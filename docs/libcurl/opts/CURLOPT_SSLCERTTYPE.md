@@ -16,6 +16,7 @@ TLS-backend:
   - Schannel
   - Secure Transport
   - wolfSSL
+Added-in: 7.9.3
 ---
 
 # NAME
@@ -37,7 +38,7 @@ the format of your certificate.
 
 Supported formats are "PEM" and "DER", except with Secure Transport or
 Schannel. OpenSSL (versions 0.9.3 and later), Secure Transport (on iOS 5 or
-later, or OS X 10.7 or later) and Schannel support "P12" for PKCS#12-encoded
+later, or macOS 10.7 or later) and Schannel support "P12" for PKCS#12-encoded
 files.
 
 The application does not have to keep the string around after setting this
@@ -46,6 +47,8 @@ option.
 # DEFAULT
 
 "PEM"
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-If built TLS enabled. Added in 7.9.3
+# %AVAILABILITY%
 
 # RETURN VALUE
 

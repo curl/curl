@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PREREQFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.80.0
 ---
 
 # NAME
@@ -32,6 +33,8 @@ argument in the pre-request callback set with CURLOPT_PREREQFUNCTION(3).
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -62,9 +65,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.80.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

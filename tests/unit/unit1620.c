@@ -40,14 +40,42 @@ static void unit_stop(void)
   curl_global_cleanup();
 }
 
+static void test_parse(
+  const char *input,
+  const char *exp_username,
+  const char *exp_password,
+  const char *exp_options)
+{
+  char *userstr = NULL;
+  char *passwdstr = NULL;
+  char *options = NULL;
+  CURLcode rc = Curl_parse_login_details(input, strlen(input),
+                                &userstr, &passwdstr, &options);
+  fail_unless(rc == CURLE_OK, "Curl_parse_login_details() failed");
+
+  fail_unless(!!exp_username == !!userstr, "username expectation failed");
+  fail_unless(!!exp_password == !!passwdstr, "password expectation failed");
+  fail_unless(!!exp_options == !!options, "options expectation failed");
+
+  if(!unitfail) {
+    fail_unless(!exp_username || strcmp(userstr, exp_username) == 0,
+                "userstr should be equal to exp_username");
+    fail_unless(!exp_password || strcmp(passwdstr, exp_password) == 0,
+                "passwdstr should be equal to exp_password");
+    fail_unless(!exp_options || strcmp(options, exp_options) == 0,
+                "options should be equal to exp_options");
+  }
+
+  free(userstr);
+  free(passwdstr);
+  free(options);
+}
+
 UNITTEST_START
 {
   CURLcode rc;
   struct Curl_easy *empty;
-  const char *hostname = "hostname";
   enum dupstring i;
-  char *userstr = NULL;
-  char *passwdstr = NULL;
 
   bool async = FALSE;
   bool protocol_connect = FALSE;
@@ -75,12 +103,20 @@ UNITTEST_START
   rc = Curl_init_do(empty, empty->conn);
   fail_unless(rc == CURLE_OK, "Curl_init_do() failed");
 
-  rc = Curl_parse_login_details(hostname, strlen(hostname),
-                                &userstr, &passwdstr, NULL);
-  fail_unless(rc == CURLE_OK,
-              "Curl_parse_login_details() failed");
-  free(userstr);
-  free(passwdstr);
+  test_parse("hostname", "hostname", NULL, NULL);
+  test_parse("user:password", "user", "password", NULL);
+  test_parse("user:password;options", "user", "password", "options");
+  test_parse("user:password;options;more", "user", "password", "options;more");
+  test_parse("", "", NULL, NULL);
+  test_parse(":", "", "", NULL);
+  test_parse(":;", "", "", NULL);
+  test_parse(":password", "", "password", NULL);
+  test_parse(":password;", "", "password", NULL);
+  test_parse(";options", "", NULL, "options");
+  test_parse("user;options", "user", NULL, "options");
+  test_parse("user:;options", "user", "", "options");
+  test_parse("user;options:password", "user", "password", "options");
+  test_parse("user;options:", "user", "", "options");
 
   Curl_freeset(empty);
   for(i = (enum dupstring)0; i < STRING_LAST; i++) {

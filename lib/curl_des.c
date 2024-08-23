@@ -24,10 +24,10 @@
 
 #include "curl_setup.h"
 
-#if defined(USE_CURL_NTLM_CORE) && !defined(USE_WOLFSSL) &&     \
-  (defined(USE_GNUTLS) ||                                       \
-   defined(USE_SECTRANSP) ||                                    \
-   defined(USE_OS400CRYPTO) ||                                  \
+#if defined(USE_CURL_NTLM_CORE) && \
+  (defined(USE_GNUTLS) ||          \
+   defined(USE_SECTRANSP) ||       \
+   defined(USE_OS400CRYPTO) ||     \
    defined(USE_WIN32_CRYPTO))
 
 #include "curl_des.h"
@@ -36,7 +36,7 @@
  * Curl_des_set_odd_parity()
  *
  * This is used to apply odd parity to the given byte array. It is typically
- * used by when a cryptography engine doesn't have its own version.
+ * used by when a cryptography engine does not have its own version.
  *
  * The function is a port of the Java based oddParity() function over at:
  *

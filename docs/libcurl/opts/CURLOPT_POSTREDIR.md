@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_POSTFIELDS (3)
 Protocol:
   - HTTP
+Added-in: 7.19.1
 ---
 
 # NAME
@@ -48,6 +49,8 @@ when setting CURLOPT_FOLLOWLOCATION(3).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -69,10 +72,12 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
-Added in 7.17.1. This option was known as CURLOPT_POST301 up to 7.19.0 as it
-only supported the 301 then. CURL_REDIR_POST_303 was added in 7.26.0.
+This option was known as CURLOPT_POST301 up to 7.19.0 as it only supported the
+301 then. CURL_REDIR_POST_303 was added in 7.26.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

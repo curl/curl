@@ -7,8 +7,10 @@ Source: libcurl
 See-also:
   - CURLOPT_TCP_KEEPALIVE (3)
   - CURLOPT_TCP_KEEPIDLE (3)
+  - CURLOPT_TCP_KEEPCNT (3)
 Protocol:
-  - All
+  - TCP
+Added-in: 7.25.0
 ---
 
 # NAME
@@ -35,6 +37,8 @@ this amount.
 
 60
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,14 +57,15 @@ int main(void)
     /* interval time between keep-alive probes: 60 seconds */
     curl_easy_setopt(curl, CURLOPT_TCP_KEEPINTVL, 60L);
 
+    /* maximum number of keep-alive probes: 3 */
+    curl_easy_setopt(curl, CURLOPT_TCP_KEEPCNT, 3L);
+
     curl_easy_perform(curl);
   }
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

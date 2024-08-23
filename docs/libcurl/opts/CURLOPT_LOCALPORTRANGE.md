@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_LOCALPORT (3)
 Protocol:
   - All
+Added-in: 7.15.2
 ---
 
 # NAME
@@ -38,6 +39,8 @@ setup failures.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -56,9 +59,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.15.2
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -11,6 +11,7 @@ See-also:
   - proxy-capath
   - cacert
   - capath
+  - dump-ca-embed
   - proxy
 Example:
   - --proxy-cacert CA-file.txt -x https://proxy $URL
@@ -18,4 +19,10 @@ Example:
 
 # `--proxy-cacert`
 
-Same as --cacert but used in HTTPS proxy context.
+Use the specified certificate file to verify the HTTPS proxy. The file may
+contain multiple CA certificates. The certificate(s) must be in PEM format.
+
+This allows you to use a different trust for the proxy compared to the remote
+server connected to via the proxy.
+
+Equivalent to --cacert but used in HTTPS proxy context.

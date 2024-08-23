@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PREREQDATA (3)
 Protocol:
   - All
+Added-in: 7.80.0
 ---
 
 # NAME
@@ -83,7 +84,9 @@ The pointer you set with CURLOPT_PREREQDATA(3).
 
 # DEFAULT
 
-By default, this is NULL and unused.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -114,9 +117,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.80.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

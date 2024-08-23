@@ -26,6 +26,7 @@
 
 #include <curl/curl.h>
 #include "urldata.h"
+#include "connect.h"
 #include "share.h"
 #include "psl.h"
 #include "vtls/vtls.h"
@@ -64,7 +65,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
     return CURLSHE_INVALID;
 
   if(share->dirty)
-    /* don't allow setting options while one or more handles are already
+    /* do not allow setting options while one or more handles are already
        using this share */
     return CURLSHE_IN_USE;
 
@@ -119,7 +120,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       break;
 
     case CURL_LOCK_DATA_CONNECT:
-      if(Curl_conncache_init(&share->conn_cache, 103))
+      if(Curl_conncache_init(&share->conn_cache, NULL, 103))
         res = CURLSHE_NOMEM;
       break;
 
@@ -223,8 +224,11 @@ curl_share_cleanup(struct Curl_share *share)
     return CURLSHE_IN_USE;
   }
 
-  Curl_conncache_close_all_connections(&share->conn_cache);
-  Curl_conncache_destroy(&share->conn_cache);
+  if(share->specifier & (1 << CURL_LOCK_DATA_CONNECT)) {
+    /* avoid the hash if it was never initialized */
+    Curl_conncache_close_all_connections(&share->conn_cache);
+    Curl_conncache_destroy(&share->conn_cache);
+  }
   Curl_hash_destroy(&share->hostcache);
 
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)
@@ -268,7 +272,7 @@ Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
     if(share->lockfunc) /* only call this if set! */
       share->lockfunc(data, type, accesstype, share->clientdata);
   }
-  /* else if we don't share this, pretend successful lock */
+  /* else if we do not share this, pretend successful lock */
 
   return CURLSHE_OK;
 }

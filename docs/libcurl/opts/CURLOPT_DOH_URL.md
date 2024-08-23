@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_VERBOSE (3)
 Protocol:
   - All
+Added-in: 7.62.0
 ---
 
 # NAME
@@ -63,8 +64,9 @@ CURLOPT_FTPPORT(3), a proxy type set to **CURLPROXY_SOCKS4** or
 
 # DEFAULT
 
-NULL - there is no default DoH URL. If this option is not set, libcurl uses
-the default name resolver.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -80,9 +82,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.62.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

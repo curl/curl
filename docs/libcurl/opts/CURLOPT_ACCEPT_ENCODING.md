@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_TRANSFER_ENCODING (3)
 Protocol:
   - HTTP
+Added-in: 7.21.6
 ---
 
 # NAME
@@ -71,9 +72,22 @@ sending the length of the non-compressed content is a common server mistake).
 The application does not have to keep the string around after setting this
 option.
 
+# HISTORY
+
+This option was called CURLOPT_ENCODING before 7.21.6
+
+# NOTES
+
+The specific libcurl you are using must have been built with zlib to be able to
+decompress gzip and deflate responses, with the brotli library to
+decompress brotli responses and with the zstd library to decompress zstd
+responses.
+
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -93,14 +107,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-This option was called CURLOPT_ENCODING before 7.21.6
-
-The specific libcurl you are using must have been built with zlib to be able to
-decompress gzip and deflate responses, with the brotli library to
-decompress brotli responses and with the zstd library to decompress zstd
-responses.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

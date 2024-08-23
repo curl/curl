@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* lib/curl_config.h.in.  Generated somehow by cmake.  */
+/* lib/curl_config.h.in. Generated somehow by cmake.  */
 
 /* Location of default ca bundle */
 #cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
@@ -304,9 +304,6 @@
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
-/* Define to 1 if you have the `idna_strerror' function. */
-#cmakedefine HAVE_IDNA_STRERROR 1
-
 /* Define to 1 if you have the <ifaddrs.h> header file. */
 #cmakedefine HAVE_IFADDRS_H 1
 
@@ -368,12 +365,6 @@
 /* Define to 1 if you have the idn2.h header file. */
 #cmakedefine HAVE_IDN2_H 1
 
-/* Define to 1 if you have the `socket' library (-lsocket). */
-#cmakedefine HAVE_LIBSOCKET 1
-
-/* Define to 1 if you have the `ssh2' library (-lssh2). */
-#cmakedefine HAVE_LIBSSH2 1
-
 /* if zlib is available */
 #cmakedefine HAVE_LIBZ 1
 
@@ -418,6 +409,9 @@
 
 /* Define to 1 if you have the `pipe' function. */
 #cmakedefine HAVE_PIPE 1
+
+/* Define to 1 if you have the `eventfd' function. */
+#cmakedefine HAVE_EVENTFD 1
 
 /* If you have a fine poll */
 #cmakedefine HAVE_POLL_FINE 1
@@ -538,6 +532,9 @@
 
 /* Define to 1 if you have the timeval struct. */
 #cmakedefine HAVE_STRUCT_TIMEVAL 1
+
+/* Define to 1 if you have the <sys/eventfd.h> header file. */
+#cmakedefine HAVE_SYS_EVENTFD_H 1
 
 /* Define to 1 if you have the <sys/filio.h> header file. */
 #cmakedefine HAVE_SYS_FILIO_H 1
@@ -677,7 +674,7 @@ ${SIZEOF_TIME_T_CODE}
 /* Define if you want to enable POSIX threaded DNS lookup */
 #cmakedefine USE_THREADS_POSIX 1
 
-/* Define if you want to enable WIN32 threaded DNS lookup */
+/* Define if you want to enable Win32 threaded DNS lookup */
 #cmakedefine USE_THREADS_WIN32 1
 
 /* if GnuTLS is enabled */
@@ -692,16 +689,28 @@ ${SIZEOF_TIME_T_CODE}
 /* if BearSSL is enabled */
 #cmakedefine USE_BEARSSL 1
 
-/* if WolfSSL is enabled */
+/* if Rustls is enabled */
+#cmakedefine USE_RUSTLS 1
+
+/* if wolfSSL is enabled */
 #cmakedefine USE_WOLFSSL 1
 
-/* if libSSH is in use */
+/* if wolfSSL has the wolfSSL_DES_ecb_encrypt function. */
+#cmakedefine HAVE_WOLFSSL_DES_ECB_ENCRYPT 1
+
+/* if wolfSSL has the wolfSSL_BIO_set_shutdown function. */
+#cmakedefine HAVE_WOLFSSL_FULL_BIO 1
+
+/* if libssh is in use */
 #cmakedefine USE_LIBSSH 1
 
-/* if libSSH2 is in use */
+/* if libssh2 is in use */
 #cmakedefine USE_LIBSSH2 1
 
-/* if libPSL is in use */
+/* if wolfssh is in use */
+#cmakedefine USE_WOLFSSH 1
+
+/* if libpsl is in use */
 #cmakedefine USE_LIBPSL 1
 
 /* if you want to use OpenLDAP code instead of legacy ldap implementation */
@@ -713,7 +722,16 @@ ${SIZEOF_TIME_T_CODE}
 /* if librtmp/rtmpdump is in use */
 #cmakedefine USE_LIBRTMP 1
 
-/* Define to 1 if you don't want the OpenSSL configuration to be loaded
+/* if GSASL is in use */
+#cmakedefine USE_GSASL 1
+
+/* if libuv is in use */
+#cmakedefine USE_LIBUV 1
+
+/* Define to 1 if you have the <uv.h> header file. */
+#cmakedefine HAVE_UV_H 1
+
+/* Define to 1 if you do not want the OpenSSL configuration to be loaded
    automatically */
 #cmakedefine CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG 1
 
@@ -755,11 +773,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Version number of package */
 #cmakedefine VERSION ${VERSION}
-
-/* Define to 1 if OS is AIX. */
-#ifndef _ALL_SOURCE
-#  undef _ALL_SOURCE
-#endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}

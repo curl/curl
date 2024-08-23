@@ -25,15 +25,13 @@
 
 #include "strcase.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_libinfo.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
-/* global variable definitions, for libcurl run-time info */
+/* global variable definitions, for libcurl runtime info */
 
 static const char *no_protos = NULL;
 
@@ -124,10 +122,11 @@ static struct feature_name_presentp {
 
 static const char *fnames[sizeof(maybe_feature) / sizeof(maybe_feature[0])];
 const char * const *feature_names = fnames;
+size_t feature_count;
 
 /*
- * libcurl_info_init: retrieves run-time information about libcurl,
- * setting a global pointer 'curlinfo' to libcurl's run-time info
+ * libcurl_info_init: retrieves runtime information about libcurl,
+ * setting a global pointer 'curlinfo' to libcurl's runtime info
  * struct, count protocols and flag those we are interested in.
  * Global pointer feature_names is set to the feature names array. If
  * the latter is not returned by curl_version_info(), it is built from
@@ -139,7 +138,7 @@ CURLcode get_libcurl_info(void)
   CURLcode result = CURLE_OK;
   const char *const *builtin;
 
-  /* Pointer to libcurl's run-time version information */
+  /* Pointer to libcurl's runtime version information */
   curlinfo = curl_version_info(CURLVERSION_NOW);
   if(!curlinfo)
     return CURLE_FAILED_INIT;
@@ -182,6 +181,7 @@ CURLcode get_libcurl_info(void)
           *p->feature_presentp = TRUE;
         break;
       }
+    ++feature_count;
   }
 
   return CURLE_OK;

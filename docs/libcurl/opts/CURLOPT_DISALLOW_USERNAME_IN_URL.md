@@ -5,12 +5,13 @@ Title: CURLOPT_DISALLOW_USERNAME_IN_URL
 Section: 3
 Source: libcurl
 See-also:
-  - CURLOPT_PROTOCOLS (3)
+  - CURLOPT_PROTOCOLS_STR (3)
   - CURLOPT_URL (3)
   - curl_url_set (3)
   - libcurl-security (3)
 Protocol:
   - All
+Added-in: 7.61.0
 ---
 
 # NAME
@@ -36,7 +37,9 @@ curl_url_set(3) function.
 
 # DEFAULT
 
-0 (disabled) - usernames are allowed by default.
+0 (disabled)
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -54,9 +57,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.61.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -57,9 +57,14 @@
   #if !defined(OPENSSL_NO_DES) && !defined(OPENSSL_NO_DEPRECATED_3_0)
     #define USE_OPENSSL_DES
   #endif
+#elif defined(USE_WOLFSSL)
+  #include <wolfssl/options.h>
+  #if !defined(NO_DES3)
+    #define USE_OPENSSL_DES
+  #endif
 #endif
 
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
 
 #if defined(USE_OPENSSL)
 #  include <openssl/des.h>
@@ -67,7 +72,6 @@
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
 #else
-#  include <wolfssl/options.h>
 #  include <wolfssl/openssl/des.h>
 #  include <wolfssl/openssl/md5.h>
 #  include <wolfssl/openssl/ssl.h>
@@ -110,7 +114,7 @@
 #elif defined(USE_WIN32_CRYPTO)
 #  include <wincrypt.h>
 #else
-#  error "Can't compile NTLM support without a crypto library with DES."
+#  error "cannot compile NTLM support without a crypto library with DES."
 #  define CURL_NTLM_NOT_SUPPORTED
 #endif
 
@@ -137,20 +141,20 @@
 */
 static void extend_key_56_to_64(const unsigned char *key_56, char *key)
 {
-  key[0] = key_56[0];
-  key[1] = (unsigned char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
-  key[2] = (unsigned char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
-  key[3] = (unsigned char)(((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3));
-  key[4] = (unsigned char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
-  key[5] = (unsigned char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
-  key[6] = (unsigned char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
-  key[7] = (unsigned char) ((key_56[6] << 1) & 0xFF);
+  key[0] = (char)key_56[0];
+  key[1] = (char)(((key_56[0] << 7) & 0xFF) | (key_56[1] >> 1));
+  key[2] = (char)(((key_56[1] << 6) & 0xFF) | (key_56[2] >> 2));
+  key[3] = (char)(((key_56[2] << 5) & 0xFF) | (key_56[3] >> 3));
+  key[4] = (char)(((key_56[3] << 4) & 0xFF) | (key_56[4] >> 4));
+  key[5] = (char)(((key_56[4] << 3) & 0xFF) | (key_56[5] >> 5));
+  key[6] = (char)(((key_56[5] << 2) & 0xFF) | (key_56[6] >> 6));
+  key[7] = (char) ((key_56[6] << 1) & 0xFF);
 }
 #endif
 
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
 /*
- * Turns a 56 bit key into the 64 bit, odd parity key and sets the key.  The
+ * Turns a 56-bit key into a 64-bit, odd parity key and sets the key. The
  * key schedule ks is also set.
  */
 static void setup_des_key(const unsigned char *key_56,
@@ -158,7 +162,7 @@ static void setup_des_key(const unsigned char *key_56,
 {
   DES_cblock key;
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, (char *) &key);
 
   /* Set the key parity to odd */
@@ -175,7 +179,7 @@ static void setup_des_key(const unsigned char *key_56,
 {
   char key[8];
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
@@ -193,7 +197,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   mbedtls_des_context ctx;
   char key[8];
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
@@ -214,7 +218,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   size_t out_len;
   CCCryptorStatus err;
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, key);
 
   /* Set the key parity to odd */
@@ -240,7 +244,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   ctl.Func_ID = ENCRYPT_ONLY;
   ctl.Data_Len = sizeof(key);
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, ctl.Crypto_Key);
 
   /* Set the key parity to odd */
@@ -278,7 +282,7 @@ static bool encrypt_des(const unsigned char *in, unsigned char *out,
   blob.hdr.aiKeyAlg = CALG_DES;
   blob.len = sizeof(blob.key);
 
-  /* Expand the 56-bit key to 64-bits */
+  /* Expand the 56-bit key to 64 bits */
   extend_key_56_to_64(key_56, blob.key);
 
   /* Set the key parity to odd */
@@ -313,7 +317,7 @@ void Curl_ntlm_core_lm_resp(const unsigned char *keys,
                             const unsigned char *plaintext,
                             unsigned char *results)
 {
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
   DES_key_schedule ks;
 
   setup_des_key(keys, DESKEY(ks));
@@ -367,7 +371,7 @@ CURLcode Curl_ntlm_core_mk_lm_hash(const char *password,
   {
     /* Create LanManager hashed password. */
 
-#if defined(USE_OPENSSL_DES) || defined(USE_WOLFSSL)
+#if defined(USE_OPENSSL_DES)
     DES_key_schedule ks;
 
     setup_des_key(pw, DESKEY(ks));
@@ -466,13 +470,13 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
   unsigned int r, s;
   unsigned int i;
 
-  ft->dwLowDateTime = t & 0xFFFFFFFF;
+  ft->dwLowDateTime = (unsigned int)t & 0xFFFFFFFF;
   ft->dwHighDateTime = 0;
 
 # ifndef HAVE_TIME_T_UNSIGNED
   /* Extend sign if needed. */
   if(ft->dwLowDateTime & 0x80000000)
-    ft->dwHighDateTime = ~0;
+    ft->dwHighDateTime = ~(unsigned int)0;
 # endif
 
   /* Bias seconds to Jan 1, 1601.
@@ -534,13 +538,13 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_hash(const char *user, size_t userlen,
 /*
  * Curl_ntlm_core_mk_ntlmv2_resp()
  *
- * This creates the NTLMv2 response as set in the ntlm type-3 message.
+ * This creates the NTLMv2 response as set in the NTLM type-3 message.
  *
  * Parameters:
  *
- * ntlmv2hash       [in] - The ntlmv2 hash (16 bytes)
+ * ntlmv2hash       [in] - The NTLMv2 hash (16 bytes)
  * challenge_client [in] - The client nonce (8 bytes)
- * ntlm             [in] - The ntlm data struct being used to read TargetInfo
+ * ntlm             [in] - The NTLM data struct being used to read TargetInfo
                            and Server challenge received in the type-2 message
  * ntresp          [out] - The address where a pointer to newly allocated
  *                         memory holding the NTLMv2 response.
@@ -629,11 +633,11 @@ CURLcode Curl_ntlm_core_mk_ntlmv2_resp(unsigned char *ntlmv2hash,
 /*
  * Curl_ntlm_core_mk_lmv2_resp()
  *
- * This creates the LMv2 response as used in the ntlm type-3 message.
+ * This creates the LMv2 response as used in the NTLM type-3 message.
  *
  * Parameters:
  *
- * ntlmv2hash        [in] - The ntlmv2 hash (16 bytes)
+ * ntlmv2hash        [in] - The NTLMv2 hash (16 bytes)
  * challenge_client  [in] - The client nonce (8 bytes)
  * challenge_client  [in] - The server challenge (8 bytes)
  * lmresp           [out] - The LMv2 response (24 bytes)
@@ -657,7 +661,7 @@ CURLcode  Curl_ntlm_core_mk_lmv2_resp(unsigned char *ntlmv2hash,
   if(result)
     return result;
 
-  /* Concatenate the HMAC MD5 output  with the client nonce */
+  /* Concatenate the HMAC MD5 output with the client nonce */
   memcpy(lmresp, hmac_output, 16);
   memcpy(lmresp + 16, challenge_client, 8);
 

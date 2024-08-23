@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_PROXYUSERNAME (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -40,7 +41,9 @@ option.
 
 # DEFAULT
 
-This is NULL by default.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -59,9 +62,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

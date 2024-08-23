@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_RTSP_SERVER_CSEQ (3)
 Protocol:
   - RTSP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -35,6 +36,8 @@ increments from this new number henceforth.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,9 +54,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.20.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

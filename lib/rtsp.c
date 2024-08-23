@@ -79,7 +79,7 @@ static unsigned int rtsp_conncheck(struct Curl_easy *data,
                                    unsigned int checks_to_perform);
 
 /* this returns the socket to wait for in the DO and DOING state for the multi
-   interface and then we're always _sending_ a request and thus we wait for
+   interface and then we are always _sending_ a request and thus we wait for
    the single socket to become writable only */
 static int rtsp_getsock_do(struct Curl_easy *data, struct connectdata *conn,
                            curl_socket_t *socks)
@@ -261,7 +261,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
    * Since all RTSP requests are included here, there is no need to
    * support custom requests like HTTP.
    **/
-  data->req.no_body = TRUE; /* most requests don't contain a body */
+  data->req.no_body = TRUE; /* most requests do not contain a body */
   switch(rtspreq) {
   default:
     failf(data, "Got invalid RTSP request");
@@ -310,13 +310,15 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   }
 
   if(rtspreq == RTSPREQ_RECEIVE) {
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, -1);
+    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, TRUE);
     goto out;
   }
 
   p_session_id = data->set.str[STRING_RTSP_SESSION_ID];
   if(!p_session_id &&
-     (rtspreq & ~(RTSPREQ_OPTIONS | RTSPREQ_DESCRIBE | RTSPREQ_SETUP))) {
+     (rtspreq & ~(Curl_RtspReq)(RTSPREQ_OPTIONS |
+                                RTSPREQ_DESCRIBE |
+                                RTSPREQ_SETUP))) {
     failf(data, "Refusing to issue an RTSP request [%s] without a session ID.",
           p_request);
     result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -576,7 +578,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  Curl_xfer_setup(data, FIRSTSOCKET, -1, TRUE, FIRSTSOCKET);
+  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, TRUE);
 
   /* issue the request */
   result = Curl_req_send(data, &req_buffer);
@@ -950,7 +952,7 @@ CURLcode Curl_rtsp_parseheader(struct Curl_easy *data, const char *header)
     /* Find the end of Session ID
      *
      * Allow any non whitespace content, up to the field separator or end of
-     * line. RFC 2326 isn't 100% clear on the session ID and for example
+     * line. RFC 2326 is not 100% clear on the session ID and for example
      * gstreamer does url-encoded session ID's not covered by the standard.
      */
     end = start;

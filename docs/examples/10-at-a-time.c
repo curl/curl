@@ -26,12 +26,8 @@
  * </DESC>
  */
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef _WIN32
-#  include <unistd.h>
-#endif
 #include <curl/curl.h>
 
 static const char *urls[] = {
@@ -127,7 +123,8 @@ int main(void)
     int still_alive = 1;
     curl_multi_perform(cm, &still_alive);
 
-    while((msg = curl_multi_info_read(cm, &msgs_left))) {
+    /* !checksrc! disable EQUALSNULL 1 */
+    while((msg = curl_multi_info_read(cm, &msgs_left)) != NULL) {
       if(msg->msg == CURLMSG_DONE) {
         char *url;
         CURL *e = msg->easy_handle;

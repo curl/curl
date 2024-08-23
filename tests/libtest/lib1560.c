@@ -151,6 +151,9 @@ struct clearurlcase {
 };
 
 static const struct testcase get_parts_list[] ={
+  {"curl.se",
+   "[10] | [11] | [12] | [13] | curl.se | [15] | / | [16] | [17]",
+   CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK},
   {"https://curl.se:0/#",
    "https | [11] | [12] | [13] | curl.se | 0 | / | [16] | ",
    0, CURLU_GET_EMPTY, CURLUE_OK},
@@ -526,6 +529,9 @@ static const struct testcase get_parts_list[] ={
 };
 
 static const struct urltestcase get_url_list[] = {
+  {"example.com",
+   "example.com/",
+   CURLU_GUESS_SCHEME, CURLU_NO_GUESS_SCHEME, CURLUE_OK},
   {"http://user@example.com?#",
    "http://user@example.com/?#",
    0, CURLU_GET_EMPTY, CURLUE_OK},
@@ -832,6 +838,14 @@ static const struct setgetcase setget_parts_list[] = {
 
 /* !checksrc! disable SPACEBEFORECOMMA 1 */
 static const struct setcase set_parts_list[] = {
+  {"https://example.com/",
+   "host=%43url.se,",
+   "https://%43url.se/",
+   0, 0, CURLUE_OK, CURLUE_OK},
+  {"https://example.com/",
+   "host=%25url.se,",
+   "",
+   0, 0, CURLUE_OK, CURLUE_BAD_HOSTNAME},
   {"https://example.com/?param=value",
    "query=\"\",",
    "https://example.com/",

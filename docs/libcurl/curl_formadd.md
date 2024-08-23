@@ -10,6 +10,7 @@ See-also:
   - curl_mime_init (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -202,6 +203,8 @@ for the curl handle.
 
 See example below.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -299,7 +302,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Deprecated in 7.56.0. Before this release, field names were allowed to contain
 zero-valued bytes. The pseudo-filename "-" to read stdin is discouraged
@@ -307,6 +310,8 @@ although still supported, but data is not read before being actually sent: the
 effective data size can then not be automatically determined, resulting in a
 chunked encoding transfer. Backslashes and double quotes in field and
 filenames are now escaped before transmission.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

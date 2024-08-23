@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_RESUME_FROM (3)
 Protocol:
   - All
+Added-in: 7.11.0
 ---
 
 # NAME
@@ -41,6 +42,8 @@ file to the remote target file.
 
 0, not used
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -68,9 +71,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.11.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

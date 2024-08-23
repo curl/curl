@@ -13,6 +13,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - GnuTLS
+Added-in: 7.5
 ---
 
 # NAME
@@ -35,6 +36,8 @@ verification that was requested (using the CURLOPT_SSL_VERIFYPEER(3)
 option).
 
 0 is a positive result. Non-zero is an error.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.5. Only set by the OpenSSL/libressl/boringssl and GnuTLS backends.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

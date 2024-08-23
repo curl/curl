@@ -6,7 +6,7 @@ Arg: <seconds>
 Help: How long to wait for 100-continue
 Protocols: HTTP
 Added: 7.47.0
-Category: http
+Category: http timeout
 Multi: single
 See-also:
   - connect-timeout

@@ -237,7 +237,7 @@ static int parsenetrc(const char *host,
           else if(strcasecompare("password", tok))
             state_password = 1;
           else if(strcasecompare("machine", tok)) {
-            /* ok, there's machine here go => */
+            /* ok, there is machine here go => */
             state = HOSTFOUND;
             state_our_login = FALSE;
           }
@@ -277,7 +277,7 @@ out:
 /*
  * @unittest: 1304
  *
- * *loginp and *passwordp MUST be allocated if they aren't NULL when passed
+ * *loginp and *passwordp MUST be allocated if they are not NULL when passed
  * in.
  */
 int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,

@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_FRESH_CONNECT (3)
 Protocol:
   - HTTP
+Added-in: 7.43.0
 ---
 
 # NAME
@@ -52,6 +53,8 @@ and support level.
 
 0 (off)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,9 +70,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.43.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

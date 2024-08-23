@@ -65,7 +65,6 @@ typedef enum {
 
 /* struct for HTTP CONNECT tunneling */
 struct h1_tunnel_state {
-  struct HTTP CONNECT;
   struct dynbuf rcvbuf;
   struct dynbuf request_data;
   size_t nsent;
@@ -182,8 +181,8 @@ static void h1_tunnel_go_state(struct Curl_cfilter *cf,
     data->info.httpcode = 0; /* clear it as it might've been used for the
                                 proxy */
     /* If a proxy-authorization header was used for the proxy, then we should
-       make sure that it isn't accidentally used for the document request
-       after we've connected. So let's free and clear it here. */
+       make sure that it is not accidentally used for the document request
+       after we have connected. So let's free and clear it here. */
     Curl_safefree(data->state.aptr.proxyuserpwd);
 #ifdef USE_HYPER
     data->state.hconnect = FALSE;
@@ -222,8 +221,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
   int http_minor;
   CURLcode result;
 
-    /* This only happens if we've looped here due to authentication
-       reasons, and we don't really use the newly cloned URL here
+    /* This only happens if we have looped here due to authentication
+       reasons, and we do not really use the newly cloned URL here
        then. Just free() it. */
   Curl_safefree(data->req.newurl);
 
@@ -267,7 +266,7 @@ static CURLcode send_CONNECT(struct Curl_cfilter *cf,
   blen -= ts->nsent;
   buf += ts->nsent;
 
-  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, &result);
+  nwritten = cf->next->cft->do_send(cf->next, data, buf, blen, FALSE, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
       result = CURLE_OK;
@@ -422,7 +421,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
 
       if(ts->cl) {
         /* A Content-Length based body: simply count down the counter
-           and make sure to break out of the loop when we're done! */
+           and make sure to break out of the loop when we are done! */
         ts->cl--;
         if(ts->cl <= 0) {
           ts->keepon = KEEPON_DONE;
@@ -440,7 +439,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         if(result)
           return result;
         if(Curl_httpchunk_is_done(data, &ts->ch)) {
-          /* we're done reading chunks! */
+          /* we are done reading chunks! */
           infof(data, "chunk reading DONE");
           ts->keepon = KEEPON_DONE;
         }
@@ -475,7 +474,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
     if(result)
       return result;
 
-    /* Newlines are CRLF, so the CR is ignored as the line isn't
+    /* Newlines are CRLF, so the CR is ignored as the line is not
        really terminated until the LF comes. Treat a following CR
        as end-of-headers as well.*/
 
@@ -498,7 +497,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         }
         else {
           /* without content-length or chunked encoding, we
-             can't keep the connection alive since the close is
+             cannot keep the connection alive since the close is
              the end signal so we bail out at once instead */
           CURL_TRC_CF(data, cf, "CONNECT: no content-length or chunked");
           ts->keepon = KEEPON_DONE;
@@ -518,7 +517,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
       return result;
 
     Curl_dyn_reset(&ts->rcvbuf);
-  } /* while there's buffer left and loop is requested */
+  } /* while there is buffer left and loop is requested */
 
   if(error)
     result = CURLE_RECV_ERROR;
@@ -666,8 +665,8 @@ static CURLcode start_CONNECT(struct Curl_cfilter *cf,
     goto error;
   }
 
-    /* This only happens if we've looped here due to authentication
-       reasons, and we don't really use the newly cloned URL here
+    /* This only happens if we have looped here due to authentication
+       reasons, and we do not really use the newly cloned URL here
        then. Just free() it. */
   Curl_safefree(data->req.newurl);
 
@@ -955,7 +954,7 @@ static CURLcode H1_CONNECT(struct Curl_cfilter *cf,
 
   DEBUGASSERT(ts->tunnel_state == H1_TUNNEL_RESPONSE);
   if(data->info.httpproxycode/100 != 2) {
-    /* a non-2xx response and we have no next url to try. */
+    /* a non-2xx response and we have no next URL to try. */
     Curl_safefree(data->req.newurl);
     /* failure, close this connection to avoid reuse */
     streamclose(conn, "proxy CONNECT failure");
@@ -1034,9 +1033,9 @@ static void cf_h1_proxy_adjust_pollset(struct Curl_cfilter *cf,
      * and not waiting on something, we are tunneling. */
     curl_socket_t sock = Curl_conn_cf_get_socket(cf, data);
     if(ts) {
-      /* when we've sent a CONNECT to a proxy, we should rather either
+      /* when we have sent a CONNECT to a proxy, we should rather either
          wait for the socket to become readable to be able to get the
-         response headers or if we're still sending the request, wait
+         response headers or if we are still sending the request, wait
          for write. */
       if(tunnel_want_send(ts))
         Curl_pollset_set_out_only(data, ps, sock);
@@ -1077,6 +1076,7 @@ struct Curl_cftype Curl_cft_h1_proxy = {
   cf_h1_proxy_destroy,
   cf_h1_proxy_connect,
   cf_h1_proxy_close,
+  Curl_cf_def_shutdown,
   Curl_cf_http_proxy_get_host,
   cf_h1_proxy_adjust_pollset,
   Curl_cf_def_data_pending,

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_RESOLVE (3)
 Protocol:
   - HTTP
+Added-in: 7.64.1
 ---
 
 # NAME
@@ -43,6 +44,11 @@ Alternative services are only used when setting up new connections. If there
 exists an existing connection to the host in the connection pool, then that is
 preferred.
 
+If CURLOPT_ALTSVC(3) is set, CURLOPT_ALTSVC_CTRL(3) gets a default value
+corresponding to CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3 - the HTTP/2
+and HTTP/3 bits are only set if libcurl was built with support for those
+versions.
+
 Setting any bit enables the alt-svc engine.
 
 ## CURLALTSVC_READONLYFILE
@@ -67,10 +73,9 @@ was also built to actually support HTTP/3, otherwise this bit is ignored.
 
 # DEFAULT
 
-Alt-Svc handling is disabled by default. If CURLOPT_ALTSVC(3) is set,
-CURLOPT_ALTSVC_CTRL(3) has a default value corresponding to
-CURLALTSVC_H1 | CURLALTSVC_H2 | CURLALTSVC_H3 - the HTTP/2 and HTTP/3 bits are
-only set if libcurl was built with support for those versions.
+0 - Alt-Svc handling is disabled
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -86,9 +91,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.64.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

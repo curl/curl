@@ -38,7 +38,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest
 
-EXTRA_DIST = Makefile.inc CMakeLists.txt README.md
+EXTRA_DIST = CMakeLists.txt README.md
 
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
@@ -47,7 +47,7 @@ LIBS = $(BLANK_AT_MAKETIME)
 
 LDADD = $(top_builddir)/src/libcurltool.la   \
         $(top_builddir)/lib/libcurlu.la      \
-        @LDFLAGS@ @LIBCURL_LIBS@
+        @LDFLAGS@ @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 

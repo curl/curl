@@ -79,21 +79,21 @@ UNITTEST bool Curl_cidr6_match(const char *ipv6,
                                unsigned int bits)
 {
 #ifdef USE_IPV6
-  int bytes;
-  int rest;
+  unsigned int bytes;
+  unsigned int rest;
   unsigned char address[16];
   unsigned char check[16];
 
   if(!bits)
     bits = 128;
 
-  bytes = bits/8;
+  bytes = bits / 8;
   rest = bits & 0x07;
+  if((bytes > 16) || ((bytes == 16) && rest))
+    return FALSE;
   if(1 != Curl_inet_pton(AF_INET6, ipv6, address))
     return FALSE;
   if(1 != Curl_inet_pton(AF_INET6, network, check))
-    return FALSE;
-  if((bytes > 16) || ((bytes == 16) && rest))
     return FALSE;
   if(bytes && memcmp(address, check, bytes))
     return FALSE;
@@ -119,13 +119,12 @@ enum nametype {
 * Checks if the host is in the noproxy list. returns TRUE if it matches and
 * therefore the proxy should NOT be used.
 ****************************************************************/
-bool Curl_check_noproxy(const char *name, const char *no_proxy,
-                        bool *spacesep)
+bool Curl_check_noproxy(const char *name, const char *no_proxy)
 {
   char hostip[128];
-  *spacesep = FALSE;
+
   /*
-   * If we don't have a hostname at all, like for example with a FILE
+   * If we do not have a hostname at all, like for example with a FILE
    * transfer, we have nothing to interrogate the noproxy list with.
    */
   if(!name || name[0] == '\0')
@@ -143,7 +142,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy,
     if(!strcmp("*", no_proxy))
       return TRUE;
 
-    /* NO_PROXY was specified and it wasn't just an asterisk */
+    /* NO_PROXY was specified and it was not just an asterisk */
 
     if(name[0] == '[') {
       char *endptr;
@@ -166,7 +165,7 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy,
       if(1 == Curl_inet_pton(AF_INET, name, &address))
         type = TYPE_IPV4;
       else {
-        /* ignore trailing dots in the host name */
+        /* ignore trailing dots in the hostname */
         if(name[namelen - 1] == '.')
           namelen--;
       }
@@ -232,7 +231,9 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy,
           slash = strchr(check, '/');
           /* if the slash is part of this token, use it */
           if(slash) {
-            bits = atoi(slash + 1);
+            /* if the bits variable gets a crazy value here, that is fine as
+               the value will then be rejected in the cidr function */
+            bits = (unsigned int)atoi(slash + 1);
             *slash = 0; /* null terminate there */
           }
           if(type == TYPE_IPV6)
@@ -248,16 +249,14 @@ bool Curl_check_noproxy(const char *name, const char *no_proxy,
       /* pass blanks after pattern */
       while(ISBLANK(*p))
         p++;
-      /* if not a comma! */
-      if(*p && (*p != ',')) {
-        *spacesep = TRUE;
-        continue;
-      }
+      /* if not a comma, this ends the loop */
+      if(*p != ',')
+        break;
       /* pass any number of commas */
       while(*p == ',')
         p++;
     } /* while(*p) */
-  } /* NO_PROXY was specified and it wasn't just an asterisk */
+  } /* NO_PROXY was specified and it was not just an asterisk */
 
   return FALSE;
 }

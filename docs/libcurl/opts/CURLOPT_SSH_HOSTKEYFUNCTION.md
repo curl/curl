@@ -10,6 +10,7 @@ See-also:
 Protocol:
   - SFTP
   - SCP
+Added-in: 7.84.0
 ---
 
 # NAME
@@ -58,6 +59,8 @@ the host key is rejected, the connection is canceled.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -88,9 +91,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.84.0 , work only with libssh2 backend.
+Work only with the libssh2 backend.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

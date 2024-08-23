@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.4.1
 ---
 
 # NAME
@@ -33,6 +34,8 @@ received. Measured in number of bytes.
 The total includes the size of any received headers suppressed by
 CURLOPT_SUPPRESS_CONNECT_HEADERS(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -54,9 +57,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.4.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

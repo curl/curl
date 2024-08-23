@@ -24,6 +24,7 @@
 #include "test.h"
 
 #include "testutil.h"
+#include "testtrace.h"
 #include "warnless.h"
 #include "memdebug.h"
 
@@ -73,6 +74,12 @@ CURLcode test(char *URL)
   easy_setopt(curls, CURLOPT_USERPWD, "u:s");
   easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, xferinfo);
   easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
+
+  libtest_debug_config.nohex = 1;
+  libtest_debug_config.tracetime = 1;
+  test_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
 
   multi_add_handle(multi, curls);
 

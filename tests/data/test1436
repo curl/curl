@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-unix sockets
+UnixSockets
 </keywords>
 </info>
 
@@ -33,7 +33,7 @@ Third
 
 <client>
 <features>
-unix-sockets
+UnixSockets
 </features>
 <server>
 http-unix

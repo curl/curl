@@ -12,6 +12,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -70,6 +71,8 @@ Encoding should not be applied to multiparts, thus the use of this function on
 a part with content set with curl_mime_subparts(3) is strongly
 discouraged.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -95,9 +98,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

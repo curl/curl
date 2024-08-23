@@ -182,13 +182,14 @@ quiche support is **EXPERIMENTAL**
 
 Since the quiche build manages its dependencies, curl can be built against the latest version. You are *probably* able to build against their main branch, but in case of problems, we recommend their latest release tag.
 
-## build
+## Build
 
 Build quiche and BoringSSL:
 
-     % git clone --recursive -b 0.20.0 https://github.com/cloudflare/quiche
+     % git clone --recursive -b 0.22.0 https://github.com/cloudflare/quiche
      % cd quiche
      % cargo build --package quiche --release --features ffi,pkg-config-meta,qlog
+     % ln -s libquiche.so target/release/libquiche.so.0
      % mkdir quiche/deps/boringssl/src/lib
      % ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
@@ -209,12 +210,12 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.2.0
+Build OpenSSL 3.3.1
 
      % cd ..
-     % git clone -b openssl-3.2.0 https://github.com/openssl/openssl
+     % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
      % cd openssl
-     % ./config enable-tls1_3 --prefix=<somewhere> --libdir=<somewhere>/lib
+     % ./config enable-tls1_3 --prefix=<somewhere> --libdir=lib
      % make
      % make install
 
@@ -235,7 +236,7 @@ Build curl:
      % git clone https://github.com/curl/curl
      % cd curl
      % autoreconf -fi
-     % LDFLAGS="-Wl,-rpath,<somewhere>/lib" ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2> 
+     % LDFLAGS="-Wl,-rpath,<somewhere>/lib" ./configure --with-openssl=<somewhere> --with-openssl-quic --with-nghttp3=<somewhere2>
      % make
      % make install
 

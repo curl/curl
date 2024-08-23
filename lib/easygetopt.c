@@ -42,7 +42,7 @@ static struct curl_easyoption *lookup(const char *name, CURLoption id)
       }
       else {
         if((o->id == id) && !(o->flags & CURLOT_FLAG_ALIAS))
-          /* don't match alias options */
+          /* do not match alias options */
           return o;
       }
       o++;

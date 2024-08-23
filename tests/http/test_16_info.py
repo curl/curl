@@ -111,11 +111,11 @@ class TestInfo:
             self.check_stat(idx, s, r, dl_size=30, ul_size=0)
 
     def check_stat(self, idx, s, r, dl_size=None, ul_size=None):
-        self.check_stat_times(s)
+        self.check_stat_times(s, idx)
         # we always send something
-        self.check_stat_positive(s, 'size_request')
+        self.check_stat_positive(s, idx, 'size_request')
         # we always receive response headers
-        self.check_stat_positive(s, 'size_header')
+        self.check_stat_positive(s, idx, 'size_header')
         if ul_size is not None:
             assert s['size_upload'] == ul_size, f'stat #{idx}\n{r.dump_logs()}'  # the file we sent
         assert s['size_request'] >= s['size_upload'], \
@@ -123,15 +123,15 @@ class TestInfo:
         if dl_size is not None:
             assert s['size_download'] == dl_size, f'stat #{idx}\n{r.dump_logs()}'  # the file we received
 
-    def check_stat_positive(self, s, key):
-        assert key in s, f'stat "{key}" missing: {s}'
-        assert s[key] > 0, f'stat "{key}" not positive: {s}'
+    def check_stat_positive(self, s, idx, key):
+        assert key in s, f'stat #{idx} "{key}" missing: {s}'
+        assert s[key] > 0, f'stat #{idx} "{key}" not positive: {s}'
 
     def check_stat_zero(self, s, key):
         assert key in s, f'stat "{key}" missing: {s}'
         assert s[key] == 0, f'stat "{key}" not zero: {s}'
 
-    def check_stat_times(self, s):
+    def check_stat_times(self, s, idx):
         # check timings reported on a transfer for consistency
         url = s['url_effective']
         # all stat keys which reporting timings
@@ -152,7 +152,7 @@ class TestInfo:
         for key in zero_keys:
             self.check_stat_zero(s, key)
         for key in pos_keys:
-            self.check_stat_positive(s, key)
+            self.check_stat_positive(s, idx, key)
         # assert that all timers before "time_pretransfer" are less or equal
         for key in ['time_appconnect', 'time_connect', 'time_namelookup']:
             assert s[key] < s['time_pretransfer'], f'time "{key}" larger than' \

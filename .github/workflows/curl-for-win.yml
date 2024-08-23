@@ -4,14 +4,32 @@
 ---
 name: curl-for-win
 
-on:
+'on':
   push:
     branches:
       - master
       - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
   pull_request:
     branches:
       - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'packages/**'
+      - 'plan9/**'
+      - 'projects/**'
+      - 'winbuild/**'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
@@ -22,7 +40,7 @@ permissions: {}
 env:
   CW_NOGET: 'curl trurl'
   CW_MAP: '0'
-  CW_JOBS: '3'
+  CW_JOBS: '5'
   CW_NOPKG: '1'
   DOCKER_CONTENT_TRUST: '1'
 
@@ -31,7 +49,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           path: 'curl'
           fetch-depth: 8
@@ -54,8 +72,10 @@ jobs:
   mac-clang:
     runs-on: macos-latest
     timeout-minutes: 30
+    env:
+      CW_JOBS: '4'
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           path: 'curl'
           fetch-depth: 8
@@ -70,7 +90,7 @@ jobs:
   win-llvm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
         with:
           path: 'curl'
           fetch-depth: 8

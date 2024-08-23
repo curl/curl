@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAX_RECV_SPEED_LARGE (3)
 Protocol:
   - All
+Added-in: 7.10.8
 ---
 
 # NAME
@@ -44,6 +45,8 @@ threshold.
 
 0, meaning disabled.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -9,7 +9,8 @@ See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
   - CURLOPT_TCP_KEEPALIVE (3)
 Protocol:
-  - All
+  - TCP
+Added-in: 7.11.2
 ---
 
 # NAME
@@ -45,6 +46,8 @@ overdone.
 
 1
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
-Always. The default was changed to 1 from 0 in 7.50.2.
+The default was changed to 1 from 0 in 7.50.2.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

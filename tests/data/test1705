@@ -1,0 +1,302 @@
+<testcase>
+<info>
+<keywords>
+script
+documentation
+managen
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+
+<name>
+managen makes manpage
+</name>
+
+<file name="%LOGDIR/mainpage.idx">
+_header.md
+%options
+_footer.md
+</file>
+
+<file1 name="%LOGDIR/_header.md">
+<!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
+<!-- SPDX-License-Identifier: curl -->
+# DESCRIPTION
+
+**curl** is a tool for transferring data from or to a server using URLs. It
+supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS,
+IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP,
+SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
+
+curl is powered by libcurl for all transfer-related features. See
+*libcurl(3)* for details.
+</file1>
+<file2 name="%LOGDIR/option1.md">
+---
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+Short: v
+Long: fakeitreal
+Mutexed: trace trace-ascii
+Help: Make the operation more talkative
+Category: important verbose global
+Added: 4.0
+Multi: boolean
+Scope: global
+See-also:
+  - include
+  - silent
+  - trace
+  - trace-ascii
+Example:
+  - --verbose $URL
+---
+
+# `--verbose`
+
+Makes curl verbose during the operation. Useful for debugging and seeing
+what's going on under the hood. A line starting with \> means header data sent
+by curl, \< means header data received by curl that is hidden in normal cases,
+and a line starting with * means additional info provided by curl.
+
+If you only want HTTP headers in the output, --include or --dump-header might
+be more suitable options.
+
+If you think this option still does not give you enough details, consider using
+--trace or --trace-ascii instead.
+
+Note that verbose output of curl activities and network traffic might contain
+sensitive data, including usernames, credentials or secret data content. Be
+aware and be careful when sharing trace logs with others.
+
+End with a quote
+
+    hello
+</file2>
+<file3 name="%LOGDIR/option2.md">
+---
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+Long: proto
+Arg: <protocols>
+Help: Enable/disable PROTOCOLS
+Added: 7.20.2
+Category: connection curl
+Multi: single
+See-also:
+  - fakeitreal
+  - proto-default
+Example:
+  - --proto =http,https,sftp $URL
+---
+
+# `--proto`
+
+Limit what protocols to allow for transfers. Protocols are evaluated left to
+right, are comma separated, and are each a protocol name or 'all', optionally
+prefixed by zero or more modifiers. Available modifiers are:
+
+## +
+Permit this protocol in addition to protocols already permitted (this is
+the default if no modifier is used).
+
+## -
+Deny this protocol, removing it from the list of protocols already permitted.
+
+## =
+Permit only this protocol (ignoring the list already permitted), though
+subject to later modification by subsequent entries in the comma separated
+list.
+
+##
+
+For example: --proto -ftps uses the default protocols, but disables ftps
+
+--proto -all,https,+http only enables http and https
+
+--proto =http,https also only enables http and https
+
+Unknown and disabled protocols produce a warning. This allows scripts to
+safely rely on being able to disable potentially dangerous protocols, without
+relying upon support for that protocol being built into curl to avoid an error.
+
+This option can be used multiple times, in which case the effect is the same
+as concatenating the protocols into one instance of the option.
+</file3>
+<file4 name="%LOGDIR/_footer.md">
+<!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
+<!-- SPDX-License-Identifier: curl -->
+# PROXY PROTOCOL PREFIXES
+The proxy string may be specified with a protocol:// prefix to specify
+alternative proxy protocols. (Added in 7.21.7)
+
+If no protocol is specified in the proxy string or if the string does not
+match a supported one, the proxy is treated as an HTTP proxy.
+
+The supported proxy protocol prefixes are as follows:
+## http://
+Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
+## https://
+Makes it treated as an **HTTPS** proxy.
+## socks4://
+Makes it the equivalent of --socks4
+## socks4a://
+Makes it the equivalent of --socks4a
+## socks5://
+Makes it the equivalent of --socks5
+## socks5h://
+Makes it the equivalent of --socks5-hostname
+</file4>
+
+<command type="perl">
+%SRCDIR/../scripts/managen -d %LOGDIR -I %SRCDIR/../include mainpage option1.md option2.md
+</command>
+</client>
+
+<verify>
+<stderr>
+option1.md:19:1:WARN: see-also a non-existing option: include
+option1.md:19:1:WARN: see-also a non-existing option: silent
+option1.md:19:1:WARN: see-also a non-existing option: trace
+option1.md:19:1:WARN: see-also a non-existing option: trace-ascii
+WARN: option1.md mutexes a non-existing option: trace
+WARN: option1.md mutexes a non-existing option: trace-ascii
+option2.md:15:1:WARN: see-also a non-existing option: proto-default
+</stderr>
+<stdout>
+.\" **************************************************************************
+.\" *                                  _   _ ____  _
+.\" *  Project                     ___| | | |  _ \| |
+.\" *                             / __| | | | |_) | |
+.\" *                            | (__| |_| |  _ <| |___
+.\" *                             \___|\___/|_| \_\_____|
+.\" *
+.\" * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+.\" *
+.\" * This software is licensed as described in the file COPYING, which
+.\" * you should have received as part of this distribution. The terms
+.\" * are also available at https://curl.se/docs/copyright.html.
+.\" *
+.\" * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+.\" * copies of the Software, and permit persons to whom the Software is
+.\" * furnished to do so, under the terms of the COPYING file.
+.\" *
+.\" * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+.\" * KIND, either express or implied.
+.\" *
+.\" * SPDX-License-Identifier: curl
+.\" *
+.\" **************************************************************************
+.\"
+.\" DO NOT EDIT. Generated by the curl project managen manpage generator.
+.\"
+.TH curl 1 "%DATE" "curl %VERNUM" "curl Manual"
+.SH DESCRIPTION
+\fBcurl\fP is a tool for transferring data from or to a server using URLs. It
+supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS,
+IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP,
+SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
+
+curl is powered by libcurl for all transfer\-related features. See
+\fIlibcurl(3)\fP for details.
+.IP "\-v, \-\-fakeitreal"
+Makes curl verbose during the operation. Useful for debugging and seeing
+what\(aqs going on under the hood. A line starting with > means header data sent
+by curl, < means header data received by curl that is hidden in normal cases,
+and a line starting with * means additional info provided by curl.
+
+If you only want HTTP headers in the output, \fI\-\-include\fP or \fI\-\-dump\-header\fP might
+be more suitable options.
+
+If you think this option still does not give you enough details, consider using
+\fI\-\-trace\fP or \fI\-\-trace\-ascii\fP instead.
+
+Note that verbose output of curl activities and network traffic might contain
+sensitive data, including usernames, credentials or secret data content. Be
+aware and be careful when sharing trace logs with others.
+
+End with a quote
+.nf
+
+hello
+.fi
+
+This option is global and does not need to be specified for each use of --next.
+
+Providing --fakeitreal multiple times has no extra effect.
+Disable it again with \-\-no-fakeitreal.
+
+Example:
+.nf
+ curl --verbose https://example.com
+.fi
+
+This option is mutually exclusive with \fI\-\-trace\fP and \fI\-\-trace\-ascii\fP.
+See also \fI\-\-include\fP, \fI\-\-silent\fP, \fI\-\-trace\fP and \fI\-\-trace\-ascii\fP.
+.IP "\-\-proto <protocols>"
+Limit what protocols to allow for transfers. Protocols are evaluated left to
+right, are comma separated, and are each a protocol name or \(aqall\(aq, optionally
+prefixed by zero or more modifiers. Available modifiers are:
+.RS
+.IP +
+Permit this protocol in addition to protocols already permitted (this is
+the default if no modifier is used).
+.IP -
+Deny this protocol, removing it from the list of protocols already permitted.
+.IP =
+Permit only this protocol (ignoring the list already permitted), though
+subject to later modification by subsequent entries in the comma separated
+list.
+.RE
+.IP
+For example: \fI\-\-proto\fP \-ftps uses the default protocols, but disables ftps
+
+\fI\-\-proto\fP \-all,https,+http only enables http and https
+
+\fI\-\-proto\fP =http,https also only enables http and https
+
+Unknown and disabled protocols produce a warning. This allows scripts to
+safely rely on being able to disable potentially dangerous protocols, without
+relying upon support for that protocol being built into curl to avoid an error.
+
+This option can be used multiple times, in which case the effect is the same
+as concatenating the protocols into one instance of the option.
+
+If --proto is provided several times, the last set value is used.
+
+Example:
+.nf
+ curl --proto =http,https,sftp https://example.com
+.fi
+
+See also \fI-v, \-\-fakeitreal\fP and \fI\-\-proto\-default\fP.
+.SH PROXY PROTOCOL PREFIXES
+The proxy string may be specified with a protocol:// prefix to specify
+alternative proxy protocols.
+
+If no protocol is specified in the proxy string or if the string does not
+match a supported one, the proxy is treated as an HTTP proxy.
+
+The supported proxy protocol prefixes are as follows:
+.IP http://
+Makes it use it as an HTTP proxy. The default if no scheme prefix is used.
+.IP https://
+Makes it treated as an \fBHTTPS\fP proxy.
+.IP socks4://
+Makes it the equivalent of \fI\-\-socks4\fP
+.IP socks4a://
+Makes it the equivalent of \fI\-\-socks4a\fP
+.IP socks5://
+Makes it the equivalent of \fI\-\-socks5\fP
+.IP socks5h://
+Makes it the equivalent of \fI\-\-socks5\-hostname\fP
+</stdout>
+</verify>
+
+</testcase>

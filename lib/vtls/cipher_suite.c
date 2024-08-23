@@ -23,7 +23,8 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if defined(USE_MBEDTLS) || defined(USE_BEARSSL)
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
+    defined(USE_BEARSSL) || defined(USE_RUSTLS)
 #include "cipher_suite.h"
 #include "curl_printf.h"
 #include "strcase.h"
@@ -33,7 +34,7 @@
  * To support the CURLOPT_SSL_CIPHER_LIST option on SSL backends
  * that do not support it natively, but do support setting a list of
  * IANA ids, we need a list of all supported cipher suite names
- * (openssl and IANA) to be able to look up the IANA ids.
+ * (OpenSSL and IANA) to be able to look up the IANA ids.
  *
  * To keep the binary size of this list down we compress each entry
  * down to 2 + 6 bytes using the C preprocessor.
@@ -42,7 +43,7 @@
 /*
  * mbedTLS NOTE: mbedTLS has mbedtls_ssl_get_ciphersuite_id() to
  * convert a string representation to an IANA id, we do not use that
- * because it does not support "standard" openssl cipher suite
+ * because it does not support "standard" OpenSSL cipher suite
  * names, nor IANA names.
  */
 
@@ -89,6 +90,21 @@ static const char *cs_txt =
   "CAMELLIA128" "\0"
   "CAMELLIA256" "\0"
 #endif
+#if defined(USE_SECTRANSP)
+  "40" "\0"
+  "ADH" "\0"
+  "AECDH" "\0"
+  "anon" "\0"
+  "DES40" "\0"
+  "DH" "\0"
+  "DSS" "\0"
+  "EDH" "\0"
+  "EXP" "\0"
+  "EXPORT" "\0"
+  "IDEA" "\0"
+  "RC2" "\0"
+  "RC4" "\0"
+#endif
 ;
 /* Indexes of above cs_txt */
 enum {
@@ -130,27 +146,42 @@ enum {
   CS_TXT_IDX_CAMELLIA128,
   CS_TXT_IDX_CAMELLIA256,
 #endif
+#if defined(USE_SECTRANSP)
+  CS_TXT_IDX_40,
+  CS_TXT_IDX_ADH,
+  CS_TXT_IDX_AECDH,
+  CS_TXT_IDX_anon,
+  CS_TXT_IDX_DES40,
+  CS_TXT_IDX_DH,
+  CS_TXT_IDX_DSS,
+  CS_TXT_IDX_EDH,
+  CS_TXT_IDX_EXP,
+  CS_TXT_IDX_EXPORT,
+  CS_TXT_IDX_IDEA,
+  CS_TXT_IDX_RC2,
+  CS_TXT_IDX_RC4,
+#endif
   CS_TXT_LEN,
 };
 
-#define CS_ZIP_IDX(a, b, c, d, e, f, g, h)    \
-{                                             \
-  (uint8_t) ((a) << 2 | ((b) & 0x3F) >> 4),   \
-  (uint8_t) ((b) << 4 | ((c) & 0x3F) >> 2),   \
-  (uint8_t) ((c) << 6 | ((d) & 0x3F)),        \
-  (uint8_t) ((e) << 2 | ((f) & 0x3F) >> 4),   \
-  (uint8_t) ((f) << 4 | ((g) & 0x3F) >> 2),   \
-  (uint8_t) ((g) << 6 | ((h) & 0x3F))         \
+#define CS_ZIP_IDX(a, b, c, d, e, f, g, h)             \
+{                                                      \
+  (uint8_t) ((((a) << 2) & 0xFF) | ((b) & 0x3F) >> 4), \
+  (uint8_t) ((((b) << 4) & 0xFF) | ((c) & 0x3F) >> 2), \
+  (uint8_t) ((((c) << 6) & 0xFF) | ((d) & 0x3F)),      \
+  (uint8_t) ((((e) << 2) & 0xFF) | ((f) & 0x3F) >> 4), \
+  (uint8_t) ((((f) << 4) & 0xFF) | ((g) & 0x3F) >> 2), \
+  (uint8_t) ((((g) << 6) & 0xFF) | ((h) & 0x3F))       \
 }
-#define CS_ENTRY(id, a, b, c, d, e, f, g, h)  \
-{                                             \
-  id,                                         \
-  CS_ZIP_IDX(                                 \
-    CS_TXT_IDX_ ## a, CS_TXT_IDX_ ## b,       \
-    CS_TXT_IDX_ ## c, CS_TXT_IDX_ ## d,       \
-    CS_TXT_IDX_ ## e, CS_TXT_IDX_ ## f,       \
-    CS_TXT_IDX_ ## g, CS_TXT_IDX_ ## h        \
-  )                                           \
+#define CS_ENTRY(id, a, b, c, d, e, f, g, h)           \
+{                                                      \
+  id,                                                  \
+  CS_ZIP_IDX(                                          \
+    CS_TXT_IDX_ ## a, CS_TXT_IDX_ ## b,                \
+    CS_TXT_IDX_ ## c, CS_TXT_IDX_ ## d,                \
+    CS_TXT_IDX_ ## e, CS_TXT_IDX_ ## f,                \
+    CS_TXT_IDX_ ## g, CS_TXT_IDX_ ## h                 \
+  )                                                    \
 }
 
 struct cs_entry {
@@ -160,6 +191,28 @@ struct cs_entry {
 
 /* !checksrc! disable COMMANOSPACE all */
 static const struct cs_entry cs_list [] = {
+  /* TLS 1.3 ciphers */
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_RUSTLS)
+  CS_ENTRY(0x1301, TLS,AES,128,GCM,SHA256,,,),
+  CS_ENTRY(0x1302, TLS,AES,256,GCM,SHA384,,,),
+  CS_ENTRY(0x1303, TLS,CHACHA20,POLY1305,SHA256,,,,),
+  CS_ENTRY(0x1304, TLS,AES,128,CCM,SHA256,,,),
+  CS_ENTRY(0x1305, TLS,AES,128,CCM,8,SHA256,,),
+#endif
+  /* TLS 1.2 ciphers */
+  CS_ENTRY(0xC02B, TLS,ECDHE,ECDSA,WITH,AES,128,GCM,SHA256),
+  CS_ENTRY(0xC02B, ECDHE,ECDSA,AES128,GCM,SHA256,,,),
+  CS_ENTRY(0xC02C, TLS,ECDHE,ECDSA,WITH,AES,256,GCM,SHA384),
+  CS_ENTRY(0xC02C, ECDHE,ECDSA,AES256,GCM,SHA384,,,),
+  CS_ENTRY(0xC02F, TLS,ECDHE,RSA,WITH,AES,128,GCM,SHA256),
+  CS_ENTRY(0xC02F, ECDHE,RSA,AES128,GCM,SHA256,,,),
+  CS_ENTRY(0xC030, TLS,ECDHE,RSA,WITH,AES,256,GCM,SHA384),
+  CS_ENTRY(0xC030, ECDHE,RSA,AES256,GCM,SHA384,,,),
+  CS_ENTRY(0xCCA8, TLS,ECDHE,RSA,WITH,CHACHA20,POLY1305,SHA256,),
+  CS_ENTRY(0xCCA8, ECDHE,RSA,CHACHA20,POLY1305,,,,),
+  CS_ENTRY(0xCCA9, TLS,ECDHE,ECDSA,WITH,CHACHA20,POLY1305,SHA256,),
+  CS_ENTRY(0xCCA9, ECDHE,ECDSA,CHACHA20,POLY1305,,,,),
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || defined(USE_BEARSSL)
   CS_ENTRY(0x002F, TLS,RSA,WITH,AES,128,CBC,SHA,),
   CS_ENTRY(0x002F, AES128,SHA,,,,,,),
   CS_ENTRY(0x0035, TLS,RSA,WITH,AES,256,CBC,SHA,),
@@ -204,27 +257,16 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xC029, ECDH,RSA,AES128,SHA256,,,,),
   CS_ENTRY(0xC02A, TLS,ECDH,RSA,WITH,AES,256,CBC,SHA384),
   CS_ENTRY(0xC02A, ECDH,RSA,AES256,SHA384,,,,),
-  CS_ENTRY(0xC02B, TLS,ECDHE,ECDSA,WITH,AES,128,GCM,SHA256),
-  CS_ENTRY(0xC02B, ECDHE,ECDSA,AES128,GCM,SHA256,,,),
-  CS_ENTRY(0xC02C, TLS,ECDHE,ECDSA,WITH,AES,256,GCM,SHA384),
-  CS_ENTRY(0xC02C, ECDHE,ECDSA,AES256,GCM,SHA384,,,),
   CS_ENTRY(0xC02D, TLS,ECDH,ECDSA,WITH,AES,128,GCM,SHA256),
   CS_ENTRY(0xC02D, ECDH,ECDSA,AES128,GCM,SHA256,,,),
   CS_ENTRY(0xC02E, TLS,ECDH,ECDSA,WITH,AES,256,GCM,SHA384),
   CS_ENTRY(0xC02E, ECDH,ECDSA,AES256,GCM,SHA384,,,),
-  CS_ENTRY(0xC02F, TLS,ECDHE,RSA,WITH,AES,128,GCM,SHA256),
-  CS_ENTRY(0xC02F, ECDHE,RSA,AES128,GCM,SHA256,,,),
-  CS_ENTRY(0xC030, TLS,ECDHE,RSA,WITH,AES,256,GCM,SHA384),
-  CS_ENTRY(0xC030, ECDHE,RSA,AES256,GCM,SHA384,,,),
   CS_ENTRY(0xC031, TLS,ECDH,RSA,WITH,AES,128,GCM,SHA256),
   CS_ENTRY(0xC031, ECDH,RSA,AES128,GCM,SHA256,,,),
   CS_ENTRY(0xC032, TLS,ECDH,RSA,WITH,AES,256,GCM,SHA384),
   CS_ENTRY(0xC032, ECDH,RSA,AES256,GCM,SHA384,,,),
-  CS_ENTRY(0xCCA8, TLS,ECDHE,RSA,WITH,CHACHA20,POLY1305,SHA256,),
-  CS_ENTRY(0xCCA8, ECDHE,RSA,CHACHA20,POLY1305,,,,),
-  CS_ENTRY(0xCCA9, TLS,ECDHE,ECDSA,WITH,CHACHA20,POLY1305,SHA256,),
-  CS_ENTRY(0xCCA9, ECDHE,ECDSA,CHACHA20,POLY1305,,,,),
-#if defined(USE_MBEDTLS)
+#endif
+#if defined(USE_SECTRANSP) || defined(USE_MBEDTLS)
   CS_ENTRY(0x0001, TLS,RSA,WITH,NULL,MD5,,,),
   CS_ENTRY(0x0001, NULL,MD5,,,,,,),
   CS_ENTRY(0x0002, TLS,RSA,WITH,NULL,SHA,,,),
@@ -297,11 +339,6 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0x00B8, RSA,PSK,NULL,SHA256,,,,),
   CS_ENTRY(0x00B9, TLS,RSA,PSK,WITH,NULL,SHA384,,),
   CS_ENTRY(0x00B9, RSA,PSK,NULL,SHA384,,,,),
-  CS_ENTRY(0x1301, TLS,AES,128,GCM,SHA256,,,),
-  CS_ENTRY(0x1302, TLS,AES,256,GCM,SHA384,,,),
-  CS_ENTRY(0x1303, TLS,CHACHA20,POLY1305,SHA256,,,,),
-  CS_ENTRY(0x1304, TLS,AES,128,CCM,SHA256,,,),
-  CS_ENTRY(0x1305, TLS,AES,128,CCM,8,SHA256,,),
   CS_ENTRY(0xC001, TLS,ECDH,ECDSA,WITH,NULL,SHA,,),
   CS_ENTRY(0xC001, ECDH,ECDSA,NULL,SHA,,,,),
   CS_ENTRY(0xC006, TLS,ECDHE,ECDSA,WITH,NULL,SHA,,),
@@ -317,7 +354,7 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xCCAB, TLS,PSK,WITH,CHACHA20,POLY1305,SHA256,,),
   CS_ENTRY(0xCCAB, PSK,CHACHA20,POLY1305,,,,,),
 #endif
-#if defined(USE_BEARSSL)
+#if defined(USE_SECTRANSP) || defined(USE_BEARSSL)
   CS_ENTRY(0x000A, TLS,RSA,WITH,3DES,EDE,CBC,SHA,),
   CS_ENTRY(0x000A, DES,CBC3,SHA,,,,,),
   CS_ENTRY(0xC003, TLS,ECDH,ECDSA,WITH,3DES,EDE,CBC,SHA),
@@ -329,6 +366,7 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xC012, TLS,ECDHE,RSA,WITH,3DES,EDE,CBC,SHA),
   CS_ENTRY(0xC012, ECDHE,RSA,DES,CBC3,SHA,,,),
 #endif
+#if defined(USE_MBEDTLS) || defined(USE_BEARSSL)
   CS_ENTRY(0xC09C, TLS,RSA,WITH,AES,128,CCM,,),
   CS_ENTRY(0xC09C, AES128,CCM,,,,,,),
   CS_ENTRY(0xC09D, TLS,RSA,WITH,AES,256,CCM,,),
@@ -345,8 +383,144 @@ static const struct cs_entry cs_list [] = {
   CS_ENTRY(0xC0AE, ECDHE,ECDSA,AES128,CCM8,,,,),
   CS_ENTRY(0xC0AF, TLS,ECDHE,ECDSA,WITH,AES,256,CCM,8),
   CS_ENTRY(0xC0AF, ECDHE,ECDSA,AES256,CCM8,,,,),
+#endif
+#if defined(USE_SECTRANSP)
+  /* entries marked bc are backward compatible aliases for old OpenSSL names */
+  CS_ENTRY(0x0003, TLS,RSA,EXPORT,WITH,RC4,40,MD5,),
+  CS_ENTRY(0x0003, EXP,RC4,MD5,,,,,),
+  CS_ENTRY(0x0004, TLS,RSA,WITH,RC4,128,MD5,,),
+  CS_ENTRY(0x0004, RC4,MD5,,,,,,),
+  CS_ENTRY(0x0005, TLS,RSA,WITH,RC4,128,SHA,,),
+  CS_ENTRY(0x0005, RC4,SHA,,,,,,),
+  CS_ENTRY(0x0006, TLS,RSA,EXPORT,WITH,RC2,CBC,40,MD5),
+  CS_ENTRY(0x0006, EXP,RC2,CBC,MD5,,,,),
+  CS_ENTRY(0x0007, TLS,RSA,WITH,IDEA,CBC,SHA,,),
+  CS_ENTRY(0x0007, IDEA,CBC,SHA,,,,,),
+  CS_ENTRY(0x0008, TLS,RSA,EXPORT,WITH,DES40,CBC,SHA,),
+  CS_ENTRY(0x0008, EXP,DES,CBC,SHA,,,,),
+  CS_ENTRY(0x0009, TLS,RSA,WITH,DES,CBC,SHA,,),
+  CS_ENTRY(0x0009, DES,CBC,SHA,,,,,),
+  CS_ENTRY(0x000B, TLS,DH,DSS,EXPORT,WITH,DES40,CBC,SHA),
+  CS_ENTRY(0x000B, EXP,DH,DSS,DES,CBC,SHA,,),
+  CS_ENTRY(0x000C, TLS,DH,DSS,WITH,DES,CBC,SHA,),
+  CS_ENTRY(0x000C, DH,DSS,DES,CBC,SHA,,,),
+  CS_ENTRY(0x000D, TLS,DH,DSS,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x000D, DH,DSS,DES,CBC3,SHA,,,),
+  CS_ENTRY(0x000E, TLS,DH,RSA,EXPORT,WITH,DES40,CBC,SHA),
+  CS_ENTRY(0x000E, EXP,DH,RSA,DES,CBC,SHA,,),
+  CS_ENTRY(0x000F, TLS,DH,RSA,WITH,DES,CBC,SHA,),
+  CS_ENTRY(0x000F, DH,RSA,DES,CBC,SHA,,,),
+  CS_ENTRY(0x0010, TLS,DH,RSA,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x0010, DH,RSA,DES,CBC3,SHA,,,),
+  CS_ENTRY(0x0011, TLS,DHE,DSS,EXPORT,WITH,DES40,CBC,SHA),
+  CS_ENTRY(0x0011, EXP,DHE,DSS,DES,CBC,SHA,,),
+  CS_ENTRY(0x0011, EXP,EDH,DSS,DES,CBC,SHA,,), /* bc */
+  CS_ENTRY(0x0012, TLS,DHE,DSS,WITH,DES,CBC,SHA,),
+  CS_ENTRY(0x0012, DHE,DSS,DES,CBC,SHA,,,),
+  CS_ENTRY(0x0012, EDH,DSS,DES,CBC,SHA,,,), /* bc */
+  CS_ENTRY(0x0013, TLS,DHE,DSS,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x0013, DHE,DSS,DES,CBC3,SHA,,,),
+  CS_ENTRY(0x0013, EDH,DSS,DES,CBC3,SHA,,,), /* bc */
+  CS_ENTRY(0x0014, TLS,DHE,RSA,EXPORT,WITH,DES40,CBC,SHA),
+  CS_ENTRY(0x0014, EXP,DHE,RSA,DES,CBC,SHA,,),
+  CS_ENTRY(0x0014, EXP,EDH,RSA,DES,CBC,SHA,,), /* bc */
+  CS_ENTRY(0x0015, TLS,DHE,RSA,WITH,DES,CBC,SHA,),
+  CS_ENTRY(0x0015, DHE,RSA,DES,CBC,SHA,,,),
+  CS_ENTRY(0x0015, EDH,RSA,DES,CBC,SHA,,,), /* bc */
+  CS_ENTRY(0x0016, TLS,DHE,RSA,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x0016, DHE,RSA,DES,CBC3,SHA,,,),
+  CS_ENTRY(0x0016, EDH,RSA,DES,CBC3,SHA,,,), /* bc */
+  CS_ENTRY(0x0017, TLS,DH,anon,EXPORT,WITH,RC4,40,MD5),
+  CS_ENTRY(0x0017, EXP,ADH,RC4,MD5,,,,),
+  CS_ENTRY(0x0018, TLS,DH,anon,WITH,RC4,128,MD5,),
+  CS_ENTRY(0x0018, ADH,RC4,MD5,,,,,),
+  CS_ENTRY(0x0019, TLS,DH,anon,EXPORT,WITH,DES40,CBC,SHA),
+  CS_ENTRY(0x0019, EXP,ADH,DES,CBC,SHA,,,),
+  CS_ENTRY(0x001A, TLS,DH,anon,WITH,DES,CBC,SHA,),
+  CS_ENTRY(0x001A, ADH,DES,CBC,SHA,,,,),
+  CS_ENTRY(0x001B, TLS,DH,anon,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x001B, ADH,DES,CBC3,SHA,,,,),
+  CS_ENTRY(0x0030, TLS,DH,DSS,WITH,AES,128,CBC,SHA),
+  CS_ENTRY(0x0030, DH,DSS,AES128,SHA,,,,),
+  CS_ENTRY(0x0031, TLS,DH,RSA,WITH,AES,128,CBC,SHA),
+  CS_ENTRY(0x0031, DH,RSA,AES128,SHA,,,,),
+  CS_ENTRY(0x0032, TLS,DHE,DSS,WITH,AES,128,CBC,SHA),
+  CS_ENTRY(0x0032, DHE,DSS,AES128,SHA,,,,),
+  CS_ENTRY(0x0034, TLS,DH,anon,WITH,AES,128,CBC,SHA),
+  CS_ENTRY(0x0034, ADH,AES128,SHA,,,,,),
+  CS_ENTRY(0x0036, TLS,DH,DSS,WITH,AES,256,CBC,SHA),
+  CS_ENTRY(0x0036, DH,DSS,AES256,SHA,,,,),
+  CS_ENTRY(0x0037, TLS,DH,RSA,WITH,AES,256,CBC,SHA),
+  CS_ENTRY(0x0037, DH,RSA,AES256,SHA,,,,),
+  CS_ENTRY(0x0038, TLS,DHE,DSS,WITH,AES,256,CBC,SHA),
+  CS_ENTRY(0x0038, DHE,DSS,AES256,SHA,,,,),
+  CS_ENTRY(0x003A, TLS,DH,anon,WITH,AES,256,CBC,SHA),
+  CS_ENTRY(0x003A, ADH,AES256,SHA,,,,,),
+  CS_ENTRY(0x003E, TLS,DH,DSS,WITH,AES,128,CBC,SHA256),
+  CS_ENTRY(0x003E, DH,DSS,AES128,SHA256,,,,),
+  CS_ENTRY(0x003F, TLS,DH,RSA,WITH,AES,128,CBC,SHA256),
+  CS_ENTRY(0x003F, DH,RSA,AES128,SHA256,,,,),
+  CS_ENTRY(0x0040, TLS,DHE,DSS,WITH,AES,128,CBC,SHA256),
+  CS_ENTRY(0x0040, DHE,DSS,AES128,SHA256,,,,),
+  CS_ENTRY(0x0068, TLS,DH,DSS,WITH,AES,256,CBC,SHA256),
+  CS_ENTRY(0x0068, DH,DSS,AES256,SHA256,,,,),
+  CS_ENTRY(0x0069, TLS,DH,RSA,WITH,AES,256,CBC,SHA256),
+  CS_ENTRY(0x0069, DH,RSA,AES256,SHA256,,,,),
+  CS_ENTRY(0x006A, TLS,DHE,DSS,WITH,AES,256,CBC,SHA256),
+  CS_ENTRY(0x006A, DHE,DSS,AES256,SHA256,,,,),
+  CS_ENTRY(0x006C, TLS,DH,anon,WITH,AES,128,CBC,SHA256),
+  CS_ENTRY(0x006C, ADH,AES128,SHA256,,,,,),
+  CS_ENTRY(0x006D, TLS,DH,anon,WITH,AES,256,CBC,SHA256),
+  CS_ENTRY(0x006D, ADH,AES256,SHA256,,,,,),
+  CS_ENTRY(0x008A, TLS,PSK,WITH,RC4,128,SHA,,),
+  CS_ENTRY(0x008A, PSK,RC4,SHA,,,,,),
+  CS_ENTRY(0x008B, TLS,PSK,WITH,3DES,EDE,CBC,SHA,),
+  CS_ENTRY(0x008B, PSK,3DES,EDE,CBC,SHA,,,),
+  CS_ENTRY(0x008E, TLS,DHE,PSK,WITH,RC4,128,SHA,),
+  CS_ENTRY(0x008E, DHE,PSK,RC4,SHA,,,,),
+  CS_ENTRY(0x008F, TLS,DHE,PSK,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x008F, DHE,PSK,3DES,EDE,CBC,SHA,,),
+  CS_ENTRY(0x0092, TLS,RSA,PSK,WITH,RC4,128,SHA,),
+  CS_ENTRY(0x0092, RSA,PSK,RC4,SHA,,,,),
+  CS_ENTRY(0x0093, TLS,RSA,PSK,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0x0093, RSA,PSK,3DES,EDE,CBC,SHA,,),
+  CS_ENTRY(0x00A0, TLS,DH,RSA,WITH,AES,128,GCM,SHA256),
+  CS_ENTRY(0x00A0, DH,RSA,AES128,GCM,SHA256,,,),
+  CS_ENTRY(0x00A1, TLS,DH,RSA,WITH,AES,256,GCM,SHA384),
+  CS_ENTRY(0x00A1, DH,RSA,AES256,GCM,SHA384,,,),
+  CS_ENTRY(0x00A2, TLS,DHE,DSS,WITH,AES,128,GCM,SHA256),
+  CS_ENTRY(0x00A2, DHE,DSS,AES128,GCM,SHA256,,,),
+  CS_ENTRY(0x00A3, TLS,DHE,DSS,WITH,AES,256,GCM,SHA384),
+  CS_ENTRY(0x00A3, DHE,DSS,AES256,GCM,SHA384,,,),
+  CS_ENTRY(0x00A4, TLS,DH,DSS,WITH,AES,128,GCM,SHA256),
+  CS_ENTRY(0x00A4, DH,DSS,AES128,GCM,SHA256,,,),
+  CS_ENTRY(0x00A5, TLS,DH,DSS,WITH,AES,256,GCM,SHA384),
+  CS_ENTRY(0x00A5, DH,DSS,AES256,GCM,SHA384,,,),
+  CS_ENTRY(0x00A6, TLS,DH,anon,WITH,AES,128,GCM,SHA256),
+  CS_ENTRY(0x00A6, ADH,AES128,GCM,SHA256,,,,),
+  CS_ENTRY(0x00A7, TLS,DH,anon,WITH,AES,256,GCM,SHA384),
+  CS_ENTRY(0x00A7, ADH,AES256,GCM,SHA384,,,,),
+  CS_ENTRY(0xC002, TLS,ECDH,ECDSA,WITH,RC4,128,SHA,),
+  CS_ENTRY(0xC002, ECDH,ECDSA,RC4,SHA,,,,),
+  CS_ENTRY(0xC007, TLS,ECDHE,ECDSA,WITH,RC4,128,SHA,),
+  CS_ENTRY(0xC007, ECDHE,ECDSA,RC4,SHA,,,,),
+  CS_ENTRY(0xC00C, TLS,ECDH,RSA,WITH,RC4,128,SHA,),
+  CS_ENTRY(0xC00C, ECDH,RSA,RC4,SHA,,,,),
+  CS_ENTRY(0xC011, TLS,ECDHE,RSA,WITH,RC4,128,SHA,),
+  CS_ENTRY(0xC011, ECDHE,RSA,RC4,SHA,,,,),
+  CS_ENTRY(0xC015, TLS,ECDH,anon,WITH,NULL,SHA,,),
+  CS_ENTRY(0xC015, AECDH,NULL,SHA,,,,,),
+  CS_ENTRY(0xC016, TLS,ECDH,anon,WITH,RC4,128,SHA,),
+  CS_ENTRY(0xC016, AECDH,RC4,SHA,,,,,),
+  CS_ENTRY(0xC017, TLS,ECDH,anon,WITH,3DES,EDE,CBC,SHA),
+  CS_ENTRY(0xC017, AECDH,DES,CBC3,SHA,,,,),
+  CS_ENTRY(0xC018, TLS,ECDH,anon,WITH,AES,128,CBC,SHA),
+  CS_ENTRY(0xC018, AECDH,AES128,SHA,,,,,),
+  CS_ENTRY(0xC019, TLS,ECDH,anon,WITH,AES,256,CBC,SHA),
+  CS_ENTRY(0xC019, AECDH,AES256,SHA,,,,,),
+#endif
 #if defined(USE_MBEDTLS)
-  /* entries marked ns are "non-standard", they are not in openssl */
+  /* entries marked ns are "non-standard", they are not in OpenSSL */
   CS_ENTRY(0x0041, TLS,RSA,WITH,CAMELLIA,128,CBC,SHA,),
   CS_ENTRY(0x0041, CAMELLIA128,SHA,,,,,,),
   CS_ENTRY(0x0045, TLS,DHE,RSA,WITH,CAMELLIA,128,CBC,SHA),
@@ -713,4 +887,5 @@ int Curl_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
   return r;
 }
 
-#endif /* defined(USE_MBEDTLS) || defined(USE_BEARSSL) */
+#endif /* defined(USE_SECTRANSP) || defined(USE_MBEDTLS) || \
+          defined(USE_BEARSSL) || defined(USE_RUSTLS) */

@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_PROXYUSERPWD (3)
 Protocol:
   - All
+Added-in: 7.10.7
 ---
 
 # NAME
@@ -43,6 +44,8 @@ CURLOPT_HTTPAUTH(3) man page.
 
 CURLAUTH_BASIC
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10.7
+# %AVAILABILITY%
 
 # RETURN VALUE
 

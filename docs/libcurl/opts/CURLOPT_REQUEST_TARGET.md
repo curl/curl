@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_URL (3)
 Protocol:
   - HTTP
+Added-in: 7.55.0
 ---
 
 # NAME
@@ -37,6 +38,8 @@ other safe guards. That includes white space and control characters.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -56,9 +59,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.55.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

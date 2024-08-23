@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_STDERR (3)
 Protocol:
   - All
+Added-in: 7.18.0
 ---
 
 # NAME
@@ -63,7 +64,9 @@ many systems!
 
 # DEFAULT
 
-By default, this is NULL and unused.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -91,9 +94,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.18.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

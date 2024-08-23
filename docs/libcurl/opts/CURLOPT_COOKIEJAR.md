@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_COOKIELIST (3)
 Protocol:
   - HTTP
+Added-in: 7.9
 ---
 
 # NAME
@@ -53,6 +54,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -74,9 +77,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with HTTP
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_REDIR_PROTOCOLS_STR (3)
 Protocol:
   - HTTP
+Added-in: 7.19.4
 ---
 
 # NAME
@@ -83,6 +84,8 @@ HTTP, HTTPS, FTP and FTPS (Added in 7.65.2).
 Older versions defaulted to all protocols except FILE, SCP and since 7.40.0
 SMB and SMBS.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -103,10 +106,11 @@ int main(int argc, char **argv)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.19.4, before then it would follow all protocols. Deprecated
-since 7.85.0.
+Deprecated since 7.85.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

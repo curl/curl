@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: trace-time
 Help: Add time stamps to trace/verbose output
 Added: 7.14.0
-Category: verbose
+Category: verbose global
 Multi: boolean
 Scope: global
 See-also:

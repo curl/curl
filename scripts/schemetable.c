@@ -62,8 +62,8 @@ static const struct detail scheme[] = {
   {"rtsp", "#ifndef CURL_DISABLE_RTSP" },
   {"scp", "#if defined(USE_SSH) && !defined(USE_WOLFSSH)" },
   {"sftp", "#if defined(USE_SSH)" },
-  {"smb", "#if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE) && \\\n"
-   "  (SIZEOF_CURL_OFF_T > 4)" },
+  {"smb", "#if !defined(CURL_DISABLE_SMB) && \\\n"
+   "  defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)" },
   {"smbs", "#if defined(USE_SSL) && !defined(CURL_DISABLE_SMB) && \\\n"
    "  defined(USE_CURL_NTLM_CORE) && (SIZEOF_CURL_OFF_T > 4)" },
   {"smtp", "#ifndef CURL_DISABLE_SMTP" },
@@ -112,10 +112,10 @@ static void showtable(int try, int init, int shift)
   printf("  static const struct Curl_handler * const protocols[%d] = {", try);
 
   /* generate table */
-  for(i=0; i < try; i++) {
+  for(i = 0; i < try; i++) {
     int match = 0;
     int j;
-    for(j=0; scheme[j].n; j++) {
+    for(j = 0; scheme[j].n; j++) {
       if(ix[j] == i) {
         printf("\n");
         printf("%s\n", scheme[j].ifdef);
@@ -154,7 +154,7 @@ int main(void)
         unsigned int v = calc(scheme[i].n, add, shift);
         int j;
         int badcombo = 0;
-        for(j=0; j < i; j++) {
+        for(j = 0; j < i; j++) {
 
           if(num[j] == v) {
             /*
@@ -183,9 +183,8 @@ int main(void)
         /* check for dupes */
         for(i = 0; scheme[i].n && good; ++i) {
           int j;
-          for(j=0; j < i; j++) {
+          for(j = 0; j < i; j++) {
             if(ix[j] == ix[i]) {
-              /* printf("NOPE, try %u causes dupes (%d and %d)\n", try, j, i); */
               good = 0;
               break;
             }

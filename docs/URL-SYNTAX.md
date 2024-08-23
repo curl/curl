@@ -67,7 +67,7 @@ and curl using scripts remain working.
 curl's URL parser allows a few deviations from the spec in order to
 inter-operate better with URLs that appear in the wild.
 
-### spaces
+### Spaces
 
 A URL provided to curl cannot contain spaces. They need to be provided URL
 encoded to be accepted in a URL by curl.
@@ -77,12 +77,12 @@ client where a resource has been redirected to, sometimes contain spaces. This
 is a violation of RFC 3986 but is fine in the WHATWG spec. curl handles these
 by re-encoding them to `%20`.
 
-### non-ASCII
+### Non-ASCII
 
 Byte values in a provided URL that are outside of the printable ASCII range
 are percent-encoded by curl.
 
-### multiple slashes
+### Multiple slashes
 
 An absolute URL always starts with a "scheme" followed by a colon. For all the
 schemes curl supports, the colon must be followed by two slashes according to
@@ -108,7 +108,7 @@ Based on what the hostname starts with, curl "guesses" what protocol to use:
  - `pop3.` means POP3
  - all other means HTTP
 
-### globbing letters
+### Globbing letters
 
 The curl command line tool supports "globbing" of URLs. It means that you can
 create ranges and lists using `[N-M]` and `{one,two,three}` sequences. The
@@ -197,7 +197,7 @@ Transitional Processing. The two standards have a huge overlap but differ
 slightly, perhaps most famously in how they deal with the German "double s"
 (`ß`).
 
-When winidn is used, curl uses IDNA 2003 Transitional Processing, like the rest
+When WinIDN is used, curl uses IDNA 2003 Transitional Processing, like the rest
 of Windows.
 
 ## Port number
@@ -226,7 +226,7 @@ directory listing for the root / home directory is returned.
 FTP servers typically put the user in its "home directory" after login, which
 then differs between users. To explicitly specify the root directory of an FTP
 server, start the path with double slash `//` or `/%2f` (2F is the hexadecimal
-value of the ascii code for the slash).
+value of the ASCII code for the slash).
 
 ## FILE
 

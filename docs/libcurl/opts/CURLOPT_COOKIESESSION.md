@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_COOKIEJAR (3)
 Protocol:
   - HTTP
+Added-in: 7.9.7
 ---
 
 # NAME
@@ -41,6 +42,8 @@ the same session.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with HTTP
+# %AVAILABILITY%
 
 # RETURN VALUE
 

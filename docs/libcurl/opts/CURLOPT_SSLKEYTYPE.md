@@ -14,6 +14,7 @@ TLS-backend:
   - OpenSSL
   - BearSSL
   - wolfSSL
+Added-in: 7.9.3
 ---
 
 # NAME
@@ -45,6 +46,8 @@ option.
 
 "PEM"
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-If built TLS enabled.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

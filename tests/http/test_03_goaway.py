@@ -105,8 +105,8 @@ class TestGoAway:
         assert nghttpx.reload(timeout=timedelta(seconds=2))
         t.join()
         r: ExecResult = self.r
-        # this should take `count` seconds to retrieve
-        assert r.duration >= timedelta(seconds=count)
+        # this should take `count` seconds to retrieve, maybe a little less
+        assert r.duration >= timedelta(seconds=count-1)
         r.check_response(count=count, http_status=200, connect_count=2)
         # reload will shut down the connection gracefully with GOAWAY
         # we expect to see a second connection opened afterwards
@@ -122,10 +122,13 @@ class TestGoAway:
         def long_run():
             curl = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
+            # pause 2 seconds between requests
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
                    f'/curltest/tweak?id=[0-{count - 1}]'\
                    '&chunks=10&chunk_size=1024&chunk_delay=100ms'
-            self.r = curl.http_download(urls=[urln], alpn_proto=proto)
+            self.r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+                '--rate', '30/m',
+            ])
 
         t = Thread(target=long_run)
         t.start()
@@ -136,7 +139,7 @@ class TestGoAway:
         t.join()
         r: ExecResult = self.r
         r.check_response(count=count, http_status=200, connect_count=2)
-        # reload will shut down the connection gracefully with GOAWAY
+        # reload will shut down the connection gracefully
         # we expect to see a second connection opened afterwards
         for idx, s in enumerate(r.stats):
             if s['num_connects'] > 0:

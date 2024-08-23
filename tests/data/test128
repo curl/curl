@@ -24,7 +24,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER --crlf
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER">
 file
-with unix newlines
+with Unix newlines
 meant to be
 converted
 with
@@ -35,6 +35,9 @@ the
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com
@@ -46,7 +49,7 @@ QUIT
 </protocol>
 <upload>
 file
-with unix newlines
+with Unix newlines
 meant to be
 converted
 with

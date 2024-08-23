@@ -863,7 +863,7 @@ number:
 
       str = (char *)iptr->val.str;
       if(!str) {
-        /* Write null string if there's space.  */
+        /* Write null string if there is space.  */
         if(prec == -1 || prec >= (int) sizeof(nilstr) - 1) {
           str = nilstr;
           len = sizeof(nilstr) - 1;
@@ -1040,7 +1040,7 @@ static int addbyter(unsigned char outc, void *f)
 {
   struct nsprintf *infop = f;
   if(infop->length < infop->max) {
-    /* only do this if we haven't reached max length yet */
+    /* only do this if we have not reached max length yet */
     *infop->buffer++ = (char)outc; /* store */
     infop->length++; /* we are now one byte larger */
     return 0;     /* fputc() returns like this on success */
@@ -1062,10 +1062,10 @@ int curl_mvsnprintf(char *buffer, size_t maxlength, const char *format,
   if(info.max) {
     /* we terminate this with a zero byte */
     if(info.max == info.length) {
-      /* we're at maximum, scrap the last letter */
+      /* we are at maximum, scrap the last letter */
       info.buffer[-1] = 0;
       DEBUGASSERT(retcode);
-      retcode--; /* don't count the nul byte */
+      retcode--; /* do not count the nul byte */
     }
     else
       info.buffer[0] = 0;

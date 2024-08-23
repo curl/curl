@@ -8,6 +8,7 @@ See-also:
   - CURLOPT_SSL_FALSESTART (3)
 Protocol:
   - All
+Added-in: 7.49.0
 ---
 
 # NAME
@@ -37,6 +38,8 @@ Fast Open is also known to be problematic on or across certain networks.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -51,10 +54,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# NOTES
 
-Added in 7.49.0. This option is currently only supported on Linux and macOS
-10.11 or later.
+This option is only supported on Linux and macOS 10.11 or later.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

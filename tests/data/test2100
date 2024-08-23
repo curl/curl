@@ -47,9 +47,9 @@ http
 # requires IPv6 so that we can assume and compare both DoH requests
 
 <features>
-debug
+Debug
 DoH
-ipv6
+IPv6
 </features>
 <name>
 HTTP GET using DoH

@@ -115,7 +115,7 @@ rem ***************************************************************************
   if "%CHECK_SRC%" == "TRUE" (
     rem Check the src directory
     if exist %SRC_DIR%\src (
-      for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\src" -Wtool_hugehelp.c "%%i"
+      for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.c.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\src" -Wtool_ca_embed.c -Wtool_hugehelp.c "%%i"
       for /f "delims=" %%i in ('dir "%SRC_DIR%\src\*.h.*" /b 2^>NUL') do @perl "%SRC_DIR%\scripts\checksrc.pl" "-D%SRC_DIR%\src" "%%i"
     )
   )

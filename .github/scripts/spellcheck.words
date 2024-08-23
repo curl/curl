@@ -33,7 +33,6 @@ archivers
 Archos
 Arntsen
 Aros
-ascii
 asynch
 AsynchDNS
 atime
@@ -44,6 +43,7 @@ Autoconf
 autoconf
 Automake
 automake
+autoreconf
 Autotools
 autotools
 AVR
@@ -69,7 +69,6 @@ Bjørn
 bool
 boolean
 BoringSSL
-boringssl
 Boukris
 Broadcom
 brotli
@@ -79,7 +78,6 @@ bugfix
 bugfixes
 buildable
 buildbot
-buildconf
 Caddy
 calloc
 CAPA
@@ -119,10 +117,10 @@ CMake
 cmake
 CMake's
 cmake's
-CNAME
-CNAMEs
 CMakeLists
 CNA
+CNAME
+CNAMEs
 CodeQL
 codeql
 CODESET
@@ -138,6 +136,7 @@ CPUs
 CR
 CRL
 CRLF
+crontab
 crt
 crypto
 cryptographic
@@ -174,6 +173,8 @@ decrypting
 deepcode
 DELE
 DER
+dereference
+dereferences
 deselectable
 deserialization
 Deserialized
@@ -209,11 +210,13 @@ EBCDIC
 ECC
 ECDHE
 ECH
-ecl
 ECHConfig
 ECHConfigList
+ecl
 ECONNREFUSED
 eCOS
+ECT
+EF
 EFnet
 EGD
 EHLO
@@ -289,7 +292,6 @@ globbed
 globbing
 gmail
 GnuTLS
-gnutls
 Golemon
 GOST
 GPG
@@ -358,6 +360,7 @@ ifdef
 ifdefed
 Ifdefs
 ifdefs
+ifhost
 IIS
 ILE
 Illumos
@@ -436,11 +439,9 @@ libpsl
 Libre
 libre
 LibreSSL
-libressl
 librtmp
 libs
 libssh
-libSSH
 libssh2
 Libtool
 libtool
@@ -450,12 +451,15 @@ libz
 libzstd
 LineageOS
 linux
+lldb
 ln
 localhost
 LOGDIR
 logfile
 lookups
 loopback
+LOWCOST
+LOWDELAY
 LPRT
 LSB
 lseek
@@ -487,6 +491,7 @@ Micrium
 MicroBlaze
 MicroOS
 middlebox
+MINCOST
 mingw
 MinGW
 MINIX
@@ -503,6 +508,7 @@ MorphOS
 MPE
 MPL
 mprintf
+MPTCP
 MQTT
 mqtt
 mqtts
@@ -522,6 +528,7 @@ mTLS
 MUA
 multicwd
 multiparts
+multipath
 MultiSSL
 mumbo
 musedev
@@ -658,6 +665,7 @@ ReactOS
 README
 realloc
 Realtime
+rebalances
 rebase
 RECV
 recv
@@ -707,6 +715,7 @@ runtests
 runtime
 Ruslan
 rustc
+Rustls
 rustls
 Sagula
 SanDisk
@@ -823,6 +832,7 @@ TCP
 tcpdump
 Tekniska
 testability
+testcurl
 TFTP
 tftp
 threadsafe
@@ -836,10 +846,12 @@ toolchain
 toolchains
 toolset
 toplevel
+TOS
 TPF
 TrackMemory
 transcode
 Tru
+trurl
 trustless
 Tse
 Tsujikawa
@@ -865,7 +877,6 @@ unescape
 Unglobbed
 Unicode
 UNICOS
-unix
 UnixSockets
 UnixWare
 unlink
@@ -899,6 +910,7 @@ VC
 vcpkg
 vexxhost
 Viktor
+VLAN
 VM
 VMS
 VMware
@@ -906,6 +918,7 @@ vnd
 VRF
 VRFY
 VSE
+vsftpd
 vsprintf
 vt
 vtls
@@ -915,6 +928,7 @@ Warta
 watchOS
 WAV
 WB
+wcurl
 web page
 WebDAV
 WebOS
@@ -925,14 +939,10 @@ WHATWG
 whitespace
 Whitespaces
 winbind
-WinBind
 winbuild
-winidn
 WinIDN
 WinLDAP
-WinSock
 winsock
-WinSSL
 winssl
 Wireshark
 wolfSSH

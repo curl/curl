@@ -5,7 +5,7 @@ Long: ssl-reqd
 Help: Require SSL/TLS
 Protocols: FTP IMAP POP3 SMTP LDAP
 Added: 7.20.0
-Category: tls
+Category: tls imap pop3 smtp ldap
 Multi: boolean
 See-also:
   - ssl

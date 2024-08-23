@@ -147,7 +147,7 @@ static CURLcode file_setup_connection(struct Curl_easy *data,
 
 /*
  * file_connect() gets called from Curl_protocol_connect() to allow us to
- * do protocol-specific actions at connect-time.  We emulate a
+ * do protocol-specific actions at connect-time. We emulate a
  * connect-then-transfer protocol and "connect" to the file here
  */
 static CURLcode file_connect(struct Curl_easy *data, bool *done)
@@ -177,18 +177,18 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     return result;
 
 #ifdef DOS_FILESYSTEM
-  /* If the first character is a slash, and there's
+  /* If the first character is a slash, and there is
      something that looks like a drive at the beginning of
-     the path, skip the slash.  If we remove the initial
+     the path, skip the slash. If we remove the initial
      slash in all cases, paths without drive letters end up
-     relative to the current directory which isn't how
+     relative to the current directory which is not how
      browsers work.
 
      Some browsers accept | instead of : as the drive letter
      separator, so we do too.
 
      On other platforms, we need the slash to indicate an
-     absolute pathname.  On Windows, absolute paths start
+     absolute pathname. On Windows, absolute paths start
      with a drive letter.
   */
   actual_path = real_path;
@@ -223,7 +223,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
    * A leading slash in an AmigaDOS path denotes the parent
    * directory, and hence we block this as it is relative.
    * Absolute paths start with 'volumename:', so we check for
-   * this first. Failing that, we treat the path as a real unix
+   * this first. Failing that, we treat the path as a real Unix
    * path, but only if the application was compiled with -lunix.
    */
   fd = -1;
@@ -308,7 +308,7 @@ static CURLcode file_upload(struct Curl_easy *data)
   bool eos = FALSE;
 
   /*
-   * Since FILE: doesn't do the full init, we need to provide some extra
+   * Since FILE: does not do the full init, we need to provide some extra
    * assignments here.
    */
 
@@ -331,7 +331,7 @@ static CURLcode file_upload(struct Curl_easy *data)
 
   fd = open(file->path, mode, data->set.new_file_perms);
   if(fd < 0) {
-    failf(data, "Can't open %s for writing", file->path);
+    failf(data, "cannot open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
   }
 
@@ -343,7 +343,7 @@ static CURLcode file_upload(struct Curl_easy *data)
   if(data->state.resume_from < 0) {
     if(fstat(fd, &file_stat)) {
       close(fd);
-      failf(data, "Can't get the size of %s", file->path);
+      failf(data, "cannot get the size of %s", file->path);
       return CURLE_WRITE_ERROR;
     }
     data->state.resume_from = (curl_off_t)file_stat.st_size;
@@ -413,13 +413,13 @@ out:
  * file_do() is the protocol-specific function for the do-phase, separated
  * from the connect-phase above. Other protocols merely setup the transfer in
  * the do-phase, to have it done in the main transfer loop but since some
- * platforms we support don't allow select()ing etc on file handles (as
+ * platforms we support do not allow select()ing etc on file handles (as
  * opposed to sockets) we instead perform the whole do-operation in this
  * function.
  */
 static CURLcode file_do(struct Curl_easy *data, bool *done)
 {
-  /* This implementation ignores the host name in conformance with
+  /* This implementation ignores the hostname in conformance with
      RFC 1738. Only local files (reachable via the standard file system)
      are supported. This means that files on remotely mounted directories
      (via NFS, Samba, NT sharing) can be accessed through a file:// URL
@@ -465,17 +465,18 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     const struct tm *tm = &buffer;
     char header[80];
     int headerlen;
-    char accept_ranges[24]= { "Accept-ranges: bytes\r\n" };
+    static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
-      headerlen = msnprintf(header, sizeof(header),
-                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
-                expected_size);
+      headerlen =
+        msnprintf(header, sizeof(header),
+                  "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+                  expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)
         return result;
 
       result = Curl_client_write(data, CLIENTWRITE_HEADER,
-                                 accept_ranges, strlen(accept_ranges));
+                                 accept_ranges, sizeof(accept_ranges) - 1);
       if(result != CURLE_OK)
         return result;
     }
@@ -486,23 +487,26 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
       return result;
 
     /* format: "Tue, 15 Nov 1994 12:45:26 GMT" */
-    headerlen = msnprintf(header, sizeof(header),
-              "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n%s",
-              Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
-              tm->tm_mday,
-              Curl_month[tm->tm_mon],
-              tm->tm_year + 1900,
-              tm->tm_hour,
-              tm->tm_min,
-              tm->tm_sec,
-              data->req.no_body ? "": "\r\n");
+    headerlen =
+      msnprintf(header, sizeof(header),
+                "Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+                tm->tm_mday,
+                Curl_month[tm->tm_mon],
+                tm->tm_year + 1900,
+                tm->tm_hour,
+                tm->tm_min,
+                tm->tm_sec);
     result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
+    if(!result)
+      /* end of headers */
+      result = Curl_client_write(data, CLIENTWRITE_HEADER, "\r\n", 2);
     if(result)
       return result;
     /* set the file size to make it available post transfer */
     Curl_pgrsSetDownloadSize(data, expected_size);
     if(data->req.no_body)
-      return result;
+      return CURLE_OK;
   }
 
   /* Check whether file range has been specified */
@@ -514,7 +518,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
    * of the stream if the filesize could be determined */
   if(data->state.resume_from < 0) {
     if(!fstated) {
-      failf(data, "Can't get the size of file.");
+      failf(data, "cannot get the size of file.");
       return CURLE_READ_ERROR;
     }
     data->state.resume_from += (curl_off_t)statbuf.st_size;
@@ -522,7 +526,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from > 0) {
     /* We check explicitly if we have a start offset, because
-     * expected_size may be -1 if we don't know how large the file is,
+     * expected_size may be -1 if we do not know how large the file is,
      * in which case we should not adjust it. */
     if(data->state.resume_from <= expected_size)
       expected_size -= data->state.resume_from;
@@ -566,7 +570,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
   if(!S_ISDIR(statbuf.st_mode)) {
     while(!result) {
       ssize_t nread;
-      /* Don't fill a whole buffer if we want less than all data */
+      /* Do not fill a whole buffer if we want less than all data */
       size_t bytestoread;
 
       if(size_known) {

@@ -10,9 +10,6 @@ curl release procedure - how to do a release
 in the source code repo
 -----------------------
 
-- do a *regular build* with a sensible build config to make sure the
-  `src/tool_hugehelp.c` file etc is correctly generated
-
 - edit `RELEASE-NOTES` to be accurate
 
 - update `docs/THANKS`
@@ -111,11 +108,11 @@ Coming dates
 Based on the description above, here are some planned release dates (at the
 time of this writing):
 
-- May 22, 2024
-- July 17, 2024
 - September 11, 2024
 - November 6, 2024
 - January 8, 2025
 - March 5, 2025
 - April 30, 2025
 - June 25, 2025
+- August 20, 2025
+- October 15, 2025

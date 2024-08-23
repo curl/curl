@@ -62,11 +62,11 @@
 #endif
 
 /*
- * Include header files for windows builds before redefining anything.
+ * Include header files for Windows builds before redefining anything.
  * Use this preprocessor block only to include or exclude windows.h,
- * winsock2.h or ws2tcpip.h. Any other windows thing belongs
- * to any other further and independent block.  Under Cygwin things work
- * just as under linux (e.g. <sys/socket.h>) and the winsock headers should
+ * winsock2.h or ws2tcpip.h. Any other Windows thing belongs
+ * to any other further and independent block. Under Cygwin things work
+ * just as under Linux (e.g. <sys/socket.h>) and the Winsock headers should
  * never be included when __CYGWIN__ is defined.
  */
 
@@ -78,7 +78,7 @@
 #    error "_UNICODE is defined but UNICODE is not defined"
 #  endif
 /*
- * Don't include unneeded stuff in Windows headers to avoid compiler
+ * Do not include unneeded stuff in Windows headers to avoid compiler
  * warnings and macro clashes.
  * Make sure to define this macro before including any Windows headers.
  */

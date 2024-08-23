@@ -6,8 +6,8 @@ SPDX-License-Identifier: curl
 
 # Continuous Integration for curl
 
-Curl runs in many different environments, so every change is run against a large
-number of test suites.
+Curl runs in many different environments, so every change is run against a
+large number of test suites.
 
 Every pull request is verified for each of the following:
 
@@ -22,10 +22,10 @@ Every pull request is verified for each of the following:
  - ... code coverage does not shrink drastically
  - ... different TLS backends still compile and pass tests
 
-If the pull-request fails one of these tests, it will show up as a red X and
-you are expected to fix the problem. If you do not understand when the issue is
-or have other problems to fix the complaint, just ask and other project
-members will likely be able to help out.
+If the pull-request fails one of these tests, it shows up as a red X and you
+are expected to fix the problem. If you do not understand when the issue is or
+have other problems to fix the complaint, just ask and other project members
+can likely help out.
 
 Consider the following table while looking at pull request failures:
 
@@ -58,7 +58,7 @@ are configured:
 
 GitHub Actions runs the following tests:
 
-- Mac OS tests with a variety of different compilation options
+- macOS tests with a variety of different compilation options
 - Fuzz tests ([see the curl-fuzzer repo for more
   info](https://github.com/curl/curl-fuzzer)).
 - Curl compiled using the Rust TLS backend with Hyper
@@ -107,11 +107,4 @@ admins/group members can be added on request.
 
 ### Cirrus CI
 
-Cirrus CI runs a basic test suite on FreeBSD and Windows. This is configured in
-`.cirrus.yml`.
-
-You can [view the full list of CI jobs on Cirrus CI's
-website](https://cirrus-ci.com/github/curl/curl).
-
-`@bagder` has access to edit the "Project Settings" on that page. Additional
-admins/group members can be added on request.
+Not used anymore.

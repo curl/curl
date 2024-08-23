@@ -42,7 +42,7 @@ expected to be URL-encoded already.
 
 ## @filename
 load data from the given file (including any newlines), URL-encode that data
-and pass it on in the POST.
+and pass it on in the POST. Using `@-` makes curl read the data from stdin.
 
 ## name@filename
 load data from the given file (including any newlines), URL-encode that data

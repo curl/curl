@@ -1,0 +1,42 @@
+<testcase>
+<info>
+<keywords>
+POP3
+Clear Text
+LIST
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+%repeat[1000 x 95 328485%0d%0a]%</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+<name>
+POP3 LIST 1000 messages
+</name>
+<command>
+pop3://%HOSTIP:%POP3PORT/ -u user:secret
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+CAPA
+USER user
+PASS secret
+LIST
+QUIT
+</protocol>
+</verify>
+</testcase>

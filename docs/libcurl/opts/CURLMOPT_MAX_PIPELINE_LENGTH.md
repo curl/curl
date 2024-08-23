@@ -9,6 +9,7 @@ See-also:
   - CURLMOPT_PIPELINING (3)
 Protocol:
   - All
+Added-in: 7.30.0
 ---
 
 # NAME
@@ -42,6 +43,8 @@ CURLMOPT_MAX_PIPELINE_LENGTH(3).
 
 5
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,9 +56,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.30.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

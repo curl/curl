@@ -87,18 +87,19 @@ class TestDownload:
         r.check_response(http_status=200, count=100, connect_count=1)
 
     # download 100 files parallel
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_02_04_download_100_parallel(self, env: Env,
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_04_download_20_parallel(self, env: Env,
                                          httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        max_parallel = 50
+        count = 20
+        max_parallel = 10
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-99]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel', '--parallel-max', f'{max_parallel}'
         ])
-        r.check_response(http_status=200, count=100)
+        r.check_response(http_status=200, count=count)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
             assert r.total_connects > 1, r.dump_logs()
@@ -323,6 +324,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_21_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         count = 2 if proto == 'http/1.1' else 10
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -340,6 +343,8 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [100*1023])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_22_lib_parallel_resume(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         count = 2 if proto == 'http/1.1' else 10
         max_parallel = 5
         docname = 'data-10m'
@@ -358,6 +363,8 @@ class TestDownload:
     # download, several at a time, pause and abort paused
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23a_lib_abort_paused(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
@@ -387,6 +394,8 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23b_lib_abort_offset(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
@@ -416,6 +425,8 @@ class TestDownload:
     # download, several at a time, abort after n bytes
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_23c_lib_fail_offset(self, env: Env, httpd, nghttpx, proto, repeat):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):

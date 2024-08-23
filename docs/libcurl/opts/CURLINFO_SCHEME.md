@@ -12,6 +12,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -39,6 +40,8 @@ CURL handle.
 The returned scheme might be upper or lowercase. Do comparisons case
 insensitively.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.52.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

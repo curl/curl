@@ -24,7 +24,7 @@
 
 EXTRA_DIST = coverage.sh completion.pl firefox-db2pem.sh checksrc.pl    \
  mk-ca-bundle.pl schemetable.c cd2nroff nroff2cd cdall cd2cd managen \
- dmaketgz
+ dmaketgz release-tools.sh verify-release
 
 ZSH_FUNCTIONS_DIR = @ZSH_FUNCTIONS_DIR@
 FISH_FUNCTIONS_DIR = @FISH_FUNCTIONS_DIR@

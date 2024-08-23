@@ -17,5 +17,3 @@ Example:
 
 Convert line feeds to carriage return plus line feeds in upload. Useful for
 **MVS (OS/390)**.
-
-(SMTP added in 7.40.0)

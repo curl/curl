@@ -34,16 +34,24 @@ CMAKE_DIST =                                    \
  CMake/CurlTests.c                              \
  CMake/FindBearSSL.cmake                        \
  CMake/FindBrotli.cmake                         \
- CMake/FindCARES.cmake                          \
+ CMake/FindCares.cmake                          \
  CMake/FindGSS.cmake                            \
- CMake/FindLibPSL.cmake                         \
- CMake/FindLibSSH2.cmake                        \
+ CMake/FindLibgsasl.cmake                       \
+ CMake/FindLibidn2.cmake                        \
+ CMake/FindLibpsl.cmake                         \
+ CMake/FindLibssh.cmake                         \
+ CMake/FindLibssh2.cmake                        \
+ CMake/FindLibuv.cmake                          \
  CMake/FindMbedTLS.cmake                        \
  CMake/FindMSH3.cmake                           \
+ CMake/FindMbedTLS.cmake                        \
  CMake/FindNGHTTP2.cmake                        \
  CMake/FindNGHTTP3.cmake                        \
  CMake/FindNGTCP2.cmake                         \
- CMake/FindQUICHE.cmake                         \
+ CMake/FindNettle.cmake                         \
+ CMake/FindQuiche.cmake                         \
+ CMake/FindRustls.cmake                         \
+ CMake/FindWolfSSH.cmake                        \
  CMake/FindWolfSSL.cmake                        \
  CMake/FindZstd.cmake                           \
  CMake/Macros.cmake                             \
@@ -62,7 +70,7 @@ VC_DIST = projects/README.md                           \
  projects/wolfssl_override.props
 
 WINBUILD_DIST = winbuild/README.md winbuild/gen_resp_file.bat \
- winbuild/MakefileBuild.vc winbuild/Makefile.vc winbuild/makedebug.cmd
+ winbuild/MakefileBuild.vc winbuild/Makefile.vc winbuild/makedebug.bat
 
 PLAN9_DIST = plan9/include/mkfile \
  plan9/include/mkfile             \
@@ -74,10 +82,9 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile.inc             \
  plan9/src/mkfile
 
-EXTRA_DIST = CHANGES COPYING maketgz Makefile.dist curl-config.in       \
- RELEASE-NOTES buildconf libcurl.pc.in $(CMAKE_DIST) $(VC_DIST)         \
- $(WINBUILD_DIST) $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat       \
- libcurl.def Dockerfile
+EXTRA_DIST = CHANGES.md COPYING maketgz Makefile.dist curl-config.in    \
+ RELEASE-NOTES libcurl.pc.in $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
+ $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat libcurl.def Dockerfile
 
 CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
  $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)       \
@@ -87,7 +94,7 @@ CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
 bin_SCRIPTS = curl-config
 
 SUBDIRS = lib docs src scripts
-DIST_SUBDIRS = $(SUBDIRS) tests packages scripts include docs
+DIST_SUBDIRS = $(SUBDIRS) tests packages include docs
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = libcurl.pc
@@ -98,8 +105,8 @@ include src/Makefile.inc
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
-	find $(distdir) -name "*.dist" -exec rm {} \;
-	(distit=`find $(srcdir) -name "*.dist" | grep -v ./ares/`; \
+	find $(distdir) -name "*.dist" -a \! -name Makefile.dist -exec rm {} \;
+	(distit=`find $(srcdir) -name "*.dist" | grep -v Makefile`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \
 	  cp -p $$file $(distdir)$$strip; \
@@ -187,7 +194,7 @@ pkgadd:
 	cd $(srcdir)/packages/Solaris && $(MAKE) package
 
 #
-# Build a cygwin binary tarball installation file
+# Build a Cygwin binary tarball installation file
 # resulting .tar.bz2 file will end up at packages/Win32/cygwin
 cygwinbin:
 	$(MAKE) -C packages/Win32/cygwin cygwinbin

@@ -216,8 +216,8 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
   struct curl_forms *forms = NULL;
   char *array_value = NULL; /* value read from an array */
 
-  /* This is a state variable, that if TRUE means that we're parsing an
-     array that we got passed to us. If FALSE we're parsing the input
+  /* This is a state variable, that if TRUE means that we are parsing an
+     array that we got passed to us. If FALSE we are parsing the input
      va_list arguments. */
   bool array_state = FALSE;
 
@@ -260,7 +260,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
     switch(option) {
     case CURLFORM_ARRAY:
       if(array_state)
-        /* we don't support an array from within an array */
+        /* we do not support an array from within an array */
         return_value = CURL_FORMADD_ILLEGAL_ARRAY;
       else {
         forms = va_arg(params, struct curl_forms *);
@@ -327,7 +327,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
         array_state?(curl_off_t)(size_t)array_value:va_arg(params, curl_off_t);
       break;
 
-      /* Get contents from a given file name */
+      /* Get contents from a given filename */
     case CURLFORM_FILECONTENT:
       if(current_form->flags & (HTTPPOST_PTRCONTENTS|HTTPPOST_READFILE))
         return_value = CURL_FORMADD_OPTION_TWICE;
@@ -429,7 +429,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
           array_state?array_value:va_arg(params, char *);
         if(userp) {
           current_form->userp = userp;
-          current_form->value = userp; /* this isn't strictly true but we
+          current_form->value = userp; /* this is not strictly true but we
                                           derive a value from this later on
                                           and we need this non-NULL to be
                                           accepted as a fine form part */
@@ -599,7 +599,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
       if(!(form->flags & HTTPPOST_PTRNAME) &&
          (form == first_form) ) {
-        /* Note that there's small risk that form->name is NULL here if the
+        /* Note that there is small risk that form->name is NULL here if the
            app passed in a bad combo, so we better check for that first. */
         if(form->name) {
           /* copy name (without strdup; possibly not null-terminated) */
@@ -764,7 +764,7 @@ void curl_formfree(struct curl_httppost *form)
       )
       free(form->contents); /* free the contents */
     free(form->contenttype); /* free the content type */
-    free(form->showfilename); /* free the faked file name */
+    free(form->showfilename); /* free the faked filename */
     free(form);       /* free the struct */
     form = next;
   } while(form); /* continue */
@@ -880,10 +880,10 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
 
         if(post->flags & (HTTPPOST_FILENAME | HTTPPOST_READFILE)) {
           if(!strcmp(file->contents, "-")) {
-            /* There are a few cases where the code below won't work; in
+            /* There are a few cases where the code below will not work; in
                particular, freopen(stdin) by the caller is not guaranteed
                to result as expected. This feature has been kept for backward
-               compatibility: use of "-" pseudo file name should be avoided. */
+               compatibility: use of "-" pseudo filename should be avoided. */
             result = curl_mime_data_cb(part, (curl_off_t) -1,
                                        (curl_read_callback) fread,
                                        fseeko_wrapper,
@@ -915,7 +915,7 @@ CURLcode Curl_getformdata(struct Curl_easy *data,
         }
       }
 
-      /* Set fake file name. */
+      /* Set fake filename. */
       if(!result && post->showfilename)
         if(post->more || (post->flags & (HTTPPOST_FILENAME | HTTPPOST_BUFFER |
                                         HTTPPOST_CALLBACK)))

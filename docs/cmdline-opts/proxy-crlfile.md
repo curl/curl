@@ -16,4 +16,8 @@ Example:
 
 # `--proxy-crlfile`
 
-Same as --crlfile but used in HTTPS proxy context.
+Provide filename for a PEM formatted file with a Certificate Revocation List
+that specifies peer certificates that are considered revoked when
+communicating with an HTTPS proxy.
+
+Equivalent to --crlfile but only used in HTTPS proxy context.

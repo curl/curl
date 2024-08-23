@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-/* global variable declarations, for libcurl run-time info */
+/* global variable declarations, for libcurl runtime info */
 
 
 extern curl_version_info_data *curlinfo;
@@ -34,6 +34,7 @@ extern const char * const *built_in_protos;
 extern size_t proto_count;
 
 extern const char * const *feature_names;
+extern size_t feature_count;
 
 extern const char *proto_file;
 extern const char *proto_ftp;

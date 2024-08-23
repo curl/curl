@@ -226,7 +226,7 @@ sub ftpmsg {
 
   # use this, open->print->close system only to make the file
   # open as little as possible, to make the test suite run
-  # better on windows/cygwin
+  # better on Windows/Cygwin
 }
 
 #**********************************************************************
@@ -670,7 +670,7 @@ sub protocolsetup {
     }
 }
 
-# Perform the disconnecgt handshake with sockfilt on the secondary connection
+# Perform the disconnect handshake with sockfilt on the secondary connection
 # (the only connection we actively disconnect).
 # This involves waiting for the disconnect acknowledgment after the DISC
 # command, while throwing away anything else that might come in before
@@ -690,9 +690,8 @@ sub disc_handshake {
                 $size = hex($1);
             }
 
-            read_datasockf(\$line, $size);
-
             logmsg "> Throwing away $size bytes on closed connection\n";
+            read_datasockf(\$line, $size);
         }
         elsif($line eq "DISC\n") {
             logmsg "Fancy that; client wants to DISC, too\n";
@@ -1863,12 +1862,7 @@ sub RETR_pop3 {
 }
 
 sub LIST_pop3 {
-    # This is a built-in fake-message list
-    my @data = (
-        "1 100\r\n",
-        "2 4294967400\r\n",  # > 4 GB
-        "3 200\r\n",
-    );
+    my @data = getpart("reply", "data");
 
     logmsg "retrieve a message list\n";
 
@@ -2077,7 +2071,8 @@ sub CWD_ftp {
   my ($folder, $fullcommand) = $_[0];
   switch_directory($folder);
   if($ftptargetdir =~ /^\/fully_simulated/) {
-    $ftplistparserstate = "enabled";
+      $ftplistparserstate = "enabled";
+      logmsg "enabled FTP list parser mode\n";
   }
   else {
     undef $ftplistparserstate;
@@ -2096,19 +2091,6 @@ sub PWD_ftp {
 
 sub LIST_ftp {
     #  print "150 ASCII data connection for /bin/ls (193.15.23.1,59196) (0 bytes)\r\n";
-
-# this is a built-in fake-dir ;-)
-my @ftpdir=("total 20\r\n",
-"drwxr-xr-x   8 98       98           512 Oct 22 13:06 .\r\n",
-"drwxr-xr-x   8 98       98           512 Oct 22 13:06 ..\r\n",
-"drwxr-xr-x   2 98       98           512 May  2  1996 .NeXT\r\n",
-"-r--r--r--   1 0        1             35 Jul 16  1996 README\r\n",
-"lrwxrwxrwx   1 0        1              7 Dec  9  1999 bin -> usr/bin\r\n",
-"dr-xr-xr-x   2 0        1            512 Oct  1  1997 dev\r\n",
-"drwxrwxrwx   2 98       98           512 May 29 16:04 download.html\r\n",
-"dr-xr-xr-x   2 0        1            512 Nov 30  1995 etc\r\n",
-"drwxrwxrwx   2 98       1            512 Oct 30 14:33 pub\r\n",
-"dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr\r\n");
 
     if($datasockf_conn eq 'no') {
         if($nodataconn425) {
@@ -2129,15 +2111,17 @@ my @ftpdir=("total 20\r\n",
         return 0;
     }
 
-    if($ftplistparserstate) {
-      @ftpdir = ftp_contentlist($ftptargetdir);
-    }
-
     logmsg "pass LIST data on data connection\n";
 
-    if($cwd_testno) {
-        loadtest("$logdir/test$cwd_testno");
-
+    if($ftplistparserstate) {
+        # provide a synthetic response
+        my @ftpdir = ftp_contentlist($ftptargetdir);
+        # old hard-coded style
+        for(@ftpdir) {
+            senddata $_;
+        }
+    }
+    else {
         my @data = getpart("reply", "data");
         for(@data) {
             my $send = $_;
@@ -2146,13 +2130,6 @@ my @ftpdir=("total 20\r\n",
             $send =~ s/\n/\r\n/g;
             logmsg "send $send as data\n";
             senddata $send;
-        }
-        $cwd_testno = 0; # forget it again
-    }
-    else {
-        # old hard-coded style
-        for(@ftpdir) {
-            senddata $_;
         }
     }
     close_dataconn(0);
@@ -2220,6 +2197,7 @@ sub MDTM_ftp {
 
 sub SIZE_ftp {
     my $testno = $_[0];
+
     if($ftplistparserstate) {
         my $size = wildcard_filesize($ftptargetdir, $testno);
         if($size == -1) {
@@ -2380,7 +2358,7 @@ sub RETR_ftp {
                 $sz = "($retrsize bytes)";
             }
 
-            sendcontrol "150 Binary data connection for $testno () $sz.\r\n";
+            sendcontrol "150 Binary data connection for $testno ($testpart) $sz.\r\n";
 
             for(@data) {
                 my $send = $_;

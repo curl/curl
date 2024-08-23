@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_WRITEDATA (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -72,7 +73,9 @@ do that.
 
 # DEFAULT
 
-libcurl uses 'fwrite' as a callback by default.
+fwrite(3)
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -85,7 +88,7 @@ struct memory {
   size_t size;
 };
 
-static size_t cb(void *data, size_t size, size_t nmemb, void *clientp)
+static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 {
   size_t realsize = size * nmemb;
   struct memory *mem = (struct memory *)clientp;
@@ -125,9 +128,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 Support for the CURL_WRITEFUNC_PAUSE return code was added in version 7.18.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

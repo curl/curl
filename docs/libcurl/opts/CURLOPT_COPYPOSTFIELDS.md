@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - HTTP
+Added-in: 7.17.1
 ---
 
 # NAME
@@ -45,6 +46,8 @@ CURLOPT_COPYPOSTFIELDS(3) option is issued.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.17.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

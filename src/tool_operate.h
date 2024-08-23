@@ -35,33 +35,25 @@ struct per_transfer {
   struct OperationConfig *config; /* for this transfer */
   struct curl_certinfo *certinfo;
   CURL *curl;
-  long retry_numretries;
+  long retry_remaining;
   long retry_sleep_default;
   long retry_sleep;
+  long num_retries; /* counts the performed retries */
   struct timeval start; /* start of this transfer */
   struct timeval retrystart;
   char *this_url;
   unsigned int urlnum; /* the index of the given URL */
   char *outfile;
-  bool infdopen; /* TRUE if infd needs closing */
   int infd;
-  bool noprogress;
   struct ProgressData progressbar;
   struct OutStruct outs;
   struct OutStruct heads;
   struct OutStruct etag_save;
   struct HdrCbData hdrcbdata;
   long num_headers;
-  bool was_last_header_empty;
-
-  bool added; /* set TRUE when added to the multi handle */
   time_t startat; /* when doing parallel transfers, this is a retry transfer
                      that has been set to sleep until this time before it
                      should get started (again) */
-  bool abort; /* when doing parallel transfers and this is TRUE then a critical
-                 error (eg --fail-early) has occurred in another transfer and
-                 this transfer will be aborted in the progress callback */
-
   /* for parallel progress bar */
   curl_off_t dltotal;
   curl_off_t dlnow;
@@ -76,6 +68,15 @@ struct per_transfer {
   char *uploadfile;
   char *errorbuffer; /* allocated and assigned while this is used for a
                         transfer */
+  bool infdopen; /* TRUE if infd needs closing */
+  bool noprogress;
+  bool was_last_header_empty;
+
+  bool added; /* set TRUE when added to the multi handle */
+  bool abort; /* when doing parallel transfers and this is TRUE then a critical
+                 error (eg --fail-early) has occurred in another transfer and
+                 this transfer will be aborted in the progress callback */
+  bool skip;  /* considered already done */
 };
 
 CURLcode operate(struct GlobalConfig *config, int argc, argv_item_t argv[]);

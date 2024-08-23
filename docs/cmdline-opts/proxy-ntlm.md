@@ -9,6 +9,7 @@ Multi: mutex
 See-also:
   - proxy-negotiate
   - proxy-anyauth
+  - proxy-user
 Example:
   - --proxy-ntlm --proxy-user user:passwd -x http://proxy $URL
 ---

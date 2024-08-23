@@ -93,12 +93,12 @@ static int casecompare(const char *first, const char *second)
 {
   while(*first && *second) {
     if(Curl_raw_toupper(*first) != Curl_raw_toupper(*second))
-      /* get out of the loop as soon as they don't match */
+      /* get out of the loop as soon as they do not match */
       return 0;
     first++;
     second++;
   }
-  /* If we're here either the strings are the same or the length is different.
+  /* If we are here either the strings are the same or the length is different.
      We can just test if the "current" character is non-zero for one and zero
      for the other. Note that the characters may not be exactly the same even
      if they match, we only want to compare zero-ness. */
@@ -141,8 +141,8 @@ int curl_strnequal(const char *first, const char *second, size_t max)
   /* if both pointers are NULL then treat them as equal if max is non-zero */
   return (NULL == first && NULL == second && max);
 }
-/* Copy an upper case version of the string from src to dest.  The
- * strings may overlap.  No more than n characters of the string are copied
+/* Copy an upper case version of the string from src to dest. The
+ * strings may overlap. No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be
  * NUL-terminated if that limit is reached.
  */
@@ -156,8 +156,8 @@ void Curl_strntoupper(char *dest, const char *src, size_t n)
   } while(*src++ && --n);
 }
 
-/* Copy a lower case version of the string from src to dest.  The
- * strings may overlap.  No more than n characters of the string are copied
+/* Copy a lower case version of the string from src to dest. The
+ * strings may overlap. No more than n characters of the string are copied
  * (including any NUL) and the destination string will NOT be
  * NUL-terminated if that limit is reached.
  */

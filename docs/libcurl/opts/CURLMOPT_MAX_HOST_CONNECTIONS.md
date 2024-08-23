@@ -9,6 +9,7 @@ See-also:
   - CURLMOPT_MAX_TOTAL_CONNECTIONS (3)
 Protocol:
   - All
+Added-in: 7.30.0
 ---
 
 # NAME
@@ -55,6 +56,8 @@ ones to get made.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.30.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

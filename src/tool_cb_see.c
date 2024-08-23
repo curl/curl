@@ -23,8 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -54,27 +52,27 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 #if(SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
 
   /* The offset check following here is only interesting if curl_off_t is
-     larger than off_t and we are not using the WIN32 large file support
-     macros that provide the support to do 64bit seeks correctly */
+     larger than off_t and we are not using the Win32 large file support
+     macros that provide the support to do 64-bit seeks correctly */
 
   if(offset > OUR_MAX_SEEK_O) {
     /* Some precaution code to work around problems with different data sizes
-       to allow seeking >32bit even if off_t is 32bit. Should be very rare and
-       is really valid on weirdo-systems. */
+       to allow seeking >32-bit even if off_t is 32-bit. Should be very rare
+       and is really valid on weirdo-systems. */
     curl_off_t left = offset;
 
     if(whence != SEEK_SET)
-      /* this code path doesn't support other types */
+      /* this code path does not support other types */
       return CURL_SEEKFUNC_FAIL;
 
     if(LSEEK_ERROR == lseek(per->infd, 0, SEEK_SET))
-      /* couldn't rewind to beginning */
+      /* could not rewind to beginning */
       return CURL_SEEKFUNC_FAIL;
 
     while(left) {
       long step = (left > OUR_MAX_SEEK_O) ? OUR_MAX_SEEK_L : (long)left;
       if(LSEEK_ERROR == lseek(per->infd, step, SEEK_CUR))
-        /* couldn't seek forwards the desired amount */
+        /* could not seek forwards the desired amount */
         return CURL_SEEKFUNC_FAIL;
       left -= step;
     }
@@ -83,8 +81,8 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 #endif
 
   if(LSEEK_ERROR == lseek(per->infd, offset, whence))
-    /* couldn't rewind, the reason is in errno but errno is just not portable
-       enough and we don't actually care that much why we failed. We'll let
+    /* could not rewind, the reason is in errno but errno is just not portable
+       enough and we do not actually care that much why we failed. We will let
        libcurl know that it may try other means if it wants to. */
     return CURL_SEEKFUNC_CANTSEEK;
 

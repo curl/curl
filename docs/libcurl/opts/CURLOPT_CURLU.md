@@ -14,6 +14,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
+Added-in: 7.63.0
 ---
 
 # NAME
@@ -44,7 +45,9 @@ updated contents is used.
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -68,9 +71,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.63.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

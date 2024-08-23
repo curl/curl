@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 8.2.0
 ---
 
 # NAME
@@ -35,6 +36,8 @@ The transfer id is unique among all transfers performed using the same
 connection cache. This is implicitly the case for all transfers in the
 same multi handle.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -59,9 +62,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 8.2.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-const char *param2text(int res);
+const char *param2text(ParameterError error);
 
 int SetHTTPrequest(struct OperationConfig *config, HttpReq req,
                    HttpReq *store);

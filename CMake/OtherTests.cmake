@@ -25,10 +25,10 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
-macro(add_header_include check header)
-  if(${check})
+macro(add_header_include _check _header)
+  if(${_check})
     set(_source_epilogue "${_source_epilogue}
-      #include <${header}>")
+      #include <${_header}>")
   endif()
 endmacro()
 
@@ -45,6 +45,7 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   endif()
   check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
+  set(CMAKE_EXTRA_INCLUDE_FILES "")
 endif()
 
 if(NOT WIN32)
@@ -137,7 +138,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
     #ifdef h_errno
       return 0;
     #else
-      force compilation error
+      #error force compilation error
     #endif
     }" HAVE_H_ERRNO)
 
@@ -158,7 +159,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
         #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
           return 0;
         #else
-          force compilation error
+          #error force compilation error
         #endif
         }" HAVE_H_ERRNO_SBS_ISSUE_7)
     endif()

@@ -1,0 +1,32 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+name: Bug Report on documentation
+description: Problems, errors, mistakes or typos in documentation.
+labels: documentation
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+
+        Only file documentation bugs here! Ask questions on the mailing lists https://curl.se/mail/
+
+  - type: textarea
+    id: source
+    attributes:
+      label: Specify which documentation you found a problem with
+      description: |
+        Include function name, URL, tarball version and all other relevant
+        details that identify the documentation source.
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+    validations:
+      required: true

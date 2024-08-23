@@ -41,7 +41,7 @@ pop3
 </server>
 <features>
 !SSPI
-debug
+Debug
 crypto
 </features>
 <name>

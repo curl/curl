@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_HTTPHEADER (3)
 Protocol:
   - All
+Added-in: 7.37.0
 ---
 
 # NAME
@@ -44,6 +45,8 @@ Pass a NULL to this to reset back to no custom headers.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -69,9 +72,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.37.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 
