@@ -1250,14 +1250,14 @@ endif()
 # CA handling
 #
 if(_curl_ca_bundle_supported)
-  set(CURL_CA_BUNDLE "auto" CACHE STRING
-    "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+  set(CURL_CA_BUNDLE "auto" CACHE
+    STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_FALLBACK OFF CACHE BOOL
     "Set ON to use built-in CA store of TLS backend. Defaults to OFF")
-  set(CURL_CA_PATH "auto" CACHE STRING
-    "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
-  set(CURL_CA_EMBED "" CACHE STRING
-    "Path to the CA bundle to embed into the curl tool.")
+  set(CURL_CA_PATH "auto" CACHE
+    STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+  set(CURL_CA_EMBED "" CACHE
+    STRING "Path to the CA bundle to embed into the curl tool.")
 
   if(CURL_CA_BUNDLE STREQUAL "")
     message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
@@ -1303,8 +1303,8 @@ if(_curl_ca_bundle_supported)
           "/etc/ssl/cert.pem")
         if(EXISTS "${_search_ca_bundle_path}")
           message(STATUS "Found CA bundle: ${_search_ca_bundle_path}")
-          set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE STRING
-            "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+          set(CURL_CA_BUNDLE "${_search_ca_bundle_path}" CACHE
+            STRING "Path to the CA bundle. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
           set(_curl_ca_bundle_set TRUE CACHE BOOL "Path to the CA bundle has been set")
           break()
         endif()
@@ -1317,8 +1317,8 @@ if(_curl_ca_bundle_supported)
       if(_curl_ca_files_found)
         unset(_curl_ca_files_found)
         message(STATUS "Found CA path: ${_search_ca_path}")
-        set(CURL_CA_PATH "${_search_ca_path}" CACHE STRING
-          "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
+        set(CURL_CA_PATH "${_search_ca_path}" CACHE
+          STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
         set(_curl_ca_path_set TRUE CACHE BOOL "Path to the CA bundle has been set")
       endif()
     endif()
