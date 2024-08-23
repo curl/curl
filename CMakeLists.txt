@@ -1113,7 +1113,7 @@ if(NOT USE_LIBSSH2 AND NOT USE_LIBSSH AND CURL_USE_WOLFSSH)
   endif()
 endif()
 
-option(CURL_USE_GSASL "Use libgsasl implementation" OFF)
+option(CURL_USE_GSASL "Use libgsasl" OFF)
 mark_as_advanced(CURL_USE_GSASL)
 if(CURL_USE_GSASL)
   find_package(Libgsasl REQUIRED)
