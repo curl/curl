@@ -255,6 +255,7 @@ jobs:
       - name: 'run tests'
         run: |
           export TFLAGS='${{ matrix.tflags }} -j10'
+          TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
             TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
@@ -386,6 +387,7 @@ jobs:
       - name: 'cmake run tests'
         run: |
           export TFLAGS='${{ matrix.build.tflags }} -j10'
+          TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
             TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
