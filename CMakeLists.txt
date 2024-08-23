@@ -1976,8 +1976,11 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  foreach(_lib IN LISTS CURL_LIBDIRS)
-    set(LIBCURL_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE} -L${_lib}")
+  foreach(_libdir IN LISTS CURL_LIBDIRS)
+    list(FIND _libcurl_libs_dirs "${_libdir}" _libdir_index)
+    if(_libdir_index LESS 0)
+      list(APPEND LIBCURL_PC_LIBS_PRIVATE "-L${_libdir}")
+    endif()
   endforeach()
 
   foreach(_lib IN LISTS CMAKE_C_IMPLICIT_LINK_LIBRARIES CURL_LIBS)
