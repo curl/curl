@@ -42,8 +42,10 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   # to build the servers.  In order to achieve proper linkage of these
   # files on Windows targets it is necessary to build the test servers
   # with CURL_STATICLIB defined, independently of how libcurl is built.
+  if(WIN32)
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+  endif()
   set_target_properties(${_target_name} PROPERTIES
-    COMPILE_DEFINITIONS "CURL_STATICLIB"
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test server ${_target}")
 endforeach()
