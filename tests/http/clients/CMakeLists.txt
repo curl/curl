@@ -45,5 +45,5 @@ foreach(_target IN LISTS check_PROGRAMS)
   endif()
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}" UNITY_BUILD OFF
-    PROJECT_LABEL "Test client ${_target_name}")
+    PROJECT_LABEL "Test client ${_target}")
 endforeach()
