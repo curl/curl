@@ -342,7 +342,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   linux-cross-mingw-w64:
-    name: 'linux-mingw'
+    name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
