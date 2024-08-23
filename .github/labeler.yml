@@ -185,9 +185,7 @@ documentation:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              .github/workflows/badwords.yml,\
-              .github/workflows/man-examples.yml,\
-              .github/workflows/synopsis.yml,\
+              .github/workflows/checkdocs.yml,\
               .github/scripts/badwords.*,\
               .github/scripts/cd2cd,\
               .github/scripts/cd2nroff,\
