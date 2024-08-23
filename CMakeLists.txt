@@ -361,8 +361,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
   if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
     message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
     # Force the feature off as this name is used as guard macro...
-    set(ENABLE_IPV6 OFF
-        CACHE BOOL "Enable IPv6 support" FORCE)
+    set(ENABLE_IPV6 OFF CACHE BOOL "Enable IPv6 support" FORCE)
   endif()
 
   if(APPLE AND NOT ENABLE_ARES)
