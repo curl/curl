@@ -3820,9 +3820,9 @@ AC_CHECK_HEADERS(
   netinet/in6.h \
   sys/un.h \
   linux/tcp.h \
+  linux/quic.h \
   netinet/tcp.h \
   netinet/udp.h \
-  netinet/quic.h \
   netdb.h \
   sys/sockio.h \
   sys/stat.h \
@@ -3874,8 +3874,8 @@ dnl default includes
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h>
 #endif
-#ifdef HAVE_NETINET_QUIC_H
-#include <netinet/quic.h>
+#ifdef HAVE_LINUX_QUIC_H
+#include <linux/quic.h>
 #endif
 ]
 )

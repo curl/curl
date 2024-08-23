@@ -25,9 +25,8 @@
 #include "curl_setup.h"
 
 #if defined(USE_LINUX_QUIC) && defined(USE_NGHTTP3)
-#include <linux/quic.h>
 #include <linux/tls.h>
-#include <netinet/quic.h>
+#include <linux/quic.h>
 #include <nghttp3/nghttp3.h>
 
 #include "urldata.h"
@@ -81,7 +80,6 @@ struct cf_linuxq_ctx {
   uint32_t version;
   uint32_t last_error;
   struct quic_transport_param transport_params;
-  struct quic_handshake_parms handshake_params;
   struct cf_call_data call_data;
   nghttp3_conn *h3conn;
   nghttp3_settings h3settings;
@@ -1473,9 +1471,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                   &ctx->transport_params, &len);
   if(rc)
     return CURLE_FAILED_INIT;
-
-  ctx->handshake_params.timeout = 15000;
-  ctx->handshake_params.peername = ctx->peer.sni;
 
   if(!ctx->qconn)
     ctx->qconn = cf_conn_create(cf, data);

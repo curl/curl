@@ -38,8 +38,8 @@
 #ifdef HAVE_NETINET_UDP_H
 #include <netinet/udp.h>
 #endif
-#ifdef HAVE_NETINET_QUIC_H
-#include <netinet/quic.h>
+#ifdef HAVE_LINUX_QUIC_H
+#include <linux/quic.h>
 #endif
 #ifdef HAVE_SYS_IOCTL_H
 #include <sys/ioctl.h>

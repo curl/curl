@@ -1409,7 +1409,6 @@ check_include_file_concat("netdb.h"          HAVE_NETDB_H)
 check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)
 check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)
-check_include_file_concat("netinet/quic.h"   HAVE_NETINET_QUIC_H)
 check_include_file("linux/tcp.h"             HAVE_LINUX_TCP_H)
 check_include_file("linux/quic.h"            HAVE_LINUX_QUIC_H)
 
