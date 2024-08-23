@@ -30,7 +30,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   set(_target_name "curl-test-server-${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})
-  include_directories(
+  target_include_directories(${_target_name} PRIVATE
     "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
     "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
     "${CURL_SOURCE_DIR}/src"  # for "tool_xattr.h" in disabled_SOURCES
