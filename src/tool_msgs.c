@@ -53,7 +53,7 @@ static void voutf(struct GlobalConfig *config,
     char *ptr;
     char *print_buffer;
 
-    print_buffer = curl_mvaprintf(fmt, ap);
+    print_buffer = vaprintf(fmt, ap);
     if(!print_buffer)
       return;
     len = strlen(print_buffer);

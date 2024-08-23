@@ -324,7 +324,7 @@ int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
       return retcode; /* no home directory found (or possibly out of
                          memory) */
 
-    filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
+    filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
     if(!filealloc) {
       free(homea);
       return -1;
@@ -334,7 +334,7 @@ int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
-      filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);
+      filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
         return -1;

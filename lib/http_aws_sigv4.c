@@ -271,7 +271,7 @@ static CURLcode make_headers(struct Curl_easy *data,
     if(!tmp_head)
       goto fail;
     head = tmp_head;
-    *date_header = curl_maprintf("%s: %s\r\n", date_hdr_key, timestamp);
+    *date_header = aprintf("%s: %s\r\n", date_hdr_key, timestamp);
   }
   else {
     char *value;
@@ -766,19 +766,19 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   result = CURLE_OUT_OF_MEMORY;
 
   canonical_request =
-    curl_maprintf("%s\n" /* HTTPRequestMethod */
-                  "%s\n" /* CanonicalURI */
-                  "%s\n" /* CanonicalQueryString */
-                  "%s\n" /* CanonicalHeaders */
-                  "%s\n" /* SignedHeaders */
-                  "%.*s",  /* HashedRequestPayload in hex */
-                  method,
-                  Curl_dyn_ptr(&canonical_path),
-                  Curl_dyn_ptr(&canonical_query) ?
-                  Curl_dyn_ptr(&canonical_query) : "",
-                  Curl_dyn_ptr(&canonical_headers),
-                  Curl_dyn_ptr(&signed_headers),
-                  (int)payload_hash_len, payload_hash);
+    aprintf("%s\n" /* HTTPRequestMethod */
+            "%s\n" /* CanonicalURI */
+            "%s\n" /* CanonicalQueryString */
+            "%s\n" /* CanonicalHeaders */
+            "%s\n" /* SignedHeaders */
+            "%.*s",  /* HashedRequestPayload in hex */
+            method,
+            Curl_dyn_ptr(&canonical_path),
+            Curl_dyn_ptr(&canonical_query) ?
+            Curl_dyn_ptr(&canonical_query) : "",
+            Curl_dyn_ptr(&canonical_headers),
+            Curl_dyn_ptr(&signed_headers),
+            (int)payload_hash_len, payload_hash);
   if(!canonical_request)
     goto fail;
 
@@ -786,12 +786,12 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
   /* provider 0 lowercase */
   Curl_strntolower(provider0, provider0, strlen(provider0));
-  request_type = curl_maprintf("%s4_request", provider0);
+  request_type = aprintf("%s4_request", provider0);
   if(!request_type)
     goto fail;
 
-  credential_scope = curl_maprintf("%s/%s/%s/%s",
-                                   date, region, service, request_type);
+  credential_scope = aprintf("%s/%s/%s/%s",
+                             date, region, service, request_type);
   if(!credential_scope)
     goto fail;
 
@@ -808,22 +808,22 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
    * Google allows using RSA key instead of HMAC, so this code might change
    * in the future. For now we only support HMAC.
    */
-  str_to_sign = curl_maprintf("%s4-HMAC-SHA256\n" /* Algorithm */
-                              "%s\n" /* RequestDateTime */
-                              "%s\n" /* CredentialScope */
-                              "%s",  /* HashedCanonicalRequest in hex */
-                              provider0,
-                              timestamp,
-                              credential_scope,
-                              sha_hex);
+  str_to_sign = aprintf("%s4-HMAC-SHA256\n" /* Algorithm */
+                        "%s\n" /* RequestDateTime */
+                        "%s\n" /* CredentialScope */
+                        "%s",  /* HashedCanonicalRequest in hex */
+                        provider0,
+                        timestamp,
+                        credential_scope,
+                        sha_hex);
   if(!str_to_sign) {
     goto fail;
   }
 
   /* provider 0 uppercase */
-  secret = curl_maprintf("%s4%s", provider0,
-                         data->state.aptr.passwd ?
-                         data->state.aptr.passwd : "");
+  secret = aprintf("%s4%s", provider0,
+                   data->state.aptr.passwd ?
+                   data->state.aptr.passwd : "");
   if(!secret)
     goto fail;
 
@@ -836,24 +836,24 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   sha256_to_hex(sha_hex, sign0);
 
   /* provider 0 uppercase */
-  auth_headers = curl_maprintf("Authorization: %s4-HMAC-SHA256 "
-                               "Credential=%s/%s, "
-                               "SignedHeaders=%s, "
-                               "Signature=%s\r\n"
-                               /*
-                                * date_header is added here, only if it was not
-                                * user-specified (using CURLOPT_HTTPHEADER).
-                                * date_header includes \r\n
-                                */
-                               "%s"
-                               "%s", /* optional sha256 header includes \r\n */
-                               provider0,
-                               user,
-                               credential_scope,
-                               Curl_dyn_ptr(&signed_headers),
-                               sha_hex,
-                               date_header ? date_header : "",
-                               content_sha256_hdr);
+  auth_headers = aprintf("Authorization: %s4-HMAC-SHA256 "
+                         "Credential=%s/%s, "
+                         "SignedHeaders=%s, "
+                         "Signature=%s\r\n"
+                         /*
+                          * date_header is added here, only if it was not
+                          * user-specified (using CURLOPT_HTTPHEADER).
+                          * date_header includes \r\n
+                          */
+                         "%s"
+                         "%s", /* optional sha256 header includes \r\n */
+                         provider0,
+                         user,
+                         credential_scope,
+                         Curl_dyn_ptr(&signed_headers),
+                         sha_hex,
+                         date_header ? date_header : "",
+                         content_sha256_hdr);
   if(!auth_headers) {
     goto fail;
   }
