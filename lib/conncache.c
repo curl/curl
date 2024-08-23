@@ -133,6 +133,7 @@ static void cpool_bundle_add(struct cpool_bundle *bundle,
 static void cpool_bundle_remove(struct cpool_bundle *bundle,
                                 struct connectdata *conn)
 {
+  (void)bundle;
   DEBUGASSERT(Curl_node_llist(&conn->cpool_node) == &bundle->conns);
   Curl_node_remove(&conn->cpool_node);
   conn->bits.in_cpool = FALSE;
@@ -297,11 +298,19 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 {
   struct cpool *cpool = cpool_get_instance(data);
   struct cpool_bundle *bundle;
-  size_t dest_limit = data->multi? data->multi->max_host_connections : 0;
-  size_t total_limit = data->multi? data->multi->max_total_connections : 0;
+  size_t dest_limit = 0;
+  size_t total_limit = 0;
   int result = CPOOL_LIMIT_OK;
 
-  if(!cpool || (!dest_limit && !total_limit))
+  if(!cpool)
+    return CPOOL_LIMIT_OK;
+
+  if(data && data->multi) {
+    dest_limit = data->multi->max_host_connections;
+    total_limit = data->multi->max_total_connections;
+  }
+
+  if(!dest_limit && !total_limit)
     return CPOOL_LIMIT_OK;
 
   CPOOL_LOCK(cpool);
