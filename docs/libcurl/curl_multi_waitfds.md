@@ -57,6 +57,8 @@ subsequent function call.
 # EXAMPLE
 
 ~~~c
+#include <stdlib.h>
+
 int main(void)
 {
   CURLMcode mc;
@@ -98,7 +100,7 @@ int main(void)
     /* Do polling on descriptors in ufds */
 
     free(ufds);
-  } while (!mc);
+  } while(!mc);
 }
 ~~~
 
