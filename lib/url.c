@@ -3260,8 +3260,6 @@ static CURLcode create_conn(struct Curl_easy *data,
   bool connections_available = TRUE;
   bool force_reuse = FALSE;
   bool waitpipe = FALSE;
-  size_t max_host_connections = Curl_multi_max_host_connections(data->multi);
-  size_t max_total_connections = Curl_multi_max_total_connections(data->multi);
 
   *async = FALSE;
   *in_connect = NULL;
@@ -3468,6 +3466,7 @@ static CURLcode create_conn(struct Curl_easy *data,
   if(result)
     goto out;
 
+  /* FIXME: do we really want to run this every time we add a transfer? */
   Curl_cpool_prune_dead(data);
 
   /*************************************************************
@@ -3526,23 +3525,25 @@ static CURLcode create_conn(struct Curl_easy *data,
       /* There is a connection that *might* become usable for multiplexing
          "soon", and we wait for that */
       connections_available = FALSE;
-    else if(!Curl_cpool_may_add_conn(data, conn, max_host_connections)) {
-      infof(data, "No more connections allowed to host: %zu",
-            max_host_connections);
-      connections_available = FALSE;
-    }
-
-    if(connections_available &&
-       !Curl_cpool_may_add(data, max_total_connections)) {
-      /* The connection pool is full. */
-#ifndef CURL_DISABLE_DOH
-      if(data->set.dohfor_mid >= 0)
-        infof(data, "Allowing DoH to override max connection limit");
-      else
-#endif
-      {
-        infof(data, "No connections available in cache");
+    else {
+      switch(Curl_cpool_check_limits(data, conn)) {
+      case CPOOL_LIMIT_DEST:
+        infof(data, "No more connections allowed to host");
         connections_available = FALSE;
+        break;
+      case CPOOL_LIMIT_TOTAL:
+#ifndef CURL_DISABLE_DOH
+        if(data->set.dohfor_mid >= 0)
+          infof(data, "Allowing DoH to override max connection limit");
+        else
+#endif
+        {
+          infof(data, "No connections available in cache");
+          connections_available = FALSE;
+        }
+        break;
+      default:
+        break;
       }
     }
 

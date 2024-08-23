@@ -473,7 +473,6 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
                                 struct Curl_easy *data)
 {
-  struct cpool *cpool;
   CURLMcode rc;
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -572,12 +571,7 @@ CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
   if(multi->next_easy_mid <= 0)
     multi->next_easy_mid = 0;
 
-  /* Point to the shared or multi handle connection pool */
-  cpool = Curl_get_cpool(data);
-  DEBUGASSERT(cpool);
-  if(cpool)
-    Curl_cpool_xfer_init(cpool, data);
-
+  Curl_cpool_xfer_init(data);
   multi_warn_debug(multi, data);
 
   return CURLM_OK;
@@ -3713,16 +3707,6 @@ CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
   there->socketp = hashp;
 
   return CURLM_OK;
-}
-
-size_t Curl_multi_max_host_connections(struct Curl_multi *multi)
-{
-  return multi ? (size_t)multi->max_host_connections : 0;
-}
-
-size_t Curl_multi_max_total_connections(struct Curl_multi *multi)
-{
-  return multi ? (size_t)multi->max_total_connections : 0;
 }
 
 static void move_pending_to_connect(struct Curl_multi *multi,

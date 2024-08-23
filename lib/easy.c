@@ -1321,8 +1321,6 @@ CURLcode curl_easy_send(struct Curl_easy *data, const void *buffer,
  */
 CURLcode curl_easy_upkeep(struct Curl_easy *data)
 {
-  struct cpool *cpool;
-
   /* Verify that we got an easy handle we can work with. */
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1330,13 +1328,6 @@ CURLcode curl_easy_upkeep(struct Curl_easy *data)
   if(Curl_is_in_callback(data))
     return CURLE_RECURSIVE_API_CALL;
 
-  cpool = Curl_get_cpool(data);
-  if(cpool) {
-    /* Use the common function to keep connections alive. */
-    return Curl_cpool_upkeep(cpool, data);
-  }
-  else {
-    /* No connections, so just return success */
-    return CURLE_OK;
-  }
+  /* Use the common function to keep connections alive. */
+  return Curl_cpool_upkeep(data);
 }

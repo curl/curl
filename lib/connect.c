@@ -321,7 +321,6 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
 curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
                                   struct connectdata **connp)
 {
-  struct cpool *cpool;
   DEBUGASSERT(data);
 
   /* this works for an easy handle:
@@ -329,11 +328,10 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
    * - that is associated with a multi handle, and whose connection
    *   was detached with CURLOPT_CONNECT_ONLY
    */
-  cpool = Curl_get_cpool(data);
-  if(cpool && (data->state.lastconnect_id != -1)) {
+  if(data->state.lastconnect_id != -1) {
     struct connectdata *conn;
 
-    conn = Curl_cpool_get_conn(cpool, data->state.lastconnect_id);
+    conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
     if(!conn) {
       data->state.lastconnect_id = -1;
       return CURL_SOCKET_BAD;

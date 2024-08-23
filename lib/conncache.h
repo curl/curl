@@ -25,12 +25,6 @@
  *
  ***************************************************************************/
 
-/*
- * All accesses to struct fields and changing of data in the connection pool
- * and connectbundles must be done with the cpool LOCKED. The pool might
- * be shared.
- */
-
 #include <curl/curl.h>
 #include "timeval.h"
 
@@ -61,13 +55,11 @@ struct cpool {
   curl_off_t next_easy_id;
   struct curltime last_cleanup;
   struct Curl_llist shutdowns;  /* The connections being shut down */
-  /* internal handle used for closing pooled connections */
-  struct Curl_easy *idata;
+  struct Curl_easy *idata; /* internal handle used for discard */
   struct Curl_multi *multi; /* != NULL iff pool belongs to multi */
   struct Curl_share *share; /* != NULL iff pool belongs to share */
   Curl_cpool_disconnect_cb *disconnect_cb;
   BIT(locked);
-  BIT(iter_locked);  /* TRUE while iterating the shutdown list */
 };
 
 /* Init the pool, pass multi only if pool is owned by it.
@@ -82,45 +74,29 @@ int Curl_cpool_init(struct cpool *cpool,
 /* Destroy all connections and free all members */
 void Curl_cpool_destroy(struct cpool *connc);
 
-/* Init the transfer to be used with the connection pool.
+/* Init the transfer to be used within its connection pool.
  * Assigns `data->id`. */
-void Curl_cpool_xfer_init(struct cpool *connc, struct Curl_easy *data);
-
-/* Return the cpool instance used by `data`.
- * May return NULL for transfers without share or multi handles.
- */
-struct cpool *Curl_get_cpool(struct Curl_easy *data);
+void Curl_cpool_xfer_init(struct Curl_easy *data);
 
 /**
- * Get the connection with the given id.
- * WARNING: this is not safe in shared connection pool, as the
- * connection may be discarded by other actions.
+ * Get the connection with the given id from the transfer's pool.
  */
-struct connectdata *Curl_cpool_get_conn(struct cpool *connc,
+struct connectdata *Curl_cpool_get_conn(struct Curl_easy *data,
                                         curl_off_t conn_id);
 
 CURLcode Curl_cpool_add_conn(struct Curl_easy *data,
                              struct connectdata *conn) WARN_UNUSED_RESULT;
 
 /**
- * Return if the pool can add another connection to the conn's
- * destination, observing the limit of `max_pre_dest` (0 == no limit).
- *
- * If the limit is exceeded, the pool will try to discard the oldest, idle
+ * Return if the pool has reached its configured limits for adding
+ * the given connection. Will try to discard the oldest, idle
  * connections to make space.
  */
-bool Curl_cpool_may_add_conn(struct Curl_easy *data,
-                             struct connectdata *conn,
-                             size_t max_per_dest);
-
-/**
- * Return if the poll can add another connection, observing the
- * overall limit of `max_total` (0 == no limit).
- *
- * If the limit is exceeded, the pool will try to discard oldest, idle
- * connections to make space.
- */
-bool Curl_cpool_may_add(struct Curl_easy *data, size_t max_total);
+#define CPOOL_LIMIT_OK     0
+#define CPOOL_LIMIT_DEST   1
+#define CPOOL_LIMIT_TOTAL  2
+int Curl_cpool_check_limits(struct Curl_easy *data,
+                            struct connectdata *conn);
 
 /* Return of conn is suitable. If so, stops iteration. */
 typedef bool Curl_cpool_conn_match_cb(struct connectdata *conn,
@@ -178,9 +154,9 @@ void Curl_cpool_disconnect(struct Curl_easy *data,
 void Curl_cpool_prune_dead(struct Curl_easy *data);
 
 /**
- * Perform upkeep actions on connections in the pool.
+ * Perform upkeep actions on connections in the transfer's pool.
  */
-CURLcode Curl_cpool_upkeep(struct cpool *cpool, void *data);
+CURLcode Curl_cpool_upkeep(void *data);
 
 typedef void Curl_cpool_conn_do_cb(struct connectdata *conn,
                                    struct Curl_easy *data,
