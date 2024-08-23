@@ -39,5 +39,6 @@ foreach(_target IN LISTS check_PROGRAMS)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "__USE_MINGW_ANSI_STDIO=1")
   endif()
   set_target_properties(${_target_name} PROPERTIES
-    OUTPUT_NAME "${_target}" UNITY_BUILD OFF)
+    OUTPUT_NAME "${_target}" UNITY_BUILD OFF
+    PROJECT_LABEL "Example ${_target}")
 endforeach()
