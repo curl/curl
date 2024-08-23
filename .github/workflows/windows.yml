@@ -118,7 +118,7 @@ jobs:
 
       - name: 'curl version'
         if: ${{ matrix.build == 'autotools' }}
-        timeout-minutes: 11
+        timeout-minutes: 1
         run: |
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
@@ -525,7 +525,7 @@ jobs:
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
-        timeout-minutes: 5
+        timeout-minutes: 1
         run: |
           find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
           if [ '${{ matrix.plat }}' != 'uwp' ]; then
