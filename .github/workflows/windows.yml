@@ -341,8 +341,8 @@ jobs:
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-  linux-cross-mingw64:
-    name: 'linux -> mingw-w64'
+  linux-cross-mingw-w64:
+    name: 'linux-mingw'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
