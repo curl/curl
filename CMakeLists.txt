@@ -85,6 +85,8 @@ endif()
 message(STATUS "CMake platform flags:${_flags}")
 set(_flags)
 
+message(STATUS "Host and target: ${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> ${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
+
 function(curl_dumpvars)  # Dump all defined variables with their values
   message("::group::CMake Variable Dump")
   get_cmake_property(_vars VARIABLES)
