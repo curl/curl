@@ -26,7 +26,7 @@
 # shellcheck disable=SC2006
 
 prefix='@prefix@'
-# Used in @libdir@
+# Used in 'libdir'
 # shellcheck disable=SC2034
 exec_prefix="@exec_prefix@"
 # shellcheck disable=SC2034
