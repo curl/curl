@@ -50,10 +50,11 @@ int main(void)
     res = curl_easy_perform(curl);
     if(CURLE_OK == res) {
       curl_off_t posttransfer;
-      res = curl_easy_getinfo(curl, CURLINFO_POSTTRANSFER_TIME_T, &posttransfer);
+      res = curl_easy_getinfo(curl, CURLINFO_POSTTRANSFER_TIME_T,
+                              &posttransfer);
       if(CURLE_OK == res) {
-        printf("Request sent after: %" CURL_FORMAT_CURL_OFF_T ".%06ld us", posttransfer / 1000000,
-               (long)(posttransfer % 1000000));
+        printf("Request sent after: %" CURL_FORMAT_CURL_OFF_T ".%06ld us",
+               posttransfer / 1000000, (long)(posttransfer % 1000000));
       }
     }
     /* always cleanup */

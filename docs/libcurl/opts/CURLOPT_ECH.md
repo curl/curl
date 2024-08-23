@@ -79,12 +79,17 @@ NULL, meaning ECH is disabled.
 # EXAMPLE
 
 ~~~c
-CURL *curl = curl_easy_init();
+int main(void)
+{
+  CURL *curl = curl_easy_init();
 
-const char *config ="ecl:AED+DQA87wAgACB/RuzUCsW3uBbSFI7mzD63TUXpI8sGDTnFTbFCDpa+CAAEAAEAAQANY292ZXIuZGVmby5pZQAA";
-if(curl) {
-  curl_easy_setopt(curl, CURLOPT_ECH, config);
-  curl_easy_perform(curl);
+  const char *config = \
+    "ecl:AED+DQA87wAgACB/RuzUCsW3uBbSFI7mzD63TUXpI8sGDTnFTbFCDpa+" \
+    "CAAEAAEAAQANY292ZXIuZGVmby5pZQAA";
+  if(curl) {
+    curl_easy_setopt(curl, CURLOPT_ECH, config);
+    curl_easy_perform(curl);
+  }
 }
 ~~~
 # %AVAILABILITY%
