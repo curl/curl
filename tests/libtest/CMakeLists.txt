@@ -59,6 +59,10 @@ endforeach()
 if(NOT WIN32)
   add_library(hostname MODULE EXCLUDE_FROM_ALL "sethostname.c")
   add_dependencies(testdeps hostname)
+  target_include_directories(${_target_name} PRIVATE
+    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
+  )
   # Output to .libs for compatibility with autotools, the test data expects a
   # library at (tests)/libtest/.libs/libhostname.so
   set_target_properties(hostname PROPERTIES
