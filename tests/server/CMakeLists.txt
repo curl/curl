@@ -21,33 +21,29 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-function(setup_test_server _target)  # ARGN are the files in the test
-  add_executable(${_target} EXCLUDE_FROM_ALL ${ARGN})
-  add_dependencies(testdeps ${_target})
-
-  include_directories(
-    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
-    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
-    "${CURL_SOURCE_DIR}/src"  # for "tool_xattr.h" in disabled_SOURCES
-  )
-
-  target_link_libraries(${_target} ${CURL_LIBS})
-
-  # Test servers simply are standalone programs that do not use libcurl
-  # library.  For convenience and to ease portability of these servers,
-  # some source code files from the libcurl subdirectory are also used
-  # to build the servers.  In order to achieve proper linkage of these
-  # files on Windows targets it is necessary to build the test servers
-  # with CURL_STATICLIB defined, independently of how libcurl is built.
-  set_target_properties(${_target} PROPERTIES
-    COMPILE_DEFINITIONS "CURL_STATICLIB"
-    PROJECT_LABEL "Test server ${_target}")
-endfunction()
 
 # Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_target IN LISTS noinst_PROGRAMS)
-  setup_test_server(${_target} ${${_target}_SOURCES})
+  set(_target_name "curl-test-server-${_target}")
+  add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
+  add_dependencies(testdeps ${_target_name})
+  include_directories(
+    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
+    "${CURL_SOURCE_DIR}/src"  # for "tool_xattr.h" in disabled_SOURCES
+  )
+  target_link_libraries(${_target_name} ${CURL_LIBS})
+  # Test servers simply are standalone programs that do not use libcurl
+  # library.  For convenience and to ease portability of these servers,
+  # some source code files from the libcurl subdirectory are also used
+  # to build the servers.  In order to achieve proper linkage of these
+  # files on Windows targets it is necessary to build the test servers
+  # with CURL_STATICLIB defined, independently of how libcurl is built.
+  set_target_properties(${_target_name} PROPERTIES
+    COMPILE_DEFINITIONS "CURL_STATICLIB"
+    OUTPUT_NAME "${_target}"
+    PROJECT_LABEL "Test server ${_target}")
 endforeach()
