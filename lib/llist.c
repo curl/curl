@@ -254,3 +254,10 @@ struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n)
 }
 
 #endif
+
+struct Curl_llist *Curl_node_llist(struct Curl_llist_node *n)
+{
+  DEBUGASSERT(n);
+  DEBUGASSERT(!n->_list || n->_init == NODEINIT);
+  return n->_list;
+}

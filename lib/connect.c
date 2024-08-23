@@ -312,23 +312,6 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
   return FALSE;
 }
 
-struct connfind {
-  curl_off_t id_tofind;
-  struct connectdata *found;
-};
-
-static int conn_is_conn(struct Curl_easy *data,
-                        struct connectdata *conn, void *param)
-{
-  struct connfind *f = (struct connfind *)param;
-  (void)data;
-  if(conn->connection_id == f->id_tofind) {
-    f->found = conn;
-    return 1;
-  }
-  return 0;
-}
-
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
@@ -345,30 +328,19 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
    * - that is associated with a multi handle, and whose connection
    *   was detached with CURLOPT_CONNECT_ONLY
    */
-  if((data->state.lastconnect_id != -1) && (data->multi_easy || data->multi)) {
-    struct connectdata *c;
-    struct connfind find;
-    find.id_tofind = data->state.lastconnect_id;
-    find.found = NULL;
+  if(data->state.lastconnect_id != -1) {
+    struct connectdata *conn;
 
-    Curl_conncache_foreach(data,
-                           data->share && (data->share->specifier
-                           & (1<< CURL_LOCK_DATA_CONNECT))?
-                           &data->share->conn_cache:
-                           data->multi_easy?
-                           &data->multi_easy->conn_cache:
-                           &data->multi->conn_cache, &find, conn_is_conn);
-
-    if(!find.found) {
+    conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
+    if(!conn) {
       data->state.lastconnect_id = -1;
       return CURL_SOCKET_BAD;
     }
 
-    c = find.found;
     if(connp)
       /* only store this if the caller cares for it */
-      *connp = c;
-    return c->sock[FIRSTSOCKET];
+      *connp = conn;
+    return conn->sock[FIRSTSOCKET];
   }
   return CURL_SOCKET_BAD;
 }

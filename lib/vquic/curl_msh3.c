@@ -911,7 +911,6 @@ static CURLcode cf_msh3_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "handshake succeeded");
       cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
       cf->conn->httpversion = 30;
-      cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
       cf->connected = TRUE;
       cf->conn->alpn = CURL_HTTP_VERSION_3;
       *done = TRUE;

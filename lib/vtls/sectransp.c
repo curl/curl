@@ -2108,9 +2108,6 @@ check_handshake:
         else
           infof(data, VTLS_INFOF_NO_ALPN);
 
-        Curl_multiuse_state(data, cf->conn->alpn == CURL_HTTP_VERSION_2 ?
-                            BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
-
         /* chosenProtocol is a reference to the string within alpnArr
            and does not need to be freed separately */
         if(alpnArr)

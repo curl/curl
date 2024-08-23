@@ -83,4 +83,7 @@ struct Curl_llist_node *Curl_node_next(struct Curl_llist_node *n);
    Curl_llist_node */
 struct Curl_llist_node *Curl_node_prev(struct Curl_llist_node *n);
 
+/* Curl_node_llist() return the list the node is in or NULL. */
+struct Curl_llist *Curl_node_llist(struct Curl_llist_node *n);
+
 #endif /* HEADER_CURL_LLIST_H */

@@ -562,7 +562,6 @@ static CURLcode cf_osslq_verify_peer(struct Curl_cfilter *cf,
 
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   cf->conn->httpversion = 30;
-  cf->conn->bundle->multiuse = BUNDLE_MULTIPLEX;
 
   return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
 }

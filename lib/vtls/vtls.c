@@ -2222,7 +2222,6 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   const unsigned char *proto,
                                   size_t proto_len)
 {
-  int can_multi = 0;
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
     (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf))?
@@ -2241,14 +2240,12 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     else if(proto_len == ALPN_H2_LENGTH &&
             !memcmp(ALPN_H2, proto, ALPN_H2_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_2;
-      can_multi = 1;
     }
 #endif
 #ifdef USE_HTTP3
     else if(proto_len == ALPN_H3_LENGTH &&
             !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_3;
-      can_multi = 1;
     }
 #endif
     else {
@@ -2267,9 +2264,6 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   }
 
 out:
-  if(!Curl_ssl_cf_is_proxy(cf))
-    Curl_multiuse_state(data, can_multi?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   return CURLE_OK;
 }
 
