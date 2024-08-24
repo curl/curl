@@ -322,8 +322,6 @@ if test "x$OPT_OPENSSL" != xno; then
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(HAVE_OPENSSL3, 1,
-        [Define to 1 if using OpenSSL 3 or later.])
       ssl_msg="OpenSSL v3+"
     ],[
       AC_MSG_RESULT([no])
