@@ -1938,11 +1938,16 @@ if(NOT CURL_DISABLE_INSTALL)
   # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
   set(CURLVERSION             "${CURL_VERSION}")
+  set(VERSIONNUM              "${CURL_VERSION_NUM}")
+  set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
   set(includedir              "\${prefix}/include")
   set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
-  set(LIBCURL_PC_LIBS_PRIVATE "")
   set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
+  # "a" (Linux) or "lib" (Windows)
+  string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
+
+  set(LIBCURL_PC_LIBS_PRIVATE "")
 
   # For processing full path libraries into -L and -l ld options,
   # the directories that go with the -L option are cached, so they
@@ -2032,12 +2037,8 @@ if(NOT CURL_DISABLE_INSTALL)
   else()
     set(ENABLE_STATIC "no")
   endif()
-  # "a" (Linux) or "lib" (Windows)
-  string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
-  set(prefix "${CMAKE_INSTALL_PREFIX}")
   # Set this to "yes" to append all libraries on which -lcurl is dependent
   set(REQUIRE_LIB_DEPS "no")
-  set(VERSIONNUM "${CURL_VERSION_NUM}")
 
   # Finally generate a "curl-config" matching this config.
   # Consumed variables:
