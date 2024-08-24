@@ -503,12 +503,11 @@ AC_SUBST([LIBCURL_PC_CFLAGS])
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"; then
-  REQUIRE_LIB_DEPS=no
+  require_lib_deps=no
 else
-  REQUIRE_LIB_DEPS=yes
+  require_lib_deps=yes
 fi
-AC_SUBST(REQUIRE_LIB_DEPS)
-AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$REQUIRE_LIB_DEPS = xyes)
+AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$require_lib_deps = xyes)
 
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
