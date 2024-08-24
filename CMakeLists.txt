@@ -132,6 +132,11 @@ option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
 
 if(WIN32)
   option(CURL_STATIC_CRT "Build libcurl with static CRT on Windows (/MT)" OFF)
+  if(CURL_STATIC_CRT)
+    set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+    set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
+    set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
+  endif()
 
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
   if(ENABLE_UNICODE)
@@ -393,12 +398,6 @@ if(ENABLE_CURL_MANUAL OR BUILD_LIBCURL_DOCS)
   if(NOT HAVE_MANUAL_TOOLS)
     message(WARNING "Perl not found. Will not build manuals.")
   endif()
-endif()
-
-if(CURL_STATIC_CRT)
-  set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
-  set(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} /MT")
-  set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /MTd")
 endif()
 
 # Disable warnings on Borland to avoid changing 3rd party code.
