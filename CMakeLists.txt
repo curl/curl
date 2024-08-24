@@ -2014,7 +2014,6 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  # Export a .pc file for client projects not using CMake
   if(LIBCURL_PC_REQUIRES_PRIVATE)
     string(REPLACE ";" "," LIBCURL_PC_REQUIRES_PRIVATE "${LIBCURL_PC_REQUIRES_PRIVATE}")
   endif()
