@@ -2036,8 +2036,6 @@ if(NOT CURL_DISABLE_INSTALL)
   else()
     set(ENABLE_STATIC       "no")
   endif()
-  # Set this to "yes" to append all libraries on which -lcurl is dependent
-  set(REQUIRE_LIB_DEPS "no")
 
   # Finally generate a "curl-config" matching this config.
   # Consumed variables:
