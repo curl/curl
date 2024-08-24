@@ -184,10 +184,8 @@ static int crypto_send(struct cf_linuxq_ctx *ctx, const uint8_t *data,
   hsinfo->crypto_level = level;
 
   n = sendmsg(ctx->q.sockfd, &msg, 0);
-  if(n < 0) {
-    printf("sendmsg errno=%d\n", errno); /* XXX */
+  if(n < 0)
     return -1;
-  }
 
   return 0;
 }
@@ -258,22 +256,29 @@ static int crypto_ssl_set_secret(SSL *ssl,
   int rc;
   uint8_t level;
 
+  if(level == QUIC_CRYPTO_APP && rx_secret) {
+    const uint8_t *extbuf;
+    size_t extlen;
+
+    SSL_get_peer_quic_transport_params(ssl, &extbuf, &extlen);
+    rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
+                    extbuf, extlen);
+    if(rc)
+      return CURLE_QUIC_CONNECT_ERROR;
+  }
+
   if(!cipher)
-    return -1;
+    return 0;
 
   ssl_type = SSL_CIPHER_get_id(cipher);
   level = crypto_ssl_level(ssl_level);
   type = crypto_ssl_cipher_type(ssl_type);
   rc = crypto_set_secret(ctx, level, type, rx_secret, tx_secret, len);
 
-  if(!rc && ctx->qconn->completed) {
-    rc = SSL_process_quic_post_handshake(ssl);
-    if(rc != 1) {
-      rc = SSL_get_error(ssl, rc);
-    if(rc != SSL_ERROR_WANT_READ && rc != SSL_ERROR_WANT_WRITE)
-      return -1;
-  }
-  return rc;
+  if(rc < 0)
+    return 0;
+
+  return 1;
 }
 
 static int crypto_ssl_send(SSL *ssl, enum ssl_encryption_level_t ssl_level,
@@ -286,7 +291,10 @@ static int crypto_ssl_send(SSL *ssl, enum ssl_encryption_level_t ssl_level,
 
   level = crypto_ssl_level(ssl_level);
   rc = crypto_send(ctx, data, len, level);
-  return rc;
+  if(rc < 0)
+    return 0;
+
+  return 1;
 }
 
 static int crypto_ssl_flush(SSL *ssl)
@@ -350,7 +358,8 @@ static CURLcode crypto_ssl_do_handshake(struct Curl_cfilter *cf,
                                         const uint8_t *buf, size_t len)
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
-  SSL_CTX *ssl_ctx = ctx->ossl.ssl_ctx;
+  SSL *ssl = ctx->tls.ossl.ssl;
+  enum ssl_encryption_level_t ssl_level;
   int rc;
 
   if(len > 0) {
@@ -361,14 +370,32 @@ static CURLcode crypto_ssl_do_handshake(struct Curl_cfilter *cf,
       return CURLE_QUIC_CONNECT_ERROR;
     }
   }
+  else if(level == QUIC_CRYPTO_INITIAL) {
+    uint8_t extbuf[256];
+    socklen_t extlen = sizeof(extbuf);
+    rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
+                    extbuf, &extlen);
+    if(rc)
+      return CURLE_QUIC_CONNECT_ERROR;
+
+    if(SSL_set_quic_transport_params(ssl, extbuf, extlen) != 1)
+      return CURLE_QUIC_CONNECT_ERROR;
+  }
 
   rc = SSL_do_handshake(ssl);
   if(rc <= 0) {
     rc = SSL_get_error(ssl, rc);
     if(rc != SSL_ERROR_WANT_READ && rc != SSL_ERROR_WANT_WRITE) {
-      failf(data, "SSL_do_handshake failed");
+      failf(data, "SSL_do_handshake: SSL_get_error: %d", rc);
       return CURLE_QUIC_CONNECT_ERROR;
     }
+  }
+
+
+  if(ctx->qconn->completed) {
+    rc = SSL_process_quic_post_handshake(ssl);
+    if(rc != 1)
+      return CURLE_QUIC_CONNECT_ERROR;
   }
 
   return CURLE_OK;
@@ -380,7 +407,6 @@ static int crypto_gtls_alert(gnutls_session_t session,
                              gnutls_alert_level_t alert_level,
                              gnutls_alert_description_t alert)
 {
-  printf("alert_level:%d, alert:%d\n", alert_level, alert); /* XXX */
   (void)session;
   (void)gtls_level;
   (void)alert_level;
@@ -432,7 +458,6 @@ static int crypto_gtls_send(gnutls_session_t session,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   int rc;
   uint8_t level;
-  printf("crypto_gtls_send htype:%d\n", htype); /* XXX */
 
   if(htype == GNUTLS_HANDSHAKE_KEY_UPDATE ||
       htype == GNUTLS_HANDSHAKE_CHANGE_CIPHER_SPEC)
@@ -440,7 +465,6 @@ static int crypto_gtls_send(gnutls_session_t session,
 
   level = crypto_gtls_level(gtls_level);
   rc = crypto_send(ctx, data, len, level);
-  printf("crypto_gtls_send rc:%d\n", rc); /* XXX */
   return rc;
 }
 
@@ -472,7 +496,6 @@ static int crypto_gtls_set_secret(gnutls_session_t session,
   uint32_t type;
   int rc;
   uint8_t level;
-  printf("crypto_gtls_set_secret\n"); /* XXX */
 
   if(ctx->qconn->completed)
     return 0;
@@ -496,7 +519,6 @@ static int crypto_gtls_tp_tx(gnutls_session_t session, gnutls_buffer_t data)
 
   rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
                   buf, &len);
-  printf("crypto_gtls_tp_tx rc:%d\n", rc); /* XXX */
   if(rc)
     return -1;
 
@@ -514,7 +536,6 @@ static int crypto_gtls_tp_rx(gnutls_session_t session, const uint8_t *data,
 
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
                   data, len);
-  printf("crypto_gtls_tp_rx rc:%d\n", rc); /* XXX */
   return rc;
 }
 
@@ -543,8 +564,6 @@ static CURLcode crypto_gtls_do_handshake(struct Curl_cfilter *cf,
   gnutls_record_encryption_level_t gtls_level;
   int rc;
 
-  /* XXX */
-  infof(data, "crypto_gtls_do_handshake: len=%ld, level = %hhd", len, level);
   session = ctx->tls.gtls.session;
   if(len > 0) {
     gtls_level = crypto_to_gtls_level(level);
@@ -555,23 +574,17 @@ static CURLcode crypto_gtls_do_handshake(struct Curl_cfilter *cf,
         failf(data, "gnutls_handshake_write failed");
         return CURLE_QUIC_CONNECT_ERROR;
       }
-      else {
-        infof(data, "gnutls_handshake_write failed");
+      else
         return CURLE_OK;
-      }
     }
   }
 
   rc = gnutls_handshake(session);
-failf(data, "gnutls_handshake rc=%d",rc);
   if(rc < 0) {
     if(gnutls_error_is_fatal(rc)) {
       gnutls_alert_send_appropriate(session, rc);
       failf(data, "gnutls_handshake failed");
       return CURLE_QUIC_CONNECT_ERROR;
-    }
-    else {
-      infof(data, "gnutls_handshake failed");
     }
   }
   return CURLE_OK;
@@ -591,7 +604,6 @@ static CURLcode crypto_do_handshake(struct Curl_cfilter *cf,
   rc = crypto_gtls_do_handshake(cf, data, level, buf, len);
 #elif defined(USE_WOLFSSL)
 #endif
-infof(data, "crypto_do_handshake rc: %d", rc);
   return rc;
 }
 static ssize_t crypto_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -670,16 +682,14 @@ static CURLcode crypto_handshake(struct Curl_cfilter *cf,
   int rc;
   uint8_t buf[1200];
   uint8_t level = QUIC_CRYPTO_INITIAL;
-infof(data, "crypto_handshake");
 
   while(!ctx->qconn->completed) {
-    /* XXX */
-    infof(data, "crypto_handshake completed: %d", ctx->qconn->completed);
     rc = crypto_do_handshake(cf, data, level, buf, len);
     if(rc)
       return rc;
     if(ctx->qconn->completed)
       return 0;
+
     rc = crypto_recv(cf, data, &level, buf, sizeof(buf));
     if(rc < 0)
       return rc;
@@ -707,6 +717,7 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
   if(!data) {
+    /* XXX: data == NULL */
     failf(data, "initialization failure, transfer not http initialized");
     return CURLE_FAILED_INIT;
   }
@@ -1359,7 +1370,7 @@ static void cf_linuxq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 {
   struct Curl_cfilter *cf;
-  struct cf_ngtcp2_ctx *ctx;
+  struct cf_linuxq_ctx *ctx;
   struct Curl_easy *data;
 
   cf = (struct Curl_cfilter *)SSL_get_app_data(ssl);
@@ -1540,10 +1551,6 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   if(rc)
     return rc;
 
-  ctx->handshake_at = now; /* XXX: move into tls code callback? */
-  CURL_TRC_CF(data, cf, "handshake complete after %dms",
-             (int)Curl_timediff(now, ctx->started_at));
-
   /*
    * XXX: We only use QUIC_EVENT_CONNECTION_CLOSE,
    * and QUIC_EVENT_STREAM_UPDATE for now
@@ -1557,10 +1564,10 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
       return CURLE_QUIC_CONNECT_ERROR;
   }
 
-  if(init_ngh3_conn(cf) != CURLE_OK) {
-    result = CURLE_QUIC_CONNECT_ERROR;
-    goto out;
-  }
+  now = Curl_now();
+  ctx->handshake_at = now; /* XXX: move into tls code callback? */
+  CURL_TRC_CF(data, cf, "handshake complete after %dms",
+             (int)Curl_timediff(now, ctx->started_at));
 
   len = sizeof(rp);
   rp.remote = 1;
@@ -1575,6 +1582,11 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
   result = qng_verify_peer(cf, data);
   if(result)
     goto out;
+
+  if(init_ngh3_conn(cf) != CURLE_OK) {
+    result = CURLE_QUIC_CONNECT_ERROR;
+    goto out;
+  }
 
   CURL_TRC_CF(data, cf, "peer verified");
   cf->connected = TRUE;
