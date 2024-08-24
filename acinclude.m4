@@ -1304,7 +1304,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   fi
 
   if test "x$ca" != "xno"; then
-    CURL_CA_BUNDLE='"'$ca'"'
+    CURL_CA_BUNDLE="$ca"
     AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default ca bundle])
     AC_SUBST(CURL_CA_BUNDLE)
     AC_MSG_RESULT([$ca])
