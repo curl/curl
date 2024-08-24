@@ -95,8 +95,7 @@ if(SHARE_LIB_OBJECT)
     # exported libcurl symbols. We handle exports via libcurl.def instead.
     # Except with symbol hiding disabled or debug mode enabled, when we export
     # _all_ symbols from libcurl DLL, without using libcurl.def.
-    set_property(TARGET ${LIB_OBJECT} APPEND
-      PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+    set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
   target_link_libraries(${LIB_OBJECT} PRIVATE ${CURL_LIBS})
   set_target_properties(${LIB_OBJECT} PROPERTIES
@@ -126,8 +125,7 @@ if(BUILD_STATIC_LIBS)
   add_library(${LIB_STATIC} STATIC ${LIB_SOURCE})
   add_library(${PROJECT_NAME}::${LIB_STATIC} ALIAS ${LIB_STATIC})
   if(WIN32)
-    set_property(TARGET ${LIB_OBJECT} APPEND
-      PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
+    set_property(TARGET ${LIB_OBJECT} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
   target_link_libraries(${LIB_STATIC} PRIVATE ${CURL_LIBS})
   # Remove the "lib" prefix since the library is already named "libcurl".
