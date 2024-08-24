@@ -2585,7 +2585,7 @@ fi
 AM_CONDITIONAL([USE_UNICODE], [test "$want_winuni" = "yes"])
 
 dnl -------------------------------------------------
-dnl check winidn option before other IDN libraries
+dnl check WinIDN option before other IDN libraries
 dnl -------------------------------------------------
 
 AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
