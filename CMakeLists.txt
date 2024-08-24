@@ -1995,8 +1995,8 @@ if(NOT CURL_DISABLE_INSTALL)
         continue()
       endif()
     endif()
-    if(_lib MATCHES "^-")
-      list(APPEND LIBCURL_PC_LIBS_PRIVATE "${_lib}")
+    if(_lib MATCHES "^-")  # '-framework <name>'
+      list(APPEND _ldflags "${_lib}")
     elseif(_lib MATCHES ".*/.*")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
