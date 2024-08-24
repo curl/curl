@@ -2682,6 +2682,45 @@ if test "$want_winidn" = "yes"; then
 fi
 
 dnl **********************************************************************
+dnl Check for the presence of AppleIDN
+dnl **********************************************************************
+
+case $host_os in
+  darwin*)
+    AC_MSG_CHECKING([whether to build with Apple IDN])
+    OPT_IDN="default"
+    AC_ARG_WITH(apple-idn,
+    AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
+    AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
+      [OPT_IDN=$withval])
+    if test "x$want_idn" != "xno" -a "x$OPT_IDN" != "xyes"; then
+      want_appleidn="no"
+    else
+      case "$OPT_IDN" in
+        no)
+          dnl --without-apple-idn option used
+          AC_MSG_RESULT([no])
+          ;;
+        *)
+          AC_MSG_RESULT([yes, check])
+          AC_CHECK_LIB(icucore, uidna_openUTS46,
+          [
+            AC_CHECK_HEADERS(unicode/uidna.h,
+              curl_idn_msg="enabled (AppleIDN)"
+              AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+              AC_SUBST(USE_APPLE_IDN, [1])
+              AC_SUBST([IDN_ENABLED], [1])
+              LIBS="-licucore -liconv $LIBS"
+              tst_links_appleidn='yes'
+            )
+          ])
+          ;;
+      esac
+    fi
+    ;;
+esac
+
+dnl **********************************************************************
 dnl Check for the presence of libidn2
 dnl **********************************************************************
 
@@ -2694,6 +2733,9 @@ AS_HELP_STRING([--without-libidn2],[Disable libidn2 usage]),
 if test "x$tst_links_winidn" = "xyes"; then
   want_idn="no"
   AC_MSG_RESULT([no (using WinIDN instead)])
+elif test "x$tst_links_appleidn" = "xyes"; then
+  want_idn="no"
+  AC_MSG_RESULT([no (using AppleIDN instead)])
 else
   case "$OPT_IDN" in
     no)
@@ -2811,44 +2853,6 @@ if test "$want_idn" = "yes"; then
     want_idn="no"
   fi
 fi
-
-dnl **********************************************************************
-dnl Check for the presence of AppleIDN
-dnl **********************************************************************
-
-case $host_os in
-  darwin*)
-    AC_MSG_CHECKING([whether to build with Apple IDN])
-    OPT_IDN="default"
-    AC_ARG_WITH(apple-idn,
-    AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
-    AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
-      [OPT_IDN=$withval])
-    if test "x$want_idn" != "xno" -a "x$OPT_IDN" != "xyes"; then
-      want_appleidn="no"
-    else
-      case "$OPT_IDN" in
-        no)
-          dnl --without-apple-idn option used
-          AC_MSG_RESULT([no])
-          ;;
-        *)
-          AC_MSG_RESULT([yes, check])
-          AC_CHECK_LIB(icucore, uidna_openUTS46,
-          [
-            AC_CHECK_HEADERS(unicode/uidna.h,
-              curl_idn_msg="enabled (AppleIDN)"
-              AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-              AC_SUBST(USE_APPLE_IDN, [1])
-              AC_SUBST([IDN_ENABLED], [1])
-              LIBS="-licucore -liconv $LIBS"
-            )
-          ])
-          ;;
-      esac
-    fi
-    ;;
-esac
 
 dnl **********************************************************************
 dnl Check for nghttp2
