@@ -4938,7 +4938,7 @@ if test "x$curl_psl_msg" = "xenabled"; then
 fi
 
 if test "x$curl_gsasl_msg" = "xenabled"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES GSASL"
+  SUPPORT_FEATURES="$SUPPORT_FEATURES gsasl"
 fi
 
 if test "x$enable_altsvc" = "xyes"; then
