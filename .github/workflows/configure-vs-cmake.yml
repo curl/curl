@@ -37,7 +37,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          ./configure --with-openssl --without-libpsl
+          ./configure --enable-static=no --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
@@ -64,7 +64,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          ./configure --with-openssl --without-libpsl
+          ./configure --enable-static=no --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
@@ -94,7 +94,7 @@ jobs:
       - name: run configure --with-schannel
         run: |
           autoreconf -fi
-          ./configure --with-schannel --without-libpsl --host=${TRIPLET}
+          ./configure --enable-static=no --with-schannel --without-libpsl --host=${TRIPLET}
 
       - name: run cmake
         run: |
