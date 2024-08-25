@@ -2761,8 +2761,8 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     OPT_WINIDN=$withval)
   case "$OPT_WINIDN" in
     default)
-      dnl enable by default on native Windows
-      if test "$curl_cv_native_windows" = "yes"; then
+      dnl enable by default on native Windows with Vista and newer
+      if test "$curl_cv_windows_vista" = 'yes'; then
         want_winidn="yes"
         want_winidn_path="default"
       else
