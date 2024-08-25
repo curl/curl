@@ -64,6 +64,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
+          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig"
           ./configure --enable-static=no --with-openssl --without-libpsl
 
       - name: run cmake
