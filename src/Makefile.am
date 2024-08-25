@@ -113,6 +113,7 @@ CS_ = $(CS_0)
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
+AM_CPPFLAGS += -DUSE_MANUAL
 
 $(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)

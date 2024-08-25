@@ -79,7 +79,6 @@ my %remove = (
     '#define PACKAGE_URL ""' => 1,
     '#define PACKAGE_VERSION "-"' => 1,
     '#define SIZEOF_LONG_LONG 8' => 1,
-    '#define USE_MANUAL 1' => 1,
     '#define VERSION "-"' => 1,
     );
 
