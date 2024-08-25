@@ -2028,6 +2028,10 @@ if(NOT CURL_DISABLE_INSTALL)
   endif()
   set(LIBCURL_PC_CFLAGS_PRIVATE "-DCURL_STATICLIB")
 
+  message(STATUS "CMAKE_SHARED_LINKER_FLAGS: |${CMAKE_SHARED_LINKER_FLAGS}|")
+  message(STATUS "_ldflags: |${ldflags}|")
+  message(STATUS "LIBCURL_PC_LIBS_PRIVATE: |${LIBCURL_PC_LIBS_PRIVATE}|")
+
   # Merge pkg-config private fields into public ones when static-only
   if(BUILD_SHARED_LIBS)
     set(ENABLE_SHARED       "yes")
