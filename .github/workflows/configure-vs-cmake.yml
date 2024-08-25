@@ -43,6 +43,12 @@ jobs:
         run: |
           cmake -B build -DCURL_USE_LIBPSL=OFF
 
+      - name: compare generated curl-config files (experimental)
+        run: diff -u curl-config build/curl-config || true
+
+      - name: compare generated libcurl.pc files (experimental)
+        run: diff -u libcurl.pc build/libcurl.pc || true
+
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
 
@@ -65,6 +71,12 @@ jobs:
           cmake -B build -DCURL_USE_LIBPSL=OFF \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             -DCURL_USE_LIBSSH2=OFF
+
+      - name: compare generated curl-config files (experimental)
+        run: diff -u curl-config build/curl-config || true
+
+      - name: compare generated libcurl.pc files (experimental)
+        run: diff -u libcurl.pc build/libcurl.pc || true
 
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
@@ -90,6 +102,12 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Windows \
             -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
             -DCMAKE_C_COMPILER=${TRIPLET}-gcc
+
+      - name: compare generated curl-config files (experimental)
+        run: diff -u curl-config build/curl-config || true
+
+      - name: compare generated libcurl.pc files (experimental)
+        run: diff -u libcurl.pc build/libcurl.pc || true
 
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
