@@ -4095,8 +4095,13 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
     want_pthreads=yes
     ;;
   esac ], [
-    AC_MSG_RESULT(auto)
-    want_pthreads=auto
+    if test "$curl_cv_native_windows" = "yes"; then
+      AC_MSG_RESULT(no)
+      want_pthreads=no
+    else
+      AC_MSG_RESULT(auto)
+      want_pthreads=auto
+    fi
     ]
 )
 
