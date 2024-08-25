@@ -523,9 +523,9 @@ jobs:
       - name: 'build'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
-            make -C bld -j5
+            make -C bld -j5 V=1
           fi
 
       - name: 'build tests'
