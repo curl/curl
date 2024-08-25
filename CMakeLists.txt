@@ -1978,7 +1978,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endforeach()
 
   unset(_implicit_libs)
-  if(NOT MINGW)
+  if(NOT MINGW AND NOT UNIX)
     set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
   endif()
 
