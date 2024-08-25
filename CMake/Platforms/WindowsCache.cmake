@@ -145,7 +145,7 @@ set(HAVE_SYS_UTIME_H 1)
 set(HAVE_TERMIOS_H 0)
 set(HAVE_TERMIO_H 0)
 
-set(HAVE_FSEEKO 0)
+set(HAVE_FSEEKO 0)  # mingw-w64 2.0.0 and newer has it
 set(HAVE__FSEEKI64 1)
 set(HAVE_SOCKET 1)
 set(HAVE_SELECT 1)
