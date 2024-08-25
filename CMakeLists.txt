@@ -1077,7 +1077,7 @@ if(CURL_USE_LIBPSL)
 endif()
 
 # libssh2
-option(CURL_USE_LIBSSH2 "Use libssh2" ON)  # FIXME: default is OFF in autotools
+option(CURL_USE_LIBSSH2 "Use libssh2" ON)
 mark_as_advanced(CURL_USE_LIBSSH2)
 set(USE_LIBSSH2 OFF)
 
@@ -1948,9 +1948,17 @@ if(NOT CURL_DISABLE_INSTALL)
   set(VERSIONNUM              "${CURL_VERSION_NUM}")
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
-  set(includedir              "\${prefix}/include")
+  if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
+    set(includedir            "${CMAKE_INSTALL_INCLUDEDIR}")
+  else()
+    set(includedir            "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+  endif()
+  if(IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
+    set(libdir                "${CMAKE_INSTALL_LIBDIR}")
+  else()
+    set(libdir                "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+  endif()
   set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
-  set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
   # "a" (Linux) or "lib" (Windows)
   string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
@@ -1983,7 +1991,12 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  foreach(_lib IN LISTS CMAKE_C_IMPLICIT_LINK_LIBRARIES CURL_LIBS)
+  unset(_implicit_libs)
+  if(NOT MINGW AND NOT UNIX)
+    set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
+  endif()
+
+  foreach(_lib IN LISTS _implicit_libs CURL_LIBS)
     if(TARGET "${_lib}")
       set(_libname "${_lib}")
       get_target_property(_imported "${_libname}" IMPORTED)
@@ -2029,8 +2042,8 @@ if(NOT CURL_DISABLE_INSTALL)
   if(_ldflags)
     list(REMOVE_DUPLICATES _ldflags)
     string(REPLACE ";" " " _ldflags "${_ldflags}")
-    set(LIBCURL_PC_LIBS_PRIVATE "${_ldflags} ${LIBCURL_PC_LIBS_PRIVATE}")
-    string(STRIP "${LIBCURL_PC_LIBS_PRIVATE}" LIBCURL_PC_LIBS_PRIVATE)
+    set(LDFLAGS "${LDFLAGS} ${_ldflags}")
+    string(STRIP "${LDFLAGS}" LDFLAGS)
   endif()
   set(LIBCURL_PC_CFLAGS_PRIVATE "-DCURL_STATICLIB")
 
@@ -2097,6 +2110,11 @@ if(NOT CURL_DISABLE_INSTALL)
   #   prefix
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
+  # Documentation:
+  #   https://people.freedesktop.org/~dbn/pkg-config-guide.html
+  #   https://manpages.debian.org/unstable/pkgconf/pkg-config.1.en.html
+  #   https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html
+  #   https://www.msys2.org/docs/pkgconfig/
   configure_file(
     "${CURL_SOURCE_DIR}/libcurl.pc.in"
     "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
