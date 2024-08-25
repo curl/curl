@@ -2588,6 +2588,7 @@ dnl -------------------------------------------------
 dnl check WinIDN option before other IDN libraries
 dnl -------------------------------------------------
 
+tst_links_winidn='no'
 if test "$curl_cv_native_windows" = 'yes'; then
   AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
   OPT_WINIDN="default"
@@ -2687,6 +2688,7 @@ dnl **********************************************************************
 dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
+tst_links_appleidn='no'
 case $host_os in
   darwin*)
     AC_MSG_CHECKING([whether to build with Apple IDN])
