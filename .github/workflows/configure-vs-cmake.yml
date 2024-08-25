@@ -59,6 +59,10 @@ jobs:
         run: |
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew install libtool autoconf automake && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
+      - name: 'toolchain versions'
+        run: |
+         echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: run configure --with-openssl
