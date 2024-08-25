@@ -472,7 +472,7 @@ jobs:
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
 
   linux-cross-mingw-w64:
-    name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
+    name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.options }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
     strategy:
@@ -480,6 +480,7 @@ jobs:
       matrix:
         build: [autotools, cmake]
         compiler: [gcc]
+        options: ['!WinIDN', '']
     env:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
@@ -495,20 +496,24 @@ jobs:
       - name: 'configure'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
+            [[ '${{ matrix.options }}' = *'!WinIDN'* ]] && options+=' -DUSE_WIN32_IDN=OFF'
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
               -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
               -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
-              -DCURL_USE_LIBPSL=OFF
+              -DCURL_USE_SCHANNEL=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              ${options}
           else
+            [[ '${{ matrix.options }}' = *'!WinIDN'* ]] && options+=' --without-winidn'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --host=${TRIPLET} \
-              --with-schannel --with-winidn \
+              --with-schannel \
               --without-libpsl \
-              --disable-dependency-tracking
+              --disable-dependency-tracking \
+              ${options}
           fi
 
       - name: 'configure log'
