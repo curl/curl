@@ -610,6 +610,23 @@ case $host_os in
   cygwin*|msys*) curl_cv_cygwin='yes';;
 esac
 
+dnl Check if native Windows targeting Vista or newer
+curl_cv_windows_vista='no'
+if test "$curl_cv_native_windows" = 'yes'; then
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      #if _WIN32_WINNT < 0x0600
+      #error
+      #endif
+    ]])
+  ],[
+    curl_cv_windows_vista='yes'
+  ],[
+  ])
+fi
+
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
 
@@ -5296,19 +5313,8 @@ if test "$tst_atomic" = "yes"; then
 elif test "x$USE_THREADS_POSIX" = "x1" -a \
      "x$ac_cv_header_pthread_h" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-else
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
-      #error
-      #endif
-    ]])
-  ],[
-    SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-  ],[
-  ])
+elif test "$curl_cv_windows_vista" = 'yes'; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 fi
 
 if test "x$want_winuni" = "xyes"; then
