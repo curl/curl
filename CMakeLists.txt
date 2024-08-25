@@ -1977,7 +1977,12 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  foreach(_lib IN LISTS CMAKE_C_IMPLICIT_LINK_LIBRARIES CURL_LIBS)
+  unset(_implicit_libs)
+  if(NOT MINGW)
+    set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
+  endif()
+
+  foreach(_lib IN LISTS _implicit_libs CURL_LIBS)
     if(TARGET "${_lib}")
       set(_libname "${_lib}")
       get_target_property(_imported "${_libname}" IMPORTED)
@@ -2030,6 +2035,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   message(STATUS "CMAKE_SHARED_LINKER_FLAGS: |${CMAKE_SHARED_LINKER_FLAGS}|")
   message(STATUS "_ldflags: |${ldflags}|")
+  message(STATUS "CMAKE_C_IMPLICIT_LINK_LIBRARIES: |${CMAKE_C_IMPLICIT_LINK_LIBRARIES}|")
   message(STATUS "LIBCURL_PC_LIBS_PRIVATE: |${LIBCURL_PC_LIBS_PRIVATE}|")
 
   # Merge pkg-config private fields into public ones when static-only
