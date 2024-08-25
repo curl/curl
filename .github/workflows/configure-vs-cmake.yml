@@ -65,6 +65,7 @@ jobs:
         run: |
           autoreconf -fi
           export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig"
+          export PKG_CONFIG_DEBUG_SPEW=1
           ./configure --enable-static=no --with-openssl --without-libpsl
 
       - name: run cmake
