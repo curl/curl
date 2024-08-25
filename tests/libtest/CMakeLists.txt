@@ -39,7 +39,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   endif()
 
   string(TOUPPER ${_target} _upper_target)
-  set(_target_name "curl-test-${_target}")
+  set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${_sources})
   add_dependencies(testdeps ${_target_name})
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
