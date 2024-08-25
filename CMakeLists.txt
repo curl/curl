@@ -1944,7 +1944,7 @@ if(NOT CURL_DISABLE_INSTALL)
   set(exec_prefix             "\${prefix}")
   set(includedir              "\${prefix}/include")
   set(LDFLAGS                 "${CMAKE_SHARED_LINKER_FLAGS}")
-  set(libdir                  "${CMAKE_INSTALL_PREFIX}/lib")
+  set(libdir                  "\${exec_prefix}/lib")
   # "a" (Linux) or "lib" (Windows)
   string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
 
