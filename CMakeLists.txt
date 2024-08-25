@@ -1008,6 +1008,8 @@ if(WIN32)
   if(USE_WIN32_IDN)
     list(APPEND CURL_LIBS "normaliz")
   endif()
+else()
+  set(USE_WIN32_IDN OFF)
 endif()
 
 if(APPLE)
@@ -1023,6 +1025,8 @@ if(APPLE)
       set(USE_APPLE_IDN OFF)
     endif()
   endif()
+else()
+  set(USE_APPLE_IDN OFF)
 endif()
 
 # Check for libidn2
