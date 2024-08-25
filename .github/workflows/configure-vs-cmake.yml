@@ -43,6 +43,12 @@ jobs:
         run: |
           cmake -B build -DCURL_USE_LIBPSL=OFF
 
+      - name: 'configure log'
+        run: cat config.log 2>/dev/null || true
+
+      - name: 'cmake log'
+        run: cat build/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
       - name: compare generated curl-config files (experimental)
         run: diff -u curl-config build/curl-config || true
 
@@ -78,6 +84,12 @@ jobs:
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             -DCURL_USE_LIBSSH2=OFF
 
+      - name: 'configure log'
+        run: cat config.log 2>/dev/null || true
+
+      - name: 'cmake log'
+        run: cat build/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
       - name: compare generated curl-config files (experimental)
         run: diff -u curl-config build/curl-config || true
 
@@ -108,6 +120,12 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Windows \
             -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
             -DCMAKE_C_COMPILER=${TRIPLET}-gcc
+
+      - name: 'configure log'
+        run: cat config.log 2>/dev/null || true
+
+      - name: 'cmake log'
+        run: cat build/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
       - name: compare generated curl-config files (experimental)
         run: diff -u curl-config build/curl-config || true
