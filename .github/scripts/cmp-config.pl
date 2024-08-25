@@ -37,10 +37,15 @@ my %remove = (
     '#define _FILE_OFFSET_BITS 64' => 1,
     '#define CURL_EXTERN_SYMBOL' => 1,
     '#define CURL_SA_FAMILY_T sa_family_t' => 1,
+    '#define CURL_SA_FAMILY_T ADDRESS_FAMILY' => 1,
+    '#define HAVE_ADDRESS_FAMILY 1' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
+    '#define GETHOSTNAME_TYPE_ARG2 int' => 1,
     '#define HAVE_BROTLI 1' => 1,
     '#define HAVE_BROTLI_DECODE_H 1' => 1,
     '#define HAVE_DECL_GETPWUID_R 1' => 1,
+    '#define HAVE_DECL_GETPWUID_R 0' => 1,
+    '#define HAVE_DECL_GETPWUID_R_MISSING 1' => 1,
     '#define HAVE_DLFCN_H 1' => 1,
     '#define HAVE_GETHOSTBYNAME 1' => 1,
     '#define HAVE_INTTYPES_H 1' => 1,
@@ -78,7 +83,6 @@ my %remove = (
     '#define PACKAGE_URL ""' => 1,
     '#define PACKAGE_VERSION "-"' => 1,
     '#define SIZEOF_LONG_LONG 8' => 1,
-    '#define USE_MANUAL 1' => 1,
     '#define VERSION "-"' => 1,
     );
 

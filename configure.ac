@@ -4003,7 +4003,6 @@ AC_CHECK_FUNCS([\
   arc4random \
   eventfd \
   fnmatch \
-  fseeko \
   geteuid \
   getpass_r \
   getppid \
@@ -4024,14 +4023,18 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
-dnl On Android, the only way to know if fseeko can be used is to see if it is
-dnl declared or not (for this API level), as the symbol always exists in the
-dnl lib.
-AC_CHECK_DECL([fseeko],
-  [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
-   [Define to 1 if you have the fseeko declaration])],
-  [],
-  [[#include <stdio.h>]])
+if test "$curl_cv_native_windows" != 'yes'; then
+  AC_CHECK_FUNCS([fseeko])
+
+  dnl On Android, the only way to know if fseeko can be used is to see if it is
+  dnl declared or not (for this API level), as the symbol always exists in the
+  dnl lib.
+  AC_CHECK_DECL([fseeko],
+    [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
+     [Define to 1 if you have the fseeko declaration])],
+    [],
+    [[#include <stdio.h>]])
+fi
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
@@ -4053,7 +4056,6 @@ dnl If the manual variable still is set, then we go with providing a built-in
 dnl manual
 
 if test "$USE_MANUAL" = "1"; then
-  AC_DEFINE(USE_MANUAL, 1, [If you want to build curl with the built-in manual])
   curl_manual_msg="enabled"
 fi
 
@@ -4096,8 +4098,13 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
     want_pthreads=yes
     ;;
   esac ], [
-    AC_MSG_RESULT(auto)
-    want_pthreads=auto
+    if test "$curl_cv_native_windows" = "yes"; then
+      AC_MSG_RESULT(no)
+      want_pthreads=no
+    else
+      AC_MSG_RESULT(auto)
+      want_pthreads=auto
+    fi
     ]
 )
 
