@@ -101,7 +101,7 @@ while test "$#" -gt 0; do
     ;;
 
   --checkfor)
-    checkfor=$2
+    checkfor="$2"
     cmajor=`echo "$checkfor" | cut -d. -f1`
     cminor=`echo "$checkfor" | cut -d. -f2`
     # when extracting the patch part we strip off everything after a
