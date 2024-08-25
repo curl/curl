@@ -37,7 +37,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-openssl --without-libpsl
+          mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-openssl --without-libpsl --without-brotli --without-zstd
 
       - name: run cmake
         run: |
