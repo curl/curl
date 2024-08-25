@@ -2588,96 +2588,98 @@ dnl -------------------------------------------------
 dnl check WinIDN option before other IDN libraries
 dnl -------------------------------------------------
 
-AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
-OPT_WINIDN="default"
-AC_ARG_WITH(winidn,
-AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
-AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
-  OPT_WINIDN=$withval)
-case "$OPT_WINIDN" in
-  no|default)
-    dnl --without-winidn option used or configure option not specified
-    want_winidn="no"
-    AC_MSG_RESULT([no])
-    ;;
-  yes)
-    dnl --with-winidn option used without path
-    want_winidn="yes"
-    want_winidn_path="default"
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    dnl --with-winidn option used with path
-    want_winidn="yes"
-    want_winidn_path="$withval"
-    AC_MSG_RESULT([yes ($withval)])
-    ;;
-esac
+if test "$curl_cv_native_windows" = 'yes'; then
+  AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
+  OPT_WINIDN="default"
+  AC_ARG_WITH(winidn,
+  AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+  AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
+    OPT_WINIDN=$withval)
+  case "$OPT_WINIDN" in
+    no|default)
+      dnl --without-winidn option used or configure option not specified
+      want_winidn="no"
+      AC_MSG_RESULT([no])
+      ;;
+    yes)
+      dnl --with-winidn option used without path
+      want_winidn="yes"
+      want_winidn_path="default"
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      dnl --with-winidn option used with path
+      want_winidn="yes"
+      want_winidn_path="$withval"
+      AC_MSG_RESULT([yes ($withval)])
+      ;;
+  esac
 
-if test "$want_winidn" = "yes"; then
-  dnl WinIDN library support has been requested
-  clean_CFLAGS="$CFLAGS"
-  clean_CPPFLAGS="$CPPFLAGS"
-  clean_LDFLAGS="$LDFLAGS"
-  clean_LIBS="$LIBS"
-  WINIDN_LIBS="-lnormaliz"
-  WINIDN_CPPFLAGS=""
-  #
-  if test "$want_winidn_path" != "default"; then
-    dnl path has been specified
-    dnl pkg-config not available or provides no info
-    WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
-    WINIDN_CPPFLAGS="-I$want_winidn_path/include"
-    WINIDN_DIR="$want_winidn_path/lib$libsuff"
-  fi
-  #
-  dnl WinIDN requires a minimum supported OS version of at least Vista (0x0600)
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
-      #error
-      #endif
-    ]])
-  ],[
-  ],[
-    CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-    CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-    CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-    CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-    WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
-  ])
-  #
-  CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
-  LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
-  LIBS="$WINIDN_LIBS $LIBS"
-  #
-  AC_MSG_CHECKING([if IdnToUnicode can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      IdnToUnicode(0, NULL, 0, NULL, 0);
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_winidn="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_winidn="no"
-  ])
-  #
-  if test "$tst_links_winidn" = "yes"; then
-    AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
-    AC_SUBST([IDN_ENABLED], [1])
-    curl_idn_msg="enabled (Windows-native)"
-  else
-    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
-    CFLAGS="$clean_CFLAGS"
-    CPPFLAGS="$clean_CPPFLAGS"
-    LDFLAGS="$clean_LDFLAGS"
-    LIBS="$clean_LIBS"
+  if test "$want_winidn" = "yes"; then
+    dnl WinIDN library support has been requested
+    clean_CFLAGS="$CFLAGS"
+    clean_CPPFLAGS="$CPPFLAGS"
+    clean_LDFLAGS="$LDFLAGS"
+    clean_LIBS="$LIBS"
+    WINIDN_LIBS="-lnormaliz"
+    WINIDN_CPPFLAGS=""
+    #
+    if test "$want_winidn_path" != "default"; then
+      dnl path has been specified
+      dnl pkg-config not available or provides no info
+      WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
+      WINIDN_CPPFLAGS="-I$want_winidn_path/include"
+      WINIDN_DIR="$want_winidn_path/lib$libsuff"
+    fi
+    #
+    dnl WinIDN requires a minimum supported OS version of at least Vista (0x0600)
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <windows.h>
+      ]],[[
+        #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+        #error
+        #endif
+      ]])
+    ],[
+    ],[
+      CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
+      CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
+      CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
+      CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
+      WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
+    ])
+    #
+    CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
+    LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
+    LIBS="$WINIDN_LIBS $LIBS"
+    #
+    AC_MSG_CHECKING([if IdnToUnicode can be linked])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <windows.h>
+      ]],[[
+        IdnToUnicode(0, NULL, 0, NULL, 0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_links_winidn="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_links_winidn="no"
+    ])
+    #
+    if test "$tst_links_winidn" = "yes"; then
+      AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
+      AC_SUBST([IDN_ENABLED], [1])
+      curl_idn_msg="enabled (Windows-native)"
+    else
+      AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+      CFLAGS="$clean_CFLAGS"
+      CPPFLAGS="$clean_CPPFLAGS"
+      LDFLAGS="$clean_LDFLAGS"
+      LIBS="$clean_LIBS"
+    fi
   fi
 fi
 
