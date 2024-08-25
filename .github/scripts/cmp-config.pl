@@ -40,6 +40,7 @@ my %remove = (
     '#define CURL_SA_FAMILY_T ADDRESS_FAMILY' => 1,
     '#define HAVE_ADDRESS_FAMILY 1' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
+    '#define GETHOSTNAME_TYPE_ARG2 int' => 1,
     '#define HAVE_BROTLI 1' => 1,
     '#define HAVE_BROTLI_DECODE_H 1' => 1,
     '#define HAVE_DECL_GETPWUID_R 1' => 1,
