@@ -450,7 +450,7 @@ static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
 
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
     CURL_TRC_CF(data, cf, "[0] %" CURL_FORMAT_SIZE_T " bytes to nghttp2 "
-                "-> %" CURL_FORMAT_SSIZE_T "", blen, rv);
+                "-> %" CURL_FORMAT_SSIZE_T, blen, rv);
     if(rv < 0) {
       failf(data,
             "process_pending_input: nghttp2_session_mem_recv() returned "

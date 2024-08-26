@@ -223,7 +223,7 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
     nwritten = wcb((char *)buf, 1, wlen, wcb_data);
     Curl_set_in_callback(data, FALSE);
     CURL_TRC_WRITE(data, "cw_out, wrote %" CURL_FORMAT_SIZE_T " %s bytes "
-                   "-> %" CURL_FORMAT_SIZE_T "",
+                   "-> %" CURL_FORMAT_SIZE_T,
                    wlen, (otype == CW_OUT_BODY)? "body" : "header",
                    nwritten);
     if(CURL_WRITEFUNC_PAUSE == nwritten) {
