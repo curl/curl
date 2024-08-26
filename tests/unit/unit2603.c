@@ -89,7 +89,8 @@ static void parse_success(struct tcase *t)
     in_consumed += (size_t)nread;
     if((size_t)nread != buflen) {
       if(!p.done) {
-        fprintf(stderr, "only %zd/%zu consumed for: '%s'\n",
+        fprintf(stderr, "only %" CURL_FORMAT_SSIZE_T "/"
+                        "%" CURL_FORMAT_SIZE_T " consumed for: '%s'\n",
                 nread, buflen, buf);
         fail("not all consumed");
       }
@@ -99,7 +100,8 @@ static void parse_success(struct tcase *t)
   fail_if(!p.done, "end not detected");
   fail_if(!p.req, "not request created");
   if(t->input_remain != (in_len - in_consumed)) {
-    fprintf(stderr, "expected %zu input bytes to remain, but got %zu\n",
+    fprintf(stderr, "expected %" CURL_FORMAT_SIZE_T " input bytes to remain, "
+                    "but got %" CURL_FORMAT_SIZE_T "\n",
             t->input_remain, in_len - in_consumed);
     fail("unexpected input consumption");
   }
@@ -109,7 +111,8 @@ static void parse_success(struct tcase *t)
     check_eq(p.req->authority, t->authority, "authority");
     check_eq(p.req->path, t->path, "path");
     if(Curl_dynhds_count(&p.req->headers) != t->header_count) {
-      fprintf(stderr, "expected %zu headers but got %zu\n", t->header_count,
+      fprintf(stderr, "expected %" CURL_FORMAT_SIZE_T " headers "
+                      "but got %" CURL_FORMAT_SIZE_T "\n", t->header_count,
              Curl_dynhds_count(&p.req->headers));
       fail("unexpected req header count");
     }

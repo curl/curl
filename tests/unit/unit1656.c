@@ -85,12 +85,14 @@ static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *dbuf)
   Curl_dyn_reset(dbuf);
   result = Curl_x509_GTime2str(dbuf, in, in + strlen(in));
   if(result != spec->exp_result) {
-    fprintf(stderr, "test %zu: expect result %d, got %d\n",
+    fprintf(stderr, "test %" CURL_FORMAT_SIZE_T ": "
+                    "expect result %d, got %d\n",
             i, spec->exp_result, result);
     return FALSE;
   }
   else if(!result && strcmp(spec->exp_output, Curl_dyn_ptr(dbuf))) {
-    fprintf(stderr, "test %zu: input '%s', expected output '%s', got '%s'\n",
+    fprintf(stderr, "test %" CURL_FORMAT_SIZE_T ": "
+                    "input '%s', expected output '%s', got '%s'\n",
             i, in, spec->exp_output, Curl_dyn_ptr(dbuf));
     return FALSE;
   }

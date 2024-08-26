@@ -100,7 +100,7 @@ UNITTEST_START
     fp = fopen(arg, "rb");
     abort_unless(fp != NULL, "Cannot open testfile");
 
-    fprintf(stderr, "Test %zd...", i);
+    fprintf(stderr, "Test %" CURL_FORMAT_SSIZE_T "...", i);
     switch(i) {
       case 0:
         rc = Curl_get_line(&buf, fp);

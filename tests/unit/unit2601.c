@@ -64,12 +64,15 @@ static void dump_bufq(struct bufq *q, const char *msg)
   const char *terr;
   size_t n;
 
-  fprintf(stderr, "bufq[chunk_size=%zu, max_chunks=%zu] %s\n",
+  fprintf(stderr, "bufq[chunk_size=%" CURL_FORMAT_SIZE_T ", "
+                  "max_chunks=%" CURL_FORMAT_SIZE_T "] %s\n",
           q->chunk_size, q->max_chunks, msg);
   fprintf(stderr, "- queue[\n");
   chunk = q->head;
   while(chunk) {
-    fprintf(stderr, "    chunk[len=%zu, roff=%zu, woff=%zu]\n",
+    fprintf(stderr, "    chunk[len=%" CURL_FORMAT_SIZE_T ", "
+                    "roff=%" CURL_FORMAT_SIZE_T ", "
+                    "woff=%" CURL_FORMAT_SIZE_T "]\n",
             chunk->dlen, chunk->r_offset, chunk->w_offset);
     chunk = chunk->next;
   }
@@ -82,8 +85,8 @@ static void dump_bufq(struct bufq *q, const char *msg)
     ++n;
     chunk = chunk->next;
   }
-  fprintf(stderr, "- chunks: %zu\n", q->chunk_count);
-  fprintf(stderr, "- spares: %zu\n", n);
+  fprintf(stderr, "- chunks: %" CURL_FORMAT_SIZE_T "\n", q->chunk_count);
+  fprintf(stderr, "- spares: %" CURL_FORMAT_SIZE_T "\n", n);
 }
 
 static unsigned char test_data[32*1024];
@@ -133,7 +136,8 @@ static void check_bufq(size_t pool_spares,
     }
   }
   if(nwritten != max_len) {
-    fprintf(stderr, "%zu bytes written, but max_len=%zu\n",
+    fprintf(stderr, "%" CURL_FORMAT_SIZE_T " bytes written, "
+                    "but max_len=%" CURL_FORMAT_SIZE_T "\n",
             nwritten, max_len);
     dump_bufq(&q, "after writing full");
     fail_if(TRUE, "write: bufq full but nwritten wrong");
@@ -152,7 +156,8 @@ static void check_bufq(size_t pool_spares,
     }
   }
   if(nread != max_len) {
-    fprintf(stderr, "%zu bytes read, but max_len=%zu\n",
+    fprintf(stderr, "%" CURL_FORMAT_SIZE_T " bytes read, "
+                    "but max_len=%" CURL_FORMAT_SIZE_T "\n",
             nwritten, max_len);
     dump_bufq(&q, "after reading empty");
     fail_if(TRUE, "read: bufq empty but nread wrong");
@@ -188,7 +193,8 @@ static void check_bufq(size_t pool_spares,
     nwritten += (size_t)n;
   }
   if(nwritten < max_len) {
-    fprintf(stderr, "%zu bytes written, but max_len=%zu\n",
+    fprintf(stderr, "%" CURL_FORMAT_SIZE_T " bytes written, "
+                    "but max_len=%" CURL_FORMAT_SIZE_T "\n",
             nwritten, max_len);
     dump_bufq(&q, "after writing full");
     fail_if(TRUE, "write: bufq full but nwritten wrong");

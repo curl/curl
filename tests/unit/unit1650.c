@@ -164,13 +164,16 @@ UNITTEST_START
     DOHcode rc = doh_encode(req[i].name, req[i].type,
                             buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
-      fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
-              req[i].rc, rc);
+      fprintf(stderr, "req %" CURL_FORMAT_SIZE_T ": "
+                      "Expected return code %d got %d\n",
+              i, req[i].rc, rc);
       abort_if(rc != req[i].rc, "return code");
     }
     if(size != req[i].size) {
-      fprintf(stderr, "req %zu: Expected size %zu got %zu\n", i,
-              req[i].size, size);
+      fprintf(stderr, "req %" CURL_FORMAT_SIZE_T ": "
+                      "Expected size %" CURL_FORMAT_SIZE_T
+                      " got %" CURL_FORMAT_SIZE_T "\n",
+              i, req[i].size, size);
       fprintf(stderr, "DNS encode made: %s\n", hexdump(buffer, size));
       abort_if(size != req[i].size, "size");
     }
@@ -193,8 +196,9 @@ UNITTEST_START
     rc = doh_decode((const unsigned char *)resp[i].packet, resp[i].size,
                     resp[i].type, &d);
     if(rc != resp[i].rc) {
-      fprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
-              resp[i].rc, rc);
+      fprintf(stderr, "resp %" CURL_FORMAT_SIZE_T ": "
+                      "Expected return code %d got %d\n",
+              i, resp[i].rc, rc);
       abort_if(rc != resp[i].rc, "return code");
     }
     len = sizeof(buffer);
@@ -234,8 +238,9 @@ UNITTEST_START
     }
     de_cleanup(&d);
     if(resp[i].out && strcmp((char *)buffer, resp[i].out)) {
-      fprintf(stderr, "resp %zu: Expected %s got %s\n", i,
-              resp[i].out, buffer);
+      fprintf(stderr, "resp %" CURL_FORMAT_SIZE_T ": "
+                      "Expected %s got %s\n",
+              i, resp[i].out, buffer);
       abort_if(resp[i].out && strcmp((char *)buffer, resp[i].out), "content");
     }
   }
@@ -248,7 +253,7 @@ UNITTEST_START
     rc = doh_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      fprintf(stderr, "%zu: %d\n", i, rc);
+      fprintf(stderr, "%" CURL_FORMAT_SIZE_T ": %d\n", i, rc);
       abort_if(!rc, "error rc");
     }
   }
@@ -262,7 +267,7 @@ UNITTEST_START
                     DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
-      fprintf(stderr, "2 %zu: %d\n", i, rc);
+      fprintf(stderr, "2 %" CURL_FORMAT_SIZE_T ": %d\n", i, rc);
       abort_if(!rc, "error rc");
     }
   }

@@ -160,7 +160,8 @@ UNITTEST_START
     showsts(e, chost);
   }
 
-  printf("Number of entries: %zu\n", Curl_llist_count(&h->list));
+  printf("Number of entries: %" CURL_FORMAT_SIZE_T "\n",
+         Curl_llist_count(&h->list));
 
   /* verify that it is exists for 7 seconds */
   chost = "expire.example";
