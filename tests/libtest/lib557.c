@@ -1135,7 +1135,9 @@ static int _strlen_check(int linenumber, char *buf, size_t len)
   size_t buflen = strlen(buf);
   if(len != buflen) {
     /* they shouldn't differ */
-    printf("sprintf strlen:%d failed:\nwe '%zu'\nsystem: '%zu'\n",
+    printf("sprintf strlen:%d failed:\n"
+           "we '%" CURL_FORMAT_SIZE_T "'\n"
+           "system: '%" CURL_FORMAT_SIZE_T "'\n",
            linenumber, buflen, len);
     return 1;
   }

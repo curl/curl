@@ -45,8 +45,8 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s, %zu bytes (0x%zx)\n", timebuf, text,
-          size, size);
+  fprintf(stream, "%s%s, %" CURL_FORMAT_SIZE_T " bytes (0x%zx)\n",
+          timebuf, text, size, size);
 
   for(i = 0; i < size; i += width) {
 

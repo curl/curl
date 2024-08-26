@@ -103,8 +103,9 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
-    printf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
-           "content-range=%s, expected=%d\n", num, res,
+    printf("%" CURL_FORMAT_SSIZE_T ": bad error code (%d): "
+           "resume=%s, fail=%s, http416=%s, content-range=%s, expected=%d\n",
+           num, res,
            (p->flags & F_RESUME)? "yes": "no",
            (p->flags & F_FAIL)? "yes": "no",
            (p->flags & F_HTTP416)? "yes": "no",
@@ -113,8 +114,8 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
     return 1;
   }
   if(hasbody && (p->flags & F_IGNOREBODY)) {
-    printf("body should be ignored and is not: resume=%s, fail=%s, "
-           "http416=%s, content-range=%s\n",
+    printf("body should be ignored and is not: "
+           "resume=%s, fail=%s, http416=%s, content-range=%s\n",
            (p->flags & F_RESUME)? "yes": "no",
            (p->flags & F_FAIL)? "yes": "no",
            (p->flags & F_HTTP416)? "yes": "no",
