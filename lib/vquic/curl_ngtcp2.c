@@ -520,7 +520,7 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   if(data)
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] "
                 "read_stream(len=%" CURL_FORMAT_SIZE_T ") "
-                "-> %" CURL_FORMAT_SSIZE_T "", stream_id, buflen, nconsumed);
+                "-> %" CURL_FORMAT_SSIZE_T, stream_id, buflen, nconsumed);
   if(nconsumed < 0) {
     struct h3_stream_ctx *stream = H3_STREAM_CTX_ID(ctx, stream_id);
     if(data && stream) {
