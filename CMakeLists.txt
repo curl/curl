@@ -974,42 +974,12 @@ if(NOT CURL_DISABLE_LDAP)
       if(CMAKE_LDAP_INCLUDE_DIR)
         include_directories(${CMAKE_LDAP_INCLUDE_DIR})
       endif()
-      set(NEED_LBER_H ON)
-      unset(_header_list)
-      if(WIN32)
-        list(APPEND _header_list "windows.h")
-      endif()
-      if(HAVE_SYS_TYPES_H)
-        list(APPEND _header_list "sys/types.h")
-      endif()
-      list(APPEND _header_list "ldap.h")
-
-      set(_include_string "")
-      foreach(_header IN LISTS _header_list)
-        set(_include_string "${_include_string}#include <${_header}>\n")
-      endforeach()
-
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
       set(CURL_LIBS "${CMAKE_LDAP_LIB};${CURL_LIBS}")
       if(HAVE_LIBLBER)
         list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LBER_LIB})
         set(CURL_LIBS "${CMAKE_LBER_LIB};${CURL_LIBS}")
-      endif()
-
-      check_c_source_compiles("
-        ${_include_string}
-        int main(int argc, char ** argv)
-        {
-          BerValue *bvp = NULL;
-          BerElement *bep = ber_init(bvp);
-          ber_free(bep, 1);
-          return 0;
-        }" NOT_NEED_LBER_H)
-      if(NOT_NEED_LBER_H)
-        set(NEED_LBER_H OFF)
-      else()
-        set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -DNEED_LBER_H")
       endif()
 
       check_function_exists("ldap_url_parse" HAVE_LDAP_URL_PARSE)

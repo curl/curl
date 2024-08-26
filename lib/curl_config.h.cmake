@@ -353,9 +353,6 @@
 /* Define to 1 if you have the lber.h header file. */
 #cmakedefine HAVE_LBER_H 1
 
-/* Define to 1 if you have the ldap.h header file. */
-#cmakedefine HAVE_LDAP_H 1
-
 /* Use LDAPS implementation */
 #cmakedefine HAVE_LDAP_SSL 1
 
@@ -607,9 +604,6 @@
 
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
-
-/* Define to 1 if you need the lber.h header file even with ldap.h */
-#cmakedefine NEED_LBER_H 1
 
 /* Define to 1 if you need the malloc.h header file even with stdlib.h */
 #cmakedefine NEED_MALLOC_H 1
