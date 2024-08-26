@@ -88,6 +88,7 @@ libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
 
 libauthretry_SOURCES = libauthretry.c $(SUPPORTFILES)
+libauthretry_LDADD = $(TESTUTIL_LIBS)
 
 libprereq_SOURCES = libprereq.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libprereq_LDADD = $(TESTUTIL_LIBS)
