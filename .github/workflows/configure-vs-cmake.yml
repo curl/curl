@@ -37,7 +37,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          ./configure --with-openssl --without-libpsl
+          ./configure --disable-dependency-tracking --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
@@ -49,22 +49,47 @@ jobs:
   check-macos:
     runs-on: macos-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
-
       - name: install packages
         run: |
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew install libtool autoconf automake && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          ./configure --with-openssl --without-libpsl
+          ./configure --disable-dependency-tracking --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
           cmake -B build -DCURL_USE_LIBPSL=OFF \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             -DCURL_USE_LIBSSH2=OFF
+
+      - name: compare generated curl_config.h files
+        run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
+
+  check-windows:
+    runs-on: ubuntu-latest
+    env:
+      TRIPLET: 'x86_64-w64-mingw32'
+    steps:
+      - name: install packages
+        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: run configure --with-schannel
+        run: |
+          autoreconf -fi
+          ./configure --disable-dependency-tracking --with-schannel --without-libpsl --host=${TRIPLET}
+
+      - name: run cmake
+        run: |
+          cmake -B build -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
+            -DCMAKE_SYSTEM_NAME=Windows \
+            -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
+            -DCMAKE_C_COMPILER=${TRIPLET}-gcc
 
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h

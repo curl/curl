@@ -503,12 +503,11 @@ AC_SUBST([LIBCURL_PC_CFLAGS])
 
 # Determine whether all dependent libraries must be specified when linking
 if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"; then
-  REQUIRE_LIB_DEPS=no
+  require_lib_deps=no
 else
-  REQUIRE_LIB_DEPS=yes
+  require_lib_deps=yes
 fi
-AC_SUBST(REQUIRE_LIB_DEPS)
-AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$REQUIRE_LIB_DEPS = xyes)
+AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$require_lib_deps = xyes)
 
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
@@ -2585,101 +2584,140 @@ fi
 AM_CONDITIONAL([USE_UNICODE], [test "$want_winuni" = "yes"])
 
 dnl -------------------------------------------------
-dnl check winidn option before other IDN libraries
+dnl check WinIDN option before other IDN libraries
 dnl -------------------------------------------------
 
-AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
-OPT_WINIDN="default"
-AC_ARG_WITH(winidn,
-AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
-AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
-  OPT_WINIDN=$withval)
-case "$OPT_WINIDN" in
-  no|default)
-    dnl --without-winidn option used or configure option not specified
-    want_winidn="no"
-    AC_MSG_RESULT([no])
-    ;;
-  yes)
-    dnl --with-winidn option used without path
-    want_winidn="yes"
-    want_winidn_path="default"
-    AC_MSG_RESULT([yes])
-    ;;
-  *)
-    dnl --with-winidn option used with path
-    want_winidn="yes"
-    want_winidn_path="$withval"
-    AC_MSG_RESULT([yes ($withval)])
-    ;;
-esac
+tst_links_winidn='no'
+if test "$curl_cv_native_windows" = 'yes'; then
+  AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
+  OPT_WINIDN="default"
+  AC_ARG_WITH(winidn,
+  AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+  AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
+    OPT_WINIDN=$withval)
+  case "$OPT_WINIDN" in
+    no|default)
+      dnl --without-winidn option used or configure option not specified
+      want_winidn="no"
+      AC_MSG_RESULT([no])
+      ;;
+    yes)
+      dnl --with-winidn option used without path
+      want_winidn="yes"
+      want_winidn_path="default"
+      AC_MSG_RESULT([yes])
+      ;;
+    *)
+      dnl --with-winidn option used with path
+      want_winidn="yes"
+      want_winidn_path="$withval"
+      AC_MSG_RESULT([yes ($withval)])
+      ;;
+  esac
 
-if test "$want_winidn" = "yes"; then
-  dnl WinIDN library support has been requested
-  clean_CFLAGS="$CFLAGS"
-  clean_CPPFLAGS="$CPPFLAGS"
-  clean_LDFLAGS="$LDFLAGS"
-  clean_LIBS="$LIBS"
-  WINIDN_LIBS="-lnormaliz"
-  WINIDN_CPPFLAGS=""
-  #
-  if test "$want_winidn_path" != "default"; then
-    dnl path has been specified
-    dnl pkg-config not available or provides no info
-    WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
-    WINIDN_CPPFLAGS="-I$want_winidn_path/include"
-    WINIDN_DIR="$want_winidn_path/lib$libsuff"
-  fi
-  #
-  dnl WinIDN requires a minimum supported OS version of at least Vista (0x0600)
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
-      #error
-      #endif
-    ]])
-  ],[
-  ],[
-    CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-    CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-    CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-    CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-    WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
-  ])
-  #
-  CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
-  LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
-  LIBS="$WINIDN_LIBS $LIBS"
-  #
-  AC_MSG_CHECKING([if IdnToUnicode can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      IdnToUnicode(0, NULL, 0, NULL, 0);
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_winidn="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_winidn="no"
-  ])
-  #
-  if test "$tst_links_winidn" = "yes"; then
-    AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
-    AC_SUBST([IDN_ENABLED], [1])
-    curl_idn_msg="enabled (Windows-native)"
-  else
-    AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
-    CFLAGS="$clean_CFLAGS"
-    CPPFLAGS="$clean_CPPFLAGS"
-    LDFLAGS="$clean_LDFLAGS"
-    LIBS="$clean_LIBS"
+  if test "$want_winidn" = "yes"; then
+    dnl WinIDN library support has been requested
+    clean_CFLAGS="$CFLAGS"
+    clean_CPPFLAGS="$CPPFLAGS"
+    clean_LDFLAGS="$LDFLAGS"
+    clean_LIBS="$LIBS"
+    WINIDN_LIBS="-lnormaliz"
+    WINIDN_CPPFLAGS=""
+    #
+    if test "$want_winidn_path" != "default"; then
+      dnl path has been specified
+      dnl pkg-config not available or provides no info
+      WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
+      WINIDN_CPPFLAGS="-I$want_winidn_path/include"
+      WINIDN_DIR="$want_winidn_path/lib$libsuff"
+    fi
+    #
+    dnl WinIDN requires a minimum supported OS version of at least Vista (0x0600)
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <windows.h>
+      ]],[[
+        #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
+        #error
+        #endif
+      ]])
+    ],[
+    ],[
+      CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
+      CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
+      CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
+      CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
+      WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
+    ])
+    #
+    CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
+    LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
+    LIBS="$WINIDN_LIBS $LIBS"
+    #
+    AC_MSG_CHECKING([if IdnToUnicode can be linked])
+    AC_LINK_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <windows.h>
+      ]],[[
+        IdnToUnicode(0, NULL, 0, NULL, 0);
+      ]])
+    ],[
+      AC_MSG_RESULT([yes])
+      tst_links_winidn="yes"
+    ],[
+      AC_MSG_RESULT([no])
+      tst_links_winidn="no"
+    ])
+    #
+    if test "$tst_links_winidn" = "yes"; then
+      AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
+      AC_SUBST([IDN_ENABLED], [1])
+      curl_idn_msg="enabled (Windows-native)"
+    else
+      AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
+      CFLAGS="$clean_CFLAGS"
+      CPPFLAGS="$clean_CPPFLAGS"
+      LDFLAGS="$clean_LDFLAGS"
+      LIBS="$clean_LIBS"
+    fi
   fi
 fi
+
+dnl **********************************************************************
+dnl Check for the presence of AppleIDN
+dnl **********************************************************************
+
+tst_links_appleidn='no'
+case $host_os in
+  darwin*)
+    AC_MSG_CHECKING([whether to build with Apple IDN])
+    OPT_IDN="default"
+    AC_ARG_WITH(apple-idn,
+    AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
+    AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
+      [OPT_IDN=$withval])
+    case "$OPT_IDN" in
+      yes)
+        dnl --with-apple-idn option used
+        AC_MSG_RESULT([yes, check])
+        AC_CHECK_LIB(icucore, uidna_openUTS46,
+        [
+          AC_CHECK_HEADERS(unicode/uidna.h,
+            curl_idn_msg="enabled (AppleIDN)"
+            AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
+            AC_SUBST(USE_APPLE_IDN, [1])
+            AC_SUBST([IDN_ENABLED], [1])
+            LIBS="-licucore -liconv $LIBS"
+            tst_links_appleidn='yes'
+          )
+        ])
+        ;;
+      *)
+        AC_MSG_RESULT([no])
+        ;;
+    esac
+    ;;
+esac
 
 dnl **********************************************************************
 dnl Check for the presence of libidn2
@@ -2694,6 +2732,9 @@ AS_HELP_STRING([--without-libidn2],[Disable libidn2 usage]),
 if test "x$tst_links_winidn" = "xyes"; then
   want_idn="no"
   AC_MSG_RESULT([no (using WinIDN instead)])
+elif test "x$tst_links_appleidn" = "xyes"; then
+  want_idn="no"
+  AC_MSG_RESULT([no (using AppleIDN instead)])
 else
   case "$OPT_IDN" in
     no)
@@ -2811,44 +2852,6 @@ if test "$want_idn" = "yes"; then
     want_idn="no"
   fi
 fi
-
-dnl **********************************************************************
-dnl Check for the presence of AppleIDN
-dnl **********************************************************************
-
-case $host_os in
-  darwin*)
-    AC_MSG_CHECKING([whether to build with Apple IDN])
-    OPT_IDN="default"
-    AC_ARG_WITH(apple-idn,
-    AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
-    AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
-      [OPT_IDN=$withval])
-    if test "x$want_idn" != "xno" -a "x$OPT_IDN" != "xyes"; then
-      want_appleidn="no"
-    else
-      case "$OPT_IDN" in
-        no)
-          dnl --without-apple-idn option used
-          AC_MSG_RESULT([no])
-          ;;
-        *)
-          AC_MSG_RESULT([yes, check])
-          AC_CHECK_LIB(icucore, uidna_openUTS46,
-          [
-            AC_CHECK_HEADERS(unicode/uidna.h,
-              curl_idn_msg="enabled (AppleIDN)"
-              AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-              AC_SUBST(USE_APPLE_IDN, [1])
-              AC_SUBST([IDN_ENABLED], [1])
-              LIBS="-licucore -liconv $LIBS"
-            )
-          ])
-          ;;
-      esac
-    fi
-    ;;
-esac
 
 dnl **********************************************************************
 dnl Check for nghttp2
@@ -4054,7 +4057,6 @@ AC_CHECK_FUNCS([\
   arc4random \
   eventfd \
   fnmatch \
-  fseeko \
   geteuid \
   getpass_r \
   getppid \
@@ -4075,14 +4077,18 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
-dnl On Android, the only way to know if fseeko can be used is to see if it is
-dnl declared or not (for this API level), as the symbol always exists in the
-dnl lib.
-AC_CHECK_DECL([fseeko],
-  [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
-   [Define to 1 if you have the fseeko declaration])],
-  [],
-  [[#include <stdio.h>]])
+if test "$curl_cv_native_windows" != 'yes'; then
+  AC_CHECK_FUNCS([fseeko])
+
+  dnl On Android, the only way to know if fseeko can be used is to see if it is
+  dnl declared or not (for this API level), as the symbol always exists in the
+  dnl lib.
+  AC_CHECK_DECL([fseeko],
+    [AC_DEFINE([HAVE_DECL_FSEEKO], [1],
+     [Define to 1 if you have the fseeko declaration])],
+    [],
+    [[#include <stdio.h>]])
+fi
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
@@ -4104,7 +4110,6 @@ dnl If the manual variable still is set, then we go with providing a built-in
 dnl manual
 
 if test "$USE_MANUAL" = "1"; then
-  AC_DEFINE(USE_MANUAL, 1, [If you want to build curl with the built-in manual])
   curl_manual_msg="enabled"
 fi
 
@@ -4147,8 +4152,13 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
     want_pthreads=yes
     ;;
   esac ], [
-    AC_MSG_RESULT(auto)
-    want_pthreads=auto
+    if test "$curl_cv_native_windows" = "yes"; then
+      AC_MSG_RESULT(no)
+      want_pthreads=no
+    else
+      AC_MSG_RESULT(auto)
+      want_pthreads=auto
+    fi
     ]
 )
 

@@ -1089,26 +1089,6 @@ AC_DEFUN([CURL_CHECK_LIBS_CONNECT], [
 ])
 
 
-dnl CURL_DEFINE_UNQUOTED (VARIABLE, [VALUE])
-dnl -------------------------------------------------
-dnl Like AC_DEFINE_UNQUOTED this macro will define a C preprocessor
-dnl symbol that can be further used in custom template configuration
-dnl files. This macro, unlike AC_DEFINE_UNQUOTED, does not use a third
-dnl argument for the description. Symbol definitions done with this
-dnl macro are intended to be exclusively used in handcrafted *.h.in
-dnl template files. Contrary to what AC_DEFINE_UNQUOTED does, this one
-dnl prevents autoheader generation and insertion of symbol template
-dnl stub and definition into the first configuration header file. Do
-dnl not use this macro as a replacement for AC_DEFINE_UNQUOTED, each
-dnl one serves different functional needs.
-
-AC_DEFUN([CURL_DEFINE_UNQUOTED], [
-cat >>confdefs.h <<_EOF
-[@%:@define] $1 ifelse($#, 2, [$2], 1)
-_EOF
-])
-
-
 dnl CURL_CHECK_FUNC_SELECT
 dnl -------------------------------------------------
 dnl Test if the socket select() function is available.

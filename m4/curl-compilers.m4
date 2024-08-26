@@ -148,7 +148,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_DEC_C], [
   CURL_CHECK_DEF([__DECC], [], [silent])
   CURL_CHECK_DEF([__DECC_VER], [], [silent])
   if test "$curl_cv_have_def___DECC" = "yes" &&
-    test "$curl_cv_have_def___DECC_VER" = "yes"; then
+     test "$curl_cv_have_def___DECC_VER" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_id="DEC_C"
     flags_dbg_yes="-g2"
@@ -1424,10 +1424,10 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
         $tmp_EXTERN char *dummy(char *buff);
         char *dummy(char *buff)
         {
-         if(buff)
-           return ++buff;
-         else
-           return buff;
+          if(buff)
+            return ++buff;
+          else
+            return buff;
         }
       ]],[[
         char b[16];

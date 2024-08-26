@@ -4870,11 +4870,11 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-   case $host_os in
-     darwin*)
+  case $host_os in
+    darwin*)
       AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-     ;;
-     *)
+      ;;
+    *)
       oldcc=$CC
       old=$LD_LIBRARY_PATH
       CC="sh ./run-compiler"
@@ -4883,8 +4883,8 @@ AC_DEFUN([CURL_RUN_IFELSE], [
       AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
       LD_LIBRARY_PATH=$old # restore
       CC=$oldcc
-     ;;
-   esac
+      ;;
+  esac
 ])
 
 dnl CURL_COVERAGE
@@ -4901,8 +4901,8 @@ AC_DEFUN([CURL_COVERAGE],[
 
   dnl check if enabled by argument
   AC_ARG_ENABLE(code-coverage,
-     AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
-     coverage="$enableval")
+    AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+    coverage="$enableval")
 
   dnl if not gcc switch off again
   AS_IF([ test "$GCC" != "yes" ], coverage="no" )
@@ -4981,19 +4981,19 @@ AC_DEFUN([CURL_SIZEOF], [
   r=0
   dnl Check the sizes in a reasonable order
   for typesize in 8 4 2 16 1; do
-     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 $2
 ]],
-     [switch(0) {
-       case 0:
-       case (sizeof($1) == $typesize):;
-     }
+    [switch(0) {
+      case 0:
+      case (sizeof($1) == $typesize):;
+    }
     ]) ],
       [
-       r=$typesize],
+        r=$typesize],
       [
-       r=0])
+        r=0])
     dnl get out of the loop once matched
     if test $r -gt 0; then
       break;

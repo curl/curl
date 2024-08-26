@@ -36,7 +36,7 @@ aren't:are not
  url =URL
 internet\b=Internet
 isation:ization
-it's:it is
+\bit's:it is
 it'd:it would
 there's:there is
 [^.]\. And: Rewrite it somehow?
