@@ -1515,9 +1515,8 @@ check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_P
 
 check_symbol_exists("fsetxattr" "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
-  foreach(_curl_test IN ITEMS HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
-    curl_internal_test(${_curl_test})
-  endforeach()
+  curl_internal_test(HAVE_FSETXATTR_5)
+  curl_internal_test(HAVE_FSETXATTR_6)
 endif()
 
 set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
@@ -1605,12 +1604,8 @@ if(ENABLE_WEBSOCKETS)
   endif()
 endif()
 
-foreach(_curl_test IN ITEMS
-    HAVE_GLIBC_STRERROR_R
-    HAVE_POSIX_STRERROR_R
-    )
-  curl_internal_test(${_curl_test})
-endforeach()
+curl_internal_test(HAVE_GLIBC_STRERROR_R)
+curl_internal_test(HAVE_POSIX_STRERROR_R)
 
 # Check for reentrant
 foreach(_curl_test IN ITEMS
