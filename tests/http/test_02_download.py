@@ -588,4 +588,3 @@ class TestDownload:
         # we see 3 connections, because Apache only every serves a single
         # request via Upgrade: and then closed the connection.
         assert r.total_connects == 3, r.dump_logs()
-
