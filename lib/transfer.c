@@ -306,11 +306,18 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     nread = Curl_xfer_recv_resp(data, buf, bytestoread,
                                 is_multiplex, &result);
     if(nread < 0) {
-      if(CURLE_AGAIN == result) {
-        result = CURLE_OK;
-        break; /* get out of loop */
+      if(CURLE_AGAIN != result)
+        goto out; /* real error */
+      result = CURLE_OK;
+      if(data->req.download_done && data->req.no_body &&
+         !data->req.resp_trailer) {
+        DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
+               "not waiting for EOS"));
+        nread = 0;
+        /* continue as if we read the EOS */
       }
-      goto out; /* real error */
+      else
+        break; /* get out of loop */
     }
 
     /* We only get a 0-length read on EndOfStream */
