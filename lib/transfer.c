@@ -1186,15 +1186,7 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
       int cwtype = CLIENTWRITE_BODY;
       if(is_eos)
         cwtype |= CLIENTWRITE_EOS;
-
-#ifndef CURL_DISABLE_POP3
-      if(blen && data->conn->handler->protocol & PROTO_FAMILY_POP3) {
-        result = data->req.ignorebody? CURLE_OK :
-                 Curl_pop3_write(data, buf, blen);
-      }
-      else
-#endif /* CURL_DISABLE_POP3 */
-        result = Curl_client_write(data, cwtype, buf, blen);
+      result = Curl_client_write(data, cwtype, buf, blen);
     }
   }
 
