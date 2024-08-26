@@ -516,20 +516,8 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
 
   userlen = strlen(user);
 
-#ifndef NTLM_HOSTNAME
-  /* Get the machine's un-qualified hostname as NTLM does not like the fully
-     qualified domain name */
-  if(Curl_gethostname(host, sizeof(host))) {
-    infof(data, "gethostname() failed, continuing without");
-    hostlen = 0;
-  }
-  else {
-    hostlen = strlen(host);
-  }
-#else
   (void)msnprintf(host, sizeof(host), "%s", NTLM_HOSTNAME);
   hostlen = sizeof(NTLM_HOSTNAME)-1;
-#endif
 
   if(ntlm->flags & NTLMFLAG_NEGOTIATE_NTLM2_KEY) {
     unsigned char ntbuffer[0x18];
