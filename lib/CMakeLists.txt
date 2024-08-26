@@ -21,8 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(LIB_NAME libcurl)
-set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
+set(LIB_NAME "libcurl")
+set(LIBCURL_OUTPUT_NAME "libcurl" CACHE STRING "Basename of the curl library")
 add_definitions("-DBUILDING_LIBCURL")
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
@@ -156,8 +156,7 @@ if(BUILD_SHARED_LIBS)
     if(CYGWIN)
       # For Cygwin always compile dllmain.c as a separate unit since it
       # includes windows.h, which should not be included in other units.
-      set_source_files_properties("dllmain.c" PROPERTIES
-        SKIP_UNITY_BUILD_INCLUSION ON)
+      set_source_files_properties("dllmain.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
     endif()
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
   endif()

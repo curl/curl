@@ -246,7 +246,7 @@ else()
 endif()
 option(CURL_USE_PKGCONFIG "Enable pkg-config to detect dependencies" ${_curl_use_pkgconfig_default})
 
-# Initialize CURL_LIBS
+# Initialize variables collecting dependency libs, paths, pkg-config names.
 set(CURL_LIBS "")
 set(CURL_LIBDIRS "")
 set(LIBCURL_PC_REQUIRES_PRIVATE "")
@@ -390,10 +390,8 @@ option(ENABLE_IPV6 "Enable IPv6 support" ON)
 mark_as_advanced(ENABLE_IPV6)
 if(ENABLE_IPV6 AND NOT WIN32)
   include(CheckStructHasMember)
-  check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h"
-                          HAVE_SOCKADDR_IN6_SIN6_ADDR)
-  check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "netinet/in.h"
-                          HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
+  check_struct_has_member("struct sockaddr_in6" "sin6_addr" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_ADDR)
+  check_struct_has_member("struct sockaddr_in6" "sin6_scope_id" "netinet/in.h" HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(NOT HAVE_SOCKADDR_IN6_SIN6_ADDR)
     message(WARNING "struct sockaddr_in6 not available, disabling IPv6 support")
     # Force the feature off as this name is used as guard macro...
@@ -492,10 +490,10 @@ if(CURL_DEFAULT_SSL_BACKEND)
 endif()
 
 if(APPLE)
-  cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_SECTRANSP "Enable Apple OS native SSL/TLS (Secure Transport)" OFF CURL_ENABLE_SSL OFF)
 endif()
 if(WIN32)
-  cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS" OFF CURL_ENABLE_SSL OFF)
+  cmake_dependent_option(CURL_USE_SCHANNEL "Enable Windows native SSL/TLS (Schannel)" OFF CURL_ENABLE_SSL OFF)
   option(CURL_WINDOWS_SSPI "Enable SSPI on Windows" ${CURL_USE_SCHANNEL})
 endif()
 cmake_dependent_option(CURL_USE_MBEDTLS "Enable mbedTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
@@ -1201,7 +1199,7 @@ if(CURL_USE_GSSAPI)
       list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "heimdal-gssapi")
     endif()
   else()
-    message(WARNING "GSSAPI support has been requested but no supporting libraries found. Skipping.")
+    message(WARNING "GSSAPI has been requested, but no supporting libraries found. Skipping.")
   endif()
 endif()
 
@@ -1242,7 +1240,7 @@ if(USE_LIBRTMP)
       list(APPEND CURL_LIBS "winmm")
     endif()
   else()
-    message(WARNING "librtmp requested, but not found or missing OpenSSL. Skipping.")
+    message(WARNING "librtmp has been requested, but not found or missing OpenSSL. Skipping.")
     set(USE_LIBRTMP OFF)
   endif()
 endif()
@@ -1517,9 +1515,8 @@ check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_P
 
 check_symbol_exists("fsetxattr" "${CURL_INCLUDES}" HAVE_FSETXATTR)
 if(HAVE_FSETXATTR)
-  foreach(_curl_test IN ITEMS HAVE_FSETXATTR_5 HAVE_FSETXATTR_6)
-    curl_internal_test(${_curl_test})
-  endforeach()
+  curl_internal_test(HAVE_FSETXATTR_5)
+  curl_internal_test(HAVE_FSETXATTR_6)
 endif()
 
 set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
@@ -1607,12 +1604,8 @@ if(ENABLE_WEBSOCKETS)
   endif()
 endif()
 
-foreach(_curl_test IN ITEMS
-    HAVE_GLIBC_STRERROR_R
-    HAVE_POSIX_STRERROR_R
-    )
-  curl_internal_test(${_curl_test})
-endforeach()
+curl_internal_test(HAVE_GLIBC_STRERROR_R)
+curl_internal_test(HAVE_POSIX_STRERROR_R)
 
 # Check for reentrant
 foreach(_curl_test IN ITEMS
@@ -1639,13 +1632,11 @@ if(NEED_REENTRANT)
 endif()
 
 if(NOT WIN32)
-  # Check clock_gettime(CLOCK_MONOTONIC, x) support
-  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)  # Check clock_gettime(CLOCK_MONOTONIC, x) support
 endif()
 
 if(APPLE)
-  # Check compiler support of __builtin_available()
-  curl_internal_test(HAVE_BUILTIN_AVAILABLE)
+  curl_internal_test(HAVE_BUILTIN_AVAILABLE)  # Check compiler support of __builtin_available()
 endif()
 
 # Some other minor tests
@@ -1729,7 +1720,7 @@ endif()
 
 if(CURL_LTO)
   if(CMAKE_VERSION VERSION_LESS 3.9)
-    message(FATAL_ERROR "Requested LTO but your cmake version ${CMAKE_VERSION} is to old. You need at least 3.9")
+    message(FATAL_ERROR "LTO has been requested, but your cmake version ${CMAKE_VERSION} is to old. You need at least 3.9")
   endif()
 
   cmake_policy(SET CMP0069 NEW)
@@ -1739,7 +1730,7 @@ if(CURL_LTO)
   if(CURL_HAS_LTO)
     message(STATUS "LTO supported and enabled")
   else()
-    message(FATAL_ERROR "LTO was requested - but compiler does not support it\n${CURL_LTO_ERROR}")
+    message(FATAL_ERROR "LTO has been requested, but the compiler does not support it\n${CURL_LTO_ERROR}")
   endif()
 endif()
 
