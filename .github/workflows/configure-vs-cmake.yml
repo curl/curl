@@ -37,7 +37,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          ./configure --disable-dependency-tracking --with-openssl --without-libpsl
+          ./configure --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
@@ -58,7 +58,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          ./configure --disable-dependency-tracking --with-openssl --without-libpsl
+          ./configure --with-openssl --without-libpsl
 
       - name: run cmake
         run: |
@@ -82,7 +82,7 @@ jobs:
       - name: run configure --with-schannel
         run: |
           autoreconf -fi
-          ./configure --disable-dependency-tracking --with-schannel --without-libpsl --host=${TRIPLET}
+          ./configure --with-schannel --without-libpsl --host=${TRIPLET}
 
       - name: run cmake
         run: |
