@@ -185,10 +185,6 @@ libauthretry
 <name>
 HTTP authorization retry (Digest)
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
- </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER digest digest
 </command>

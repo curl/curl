@@ -34,10 +34,6 @@ SSL
 <name>
 IMAP NTLM graceful cancellation
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
- </setenv>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u testuser:testpass
 </command>

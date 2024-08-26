@@ -47,10 +47,6 @@ SSL
 <name>
 POP3 NTLM authentication with SASL downgrade
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
- </setenv>
 <command>
 pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret
 </command>

@@ -73,10 +73,6 @@ http
 <name>
 HTTP POST with NTLM authorization and following a 302 redirect
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
- </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -L -d "stuff to send away"
 </command>

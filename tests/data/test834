@@ -45,10 +45,6 @@ SSL
 <name>
 IMAP NTLM authentication with SASL downgrade
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
- </setenv>
 <command>
 'imap://%HOSTIP:%IMAPPORT/%TESTNUMBER/;MAILINDEX=1' -u user:secret
 </command>

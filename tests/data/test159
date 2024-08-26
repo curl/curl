@@ -53,10 +53,6 @@ http
 <name>
 HTTP with NTLM authorization when talking HTTP/1.0 (known to fail)
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
- </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --ntlm -0
 </command>
