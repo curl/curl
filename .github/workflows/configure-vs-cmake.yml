@@ -74,7 +74,6 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
-          export PKG_CONFIG_PATH="$(brew --prefix)/lib/pkgconfig"
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-openssl --without-libpsl
 
