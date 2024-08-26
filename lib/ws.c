@@ -1133,7 +1133,7 @@ static CURLcode ws_send_raw(CURL *data, const void *buffer,
   }
 
   CURL_TRC_WS(data, "ws_send_raw(len=%" CURL_FORMAT_SIZE_T ")"
-                    " -> %d, %" CURL_FORMAT_SIZE_T "",
+                    " -> %d, %" CURL_FORMAT_SIZE_T,
               buflen, result, *pnwritten);
   return result;
 }
