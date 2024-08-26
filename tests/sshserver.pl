@@ -1121,6 +1121,7 @@ if($error) {
     exit 1;
 }
 
+
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
 #

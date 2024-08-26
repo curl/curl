@@ -377,7 +377,7 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
         break;
       default:
         per->infd = open(per->uploadfile, O_RDONLY | O_BINARY,
-                        "rfm=stmlf", "ctx=stm");
+                         "rfm=stmlf", "ctx=stm");
       }
     }
     if(per->infd == -1)

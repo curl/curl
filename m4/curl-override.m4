@@ -48,7 +48,7 @@ dnl a c89 compiler and does not support K&R.
 
 m4_define([AC_LANG_PROGRAM(C)],
 [$1
-int main (void)
+int main(void)
 {
 $2
  ;
