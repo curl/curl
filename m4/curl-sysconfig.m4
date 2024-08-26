@@ -28,14 +28,14 @@ case $host_os in
   darwin*)
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#include <TargetConditionals.h>
+        #include <sys/types.h>
+        #include <TargetConditionals.h>
       ]],[[
-#if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
-      return 0;
-#else
-#error Not macOS
-#endif
+        #if TARGET_OS_MAC && !(defined(TARGET_OS_IPHONE) && TARGET_OS_IPHONE)
+          return 0;
+        #else
+        #error Not macOS
+        #endif
       ]])
     ],[
       build_for_macos="yes"

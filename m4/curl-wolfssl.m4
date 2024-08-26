@@ -80,8 +80,8 @@ if test "x$OPT_WOLFSSL" != xno; then
       LDFLAGS="$LDFLAGS $addld"
       AC_MSG_NOTICE([Add $addld to LDFLAGS])
       if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
-         AC_MSG_NOTICE([Add $addcflags to CPPFLAGS])
+        CPPFLAGS="$CPPFLAGS $addcflags"
+        AC_MSG_NOTICE([Add $addcflags to CPPFLAGS])
       fi
 
       my_ac_save_LIBS="$LIBS"
@@ -101,21 +101,21 @@ if test "x$OPT_WOLFSSL" != xno; then
           return wolfSSL_Init();
         ]])
       ],[
-         AC_MSG_RESULT(yes)
-         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
-         AC_SUBST(USE_WOLFSSL, [1])
-         WOLFSSL_ENABLED=1
-         USE_WOLFSSL="yes"
-         ssl_msg="wolfSSL"
-         QUIC_ENABLED=yes
-         test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         AC_MSG_RESULT(no)
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-         wolfssllibpath=""
-       ])
+        AC_MSG_RESULT(yes)
+        AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
+        AC_SUBST(USE_WOLFSSL, [1])
+        WOLFSSL_ENABLED=1
+        USE_WOLFSSL="yes"
+        ssl_msg="wolfSSL"
+        QUIC_ENABLED=yes
+        test wolfssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+      ],
+      [
+        AC_MSG_RESULT(no)
+        CPPFLAGS=$_cppflags
+        LDFLAGS=$_ldflags
+        wolfssllibpath=""
+      ])
       LIBS="$my_ac_save_LIBS"
     fi
 

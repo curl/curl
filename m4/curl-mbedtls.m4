@@ -70,18 +70,18 @@ if test "x$OPT_MBEDTLS" != xno; then
       fi
 
       AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
-       [
-       AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-       AC_SUBST(USE_MBEDTLS, [1])
-       MBEDTLS_ENABLED=1
-       USE_MBEDTLS="yes"
-       ssl_msg="mbedTLS"
-       test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-       ], -lmbedx509 -lmbedcrypto)
+        [
+        AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+        AC_SUBST(USE_MBEDTLS, [1])
+        MBEDTLS_ENABLED=1
+        USE_MBEDTLS="yes"
+        ssl_msg="mbedTLS"
+        test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        ],
+        [
+          CPPFLAGS=$_cppflags
+          LDFLAGS=$_ldflags
+        ], -lmbedx509 -lmbedcrypto)
     fi
 
     if test "x$USE_MBEDTLS" = "xyes"; then
