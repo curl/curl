@@ -139,13 +139,6 @@ build_all_programs()
         cd libtest || exit 1
         get_make_vars Makefile.inc
 
-        #       Special case: redefine chkhostname compilation parameters.
-
-        # shellcheck disable=SC2034
-        chkhostname_SOURCES=chkhostname.c
-        # shellcheck disable=SC2034
-        chkhostname_LDADD=curl_gethostname.o
-
         # shellcheck disable=SC2153
         build_all_programs "" "${TARGETLIB}/${SRVPGM}"
 )
