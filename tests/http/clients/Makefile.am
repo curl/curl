@@ -56,11 +56,7 @@ endif
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-if USE_EXPLICIT_LIB_DEPS
 LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-else
-LDADD = $(LIBDIR)/libcurl.la
-endif
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@
