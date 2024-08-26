@@ -947,11 +947,6 @@ if(NOT CURL_DISABLE_LDAP)
       endif()
       list(APPEND _header_list "ldap.h")
 
-      set(_include_string "")
-      foreach(_header IN LISTS _header_list)
-        set(_include_string "${_include_string}#include <${_header}>\n")
-      endforeach()
-
       list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DLDAP_DEPRECATED=1")
       list(APPEND CMAKE_REQUIRED_LIBRARIES ${CMAKE_LDAP_LIB})
       set(CURL_LIBS "${CMAKE_LDAP_LIB};${CURL_LIBS}")
