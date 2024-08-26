@@ -855,7 +855,9 @@ struct url_conn_match {
 
   BIT(wait_pipe);
   BIT(force_reuse);
-  BIT(seen_pending_candidate);
+  BIT(seen_pending_conn);
+  BIT(seen_single_use_conn);
+  BIT(seen_multiplex_conn);
 };
 
 static bool url_match_conn(struct connectdata *conn, void *userdata)
@@ -907,7 +909,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
   if(!Curl_conn_is_connected(conn, FIRSTSOCKET)) {
     if(match->may_multiplex) {
-      match->seen_pending_candidate = TRUE;
+      match->seen_pending_conn = TRUE;
       /* Do not pick a connection that has not connected yet */
       infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
             " is not open enough, cannot reuse", conn->connection_id);
@@ -918,9 +920,12 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   /* `conn` is connected. If it has transfers, can we add ours to it? */
 
   if(CONN_INUSE(conn)) {
-    if(!conn->bits.multiplex)
+    if(!conn->bits.multiplex) {
       /* conn busy and conn cannot take more transfers */
+      match->seen_single_use_conn = TRUE;
       return FALSE;
+    }
+    match->seen_multiplex_conn = TRUE;
     if(!match->may_multiplex)
       /* conn busy and transfer cannot be multiplexed */
       return FALSE;
@@ -1188,7 +1193,13 @@ static bool url_match_result(bool result, void *userdata)
     Curl_attach_connection(match->data, match->found);
     return TRUE;
   }
-  else if(match->seen_pending_candidate && match->data->set.pipewait) {
+  else if(match->seen_single_use_conn && !match->seen_multiplex_conn) {
+    /* We've seen a single-use, existing connection to the destination and
+     * no multiplexed one. It seems safe to assume that the server does
+     * not support multiplexing. */
+    match->wait_pipe = FALSE;
+  }
+  else if(match->seen_pending_conn && match->data->set.pipewait) {
     infof(match->data,
           "Found pending candidate for reuse and CURLOPT_PIPEWAIT is set");
     match->wait_pipe = TRUE;
