@@ -103,8 +103,8 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
 
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
-  CURL_TRC_CF(data, cf, "gtls_push(len=%zu) -> %zd, err=%d",
-              blen, nwritten, result);
+  CURL_TRC_CF(data, cf, "gtls_push(len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", err=%d", blen, nwritten, result);
   backend->gtls.io_result = result;
   if(nwritten < 0) {
     gnutls_transport_set_errno(backend->gtls.session,
@@ -135,8 +135,8 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   }
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
-  CURL_TRC_CF(data, cf, "glts_pull(len=%zu) -> %zd, err=%d",
-              blen, nread, result);
+  CURL_TRC_CF(data, cf, "glts_pull(len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", err=%d", blen, nread, result);
   backend->gtls.io_result = result;
   if(nread < 0) {
     gnutls_transport_set_errno(backend->gtls.session,
@@ -745,8 +745,8 @@ static CURLcode gtls_update_session_id(struct Curl_cfilter *cf,
       /* extract session ID to the allocated buffer */
       gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
 
-      CURL_TRC_CF(data, cf, "get session id (len=%zu) and store in cache",
-                  connect_idsize);
+      CURL_TRC_CF(data, cf, "get session id (len=%" CURL_FORMAT_SIZE_T ") "
+                  "and store in cache", connect_idsize);
       Curl_ssl_sessionid_lock(data);
       /* store this session id, takes ownership */
       result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
@@ -1091,7 +1091,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       if(rc < 0)
         infof(data, "SSL failed to set session ID");
       else
-        infof(data, "SSL reusing session ID (size=%zu)", ssl_idsize);
+        infof(data, "SSL reusing session ID (size=%" CURL_FORMAT_SIZE_T ")",
+              ssl_idsize);
     }
     Curl_ssl_sessionid_unlock(data);
   }

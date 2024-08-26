@@ -202,8 +202,9 @@ static int mbedtls_bio_cf_write(void *bio,
 
   nwritten = Curl_conn_cf_send(cf->next, data, (char *)buf, blen, FALSE,
                                &result);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write(len=%zu) -> %zd, err=%d",
-              blen, nwritten, result);
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_out_write("
+              "len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", err=%d", blen, nwritten, result);
   if(nwritten < 0 && CURLE_AGAIN == result) {
     nwritten = MBEDTLS_ERR_SSL_WANT_WRITE;
   }
@@ -225,8 +226,9 @@ static int mbedtls_bio_cf_read(void *bio, unsigned char *buf, size_t blen)
     return 0;
 
   nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, blen, &result);
-  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read(len=%zu) -> %zd, err=%d",
-              blen, nread, result);
+  CURL_TRC_CF(data, cf, "mbedtls_bio_cf_in_read("
+              "len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", err=%d", blen, nread, result);
   if(nread < 0 && CURLE_AGAIN == result) {
     nread = MBEDTLS_ERR_SSL_WANT_READ;
   }
@@ -1180,8 +1182,8 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   ret = mbedtls_ssl_write(&backend->ssl, (unsigned char *)mem, len);
 
   if(ret < 0) {
-    CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
-                len, -ret);
+    CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%" CURL_FORMAT_SIZE_T ") -> "
+                "-0x%04X", len, -ret);
     *curlcode = ((ret == MBEDTLS_ERR_SSL_WANT_WRITE)
 #ifdef TLS13_SUPPORT
       || (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
@@ -1330,8 +1332,8 @@ static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ret = mbedtls_ssl_read(&backend->ssl, (unsigned char *)buf,
                          buffersize);
   if(ret <= 0) {
-    CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
-                buffersize, -ret);
+    CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%" CURL_FORMAT_SIZE_T ") -> "
+                "-0x%04X", buffersize, -ret);
     if(ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
       return 0;
     *curlcode = ((ret == MBEDTLS_ERR_SSL_WANT_READ)

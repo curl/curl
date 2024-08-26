@@ -727,7 +727,8 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
       buf = br_ssl_engine_sendrec_buf(&backend->ctx.eng, &len);
       ret = Curl_conn_cf_send(cf->next, data, (char *)buf, len, FALSE,
                               &result);
-      CURL_TRC_CF(data, cf, "ssl_send(len=%zu) -> %zd, %d", len, ret, result);
+      CURL_TRC_CF(data, cf, "ssl_send(len=%" CURL_FORMAT_SIZE_T ") -> "
+                  "%" CURL_FORMAT_SSIZE_T ", %d", len, ret, result);
       if(ret <= 0) {
         if(result == CURLE_AGAIN)
           connssl->io_need |= CURL_SSL_IO_NEED_SEND;
@@ -738,7 +739,8 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
     else if(state & BR_SSL_RECVREC) {
       buf = br_ssl_engine_recvrec_buf(&backend->ctx.eng, &len);
       ret = Curl_conn_cf_recv(cf->next, data, (char *)buf, len, &result);
-      CURL_TRC_CF(data, cf, "ssl_recv(len=%zu) -> %zd, %d", len, ret, result);
+      CURL_TRC_CF(data, cf, "ssl_recv(len=%" CURL_FORMAT_SIZE_T ") -> "
+                  "%" CURL_FORMAT_SSIZE_T ", %d", len, ret, result);
       if(ret == 0) {
         failf(data, "SSL: EOF without close notify");
         return CURLE_RECV_ERROR;

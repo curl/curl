@@ -1292,12 +1292,13 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
     failf(data, "schannel: failed to send initial handshake data: "
-          "sent %zd of %lu bytes", written, outbuf.cbBuffer);
+          "sent %" CURL_FORMAT_SSIZE_T " of %lu bytes",
+          written, outbuf.cbBuffer);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
   DEBUGF(infof(data, "schannel: sent initial handshake data: "
-               "sent %zd bytes", written));
+               "sent %" CURL_FORMAT_SSIZE_T " bytes", written));
 
   backend->recv_unrecoverable_err = CURLE_OK;
   backend->recv_sspi_close_notify = false;
@@ -1408,11 +1409,13 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* increase encrypted data buffer offset */
       backend->encdata_offset += nread;
       backend->encdata_is_incomplete = false;
-      DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
+      DEBUGF(infof(data, "schannel: encrypted data got %" CURL_FORMAT_SSIZE_T,
+                   nread));
     }
 
     DEBUGF(infof(data,
-                 "schannel: encrypted data buffer: offset %zu length %zu",
+                 "schannel: encrypted data buffer:"
+                 " offset %" CURL_FORMAT_SIZE_T " length %" CURL_FORMAT_SIZE_T,
                  backend->encdata_offset, backend->encdata_length));
 
     /* setup input buffers */
@@ -1481,7 +1484,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
           if((result != CURLE_OK) ||
              (outbuf[i].cbBuffer != (size_t) written)) {
             failf(data, "schannel: failed to send next handshake data: "
-                  "sent %zd of %lu bytes", written, outbuf[i].cbBuffer);
+                  "sent %" CURL_FORMAT_SSIZE_T " of %lu bytes",
+                  written, outbuf[i].cbBuffer);
             return CURLE_SSL_CONNECT_ERROR;
           }
         }
@@ -2028,7 +2032,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       if(timeout_ms < 0) {
         /* we already got the timeout */
         failf(data, "schannel: timed out sending data "
-              "(bytes sent: %zd)", written);
+              "(bytes sent: %" CURL_FORMAT_SSIZE_T ")", written);
         *err = CURLE_OPERATION_TIMEDOUT;
         written = -1;
         break;
@@ -2045,7 +2049,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       }
       else if(0 == what) {
         failf(data, "schannel: timed out sending data "
-              "(bytes sent: %zd)", written);
+              "(bytes sent: %" CURL_FORMAT_SSIZE_T ")", written);
         *err = CURLE_OPERATION_TIMEDOUT;
         written = -1;
         break;
@@ -2115,7 +2119,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
    * handled in the cleanup.
    */
 
-  DEBUGF(infof(data, "schannel: client wants to read %zu bytes", len));
+  DEBUGF(infof(data, "schannel: client wants to read "
+                     "%" CURL_FORMAT_SIZE_T " bytes", len));
   *err = CURLE_OK;
 
   if(len && len <= backend->decdata_offset) {
@@ -2157,12 +2162,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->encdata_buffer = reallocated_buffer;
       backend->encdata_length = reallocated_length;
       size = backend->encdata_length - backend->encdata_offset;
-      DEBUGF(infof(data, "schannel: encdata_buffer resized %zu",
-                   backend->encdata_length));
+      DEBUGF(infof(data, "schannel: encdata_buffer resized "
+                   "%" CURL_FORMAT_SIZE_T, backend->encdata_length));
     }
 
     DEBUGF(infof(data,
-                 "schannel: encrypted data buffer: offset %zu length %zu",
+                 "schannel: encrypted data buffer:"
+                 " offset %" CURL_FORMAT_SIZE_T " length %" CURL_FORMAT_SIZE_T,
                  backend->encdata_offset, backend->encdata_length));
 
     /* read encrypted data from socket */
@@ -2187,12 +2193,14 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     else if(nread > 0) {
       backend->encdata_offset += (size_t)nread;
       backend->encdata_is_incomplete = false;
-      DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
+      DEBUGF(infof(data, "schannel: encrypted data got %" CURL_FORMAT_SSIZE_T,
+                   nread));
     }
   }
 
   DEBUGF(infof(data,
-               "schannel: encrypted data buffer: offset %zu length %zu",
+               "schannel: encrypted data buffer:"
+               " offset %" CURL_FORMAT_SIZE_T " length %" CURL_FORMAT_SIZE_T,
                backend->encdata_offset, backend->encdata_length));
 
   /* decrypt loop */
@@ -2254,9 +2262,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           backend->decdata_offset += size;
         }
 
-        DEBUGF(infof(data, "schannel: decrypted data added: %zu", size));
         DEBUGF(infof(data,
-                     "schannel: decrypted cached: offset %zu length %zu",
+                     "schannel: decrypted data added: %" CURL_FORMAT_SIZE_T,
+                     size));
+        DEBUGF(infof(data,
+                     "schannel: decrypted cached:"
+                     " offset %" CURL_FORMAT_SIZE_T
+                     " length %" CURL_FORMAT_SIZE_T,
                      backend->decdata_offset, backend->decdata_length));
       }
 
@@ -2278,7 +2290,9 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         }
 
         DEBUGF(infof(data,
-                     "schannel: encrypted cached: offset %zu length %zu",
+                     "schannel: encrypted cached:"
+                     " offset %" CURL_FORMAT_SIZE_T
+                     " length %" CURL_FORMAT_SIZE_T,
                      backend->encdata_offset, backend->encdata_length));
       }
       else {
@@ -2342,11 +2356,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   DEBUGF(infof(data,
-               "schannel: encrypted data buffer: offset %zu length %zu",
+               "schannel: encrypted data buffer:"
+               " offset %" CURL_FORMAT_SIZE_T " length %" CURL_FORMAT_SIZE_T,
                backend->encdata_offset, backend->encdata_length));
 
   DEBUGF(infof(data,
-               "schannel: decrypted data buffer: offset %zu length %zu",
+               "schannel: decrypted data buffer:"
+               " offset %" CURL_FORMAT_SIZE_T " length %" CURL_FORMAT_SIZE_T,
                backend->decdata_offset, backend->decdata_length));
 
 cleanup:
@@ -2387,9 +2403,12 @@ cleanup:
     memmove(backend->decdata_buffer, backend->decdata_buffer + size,
             backend->decdata_offset - size);
     backend->decdata_offset -= size;
-    DEBUGF(infof(data, "schannel: decrypted data returned %zu", size));
     DEBUGF(infof(data,
-                 "schannel: decrypted data buffer: offset %zu length %zu",
+                 "schannel: decrypted data returned %" CURL_FORMAT_SIZE_T,
+                 size));
+    DEBUGF(infof(data,
+                 "schannel: decrypted data buffer:"
+                 " offset %" CURL_FORMAT_SIZE_T " length %" CURL_FORMAT_SIZE_T,
                  backend->decdata_offset, backend->decdata_length));
     *err = CURLE_OK;
     return (ssize_t)size;
@@ -2537,7 +2556,8 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
         if(written < (ssize_t)outbuf.cbBuffer) {
           /* TODO: handle partial sends */
           infof(data, "schannel: failed to send close msg: %s"
-                " (bytes written: %zd)", curl_easy_strerror(result), written);
+                " (bytes written: %" CURL_FORMAT_SSIZE_T ")",
+                curl_easy_strerror(result), written);
           result = CURLE_SEND_ERROR;
           goto out;
         }

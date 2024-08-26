@@ -104,8 +104,9 @@ read_cb(void *userdata, uint8_t *buf, uintptr_t len, uintptr_t *out_n)
   else if(nread == 0)
     connssl->peer_closed = TRUE;
   *out_n = (uintptr_t)nread;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next recv(len=%zu) -> %zd, %d",
-              len, nread, result);
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf,
+              "cf->next recv(len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", %d", len, nread, result);
   return ret;
 }
 
@@ -126,8 +127,9 @@ write_cb(void *userdata, const uint8_t *buf, uintptr_t len, uintptr_t *out_n)
       ret = EINVAL;
   }
   *out_n = (uintptr_t)nwritten;
-  CURL_TRC_CF(io_ctx->data, io_ctx->cf, "cf->next send(len=%zu) -> %zd, %d",
-              len, nwritten, result);
+  CURL_TRC_CF(io_ctx->data, io_ctx->cf,
+              "cf->next send(len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", %d", len, nwritten, result);
   return ret;
 }
 
@@ -264,8 +266,9 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d",
-              plainlen, nread, *err);
+  CURL_TRC_CF(data, cf,
+              "cf_recv(len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%" CURL_FORMAT_SSIZE_T ", %d", plainlen, nread, *err);
   return nread;
 }
 
@@ -285,7 +288,8 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
     io_error = rustls_connection_write_tls(rconn, write_cb, &io_ctx,
                                            &tlswritten);
     if(io_error == EAGAIN || io_error == EWOULDBLOCK) {
-      CURL_TRC_CF(data, cf, "cf_send: EAGAIN after %zu bytes",
+      CURL_TRC_CF(data, cf,
+                  "cf_send: EAGAIN after %" CURL_FORMAT_SIZE_T " bytes",
                   tlswritten_total);
       return CURLE_AGAIN;
     }
@@ -299,7 +303,8 @@ static CURLcode cr_flush_out(struct Curl_cfilter *cf, struct Curl_easy *data,
       failf(data, "EOF in swrite");
       return CURLE_SEND_ERROR;
     }
-    CURL_TRC_CF(data, cf, "cf_send: wrote %zu TLS bytes", tlswritten);
+    CURL_TRC_CF(data, cf, "cf_send: wrote %" CURL_FORMAT_SIZE_T " TLS bytes",
+                tlswritten);
     tlswritten_total += tlswritten;
   }
   return result;
@@ -335,7 +340,7 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   rconn = backend->conn;
   DEBUGASSERT(rconn);
 
-  CURL_TRC_CF(data, cf, "cf_send(len=%zu)", plainlen);
+  CURL_TRC_CF(data, cf, "cf_send(len=%" CURL_FORMAT_SIZE_T ")", plainlen);
 
   /* If a previous send blocked, we already added its plain bytes
    * to rustsls and must not do that again. Flush the TLS bytes and,
@@ -343,7 +348,8 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
    * send. */
   if(backend->plain_out_buffered) {
     *err = cr_flush_out(cf, data, rconn);
-    CURL_TRC_CF(data, cf, "cf_send: flushing %zu previously added bytes -> %d",
+    CURL_TRC_CF(data, cf, "cf_send: flushing %" CURL_FORMAT_SIZE_T
+                " previously added bytes -> %d",
                 backend->plain_out_buffered, *err);
     if(*err)
       return -1;
@@ -358,7 +364,8 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(blen > 0) {
-    CURL_TRC_CF(data, cf, "cf_send: adding %zu plain bytes to Rustls", blen);
+    CURL_TRC_CF(data, cf, "cf_send: adding %" CURL_FORMAT_SIZE_T
+                " plain bytes to Rustls", blen);
     rresult = rustls_connection_write(rconn, buf, blen, &plainwritten);
     if(rresult != RUSTLS_RESULT_OK) {
       rustls_error(rresult, errorbuf, sizeof(errorbuf), &errorlen);
@@ -378,8 +385,9 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(CURLE_AGAIN == *err) {
       /* The TLS bytes may have been partially written, but we fail the
        * complete send() and remember how much we already added to Rustls. */
-      CURL_TRC_CF(data, cf, "cf_send: EAGAIN, remember we added %zu plain"
-                  " bytes already to Rustls", blen);
+      CURL_TRC_CF(data, cf, "cf_send: EAGAIN, remember we added "
+                  "%" CURL_FORMAT_SIZE_T " plain bytes already to Rustls",
+                  blen);
       backend->plain_out_buffered = plainwritten;
       if(nwritten) {
         *err = CURLE_OK;
@@ -391,8 +399,8 @@ cr_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else
     nwritten += (ssize_t)plainwritten;
 
-  CURL_TRC_CF(data, cf, "cf_send(len=%zu) -> %d, %zd",
-              plainlen, *err, nwritten);
+  CURL_TRC_CF(data, cf, "cf_send(len=%" CURL_FORMAT_SIZE_T ") -> "
+              "%d, %" CURL_FORMAT_SSIZE_T, plainlen, *err, nwritten);
   return nwritten;
 }
 

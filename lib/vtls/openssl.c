@@ -3901,7 +3901,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 # endif
           else {
             trying_ech_now = 1;
-            infof(data, "ECH: imported ECHConfigList of length %zu", elen);
+            infof(data, "ECH: imported ECHConfigList of "
+                  "length %" CURL_FORMAT_SIZE_T, elen);
           }
         }
         else {

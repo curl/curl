@@ -271,7 +271,8 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
 
   DEBUGASSERT(data);
   nread = Curl_conn_cf_recv(cf->next, data, buf, *dataLength, &result);
-  CURL_TRC_CF(data, cf, "bio_read(len=%zu) -> %zd, result=%d",
+  CURL_TRC_CF(data, cf, "bio_read(len=%" CURL_FORMAT_SIZE_T ") -> "
+                        "%" CURL_FORMAT_SSIZE_T ", result=%d",
               *dataLength, nread, result);
   if(nread < 0) {
     switch(result) {
@@ -312,7 +313,8 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   DEBUGASSERT(data);
   nwritten = Curl_conn_cf_send(cf->next, data, buf, *dataLength, FALSE,
                                &result);
-  CURL_TRC_CF(data, cf, "bio_send(len=%zu) -> %zd, result=%d",
+  CURL_TRC_CF(data, cf, "bio_send(len=%" CURL_FORMAT_SIZE_T ") -> "
+                        "%" CURL_FORMAT_SSIZE_T ", result=%d",
               *dataLength, nwritten, result);
   if(nwritten <= 0) {
     if(result == CURLE_AGAIN) {
@@ -431,7 +433,8 @@ static CURLcode CopyCertSubject(struct Curl_easy *data,
         *certp = cbuf;
     }
     else {
-      failf(data, "SSL: could not allocate %zu bytes of memory", cbuf_size);
+      failf(data, "SSL: could not allocate "
+                  "%" CURL_FORMAT_SIZE_T " bytes of memory", cbuf_size);
       result = CURLE_OUT_OF_MEMORY;
     }
   }
@@ -1558,8 +1561,8 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
      */
     res = pem_to_der((const char *)certbuf + offset, &der, &derlen);
     if(res < 0) {
-      failf(data, "SSL: invalid CA certificate #%d (offset %zu) in bundle",
-            n, offset);
+      failf(data, "SSL: invalid CA certificate #%d "
+                  "(offset %" CURL_FORMAT_SIZE_T ") in bundle", n, offset);
       result = CURLE_SSL_CACERT_BADFILE;
       goto out;
     }
@@ -1760,7 +1763,8 @@ static CURLcode pkp_pin_peer_pubkey(struct Curl_easy *data,
         spkiHeaderLength = 23;
         break;
       default:
-        infof(data, "SSL: unhandled public key length: %zu", pubkeylen);
+        infof(data, "SSL: unhandled public key length: %" CURL_FORMAT_SIZE_T,
+              pubkeylen);
 #elif SECTRANSP_PINNEDPUBKEY_V2
       default:
         /* ecDSA secp256r1 pubkeylen == 91 header already included?
@@ -2468,7 +2472,8 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
        * underlying filter and hope it will end. */
       nread = Curl_conn_cf_recv(cf->next, data, buf, sizeof(buf), &result);
     }
-    CURL_TRC_CF(data, cf, "shutdown read -> %zd, %d", nread, result);
+    CURL_TRC_CF(data, cf, "shutdown read -> %" CURL_FORMAT_SSIZE_T ", %d",
+                nread, result);
     if(nread <= 0)
       break;
   }

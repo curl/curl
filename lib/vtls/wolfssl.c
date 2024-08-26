@@ -307,7 +307,7 @@ static int wolfssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   }
   nwritten = Curl_conn_cf_send(cf->next, data, buf, blen, FALSE, &result);
   backend->io_result = result;
-  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
+  CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %" CURL_FORMAT_SSIZE_T ", %d",
               blen, nwritten, result);
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nwritten < 0 && CURLE_AGAIN == result) {
@@ -337,7 +337,8 @@ static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
 
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
   backend->io_result = result;
-  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %zd, %d", blen, nread, result);
+  CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %" CURL_FORMAT_SSIZE_T ", %d",
+              blen, nread, result);
   wolfSSL_BIO_clear_retry_flags(bio);
   if(nread < 0 && CURLE_AGAIN == result)
     BIO_set_retry_read(bio);
@@ -1499,16 +1500,20 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       /* there is data pending, re-invoke SSL_write() */
-      CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len);
+      CURL_TRC_CF(data, cf,
+                  "wolfssl_send(len=%" CURL_FORMAT_SIZE_T ") -> AGAIN", len);
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
       if(backend->io_result == CURLE_AGAIN) {
-        CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> AGAIN", len);
+        CURL_TRC_CF(data, cf,
+                    "wolfssl_send(len=%" CURL_FORMAT_SIZE_T ") -> AGAIN", len);
         *curlcode = CURLE_AGAIN;
         return -1;
       }
-      CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d, %d", len, rc, err);
+      CURL_TRC_CF(data, cf,
+                  "wolfssl_send(len=%" CURL_FORMAT_SIZE_T ") -> %d, %d",
+                  len, rc, err);
       {
         char error_buffer[256];
         failf(data, "SSL write: %s, errno %d",
@@ -1520,7 +1525,8 @@ static ssize_t wolfssl_send(struct Curl_cfilter *cf,
       return -1;
     }
   }
-  CURL_TRC_CF(data, cf, "wolfssl_send(len=%zu) -> %d", len, rc);
+  CURL_TRC_CF(data, cf, "wolfssl_send(len=%" CURL_FORMAT_SIZE_T ") -> %d",
+              len, rc);
   return rc;
 }
 
@@ -1672,19 +1678,23 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
 
     switch(err) {
     case SSL_ERROR_ZERO_RETURN: /* no more data */
-      CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen);
+      CURL_TRC_CF(data, cf,
+                  "wolfssl_recv(len=%" CURL_FORMAT_SIZE_T ") -> CLOSED", blen);
       *curlcode = CURLE_OK;
       return 0;
     case SSL_ERROR_NONE:
     case SSL_ERROR_WANT_READ:
     case SSL_ERROR_WANT_WRITE:
       /* there is data pending, re-invoke wolfSSL_read() */
-      CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
+      CURL_TRC_CF(data, cf,
+                  "wolfssl_recv(len=%" CURL_FORMAT_SIZE_T ") -> AGAIN", blen);
       *curlcode = CURLE_AGAIN;
       return -1;
     default:
       if(backend->io_result == CURLE_AGAIN) {
-        CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
+        CURL_TRC_CF(data, cf,
+                    "wolfssl_recv(len=%" CURL_FORMAT_SIZE_T ") -> AGAIN",
+                    blen);
         *curlcode = CURLE_AGAIN;
         return -1;
       }
@@ -1699,7 +1709,8 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
       return -1;
     }
   }
-  CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> %d", blen, nread);
+  CURL_TRC_CF(data, cf, "wolfssl_recv(len=%" CURL_FORMAT_SIZE_T ") -> %d",
+              blen, nread);
   return nread;
 }
 

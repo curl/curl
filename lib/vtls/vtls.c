@@ -1772,8 +1772,8 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
     /* eof */
     *err = CURLE_OK;
   }
-  CURL_TRC_CF(data, cf, "cf_recv(len=%zu) -> %zd, %d", len,
-              nread, *err);
+  CURL_TRC_CF(data, cf, "cf_recv(len=%" CURL_FORMAT_SIZE_T ") -> "
+                        "%" CURL_FORMAT_SSIZE_T ", %d", len, nread, *err);
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
