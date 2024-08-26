@@ -1637,13 +1637,11 @@ if(NEED_REENTRANT)
 endif()
 
 if(NOT WIN32)
-  # Check clock_gettime(CLOCK_MONOTONIC, x) support
-  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)
+  curl_internal_test(HAVE_CLOCK_GETTIME_MONOTONIC)  # Check clock_gettime(CLOCK_MONOTONIC, x) support
 endif()
 
 if(APPLE)
-  # Check compiler support of __builtin_available()
-  curl_internal_test(HAVE_BUILTIN_AVAILABLE)
+  curl_internal_test(HAVE_BUILTIN_AVAILABLE)  # Check compiler support of __builtin_available()
 endif()
 
 # Some other minor tests
