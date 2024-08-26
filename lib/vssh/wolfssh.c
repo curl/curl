@@ -281,7 +281,8 @@ static ssize_t wsftp_send(struct Curl_easy *data, int sockindex,
     return -1;
   }
   DEBUGASSERT(rc == (int)len);
-  infof(data, "sent %zu bytes SFTP from offset %" CURL_FORMAT_CURL_OFF_T,
+  infof(data, "sent %" CURL_FORMAT_SIZE_T " bytes SFTP "
+              "from offset %" CURL_FORMAT_CURL_OFF_T,
         len, sshc->offset);
   sshc->offset += len;
   return (ssize_t)rc;
