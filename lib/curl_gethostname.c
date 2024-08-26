@@ -39,15 +39,6 @@
  *
  * Note: The function always returns the un-qualified hostname rather
  * than being provider dependent.
- *
- * For libcurl shared library release builds the test suite preloads
- * another shared library named libhostname using the LD_PRELOAD
- * mechanism which intercepts, and might override, the gethostname()
- * function call. In this case a given platform must support the
- * LD_PRELOAD mechanism and additionally have environment variable
- * CURL_GETHOSTNAME set in order to override the returned hostname.
- *
- * For libcurl static library release builds no overriding takes place.
  */
 
 int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
@@ -78,9 +69,6 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 
 #else /* DEBUGBUILD */
 
-  /* The call to system's gethostname() might get intercepted by the
-     libhostname library when libcurl is built as a non-debug shared
-     library when running the test suite. */
   name[0] = '\0';
   err = gethostname(name, namelen);
 
