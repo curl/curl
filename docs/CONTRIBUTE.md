@@ -238,7 +238,7 @@ Use the following ways to improve the message and provide pointers to related
 work.
 
 - `Follow-up to {shorthash}` - if this fixes or continues a previous commit;
-add a `Ref:` that commit's PR or issue if it's not a small, obvious fix;
+add a `Ref:` that commit's PR or issue if it is not a small, obvious fix;
 followed by an empty line
 
 - `Bug: URL` to the source of the report or more related discussion; use
