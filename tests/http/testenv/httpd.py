@@ -260,7 +260,6 @@ class Httpd:
                 f'ReadBufferSize 16000',
                 f'H2MinWorkers 16',
                 f'H2MaxWorkers 256',
-                f'H2Direct on',
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
                 f'Listen {self.env.proxy_port}',
@@ -276,6 +275,7 @@ class Httpd:
                 f'    ServerAlias localhost',
                 f'    DocumentRoot "{self._docs_dir}"',
                 f'    Protocols h2c http/1.1',
+                f'    H2Direct on',
             ])
             conf.extend(self._curltest_conf(domain1))
             conf.extend([

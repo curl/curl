@@ -567,3 +567,27 @@ class TestDownload:
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
+
+    # download parallel with prior knowledge
+    def test_02_30_parallel_prior_knowledge(self, env: Env, httpd):
+        count = 3
+        curl = CurlClient(env=env)
+        urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], extra_args=[
+            '--parallel', '--http2-prior-knowledge'
+        ])
+        r.check_response(http_status=200, count=count)
+        assert r.total_connects == 1, r.dump_logs()
+
+    # download parallel with h2 "Upgrade:"
+    def test_02_31_parallel_upgrade(self, env: Env, httpd):
+        count = 3
+        curl = CurlClient(env=env)
+        urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], extra_args=[
+            '--parallel', '--http2'
+        ])
+        r.check_response(http_status=200, count=count)
+        # we see 3 connections, because Apache only every serves a single
+        # request via Upgrade: and then closed the connection.
+        assert r.total_connects == 3, r.dump_logs()

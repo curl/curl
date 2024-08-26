@@ -116,3 +116,26 @@ class TestBasic:
         # got the Conten-Length: header, but did not download anything
         assert r.responses[0]['header']['content-length'] == '30', f'{r.responses[0]}'
         assert r.stats[0]['size_download'] == 0, f'{r.stats[0]}'
+
+    # http: GET for HTTP/2, see Upgrade:, 101 switch
+    def test_01_08_h2_upgrade(self, env: Env, httpd):
+        curl = CurlClient(env=env)
+        url = f'http://{env.domain1}:{env.http_port}/data.json'
+        r = curl.http_get(url=url, extra_args=['--http2'])
+        r.check_exit_code(0)
+        assert len(r.responses) == 2, f'{r.responses}'
+        assert r.responses[0]['status'] == 101, f'{r.responses[0]}'
+        assert r.responses[1]['status'] == 200, f'{r.responses[1]}'
+        assert r.responses[1]['protocol'] == 'HTTP/2', f'{r.responses[1]}'
+        assert r.json['server'] == env.domain1
+
+    # http: GET for HTTP/2 with prior knowledge
+    def test_01_09_h2_prior_knowledge(self, env: Env, httpd):
+        curl = CurlClient(env=env)
+        url = f'http://{env.domain1}:{env.http_port}/data.json'
+        r = curl.http_get(url=url, extra_args=['--http2-prior-knowledge'])
+        r.check_exit_code(0)
+        assert len(r.responses) == 1, f'{r.responses}'
+        assert r.response['status'] == 200, f'{r.responsw}'
+        assert r.response['protocol'] == 'HTTP/2', f'{r.response}'
+        assert r.json['server'] == env.domain1
