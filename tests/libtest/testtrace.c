@@ -50,7 +50,7 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04zx: ", i);
+    fprintf(stream, "%04" CURL_FORMAT_XSIZE_T ": ", i);
 
     if(!nohex) {
       /* hex not disabled, show it */

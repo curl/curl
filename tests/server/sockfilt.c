@@ -1099,7 +1099,8 @@ static bool juggle(curl_socket_t *sockfdp,
          Replies to PORT with "IPv[num]/[port]" */
       msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n", ipv_inuse, port);
       buffer_len = (ssize_t)strlen((char *)buffer);
-      msnprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
+      msnprintf(data, sizeof(data), "PORT\n%04" CURL_FORMAT_XSIZE_T "\n",
+                buffer_len);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, buffer_len))
@@ -1176,7 +1177,8 @@ static bool juggle(curl_socket_t *sockfdp,
     nread_socket = sread(sockfd, buffer, sizeof(buffer));
 
     if(nread_socket > 0) {
-      msnprintf(data, sizeof(data), "DATA\n%04zx\n", nread_socket);
+      msnprintf(data, sizeof(data), "DATA\n%04" CURL_FORMAT_XSIZE_T "\n",
+                nread_socket);
       if(!write_stdout(data, 10))
         return FALSE;
       if(!write_stdout(buffer, nread_socket))
