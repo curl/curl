@@ -1278,16 +1278,15 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         ssize_t *pnrcvd)
 {
   int sockindex;
-
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
-  /* FIXME: would like to enable this, but some protocols (MQTT) do not
-   * setup the transfer correctly, it seems
+  DEBUGASSERT(data->conn->sockfd != CURL_SOCKET_BAD);
   if(data->conn->sockfd == CURL_SOCKET_BAD) {
     failf(data, "transfer not setup for receiving");
-    DEBUGASSERT(0);
     return CURLE_RECV_ERROR;
-  } */
+  }
   sockindex = ((data->conn->sockfd != CURL_SOCKET_BAD) &&
                (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]));
   if(data->set.buffer_size > 0 && (size_t)data->set.buffer_size < blen)
