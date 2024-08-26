@@ -954,7 +954,7 @@ static int _ldap_url_parse2(struct Curl_easy *data,
       char *unescaped;
       CURLcode result;
 
-      LDAP_TRACE(("attr[%zu] '%s'\n", i, attributes[i]));
+      LDAP_TRACE(("attr[%" CURL_FORMAT_SIZE_T "] '%s'\n", i, attributes[i]));
 
       /* Unescape the attribute */
       result = Curl_urldecode(attributes[i], 0, &unescaped, NULL,

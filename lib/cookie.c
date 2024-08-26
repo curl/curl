@@ -581,7 +581,8 @@ Curl_cookie_add(struct Curl_easy *data,
         if(nlen >= (MAX_NAME-1) || vlen >= (MAX_NAME-1) ||
            ((nlen + vlen) > MAX_NAME)) {
           freecookie(co);
-          infof(data, "oversized cookie dropped, name/val %zu + %zu bytes",
+          infof(data, "oversized cookie dropped, name/val "
+                "%" CURL_FORMAT_SIZE_T " + %" CURL_FORMAT_SIZE_T " bytes",
                 nlen, vlen);
           return NULL;
         }
@@ -1433,8 +1434,8 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
 
             matches++;
             if(matches >= MAX_COOKIE_SEND_AMOUNT) {
-              infof(data, "Included max number of cookies (%zu) in request!",
-                    matches);
+              infof(data, "Included max number of cookies"
+                    " (%" CURL_FORMAT_SIZE_T ") in request!", matches);
               break;
             }
           }

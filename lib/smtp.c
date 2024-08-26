@@ -1909,8 +1909,8 @@ static CURLcode cr_eob_read(struct Curl_easy *data,
     ctx->eos = TRUE;
   }
   *peos = ctx->eos;
-  DEBUGF(infof(data, "cr_eob_read(%zu) -> %d, %zd, %d",
-         blen, result, *pnread, *peos));
+  DEBUGF(infof(data, "cr_eob_read(%" CURL_FORMAT_SIZE_T ") "
+         "-> %d, %" CURL_FORMAT_SSIZE_T ", %d", blen, result, *pnread, *peos));
   return result;
 }
 

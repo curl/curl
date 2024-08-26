@@ -1202,8 +1202,8 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
     data->req.eos_written = TRUE;
     data->req.download_done = TRUE;
   }
-  CURL_TRC_WRITE(data, "xfer_write_resp(len=%zu, eos=%d) -> %d",
-                 blen, is_eos, result);
+  CURL_TRC_WRITE(data, "xfer_write_resp(len=%" CURL_FORMAT_SIZE_T
+                 ", eos=%d) -> %d", blen, is_eos, result);
   return result;
 }
 
@@ -1261,8 +1261,8 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   else if(!result && *pnwritten)
     data->info.request_size += *pnwritten;
 
-  DEBUGF(infof(data, "Curl_xfer_send(len=%zu) -> %d, %zu",
-               blen, result, *pnwritten));
+  DEBUGF(infof(data, "Curl_xfer_send(len=%" CURL_FORMAT_SIZE_T ") "
+               "-> %d, %" CURL_FORMAT_SIZE_T, blen, result, *pnwritten));
   return result;
 }
 

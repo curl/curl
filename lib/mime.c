@@ -1949,14 +1949,15 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 
   /* Once we have errored, we will return the same error forever */
   if(ctx->errored) {
-    CURL_TRC_READ(data, "cr_mime_read(len=%zu) is errored -> %d, eos=0",
-                  blen, ctx->error_result);
+    CURL_TRC_READ(data, "cr_mime_read(len=%" CURL_FORMAT_SIZE_T ") is errored "
+                  "-> %d, eos=0", blen, ctx->error_result);
     *pnread = 0;
     *peos = FALSE;
     return ctx->error_result;
   }
   if(ctx->seen_eos) {
-    CURL_TRC_READ(data, "cr_mime_read(len=%zu) seen eos -> 0, eos=1", blen);
+    CURL_TRC_READ(data, "cr_mime_read(len=%" CURL_FORMAT_SIZE_T ") seen eos "
+                  "-> 0, eos=1", blen);
     *pnread = 0;
     *peos = TRUE;
     return CURLE_OK;
@@ -1975,15 +1976,16 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
      * such small lengths. Returning 0 bytes read is a fix that only works
      * as request upload buffers will get flushed eventually and larger
      * reads will happen again. */
-    CURL_TRC_READ(data, "cr_mime_read(len=%zu), too small, return", blen);
+    CURL_TRC_READ(data, "cr_mime_read(len=%" CURL_FORMAT_SIZE_T ")"
+                  ", too small, return", blen);
     *pnread = 0;
     *peos = FALSE;
     goto out;
   }
 
   nread = Curl_mime_read(buf, 1, blen, ctx->part);
-  CURL_TRC_READ(data, "cr_mime_read(len=%zu), mime_read() -> %zd",
-                blen, nread);
+  CURL_TRC_READ(data, "cr_mime_read(len=%" CURL_FORMAT_SIZE_T ")"
+                ", mime_read() -> %" CURL_FORMAT_SSIZE_T, blen, nread);
 
   switch(nread) {
   case 0:
@@ -2008,7 +2010,8 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
 
   case CURL_READFUNC_PAUSE:
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
-    CURL_TRC_READ(data, "cr_mime_read(len=%zu), paused by callback", blen);
+    CURL_TRC_READ(data, "cr_mime_read(len=%" CURL_FORMAT_SIZE_T ")"
+                  ", paused by callback", blen);
     data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
@@ -2042,8 +2045,10 @@ static CURLcode cr_mime_read(struct Curl_easy *data,
   }
 
 out:
-  CURL_TRC_READ(data, "cr_mime_read(len=%zu, total=%" CURL_FORMAT_CURL_OFF_T
-                ", read=%"CURL_FORMAT_CURL_OFF_T") -> %d, %zu, %d",
+  CURL_TRC_READ(data, "cr_mime_read(len=%" CURL_FORMAT_SIZE_T
+                ", total=%" CURL_FORMAT_CURL_OFF_T
+                ", read=%"CURL_FORMAT_CURL_OFF_T") "
+                "-> %d, %" CURL_FORMAT_SIZE_T ", %d",
                 blen, ctx->total_len, ctx->read_len, CURLE_OK, *pnread, *peos);
   return CURLE_OK;
 }

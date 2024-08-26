@@ -324,9 +324,10 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
       if(!oldest_idle)
         break;
       /* disconnect the old conn and continue */
-      DEBUGF(infof(data, "Discarding connection #%"
-                   CURL_FORMAT_CURL_OFF_T " from %zu to reach destination "
-                   "limit of %zu", oldest_idle->connection_id,
+      DEBUGF(infof(data, "Discarding connection #"
+                   "%" CURL_FORMAT_CURL_OFF_T " from "
+                   "%" CURL_FORMAT_SIZE_T " to reach destination limit of "
+                   "%" CURL_FORMAT_SIZE_T, oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
     }
@@ -342,10 +343,11 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
       if(!oldest_idle)
         break;
       /* disconnect the old conn and continue */
-      DEBUGF(infof(data, "Discarding connection #%"
-                   CURL_FORMAT_CURL_OFF_T " from %zu to reach total "
-                   "limit of %zu",
-                   oldest_idle->connection_id, cpool->num_conn, total_limit));
+      DEBUGF(infof(data, "Discarding connection #"
+                   "%" CURL_FORMAT_CURL_OFF_T " from "
+                   "%" CURL_FORMAT_SIZE_T " to reach total limit of "
+                   "%" CURL_FORMAT_SIZE_T, oldest_idle->connection_id,
+                   cpool->num_conn, total_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
     }
     if(cpool->num_conn >= total_limit) {
@@ -385,7 +387,7 @@ CURLcode Curl_cpool_add_conn(struct Curl_easy *data,
   conn->connection_id = cpool->next_connection_id++;
   cpool->num_conn++;
   DEBUGF(infof(data, "Added connection %" CURL_FORMAT_CURL_OFF_T ". "
-               "The cache now contains %zu members",
+               "The cache now contains %" CURL_FORMAT_SIZE_T " members",
                conn->connection_id, cpool->num_conn));
 out:
   CPOOL_UNLOCK(cpool);
@@ -720,8 +722,8 @@ static void cpool_discard_conn(struct cpool *cpool,
    */
   if(CONN_INUSE(conn) && !aborted) {
     DEBUGF(infof(data, "[CCACHE] not discarding #%" CURL_FORMAT_CURL_OFF_T
-                       " still in use by %zu transfers", conn->connection_id,
-                       CONN_INUSE(conn)));
+                       " still in use by %" CURL_FORMAT_SIZE_T " transfers",
+                       conn->connection_id, CONN_INUSE(conn)));
     return;
   }
 
@@ -779,7 +781,8 @@ static void cpool_discard_conn(struct cpool *cpool,
 
   Curl_llist_append(&cpool->shutdowns, conn, &conn->cpool_node);
   DEBUGF(infof(data, "[CCACHE] added #%" CURL_FORMAT_CURL_OFF_T
-                     " to shutdown list of length %zu", conn->connection_id,
+                     " to shutdown list of length %" CURL_FORMAT_SIZE_T,
+                     conn->connection_id,
                      Curl_llist_count(&cpool->shutdowns)));
 }
 
@@ -799,7 +802,8 @@ void Curl_cpool_disconnect(struct Curl_easy *data,
    * are other users of it */
   if(CONN_INUSE(conn) && !aborted) {
     DEBUGASSERT(0); /* does this ever happen? */
-    DEBUGF(infof(data, "Curl_disconnect when inuse: %zu", CONN_INUSE(conn)));
+    DEBUGF(infof(data, "Curl_disconnect when inuse: %" CURL_FORMAT_SIZE_T,
+                       CONN_INUSE(conn)));
     return;
   }
 
@@ -983,7 +987,8 @@ static void cpool_perform(struct cpool *cpool)
     return;
 
   DEBUGASSERT(data);
-  DEBUGF(infof(data, "[CCACHE] perform, %zu connections being shutdown",
+  DEBUGF(infof(data, "[CCACHE] perform, "
+               "%" CURL_FORMAT_SIZE_T " connections being shutdown",
                Curl_llist_count(&cpool->shutdowns)));
   while(e) {
     enext = Curl_node_next(e);

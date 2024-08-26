@@ -905,7 +905,8 @@ CURLcode Curl_GetFTPResponse(struct Curl_easy *data,
   } /* while there is buffer left and loop is requested */
 
   pp->pending_resp = FALSE;
-  CURL_TRC_FTP(data, "getFTPResponse -> result=%d, nread=%zd, ftpcode=%d",
+  CURL_TRC_FTP(data, "getFTPResponse "
+               "-> result=%d, nread=%" CURL_FORMAT_SSIZE_T ", ftpcode=%d",
                result, *nreadp, *ftpcode);
 
   return result;

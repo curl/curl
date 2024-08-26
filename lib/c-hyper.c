@@ -86,12 +86,13 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
   DEBUGASSERT(conn);
   (void)ctx;
 
-  DEBUGF(infof(data, "Curl_hyper_recv(%zu)", buflen));
+  DEBUGF(infof(data, "Curl_hyper_recv(%" CURL_FORMAT_SIZE_T ")", buflen));
   result = Curl_conn_recv(data, io_ctx->sockindex,
                           (char *)buf, buflen, &nread);
   if(result == CURLE_AGAIN) {
     /* would block, register interest */
-    DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> EAGAIN", buflen));
+    DEBUGF(infof(data, "Curl_hyper_recv(%" CURL_FORMAT_SIZE_T ") -> EAGAIN",
+                 buflen));
     if(data->hyp.read_waker)
       hyper_waker_free(data->hyp.read_waker);
     data->hyp.read_waker = hyper_context_waker(ctx);
@@ -105,7 +106,8 @@ size_t Curl_hyper_recv(void *userp, hyper_context *ctx,
     failf(data, "Curl_read failed");
     return HYPER_IO_ERROR;
   }
-  DEBUGF(infof(data, "Curl_hyper_recv(%zu) -> %zd", buflen, nread));
+  DEBUGF(infof(data, "Curl_hyper_recv(%" CURL_FORMAT_SIZE_T ") "
+               "-> %" CURL_FORMAT_SSIZE_T, buflen, nread));
   return (size_t)nread;
 }
 
@@ -117,11 +119,12 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
   CURLcode result;
   size_t nwrote;
 
-  DEBUGF(infof(data, "Curl_hyper_send(%zu)", buflen));
+  DEBUGF(infof(data, "Curl_hyper_send(%" CURL_FORMAT_SIZE_T ")", buflen));
   result = Curl_conn_send(data, io_ctx->sockindex,
                           (void *)buf, buflen, FALSE, &nwrote);
   if(result == CURLE_AGAIN) {
-    DEBUGF(infof(data, "Curl_hyper_send(%zu) -> EAGAIN", buflen));
+    DEBUGF(infof(data, "Curl_hyper_send(%" CURL_FORMAT_SIZE_T ") "
+                 "-> EAGAIN", buflen));
     /* would block, register interest */
     if(data->hyp.write_waker)
       hyper_waker_free(data->hyp.write_waker);
@@ -136,7 +139,8 @@ size_t Curl_hyper_send(void *userp, hyper_context *ctx,
     failf(data, "Curl_write failed");
     return HYPER_IO_ERROR;
   }
-  DEBUGF(infof(data, "Curl_hyper_send(%zu) -> %zd", buflen, nwrote));
+  DEBUGF(infof(data, "Curl_hyper_send(%" CURL_FORMAT_SIZE_T ") "
+               "-> %" CURL_FORMAT_SSIZE_T, buflen, nwrote));
   return (size_t)nwrote;
 }
 

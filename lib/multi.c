@@ -607,8 +607,8 @@ static void multi_done_locked(struct connectdata *conn,
 
   if(CONN_INUSE(conn)) {
     /* Stop if still used. */
-    DEBUGF(infof(data, "Connection still in use %zu, "
-                 "no more multi_done now!",
+    DEBUGF(infof(data, "Connection still in use %" CURL_FORMAT_SIZE_T
+                 ", no more multi_done now!",
                  Curl_llist_count(&conn->easyq)));
     return;
   }
@@ -3805,7 +3805,8 @@ CURLcode Curl_multi_xfer_buf_borrow(struct Curl_easy *data,
   if(!data->multi->xfer_buf) {
     data->multi->xfer_buf = malloc((size_t)data->set.buffer_size);
     if(!data->multi->xfer_buf) {
-      failf(data, "could not allocate xfer_buf of %zu bytes",
+      failf(data, "could not allocate xfer_buf of "
+            "%" CURL_FORMAT_SIZE_T " bytes",
             (size_t)data->set.buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }
@@ -3858,7 +3859,8 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
   if(!data->multi->xfer_ulbuf) {
     data->multi->xfer_ulbuf = malloc((size_t)data->set.upload_buffer_size);
     if(!data->multi->xfer_ulbuf) {
-      failf(data, "could not allocate xfer_ulbuf of %zu bytes",
+      failf(data, "could not allocate xfer_ulbuf of "
+            "%" CURL_FORMAT_SIZE_T " bytes",
             (size_t)data->set.upload_buffer_size);
       return CURLE_OUT_OF_MEMORY;
     }

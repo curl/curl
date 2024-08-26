@@ -149,7 +149,7 @@ ALLOC_FUNC void *curl_dbg_malloc(size_t wantedsize,
   }
 
   if(source)
-    curl_dbg_log("MEM %s:%d malloc(%zu) = %p\n",
+    curl_dbg_log("MEM %s:%d malloc(%" CURL_FORMAT_SIZE_T ") = %p\n",
                  source, line, wantedsize,
                  mem ? (void *)mem->mem : (void *)0);
 
@@ -177,7 +177,8 @@ ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
     mem->size = user_size;
 
   if(source)
-    curl_dbg_log("MEM %s:%d calloc(%zu,%zu) = %p\n",
+    curl_dbg_log("MEM %s:%d calloc(%" CURL_FORMAT_SIZE_T ","
+                 "%" CURL_FORMAT_SIZE_T ") = %p\n",
                  source, line, wanted_elements, wanted_size,
                  mem ? (void *)mem->mem : (void *)0);
 
@@ -202,7 +203,7 @@ ALLOC_FUNC char *curl_dbg_strdup(const char *str,
     memcpy(mem, str, len);
 
   if(source)
-    curl_dbg_log("MEM %s:%d strdup(%p) (%zu) = %p\n",
+    curl_dbg_log("MEM %s:%d strdup(%p) (%" CURL_FORMAT_SIZE_T ") = %p\n",
                  source, line, (const void *)str, len, (const void *)mem);
 
   return mem;
@@ -228,7 +229,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
     memcpy(mem, str, bsiz);
 
   if(source)
-    curl_dbg_log("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
+    curl_dbg_log("MEM %s:%d wcsdup(%p) (%" CURL_FORMAT_SIZE_T ") = %p\n",
                 source, line, (void *)str, bsiz, (void *)mem);
 
   return mem;
@@ -264,7 +265,7 @@ void *curl_dbg_realloc(void *ptr, size_t wantedsize,
 
   mem = (Curl_crealloc)(mem, size);
   if(source)
-    curl_dbg_log("MEM %s:%d realloc(%p, %zu) = %p\n",
+    curl_dbg_log("MEM %s:%d realloc(%p, %" CURL_FORMAT_SIZE_T ") = %p\n",
                 source, line, (void *)ptr, wantedsize,
                 mem ? (void *)mem->mem : (void *)0);
 

@@ -471,7 +471,8 @@ static ssize_t nw_out_writer(void *writer_ctx,
     ssize_t nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf,
                                          buflen, FALSE, err);
     if(nwritten > 0)
-      CURL_TRC_CF(data, cf, "[0] egress: wrote %zd bytes", nwritten);
+      CURL_TRC_CF(data, cf, "[0] egress: wrote %" CURL_FORMAT_SSIZE_T " bytes",
+                  nwritten);
     return nwritten;
   }
   return 0;
@@ -643,7 +644,7 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
     if(rv < 0) {
       failf(data,
             "process_pending_input: nghttp2_session_mem_recv() returned "
-            "%zd:%s", rv, nghttp2_strerror((int)rv));
+            "%" CURL_FORMAT_SSIZE_T ":%s", rv, nghttp2_strerror((int)rv));
       *err = CURLE_RECV_ERROR;
       return -1;
     }
@@ -652,8 +653,9 @@ static int h2_process_pending_input(struct Curl_cfilter *cf,
       break;
     }
     else {
-      CURL_TRC_CF(data, cf, "process_pending_input: %zu bytes left "
-                  "in connection buffer", Curl_bufq_len(&ctx->inbufq));
+      CURL_TRC_CF(data, cf, "process_pending_input: "
+                  "%" CURL_FORMAT_SIZE_T " bytes left in connection buffer",
+                  Curl_bufq_len(&ctx->inbufq));
     }
   }
 
@@ -695,8 +697,8 @@ static bool http2_connisalive(struct Curl_cfilter *cf, struct Curl_easy *data,
     *input_pending = FALSE;
     nread = Curl_bufq_slurp(&ctx->inbufq, nw_in_reader, cf, &result);
     if(nread != -1) {
-      CURL_TRC_CF(data, cf, "%zd bytes stray data read before trying "
-                  "h2 connection", nread);
+      CURL_TRC_CF(data, cf, "%" CURL_FORMAT_SSIZE_T " bytes stray data "
+                  "read before trying h2 connection", nread);
       if(h2_process_pending_input(cf, data, &result) < 0)
         /* immediate error, considered dead */
         alive = FALSE;
@@ -758,8 +760,8 @@ static CURLcode nw_out_flush(struct Curl_cfilter *cf,
   nwritten = Curl_bufq_pass(&ctx->outbufq, nw_out_writer, cf, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
-      CURL_TRC_CF(data, cf, "flush nw send buffer(%zu) -> EAGAIN",
-                  Curl_bufq_len(&ctx->outbufq));
+      CURL_TRC_CF(data, cf, "flush nw send buffer(%" CURL_FORMAT_SIZE_T ") "
+                  "-> EAGAIN", Curl_bufq_len(&ctx->outbufq));
       ctx->nw_out_blocked = 1;
     }
     return result;
@@ -1055,7 +1057,8 @@ static void h2_xfer_write_resp_hd(struct Curl_cfilter *cf,
     if(!stream->xfer_result && !eos)
       stream->xfer_result = cf_h2_update_local_win(cf, data, stream, FALSE);
     if(stream->xfer_result)
-      CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of headers",
+      CURL_TRC_CF(data, cf, "[%d] error %d writing "
+                  "%" CURL_FORMAT_SIZE_T " bytes of headers",
                   stream->id, stream->xfer_result, blen);
   }
 }
@@ -1074,8 +1077,8 @@ static void h2_xfer_write_resp(struct Curl_cfilter *cf,
   /* If the transfer write is errored, we do not want any more data */
   if(stream->xfer_result) {
     struct cf_h2_ctx *ctx = cf->ctx;
-    CURL_TRC_CF(data, cf, "[%d] error %d writing %zu bytes of data, "
-                "RST-ing stream",
+    CURL_TRC_CF(data, cf, "[%d] error %d writing "
+                "%" CURL_FORMAT_SIZE_T " bytes of data, RST-ing stream",
                 stream->id, stream->xfer_result, blen);
     nghttp2_submit_rst_stream(ctx->h2, 0, stream->id,
                               (uint32_t)NGHTTP2_ERR_CALLBACK_FAILURE);
@@ -1676,7 +1679,8 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
     nread = 0;
   }
 
-  CURL_TRC_CF(data_s, cf, "[%d] req_body_read(len=%zu) eos=%d -> %zd, %d",
+  CURL_TRC_CF(data_s, cf, "[%d] req_body_read(len=%" CURL_FORMAT_SIZE_T ")"
+              " eos=%d -> %" CURL_FORMAT_SSIZE_T ", %d",
               stream_id, length, stream->body_eos, nread, result);
 
   if(nread == 0)
@@ -1819,7 +1823,8 @@ static ssize_t http2_handle_stream_close(struct Curl_cfilter *cf,
   rv = 0;
 
 out:
-  CURL_TRC_CF(data, cf, "handle_stream_close -> %zd, %d", rv, *err);
+  CURL_TRC_CF(data, cf, "handle_stream_close -> %" CURL_FORMAT_SSIZE_T ", %d",
+              rv, *err);
   return rv;
 }
 
@@ -1925,7 +1930,8 @@ static ssize_t stream_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(nread < 0 && *err != CURLE_AGAIN)
-    CURL_TRC_CF(data, cf, "[%d] stream_recv(len=%zu) -> %zd, %d",
+    CURL_TRC_CF(data, cf, "[%d] stream_recv(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d",
                 stream->id, len, nread, *err);
   return nread;
 }
@@ -1941,8 +1947,8 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
-    CURL_TRC_CF(data, cf, "Process %zu bytes in connection buffer",
-                Curl_bufq_len(&ctx->inbufq));
+    CURL_TRC_CF(data, cf, "Process %" CURL_FORMAT_SIZE_T " bytes "
+                "in connection buffer", Curl_bufq_len(&ctx->inbufq));
     if(h2_process_pending_input(cf, data, &result) < 0)
       return result;
   }
@@ -1977,14 +1983,15 @@ static CURLcode h2_progress_ingress(struct Curl_cfilter *cf,
       break;
     }
     else {
-      CURL_TRC_CF(data, cf, "[0] ingress: read %zd bytes", nread);
+      CURL_TRC_CF(data, cf, "[0] ingress: read %" CURL_FORMAT_SSIZE_T " bytes",
+                  nread);
       data_max_bytes = (data_max_bytes > (size_t)nread)?
                         (data_max_bytes - (size_t)nread) : 0;
     }
 
     if(h2_process_pending_input(cf, data, &result))
       return result;
-    CURL_TRC_CF(data, cf, "[0] progress ingress: inbufg=%zu",
+    CURL_TRC_CF(data, cf, "[0] progress ingress: inbufg=%" CURL_FORMAT_SIZE_T,
                 Curl_bufq_len(&ctx->inbufq));
   }
 
@@ -2067,8 +2074,8 @@ out:
     *err = result;
     nread = -1;
   }
-  CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%zu) -> %zd %d, "
-              "window=%d/%d, connection %d/%d",
+  CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%" CURL_FORMAT_SIZE_T ") "
+              "-> %" CURL_FORMAT_SSIZE_T " %d, window=%d/%d, connection %d/%d",
               stream->id, len, nread, *err,
               nghttp2_session_get_stream_effective_recv_data_length(
                 ctx->h2, stream->id),
@@ -2243,7 +2250,7 @@ static ssize_t h2_submit(struct h2_stream_ctx **pstream,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "[%d] submit -> %zd, %d",
+  CURL_TRC_CF(data, cf, "[%d] submit -> %" CURL_FORMAT_SSIZE_T ", %d",
               stream? stream->id : -1, nwritten, *err);
   Curl_safefree(nva);
   *pstream = stream;
@@ -2277,7 +2284,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
      * If this works, we report to have written `len` bytes. */
     DEBUGASSERT(eos);
     nwritten = cf_h2_body_send(cf, data, stream, buf, 0, eos, err);
-    CURL_TRC_CF(data, cf, "[%d] cf_body_send last CHUNK -> %zd, %d, eos=%d",
+    CURL_TRC_CF(data, cf, "[%d] cf_body_send last CHUNK "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d, eos=%d",
                 stream->id, nwritten, *err, eos);
     if(nwritten < 0) {
       goto out;
@@ -2286,7 +2294,8 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     nwritten = cf_h2_body_send(cf, data, stream, buf, len, eos, err);
-    CURL_TRC_CF(data, cf, "[%d] cf_body_send(len=%zu) -> %zd, %d, eos=%d",
+    CURL_TRC_CF(data, cf, "[%d] cf_body_send(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d, eos=%d",
                 stream->id, len, nwritten, *err, eos);
   }
 
@@ -2323,9 +2332,11 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   if(stream) {
-    CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) -> %zd, %d, "
+    CURL_TRC_CF(data, cf, "[%d] cf_send(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d, "
                 "eos=%d, h2 windows %d-%d (stream-conn), "
-                "buffers %zu-%zu (stream-conn)",
+                "buffers %" CURL_FORMAT_SIZE_T "-%" CURL_FORMAT_SIZE_T
+                " (stream-conn)",
                 stream->id, len, nwritten, *err,
                 stream->body_eos,
                 nghttp2_session_get_stream_remote_window_size(
@@ -2335,8 +2346,10 @@ out:
                 Curl_bufq_len(&ctx->outbufq));
   }
   else {
-    CURL_TRC_CF(data, cf, "cf_send(len=%zu) -> %zd, %d, "
-                "connection-window=%d, nw_send_buffer(%zu)",
+    CURL_TRC_CF(data, cf, "cf_send(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d, "
+                "connection-window=%d, "
+                "nw_send_buffer(%" CURL_FORMAT_SIZE_T ")",
                 len, nwritten, *err,
                 nghttp2_session_get_remote_window_size(ctx->h2),
                 Curl_bufq_len(&ctx->outbufq));
@@ -2369,7 +2382,8 @@ out:
   if(stream) {
     CURL_TRC_CF(data, cf, "[%d] flush -> %d, "
                 "h2 windows %d-%d (stream-conn), "
-                "buffers %zu-%zu (stream-conn)",
+                "buffers %" CURL_FORMAT_SIZE_T "-%" CURL_FORMAT_SIZE_T
+                " (stream-conn)",
                 stream->id, result,
                 nghttp2_session_get_stream_remote_window_size(
                   ctx->h2, stream->id),
@@ -2379,7 +2393,8 @@ out:
   }
   else {
     CURL_TRC_CF(data, cf, "flush -> %d, "
-                "connection-window=%d, nw_send_buffer(%zu)",
+                "connection-window=%d, "
+                "nw_send_buffer(%" CURL_FORMAT_SIZE_T ")",
                 result, nghttp2_session_get_remote_window_size(ctx->h2),
                 Curl_bufq_len(&ctx->outbufq));
   }
@@ -2902,12 +2917,12 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
     }
     if((size_t)copied < nread) {
       failf(data, "connection buffer size could not take all data "
-            "from HTTP Upgrade response header: copied=%zd, datalen=%zu",
-            copied, nread);
+            "from HTTP Upgrade response header: copied=%" CURL_FORMAT_SSIZE_T
+            ", datalen=%" CURL_FORMAT_SIZE_T, copied, nread);
       return CURLE_HTTP2;
     }
     infof(data, "Copied HTTP/2 data in stream buffer to connection buffer"
-          " after upgrade: len=%zu", nread);
+          " after upgrade: len=%" CURL_FORMAT_SIZE_T, nread);
   }
 
   conn->httpversion = 20; /* we know we are on HTTP/2 now */

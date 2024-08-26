@@ -499,8 +499,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     gss_release_buffer(&gss_status, &gss_recv_token);
 
     if(gss_w_token.length != 1) {
-      failf(data, "Invalid GSS-API encryption response length (%zu).",
-            gss_w_token.length);
+      failf(data, "Invalid GSS-API encryption response length"
+            " (%" CURL_FORMAT_SIZE_T ").", gss_w_token.length);
       gss_release_buffer(&gss_status, &gss_w_token);
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
       return CURLE_COULDNT_CONNECT;
@@ -511,8 +511,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   }
   else {
     if(gss_recv_token.length != 1) {
-      failf(data, "Invalid GSS-API encryption response length (%zu).",
-            gss_recv_token.length);
+      failf(data, "Invalid GSS-API encryption response length"
+            " (%" CURL_FORMAT_SIZE_T ").", gss_recv_token.length);
       gss_release_buffer(&gss_status, &gss_recv_token);
       gss_delete_sec_context(&gss_status, &gss_context, NULL);
       return CURLE_COULDNT_CONNECT;

@@ -1544,7 +1544,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     win_update_sndbuf_size(ctx);
 #endif
 
-  CURL_TRC_CF(data, cf, "send(len=%zu) -> %d, err=%d",
+  CURL_TRC_CF(data, cf, "send(len=%" CURL_FORMAT_SIZE_T ") -> %d, err=%d",
               orig_len, (int)nwritten, *err);
   cf->conn->sock[cf->sockindex] = fdsave;
   return nwritten;
@@ -1564,7 +1564,8 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     unsigned char c = 0;
     Curl_rand(data, &c, 1);
     if(c >= ((100-ctx->rblock_percent)*256/100)) {
-      CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE EWOULDBLOCK", len);
+      CURL_TRC_CF(data, cf, "recv(len=%" CURL_FORMAT_SIZE_T ")"
+                  " SIMULATE EWOULDBLOCK", len);
       *err = CURLE_AGAIN;
       return -1;
     }
@@ -1572,7 +1573,8 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(cf->cft != &Curl_cft_udp && ctx->recv_max && ctx->recv_max < len) {
     size_t orig_len = len;
     len = ctx->recv_max;
-    CURL_TRC_CF(data, cf, "recv(len=%zu) SIMULATE max read of %zu bytes",
+    CURL_TRC_CF(data, cf, "recv(len=%" CURL_FORMAT_SIZE_T ")"
+                " SIMULATE max read of %" CURL_FORMAT_SIZE_T " bytes",
                 orig_len, len);
   }
 #endif
@@ -1607,8 +1609,8 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  CURL_TRC_CF(data, cf, "recv(len=%zu) -> %d, err=%d", len, (int)nread,
-              *err);
+  CURL_TRC_CF(data, cf, "recv(len=%" CURL_FORMAT_SIZE_T ") "
+              "-> %d, err=%d", len, (int)nread, *err);
   if(nread > 0 && !ctx->got_first_byte) {
     ctx->first_byte_at = Curl_now();
     ctx->got_first_byte = TRUE;

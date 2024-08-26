@@ -1160,13 +1160,13 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     if(CONN_INUSE(conn) >=
             Curl_multi_max_concurrent_streams(data->multi)) {
       infof(data, "client side MAX_CONCURRENT_STREAMS reached"
-            ", skip (%zu)", CONN_INUSE(conn));
+            ", skip (%" CURL_FORMAT_SIZE_T ")", CONN_INUSE(conn));
       return FALSE;
     }
     if(CONN_INUSE(conn) >=
             Curl_conn_get_max_concurrent(data, conn, FIRSTSOCKET)) {
-      infof(data, "MAX_CONCURRENT_STREAMS reached, skip (%zu)",
-            CONN_INUSE(conn));
+      infof(data, "MAX_CONCURRENT_STREAMS reached"
+            ", skip (%" CURL_FORMAT_SIZE_T ")", CONN_INUSE(conn));
       return FALSE;
     }
     /* When not multiplexed, we have a match here! */

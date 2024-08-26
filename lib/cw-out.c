@@ -222,7 +222,8 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
     Curl_set_in_callback(data, TRUE);
     nwritten = wcb((char *)buf, 1, wlen, wcb_data);
     Curl_set_in_callback(data, FALSE);
-    CURL_TRC_WRITE(data, "cw_out, wrote %zu %s bytes -> %zu",
+    CURL_TRC_WRITE(data, "cw_out, wrote %" CURL_FORMAT_SIZE_T " %s bytes "
+                   "-> %" CURL_FORMAT_SIZE_T "",
                    wlen, (otype == CW_OUT_BODY)? "body" : "header",
                    nwritten);
     if(CURL_WRITEFUNC_PAUSE == nwritten) {
@@ -240,12 +241,14 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
       break;
     }
     else if(CURL_WRITEFUNC_ERROR == nwritten) {
-      failf(data, "client returned ERROR on write of %zu bytes", wlen);
+      failf(data, "client returned ERROR on write "
+            "of %" CURL_FORMAT_SIZE_T " bytes", wlen);
       return CURLE_WRITE_ERROR;
     }
     else if(nwritten != wlen) {
       failf(data, "Failure writing output to destination, "
-            "passed %zu returned %zd", wlen, nwritten);
+            "passed %" CURL_FORMAT_SIZE_T " returned "
+            "%" CURL_FORMAT_SSIZE_T, wlen, nwritten);
       return CURLE_WRITE_ERROR;
     }
     *pconsumed += nwritten;

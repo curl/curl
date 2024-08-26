@@ -302,7 +302,8 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   /* add client id */
   rc = add_client_id(client_id, strlen(client_id), packet, pos + 1);
   if(rc) {
-    failf(data, "Client ID length mismatched: [%zu]", strlen(client_id));
+    failf(data, "Client ID length mismatched: [%" CURL_FORMAT_SIZE_T "]",
+          strlen(client_id));
     result = CURLE_WEIRD_SERVER_REPLY;
     goto end;
   }
@@ -319,7 +320,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
     rc = add_user(username, ulen,
                   (unsigned char *)packet, start_user, remain_pos);
     if(rc) {
-      failf(data, "Username is too large: [%zu]", ulen);
+      failf(data, "Username is too large: [%" CURL_FORMAT_SIZE_T "]", ulen);
       result = CURLE_WEIRD_SERVER_REPLY;
       goto end;
     }
@@ -329,7 +330,7 @@ static CURLcode mqtt_connect(struct Curl_easy *data)
   if(plen) {
     rc = add_passwd(passwd, plen, packet, start_pwd, remain_pos);
     if(rc) {
-      failf(data, "Password is too large: [%zu]", plen);
+      failf(data, "Password is too large: [%" CURL_FORMAT_SIZE_T "]", plen);
       result = CURLE_WEIRD_SERVER_REPLY;
       goto end;
     }
@@ -660,7 +661,7 @@ MQTT_SUBACK_COMING:
 
     /* -- switched state -- */
     remlen = mq->remaining_length;
-    infof(data, "Remaining length: %zu bytes", remlen);
+    infof(data, "Remaining length: %" CURL_FORMAT_SIZE_T " bytes", remlen);
     if(data->set.max_filesize &&
        (curl_off_t)remlen > data->set.max_filesize) {
       failf(data, "Maximum file size exceeded");

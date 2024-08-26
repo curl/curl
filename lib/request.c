@@ -210,7 +210,8 @@ static CURLcode xfer_send(struct Curl_easy *data,
   if(data->req.eos_read &&
     (Curl_bufq_is_empty(&data->req.sendbuf) ||
      Curl_bufq_len(&data->req.sendbuf) == blen)) {
-    DEBUGF(infof(data, "sending last upload chunk of %zu bytes", blen));
+    DEBUGF(infof(data, "sending last upload chunk of "
+           "%" CURL_FORMAT_SIZE_T " bytes", blen));
     eos = TRUE;
   }
   result = Curl_xfer_send(data, buf, blen, eos, pnwritten);
@@ -294,8 +295,8 @@ static CURLcode req_flush(struct Curl_easy *data)
     if(result)
       return result;
     if(!Curl_bufq_is_empty(&data->req.sendbuf)) {
-      DEBUGF(infof(data, "Curl_req_flush(len=%zu) -> EAGAIN",
-             Curl_bufq_len(&data->req.sendbuf)));
+      DEBUGF(infof(data, "Curl_req_flush(len=%" CURL_FORMAT_SIZE_T ") "
+             "-> EAGAIN", Curl_bufq_len(&data->req.sendbuf)));
       return CURLE_AGAIN;
     }
   }

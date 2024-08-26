@@ -3117,7 +3117,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
         infof(data, "Illegal STS header skipped");
 #ifdef DEBUGBUILD
       else
-        infof(data, "Parsed STS header fine (%zu entries)",
+        infof(data, "Parsed STS header fine (%" CURL_FORMAT_SIZE_T " entries)",
               Curl_llist_count(&data->hsts->list));
 #endif
     }
@@ -3345,7 +3345,8 @@ CURLcode Curl_bump_headersize(struct Curl_easy *data,
   else
     bad = data->req.allheadercount + delta;
   if(bad) {
-    failf(data, "Too large response headers: %zu > %u", bad, max);
+    failf(data, "Too large response headers: %" CURL_FORMAT_SIZE_T " > %u",
+          bad, max);
     return CURLE_RECV_ERROR;
   }
   return CURLE_OK;

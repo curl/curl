@@ -242,8 +242,8 @@ static ssize_t proxy_nw_in_reader(void *reader_ctx,
   if(cf) {
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     nread = Curl_conn_cf_recv(cf->next, data, (char *)buf, buflen, err);
-    CURL_TRC_CF(data, cf, "[0] nw_in_reader(len=%zu) -> %zd, %d",
-                buflen, nread, *err);
+    CURL_TRC_CF(data, cf, "[0] nw_in_reader(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d", buflen, nread, *err);
   }
   else {
     nread = 0;
@@ -262,8 +262,8 @@ static ssize_t proxy_h2_nw_out_writer(void *writer_ctx,
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     nwritten = Curl_conn_cf_send(cf->next, data, (const char *)buf, buflen,
                                  FALSE, err);
-    CURL_TRC_CF(data, cf, "[0] nw_out_writer(len=%zu) -> %zd, %d",
-                buflen, nwritten, *err);
+    CURL_TRC_CF(data, cf, "[0] nw_out_writer(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d", buflen, nwritten, *err);
   }
   else {
     nwritten = 0;
@@ -422,8 +422,8 @@ static CURLcode proxy_h2_nw_out_flush(struct Curl_cfilter *cf,
                             &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
-      CURL_TRC_CF(data, cf, "[0] flush nw send buffer(%zu) -> EAGAIN",
-                  Curl_bufq_len(&ctx->outbufq));
+      CURL_TRC_CF(data, cf, "[0] flush nw send buffer(%" CURL_FORMAT_SIZE_T ")"
+                  " -> EAGAIN", Curl_bufq_len(&ctx->outbufq));
       ctx->nw_out_blocked = 1;
     }
     return result;
@@ -449,11 +449,12 @@ static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
   while(Curl_bufq_peek(&ctx->inbufq, &buf, &blen)) {
 
     rv = nghttp2_session_mem_recv(ctx->h2, (const uint8_t *)buf, blen);
-    CURL_TRC_CF(data, cf, "[0] %zu bytes to nghttp2 -> %zd", blen, rv);
+    CURL_TRC_CF(data, cf, "[0] %" CURL_FORMAT_SIZE_T " bytes to nghttp2 "
+                "-> %" CURL_FORMAT_SSIZE_T "", blen, rv);
     if(rv < 0) {
       failf(data,
             "process_pending_input: nghttp2_session_mem_recv() returned "
-            "%zd:%s", rv, nghttp2_strerror((int)rv));
+            "%" CURL_FORMAT_SSIZE_T ":%s", rv, nghttp2_strerror((int)rv));
       *err = CURLE_RECV_ERROR;
       return -1;
     }
@@ -463,8 +464,9 @@ static int proxy_h2_process_pending_input(struct Curl_cfilter *cf,
       break;
     }
     else {
-      CURL_TRC_CF(data, cf, "[0] process_pending_input: %zu bytes left "
-                  "in connection buffer", Curl_bufq_len(&ctx->inbufq));
+      CURL_TRC_CF(data, cf, "[0] process_pending_input: "
+                  "%" CURL_FORMAT_SIZE_T " bytes left in connection buffer",
+                  Curl_bufq_len(&ctx->inbufq));
     }
   }
 
@@ -480,8 +482,8 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
 
   /* Process network input buffer fist */
   if(!Curl_bufq_is_empty(&ctx->inbufq)) {
-    CURL_TRC_CF(data, cf, "[0] process %zu bytes in connection buffer",
-                Curl_bufq_len(&ctx->inbufq));
+    CURL_TRC_CF(data, cf, "[0] process %" CURL_FORMAT_SIZE_T " bytes "
+                "in connection buffer", Curl_bufq_len(&ctx->inbufq));
     if(proxy_h2_process_pending_input(cf, data, &result) < 0)
       return result;
   }
@@ -494,7 +496,8 @@ static CURLcode proxy_h2_progress_ingress(struct Curl_cfilter *cf,
         !Curl_bufq_is_full(&ctx->tunnel.recvbuf)) {
 
     nread = Curl_bufq_slurp(&ctx->inbufq, proxy_nw_in_reader, cf, &result);
-    CURL_TRC_CF(data, cf, "[0] read %zu bytes nw data -> %zd, %d",
+    CURL_TRC_CF(data, cf, "[0] read %" CURL_FORMAT_SIZE_T " bytes nw data "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d",
                 Curl_bufq_len(&ctx->inbufq), nread, result);
     if(nread < 0) {
       if(result != CURLE_AGAIN) {
@@ -839,8 +842,8 @@ static ssize_t tunnel_send_callback(nghttp2_session *session,
   if(ts->closed && Curl_bufq_is_empty(&ts->sendbuf))
     *data_flags = NGHTTP2_DATA_FLAG_EOF;
 
-  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback -> %zd",
-              ts->stream_id, nread);
+  CURL_TRC_CF(data, cf, "[%d] tunnel_send_callback "
+              "-> %" CURL_FORMAT_SSIZE_T, ts->stream_id, nread);
   return nread;
 }
 
@@ -1303,7 +1306,8 @@ static ssize_t h2_handle_tunnel_close(struct Curl_cfilter *cf,
 
   *err = CURLE_OK;
   rv = 0;
-  CURL_TRC_CF(data, cf, "[%d] handle_tunnel_close -> %zd, %d",
+  CURL_TRC_CF(data, cf, "[%d] handle_tunnel_close "
+              "-> %" CURL_FORMAT_SSIZE_T ", %d",
               ctx->tunnel.stream_id, rv, *err);
   return rv;
 }
@@ -1341,7 +1345,8 @@ static ssize_t tunnel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
 out:
-  CURL_TRC_CF(data, cf, "[%d] tunnel_recv(len=%zu) -> %zd, %d",
+  CURL_TRC_CF(data, cf, "[%d] tunnel_recv(len=%" CURL_FORMAT_SIZE_T ") "
+              "-> %" CURL_FORMAT_SSIZE_T ", %d",
               ctx->tunnel.stream_id, len, nread, *err);
   return nread;
 }
@@ -1370,7 +1375,7 @@ static ssize_t cf_h2_proxy_recv(struct Curl_cfilter *cf,
   nread = tunnel_recv(cf, data, buf, len, err);
 
   if(nread > 0) {
-    CURL_TRC_CF(data, cf, "[%d] increase window by %zd",
+    CURL_TRC_CF(data, cf, "[%d] increase window by %" CURL_FORMAT_SSIZE_T,
                 ctx->tunnel.stream_id, nread);
     nghttp2_session_consume(ctx->h2, ctx->tunnel.stream_id, (size_t)nread);
   }
@@ -1388,7 +1393,8 @@ out:
      * draining to avoid stalling when no socket events happen. */
     drain_tunnel(cf, data, &ctx->tunnel);
   }
-  CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%zu) -> %zd %d",
+  CURL_TRC_CF(data, cf, "[%d] cf_recv(len=%" CURL_FORMAT_SIZE_T ") "
+              "-> %" CURL_FORMAT_SSIZE_T " %d",
               ctx->tunnel.stream_id, len, nread, *err);
   CF_DATA_RESTORE(cf, save);
   return nread;
@@ -1470,8 +1476,10 @@ out:
      * draining to avoid stalling when no socket events happen. */
     drain_tunnel(cf, data, &ctx->tunnel);
   }
-  CURL_TRC_CF(data, cf, "[%d] cf_send(len=%zu) -> %zd, %d, "
-              "h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)",
+  CURL_TRC_CF(data, cf, "[%d] cf_send(len=%" CURL_FORMAT_SIZE_T ") "
+              "-> %" CURL_FORMAT_SSIZE_T ", %d, "
+              "h2 windows %d-%d (stream-conn), buffers "
+              "%" CURL_FORMAT_SIZE_T "-%" CURL_FORMAT_SIZE_T " (stream-conn)",
               ctx->tunnel.stream_id, len, nwritten, *err,
               nghttp2_session_get_stream_remote_window_size(
                   ctx->h2, ctx->tunnel.stream_id),
@@ -1503,7 +1511,8 @@ static CURLcode cf_h2_proxy_flush(struct Curl_cfilter *cf,
 
 out:
   CURL_TRC_CF(data, cf, "[%d] flush -> %d, "
-              "h2 windows %d-%d (stream-conn), buffers %zu-%zu (stream-conn)",
+              "h2 windows %d-%d (stream-conn), buffers "
+              "%" CURL_FORMAT_SIZE_T "-%" CURL_FORMAT_SIZE_T " (stream-conn)",
               ctx->tunnel.stream_id, result,
               nghttp2_session_get_stream_remote_window_size(
                 ctx->h2, ctx->tunnel.stream_id),

@@ -651,7 +651,8 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
             /* This could be the next response, no consume and return */
             if(*pconsumed) {
               DEBUGF(infof(data, "RTP rtsp_filter_rtp[SKIP] RTSP/ prefix, "
-                           "skipping %zd bytes of junk", *pconsumed));
+                           "skipping %" CURL_FORMAT_SSIZE_T " bytes of junk",
+                           *pconsumed));
             }
             rtspc->state = RTP_PARSE_SKIP;
             rtspc->in_header = TRUE;
@@ -757,7 +758,7 @@ static CURLcode rtsp_filter_rtp(struct Curl_easy *data,
         buf += needed;
         blen -= needed;
         /* complete RTP message in buffer */
-        DEBUGF(infof(data, "RTP write channel %d rtp_len %zu",
+        DEBUGF(infof(data, "RTP write channel %d rtp_len %" CURL_FORMAT_SIZE_T,
                      rtspc->rtp_channel, rtspc->rtp_len));
         result = rtp_client_write(data, Curl_dyn_ptr(&rtspc->buf),
                                   rtspc->rtp_len);
@@ -804,8 +805,8 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
     goto out;
   }
 
-  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, eos=%d)",
-               blen, rtspc->in_header, is_eos));
+  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%" CURL_FORMAT_SIZE_T
+               ", in_header=%d, eos=%d)", blen, rtspc->in_header, is_eos));
 
   /* If header parsing is not ongoing, extract RTP messages */
   if(!rtspc->in_header) {
@@ -816,8 +817,8 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
     blen -= consumed;
     /* either we consumed all or are at the start of header parsing */
     if(blen && !data->req.header)
-      DEBUGF(infof(data, "RTSP: %zu bytes, possibly excess in response body",
-                   blen));
+      DEBUGF(infof(data, "RTSP: %" CURL_FORMAT_SIZE_T " bytes"
+                   ", possibly excess in response body", blen));
   }
 
   /* we want to parse headers, do so */
@@ -853,7 +854,8 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
   /* we SHOULD have consumed all bytes, unless the response is borked.
    * In which case we write out the left over bytes, letting the client
    * writer deal with it (it will report EXCESS and fail the transfer). */
-  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%zu, in_header=%d, done=%d "
+  DEBUGF(infof(data, "rtsp_rtp_write_resp(len=%" CURL_FORMAT_SIZE_T
+               ", in_header=%d, done=%d "
                " rtspc->state=%d, req.size=%" CURL_FORMAT_CURL_OFF_T ")",
                blen, rtspc->in_header, data->req.done, rtspc->state,
                data->req.size));

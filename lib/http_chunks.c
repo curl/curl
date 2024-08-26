@@ -225,8 +225,9 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       ch->datasize -= piece; /* decrease amount left to expect */
       buf += piece;    /* move read pointer forward */
       blen -= piece;   /* decrease space left in this round */
-      CURL_TRC_WRITE(data, "http_chunked, write %zu body bytes, %"
-                     CURL_FORMAT_CURL_OFF_T " bytes in chunk remain",
+      CURL_TRC_WRITE(data, "http_chunked, write "
+                     "%" CURL_FORMAT_SIZE_T " body bytes, "
+                     "%" CURL_FORMAT_CURL_OFF_T " bytes in chunk remain",
                      piece, ch->datasize);
 
       if(0 == ch->datasize)
@@ -449,7 +450,8 @@ static CURLcode cw_chunked_write(struct Curl_easy *data,
     /* chunks read successfully, download is complete */
     data->req.download_done = TRUE;
     if(blen) {
-      infof(data, "Leftovers after chunking: %zu bytes", blen);
+      infof(data, "Leftovers after chunking: %" CURL_FORMAT_SIZE_T " bytes",
+            blen);
     }
   }
   else if((type & CLIENTWRITE_EOS) && !data->req.no_body) {
@@ -594,8 +596,8 @@ static CURLcode add_chunk(struct Curl_easy *data,
       result = Curl_bufq_cwrite(&ctx->chunkbuf, buf, nread, &n);
     if(!result)
       result = Curl_bufq_cwrite(&ctx->chunkbuf, "\r\n", 2, &n);
-    CURL_TRC_READ(data, "http_chunk, made chunk of %zu bytes -> %d",
-                 nread, result);
+    CURL_TRC_READ(data, "http_chunk, made chunk of "
+                  "%" CURL_FORMAT_SIZE_T " bytes -> %d", nread, result);
     if(result)
       return result;
   }
