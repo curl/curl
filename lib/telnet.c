@@ -1334,6 +1334,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
+  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, FALSE);
+
   tn = data->req.p.telnet;
 
   result = check_telnet_options(data);
