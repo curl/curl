@@ -562,7 +562,8 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
                 kind, *userpwd);
     else
       msnprintf(prompt, sizeof(prompt),
-                "Enter %s password for user '%s' on URL #%zu:",
+                "Enter %s password for user '%s'"
+                " on URL #%" CURL_FORMAT_SIZE_T ":",
                 kind, *userpwd, i + 1);
 
     /* get password */

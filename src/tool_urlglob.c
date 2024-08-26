@@ -481,7 +481,9 @@ CURLcode glob_url(struct URLGlob **glob, char *url, curl_off_t *urlnum,
       char text[512];
       const char *t;
       if(glob_expand->pos) {
-        msnprintf(text, sizeof(text), "%s in URL position %zu:\n%s\n%*s^",
+        msnprintf(text, sizeof(text), "%s in URL "
+                                      "position %" CURL_FORMAT_SIZE_T ":"
+                                      "\n%s\n%*s^",
                   glob_expand->error,
                   glob_expand->pos, url, (int)glob_expand->pos - 1, " ");
         t = text;

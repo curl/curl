@@ -197,7 +197,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
            ((output != tool_stderr) && (output != stdout))) {
           if(!newl)
             log_line_start(output, timebuf, idsbuf, type);
-          fprintf(output, "[%zu bytes data]\n", size);
+          fprintf(output, "[%" CURL_FORMAT_SIZE_T " bytes data]\n", size);
           newl = FALSE;
           traced_data = TRUE;
         }
@@ -257,8 +257,8 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s%s, %zu bytes (0x%zx)\n", timebuf, idsbuf,
-          text, size, size);
+  fprintf(stream, "%s%s%s, %" CURL_FORMAT_SIZE_T " bytes (0x%zx)\n",
+          timebuf, idsbuf, text, size, size);
 
   for(i = 0; i < size; i += width) {
 

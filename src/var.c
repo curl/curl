@@ -397,7 +397,8 @@ ParameterError setvariable(struct GlobalConfig *global,
     line++;
   nlen = line - name;
   if(!nlen || (nlen >= MAX_VAR_LEN)) {
-    warnf(global, "Bad variable name length (%zd), skipping", nlen);
+    warnf(global, "Bad variable name length (%" CURL_FORMAT_SSIZE_T ")"
+                  ", skipping", nlen);
     return PARAM_OK;
   }
   if(import) {
