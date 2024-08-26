@@ -179,6 +179,7 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
     sel_org = sel;
   }
 
+  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, FALSE);
   k = curlx_uztosz(len);
 
   for(;;) {
@@ -238,7 +239,6 @@ static CURLcode gopher_do(struct Curl_easy *data, bool *done)
   if(result)
     return result;
 
-  Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
   return CURLE_OK;
 }
 #endif /* CURL_DISABLE_GOPHER */
