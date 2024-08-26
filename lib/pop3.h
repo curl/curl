@@ -90,9 +90,4 @@ extern const struct Curl_handler Curl_handler_pop3s;
 #define POP3_EOB "\x0d\x0a\x2e\x0d\x0a"
 #define POP3_EOB_LEN 5
 
-/* This function scans the body after the end-of-body and writes everything
- * until the end is found */
-CURLcode Curl_pop3_write(struct Curl_easy *data,
-                         const char *str, size_t nread);
-
 #endif /* HEADER_CURL_POP3_H */

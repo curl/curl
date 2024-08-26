@@ -107,6 +107,11 @@ static CURLcode pop3_continue_auth(struct Curl_easy *data, const char *mech,
 static CURLcode pop3_cancel_auth(struct Curl_easy *data, const char *mech);
 static CURLcode pop3_get_message(struct Curl_easy *data, struct bufref *out);
 
+/* This function scans the body after the end-of-body and writes everything
+ * until the end is found */
+static CURLcode pop3_write(struct Curl_easy *data,
+                           const char *str, size_t nread, bool is_eos);
+
 /*
  * POP3 protocol handler.
  */
@@ -125,7 +130,7 @@ const struct Curl_handler Curl_handler_pop3 = {
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
+  pop3_write,                       /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
@@ -155,7 +160,7 @@ const struct Curl_handler Curl_handler_pop3s = {
   ZERO_NULL,                        /* domore_getsock */
   ZERO_NULL,                        /* perform_getsock */
   pop3_disconnect,                  /* disconnect */
-  ZERO_NULL,                        /* write_resp */
+  pop3_write,                       /* write_resp */
   ZERO_NULL,                        /* write_resp_hd */
   ZERO_NULL,                        /* connection_check */
   ZERO_NULL,                        /* attach connection */
@@ -948,8 +953,8 @@ static CURLcode pop3_state_command_resp(struct Curl_easy *data,
       pp->nfinal = 0; /* done */
 
       if(!data->req.no_body) {
-        result = Curl_pop3_write(data, Curl_dyn_ptr(&pp->recvbuf),
-                                 Curl_dyn_len(&pp->recvbuf));
+        result = pop3_write(data, Curl_dyn_ptr(&pp->recvbuf),
+                            Curl_dyn_len(&pp->recvbuf), FALSE);
         if(result)
           return result;
       }
@@ -1447,12 +1452,13 @@ static CURLcode pop3_parse_custom_request(struct Curl_easy *data)
 
 /***********************************************************************
  *
- * Curl_pop3_write()
+ * pop3_write()
  *
  * This function scans the body after the end-of-body and writes everything
  * until the end is found.
  */
-CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
+static CURLcode pop3_write(struct Curl_easy *data, const char *str,
+                           size_t nread, bool is_eos)
 {
   /* This code could be made into a special function in the handler struct */
   CURLcode result = CURLE_OK;
@@ -1462,6 +1468,7 @@ CURLcode Curl_pop3_write(struct Curl_easy *data, const char *str, size_t nread)
   bool strip_dot = FALSE;
   size_t last = 0;
   size_t i;
+  (void)is_eos;
 
   /* Search through the buffer looking for the end-of-body marker which is
      5 bytes (0d 0a 2e 0d 0a). Note that a line starting with a dot matches
