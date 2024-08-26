@@ -1264,7 +1264,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_HALT_ON_ERROR], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
     ]],[[
-      force compilation error
+      #error force compilation error
     ]])
   ],[
     AC_MSG_RESULT([no])

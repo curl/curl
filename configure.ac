@@ -2583,7 +2583,7 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
 
   esac
 ], [
-AC_MSG_RESULT(no)
+  AC_MSG_RESULT(no)
 ]
 )
 
@@ -4064,8 +4064,8 @@ fi
 CURL_CHECK_NONBLOCKING_SOCKET
 
 if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$CURL_CA_EMBED" != "x"; then
-  AC_PATH_PROG( PERL, perl, ,
-    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
+  AC_PATH_PROG(PERL, perl,,
+    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
   AC_SUBST(PERL)
 
   if test -z "$PERL"; then
@@ -4132,7 +4132,7 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
       AC_MSG_RESULT(auto)
       want_pthreads=auto
     fi
-    ]
+  ]
 )
 
 dnl turn off pthreads if rt is disabled

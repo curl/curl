@@ -182,7 +182,7 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
 #ifdef _WIN32
         int dummy=1;
 #else
-        Not a native Windows build target.
+        #error Not a native Windows build target.
 #endif
       ]])
     ],[
@@ -1333,7 +1333,7 @@ AS_HELP_STRING([--without-ca-fallback], [Don't use the built-in CA store of the 
     if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1"; then
       AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL or GnuTLS])
     fi
-    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built-in CA store of SSL library ])
+    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built-in CA store of SSL library])
   fi
 ])
 
@@ -1384,7 +1384,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
 #if !defined(_WIN32_WCE) && (defined(__MINGW32__) || defined(_MSC_VER))
           int dummy=1;
 #else
-          Win32 large file API not supported.
+          #error Win32 large file API not supported.
 #endif
         ]])
       ],[
@@ -1398,7 +1398,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
 #if defined(_WIN32_WCE) || defined(__MINGW32__) || defined(_MSC_VER)
           int dummy=1;
 #else
-          Win32 small file API not supported.
+          #error Win32 small file API not supported.
 #endif
         ]])
       ],[
