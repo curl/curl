@@ -313,6 +313,12 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
       curl_cv_header_ldap_h="no"
     ])
   ])
+  case "$curl_cv_header_ldap_h" in
+    yes)
+      AC_DEFINE_UNQUOTED(HAVE_LDAP_H, 1,
+        [Define to 1 if you have the ldap.h header file.])
+      ;;
+  esac
 ])
 
 
