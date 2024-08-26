@@ -223,7 +223,7 @@ static void logprotocol(mqttdir dir,
     optr += 2;
     left -= 2;
   }
-  fprintf(output, "%s %s %zx %s\n",
+  fprintf(output, "%s %s %" CURL_FORMAT_XSIZE_T " %s\n",
           dir == FROM_CLIENT? "client": "server",
           prefix, remlen,
           data);
@@ -592,7 +592,9 @@ static curl_socket_t mqttit(curl_socket_t fd)
 
       /* check the length of the payload */
       if((ssize_t)payload_len != (rc - 12)) {
-        logmsg("Payload length mismatch, expected %zx got %zx",
+        logmsg("Payload length mismatch,"
+               " expected %" CURL_FORMAT_XSIZE_T
+               " got %" CURL_FORMAT_XSIZE_T,
                rc - 12, payload_len);
         goto end;
       }

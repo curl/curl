@@ -257,7 +257,8 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
     /* without the hex output, we can fit more on screen */
     width = 0x40;
 
-  fprintf(stream, "%s%s%s, %" CURL_FORMAT_SIZE_T " bytes (0x%zx)\n",
+  fprintf(stream, "%s%s%s, %" CURL_FORMAT_SIZE_T " bytes"
+          " (0x%" CURL_FORMAT_XSIZE_T ")\n",
           timebuf, idsbuf, text, size, size);
 
   for(i = 0; i < size; i += width) {
