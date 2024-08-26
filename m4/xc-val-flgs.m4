@@ -211,7 +211,7 @@ AC_DEFUN([XC_CHECK_USER_FLAGS], [
      test $xc_bad_var_cflags = yes ||
      test $xc_bad_var_ldflags = yes ||
      test $xc_bad_var_cppflags = yes; then
-     AC_MSG_ERROR([Can not continue. Fix errors mentioned immediately above this line.])
+    AC_MSG_ERROR([Can not continue. Fix errors mentioned immediately above this line.])
   fi
 ])
 
@@ -239,6 +239,6 @@ AC_DEFUN([XC_CHECK_BUILD_FLAGS], [
      test $xc_bad_var_cflags = yes ||
      test $xc_bad_var_ldflags = yes ||
      test $xc_bad_var_cppflags = yes; then
-     AC_MSG_WARN([Continuing even with errors mentioned immediately above this line.])
+    AC_MSG_WARN([Continuing even with errors mentioned immediately above this line.])
   fi
 ])

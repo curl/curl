@@ -141,63 +141,60 @@ if test "x$OPT_OPENSSL" != xno; then
   LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
 
   AC_CHECK_LIB(crypto, HMAC_Update,[
-     HAVECRYPTO="yes"
-     LIBS="-lcrypto $LIBS"
-     ],[
-     if test -n "$LIB_OPENSSL" ; then
-       LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
-     fi
-     if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
-       # only set this if pkg-config wasn't used
-       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
-     fi
-     # Linking previously failed, try extra paths from --with-openssl or
-     # pkg-config.  Use a different function name to avoid reusing the earlier
-     # cached result.
-     AC_CHECK_LIB(crypto, HMAC_Init_ex,[
-       HAVECRYPTO="yes"
-       LIBS="-lcrypto $LIBS"], [
+    HAVECRYPTO="yes"
+    LIBS="-lcrypto $LIBS"
+    ],[
+    if test -n "$LIB_OPENSSL" ; then
+      LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
+    fi
+    if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
+      # only set this if pkg-config wasn't used
+      CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
+    fi
+    # Linking previously failed, try extra paths from --with-openssl or
+    # pkg-config.  Use a different function name to avoid reusing the earlier
+    # cached result.
+    AC_CHECK_LIB(crypto, HMAC_Init_ex,[
+      HAVECRYPTO="yes"
+      LIBS="-lcrypto $LIBS"], [
 
-       dnl still no, but what about with -ldl?
-       AC_MSG_CHECKING([OpenSSL linking with -ldl])
-       LIBS="-lcrypto $CLEANLIBS -ldl"
-       AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
-         #include <openssl/err.h>
-       ]], [[
-         ERR_clear_error();
-       ]]) ],
-       [
-         AC_MSG_RESULT(yes)
-         HAVECRYPTO="yes"
-       ],
-       [
-         AC_MSG_RESULT(no)
-         dnl ok, so what about both -ldl and -lpthread?
-         dnl This may be necessary for static libraries.
+      dnl still no, but what about with -ldl?
+      AC_MSG_CHECKING([OpenSSL linking with -ldl])
+      LIBS="-lcrypto $CLEANLIBS -ldl"
+      AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
+        #include <openssl/err.h>
+      ]], [[
+        ERR_clear_error();
+      ]]) ],
+      [
+        AC_MSG_RESULT(yes)
+        HAVECRYPTO="yes"
+      ],
+      [
+        AC_MSG_RESULT(no)
+        dnl ok, so what about both -ldl and -lpthread?
+        dnl This may be necessary for static libraries.
 
-         AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
-         LIBS="-lcrypto $CLEANLIBS -ldl -lpthread"
-         AC_LINK_IFELSE([
-           AC_LANG_PROGRAM([[
-           #include <openssl/err.h>
-         ]], [[
-           ERR_clear_error();
-         ]])],
-         [
-           AC_MSG_RESULT(yes)
-           HAVECRYPTO="yes"
-         ],
-         [
-           AC_MSG_RESULT(no)
-           LDFLAGS="$CLEANLDFLAGS"
-           CPPFLAGS="$CLEANCPPFLAGS"
-           LIBS="$CLEANLIBS"
-
-         ])
-
-       ])
-
-     ])
+        AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
+        LIBS="-lcrypto $CLEANLIBS -ldl -lpthread"
+        AC_LINK_IFELSE([
+          AC_LANG_PROGRAM([[
+          #include <openssl/err.h>
+        ]], [[
+          ERR_clear_error();
+        ]])],
+        [
+          AC_MSG_RESULT(yes)
+          HAVECRYPTO="yes"
+        ],
+        [
+          AC_MSG_RESULT(no)
+          LDFLAGS="$CLEANLDFLAGS"
+          CPPFLAGS="$CLEANCPPFLAGS"
+          LIBS="$CLEANLIBS"
+        ])
+      ])
+    ])
   ])
 
   if test X"$HAVECRYPTO" = X"yes"; then
@@ -284,7 +281,7 @@ if test "x$OPT_OPENSSL" != xno; then
         #ifndef OPENSSL_IS_AWSLC
         #error not AWS-LC
         #endif
-     ]])
+      ]])
     ],[
       AC_MSG_RESULT([yes])
       ssl_msg="AWS-LC"
@@ -296,7 +293,7 @@ if test "x$OPT_OPENSSL" != xno; then
     AC_MSG_CHECKING([for LibreSSL])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <openssl/opensslv.h>
+        #include <openssl/opensslv.h>
       ]],[[
         int dummy = LIBRESSL_VERSION_NUMBER;
       ]])
@@ -312,7 +309,7 @@ if test "x$OPT_OPENSSL" != xno; then
     AC_MSG_CHECKING([for OpenSSL >= v3])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <openssl/opensslv.h>
+        #include <openssl/opensslv.h>
       ]],[[
         #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
         return 0;
@@ -339,14 +336,14 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
-       dnl when the ssl shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
-       dnl to prevent further configure tests to fail due to this
-       if test "x$cross_compiling" != "xyes"; then
-         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
-         export CURL_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])
-       fi
+      dnl when the ssl shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl to prevent further configure tests to fail due to this
+      if test "x$cross_compiling" != "xyes"; then
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])
+      fi
     fi
     check_for_ca_bundle=1
     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
@@ -356,7 +353,7 @@ if test "x$OPT_OPENSSL" != xno; then
 fi
 
 if test X"$OPT_OPENSSL" != Xno &&
-  test "$OPENSSL_ENABLED" != "1"; then
+   test "$OPENSSL_ENABLED" != "1"; then
   AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
   AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
@@ -395,7 +392,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_MSG_CHECKING([for SRP support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <openssl/ssl.h>
+      #include <openssl/ssl.h>
     ]],[[
       SSL_CTX_set_srp_username(NULL, "");
       SSL_CTX_set_srp_password(NULL, "");
@@ -430,7 +427,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_MSG_CHECKING([for QUIC support and OpenSSL >= 3.3])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <openssl/ssl.h>
+      #include <openssl/ssl.h>
     ]],[[
       #if (OPENSSL_VERSION_NUMBER < 0x30300000L)
       #error need at least version 3.3.0
