@@ -259,7 +259,7 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
   } while((size_t)nread < nbytes);
 
   if(verbose)
-    logmsg("read %zd bytes", nread);
+    logmsg("read %" CURL_FORMAT_SSIZE_T " bytes", nread);
 
   return nread;
 }
@@ -305,7 +305,7 @@ static ssize_t fullwrite(int filedes, const void *buffer, size_t nbytes)
   } while((size_t)nwrite < nbytes);
 
   if(verbose)
-    logmsg("wrote %zd bytes", nwrite);
+    logmsg("wrote %" CURL_FORMAT_SSIZE_T " bytes", nwrite);
 
   return nwrite;
 }
@@ -402,11 +402,13 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 
   *buffer_len = (ssize_t)strtol((char *)buffer, NULL, 16);
   if(*buffer_len > maxlen) {
-    logmsg("ERROR: Buffer size (%zd bytes) too small for data size "
-           "(%zd bytes)", maxlen, *buffer_len);
+    logmsg("ERROR: Buffer size (%" CURL_FORMAT_SSIZE_T " bytes) too small "
+           "for data size (%" CURL_FORMAT_SSIZE_T " bytes)",
+           maxlen, *buffer_len);
     return FALSE;
   }
-  logmsg("> %zd bytes data, server => client", *buffer_len);
+  logmsg("> %" CURL_FORMAT_SSIZE_T " bytes data, server => client",
+         *buffer_len);
 
   if(!read_stdin(buffer, *buffer_len))
     return FALSE;
@@ -1122,7 +1124,9 @@ static bool juggle(curl_socket_t *sockfdp,
         /* send away on the socket */
         ssize_t bytes_written = swrite(sockfd, buffer, buffer_len);
         if(bytes_written != buffer_len) {
-          logmsg("Not all data was sent. Bytes to send: %zd sent: %zd",
+          logmsg("Not all data was sent."
+                 " Bytes to send: %" CURL_FORMAT_SSIZE_T
+                 " sent: %" CURL_FORMAT_SSIZE_T,
                  buffer_len, bytes_written);
         }
       }
@@ -1178,7 +1182,8 @@ static bool juggle(curl_socket_t *sockfdp,
       if(!write_stdout(buffer, nread_socket))
         return FALSE;
 
-      logmsg("< %zd bytes data, client => server", nread_socket);
+      logmsg("< %" CURL_FORMAT_SSIZE_T " bytes data, client => server",
+             nread_socket);
       lograw(buffer, nread_socket);
     }
 

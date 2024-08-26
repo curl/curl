@@ -385,8 +385,8 @@ static int ProcessRequest(struct httprequest *req)
                   req->rtp_buffersize += rtp_size + 4;
                   free(rtp_scratch);
                 }
-                logmsg("rtp_buffersize is %zu, rtp_size is %d.",
-                       req->rtp_buffersize, rtp_size);
+                logmsg("rtp_buffersize is %" CURL_FORMAT_SIZE_T
+                       ", rtp_size is %d.", req->rtp_buffersize, rtp_size);
               }
             }
             else {
@@ -487,7 +487,8 @@ static int ProcessRequest(struct httprequest *req)
 
       logmsg("Found Content-Length: %lu in the request", clen);
       if(req->skip)
-        logmsg("... but will abort after %zu bytes", req->cl);
+        logmsg("... but will abort after %" CURL_FORMAT_SIZE_T " bytes",
+               req->cl);
       break;
     }
     else if(strncasecompare("Transfer-Encoding: chunked", line,
@@ -531,7 +532,7 @@ static int ProcessRequest(struct httprequest *req)
     req->ntlm = TRUE; /* NTLM found */
     logmsg("Received NTLM type-3, sending back data %ld", req->partno);
     if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
+      logmsg("  Expecting %" CURL_FORMAT_SIZE_T " POSTed bytes", req->cl);
     }
   }
   else if(!req->ntlm &&
@@ -631,11 +632,13 @@ static void storerequest(char *reqbuf, size_t totalsize)
   } while((writeleft > 0) && ((error = errno) == EINTR));
 
   if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
+    logmsg("Wrote request (%" CURL_FORMAT_SIZE_T " bytes) input to %s",
+           totalsize, dumpfile);
   else if(writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
            dumpfile, error, strerror(error));
-    logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
+    logmsg("Wrote only (%" CURL_FORMAT_SIZE_T " bytes) "
+           "of (%" CURL_FORMAT_SIZE_T " bytes) request input to %s",
            totalsize-writeleft, totalsize, dumpfile);
   }
 
@@ -722,7 +725,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       return 1;
     }
 
-    logmsg("Read %zd bytes", got);
+    logmsg("Read %" CURL_FORMAT_SSIZE_T " bytes", got);
 
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
@@ -823,8 +826,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
                 CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
       msglen = strlen(msgbuf);
       msnprintf(weare, sizeof(weare),
-                "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
-                msglen, msgbuf);
+                "HTTP/1.1 200 OK\r\nContent-Length: %" CURL_FORMAT_SIZE_T
+                "\r\n\r\n%s", msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_INTERNAL:
@@ -944,7 +947,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
       break;
     }
     else {
-      logmsg("Sent off %zd bytes", written);
+      logmsg("Sent off %" CURL_FORMAT_SSIZE_T " bytes", written);
     }
     /* write to file as well */
     fwrite(buffer, 1, (size_t)written, dump);
@@ -957,7 +960,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
   /* Send out any RTP data */
   if(req->rtp_buffer) {
-    logmsg("About to write %zu RTP bytes", req->rtp_buffersize);
+    logmsg("About to write %" CURL_FORMAT_SIZE_T " RTP bytes",
+           req->rtp_buffersize);
     count = req->rtp_buffersize;
     do {
       size_t num = count;
@@ -990,15 +994,15 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   }
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%zu bytes) of "
-           "(%zu bytes) were sent",
+    logmsg("Sending response failed. Only (%" CURL_FORMAT_SIZE_T " bytes) "
+           "of (%" CURL_FORMAT_SIZE_T " bytes) were sent",
            responsesize-count, responsesize);
     free(ptr);
     free(cmd);
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to %s",
+  logmsg("Response sent (%" CURL_FORMAT_SIZE_T " bytes) and written to %s",
          responsesize, responsedump);
   free(ptr);
 

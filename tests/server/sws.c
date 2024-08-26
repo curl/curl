@@ -371,8 +371,8 @@ static int ProcessRequest(struct httprequest *req)
 
   req->callcount++;
 
-  logmsg("Process %zu bytes request%s", req->offset,
-         req->callcount > 1?" [CONTINUED]":"");
+  logmsg("Process %" CURL_FORMAT_SIZE_T " bytes request%s",
+         req->offset, req->callcount > 1?" [CONTINUED]":"");
 
   /* try to figure out the request characteristics as soon as possible, but
      only once! */
@@ -643,7 +643,8 @@ static int ProcessRequest(struct httprequest *req)
 
       logmsg("Found Content-Length: %lu in the request", clen);
       if(req->skip)
-        logmsg("... but will abort after %zu bytes", req->cl);
+        logmsg("... but will abort after %" CURL_FORMAT_SIZE_T " bytes",
+               req->cl);
     }
     else if(strncasecompare("Transfer-Encoding: chunked", line,
                             strlen("Transfer-Encoding: chunked"))) {
@@ -723,7 +724,7 @@ static int ProcessRequest(struct httprequest *req)
     req->ntlm = TRUE; /* NTLM found */
     logmsg("Received NTLM type-3, sending back data %ld", req->partno);
     if(req->cl) {
-      logmsg("  Expecting %zu POSTed bytes", req->cl);
+      logmsg("  Expecting %" CURL_FORMAT_SIZE_T " POSTed bytes", req->cl);
     }
   }
   else if(!req->ntlm &&
@@ -820,11 +821,13 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   } while((writeleft > 0) && ((error = errno) == EINTR));
 
   if(writeleft == 0)
-    logmsg("Wrote request (%zu bytes) input to %s", totalsize, dumpfile);
+    logmsg("Wrote request (%" CURL_FORMAT_SIZE_T " bytes) input to %s",
+           totalsize, dumpfile);
   else if(writeleft > 0) {
     logmsg("Error writing file %s error: %d %s",
            dumpfile, error, strerror(error));
-    logmsg("Wrote only (%zu bytes) of (%zu bytes) request input to %s",
+    logmsg("Wrote only (%" CURL_FORMAT_SIZE_T " bytes) of "
+           "(%" CURL_FORMAT_SIZE_T " bytes) request input to %s",
            totalsize-writeleft, totalsize, dumpfile);
   }
 
@@ -893,7 +896,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
         got = sread(sock, reqbuf + req->offset, REQBUFSIZ - req->offset);
         if(got > 0) {
           req->offset += got;
-          logmsg("Got %zu bytes from client", got);
+          logmsg("Got %" CURL_FORMAT_SIZE_T " bytes from client", got);
         }
 
         if((got == -1) && ((EAGAIN == errno) || (EWOULDBLOCK == errno))) {
@@ -967,7 +970,7 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
       return -1;
     }
 
-    logmsg("Read %zd bytes", got);
+    logmsg("Read %" CURL_FORMAT_SSIZE_T " bytes", got);
 
     req->offset += (size_t)got;
     reqbuf[req->offset] = '\0';
@@ -1066,8 +1069,8 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
         msnprintf(weare, sizeof(weare), "%s", msgbuf);
       else
         msnprintf(weare, sizeof(weare),
-                  "HTTP/1.1 200 OK\r\nContent-Length: %zu\r\n\r\n%s",
-                  msglen, msgbuf);
+                  "HTTP/1.1 200 OK\r\nContent-Length: %" CURL_FORMAT_SIZE_T
+                  "\r\n\r\n%s", msglen, msgbuf);
       buffer = weare;
       break;
     case DOCNUMBER_404:
@@ -1195,8 +1198,8 @@ retry:
       int intervals = msecs_left / MAX_SLEEP_TIME_MS;
       if(msecs_left%MAX_SLEEP_TIME_MS)
         intervals++;
-      logmsg("Pausing %d milliseconds after writing %zd bytes",
-             msecs_left, written);
+      logmsg("Pausing %d milliseconds after writing"
+             " %" CURL_FORMAT_SSIZE_T " bytes", msecs_left, written);
       while((intervals > 0) && !got_exit_signal) {
         int sleep_time = msecs_left > MAX_SLEEP_TIME_MS ?
           MAX_SLEEP_TIME_MS : msecs_left;
@@ -1221,8 +1224,8 @@ retry:
   }
 
   if(sendfailure) {
-    logmsg("Sending response failed. Only (%zu bytes) of (%zu bytes) "
-           "were sent",
+    logmsg("Sending response failed. Only (%" CURL_FORMAT_SIZE_T " bytes) "
+           "of (%" CURL_FORMAT_SIZE_T " bytes) were sent",
            responsesize-count, responsesize);
     prevtestno = req->testno;
     prevpartno = req->partno;
@@ -1231,7 +1234,7 @@ retry:
     return -1;
   }
 
-  logmsg("Response sent (%zu bytes) and written to %s",
+  logmsg("Response sent (%" CURL_FORMAT_SIZE_T " bytes) and written to %s",
          responsesize, responsedump);
   free(ptr);
 
@@ -1590,14 +1593,16 @@ static void http_connect(curl_socket_t *infdp,
             /* read from client */
             rc = sread(clientfd[i], &readclient[i][tos[i]], len);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP READING client", data_or_ctrl(i), rc);
+              logmsg("[%s] got %" CURL_FORMAT_SSIZE_T ", STOP READING client",
+                     data_or_ctrl(i), rc);
               shutdown(clientfd[i], SHUT_RD);
               poll_client_rd[i] = FALSE;
             }
             else {
-              logmsg("[%s] READ %zd bytes from client", data_or_ctrl(i), rc);
-              logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
-                     data_to_hex(&readclient[i][tos[i]], rc));
+              logmsg("[%s] READ %" CURL_FORMAT_SSIZE_T " bytes from client",
+                     data_or_ctrl(i), rc);
+              logmsg("[%s] READ \"%s\"",
+                     data_or_ctrl(i), data_to_hex(&readclient[i][tos[i]], rc));
               tos[i] += rc;
             }
           }
@@ -1608,14 +1613,16 @@ static void http_connect(curl_socket_t *infdp,
             /* read from server */
             rc = sread(serverfd[i], &readserver[i][toc[i]], len);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP READING server", data_or_ctrl(i), rc);
+              logmsg("[%s] got %" CURL_FORMAT_SSIZE_T ", STOP READING server",
+                     data_or_ctrl(i), rc);
               shutdown(serverfd[i], SHUT_RD);
               poll_server_rd[i] = FALSE;
             }
             else {
-              logmsg("[%s] READ %zd bytes from server", data_or_ctrl(i), rc);
-              logmsg("[%s] READ \"%s\"", data_or_ctrl(i),
-                     data_to_hex(&readserver[i][toc[i]], rc));
+              logmsg("[%s] READ %" CURL_FORMAT_SSIZE_T " bytes from server",
+                     data_or_ctrl(i), rc);
+              logmsg("[%s] READ \"%s\"",
+                     data_or_ctrl(i), data_to_hex(&readserver[i][toc[i]], rc));
               toc[i] += rc;
             }
           }
@@ -1625,15 +1632,17 @@ static void http_connect(curl_socket_t *infdp,
             /* write to client */
             rc = swrite(clientfd[i], readserver[i], toc[i]);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP WRITING client", data_or_ctrl(i), rc);
+              logmsg("[%s] got %" CURL_FORMAT_SSIZE_T ", STOP WRITING client",
+                     data_or_ctrl(i), rc);
               shutdown(clientfd[i], SHUT_WR);
               poll_client_wr[i] = FALSE;
               tcp_fin_wr = TRUE;
             }
             else {
-              logmsg("[%s] SENT %zd bytes to client", data_or_ctrl(i), rc);
-              logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
-                     data_to_hex(readserver[i], rc));
+              logmsg("[%s] SENT %" CURL_FORMAT_SSIZE_T " bytes to client",
+                     data_or_ctrl(i), rc);
+              logmsg("[%s] SENT \"%s\"",
+                     data_or_ctrl(i), data_to_hex(readserver[i], rc));
               if(toc[i] - rc)
                 memmove(&readserver[i][0], &readserver[i][rc], toc[i]-rc);
               toc[i] -= rc;
@@ -1645,15 +1654,17 @@ static void http_connect(curl_socket_t *infdp,
             /* write to server */
             rc = swrite(serverfd[i], readclient[i], tos[i]);
             if(rc <= 0) {
-              logmsg("[%s] got %zd, STOP WRITING server", data_or_ctrl(i), rc);
+              logmsg("[%s] got %" CURL_FORMAT_SSIZE_T ", STOP WRITING server",
+                     data_or_ctrl(i), rc);
               shutdown(serverfd[i], SHUT_WR);
               poll_server_wr[i] = FALSE;
               tcp_fin_wr = TRUE;
             }
             else {
-              logmsg("[%s] SENT %zd bytes to server", data_or_ctrl(i), rc);
-              logmsg("[%s] SENT \"%s\"", data_or_ctrl(i),
-                     data_to_hex(readclient[i], rc));
+              logmsg("[%s] SENT %" CURL_FORMAT_SSIZE_T " bytes to server",
+                     data_or_ctrl(i), rc);
+              logmsg("[%s] SENT \"%s\"",
+                     data_or_ctrl(i), data_to_hex(readclient[i], rc));
               if(tos[i] - rc)
                 memmove(&readclient[i][0], &readclient[i][rc], tos[i]-rc);
               tos[i] -= rc;
@@ -2033,8 +2044,8 @@ int main(int argc, char *argv[])
 #ifdef USE_UNIX_SOCKETS
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
-          fprintf(stderr,
-                  "sws: socket path must be shorter than %zu chars: %s\n",
+          fprintf(stderr, "sws: socket path must be shorter than "
+                          "%" CURL_FORMAT_SIZE_T " chars: %s\n",
                   sizeof(me.sau.sun_path), unix_socket);
           return 0;
         }
