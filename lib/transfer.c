@@ -1241,15 +1241,9 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   CURLcode result;
   int sockindex;
 
-  if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  /* FIXME: would like to enable this, but some protocols (MQTT) do not
-   * setup the transfer correctly, it seems
-  if(data->conn->writesockfd == CURL_SOCKET_BAD) {
-    failf(data, "transfer not setup for sending");
-    DEBUGASSERT(0);
-    return CURLE_SEND_ERROR;
-  } */
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+
   sockindex = ((data->conn->writesockfd != CURL_SOCKET_BAD) &&
                (data->conn->writesockfd == data->conn->sock[SECONDARYSOCKET]));
   result = Curl_conn_send(data, sockindex, buf, blen, eos, pnwritten);
@@ -1271,18 +1265,13 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
 {
   int sockindex;
 
-  if(!data || !data->conn)
-    return CURLE_FAILED_INIT;
-  /* FIXME: would like to enable this, but some protocols (MQTT) do not
-   * setup the transfer correctly, it seems
-  if(data->conn->sockfd == CURL_SOCKET_BAD) {
-    failf(data, "transfer not setup for receiving");
-    DEBUGASSERT(0);
-    return CURLE_RECV_ERROR;
-  } */
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  DEBUGASSERT(data->set.buffer_size > 0);
+
   sockindex = ((data->conn->sockfd != CURL_SOCKET_BAD) &&
                (data->conn->sockfd == data->conn->sock[SECONDARYSOCKET]));
-  if(data->set.buffer_size > 0 && (size_t)data->set.buffer_size < blen)
+  if((size_t)data->set.buffer_size < blen)
     blen = (size_t)data->set.buffer_size;
   return Curl_conn_recv(data, sockindex, buf, blen, pnrcvd);
 }
