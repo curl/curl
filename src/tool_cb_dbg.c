@@ -263,7 +263,7 @@ static void dump(const char *timebuf, const char *idsbuf, const char *text,
 
   for(i = 0; i < size; i += width) {
 
-    fprintf(stream, "%04zx: ", i);
+    fprintf(stream, "%04" CURL_FORMAT_XSIZE_T ": ", i);
 
     if(tracetype == TRACE_BIN) {
       /* hex not disabled, show it */
