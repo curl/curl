@@ -747,7 +747,8 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   (void)cf;
   if(stream && stream->req) {
     msh3_lock_acquire(&stream->recv_lock);
-    CURL_TRC_CF((struct Curl_easy *)data, cf, "data pending = %" CURL_FORMAT_SIZE_T,
+    CURL_TRC_CF((struct Curl_easy *)data, cf,
+                "data pending = %" CURL_FORMAT_SIZE_T,
                 Curl_bufq_len(&stream->recvbuf));
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);

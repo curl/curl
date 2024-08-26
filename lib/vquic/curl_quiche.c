@@ -460,8 +460,8 @@ static CURLcode cf_recv_body(struct Curl_cfilter *cf,
                              stream_resp_read, &cb_ctx, &result);
 
   if(nwritten < 0 && result != CURLE_AGAIN) {
-    CURL_TRC_CF(data, cf, "[%"CURL_PRIu64"] recv_body error %" CURL_FORMAT_SSIZE_T,
-                stream->id, nwritten);
+    CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] "
+                "recv_body error %" CURL_FORMAT_SSIZE_T, stream->id, nwritten);
     failf(data, "Error %d in HTTP/3 response body for stream[%"CURL_PRIu64"]",
           result, stream->id);
     stream->closed = TRUE;
@@ -714,7 +714,8 @@ static ssize_t read_pkt_to_send(void *userp,
   }
 
   if(nwritten < 0) {
-    failf(x->data, "quiche_conn_send returned %" CURL_FORMAT_SSIZE_T, nwritten);
+    failf(x->data, "quiche_conn_send returned %" CURL_FORMAT_SSIZE_T,
+          nwritten);
     *err = CURLE_SEND_ERROR;
     return -1;
   }
@@ -960,7 +961,8 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
   else if(nwritten < 0) {
     CURL_TRC_CF(data, cf, "[%" CURL_PRIu64 "] "
                 "send_body(len=%" CURL_FORMAT_SIZE_T ") "
-                "-> quiche err %" CURL_FORMAT_SSIZE_T, stream->id, len, nwritten);
+                "-> quiche err %" CURL_FORMAT_SSIZE_T,
+                stream->id, len, nwritten);
     *err = CURLE_SEND_ERROR;
     return -1;
   }
