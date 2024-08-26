@@ -3154,6 +3154,11 @@ CURLcode Curl_http_header(struct Curl_easy *data,
       }
       return CURLE_OK;
     }
+    v = HD_VAL(hd, hdlen, "Trailer:");
+    if(v) {
+      data->req.resp_trailer = TRUE;
+      return CURLE_OK;
+    }
     break;
   case 'w':
   case 'W':

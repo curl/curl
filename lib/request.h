@@ -135,6 +135,7 @@ struct SingleRequest {
   BIT(http_bodyless); /* HTTP response status code is between 100 and 199,
                          204 or 304 */
   BIT(chunk);         /* if set, this is a chunked transfer-encoding */
+  BIT(resp_trailer);  /* response carried 'Trailer:' header field */
   BIT(ignore_cl);     /* ignore content-length */
   BIT(upload_chunky); /* set TRUE if we are doing chunked transfer-encoding
                          on upload */

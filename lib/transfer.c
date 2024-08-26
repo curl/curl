@@ -307,6 +307,12 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
                                 is_multiplex, &result);
     if(nread < 0) {
       if(CURLE_AGAIN == result) {
+        if(data->req.download_done && data->req.no_body &&
+           !data->req.resp_trailer) {
+          DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
+                 "not waiting for EOS"));
+          data->req.keepon &= ~KEEP_RECV;
+        }
         result = CURLE_OK;
         break; /* get out of loop */
       }
