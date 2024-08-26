@@ -344,9 +344,6 @@
 /* Define to 1 if you have the lber.h header file. */
 #cmakedefine HAVE_LBER_H 1
 
-/* Define to 1 if you have the ldap.h header file. */
-#cmakedefine HAVE_LDAP_H 1
-
 /* Use LDAPS implementation */
 #cmakedefine HAVE_LDAP_SSL 1
 
