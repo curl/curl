@@ -30,6 +30,7 @@ REPLY AHVzZXIAc2VjcmV0 235 Authenticated
 smtp
 </server>
 <features>
+Debug
 NTLM
 SSL
 !SSPI
