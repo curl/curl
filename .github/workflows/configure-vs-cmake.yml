@@ -37,6 +37,7 @@ jobs:
       - name: run configure --with-openssl
         run: |
           autoreconf -fi
+          export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-openssl --without-libpsl --without-brotli --without-zstd
 
       - name: run cmake
@@ -111,6 +112,7 @@ jobs:
       - name: run configure --with-schannel
         run: |
           autoreconf -fi
+          export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-schannel --without-libpsl --host=${TRIPLET}
 
       - name: run cmake
