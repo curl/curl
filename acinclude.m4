@@ -265,6 +265,13 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
     ],[
       curl_cv_need_header_lber_h="yes"
     ])
+    #
+    case "$curl_cv_need_header_lber_h" in
+      yes)
+        AC_DEFINE_UNQUOTED(NEED_LBER_H, 1,
+          [Define to 1 if you need the lber.h header file even with ldap.h])
+        ;;
+    esac
   fi
 ])
 
