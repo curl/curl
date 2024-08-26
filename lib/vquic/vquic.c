@@ -180,14 +180,15 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     case EIO:
       if(pktlen > gsolen) {
         /* GSO failure */
-        failf(data, "sendmsg() returned %zd (errno %d); disable GSO", sent,
-              SOCKERRNO);
+        failf(data, "sendmsg() returned %" CURL_FORMAT_SSIZE_T " (errno %d);"
+              " disable GSO", sent, SOCKERRNO);
         qctx->no_gso = TRUE;
         return send_packet_no_gso(cf, data, qctx, pkt, pktlen, gsolen, psent);
       }
       FALLTHROUGH();
     default:
-      failf(data, "sendmsg() returned %zd (errno %d)", sent, SOCKERRNO);
+      failf(data, "sendmsg() returned %" CURL_FORMAT_SSIZE_T " (errno %d)",
+            sent, SOCKERRNO);
       return CURLE_SEND_ERROR;
     }
   }
@@ -210,7 +211,8 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
       return CURLE_AGAIN;
     }
     else {
-      failf(data, "send() returned %zd (errno %d)", sent, SOCKERRNO);
+      failf(data, "send() returned %" CURL_FORMAT_SSIZE_T " (errno %d)",
+            sent, SOCKERRNO);
       if(SOCKERRNO != EMSGSIZE) {
         return CURLE_SEND_ERROR;
       }
@@ -294,7 +296,9 @@ CURLcode vquic_flush(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = vquic_send_packets(cf, data, qctx, buf, blen, gsolen, &sent);
-    CURL_TRC_CF(data, cf, "vquic_send(len=%zu, gso=%zu) -> %d, sent=%zu",
+    CURL_TRC_CF(data, cf, "vquic_send(len=%" CURL_FORMAT_SIZE_T
+                          ", gso=%" CURL_FORMAT_SIZE_T ") -> %d"
+                          ", sent=%" CURL_FORMAT_SIZE_T,
                 blen, gsolen, result, sent);
     if(result) {
       if(result == CURLE_AGAIN) {
@@ -326,7 +330,10 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
   qctx->split_len = Curl_bufq_len(&qctx->sendbuf) - tail_len;
   qctx->split_gsolen = gsolen;
   qctx->gsolen = tail_gsolen;
-  CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%zu gso=%zu][%zu gso=%zu]",
+  CURL_TRC_CF(data, cf, "vquic_send_tail_split: [%" CURL_FORMAT_SIZE_T
+                        " gso=%" CURL_FORMAT_SIZE_T "]"
+                        "[%" CURL_FORMAT_SIZE_T
+                        " gso=%" CURL_FORMAT_SIZE_T "]",
               qctx->split_len, qctx->split_gsolen,
               tail_len, qctx->gsolen);
   return vquic_flush(cf, data, qctx);
@@ -453,7 +460,8 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+    CURL_TRC_CF(data, cf, "recvd %" CURL_FORMAT_SIZE_T " packets with "
+                          "%" CURL_FORMAT_SIZE_T " bytes -> %d",
                 pkts, total_nread, result);
   return result;
 }
@@ -507,7 +515,8 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
         goto out;
       }
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
-      failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
+      failf(data, "QUIC: recvmsg() unexpectedly returned "
+                  "%" CURL_FORMAT_SSIZE_T " (errno=%d; %s)",
                   nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
@@ -540,7 +549,8 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+    CURL_TRC_CF(data, cf, "recvd %" CURL_FORMAT_SIZE_T " packets with "
+                          "%" CURL_FORMAT_SIZE_T " bytes -> %d",
                 pkts, total_nread, result);
   return result;
 }
@@ -582,7 +592,8 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
         goto out;
       }
       Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
-      failf(data, "QUIC: recvfrom() unexpectedly returned %zd (errno=%d; %s)",
+      failf(data, "QUIC: recvfrom() unexpectedly returned "
+                  "%" CURL_FORMAT_SSIZE_T " (errno=%d; %s)",
                   nread, SOCKERRNO, errstr);
       result = CURLE_RECV_ERROR;
       goto out;
@@ -598,7 +609,8 @@ static CURLcode recvfrom_packets(struct Curl_cfilter *cf,
 
 out:
   if(total_nread || result)
-    CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
+    CURL_TRC_CF(data, cf, "recvd %" CURL_FORMAT_SIZE_T " packets with "
+                          "%" CURL_FORMAT_SIZE_T " bytes -> %d",
                 pkts, total_nread, result);
   return result;
 }

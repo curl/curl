@@ -518,8 +518,9 @@ static int cb_recv_stream_data(ngtcp2_conn *tconn, uint32_t flags,
   if(!data)
     data = CF_DATA_CURRENT(cf);
   if(data)
-    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] read_stream(len=%zu) -> %zd",
-                stream_id, buflen, nconsumed);
+    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] "
+                "read_stream(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T "", stream_id, buflen, nconsumed);
   if(nconsumed < 0) {
     struct h3_stream_ctx *stream = H3_STREAM_CTX_ID(ctx, stream_id);
     if(data && stream) {
@@ -915,8 +916,9 @@ static void h3_xfer_write_resp_hd(struct Curl_cfilter *cf,
   if(!stream->xfer_result) {
     stream->xfer_result = Curl_xfer_write_resp_hd(data, buf, blen, eos);
     if(stream->xfer_result)
-      CURL_TRC_CF(data, cf, "[%"CURL_PRId64"] error %d writing %zu "
-                  "bytes of headers", stream->id, stream->xfer_result, blen);
+      CURL_TRC_CF(data, cf, "[%"CURL_PRId64"] error %d writing "
+                  "%" CURL_FORMAT_SIZE_T " bytes of headers",
+                  stream->id, stream->xfer_result, blen);
   }
 }
 
@@ -931,8 +933,9 @@ static void h3_xfer_write_resp(struct Curl_cfilter *cf,
     stream->xfer_result = Curl_xfer_write_resp(data, buf, blen, eos);
     /* If the transfer write is errored, we do not want any more data */
     if(stream->xfer_result) {
-      CURL_TRC_CF(data, cf, "[%"CURL_PRId64"] error %d writing %zu bytes "
-                  "of data", stream->id, stream->xfer_result, blen);
+      CURL_TRC_CF(data, cf, "[%"CURL_PRId64"] error %d writing "
+                  "%" CURL_FORMAT_SIZE_T " bytes of data",
+                  stream->id, stream->xfer_result, blen);
     }
   }
 }
@@ -954,12 +957,13 @@ static int cb_h3_recv_data(nghttp3_conn *conn, int64_t stream3_id,
 
   h3_xfer_write_resp(cf, data, stream, (char *)buf, blen, FALSE);
   if(blen) {
-    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] ACK %zu bytes of DATA",
-                stream->id, blen);
+    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] ACK "
+                "%" CURL_FORMAT_SIZE_T " bytes of DATA", stream->id, blen);
     ngtcp2_conn_extend_max_stream_offset(ctx->qconn, stream->id, blen);
     ngtcp2_conn_extend_max_offset(ctx->qconn, blen);
   }
-  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] DATA len=%zu", stream->id, blen);
+  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] DATA "
+              "len=%" CURL_FORMAT_SIZE_T, stream->id, blen);
   return 0;
 }
 
@@ -1279,7 +1283,9 @@ out:
       nread = -1;
     }
   }
-  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_recv(blen=%zu) -> %zd, %d",
+  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] "
+              "cf_recv(blen=%" CURL_FORMAT_SIZE_T ") "
+              "-> %" CURL_FORMAT_SSIZE_T ", %d",
               stream? stream->id : -1, blen, nread, *err);
   CF_DATA_RESTORE(cf, save);
   return nread;
@@ -1376,8 +1382,9 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   }
 
   CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] read req body -> "
-              "%d vecs%s with %zu (buffered=%zu, left=%"
-              CURL_FORMAT_CURL_OFF_T ")",
+              "%d vecs%s with %" CURL_FORMAT_SIZE_T
+              " (buffered=%" CURL_FORMAT_SIZE_T
+              ", left=%" CURL_FORMAT_CURL_OFF_T ")",
               stream->id, (int)nvecs,
               *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
               nwritten, Curl_bufq_len(&stream->sendbuf),
@@ -1579,7 +1586,8 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       sent = (ssize_t)len;
       goto out;
     }
-    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] send_body(len=%zu) "
+    CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] "
+                "send_body(len=%" CURL_FORMAT_SIZE_T ") "
                 "-> stream closed", stream->id, len);
     *err = CURLE_HTTP3;
     sent = -1;
@@ -1594,7 +1602,8 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else {
     sent = Curl_bufq_write(&stream->sendbuf, buf, len, err);
     CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_send, add to "
-                "sendbuf(len=%zu) -> %zd, %d",
+                "sendbuf(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d",
                 stream->id, len, sent, *err);
     if(sent < 0) {
       goto out;
@@ -1615,7 +1624,9 @@ out:
     *err = result;
     sent = -1;
   }
-  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] cf_send(len=%zu) -> %zd, %d",
+  CURL_TRC_CF(data, cf, "[%" CURL_PRId64 "] "
+              "cf_send(len=%" CURL_FORMAT_SIZE_T ") "
+              "-> %" CURL_FORMAT_SSIZE_T ", %d",
               stream? stream->id : -1, len, sent, *err);
   CF_DATA_RESTORE(cf, save);
   return sent;
@@ -2409,7 +2420,7 @@ static CURLcode cf_ngtcp2_query(struct Curl_cfilter *cf,
     else  /* transport params not arrived yet? take our default. */
       *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
     CURL_TRC_CF(data, cf, "query conn[%" CURL_FORMAT_CURL_OFF_T "]: "
-                "MAX_CONCURRENT -> %d (%zu in use)",
+                "MAX_CONCURRENT -> %d (%" CURL_FORMAT_SIZE_T " in use)",
                 cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
     CF_DATA_RESTORE(cf, save);
     return CURLE_OK;

@@ -530,8 +530,8 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
     goto out;
   }
   else if(stream->error3) {
-    failf(data, "HTTP/3 stream was not closed cleanly: (error %zd)",
-          (ssize_t)stream->error3);
+    failf(data, "HTTP/3 stream was not closed cleanly:"
+          " (error %" CURL_FORMAT_SSIZE_T ")", (ssize_t)stream->error3);
     *err = CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "cf_recv, closed uncleanly -> %d", *err);
     goto out;
@@ -571,7 +571,8 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   ssize_t nread = -1;
   struct cf_call_data save;
 
-  CURL_TRC_CF(data, cf, "cf_recv(len=%zu), stream=%d", len, !!stream);
+  CURL_TRC_CF(data, cf, "cf_recv(len=%" CURL_FORMAT_SIZE_T "), stream=%d",
+              len, !!stream);
   if(!stream) {
     *err = CURLE_RECV_ERROR;
     return -1;
@@ -591,7 +592,8 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(!Curl_bufq_is_empty(&stream->recvbuf)) {
     nread = Curl_bufq_read(&stream->recvbuf,
                            (unsigned char *)buf, len, err);
-    CURL_TRC_CF(data, cf, "read recvbuf(len=%zu) -> %zd, %d",
+    CURL_TRC_CF(data, cf, "read recvbuf(len=%" CURL_FORMAT_SIZE_T ") "
+                "-> %" CURL_FORMAT_SSIZE_T ", %d",
                 len, nread, *err);
     if(nread < 0)
       goto out;
@@ -634,7 +636,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   /* Sizes must match for cast below to work" */
   DEBUGASSERT(stream);
-  CURL_TRC_CF(data, cf, "req: send %zu bytes", len);
+  CURL_TRC_CF(data, cf, "req: send %" CURL_FORMAT_SIZE_T " bytes", len);
 
   if(!stream->req) {
     /* The first send on the request contains the headers and possibly some
@@ -668,7 +670,8 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       nva[i].ValueLength = e->valuelen;
     }
 
-    CURL_TRC_CF(data, cf, "req: send %zu headers", nheader);
+    CURL_TRC_CF(data, cf, "req: send %" CURL_FORMAT_SIZE_T " headers",
+                nheader);
     stream->req = MsH3RequestOpen(ctx->qconn, &msh3_request_if, data,
                                   nva, nheader,
                                   eos ? MSH3_REQUEST_FLAG_FIN :
@@ -684,7 +687,7 @@ static ssize_t cf_msh3_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   else {
     /* request is open */
-    CURL_TRC_CF(data, cf, "req: send %zu body bytes", len);
+    CURL_TRC_CF(data, cf, "req: send %" CURL_FORMAT_SIZE_T " body bytes", len);
     if(len > 0xFFFFFFFF) {
       len = 0xFFFFFFFF;
     }
@@ -744,7 +747,7 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   (void)cf;
   if(stream && stream->req) {
     msh3_lock_acquire(&stream->recv_lock);
-    CURL_TRC_CF((struct Curl_easy *)data, cf, "data pending = %zu",
+    CURL_TRC_CF((struct Curl_easy *)data, cf, "data pending = %" CURL_FORMAT_SIZE_T,
                 Curl_bufq_len(&stream->recvbuf));
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
