@@ -4064,14 +4064,6 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
 CURL_CHECK_LIB_ARES
 
-if test "x$curl_cv_native_windows" != "xyes" &&
-   test "x$enable_shared" = "xyes"; then
-  build_libhostname=yes
-else
-  build_libhostname=no
-fi
-AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
-
 if test "x$want_ares" != xyes; then
   CURL_CHECK_OPTION_THREADED_RESOLVER
 
