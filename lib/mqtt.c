@@ -716,12 +716,14 @@ static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   *done = FALSE; /* unconditionally */
 
+  /* do it before mqtt_connect */
+  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, FALSE);
+
   result = mqtt_connect(data);
   if(result) {
     failf(data, "Error %d sending MQTT CONNECT request", result);
     return result;
   }
-  Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, FALSE);
   mqstate(data, MQTT_FIRST, MQTT_CONNACK);
   return CURLE_OK;
 }
