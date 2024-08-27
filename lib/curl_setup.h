@@ -337,7 +337,7 @@
 #if defined(__MINGW32__)
 /* override __MINGW_PRINTF_FORMAT with gnu_printf for internal code */
 #define CURL_TEMP_PRINTF(fmt, arg) \
-  __attribute__((__format__(gnu_printf, fmt, arg)))
+  __attribute__((format(gnu_printf, fmt, arg)))
 #else
 #define CURL_TEMP_PRINTF(fmt, arg) \
   __attribute__((format(printf, fmt, arg)))

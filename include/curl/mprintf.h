@@ -40,7 +40,7 @@ extern "C" {
 #if defined(__MINGW32__)
 #if defined(__MINGW_PRINTF_FORMAT)  /* mingw-w64 3.0.0+. Needs stdio.h. */
 #define CURL_TEMP_PRINTF(fmt, arg) \
-  __attribute__((__format__(__MINGW_PRINTF_FORMAT, fmt, arg)))
+  __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
 #define CURL_TEMP_PRINTF(fmt, arg)
 #endif
