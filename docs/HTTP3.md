@@ -383,7 +383,7 @@ ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
 are huge but do not occupy that much space on disk since they are just big
 holes.
 
-In a Debian setup you can install **apache2**. It runs on port 80 and has a
+In a Debian setup you can install apache2. It runs on port 80 and has a
 document root in `/var/www/html`. Download the 8GB file from apache with `curl
 localhost/8GB -o dev/null`
 
@@ -396,10 +396,10 @@ You can select either or both of these server solutions.
 
 ### nghttpx
 
-Get, build and install **quictls**, **nghttp3** and **ngtcp2** as described
+Get, build and install quictls, nghttp3 and ngtcp2 as described
 above.
 
-Get, build and install **nghttp2**:
+Get, build and install nghttp2:
 
     git clone https://github.com/nghttp2/nghttp2.git
     cd nghttp2
