@@ -45,6 +45,9 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
+static void cf_cntrl_update_info(struct Curl_easy *data,
+                                 struct connectdata *conn);
+
 #ifdef UNITTESTS
 /* used by unit2600.c */
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -428,7 +431,10 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
     result = cf->cft->do_connect(cf, data, blocking, done);
     if(!result && *done) {
-      Curl_conn_ev_update_info(data, data->conn);
+      /* Now that the complete filter chain is connected, let all filters
+       * persist information at the connection. E.g. cf-socket sets the
+       * socket and ip related information. */
+      cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
     }
@@ -652,6 +658,15 @@ curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
   return CURL_SOCKET_BAD;
 }
 
+CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int *is_ipv6, struct ip_quadruple *ipquad)
+{
+  if(cf)
+    return cf->cft->query(cf, data, CF_QUERY_IP_INFO, is_ipv6, ipquad);
+  return CURLE_UNKNOWN_OPTION;
+}
+
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
 {
   struct Curl_cfilter *cf;
@@ -749,8 +764,8 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause)
                       CF_CTRL_DATA_PAUSE, do_pause, NULL);
 }
 
-void Curl_conn_ev_update_info(struct Curl_easy *data,
-                              struct connectdata *conn)
+static void cf_cntrl_update_info(struct Curl_easy *data,
+                                 struct connectdata *conn)
 {
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }

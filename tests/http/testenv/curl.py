@@ -390,7 +390,9 @@ class ExecResult:
                 f'were made\n{self.dump_logs()}'
 
     def check_stats(self, count: int, http_status: Optional[int] = None,
-                    exitcode: Optional[int] = None):
+                    exitcode: Optional[int] = None,
+                    remote_port: Optional[int] = None,
+                    remote_ip: Optional[str] = None):
         if exitcode is None:
             self.check_exit_code(0)
         assert len(self.stats) == count, \
@@ -408,6 +410,18 @@ class ExecResult:
                     assert x['exitcode'] == exitcode, \
                         f'status #{idx} exitcode: expected {exitcode}, '\
                         f'got {x["exitcode"]}\n{self.dump_stat(x)}'
+        if remote_port is not None:
+            for idx, x in enumerate(self.stats):
+                assert 'remote_port' in x, f'remote_port missing\n{self.dump_stat(x)}'
+                assert x['remote_port'] == remote_port, \
+                        f'status #{idx} remote_port: expected {remote_port}, '\
+                        f'got {x["remote_port"]}\n{self.dump_stat(x)}'
+        if remote_ip is not None:
+            for idx, x in enumerate(self.stats):
+                assert 'remote_ip' in x, f'remote_ip missing\n{self.dump_stat(x)}'
+                assert x['remote_ip'] == remote_ip, \
+                        f'status #{idx} remote_ip: expected {remote_ip}, '\
+                        f'got {x["remote_ip"]}\n{self.dump_stat(x)}'
 
     def dump_logs(self):
         lines = ['>>--stdout ----------------------------------------------\n']

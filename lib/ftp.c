@@ -2082,7 +2082,6 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      Curl_conn_ev_update_info(data, conn);
       Curl_safefree(ftpc->newhost);
       ftpc->newhost = strdup(control_address(conn));
       if(!ftpc->newhost)

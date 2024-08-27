@@ -72,9 +72,6 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port);
 
-void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          struct ip_quadruple *ip);
-
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
  * argument specifies if it is the end of a connection or a stream.
