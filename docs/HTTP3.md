@@ -317,15 +317,15 @@ directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 
 Use only HTTP/3:
 
-    curl --http3-only https://example.org:4433/
+     % curl --http3-only https://example.org:4433/
 
 Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
-    curl --http3 https://example.org:4433/
+     % curl --http3 https://example.org:4433/
 
 Upgrade via Alt-Svc:
 
-    curl --alt-svc altsvc.cache https://curl.se/
+     % curl --alt-svc altsvc.cache https://curl.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
@@ -401,18 +401,18 @@ above.
 
 Get, build and install nghttp2:
 
-    git clone https://github.com/nghttp2/nghttp2.git
-    cd nghttp2
-    autoreconf -fi
-    PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
-    make && make install
+     % git clone https://github.com/nghttp2/nghttp2.git
+     % cd nghttp2
+     % autoreconf -fi
+     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+     % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
 HTTP/1 on localhost port 80. For local toying, we can just use the test cert
 that exists in curl's test dir.
 
-    CERT=$CURLSRC/tests/stunnel.pem
-    $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
+     % CERT=$CURLSRC/tests/stunnel.pem
+     % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
       --frontend="localhost,9443;quic"
 
 ### Caddy
@@ -429,7 +429,7 @@ localhost:7443 {
 
 Then run Caddy:
 
-    ./caddy start
+     % ./caddy start
 
 Making requests to `https://localhost:7443` should tell you which protocol is being used.
 
