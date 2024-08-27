@@ -50,7 +50,7 @@ jobs:
         include:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy', name: '!proxy' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver', name: 'default' }
-          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skipall'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
+          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '', name: 'default R' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no', name: 'default' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --with-windows-unicode --enable-ares', name: 'c-ares U' }
