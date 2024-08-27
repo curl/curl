@@ -470,7 +470,7 @@ typedef void (*SIGHANDLER_T)(int);
 /* Workaround for warning C4306:
    'type cast' : conversion from 'int' to 'void (__cdecl *)(int)' */
 #undef SIG_ERR
-/*#define SIG_ERR ((SIGHANDLER_T)-1)*/
+#define SIG_ERR ((SIGHANDLER_T)(size_t)-1)
 #endif
 
 #ifdef SIGHUP
