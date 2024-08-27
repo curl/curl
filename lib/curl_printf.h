@@ -31,9 +31,6 @@
 
 /* override format checks with those defined in curl_setup.h */
 #define CURL_TEMP_PRINTF CURL_PRINTF
-#ifndef CURL_PRINTF
-#error "CURL_PRINTF NOT DEFINED!"
-#endif
 
 #include <curl/mprintf.h>
 
