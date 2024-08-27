@@ -83,6 +83,9 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
   else {
 #endif /* USE_UNIX_SOCKETS */
   result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
+  if(result)
+    return result;
+
   /* Emit the correct prefix for IPv6 */
   if(data->set.str[STRING_HAPROXY_CLIENT_IP])
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
