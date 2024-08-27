@@ -32,8 +32,8 @@ sort_lists() {
   done < "$1"
 }
 
-am=$(mktemp autotools); sort_lists "$1" > "${am}"
-cm=$(mktemp cmake)    ; sort_lists "$2" > "${cm}"
+am=$(mktemp -t autotools); sort_lists "$1" > "${am}"
+cm=$(mktemp -t cmake)    ; sort_lists "$2" > "${cm}"
 diff -u "${am}" "${cm}"
 res="$?"
 rm -r -f "${am}" "${cm}"
