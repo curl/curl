@@ -29,6 +29,9 @@
  * *rintf() functions.
  */
 
+/* override format checks with those defined in curl_setup.h */
+#define CURL_TEMP_PRINTF CURL_PRINTF
+
 #include <curl/mprintf.h>
 
 #define MERR_OK        0
