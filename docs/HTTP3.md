@@ -313,6 +313,144 @@ directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 
      % C:\Program Files\msh3\lib> F:\curl\builds\libcurl-vc-x64-release-dll-ipv6-sspi-schannel-msh3\bin\curl.exe --http3 https://curl.se/
 
+# Linux QUIC version
+
+Linux QUIC support is **EXPERIMENTAL**
+
+Follow the [In-kernel QUIC implementation](https://github.com/lxin/quic)
+instructions to install the loadable kernel module and header files.
+The kernel module is currently under active development, and the discussion
+on integrating it into the Linux source repository is ongoing.
+As the kernel module is under active development and not versioned,
+it is important to note that the following build instructions may
+require updates.
+Please also consider the instructions in the linked repository.
+
+## Build with quictls
+
+Build quictls:
+
+     % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
+     % cd openssl
+     % ./config enable-tls1_3 --prefix=<somewhere1>
+     % make
+     % make install
+
+Build nghttp3:
+
+     % cd ..
+     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % git submodule update --init
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build the QUIC kernel module:
+
+     % cd ..
+     % git clone https://github.com/lxin/quic
+     % cd quic
+     % ./autogen.sh
+     % ./configure --prefix=/usr
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % LDFLAGS="-Wl,-rpath,<somewhere1>/lib" ./configure --with-openssl=<somewhere1> --with-nghttp3=<somewhere2> --with-linux-quic
+     % make
+     % make install
+
+## Build with GnuTLS
+
+Build GnuTLS:
+
+     % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
+     % cd gnutls
+     % ./bootstrap
+     % ./configure --prefix=<somewhere1>
+     % make
+     % make install
+
+Build nghttp3:
+
+     % cd ..
+     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % git submodule update --init
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build the QUIC kernel module:
+
+     % cd ..
+     % git clone https://github.com/lxin/quic
+     % cd quic
+     % ./autogen.sh
+     % ./configure --prefix=/usr
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure --with-gnutls=<somewhere1> --with-nghttp3=<somewhere2> --with-linux-quic
+     % make
+     % make install
+
+## Build with wolfSSL
+
+Build wolfSSL:
+
+     % git clone https://github.com/wolfSSL/wolfssl.git
+     % cd wolfssl
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere1> --enable-quic --enable-session-ticket --enable-earlydata --enable-psk --enable-harden --enable-altcertchains
+     % make
+     % make install
+
+Build nghttp3:
+
+     % cd ..
+     % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
+     % cd nghttp3
+     % git submodule update --init
+     % autoreconf -fi
+     % ./configure --prefix=<somewhere2> --enable-lib-only
+     % make
+     % make install
+
+Build the QUIC kernel module:
+
+     % cd ..
+     % git clone https://github.com/lxin/quic
+     % cd quic
+     % ./autogen.sh
+     % ./configure --prefix=/usr
+     % make
+     % make install
+
+Build curl:
+
+     % cd ..
+     % git clone https://github.com/curl/curl
+     % cd curl
+     % autoreconf -fi
+     % ./configure --with-wolfssl=<somewhere1> --with-nghttp3=<somewhere2> --with-linux-quic
+     % make
+     % make install
+
 # `--http3`
 
 Use only HTTP/3:
