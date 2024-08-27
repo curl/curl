@@ -3669,7 +3669,7 @@ static CURLcode create_conn(struct Curl_easy *data,
       goto out;
   }
 
-  /* presist the scheme and handler the transfer is using */
+  /* persist the scheme and handler the transfer is using */
   data->info.conn_scheme = conn->handler->scheme;
   /* conn_protocol can only provide "old" protocols */
   data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
