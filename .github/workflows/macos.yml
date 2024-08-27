@@ -299,15 +299,15 @@ jobs:
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DBUILD_EXAMPLES=ON
             macos-version-min: '10.15'
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
-            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
