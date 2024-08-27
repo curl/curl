@@ -264,7 +264,7 @@ static int crypto_ssl_set_secret(SSL *ssl,
     rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
                     extbuf, extlen);
     if(rc)
-      return CURLE_QUIC_CONNECT_ERROR;
+      return 0;
   }
 
   if(!cipher)
@@ -390,7 +390,6 @@ static CURLcode crypto_ssl_do_handshake(struct Curl_cfilter *cf,
       return CURLE_QUIC_CONNECT_ERROR;
     }
   }
-
 
   if(ctx->qconn->completed) {
     rc = SSL_process_quic_post_handshake(ssl);
@@ -591,6 +590,185 @@ static CURLcode crypto_gtls_do_handshake(struct Curl_cfilter *cf,
 }
 
 #elif defined(USE_WOLFSSL)
+static uint8_t crypto_wssl_level(WOLFSSL_ENCRYPTION_LEVEL level)
+{
+  switch(level) {
+  case wolfssl_encryption_application:
+    return QUIC_CRYPTO_APP;
+  case wolfssl_encryption_initial:
+    return QUIC_CRYPTO_INITIAL;
+  case wolfssl_encryption_handshake:
+    return QUIC_CRYPTO_HANDSHAKE;
+  case wolfssl_encryption_early_data:
+    return QUIC_CRYPTO_EARLY;
+  default:
+    DEBUGASSERT(0);
+    return QUIC_CRYPTO_MAX;
+  }
+}
+
+static WOLFSSL_ENCRYPTION_LEVEL crypto_to_wssl_level(uint8_t level)
+{
+  switch(level) {
+  case QUIC_CRYPTO_APP:
+    return wolfssl_encryption_application;
+  case QUIC_CRYPTO_INITIAL:
+    return wolfssl_encryption_initial;
+  case QUIC_CRYPTO_HANDSHAKE:
+    return wolfssl_encryption_handshake;
+  case QUIC_CRYPTO_EARLY:
+    return wolfssl_encryption_early_data;
+  default:
+    DEBUGASSERT(0);
+    return 0;
+  }
+}
+
+static uint32_t crypto_wssl_cipher_type(uint32_t cipher)
+{
+  switch(cipher) {
+  case TLS1_3_CK_AES_128_CCM_SHA256:
+    return TLS_CIPHER_AES_CCM_128;
+  case TLS1_3_CK_AES_128_GCM_SHA256:
+    return TLS_CIPHER_AES_GCM_128;
+  case TLS1_3_CK_AES_256_GCM_SHA384:
+    return TLS_CIPHER_AES_GCM_256;
+  case TLS1_3_CK_CHACHA20_POLY1305_SHA256:
+    return TLS_CIPHER_CHACHA20_POLY1305;
+  default:
+    DEBUGASSERT(0);
+    return 0;
+  }
+}
+
+static int crypto_wssl_set_secret(WOLFSSL *wssl,
+                                  WOLFSSL_ENCRYPTION_LEVEL wssl_level,
+                                  const uint8_t *rx_secret,
+                                  const uint8_t *tx_secret, size_t len)
+{
+  struct Curl_cfilter *cf = wolfSSL_get_app_data(wssl);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  const WOLFSSL_CIPHER *cipher = wolfSSL_get_current_cipher(wssl);
+  uint32_t type, wssl_type;
+  int rc;
+  uint8_t level;
+
+  if(level == QUIC_CRYPTO_APP && rx_secret) {
+    const uint8_t *extbuf;
+    size_t extlen;
+
+    wolfSSL_get_peer_quic_transport_params(wssl, &extbuf, &extlen);
+    rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
+                    extbuf, extlen);
+    if(rc)
+      return 0;
+  }
+
+  if(!cipher)
+    return 0;
+
+  wssl_type = wolfSSL_CIPHER_get_id(cipher);
+  level = crypto_wssl_level(wssl_level);
+  type = crypto_wssl_cipher_type(wssl_type);
+  rc = crypto_set_secret(ctx, level, type, rx_secret, tx_secret, len);
+
+  if(rc < 0)
+    return 0;
+
+  return 1;
+}
+
+static int crypto_wssl_send(WOLFSSL *wssl, WOLFSSL_ENCRYPTION_LEVEL wssl_level,
+                            const uint8_t *data, size_t len)
+{
+  struct Curl_cfilter *cf = wolfSSL_get_app_data(wssl);
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  int rc;
+  uint8_t level;
+
+  level = crypto_wssl_level(wssl_level);
+  rc = crypto_send(ctx, data, len, level);
+  if(rc < 0)
+    return 0;
+
+  return 1;
+}
+
+static int crypto_wssl_flush(WOLFSSL *wssl)
+{
+  (void)wssl;
+  return 1;
+}
+
+static int crypto_wssl_alert(WOLFSSL *wssl,
+                             WOLFSSL_ENCRYPTION_LEVEL wssl_level,
+                             uint8_t alert)
+{
+  (void)wssl;
+  (void)wssl_level;
+  (void)alert;
+  /* XXX: log, set alert */
+  return 1;
+}
+
+static WOLFSSL_QUIC_METHOD crypto_wssl_quic_method = {
+  crypto_wssl_set_secret, crypto_wssl_send, crypto_wssl_flush,
+  crypto_wssl_alert
+};
+
+static void crypto_wssl_configure_context(WOLFSSL_CTX *wssl_ctx)
+{
+  wolfSSL_CTX_set_max_proto_version(wssl_ctx, TLS1_3_VERSION);
+  wolfSSL_CTX_set_min_proto_version(wssl_ctx, TLS1_3_VERSION);
+  wolfSSL_CTX_set_quic_method(wssl_ctx, &crypto_wssl_quic_method);
+}
+
+static CURLcode crypto_wssl_do_handshake(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data, uint8_t level,
+                                        const uint8_t *buf, size_t len)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  WOLFSSL *wssl = ctx->tls.wssl.handle;
+  WOLFSSL_ENCRYPTION_LEVEL wssl_level;
+  int rc;
+
+  if(len > 0) {
+    wssl_level = crypto_to_wssl_level(level);
+    rc = wolfSSL_provide_quic_data(wssl, wssl_level, buf, len);
+    if(rc != 1) {
+      failf(data, "wolfSSL_provide_quic_data failed");
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
+  }
+  else if(level == QUIC_CRYPTO_INITIAL) {
+    uint8_t extbuf[256];
+    socklen_t extlen = sizeof(extbuf);
+    rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
+                    extbuf, &extlen);
+    if(rc)
+      return CURLE_QUIC_CONNECT_ERROR;
+
+    if(wolfSSL_set_quic_transport_params(wssl, extbuf, extlen) != 1)
+      return CURLE_QUIC_CONNECT_ERROR;
+  }
+
+  rc = wolfSSL_SSL_do_handshake(wssl);
+  if(rc <= 0) {
+    rc = wolfSSL_get_error(wssl, rc);
+    if(rc != WOLFSSL_ERROR_WANT_READ && rc != WOLFSSL_ERROR_WANT_WRITE) {
+      failf(data, "wolfSSL_do_handshake: wolfSSL_get_error: %d", rc);
+      return CURLE_QUIC_CONNECT_ERROR;
+    }
+  }
+
+  if(ctx->qconn->completed) {
+    rc = wolfSSL_process_quic_post_handshake(wssl);
+    if(rc != 1)
+      return CURLE_QUIC_CONNECT_ERROR;
+  }
+
+  return CURLE_OK;
+}
 #endif
 
 static CURLcode crypto_do_handshake(struct Curl_cfilter *cf,
@@ -603,6 +781,7 @@ static CURLcode crypto_do_handshake(struct Curl_cfilter *cf,
 #elif defined(USE_GNUTLS)
   rc = crypto_gtls_do_handshake(cf, data, level, buf, len);
 #elif defined(USE_WOLFSSL)
+  rc = crypto_wssl_do_handshake(cf, data, level, buf, len);
 #endif
   return rc;
 }
@@ -1406,10 +1585,7 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   }
 #elif defined(USE_WOLFSSL)
-  if(ngtcp2_crypto_wolfssl_configure_client_context(ctx->wssl.ctx) != 0) {
-    failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
-    return CURLE_FAILED_INIT;
-  }
+  crypto_wssl_configure_context(ctx->wssl.ctx);
 #endif
   return CURLE_OK;
 }
