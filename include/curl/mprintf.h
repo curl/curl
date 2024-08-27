@@ -37,7 +37,7 @@ extern "C" {
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
 #if defined(__MINGW32__)
-#if defined(__MINGW_PRINTF_FORMAT)  /* mingw-w64 4.0.0+. Needs stdio.h. */
+#if defined(__MINGW_PRINTF_FORMAT)  /* mingw-w64 3.0.0+. Needs stdio.h. */
 #define CURL_TEMP_PRINTF(fmt, arg) \
   __attribute__((__format__(__MINGW_PRINTF_FORMAT, fmt, arg)))
 #else
