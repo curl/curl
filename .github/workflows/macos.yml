@@ -253,6 +253,7 @@ jobs:
         run: make -C bld V=1 -C tests
 
       - name: 'run tests'
+        timeout-minutes: 20
         run: |
           export TFLAGS='${{ matrix.tflags }} -j10'
           TFLAGS+=' ~2037 ~2041'  # flaky
@@ -385,6 +386,7 @@ jobs:
         run: make -C bld testdeps
 
       - name: 'cmake run tests'
+        timeout-minutes: 10
         run: |
           export TFLAGS='${{ matrix.build.tflags }} -j10'
           TFLAGS+=' ~2037 ~2041'  # flaky
