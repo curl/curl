@@ -335,9 +335,16 @@
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
   !defined(CURL_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
+/* Skip format checks for older mingw-w64 versions. They do not grok
+   the `%zd` `%zu` formats by default, and there is format check CI
+   coverage with newer mingw-w64 versions without them. */
+#if __MINGW64_VERSION_MAJOR >= 8
 /* override __MINGW_PRINTF_FORMAT with gnu_printf for internal code */
 #define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(gnu_printf, fmt, arg)))
+  __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
+#else
+#define CURL_PRINTF(fmt, arg)
+#endif
 #else
 #define CURL_PRINTF(fmt, arg) \
   __attribute__((format(__printf__, fmt, arg)))
