@@ -51,7 +51,7 @@ Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and 
 OpenSSL does not offer the required APIs for building a QUIC client. You need
 to use a TLS library that has such APIs and that works with *ngtcp2*.
 
-Build quictls
+Build quictls:
 
      % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
      % cd openssl
@@ -59,7 +59,7 @@ Build quictls
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -70,7 +70,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
      % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
@@ -80,7 +80,7 @@ Build ngtcp2
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -94,7 +94,7 @@ For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute a
 
 ## Build with GnuTLS
 
-Build GnuTLS
+Build GnuTLS:
 
      % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
      % cd gnutls
@@ -103,7 +103,7 @@ Build GnuTLS
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -114,7 +114,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
      % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
@@ -124,7 +124,7 @@ Build ngtcp2
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -136,7 +136,7 @@ Build curl
 
 ## Build with wolfSSL
 
-Build wolfSSL
+Build wolfSSL:
 
      % git clone https://github.com/wolfSSL/wolfssl.git
      % cd wolfssl
@@ -145,7 +145,7 @@ Build wolfSSL
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -156,7 +156,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
      % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
@@ -166,7 +166,7 @@ Build ngtcp2
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -210,7 +210,7 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.3.1
+Build OpenSSL 3.3.1:
 
      % cd ..
      % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
@@ -219,7 +219,7 @@ Build OpenSSL 3.3.1
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -317,15 +317,15 @@ directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 
 Use only HTTP/3:
 
-    curl --http3-only https://example.org:4433/
+     % curl --http3-only https://example.org:4433/
 
 Use HTTP/3 with fallback to HTTP/2 or HTTP/1.1 (see "HTTPS eyeballing" below):
 
-    curl --http3 https://example.org:4433/
+     % curl --http3 https://example.org:4433/
 
 Upgrade via Alt-Svc:
 
-    curl --alt-svc altsvc.cache https://curl.se/
+     % curl --alt-svc altsvc.cache https://curl.se/
 
 See this [list of public HTTP/3 servers](https://bagder.github.io/HTTP3-test/)
 
@@ -383,7 +383,7 @@ ones. You can easily create huge local files like `truncate -s=8G 8GB` - they
 are huge but do not occupy that much space on disk since they are just big
 holes.
 
-In a Debian setup you can install **apache2**. It runs on port 80 and has a
+In a Debian setup you can install apache2. It runs on port 80 and has a
 document root in `/var/www/html`. Download the 8GB file from apache with `curl
 localhost/8GB -o dev/null`
 
@@ -396,23 +396,23 @@ You can select either or both of these server solutions.
 
 ### nghttpx
 
-Get, build and install **quictls**, **nghttp3** and **ngtcp2** as described
+Get, build and install quictls, nghttp3 and ngtcp2 as described
 above.
 
-Get, build and install **nghttp2**:
+Get, build and install nghttp2:
 
-    git clone https://github.com/nghttp2/nghttp2.git
-    cd nghttp2
-    autoreconf -fi
-    PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
-    make && make install
+     % git clone https://github.com/nghttp2/nghttp2.git
+     % cd nghttp2
+     % autoreconf -fi
+     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+     % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to
 HTTP/1 on localhost port 80. For local toying, we can just use the test cert
 that exists in curl's test dir.
 
-    CERT=$CURLSRC/tests/stunnel.pem
-    $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
+     % CERT=$CURLSRC/tests/stunnel.pem
+     % $HOME/bin/nghttpx $CERT $CERT --backend=localhost,80 \
       --frontend="localhost,9443;quic"
 
 ### Caddy
@@ -429,7 +429,7 @@ localhost:7443 {
 
 Then run Caddy:
 
-    ./caddy start
+     % ./caddy start
 
 Making requests to `https://localhost:7443` should tell you which protocol is being used.
 
