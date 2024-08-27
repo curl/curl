@@ -50,14 +50,14 @@ jobs:
       - name: 'cmake log'
         run: cat bld_cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: compare generated curl-config files
-        run: ./.github/scripts/cmp-pkg-config.sh bld_am/curl-config bld_cm/curl-config
+      - name: compare generated curl_config.h files
+        run: ./.github/scripts/cmp-config.pl bld_am/lib/curl_config.h bld_cm/lib/curl_config.h
 
       - name: compare generated libcurl.pc files
         run: ./.github/scripts/cmp-pkg-config.sh bld_am/libcurl.pc bld_cm/libcurl.pc
 
-      - name: compare generated curl_config.h files
-        run: ./.github/scripts/cmp-config.pl bld_am/lib/curl_config.h bld_cm/lib/curl_config.h
+      - name: compare generated curl-config files
+        run: ./.github/scripts/cmp-pkg-config.sh bld_am/curl-config bld_cm/curl-config
 
   check-macos:
     runs-on: macos-latest
@@ -90,14 +90,14 @@ jobs:
       - name: 'cmake log'
         run: cat bld_cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: compare generated curl-config files
-        run: ./.github/scripts/cmp-pkg-config.sh bld_am/curl-config bld_cm/curl-config
+      - name: compare generated curl_config.h files
+        run: ./.github/scripts/cmp-config.pl bld_am/lib/curl_config.h bld_cm/lib/curl_config.h
 
       - name: compare generated libcurl.pc files
         run: ./.github/scripts/cmp-pkg-config.sh bld_am/libcurl.pc bld_cm/libcurl.pc
 
-      - name: compare generated curl_config.h files
-        run: ./.github/scripts/cmp-config.pl bld_am/lib/curl_config.h bld_cm/lib/curl_config.h
+      - name: compare generated curl-config files
+        run: ./.github/scripts/cmp-pkg-config.sh bld_am/curl-config bld_cm/curl-config
 
   check-windows:
     runs-on: ubuntu-latest
@@ -128,11 +128,11 @@ jobs:
       - name: 'cmake log'
         run: cat bld_cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: compare generated curl-config files
-        run: ./.github/scripts/cmp-pkg-config.sh bld_am/curl-config bld_cm/curl-config
+      - name: compare generated curl_config.h files
+        run: ./.github/scripts/cmp-config.pl bld_am/lib/curl_config.h bld_cm/lib/curl_config.h
 
       - name: compare generated libcurl.pc files
         run: ./.github/scripts/cmp-pkg-config.sh bld_am/libcurl.pc bld_cm/libcurl.pc
 
-      - name: compare generated curl_config.h files
-        run: ./.github/scripts/cmp-config.pl bld_am/lib/curl_config.h bld_cm/lib/curl_config.h
+      - name: compare generated curl-config files
+        run: ./.github/scripts/cmp-pkg-config.sh bld_am/curl-config bld_cm/curl-config
