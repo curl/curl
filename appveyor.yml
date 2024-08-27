@@ -59,6 +59,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
+      TFLAGS: 'skiprun'
     - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.2, WebSockets, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
@@ -91,6 +92,7 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
+      TFLAGS: 'skiprun'
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
