@@ -76,11 +76,11 @@ jobs:
         run: |
           autoreconf -fi
           export PKG_CONFIG_DEBUG_SPEW=1
-          mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-openssl --without-libpsl
+          mkdir bld_am && cd bld_am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap
 
       - name: run cmake
         run: |
-          cmake -B bld_cm -DCURL_USE_LIBPSL=OFF \
+          cmake -B bld_cm -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             -DCURL_USE_LIBSSH2=OFF
 
