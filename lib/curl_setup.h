@@ -340,7 +340,7 @@
   __attribute__((format(gnu_printf, fmt, arg)))
 #else
 #define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(printf, fmt, arg)))
+  __attribute__((format(__printf__, fmt, arg)))
 #endif
 #else
 #define CURL_PRINTF(fmt, arg)
