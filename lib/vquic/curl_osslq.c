@@ -612,10 +612,8 @@ static CURLcode h3_data_setup(struct Curl_cfilter *cf,
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
 
-  if(!data) {
-    failf(data, "initialization failure, transfer not http initialized");
+  if(!data)
     return CURLE_FAILED_INIT;
-  }
 
   if(stream)
     return CURLE_OK;
