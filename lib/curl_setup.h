@@ -339,9 +339,11 @@
    the `%zd` `%zu` formats by default, and there is format check CI
    coverage with newer mingw-w64 versions without them. */
 #if __MINGW64_VERSION_MAJOR >= 8
-/* override __MINGW_PRINTF_FORMAT with gnu_printf for internal code */
+/* override __MINGW_PRINTF_FORMAT with gnu_printf for internal code
+   to match the CURL_FORMAT_CURL_OFF_T overrides above, regardless
+   of the __USE_MINGW_ANSI_STDIO setting. */
 #define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(__MINGW_PRINTF_FORMAT, fmt, arg)))
+  __attribute__((format(gnu_printf, fmt, arg)))
 #else
 #define CURL_PRINTF(fmt, arg)
 #endif
