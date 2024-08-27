@@ -317,6 +317,38 @@
 #define CURL_CONC_MACROS_(A,B) A ## B
 #define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
 
+/* based on logic in "curl/mprintf.h" */
+#ifndef CURL_TEMP_PRINTF
+#if (defined(__GNUC__) || defined(__clang__) ||                         \
+  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
+  !defined(CURL_NO_FMT_CHECKS)
+#if defined(__MINGW32__)
+/* override __MINGW_PRINTF_FORMAT with gnu_printf for internal code */
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((__format__(gnu_printf, fmt, arg)))
+#else
+#define CURL_TEMP_PRINTF(fmt, arg) \
+  __attribute__((format(printf, fmt, arg)))
+#endif
+#else
+#define CURL_TEMP_PRINTF(fmt, arg)
+#endif
+#endif
+/* use the same format check for internal functions */
+#define CURL_PRINTF CURL_TEMP_PRINTF
+
+/* curl uses its own printf() function internally. It understands the GNU
+ * format. Use this format, so that is matches the GNU format attribute we
+ * use with the MinGW compiler, allowing it to verify them at compile-time.
+ */
+#ifdef  __MINGW32__
+#  undef CURL_FORMAT_CURL_OFF_T
+#  undef CURL_FORMAT_CURL_OFF_TU
+#  define CURL_FORMAT_CURL_OFF_T   "lld"
+#  define CURL_FORMAT_CURL_OFF_TU  "llu"
+#endif
+
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
    gcc (as of v14) is also missing it. */
@@ -404,27 +436,6 @@
 
 #include <stdio.h>
 #include <assert.h>
-
-/* based on logic in "curl/mprintf.h" */
-
-#if (defined(__GNUC__) || defined(__clang__) ||                         \
-  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
-  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(CURL_NO_FMT_CHECKS)
-#if defined(__MINGW32__)
-#if defined(__MINGW_PRINTF_FORMAT)  /* mingw-w64 3.0.0+. Needs stdio.h. */
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((__format__(__MINGW_PRINTF_FORMAT, fmt, arg)))
-#else
-#define CURL_PRINTF(fmt, arg)
-#endif
-#else
-#define CURL_PRINTF(fmt, arg) \
-  __attribute__((format(__printf__, fmt, arg)))
-#endif
-#else
-#define CURL_PRINTF(fmt, arg)
-#endif
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
 # if ! defined __LP64
