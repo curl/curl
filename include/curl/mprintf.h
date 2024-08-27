@@ -49,6 +49,7 @@ extern "C" {
 #endif
 #else
 #define CURL_TEMP_PRINTF(fmt, arg)
+#error "DISABLING FORMAT CHECKS"
 #endif
 
 CURL_EXTERN int curl_mprintf(const char *format, ...)

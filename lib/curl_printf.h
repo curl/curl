@@ -32,8 +32,15 @@
 /* Skip format checks for older mingw-w64 versions. They do not grok
    the `%zd` `%zu` formats by default, and there is format check CI
    coverage with newer mingw-w64 versions without them. */
+#ifndef __MINGW64_VERSION_MAJOR
+#error "__MINGW64_VERSION_MAJOR NOT DEFINED"
+#elif __MINGW64_VERSION_MAJOR <= 7
+#error "__MINGW64_VERSION_MAJOR 7 OR LOWER"
+#endif
+
 #if defined(__MINGW32__) && !defined(__clang__) && __MINGW64_VERSION_MAJOR <= 7
 #define CURL_NO_FMT_CHECK_PUB
+#error "DISABLING CURL_NO_FMT_CHECK_PUB"
 #endif
 
 #include <curl/mprintf.h>
