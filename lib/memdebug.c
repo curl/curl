@@ -177,7 +177,7 @@ ALLOC_FUNC void *curl_dbg_calloc(size_t wanted_elements, size_t wanted_size,
     mem->size = user_size;
 
   if(source)
-    curl_dbg_log("MEM %s:%d calloc(%" CURL_FORMAT_SIZE_T ","
+    curl_dbg_log("MEM %s:%d calloc(%" CURL_FORMAT_SIZE_T ", "
                  "%" CURL_FORMAT_SIZE_T ") = %p\n",
                  source, line, wanted_elements, wanted_size,
                  mem ? (void *)mem->mem : (void *)0);
