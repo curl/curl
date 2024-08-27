@@ -317,6 +317,17 @@
 #define CURL_CONC_MACROS_(A,B) A ## B
 #define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
 
+/* curl uses its own printf() function internally. It understands the GNU
+ * format. Use this format, so that is matches the GNU format attribute we
+ * use with the MinGW compiler, allowing it to verify them at compile-time.
+ */
+#ifdef  __MINGW32__
+#  undef CURL_FORMAT_CURL_OFF_T
+#  undef CURL_FORMAT_CURL_OFF_TU
+#  define CURL_FORMAT_CURL_OFF_T   "lld"
+#  define CURL_FORMAT_CURL_OFF_TU  "llu"
+#endif
+
 /* based on logic in "curl/mprintf.h" */
 #ifndef CURL_TEMP_PRINTF
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
@@ -337,17 +348,6 @@
 #endif
 /* use the same format check for internal functions */
 #define CURL_PRINTF CURL_TEMP_PRINTF
-
-/* curl uses its own printf() function internally. It understands the GNU
- * format. Use this format, so that is matches the GNU format attribute we
- * use with the MinGW compiler, allowing it to verify them at compile-time.
- */
-#ifdef  __MINGW32__
-#  undef CURL_FORMAT_CURL_OFF_T
-#  undef CURL_FORMAT_CURL_OFF_TU
-#  define CURL_FORMAT_CURL_OFF_T   "lld"
-#  define CURL_FORMAT_CURL_OFF_TU  "llu"
-#endif
 
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
