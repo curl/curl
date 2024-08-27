@@ -51,7 +51,7 @@ Building curl with ngtcp2 involves 3 components: `ngtcp2` itself, `nghttp3` and 
 OpenSSL does not offer the required APIs for building a QUIC client. You need
 to use a TLS library that has such APIs and that works with *ngtcp2*.
 
-Build quictls
+Build quictls:
 
      % git clone --depth 1 -b openssl-3.1.4+quic https://github.com/quictls/openssl
      % cd openssl
@@ -59,7 +59,7 @@ Build quictls
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -70,7 +70,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
      % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
@@ -80,7 +80,7 @@ Build ngtcp2
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -94,7 +94,7 @@ For OpenSSL 3.0.0 or later builds on Linux for x86_64 architecture, substitute a
 
 ## Build with GnuTLS
 
-Build GnuTLS
+Build GnuTLS:
 
      % git clone --depth 1 https://gitlab.com/gnutls/gnutls.git
      % cd gnutls
@@ -103,7 +103,7 @@ Build GnuTLS
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -114,7 +114,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
      % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
@@ -124,7 +124,7 @@ Build ngtcp2
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -136,7 +136,7 @@ Build curl
 
 ## Build with wolfSSL
 
-Build wolfSSL
+Build wolfSSL:
 
      % git clone https://github.com/wolfSSL/wolfssl.git
      % cd wolfssl
@@ -145,7 +145,7 @@ Build wolfSSL
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
@@ -156,7 +156,7 @@ Build nghttp3
      % make
      % make install
 
-Build ngtcp2
+Build ngtcp2:
 
      % cd ..
      % git clone -b v1.2.0 https://github.com/ngtcp2/ngtcp2
@@ -166,7 +166,7 @@ Build ngtcp2
      % make
      % make install
 
-Build curl
+Build curl:
 
      % cd ..
      % git clone https://github.com/curl/curl
@@ -210,7 +210,7 @@ Build curl:
 
 QUIC support is **EXPERIMENTAL**
 
-Build OpenSSL 3.3.1
+Build OpenSSL 3.3.1:
 
      % cd ..
      % git clone -b openssl-3.3.1 https://github.com/openssl/openssl
@@ -219,7 +219,7 @@ Build OpenSSL 3.3.1
      % make
      % make install
 
-Build nghttp3
+Build nghttp3:
 
      % cd ..
      % git clone -b v1.1.0 https://github.com/ngtcp2/nghttp3
