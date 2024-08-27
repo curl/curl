@@ -14,11 +14,11 @@ sort_lists() {
     else
       # libcurl.pc
       if [[ "${l}" =~ ^(Requires|Libs|Cflags)(\.private)?:(.+)$ ]]; then
-        val="$(printf '%s' "${BASH_REMATCH[3]}" | tr ', ' '\n' | sort | tr '\n' ' ')"
+        val="$(printf '%s' "${BASH_REMATCH[3]}" | tr ', ' '\n' | sort -u | tr '\n' ' ')"
         l="${BASH_REMATCH[1]}${BASH_REMATCH[2]}:${val}"
       # curl-config
       elif [[ "${section}" =~ (--libs|--static-libs) && "${l}" =~ ^( *echo\ \")(.+)(\")$ ]]; then
-        val="$(printf '%s' "${BASH_REMATCH[2]}" | tr ' ' '\n' | sort | tr '\n' ' ')"
+        val="$(printf '%s' "${BASH_REMATCH[2]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
         l="${BASH_REMATCH[1]}${val}${BASH_REMATCH[3]}"
         section=''
       fi
