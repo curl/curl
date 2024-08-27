@@ -29,8 +29,12 @@
  * *rintf() functions.
  */
 
-/* override format checks with those defined in curl_setup.h */
-#define CURL_TEMP_PRINTF CURL_PRINTF
+/* Skip format checks for older mingw-w64 versions. They do not grok
+   the `%zd` `%zu` formats by default, and there is format check CI
+   coverage with newer mingw-w64 versions without them. */
+#if defined(__MINGW32__) && !defined(__clang__) && __MINGW64_VERSION_MAJOR <= 7
+#define CURL_NO_FMT_CHECK_PUB
+#endif
 
 #include <curl/mprintf.h>
 
