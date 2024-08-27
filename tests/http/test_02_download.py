@@ -272,7 +272,9 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        r.check_stats(count=count, http_status=404, exitcode=0)
+        r.check_stats(count=count, http_status=404, exitcode=0,
+                      remote_port=env.port_for(alpn_proto=proto),
+                      remote_ip='127.0.0.1')
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, repeat, proto):
@@ -286,7 +288,9 @@ class TestDownload:
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--fail'
         ])
-        r.check_stats(count=count, http_status=404, exitcode=22)
+        r.check_stats(count=count, http_status=404, exitcode=22,
+                      remote_port=env.port_for(alpn_proto=proto),
+                      remote_ip='127.0.0.1')
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")

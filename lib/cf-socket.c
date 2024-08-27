@@ -1614,6 +1614,18 @@ static ssize_t cf_socket_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   return nread;
 }
 
+static void cf_socket_update_data(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
+{
+  /* Update the IP info held in the transfer, if we have that. */
+  if(cf->connected && (cf->sockindex == FIRSTSOCKET)) {
+    struct cf_socket_ctx *ctx = cf->ctx;
+    data->info.primary = ctx->ip;
+    /* not sure if this is redundant... */
+    data->info.conn_remote_port = cf->conn->remote_port;
+  }
+}
+
 static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct cf_socket_ctx *ctx = cf->ctx;
@@ -1621,17 +1633,15 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* use this socket from now on */
   cf->conn->sock[cf->sockindex] = ctx->sock;
   set_local_ip(cf, data);
-  if(cf->sockindex == SECONDARYSOCKET)
-    cf->conn->secondary = ctx->ip;
-  else
-    cf->conn->primary = ctx->ip;
-  /* the first socket info gets some specials */
   if(cf->sockindex == FIRSTSOCKET) {
+    cf->conn->primary = ctx->ip;
     cf->conn->remote_addr = &ctx->addr;
   #ifdef USE_IPV6
     cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
   #endif
-    Curl_persistconninfo(data, cf->conn, &ctx->ip);
+  }
+  else {
+    cf->conn->secondary = ctx->ip;
   }
   ctx->active = TRUE;
 }
@@ -1647,9 +1657,10 @@ static CURLcode cf_socket_cntrl(struct Curl_cfilter *cf,
   switch(event) {
   case CF_CTRL_CONN_INFO_UPDATE:
     cf_socket_active(cf, data);
+    cf_socket_update_data(cf, data);
     break;
   case CF_CTRL_DATA_SETUP:
-    Curl_persistconninfo(data, cf->conn, &ctx->ip);
+    cf_socket_update_data(cf, data);
     break;
   case CF_CTRL_FORGET_SOCKET:
     ctx->sock = CURL_SOCKET_BAD;
@@ -1732,6 +1743,10 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     }
     return CURLE_OK;
   }
+  case CF_QUERY_IP_INFO:
+    *pres1 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
+    *(struct ip_quadruple *)pres2 = ctx->ip;
+    return CURLE_OK;
   default:
     break;
   }

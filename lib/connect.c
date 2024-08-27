@@ -208,31 +208,6 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
   return (pt->tv_sec > 0) || (pt->tv_usec > 0);
 }
 
-/* Copies connection info into the transfer handle to make it available when
-   the transfer handle is no longer associated with the connection. */
-void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          struct ip_quadruple *ip)
-{
-  if(ip)
-    data->info.primary = *ip;
-  else {
-    memset(&data->info.primary, 0, sizeof(data->info.primary));
-    data->info.primary.remote_port = -1;
-    data->info.primary.local_port = -1;
-  }
-  data->info.conn_scheme = conn->handler->scheme;
-  /* conn_protocol can only provide "old" protocols */
-  data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
-  data->info.conn_remote_port = conn->remote_port;
-  data->info.used_proxy =
-#ifdef CURL_DISABLE_PROXY
-    0
-#else
-    conn->bits.proxy
-#endif
-    ;
-}
-
 static const struct Curl_addrinfo *
 addr_first_match(const struct Curl_addrinfo *addr, int family)
 {
@@ -992,8 +967,6 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
         cf->next = ctx->winner->cf;
         ctx->winner->cf = NULL;
         cf_he_ctx_clear(cf, data);
-        Curl_conn_cf_cntrl(cf->next, data, TRUE,
-                           CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */

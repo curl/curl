@@ -94,7 +94,9 @@ class TestBasic:
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
-        r.check_stats(http_status=200, count=1)
+        r.check_stats(http_status=200, count=1,
+                      remote_port=env.port_for(alpn_proto=proto),
+                      remote_ip='127.0.0.1')
         assert r.stats[0]['time_connect'] > 0, f'{r.stats[0]}'
         assert r.stats[0]['time_appconnect'] > 0, f'{r.stats[0]}'
 
@@ -108,7 +110,9 @@ class TestBasic:
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json'
         r = curl.http_download(urls=[url], with_stats=True, with_headers=True,
                                extra_args=['-I'])
-        r.check_stats(http_status=200, count=1, exitcode=0)
+        r.check_stats(http_status=200, count=1, exitcode=0,
+                      remote_port=env.port_for(alpn_proto=proto),
+                      remote_ip='127.0.0.1')
         # got the Conten-Length: header, but did not download anything
         assert r.responses[0]['header']['content-length'] == '30', f'{r.responses[0]}'
         assert r.stats[0]['size_download'] == 0, f'{r.stats[0]}'

@@ -3434,7 +3434,9 @@ static CURLcode create_conn(struct Curl_easy *data,
     /* this is supposed to be the connect function so we better at least check
        that the file is present here! */
     DEBUGASSERT(conn->handler->connect_it);
-    Curl_persistconninfo(data, conn, NULL);
+    data->info.conn_scheme = conn->handler->scheme;
+    /* conn_protocol can only provide "old" protocols */
+    data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
     result = conn->handler->connect_it(data, &done);
 
     /* Setup a "faked" transfer that will do nothing */
@@ -3630,9 +3632,20 @@ static CURLcode create_conn(struct Curl_easy *data,
       goto out;
   }
 
+  /* persist the scheme and handler the transfer is using */
+  data->info.conn_scheme = conn->handler->scheme;
+  /* conn_protocol can only provide "old" protocols */
+  data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
+  data->info.used_proxy =
+#ifdef CURL_DISABLE_PROXY
+    0
+#else
+    conn->bits.proxy
+#endif
+    ;
+
   /* Everything general done, inform filters that they need
-   * to prepare for a data transfer.
-   */
+   * to prepare for a data transfer. */
   result = Curl_conn_ev_data_setup(data);
 
 out:

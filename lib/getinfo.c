@@ -77,10 +77,9 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   free(info->wouldredirect);
   info->wouldredirect = NULL;
 
-  info->primary.remote_ip[0] = '\0';
-  info->primary.local_ip[0] = '\0';
-  info->primary.remote_port = 0;
-  info->primary.local_port = 0;
+  memset(&info->primary, 0, sizeof(info->primary));
+  info->primary.remote_port = -1;
+  info->primary.local_port = -1;
   info->retry_after = 0;
 
   info->conn_scheme = 0;

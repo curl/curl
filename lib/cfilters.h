@@ -30,6 +30,7 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct Curl_dns_entry;
 struct connectdata;
+struct ip_quadruple;
 
 /* Callback to destroy resources held by this filter instance.
  * Implementations MUST NOT chain calls to cf->next.
@@ -165,6 +166,8 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
  *                   -1 if not determined yet.
  * - CF_QUERY_SOCKET: the socket used by the filter chain
  * - CF_QUERY_NEED_FLUSH: TRUE iff any of the filters have unsent data
+ * - CF_QUERY_IP_INFO: res1 says if connection used IPv6, res2 is the
+ *                   ip quadruple
  */
 /*      query                             res1       res2     */
 #define CF_QUERY_MAX_CONCURRENT     1  /* number     -        */
@@ -174,6 +177,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_TIMER_APPCONNECT   5  /* -          struct curltime */
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
+#define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -343,6 +347,10 @@ bool Curl_conn_cf_is_ssl(struct Curl_cfilter *cf);
  */
 curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
                                       struct Curl_easy *data);
+
+CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int *is_ipv6, struct ip_quadruple *ipquad);
 
 bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
                               struct Curl_easy *data);
@@ -514,12 +522,6 @@ void Curl_conn_ev_data_done(struct Curl_easy *data, bool premature);
  * Notify connection filters that the transfer of data is paused/unpaused.
  */
 CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause);
-
-/**
- * Inform connection filters to update their info in `conn`.
- */
-void Curl_conn_ev_update_info(struct Curl_easy *data,
-                              struct connectdata *conn);
 
 /**
  * Check if FIRSTSOCKET's cfilter chain deems connection alive.

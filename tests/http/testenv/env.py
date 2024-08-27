@@ -552,13 +552,16 @@ class Env:
     def ci_run(self) -> bool:
         return "CURL_CI" in os.environ
 
-    def authority_for(self, domain: str, alpn_proto: Optional[str] = None):
+    def port_for(self, alpn_proto: Optional[str] = None):
         if alpn_proto is None or \
                 alpn_proto in ['h2', 'http/1.1', 'http/1.0', 'http/0.9']:
-            return f'{domain}:{self.https_port}'
+            return self.https_port
         if alpn_proto in ['h3']:
-            return f'{domain}:{self.h3_port}'
-        return f'{domain}:{self.http_port}'
+            return self.h3_port
+        return self.http_port
+
+    def authority_for(self, domain: str, alpn_proto: Optional[str] = None):
+        return f'{domain}:{self.port_for(alpn_proto=alpn_proto)}'
 
     def make_data_file(self, indir: str, fname: str, fsize: int) -> str:
         fpath = os.path.join(indir, fname)
