@@ -329,7 +329,6 @@
 #endif
 
 /* based on logic in "curl/mprintf.h" */
-#ifndef CURL_TEMP_PRINTF
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
@@ -344,7 +343,6 @@
 #endif
 #else
 #define CURL_TEMP_PRINTF(fmt, arg)
-#endif
 #endif
 /* use the same format check for internal functions */
 #define CURL_PRINTF CURL_TEMP_PRINTF
