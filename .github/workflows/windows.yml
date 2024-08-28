@@ -465,7 +465,7 @@ jobs:
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
             arch: 'x64'
             plat: 'windows'
-            type: 'Release'
+            type: 'Debug'
             tflags: '~1516'
             # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
             #          read its configuration from, making it vulnerable to attacks on
