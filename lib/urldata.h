@@ -501,9 +501,6 @@ struct ConnectBits {
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
                          apps */
-  BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
-                                in a CONNECT request with auth, so that
-                                libcurl should reconnect and continue. */
   BIT(proxy); /* if set, this transfer is done through a proxy - any type */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */

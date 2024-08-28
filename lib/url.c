@@ -3671,14 +3671,6 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
     return result;
   }
 
-#ifndef CURL_DISABLE_PROXY
-  /* set proxy_connect_closed to false unconditionally already here since it
-     is used strictly to provide extra information to a parent function in the
-     case of proxy CONNECT failures and we must make sure we do not have it
-     lingering set from a previous invoke */
-  conn->bits.proxy_connect_closed = FALSE;
-#endif
-
 #ifdef CURL_DO_LINEEND_CONV
   data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
 #endif /* CURL_DO_LINEEND_CONV */

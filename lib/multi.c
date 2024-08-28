@@ -2014,21 +2014,11 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       /* this is HTTP-specific, but sending CONNECT to a proxy is HTTP... */
       DEBUGASSERT(data->conn);
       result = Curl_http_connect(data, &protocol_connected);
-#ifndef CURL_DISABLE_PROXY
-      if(data->conn->bits.proxy_connect_closed) {
+      if(!result) {
         rc = CURLM_CALL_MULTI_PERFORM;
-        /* connect back to proxy again */
-        result = CURLE_OK;
-        multi_done(data, CURLE_OK, FALSE);
-        multistate(data, MSTATE_CONNECT);
+        /* initiate protocol connect phase */
+        multistate(data, MSTATE_PROTOCONNECT);
       }
-      else
-#endif
-        if(!result) {
-          rc = CURLM_CALL_MULTI_PERFORM;
-          /* initiate protocol connect phase */
-          multistate(data, MSTATE_PROTOCONNECT);
-        }
       else
         stream_error = TRUE;
       break;
