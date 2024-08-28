@@ -31,7 +31,7 @@ supported_features="@SUPPORT_FEATURES@"
 
 Name: libcurl
 URL: https://curl.se/
-Description: Library to transfer files with FTP, HTTP, etc.
+Description: Library to transfer files with HTTP, FTP, etc.
 Version: @CURLVERSION@
 Requires: @LIBCURL_PC_REQUIRES@
 Requires.private: @LIBCURL_PC_REQUIRES_PRIVATE@
