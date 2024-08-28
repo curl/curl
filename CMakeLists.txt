@@ -595,11 +595,6 @@ if(CURL_USE_OPENSSL)
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  if(NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl >= 3.0.0")
-  else()
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
-  endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
@@ -925,6 +920,16 @@ if(USE_OPENSSL_QUIC)
   include_directories(SYSTEM ${NGHTTP3_INCLUDE_DIRS})
   list(APPEND CURL_LIBS ${NGHTTP3_LIBRARIES})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libnghttp3")
+endif()
+
+if(USE_OPENSSL)
+  if(USE_OPENSSL_QUIC)
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl >= 3.3.0")
+  elseif(NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl >= 3.0.0")
+  else()
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
+  endif()
 endif()
 
 if(CURL_WITH_MULTI_SSL AND (USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC))
