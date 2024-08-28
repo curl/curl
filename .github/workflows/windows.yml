@@ -484,14 +484,31 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: 'vcpkg versions'
-        timeout-minutes: 1
+        timeout-minutes: 5
         run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" pull
+          git -C "$VCPKG_INSTALLATION_ROOT" checkout f5ec6f30ff70f04f841436a0f36600bdbabfcfbf
+          "$VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.bat"
+          # Add separator for easy read the version on the ci.
+          echo "========================================================"
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
       - name: 'vcpkg build'
         timeout-minutes: 35
         run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+
+      - name: Prepare logs on failure
+        if: ${{failure()}}
+        run: |
+          7z a -t7z -r -mx=9 "$VCPKG_INSTALLATION_ROOT/buildtrees/*.log" logs.7z
+
+      - name: Upload logs on failure
+        if: ${{failure()}}
+        uses: actions/upload-artifact@834a144ee995460fba8ed112a2fc961b36a5ec5a
+        with:
+          name: windows_logs_${{matrix.arch}}_${{matrix.plat}}_${{matrix.type}}_${{github.event.pull_request.head.sha}}
+          path: logs.7z
 
       - name: 'cmake configure'
         timeout-minutes: 5
