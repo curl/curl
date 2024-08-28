@@ -53,7 +53,6 @@ open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what lis
 while( <CURLCONFIG> )
 {
     chomp;
-    # ignore curl-config --features not in curl's feature list
     push @curl_config, $_;
 }
 close CURLCONFIG;
