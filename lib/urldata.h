@@ -105,6 +105,11 @@ typedef unsigned int curl_prot_t;
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
+/* do FTP line-end conversions on most platforms */
+#define CURL_DO_LINEEND_CONV
+#endif
+
 /* Convenience defines for checking protocols or their SSL based version. Each
    protocol handler should only ever have a single CURLPROTO_ in its protocol
    field. */
@@ -1268,12 +1273,6 @@ struct UrlState {
 
   /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
-#if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
-/* do FTP line-end conversions on most platforms */
-#define CURL_DO_LINEEND_CONV
-  /* for FTP downloads: how many CRLFs did we converted to LFs? */
-  curl_off_t crlf_conversions;
-#endif
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
