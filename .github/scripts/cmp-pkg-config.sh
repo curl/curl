@@ -14,7 +14,14 @@ sort_lists() {
     else
       # libcurl.pc
       if [[ "${l}" =~ ^(Requires|Libs|Cflags)(\.private)?:(.+)$ ]]; then
-        val="$(printf '%s' "${BASH_REMATCH[3]}" | tr ', ' '\n' | sort -u | tr '\n' ' ')"
+        if [ "${BASH_REMATCH[1]}" = 'Requires' ]; then
+          # Spec does not allow duplicates here:
+          # https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html#Requires:
+          # "You may only mention the same package one time on the Requires: line"
+          val="$(printf '%s' "${BASH_REMATCH[3]}" | tr ',' '\n' | sort | tr '\n' ' ')"
+        else
+          val="$(printf '%s' "${BASH_REMATCH[3]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
+        fi
         l="${BASH_REMATCH[1]}${BASH_REMATCH[2]}:${val}"
       # curl-config
       elif [[ "${section}" =~ (--libs|--static-libs) && "${l}" =~ ^( *echo\ \")(.+)(\")$ ]]; then
