@@ -320,7 +320,7 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
       AC_MSG_RESULT([yes])
       ssl_msg="OpenSSL v3+"
-      have_openssl3='yes'
+      have_openssl3=1
     ],[
       AC_MSG_RESULT([no])
     ])
@@ -419,7 +419,7 @@ fi
 if test "$OPENSSL_ENABLED" = "1"; then
   if test "$have_openssl_quic" = '1'; then
     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.3.0"
-  elif test "$have_openssl3" = 'yes'; then
+  elif test "$have_openssl3" = '1'; then
     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.0.0"
   else
     LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
