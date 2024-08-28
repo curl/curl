@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
---data @file!0-499
+--data @file!9500-
 Only a part of a file
 </keywords>
 </info>
@@ -25,15 +25,15 @@ blablabla
 http
 </server>
 <name>
-POST only a part of --data (first 500 byte)
+POST only a part of --data (all bytes from offset 9500 and forward)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!0-499
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!9500-
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
-%repeat[249 x xy]%
-0123456789
-repeat[500 x test]%
+%repeat[9498 x 0]%
+%repeat[498 x 1]%
+%repeat[500 x 2]%
 </file>
 </client>
 
@@ -44,10 +44,11 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 500
+Content-Length: 1002
 Content-Type: application/x-www-form-urlencoded
 
-%repeat[249 x xy]%
+%repeat[498 x 1]%
+%repeat[500 x 2]%
 </protocol>
 </verify>
 </testcase>
