@@ -1028,6 +1028,8 @@ Curl_cookie_add(struct Curl_easy *data,
    * must also check that the data handle is not NULL since the psl code will
    * dereference it.
    */
+  DEBUGF(infof(data, "PSL check set-cookie '%s' for domain=%s in %s",
+         co->name, co->domain, domain));
   if(data && (domain && co->domain && !Curl_host_is_ipnum(co->domain))) {
     bool acceptable = FALSE;
     char lcase[256];
@@ -1054,6 +1056,9 @@ Curl_cookie_add(struct Curl_easy *data,
       return NULL;
     }
   }
+#else
+  DEBUGF(infof(data, "NO PSL to check set-cookie '%s' for domain=%s in %s",
+         co->name, co->domain, domain));
 #endif
 
   /* A non-secure cookie may not overlay an existing secure cookie. */
