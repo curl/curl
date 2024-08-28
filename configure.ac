@@ -1250,12 +1250,12 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#endif
+          #ifdef _WIN32
+          #ifndef WIN32_LEAN_AND_MEAN
+          #define WIN32_LEAN_AND_MEAN
+          #endif
+          #include <winsock2.h>
+          #endif
         ]],[[
           gethostbyname("localhost");
         ]])
@@ -1276,8 +1276,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_CHECKING([for gethostbyname for Minix 3])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-/* Older Minix versions may need <net/gen/netdb.h> here instead */
-#include <netdb.h>
+      /* Older Minix versions may need <net/gen/netdb.h> here instead */
+      #include <netdb.h>
     ]],[[
       gethostbyname("localhost");
     ]])
@@ -1294,8 +1294,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_CHECKING([for gethostbyname for eCos])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <stdio.h>
-#include <netdb.h>
+      #include <stdio.h>
+      #include <netdb.h>
     ]],[[
       gethostbyname("localhost");
     ]])
@@ -1780,27 +1780,27 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
   esac ],
 
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-/* are AF_INET6 and sockaddr_in6 available? */
-#include <sys/types.h>
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#if defined (__TANDEM)
-# include <netinet/in6.h>
-#endif
-#endif
+    /* are AF_INET6 and sockaddr_in6 available? */
+    #include <sys/types.h>
+    #ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #if defined (__TANDEM)
+    # include <netinet/in6.h>
+    #endif
+    #endif
 
-int main(void)
-{
- struct sockaddr_in6 s;
- (void)s;
- return socket(AF_INET6, SOCK_STREAM, 0) < 0;
-}
-]])
-],
+    int main(void)
+    {
+      struct sockaddr_in6 s;
+      (void)s;
+      return socket(AF_INET6, SOCK_STREAM, 0) < 0;
+    }
+  ]])
+  ],
   AC_MSG_RESULT(yes)
   ipv6=yes,
   AC_MSG_RESULT(no)
@@ -1817,20 +1817,20 @@ if test "$ipv6" = yes; then
 
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
   AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <netinet/in.h>
-#if defined (__TANDEM)
-# include <netinet/in6.h>
-#endif
-#endif
-]], [[
-  struct sockaddr_in6 s;
-  s.sin6_scope_id = 0;
-]])], [
+    #include <sys/types.h>
+    #ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #else
+    #include <netinet/in.h>
+    #if defined (__TANDEM)
+    # include <netinet/in6.h>
+    #endif
+    #endif
+  ]], [[
+    struct sockaddr_in6 s;
+    s.sin6_scope_id = 0;
+  ]])], [
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
   ], [
@@ -1953,10 +1953,10 @@ if test x"$want_gss" = xyes; then
         [],
         [not_mit=1],
         [
-AC_INCLUDES_DEFAULT
-#ifdef HAVE_GSSAPI_GSSAPI_H
-#include <gssapi/gssapi.h>
-#endif
+          AC_INCLUDES_DEFAULT
+          #ifdef HAVE_GSSAPI_GSSAPI_H
+          #include <gssapi/gssapi.h>
+          #endif
         ])
       if test "x$not_mit" = "x1"; then
         dnl MIT not found, check for Heimdal
@@ -1974,9 +1974,9 @@ AC_INCLUDES_DEFAULT
         AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
-#include <gssapi/gssapi.h>
-#include <gssapi/gssapi_generic.h>
-#include <gssapi/gssapi_krb5.h>
+            #include <gssapi/gssapi.h>
+            #include <gssapi/gssapi_generic.h>
+            #include <gssapi/gssapi_krb5.h>
           ]],[[
             gss_import_name(
                             (OM_uint32 *)0,
@@ -3598,8 +3598,8 @@ if test X"$want_quiche" != Xno; then
           LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE quiche",
           [],
           [
-AC_INCLUDES_DEFAULT
-#include <sys/socket.h>
+            AC_INCLUDES_DEFAULT
+            #include <sys/socket.h>
           ]
         )
       ],

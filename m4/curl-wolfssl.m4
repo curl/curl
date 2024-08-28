@@ -91,12 +91,12 @@ if test "x$OPT_WOLFSSL" != xno; then
       AC_MSG_CHECKING([for wolfSSL_Init in -lwolfssl])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-/* These are not needed for detection and confuse wolfSSL.
-   They are set up properly later if it is detected.  */
-#undef SIZEOF_LONG
-#undef SIZEOF_LONG_LONG
-#include <wolfssl/options.h>
-#include <wolfssl/ssl.h>
+          /* These are not needed for detection and confuse wolfSSL.
+             They are set up properly later if it is detected.  */
+          #undef SIZEOF_LONG
+          #undef SIZEOF_LONG_LONG
+          #include <wolfssl/options.h>
+          #include <wolfssl/ssl.h>
         ]],[[
           return wolfSSL_Init();
         ]])
