@@ -369,7 +369,6 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
       }
       /* either we just wrote the newline or it is part of the next
        * chunk of bytes we write. */
-      data->state.crlf_conversions++;
       ctx->newline_pending = FALSE;
     }
 
@@ -400,7 +399,6 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
     /* EndOfStream, if we have a trailing cr, now is the time to write it */
     if(ctx->newline_pending) {
       ctx->newline_pending = FALSE;
-      data->state.crlf_conversions++;
       return Curl_cwriter_write(data, writer->next, type, &nl, 1);
     }
     /* Always pass on the EOS type indicator */
@@ -3547,14 +3545,6 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   else {
     if((-1 != data->req.size) &&
        (data->req.size != data->req.bytecount) &&
-#ifdef CURL_DO_LINEEND_CONV
-       /* Most FTP servers do not adjust their file SIZE response for CRLFs,
-        * so we will check to see if the discrepancy can be explained by the
-        * number of CRLFs we have changed to LFs.
-        */
-       ((data->req.size + data->state.crlf_conversions) !=
-        data->req.bytecount) &&
-#endif /* CURL_DO_LINEEND_CONV */
        (data->req.maxdownload != data->req.bytecount)) {
       failf(data, "Received only partial file: %" CURL_FORMAT_CURL_OFF_T
             " bytes", data->req.bytecount);

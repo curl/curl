@@ -3671,10 +3671,6 @@ CURLcode Curl_setup_conn(struct Curl_easy *data,
     return result;
   }
 
-#ifdef CURL_DO_LINEEND_CONV
-  data->state.crlf_conversions = 0; /* reset CRLF conversion counter */
-#endif /* CURL_DO_LINEEND_CONV */
-
   /* set start time here for timeout purposes in the connect procedure, it
      is later set again for the progress meter purpose */
   conn->now = Curl_now();

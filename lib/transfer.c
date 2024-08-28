@@ -518,15 +518,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
      * returning.
      */
     if(!(data->req.no_body) && (k->size != -1) &&
-       (k->bytecount != k->size) &&
-#ifdef CURL_DO_LINEEND_CONV
-       /* Most FTP servers do not adjust their file SIZE response for CRLFs,
-          so we will check to see if the discrepancy can be explained
-          by the number of CRLFs we have changed to LFs.
-       */
-       (k->bytecount != (k->size + data->state.crlf_conversions)) &&
-#endif /* CURL_DO_LINEEND_CONV */
-       !k->newurl) {
+       (k->bytecount != k->size) && !k->newurl) {
       failf(data, "transfer closed with %" CURL_FORMAT_CURL_OFF_T
             " bytes remaining to read", k->size - k->bytecount);
       result = CURLE_PARTIAL_FILE;
