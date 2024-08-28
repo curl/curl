@@ -44,7 +44,6 @@ close CURL;
 $curl_protocols =~ s/\r//;
 $curl_protocols =~ /\w+: (.*)$/;
 @curl = split / /,$1;
-@curl = sort @curl;
 
 # Read the output of curl-config
 my @curl_config;
@@ -57,7 +56,11 @@ while( <CURLCONFIG> )
 }
 close CURLCONFIG;
 
-@curl_config = sort @curl_config;
+# allow order mismatch to handle autotools builds with no 'sort -f' available
+if($what eq "features") {
+    @curl = sort @curl;
+    @curl_config = sort @curl_config;
+}
 
 my $curlproto = join ' ', @curl;
 my $curlconfigproto = join ' ', @curl_config;
