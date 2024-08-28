@@ -595,7 +595,11 @@ if(CURL_USE_OPENSSL)
   # Depend on OpenSSL via imported targets. This allows our dependents to
   # get our dependencies transitively.
   list(APPEND CURL_LIBS OpenSSL::SSL OpenSSL::Crypto)
-  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
+  if(NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl >= 3.0.0")
+  else()
+    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "openssl")
+  endif()
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "openssl")
     set(_valid_default_ssl_backend TRUE)
