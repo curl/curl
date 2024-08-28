@@ -4,7 +4,7 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3236
+ Contributors:                 3237
 
 This release includes the following changes:
 
@@ -33,6 +33,8 @@ This release includes the following bugfixes:
  o bearssl: improve shutdown handling [45]
  o BINDINGS: add zig binding [100]
  o build: add `iphlpapi` lib for libssh on Windows [166]
+ o build: check OS-native IDN first, then libidn2 [223]
+ o build: delete unused `REQUIRE_LIB_DEPS` [226]
  o build: improve compiler version detection portability
  o build: make `CURL_FORMAT_CURL_OFF_T[U]` work with mingw-w64 <=7.0.0 [207]
  o build: silence C4232 MSVC warnings in vcpkg ngtcp2 builds [137]
@@ -43,6 +45,7 @@ This release includes the following bugfixes:
  o CHANGES: rename to CHANGES.md, no longer generated [40]
  o CI: enable parallel testing in CI builds [18]
  o ci: Update actions/upload-artifact digest to 89ef406 [24]
+ o cmake: `Libs.private` improvements [215]
  o cmake: add `CURL_USE_PKGCONFIG` option [138]
  o cmake: add Linux CI job, fix pytest with cmake [71]
  o cmake: add math library when using wolfssl and ngtcp2 [66]
@@ -78,15 +81,21 @@ This release includes the following bugfixes:
  o cmake: respect cflags/libdirs of native pkg-config detections [175]
  o cmake: show CMake platform/compiler flags [63]
  o cmake: show warning if libpsl is not found [154]
+ o cmake: sync code between test/example targets [234]
  o cmake: sync up formatting in Find modules [129]
  o cmake: TLS 1.3 warning only for bearssl and sectranp [118]
  o cmake: update `curl-config.cmake.in` template var list
  o cmake: update list of "advanced" variables [119]
  o cmake: use numeric comparison for `HAVE_WIN32_WINNT` [69]
+ o configure: delete unused `CURL_DEFINE_UNQUOTED` function [224]
+ o configure: delete unused `HAVE_OPENSSL3` macro [225]
  o configure: delete unused `m4/xc-translit.m4` [114]
  o configure: detect AppleIDN [70]
  o configure: fail if PSL is not disabled but not found [46]
+ o configure: fix WinIDN builds targeting old Windows [210]
+ o configure: remove USE_EXPLICIT_LIB_DEPS [199]
  o configure: replace nonportable grep -o with awk [111]
+ o connect: limit update IP info [191]
  o cookie.md: try to articulate the two different uses this option has [92]
  o curl: allow 500MB data URL encode strings [38]
  o curl: find curlrc in XDG_CONFIG_HOME without leading dot [186]
@@ -106,6 +115,7 @@ This release includes the following bugfixes:
  o dmaketgz: only run 'make distclean' if Makefile exists
  o docs/SSLCERTS: rewrite [174]
  o docs: add description of effect of --location-trusted on cookie [157]
+ o docs: fix some examples in man pages
  o docs: improve cipher options documentation [159]
  o docs: mention "@-" in more places [67]
  o docs: remove ALTSVC.md, HSTS.md, HTTP2.md and PARALLEL-TRANSFERS.md [105]
@@ -157,9 +167,11 @@ This release includes the following bugfixes:
  o mk-ca-bundle.pl: include a link to the caextract webpage [68]
  o multi: make the "general" list of easy handles a Curl_llist [97]
  o multi: on socket callback error, remove socket hash entry nonetheless [149]
+ o ngtcp2/osslq: remove NULL pointer dereferences [213]
  o ngtcp2: use NGHTTP3 prefix instead of NGTCP2 for errors in h3 callbacks [79]
  o openssl: improve shutdown handling [44]
  o pingpong: drain the input buffer when reading responses [193]
+ o pop3: use the protocol handler ->write_resp [220]
  o progress: ratelimit/progress tweaks [32]
  o pytests: add tests for HEAD requests in all HTTP versions [42]
  o runtests: if DISABLED cannot be read, error out [56]
@@ -173,6 +185,7 @@ This release includes the following bugfixes:
  o setopt: let CURLOPT_ECH set to NULL reset to default [187]
  o setopt: make CURLOPT_TFTP_BLKSIZE accept bad values [184]
  o sha256: fix symbol collision between nettle (GnuTLS) and OpenSSL [135]
+ o share: don't reinitialize conncache [214]
  o sigpipe: init the struct so that first apply ignores [49]
  o smtp: add tracing feature [120]
  o splay: use access functions, add asserts, use Curl_timediff [121]
@@ -199,10 +212,13 @@ This release includes the following bugfixes:
  o tool_operhlp: fix  "potentially uninitialized local variable 'pc' used" [48]
  o tool_paramhlp: bump maximum post data size in memory to 16GB [128]
  o transfer: Curl_sendrecv() and event related improvements [164]
+ o transfer: remove comments, add asserts [218]
+ o transfer: skip EOS read when download done [196]
  o url: dns_entry related improvements [16]
  o urlapi: verify URL *decoded* hostname when set [160]
  o urldata: introduce `data->mid`, a unique identifier inside a multi [127]
  o urldata: remove 'scratch' from the UrlState struct [86]
+ o urldata: remove proxy_connect_closed bit [178]
  o verify-release: shell script that verifies a release tarball [29]
  o version: fix shadowing a `libssh.h` symbol [176]
  o vtls: add SSLSUPP_CIPHER_LIST [107]
@@ -237,16 +253,17 @@ advice from friends like these:
 
   Aki, Alex Snast, Antoine du Hamel, Austin Moore, Benjamin Riefenstahl Mecom,
   Bo Anderson, Chris Swan, Christoph Reiter, Dan Fandrich, Daniel Stenberg,
-  David Sardari, dependabot[bot], Emanuele Torre, feelingseas on github,
-  Gruber Glass, Hiroki Kurosawa, Jan Venekamp, Jason Hood, Jiacai Liu,
-  Joe Birr-Pixton, John Haugabook, Joshix-1 on github, Justin Maggard,
-  kit-ty-kate on github, lolbinarycat on github, MasterInQuestion on github,
-  Matt Jolly, Max Faxälv, Micah Snyder, Moritz Buhl, Pete Cordell,
-  ralfjunker on github, Rasmus Thomsen, Ray Satiro, renovate[bot],
-  Ryan Carsten Schmidt, Sam Jessup, Sergio Durigan Junior, Slaven Rezić,
-  Stefan Eissing, Steffen Kieß, Tal Regev, Tim Yuer, Venkat Krishna R,
-  Viktor Petersson, Viktor Szakats, XYenon, Yedaya Katsman, 罗朝辉
-  (49 contributors)
+  David Sardari, dependabot[bot], Emanuele Torre, Eric Norris,
+  feelingseas on github, Gruber Glass, Hiroki Kurosawa, Jan Venekamp,
+  Jason Hood, Jiacai Liu, Joe Birr-Pixton, John Haugabook, Joshix-1 on github,
+  Justin Maggard, kit-ty-kate on github, lolbinarycat on github,
+  MasterInQuestion on github, Matt Jolly, Max Faxälv, Micah Snyder,
+  Moritz Buhl, Pete Cordell, ralfjunker on github, Rasmus Thomsen, Ray Satiro,
+  renovate[bot], Ryan Carsten Schmidt, Sam Jessup, Sergio Durigan Junior,
+  Slaven Rezić, Stefan Eissing, Steffen Kieß, Tal Regev, Tim Yuer,
+  Venkat Krishna R, Viktor Petersson, Viktor Szakats, XYenon, Yedaya Katsman,
+  罗朝辉
+  (50 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -426,6 +443,7 @@ References to bug reports and discussions on issues:
  [175] = https://curl.se/bug/?i=14641
  [176] = https://curl.se/bug/?i=14617
  [177] = https://curl.se/bug/?i=14612
+ [178] = https://curl.se/bug/?i=14708
  [180] = https://curl.se/bug/?i=14653
  [181] = https://curl.se/bug/?i=14591
  [182] = https://curl.se/bug/?i=14634
@@ -437,9 +455,12 @@ References to bug reports and discussions on issues:
  [188] = https://curl.se/bug/?i=14575
  [189] = https://curl.se/bug/?i=14634
  [190] = https://curl.se/bug/?i=14648
+ [191] = https://curl.se/bug/?i=14699
  [193] = https://curl.se/bug/?i=14201
  [195] = https://curl.se/bug/?i=14168
+ [196] = https://curl.se/bug/?i=14670
  [197] = https://curl.se/bug/?i=14647
+ [199] = https://curl.se/bug/?i=14697
  [200] = https://curl.se/bug/?i=14588
  [201] = https://curl.se/bug/?i=14587
  [202] = https://curl.se/bug/?i=14586
@@ -449,3 +470,14 @@ References to bug reports and discussions on issues:
  [206] = https://curl.se/bug/?i=14642
  [207] = https://curl.se/bug/?i=14640
  [208] = https://curl.se/bug/?i=14626
+ [210] = https://curl.se/bug/?i=12606
+ [213] = https://curl.se/bug/?i=14701
+ [214] = https://curl.se/bug/?i=14696
+ [215] = https://curl.se/bug/?i=14668
+ [218] = https://curl.se/bug/?i=14688
+ [220] = https://curl.se/bug/?i=14684
+ [223] = https://curl.se/bug/?i=14674
+ [224] = https://curl.se/bug/?i=14673
+ [225] = https://curl.se/bug/?i=14672
+ [226] = https://curl.se/bug/?i=14671
+ [234] = https://curl.se/bug/?i=14660
