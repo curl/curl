@@ -13,7 +13,7 @@ sort_lists() {
       echo "<IGNORED>"
     else
       # libcurl.pc
-      if [[ "${l}" =~ ^(Requires|Libs|Cflags)(\.private)?:(.+)$ ]]; then
+      if [[ "${l}" =~ ^(Requires|Libs|Cflags)(\.private)?:\ (.+)$ ]]; then
         if [ "${BASH_REMATCH[1]}" = 'Requires' ]; then
           # Spec does not allow duplicates here:
           # https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html#Requires:
@@ -22,7 +22,7 @@ sort_lists() {
         else
           val="$(printf '%s' "${BASH_REMATCH[3]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
         fi
-        l="${BASH_REMATCH[1]}${BASH_REMATCH[2]}:${val}"
+        l="${BASH_REMATCH[1]}${BASH_REMATCH[2]}: ${val}"
       # curl-config
       elif [[ "${section}" =~ (--libs|--static-libs) && "${l}" =~ ^( *echo\ \")(.+)(\")$ ]]; then
         val="$(printf '%s' "${BASH_REMATCH[2]}" | tr ' ' '\n' | sort -u | tr '\n' ' ')"
