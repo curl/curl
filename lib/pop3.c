@@ -210,7 +210,7 @@ struct pop3_cmd {
   BIT(multiline_with_args); /* is multi-line when command has args */
 };
 
-static struct pop3_cmd pop3cmds[] = {
+static const struct pop3_cmd pop3cmds[] = {
   { "APOP", 4, FALSE, FALSE },
   { "CAPA", 4, TRUE, TRUE },
   { "DELE", 4, FALSE, FALSE },
