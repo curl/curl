@@ -253,7 +253,6 @@ if test "x$OPT_OPENSSL" != xno; then
     fi
   fi
 
-  openssl3='no'
   if test X"$OPENSSL_ENABLED" = X"1"; then
     dnl These can only exist if OpenSSL exists
 
@@ -321,7 +320,7 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
       AC_MSG_RESULT([yes])
       ssl_msg="OpenSSL v3+"
-      openssl3='yes'
+      have_openssl3='yes'
     ],[
       AC_MSG_RESULT([no])
     ])
@@ -348,11 +347,6 @@ if test "x$OPT_OPENSSL" != xno; then
       fi
     fi
     check_for_ca_bundle=1
-    if test "$openssl3" = 'yes'; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.0.0"
-    else
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
-    fi
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
@@ -422,3 +416,13 @@ if test "$OPENSSL_ENABLED" = "1"; then
   ])
 fi
 ])
+
+if test "$OPENSSL_ENABLED" = "1"; then
+  if test "$have_openssl_quic" = 'yes'; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.3.0"
+  elif test "$have_openssl3" = 'yes'; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.0.0"
+  else
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+  fi
+fi
