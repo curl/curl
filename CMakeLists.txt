@@ -2104,6 +2104,11 @@ if(NOT CURL_DISABLE_INSTALL)
   #   prefix
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
+  # Documentation:
+  #   https://people.freedesktop.org/~dbn/pkg-config-guide.html
+  #   https://manpages.debian.org/unstable/pkgconf/pkg-config.1.en.html
+  #   https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html
+  #   https://www.msys2.org/docs/pkgconfig/
   configure_file(
     "${CURL_SOURCE_DIR}/libcurl.pc.in"
     "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
