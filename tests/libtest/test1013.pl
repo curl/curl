@@ -38,7 +38,6 @@ open(CURL, "$ARGV[1]") || die "Can't get curl $what list\n";
 while( <CURL> )
 {
     $curl_protocols = $_ if ( /$what:/i );
-    $curl_protocols = uc($curl_protocols) if( $what eq "protocols" );
 }
 close CURL;
 
@@ -53,6 +52,7 @@ open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what lis
 while( <CURLCONFIG> )
 {
     chomp;
+    $_ = lc($_) if($what eq "protocols");  # accept uppercase protocols in curl-config
     push @curl_config, $_;
 }
 close CURLCONFIG;
