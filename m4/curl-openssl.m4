@@ -349,7 +349,7 @@ if test "x$OPT_OPENSSL" != xno; then
     fi
     check_for_ca_bundle=1
     if test "$openssl3" = 'yes'; then
-      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl >= 3.0.0"
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.0.0"
     else
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
     fi
