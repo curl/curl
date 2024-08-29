@@ -76,20 +76,32 @@ check_c_source_compiles("${_source_epilogue}
 
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
-if(NOT CMAKE_CROSSCOMPILING AND NOT APPLE)
+if(NOT APPLE)
   set(_source_epilogue "#undef inline")
   add_header_include(HAVE_SYS_POLL_H "sys/poll.h")
   add_header_include(HAVE_POLL_H "poll.h")
-  check_c_source_runs("${_source_epilogue}
-    #include <stdlib.h>
-    #include <sys/time.h>
-    int main(void)
-    {
-      if(0 != poll(0, 0, 10)) {
-        return 1; /* fail */
-      }
-      return 0;
-    }" HAVE_POLL_FINE)
+  if(NOT CMAKE_CROSSCOMPILING)
+    check_c_source_runs("${_source_epilogue}
+      #include <stdlib.h>
+      int main(void)
+      {
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
+        }
+        return 0;
+      }" HAVE_POLL_FINE)
+  elseif(UNIX)
+    check_c_source_compiles("${_source_epilogue}
+      #include <stdlib.h>
+      int main(void)
+      {
+        #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+          (void)poll(0, 0, 0);
+        #else
+          #error force compilation error
+        #endif
+      }" HAVE_POLL_FINE)
+  endif()
 endif()
 
 # Detect HAVE_GETADDRINFO_THREADSAFE

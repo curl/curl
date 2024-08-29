@@ -3470,26 +3470,46 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
-    test "$tst_compi_poll" = "yes"; then
-    AC_MSG_CHECKING([if poll seems to work])
-    CURL_RUN_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stdlib
-        $curl_includes_poll
-      ]],[[
-        /* detect the original poll() breakage */
-        if(0 != poll(0, 0, 10)) {
-          return 1; /* fail */
-        }
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_works_poll="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_works_poll="no"
-    ])
+  if test "$tst_compi_poll" = "yes"; then
+    if test "x$cross_compiling" != "xyes"; then
+      AC_MSG_CHECKING([if poll seems to work])
+      CURL_RUN_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_stdlib
+          $curl_includes_poll
+        ]],[[
+          /* detect the original poll() breakage */
+          if(0 != poll(0, 0, 10)) {
+            return 1; /* fail */
+          }
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_works_poll="yes"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_works_poll="no"
+      ])
+    else
+      AC_MSG_CHECKING([if native poll seems to be supported])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_stdlib
+        ]],[[
+          #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+            return 0;
+          #else
+            #error force compilation error
+          #endif
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_works_poll="yes"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_works_poll="no"
+      ])
+    fi
   fi
   #
   if test "$tst_compi_poll" = "yes" &&
