@@ -64,7 +64,6 @@
  4. FTP
  4.1 HOST
  4.4 Support CURLOPT_PREQUOTE for directories listings
- 4.5 ASCII support
  4.6 GSSAPI via Windows SSPI
  4.7 STAT for LIST without data connection
  4.8 Passive transfer could try other IP addresses
@@ -567,11 +566,6 @@
  to get updated to get fixed.
 
  https://github.com/curl/curl/issues/8602
-
-4.5 ASCII support
-
- FTP ASCII transfers do not follow RFC 959. They do not convert the data
- accordingly.
 
 4.6 GSSAPI via Windows SSPI
 

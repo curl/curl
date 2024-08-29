@@ -105,11 +105,6 @@ typedef unsigned int curl_prot_t;
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
-#if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
-/* do FTP line-end conversions on most platforms */
-#define CURL_DO_LINEEND_CONV
-#endif
-
 /* Convenience defines for checking protocols or their SSL based version. Each
    protocol handler should only ever have a single CURLPROTO_ in its protocol
    field. */
