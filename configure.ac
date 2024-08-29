@@ -592,8 +592,8 @@ CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
 
-case $host_os in
-  darwin*)
+case $host in
+  *-apple-*)
     CURL_SUPPORTS_BUILTIN_AVAILABLE
     ;;
 esac
@@ -1985,7 +1985,7 @@ if test x"$want_gss" = xyes; then
     LIBS="-lgss $LIBS"
   elif test -z "$GSSAPI_LIB_DIR"; then
     case $host in
-      *-*-darwin*)
+      *-apple-*)
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
         ;;
       *)
@@ -2709,8 +2709,8 @@ dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
 tst_links_appleidn='no'
-case $host_os in
-  darwin*)
+case $host in
+  *-apple-*)
     AC_MSG_CHECKING([whether to build with Apple IDN])
     OPT_IDN="default"
     AC_ARG_WITH(apple-idn,

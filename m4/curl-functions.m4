@@ -1473,6 +1473,11 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
   #
   if test "$curl_cv_func_getaddrinfo" = "yes"; then
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
+    case $host in
+      *-apple-*)
+        dnl Darwin 6.0 and macOS 10.2.X and newer
+        tst_tsafe_getaddrinfo="yes"
+    esac
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
         dnl AIX 5.1 and older
@@ -1485,10 +1490,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
       darwin[[12345]].*)
         dnl Darwin 5.0 and macOS 10.1.X and older
         tst_tsafe_getaddrinfo="no"
-        ;;
-      darwin*)
-        dnl Darwin 6.0 and macOS 10.2.X and newer
-        tst_tsafe_getaddrinfo="yes"
         ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
         dnl FreeBSD 5.4 and older
@@ -3409,8 +3410,8 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_works_poll="unknown"
   tst_allow_poll="unknown"
   #
-  case $host_os in
-    darwin*|interix*)
+  case $host in
+    *-apple-*|*-*-interix*)
       dnl poll() does not work on these platforms
       dnl Interix: "does provide poll(), but the implementing developer must
       dnl have been in a bad mood, because poll() only works on the /proc
@@ -4874,8 +4875,8 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  case $host_os in
-    darwin*)
+  case $host in
+    *-apple-*)
       AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
       ;;
     *)
