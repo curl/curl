@@ -434,6 +434,8 @@ static void cf_osslq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
   CURL_TRC_CF(data, cf, "destroy");
   if(ctx) {
     CURL_TRC_CF(data, cf, "cf_osslq_destroy()");
+    if(ctx->tls.ossl.ssl)
+      cf_osslq_ctx_close(ctx);
     cf_osslq_ctx_free(ctx);
   }
   cf->ctx = NULL;
