@@ -1195,6 +1195,12 @@ sub singletest_count {
     return 0;
 }
 
+# Make sure all line endings in the array are the same: CRLF
+sub normalize_text {
+    my (@text) = @_;
+    s/\r\n/\n/g for @text;
+    s/\n/\r\n/g for @text;
+}
 
 #######################################################################
 # Verify test succeeded
@@ -1254,10 +1260,8 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$hash{'mode'};
         if($filemode && ($filemode eq "text")) {
-            s/\r\n/\n/g for @validstdout;
-            s/\n/\r\n/g for @validstdout;
-            s/\r\n/\n/g for @actual;
-            s/\n/\r\n/g for @actual;
+            normalize_text(\@validstdout);
+            normalize_text(\@actual);
         }
 
         if($hash{'nonewline'}) {
@@ -1310,13 +1314,11 @@ sub singletest_check {
             # text mode check in hyper-mode. Sometimes necessary if the stderr
             # data *looks* like HTTP and thus has gotten CRLF newlines
             # mistakenly
-            s/\r\n/\n/g for @validstderr;
+            normalize_text(\@validstderr);
         }
         if($filemode && ($filemode eq "text")) {
-            s/\r\n/\n/g for @validstderr;
-            s/\n/\r\n/g for @validstderr;
-            s/\r\n/\n/g for @actual;
-            s/\n/\r\n/g for @actual;
+            normalize_text(\@validstderr);
+            normalize_text(\@actual);
         }
 
         if($hash{'nonewline'}) {
@@ -1409,8 +1411,7 @@ sub singletest_check {
                 # get the mode attribute
                 my $filemode=$replycheckpartattr{'mode'};
                 if($filemode && ($filemode eq "text")) {
-                    s/\r\n/\n/g for @replycheckpart;
-                    s/\n/\r\n/g for @replycheckpart;
+                    normalize_text(\@replycheckpart);
                 }
                 if($replycheckpartattr{'nonewline'}) {
                     # Yes, we must cut off the final newline from the final line
@@ -1438,8 +1439,7 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
         if($filemode && ($filemode eq "text")) {
-            s/\r\n/\n/g for @reply;
-            s/\n/\r\n/g for @reply;
+            normalize_text(\@reply);
         }
         if($replyattr{'crlf'} ||
            ($feature{"hyper"} && ($keywords{"HTTP"}
@@ -1455,8 +1455,7 @@ sub singletest_check {
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
         if($filemode && ($filemode eq "text")) {
-            s/\r\n/\n/g for @out;
-            s/\n/\r\n/g for @out;
+            normalize_text(\@out);
         }
         $res = compare($runnerid, $testnum, $testname, "data", \@out, \@reply);
         if ($res) {
@@ -1588,10 +1587,8 @@ sub singletest_check {
 
             my $filemode=$hash{'mode'};
             if($filemode && ($filemode eq "text")) {
-                s/\r\n/\n/g for @outfile;
-                s/\n/\r\n/g for @outfile;
-                s/\r\n/\n/g for @generated;
-                s/\n/\r\n/g for @generated;
+                normalize_text(\@outfile);
+                normalize_text(\@generated);
             }
             if($hash{'crlf'} ||
                ($feature{"hyper"} && ($keywords{"HTTP"}
