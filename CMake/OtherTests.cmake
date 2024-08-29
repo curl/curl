@@ -88,23 +88,6 @@ if(NOT CMAKE_CROSSCOMPILING AND NOT APPLE)
       if(0 != poll(0, 0, 10)) {
         return 1; /* fail */
       }
-      else {
-        /* detect the 10.12 poll() breakage */
-        struct timeval before, after;
-        int rc;
-        size_t us;
-
-        gettimeofday(&before, NULL);
-        rc = poll(NULL, 0, 500);
-        gettimeofday(&after, NULL);
-
-        us = (after.tv_sec - before.tv_sec) * 1000000 +
-          (after.tv_usec - before.tv_usec);
-
-        if(us < 400000) {
-          return 1;
-        }
-      }
       return 0;
     }" HAVE_POLL_FINE)
 endif()
