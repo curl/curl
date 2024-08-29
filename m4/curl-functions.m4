@@ -1559,13 +1559,13 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
-#if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
-          return 0;
-#elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
-          return 0;
-#else
-          #error force compilation error
-#endif
+          #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
+            return 0;
+          #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
+            return 0;
+          #else
+            #error force compilation error
+          #endif
         ]])
       ],[
         tst_h_errno_sbs_issue_7="yes"
