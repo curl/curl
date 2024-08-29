@@ -1,0 +1,45 @@
+<testcase>
+<info>
+<keywords>
+FTP
+EPSV
+STOR
+TYPE A
+</keywords>
+</info>
+
+# Client-side
+<client>
+<server>
+ftp
+</server>
+<name>
+FTP PASV upload ASCII file
+</name>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+%repeat[1750 x a line of text used for verifying this !%0a]%
+</file>
+<command>
+"ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=a" -T %LOGDIR/test%TESTNUMBER.txt
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+QUIT
+</strip>
+<upload crlf="yes">
+%repeat[1750 x a line of text used for verifying this !%0a]%
+</upload>
+<protocol>
+USER anonymous
+PASS ftp@example.com
+PWD
+EPSV
+TYPE A
+STOR %TESTNUMBER
+QUIT
+</protocol>
+</verify>
+</testcase>
