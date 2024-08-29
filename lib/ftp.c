@@ -327,7 +327,6 @@ static void freedirs(struct ftp_conn *ftpc)
   Curl_safefree(ftpc->newhost);
 }
 
-#ifdef CURL_DO_LINEEND_CONV
 /***********************************************************************
  *
  * Lineend Conversions
@@ -416,7 +415,6 @@ static const struct Curl_cwtype ftp_cw_lc = {
   sizeof(struct ftp_cw_lc_ctx)
 };
 
-#endif /* CURL_DO_LINEEND_CONV */
 /***********************************************************************
  *
  * AcceptServerConnect()
@@ -4142,27 +4140,22 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  /* FTP data may need conversion. */
+  struct Curl_cwriter *ftp_lc_writer;
 
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-#ifdef CURL_DO_LINEEND_CONV
-  {
-    /* FTP data may need conversion. */
-    struct Curl_cwriter *ftp_lc_writer;
+  result = Curl_cwriter_create(&ftp_lc_writer, data, &ftp_cw_lc,
+                               CURL_CW_CONTENT_DECODE);
+  if(result)
+    return result;
 
-    result = Curl_cwriter_create(&ftp_lc_writer, data, &ftp_cw_lc,
-                                 CURL_CW_CONTENT_DECODE);
-    if(result)
-      return result;
-
-    result = Curl_cwriter_add(data, ftp_lc_writer);
-    if(result) {
-      Curl_cwriter_free(data, ftp_lc_writer);
-      return result;
-    }
+  result = Curl_cwriter_add(data, ftp_lc_writer);
+  if(result) {
+    Curl_cwriter_free(data, ftp_lc_writer);
+    return result;
   }
-#endif /* CURL_DO_LINEEND_CONV */
 
   if(data->state.wildcardmatch) {
     result = wc_statemach(data);
