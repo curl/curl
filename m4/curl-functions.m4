@@ -3477,10 +3477,9 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_poll
-        $curl_includes_time
       ]],[[
         /* detect the original poll() breakage */
-        if(0 != poll(0, 0, 10))
+        if(0 != poll(0, 0, 10)) {
           return 1; /* fail */
         }
       ]])
