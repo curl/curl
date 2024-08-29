@@ -1489,6 +1489,9 @@ sub singletest_check {
                 eval $strip;
             }
         }
+        if($hash{'crlf'}) {
+            subnewlines(1, \$_) for @upload;
+        }
 
         $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload);
         if ($res) {
