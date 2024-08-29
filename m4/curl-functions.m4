@@ -3477,26 +3477,10 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
       AC_LANG_PROGRAM([[
         $curl_includes_stdlib
         $curl_includes_poll
-        $curl_includes_time
       ]],[[
         /* detect the original poll() breakage */
-        if(0 != poll(0, 0, 10))
-          exit(1); /* fail */
-        else {
-          /* detect the 10.12 poll() breakage */
-          struct timeval before, after;
-          int rc;
-          size_t us;
-
-          gettimeofday(&before, NULL);
-          rc = poll(NULL, 0, 500);
-          gettimeofday(&after, NULL);
-
-          us = (after.tv_sec - before.tv_sec) * 1000000 +
-            (after.tv_usec - before.tv_usec);
-
-          if(us < 400000)
-            exit(1);
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
         }
       ]])
     ],[
