@@ -77,10 +77,10 @@ check_c_source_compiles("${_source_epilogue}
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
 if(NOT APPLE)
+  set(_source_epilogue "#undef inline")
+  add_header_include(HAVE_SYS_POLL_H "sys/poll.h")
+  add_header_include(HAVE_POLL_H "poll.h")
   if(NOT CMAKE_CROSSCOMPILING)
-    set(_source_epilogue "#undef inline")
-    add_header_include(HAVE_SYS_POLL_H "sys/poll.h")
-    add_header_include(HAVE_POLL_H "poll.h")
     check_c_source_runs("${_source_epilogue}
       #include <stdlib.h>
       int main(void)
@@ -91,12 +91,12 @@ if(NOT APPLE)
         return 0;
       }" HAVE_POLL_FINE)
   elseif(UNIX)
-    check_c_source_compiles("
+    check_c_source_compiles("${_source_epilogue}
       #include <stdlib.h>
       int main(void)
       {
         #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
-          return 0;
+          (void)poll(0, 0, 0);
         #else
           #error force compilation error
         #endif
