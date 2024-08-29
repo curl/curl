@@ -3409,8 +3409,8 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_works_poll="unknown"
   tst_allow_poll="unknown"
   #
-  case $host_os in
-    darwin*|interix*)
+  case $host in
+    *-apple-*|*-*-interix*)
       dnl poll() does not work on these platforms
       dnl Interix: "does provide poll(), but the implementing developer must
       dnl have been in a bad mood, because poll() only works on the /proc
@@ -4870,8 +4870,8 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-  case $host_os in
-    darwin*)
+  case $host in
+    *-apple-*)
       AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
       ;;
     *)

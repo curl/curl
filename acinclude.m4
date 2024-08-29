@@ -1616,8 +1616,8 @@ dnl
 AC_DEFUN([CURL_DARWIN_CFLAGS], [
 
   tst_cflags="no"
-  case $host_os in
-    darwin*)
+  case $host in
+    *-apple-*)
       tst_cflags="yes"
       ;;
   esac
