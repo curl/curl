@@ -374,7 +374,9 @@ sub render {
         elsif($d =~ /^    (.*)/) {
             my $word = $1;
             if(!$quote && $manpage) {
+                push @desc, "\n" if($blankline);
                 push @desc, ".nf\n";
+                $blankline = 0;
             }
             $quote = 1;
             $d = "$word\n";

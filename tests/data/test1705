@@ -222,8 +222,8 @@ sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.
 
 End with a quote
-.nf
 
+.nf
 hello
 .fi
 
