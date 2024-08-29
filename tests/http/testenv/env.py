@@ -563,18 +563,21 @@ class Env:
     def authority_for(self, domain: str, alpn_proto: Optional[str] = None):
         return f'{domain}:{self.port_for(alpn_proto=alpn_proto)}'
 
-    def make_data_file(self, indir: str, fname: str, fsize: int) -> str:
+    def make_data_file(self, indir: str, fname: str, fsize: int,
+                       line_length: int = 1024) -> str:
+        if line_length < 11:
+            raise 'line_length less than 11 not supported'
         fpath = os.path.join(indir, fname)
         s10 = "0123456789"
-        s = (101 * s10) + s10[0:3]
+        s = round((line_length / 10) + 1) * s10
+        s = s[0:line_length-11]
         with open(fpath, 'w') as fd:
-            for i in range(int(fsize / 1024)):
+            for i in range(int(fsize / line_length)):
                 fd.write(f"{i:09d}-{s}\n")
-            remain = int(fsize % 1024)
+            remain = int(fsize % line_length)
             if remain != 0:
-                i = int(fsize / 1024) + 1
-                s = f"{i:09d}-{s}\n"
-                fd.write(s[0:remain])
+                i = int(fsize / line_length) + 1
+                fd.write(f"{i:09d}-{s}"[0:remain-1] + "\n")
         return fpath
 
     def make_clients(self):
