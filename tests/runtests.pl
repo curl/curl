@@ -1197,9 +1197,9 @@ sub singletest_count {
 
 # Make sure all line endings in the array are the same: CRLF
 sub normalize_text {
-    my (@text) = @_;
-    s/\r\n/\n/g for @text;
-    s/\n/\r\n/g for @text;
+    my ($ref) = @_;
+    s/\r\n/\n/g for @$ref;
+    s/\n/\r\n/g for @$ref;
 }
 
 #######################################################################
