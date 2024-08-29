@@ -656,9 +656,9 @@ if(CURL_USE_RUSTLS)
   include_directories(${RUSTLS_INCLUDE_DIRS})
 
   if(CURL_DEFAULT_SSL_BACKEND AND CURL_DEFAULT_SSL_BACKEND STREQUAL "rustls")
-    set(valid_default_ssl_backend TRUE)
+    set(_valid_default_ssl_backend TRUE)
   endif()
-  set(curl_ca_bundle_supported TRUE)
+  set(_curl_ca_bundle_supported TRUE)
 endif()
 
 if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
