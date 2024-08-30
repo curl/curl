@@ -69,6 +69,30 @@ jobs:
       - name: compare generated curl_config.h files
         run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
 
+  check-macos-securetransport:
+    runs-on: macos-latest
+    steps:
+      - name: install packages
+        run: |
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew install libtool autoconf automake && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
+      - name: run configure --with-secure-transport
+        run: |
+          autoreconf -fi
+          ./configure --with-secure-transport --without-libpsl
+
+      - name: run cmake
+        run: |
+          cmake -B build -DCURL_USE_LIBPSL=OFF \
+            "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+            -DCURL_USE_SECTRANSP=ON -DCURL_USE_OPENSSL=OFF \
+            -DCURL_USE_LIBSSH2=OFF
+
+      - name: compare generated curl_config.h files
+        run: ./.github/scripts/cmp-config.pl lib/curl_config.h build/lib/curl_config.h
+
   check-windows:
     runs-on: ubuntu-latest
     env:
