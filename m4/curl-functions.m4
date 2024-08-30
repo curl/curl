@@ -3492,7 +3492,7 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
       ])
     else
       AC_MSG_CHECKING([if native poll seems to be supported])
-      CURL_RUN_IFELSE([
+      AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
           $curl_includes_stdlib
         ]],[[
