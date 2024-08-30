@@ -2112,8 +2112,8 @@ dnl **********************************************************************
 dnl Check for the random seed preferences
 dnl **********************************************************************
 
-dnl Check for user-specified random device
 if test "$curl_cv_native_windows" != 'yes'; then
+  dnl Check for user-specified random device
   AC_ARG_WITH(random,
   AS_HELP_STRING([--with-random=FILE],
                  [read randomness from FILE (default=/dev/urandom)]),
