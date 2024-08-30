@@ -44,7 +44,7 @@ dnl -------------------------------------------------
 dnl This is done to prevent compiler warning
 dnl 'function declaration isn't a prototype'
 dnl in function main. This requires at least
-dnl a c89 compiler and does not support K&R.
+dnl a C89 compiler and does not support K&R.
 
 m4_define([AC_LANG_PROGRAM(C)],
 [$1
