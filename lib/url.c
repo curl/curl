@@ -907,7 +907,10 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
      * connections that do not use this feature */
     return FALSE;
 
-  if(!Curl_conn_is_connected(conn, FIRSTSOCKET)) {
+  if(!Curl_conn_is_connected(conn, FIRSTSOCKET) ||
+     conn->bits.asks_multiplex) {
+    /* Not yet connected, or not yet decided if it multiplexes. The later
+     * happens for HTTP/2 Upgrade: requests that need a response. */
     if(match->may_multiplex) {
       match->seen_pending_conn = TRUE;
       /* Do not pick a connection that has not connected yet */

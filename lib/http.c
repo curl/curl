@@ -3439,6 +3439,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
         /* Switching to HTTP/2, where we will get more responses */
         infof(data, "Received 101, Switching to HTTP/2");
         k->upgr101 = UPGR101_RECEIVED;
+        data->conn->bits.asks_multiplex = FALSE;
         /* We expect more response from HTTP/2 later */
         k->header = TRUE;
         k->headerline = 0; /* restart the header line counter */
@@ -3485,6 +3486,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   if(k->upgr101 == UPGR101_H2) {
     /* A requested upgrade was denied, poke the multi handle to possibly
        allow a pending pipewait to continue */
+    data->conn->bits.asks_multiplex = FALSE;
     Curl_multi_connchanged(data->multi);
   }
 

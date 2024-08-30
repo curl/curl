@@ -535,6 +535,7 @@ struct ConnectBits {
 #endif
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
+  BIT(asks_multiplex); /* connection asks for multiplexing, but is not yet */
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
