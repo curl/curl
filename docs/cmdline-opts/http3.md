@@ -30,6 +30,6 @@ host and port.
 When asked to use HTTP/3, curl issues a separate attempt to use older HTTP
 versions with a slight delay, so if the HTTP/3 transfer fails or is slow, curl
 still tries to proceed with an older HTTP version. The fallback performs the
-regular negoatiaion between HTTP/1 and HTTP/2.
+regular negotiation between HTTP/1 and HTTP/2.
 
 Use --http3-only for similar functionality *without* a fallback.
