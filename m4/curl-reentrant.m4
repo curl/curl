@@ -40,7 +40,7 @@ dnl makes errno available as a preprocessor macro.
 AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
-#include <errno.h>
+      #include <errno.h>
     ]],[[
       if(0 != errno)
         return 1;
@@ -53,27 +53,27 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
   if test "$tmp_errno" = "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <errno.h>
+        #include <errno.h>
       ]],[[
-#ifdef errno
-        int dummy=1;
-#else
-        #error force compilation error
-#endif
+        #ifdef errno
+          int dummy=1;
+        #else
+          #error force compilation error
+        #endif
       ]])
     ],[
       tmp_errno="errno_macro_defined"
     ],[
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
-#define _REENTRANT
-#include <errno.h>
+          #define _REENTRANT
+          #include <errno.h>
         ]],[[
-#ifdef errno
-          int dummy=1;
-#else
-          #error force compilation error
-#endif
+          #ifdef errno
+            int dummy=1;
+          #else
+            #error force compilation error
+          #endif
         ]])
       ],[
         tmp_errno="errno_macro_needs_reentrant"
@@ -99,15 +99,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GMTIME_R], [
   ])
   if test "$tmp_gmtime_r" = "yes"; then
     AC_EGREP_CPP([gmtime_r],[
-#include <sys/types.h>
-#include <time.h>
+      #include <sys/types.h>
+      #include <time.h>
     ],[
       tmp_gmtime_r="proto_declared"
     ],[
       AC_EGREP_CPP([gmtime_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <time.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <time.h>
       ],[
         tmp_gmtime_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -132,15 +132,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_LOCALTIME_R], [
   ])
   if test "$tmp_localtime_r" = "yes"; then
     AC_EGREP_CPP([localtime_r],[
-#include <sys/types.h>
-#include <time.h>
+      #include <sys/types.h>
+      #include <time.h>
     ],[
       tmp_localtime_r="proto_declared"
     ],[
       AC_EGREP_CPP([localtime_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <time.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <time.h>
       ],[
         tmp_localtime_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -165,15 +165,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRERROR_R], [
   ])
   if test "$tmp_strerror_r" = "yes"; then
     AC_EGREP_CPP([strerror_r],[
-#include <sys/types.h>
-#include <string.h>
+      #include <sys/types.h>
+      #include <string.h>
     ],[
       tmp_strerror_r="proto_declared"
     ],[
       AC_EGREP_CPP([strerror_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <string.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <string.h>
       ],[
         tmp_strerror_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -198,15 +198,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_STRTOK_R], [
   ])
   if test "$tmp_strtok_r" = "yes"; then
     AC_EGREP_CPP([strtok_r],[
-#include <sys/types.h>
-#include <string.h>
+      #include <sys/types.h>
+      #include <string.h>
     ],[
       tmp_strtok_r="proto_declared"
     ],[
       AC_EGREP_CPP([strtok_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <string.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <string.h>
       ],[
         tmp_strtok_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -231,15 +231,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETHOSTBYNAME_R], [
   ])
   if test "$tmp_gethostbyname_r" = "yes"; then
     AC_EGREP_CPP([gethostbyname_r],[
-#include <sys/types.h>
-#include <netdb.h>
+      #include <sys/types.h>
+      #include <netdb.h>
     ],[
       tmp_gethostbyname_r="proto_declared"
     ],[
       AC_EGREP_CPP([gethostbyname_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <netdb.h>
       ],[
         tmp_gethostbyname_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -264,15 +264,15 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_GETPROTOBYNAME_R], [
   ])
   if test "$tmp_getprotobyname_r" = "yes"; then
     AC_EGREP_CPP([getprotobyname_r],[
-#include <sys/types.h>
-#include <netdb.h>
+      #include <sys/types.h>
+      #include <netdb.h>
     ],[
       tmp_getprotobyname_r="proto_declared"
     ],[
       AC_EGREP_CPP([getprotobyname_r],[
-#define _REENTRANT
-#include <sys/types.h>
-#include <netdb.h>
+        #define _REENTRANT
+        #include <sys/types.h>
+        #include <netdb.h>
       ],[
         tmp_getprotobyname_r="proto_needs_reentrant"
         tmp_need_reentrant="yes"
@@ -410,11 +410,11 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
     ]],[[
-#ifdef _REENTRANT
-      int dummy=1;
-#else
-      #error force compilation error
-#endif
+      #ifdef _REENTRANT
+        int dummy=1;
+      #else
+        #error force compilation error
+      #endif
     ]])
   ],[
     AC_MSG_RESULT([yes])
@@ -470,11 +470,11 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
   AC_COMPILE_IFELSE([
     AC_LANG_PROGRAM([[
     ]],[[
-#ifdef _THREAD_SAFE
-      int dummy=1;
-#else
-      #error force compilation error
-#endif
+      #ifdef _THREAD_SAFE
+        int dummy=1;
+      #else
+        #error force compilation error
+      #endif
     ]])
   ],[
     AC_MSG_RESULT([yes])
