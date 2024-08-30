@@ -4,7 +4,7 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3237
+ Contributors:                 3236
 
 This release includes the following changes:
 
@@ -35,6 +35,7 @@ This release includes the following bugfixes:
  o build: add `iphlpapi` lib for libssh on Windows [166]
  o build: check OS-native IDN first, then libidn2 [223]
  o build: delete unused `REQUIRE_LIB_DEPS` [226]
+ o build: drop unused feature-detection code for Apple `poll()` [227]
  o build: improve compiler version detection portability
  o build: make `CURL_FORMAT_CURL_OFF_T[U]` work with mingw-w64 <=7.0.0 [207]
  o build: silence C4232 MSVC warnings in vcpkg ngtcp2 builds [137]
@@ -87,6 +88,7 @@ This release includes the following bugfixes:
  o cmake: update `curl-config.cmake.in` template var list
  o cmake: update list of "advanced" variables [119]
  o cmake: use numeric comparison for `HAVE_WIN32_WINNT` [69]
+ o cmdline-opts: language fix for expect100-timeout.md and max-time.md [192]
  o configure: delete unused `CURL_DEFINE_UNQUOTED` function [224]
  o configure: delete unused `HAVE_OPENSSL3` macro [225]
  o configure: delete unused `m4/xc-translit.m4` [114]
@@ -124,11 +126,13 @@ This release includes the following bugfixes:
  o easy: fix curl_easy_upkeep for shared connection caches [52]
  o escape: allow curl_easy_escape to generate 3*input length output [39]
  o FEATURES.md: fix typo [180]
+ o ftp: always offer line end conversions [219]
  o ftp: flush pingpong before response [73]
  o getinfo: return zero for unsupported options (when disabled) [189]
  o GHA/windows: enable MulitSSL in an MSVC job [2]
  o GHA: scan git repository and detect unvetted binary files [3]
  o gnutls/wolfssl: improve error message when certificate fails [125]
+ o gnutls: send all data [230]
  o gtls: fix OCSP stapling management [206]
  o hash: provide asserts to verify API use [96]
  o http/2: simplify eos/blocked handling [90]
@@ -136,6 +140,7 @@ This release includes the following bugfixes:
  o http2: fix GOAWAY message sent to server [171]
  o http2: improve rate limiting of downloads [33]
  o http2: improved upload eos handling [41]
+ o http3.md: mention how the fallback can be h1 or h2 [194]
  o hyper: call Curl_req_set_upload_done() [126]
  o idn: more strictly check AppleIDN errors [98]
  o idn: support non-UTF-8 input under AppleIDN [99]
@@ -157,6 +162,8 @@ This release includes the following bugfixes:
  o Makefile.mk: fixup enabling libidn2 [61]
  o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
  o maketgz: accept option to include latest commit hash [5]
+ o managen: fix superfluous leading blank line in quoted sections [211]
+ o managen: in man output, remove the leading space from examples [198]
  o managen: wordwrap long example lines in ASCII output [143]
  o manpage: ensure a maximum width for the text version [75]
  o max-filesize.md: mention zero disables the limit [93]
@@ -169,13 +176,16 @@ This release includes the following bugfixes:
  o multi: on socket callback error, remove socket hash entry nonetheless [149]
  o ngtcp2/osslq: remove NULL pointer dereferences [213]
  o ngtcp2: use NGHTTP3 prefix instead of NGTCP2 for errors in h3 callbacks [79]
+ o openssl quic: fix memory leak [229]
  o openssl: improve shutdown handling [44]
  o pingpong: drain the input buffer when reading responses [193]
+ o POP3: fix multi-line responses [168]
  o pop3: use the protocol handler ->write_resp [220]
  o progress: ratelimit/progress tweaks [32]
  o pytests: add tests for HEAD requests in all HTTP versions [42]
  o runtests: if DISABLED cannot be read, error out [56]
  o runtests: log ignored but passed tests [130]
+ o runtests: remove "has_textaware" [217]
  o rustls: fix setting tls version [202]
  o rustls: make all tests pass [1]
  o scorecard: tweak request measurements [139]
@@ -218,6 +228,7 @@ This release includes the following bugfixes:
  o urlapi: verify URL *decoded* hostname when set [160]
  o urldata: introduce `data->mid`, a unique identifier inside a multi [127]
  o urldata: remove 'scratch' from the UrlState struct [86]
+ o urldata: remove crlf_conversions counter [232]
  o urldata: remove proxy_connect_closed bit [178]
  o verify-release: shell script that verifies a release tarball [29]
  o version: fix shadowing a `libssh.h` symbol [176]
@@ -251,18 +262,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aki, Alex Snast, Antoine du Hamel, Austin Moore, Benjamin Riefenstahl Mecom,
-  Bo Anderson, Chris Swan, Christoph Reiter, Dan Fandrich, Daniel Stenberg,
-  David Sardari, dependabot[bot], Emanuele Torre, Eric Norris,
-  feelingseas on github, Gruber Glass, Hiroki Kurosawa, Jan Venekamp,
-  Jason Hood, Jiacai Liu, Joe Birr-Pixton, John Haugabook, Joshix-1 on github,
-  Justin Maggard, kit-ty-kate on github, lolbinarycat on github,
-  MasterInQuestion on github, Matt Jolly, Max Faxälv, Micah Snyder,
-  Moritz Buhl, Pete Cordell, ralfjunker on github, Rasmus Thomsen, Ray Satiro,
-  renovate[bot], Ryan Carsten Schmidt, Sam Jessup, Sergio Durigan Junior,
-  Slaven Rezić, Stefan Eissing, Steffen Kieß, Tal Regev, Tim Yuer,
-  Venkat Krishna R, Viktor Petersson, Viktor Szakats, XYenon, Yedaya Katsman,
-  罗朝辉
+  Aki Sakurai, Alex Snast, Antoine du Hamel, Austin Moore,
+  Benjamin Riefenstahl Mecom, Bo Anderson, Chris Swan, Christoph Reiter,
+  Dan Fandrich, Daniel Stenberg, David Sardari, dependabot[bot],
+  Emanuele Torre, Eric Norris, feelingseas on github, Gruber Glass,
+  Hiroki Kurosawa, Jan Venekamp, Jason Hood, Jiacai Liu, Joe Birr-Pixton,
+  John Haugabook, Joshix-1 on github, Justin Maggard, kit-ty-kate on github,
+  lolbinarycat on github, MasterInQuestion on github, Matt Jolly, Max Faxälv,
+  Micah Snyder, Moritz Buhl, Pete Cordell, ralfjunker on github,
+  Rasmus Thomsen, Ray Satiro, renovate[bot], Ryan Carsten Schmidt, Sam Jessup,
+  Sergio Durigan Junior, Slaven Rezić, Stefan Eissing, Steffen Kieß, Tal Regev,
+  Tim Yuer, Venkat Krishna R, Viktor Petersson, Viktor Szakats, XYenon,
+  Yedaya Katsman, 罗朝辉
   (50 contributors)
 
 References to bug reports and discussions on issues:
@@ -434,6 +445,7 @@ References to bug reports and discussions on issues:
  [165] = https://curl.se/bug/?i=14629
  [166] = https://curl.se/bug/?i=14618
  [167] = https://curl.se/bug/?i=14614
+ [168] = https://curl.se/bug/?i=14677
  [169] = https://curl.se/bug/?i=14565
  [170] = https://curl.se/bug/?i=14548
  [171] = https://curl.se/bug/?i=14623
@@ -456,10 +468,13 @@ References to bug reports and discussions on issues:
  [189] = https://curl.se/bug/?i=14634
  [190] = https://curl.se/bug/?i=14648
  [191] = https://curl.se/bug/?i=14699
+ [192] = https://curl.se/bug/?i=14737
  [193] = https://curl.se/bug/?i=14201
+ [194] = https://curl.se/bug/?i=14736
  [195] = https://curl.se/bug/?i=14168
  [196] = https://curl.se/bug/?i=14670
  [197] = https://curl.se/bug/?i=14647
+ [198] = https://curl.se/bug/?i=14735
  [199] = https://curl.se/bug/?i=14697
  [200] = https://curl.se/bug/?i=14588
  [201] = https://curl.se/bug/?i=14587
@@ -471,13 +486,20 @@ References to bug reports and discussions on issues:
  [207] = https://curl.se/bug/?i=14640
  [208] = https://curl.se/bug/?i=14626
  [210] = https://curl.se/bug/?i=12606
+ [211] = https://curl.se/bug/?i=14732
  [213] = https://curl.se/bug/?i=14701
  [214] = https://curl.se/bug/?i=14696
  [215] = https://curl.se/bug/?i=14668
+ [217] = https://curl.se/bug/?i=14717
  [218] = https://curl.se/bug/?i=14688
+ [219] = https://curl.se/bug/?i=14717
  [220] = https://curl.se/bug/?i=14684
  [223] = https://curl.se/bug/?i=14674
  [224] = https://curl.se/bug/?i=14673
  [225] = https://curl.se/bug/?i=14672
  [226] = https://curl.se/bug/?i=14671
+ [227] = https://curl.se/bug/?i=14718
+ [229] = https://curl.se/bug/?i=14720
+ [230] = https://curl.se/bug/?i=14722
+ [232] = https://curl.se/bug/?i=14709
  [234] = https://curl.se/bug/?i=14660
