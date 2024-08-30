@@ -1736,6 +1736,7 @@ CURLcode Curl_http2_request_upgrade(struct dynbuf *req,
   free(base64);
 
   k->upgr101 = UPGR101_H2;
+  data->conn->bits.asks_multiplex = TRUE;
 
   return result;
 }
