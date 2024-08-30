@@ -803,7 +803,7 @@ sub single {
                 $e =~ s!\$URL!https://example.com!g;
                 # convert single backslahes to doubles
                 $e =~ s/\\/\\\\/g;
-                print " curl $e\n";
+                print "curl $e\n";
             }
             print ".fi\n";
         }
