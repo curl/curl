@@ -532,7 +532,7 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     AC_MSG_CHECKING([that c-ares is good and recent enough])
     AC_LINK_IFELSE([
       AC_LANG_PROGRAM([[
-#include <ares.h>
+        #include <ares.h>
         /* set of dummy functions in case c-ares was built with debug */
         void curl_dofree() { }
         void curl_sclose() { }
