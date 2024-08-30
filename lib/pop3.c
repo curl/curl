@@ -212,6 +212,7 @@ struct pop3_cmd {
 
 static const struct pop3_cmd pop3cmds[] = {
   { "APOP", 4, FALSE, FALSE },
+  { "AUTH", 4, FALSE, FALSE },
   { "CAPA", 4, TRUE, TRUE },
   { "DELE", 4, FALSE, FALSE },
   { "LIST", 4, TRUE, TRUE },
@@ -222,9 +223,12 @@ static const struct pop3_cmd pop3cmds[] = {
   { "RETR", 4, TRUE, TRUE },
   { "RSET", 4, FALSE, FALSE },
   { "STAT", 4, FALSE, FALSE },
+  { "STLS", 4, FALSE, FALSE },
   { "TOP",  3, TRUE, TRUE },
   { "UIDL", 4, TRUE, FALSE },
   { "USER", 4, FALSE, FALSE },
+  { "UTF8", 4, FALSE, FALSE },
+  { "XTND", 4, TRUE, TRUE },
 };
 
 /* Return iff a command is defined as "multi-line" (RFC 1939),
@@ -241,7 +245,9 @@ static bool pop3_is_multiline(const char *cmdline)
         return pop3cmds[i].multiline_with_args;
     }
   }
-  return FALSE;
+  /* Unknown command, assume multi-line for backward compatibility with
+   * earlier curl versions that only could do multi-line responses. */
+  return TRUE;
 }
 
 /***********************************************************************
