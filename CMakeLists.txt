@@ -492,6 +492,8 @@ count_true(_enabled_ssl_options_count
 )
 if(_enabled_ssl_options_count GREATER 1)
   set(CURL_WITH_MULTI_SSL ON)
+elseif(_enabled_ssl_options_count EQUAL 0)
+  set(CURL_DISABLE_HSTS ON)
 endif()
 
 if(CURL_USE_SCHANNEL)
