@@ -93,6 +93,6 @@ extern "C"
 #endif
 char $1 ();
 #if defined __stub_$1 || defined __stub___$1
-choke me
+#error force compilation error
 #endif
 ], [return $1 ();])])
