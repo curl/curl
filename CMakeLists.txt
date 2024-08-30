@@ -331,6 +331,10 @@ option(CURL_DISABLE_VERBOSE_STRINGS "Disable verbose strings" OFF)
 mark_as_advanced(CURL_DISABLE_VERBOSE_STRINGS)
 
 if(CURL_DISABLE_HTTP)
+  if(NOT CURL_DISABLE_FTP OR
+     NOT CURL_DISABLE_RTSP)
+    message(WARNING "Disable HTTP disables FTP over proxy and RTSP")
+  endif()
   set(CURL_DISABLE_RTSP ON)
   set(CURL_DISABLE_ALTSVC ON)
   set(CURL_DISABLE_HSTS ON)
