@@ -43,6 +43,10 @@
 #include "connect.h" /* for the connect timeout */
 #include "cipher_suite.h"
 
+#if !defined(HAVE_ARC4RANDOM)
+#error "Rustls requires arc4random"
+#endif
+
 struct rustls_ssl_backend_data
 {
   const struct rustls_client_config *config;

@@ -1444,6 +1444,10 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING AND
   mark_as_advanced(RANDOM_FILE)
 endif()
 
+if(USE_RUSTLS AND NOT HAVE_ARC4RANDOM)
+  message(FATAL_ERROR "Rustls requires arc4random.")
+endif()
+
 # Check for some functions that are used
 if(WIN32)
   set(CMAKE_REQUIRED_LIBRARIES "ws2_32")

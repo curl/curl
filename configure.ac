@@ -4028,6 +4028,10 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
+if test "$RUSTLS_ENABLED" = '1' -a "$HAVE_ARC4RANDOM" != '1'; then
+  AC_MSG_ERROR([Rustls requires arc4random.])
+fi
+
 if test "$curl_cv_native_windows" != 'yes'; then
   AC_CHECK_FUNCS([fseeko])
 
