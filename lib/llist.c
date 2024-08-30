@@ -170,6 +170,7 @@ Curl_node_uremove(struct Curl_llist_node *e, void *user)
 
   ptr = e->_ptr;
 
+  e->_list = NULL;
   e->_ptr  = NULL;
   e->_prev = NULL;
   e->_next = NULL;
