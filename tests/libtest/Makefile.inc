@@ -37,6 +37,8 @@ MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
 SUPPORTFILES = $(TIMEDIFF) first.c test.h
 
+THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
+
 # These are all libcurl test programs
 noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
@@ -78,7 +80,7 @@ noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
- lib3100 lib3101 lib3102 lib3103
+ lib3100 lib3101 lib3102 lib3103 lib3207
 
 libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
@@ -716,3 +718,6 @@ lib3102_LDADD = $(TESTUTIL_LIBS)
 
 lib3103_SOURCES = lib3103.c $(SUPPORTFILES)
 lib3103_LDADD = $(TESTUTIL_LIBS)
+
+lib3207_SOURCES = lib3207.c $(SUPPORTFILES) $(TESTUTIL) $(THREADS) $(WARNLESS) $(MULTIBYTE)
+lib3207_LDADD = $(TESTUTIL_LIBS)
