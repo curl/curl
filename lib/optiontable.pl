@@ -105,7 +105,7 @@ while(<STDIN>) {
     if(/^#define (CURLOPT_[^ ]*) *(CURLOPT_\S*)/) {
         my ($o, $n)=($1, $2);
         # skip obsolete ones
-        if($n !~ /OBSOLETE/) {
+        if(($n !~ /OBSOLETE/) && ($o !~ /OBSOLETE/)) {
             $o =~ s/^CURLOPT_//;
             $n =~ s/^CURLOPT_//;
             $alias{$o} = $n;
