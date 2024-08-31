@@ -359,32 +359,6 @@ if test X"$OPT_OPENSSL" != Xno &&
   AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
 fi
 
-dnl **********************************************************************
-dnl Check for the random seed preferences
-dnl **********************************************************************
-
-if test X"$OPENSSL_ENABLED" = X"1"; then
-  dnl Check for user-specified random device
-  AC_ARG_WITH(random,
-  AS_HELP_STRING([--with-random=FILE],
-                 [read randomness from FILE (default=/dev/urandom)]),
-    [ RANDOM_FILE="$withval" ],
-    [
-      if test x$cross_compiling != xyes; then
-        dnl Check for random device
-        AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
-      else
-        AC_MSG_WARN([skipped the /dev/urandom detection when cross-compiling])
-      fi
-    ]
-  )
-  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno; then
-    AC_SUBST(RANDOM_FILE)
-    AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
-    [a suitable file to read random data from])
-  fi
-fi
-
 dnl ---
 dnl We require OpenSSL with SRP support.
 dnl ---

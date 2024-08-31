@@ -998,12 +998,6 @@ static CURLcode ossl_seed(struct Curl_easy *data)
   return CURLE_SSL_CONNECT_ERROR;
 #else
 
-#ifdef RANDOM_FILE
-  RAND_load_file(RANDOM_FILE, RAND_LOAD_LENGTH);
-  if(rand_enough())
-    return CURLE_OK;
-#endif
-
   /* fallback to a custom seeding of the PRNG using a hash based on a current
      time */
   do {

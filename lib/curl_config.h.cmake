@@ -638,9 +638,6 @@
 /* Define to the version of this package. */
 #cmakedefine PACKAGE_VERSION ${PACKAGE_VERSION}
 
-/* a suitable file to read random data from */
-#cmakedefine RANDOM_FILE "${RANDOM_FILE}"
-
 /*
  Note: SIZEOF_* variables are fetched with CMake through check_type_size().
  As per CMake documentation on CheckTypeSize, C preprocessor code is

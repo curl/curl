@@ -1440,12 +1440,6 @@ if(SIZEOF_SUSECONDS_T)
   set(HAVE_SUSECONDS_T 1)
 endif()
 
-if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING AND
-   (NOT DEFINED RANDOM_FILE OR RANDOM_FILE))
-  find_file(RANDOM_FILE "urandom" "/dev")
-  mark_as_advanced(RANDOM_FILE)
-endif()
-
 # Check for some functions that are used
 if(WIN32)
   set(CMAKE_REQUIRED_LIBRARIES "ws2_32")

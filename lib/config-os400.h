@@ -65,9 +65,6 @@
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t
 
-/* Define this as a suitable file to read random data from */
-#undef RANDOM_FILE
-
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 
