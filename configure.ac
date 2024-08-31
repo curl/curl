@@ -2558,8 +2558,8 @@ if test "$curl_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
   OPT_WINUNI="default"
   AC_ARG_WITH(windows-unicode,
-  AS_HELP_STRING([--with-windows-unicode],[enable Windows Unicode])
-  AS_HELP_STRING([--without-windows-unicode], [disable Windows Unicode (default)]),
+AS_HELP_STRING([--with-windows-unicode],[enable Windows Unicode])
+AS_HELP_STRING([--without-windows-unicode], [disable Windows Unicode (default)]),
     OPT_WINUNI=$withval)
   case "$OPT_WINUNI" in
     yes)
@@ -2584,8 +2584,8 @@ if test "$curl_cv_native_windows" = 'yes'; then
   AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
   OPT_WINIDN="default"
   AC_ARG_WITH(winidn,
-  AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
-  AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
+AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     OPT_WINIDN=$withval)
   case "$OPT_WINIDN" in
     no|default)
@@ -2672,8 +2672,8 @@ case $host_os in
     AC_MSG_CHECKING([whether to build with Apple IDN])
     OPT_IDN="default"
     AC_ARG_WITH(apple-idn,
-    AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
-    AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
+AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
+AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
       [OPT_IDN=$withval])
     case "$OPT_IDN" in
       yes)
