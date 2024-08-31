@@ -35,7 +35,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM _sources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
+    list(REMOVE_ITEM _sources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
   endif()
 
   string(TOUPPER ${_target} _upper_target)

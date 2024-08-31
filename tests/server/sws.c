@@ -2240,7 +2240,7 @@ int main(int argc, char *argv[])
          protocol_type, socket_type, location_str);
 
   /* start accepting connections */
-  rc = listen(sock, 5);
+  rc = listen(sock, 50);
   if(0 != rc) {
     error = SOCKERRNO;
     logmsg("listen() failed with error: (%d) %s", error, sstrerror(error));

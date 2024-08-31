@@ -138,7 +138,7 @@ extern curl_calloc_callback Curl_ccalloc;
 extern curl_wcsdup_callback Curl_cwcsdup;
 #endif
 
-#ifndef CURLDEBUG
+#if !defined(CURLDEBUG) && defined(BUILDING_LIBCURL)
 
 /*
  * libcurl's 'memory tracking' system defines strdup, malloc, calloc,
