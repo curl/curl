@@ -154,20 +154,6 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
   }
 #endif
 
-#if defined(RANDOM_FILE) && !defined(_WIN32)
-  if(!seeded) {
-    /* if there is a random file to read a seed from, use it */
-    int fd = open(RANDOM_FILE, O_RDONLY);
-    if(fd > -1) {
-      /* read random data into the randseed variable */
-      ssize_t nread = read(fd, &randseed, sizeof(randseed));
-      if(nread == sizeof(randseed))
-        seeded = TRUE;
-      close(fd);
-    }
-  }
-#endif
-
   if(!seeded) {
     struct curltime now = Curl_now();
     infof(data, "WARNING: using weak random seed");

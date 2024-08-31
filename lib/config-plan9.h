@@ -41,7 +41,6 @@
 #define PACKAGE_STRING "curl -"
 #define PACKAGE_TARNAME "curl"
 #define PACKAGE_VERSION "-"
-#define RANDOM_FILE "/dev/random"
 #define VERSION "0.0.0" /* TODO */
 
 #define STDC_HEADERS 1
