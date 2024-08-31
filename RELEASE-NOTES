@@ -8,7 +8,7 @@ curl and libcurl 8.10.0
 
 This release includes the following changes:
 
- o autotools: add `--with-windows-unicode` option [103]
+ o autotools: add `--enable-windows-unicode` option [103]
  o curl: --help [option] displays documentation for given cmdline option [19]
  o curl: add --skip-existing [54]
  o curl: for -O, use "default" as filename when the URL has none [34]
