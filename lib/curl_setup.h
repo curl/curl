@@ -328,6 +328,23 @@
 #  define CURL_FORMAT_CURL_OFF_TU  "llu"
 #endif
 
+/* based on logic in "curl/mprintf.h" */
+
+#if (defined(__GNUC__) || defined(__clang__) ||                         \
+  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
+  defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
+  !defined(CURL_NO_FMT_CHECKS)
+#if defined(__MINGW32__) && !defined(__clang__)
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(gnu_printf, fmt, arg)))
+#else
+#define CURL_PRINTF(fmt, arg) \
+  __attribute__((format(__printf__, fmt, arg)))
+#endif
+#else
+#define CURL_PRINTF(fmt, arg)
+#endif
+
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
    gcc (as of v14) is also missing it. */
