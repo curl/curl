@@ -131,6 +131,9 @@
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
+/* disabled shuffle DNS feature */
+#cmakedefine CURL_DISABLE_SHUFFLE_DNS 1
+
 /* disables SMB */
 #cmakedefine CURL_DISABLE_SMB 1
 
