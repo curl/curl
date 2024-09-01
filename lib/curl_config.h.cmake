@@ -89,6 +89,9 @@
 /* disables HTTP */
 #cmakedefine CURL_DISABLE_HTTP 1
 
+/* disabled all HTTP authentication methods */
+#cmakedefine CURL_DISABLE_HTTP_AUTH 1
+
 /* disables IMAP */
 #cmakedefine CURL_DISABLE_IMAP 1
 
