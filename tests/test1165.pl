@@ -93,9 +93,7 @@ sub scan_file {
     while(<F>) {
         while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
             my ($sym)=($1);
-            if(not $sym =~ /^(CURL_DISABLE_SHA512_256)/) { # Skip this symbol, to be implemented
-                $file{$sym} = $source;
-            }
+            $file{$sym} = $source;
         }
     }
     close F;

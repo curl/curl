@@ -144,6 +144,10 @@ Disable support for proxies
 
 Disable the RTSP protocol.
 
+## `CURL_DISABLE_SHA512_256`
+
+Disable the SHA-512/256 hash algorithm.
+
 ## `CURL_DISABLE_SHUFFLE_DNS`
 
 Disable the shuffle DNS feature
