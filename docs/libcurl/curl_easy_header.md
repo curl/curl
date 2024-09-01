@@ -65,7 +65,7 @@ does not have to bother about multiple headers used wrongly.
 
 The memory for the returned struct is associated with the easy handle and
 subsequent calls to curl_easy_header(3) clobber the struct used in the
-previous calls for the same easy handle. Applications need to copy the data if
+previous calls for the same easy handle. The application needs to copy the data if
 it wants to keep it around. The memory used for the struct gets freed with
 calling curl_easy_cleanup(3) of the easy handle.
 
