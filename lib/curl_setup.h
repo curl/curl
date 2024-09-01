@@ -28,6 +28,8 @@
 #define CURL_NO_OLDIES
 #endif
 
+#define CURL_SKIP_INCLUDE_MPRINTF
+
 /* FIXME: Delete this once the warnings have been fixed. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
 #ifdef __GNUC__
