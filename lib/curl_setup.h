@@ -348,7 +348,7 @@
 #define CURL_PRINTF(fmt, arg)
 #endif
 
-/* Override printf mask check rules in "curl/mprintf.h" */
+/* Override default printf mask check rules in "curl/mprintf.h" */
 #define CURL_TEMP_PRINTF CURL_PRINTF
 
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
