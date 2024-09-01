@@ -32,6 +32,7 @@
 extern "C" {
 #endif
 
+#ifndef CURL_TEMP_PRINTF
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
@@ -49,6 +50,7 @@ extern "C" {
 #endif
 #else
 #define CURL_TEMP_PRINTF(fmt, arg)
+#endif
 #endif
 
 CURL_EXTERN int curl_mprintf(const char *format, ...)

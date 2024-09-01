@@ -347,6 +347,8 @@
 #define CURL_PRINTF(fmt, arg)
 #endif
 
+#define CURL_TEMP_PRINTF CURL_PRINTF  /* override "curl/mprintf.h" */
+
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
    gcc (as of v14) is also missing it. */
