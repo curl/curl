@@ -4647,6 +4647,25 @@ AS_HELP_STRING([--disable-progress-meter],[Disable progress-meter]),
 )
 
 dnl ************************************************************
+dnl disable SHA-512/256 hash algorithm
+dnl
+AC_MSG_CHECKING([whether to support the SHA-512/256 hash algorithm])
+AC_ARG_ENABLE(sha512-256,
+AS_HELP_STRING([--enable-sha512-256],[Enable SHA-512/256 hash algorithm (default)])
+AS_HELP_STRING([--disable-sha512-256],[Disable SHA-512/256 hash algorithm]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_SHA512_256, 1, [disable SHA-512/256 hash algorithm])
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable shuffle DNS support
 dnl
 AC_MSG_CHECKING([whether to support DNS shuffling])

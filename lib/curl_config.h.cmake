@@ -134,6 +134,9 @@
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
+/* disables SHA-512/256 hash algorithm */
+#cmakedefine CURL_DISABLE_SHA512_256 1
+
 /* disabled shuffle DNS feature */
 #cmakedefine CURL_DISABLE_SHUFFLE_DNS 1
 
