@@ -35,7 +35,7 @@ extern "C" {
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
   defined(__IAR_SYSTEMS_ICC__)) &&                                      \
   defined(__STDC_VERSION__) && (__STDC_VERSION__ >= 199901L) &&         \
-  !defined(CURL_NO_FMT_CHECKS) && !defined(CURL_NO_FMT_CHECK_PUB)
+  !defined(CURL_NO_FMT_CHECKS)
 #if defined(__MINGW32__) && !defined(__clang__)
 #if defined(__MINGW_PRINTF_FORMAT)  /* mingw-w64 3.0.0+. Needs stdio.h. */
 #define CURL_TEMP_PRINTF(fmt, arg) \
@@ -49,7 +49,6 @@ extern "C" {
 #endif
 #else
 #define CURL_TEMP_PRINTF(fmt, arg)
-#error "DISABLING FORMAT CHECKS"
 #endif
 
 CURL_EXTERN int curl_mprintf(const char *format, ...)

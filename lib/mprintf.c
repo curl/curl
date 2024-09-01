@@ -24,8 +24,7 @@
 
 #include "curl_setup.h"
 #include "dynbuf.h"
-#include "curl_printf.h"  /* must include it before curl/mprintf.h */
-#include <curl/mprintf.h>
+#include "curl_printf.h"
 
 #include "curl_memory.h"
 /* The last #include file should be: */
