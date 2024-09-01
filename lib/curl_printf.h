@@ -29,6 +29,8 @@
  * *rintf() functions.
  */
 
+#include <curl/curl.h>  /* for CURL_EXTERN */
+
 /* based on logic in "curl/mprintf.h" */
 
 CURL_EXTERN int curl_mprintf(const char *format, ...)
