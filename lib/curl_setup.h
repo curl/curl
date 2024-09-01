@@ -28,7 +28,7 @@
 #define CURL_NO_OLDIES
 #endif
 
-/* Tell curl/curl.h not to include curl/printf.h */
+/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
 #define CURL_SKIP_INCLUDE_MPRINTF
 
 /* FIXME: Delete this once the warnings have been fixed. */
