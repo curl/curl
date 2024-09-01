@@ -148,7 +148,9 @@ static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,
 #endif
 
 #if defined(HAVE_ARC4RANDOM) && \
-  !(defined(USE_OPENSSL) && defined(LIBRESSL_VERSION_NUMBER))
+  !(defined(USE_OPENSSL) && \
+    defined(LIBRESSL_VERSION_NUMBER) && \
+    LIBRESSL_VERSION_NUMBER < 0x3090000fL)
   if(!seeded) {
     *rnd = (unsigned int)arc4random();
     return CURLE_OK;
