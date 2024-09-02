@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "test.h"
+#include "first.h"
 
 #ifdef HAVE_LOCALE_H
 #  include <locale.h> /* for setlocale() */
@@ -137,6 +138,9 @@ int main(int argc, char **argv)
 {
   char *URL;
   CURLcode result;
+  int basearg;
+  char *test_id;
+  test_func_t testfunc;
 
 #ifdef O_BINARY
 #  ifdef __HIGHC__
@@ -157,25 +161,61 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 #endif
 
-  if(argc < 2) {
+  test_argc = argc;
+  test_argv = argv;
+
+#ifdef CURLTESTS_BUNDLED
+  --test_argc;
+  ++test_argv;
+
+  basearg = 2;
+
+  if(argc < (basearg + 1)) {
+    fprintf(stderr, "Pass test-ID and URL as arguments please\n");
+    return 1;
+  }
+
+  test_id = argv[basearg - 1];
+  testfunc = NULL;
+  {
+    size_t tmp;
+    for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
+      if(strcmp(test_id, s_tests[tmp].id) == 0) {
+        testfunc = s_tests[tmp].ptr;
+        break;
+      }
+    }
+  }
+
+  if(!testfunc) {
+    fprintf(stderr, "Test '%s' not found.\n", test_id);
+    return 1;
+  }
+
+  fprintf(stderr, "Test: %s\n", test_id);
+#else
+  basearg = 1;
+
+  if(argc < (basearg + 1)) {
     fprintf(stderr, "Pass URL as argument please\n");
     return 1;
   }
 
-  test_argc = argc;
-  test_argv = argv;
+  (void)test_id;
+  testfunc = test;
+#endif
 
-  if(argc > 2)
-    libtest_arg2 = argv[2];
+  if(argc > (basearg + 1))
+    libtest_arg2 = argv[basearg + 1];
 
-  if(argc > 3)
-    libtest_arg3 = argv[3];
+  if(argc > (basearg + 2))
+    libtest_arg3 = argv[basearg + 2];
 
-  URL = argv[1]; /* provide this to the rest */
+  URL = argv[basearg]; /* provide this to the rest */
 
   fprintf(stderr, "URL: %s\n", URL);
 
-  result = test(URL);
+  result = testfunc(URL);
   fprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef _WIN32

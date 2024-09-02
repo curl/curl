@@ -35,7 +35,7 @@ MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
-SUPPORTFILES = $(TIMEDIFF) first.c test.h
+SUPPORTFILES = $(TIMEDIFF) first.c first.h test.h
 
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
