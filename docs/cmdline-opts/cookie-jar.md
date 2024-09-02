@@ -11,6 +11,7 @@ Added: 7.9
 Multi: single
 See-also:
   - cookie
+  - junk-session-cookies
 Example:
   - -c store-here.txt $URL
   - -c store-here.txt -b read-these $URL

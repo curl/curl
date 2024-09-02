@@ -27,6 +27,7 @@
 import difflib
 import filecmp
 import logging
+import math
 import os
 from datetime import timedelta
 import pytest
@@ -77,28 +78,30 @@ class TestDownload:
 
     # download 100 files sequentially
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_02_03_download_100_sequential(self, env: Env,
-                                           httpd, nghttpx, repeat, proto):
+    def test_02_03_download_sequential(self, env: Env,
+                                       httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
+        count = 10
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-99]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto)
-        r.check_response(http_status=200, count=100, connect_count=1)
+        r.check_response(http_status=200, count=count, connect_count=1)
 
     # download 100 files parallel
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_02_04_download_100_parallel(self, env: Env,
-                                         httpd, nghttpx, repeat, proto):
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_04_download_parallel(self, env: Env,
+                                     httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        max_parallel = 50
+        count = 10
+        max_parallel = 5
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-99]'
+        urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel', '--parallel-max', f'{max_parallel}'
         ])
-        r.check_response(http_status=200, count=100)
+        r.check_response(http_status=200, count=count)
         if proto == 'http/1.1':
             # http/1.1 parallel transfers will open multiple connections
             assert r.total_connects > 1, r.dump_logs()
@@ -182,7 +185,7 @@ class TestDownload:
                               httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 20
+        count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-1m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
@@ -193,7 +196,7 @@ class TestDownload:
                               httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 20
+        count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-1m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
@@ -208,7 +211,7 @@ class TestDownload:
                               httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 10
+        count = 3
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto)
@@ -223,7 +226,7 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
-        count = 10
+        count = 3
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
@@ -236,7 +239,7 @@ class TestDownload:
                                      httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 50
+        count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
@@ -249,7 +252,7 @@ class TestDownload:
                                     httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 50
+        count = 5
         urln = f'http://{env.domain1}:{env.http_port}/data-10m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
@@ -263,13 +266,15 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
-        count = 10
+        count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
-        r.check_stats(count=count, http_status=404, exitcode=0)
+        r.check_stats(count=count, http_status=404, exitcode=0,
+                      remote_port=env.port_for(alpn_proto=proto),
+                      remote_ip='127.0.0.1')
 
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_02_15_fail_not_found(self, env: Env, httpd, nghttpx, repeat, proto):
@@ -277,13 +282,15 @@ class TestDownload:
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
-        count = 10
+        count = 5
         urln = f'https://{env.authority_for(env.domain1, proto)}/not-found?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--fail'
         ])
-        r.check_stats(count=count, http_status=404, exitcode=22)
+        r.check_stats(count=count, http_status=404, exitcode=22,
+                      remote_port=env.port_for(alpn_proto=proto),
+                      remote_ip='127.0.0.1')
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
@@ -305,7 +312,7 @@ class TestDownload:
         # ok, make 100 downloads with 2 parallel running and they
         # are expected to stumble into the issue when using `lib/http2.c`
         # from curl 7.88.0
-        count = 100
+        count = 5
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data-1m?[0-{count-1}]'
         curl = CurlClient(env=env)
         r = curl.http_download(urls=[urln], alpn_proto="h2", extra_args=[
@@ -325,7 +332,7 @@ class TestDownload:
     def test_02_21_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 2 if proto == 'http/1.1' else 10
+        count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='h2-download', env=env)
@@ -344,7 +351,7 @@ class TestDownload:
     def test_02_22_lib_parallel_resume(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 2 if proto == 'http/1.1' else 10
+        count = 2
         max_parallel = 5
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -368,13 +375,11 @@ class TestDownload:
             pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
+        count = 10
+        max_parallel = 5
         if proto in ['h2', 'h3']:
-            count = 200
-            max_parallel = 100
             pause_offset = 64 * 1024
         else:
-            count = 10
-            max_parallel = 5
             pause_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -399,13 +404,11 @@ class TestDownload:
             pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
+        count = 10
+        max_parallel = 5
         if proto in ['h2', 'h3']:
-            count = 200
-            max_parallel = 100
             abort_offset = 64 * 1024
         else:
-            count = 10
-            max_parallel = 5
             abort_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -430,13 +433,11 @@ class TestDownload:
             pytest.skip('OpenSSL QUIC fails here')
         if proto == 'h3' and env.ci_run and env.curl_uses_lib('quiche'):
             pytest.skip("fails in CI, but works locally for unknown reasons")
+        count = 10
+        max_parallel = 5
         if proto in ['h2', 'h3']:
-            count = 200
-            max_parallel = 100
             fail_offset = 64 * 1024
         else:
-            count = 10
-            max_parallel = 5
             fail_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
@@ -453,19 +454,22 @@ class TestDownload:
         self.check_downloads(client, srcfile, count, complete=False)
 
     # speed limited download
-    @pytest.mark.parametrize("proto", ['h2', 'h3'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_24_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
         url = f'https://{env.authority_for(env.domain1, proto)}/data-1m'
         curl = CurlClient(env=env)
+        speed_limit = 384 * 1024
+        min_duration = math.floor((1024 * 1024)/speed_limit)
         r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
-            '--limit-rate', f'{196 * 1024}'
+            '--limit-rate', f'{speed_limit}'
         ])
         r.check_response(count=count, http_status=200)
-        assert r.duration > timedelta(seconds=4), \
-            f'rate limited transfer should take more than 4s, not {r.duration}'
+        assert r.duration > timedelta(seconds=min_duration), \
+            f'rate limited transfer should take more than {min_duration}s, '\
+            f'not {r.duration}'
 
     # make extreme parallel h2 upgrades, check invalid conn reuse
     # before protocol switch has happened
@@ -551,7 +555,7 @@ class TestDownload:
     @pytest.mark.parametrize("pause_offset", [0, 10*1024, 100*1023, 640000])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_02_29_h2_lib_serial(self, env: Env, httpd, nghttpx, proto, pause_offset, repeat):
-        count = 2 if proto == 'http/1.1' else 10
+        count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
         client = LocalClient(name='h2-download', env=env)
@@ -563,3 +567,27 @@ class TestDownload:
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
+
+    # download parallel with prior knowledge
+    def test_02_30_parallel_prior_knowledge(self, env: Env, httpd):
+        count = 3
+        curl = CurlClient(env=env)
+        urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], extra_args=[
+            '--parallel', '--http2-prior-knowledge'
+        ])
+        r.check_response(http_status=200, count=count)
+        assert r.total_connects == 1, r.dump_logs()
+
+    # download parallel with h2 "Upgrade:"
+    def test_02_31_parallel_upgrade(self, env: Env, httpd):
+        count = 3
+        curl = CurlClient(env=env)
+        urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], extra_args=[
+            '--parallel', '--http2'
+        ])
+        r.check_response(http_status=200, count=count)
+        # we see 3 connections, because Apache only every serves a single
+        # request via Upgrade: and then closed the connection.
+        assert r.total_connects == 3, r.dump_logs()

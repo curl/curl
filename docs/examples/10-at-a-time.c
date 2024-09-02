@@ -26,12 +26,8 @@
  * </DESC>
  */
 
-#include <errno.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef _WIN32
-#  include <unistd.h>
-#endif
 #include <curl/curl.h>
 
 static const char *urls[] = {

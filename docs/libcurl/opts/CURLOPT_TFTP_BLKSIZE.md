@@ -8,6 +8,7 @@ See-also:
   - CURLOPT_MAXFILESIZE (3)
 Protocol:
   - TFTP
+Added-in: 7.19.4
 ---
 
 # NAME
@@ -35,6 +36,8 @@ is used.
 
 512
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -52,9 +55,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.19.4
+# %AVAILABILITY%
 
 # RETURN VALUE
 

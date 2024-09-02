@@ -37,6 +37,9 @@ GN_1 =
 GN_ = $(GN_0)
 
 MANAGEN=$(top_srcdir)/scripts/managen
+MAXLINE=$(top_srcdir)/scripts/maxline
+
+# Maximum number of columns accepted in the ASCII version of the manpage
 INCDIR=$(top_srcdir)/include
 
 if BUILD_DOCS
@@ -54,7 +57,7 @@ $(ASCIIPAGE): $(DPAGES) $(SUPPORT) mainpage.idx Makefile.inc $(MANAGEN)
 	$(GEN)(rm -f $(ASCIIPAGE) && @PERL@ $(MANAGEN) -d $(srcdir) -I $(INCDIR) ascii $(DPAGES) > asciipage.tmp.$$$$ && mv asciipage.tmp.$$$$ $(ASCIIPAGE))
 
 listhelp:
-	$(MANAGEN) listhelp $(DPAGES) > $(top_builddir)/src/tool_listhelp.c
+	$(MANAGEN) -d $(srcdir) listhelp $(DPAGES) > $(top_builddir)/src/tool_listhelp.c
 
 listcats:
 	@$(MANAGEN) listcats $(DPAGES)

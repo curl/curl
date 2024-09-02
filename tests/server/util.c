@@ -28,7 +28,7 @@
 #include <netinet/in.h>
 #endif
 #ifdef _XOPEN_SOURCE_EXTENDED
-/* This define is "almost" required to build on HPUX 11 */
+/* This define is "almost" required to build on HP-UX 11 */
 #include <arpa/inet.h>
 #endif
 #ifdef HAVE_NETDB_H
@@ -40,9 +40,6 @@
 #include <sys/poll.h>
 #endif
 
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
@@ -143,7 +140,7 @@ static const char *win32_strerror(int err, char *buf, size_t buflen)
   return buf;
 }
 
-/* use instead of perror() on generic windows */
+/* use instead of perror() on generic Windows */
 void win32_perror(const char *msg)
 {
   char buf[512];
@@ -166,7 +163,7 @@ void win32_init(void)
 
   if(err) {
     perror("Winsock init failed");
-    logmsg("Error initialising winsock -- aborting");
+    logmsg("Error initialising Winsock -- aborting");
     exit(1);
   }
 
@@ -190,7 +187,7 @@ void win32_cleanup(void)
   _flushall();
 }
 
-/* socket-safe strerror (works on WinSock errors, too */
+/* socket-safe strerror (works on Winsock errors, too */
 const char *sstrerror(int err)
 {
   static char buf[512];
@@ -366,7 +363,7 @@ void clear_advisor_read_lock(const char *filename)
 }
 
 
-#if defined(_WIN32) && !defined(MSDOS)
+#if defined(_WIN32)
 
 static struct timeval tvnow(void)
 {
@@ -469,6 +466,13 @@ long timediff(struct timeval newer, struct timeval older)
 
 typedef void (*SIGHANDLER_T)(int);
 
+#if defined(_MSC_VER) && _MSC_VER == 1600
+/* Workaround for warning C4306:
+   'type cast' : conversion from 'int' to 'void (__cdecl *)(int)' */
+#undef SIG_ERR
+#define SIG_ERR  ((SIGHANDLER_T)(size_t)-1)
+#endif
+
 #ifdef SIGHUP
 static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
 #endif
@@ -493,7 +497,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
 #ifdef _WIN32_WCE
 static DWORD thread_main_id = 0;
 #else
@@ -550,7 +554,7 @@ static void exit_signal_handler(int signum)
  * They are included for ANSI compatibility. Therefore, you can set
  * signal handlers for these signals by using signal, and you can also
  * explicitly generate these signals by calling raise. Source:
- * https://docs.microsoft.com/de-de/cpp/c-runtime-library/reference/signal
+ * https://docs.microsoft.com/en-us/cpp/c-runtime-library/reference/signal
  */
 static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 {
@@ -574,6 +578,9 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   }
   return TRUE;
 }
+#endif
+
+#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -687,13 +694,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
 void install_signal_handlers(bool keep_sigalrm)
 {
 #ifdef _WIN32
-#ifdef _WIN32_WCE
-  typedef HANDLE curl_win_thread_handle_t;
-#else
-  typedef uintptr_t curl_win_thread_handle_t;
-#endif
-  curl_win_thread_handle_t thread;
-  /* setup windows exit event before any signal can trigger */
+  /* setup Windows exit event before any signal can trigger */
   exit_event = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!exit_event)
     logmsg("cannot create exit event");
@@ -741,16 +742,27 @@ void install_signal_handlers(bool keep_sigalrm)
 #ifdef _WIN32
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
+
+#ifndef CURL_WINDOWS_APP
+  {
 #ifdef _WIN32_WCE
-  thread = CreateThread(NULL, 0, &main_window_loop,
-                        (LPVOID)GetModuleHandle(NULL), 0, &thread_main_id);
+    typedef HANDLE curl_win_thread_handle_t;
 #else
-  thread = _beginthreadex(NULL, 0, &main_window_loop,
-                          (void *)GetModuleHandle(NULL), 0, &thread_main_id);
+    typedef uintptr_t curl_win_thread_handle_t;
 #endif
-  thread_main_window = (HANDLE)thread;
-  if(!thread_main_window || !thread_main_id)
-    logmsg("cannot start main window loop");
+    curl_win_thread_handle_t thread;
+#ifdef _WIN32_WCE
+    thread = CreateThread(NULL, 0, &main_window_loop,
+                          (LPVOID)GetModuleHandle(NULL), 0, &thread_main_id);
+#else
+    thread = _beginthreadex(NULL, 0, &main_window_loop,
+                            (void *)GetModuleHandle(NULL), 0, &thread_main_id);
+#endif
+    thread_main_window = (HANDLE)thread;
+    if(!thread_main_window || !thread_main_id)
+      logmsg("cannot start main window loop");
+  }
+#endif
 #endif
 }
 
@@ -786,6 +798,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
+#ifndef CURL_WINDOWS_APP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
@@ -801,6 +814,7 @@ void restore_signal_handlers(bool keep_sigalrm)
       exit_event = NULL;
     }
   }
+#endif
 #endif
 }
 

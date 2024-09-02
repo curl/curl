@@ -47,6 +47,11 @@
 
 #include <curl/curl.h>
 
+#ifdef __GNUC__
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 int main(int argc, char *argv[])
 {
   CURL *curl;
@@ -110,3 +115,7 @@ int main(int argc, char *argv[])
   }
   return 0;
 }
+
+#ifdef __GNUC__
+#pragma GCC diagnostic pop
+#endif

@@ -12,6 +12,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.25.0
 ---
 
 # NAME
@@ -89,6 +90,8 @@ could be a privacy violation and unexpected.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -107,9 +110,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.25.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

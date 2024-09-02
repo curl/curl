@@ -45,7 +45,10 @@
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-#ifdef DEBUGBUILD
+static void cf_cntrl_update_info(struct Curl_easy *data,
+                                 struct connectdata *conn);
+
+#ifdef UNITTESTS
 /* used by unit2600.c */
 void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -54,6 +57,15 @@ void Curl_cf_def_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->next->cft->do_close(cf->next, data);
 }
 #endif
+
+CURLcode Curl_cf_def_shutdown(struct Curl_cfilter *cf,
+                              struct Curl_easy *data, bool *done)
+{
+  (void)cf;
+  (void)data;
+  *done = TRUE;
+  return CURLE_OK;
+}
 
 static void conn_report_connect_stats(struct Curl_easy *data,
                                       struct connectdata *conn);
@@ -89,10 +101,11 @@ bool Curl_cf_def_data_pending(struct Curl_cfilter *cf,
 }
 
 ssize_t  Curl_cf_def_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, CURLcode *err)
+                          const void *buf, size_t len, bool eos,
+                          CURLcode *err)
 {
   return cf->next?
-    cf->next->cft->do_send(cf->next, data, buf, len, err) :
+    cf->next->cft->do_send(cf->next, data, buf, len, eos, err) :
     CURLE_RECV_ERROR;
 }
 
@@ -166,6 +179,61 @@ void Curl_conn_close(struct Curl_easy *data, int index)
   if(cf) {
     cf->cft->do_close(cf, data);
   }
+  Curl_shutdown_clear(data, index);
+}
+
+CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_OK;
+  timediff_t timeout_ms;
+  struct curltime now;
+
+  DEBUGASSERT(data->conn);
+  /* Get the first connected filter that is not shut down already. */
+  cf = data->conn->cfilter[sockindex];
+  while(cf && (!cf->connected || cf->shutdown))
+    cf = cf->next;
+
+  if(!cf) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  *done = FALSE;
+  now = Curl_now();
+  if(!Curl_shutdown_started(data, sockindex)) {
+    DEBUGF(infof(data, "shutdown start on%s connection",
+           sockindex? " secondary" : ""));
+    Curl_shutdown_start(data, sockindex, &now);
+  }
+  else {
+    timeout_ms = Curl_shutdown_timeleft(data->conn, sockindex, &now);
+    if(timeout_ms < 0) {
+      failf(data, "SSL shutdown timeout");
+      return CURLE_OPERATION_TIMEDOUT;
+    }
+  }
+
+  while(cf) {
+    if(!cf->shutdown) {
+      bool cfdone = FALSE;
+      result = cf->cft->do_shutdown(cf, data, &cfdone);
+      if(result) {
+        CURL_TRC_CF(data, cf, "shut down failed with %d", result);
+        return result;
+      }
+      else if(!cfdone) {
+        CURL_TRC_CF(data, cf, "shut down not done yet");
+        return CURLE_OK;
+      }
+      CURL_TRC_CF(data, cf, "shut down successfully");
+      cf->shutdown = TRUE;
+    }
+    cf = cf->next;
+  }
+  *done = (!result);
+  return result;
 }
 
 ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
@@ -192,7 +260,8 @@ ssize_t Curl_cf_recv(struct Curl_easy *data, int num, char *buf,
 }
 
 ssize_t Curl_cf_send(struct Curl_easy *data, int num,
-                     const void *mem, size_t len, CURLcode *code)
+                     const void *mem, size_t len, bool eos,
+                     CURLcode *code)
 {
   struct Curl_cfilter *cf;
 
@@ -204,7 +273,7 @@ ssize_t Curl_cf_send(struct Curl_easy *data, int num,
     cf = cf->next;
   }
   if(cf) {
-    ssize_t nwritten = cf->cft->do_send(cf, data, mem, len, code);
+    ssize_t nwritten = cf->cft->do_send(cf, data, mem, len, eos, code);
     DEBUGASSERT(nwritten >= 0 || *code);
     DEBUGASSERT(nwritten < 0 || !*code || !len);
     return nwritten;
@@ -315,10 +384,11 @@ void Curl_conn_cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 }
 
 ssize_t Curl_conn_cf_send(struct Curl_cfilter *cf, struct Curl_easy *data,
-                          const void *buf, size_t len, CURLcode *err)
+                          const void *buf, size_t len, bool eos,
+                          CURLcode *err)
 {
   if(cf)
-    return cf->cft->do_send(cf, data, buf, len, err);
+    return cf->cft->do_send(cf, data, buf, len, eos, err);
   *err = CURLE_SEND_ERROR;
   return -1;
 }
@@ -345,14 +415,26 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
 
   cf = data->conn->cfilter[sockindex];
   DEBUGASSERT(cf);
-  if(!cf)
+  if(!cf) {
+    *done = FALSE;
     return CURLE_FAILED_INIT;
+  }
 
   *done = cf->connected;
   if(!*done) {
+    if(Curl_conn_needs_flush(data, sockindex)) {
+      DEBUGF(infof(data, "Curl_conn_connect(index=%d), flush", sockindex));
+      result = Curl_conn_flush(data, sockindex);
+      if(result && (result != CURLE_AGAIN))
+        return result;
+    }
+
     result = cf->cft->do_connect(cf, data, blocking, done);
     if(!result && *done) {
-      Curl_conn_ev_update_info(data, data->conn);
+      /* Now that the complete filter chain is connected, let all filters
+       * persist information at the connection. E.g. cf-socket sets the
+       * socket and ip related information. */
+      cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
     }
@@ -435,12 +517,30 @@ bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)
   return FALSE;
 }
 
+bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
+                              struct Curl_easy *data)
+{
+  CURLcode result;
+  int pending = FALSE;
+  result = cf? cf->cft->query(cf, data, CF_QUERY_NEED_FLUSH,
+                              &pending, NULL) : CURLE_UNKNOWN_OPTION;
+  return (result || pending == FALSE)? FALSE : TRUE;
+}
+
+bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)
+{
+  return Curl_conn_cf_needs_flush(data->conn->cfilter[sockindex], data);
+}
+
 void Curl_conn_cf_adjust_pollset(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  struct easy_pollset *ps)
 {
   /* Get the lowest not-connected filter, if there are any */
   while(cf && !cf->connected && cf->next && !cf->next->connected)
+    cf = cf->next;
+  /* Skip all filters that have already shut down */
+  while(cf && cf->shutdown)
     cf = cf->next;
   /* From there on, give all filters a chance to adjust the pollset.
    * Lower filters are called later, so they may override */
@@ -460,6 +560,42 @@ void Curl_conn_adjust_pollset(struct Curl_easy *data,
   for(i = 0; i < 2; ++i) {
     Curl_conn_cf_adjust_pollset(data->conn->cfilter[i], data, ps);
   }
+}
+
+int Curl_conn_cf_poll(struct Curl_cfilter *cf,
+                      struct Curl_easy *data,
+                      timediff_t timeout_ms)
+{
+  struct easy_pollset ps;
+  struct pollfd pfds[MAX_SOCKSPEREASYHANDLE];
+  unsigned int i, npfds = 0;
+
+  DEBUGASSERT(cf);
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  memset(&ps, 0, sizeof(ps));
+  memset(pfds, 0, sizeof(pfds));
+
+  Curl_conn_cf_adjust_pollset(cf, data, &ps);
+  DEBUGASSERT(ps.num <= MAX_SOCKSPEREASYHANDLE);
+  for(i = 0; i < ps.num; ++i) {
+    short events = 0;
+    if(ps.actions[i] & CURL_POLL_IN) {
+      events |= POLLIN;
+    }
+    if(ps.actions[i] & CURL_POLL_OUT) {
+      events |= POLLOUT;
+    }
+    if(events) {
+      pfds[npfds].fd = ps.sockets[i];
+      pfds[npfds].events = events;
+      ++npfds;
+    }
+  }
+
+  if(!npfds)
+    DEBUGF(infof(data, "no sockets to poll!"));
+  return Curl_poll(pfds, npfds, timeout_ms);
 }
 
 void Curl_conn_get_host(struct Curl_easy *data, int sockindex,
@@ -520,6 +656,15 @@ curl_socket_t Curl_conn_cf_get_socket(struct Curl_cfilter *cf,
   if(cf && !cf->cft->query(cf, data, CF_QUERY_SOCKET, NULL, &sock))
     return sock;
   return CURL_SOCKET_BAD;
+}
+
+CURLcode Curl_conn_cf_get_ip_info(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data,
+                                  int *is_ipv6, struct ip_quadruple *ipquad)
+{
+  if(cf)
+    return cf->cft->query(cf, data, CF_QUERY_IP_INFO, is_ipv6, ipquad);
+  return CURLE_UNKNOWN_OPTION;
 }
 
 curl_socket_t Curl_conn_get_socket(struct Curl_easy *data, int sockindex)
@@ -588,6 +733,13 @@ CURLcode Curl_conn_ev_data_idle(struct Curl_easy *data)
                       CF_CTRL_DATA_IDLE, 0, NULL);
 }
 
+
+CURLcode Curl_conn_flush(struct Curl_easy *data, int sockindex)
+{
+  return Curl_conn_cf_cntrl(data->conn->cfilter[sockindex], data, FALSE,
+                            CF_CTRL_FLUSH, 0, NULL);
+}
+
 /**
  * Notify connection filters that the transfer represented by `data`
  * is done with sending data (e.g. has uploaded everything).
@@ -612,8 +764,8 @@ CURLcode Curl_conn_ev_data_pause(struct Curl_easy *data, bool do_pause)
                       CF_CTRL_DATA_PAUSE, do_pause, NULL);
 }
 
-void Curl_conn_ev_update_info(struct Curl_easy *data,
-                              struct connectdata *conn)
+static void cf_cntrl_update_info(struct Curl_easy *data,
+                                 struct connectdata *conn)
 {
   cf_cntrl_all(conn, data, TRUE, CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 }
@@ -706,9 +858,10 @@ CURLcode Curl_conn_recv(struct Curl_easy *data, int sockindex,
 }
 
 CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
-                        const void *buf, size_t blen,
+                        const void *buf, size_t blen, bool eos,
                         size_t *pnwritten)
 {
+  size_t write_len = blen;
   ssize_t nwritten;
   CURLcode result = CURLE_OK;
   struct connectdata *conn;
@@ -718,7 +871,7 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
   DEBUGASSERT(data);
   DEBUGASSERT(data->conn);
   conn = data->conn;
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
   {
     /* Allow debug builds to override this logic to force short sends
     */
@@ -726,11 +879,14 @@ CURLcode Curl_conn_send(struct Curl_easy *data, int sockindex,
     if(p) {
       size_t altsize = (size_t)strtoul(p, NULL, 10);
       if(altsize)
-        blen = CURLMIN(blen, altsize);
+        write_len = CURLMIN(write_len, altsize);
     }
   }
 #endif
-  nwritten = conn->send[sockindex](data, sockindex, buf, blen, &result);
+  if(write_len != blen)
+    eos = FALSE;
+  nwritten = conn->send[sockindex](data, sockindex, buf, write_len, eos,
+                                   &result);
   DEBUGASSERT((nwritten >= 0) || result);
   *pnwritten = (nwritten < 0)? 0 : (size_t)nwritten;
   return result;

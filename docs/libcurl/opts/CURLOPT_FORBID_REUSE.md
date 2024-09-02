@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_MAXLIFETIME_CONN (3)
 Protocol:
   - All
+Added-in: 7.7
 ---
 
 # NAME
@@ -39,6 +40,8 @@ Set to 0 to have libcurl keep the connection open for possible later reuse
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -58,9 +61,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

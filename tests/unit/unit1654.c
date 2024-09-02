@@ -57,51 +57,51 @@ UNITTEST_START
     fail_if(!curl, "curl_easy_init");
     goto fail;
   }
-  fail_unless(asi->list.size == 4, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 4, "wrong number of entries");
   msnprintf(outname, sizeof(outname), "%s-out", arg);
 
   result = Curl_altsvc_parse(curl, asi, "h2=\"example.com:8080\"\r\n",
                              ALPN_h1, "example.org", 8080);
   fail_if(result, "Curl_altsvc_parse() failed!");
-  fail_unless(asi->list.size == 5, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 5, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi, "h3=\":8080\"\r\n",
                              ALPN_h1, "2.example.org", 8080);
   fail_if(result, "Curl_altsvc_parse(2) failed!");
-  fail_unless(asi->list.size == 6, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 6, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.com:8080\", h3=\"yesyes.com\"\r\n",
                              ALPN_h1, "3.example.org", 8080);
   fail_if(result, "Curl_altsvc_parse(3) failed!");
   /* that one should make two entries */
-  fail_unless(asi->list.size == 8, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 8, "wrong number of entries");
 
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.com:443\"; ma = 120;\r\n",
                              ALPN_h2, "example.org", 80);
   fail_if(result, "Curl_altsvc_parse(4) failed!");
-  fail_unless(asi->list.size == 9, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 9, "wrong number of entries");
 
   /* quoted 'ma' value */
   result = Curl_altsvc_parse(curl, asi,
                              "h2=\"example.net:443\"; ma=\"180\";\r\n",
                              ALPN_h2, "example.net", 80);
   fail_if(result, "Curl_altsvc_parse(4) failed!");
-  fail_unless(asi->list.size == 10, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   result =
     Curl_altsvc_parse(curl, asi,
                       "h2=\":443\", h3=\":443\"; ma = 120; persist = 1\r\n",
                       ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(5) failed!");
-  fail_unless(asi->list.size == 12, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 12, "wrong number of entries");
 
   /* clear that one again and decrease the counter */
   result = Curl_altsvc_parse(curl, asi, "clear;\r\n",
                              ALPN_h1, "curl.se", 80);
   fail_if(result, "Curl_altsvc_parse(6) failed!");
-  fail_unless(asi->list.size == 10, "wrong number of entries");
+  fail_unless(Curl_llist_count(&asi->list) == 10, "wrong number of entries");
 
   Curl_altsvc_save(curl, asi, outname);
 

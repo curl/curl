@@ -3,12 +3,15 @@
 # SPDX-License-Identifier: curl
 
 10-at-a-time
+address-scope
 altsvc
 anyauthput
 certinfo
 chkspeed
+connect-to
 cookie_interface
 debug
+default-scheme
 externalsocket
 fileupload
 fopen
@@ -20,10 +23,13 @@ ftpsget
 ftpupload
 ftpuploadfrommem
 ftpuploadresume
-getreferrer
 getinfo
 getinmemory
 getredirect
+getreferrer
+headerapi
+hsts-preload
+http-options
 http-post
 http2-download
 http2-pushinmemory
@@ -50,6 +56,11 @@ imap-search
 imap-ssl
 imap-store
 imap-tls
+interface
+ipv6
+keepalive
+localport
+maxconnects
 multi-app
 multi-debugcallback
 multi-double
@@ -58,6 +69,8 @@ multi-legacy
 multi-poll
 multi-post
 multi-single
+netrc
+new-gitignore
 parseurl
 persistent
 pop3-authzid
@@ -76,8 +89,11 @@ postinmemory
 postit2
 postit2-formadd
 progressfunc
+protofeats
+range
 resolve
 rtsp
+rtsp-options
 sendrecv
 sepheaders
 sftpget
@@ -95,7 +111,10 @@ smtp-ssl
 smtp-tls
 smtp-vrfy
 sslbackend
-urlapi
+unixsocket
 url2file
+urlapi
 usercertinmem
+websocket
+websocket-cb
 xmlstream

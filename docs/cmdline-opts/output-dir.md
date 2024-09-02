@@ -5,7 +5,7 @@ Long: output-dir
 Arg: <dir>
 Help: Directory to save files in
 Added: 7.73.0
-Category: curl
+Category: output
 Multi: single
 See-also:
   - remote-name

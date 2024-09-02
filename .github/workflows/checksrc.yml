@@ -1,0 +1,97 @@
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# SPDX-License-Identifier: curl
+
+# This workflow contains checks at the source code level only.
+
+name: Source
+
+'on':
+  push:
+    branches:
+      - master
+      - '*/ci'
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'plan9/**'
+      - 'tests/data/**'
+      - 'winbuild/**'
+  pull_request:
+    branches:
+      - master
+    paths-ignore:
+      - '**/*.md'
+      - '.azure-pipelines.yml'
+      - '.circleci/**'
+      - 'appveyor.*'
+      - 'plan9/**'
+      - 'tests/data/**'
+      - 'winbuild/**'
+
+permissions: {}
+
+jobs:
+  checksrc:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        name: checkout
+
+      - name: check
+        run: git ls-files -z "*.[ch]" | xargs -0 -n1 ./scripts/checksrc.pl
+
+  codespell-cmakelint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        name: checkout
+
+      - name: install
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update
+          sudo apt-get install codespell python3-pip
+          python3 -m pip install cmakelint==1.4.3
+
+      - name: spellcheck
+        run: codespell --skip src/tool_hugehelp.c -I .github/scripts/codespell-ignore.txt include src lib
+
+      - name: cmakelint
+        run: scripts/cmakelint.sh
+
+  reuse:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        name: checkout
+
+      - name: REUSE Compliance Check
+        uses: fsfe/reuse-action@3ae3c6bdf1257ab19397fab11fd3312144692083 # v4
+
+  miscchecks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        name: checkout
+
+      - name: shellcheck
+        run: .github/scripts/shellcheck.sh
+
+      - name: spacecheck
+        run: .github/scripts/spacecheck.pl
+
+      - name: yamlcheck
+        run: .github/scripts/yamlcheck.sh
+
+      - name: binarycheck
+        run: .github/scripts/binarycheck.pl
+
+      # we allow some extra in source code
+      - name: badwords
+        run: >
+          grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt |
+          .github/scripts/badwords.pl `git ls-files -- src lib include`

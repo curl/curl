@@ -9,11 +9,12 @@ See-also:
   - CURLOPT_TCP_KEEPIDLE (3)
 Protocol:
   - All
+Added-in: 7.62.0
 ---
 
 # NAME
 
-curl_easy_upkeep - Perform any connection upkeep checks.
+curl_easy_upkeep - keep existing connections alive
 
 # SYNOPSIS
 
@@ -37,6 +38,12 @@ is called, an HTTP/2 PING frame is sent on the connection.
 This function must be explicitly called in order to perform the upkeep work.
 The connection upkeep interval is set with
 CURLOPT_UPKEEP_INTERVAL_MS(3).
+
+If you call this function on an easy handle that uses a shared connection cache
+then upkeep is performed on the connections in that cache, even if those
+connections were never used by the easy handle. (Added in 8.10.0)
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -68,9 +75,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.62.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

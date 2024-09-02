@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_RTSP_REQUEST (3)
 Protocol:
   - RTSP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -65,6 +66,8 @@ You can also abort the transfer by returning CURL_WRITEFUNC_ERROR. (7.87.0)
 NULL, the interleave data is then passed to the regular write function:
 CURLOPT_WRITEFUNCTION(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -91,9 +94,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.20.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

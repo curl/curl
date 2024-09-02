@@ -73,6 +73,9 @@ moo
 # Verify data after the test has been "shot"
 <verify>
 <strip>
+QUIT
+</strip>
+<strip>
 ^timeout = [5-6]$
 </strip>
 <protocol>

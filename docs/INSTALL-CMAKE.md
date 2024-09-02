@@ -22,7 +22,7 @@ Missing features in the CMake build:
 
  - Builds libcurl without large file support
  - Does not support all SSL libraries (only OpenSSL, Schannel, Secure
-   Transport, and mbedTLS, WolfSSL)
+   Transport, and mbedTLS, wolfSSL)
  - Does not allow different resolver backends (no c-ares build support)
  - No RTMP support built
  - Does not allow build curl and libcurl debug enabled

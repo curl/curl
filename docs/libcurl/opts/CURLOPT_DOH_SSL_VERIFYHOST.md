@@ -14,6 +14,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.76.0
 ---
 
 # NAME
@@ -59,6 +60,8 @@ of the DoH server certificate.
 
 2
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -79,11 +82,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.76.0
-
-If built TLS enabled.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

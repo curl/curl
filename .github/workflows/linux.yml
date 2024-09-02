@@ -4,7 +4,7 @@
 
 name: Linux
 
-on:
+'on':
   push:
     branches:
       - master
@@ -13,7 +13,6 @@ on:
       - '**/*.md'
       - '.azure-pipelines.yml'
       - '.circleci/**'
-      - '.cirrus.yml'
       - 'appveyor.*'
       - 'packages/**'
       - 'plan9/**'
@@ -26,7 +25,6 @@ on:
       - '**/*.md'
       - '.azure-pipelines.yml'
       - '.circleci/**'
-      - '.cirrus.yml'
       - 'appveyor.*'
       - 'packages/**'
       - 'plan9/**'
@@ -40,15 +38,15 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 5
   # unhandled
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
   libressl-version: 3.9.2
   # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
-  mbedtls-version: 3.5.0
+  mbedtls-version: 3.6.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
-  mod_h2-version: 2.0.27
+  mod_h2-version: 2.0.29
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # handled in renovate.json
@@ -59,8 +57,8 @@ env:
   rustls-version: 0.13.0
 
 jobs:
-  autotools:
-    name: ${{ matrix.build.name }}
+  linux:
+    name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
     container: ${{ matrix.build.container }}
     timeout-minutes: 90
@@ -80,10 +78,16 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
 
-          - name: libressl
-            install_packages: zlib1g-dev valgrind
+          - name: libressl heimdal
+            install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
-            configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
+            configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
+            singleuse: --unit
+
+          - name: libressl heimdal
+            install_packages: zlib1g-dev heimdal-dev valgrind
+            install_steps: libressl pytest
+            generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
             singleuse: --unit
 
           - name: libressl-clang
@@ -122,10 +126,16 @@ jobs:
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-clang
-            install_packages: zlib1g-dev clang
+          - name: openssl3-clang krb5
+            install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug --enable-websockets
+            singleuse: --unit
+
+          - name: openssl3-clang krb5
+            install_packages: zlib1g-dev libkrb5-dev clang
+            install_steps: openssl3
+            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DENABLE_WEBSOCKETS=ON
             singleuse: --unit
 
           - name: address-sanitizer
@@ -204,7 +214,7 @@ jobs:
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: Fix kernel mmap rnd bits
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -261,7 +271,7 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
           cd libressl-git
           ./autogen.sh
-          ./configure --prefix=$HOME/libressl
+          ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
       - name: cache mbedtls
@@ -297,7 +307,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix=$HOME/openssl3 --libdir=$HOME/openssl3/lib
+          ./config --prefix=$HOME/openssl3 --libdir=lib
           make -j1 install_sw
 
       - name: cache quictls
@@ -315,7 +325,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl
           cd openssl
-          ./config --prefix=$HOME/quictls --libdir=$HOME/quictls/lib
+          ./config --prefix=$HOME/quictls --libdir=lib
           make -j1 install_sw
 
       - name: cache msh3
@@ -414,38 +424,73 @@ jobs:
           sudo make install
 
       - run: autoreconf -fi
+        if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
-        name: 'configure'
+      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
+        if: ${{ matrix.build.configure }}
+        name: 'configure (autotools)'
 
-      - run: make V=1
+      - run: |
+          cmake . \
+            -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+            -DBUILD_EXAMPLES=ON \
+            -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+            ${{ matrix.build.generate }}
+        if: ${{ matrix.build.generate }}
+        name: 'configure (cmake)'
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'test configs'
+        run: |
+          cat tests/config || true
+          cat tests/http/config.ini || true
+
+      - run: make V=1 VERBOSE=1
         name: 'make'
 
       - run: |
           git config --global --add safe.directory "*"
-          ./scripts/singleuse.pl ${{ matrix.build.singleuse }} lib/.libs/libcurl.a
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            libcurla=lib/libcurl.a
+          else
+            libcurla=lib/.libs/libcurl.a
+          fi
+          ./scripts/singleuse.pl ${{ matrix.build.singleuse }} ${libcurla}
         name: single-use function check
 
       - run: ./src/curl -V
         name: 'check curl -V output'
 
       - run: make V=1 examples
+        if: ${{ matrix.build.configure }}
         name: 'make examples'
 
       - run: make V=1 -C tests
-        name: 'make tests'
+        if: ${{ matrix.build.configure }}
+        name: 'make tests (autotools)'
 
-      - run: make V=1 test-ci
-        name: 'run tests'
-        env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+      - run: make VERBOSE=1 testdeps
+        if: ${{ matrix.build.generate }}
+        name: 'make tests (cmake)'
+
+      - name: 'run tests'
+        run: |
+          export TFLAGS='${{ matrix.build.tflags }}'
+          if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
+            TFLAGS+=' ~2077 ~2078'  # valgrind errors
+          fi
+          make V=1 VERBOSE=1 test-ci
 
       - if: contains(matrix.build.install_steps, 'pytest')
-        # run for `tests` directory, so pytest does not pick up any other
+        # run for `tests/http` directory, so pytest does not pick up any other
         # packages we might have built here
         run:
-          pytest -v tests
+          pytest -v tests/http
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"

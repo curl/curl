@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAXCONNECTS (3)
 Protocol:
   - All
+Added-in: 7.16.3
 ---
 
 # NAME
@@ -52,6 +53,8 @@ ones to get made.
 
 See DESCRIPTION
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -63,9 +66,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.16.3
+# %AVAILABILITY%
 
 # RETURN VALUE
 

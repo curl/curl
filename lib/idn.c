@@ -53,64 +53,105 @@
 /* for macOS and iOS targets */
 #if defined(USE_APPLE_IDN)
 #include <unicode/uidna.h>
+#include <iconv.h>
+#include <langinfo.h>
+
+#define MAX_HOST_LENGTH 512
+
+static CURLcode iconv_to_utf8(const char *in, size_t inlen,
+                              char **out, size_t *outlen)
+{
+  iconv_t cd = iconv_open("UTF-8", nl_langinfo(CODESET));
+  if(cd != (iconv_t)-1) {
+    size_t iconv_outlen = *outlen;
+    char *iconv_in = (char *)in;
+    size_t iconv_inlen = inlen;
+    size_t iconv_result = iconv(cd, &iconv_in, &iconv_inlen,
+                                out, &iconv_outlen);
+    *outlen -= iconv_outlen;
+    iconv_close(cd);
+    if(iconv_result == (size_t)-1) {
+      if(errno == ENOMEM)
+        return CURLE_OUT_OF_MEMORY;
+      else
+        return CURLE_URL_MALFORMAT;
+    }
+
+    return CURLE_OK;
+  }
+  else {
+    if(errno == ENOMEM)
+      return CURLE_OUT_OF_MEMORY;
+    else
+      return CURLE_FAILED_INIT;
+  }
+}
 
 static CURLcode mac_idn_to_ascii(const char *in, char **out)
 {
-  UErrorCode err = U_ZERO_ERROR;
-  UIDNA* idna = uidna_openUTS46(UIDNA_CHECK_BIDI, &err);
-  if(U_FAILURE(err)) {
-    return CURLE_OUT_OF_MEMORY;
-  }
-  else {
-    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    char buffer[256] = {0};
-    (void)uidna_nameToASCII_UTF8(idna, in, -1, buffer,
-      sizeof(buffer), &info, &err);
-    uidna_close(idna);
-    if(U_FAILURE(err)) {
-      return CURLE_URL_MALFORMAT;
+  size_t inlen = strlen(in);
+  if(inlen < MAX_HOST_LENGTH) {
+    char iconv_buffer[MAX_HOST_LENGTH] = {0};
+    char *iconv_outptr = iconv_buffer;
+    size_t iconv_outlen = sizeof(iconv_buffer);
+    CURLcode iconv_result = iconv_to_utf8(in, inlen,
+                                          &iconv_outptr, &iconv_outlen);
+    if(!iconv_result) {
+      UErrorCode err = U_ZERO_ERROR;
+      UIDNA* idna = uidna_openUTS46(
+        UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
+      if(!U_FAILURE(err)) {
+        UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+        char buffer[MAX_HOST_LENGTH] = {0};
+        (void)uidna_nameToASCII_UTF8(idna, iconv_buffer, (int)iconv_outlen,
+                                     buffer, sizeof(buffer) - 1, &info, &err);
+        uidna_close(idna);
+        if(!U_FAILURE(err) && !info.errors) {
+          *out = strdup(buffer);
+          if(*out)
+            return CURLE_OK;
+          else
+            return CURLE_OUT_OF_MEMORY;
+        }
+      }
     }
-    else {
-      *out = strdup(buffer);
-      if(*out)
-        return CURLE_OK;
-      else
-        return CURLE_OUT_OF_MEMORY;
-    }
+    else
+      return iconv_result;
   }
+  return CURLE_URL_MALFORMAT;
 }
 
 static CURLcode mac_ascii_to_idn(const char *in, char **out)
 {
-  UErrorCode err = U_ZERO_ERROR;
-  UIDNA* idna = uidna_openUTS46(UIDNA_CHECK_BIDI, &err);
-  if(U_FAILURE(err)) {
-    return CURLE_OUT_OF_MEMORY;
-  }
-  else {
-    UIDNAInfo info = UIDNA_INFO_INITIALIZER;
-    char buffer[256] = {0};
-    (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
-      sizeof(buffer), &info, &err);
-    uidna_close(idna);
-    if(U_FAILURE(err)) {
-      return CURLE_URL_MALFORMAT;
-    }
-    else {
-      *out = strdup(buffer);
-      if(*out)
-        return CURLE_OK;
-      else
-        return CURLE_OUT_OF_MEMORY;
+  size_t inlen = strlen(in);
+  if(inlen < MAX_HOST_LENGTH) {
+    UErrorCode err = U_ZERO_ERROR;
+    UIDNA* idna = uidna_openUTS46(
+      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
+    if(!U_FAILURE(err)) {
+      UIDNAInfo info = UIDNA_INFO_INITIALIZER;
+      char buffer[MAX_HOST_LENGTH] = {0};
+      (void)uidna_nameToUnicodeUTF8(idna, in, -1, buffer,
+                                    sizeof(buffer) - 1, &info, &err);
+      uidna_close(idna);
+      if(!U_FAILURE(err)) {
+        *out = strdup(buffer);
+        if(*out)
+          return CURLE_OK;
+        else
+          return CURLE_OUT_OF_MEMORY;
+      }
     }
   }
+  return CURLE_URL_MALFORMAT;
 }
 #endif
 
 #ifdef USE_WIN32_IDN
 /* using Windows kernel32 and normaliz libraries. */
 
-#if !defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600
+#if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && \
+  (!defined(WINVER) || WINVER < 0x600)
 WINBASEAPI int WINAPI IdnToAscii(DWORD dwFlags,
                                  const WCHAR *lpUnicodeCharStr,
                                  int cchUnicodeChar,
@@ -207,7 +248,7 @@ bool Curl_is_ASCII_name(const char *hostname)
  * Curl_idn_decode() returns an allocated IDN decoded string if it was
  * possible. NULL on error.
  *
- * CURLE_URL_MALFORMAT - the host name could not be converted
+ * CURLE_URL_MALFORMAT - the hostname could not be converted
  * CURLE_OUT_OF_MEMORY - memory problem
  *
  */
@@ -319,7 +360,7 @@ void Curl_free_idnconverted_hostname(struct hostname *host)
  */
 CURLcode Curl_idnconvert_hostname(struct hostname *host)
 {
-  /* set the name we use to display the host name */
+  /* set the name we use to display the hostname */
   host->dispname = host->name;
 
 #ifdef USE_IDN

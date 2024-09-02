@@ -12,6 +12,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.84.0
 ---
 
 # NAME
@@ -40,6 +41,8 @@ This is a path identifying a single file containing CA certificates.
 
 The **path** pointer is set to NULL if there is no default path.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -57,9 +60,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.84.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

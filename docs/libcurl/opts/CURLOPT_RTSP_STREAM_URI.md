@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_RTSP_TRANSPORT (3)
 Protocol:
   - RTSP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -43,6 +44,8 @@ option.
 
 "*"
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.20.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

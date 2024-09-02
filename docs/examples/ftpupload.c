@@ -90,7 +90,7 @@ int main(void)
   /* get a FILE * of the same file */
   hd_src = fopen(LOCAL_FILE, "rb");
 
-  /* In windows, this inits the winsock stuff */
+  /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */

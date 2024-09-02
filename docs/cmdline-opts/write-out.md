@@ -63,6 +63,11 @@ The variables available are:
 Output the certificate chain with details. Supported only by the OpenSSL,
 GnuTLS, Schannel and Secure Transport backends. (Added in 7.88.0)
 
+## `conn_id`
+The connection identifier last used by the transfer. The connection id is
+unique number among all connections using the same connection cache.
+(Added in 8.2.0)
+
 ## `content_type`
 The Content-Type of the requested document, if there was any.
 
@@ -75,8 +80,8 @@ The numerical exit code of the transfer. (Added in 7.75.0)
 ## `filename_effective`
 The ultimate filename that curl writes out to. This is only meaningful if curl
 is told to write to a file with the --remote-name or --output option. It is
-most useful in combination with the --remote-header-name option. (Added in
-7.26.0)
+most useful in combination with the --remote-header-name option.
+(Added in 7.26.0)
 
 ## `ftp_entry_path`
 The initial path curl ended up in when logging on to the remote FTP
@@ -129,6 +134,10 @@ redirect). Note that the status line IS NOT a header. (Added in 7.73.0)
 
 ## `num_redirects`
 Number of redirects that were followed in the request. (Added in 7.12.3)
+
+## `num_retries`
+Number of retries actually performed when `--retry` has been used.
+(Added in 8.9.0)
 
 ## `onerror`
 The rest of the output is only shown if the transfer returned a non-zero error.
@@ -211,6 +220,10 @@ remote host (or proxy) was completed.
 ## `time_namelookup`
 The time, in seconds, it took from the start until the name resolving was
 completed.
+
+## `time_posttransfer`
+The time it took from the start until the last byte is sent by libcurl.
+In microseconds. (Added in 8.10.0)
 
 ## `time_pretransfer`
 The time, in seconds, it took from the start until the file transfer was just
@@ -305,3 +318,9 @@ same index number as the origin globbed URL. (Added in 7.75.0)
 ## `url_effective`
 The URL that was fetched last. This is most meaningful if you have told curl
 to follow location: headers.
+
+## `xfer_id`
+The numerical identifier of the last transfer done. -1 if no transfer has been
+started yet for the handle. The transfer id is unique among all transfers
+performed using the same connection cache.
+(Added in 8.2.0)

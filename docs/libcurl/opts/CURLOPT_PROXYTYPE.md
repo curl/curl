@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_PROXYPORT (3)
 Protocol:
   - All
+Added-in: 7.10
 ---
 
 # NAME
@@ -34,7 +35,7 @@ HTTP Proxy. Default.
 ## CURLPROXY_HTTPS
 
 HTTPS Proxy using HTTP/1. (Added in 7.52.0 for OpenSSL and GnuTLS. Since
-7.87.0, it also works for BearSSL, mbedTLS, rustls, Schannel, Secure Transport
+7.87.0, it also works for BearSSL, mbedTLS, Rustls, Schannel, Secure Transport
 and wolfSSL.)
 
 ## CURLPROXY_HTTPS2
@@ -63,12 +64,16 @@ SOCKS5 Proxy.
 
 SOCKS5 Proxy. Proxy resolves URL hostname.
 
+##
+
 Often it is more convenient to specify the proxy type with the scheme part of
 the CURLOPT_PROXY(3) string.
 
 # DEFAULT
 
 CURLPROXY_HTTP
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -88,9 +93,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

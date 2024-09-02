@@ -14,7 +14,7 @@
    fun:zstd_unencode_write
    fun:Curl_unencode_write
    fun:readwrite_data
-   fun:Curl_readwrite
+   fun:Curl_sendrecv
    fun:multi_runsingle
    fun:curl_multi_perform
    fun:easy_transfer
@@ -31,7 +31,7 @@
    Memcheck:Cond
    fun:ZSTD_decompressStream
    fun:zstd_unencode_write
-   fun:Curl_readwrite
+   fun:Curl_sendrecv
    fun:multi_runsingle
    fun:curl_multi_perform
    fun:curl_easy_perform

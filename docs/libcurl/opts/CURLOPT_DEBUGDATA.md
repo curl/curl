@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_STDERR (3)
 Protocol:
   - All
+Added-in: 7.9.6
 ---
 
 # NAME
@@ -32,6 +33,8 @@ not used by libcurl, it is only passed to the callback.
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -75,9 +78,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

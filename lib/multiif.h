@@ -30,7 +30,7 @@
 
 CURLcode Curl_updatesocket(struct Curl_easy *data);
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id);
-void Curl_expire_clear(struct Curl_easy *data);
+bool Curl_expire_clear(struct Curl_easy *data);
 void Curl_expire_done(struct Curl_easy *data, expire_id id);
 CURLMcode Curl_update_timer(struct Curl_multi *multi) WARN_UNUSED_RESULT;
 void Curl_attach_connection(struct Curl_easy *data,
@@ -63,26 +63,26 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize,
 /* mask for checking if read and/or write is set for index x */
 #define GETSOCK_MASK_RW(x) (GETSOCK_READSOCK(x)|GETSOCK_WRITESOCK(x))
 
-/* Return the value of the CURLMOPT_MAX_HOST_CONNECTIONS option */
-size_t Curl_multi_max_host_connections(struct Curl_multi *multi);
-
-/* Return the value of the CURLMOPT_MAX_TOTAL_CONNECTIONS option */
-size_t Curl_multi_max_total_connections(struct Curl_multi *multi);
-
-void Curl_multiuse_state(struct Curl_easy *data,
-                         int bundlestate); /* use BUNDLE_* defines */
-
 /*
  * Curl_multi_closed()
  *
  * Used by the connect code to tell the multi_socket code that one of the
- * sockets we were using is about to be closed.  This function will then
+ * sockets we were using is about to be closed. This function will then
  * remove it from the sockethash for this handle to make the multi_socket API
  * behave properly, especially for the case when libcurl will create another
  * socket again and it gets the same file descriptor number.
  */
 
 void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s);
+
+/* Compare the two pollsets to notify the multi_socket API of changes
+ * in socket polling, e.g calling multi->socket_cb() with the changes if
+ * differences are seen.
+ */
+CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
+                                struct Curl_easy *data,
+                                struct easy_pollset *ps,
+                                struct easy_pollset *last_ps);
 
 /*
  * Add a handle and move it into PERFORM state at once. For pushed streams.
@@ -143,5 +143,11 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
  * @param buf the upload buffer pointer borrowed for coding error checks.
  */
 void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
+
+/**
+ * Get the transfer handle for the given id. Returns NULL if not found.
+ */
+struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
+                                        curl_off_t id);
 
 #endif /* HEADER_CURL_MULTIIF_H */

@@ -134,7 +134,7 @@ void Curl_sspi_global_cleanup(void)
  *
  * Parameters:
  *
- * userp    [in]     - The user name in the format User or Domain\User.
+ * userp    [in]     - The username in the format User or Domain\User.
  * passwdp  [in]     - The user's password.
  * identity [in/out] - The identity structure.
  *

@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_POST (3)
   - CURLOPT_UPLOAD (3)
   - curl_easy_reset (3)
+Added-in: 7.8.1
 ---
 
 # NAME
@@ -42,6 +43,8 @@ reset a handle to default method, consider curl_easy_reset(3).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with HTTP
+# %AVAILABILITY%
 
 # RETURN VALUE
 

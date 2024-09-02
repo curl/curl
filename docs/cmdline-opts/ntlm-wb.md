@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: ntlm-wb
 Help: HTTP NTLM authentication with winbind
 Protocols: HTTP
-Category: auth http
+Category: deprecated
 Added: 7.22.0
 Multi: mutex
 See-also:

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_SOCKOPTFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.17.1
 ---
 
 # NAME
@@ -32,7 +33,9 @@ CURLOPT_OPENSOCKETFUNCTION(3).
 
 # DEFAULT
 
-The default value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -81,9 +84,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.17.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

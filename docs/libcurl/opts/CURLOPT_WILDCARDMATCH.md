@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_URL (3)
 Protocol:
   - FTP
+Added-in: 7.21.0
 ---
 
 # NAME
@@ -76,6 +77,8 @@ Using the rules above, a filename pattern can be constructed:
 
     ftp://example.com/some/path/[a-z[:upper:]\\].jpg
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -100,9 +103,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.21.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

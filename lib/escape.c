@@ -60,17 +60,18 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   struct dynbuf d;
   (void)data;
 
-  if(inlength < 0)
+  if(!string || (inlength < 0))
     return NULL;
-
-  Curl_dyn_init(&d, CURL_MAX_INPUT_LENGTH * 3);
 
   length = (inlength?(size_t)inlength:strlen(string));
   if(!length)
     return strdup("");
 
+  Curl_dyn_init(&d, length * 3 + 1);
+
   while(length--) {
-    unsigned char in = *string++; /* treat the characters unsigned */
+    /* treat the characters unsigned */
+    unsigned char in = (unsigned char)*string++;
 
     if(ISUNRESERVED(in)) {
       /* append this */
@@ -137,7 +138,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
   *ostring = ns;
 
   while(alloc) {
-    unsigned char in = *string;
+    unsigned char in = (unsigned char)*string;
     if(('%' == in) && (alloc > 2) &&
        ISXDIGIT(string[1]) && ISXDIGIT(string[2])) {
       /* this is two hexadecimal digits following a '%' */
@@ -157,7 +158,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
       return CURLE_URL_MALFORMAT;
     }
 
-    *ns++ = in;
+    *ns++ = (char)in;
   }
   *ns = 0; /* terminate it */
 
@@ -180,7 +181,7 @@ char *curl_easy_unescape(struct Curl_easy *data, const char *string,
 {
   char *str = NULL;
   (void)data;
-  if(length >= 0) {
+  if(string && (length >= 0)) {
     size_t inputlen = (size_t)length;
     size_t outputlen;
     CURLcode res = Curl_urldecode(string, inputlen, &str, &outputlen,
@@ -222,8 +223,8 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
     while(len-- && (olen >= 3)) {
       /* clang-tidy warns on this line without this comment: */
       /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
-      *out++ = hex[(*src & 0xF0)>>4];
-      *out++ = hex[*src & 0x0F];
+      *out++ = (unsigned char)hex[(*src & 0xF0)>>4];
+      *out++ = (unsigned char)hex[*src & 0x0F];
       ++src;
       olen -= 2;
     }

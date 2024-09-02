@@ -10,12 +10,13 @@ See-also:
   - CURLOPT_FORBID_REUSE (3)
   - CURLOPT_FRESH_CONNECT (3)
   - CURLOPT_PATH_AS_IS (3)
-  - CURLOPT_PROTOCOLS (3)
+  - CURLOPT_PROTOCOLS_STR (3)
   - curl_easy_perform (3)
   - curl_url_get (3)
   - curl_url_set (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -80,15 +81,14 @@ expected to be a sequence of characters using an ASCII compatible encoding.
 
 If libcurl is built with IDN support, the server name part of the URL can use
 an "international name" by using the current encoding (according to locale) or
-UTF-8 (when winidn is used; or a Windows Unicode build using libidn2).
+UTF-8 (when WinIDN is used; or a Windows Unicode build using libidn2).
 
 If libcurl is built without IDN support, the server name is used exactly as
 specified when passed to the name resolver functions.
 
 # DEFAULT
 
-There is no default URL. If this option is not set, no transfer can be
-performed.
+NULL. If this option is not set, no transfer can be performed.
 
 # SECURITY CONCERNS
 
@@ -109,11 +109,13 @@ custom port number can allow external users to play tricks with your local
 services.
 
 Accepting external URLs may also use other protocols than http:// or other
-common ones. Restrict what accept with CURLOPT_PROTOCOLS(3).
+common ones. Restrict what accept with CURLOPT_PROTOCOLS_STR(3).
 
 User provided URLs can also be made to point to sites that redirect further on
 (possibly to other protocols too). Consider your
-CURLOPT_FOLLOWLOCATION(3) and CURLOPT_REDIR_PROTOCOLS(3) settings.
+CURLOPT_FOLLOWLOCATION(3) and CURLOPT_REDIR_PROTOCOLS_STR(3) settings.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -129,9 +131,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-POP3 and SMTP were added in 7.31.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -8,6 +8,7 @@ Added: 7.18.0
 Multi: boolean
 See-also:
   - keepalive-time
+  - keepalive-cnt
 Example:
   - --no-keepalive $URL
 ---

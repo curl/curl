@@ -30,7 +30,7 @@
  * Curl_read16_le()
  *
  * This function converts a 16-bit integer from the little endian format, as
- * used in the incoming package to whatever endian format we're using
+ * used in the incoming package to whatever endian format we are using
  * natively.
  *
  * Parameters:
@@ -49,7 +49,7 @@ unsigned short Curl_read16_le(const unsigned char *buf)
  * Curl_read32_le()
  *
  * This function converts a 32-bit integer from the little endian format, as
- * used in the incoming package to whatever endian format we're using
+ * used in the incoming package to whatever endian format we are using
  * natively.
  *
  * Parameters:
@@ -68,7 +68,7 @@ unsigned int Curl_read32_le(const unsigned char *buf)
  * Curl_read16_be()
  *
  * This function converts a 16-bit integer from the big endian format, as
- * used in the incoming package to whatever endian format we're using
+ * used in the incoming package to whatever endian format we are using
  * natively.
  *
  * Parameters:

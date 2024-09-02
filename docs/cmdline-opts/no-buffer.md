@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: no-buffer
 Short: N
 Help: Disable buffering of the output stream
-Category: curl
+Category: output
 Added: 6.5
 Multi: boolean
 See-also:

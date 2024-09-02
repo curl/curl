@@ -316,7 +316,9 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   }
   /* Update stats, write and report progress */
   data->req.bytecount += nwrite;
-  ++data->req.bodywrites;
+#ifdef USE_HYPER
+  data->req.bodywritten = TRUE;
+#endif
   result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
   if(result)
     return result;
@@ -604,6 +606,14 @@ CURLcode Curl_creader_def_unpause(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+bool Curl_creader_def_is_paused(struct Curl_easy *data,
+                                struct Curl_creader *reader)
+{
+  (void)data;
+  (void)reader;
+  return FALSE;
+}
+
 void Curl_creader_def_done(struct Curl_easy *data,
                            struct Curl_creader *reader, int premature)
 {
@@ -622,6 +632,7 @@ struct cr_in_ctx {
   BIT(seen_eos);
   BIT(errored);
   BIT(has_used_cb);
+  BIT(is_paused);
 };
 
 static CURLcode cr_in_init(struct Curl_easy *data, struct Curl_creader *reader)
@@ -643,6 +654,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
 {
   struct cr_in_ctx *ctx = reader->ctx;
   size_t nread;
+
+  ctx->is_paused = FALSE;
 
   /* Once we have errored, we will return the same error forever */
   if(ctx->errored) {
@@ -695,13 +708,14 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   case CURL_READFUNC_PAUSE:
     if(data->conn->handler->flags & PROTOPT_NONETWORK) {
       /* protocols that work without network cannot be paused. This is
-         actually only FILE:// just now, and it can't pause since the transfer
-         isn't done using the "normal" procedure. */
+         actually only FILE:// just now, and it cannot pause since the transfer
+         is not done using the "normal" procedure. */
       failf(data, "Read callback asked for PAUSE when not supported");
       return CURLE_READ_ERROR;
     }
     /* CURL_READFUNC_PAUSE pauses read callbacks that feed socket writes */
     CURL_TRC_READ(data, "cr_in_read, callback returned CURL_READFUNC_PAUSE");
+    ctx->is_paused = TRUE;
     data->req.keepon |= KEEP_SEND_PAUSE; /* mark socket send as paused */
     *pnread = 0;
     *peos = FALSE;
@@ -772,7 +786,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
       failf(data, "Could not seek stream");
       return CURLE_READ_ERROR;
     }
-    /* when seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+    /* when seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
     do {
       char scratch[4*1024];
       size_t readthisamountnow =
@@ -806,7 +820,7 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
       return CURLE_PARTIAL_FILE;
     }
   }
-  /* we've passed, proceed as normal */
+  /* we have passed, proceed as normal */
   return CURLE_OK;
 }
 
@@ -858,12 +872,28 @@ static CURLcode cr_in_rewind(struct Curl_easy *data,
     }
 
     /* no callback set or failure above, makes us fail at once */
-    failf(data, "necessary data rewind wasn't possible");
+    failf(data, "necessary data rewind was not possible");
     return CURLE_SEND_FAIL_REWIND;
   }
   return CURLE_OK;
 }
 
+static CURLcode cr_in_unpause(struct Curl_easy *data,
+                              struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = reader->ctx;
+  (void)data;
+  ctx->is_paused = FALSE;
+  return CURLE_OK;
+}
+
+static bool cr_in_is_paused(struct Curl_easy *data,
+                            struct Curl_creader *reader)
+{
+  struct cr_in_ctx *ctx = reader->ctx;
+  (void)data;
+  return ctx->is_paused;
+}
 
 static const struct Curl_crtype cr_in = {
   "cr-in",
@@ -874,7 +904,8 @@ static const struct Curl_crtype cr_in = {
   cr_in_total_length,
   cr_in_resume_from,
   cr_in_rewind,
-  Curl_creader_def_unpause,
+  cr_in_unpause,
+  cr_in_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_in_ctx)
 };
@@ -987,12 +1018,18 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
         return result;
       start = i + 1;
       if(!data->set.crlf && (data->state.infilesize != -1)) {
-        /* we're here only because FTP is in ASCII mode...
+        /* we are here only because FTP is in ASCII mode...
            bump infilesize for the LF we just added */
         data->state.infilesize++;
         /* comment: this might work for FTP, but in HTTP we could not change
          * the content length after having started the request... */
       }
+    }
+
+    if(start < i) { /* leftover */
+      result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
+      if(result)
+        return result;
     }
   }
 
@@ -1030,6 +1067,7 @@ static const struct Curl_crtype cr_lc = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_lc_ctx)
 };
@@ -1064,11 +1102,7 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
   clen = r->crt->total_length(data, r);
   /* if we do not have 0 length init, and crlf conversion is wanted,
    * add the reader for it */
-  if(clen && (data->set.crlf
-#ifdef CURL_DO_LINEEND_CONV
-     || data->state.prefer_ascii
-#endif
-    )) {
+  if(clen && (data->set.crlf || data->state.prefer_ascii)) {
     result = cr_lc_add(data);
     if(result)
       return result;
@@ -1203,6 +1237,7 @@ static const struct Curl_crtype cr_null = {
   Curl_creader_def_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct Curl_creader)
 };
@@ -1302,6 +1337,7 @@ static const struct Curl_crtype cr_buf = {
   cr_buf_resume_from,
   Curl_creader_def_rewind,
   Curl_creader_def_unpause,
+  Curl_creader_def_is_paused,
   Curl_creader_def_done,
   sizeof(struct cr_buf_ctx)
 };
@@ -1362,6 +1398,18 @@ CURLcode Curl_creader_unpause(struct Curl_easy *data)
     reader = reader->next;
   }
   return result;
+}
+
+bool Curl_creader_is_paused(struct Curl_easy *data)
+{
+  struct Curl_creader *reader = data->req.reader_stack;
+
+  while(reader) {
+    if(reader->crt->is_paused(data, reader))
+      return TRUE;
+    reader = reader->next;
+  }
+  return FALSE;
 }
 
 void Curl_creader_done(struct Curl_easy *data, int premature)

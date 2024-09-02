@@ -15,6 +15,8 @@ TLS-backend:
   - Secure Transport
   - Schannel
   - mbedTLS
+  - wolfSSL
+Added-in: 7.71.0
 ---
 
 # NAME
@@ -49,6 +51,8 @@ expects a filename as input.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -75,10 +79,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.71.0. This option is supported by the OpenSSL, Secure Transport,
-Schannel and mbedTLS (since 7.78.0) backends.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

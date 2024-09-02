@@ -6,16 +6,15 @@ SPDX-License-Identifier: curl
 
 # Building curl with HTTPS-RR and ECH support
 
-We've added support for ECH to in this curl build. That can use HTTPS RRs
-published in the DNS, if curl is using DoH, or else can accept the relevant
-ECHConfigList values from the command line. That works with OpenSSL,
-WolfSSL or boringssl as the TLS provider, depending on how you build curl.
+We have added support for ECH to curl. It can use HTTPS RRs published in the
+DNS if curl uses DoH, or else can accept the relevant ECHConfigList values
+from the command line. This works with OpenSSL, wolfSSL or BoringSSL as the
+TLS provider.
 
 This feature is EXPERIMENTAL. DO NOT USE IN PRODUCTION.
 
 This should however provide enough of a proof-of-concept to prompt an informed
-discussion about a good path forward for ECH support in curl, when using
-OpenSSL, or other TLS libraries, as those add ECH support.
+discussion about a good path forward for ECH support in curl.
 
 ## OpenSSL Build
 
@@ -42,21 +41,21 @@ To build curl ECH-enabled, making use of the above:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL...
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
     ...lots more output...
 ```
 
-If you do not get that WARNING at the end of the ``configure`` command, then ECH
-is not enabled, so go back some steps and re-do whatever needs re-doing:-) If you
-want to debug curl then you should add ``--enable-debug`` to the ``configure``
-command.
+If you do not get that WARNING at the end of the ``configure`` command, then
+ECH is not enabled, so go back some steps and re-do whatever needs re-doing:-)
+If you want to debug curl then you should add ``--enable-debug`` to the
+``configure`` command.
 
 In a recent (2024-05-20) build on one machine, configure failed to find the
 ECH-enabled SSL library, apparently due to the existence of
 ``$HOME/code/openssl-local-inst/lib/pkgconfig`` as a directory containing
-various settings. Deleting that directory worked around the problem but may not
-be the best solution.
+various settings. Deleting that directory worked around the problem but may
+not be the best solution.
 
 ## Using ECH and DoH
 
@@ -150,7 +149,7 @@ the verbose output, e.g.:
 ```
 
 At that point, you could copy the base64 encoded value above and try again.
-For now, this only works for the OpenSSL and boringssl builds.
+For now, this only works for the OpenSSL and BoringSSL builds.
 
 ## Default settings
 
@@ -216,7 +215,7 @@ or IP address hints.
 - ``USE_ECH`` protects ECH specific code.
 
 There are various obvious code blocks for handling the new command line
-arguments which aren't described here, but should be fairly clear.
+arguments which are not described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
@@ -270,7 +269,7 @@ curl might handle those values when present in the DNS.
   ("aliasMode") - the current code takes no account of that at all. One could
 envisage implementing the equivalent of following CNAMEs in such cases, but
 it is not clear if that'd be a good plan. (As of now, chrome browsers do not seem
-to have any support for that "aliasMode" and we've not checked Firefox for that
+to have any support for that "aliasMode" and we have not checked Firefox for that
 recently.)
 
 - We have not investigated what related changes or additions might be needed
@@ -282,7 +281,7 @@ doing so would seem to require re-implementing an ECH-enabled server as part
 of the curl test harness. For now, we have a ``./tests/ech_test.sh`` script
 that attempts ECH with various test servers and with many combinations of the
 allowed command line options. While that is a useful test and has find issues,
-it is not comprehensive and we're not (as yet) sure what would be the right
+it is not comprehensive and we are not (as yet) sure what would be the right
 level of coverage. When running that script you should not have a
 ``$HOME/.curlrc`` file that affects ECH or some of the negative tests could
 produce spurious failures.
@@ -307,7 +306,7 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
 The binary produced by the cmake build does not need any ECH-specific
 ``LD_LIBRARY_PATH`` setting.
 
-## boringssl build
+## BoringSSL build
 
 BoringSSL is also supported by curl and also supports ECH, so to build
 with that, instead of our ECH-enabled OpenSSL:
@@ -331,20 +330,20 @@ Then:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ech ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
     make
 ```
 
-The boringssl APIs are fairly similar to those in our ECH-enabled OpenSSL
+The BoringSSL APIs are fairly similar to those in our ECH-enabled OpenSSL
 fork, so code changes are also in ``lib/vtls/openssl.c``, protected
 via ``#ifdef OPENSSL_IS_BORINGSSL`` and are mostly obvious API variations.
- 
-The boringssl APIs however do not support the ``--ech pn:`` command line
+
+The BoringSSL APIs however do not support the ``--ech pn:`` command line
 variant as of now.
 
-## WolfSSL build
+## wolfSSL build
 
-WolfSSL also supports ECH and can be used by curl, so here's how:
+wolfSSL also supports ECH and can be used by curl, so here's how:
 
 ```bash
     cd $HOME/code
@@ -356,7 +355,7 @@ WolfSSL also supports ECH and can be used by curl, so here's how:
     make install
 ```
 
-The install prefix (``inst``) in the above causes WolfSSL to be installed there
+The install prefix (``inst``) in the above causes wolfSSL to be installed there
 and we seem to need that for the curl configure command to work out. The
 ``--enable-opensslextra`` turns out (after much faffing about;-) to be
 important or else we get build problems with curl below.
@@ -370,7 +369,7 @@ important or else we get build problems with curl below.
     make
 ```
 
-There are some known issues with the ECH implementation in WolfSSL:
+There are some known issues with the ECH implementation in wolfSSL:
 
 - The main issue is that the client currently handles HelloRetryRequest
   incorrectly.  [HRR issue](https://github.com/wolfSSL/wolfssl/issues/6802).)
@@ -378,32 +377,31 @@ There are some known issues with the ECH implementation in WolfSSL:
   [this ECH test web site](https://tls-ech.dev) and any other similarly configured
   sites.
 - There is also an issue related to so-called middlebox compatibility mode.
-  [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774) 
+  [middlebox compatibility issue](https://github.com/wolfSSL/wolfssl/issues/6774)
 
-### Code changes to support WolfSSL
+### Code changes to support wolfSSL
 
 There are what seem like oddball differences:
 
-- The DoH URL in``$HOME/.curlrc`` can use "1.1.1.1" for OpenSSL but has to be
-  "one.one.one.one" for WolfSSL. The latter works for both, so OK, we'll change
-  to that.
-- There seems to be some difference in CA databases too - the WolfSSL version
-  does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can ignore
-  that for our purposes via ``--insecure``/``-k`` but would need to fix for a
-  real setup. (Browsers do like those certificates though.)
+- The DoH URL in``$HOME/.curlrc`` can use `1.1.1.1` for OpenSSL but has to be
+  `one.one.one.one` for wolfSSL. The latter works for both, so OK, we us that.
+- There seems to be some difference in CA databases too - the wolfSSL version
+  does not like ``defo.ie``, whereas the system and OpenSSL ones do. We can
+  ignore that for our purposes via ``--insecure``/``-k`` but would need to fix
+  for a real setup. (Browsers do like those certificates though.)
 
 Then there are some functional code changes:
 
-- tweak to ``configure.ac`` to check if WolfSSL has ECH or not
+- tweak to ``configure.ac`` to check if wolfSSL has ECH or not
 - added code to ``lib/vtls/wolfssl.c`` mirroring what's done in the
   OpenSSL equivalent above.
-- WolfSSL does not support ``--ech false`` or the ``--ech pn:`` command line
+- wolfSSL does not support ``--ech false`` or the ``--ech pn:`` command line
   argument.
 
 The lack of support for ``--ech false`` is because wolfSSL has decided to
 always at least GREASE if built to support ECH. In other words, GREASE is
 a compile time choice for wolfSSL, but a runtime choice for OpenSSL or
-boringssl. (Both are reasonable.)
+BoringSSL. (Both are reasonable.)
 
 ## Additional notes
 
@@ -418,22 +416,22 @@ on localhost:53, so would fit this use-case. That said, it is unclear if
 this is a niche that is worth trying to address. (The author is just as happy to
 let curl use DoH to talk to the same public recursive that stubby might use:-)
 
-Assuming for the moment this is a use-case we'd like to support, then
-if DoH is not being used by curl, it is not clear at this time how to provide
+Assuming for the moment this is a use-case we would like to support, then if
+DoH is not being used by curl, it is not clear at this time how to provide
 support for ECH. One option would seem to be to extend the ``c-ares`` library
-to support HTTPS RRs, but in that case it is not now clear whether such changes
-would be attractive to the ``c-ares`` maintainers, nor whether the "tag=value"
-extensibility inherent in the HTTPS/SVCB specification is a good match for the
-``c-ares`` approach of defining structures specific to decoded answers for each
-supported RRtype. We're also not sure how many downstream curl deployments
-actually make use of the ``c-ares`` library, which would affect the utility of
-such changes. Another option might be to consider using some other generic DNS
-library that does support HTTPS RRs, but it is unclear if such a library could
-or would be used by all or almost all curl builds and downstream releases of
-curl.
+to support HTTPS RRs, but in that case it is not now clear whether such
+changes would be attractive to the ``c-ares`` maintainers, nor whether the
+"tag=value" extensibility inherent in the HTTPS/SVCB specification is a good
+match for the ``c-ares`` approach of defining structures specific to decoded
+answers for each supported RRtype. We are also not sure how many downstream
+curl deployments actually make use of the ``c-ares`` library, which would
+affect the utility of such changes. Another option might be to consider using
+some other generic DNS library that does support HTTPS RRs, but it is unclear
+if such a library could or would be used by all or almost all curl builds and
+downstream releases of curl.
 
 Our current conclusion is that doing the above is likely best left until we
-have some experience with the "using DoH" approach, so we're going to punt on
+have some experience with the "using DoH" approach, so we are going to punt on
 this for now.
 
 ### Debugging
@@ -447,7 +445,7 @@ LD_LIBRARY_PATH=$HOME/code/openssl:./lib/.libs gdb ./src/.libs/curl
 ### Localhost testing
 
 It can be useful to be able to run against a localhost OpenSSL ``s_server``
-for testing. We have published instructions for such 
+for testing. We have published instructions for such
 [localhost tests](https://github.com/defo-project/ech-dev-utils/blob/main/howtos/localhost-tests.md)
 in another repository. Once you have that set up, you can start a server
 and then run curl against that:
@@ -476,5 +474,5 @@ to get the HTTPS RR and pass the ECHConfigList from that on the command line,
 if needed, or one can access the value from command line output in verbose more
 and then re-use that in another invocation.
 
-Both our OpenSSL fork and boringssl have APIs for both controlling GREASE and
-accessing and logging ``retry_configs``, it seems WolfSSL has neither.
+Both our OpenSSL fork and BoringSSL have APIs for both controlling GREASE and
+accessing and logging ``retry_configs``, it seems wolfSSL has neither.

@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_PASSWORD (3)
   - CURLOPT_USERNAME (3)
+Added-in: 7.13.0
 ---
 
 # NAME
@@ -36,6 +37,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,9 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.13.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -13,6 +13,7 @@ See-also:
 Protocol:
   - HTTP
   - MQTT
+Added-in: 7.1
 ---
 
 # NAME
@@ -73,6 +74,8 @@ CURLOPT_MIMEPOST(3) option combined with curl_mime_init(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -115,9 +118,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

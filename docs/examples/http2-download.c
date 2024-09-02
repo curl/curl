@@ -30,12 +30,6 @@
 #include <string.h>
 #include <errno.h>
 
-/* somewhat unix-specific */
-#ifndef _WIN32
-#include <sys/time.h>
-#include <unistd.h>
-#endif
-
 /* curl stuff */
 #include <curl/curl.h>
 #include <curl/mprintf.h>

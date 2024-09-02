@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_FTP_SSL_CCC (3)
   - CURLOPT_USE_SSL (3)
+Added-in: 7.12.2
 ---
 
 # NAME
@@ -47,6 +48,8 @@ Try "AUTH TLS" first, and only if that fails try "AUTH SSL".
 
 CURLFTPAUTH_DEFAULT
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,9 +68,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.12.2
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -22,21 +22,22 @@
 #
 ###########################################################################
 
+# Get 'UNITPROGS', 'UNITFILES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include(${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake)
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-include_directories(
-  ${CURL_SOURCE_DIR}/lib          # To be able to reach "curl_setup_once.h"
-  ${CURL_SOURCE_DIR}/tests/libtest
-  ${CURL_SOURCE_DIR}/src
-  ${CURL_BINARY_DIR}/lib          # To be able to reach "curl_config.h"
-  ${CURL_BINARY_DIR}/include      # To be able to reach "curl/curl.h"
-)
-
-if(ENABLE_CURLDEBUG)  # running unittests require curl to compiled with CURLDEBUG
-  foreach(_testfile ${UNITPROGS})
-    add_executable(${_testfile} EXCLUDE_FROM_ALL ${_testfile}.c ${UNITFILES})
-    add_dependencies(testdeps ${_testfile})
-    target_link_libraries(${_testfile} curltool curlu)
-  endforeach()
-endif()
+foreach(_target IN LISTS UNITPROGS)
+  set(_target_name "${_target}")
+  add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c" ${UNITFILES})
+  add_dependencies(testdeps ${_target_name})
+  target_link_libraries(${_target_name} curltool curlu)
+  target_include_directories(${_target_name} PRIVATE
+    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
+    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${CURL_SOURCE_DIR}/src"
+    "${CURL_SOURCE_DIR}/tests/libtest"
+  )
+  set_target_properties(${_target_name} PROPERTIES
+    OUTPUT_NAME "${_target}"
+    PROJECT_LABEL "Test unit ${_target}")
+endforeach()

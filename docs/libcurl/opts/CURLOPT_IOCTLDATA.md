@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_SEEKFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.12.3
 ---
 
 # NAME
@@ -30,7 +31,9 @@ argument in the ioctl callback set with CURLOPT_IOCTLFUNCTION(3).
 
 # DEFAULT
 
-By default, the value of this parameter is NULL.
+NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -61,9 +64,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
-Added in 7.12.3. Deprecated since 7.18.0.
+Deprecated since 7.18.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

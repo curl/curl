@@ -6,7 +6,7 @@ Arg: <seconds>
 Help: How long to wait for 100-continue
 Protocols: HTTP
 Added: 7.47.0
-Category: http
+Category: http timeout
 Multi: single
 See-also:
   - connect-timeout
@@ -21,5 +21,5 @@ response when curl emits an Expects: 100-continue header in its request. By
 default curl waits one second. This option accepts decimal values. When curl
 stops waiting, it continues as if a response was received.
 
-The decimal value needs to provided using a dot (`.`) as decimal separator -
+The decimal value needs to be provided using a dot (`.`) as decimal separator -
 not the local version even if it might be using another separator.

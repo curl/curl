@@ -37,10 +37,11 @@ void Curl_freeset(struct Curl_easy *data);
 CURLcode Curl_uc_to_curlcode(CURLUcode uc);
 CURLcode Curl_close(struct Curl_easy **datap); /* opposite of curl_open() */
 CURLcode Curl_connect(struct Curl_easy *, bool *async, bool *protocol_connect);
-void Curl_disconnect(struct Curl_easy *data,
-                     struct connectdata *, bool dead_connection);
+bool Curl_on_disconnect(struct Curl_easy *data,
+                        struct connectdata *, bool aborted);
 CURLcode Curl_setup_conn(struct Curl_easy *data,
                          bool *protocol_done);
+void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn);
 CURLcode Curl_parse_login_details(const char *login, const size_t len,
                                   char **userptr, char **passwdptr,
                                   char **optionsptr);
@@ -63,6 +64,21 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 void Curl_verboseconnect(struct Curl_easy *data, struct connectdata *conn,
                          int sockindex);
 #endif
+
+/**
+ * Return TRUE iff the given connection is considered dead.
+ * @param nowp      NULL or pointer to time being checked against.
+ */
+bool Curl_conn_seems_dead(struct connectdata *conn,
+                          struct Curl_easy *data,
+                          struct curltime *nowp);
+
+/**
+ * Perform upkeep operations on the connection.
+ */
+CURLcode Curl_conn_upkeep(struct Curl_easy *data,
+                          struct connectdata *conn,
+                          struct curltime *now);
 
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
 void Curl_data_priority_clear_state(struct Curl_easy *data);

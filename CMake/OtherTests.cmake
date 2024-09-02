@@ -25,17 +25,17 @@ include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
-macro(add_header_include check header)
-  if(${check})
+macro(add_header_include _check _header)
+  if(${_check})
     set(_source_epilogue "${_source_epilogue}
-      #include <${header}>")
+      #include <${_header}>")
   endif()
 endmacro()
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
-  set(CMAKE_EXTRA_INCLUDE_FILES)
+  unset(CMAKE_EXTRA_INCLUDE_FILES)
   if(WIN32)
     set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
     set(CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")
@@ -45,6 +45,7 @@ if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   endif()
   check_type_size("struct sockaddr_storage" SIZEOF_STRUCT_SOCKADDR_STORAGE)
   set(HAVE_STRUCT_SOCKADDR_STORAGE ${HAVE_SIZEOF_STRUCT_SOCKADDR_STORAGE})
+  set(CMAKE_EXTRA_INCLUDE_FILES "")
 endif()
 
 if(NOT WIN32)
@@ -75,37 +76,32 @@ check_c_source_compiles("${_source_epilogue}
 
 unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
 
-if(NOT CMAKE_CROSSCOMPILING AND NOT APPLE)
+if(NOT APPLE)
   set(_source_epilogue "#undef inline")
   add_header_include(HAVE_SYS_POLL_H "sys/poll.h")
   add_header_include(HAVE_POLL_H "poll.h")
-  check_c_source_runs("${_source_epilogue}
-    #include <stdlib.h>
-    #include <sys/time.h>
-    int main(void)
-    {
-      if(0 != poll(0, 0, 10)) {
-        return 1; /* fail */
-      }
-      else {
-        /* detect the 10.12 poll() breakage */
-        struct timeval before, after;
-        int rc;
-        size_t us;
-
-        gettimeofday(&before, NULL);
-        rc = poll(NULL, 0, 500);
-        gettimeofday(&after, NULL);
-
-        us = (after.tv_sec - before.tv_sec) * 1000000 +
-          (after.tv_usec - before.tv_usec);
-
-        if(us < 400000) {
-          return 1;
+  if(NOT CMAKE_CROSSCOMPILING)
+    check_c_source_runs("${_source_epilogue}
+      #include <stdlib.h>
+      int main(void)
+      {
+        if(0 != poll(0, 0, 10)) {
+          return 1; /* fail */
         }
-      }
-      return 0;
-    }" HAVE_POLL_FINE)
+        return 0;
+      }" HAVE_POLL_FINE)
+  elseif(UNIX)
+    check_c_source_compiles("${_source_epilogue}
+      #include <stdlib.h>
+      int main(void)
+      {
+        #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+          (void)poll(0, 0, 0);
+        #else
+          #error force compilation error
+        #endif
+      }" HAVE_POLL_FINE)
+  endif()
 endif()
 
 # Detect HAVE_GETADDRINFO_THREADSAFE
@@ -137,7 +133,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
     #ifdef h_errno
       return 0;
     #else
-      force compilation error
+      #error force compilation error
     #endif
     }" HAVE_H_ERRNO)
 
@@ -158,7 +154,7 @@ if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
         #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
           return 0;
         #else
-          force compilation error
+          #error force compilation error
         #endif
         }" HAVE_H_ERRNO_SBS_ISSUE_7)
     endif()

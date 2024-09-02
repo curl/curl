@@ -31,7 +31,7 @@
  * changed.
  *
  * In order to differentiate between platforms/compilers/architectures use
- * only compiler built in predefined preprocessor symbols.
+ * only compiler built-in predefined preprocessor symbols.
  *
  * curl_off_t
  * ----------
@@ -46,7 +46,7 @@
  * As a general rule, curl_off_t shall not be mapped to off_t. This rule shall
  * only be violated if off_t is the only 64-bit data type available and the
  * size of off_t is independent of large file support settings. Keep your
- * build on the safe side avoiding an off_t gating.  If you have a 64-bit
+ * build on the safe side avoiding an off_t gating. If you have a 64-bit
  * off_t then take for sure that another 64-bit data type exists, dig deeper
  * and you will find it.
  *
@@ -402,7 +402,7 @@
 #  define CURL_PULL_SYS_SOCKET_H     1
 
 #else
-/* generic "safe guess" on old 32 bit style */
+/* generic "safe guess" on old 32-bit style */
 # define CURL_TYPEOF_CURL_OFF_T     long
 # define CURL_FORMAT_CURL_OFF_T     "ld"
 # define CURL_FORMAT_CURL_OFF_TU    "lu"

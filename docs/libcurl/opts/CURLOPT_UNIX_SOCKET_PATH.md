@@ -10,6 +10,7 @@ See-also:
   - unix (7)
 Protocol:
   - All
+Added-in: 7.40.0
 ---
 
 # NAME
@@ -47,7 +48,9 @@ option.
 
 # DEFAULT
 
-Default is NULL, meaning that no Unix domain sockets are used.
+NULL - no Unix domain sockets are used.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -75,9 +78,7 @@ you can use the proc filesystem to bypass the limitation:
   /* Be sure to keep dirfd valid until you discard the handle */
 ~~~
 
-# AVAILABILITY
-
-Added in 7.40.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

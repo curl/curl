@@ -62,6 +62,9 @@ proxy
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 
 # The second and third CONNECT will be made to the dynamic port number the FTP
 # server opens for us, so we can't compare with known pre-existing numbers!

@@ -46,8 +46,9 @@ else:
 try:
     import impacket
 except ImportError:
-    sys.stderr.write('Python package impacket needs to be installed!\n')
-    sys.stderr.write('Use pip or your package manager to install it.\n')
+    sys.stderr.write(
+        'Warning: Python package impacket is required for smb testing; '
+        'use pip or your package manager to install it\n')
     sys.exit(1)
 from impacket import smb as imp_smb
 from impacket import smbserver as imp_smbserver

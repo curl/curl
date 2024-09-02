@@ -20,7 +20,7 @@ none
 </server>
 <features>
 file
-large_file
+Largefile
 </features>
 <name>
 Invalid large X- range on a file://

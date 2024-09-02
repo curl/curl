@@ -148,7 +148,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_DEC_C], [
   CURL_CHECK_DEF([__DECC], [], [silent])
   CURL_CHECK_DEF([__DECC_VER], [], [silent])
   if test "$curl_cv_have_def___DECC" = "yes" &&
-    test "$curl_cv_have_def___DECC_VER" = "yes"; then
+     test "$curl_cv_have_def___DECC_VER" = "yes"; then
     AC_MSG_RESULT([yes])
     compiler_id="DEC_C"
     flags_dbg_yes="-g2"
@@ -185,7 +185,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     compiler_id="GNU_C"
     AC_MSG_CHECKING([compiler version])
     # strip '-suffix' parts, e.g. Ubuntu Windows cross-gcc returns '10-win32'
-    gccver=`$CC -dumpversion | sed -E 's/-.+$//'`
+    gccver=`$CC -dumpversion | "$SED" 's/-.\{1,\}$//'`
     gccvhi=`echo $gccver | cut -d . -f1`
     if echo $gccver | grep -F '.' >/dev/null; then
       gccvlo=`echo $gccver | cut -d . -f2`
@@ -519,6 +519,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         dnl warn about compile-time arguments used during link-time, like
         dnl -O and -g and -pedantic.
         tmp_CFLAGS="$tmp_CFLAGS -Qunused-arguments"
+        tmp_CFLAGS="$tmp_CFLAGS -Werror-implicit-function-declaration"
         ;;
         #
       DEC_C)
@@ -568,7 +569,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
         #
       INTEL_UNIX_C)
         #
-        dnl On unix this compiler uses gcc's header files, so
+        dnl On Unix this compiler uses gcc's header files, so
         dnl we select ANSI C89 dialect plus GNU extensions.
         tmp_CFLAGS="$tmp_CFLAGS -std=gnu89"
         dnl Change some warnings into errors
@@ -851,13 +852,13 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [enum-conversion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sometimes-uninitialized])
             case $host_os in
-            cygwin* | mingw*)
-              dnl skip missing-variable-declarations warnings for cygwin and
-              dnl mingw because the libtool wrapper executable causes them
-              ;;
-            *)
-              CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-variable-declarations])
-              ;;
+              cygwin* | mingw*)
+                dnl skip missing-variable-declarations warnings for Cygwin and
+                dnl MinGW because the libtool wrapper executable causes them
+                ;;
+              *)
+                CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-variable-declarations])
+                ;;
             esac
           fi
           #
@@ -897,10 +898,6 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"  # we have silencing markup for clang 10.0 and above only
           fi
         fi
-        dnl Disable pointer to bool conversion warnings since they cause
-        dnl lib/securetransp.c cause several warnings for checks we want.
-        dnl This option should be placed after -Wconversion.
-        tmp_CFLAGS="$tmp_CFLAGS -Wno-pointer-bool-conversion"
         ;;
         #
       DEC_C)
@@ -1035,7 +1032,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only gcc 4.5 or later
           if test "$compiler_num" -ge "405"; then
-            dnl Only windows targets
+            dnl Only Windows targets
             if test "$curl_cv_native_windows" = "yes"; then
               tmp_CFLAGS="$tmp_CFLAGS -Wno-pedantic-ms-format"
             fi
@@ -1071,7 +1068,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [duplicated-branches])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [restrict])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [alloc-zero])
-            tmp_CFLAGS="$tmp_CFLAGS -Wformat-overflow=2"
+            tmp_CFLAGS="$tmp_CFLAGS -Wno-format-overflow"
             tmp_CFLAGS="$tmp_CFLAGS -Wformat-truncation=2"
             tmp_CFLAGS="$tmp_CFLAGS -Wimplicit-fallthrough"
           fi
@@ -1246,52 +1243,6 @@ squeeze() {
   return 0
 }
 ])
-
-
-dnl CURL_CHECK_CURLDEBUG
-dnl -------------------------------------------------
-dnl Settings which depend on configure's curldebug given
-dnl option, and other additional configure pre-requisites.
-dnl Actually the curl debug memory tracking feature can
-dnl only be used/enabled when libcurl is built as a static
-dnl library or as a shared one on those systems on which
-dnl shared libraries support undefined symbols.
-
-AC_DEFUN([CURL_CHECK_CURLDEBUG], [
-  AC_REQUIRE([XC_LIBTOOL])dnl
-  AC_REQUIRE([CURL_SHFUNC_SQUEEZE])dnl
-  supports_curldebug="unknown"
-  if test "$want_curldebug" = "yes"; then
-    if test "x$enable_shared" != "xno" &&
-      test "x$enable_shared" != "xyes"; then
-      AC_MSG_WARN([unknown enable_shared setting.])
-      supports_curldebug="no"
-    fi
-    if test "x$enable_static" != "xno" &&
-      test "x$enable_static" != "xyes"; then
-      AC_MSG_WARN([unknown enable_static setting.])
-      supports_curldebug="no"
-    fi
-    if test "$supports_curldebug" != "no"; then
-      if test "$enable_shared" = "yes" &&
-        test "x$xc_lt_shlib_use_no_undefined" = 'xyes'; then
-        supports_curldebug="no"
-        AC_MSG_WARN([shared library does not support undefined symbols.])
-      fi
-    fi
-  fi
-  #
-  if test "$want_curldebug" = "yes"; then
-    AC_MSG_CHECKING([if curl debug memory tracking can be enabled])
-    test "$supports_curldebug" = "no" || supports_curldebug="yes"
-    AC_MSG_RESULT([$supports_curldebug])
-    if test "$supports_curldebug" = "no"; then
-      AC_MSG_WARN([cannot enable curl debug memory tracking.])
-      want_curldebug="no"
-    fi
-  fi
-])
-
 
 
 dnl CURL_CHECK_COMPILER_HALT_ON_ERROR
@@ -1473,10 +1424,10 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
         $tmp_EXTERN char *dummy(char *buff);
         char *dummy(char *buff)
         {
-         if(buff)
-           return ++buff;
-         else
-           return buff;
+          if(buff)
+            return ++buff;
+          else
+            return buff;
         }
       ]],[[
         char b[16];

@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.45.0
 ---
 
 # NAME
@@ -39,6 +40,8 @@ CURLOPT_CONNECT_ONLY(3), which skips the transfer phase.
 
 CURLINFO_ACTIVESOCKET(3) was added as a replacement for
 CURLINFO_LASTSOCKET(3) since that one is not working on all platforms.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -71,9 +74,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.45.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

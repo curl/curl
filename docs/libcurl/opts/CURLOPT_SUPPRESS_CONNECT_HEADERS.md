@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PROXY (3)
 Protocol:
   - All
+Added-in: 7.54.0
 ---
 
 # NAME
@@ -70,6 +71,8 @@ Content-Type: application/json
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -92,9 +95,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.54.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

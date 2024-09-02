@@ -16,6 +16,7 @@ TLS-backend:
   - GnuTLS
   - mbedTLS
   - wolfSSL
+Added-in: 7.9.8
 ---
 
 # NAME
@@ -48,7 +49,9 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 # DEFAULT
 
-A default path detected at build time.
+A path detected at build time.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-This option is supported by the OpenSSL, GnuTLS, mbedTLS and wolfSSL backends.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

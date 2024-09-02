@@ -23,3 +23,7 @@ Issue a non-TLS HTTP requests using HTTP/2 directly without HTTP/1.1 Upgrade.
 It requires prior knowledge that the server supports HTTP/2 straight away.
 HTTPS requests still do HTTP/2 the standard way with negotiated protocol
 version in the TLS handshake.
+
+Since 8.10.0 if this option is set for an HTTPS request then the application
+layer protocol version (ALPN) offered to the server is only HTTP/2. Prior to
+that both HTTP/1.1 and HTTP/2 were offered.

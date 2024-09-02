@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.19.0
 ---
 
 # NAME
@@ -37,6 +38,8 @@ When a redirect is followed, the time from each request is added together.
 
 See also the TIMES overview in the curl_easy_getinfo(3) man page.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.19.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

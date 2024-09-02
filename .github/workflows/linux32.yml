@@ -4,7 +4,7 @@
 
 name: Linux 32-bit
 
-on:
+'on':
   push:
     branches:
       - master
@@ -14,7 +14,6 @@ on:
       - '**/CMakeLists.txt'
       - '.azure-pipelines.yml'
       - '.circleci/**'
-      - '.cirrus.yml'
       - 'appveyor.*'
       - 'CMake/**'
       - 'packages/**'
@@ -29,7 +28,6 @@ on:
       - '**/CMakeLists.txt'
       - '.azure-pipelines.yml'
       - '.circleci/**'
-      - '.cirrus.yml'
       - 'appveyor.*'
       - 'CMake/**'
       - 'packages/**'
@@ -44,7 +42,7 @@ concurrency:
 permissions: {}
 
 env:
-  MAKEFLAGS: -j 3
+  MAKEFLAGS: -j 5
 
 jobs:
   linux-i686:
@@ -68,12 +66,12 @@ jobs:
           sudo python3 -m pip install impacket
         name: 'install prereqs'
 
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
         name: 'configure'
 
       - run: make V=1

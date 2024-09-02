@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_VERBOSE (3)
 Protocol:
   - All
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -34,6 +35,8 @@ never does anything with this data.
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -61,9 +64,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10.3
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-/* somewhat unix-specific */
+/* somewhat Unix-specific */
 #ifndef _MSC_VER
 #include <sys/time.h>
 #include <unistd.h>

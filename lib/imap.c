@@ -512,7 +512,7 @@ static CURLcode imap_perform_login(struct Curl_easy *data,
   char *passwd;
 
   /* Check we have a username and password to authenticate with and end the
-     connect phase if we don't */
+     connect phase if we do not */
   if(!data->state.aptr.user) {
     imap_state(data, IMAP_STOP);
 
@@ -612,7 +612,7 @@ static CURLcode imap_perform_authentication(struct Curl_easy *data,
   saslprogress progress;
 
   /* Check if already authenticated OR if there is enough data to authenticate
-     with and end the connect phase if we don't */
+     with and end the connect phase if we do not */
   if(imapc->preauth ||
      !Curl_sasl_can_authenticate(&imapc->sasl, data)) {
     imap_state(data, IMAP_STOP);
@@ -776,7 +776,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
   /* Prepare the mime data if some. */
   if(data->set.mimepost.kind != MIMEKIND_NONE) {
     /* Use the whole structure as data. */
-    data->set.mimepost.flags &= ~MIME_BODY_ONLY;
+    data->set.mimepost.flags &= ~(unsigned int)MIME_BODY_ONLY;
 
     /* Add external headers and mime version. */
     curl_mime_headers(&data->set.mimepost, data->set.headers, 0);
@@ -1187,7 +1187,7 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
         chunk = (size_t)size;
 
       if(!chunk) {
-        /* no size, we're done with the data */
+        /* no size, we are done with the data */
         imap_state(data, IMAP_STOP);
         return CURLE_OK;
       }
@@ -1214,18 +1214,18 @@ static CURLcode imap_state_fetch_resp(struct Curl_easy *data,
 
     if(data->req.bytecount == size)
       /* The entire data is already transferred! */
-      Curl_xfer_setup(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup_nop(data);
     else {
       /* IMAP download */
       data->req.maxdownload = size;
       /* force a recv/send check of this connection, as the data might've been
        read off the socket already */
       data->state.select_bits = CURL_CSELECT_IN;
-      Curl_xfer_setup(data, FIRSTSOCKET, size, FALSE, -1);
+      Curl_xfer_setup1(data, CURL_XFER_RECV, size, FALSE);
     }
   }
   else {
-    /* We don't know how to parse this line */
+    /* We do not know how to parse this line */
     failf(data, "Failed to parse FETCH response.");
     result = CURLE_WEIRD_SERVER_REPLY;
   }
@@ -1269,7 +1269,7 @@ static CURLcode imap_state_append_resp(struct Curl_easy *data, int imapcode,
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
 
     /* IMAP upload */
-    Curl_xfer_setup(data, -1, -1, FALSE, FIRSTSOCKET);
+    Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
 
     /* End of DO phase */
     imap_state(data, IMAP_STOP);
@@ -1694,7 +1694,7 @@ static CURLcode imap_dophase_done(struct Curl_easy *data, bool connected)
 
   if(imap->transfer != PPTRANSFER_BODY)
     /* no data to transfer */
-    Curl_xfer_setup(data, -1, -1, FALSE, -1);
+    Curl_xfer_setup_nop(data);
 
   return CURLE_OK;
 }

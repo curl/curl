@@ -226,8 +226,7 @@ in fact, very few common utilities are available. As a consequence, the
 config-os400.h has been coded manually and the compilation scripts are
 a set of shell scripts stored in subdirectory packages/OS400.
 
-  The "curl" command and the test environment are currently not supported on
-OS/400.
+  The test environment is currently not supported on OS/400.
 
 
 Protocols currently implemented on OS/400:

@@ -236,7 +236,7 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
 
   r->m_sb.sb_socket = (int)conn->sock[FIRSTSOCKET];
 
-  /* We have to know if it's a write before we send the
+  /* We have to know if it is a write before we send the
    * connect request packet
    */
   if(data->state.upload)
@@ -273,10 +273,10 @@ static CURLcode rtmp_do(struct Curl_easy *data, bool *done)
 
   if(data->state.upload) {
     Curl_pgrsSetUploadSize(data, data->state.infilesize);
-    Curl_xfer_setup(data, -1, -1, FALSE, FIRSTSOCKET);
+    Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
   }
   else
-    Curl_xfer_setup(data, FIRSTSOCKET, -1, FALSE, -1);
+    Curl_xfer_setup1(data, CURL_XFER_RECV, -1, FALSE);
   *done = TRUE;
   return CURLE_OK;
 }
@@ -329,13 +329,14 @@ static ssize_t rtmp_recv(struct Curl_easy *data, int sockindex, char *buf,
 }
 
 static ssize_t rtmp_send(struct Curl_easy *data, int sockindex,
-                         const void *buf, size_t len, CURLcode *err)
+                         const void *buf, size_t len, bool eos, CURLcode *err)
 {
   struct connectdata *conn = data->conn;
   RTMP *r = conn->proto.rtmp;
   ssize_t num;
 
   (void)sockindex; /* unused */
+  (void)eos; /* unused */
 
   num = RTMP_Write(r, (char *)buf, curlx_uztosi(len));
   if(num < 0)

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_COOKIESESSION (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -67,6 +68,8 @@ run.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -92,9 +95,7 @@ int main(void)
 The cookie file format and general cookie concepts in curl are described
 online here: https://curl.se/docs/http-cookies.html
 
-# AVAILABILITY
-
-As long as HTTP is supported
+# %AVAILABILITY%
 
 # RETURN VALUE
 

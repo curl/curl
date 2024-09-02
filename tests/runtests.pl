@@ -60,6 +60,7 @@ use strict;
 # Promote all warnings to fatal
 use warnings FATAL => 'all';
 use 5.006;
+use POSIX qw(strftime);
 
 # These should be the only variables that might be needed to get edited:
 
@@ -131,9 +132,6 @@ my $ftp_ipv6;       # set if FTP server has IPv6 support
 
 my $resolver;       # name of the resolver backend (for human presentation)
 
-my $has_textaware;  # set if running on a system that has a text mode concept
-                    # on files. Windows for example
-
 my %skipped;    # skipped{reason}=counter, reasons for skip
 my @teststat;   # teststat[testnum]=reason, reasons for skip
 my %disabled_keywords;  # key words of tests to skip
@@ -142,6 +140,8 @@ my %enabled_keywords;   # key words of tests to run
 my %disabled;           # disabled test cases
 my %ignored;            # ignored results of test cases
 my %ignoretestcodes;    # if test results are to be ignored
+
+my $passedign;   # tests passed with results ignored
 
 my $timestats;   # time stamping and stats generation
 my $fullstats;   # show time stats for every single test
@@ -328,8 +328,8 @@ if ($ENV{"NGHTTPX"}) {
 my $disttests = "";
 sub get_disttests {
     # If a non-default $TESTDIR is being used there may not be any
-    # Makefile.inc in which case there's nothing to do.
-    open(my $dh, "<", "$TESTDIR/Makefile.inc") or return;
+    # Makefile.am in which case there's nothing to do.
+    open(my $dh, "<", "$TESTDIR/Makefile.am") or return;
     while(<$dh>) {
         chomp $_;
         if(($_ =~ /^#/) ||($_ !~ /test/)) {
@@ -499,6 +499,10 @@ sub checksystemfeatures {
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
 
+    my $current_time = int(time());
+    $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
+    $DATE = strftime "%Y-%m-%d", gmtime($current_time);
+
     open(my $versout, "<", "$curlverout");
     @version = <$versout>;
     close($versout);
@@ -519,6 +523,8 @@ sub checksystemfeatures {
         if($_ =~ /^curl ([^ ]*)/) {
             $curl = $_;
             $CURLVERSION = $1;
+            $CURLVERNUM = $CURLVERSION;
+            $CURLVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading dots and numbers
             $curl =~ s/^(.*)(libcurl.*)/$1/g || die "Failure determining curl binary version";
 
             $libcurl = $2;
@@ -528,9 +534,8 @@ sub checksystemfeatures {
             }
             if($curl =~ /win32|Windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
-                # Win32-style path.
+                # Windows-style path.
                 $pwd = sys_native_current_path();
-                $has_textaware = 1;
                 $feature{"win32"} = 1;
                 # set if built with MinGW (as opposed to MinGW-w64)
                 $feature{"MinGW"} = 1 if ($curl =~ /-pc-mingw32/);
@@ -586,6 +591,15 @@ sub checksystemfeatures {
                 # nghttp2 supports h2c, hyper does not
                 $feature{"h2c"} = 1;
             }
+            if ($libcurl =~ /AppleIDN/) {
+                $feature{"AppleIDN"} = 1;
+            }
+            if ($libcurl =~ /WinIDN/) {
+                $feature{"WinIDN"} = 1;
+            }
+            if ($libcurl =~ /libidn2/) {
+                $feature{"libidn2"} = 1;
+            }
             if ($libcurl =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
             }
@@ -613,19 +627,19 @@ sub checksystemfeatures {
             # built with memory tracking support (--enable-curldebug); may be disabled later
             $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
             # curl was built with --enable-debug
-            $feature{"debug"} = $feat =~ /debug/i;
+            $feature{"Debug"} = $feat =~ /Debug/i;
             # ssl enabled
             $feature{"SSL"} = $feat =~ /SSL/i;
             # multiple ssl backends available.
             $feature{"MultiSSL"} = $feat =~ /MultiSSL/i;
             # large file support
-            $feature{"large_file"} = $feat =~ /Largefile/i;
+            $feature{"Largefile"} = $feat =~ /Largefile/i;
             # IDN support
-            $feature{"idn"} = $feat =~ /IDN/i;
+            $feature{"IDN"} = $feat =~ /IDN/i;
             # IPv6 support
-            $feature{"ipv6"} = $feat =~ /IPv6/i;
+            $feature{"IPv6"} = $feat =~ /IPv6/i;
             # Unix sockets support
-            $feature{"unix-sockets"} = $feat =~ /UnixSockets/i;
+            $feature{"UnixSockets"} = $feat =~ /UnixSockets/i;
             # libz compression
             $feature{"libz"} = $feat =~ /libz/i;
             # Brotli compression
@@ -644,8 +658,6 @@ sub checksystemfeatures {
             $feature{"Kerberos"} = $feat =~ /Kerberos/i;
             # SPNEGO enabled
             $feature{"SPNEGO"} = $feat =~ /SPNEGO/i;
-            # CharConv enabled
-            $feature{"CharConv"} = $feat =~ /CharConv/i;
             # TLS-SRP enabled
             $feature{"TLS-SRP"} = $feat =~ /TLS-SRP/i;
             # PSL enabled
@@ -672,12 +684,12 @@ sub checksystemfeatures {
                 push @protocols, 'http/3';
             }
             # https proxy support
-            $feature{"https-proxy"} = $feat =~ /HTTPS-proxy/;
-            if($feature{"https-proxy"}) {
+            $feature{"HTTPS-proxy"} = $feat =~ /HTTPS-proxy/;
+            if($feature{"HTTPS-proxy"}) {
                 # 'https-proxy' is used as "server" so consider it a protocol
                 push @protocols, 'https-proxy';
             }
-            # UNICODE support
+            # Unicode support
             $feature{"Unicode"} = $feat =~ /Unicode/i;
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
@@ -739,9 +751,9 @@ sub checksystemfeatures {
     }
 
     # allow this feature only if debug mode is disabled
-    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"debug"};
+    $feature{"ld_preload"} = $feature{"ld_preload"} && !$feature{"Debug"};
 
-    if($feature{"ipv6"}) {
+    if($feature{"IPv6"}) {
         # client has IPv6 support
 
         # check if the HTTP server has it!
@@ -761,7 +773,7 @@ sub checksystemfeatures {
         }
     }
 
-    if($feature{"unix-sockets"}) {
+    if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
         my $cmd = "server/sws".exe_ext('SRV')." --version";
         my @sws = `$cmd`;
@@ -779,7 +791,7 @@ sub checksystemfeatures {
     }
     close($manh);
 
-    $feature{"unittest"} = $feature{"debug"};
+    $feature{"unittest"} = $feature{"Debug"};
     $feature{"nghttpx"} = !!$ENV{'NGHTTPX'};
     $feature{"nghttpx-h3"} = !!$nghttpx_h3;
 
@@ -821,7 +833,9 @@ sub checksystemfeatures {
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
+    chomp $hostname;
     my $hosttype=join(' ', runclientoutput("uname -a"));
+    chomp $hosttype;
     my $hostos=$^O;
 
     # display summary information about curl and the test host
@@ -830,8 +844,8 @@ sub checksystemfeatures {
             "* $libcurl\n",
             "* Features: $feat\n",
             "* Disabled: $dis\n",
-            "* Host: $hostname",
-            "* System: $hosttype",
+            "* Host: $hostname\n",
+            "* System: $hosttype\n",
             "* OS: $hostos\n");
 
     if($jobs) {
@@ -1029,7 +1043,7 @@ sub singletest_shouldrun {
     my @what;  # what features are needed
 
     if($disttests !~ /test$testnum(\W|\z)/ ) {
-        logmsg "Warning: test$testnum not present in tests/data/Makefile.inc\n";
+        logmsg "Warning: test$testnum not present in tests/data/Makefile.am\n";
     }
     if($disabled{$testnum}) {
         if(!$run_disabled) {
@@ -1181,6 +1195,12 @@ sub singletest_count {
     return 0;
 }
 
+# Make sure all line endings in the array are the same: CRLF
+sub normalize_text {
+    my ($ref) = @_;
+    s/\r\n/\n/g for @$ref;
+    s/\n/\r\n/g for @$ref;
+}
 
 #######################################################################
 # Verify test succeeded
@@ -1239,12 +1259,9 @@ sub singletest_check {
 
         # get the mode attribute
         my $filemode=$hash{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            s/\r\n/\n/g for @validstdout;
-            s/\n/\r\n/g for @validstdout;
-            s/\r\n/\n/g for @actual;
-            s/\n/\r\n/g for @actual;
+        if($filemode && ($filemode eq "text")) {
+            normalize_text(\@validstdout);
+            normalize_text(\@actual);
         }
 
         if($hash{'nonewline'}) {
@@ -1297,18 +1314,21 @@ sub singletest_check {
             # text mode check in hyper-mode. Sometimes necessary if the stderr
             # data *looks* like HTTP and thus has gotten CRLF newlines
             # mistakenly
-            s/\r\n/\n/g for @validstderr;
+            normalize_text(\@validstderr);
         }
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            s/\r\n/\n/g for @validstderr;
-            s/\n/\r\n/g for @validstderr;
+        if($filemode && ($filemode eq "text")) {
+            normalize_text(\@validstderr);
+            normalize_text(\@actual);
         }
 
         if($hash{'nonewline'}) {
             # Yes, we must cut off the final newline from the final line
             # of the protocol data
             chomp($validstderr[-1]);
+        }
+
+        if($hash{'crlf'}) {
+            subnewlines(0, \$_) for @validstderr;
         }
 
         $res = compare($runnerid, $testnum, $testname, "stderr", \@actual, \@validstderr);
@@ -1390,10 +1410,8 @@ sub singletest_check {
                 my %replycheckpartattr = getpartattr("reply", "datacheck".$partsuffix);
                 # get the mode attribute
                 my $filemode=$replycheckpartattr{'mode'};
-                if($filemode && ($filemode eq "text") && $has_textaware) {
-                    # text mode when running on windows: fix line endings
-                    s/\r\n/\n/g for @replycheckpart;
-                    s/\n/\r\n/g for @replycheckpart;
+                if($filemode && ($filemode eq "text")) {
+                    normalize_text(\@replycheckpart);
                 }
                 if($replycheckpartattr{'nonewline'}) {
                     # Yes, we must cut off the final newline from the final line
@@ -1420,10 +1438,8 @@ sub singletest_check {
         }
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
-        if($filemode && ($filemode eq "text") && $has_textaware) {
-            # text mode when running on windows: fix line endings
-            s/\r\n/\n/g for @reply;
-            s/\n/\r\n/g for @reply;
+        if($filemode && ($filemode eq "text")) {
+            normalize_text(\@reply);
         }
         if($replyattr{'crlf'} ||
            ($feature{"hyper"} && ($keywords{"HTTP"}
@@ -1435,6 +1451,12 @@ sub singletest_check {
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
         my @out = loadarray($CURLOUT);
+
+        # get the mode attribute
+        my $filemode=$replyattr{'mode'};
+        if($filemode && ($filemode eq "text")) {
+            normalize_text(\@out);
+        }
         $res = compare($runnerid, $testnum, $testname, "data", \@out, \@reply);
         if ($res) {
             return -1;
@@ -1453,6 +1475,11 @@ sub singletest_check {
             # cut off the final newline from the final line of the upload data
             chomp($upload[-1]);
         }
+        for my $line (@upload) {
+            subbase64(\$line);
+            subsha256base64file(\$line);
+            substrippemfile(\$line);
+        }
 
         # verify uploaded data
         my @out = loadarray("$logdir/upload.$testnum");
@@ -1461,6 +1488,9 @@ sub singletest_check {
             for(@out) {
                 eval $strip;
             }
+        }
+        if($hash{'crlf'}) {
+            subnewlines(1, \$_) for @upload;
         }
 
         $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload);
@@ -1556,10 +1586,9 @@ sub singletest_check {
             my @stripfilepar = getpart("verify", "stripfile".$partsuffix);
 
             my $filemode=$hash{'mode'};
-            if($filemode && ($filemode eq "text") && $has_textaware) {
-                # text mode when running on windows: fix line endings
-                s/\r\n/\n/g for @outfile;
-                s/\n/\r\n/g for @outfile;
+            if($filemode && ($filemode eq "text")) {
+                normalize_text(\@outfile);
+                normalize_text(\@generated);
             }
             if($hash{'crlf'} ||
                ($feature{"hyper"} && ($keywords{"HTTP"}
@@ -1753,6 +1782,8 @@ sub singletest_success {
     }
 
     if($errorreturncode==2) {
+        # ignored test success
+        $passedign .= "$testnum ";
         logmsg "Warning: test$testnum result is ignored, but passed!\n";
     }
 }
@@ -1971,6 +2002,8 @@ sub runtimestats {
 
     return if(not $timestats);
 
+    logmsg "::group::Run Time Stats\n";
+
     logmsg "\nTest suite total running time breakdown per task...\n\n";
 
     my @timesrvr;
@@ -2097,6 +2130,8 @@ sub runtimestats {
     }
 
     logmsg "\n";
+
+    logmsg "::endgroup::\n";
 }
 
 #######################################################################
@@ -2600,6 +2635,10 @@ sub disabledtests {
             }
         }
     }
+    else {
+        print STDERR "Cannot open $file, exiting\n";
+        exit 3;
+    }
 }
 
 #######################################################################
@@ -3027,16 +3066,47 @@ if(%skipped && !$short) {
     }
 }
 
+sub testnumdetails {
+    my ($desc, $numlist) = @_;
+    foreach my $testnum (split(' ', $numlist)) {
+        if(!loadtest("${TESTDIR}/test${testnum}")) {
+            my @info_keywords = getpart("info", "keywords");
+            my $testname = (getpart("client", "name"))[0];
+            chomp $testname;
+            logmsg "$desc $testnum: '$testname'";
+            my $first = 1;
+            for my $k (@info_keywords) {
+                chomp $k;
+                my $sep = ($first == 1) ? " " : ", ";
+                logmsg "$sep$k";
+                $first = 0;
+            }
+            logmsg "\n";
+        }
+    }
+}
+
 if($total) {
+    if($passedign) {
+        my $sorted = numsortwords($passedign);
+        logmsg "::group::Passed Ignored Test details\n";
+        testnumdetails("PASSED-IGNORED", $sorted);
+        logmsg "IGNORED: passed tests: $sorted\n";
+        logmsg "::endgroup::\n";
+    }
+
     if($failedign) {
-        my $failedignsorted = numsortwords($failedign);
-        logmsg "IGNORED: failed tests: $failedignsorted\n";
+        my $sorted = numsortwords($failedign);
+        testnumdetails("FAIL-IGNORED", $sorted);
+        logmsg "IGNORED: failed tests: $sorted\n";
     }
     logmsg sprintf("TESTDONE: $ok tests out of $total reported OK: %d%%\n",
                    $ok/$total*100);
 
     if($failed && ($ok != $total)) {
         my $failedsorted = numsortwords($failed);
+        logmsg "\n";
+        testnumdetails("FAIL", $failedsorted);
         logmsg "\nTESTFAIL: These test cases failed: $failedsorted\n\n";
     }
 }

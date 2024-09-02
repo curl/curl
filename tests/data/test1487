@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+-J
+</keywords>
+</info>
+
+#
+<reply>
+<data nocheck="yes">
+HTTP/1.1 301 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
+
+12345
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+# this relies on the debug feature to allow us to set directory to store the
+# -J output in
+<features>
+Debug
+</features>
+<server>
+http
+</server>
+<name>
+HTTP GET with -J and Content-Disposition on 301
+</name>
+<setenv>
+CURL_TESTDIR=%LOGDIR
+</setenv>
+<command option="no-output,no-include">
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+<file name="%LOGDIR/name%TESTNUMBER">
+12345
+</file>
+
+</verify>
+</testcase>

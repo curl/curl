@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_USERAGENT (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -38,6 +39,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,9 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-If built with HTTP support
+# %AVAILABILITY%
 
 # RETURN VALUE
 

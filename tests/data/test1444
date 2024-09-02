@@ -37,6 +37,9 @@ perl -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 1234567890)'
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_PROXY (3)
   - CURLOPT_PROXYPORT (3)
   - CURLOPT_PROXYTYPE (3)
+Added-in: 7.3
 ---
 
 # NAME
@@ -49,6 +50,8 @@ rarely works through the proxy anyway).
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

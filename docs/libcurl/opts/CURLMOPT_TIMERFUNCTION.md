@@ -9,6 +9,7 @@ See-also:
   - CURLMOPT_TIMERDATA (3)
 Protocol:
   - All
+Added-in: 7.16.0
 ---
 
 # NAME
@@ -63,6 +64,8 @@ callback with a zero timeout...
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -92,9 +95,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.16.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

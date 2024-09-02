@@ -58,7 +58,7 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
 #ifdef errno
         int dummy=1;
 #else
-        force compilation error
+        #error force compilation error
 #endif
       ]])
     ],[
@@ -72,7 +72,7 @@ AC_DEFUN([CURL_CHECK_NEED_REENTRANT_ERRNO], [
 #ifdef errno
           int dummy=1;
 #else
-          force compilation error
+          #error force compilation error
 #endif
         ]])
       ],[
@@ -413,7 +413,7 @@ AC_DEFUN([CURL_CONFIGURE_REENTRANT], [
 #ifdef _REENTRANT
       int dummy=1;
 #else
-      force compilation error
+      #error force compilation error
 #endif
     ]])
   ],[
@@ -473,7 +473,7 @@ AC_DEFUN([CURL_CONFIGURE_THREAD_SAFE], [
 #ifdef _THREAD_SAFE
       int dummy=1;
 #else
-      force compilation error
+      #error force compilation error
 #endif
     ]])
   ],[

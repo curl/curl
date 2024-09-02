@@ -12,6 +12,7 @@ See-also:
   - libcurl-ws (3)
 Protocol:
   - WS
+Added-in: 7.86.0
 ---
 
 # NAME
@@ -97,6 +98,8 @@ This transfer is now closed.
 
 This as an incoming ping message, that expects a pong response.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -132,9 +135,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.86.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

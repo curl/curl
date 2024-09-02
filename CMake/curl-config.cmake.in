@@ -23,6 +23,14 @@
 ###########################################################################
 @PACKAGE_INIT@
 
+if(NOT DEFINED CURL_USE_PKGCONFIG)
+  if(UNIX OR (MSVC AND VCPKG_TOOLCHAIN))  # Keep in sync with root CMakeLists.txt
+    set(CURL_USE_PKGCONFIG ON)
+  else()
+    set(CURL_USE_PKGCONFIG OFF)
+  endif()
+endif()
+
 include(CMakeFindDependencyMacro)
 if(@USE_OPENSSL@)
   find_dependency(OpenSSL @OPENSSL_VERSION_MAJOR@)
@@ -38,3 +46,7 @@ check_required_components("@PROJECT_NAME@")
 if(NOT TARGET @PROJECT_NAME@::libcurl)
   add_library(@PROJECT_NAME@::libcurl ALIAS @PROJECT_NAME@::@LIB_SELECTED@)
 endif()
+
+# For compatibility with CMake's FindCURL.cmake
+set(CURL_LIBRARIES @PROJECT_NAME@::libcurl)
+set_and_check(CURL_INCLUDE_DIRS "@PACKAGE_CMAKE_INSTALL_INCLUDEDIR@")

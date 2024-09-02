@@ -37,6 +37,9 @@ ftp://userdude:passfellow@%HOSTIP:%FTPPORT/%TESTNUMBER --use-ascii
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER userdude
 PASS passfellow

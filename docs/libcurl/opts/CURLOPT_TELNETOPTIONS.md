@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_QUOTE (3)
 Protocol:
   - TELNET
+Added-in: 7.7
 ---
 
 # NAME
@@ -35,6 +36,8 @@ standard for details.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,9 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with TELNET
+# %AVAILABILITY%
 
 # RETURN VALUE
 

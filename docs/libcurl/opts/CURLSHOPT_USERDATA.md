@@ -11,6 +11,7 @@ See-also:
   - curl_share_setopt (3)
 Protocol:
   - All
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -31,6 +32,8 @@ The *clientp* parameter is held verbatim by libcurl and is passed on as
 the *clientp* argument to the callbacks set with
 CURLSHOPT_LOCKFUNC(3) and CURLSHOPT_UNLOCKFUNC(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -49,9 +52,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10
+# %AVAILABILITY%
 
 # RETURN VALUE
 

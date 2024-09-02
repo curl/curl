@@ -11,6 +11,7 @@ See-also:
   - curl_share_setopt (3)
 Protocol:
   - All
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -40,6 +41,8 @@ Cookie data is shared across the easy handles using this shared object. Note
 that this does not activate an easy handle's cookie handling. You can do that
 separately by using CURLOPT_COOKIEFILE(3) for example.
 
+It is not supported to share cookies between multiple concurrent threads.
+
 ## CURL_LOCK_DATA_DNS
 
 Cached DNS hosts are shared across the easy handles using this shared
@@ -53,6 +56,8 @@ object. This reduces the time spent in the SSL handshake when reconnecting to
 the same server. Note SSL session IDs are reused within the same easy handle
 by default. Note this symbol was added in 7.10.3 but was not implemented until
 7.23.0.
+
+It is not supported to share SSL sessions between multiple concurrent threads.
 
 ## CURL_LOCK_DATA_CONNECT
 
@@ -91,6 +96,8 @@ It is not supported to share the HSTS between multiple concurrent threads.
 
 Added in 7.88.0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -104,9 +111,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10
+# %AVAILABILITY%
 
 # RETURN VALUE
 

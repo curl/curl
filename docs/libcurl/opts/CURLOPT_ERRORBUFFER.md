@@ -13,6 +13,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -50,6 +51,8 @@ debug and trace why errors happen.
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -90,9 +93,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

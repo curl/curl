@@ -34,21 +34,19 @@
 
 CURLcode Curl_macos_init(void)
 {
-  {
-    /*
-     * The automagic conversion from IPv4 literals to IPv6 literals only
-     * works if the SCDynamicStoreCopyProxies system function gets called
-     * first. As Curl currently doesn't support system-wide HTTP proxies, we
-     * therefore don't use any value this function might return.
-     *
-     * This function is only available on macOS and is not needed for
-     * IPv4-only builds, hence the conditions for defining
-     * CURL_MACOS_CALL_COPYPROXIES in curl_setup.h.
-     */
-    CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
-    if(dict)
-      CFRelease(dict);
-  }
+  /*
+   * The automagic conversion from IPv4 literals to IPv6 literals only
+   * works if the SCDynamicStoreCopyProxies system function gets called
+   * first. As Curl currently does not support system-wide HTTP proxies, we
+   * therefore do not use any value this function might return.
+   *
+   * This function is only available on macOS and is not needed for
+   * IPv4-only builds, hence the conditions for defining
+   * CURL_MACOS_CALL_COPYPROXIES in curl_setup.h.
+   */
+  CFDictionaryRef dict = SCDynamicStoreCopyProxies(NULL);
+  if(dict)
+    CFRelease(dict);
   return CURLE_OK;
 }
 

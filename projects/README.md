@@ -97,40 +97,40 @@ use `VC10\curl-all.sln` to build curl and libcurl.
 ## Running DLL based configurations
 
 If you are a developer and plan to run the curl tool from Visual Studio with
-any third-party libraries (such as OpenSSL, wolfSSL or LibSSH2) then you will
+any third-party libraries (such as OpenSSL, wolfSSL or libssh2) then you will
 need to add the search path of these DLLs to the configuration's PATH
 environment. To do that:
 
  1. Open the 'curl-all.sln' or 'curl.sln' solutions
  2. Right-click on the 'curl' project and select Properties
  3. Navigate to 'Configuration Properties > Debugging > Environment'
- 4. Add `PATH='Path to DLL';C:\Windows\system32;C:\Windows;C:\Windows\System32\Wbem`
+ 4. Add `PATH='Path to DLL';C:\Windows\System32;C:\Windows;C:\Windows\System32\Wbem`
 
 ... where 'Path to DLL` is the configuration specific path. For example the
 following configurations in Visual Studio 2010 might be:
 
 DLL Debug - DLL OpenSSL (Win32):
 
-    PATH=..\..\..\..\..\openssl\build\Win32\VC10\DLL Debug;C:\Windows\system32;
+    PATH=..\..\..\..\..\openssl\build\Win32\VC10\DLL Debug;C:\Windows\System32;
     C:\Windows;C:\Windows\System32\Wbem
 
 DLL Debug - DLL OpenSSL (x64):
 
-    PATH=..\..\..\..\..\openssl\build\Win64\VC10\DLL Debug;C:\Windows\system32;
+    PATH=..\..\..\..\..\openssl\build\Win64\VC10\DLL Debug;C:\Windows\System32;
     C:\Windows;C:\Windows\System32\Wbem
 
 DLL Debug - DLL wolfSSL (Win32):
 
-    PATH=..\..\..\..\..\wolfssl\build\Win32\VC10\DLL Debug;C:\Windows\system32;
+    PATH=..\..\..\..\..\wolfssl\build\Win32\VC10\DLL Debug;C:\Windows\System32;
     C:\Windows;C:\Windows\System32\Wbem
 
 DLL Debug - DLL wolfSSL (x64):
 
-    PATH=..\..\..\..\..\wolfssl\build\Win64\VC10\DLL Debug;C:\Windows\system32;
+    PATH=..\..\..\..\..\wolfssl\build\Win64\VC10\DLL Debug;C:\Windows\System32;
     C:\Windows;C:\Windows\System32\Wbem
 
 If you are using a configuration that uses multiple third-party library DLLs
-(such as DLL Debug - DLL OpenSSL - DLL LibSSH2) then 'Path to DLL' will need
+(such as DLL Debug - DLL OpenSSL - DLL libssh2) then 'Path to DLL' will need
 to contain the path to both of these.
 
 ## Notes

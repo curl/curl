@@ -18,7 +18,7 @@ VRFY
 smtp
 </server>
 <features>
-!idn
+!IDN
 !win32
 </features>
 <setenv>

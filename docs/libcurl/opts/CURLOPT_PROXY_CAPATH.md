@@ -16,6 +16,7 @@ TLS-backend:
   - OpenSSL
   - GnuTLS
   - mbedTLS
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -47,6 +48,8 @@ The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,11 +68,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.52.0
-
-mbedTLS support added in 7.56.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

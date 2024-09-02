@@ -30,8 +30,10 @@
 #include "version_win32.h"
 #include "warnless.h"
 
-/* The last #include files should be: */
+/* The last 2 #include files should be in this order */
+#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
+#endif
 #include "memdebug.h"
 
 /* This Unicode version struct works for VerifyVersionInfoW (OSVERSIONINFOEXW)
@@ -53,7 +55,7 @@ struct OUR_OSVERSIONINFOEXW {
 /*
  * curlx_verify_windows_version()
  *
- * This is used to verify if we are running on a specific windows version.
+ * This is used to verify if we are running on a specific Windows version.
  *
  * Parameters:
  *
@@ -63,7 +65,7 @@ struct OUR_OSVERSIONINFOEXW {
  *                     ignored.
  * platform     [in] - The optional platform identifier.
  * condition    [in] - The test condition used to specifier whether we are
- *                     checking a version less then, equal to or greater than
+ *                     checking a version less than, equal to or greater than
  *                     what is specified in the major and minor version
  *                     numbers.
  *
@@ -78,12 +80,12 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   bool matched = FALSE;
 
 #if defined(CURL_WINDOWS_APP)
-  (void)buildVersion;
-
   /* We have no way to determine the Windows version from Windows apps,
-     so let's assume we're running on the target Windows version. */
+     so let's assume we are running on the target Windows version. */
   const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);
   const WORD targetVersion = (WORD)_WIN32_WINNT;
+
+  (void)buildVersion;
 
   switch(condition) {
   case VERSION_LESS_THAN:
@@ -108,7 +110,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
   }
 
   if(matched && (platform == PLATFORM_WINDOWS)) {
-    /* we're always running on PLATFORM_WINNT */
+    /* we are always running on PLATFORM_WINNT */
     matched = FALSE;
   }
 #elif !defined(_WIN32_WINNT) || !defined(_WIN32_WINNT_WIN2K) || \

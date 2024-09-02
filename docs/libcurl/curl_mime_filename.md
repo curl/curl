@@ -12,6 +12,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -42,6 +43,8 @@ to NULL to remove a previously attached remote filename.
 The remote filename string is copied into the part, thus the associated
 storage may safely be released or reused after call. Setting a part's file
 name multiple times is valid: only the value set by the last call is retained.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -74,9 +77,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

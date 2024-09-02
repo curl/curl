@@ -19,7 +19,7 @@ Example:
 Use the specified SOCKS5 proxy - but resolve the hostname locally. If the
 port number is not specified, it is assumed at port 1080.
 
-To specify proxy on a unix domain socket, use localhost for host, e.g.
+To specify proxy on a Unix domain socket, use localhost for host, e.g.
 `socks5://localhost/path/to/socket.sock`
 
 This option overrides any previous use of --proxy, as they are mutually
@@ -33,4 +33,4 @@ used with an HTTP/HTTPS proxy (added in 7.52.0). In such a case, curl first
 connects to the SOCKS proxy and then connects (through SOCKS) to the HTTP or
 HTTPS proxy.
 
-This option (as well as --socks4) does not work with IPV6, FTPS or LDAP.
+This option does not work with FTPS or LDAP.

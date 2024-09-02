@@ -13,6 +13,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -49,6 +50,8 @@ last call is retained. It is possible to unassign part's contents by setting
 Setting large data is memory consuming: one might consider using
 curl_mime_data_cb(3) in such a case.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -71,9 +74,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

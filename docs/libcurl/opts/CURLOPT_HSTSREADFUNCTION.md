@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_HSTSREADDATA (3)
   - CURLOPT_HSTSWRITEFUNCTION (3)
   - CURLOPT_HSTS_CTRL (3)
+Added-in: 7.74.0
 ---
 
 # NAME
@@ -63,6 +64,8 @@ do that.
 
 NULL - no callback.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -95,9 +98,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.74.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

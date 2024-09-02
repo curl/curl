@@ -298,6 +298,7 @@ struct Curl_cftype Curl_cft_http_proxy = {
   http_proxy_cf_destroy,
   http_proxy_cf_connect,
   http_proxy_cf_close,
+  Curl_cf_def_shutdown,
   Curl_cf_http_proxy_get_host,
   Curl_cf_def_adjust_pollset,
   Curl_cf_def_data_pending,

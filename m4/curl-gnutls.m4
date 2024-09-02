@@ -93,24 +93,24 @@ if test "x$OPT_GNUTLS" != xno; then
       LIBS="$addlib $LIBS"
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
+        CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
       dnl this function is selected since it was introduced in 3.1.10
       AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
-       [
-       AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
-       AC_SUBST(USE_GNUTLS, [1])
-       GNUTLS_ENABLED=1
-       USE_GNUTLS="yes"
-       ssl_msg="GnuTLS"
-       QUIC_ENABLED=yes
-       test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         LIBS="$CLEANLIBS"
-         CPPFLAGS="$CLEANCPPFLAGS"
-       ])
+        [
+        AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
+        AC_SUBST(USE_GNUTLS, [1])
+        GNUTLS_ENABLED=1
+        USE_GNUTLS="yes"
+        ssl_msg="GnuTLS"
+        QUIC_ENABLED=yes
+        test gnutls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        ],
+        [
+          LIBS="$CLEANLIBS"
+          CPPFLAGS="$CLEANCPPFLAGS"
+        ])
 
       if test "x$USE_GNUTLS" = "xyes"; then
         AC_MSG_NOTICE([detected GnuTLS version $version])
@@ -126,6 +126,7 @@ if test "x$OPT_GNUTLS" != xno; then
             AC_MSG_NOTICE([Added $gtlslib to CURL_LIBRARY_PATH])
           fi
         fi
+        LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gnutls nettle"
       fi
 
     fi
@@ -159,10 +160,10 @@ dnl We require GnuTLS with SRP support.
 dnl ---
 if test "$GNUTLS_ENABLED" = "1"; then
   AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
-   [
-     AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
-     AC_SUBST(HAVE_GNUTLS_SRP, [1])
-   ])
+    [
+      AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
+      AC_SUBST(HAVE_GNUTLS_SRP, [1])
+    ])
 fi
 
 ])

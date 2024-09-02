@@ -11,6 +11,7 @@ See-also:
   - libcurl-errors (3)
 Protocol:
   - All
+Added-in: 7.73.0
 ---
 
 # NAME
@@ -71,6 +72,8 @@ transfer returned a **CURLE_PROXY** error. That error code matches the
 
 The error code is zero (**CURLPX_OK**) if no response code was available.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -94,9 +97,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.73.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

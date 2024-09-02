@@ -35,7 +35,7 @@ Funny-head: yesyes
 http
 </server>
 <name>
-warn about unicode quote character read from config file
+warn about Unicode quote character read from config file
 </name>
 <file name="%LOGDIR/input%TESTNUMBER">
 -H “host:fake”
@@ -49,7 +49,7 @@ warn about unicode quote character read from config file
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
-%hex[Warning: The argument '%e2%80%9chost:fake%e2%80%9d' starts with a unicode quote where ]hex%
+%hex[Warning: The argument '%e2%80%9chost:fake%e2%80%9d' starts with a Unicode quote where ]hex%
 Warning: maybe an ASCII " was intended?
 </stderr>
 </verify>

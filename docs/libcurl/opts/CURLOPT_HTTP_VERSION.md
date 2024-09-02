@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_HTTP09_ALLOWED (3)
   - CURLOPT_HTTP200ALIASES (3)
   - CURLOPT_SSLVERSION (3)
+Added-in: 7.9.1
 ---
 
 # NAME
@@ -72,6 +73,10 @@ prior knowledge that the server supports HTTP/2 straight away. HTTPS requests
 still do HTTP/2 the standard way with negotiated protocol version in the TLS
 handshake. (Added in 7.49.0)
 
+Since 8.10.0 if this option is set for an HTTPS request then the application
+layer protocol version (ALPN) offered to the server is only HTTP/2. Prior to
+that both HTTP/1.1 and HTTP/2 were offered.
+
 ## CURL_HTTP_VERSION_3
 
 (Added in 7.66.0) This option makes libcurl attempt to use HTTP/3 to the host
@@ -88,6 +93,8 @@ server does not support HTTP/3.
 Since curl 7.62.0: CURL_HTTP_VERSION_2TLS
 
 Before that: CURL_HTTP_VERSION_1_1
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -108,9 +115,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with HTTP
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: remove-on-error
 Help: Remove output file on errors
-Category: curl
+Category: output
 Added: 7.83.0
 Multi: boolean
 See-also:

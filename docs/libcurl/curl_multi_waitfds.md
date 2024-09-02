@@ -1,5 +1,5 @@
 ---
-c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
+c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Title: curl_multi_waitfds
 Section: 3
@@ -11,11 +11,12 @@ See-also:
   - curl_multi_fdset (3)
 Protocol:
   - All
+Added-in: 8.8.0
 ---
 
 # NAME
 
-curl_multi_waitfds - extracts file descriptor information from a multi handle
+curl_multi_waitfds - extract file descriptor information from a multi handle
 
 # SYNOPSIS
 
@@ -51,9 +52,13 @@ The client code can pass *size* equal to zero just to get the number of the
 descriptors and allocate appropriate storage for them to be used in a
 subsequent function call.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
+#include <stdlib.h>
+
 int main(void)
 {
   CURLMcode mc;
@@ -95,13 +100,11 @@ int main(void)
     /* Do polling on descriptors in ufds */
 
     free(ufds);
-  } while (!mc);
+  } while(!mc);
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 8.8.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

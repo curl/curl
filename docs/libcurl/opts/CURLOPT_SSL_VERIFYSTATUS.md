@@ -13,6 +13,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - GnuTLS
+Added-in: 7.41.0
 ---
 
 # NAME
@@ -41,6 +42,8 @@ extension, the verification fails.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -58,10 +61,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.41.0. This option is currently only supported by the OpenSSL and
-GnuTLS TLS backends.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -68,7 +68,8 @@ declare -A ech_targets=(
     [draft-13.esni.defo.ie:12414]=""
     [crypto.cloudflare.com]="cdn-cgi/trace"
     [tls-ech.dev]=""
-    [epochbelt.com]=""
+    # this one's gone away for now (possibly temporarily)
+    # [epochbelt.com]=""
 )
 
 # Targets we expect not to be ECH-enabled servers
@@ -102,12 +103,12 @@ declare -A neither_targets=(
 : "${tout:=10s}"
 
 # Where we find OpenSSL .so's
-: "${OSSL:=$HOME/code/openssl}"
+: "${OSSL:=$HOME/code/openssl-local-inst}"
 
-# Where we find WolfSSL .so's
+# Where we find wolfSSL .so's
 : "${WSSL:=$HOME/code/wolfssl/inst/lib}"
 
-# Where we find boringssl .so's
+# Where we find BoringSSL .so's
 : "${BSSL:=$HOME/code/boringssl/inst/lib}"
 
 # Where we send DoH queries when using kdig or curl
@@ -412,6 +413,11 @@ then
             echo "Skipping $targ as ports != 443 seem blocked"
             continue
         fi
+        if [[ "$host" == "crypto.cloudflare.com" ]]
+        then
+            echo "Skipping $host as they've blocked PN override"
+            continue
+        fi
         path=${ech_targets[$targ]}
         turl="https://$host:$port/$path"
         echo "PN override check for $turl"
@@ -533,7 +539,7 @@ fi
 fi # skip
 
 # Check combinations of command line options, if we're good so far
-# Most of this only works for openssl, which is ok, as we're checking
+# Most of this only works for OpenSSL, which is ok, as we're checking
 # the argument handling here, not the ECH protocol
 if [[ "$using_ossl" == "yes" && "$allgood" == "yes" ]]
 then

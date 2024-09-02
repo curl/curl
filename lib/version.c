@@ -258,10 +258,11 @@ char *curl_version(void)
     api.ldapai_info_version = LDAP_API_INFO_VERSION;
 
     if(ldap_get_option(NULL, LDAP_OPT_API_INFO, &api) == LDAP_OPT_SUCCESS) {
-      unsigned int patch = api.ldapai_vendor_version % 100;
-      unsigned int major = api.ldapai_vendor_version / 10000;
+      unsigned int patch = (unsigned int)(api.ldapai_vendor_version % 100);
+      unsigned int major = (unsigned int)(api.ldapai_vendor_version / 10000);
       unsigned int minor =
-        ((api.ldapai_vendor_version - major * 10000) - patch) / 100;
+        (((unsigned int)api.ldapai_vendor_version - major * 10000)
+          - patch) / 100;
       msnprintf(ldap_buf, sizeof(ldap_buf), "%s/%u.%u.%u",
                 api.ldapai_vendor_name, major, minor, patch);
       src[i++] = ldap_buf;
@@ -394,7 +395,7 @@ static const char * const supported_protocols[] = {
 };
 
 /*
- * Feature presence run-time check functions.
+ * Feature presence runtime check functions.
  *
  * Warning: the value returned by these should not change between
  * curl_global_init() and curl_global_cleanup() calls.
@@ -540,7 +541,7 @@ static curl_version_info_data version_info = {
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
   OS,   /* as found by configure or set by hand at build-time */
-  0,    /* features bitmask is built at run-time */
+  0,    /* features bitmask is built at runtime */
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */
   NULL, /* zlib_version */
@@ -580,7 +581,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   int features = 0;
 
 #if defined(USE_SSH)
-  static char ssh_buffer[80];
+  static char ssh_buf[80];  /* 'ssh_buffer' clashes with libssh/libssh.h */
 #endif
 #ifdef USE_SSL
 #ifdef CURL_WITH_MULTI_SSL
@@ -596,7 +597,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
   static char zstd_buffer[80];
 #endif
 
-  (void)stamp; /* avoid compiler warnings, we don't use this */
+  (void)stamp; /* avoid compiler warnings, we do not use this */
 
 #ifdef USE_SSL
   Curl_ssl_version(ssl_buffer, sizeof(ssl_buffer));
@@ -621,8 +622,8 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #endif
 
 #if defined(USE_SSH)
-  Curl_ssh_version(ssh_buffer, sizeof(ssh_buffer));
-  version_info.libssh_version = ssh_buffer;
+  Curl_ssh_version(ssh_buf, sizeof(ssh_buf));
+  version_info.libssh_version = ssh_buf;
 #endif
 
 #ifdef HAVE_BROTLI
@@ -640,7 +641,7 @@ curl_version_info_data *curl_version_info(CURLversion stamp)
 #ifdef USE_NGHTTP2
   {
     nghttp2_info *h2 = nghttp2_version(0);
-    version_info.nghttp2_ver_num = h2->version_num;
+    version_info.nghttp2_ver_num = (unsigned int)h2->version_num;
     version_info.nghttp2_version = h2->version_str;
   }
 #endif

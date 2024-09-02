@@ -89,6 +89,7 @@ DPAGES = \
   doh-cert-status.md \
   doh-insecure.md \
   doh-url.md \
+  dump-ca-embed.md \
   dump-header.md \
   ech.md \
   egd-file.md \
@@ -133,14 +134,15 @@ DPAGES = \
   http3.md \
   http3-only.md \
   ignore-content-length.md \
-  include.md \
   insecure.md \
   interface.md \
+  ip-tos.md \
   ipfs-gateway.md \
   ipv4.md \
   ipv6.md \
   json.md \
   junk-session-cookies.md \
+  keepalive-cnt.md \
   keepalive-time.md \
   key-type.md \
   key.md \
@@ -161,6 +163,7 @@ DPAGES = \
   max-redirs.md \
   max-time.md \
   metalink.md \
+  mptcp.md \
   negotiate.md \
   netrc-file.md \
   netrc-optional.md \
@@ -248,7 +251,9 @@ DPAGES = \
   sasl-ir.md \
   service-name.md \
   show-error.md \
+  show-headers.md \
   silent.md \
+  skip-existing.md \
   socks4.md \
   socks4a.md \
   socks5-basic.md \
@@ -302,5 +307,6 @@ DPAGES = \
   variable.md \
   verbose.md \
   version.md \
+  vlan-priority.md \
   write-out.md \
   xattr.md

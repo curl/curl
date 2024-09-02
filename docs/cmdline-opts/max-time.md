@@ -5,7 +5,7 @@ Long: max-time
 Short: m
 Arg: <seconds>
 Help: Maximum time allowed for transfer
-Category: connection
+Category: connection timeout
 Added: 4.0
 Multi: single
 See-also:
@@ -26,5 +26,5 @@ If you enable retrying the transfer (--retry) then the maximum time counter is
 reset each time the transfer is retried. You can use --retry-max-time to limit
 the retry time.
 
-The decimal value needs to provided using a dot (.) as decimal separator - not
-the local version even if it might be using another separator.
+The decimal value needs to be provided using a dot (.) as decimal separator -
+not the local version even if it might be using another separator.

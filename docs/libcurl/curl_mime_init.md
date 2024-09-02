@@ -13,6 +13,7 @@ Protocol:
   - HTTP
   - IMAP
   - SMTP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -41,6 +42,8 @@ reporting. Since 7.87.0, it does not need to be the final target handle.
 Using a mime handle is the recommended way to post an HTTP form, format and
 send a multi-part email with SMTP or upload such an email to an IMAP server.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,9 +70,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-As long as at least one of HTTP, SMTP or IMAP is enabled. Added in 7.56.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

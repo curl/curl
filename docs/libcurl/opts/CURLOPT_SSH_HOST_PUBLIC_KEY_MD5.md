@@ -12,6 +12,7 @@ See-also:
 Protocol:
   - SFTP
   - SCP
+Added-in: 7.17.1
 ---
 
 # NAME
@@ -43,6 +44,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -60,9 +63,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.17.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

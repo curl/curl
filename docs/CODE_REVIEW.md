@@ -141,13 +141,13 @@ data. Where it comes from and where it goes.
 `size_t` is not a fixed size. `time_t` can be signed or unsigned and have
 different sizes. Relying on variable sizes is a red flag.
 
-Also remember that endianness and >= 32 bit accesses to unaligned addresses
+Also remember that endianness and >= 32-bit accesses to unaligned addresses
 are problematic areas.
 
 ## Integer overflows
 
-Be careful about integer overflows. Some variable types can be either 32 bit
-or 64 bit. Integer overflows must be detected and acted on *before* they
+Be careful about integer overflows. Some variable types can be either 32-bit
+or 64-bit. Integer overflows must be detected and acted on *before* they
 happen.
 
 ## Dangerous use of functions

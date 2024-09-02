@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_XFERINFOFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -59,11 +60,13 @@ if you only download data, the upload size remains 0). Many times the callback
 is called one or more times first, before it knows the data sizes so a program
 must be made to handle that.
 
+Return zero from the callback if everything is fine.
+
 If your callback function returns CURL_PROGRESSFUNC_CONTINUE it causes libcurl
 to continue executing the default progress function.
 
-Returning any other non-zero value from this callback makes libcurl abort the
-transfer and return *CURLE_ABORTED_BY_CALLBACK*.
+Return 1 from this callback to make libcurl abort the transfer and return
+*CURLE_ABORTED_BY_CALLBACK*.
 
 If you transfer data with the multi interface, this function is not called
 during periods of idleness unless you call the appropriate libcurl function
@@ -74,8 +77,9 @@ get called.
 
 # DEFAULT
 
-By default, libcurl has an internal progress meter. That is rarely wanted by
-users.
+NULL. libcurl has an internal progress meter. That is rarely wanted by users.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -114,9 +118,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Deprecated since 7.32.0.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

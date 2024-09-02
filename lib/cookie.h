@@ -75,7 +75,7 @@ struct CookieInfo {
 
 /** Limits for INCOMING cookies **/
 
-/* The longest we allow a line to be when reading a cookie from a HTTP header
+/* The longest we allow a line to be when reading a cookie from an HTTP header
    or from a cookie jar */
 #define MAX_COOKIE_LINE 5000
 

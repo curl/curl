@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.12.1
 ---
 
 # NAME
@@ -35,6 +36,8 @@ It does not change the following information kept in the handle: live
 connections, the Session ID cache, the DNS cache, the cookies, the shares or
 the alt-svc cache.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -49,9 +52,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-This function was added in libcurl 7.12.1
+# %AVAILABILITY%
 
 # RETURN VALUE
 

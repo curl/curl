@@ -47,7 +47,7 @@ Funny-head: yesyes
 http
 </server>
 <features>
-debug
+Debug
 xattr
 </features>
 # simulate the xattr operations

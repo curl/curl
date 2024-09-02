@@ -35,6 +35,13 @@ struct sigpipe_ignore {
 };
 
 #define SIGPIPE_VARIABLE(x) struct sigpipe_ignore x
+#define SIGPIPE_MEMBER(x)   struct sigpipe_ignore x
+
+static void sigpipe_init(struct sigpipe_ignore *ig)
+{
+  memset(ig, 0, sizeof(*ig));
+  ig->no_signal = TRUE;
+}
 
 /*
  * sigpipe_ignore() makes sure we ignore SIGPIPE while running libcurl
@@ -70,11 +77,23 @@ static void sigpipe_restore(struct sigpipe_ignore *ig)
     sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
 }
 
+static void sigpipe_apply(struct Curl_easy *data,
+                          struct sigpipe_ignore *ig)
+{
+  if(data->set.no_signal != ig->no_signal) {
+    sigpipe_restore(ig);
+    sigpipe_ignore(data, ig);
+  }
+}
+
 #else
 /* for systems without sigaction */
 #define sigpipe_ignore(x,y) Curl_nop_stmt
+#define sigpipe_apply(x,y) Curl_nop_stmt
+#define sigpipe_init(x)  Curl_nop_stmt
 #define sigpipe_restore(x)  Curl_nop_stmt
 #define SIGPIPE_VARIABLE(x)
+#define SIGPIPE_MEMBER(x)   bool x
 #endif
 
 #endif /* HEADER_CURL_SIGPIPE_H */

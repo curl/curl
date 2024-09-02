@@ -11,6 +11,7 @@ See-also:
   - curl_share_setopt (3)
 Protocol:
   - All
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -58,6 +59,8 @@ The connection cache is no longer shared.
 
 The Public Suffix List is no longer shared.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -71,9 +74,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10
+# %AVAILABILITY%
 
 # RETURN VALUE
 

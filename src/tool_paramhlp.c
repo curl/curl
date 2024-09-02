@@ -25,8 +25,6 @@
 
 #include "strcase.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_cfgable.h"
@@ -90,12 +88,11 @@ static size_t memcrlf(char *orig,
   return total; /* no delimiter found */
 }
 
-#define MAX_FILE2STRING (256*1024*1024) /* big enough ? */
+#define MAX_FILE2STRING MAX_FILE2MEMORY
 
 ParameterError file2string(char **bufp, FILE *file)
 {
   struct curlx_dynbuf dyn;
-  DEBUGASSERT(MAX_FILE2STRING < INT_MAX); /* needs to fit in an int later */
   curlx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
     do {
@@ -133,7 +130,6 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     size_t nread;
     struct curlx_dynbuf dyn;
     /* The size needs to fit in an int later */
-    DEBUGASSERT(MAX_FILE2MEMORY < INT_MAX);
     curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];
@@ -399,7 +395,7 @@ ParameterError proto2num(struct OperationConfig *config,
       protoset_set(protoset, p);
   }
 
-  /* Allow strtok() here since this isn't used threaded */
+  /* Allow strtok() here since this is not used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
   for(token = strtok(buffer, sep);
       token;
@@ -508,7 +504,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
 {
   char *endptr;
   if(str[0] == '-')
-    /* offsets aren't negative, this indicates weird input */
+    /* offsets are not negative, this indicates weird input */
     return PARAM_NEGATIVE_NUMERIC;
 
 #if(SIZEOF_CURL_OFF_T > SIZEOF_LONG)
@@ -561,13 +557,13 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* build a nice-looking prompt */
     if(!i && last)
-      curlx_msnprintf(prompt, sizeof(prompt),
-                      "Enter %s password for user '%s':",
-                      kind, *userpwd);
+      msnprintf(prompt, sizeof(prompt),
+                "Enter %s password for user '%s':",
+                kind, *userpwd);
     else
-      curlx_msnprintf(prompt, sizeof(prompt),
-                      "Enter %s password for user '%s' on URL #%zu:",
-                      kind, *userpwd, i + 1);
+      msnprintf(prompt, sizeof(prompt),
+                "Enter %s password for user '%s' on URL #%zu:",
+                kind, *userpwd, i + 1);
 
     /* get password */
     getpass_r(prompt, passwd, sizeof(passwd));

@@ -42,12 +42,12 @@
 /*
   The dirslash() function breaks a null-terminated pathname string into
   directory and filename components then returns the directory component up
-  to, *AND INCLUDING*, a final '/'.  If there is no directory in the path,
+  to, *AND INCLUDING*, a final '/'. If there is no directory in the path,
   this instead returns a "" string.
 
   This function returns a pointer to malloc'ed memory.
 
-  The input path to this function is expected to have a file name part.
+  The input path to this function is expected to have a filename part.
 */
 
 #ifdef _WIN32
@@ -88,7 +88,7 @@ static char *dirslash(const char *path)
  * Curl_fopen() opens a file for writing with a temp name, to be renamed
  * to the final name when completed. If there is an existing file using this
  * name at the time of the open, this function will clone the mode from that
- * file.  if 'tempname' is non-NULL, it needs a rename after the file is
+ * file. if 'tempname' is non-NULL, it needs a rename after the file is
  * written.
  */
 CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
@@ -117,7 +117,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
 
   dir = dirslash(filename);
   if(dir) {
-    /* The temp file name should not end up too long for the target file
+    /* The temp filename should not end up too long for the target file
        system */
     tempstore = aprintf("%s%s.tmp", dir, randbuf);
     free(dir);

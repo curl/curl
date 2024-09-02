@@ -48,7 +48,7 @@
  * Parameters:
  *
  * service  [in] - The service type such as http, smtp, pop or imap.
- * host     [in] - The host name.
+ * host     [in] - The hostname.
  * realm    [in] - The realm.
  *
  * Returns a pointer to the newly allocated SPN.
@@ -93,7 +93,7 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
     return NULL;
 
   /* Allocate and return a TCHAR based SPN. Since curlx_convert_UTF8_to_tchar
-     must be freed by curlx_unicodefree we'll dupe the result so that the
+     must be freed by curlx_unicodefree we will dupe the result so that the
      pointer this function returns can be normally free'd. */
   tchar_spn = curlx_convert_UTF8_to_tchar(utf8_spn);
   free(utf8_spn);
@@ -115,14 +115,14 @@ TCHAR *Curl_auth_build_spn(const char *service, const char *host,
  * Domain/User (curl Down-level format - for compatibility with existing code)
  * User@Domain (User Principal Name)
  *
- * Note: The user name may be empty when using a GSS-API library or Windows
+ * Note: The username may be empty when using a GSS-API library or Windows
  * SSPI as the user and domain are either obtained from the credentials cache
  * when using GSS-API or via the currently logged in user's credentials when
  * using Windows SSPI.
  *
  * Parameters:
  *
- * user  [in] - The user name.
+ * user  [in] - The username.
  *
  * Returns TRUE on success; otherwise FALSE.
  */

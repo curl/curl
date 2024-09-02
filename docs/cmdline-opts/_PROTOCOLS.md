@@ -49,3 +49,5 @@ Fetching a telnet URL starts an interactive session where it sends what it
 reads on stdin and outputs what the server sends it.
 ## TFTP
 curl can do TFTP downloads and uploads.
+## WS(S)
+WebSocket done over HTTP/1. WSS implies that it works over HTTPS.

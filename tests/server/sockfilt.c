@@ -99,9 +99,6 @@
 #include <netdb.h>
 #endif
 
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
@@ -152,7 +149,7 @@ enum sockmode {
   ACTIVE_DISCONNECT  /* as a client, disconnected from server */
 };
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
 /*
  * read-wrapper to support reading from stdin on Windows.
  */
@@ -420,13 +417,13 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 }
 
 
-#ifdef USE_WINSOCK
+#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_APP)
 /*
- * WinSock select() does not support standard file descriptors,
+ * Winsock select() does not support standard file descriptors,
  * it can only check SOCKETs. The following function is an attempt
  * to re-create a select() function with support for other handle types.
  *
- * select() function with support for WINSOCK2 sockets and all
+ * select() function with support for Winsock2 sockets and all
  * other handle types supported by WaitForMultipleObjectsEx() as
  * well as disk files, anonymous and names pipes, and character input.
  *
@@ -683,7 +680,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* loop over the handles in the input descriptor sets */
   nfd = 0; /* number of handled file descriptors */
   nth = 0; /* number of internal waiting threads */
-  nws = 0; /* number of handled WINSOCK sockets */
+  nws = 0; /* number of handled Winsock sockets */
   for(fd = 0; fd < nfds; fd++) {
     wsasock = curlx_sitosk(fd);
     wsaevents.lNetworkEvents = 0;
@@ -829,7 +826,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
         FD_CLR(wsasock, exceptfds);
       }
       else {
-        /* try to handle the event with the WINSOCK2 functions */
+        /* try to handle the event with the Winsock2 functions */
         wsaevents.lNetworkEvents = 0;
         error = WSAEnumNetworkEvents(wsasock, handle, &wsaevents);
         if(error != SOCKET_ERROR) {
@@ -921,10 +918,9 @@ static bool disc_handshake(void)
       }
       else if(!memcmp("DATA", buffer, 4)) {
         /* We must read more data to stay in sync */
+        logmsg("Throwing away data bytes");
         if(!read_data_block(buffer, sizeof(buffer), &buffer_len))
           return FALSE;
-
-        logmsg("Throwing again %zd data bytes", buffer_len);
 
       }
       else if(!memcmp("QUIT", buffer, 4)) {

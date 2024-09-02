@@ -32,6 +32,7 @@ from datetime import timedelta, datetime
 from json import JSONEncoder
 import time
 from typing import List, Union, Optional
+import copy
 
 from .curl import CurlClient, ExecResult
 from .env import Env
@@ -78,6 +79,7 @@ class Httpd:
         self._auth_digest = True
         self._proxy_auth_basic = proxy_auth
         self._extra_configs = {}
+        self._loaded_extra_configs = None
         assert env.apxs
         p = subprocess.run(args=[env.apxs, '-q', 'libexecdir'],
                            capture_output=True, text=True)
@@ -151,10 +153,12 @@ class Httpd:
         if r.exit_code != 0:
             log.error(f'failed to start httpd: {r}')
             return False
+        self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def stop(self):
         r = self._apachectl('stop')
+        self._loaded_extra_configs = None
         if r.exit_code == 0:
             return self.wait_dead(timeout=timedelta(seconds=5))
         log.fatal(f'stopping httpd failed: {r}')
@@ -167,9 +171,16 @@ class Httpd:
     def reload(self):
         self._write_config()
         r = self._apachectl("graceful")
+        self._loaded_extra_configs = None
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
+        self._loaded_extra_configs = copy.deepcopy(self._extra_configs)
         return self.wait_live(timeout=timedelta(seconds=5))
+
+    def reload_if_config_changed(self):
+        if self._loaded_extra_configs == self._extra_configs:
+            return True
+        return self.reload()
 
     def wait_dead(self, timeout: timedelta):
         curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
@@ -246,22 +257,15 @@ class Httpd:
                 f'ErrorLog {self._error_log}',
                 f'LogLevel {self._get_log_level()}',
                 f'StartServers 4',
+                f'ReadBufferSize 16000',
                 f'H2MinWorkers 16',
                 f'H2MaxWorkers 256',
-                f'H2Direct on',
                 f'Listen {self.env.http_port}',
                 f'Listen {self.env.https_port}',
                 f'Listen {self.env.proxy_port}',
                 f'Listen {self.env.proxys_port}',
                 f'TypesConfig "{self._conf_dir}/mime.types',
                 f'SSLSessionCache "shmcb:ssl_gcache_data(32000)"',
-                (f'SSLCipherSuite SSL'
-                 f' ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256'
-                 f':ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305'
-                ),
-                (f'SSLCipherSuite TLSv1.3'
-                 f' TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256'
-                ),
             ]
             if 'base' in self._extra_configs:
                 conf.extend(self._extra_configs['base'])
@@ -271,6 +275,7 @@ class Httpd:
                 f'    ServerAlias localhost',
                 f'    DocumentRoot "{self._docs_dir}"',
                 f'    Protocols h2c http/1.1',
+                f'    H2Direct on',
             ])
             conf.extend(self._curltest_conf(domain1))
             conf.extend([
@@ -308,6 +313,18 @@ class Httpd:
             conf.extend(self._curltest_conf(domain1))
             if domain1 in self._extra_configs:
                 conf.extend(self._extra_configs[domain1])
+            conf.extend([
+                f'</VirtualHost>',
+                f'',
+            ])
+            conf.extend([  # plain http host for domain2
+                f'<VirtualHost *:{self.env.http_port}>',
+                f'    ServerName {domain2}',
+                f'    ServerAlias localhost',
+                f'    DocumentRoot "{self._docs_dir}"',
+                f'    Protocols h2c http/1.1',
+            ])
+            conf.extend(self._curltest_conf(domain2))
             conf.extend([
                 f'</VirtualHost>',
                 f'',

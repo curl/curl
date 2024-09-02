@@ -32,13 +32,33 @@
 struct Curl_dns_entry;
 struct ip_quadruple;
 
-/* generic function that returns how much time there's left to run, according
+/* generic function that returns how much time there is left to run, according
    to the timeouts set */
 timediff_t Curl_timeleft(struct Curl_easy *data,
                          struct curltime *nowp,
                          bool duringconnect);
 
 #define DEFAULT_CONNECT_TIMEOUT 300000 /* milliseconds == five minutes */
+
+#define DEFAULT_SHUTDOWN_TIMEOUT_MS   (2 * 1000)
+
+void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
+                         struct curltime *nowp);
+
+/* return how much time there is left to shutdown the connection at
+ * sockindex. Returns 0 if there is no limit or shutdown has not started. */
+timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
+                                  struct curltime *nowp);
+
+/* return how much time there is left to shutdown the connection.
+ * Returns 0 if there is no limit or shutdown has not started. */
+timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
+                                       struct curltime *nowp);
+
+void Curl_shutdown_clear(struct Curl_easy *data, int sockindex);
+
+/* TRUE iff shutdown has been started */
+bool Curl_shutdown_started(struct Curl_easy *data, int sockindex);
 
 /*
  * Used to extract socket and connectdata struct for the most recent
@@ -51,9 +71,6 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
 
 bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
                       char *addr, int *port);
-
-void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          struct ip_quadruple *ip);
 
 /*
  * Curl_conncontrol() marks the end of a connection/stream. The 'closeit'
@@ -125,7 +142,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
 extern struct Curl_cftype Curl_cft_happy_eyeballs;
 extern struct Curl_cftype Curl_cft_setup;
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 void Curl_debug_set_transport_provider(int transport,
                                        cf_ip_connect_create *cf_create);
 #endif

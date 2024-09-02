@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_WILDCARDMATCH (3)
 Protocol:
   - FTP
+Added-in: 7.21.0
 ---
 
 # NAME
@@ -44,6 +45,8 @@ error occurred.
 
 NULL == an internal function for wildcard matching.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -77,9 +80,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.21.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

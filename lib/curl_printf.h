@@ -29,6 +29,10 @@
  * *rintf() functions.
  */
 
+#ifndef CURL_TEMP_PRINTF
+#error "CURL_TEMP_PRINTF must be set before including curl/mprintf.h"
+#endif
+
 #include <curl/mprintf.h>
 
 #define MERR_OK        0
@@ -40,7 +44,6 @@
 # undef msnprintf
 # undef vprintf
 # undef vfprintf
-# undef vsnprintf
 # undef mvsnprintf
 # undef aprintf
 # undef vaprintf

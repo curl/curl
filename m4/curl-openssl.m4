@@ -38,7 +38,7 @@ if test "x$OPT_OPENSSL" != xno; then
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
-  dnl This is for Msys/Mingw
+  dnl This is for MSYS/MinGW
   case $host in
     *-*-msys* | *-*-mingw*)
       AC_MSG_CHECKING([for gdi32])
@@ -61,48 +61,48 @@ if test "x$OPT_OPENSSL" != xno; then
   esac
 
   case "$OPT_OPENSSL" in
-  yes)
-    dnl --with-openssl (without path) used
-    PKGTEST="yes"
-    PREFIX_OPENSSL=
-    ;;
-  *)
-    dnl check the given --with-openssl spot
-    PKGTEST="no"
-    PREFIX_OPENSSL=$OPT_OPENSSL
-
-    dnl Try pkg-config even when cross-compiling.  Since we
-    dnl specify PKG_CONFIG_LIBDIR we're only looking where
-    dnl the user told us to look
-    OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
-    if test -f "$OPENSSL_PCDIR/openssl.pc"; then
-      AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+    yes)
+      dnl --with-openssl (without path) used
       PKGTEST="yes"
-    fi
+      PREFIX_OPENSSL=
+      ;;
+    *)
+      dnl check the given --with-openssl spot
+      PKGTEST="no"
+      PREFIX_OPENSSL=$OPT_OPENSSL
 
-    if test "$PKGTEST" != "yes"; then
-      # try lib64 instead
-      OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+      dnl Try pkg-config even when cross-compiling.  Since we
+      dnl specify PKG_CONFIG_LIBDIR we're only looking where
+      dnl the user told us to look
+      OPENSSL_PCDIR="$OPT_OPENSSL/lib/pkgconfig"
       if test -f "$OPENSSL_PCDIR/openssl.pc"; then
         AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
         PKGTEST="yes"
       fi
-    fi
 
-    if test "$PKGTEST" != "yes"; then
-      if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
-        AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+      if test "$PKGTEST" != "yes"; then
+        # try lib64 instead
+        OPENSSL_PCDIR="$OPT_OPENSSL/lib64/pkgconfig"
+        if test -f "$OPENSSL_PCDIR/openssl.pc"; then
+          AC_MSG_NOTICE([PKG_CONFIG_LIBDIR will be set to "$OPENSSL_PCDIR"])
+          PKGTEST="yes"
+        fi
       fi
-    fi
 
-    dnl in case pkg-config comes up empty, use what we got
-    dnl via --with-openssl
-    LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
-    if test "$PREFIX_OPENSSL" != "/usr" ; then
-      SSL_LDFLAGS="-L$LIB_OPENSSL"
-      SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
-    fi
-    ;;
+      if test "$PKGTEST" != "yes"; then
+        if test ! -f "$PREFIX_OPENSSL/include/openssl/ssl.h"; then
+          AC_MSG_ERROR([$PREFIX_OPENSSL is a bad --with-openssl prefix!])
+        fi
+      fi
+
+      dnl in case pkg-config comes up empty, use what we got
+      dnl via --with-openssl
+      LIB_OPENSSL="$PREFIX_OPENSSL/lib$libsuff"
+      if test "$PREFIX_OPENSSL" != "/usr" ; then
+        SSL_LDFLAGS="-L$LIB_OPENSSL"
+        SSL_CPPFLAGS="-I$PREFIX_OPENSSL/include"
+      fi
+      ;;
   esac
 
   if test "$PKGTEST" = "yes"; then
@@ -141,63 +141,60 @@ if test "x$OPT_OPENSSL" != xno; then
   LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
 
   AC_CHECK_LIB(crypto, HMAC_Update,[
-     HAVECRYPTO="yes"
-     LIBS="-lcrypto $LIBS"
-     ],[
-     if test -n "$LIB_OPENSSL" ; then
-       LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
-     fi
-     if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
-       # only set this if pkg-config wasn't used
-       CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
-     fi
-     # Linking previously failed, try extra paths from --with-openssl or
-     # pkg-config.  Use a different function name to avoid reusing the earlier
-     # cached result.
-     AC_CHECK_LIB(crypto, HMAC_Init_ex,[
-       HAVECRYPTO="yes"
-       LIBS="-lcrypto $LIBS"], [
+    HAVECRYPTO="yes"
+    LIBS="-lcrypto $LIBS"
+    ],[
+    if test -n "$LIB_OPENSSL" ; then
+      LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
+    fi
+    if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
+      # only set this if pkg-config wasn't used
+      CPPFLAGS="$CLEANCPPFLAGS -I$PREFIX_OPENSSL/include"
+    fi
+    # Linking previously failed, try extra paths from --with-openssl or
+    # pkg-config.  Use a different function name to avoid reusing the earlier
+    # cached result.
+    AC_CHECK_LIB(crypto, HMAC_Init_ex,[
+      HAVECRYPTO="yes"
+      LIBS="-lcrypto $LIBS"], [
 
-       dnl still no, but what about with -ldl?
-       AC_MSG_CHECKING([OpenSSL linking with -ldl])
-       LIBS="-lcrypto $CLEANLIBS -ldl"
-       AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
-         #include <openssl/err.h>
-       ]], [[
-         ERR_clear_error();
-       ]]) ],
-       [
-         AC_MSG_RESULT(yes)
-         HAVECRYPTO="yes"
-       ],
-       [
-         AC_MSG_RESULT(no)
-         dnl ok, so what about both -ldl and -lpthread?
-         dnl This may be necessary for static libraries.
+      dnl still no, but what about with -ldl?
+      AC_MSG_CHECKING([OpenSSL linking with -ldl])
+      LIBS="-lcrypto $CLEANLIBS -ldl"
+      AC_LINK_IFELSE([ AC_LANG_PROGRAM([[
+        #include <openssl/err.h>
+      ]], [[
+        ERR_clear_error();
+      ]]) ],
+      [
+        AC_MSG_RESULT(yes)
+        HAVECRYPTO="yes"
+      ],
+      [
+        AC_MSG_RESULT(no)
+        dnl ok, so what about both -ldl and -lpthread?
+        dnl This may be necessary for static libraries.
 
-         AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
-         LIBS="-lcrypto $CLEANLIBS -ldl -lpthread"
-         AC_LINK_IFELSE([
-           AC_LANG_PROGRAM([[
-           #include <openssl/err.h>
-         ]], [[
-           ERR_clear_error();
-         ]])],
-         [
-           AC_MSG_RESULT(yes)
-           HAVECRYPTO="yes"
-         ],
-         [
-           AC_MSG_RESULT(no)
-           LDFLAGS="$CLEANLDFLAGS"
-           CPPFLAGS="$CLEANCPPFLAGS"
-           LIBS="$CLEANLIBS"
-
-         ])
-
-       ])
-
-     ])
+        AC_MSG_CHECKING([OpenSSL linking with -ldl and -lpthread])
+        LIBS="-lcrypto $CLEANLIBS -ldl -lpthread"
+        AC_LINK_IFELSE([
+          AC_LANG_PROGRAM([[
+          #include <openssl/err.h>
+        ]], [[
+          ERR_clear_error();
+        ]])],
+        [
+          AC_MSG_RESULT(yes)
+          HAVECRYPTO="yes"
+        ],
+        [
+          AC_MSG_RESULT(no)
+          LDFLAGS="$CLEANLDFLAGS"
+          CPPFLAGS="$CLEANCPPFLAGS"
+          LIBS="$CLEANLIBS"
+        ])
+      ])
+    ])
   ])
 
   if test X"$HAVECRYPTO" = X"yes"; then
@@ -207,18 +204,18 @@ if test "x$OPT_OPENSSL" != xno; then
     AC_CHECK_LIB(ssl, SSL_connect)
 
     if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-        dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
-        AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
-        OLIBS=$LIBS
-        LIBS="-lRSAglue -lrsaref $LIBS"
-        AC_CHECK_LIB(ssl, SSL_connect)
-        if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
-            dnl still no SSL_connect
-            AC_MSG_RESULT(no)
-            LIBS=$OLIBS
-        else
-            AC_MSG_RESULT(yes)
-        fi
+      dnl we didn't find the SSL lib, try the RSAglue/rsaref stuff
+      AC_MSG_CHECKING(for ssl with RSAglue/rsaref libs in use);
+      OLIBS=$LIBS
+      LIBS="-lRSAglue -lrsaref $LIBS"
+      AC_CHECK_LIB(ssl, SSL_connect)
+      if test "$ac_cv_lib_ssl_SSL_connect" != yes; then
+        dnl still no SSL_connect
+        AC_MSG_RESULT(no)
+        LIBS=$OLIBS
+      else
+        AC_MSG_RESULT(yes)
+      fi
 
     else
 
@@ -247,7 +244,7 @@ if test "x$OPT_OPENSSL" != xno; then
     fi
 
     if test X"$OPENSSL_ENABLED" != X"1"; then
-       LIBS="$CLEANLIBS"
+      LIBS="$CLEANLIBS"
     fi
 
     if test X"$OPT_OPENSSL" != Xoff &&
@@ -261,50 +258,50 @@ if test "x$OPT_OPENSSL" != xno; then
 
     AC_MSG_CHECKING([for BoringSSL])
     AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-                #include <openssl/base.h>
-                ]],[[
-                #ifndef OPENSSL_IS_BORINGSSL
-                #error not boringssl
-                #endif
-       ]])
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_BORINGSSL
+        #error not boringssl
+        #endif
+      ]])
     ],[
-        AC_MSG_RESULT([yes])
-        ssl_msg="BoringSSL"
-        OPENSSL_IS_BORINGSSL=1
+      AC_MSG_RESULT([yes])
+      ssl_msg="BoringSSL"
+      OPENSSL_IS_BORINGSSL=1
     ],[
-        AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no])
     ])
 
     AC_MSG_CHECKING([for AWS-LC])
     AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-                #include <openssl/base.h>
-                ]],[[
-                #ifndef OPENSSL_IS_AWSLC
-                #error not AWS-LC
-                #endif
-       ]])
+      AC_LANG_PROGRAM([[
+        #include <openssl/base.h>
+        ]],[[
+        #ifndef OPENSSL_IS_AWSLC
+        #error not AWS-LC
+        #endif
+      ]])
     ],[
-        AC_MSG_RESULT([yes])
-        ssl_msg="AWS-LC"
-        OPENSSL_IS_BORINGSSL=1
+      AC_MSG_RESULT([yes])
+      ssl_msg="AWS-LC"
+      OPENSSL_IS_BORINGSSL=1
     ],[
-        AC_MSG_RESULT([no])
+      AC_MSG_RESULT([no])
     ])
 
-    AC_MSG_CHECKING([for libressl])
+    AC_MSG_CHECKING([for LibreSSL])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <openssl/opensslv.h>
+        #include <openssl/opensslv.h>
       ]],[[
         int dummy = LIBRESSL_VERSION_NUMBER;
       ]])
     ],[
       AC_MSG_RESULT([yes])
       AC_DEFINE_UNQUOTED(HAVE_LIBRESSL, 1,
-        [Define to 1 if using libressl.])
-      ssl_msg="libressl"
+        [Define to 1 if using LibreSSL.])
+      ssl_msg="LibreSSL"
     ],[
       AC_MSG_RESULT([no])
     ])
@@ -312,7 +309,7 @@ if test "x$OPT_OPENSSL" != xno; then
     AC_MSG_CHECKING([for OpenSSL >= v3])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#include <openssl/opensslv.h>
+        #include <openssl/opensslv.h>
       ]],[[
         #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
         return 0;
@@ -322,8 +319,6 @@ if test "x$OPT_OPENSSL" != xno; then
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(HAVE_OPENSSL3, 1,
-        [Define to 1 if using OpenSSL 3 or later.])
       ssl_msg="OpenSSL v3+"
     ],[
       AC_MSG_RESULT([no])
@@ -341,52 +336,27 @@ if test "x$OPT_OPENSSL" != xno; then
 
   if test "$OPENSSL_ENABLED" = "1"; then
     if test -n "$LIB_OPENSSL"; then
-       dnl when the ssl shared libs were found in a path that the run-time
-       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
-       dnl to prevent further configure tests to fail due to this
-       if test "x$cross_compiling" != "xyes"; then
-         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
-         export CURL_LIBRARY_PATH
-         AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])
-       fi
+      dnl when the ssl shared libs were found in a path that the run-time
+      dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
+      dnl to prevent further configure tests to fail due to this
+      if test "x$cross_compiling" != "xyes"; then
+        CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$LIB_OPENSSL"
+        export CURL_LIBRARY_PATH
+        AC_MSG_NOTICE([Added $LIB_OPENSSL to CURL_LIBRARY_PATH])
+      fi
     fi
     check_for_ca_bundle=1
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
 fi
 
 if test X"$OPT_OPENSSL" != Xno &&
-  test "$OPENSSL_ENABLED" != "1"; then
+   test "$OPENSSL_ENABLED" != "1"; then
   AC_MSG_NOTICE([OPT_OPENSSL: $OPT_OPENSSL])
   AC_MSG_NOTICE([OPENSSL_ENABLED: $OPENSSL_ENABLED])
   AC_MSG_ERROR([--with-openssl was given but OpenSSL could not be detected])
-fi
-
-dnl **********************************************************************
-dnl Check for the random seed preferences
-dnl **********************************************************************
-
-if test X"$OPENSSL_ENABLED" = X"1"; then
-  dnl Check for user-specified random device
-  AC_ARG_WITH(random,
-  AS_HELP_STRING([--with-random=FILE],
-                 [read randomness from FILE (default=/dev/urandom)]),
-      [ RANDOM_FILE="$withval" ],
-      [
-          if test x$cross_compiling != xyes; then
-            dnl Check for random device
-            AC_CHECK_FILE("/dev/urandom", [ RANDOM_FILE="/dev/urandom"] )
-          else
-            AC_MSG_WARN([skipped the /dev/urandom detection when cross-compiling])
-          fi
-      ]
-  )
-  if test -n "$RANDOM_FILE" && test X"$RANDOM_FILE" != Xno ; then
-          AC_SUBST(RANDOM_FILE)
-          AC_DEFINE_UNQUOTED(RANDOM_FILE, "$RANDOM_FILE",
-          [a suitable file to read random data from])
-  fi
 fi
 
 dnl ---
@@ -396,7 +366,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
   AC_MSG_CHECKING([for SRP support in OpenSSL])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <openssl/ssl.h>
+      #include <openssl/ssl.h>
     ]],[[
       SSL_CTX_set_srp_username(NULL, "");
       SSL_CTX_set_srp_password(NULL, "");
@@ -428,17 +398,19 @@ dnl ---
 dnl We may use OpenSSL QUIC.
 dnl ---
 if test "$OPENSSL_ENABLED" = "1"; then
-  AC_MSG_CHECKING([for QUIC support in OpenSSL])
+  AC_MSG_CHECKING([for QUIC support and OpenSSL >= 3.3])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <openssl/ssl.h>
+      #include <openssl/ssl.h>
     ]],[[
+      #if (OPENSSL_VERSION_NUMBER < 0x30300000L)
+      #error need at least version 3.3.0
+      #endif
       OSSL_QUIC_client_method();
     ]])
   ],[
     AC_MSG_RESULT([yes])
-    AC_DEFINE(HAVE_OPENSSL_QUIC, 1, [if you have the functions OSSL_QUIC_client_method])
-    AC_SUBST(HAVE_OPENSSL_QUIC, [1])
+    have_openssl_quic=1
   ],[
     AC_MSG_RESULT([no])
   ])

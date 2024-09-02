@@ -149,6 +149,6 @@ CURLcode test(char *URL)
   return res;
 }
 
-#else /* no websockets */
+#else /* no WebSockets */
 NO_SUPPORT_BUILT_IN
 #endif

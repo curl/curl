@@ -10,6 +10,7 @@ See-also:
   - libcurl-thread (3)
 Protocol:
   - All
+Added-in: 7.8
 ---
 
 # NAME
@@ -59,6 +60,8 @@ depending on how OpenSSL was built and loaded as a library. It is possible in
 some rare circumstances a memory leak could occur unless you implement your own
 OpenSSL thread cleanup. Refer to libcurl-thread(3).
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -72,9 +75,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.8
+# %AVAILABILITY%
 
 # RETURN VALUE
 

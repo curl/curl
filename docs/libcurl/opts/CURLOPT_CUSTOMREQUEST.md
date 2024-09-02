@@ -15,6 +15,7 @@ Protocol:
   - IMAP
   - POP3
   - SMTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -95,12 +96,11 @@ with CURLOPT_MAIL_RCPT(3), to specify an EXPN request. If the
 CURLOPT_NOBODY(3) option is specified then the request can be used to
 issue **NOOP** and **RSET** commands.
 
-The application does not have to keep the string around after setting this
-option.
-
 # DEFAULT
 
 NULL
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -122,9 +122,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-IMAP is supported since 7.30.0, POP3 since 7.26.0 and SMTP since 7.34.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

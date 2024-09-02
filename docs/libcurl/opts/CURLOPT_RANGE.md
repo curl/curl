@@ -15,6 +15,7 @@ Protocol:
   - FILE
   - RTSP
   - SFTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -58,6 +59,8 @@ option.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -76,9 +79,11 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
 FILE since 7.18.0, RTSP since 7.20.0
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

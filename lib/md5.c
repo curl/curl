@@ -172,7 +172,7 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
 
 /* For Apple operating systems: CommonCrypto has the functions we need.
    These functions are available on Tiger and later, as well as iOS 2.0
-   and later. If you're building for an older cat, well, sorry.
+   and later. If you are building for an older cat, well, sorry.
 
    Declaring the functions as static like this seems to be a bit more
    reliable than defining COMMON_DIGEST_FOR_OPENSSL on older cats. */
@@ -254,7 +254,7 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
  * Author:
  * Alexander Peslyak, better known as Solar Designer <solar at openwall.com>
  *
- * This software was written by Alexander Peslyak in 2001.  No copyright is
+ * This software was written by Alexander Peslyak in 2001. No copyright is
  * claimed, and the software is hereby placed in the public domain.
  * In case this attempt to disclaim copyright and place the software in the
  * public domain is deemed null and void, then the software is
@@ -264,19 +264,19 @@ static void my_md5_final(unsigned char *digest, my_md5_ctx *ctx)
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted.
  *
- * There's ABSOLUTELY NO WARRANTY, express or implied.
+ * There is ABSOLUTELY NO WARRANTY, express or implied.
  *
  * (This is a heavily cut-down "BSD license".)
  *
  * This differs from Colin Plumb's older public domain implementation in that
  * no exactly 32-bit integer data type is required (any 32-bit or wider
- * unsigned integer data type will do), there's no compile-time endianness
- * configuration, and the function prototypes match OpenSSL's.  No code from
+ * unsigned integer data type will do), there is no compile-time endianness
+ * configuration, and the function prototypes match OpenSSL's. No code from
  * Colin Plumb's implementation has been reused; this comment merely compares
  * the properties of the two independent implementations.
  *
  * The primary goals of this implementation are portability and ease of use.
- * It is meant to be fast, but not as fast as possible.  Some known
+ * It is meant to be fast, but not as fast as possible. Some known
  * optimizations are not included to reduce source code size and avoid
  * compile-time configuration.
  */
@@ -323,8 +323,8 @@ static void my_md5_final(unsigned char *result, my_md5_ctx *ctx);
  * in a properly aligned word in host byte order.
  *
  * The check for little-endian architectures that tolerate unaligned
- * memory accesses is just an optimization.  Nothing will break if it
- * doesn't work.
+ * memory accesses is just an optimization. Nothing will break if it
+ * does not work.
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 #define MD5_SET(n) \
@@ -344,7 +344,7 @@ static void my_md5_final(unsigned char *result, my_md5_ctx *ctx);
 
 /*
  * This processes one or more 64-byte data blocks, but does NOT update
- * the bit counters.  There are no alignment requirements.
+ * the bit counters. There are no alignment requirements.
  */
 static const void *my_md5_body(my_md5_ctx *ctx,
                                const void *data, unsigned long size)

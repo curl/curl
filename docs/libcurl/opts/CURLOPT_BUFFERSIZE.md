@@ -11,6 +11,7 @@ See-also:
   - CURLOPT_WRITEFUNCTION (3)
 Protocol:
   - All
+Added-in: 7.10
 ---
 
 # NAME
@@ -53,6 +54,8 @@ allocated as long as there are active transfers.
 
 CURL_MAX_WRITE_SIZE (16kB)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -73,9 +76,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10. Growing the buffer was added in 7.53.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -82,13 +82,13 @@ static char *max5data(curl_off_t bytes, char *max5)
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "k", bytes/ONE_KILOBYTE);
 
   else if(bytes < CURL_OFF_T_C(100) * ONE_MEGABYTE)
-    /* 'XX.XM' is good as long as we're less than 100 megs */
+    /* 'XX.XM' is good as long as we are less than 100 megs */
     msnprintf(max5, 6, "%2" CURL_FORMAT_CURL_OFF_T ".%0"
               CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE,
               (bytes%ONE_MEGABYTE) / (ONE_MEGABYTE/CURL_OFF_T_C(10)) );
 
   else if(bytes < CURL_OFF_T_C(10000) * ONE_MEGABYTE)
-    /* 'XXXXM' is good until we're at 10000MB or above */
+    /* 'XXXXM' is good until we are at 10000MB or above */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "M", bytes/ONE_MEGABYTE);
 
   else if(bytes < CURL_OFF_T_C(100) * ONE_GIGABYTE)
@@ -109,7 +109,7 @@ static char *max5data(curl_off_t bytes, char *max5)
     /* up to 10000PB, display without decimal: XXXXP */
     msnprintf(max5, 6, "%4" CURL_FORMAT_CURL_OFF_T "P", bytes/ONE_PETABYTE);
 
-  /* 16384 petabytes (16 exabytes) is the maximum a 64 bit unsigned number can
+  /* 16384 petabytes (16 exabytes) is the maximum a 64-bit unsigned number can
      hold, but our data type is signed so 8192PB will be the maximum. */
 
   return max5;
@@ -140,7 +140,7 @@ int Curl_pgrsDone(struct Curl_easy *data)
 
   if(!(data->progress.flags & PGRS_HIDE) &&
      !data->progress.callback)
-    /* only output if we don't use a progress callback and we're not
+    /* only output if we do not use a progress callback and we are not
      * hidden */
     fprintf(data->set.err, "\n");
 
@@ -204,7 +204,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_STARTTRANSFER:
     delta = &data->progress.t_starttransfer;
     /* prevent updating t_starttransfer unless:
-     *   1) this is the first time we're setting t_starttransfer
+     *   1) this is the first time we are setting t_starttransfer
      *   2) a redirect has occurred since the last time t_starttransfer was set
      * This prevents repeated invocations of the function from incorrectly
      * changing the t_starttransfer time.
@@ -217,7 +217,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
       break;
     }
   case TIMER_POSTRANSFER:
-    /* this is the normal end-of-transfer thing */
+    delta = &data->progress.t_posttransfer;
     break;
   case TIMER_REDIRECT:
     data->progress.t_redirect = Curl_timediff_us(timestamp,
@@ -252,12 +252,12 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_now();
   data->progress.is_t_startransfer_set = false;
-  data->progress.ul_limit_start = data->progress.start;
-  data->progress.dl_limit_start = data->progress.start;
-  data->progress.ul_limit_size = 0;
-  data->progress.dl_limit_size = 0;
-  data->progress.downloaded = 0;
-  data->progress.uploaded = 0;
+  data->progress.ul.limit.start = data->progress.start;
+  data->progress.dl.limit.start = data->progress.start;
+  data->progress.ul.limit.start_size = 0;
+  data->progress.dl.limit.start_size = 0;
+  data->progress.dl.cur_size = 0;
+  data->progress.ul.cur_size = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
   data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
   Curl_ratelimit(data, data->progress.start);
@@ -265,11 +265,11 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
 
 /*
  * This is used to handle speed limits, calculating how many milliseconds to
- * wait until we're back under the speed limit, if needed.
+ * wait until we are back under the speed limit, if needed.
  *
  * The way it works is by having a "starting point" (time & amount of data
  * transferred by then) used in the speed computation, to be used instead of
- * the start of the transfer.  This starting point is regularly moved as
+ * the start of the transfer. This starting point is regularly moved as
  * transfer goes on, to keep getting accurate values (instead of average over
  * the entire transfer).
  *
@@ -281,17 +281,15 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
  * starting point should be reset (to current); or the number of milliseconds
  * to wait to get back under the speed limit.
  */
-timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
-                                  curl_off_t startsize,
-                                  curl_off_t limit,
-                                  struct curltime start,
+timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
+                                  curl_off_t speed_limit,
                                   struct curltime now)
 {
-  curl_off_t size = cursize - startsize;
+  curl_off_t size = d->cur_size - d->limit.start_size;
   timediff_t minimum;
   timediff_t actual;
 
-  if(!limit || !size)
+  if(!speed_limit || !size)
     return 0;
 
   /*
@@ -299,9 +297,9 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
    * stay below 'limit'.
    */
   if(size < CURL_OFF_T_MAX/1000)
-    minimum = (timediff_t) (CURL_OFF_T_C(1000) * size / limit);
+    minimum = (timediff_t) (CURL_OFF_T_C(1000) * size / speed_limit);
   else {
-    minimum = (timediff_t) (size / limit);
+    minimum = (timediff_t) (size / speed_limit);
     if(minimum < TIMEDIFF_T_MAX/1000)
       minimum *= 1000;
     else
@@ -312,7 +310,7 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
    * 'actual' is the time in milliseconds it took to actually download the
    * last 'size' bytes.
    */
-  actual = Curl_timediff_ceil(now, start);
+  actual = Curl_timediff_ceil(now, d->limit.start);
   if(actual < minimum) {
     /* if it downloaded the data faster than the limit, make it wait the
        difference */
@@ -327,7 +325,7 @@ timediff_t Curl_pgrsLimitWaitTime(curl_off_t cursize,
  */
 CURLcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  data->progress.downloaded = size;
+  data->progress.dl.cur_size = size;
   return CURLE_OK;
 }
 
@@ -336,19 +334,19 @@ CURLcode Curl_pgrsSetDownloadCounter(struct Curl_easy *data, curl_off_t size)
  */
 void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
 {
-  /* don't set a new stamp unless the time since last update is long enough */
+  /* do not set a new stamp unless the time since last update is long enough */
   if(data->set.max_recv_speed) {
-    if(Curl_timediff(now, data->progress.dl_limit_start) >=
+    if(Curl_timediff(now, data->progress.dl.limit.start) >=
        MIN_RATE_LIMIT_PERIOD) {
-      data->progress.dl_limit_start = now;
-      data->progress.dl_limit_size = data->progress.downloaded;
+      data->progress.dl.limit.start = now;
+      data->progress.dl.limit.start_size = data->progress.dl.cur_size;
     }
   }
   if(data->set.max_send_speed) {
-    if(Curl_timediff(now, data->progress.ul_limit_start) >=
+    if(Curl_timediff(now, data->progress.ul.limit.start) >=
        MIN_RATE_LIMIT_PERIOD) {
-      data->progress.ul_limit_start = now;
-      data->progress.ul_limit_size = data->progress.uploaded;
+      data->progress.ul.limit.start = now;
+      data->progress.ul.limit.start_size = data->progress.ul.cur_size;
     }
   }
 }
@@ -358,17 +356,17 @@ void Curl_ratelimit(struct Curl_easy *data, struct curltime now)
  */
 void Curl_pgrsSetUploadCounter(struct Curl_easy *data, curl_off_t size)
 {
-  data->progress.uploaded = size;
+  data->progress.ul.cur_size = size;
 }
 
 void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
 {
   if(size >= 0) {
-    data->progress.size_dl = size;
+    data->progress.dl.total_size = size;
     data->progress.flags |= PGRS_DL_SIZE_KNOWN;
   }
   else {
-    data->progress.size_dl = 0;
+    data->progress.dl.total_size = 0;
     data->progress.flags &= ~PGRS_DL_SIZE_KNOWN;
   }
 }
@@ -376,11 +374,11 @@ void Curl_pgrsSetDownloadSize(struct Curl_easy *data, curl_off_t size)
 void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
 {
   if(size >= 0) {
-    data->progress.size_ul = size;
+    data->progress.ul.total_size = size;
     data->progress.flags |= PGRS_UL_SIZE_KNOWN;
   }
   else {
-    data->progress.size_ul = 0;
+    data->progress.ul.total_size = 0;
     data->progress.flags &= ~PGRS_UL_SIZE_KNOWN;
   }
 }
@@ -399,7 +397,7 @@ static curl_off_t trspeed(curl_off_t size, /* number of bytes */
     return CURL_OFF_T_MAX;
 }
 
-/* returns TRUE if it's time to show the progress meter */
+/* returns TRUE if it is time to show the progress meter */
 static bool progress_calc(struct Curl_easy *data, struct curltime now)
 {
   bool timetoshow = FALSE;
@@ -407,8 +405,8 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
 
   /* The time spent so far (from the start) in microseconds */
   p->timespent = Curl_timediff_us(now, p->start);
-  p->dlspeed = trspeed(p->downloaded, p->timespent);
-  p->ulspeed = trspeed(p->uploaded, p->timespent);
+  p->dl.speed = trspeed(p->dl.cur_size, p->timespent);
+  p->ul.speed = trspeed(p->ul.cur_size, p->timespent);
 
   /* Calculations done at most once a second, unless end is reached */
   if(p->lastshow != now.tv_sec) {
@@ -419,7 +417,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
 
     /* Let's do the "current speed" thing, with the dl + ul speeds
        combined. Store the speed at entry 'nowindex'. */
-    p->speeder[ nowindex ] = p->downloaded + p->uploaded;
+    p->speeder[ nowindex ] = p->dl.cur_size + p->ul.cur_size;
 
     /* remember the exact time for this moment */
     p->speeder_time [ nowindex ] = now;
@@ -431,10 +429,10 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
     /* figure out how many index entries of data we have stored in our speeder
        array. With N_ENTRIES filled in, we have about N_ENTRIES-1 seconds of
        transfer. Imagine, after one second we have filled in two entries,
-       after two seconds we've filled in three entries etc. */
+       after two seconds we have filled in three entries etc. */
     countindex = ((p->speeder_c >= CURR_TIME)? CURR_TIME:p->speeder_c) - 1;
 
-    /* first of all, we don't do this if there's no counted seconds yet */
+    /* first of all, we do not do this if there is no counted seconds yet */
     if(countindex) {
       int checkindex;
       timediff_t span_ms;
@@ -465,31 +463,55 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
     }
     else
       /* the first second we use the average */
-      p->current_speed = p->ulspeed + p->dlspeed;
+      p->current_speed = p->ul.speed + p->dl.speed;
 
   } /* Calculations end */
   return timetoshow;
 }
 
 #ifndef CURL_DISABLE_PROGRESS_METER
+
+struct pgrs_estimate {
+  curl_off_t secs;
+  curl_off_t percent;
+};
+
+static curl_off_t pgrs_est_percent(curl_off_t total, curl_off_t cur)
+{
+  if(total > CURL_OFF_T_C(10000))
+    return cur / (total/CURL_OFF_T_C(100));
+  else if(total > CURL_OFF_T_C(0))
+    return (cur*100) / total;
+  return 0;
+}
+
+static void pgrs_estimates(struct pgrs_dir *d,
+                           bool total_known,
+                           struct pgrs_estimate *est)
+{
+  est->secs = 0;
+  est->percent = 0;
+  if(total_known && (d->speed > CURL_OFF_T_C(0))) {
+    est->secs = d->total_size / d->speed;
+    est->percent = pgrs_est_percent(d->total_size, d->cur_size);
+  }
+}
+
 static void progress_meter(struct Curl_easy *data)
 {
+  struct Progress *p = &data->progress;
   char max5[6][10];
-  curl_off_t dlpercen = 0;
-  curl_off_t ulpercen = 0;
-  curl_off_t total_percen = 0;
-  curl_off_t total_transfer;
-  curl_off_t total_expected_transfer;
+  struct pgrs_estimate dl_estm;
+  struct pgrs_estimate ul_estm;
+  struct pgrs_estimate total_estm;
+  curl_off_t total_cur_size;
+  curl_off_t total_expected_size;
   char time_left[10];
   char time_total[10];
   char time_spent[10];
-  curl_off_t ulestimate = 0;
-  curl_off_t dlestimate = 0;
-  curl_off_t total_estimate;
-  curl_off_t timespent =
-    (curl_off_t)data->progress.timespent/1000000; /* seconds */
+  curl_off_t cur_secs = (curl_off_t)p->timespent/1000000; /* seconds */
 
-  if(!(data->progress.flags & PGRS_HEADERS_OUT)) {
+  if(!(p->flags & PGRS_HEADERS_OUT)) {
     if(data->state.resume_from) {
       fprintf(data->set.err,
               "** Resuming transfer from byte position %"
@@ -500,78 +522,48 @@ static void progress_meter(struct Curl_easy *data)
             "Time    Time     Time  Current\n"
             "                                 Dload  Upload   "
             "Total   Spent    Left  Speed\n");
-    data->progress.flags |= PGRS_HEADERS_OUT; /* headers are shown */
+    p->flags |= PGRS_HEADERS_OUT; /* headers are shown */
   }
 
-  /* Figure out the estimated time of arrival for the upload */
-  if((data->progress.flags & PGRS_UL_SIZE_KNOWN) &&
-     (data->progress.ulspeed > CURL_OFF_T_C(0))) {
-    ulestimate = data->progress.size_ul / data->progress.ulspeed;
+  /* Figure out the estimated time of arrival for upload and download */
+  pgrs_estimates(&p->ul, (p->flags & PGRS_UL_SIZE_KNOWN), &ul_estm);
+  pgrs_estimates(&p->dl, (p->flags & PGRS_DL_SIZE_KNOWN), &dl_estm);
 
-    if(data->progress.size_ul > CURL_OFF_T_C(10000))
-      ulpercen = data->progress.uploaded /
-        (data->progress.size_ul/CURL_OFF_T_C(100));
-    else if(data->progress.size_ul > CURL_OFF_T_C(0))
-      ulpercen = (data->progress.uploaded*100) /
-        data->progress.size_ul;
-  }
-
-  /* ... and the download */
-  if((data->progress.flags & PGRS_DL_SIZE_KNOWN) &&
-     (data->progress.dlspeed > CURL_OFF_T_C(0))) {
-    dlestimate = data->progress.size_dl / data->progress.dlspeed;
-
-    if(data->progress.size_dl > CURL_OFF_T_C(10000))
-      dlpercen = data->progress.downloaded /
-        (data->progress.size_dl/CURL_OFF_T_C(100));
-    else if(data->progress.size_dl > CURL_OFF_T_C(0))
-      dlpercen = (data->progress.downloaded*100) /
-        data->progress.size_dl;
-  }
-
-  /* Now figure out which of them is slower and use that one for the
-     total estimate! */
-  total_estimate = ulestimate>dlestimate?ulestimate:dlestimate;
-
+  /* Since both happen at the same time, total expected duration is max. */
+  total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
-  time2str(time_left, total_estimate > 0?(total_estimate - timespent):0);
-  time2str(time_total, total_estimate);
-  time2str(time_spent, timespent);
+  time2str(time_left, total_estm.secs > 0?(total_estm.secs - cur_secs):0);
+  time2str(time_total, total_estm.secs);
+  time2str(time_spent, cur_secs);
 
   /* Get the total amount of data expected to get transferred */
-  total_expected_transfer =
-    ((data->progress.flags & PGRS_UL_SIZE_KNOWN)?
-     data->progress.size_ul:data->progress.uploaded)+
-    ((data->progress.flags & PGRS_DL_SIZE_KNOWN)?
-     data->progress.size_dl:data->progress.downloaded);
+  total_expected_size =
+    ((p->flags & PGRS_UL_SIZE_KNOWN)? p->ul.total_size:p->ul.cur_size) +
+    ((p->flags & PGRS_DL_SIZE_KNOWN)? p->dl.total_size:p->dl.cur_size);
 
   /* We have transferred this much so far */
-  total_transfer = data->progress.downloaded + data->progress.uploaded;
+  total_cur_size = p->dl.cur_size + p->ul.cur_size;
 
   /* Get the percentage of data transferred so far */
-  if(total_expected_transfer > CURL_OFF_T_C(10000))
-    total_percen = total_transfer /
-      (total_expected_transfer/CURL_OFF_T_C(100));
-  else if(total_expected_transfer > CURL_OFF_T_C(0))
-    total_percen = (total_transfer*100) / total_expected_transfer;
+  total_estm.percent = pgrs_est_percent(total_expected_size, total_cur_size);
 
   fprintf(data->set.err,
           "\r"
           "%3" CURL_FORMAT_CURL_OFF_T " %s  "
           "%3" CURL_FORMAT_CURL_OFF_T " %s  "
           "%3" CURL_FORMAT_CURL_OFF_T " %s  %s  %s %s %s %s %s",
-          total_percen,  /* 3 letters */                /* total % */
-          max5data(total_expected_transfer, max5[2]),   /* total size */
-          dlpercen,      /* 3 letters */                /* rcvd % */
-          max5data(data->progress.downloaded, max5[0]), /* rcvd size */
-          ulpercen,      /* 3 letters */                /* xfer % */
-          max5data(data->progress.uploaded, max5[1]),   /* xfer size */
-          max5data(data->progress.dlspeed, max5[3]),    /* avrg dl speed */
-          max5data(data->progress.ulspeed, max5[4]),    /* avrg ul speed */
+          total_estm.percent, /* 3 letters */           /* total % */
+          max5data(total_expected_size, max5[2]),       /* total size */
+          dl_estm.percent, /* 3 letters */              /* rcvd % */
+          max5data(p->dl.cur_size, max5[0]),            /* rcvd size */
+          ul_estm.percent, /* 3 letters */              /* xfer % */
+          max5data(p->ul.cur_size, max5[1]),            /* xfer size */
+          max5data(p->dl.speed, max5[3]),               /* avrg dl speed */
+          max5data(p->ul.speed, max5[4]),               /* avrg ul speed */
           time_total,    /* 8 letters */                /* total time */
           time_spent,    /* 8 letters */                /* time spent */
           time_left,     /* 8 letters */                /* time left */
-          max5data(data->progress.current_speed, max5[5])
+          max5data(p->current_speed, max5[5])
     );
 
   /* we flush the output stream to make it appear as soon as possible */
@@ -587,20 +579,18 @@ static void progress_meter(struct Curl_easy *data)
  * Curl_pgrsUpdate() returns 0 for success or the value returned by the
  * progress callback!
  */
-int Curl_pgrsUpdate(struct Curl_easy *data)
+static int pgrsupdate(struct Curl_easy *data, bool showprogress)
 {
-  struct curltime now = Curl_now(); /* what time is it */
-  bool showprogress = progress_calc(data, now);
   if(!(data->progress.flags & PGRS_HIDE)) {
     if(data->set.fxferinfo) {
       int result;
-      /* There's a callback set, call that */
+      /* There is a callback set, call that */
       Curl_set_in_callback(data, true);
       result = data->set.fxferinfo(data->set.progress_client,
-                                   data->progress.size_dl,
-                                   data->progress.downloaded,
-                                   data->progress.size_ul,
-                                   data->progress.uploaded);
+                                   data->progress.dl.total_size,
+                                   data->progress.dl.cur_size,
+                                   data->progress.ul.total_size,
+                                   data->progress.ul.cur_size);
       Curl_set_in_callback(data, false);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
         if(result)
@@ -613,10 +603,10 @@ int Curl_pgrsUpdate(struct Curl_easy *data)
       /* The older deprecated callback is set, call that */
       Curl_set_in_callback(data, true);
       result = data->set.fprogress(data->set.progress_client,
-                                   (double)data->progress.size_dl,
-                                   (double)data->progress.downloaded,
-                                   (double)data->progress.size_ul,
-                                   (double)data->progress.uploaded);
+                                   (double)data->progress.dl.total_size,
+                                   (double)data->progress.dl.cur_size,
+                                   (double)data->progress.ul.total_size,
+                                   (double)data->progress.ul.cur_size);
       Curl_set_in_callback(data, false);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
         if(result)
@@ -630,4 +620,20 @@ int Curl_pgrsUpdate(struct Curl_easy *data)
   }
 
   return 0;
+}
+
+int Curl_pgrsUpdate(struct Curl_easy *data)
+{
+  struct curltime now = Curl_now(); /* what time is it */
+  bool showprogress = progress_calc(data, now);
+  return pgrsupdate(data, showprogress);
+}
+
+/*
+ * Update all progress, do not do progress meter/callbacks.
+ */
+void Curl_pgrsUpdate_nometer(struct Curl_easy *data)
+{
+  struct curltime now = Curl_now(); /* what time is it */
+  (void)progress_calc(data, now);
 }

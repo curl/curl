@@ -58,7 +58,7 @@ int main(int argc, char **argv)
 
   url = argv[1];
 
-  /* In windows, this inits the winsock stuff */
+  /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
 
   /* get a curl handle */

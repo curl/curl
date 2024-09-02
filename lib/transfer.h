@@ -32,7 +32,6 @@ char *Curl_checkheaders(const struct Curl_easy *data,
 void Curl_init_CONNECT(struct Curl_easy *data);
 
 CURLcode Curl_pretransfer(struct Curl_easy *data);
-CURLcode Curl_posttransfer(struct Curl_easy *data);
 
 typedef enum {
   FOLLOW_NONE,  /* not used within the function, just a placeholder to
@@ -45,7 +44,7 @@ typedef enum {
 
 CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
                      followtype type);
-CURLcode Curl_readwrite(struct Curl_easy *data);
+CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);
 CURLcode Curl_retry_request(struct Curl_easy *data, char **url);
@@ -76,15 +75,37 @@ CURLcode Curl_xfer_write_resp(struct Curl_easy *data,
 CURLcode Curl_xfer_write_resp_hd(struct Curl_easy *data,
                                  const char *hd0, size_t hdlen, bool is_eos);
 
-/* This sets up a forthcoming transfer */
-void Curl_xfer_setup(struct Curl_easy *data,
-                     int sockindex,     /* socket index to read from or -1 */
-                     curl_off_t size,   /* -1 if unknown at this point */
-                     bool getheader,    /* TRUE if header parsing is wanted */
-                     int writesockindex /* socket index to write to. May be
-                                           the same we read from. -1
-                                           disables */
-  );
+#define CURL_XFER_NOP     (0)
+#define CURL_XFER_RECV    (1<<(0))
+#define CURL_XFER_SEND    (1<<(1))
+#define CURL_XFER_SENDRECV (CURL_XFER_RECV|CURL_XFER_SEND)
+
+/**
+ * The transfer is neither receiving nor sending now.
+ */
+void Curl_xfer_setup_nop(struct Curl_easy *data);
+
+/**
+ * The transfer will use socket 1 to send/recv. `recv_size` is
+ * the amount to receive or -1 if unknown. `getheader` indicates
+ * response header processing is expected.
+ */
+void Curl_xfer_setup1(struct Curl_easy *data,
+                      int send_recv,
+                      curl_off_t recv_size,
+                      bool getheader);
+
+/**
+ * The transfer will use socket 2 to send/recv. `recv_size` is
+ * the amount to receive or -1 if unknown. With `shutdown` being
+ * set, the transfer is only allowed to either send OR receive
+ * and the socket 2 connection will be shutdown at the end of
+ * the transfer. An unclean shutdown will fail the transfer.
+ */
+void Curl_xfer_setup2(struct Curl_easy *data,
+                      int send_recv,
+                      curl_off_t recv_size,
+                      bool shutdown);
 
 /**
  * Multi has set transfer to DONE. Last chance to trigger
@@ -93,12 +114,23 @@ void Curl_xfer_setup(struct Curl_easy *data,
 CURLcode Curl_xfer_write_done(struct Curl_easy *data, bool premature);
 
 /**
+ * Return TRUE iff transfer has pending data to send. Checks involved
+ * connection filters.
+ */
+bool Curl_xfer_needs_flush(struct Curl_easy *data);
+
+/**
+ * Flush any pending send data on the transfer connection.
+ */
+CURLcode Curl_xfer_flush(struct Curl_easy *data);
+
+/**
  * Send data on the socket/connection filter designated
  * for transfer's outgoing data.
  * Will return CURLE_OK on blocking with (*pnwritten == 0).
  */
 CURLcode Curl_xfer_send(struct Curl_easy *data,
-                        const void *buf, size_t blen,
+                        const void *buf, size_t blen, bool eos,
                         size_t *pnwritten);
 
 /**
@@ -111,5 +143,13 @@ CURLcode Curl_xfer_recv(struct Curl_easy *data,
                         ssize_t *pnrcvd);
 
 CURLcode Curl_xfer_send_close(struct Curl_easy *data);
+CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done);
+
+/**
+ * Return TRUE iff the transfer is not done, but further progress
+ * is blocked. For example when it is only receiving and its writer
+ * is PAUSED.
+ */
+bool Curl_xfer_is_blocked(struct Curl_easy *data);
 
 #endif /* HEADER_CURL_TRANSFER_H */

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: curl
 
 # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
-WOLFSSL_VER=5.7.0
+WOLFSSL_VER=5.7.2
 
 # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
 WOLFSSH_VER=1.4.17

@@ -4,7 +4,7 @@
 
 name: AppVeyor Status Report
 
-on:
+'on':
   status
 
 concurrency:

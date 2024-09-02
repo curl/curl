@@ -1475,35 +1475,35 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
     AC_MSG_CHECKING([if getaddrinfo is threadsafe])
     case $host_os in
       aix[[1234]].* | aix5.[[01]].*)
-        dnl aix 5.1 and older
+        dnl AIX 5.1 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       aix*)
-        dnl aix 5.2 and newer
+        dnl AIX 5.2 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       darwin[[12345]].*)
-        dnl darwin 5.0 and mac os x 10.1.X and older
+        dnl Darwin 5.0 and macOS 10.1.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
       darwin*)
-        dnl darwin 6.0 and mac os x 10.2.X and newer
+        dnl Darwin 6.0 and macOS 10.2.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       freebsd[[1234]].* | freebsd5.[[1234]]*)
-        dnl freebsd 5.4 and older
+        dnl FreeBSD 5.4 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       freebsd*)
-        dnl freebsd 5.5 and newer
+        dnl FreeBSD 5.5 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       hpux[[123456789]].* | hpux10.* | hpux11.0* | hpux11.10*)
-        dnl hpux 11.10 and older
+        dnl HP-UX 11.10 and older
         tst_tsafe_getaddrinfo="no"
         ;;
       hpux*)
-        dnl hpux 11.11 and newer
+        dnl HP-UX 11.11 and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       midnightbsd*)
@@ -1511,19 +1511,19 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
         tst_tsafe_getaddrinfo="yes"
         ;;
       netbsd[[123]].*)
-        dnl netbsd 3.X and older
+        dnl NetBSD 3.X and older
         tst_tsafe_getaddrinfo="no"
         ;;
       netbsd*)
-        dnl netbsd 4.X and newer
+        dnl NetBSD 4.X and newer
         tst_tsafe_getaddrinfo="yes"
         ;;
       *bsd*)
-        dnl All other bsd's
+        dnl All other BSD's
         tst_tsafe_getaddrinfo="no"
         ;;
       solaris2*)
-        dnl solaris which have it
+        dnl Solaris which have it
         tst_tsafe_getaddrinfo="yes"
         ;;
     esac
@@ -1563,7 +1563,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
 #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
           return 0;
 #else
-          force compilation error
+          #error force compilation error
 #endif
         ]])
       ],[
@@ -3470,42 +3470,46 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   fi
   #
   dnl only do runtime verification when not cross-compiling
-  if test "x$cross_compiling" != "xyes" &&
-    test "$tst_compi_poll" = "yes"; then
-    AC_MSG_CHECKING([if poll seems to work])
-    CURL_RUN_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_stdlib
-        $curl_includes_poll
-        $curl_includes_time
-      ]],[[
-        /* detect the original poll() breakage */
-        if(0 != poll(0, 0, 10))
-          exit(1); /* fail */
-        else {
-          /* detect the 10.12 poll() breakage */
-          struct timeval before, after;
-          int rc;
-          size_t us;
-
-          gettimeofday(&before, NULL);
-          rc = poll(NULL, 0, 500);
-          gettimeofday(&after, NULL);
-
-          us = (after.tv_sec - before.tv_sec) * 1000000 +
-            (after.tv_usec - before.tv_usec);
-
-          if(us < 400000)
-            exit(1);
-        }
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_works_poll="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_works_poll="no"
-    ])
+  if test "$tst_compi_poll" = "yes"; then
+    if test "x$cross_compiling" != "xyes"; then
+      AC_MSG_CHECKING([if poll seems to work])
+      CURL_RUN_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_stdlib
+          $curl_includes_poll
+        ]],[[
+          /* detect the original poll() breakage */
+          if(0 != poll(0, 0, 10)) {
+            return 1; /* fail */
+          }
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_works_poll="yes"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_works_poll="no"
+      ])
+    else
+      AC_MSG_CHECKING([if native poll seems to be supported])
+      AC_COMPILE_IFELSE([
+        AC_LANG_PROGRAM([[
+          $curl_includes_stdlib
+        ]],[[
+          #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+            return 0;
+          #else
+            #error force compilation error
+          #endif
+        ]])
+      ],[
+        AC_MSG_RESULT([yes])
+        tst_works_poll="yes"
+      ],[
+        AC_MSG_RESULT([no])
+        tst_works_poll="no"
+      ])
+    fi
   fi
   #
   if test "$tst_compi_poll" = "yes" &&
@@ -4870,11 +4874,11 @@ dnl CURL_LIBRARY_PATH variable. It keeps the LD_LIBRARY_PATH
 dnl changes contained within this macro.
 
 AC_DEFUN([CURL_RUN_IFELSE], [
-   case $host_os in
-     darwin*)
+  case $host_os in
+    darwin*)
       AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
-     ;;
-     *)
+      ;;
+    *)
       oldcc=$CC
       old=$LD_LIBRARY_PATH
       CC="sh ./run-compiler"
@@ -4883,8 +4887,8 @@ AC_DEFUN([CURL_RUN_IFELSE], [
       AC_RUN_IFELSE([AC_LANG_SOURCE([$1])], $2, $3, $4)
       LD_LIBRARY_PATH=$old # restore
       CC=$oldcc
-     ;;
-   esac
+      ;;
+  esac
 ])
 
 dnl CURL_COVERAGE
@@ -4901,8 +4905,8 @@ AC_DEFUN([CURL_COVERAGE],[
 
   dnl check if enabled by argument
   AC_ARG_ENABLE(code-coverage,
-     AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
-     coverage="$enableval")
+    AS_HELP_STRING([--enable-code-coverage], [Provide code coverage]),
+    coverage="$enableval")
 
   dnl if not gcc switch off again
   AS_IF([ test "$GCC" != "yes" ], coverage="no" )
@@ -4981,19 +4985,19 @@ AC_DEFUN([CURL_SIZEOF], [
   r=0
   dnl Check the sizes in a reasonable order
   for typesize in 8 4 2 16 1; do
-     AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
+    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 #include <sys/types.h>
 $2
 ]],
-     [switch(0) {
-       case 0:
-       case (sizeof($1) == $typesize):;
-     }
+    [switch(0) {
+      case 0:
+      case (sizeof($1) == $typesize):;
+    }
     ]) ],
       [
-       r=$typesize],
+        r=$typesize],
       [
-       r=0])
+        r=0])
     dnl get out of the loop once matched
     if test $r -gt 0; then
       break;
@@ -5004,7 +5008,7 @@ $2
   fi
   AC_MSG_RESULT($r)
   dnl lowercase and underscore instead of space
-  tname=$(echo "ac_cv_sizeof_$1" | tr A-Z a-z | tr " " "_")
+  tname=`echo "ac_cv_sizeof_$1" | tr A-Z a-z | tr " " "_"`
   eval "$tname=$r"
 
   AC_DEFINE_UNQUOTED(TYPE, [$r], [Size of $1 in number of bytes])

@@ -38,6 +38,8 @@ struct Curl_ssl_session;
 #define SSLSUPP_TLS13_CIPHERSUITES (1<<5) /* supports TLS 1.3 ciphersuites */
 #define SSLSUPP_CAINFO_BLOB  (1<<6)
 #define SSLSUPP_ECH          (1<<7)
+#define SSLSUPP_CA_CACHE     (1<<8)
+#define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
 
@@ -130,6 +132,7 @@ CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
+#define CURL_X509_STR_MAX  100000
 
 void Curl_ssl_free_certinfo(struct Curl_easy *data);
 CURLcode Curl_ssl_init_certinfo(struct Curl_easy *data, int num);
@@ -180,6 +183,25 @@ bool Curl_ssl_cert_status_request(void);
 
 bool Curl_ssl_false_start(struct Curl_easy *data);
 
+/* The maximum size of the SSL channel binding is 85 bytes, as defined in
+ * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
+ * and SHA-512 is the longest supported hash algorithm, with a digest length of
+ * 64 bytes.
+ * The maximum size of the channel binding is therefore 21 + 64 = 85 bytes.
+ */
+#define SSL_CB_MAX_SIZE 85
+
+/* Return the tls-server-end-point channel binding, including the
+ * 'tls-server-end-point:' prefix.
+ * If successful, the data is written to the dynbuf, and CURLE_OK is returned.
+ * The dynbuf MUST HAVE a minimum toobig size of SSL_CB_MAX_SIZE.
+ * If the dynbuf is too small, CURLE_OUT_OF_MEMORY is returned.
+ * If channel binding is not supported, binding stays empty and CURLE_OK is
+ * returned.
+ */
+CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
+                                       struct dynbuf *binding);
+
 #define SSL_SHUTDOWN_TIMEOUT 10000 /* ms */
 
 CURLcode Curl_ssl_cfilter_add(struct Curl_easy *data,
@@ -190,7 +212,7 @@ CURLcode Curl_cf_ssl_insert_after(struct Curl_cfilter *cf_at,
                                   struct Curl_easy *data);
 
 CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
-                                 int sockindex);
+                                 int sockindex, bool send_shutdown);
 
 #ifndef CURL_DISABLE_PROXY
 CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
@@ -202,7 +224,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
  * Option is one of the defined SSLSUPP_* values.
  * `data` maybe NULL for the features of the default implementation.
  */
-bool Curl_ssl_supports(struct Curl_easy *data, int ssl_option);
+bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option);
 
 /**
  * Get the internal ssl instance (like OpenSSL's SSL*) from the filter
@@ -249,7 +271,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN
-#define Curl_ssl_cfilter_remove(a,b) CURLE_OK
+#define Curl_ssl_cfilter_remove(a,b,c) CURLE_OK
 #define Curl_ssl_cf_get_config(a,b) NULL
 #define Curl_ssl_cf_get_primary_config(a) NULL
 #endif

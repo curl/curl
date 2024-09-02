@@ -13,6 +13,7 @@ Protocol:
 TLS-backend:
   - OpenSSL
   - wolfSSL
+Added-in: 7.73.0
 ---
 
 # NAME
@@ -37,6 +38,8 @@ the SSL backend libcurl is built to use supports it).
 
 "", embedded in SSL backend
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,9 +56,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.73.0. Supported by the OpenSSL backend.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

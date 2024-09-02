@@ -39,19 +39,20 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w);
  * Macros curlx_convert_UTF8_to_tchar(), curlx_convert_tchar_to_UTF8()
  * and curlx_unicodefree() main purpose is to minimize the number of
  * preprocessor conditional directives needed by code using these
- * to differentiate UNICODE from non-UNICODE builds.
+ * to differentiate Unicode from non-Unicode builds.
  *
- * In the case of a non-UNICODE build the tchar strings are char strings that
+ * In the case of a non-Unicode build the tchar strings are char strings that
  * are duplicated via strdup and remain in whatever the passed in encoding is,
  * which is assumed to be UTF-8 but may be other encoding. Therefore the
- * significance of the conversion functions is primarily for UNICODE builds.
+ * significance of the conversion functions is primarily for Unicode builds.
  *
  * Allocated memory should be free'd with curlx_unicodefree().
  *
  * Note: Because these are curlx functions their memory usage is not tracked
- * by the curl memory tracker memdebug. You'll notice that curlx function-like
- * macros call free and strdup in parentheses, eg (strdup)(ptr), and that's to
- * ensure that the curl memdebug override macros do not replace them.
+ * by the curl memory tracker memdebug. you will notice that curlx
+ * function-like macros call free and strdup in parentheses, eg (strdup)(ptr),
+ * and that is to ensure that the curl memdebug override macros do not replace
+ * them.
  */
 
 #if defined(UNICODE) && defined(_WIN32)

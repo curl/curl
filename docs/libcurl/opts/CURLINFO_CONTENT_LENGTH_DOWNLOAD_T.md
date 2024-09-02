@@ -10,6 +10,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - HTTP
+Added-in: 7.55.0
 ---
 
 # NAME
@@ -30,6 +31,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
 Pass a pointer to a *curl_off_t* to receive the content-length of the
 download. This is the value read from the Content-Length: field. Stores -1 if
 the size is not known.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -56,9 +59,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.55.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

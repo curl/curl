@@ -65,9 +65,6 @@
 /* Define this to 'int' if ssize_t is not an available typedefed type */
 #undef ssize_t
 
-/* Define this as a suitable file to read random data from */
-#undef RANDOM_FILE
-
 /* Define to 1 if you have the alarm function. */
 #define HAVE_ALARM 1
 
@@ -106,9 +103,6 @@
 
 /* Define if you have the <io.h> header file. */
 #undef HAVE_IO_H
-
-/* Define if you have the `socket' library (-lsocket). */
-#undef HAVE_LIBSOCKET
 
 /* Define if you have GSS API. */
 #define HAVE_GSSAPI
@@ -235,7 +229,7 @@
 /* Define if you have the ANSI C header files. */
 #define STDC_HEADERS
 
-/* Define to enable HTTP3 support (experimental, requires NGTCP2, QUICHE or
+/* Define to enable HTTP3 support (experimental, requires NGTCP2, quiche or
    MSH3) */
 #undef USE_HTTP3
 

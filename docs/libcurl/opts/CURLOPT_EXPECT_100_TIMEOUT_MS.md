@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_POST (3)
 Protocol:
   - HTTP
+Added-in: 7.36.0
 ---
 
 # NAME
@@ -36,6 +37,8 @@ sent anyway.
 
 1000 milliseconds
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,9 +56,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.36.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

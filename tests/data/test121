@@ -35,6 +35,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -Q "-DELE after_transfer" -Q "DELE before_tra
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

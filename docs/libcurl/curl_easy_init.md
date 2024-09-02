@@ -13,11 +13,12 @@ See-also:
   - curl_multi_init (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
 
-curl_easy_init - Start a libcurl easy session
+curl_easy_init - create an easy handle
 
 # SYNOPSIS
 
@@ -42,13 +43,15 @@ all the options that were set in the source handle set in the new copy as
 well.
 
 If you did not already call curl_global_init(3) before calling this function,
-curl_easy_init(3) does it automatically. This may be lethal in multi-threaded
-cases, if curl_global_init(3) is not thread-safe in your system, and it may
+curl_easy_init(3) does it automatically. This can be lethal in multi-threaded
+cases for platforms where curl_global_init(3) is not thread-safe, and it may
 then result in resource problems because there is no corresponding cleanup.
 
 You are strongly advised to not allow this automatic behavior, by calling
 curl_global_init(3) yourself properly. See the description in libcurl(3) of
 global environment requirements for details of how to use this function.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -65,9 +68,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

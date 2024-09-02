@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_FOLLOWLOCATION (3)
 Protocol:
   - HTTP
+Added-in: 7.5
 ---
 
 # NAME
@@ -40,6 +41,8 @@ to get stuck in never-ending redirect loops.
 
 30 (since 8.3.0), it was previously unlimited.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,9 +64,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with HTTP
+# %AVAILABILITY%
 
 # RETURN VALUE
 

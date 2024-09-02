@@ -55,7 +55,8 @@ struct cf_hc_baller {
   CURLcode result;
   struct curltime started;
   int reply_ms;
-  bool enabled;
+  BIT(enabled);
+  BIT(shutdown);
 };
 
 static void cf_hc_baller_reset(struct cf_hc_baller *b,
@@ -93,6 +94,21 @@ static bool cf_hc_baller_data_pending(struct cf_hc_baller *b,
                                       const struct Curl_easy *data)
 {
   return b->cf && !b->result && b->cf->cft->has_data_pending(b->cf, data);
+}
+
+static bool cf_hc_baller_needs_flush(struct cf_hc_baller *b,
+                                     struct Curl_easy *data)
+{
+  return b->cf && !b->result && Curl_conn_cf_needs_flush(b->cf, data);
+}
+
+static CURLcode cf_hc_baller_cntrl(struct cf_hc_baller *b,
+                                   struct Curl_easy *data,
+                                   int event, int arg1, void *arg2)
+{
+  if(b->cf && !b->result)
+    return Curl_conn_cf_cntrl(b->cf, data, FALSE, event, arg1, arg2);
+  return CURLE_OK;
 }
 
 struct cf_hc_ctx {
@@ -194,8 +210,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   }
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
-  Curl_conn_cf_cntrl(cf->next, data, TRUE,
-                     CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
   return result;
 }
 
@@ -322,6 +336,49 @@ out:
   return result;
 }
 
+static CURLcode cf_hc_shutdown(struct Curl_cfilter *cf,
+                               struct Curl_easy *data, bool *done)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  struct cf_hc_baller *ballers[2];
+  size_t i;
+  CURLcode result = CURLE_OK;
+
+  DEBUGASSERT(data);
+  if(cf->connected) {
+    *done = TRUE;
+    return CURLE_OK;
+  }
+
+  /* shutdown all ballers that have not done so already. If one fails,
+   * continue shutting down others until all are shutdown. */
+  ballers[0] = &ctx->h3_baller;
+  ballers[1] = &ctx->h21_baller;
+  for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+    struct cf_hc_baller *b = ballers[i];
+    bool bdone = FALSE;
+    if(!cf_hc_baller_is_active(b) || b->shutdown)
+      continue;
+    b->result = b->cf->cft->do_shutdown(b->cf, data, &bdone);
+    if(b->result || bdone)
+      b->shutdown = TRUE; /* treat a failed shutdown as done */
+  }
+
+  *done = TRUE;
+  for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+    if(ballers[i] && !ballers[i]->shutdown)
+      *done = FALSE;
+  }
+  if(*done) {
+    for(i = 0; i < sizeof(ballers)/sizeof(ballers[0]); i++) {
+      if(ballers[i] && ballers[i]->result)
+        result = ballers[i]->result;
+    }
+  }
+  CURL_TRC_CF(data, cf, "shutdown -> %d, done=%d", result, *done);
+  return result;
+}
+
 static void cf_hc_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct easy_pollset *ps)
@@ -384,6 +441,8 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             int query, int *pres1, void *pres2)
 {
+  struct cf_hc_ctx *ctx = cf->ctx;
+
   if(!cf->connected) {
     switch(query) {
     case CF_QUERY_TIMER_CONNECT: {
@@ -396,6 +455,14 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
       *when = cf_get_max_baller_time(cf, data, CF_QUERY_TIMER_APPCONNECT);
       return CURLE_OK;
     }
+    case CF_QUERY_NEED_FLUSH: {
+      if(cf_hc_baller_needs_flush(&ctx->h3_baller, data)
+         || cf_hc_baller_needs_flush(&ctx->h21_baller, data)) {
+        *pres1 = TRUE;
+        return CURLE_OK;
+      }
+      break;
+    }
     default:
       break;
     }
@@ -403,6 +470,23 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
   return cf->next?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
+}
+
+static CURLcode cf_hc_cntrl(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            int event, int arg1, void *arg2)
+{
+  struct cf_hc_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  if(!cf->connected) {
+    result = cf_hc_baller_cntrl(&ctx->h3_baller, data, event, arg1, arg2);
+    if(!result || (result == CURLE_AGAIN))
+      result = cf_hc_baller_cntrl(&ctx->h21_baller, data, event, arg1, arg2);
+    if(result == CURLE_AGAIN)
+      result = CURLE_OK;
+  }
+  return result;
 }
 
 static void cf_hc_close(struct Curl_cfilter *cf, struct Curl_easy *data)
@@ -434,12 +518,13 @@ struct Curl_cftype Curl_cft_http_connect = {
   cf_hc_destroy,
   cf_hc_connect,
   cf_hc_close,
+  cf_hc_shutdown,
   Curl_cf_def_get_host,
   cf_hc_adjust_pollset,
   cf_hc_data_pending,
   Curl_cf_def_send,
   Curl_cf_def_recv,
-  Curl_cf_def_cntrl,
+  cf_hc_cntrl,
   Curl_cf_def_conn_is_alive,
   Curl_cf_def_conn_keep_alive,
   cf_hc_query,
@@ -510,7 +595,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 
   if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
     result = Curl_conn_may_http3(data, conn);
-    if(result) /* can't do it */
+    if(result) /* cannot do it */
       goto out;
     try_h3 = TRUE;
     try_h21 = FALSE;

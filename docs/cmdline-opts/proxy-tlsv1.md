@@ -14,4 +14,7 @@ Example:
 
 # `--proxy-tlsv1`
 
-Same as --tlsv1 but used in HTTPS proxy context.
+Use at least TLS version 1.x when negotiating with an HTTPS proxy. That means
+TLS version 1.0 or higher
+
+Equivalent to --tlsv1 but for an HTTPS proxy context.

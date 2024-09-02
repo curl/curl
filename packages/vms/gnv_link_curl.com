@@ -123,7 +123,7 @@ $   endif
 $ endif
 $!
 $! Create the a new option file with special fixup for HP SSL
-$! For a shared image, we always want ZLIB and 32 bit HPSSL
+$! For a shared image, we always want ZLIB and 32-bit HPSSL
 $!
 $ if f$search("gnv$libzshr32") .eqs. ""
 $ then
@@ -400,6 +400,7 @@ $       link'ldebug'/exe=[.src]curl.exe/dsf=[.src]curl.dsf -
            [.src]curl-tool_bname.o, [.src]curl-tool_cb_dbg.o, -
            [.src]curl-tool_cb_hdr.o, [.src]curl-tool_cb_prg.o, -
            [.src]curl-tool_cb_rea.o, [.src]curl-tool_cb_see.o, -
+           [.src]curl-tool_cb_soc.o, -
            [.src]curl-tool_cb_wrt.o, [.src]curl-tool_cfgable.o, -
            [.src]curl-tool_convert.o, [.src]curl-tool_dirhie.o, -
            [.src]curl-tool_doswin.o, [.src]curl-tool_easysrc.o, -

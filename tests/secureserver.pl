@@ -243,7 +243,7 @@ if($stunnel_version < 310) {
 if($stunnel =~ /tstunnel(\.exe)?$/) {
     $tstunnel_windows = 1;
 
-    # convert Cygwin/MinGW paths to Win32 format
+    # convert Cygwin/MinGW paths to Windows format
     $capath = pathhelp::sys_native_abs_path($capath);
     $certfile = pathhelp::sys_native_abs_path($certfile);
 }

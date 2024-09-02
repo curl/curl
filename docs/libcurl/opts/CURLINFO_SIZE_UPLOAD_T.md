@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.55.0
 ---
 
 # NAME
@@ -30,6 +31,8 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_SIZE_UPLOAD_T,
 
 Pass a pointer to a *curl_off_t* to receive the total amount of bytes that
 were uploaded.
+
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -55,9 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.55.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -11,11 +11,12 @@ See-also:
   - curl_global_init (3)
 Protocol:
   - All
+Added-in: 7.9
 ---
 
 # NAME
 
-curl_easy_duphandle - Clone a libcurl session handle
+curl_easy_duphandle - clone an easy handle
 
 # SYNOPSIS
 
@@ -46,6 +47,8 @@ data from the main filename to populate the cache.
 In multi-threaded programs, this function must be called in a synchronous way,
 the input handle may not be in use when cloned.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.9
+# %AVAILABILITY%
 
 # RETURN VALUE
 

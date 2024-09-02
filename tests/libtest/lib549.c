@@ -52,7 +52,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_PROXY_TRANSFER_MODE, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
   if(libtest_arg3) {
-    /* enable ascii/text mode */
+    /* enable ASCII/text mode */
     test_setopt(curl, CURLOPT_TRANSFERTEXT, 1L);
   }
 

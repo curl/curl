@@ -54,7 +54,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 Connection: Upgrade, HTTP2-Settings
 Upgrade: h2c
-HTTP2-Settings: AAMAAABkAAQAoAAAAAIAAAAA
+HTTP2-Settings: AAMAAABkAAQAAQAAAAIAAAAA
 
 </protocol>
 

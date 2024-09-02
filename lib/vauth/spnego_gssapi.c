@@ -65,10 +65,10 @@ bool Curl_auth_is_spnego_supported(void)
  * Parameters:
  *
  * data        [in]     - The session handle.
- * userp       [in]     - The user name in the format User or Domain\User.
+ * userp       [in]     - The username in the format User or Domain\User.
  * passwdp     [in]     - The user's password.
  * service     [in]     - The service type such as http, smtp, pop or imap.
- * host        [in]     - The host name.
+ * host        [in]     - The hostname.
  * chlg64      [in]     - The optional base64 encoded challenge message.
  * nego        [in/out] - The Negotiate data struct being used and modified.
  *
@@ -91,14 +91,16 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   gss_buffer_desc spn_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
   gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+  gss_channel_bindings_t chan_bindings = GSS_C_NO_CHANNEL_BINDINGS;
+  struct gss_channel_bindings_struct chan;
 
   (void) user;
   (void) password;
 
   if(nego->context && nego->status == GSS_S_COMPLETE) {
     /* We finished successfully our part of authentication, but server
-     * rejected it (since we're again here). Exit with an error since we
-     * can't invent anything better */
+     * rejected it (since we are again here). Exit with an error since we
+     * cannot invent anything better */
     Curl_auth_cleanup_spnego(nego);
     return CURLE_LOGIN_DENIED;
   }
@@ -148,13 +150,21 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     input_token.length = chlglen;
   }
 
+  /* Set channel binding data if available */
+  if(nego->channel_binding_data.leng > 0) {
+    memset(&chan, 0, sizeof(struct gss_channel_bindings_struct));
+    chan.application_data.length = nego->channel_binding_data.leng;
+    chan.application_data.value = nego->channel_binding_data.bufr;
+    chan_bindings = &chan;
+  }
+
   /* Generate our challenge-response message */
   major_status = Curl_gss_init_sec_context(data,
                                            &minor_status,
                                            &nego->context,
                                            nego->spn,
                                            &Curl_spnego_mech_oid,
-                                           GSS_C_NO_CHANNEL_BINDINGS,
+                                           chan_bindings,
                                            &input_token,
                                            &output_token,
                                            TRUE,

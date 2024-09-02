@@ -25,8 +25,6 @@
 
 #include "strcase.h"
 
-#define ENABLE_CURLX_PRINTF
-/* use our own printf() functions */
 #include "curlx.h"
 
 #include "tool_binmode.h"
@@ -71,300 +69,16 @@ static ParameterError getstr(char **str, const char *val, bool allowblank)
   return PARAM_OK;
 }
 
-/* one enum for every command line option. The name is the verbatim long
-   option name, but in uppercase with periods and minuses replaced with
-   underscores using a "C_" prefix. */
-typedef enum {
-  C_ABSTRACT_UNIX_SOCKET,
-  C_ALPN,
-  C_ALT_SVC,
-  C_ANYAUTH,
-  C_APPEND,
-  C_AWS_SIGV4,
-  C_BASIC,
-  C_BUFFER,
-  C_CA_NATIVE,
-  C_CACERT,
-  C_CAPATH,
-  C_CERT,
-  C_CERT_STATUS,
-  C_CERT_TYPE,
-  C_CIPHERS,
-  C_CLOBBER,
-  C_COMPRESSED,
-  C_COMPRESSED_SSH,
-  C_CONFIG,
-  C_CONNECT_TIMEOUT,
-  C_CONNECT_TO,
-  C_CONTINUE_AT,
-  C_COOKIE,
-  C_COOKIE_JAR,
-  C_CREATE_DIRS,
-  C_CREATE_FILE_MODE,
-  C_CRLF,
-  C_CRLFILE,
-  C_CURVES,
-  C_DATA,
-  C_DATA_ASCII,
-  C_DATA_BINARY,
-  C_DATA_RAW,
-  C_DATA_URLENCODE,
-  C_DELEGATION,
-  C_DIGEST,
-  C_DISABLE,
-  C_DISABLE_EPRT,
-  C_DISABLE_EPSV,
-  C_DISALLOW_USERNAME_IN_URL,
-  C_DNS_INTERFACE,
-  C_DNS_IPV4_ADDR,
-  C_DNS_IPV6_ADDR,
-  C_DNS_SERVERS,
-  C_DOH_CERT_STATUS,
-  C_DOH_INSECURE,
-  C_DOH_URL,
-  C_DUMP_HEADER,
-  C_ECH,
-  C_EGD_FILE,
-  C_ENGINE,
-  C_EPRT,
-  C_EPSV,
-  C_ETAG_COMPARE,
-  C_ETAG_SAVE,
-  C_EXPECT100_TIMEOUT,
-  C_FAIL,
-  C_FAIL_EARLY,
-  C_FAIL_WITH_BODY,
-  C_FALSE_START,
-  C_FORM,
-  C_FORM_ESCAPE,
-  C_FORM_STRING,
-  C_FTP_ACCOUNT,
-  C_FTP_ALTERNATIVE_TO_USER,
-  C_FTP_CREATE_DIRS,
-  C_FTP_METHOD,
-  C_FTP_PASV,
-  C_FTP_PORT,
-  C_FTP_PRET,
-  C_FTP_SKIP_PASV_IP,
-  C_FTP_SSL,
-  C_FTP_SSL_CCC,
-  C_FTP_SSL_CCC_MODE,
-  C_FTP_SSL_CONTROL,
-  C_FTP_SSL_REQD,
-  C_GET,
-  C_GLOBOFF,
-  C_HAPPY_EYEBALLS_TIMEOUT_MS,
-  C_HAPROXY_CLIENTIP,
-  C_HAPROXY_PROTOCOL,
-  C_HEAD,
-  C_HEADER,
-  C_HELP,
-  C_HOSTPUBMD5,
-  C_HOSTPUBSHA256,
-  C_HSTS,
-  C_HTTP0_9,
-  C_HTTP1_0,
-  C_HTTP1_1,
-  C_HTTP2,
-  C_HTTP2_PRIOR_KNOWLEDGE,
-  C_HTTP3,
-  C_HTTP3_ONLY,
-  C_IGNORE_CONTENT_LENGTH,
-  C_INCLUDE,
-  C_INSECURE,
-  C_INTERFACE,
-  C_IPFS_GATEWAY,
-  C_IPV4,
-  C_IPV6,
-  C_JSON,
-  C_JUNK_SESSION_COOKIES,
-  C_KEEPALIVE,
-  C_KEEPALIVE_TIME,
-  C_KEY,
-  C_KEY_TYPE,
-  C_KRB,
-  C_KRB4,
-  C_LIBCURL,
-  C_LIMIT_RATE,
-  C_LIST_ONLY,
-  C_LOCAL_PORT,
-  C_LOCATION,
-  C_LOCATION_TRUSTED,
-  C_LOGIN_OPTIONS,
-  C_MAIL_AUTH,
-  C_MAIL_FROM,
-  C_MAIL_RCPT,
-  C_MAIL_RCPT_ALLOWFAILS,
-  C_MANUAL,
-  C_MAX_FILESIZE,
-  C_MAX_REDIRS,
-  C_MAX_TIME,
-  C_METALINK,
-  C_NEGOTIATE,
-  C_NETRC,
-  C_NETRC_FILE,
-  C_NETRC_OPTIONAL,
-  C_NEXT,
-  C_NOPROXY,
-  C_NPN,
-  C_NTLM,
-  C_NTLM_WB,
-  C_OAUTH2_BEARER,
-  C_OUTPUT,
-  C_OUTPUT_DIR,
-  C_PARALLEL,
-  C_PARALLEL_IMMEDIATE,
-  C_PARALLEL_MAX,
-  C_PASS,
-  C_PATH_AS_IS,
-  C_PINNEDPUBKEY,
-  C_POST301,
-  C_POST302,
-  C_POST303,
-  C_PREPROXY,
-  C_PROGRESS_BAR,
-  C_PROGRESS_METER,
-  C_PROTO,
-  C_PROTO_DEFAULT,
-  C_PROTO_REDIR,
-  C_PROXY,
-  C_PROXY_ANYAUTH,
-  C_PROXY_BASIC,
-  C_PROXY_CA_NATIVE,
-  C_PROXY_CACERT,
-  C_PROXY_CAPATH,
-  C_PROXY_CERT,
-  C_PROXY_CERT_TYPE,
-  C_PROXY_CIPHERS,
-  C_PROXY_CRLFILE,
-  C_PROXY_DIGEST,
-  C_PROXY_HEADER,
-  C_PROXY_HTTP2,
-  C_PROXY_INSECURE,
-  C_PROXY_KEY,
-  C_PROXY_KEY_TYPE,
-  C_PROXY_NEGOTIATE,
-  C_PROXY_NTLM,
-  C_PROXY_PASS,
-  C_PROXY_PINNEDPUBKEY,
-  C_PROXY_SERVICE_NAME,
-  C_PROXY_SSL_ALLOW_BEAST,
-  C_PROXY_SSL_AUTO_CLIENT_CERT,
-  C_PROXY_TLS13_CIPHERS,
-  C_PROXY_TLSAUTHTYPE,
-  C_PROXY_TLSPASSWORD,
-  C_PROXY_TLSUSER,
-  C_PROXY_TLSV1,
-  C_PROXY_USER,
-  C_PROXY1_0,
-  C_PROXYTUNNEL,
-  C_PUBKEY,
-  C_QUOTE,
-  C_RANDOM_FILE,
-  C_RANGE,
-  C_RATE,
-  C_RAW,
-  C_REFERER,
-  C_REMOTE_HEADER_NAME,
-  C_REMOTE_NAME,
-  C_REMOTE_NAME_ALL,
-  C_REMOTE_TIME,
-  C_REMOVE_ON_ERROR,
-  C_REQUEST,
-  C_REQUEST_TARGET,
-  C_RESOLVE,
-  C_RETRY,
-  C_RETRY_ALL_ERRORS,
-  C_RETRY_CONNREFUSED,
-  C_RETRY_DELAY,
-  C_RETRY_MAX_TIME,
-  C_SASL_AUTHZID,
-  C_SASL_IR,
-  C_SERVICE_NAME,
-  C_SESSIONID,
-  C_SHOW_ERROR,
-  C_SILENT,
-  C_SOCKS4,
-  C_SOCKS4A,
-  C_SOCKS5,
-  C_SOCKS5_BASIC,
-  C_SOCKS5_GSSAPI,
-  C_SOCKS5_GSSAPI_NEC,
-  C_SOCKS5_GSSAPI_SERVICE,
-  C_SOCKS5_HOSTNAME,
-  C_SPEED_LIMIT,
-  C_SPEED_TIME,
-  C_SSL,
-  C_SSL_ALLOW_BEAST,
-  C_SSL_AUTO_CLIENT_CERT,
-  C_SSL_NO_REVOKE,
-  C_SSL_REQD,
-  C_SSL_REVOKE_BEST_EFFORT,
-  C_SSLV2,
-  C_SSLV3,
-  C_STDERR,
-  C_STYLED_OUTPUT,
-  C_SUPPRESS_CONNECT_HEADERS,
-  C_TCP_FASTOPEN,
-  C_TCP_NODELAY,
-  C_TELNET_OPTION,
-  C_TEST_EVENT,
-  C_TFTP_BLKSIZE,
-  C_TFTP_NO_OPTIONS,
-  C_TIME_COND,
-  C_TLS_MAX,
-  C_TLS13_CIPHERS,
-  C_TLSAUTHTYPE,
-  C_TLSPASSWORD,
-  C_TLSUSER,
-  C_TLSV1,
-  C_TLSV1_0,
-  C_TLSV1_1,
-  C_TLSV1_2,
-  C_TLSV1_3,
-  C_TR_ENCODING,
-  C_TRACE,
-  C_TRACE_ASCII,
-  C_TRACE_CONFIG,
-  C_TRACE_IDS,
-  C_TRACE_TIME,
-  C_UNIX_SOCKET,
-  C_UPLOAD_FILE,
-  C_URL,
-  C_URL_QUERY,
-  C_USE_ASCII,
-  C_USER,
-  C_USER_AGENT,
-  C_VARIABLE,
-  C_VERBOSE,
-  C_VERSION,
-  C_WDEBUG,
-  C_WRITE_OUT,
-  C_XATTR
-} cmdline_t;
-
-struct LongShort {
-  const char *lname;  /* long name option */
-  enum {
-    ARG_NONE, /* stand-alone but not a boolean */
-    ARG_BOOL, /* accepts a --no-[name] prefix */
-    ARG_STRG, /* requires an argument */
-    ARG_FILE  /* requires an argument, usually a file name */
-  } desc;
-  char letter;  /* short name option or ' ' */
-  cmdline_t cmd;
-};
-
 /* this array MUST be alphasorted based on the 'lname' */
 static const struct LongShort aliases[]= {
   {"abstract-unix-socket",       ARG_FILE, ' ', C_ABSTRACT_UNIX_SOCKET},
-  {"alpn",                       ARG_BOOL, ' ', C_ALPN},
+  {"alpn",                       ARG_BOOL|ARG_NO, ' ', C_ALPN},
   {"alt-svc",                    ARG_STRG, ' ', C_ALT_SVC},
   {"anyauth",                    ARG_BOOL, ' ', C_ANYAUTH},
   {"append",                     ARG_BOOL, 'a', C_APPEND},
   {"aws-sigv4",                  ARG_STRG, ' ', C_AWS_SIGV4},
   {"basic",                      ARG_BOOL, ' ', C_BASIC},
-  {"buffer",                     ARG_BOOL, 'N', C_BUFFER},
+  {"buffer",                     ARG_BOOL|ARG_NO, 'N', C_BUFFER},
   {"ca-native",                  ARG_BOOL, ' ', C_CA_NATIVE},
   {"cacert",                     ARG_FILE, ' ', C_CACERT},
   {"capath",                     ARG_FILE, ' ', C_CAPATH},
@@ -372,7 +86,7 @@ static const struct LongShort aliases[]= {
   {"cert-status",                ARG_BOOL, ' ', C_CERT_STATUS},
   {"cert-type",                  ARG_STRG, ' ', C_CERT_TYPE},
   {"ciphers",                    ARG_STRG, ' ', C_CIPHERS},
-  {"clobber",                    ARG_BOOL, ' ', C_CLOBBER},
+  {"clobber",                    ARG_BOOL|ARG_NO, ' ', C_CLOBBER},
   {"compressed",                 ARG_BOOL, ' ', C_COMPRESSED},
   {"compressed-ssh",             ARG_BOOL, ' ', C_COMPRESSED_SSH},
   {"config",                     ARG_FILE, 'K', C_CONFIG},
@@ -404,6 +118,7 @@ static const struct LongShort aliases[]= {
   {"doh-cert-status",            ARG_BOOL, ' ', C_DOH_CERT_STATUS},
   {"doh-insecure",               ARG_BOOL, ' ', C_DOH_INSECURE},
   {"doh-url"        ,            ARG_STRG, ' ', C_DOH_URL},
+  {"dump-ca-embed",              ARG_NONE, ' ', C_DUMP_CA_EMBED},
   {"dump-header",                ARG_FILE, 'D', C_DUMP_HEADER},
   {"ech",                        ARG_STRG, ' ', C_ECH},
   {"egd-file",                   ARG_STRG, ' ', C_EGD_FILE},
@@ -452,15 +167,17 @@ static const struct LongShort aliases[]= {
   {"http3",                      ARG_NONE, ' ', C_HTTP3},
   {"http3-only",                 ARG_NONE, ' ', C_HTTP3_ONLY},
   {"ignore-content-length",      ARG_BOOL, ' ', C_IGNORE_CONTENT_LENGTH},
-  {"include",                    ARG_BOOL, 'i', C_INCLUDE},
+  {"include",                    ARG_BOOL, ' ', C_INCLUDE},
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
   {"interface",                  ARG_STRG, ' ', C_INTERFACE},
+  {"ip-tos",                     ARG_STRG, ' ', C_IP_TOS},
   {"ipfs-gateway",               ARG_STRG, ' ', C_IPFS_GATEWAY},
   {"ipv4",                       ARG_NONE, '4', C_IPV4},
   {"ipv6",                       ARG_NONE, '6', C_IPV6},
   {"json",                       ARG_STRG, ' ', C_JSON},
   {"junk-session-cookies",       ARG_BOOL, 'j', C_JUNK_SESSION_COOKIES},
-  {"keepalive",                  ARG_BOOL, ' ', C_KEEPALIVE},
+  {"keepalive",                  ARG_BOOL|ARG_NO, ' ', C_KEEPALIVE},
+  {"keepalive-cnt",              ARG_STRG, ' ', C_KEEPALIVE_CNT},
   {"keepalive-time",             ARG_STRG, ' ', C_KEEPALIVE_TIME},
   {"key",                        ARG_FILE, ' ', C_KEY},
   {"key-type",                   ARG_STRG, ' ', C_KEY_TYPE},
@@ -482,13 +199,14 @@ static const struct LongShort aliases[]= {
   {"max-redirs",                 ARG_STRG, ' ', C_MAX_REDIRS},
   {"max-time",                   ARG_STRG, 'm', C_MAX_TIME},
   {"metalink",                   ARG_BOOL, ' ', C_METALINK},
+  {"mptcp",                      ARG_BOOL, ' ', C_MPTCP},
   {"negotiate",                  ARG_BOOL, ' ', C_NEGOTIATE},
   {"netrc",                      ARG_BOOL, 'n', C_NETRC},
   {"netrc-file",                 ARG_FILE, ' ', C_NETRC_FILE},
   {"netrc-optional",             ARG_BOOL, ' ', C_NETRC_OPTIONAL},
   {"next",                       ARG_NONE, ':', C_NEXT},
   {"noproxy",                    ARG_STRG, ' ', C_NOPROXY},
-  {"npn",                        ARG_BOOL, ' ', C_NPN},
+  {"npn",                        ARG_BOOL|ARG_NO, ' ', C_NPN},
   {"ntlm",                       ARG_BOOL, ' ', C_NTLM},
   {"ntlm-wb",                    ARG_BOOL, ' ', C_NTLM_WB},
   {"oauth2-bearer",              ARG_STRG, ' ', C_OAUTH2_BEARER},
@@ -505,7 +223,7 @@ static const struct LongShort aliases[]= {
   {"post303",                    ARG_BOOL, ' ', C_POST303},
   {"preproxy",                   ARG_STRG, ' ', C_PREPROXY},
   {"progress-bar",               ARG_BOOL, '#', C_PROGRESS_BAR},
-  {"progress-meter",             ARG_BOOL, ' ', C_PROGRESS_METER},
+  {"progress-meter",             ARG_BOOL|ARG_NO, ' ', C_PROGRESS_METER},
   {"proto",                      ARG_STRG, ' ', C_PROTO},
   {"proto-default",              ARG_STRG, ' ', C_PROTO_DEFAULT},
   {"proto-redir",                ARG_STRG, ' ', C_PROTO_REDIR},
@@ -563,9 +281,11 @@ static const struct LongShort aliases[]= {
   {"sasl-authzid",               ARG_STRG, ' ', C_SASL_AUTHZID},
   {"sasl-ir",                    ARG_BOOL, ' ', C_SASL_IR},
   {"service-name",               ARG_STRG, ' ', C_SERVICE_NAME},
-  {"sessionid",                  ARG_BOOL, ' ', C_SESSIONID},
+  {"sessionid",                  ARG_BOOL|ARG_NO, ' ', C_SESSIONID},
   {"show-error",                 ARG_BOOL, 'S', C_SHOW_ERROR},
+  {"show-headers",               ARG_BOOL, 'i', C_SHOW_HEADERS},
   {"silent",                     ARG_BOOL, 's', C_SILENT},
+  {"skip-existing",              ARG_BOOL, ' ', C_SKIP_EXISTING},
   {"socks4",                     ARG_STRG, ' ', C_SOCKS4},
   {"socks4a",                    ARG_STRG, ' ', C_SOCKS4A},
   {"socks5",                     ARG_STRG, ' ', C_SOCKS5},
@@ -620,6 +340,7 @@ static const struct LongShort aliases[]= {
   {"variable",                   ARG_STRG, ' ', C_VARIABLE},
   {"verbose",                    ARG_BOOL, 'v', C_VERBOSE},
   {"version",                    ARG_BOOL, 'V', C_VERSION},
+  {"vlan-priority",              ARG_STRG, ' ', C_VLAN_PRIORITY},
 #ifdef USE_WATT32
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
 #endif
@@ -629,7 +350,7 @@ static const struct LongShort aliases[]= {
 
 /* Split the argument of -E to 'certname' and 'passphrase' separated by colon.
  * We allow ':' and '\' to be escaped by '\' so that we can use certificate
- * nicknames containing ':'.  See <https://sourceforge.net/p/curl/bugs/1196/>
+ * nicknames containing ':'. See <https://sourceforge.net/p/curl/bugs/1196/>
  * for details. */
 #ifndef UNITTESTS
 static
@@ -670,7 +391,7 @@ void parse_cert_parameter(const char *cert_parameter,
     strncpy(certname_place, param_place, span);
     param_place += span;
     certname_place += span;
-    /* we just ate all the non-special chars. now we're on either a special
+    /* we just ate all the non-special chars. now we are on either a special
      * char or the end of the string. */
     switch(*param_place) {
     case '\0':
@@ -697,11 +418,11 @@ void parse_cert_parameter(const char *cert_parameter,
       }
       break;
     case ':':
-      /* Since we live in a world of weirdness and confusion, the win32
+      /* Since we live in a world of weirdness and confusion, the Windows
          dudes can use : when using drive letters and thus c:\file:password
          needs to work. In order not to break compatibility, we still use : as
-         separator, but we try to detect when it is used for a file name! On
-         windows. */
+         separator, but we try to detect when it is used for a filename! On
+         Windows. */
 #ifdef _WIN32
       if((param_place == &cert_parameter[1]) &&
          (cert_parameter[2] == '\\' || cert_parameter[2] == '/') &&
@@ -716,7 +437,7 @@ void parse_cert_parameter(const char *cert_parameter,
       }
 #endif
       /* escaped colons and Windows drive letter colons were handled
-       * above; if we're still here, this is a separating colon */
+       * above; if we are still here, this is a separating colon */
       param_place++;
       if(*param_place) {
         *passphrase = strdup(param_place);
@@ -827,7 +548,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
 static void cleanarg(argv_item_t str)
 {
   /* now that getstr has copied the contents of nextarg, wipe the next
-   * argument out so that the username:password isn't displayed in the
+   * argument out so that the username:password is not displayed in the
    * system process list */
   if(str) {
     size_t len = strlen(str);
@@ -838,6 +559,9 @@ static void cleanarg(argv_item_t str)
 #define cleanarg(x)
 #endif
 
+/* the maximum size we allow the dynbuf generated string */
+#define MAX_DATAURLENCODE (500*1024*1024)
+
 /* --data-urlencode */
 static ParameterError data_urlencode(struct GlobalConfig *global,
                                      char *nextarg,
@@ -845,7 +569,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
                                      size_t *lenp)
 {
   /* [name]=[content], we encode the content part only
-   * [name]@[file name]
+   * [name]@[filename]
    *
    * Case 2: we first load the file using that name and then encode
    * the content.
@@ -864,14 +588,14 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     is_file = *p++; /* pass the separator */
   }
   else {
-    /* neither @ nor =, so no name and it isn't a file */
+    /* neither @ nor =, so no name and it is not a file */
     nlen = 0;
     is_file = 0;
     p = nextarg;
   }
   if('@' == is_file) {
     FILE *file;
-    /* a '@' letter, it means that a file name or - (stdin) follows */
+    /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
       set_binmode(stdin);
@@ -913,15 +637,22 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
       char *n;
       replace_url_encoded_space_by_plus(enc);
       if(nlen > 0) { /* only append '=' if we have a name */
-        n = aprintf("%.*s=%s", (int)nlen, nextarg, enc);
-        curl_free(enc);
-        if(!n)
+        struct curlx_dynbuf dyn;
+        curlx_dyn_init(&dyn, MAX_DATAURLENCODE);
+        if(curlx_dyn_addn(&dyn, nextarg, nlen) ||
+           curlx_dyn_addn(&dyn, "=", 1) ||
+           curlx_dyn_add(&dyn, enc)) {
+          curl_free(enc);
           return PARAM_NO_MEM;
+        }
+        curl_free(enc);
+        n = curlx_dyn_ptr(&dyn);
+        size = curlx_dyn_len(&dyn);
       }
-      else
+      else {
         n = enc;
-
-      size = strlen(n);
+        size = strlen(n);
+      }
       postdata = n;
     }
     else
@@ -956,7 +687,7 @@ static CURLcode set_trace_config(struct GlobalConfig *global,
   if(!tmp)
     return CURLE_OUT_OF_MEMORY;
 
-  /* Allow strtok() here since this isn't used threaded */
+  /* Allow strtok() here since this is not used threaded */
   /* !checksrc! disable BANNEDFUNC 2 */
   token = strtok(tmp, ", ");
   while(token) {
@@ -1007,7 +738,7 @@ static int findarg(const void *a, const void *b)
   return strcmp(aa->lname, bb->lname);
 }
 
-static const struct LongShort *single(char letter)
+const struct LongShort *findshortopt(char letter)
 {
   static const struct LongShort *singles[128 - ' ']; /* ASCII => pointer */
   static bool singles_done = FALSE;
@@ -1025,6 +756,52 @@ static const struct LongShort *single(char letter)
     singles_done = TRUE;
   }
   return singles[letter - ' '];
+}
+
+struct TOSEntry {
+  const char *name;
+  unsigned char value;
+};
+
+static const struct TOSEntry tos_entries[] = {
+  {"AF11", 0x28},
+  {"AF12", 0x30},
+  {"AF13", 0x38},
+  {"AF21", 0x48},
+  {"AF22", 0x50},
+  {"AF23", 0x58},
+  {"AF31", 0x68},
+  {"AF32", 0x70},
+  {"AF33", 0x78},
+  {"AF41", 0x88},
+  {"AF42", 0x90},
+  {"AF43", 0x98},
+  {"CE",   0x03},
+  {"CS0",  0x00},
+  {"CS1",  0x20},
+  {"CS2",  0x40},
+  {"CS3",  0x60},
+  {"CS4",  0x80},
+  {"CS5",  0xa0},
+  {"CS6",  0xc0},
+  {"CS7",  0xe0},
+  {"ECT0", 0x02},
+  {"ECT1", 0x01},
+  {"EF",   0xb8},
+  {"LE",   0x04},
+  {"LOWCOST",     0x02},
+  {"LOWDELAY",    0x10},
+  {"MINCOST",     0x02},
+  {"RELIABILITY", 0x04},
+  {"THROUGHPUT",  0x08},
+  {"VOICE-ADMIT", 0xb0}
+};
+
+static int find_tos(const void *a, const void *b)
+{
+  const struct TOSEntry *aa = a;
+  const struct TOSEntry *bb = b;
+  return strcmp(aa->name, bb->name);
 }
 
 #define MAX_QUERY_LEN 100000 /* larger is not likely to ever work */
@@ -1080,7 +857,7 @@ static ParameterError set_data(cmdline_t cmd,
       return err;
   }
   else if('@' == *nextarg && (cmd != C_DATA_RAW)) {
-    /* the data begins with a '@' letter, it means that a file name
+    /* the data begins with a '@' letter, it means that a filename
        or - (stdin) follows */
     nextarg++; /* pass the @ */
 
@@ -1176,6 +953,20 @@ static ParameterError set_rate(struct GlobalConfig *global,
 
   if(div) {
     char unit = div[1];
+    curl_off_t numunits;
+    char *endp;
+
+    if(curlx_strtoofft(&div[1], &endp, 10, &numunits)) {
+      /* if it fails, there is no legit number specified */
+      if(endp == &div[1])
+        /* if endp did not move, accept it as a 1 */
+        numunits = 1;
+      else
+        return PARAM_BAD_USE;
+    }
+    else
+      unit = *endp;
+
     switch(unit) {
     case 's': /* per second */
       numerator = 1000;
@@ -1193,6 +984,14 @@ static ParameterError set_rate(struct GlobalConfig *global,
       err = PARAM_BAD_USE;
       break;
     }
+
+    if((LONG_MAX / numerator) < numunits) {
+      /* overflow, too large number */
+      errorf(global, "too large --rate unit");
+      err = PARAM_NUMBER_TOO_LARGE;
+    }
+    /* this typecast is okay based on the check above */
+    numerator *= (long)numunits;
   }
 
   if(err)
@@ -1203,6 +1002,15 @@ static ParameterError set_rate(struct GlobalConfig *global,
     global->ms_per_transfer = numerator/denominator;
 
   return err;
+}
+
+const struct LongShort *findlongopt(const char *opt)
+{
+  struct LongShort key;
+  key.lname = opt;
+
+  return bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
+                 sizeof(aliases[0]), findarg);
 }
 
 
@@ -1219,6 +1027,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   time_t now;
   bool longopt = FALSE;
   bool singleopt = FALSE; /* when true means '-o foo' used '-ofoo' */
+  size_t nopts = 0; /* options processed in `flag`*/
   ParameterError err = PARAM_OK;
   bool toggle = TRUE; /* how to switch boolean options, on or off. Controlled
                          by using --OPTION or --no-OPTION */
@@ -1239,14 +1048,13 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   (void)cleararg;
 #endif
 
-  *usedarg = FALSE; /* default is that we don't use the arg */
+  *usedarg = FALSE; /* default is that we do not use the arg */
 
   if(('-' != flag[0]) || ('-' == flag[1])) {
     /* this should be a long name */
     const char *word = ('-' == flag[0]) ? flag + 2 : flag;
     bool noflagged = FALSE;
     bool expand = FALSE;
-    struct LongShort key;
 
     if(!strncmp(word, "no-", 3)) {
       /* disable this option but ignore the "no-" part when looking for it */
@@ -1259,10 +1067,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       word += 7;
       expand = TRUE;
     }
-    key.lname = word;
 
-    a = bsearch(&key, aliases, sizeof(aliases)/sizeof(aliases[0]),
-                sizeof(aliases[0]), findarg);
+    a = findlongopt(word);
     if(a) {
       longopt = TRUE;
     }
@@ -1270,8 +1076,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = PARAM_OPTION_UNKNOWN;
       goto error;
     }
-    if(noflagged && (a->desc != ARG_BOOL)) {
-      /* --no- prefixed an option that isn't boolean! */
+    if(noflagged && (ARGTYPE(a->desc) != ARG_BOOL)) {
+      /* --no- prefixed an option that is not boolean! */
       err = PARAM_NO_NOT_BOOLEAN;
       goto error;
     }
@@ -1279,9 +1085,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       struct curlx_dynbuf nbuf;
       bool replaced;
 
-      if((a->desc != ARG_STRG) &&
-         (a->desc != ARG_FILE)) {
-        /* --expand on an option that isn't a string or a filename */
+      if((ARGTYPE(a->desc) != ARG_STRG) &&
+         (ARGTYPE(a->desc) != ARG_FILE)) {
+        /* --expand on an option that is not a string or a filename */
         err = PARAM_EXPAND_ERROR;
         goto error;
       }
@@ -1307,19 +1113,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     cmdline_t cmd;
 
     if(!longopt && !a) {
-      a = single(*parse);
+      a = findshortopt(*parse);
       if(!a) {
         err = PARAM_OPTION_UNKNOWN;
         break;
       }
     }
     letter = a->letter;
-    cmd = a->cmd;
-    if(a->desc >= ARG_STRG) {
+    cmd = (cmdline_t)a->cmd;
+    if(ARGTYPE(a->desc) >= ARG_STRG) {
       /* this option requires an extra parameter */
       if(!longopt && parse[1]) {
         nextarg = (char *)&parse[1]; /* this is the actual extra parameter */
-        singleopt = TRUE;   /* don't loop anymore after this */
+        singleopt = TRUE;   /* do not loop anymore after this */
       }
       else if(!nextarg) {
         err = PARAM_REQUIRES_PARAMETER;
@@ -1332,19 +1138,19 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         *usedarg = TRUE; /* mark it as used */
       }
 
-      if((a->desc == ARG_FILE) &&
+      if((ARGTYPE(a->desc) == ARG_FILE) &&
          (nextarg[0] == '-') && nextarg[1]) {
-        /* if the file name looks like a command line option */
-        warnf(global, "The file name argument '%s' looks like a flag.",
+        /* if the filename looks like a command line option */
+        warnf(global, "The filename argument '%s' looks like a flag.",
               nextarg);
       }
       else if(!strncmp("\xe2\x80\x9c", nextarg, 3)) {
-        warnf(global, "The argument '%s' starts with a unicode quote where "
+        warnf(global, "The argument '%s' starts with a Unicode quote where "
               "maybe an ASCII \" was intended?",
               nextarg);
       }
     }
-    else if((a->desc == ARG_NONE) && !toggle) {
+    else if((ARGTYPE(a->desc) == ARG_NONE) && !toggle) {
       err = PARAM_NO_PREFIX;
       break;
     }
@@ -1492,7 +1298,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_ANYAUTH: /* --anyauth */
       if(toggle)
         config->authtype = CURLAUTH_ANY;
-      /* --no-anyauth simply doesn't touch it */
+      /* --no-anyauth simply does not touch it */
       break;
 #ifdef USE_WATT32
     case C_WDEBUG: /* --wdebug */
@@ -1571,7 +1377,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->url_get = config->url_list;
 
       if(config->url_get) {
-        /* there's a node here, if it already is filled-in continue to find
+        /* there is a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_get && (config->url_get->flags & GETOUT_URL))
           config->url_get = config->url_get->next;
@@ -1629,6 +1435,22 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_TCP_NODELAY: /* --tcp-nodelay */
       config->tcp_nodelay = toggle;
+      break;
+    case C_IP_TOS: { /* --ip-tos */
+      struct TOSEntry find;
+      const struct TOSEntry *entry;
+      find.name = nextarg;
+      entry = bsearch(&find, tos_entries,
+                      sizeof(tos_entries)/sizeof(*tos_entries),
+                      sizeof(*tos_entries), find_tos);
+      if(entry)
+        config->ip_tos = entry->value;
+      else /* numeric tos value */
+        err = str2unummax(&config->ip_tos, nextarg, 0xFF);
+      break;
+    }
+    case C_VLAN_PRIORITY: /* --vlan-priority */
+      err = str2unummax(&config->vlan_priority, nextarg, 7);
       break;
     case C_PROXY_DIGEST: /* --proxy-digest */
       config->proxydigest = toggle;
@@ -1688,7 +1510,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       while(ISDIGIT(*p))
         p++;
       if(*p) {
-        /* if there's anything more than a plain decimal number */
+        /* if there is anything more than a plain decimal number */
         rc = sscanf(p, " - %6s", lrange);
         *p = 0; /* null-terminate to make str2unum() work below */
       }
@@ -1761,6 +1583,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_KEEPALIVE_TIME: /* --keepalive-time */
       err = str2unum(&config->alivetime, nextarg);
       break;
+    case C_KEEPALIVE_CNT: /* --keepalive-cnt */
+      err = str2unum(&config->alivecnt, nextarg);
+      break;
     case C_POST301: /* --post301 */
       config->post301 = toggle;
       break;
@@ -1825,7 +1650,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->sasl_ir = toggle;
       break;
     case C_TEST_EVENT: /* --test-event */
-#ifdef CURLDEBUG
+#ifdef DEBUGBUILD
       global->test_event_based = toggle;
 #else
       warnf(global, "--test-event is ignored unless a debug build");
@@ -1888,7 +1713,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_PROGRESS_BAR: /* --progress-bar */
       global->progressmode = toggle ? CURL_PROGRESS_BAR : CURL_PROGRESS_STATS;
       break;
-    case C_VARIABLE: /* --Variable */
+    case C_VARIABLE: /* --variable */
       err = setvariable(global, nextarg);
       break;
     case C_NEXT: /* --next */
@@ -2029,6 +1854,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_URL_QUERY:  /* --url-query */
       err = url_query(nextarg, global, config);
+      break;
+    case C_DUMP_CA_EMBED: /* --dump-ca-embed */
+      err = PARAM_CA_EMBED_REQUESTED;
       break;
     case C_DUMP_HEADER: /* --dump-header */
       err = getstr(&config->headerfile, nextarg, DENY_BLANK);
@@ -2378,7 +2206,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else {
           err = file2memory(&string, &len, file);
           if(!err && string) {
-            /* Allow strtok() here since this isn't used threaded */
+            /* Allow strtok() here since this is not used threaded */
             /* !checksrc! disable BANNEDFUNC 2 */
             char *h = strtok(string, "\r\n");
             while(h) {
@@ -2404,6 +2232,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_INCLUDE: /* --include */
+    case C_SHOW_HEADERS: /* --show-headers */
       config->show_headers = toggle; /* show the headers as well in the
                                         general output stream */
       break;
@@ -2488,7 +2317,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!config->url_out)
         config->url_out = config->url_list;
       if(config->url_out) {
-        /* there's a node here, if it already is filled-in continue to find
+        /* there is a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_out && (config->url_out->flags & GETOUT_OUTFILE))
           config->url_out = config->url_out->next;
@@ -2539,7 +2368,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
 
     case C_DISABLE: /* --disable */
-      /* if used first, already taken care of, we do it like this so we don't
+      /* if used first, already taken care of, we do it like this so we do not
          cause an error! */
       break;
     case C_QUOTE: /* --quote */
@@ -2562,9 +2391,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_RANGE: /* --range */
       /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
-         (and won't actually be range by definition). The man page previously
-         claimed that to be a good way, why this code is added to work-around
-         it. */
+         (and will not actually be range by definition). The manpage
+         previously claimed that to be a good way, why this code is added to
+         work-around it. */
       if(ISDIGIT(*nextarg) && !strchr(nextarg, '-')) {
         char buffer[32];
         if(curlx_strtoofft(nextarg, NULL, 10, &value)) {
@@ -2606,6 +2435,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_SILENT: /* --silent */
       global->silent = toggle;
       break;
+    case C_SKIP_EXISTING: /* --skip-existing */
+      config->skip_existing = toggle;
+      break;
     case C_SHOW_ERROR: /* --show-error */
       global->showerror = toggle;
       break;
@@ -2618,7 +2450,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!config->url_ul)
         config->url_ul = config->url_list;
       if(config->url_ul) {
-        /* there's a node here, if it already is filled-in continue to find
+        /* there is a node here, if it already is filled-in continue to find
            an "empty" node */
         while(config->url_ul && (config->url_ul->flags & GETOUT_UPLOAD))
           config->url_ul = config->url_ul->next;
@@ -2657,8 +2489,27 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       cleanarg(clearthis);
       break;
     case C_VERBOSE: /* --verbose */
-      if(toggle) {
-        /* the '%' thing here will cause the trace get sent to stderr */
+      /* This option is a super-boolean with side effect when applied
+       * more than once in the same argument flag, like `-vvv`. */
+      if(!toggle) {
+        global->verbosity = 0;
+        if(set_trace_config(global, "-all"))
+          err = PARAM_NO_MEM;
+        global->tracetype = TRACE_NONE;
+        break;
+      }
+      else if(!nopts) {
+        /* fist `-v` in an argument resets to base verbosity */
+        global->verbosity = 0;
+        if(set_trace_config(global, "-all")) {
+          err = PARAM_NO_MEM;
+          break;
+        }
+      }
+      /* the '%' thing here will cause the trace get sent to stderr */
+      switch(global->verbosity) {
+      case 0:
+        global->verbosity = 1;
         Curl_safefree(global->trace_dump);
         global->trace_dump = strdup("%");
         if(!global->trace_dump)
@@ -2666,13 +2517,30 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         else {
           if(global->tracetype && (global->tracetype != TRACE_PLAIN))
             warnf(global,
-                  "-v, --verbose overrides an earlier trace/verbose option");
+                  "-v, --verbose overrides an earlier trace option");
           global->tracetype = TRACE_PLAIN;
         }
+        break;
+      case 1:
+        global->verbosity = 2;
+        if(set_trace_config(global, "ids,time,protocol"))
+          err = PARAM_NO_MEM;
+        break;
+      case 2:
+        global->verbosity = 3;
+        global->tracetype = TRACE_ASCII;
+        if(set_trace_config(global, "ssl,read,write"))
+          err = PARAM_NO_MEM;
+        break;
+      case 3:
+        global->verbosity = 4;
+        if(set_trace_config(global, "network"))
+          err = PARAM_NO_MEM;
+        break;
+      default:
+        /* no effect for now */
+        break;
       }
-      else
-        /* verbose is disabled here */
-        global->tracetype = TRACE_NONE;
       break;
     case C_VERSION: /* --version */
       if(toggle)    /* --no-version yields no output! */
@@ -2681,7 +2549,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_WRITE_OUT: /* --write-out */
       /* get the output string */
       if('@' == *nextarg) {
-        /* the data begins with a '@' letter, it means that a file name
+        /* the data begins with a '@' letter, it means that a filename
            or - (stdin) follows */
         FILE *file;
         const char *fname;
@@ -2778,7 +2646,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       now = time(NULL);
       config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
       if(-1 == config->condtime) {
-        /* now let's see if it is a file name to get the time from instead! */
+        /* now let's see if it is a filename to get the time from instead! */
         rc = getfiletime(nextarg, global, &value);
         if(!rc)
           /* pull the time out from the file */
@@ -2788,17 +2656,20 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
           config->timecond = CURL_TIMECOND_NONE;
           warnf(global,
                 "Illegal date format for -z, --time-cond (and not "
-                "a file name). Disabling time condition. "
+                "a filename). Disabling time condition. "
                 "See curl_getdate(3) for valid date syntax.");
         }
       }
+      break;
+    case C_MPTCP: /* --mptcp */
+      config->mptcp = TRUE;
       break;
     default: /* unknown flag */
       err = PARAM_OPTION_UNKNOWN;
       break;
     }
     a = NULL;
-
+    ++nopts; /* processed one option from `flag` input, loop for more */
   } while(!longopt && !singleopt && *++parse && !*usedarg && !err);
 
 error:
@@ -2874,7 +2745,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
         else if(!result && passarg)
-          i++; /* we're supposed to skip this */
+          i++; /* we are supposed to skip this */
       }
     }
     else {
@@ -2898,7 +2769,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   if(result && result != PARAM_HELP_REQUESTED &&
      result != PARAM_MANUAL_REQUESTED &&
      result != PARAM_VERSION_INFO_REQUESTED &&
-     result != PARAM_ENGINES_REQUESTED) {
+     result != PARAM_ENGINES_REQUESTED &&
+     result != PARAM_CA_EMBED_REQUESTED) {
     const char *reason = param2text(result);
 
     if(orig_opt && strcmp(":", orig_opt))

@@ -15,6 +15,7 @@ Protocol:
   - TLS
 TLS-backend:
   - All
+Added-in: 7.4.2
 ---
 
 # NAME
@@ -72,6 +73,8 @@ malicious servers.
 
 1 - enabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -89,9 +92,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-If built TLS enabled.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

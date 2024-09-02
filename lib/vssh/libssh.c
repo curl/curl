@@ -31,11 +31,6 @@
 
 #include <limits.h>
 
-/* in 0.10.0 or later, ignore deprecated warnings */
-#define SSH_SUPPRESS_DEPRECATED
-#include <libssh/libssh.h>
-#include <libssh/sftp.h>
-
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -661,7 +656,7 @@ restart:
 
 /*
  * ssh_statemach_act() runs the SSH state machine as far as it can without
- * blocking and without reaching the end.  The data the pointer 'block' points
+ * blocking and without reaching the end. The data the pointer 'block' points
  * to will be set to TRUE if the libssh function returns SSH_AGAIN
  * meaning it wants to be called again when the socket is ready
  */
@@ -675,7 +670,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
   int rc = SSH_NO_ERROR, err;
   int seekerr = CURL_SEEKFUNC_OK;
   const char *err_msg;
-  *block = 0;                   /* we're not blocking by default */
+  *block = 0;                   /* we are not blocking by default */
 
   do {
 
@@ -740,7 +735,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           break;
         }
 
-        sshc->auth_methods = ssh_userauth_list(sshc->ssh_session, NULL);
+        sshc->auth_methods =
+          (unsigned int)ssh_userauth_list(sshc->ssh_session, NULL);
         if(sshc->auth_methods)
           infof(data, "SSH authentication methods available: %s%s%s%s",
                 sshc->auth_methods & SSH_AUTH_METHOD_PUBLICKEY ?
@@ -1306,7 +1302,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             failf(data, "Could not seek stream");
             return CURLE_FTP_COULDNT_USE_REST;
           }
-          /* seekerr == CURL_SEEKFUNC_CANTSEEK (can't seek to offset) */
+          /* seekerr == CURL_SEEKFUNC_CANTSEEK (cannot seek to offset) */
           do {
             char scratch[4*1024];
             size_t readthisamountnow =
@@ -1349,12 +1345,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         Curl_pgrsSetUploadSize(data, data->state.infilesize);
       }
       /* upload data */
-      Curl_xfer_setup(data, -1, -1, FALSE, FIRSTSOCKET);
+      Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
 
-      /* store this original bitmask setup to use later on if we can't
+      /* store this original bitmask setup to use later on if we cannot
          figure out a "real" bitmask */
       sshc->orig_waitfor = data->req.keepon;
 
@@ -1363,7 +1359,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
          with both accordingly */
       data->state.select_bits = CURL_CSELECT_OUT;
 
-      /* since we don't really wait for anything at this point, we want the
+      /* since we do not really wait for anything at this point, we want the
          state machine to move on as soon as possible so we set a very short
          timeout here */
       Curl_expire(data, 0, EXPIRE_RUN_NOW);
@@ -1402,7 +1398,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       ++sshc->slash_pos;
       if(rc < 0) {
         /*
-         * Abort if failure wasn't that the dir already exists or the
+         * Abort if failure was not that the dir already exists or the
          * permission was denied (creation might succeed further down the
          * path) - retry on unspecific FAILURE also
          */
@@ -1575,7 +1571,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       sshc->sftp_dir = NULL;
 
       /* no data to transfer */
-      Curl_xfer_setup(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup_nop(data);
       state(data, SSH_STOP);
       break;
 
@@ -1609,9 +1605,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
               !(attrs->flags & SSH_FILEXFER_ATTR_SIZE) ||
               (attrs->size == 0)) {
         /*
-         * sftp_fstat didn't return an error, so maybe the server
-         * just doesn't support stat()
-         * OR the server doesn't return a file size with a stat()
+         * sftp_fstat did not return an error, so maybe the server
+         * just does not support stat()
+         * OR the server does not return a file size with a stat()
          * OR file size is 0
          */
         data->req.size = -1;
@@ -1684,7 +1680,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       /* We can resume if we can seek to the resume position */
       if(data->state.resume_from) {
         if(data->state.resume_from < 0) {
-          /* We're supposed to download the last abs(from) bytes */
+          /* We are supposed to download the last abs(from) bytes */
           if((curl_off_t)size < -data->state.resume_from) {
             failf(data, "Offset (%"
                   CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
@@ -1720,12 +1716,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
     /* Setup the actual download */
     if(data->req.size == 0) {
       /* no data to transfer */
-      Curl_xfer_setup(data, -1, -1, FALSE, -1);
+      Curl_xfer_setup_nop(data);
       infof(data, "File already completely downloaded");
       state(data, SSH_STOP);
       break;
     }
-    Curl_xfer_setup(data, FIRSTSOCKET, data->req.size, FALSE, -1);
+    Curl_xfer_setup1(data, CURL_XFER_RECV, data->req.size, FALSE);
 
     /* not set by Curl_xfer_setup to preserve keepon bits */
     conn->writesockfd = conn->sockfd;
@@ -1849,12 +1845,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       }
 
       /* upload data */
-      Curl_xfer_setup(data, -1, data->req.size, FALSE, FIRSTSOCKET);
+      Curl_xfer_setup1(data, CURL_XFER_SEND, -1, FALSE);
 
       /* not set by Curl_xfer_setup to preserve keepon bits */
       conn->sockfd = conn->writesockfd;
 
-      /* store this original bitmask setup to use later on if we can't
+      /* store this original bitmask setup to use later on if we cannot
          figure out a "real" bitmask */
       sshc->orig_waitfor = data->req.keepon;
 
@@ -1893,7 +1889,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         /* download data */
         bytecount = ssh_scp_request_get_size(sshc->scp_session);
         data->req.maxdownload = (curl_off_t) bytecount;
-        Curl_xfer_setup(data, FIRSTSOCKET, bytecount, FALSE, -1);
+        Curl_xfer_setup1(data, CURL_XFER_RECV, bytecount, FALSE);
 
         /* not set by Curl_xfer_setup to preserve keepon bits */
         conn->writesockfd = conn->sockfd;
@@ -1944,7 +1940,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       FALLTHROUGH();
 
     case SSH_SESSION_DISCONNECT:
-      /* during weird times when we've been prematurely aborted, the channel
+      /* during weird times when we have been prematurely aborted, the channel
          is still alive when we reach this state and we MUST kill the channel
          properly first */
       if(sshc->scp_session) {
@@ -2061,7 +2057,7 @@ static void myssh_block2waitfor(struct connectdata *conn, bool block)
 {
   struct ssh_conn *sshc = &conn->proto.sshc;
 
-  /* If it didn't block, or nothing was returned by ssh_get_poll_flags
+  /* If it did not block, or nothing was returned by ssh_get_poll_flags
    * have the original set */
   conn->waitfor = sshc->orig_waitfor;
 
@@ -2356,7 +2352,7 @@ static CURLcode scp_disconnect(struct Curl_easy *data,
   (void) dead_connection;
 
   if(ssh->ssh_session) {
-    /* only if there's a session still around to use! */
+    /* only if there is a session still around to use! */
 
     state(data, SSH_SESSION_DISCONNECT);
 
@@ -2403,12 +2399,13 @@ static CURLcode scp_done(struct Curl_easy *data, CURLcode status,
 }
 
 static ssize_t scp_send(struct Curl_easy *data, int sockindex,
-                        const void *mem, size_t len, CURLcode *err)
+                        const void *mem, size_t len, bool eos, CURLcode *err)
 {
   int rc;
   struct connectdata *conn = data->conn;
   (void) sockindex; /* we only support SCP on the fixed known primary socket */
   (void) err;
+  (void)eos;
 
   rc = ssh_scp_write(conn->proto.sshc.scp_session, mem, len);
 
@@ -2521,7 +2518,7 @@ static CURLcode sftp_disconnect(struct Curl_easy *data,
   DEBUGF(infof(data, "SSH DISCONNECT starts now"));
 
   if(conn->proto.sshc.ssh_session) {
-    /* only if there's a session still around to use! */
+    /* only if there is a session still around to use! */
     state(data, SSH_SFTP_SHUTDOWN);
     result = myssh_block_statemach(data, TRUE);
   }
@@ -2551,11 +2548,13 @@ static CURLcode sftp_done(struct Curl_easy *data, CURLcode status,
 
 /* return number of sent bytes */
 static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
-                         const void *mem, size_t len, CURLcode *err)
+                         const void *mem, size_t len, bool eos,
+                         CURLcode *err)
 {
   ssize_t nwrite;
   struct connectdata *conn = data->conn;
   (void)sockindex;
+  (void)eos;
 
   /* limit the writes to the maximum specified in Section 3 of
    * https://datatracker.ietf.org/doc/html/draft-ietf-secsh-filexfer-02
@@ -2611,7 +2610,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
 
       nread = sftp_async_read(conn->proto.sshc.sftp_file,
                               mem, (uint32_t)len,
-                              conn->proto.sshc.sftp_file_index);
+                              (uint32_t)conn->proto.sshc.sftp_file_index);
 
       myssh_block2waitfor(conn, (nread == SSH_AGAIN)?TRUE:FALSE);
 
@@ -2715,7 +2714,7 @@ static void sftp_quote(struct Curl_easy *data)
   }
 
   /*
-   * SFTP is a binary protocol, so we don't send text commands
+   * SFTP is a binary protocol, so we do not send text commands
    * to the server. Instead, we scan for commands used by
    * OpenSSH's sftp program and call the appropriate libssh
    * functions.

@@ -33,7 +33,7 @@
 
 #ifdef USE_SCHANNEL
 #ifndef USE_WINDOWS_SSPI
-#  error "Can't compile SCHANNEL support without SSPI."
+#  error "cannot compile SCHANNEL support without SSPI."
 #endif
 
 #include "schannel.h"
@@ -82,8 +82,8 @@ static int is_cr_or_lf(char c)
 }
 
 /* Search the substring needle,needlelen into string haystack,haystacklen
- * Strings don't need to be terminated by a '\0'.
- * Similar of OSX/Linux memmem (not available on Visual Studio).
+ * Strings do not need to be terminated by a '\0'.
+ * Similar of macOS/Linux memmem (not available on Visual Studio).
  * Return position of beginning of first occurrence or NULL if not found
  */
 static const char *c_memmem(const void *haystack, size_t haystacklen,
@@ -335,7 +335,7 @@ cleanup:
 
 /*
  * Returns the number of characters necessary to populate all the host_names.
- * If host_names is not NULL, populate it with all the host names. Each string
+ * If host_names is not NULL, populate it with all the hostnames. Each string
  * in the host_names is null-terminated and the last string is double
  * null-terminated. If no DNS names are found, a single null-terminated empty
  * string is returned.
@@ -346,6 +346,12 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   DWORD length)
 {
   DWORD actual_length = 0;
+#if defined(CURL_WINDOWS_APP)
+  (void)data;
+  (void)cert_context;
+  (void)host_names;
+  (void)length;
+#else
   BOOL compute_content = FALSE;
   CERT_INFO *cert_info = NULL;
   CERT_EXTENSION *extension = NULL;
@@ -441,14 +447,14 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     }
     /* Sanity check to prevent buffer overrun. */
     if((actual_length + current_length) > length) {
-      failf(data, "schannel: Not enough memory to list all host names.");
+      failf(data, "schannel: Not enough memory to list all hostnames.");
       break;
     }
     dns_w = entry->pwszDNSName;
-    /* pwszDNSName is in ia5 string format and hence doesn't contain any
-     * non-ascii characters. */
+    /* pwszDNSName is in ia5 string format and hence does not contain any
+     * non-ASCII characters. */
     while(*dns_w != '\0') {
-      *current_pos++ = (char)(*dns_w++);
+      *current_pos++ = (TCHAR)(*dns_w++);
     }
     *current_pos++ = '\0';
     actual_length += (DWORD)current_length;
@@ -457,6 +463,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
     /* Last string has double null-terminator. */
     *current_pos = '\0';
   }
+#endif
   return actual_length;
 }
 

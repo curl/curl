@@ -43,6 +43,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER %LOGDIR/ip%TESTNUMBER activeftp
 #
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <strippart>
 s/^(EPRT \|1\|)(.*)/$1/
 </strippart>

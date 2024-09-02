@@ -10,6 +10,7 @@ See-also:
 Protocol:
   - SFTP
   - SCP
+Added-in: 7.56.0
 ---
 
 # NAME
@@ -35,6 +36,8 @@ may or may not do it.
 
 0, disabled
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -53,9 +56,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.56.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

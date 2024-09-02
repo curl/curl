@@ -54,6 +54,7 @@
 --doh-cert-status                    7.76.0
 --doh-insecure                       7.76.0
 --doh-url                            7.62.0
+--dump-ca-embed                      8.10.0
 --dump-header (-D)                   5.7
 --ech                                8.8.0
 --egd-file                           7.7
@@ -98,14 +99,15 @@
 --http3                              7.66.0
 --http3-only                         7.88.0
 --ignore-content-length              7.14.1
+--ip-tos                             8.9.0
 --ipfs-gateway                       8.4.0
---include (-i)                       4.8
 --insecure (-k)                      7.10
 --interface                          7.3
 --ipv4 (-4)                          7.10.8
 --ipv6 (-6)                          7.10.8
 --json                               7.82.0
 --junk-session-cookies (-j)          7.9.7
+--keepalive-cnt                      8.9.0
 --keepalive-time                     7.18.0
 --key                                7.9.3
 --key-type                           7.9.3
@@ -126,6 +128,7 @@
 --max-redirs                         7.5
 --max-time (-m)                      4.0
 --metalink                           7.27.0
+--mptcp                              8.9.0
 --negotiate                          7.10.6
 --netrc (-n)                         4.6
 --netrc-file                         7.21.5
@@ -213,7 +216,9 @@
 --sasl-ir                            7.31.0
 --service-name                       7.43.0
 --show-error (-S)                    5.9
+--show-headers (-i)                  4.8
 --silent (-s)                        4.0
+--skip-existing                      8.10.0
 --socks4                             7.15.2
 --socks4a                            7.18.0
 --socks5                             7.18.0
@@ -267,5 +272,6 @@
 --variable                           8.3.0
 --verbose (-v)                       4.0
 --version (-V)                       4.0
+--vlan-priority                      8.9.0
 --write-out (-w)                     6.5
 --xattr                              7.21.3

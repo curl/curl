@@ -50,7 +50,6 @@ UNITTEST_START
 /* 540 a's */
 #define SA540 SA60 SA60 SA60 SA60 SA60 SA60 SA60 SA60 SA60
   int i;
-  int error = 0;
   size_t too_long = 90720;
   struct set list[] = {
     { "-too-long-", "", "", "", CURLE_TOO_LARGE},
@@ -85,18 +84,18 @@ UNITTEST_START
            list[i].cp, list[i].home, list[i].result);
     if(result != list[i].result) {
       printf("... returned %d\n", result);
-      error++;
+      unitfail++;
     }
     if(!result) {
       if(cp && strcmp(cp, list[i].next)) {
         printf("... cp points to '%s', not '%s' as expected \n",
                cp, list[i].next);
-        error++;
+        unitfail++;
       }
       if(path && strcmp(path, list[i].expect)) {
         printf("... gave '%s', not '%s' as expected \n",
                path, list[i].expect);
-        error++;
+        unitfail++;
       }
       curl_free(path);
 
@@ -104,7 +103,6 @@ UNITTEST_START
   }
 
   free((void *)list[0].cp);
-  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
 }
 #endif
 

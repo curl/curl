@@ -12,6 +12,7 @@ Protocol:
   - SFTP
   - SCP
   - FILE
+Added-in: 7.16.4
 ---
 
 # NAME
@@ -38,6 +39,8 @@ this are *sftp://*, *scp://*, and *file://*.
 
 0755
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -55,9 +58,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.16.4
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -237,7 +237,7 @@ static int parsenetrc(const char *host,
           else if(strcasecompare("password", tok))
             state_password = 1;
           else if(strcasecompare("machine", tok)) {
-            /* ok, there's machine here go => */
+            /* ok, there is machine here go => */
             state = HOSTFOUND;
             state_our_login = FALSE;
           }
@@ -277,7 +277,7 @@ out:
 /*
  * @unittest: 1304
  *
- * *loginp and *passwordp MUST be allocated if they aren't NULL when passed
+ * *loginp and *passwordp MUST be allocated if they are not NULL when passed
  * in.
  */
 int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
@@ -324,7 +324,7 @@ int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
       return retcode; /* no home directory found (or possibly out of
                          memory) */
 
-    filealloc = curl_maprintf("%s%s.netrc", home, DIR_CHAR);
+    filealloc = aprintf("%s%s.netrc", home, DIR_CHAR);
     if(!filealloc) {
       free(homea);
       return -1;
@@ -334,7 +334,7 @@ int Curl_parsenetrc(const char *host, char **loginp, char **passwordp,
 #ifdef _WIN32
     if(retcode == NETRC_FILE_MISSING) {
       /* fallback to the old-style "_netrc" file */
-      filealloc = curl_maprintf("%s%s_netrc", home, DIR_CHAR);
+      filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
         free(homea);
         return -1;

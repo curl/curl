@@ -262,7 +262,7 @@ data. We consider this functionality a best-effort and omissions are not
 security vulnerabilities.
 
  - not all systems allow the arguments to be blanked in the first place
- - since curl blanks the argument itself they area readable for a short moment
+ - since curl blanks the argument itself they are readable for a short moment
    no matter what
  - virtually every argument can contain sensitive data, depending on use
  - blanking all arguments would make it impractical for users to differentiate
@@ -298,3 +298,18 @@ is curl working as designed and is not a curl security problem. Escape
 sequences, moving cursor, changing color etc, is also frequently used for
 good. To reduce the risk of getting fooled, save files and browse them after
 download using a display method that minimizes risks.
+
+## NULL dereferences and crashes
+
+If a malicious server can trigger a NULL dereference in curl or otherwise
+cause curl to crash (and nothing worse), chances are big that we do not
+consider that a security problem.
+
+Malicious servers can already cause considerable harm and denial of service
+like scenarios without having to trigger such code paths. For example by
+stalling, being terribly slow or by delivering enormous amounts of data.
+Additionally, applications are expected to handle "normal" crashes without
+that being the end of the world.
+
+There need to be more and special circumstances to treat such problems as
+security issues.

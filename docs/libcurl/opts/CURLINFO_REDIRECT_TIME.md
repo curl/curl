@@ -12,6 +12,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - HTTP
+Added-in: 7.9.7
 ---
 
 # NAME
@@ -36,6 +37,8 @@ the complete execution time for multiple redirections.
 
 See also the TIMES overview in the curl_easy_getinfo(3) man page.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -59,9 +62,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.9.7
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_ALTSVC (3)
   - CURLOPT_HSTS_CTRL (3)
   - CURLOPT_RESOLVE (3)
+Added-in: 7.74.0
 ---
 
 # NAME
@@ -59,6 +60,8 @@ currently no length or size limit.
 
 NULL, no filename
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -72,9 +75,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.74.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

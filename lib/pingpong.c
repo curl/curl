@@ -119,7 +119,7 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
                            interval_ms);
 
   if(block) {
-    /* if we didn't wait, we don't have to spend time on this now */
+    /* if we did not wait, we do not have to spend time on this now */
     if(Curl_pgrsUpdate(data))
       result = CURLE_ABORTED_BY_CALLBACK;
     else
@@ -179,7 +179,7 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
   DEBUGASSERT(pp->sendthis == NULL);
 
   if(!conn)
-    /* can't send without a connection! */
+    /* cannot send without a connection! */
     return CURLE_SEND_ERROR;
 
   Curl_dyn_reset(&pp->sendbuf);
@@ -199,7 +199,8 @@ CURLcode Curl_pp_vsendf(struct Curl_easy *data,
 #ifdef HAVE_GSSAPI
   conn->data_prot = PROT_CMD;
 #endif
-  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, &bytes_written);
+  result = Curl_conn_send(data, FIRSTSOCKET, s, write_len, FALSE,
+                          &bytes_written);
   if(result == CURLE_AGAIN) {
     bytes_written = 0;
   }
@@ -285,94 +286,99 @@ CURLcode Curl_pp_readresp(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   CURLcode result = CURLE_OK;
+  ssize_t gotbytes;
+  char buffer[900];
 
   *code = 0; /* 0 for errors or not done */
   *size = 0;
 
-  if(pp->nfinal) {
-    /* a previous call left this many bytes in the beginning of the buffer as
-       that was the final line; now ditch that */
-    size_t full = Curl_dyn_len(&pp->recvbuf);
-
-    /* trim off the "final" leading part */
-    Curl_dyn_tail(&pp->recvbuf, full -  pp->nfinal);
-
-    pp->nfinal = 0; /* now gone */
-  }
-  if(!pp->overflow) {
-    ssize_t gotbytes = 0;
-    char buffer[900];
-
-    result = pingpong_read(data, sockindex, buffer, sizeof(buffer), &gotbytes);
-    if(result == CURLE_AGAIN)
-      return CURLE_OK;
-
-    if(result)
-      return result;
-
-    if(gotbytes <= 0) {
-      failf(data, "response reading failed (errno: %d)", SOCKERRNO);
-      return CURLE_RECV_ERROR;
-    }
-
-    result = Curl_dyn_addn(&pp->recvbuf, buffer, gotbytes);
-    if(result)
-      return result;
-
-    data->req.headerbytecount += (unsigned int)gotbytes;
-
-    pp->nread_resp += gotbytes;
-  }
-
   do {
-    char *line = Curl_dyn_ptr(&pp->recvbuf);
-    char *nl = memchr(line, '\n', Curl_dyn_len(&pp->recvbuf));
-    if(nl) {
-      /* a newline is CRLF in pp-talk, so the CR is ignored as
-         the line isn't really terminated until the LF comes */
-      size_t length = nl - line + 1;
+    gotbytes = 0;
+    if(pp->nfinal) {
+      /* a previous call left this many bytes in the beginning of the buffer as
+         that was the final line; now ditch that */
+      size_t full = Curl_dyn_len(&pp->recvbuf);
 
-      /* output debug output if that is requested */
-#ifdef HAVE_GSSAPI
-      if(!conn->sec_complete)
-#endif
-        Curl_debug(data, CURLINFO_HEADER_IN, line, length);
+      /* trim off the "final" leading part */
+      Curl_dyn_tail(&pp->recvbuf, full -  pp->nfinal);
 
-      /*
-       * Pass all response-lines to the callback function registered for
-       * "headers". The response lines can be seen as a kind of headers.
-       */
-      result = Curl_client_write(data, CLIENTWRITE_INFO, line, length);
+      pp->nfinal = 0; /* now gone */
+    }
+    if(!pp->overflow) {
+      result = pingpong_read(data, sockindex, buffer, sizeof(buffer),
+                             &gotbytes);
+      if(result == CURLE_AGAIN)
+        return CURLE_OK;
+
       if(result)
         return result;
 
-      if(pp->endofresp(data, conn, line, length, code)) {
-        /* When at "end of response", keep the endofresp line first in the
-           buffer since it will be accessed outside (by pingpong
-           parsers). Store the overflow counter to inform about additional
-           data in this buffer after the endofresp line. */
-        pp->nfinal = length;
-        if(Curl_dyn_len(&pp->recvbuf) > length)
-          pp->overflow = Curl_dyn_len(&pp->recvbuf) - length;
-        else
-          pp->overflow = 0;
-        *size = pp->nread_resp; /* size of the response */
-        pp->nread_resp = 0; /* restart */
-        break;
+      if(gotbytes <= 0) {
+        failf(data, "response reading failed (errno: %d)", SOCKERRNO);
+        return CURLE_RECV_ERROR;
       }
-      if(Curl_dyn_len(&pp->recvbuf) > length)
-        /* keep the remaining piece */
-        Curl_dyn_tail((&pp->recvbuf), Curl_dyn_len(&pp->recvbuf) - length);
-      else
-        Curl_dyn_reset(&pp->recvbuf);
-    }
-    else {
-      /* without a newline, there is no overflow */
-      pp->overflow = 0;
-      break;
+
+      result = Curl_dyn_addn(&pp->recvbuf, buffer, gotbytes);
+      if(result)
+        return result;
+
+      data->req.headerbytecount += (unsigned int)gotbytes;
+
+      pp->nread_resp += gotbytes;
     }
 
-  } while(1); /* while there's buffer left to scan */
+    do {
+      char *line = Curl_dyn_ptr(&pp->recvbuf);
+      char *nl = memchr(line, '\n', Curl_dyn_len(&pp->recvbuf));
+      if(nl) {
+        /* a newline is CRLF in pp-talk, so the CR is ignored as
+           the line is not really terminated until the LF comes */
+        size_t length = nl - line + 1;
+
+        /* output debug output if that is requested */
+#ifdef HAVE_GSSAPI
+        if(!conn->sec_complete)
+#endif
+          Curl_debug(data, CURLINFO_HEADER_IN, line, length);
+
+        /*
+         * Pass all response-lines to the callback function registered for
+         * "headers". The response lines can be seen as a kind of headers.
+         */
+        result = Curl_client_write(data, CLIENTWRITE_INFO, line, length);
+        if(result)
+          return result;
+
+        if(pp->endofresp(data, conn, line, length, code)) {
+          /* When at "end of response", keep the endofresp line first in the
+             buffer since it will be accessed outside (by pingpong
+             parsers). Store the overflow counter to inform about additional
+             data in this buffer after the endofresp line. */
+          pp->nfinal = length;
+          if(Curl_dyn_len(&pp->recvbuf) > length)
+            pp->overflow = Curl_dyn_len(&pp->recvbuf) - length;
+          else
+            pp->overflow = 0;
+          *size = pp->nread_resp; /* size of the response */
+          pp->nread_resp = 0; /* restart */
+          gotbytes = 0; /* force break out of outer loop */
+          break;
+        }
+        if(Curl_dyn_len(&pp->recvbuf) > length)
+          /* keep the remaining piece */
+          Curl_dyn_tail((&pp->recvbuf), Curl_dyn_len(&pp->recvbuf) - length);
+        else
+          Curl_dyn_reset(&pp->recvbuf);
+      }
+      else {
+        /* without a newline, there is no overflow */
+        pp->overflow = 0;
+        break;
+      }
+
+    } while(1); /* while there is buffer left to scan */
+
+  } while(gotbytes == sizeof(buffer));
 
   pp->pending_resp = FALSE;
 
@@ -394,6 +400,13 @@ int Curl_pp_getsock(struct Curl_easy *data,
   return GETSOCK_READSOCK(0);
 }
 
+bool Curl_pp_needs_flush(struct Curl_easy *data,
+                         struct pingpong *pp)
+{
+  (void)data;
+  return pp->sendleft > 0;
+}
+
 CURLcode Curl_pp_flushsend(struct Curl_easy *data,
                            struct pingpong *pp)
 {
@@ -401,9 +414,12 @@ CURLcode Curl_pp_flushsend(struct Curl_easy *data,
   size_t written;
   CURLcode result;
 
+  if(!Curl_pp_needs_flush(data, pp))
+    return CURLE_OK;
+
   result = Curl_conn_send(data, FIRSTSOCKET,
                           pp->sendthis + pp->sendsize - pp->sendleft,
-                          pp->sendleft, &written);
+                          pp->sendleft, FALSE, &written);
   if(result == CURLE_AGAIN) {
     result = CURLE_OK;
     written = 0;

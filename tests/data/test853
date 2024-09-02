@@ -18,11 +18,11 @@ SLOWDOWN
 </servercmd>
 # When doing LIST, we get the default list output hard-coded in the test
 # POP3 server
-<datacheck>
+<data>
 1 100
 2 4294967400
 3 200
-</datacheck>
+</data>
 </reply>
 
 #

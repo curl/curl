@@ -95,7 +95,7 @@ Curl_freeaddrinfo(struct Curl_addrinfo *cahead)
  * the only difference that instead of returning a linked list of
  * addrinfo structs this one returns a linked list of Curl_addrinfo
  * ones. The memory allocated by this function *MUST* be free'd with
- * Curl_freeaddrinfo().  For each successful call to this function
+ * Curl_freeaddrinfo(). For each successful call to this function
  * there must be an associated call later to Curl_freeaddrinfo().
  *
  * There should be no single call to system's getaddrinfo() in the
@@ -221,7 +221,7 @@ Curl_getaddrinfo_ex(const char *nodename,
  * stack, but usable also for IPv4, all hosts and environments.
  *
  * The memory allocated by this function *MUST* be free'd later on calling
- * Curl_freeaddrinfo().  For each successful call to this function there
+ * Curl_freeaddrinfo(). For each successful call to this function there
  * must be an associated call later to Curl_freeaddrinfo().
  *
  *   Curl_addrinfo defined in "lib/curl_addrinfo.h"
@@ -317,7 +317,11 @@ Curl_he2ai(const struct hostent *he, int port)
       addr = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr->sin_addr, curr, sizeof(struct in_addr));
+#ifdef __MINGW32__
+      addr->sin_family = (short)(he->h_addrtype);
+#else
       addr->sin_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
+#endif
       addr->sin_port = htons((unsigned short)port);
       break;
 
@@ -326,7 +330,11 @@ Curl_he2ai(const struct hostent *he, int port)
       addr6 = (void *)ai->ai_addr; /* storage area for this info */
 
       memcpy(&addr6->sin6_addr, curr, sizeof(struct in6_addr));
+#ifdef __MINGW32__
+      addr6->sin6_family = (short)(he->h_addrtype);
+#else
       addr6->sin6_family = (CURL_SA_FAMILY_T)(he->h_addrtype);
+#endif
       addr6->sin6_port = htons((unsigned short)port);
       break;
 #endif
@@ -359,7 +367,7 @@ struct namebuff {
 /*
  * Curl_ip2addr()
  *
- * This function takes an internet address, in binary form, as input parameter
+ * This function takes an Internet address, in binary form, as input parameter
  * along with its address family and the string version of the address, and it
  * returns a Curl_addrinfo chain filled in correctly with information for the
  * given address/host
@@ -511,7 +519,7 @@ struct Curl_addrinfo *Curl_unix2addr(const char *path, bool *longpath,
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't want to include in memdebug.c
+ * require a bunch of structs I did not want to include in memdebug.c
  */
 
 void
@@ -535,7 +543,7 @@ curl_dbg_freeaddrinfo(struct addrinfo *freethis,
  *
  * This is strictly for memory tracing and are using the same style as the
  * family otherwise present in memdebug.c. I put these ones here since they
- * require a bunch of structs I didn't want to include in memdebug.c
+ * require a bunch of structs I did not want to include in memdebug.c
  */
 
 int
@@ -563,7 +571,7 @@ curl_dbg_getaddrinfo(const char *hostname,
 
 #if defined(HAVE_GETADDRINFO) && defined(USE_RESOLVE_ON_IPS)
 /*
- * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and Mac OS X
+ * Work-arounds the sin6_port is always zero bug on iOS 9.3.2 and macOS
  * 10.11.5.
  */
 void Curl_addrinfo_set_port(struct Curl_addrinfo *addrinfo, int port)

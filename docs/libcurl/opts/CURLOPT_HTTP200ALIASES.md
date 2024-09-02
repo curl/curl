@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_HTTP09_ALLOWED (3)
   - CURLOPT_HTTP_VERSION (3)
+Added-in: 7.10.3
 ---
 
 # NAME
@@ -44,6 +45,8 @@ assumed to match HTTP 1.0 when an alias match.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10.3
+# %AVAILABILITY%
 
 # RETURN VALUE
 

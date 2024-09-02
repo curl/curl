@@ -27,7 +27,7 @@
 # Usage:   make -f Makefile.mk CFG=-feat1[-feat2][-feat3][...]
 # Example: make -f Makefile.mk CFG=-zlib-ssl-libssh2-ipv6
 #
-# Look for ' ?=' to find all accepted customization variables.
+# Look for ' ?=' to find accepted customization variables.
 
 # This script is reused by 'src' and 'docs/examples' Makefile.mk scripts.
 
@@ -239,7 +239,7 @@ endif
 
 ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
-  CPPFLAGS += -DUSE_LIBIDN2
+  CPPFLAGS += -DHAVE_LIBIDN2 -DHAVE_IDN2_H
   CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2

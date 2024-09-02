@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_FTPPORT (3)
   - CURLOPT_FTP_USE_EPSV (3)
+Added-in: 7.10.5
 ---
 
 # NAME
@@ -41,6 +42,8 @@ then.
 
 # DEFAULT
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -64,9 +67,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.10.5
+# %AVAILABILITY%
 
 # RETURN VALUE
 

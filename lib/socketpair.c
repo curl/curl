@@ -27,14 +27,31 @@
 #include "urldata.h"
 #include "rand.h"
 
-#if defined(HAVE_PIPE) && defined(HAVE_FCNTL)
-#include <fcntl.h>
+#if defined(USE_EVENTFD)
+#ifdef HAVE_SYS_EVENTFD_H
+#include <sys/eventfd.h>
+#endif
 
-int Curl_pipe(curl_socket_t socks[2])
+int Curl_eventfd(curl_socket_t socks[2], bool nonblocking)
+{
+  int efd = eventfd(0, nonblocking ? EFD_CLOEXEC | EFD_NONBLOCK : EFD_CLOEXEC);
+  if(efd == -1) {
+    socks[0] = socks[1] = CURL_SOCKET_BAD;
+    return -1;
+  }
+  socks[0] = socks[1] = efd;
+  return 0;
+}
+#elif defined(HAVE_PIPE)
+#ifdef HAVE_FCNTL
+#include <fcntl.h>
+#endif
+
+int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
 {
   if(pipe(socks))
     return -1;
-
+#ifdef HAVE_FCNTL
   if(fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
      fcntl(socks[1], F_SETFD, FD_CLOEXEC) ) {
     close(socks[0]);
@@ -42,13 +59,45 @@ int Curl_pipe(curl_socket_t socks[2])
     socks[0] = socks[1] = CURL_SOCKET_BAD;
     return -1;
   }
+#endif
+  if(nonblocking) {
+    if(curlx_nonblock(socks[0], TRUE) < 0 ||
+       curlx_nonblock(socks[1], TRUE) < 0) {
+      close(socks[0]);
+      close(socks[1]);
+      socks[0] = socks[1] = CURL_SOCKET_BAD;
+      return -1;
+    }
+  }
 
   return 0;
 }
 #endif
 
 
-#if !defined(HAVE_SOCKETPAIR) && !defined(CURL_DISABLE_SOCKETPAIR)
+#ifndef CURL_DISABLE_SOCKETPAIR
+#ifdef HAVE_SOCKETPAIR
+int Curl_socketpair(int domain, int type, int protocol,
+                    curl_socket_t socks[2], bool nonblocking)
+{
+#ifdef SOCK_NONBLOCK
+  type = nonblocking ? type | SOCK_NONBLOCK : type;
+#endif
+  if(socketpair(domain, type, protocol, socks))
+    return -1;
+#ifndef SOCK_NONBLOCK
+  if(nonblocking) {
+    if(curlx_nonblock(socks[0], TRUE) < 0 ||
+       curlx_nonblock(socks[1], TRUE) < 0) {
+      close(socks[0]);
+      close(socks[1]);
+      return -1;
+    }
+  }
+#endif
+  return 0;
+}
+#else /* !HAVE_SOCKETPAIR */
 #ifdef _WIN32
 /*
  * This is a socketpair() implementation for Windows.
@@ -80,7 +129,7 @@ int Curl_pipe(curl_socket_t socks[2])
 #include "memdebug.h"
 
 int Curl_socketpair(int domain, int type, int protocol,
-                    curl_socket_t socks[2])
+                    curl_socket_t socks[2], bool nonblocking)
 {
   union {
     struct sockaddr_in inaddr;
@@ -106,7 +155,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   socks[0] = socks[1] = CURL_SOCKET_BAD;
 
 #if defined(_WIN32) || defined(__CYGWIN__)
-  /* don't set SO_REUSEADDR on Windows */
+  /* do not set SO_REUSEADDR on Windows */
   (void)reuse;
 #ifdef SO_EXCLUSIVEADDRUSE
   {
@@ -134,7 +183,7 @@ int Curl_socketpair(int domain, int type, int protocol,
   if(connect(socks[0], &a.addr, sizeof(a.inaddr)) == -1)
     goto error;
 
-  /* use non-blocking accept to make sure we don't block forever */
+  /* use non-blocking accept to make sure we do not block forever */
   if(curlx_nonblock(listener, TRUE) < 0)
     goto error;
   pfd[0].fd = listener;
@@ -168,7 +217,7 @@ int Curl_socketpair(int domain, int type, int protocol,
       nread = sread(socks[1], p, s);
       if(nread == -1) {
         int sockerr = SOCKERRNO;
-        /* Don't block forever */
+        /* Do not block forever */
         if(Curl_timediff(Curl_now(), start) > (60 * 1000))
           goto error;
         if(
@@ -198,6 +247,10 @@ int Curl_socketpair(int domain, int type, int protocol,
     } while(1);
   }
 
+  if(nonblocking)
+    if(curlx_nonblock(socks[0], TRUE) < 0 ||
+       curlx_nonblock(socks[1], TRUE) < 0)
+      goto error;
   sclose(listener);
   return 0;
 
@@ -207,5 +260,5 @@ error:
   sclose(socks[1]);
   return -1;
 }
-
-#endif /* ! HAVE_SOCKETPAIR */
+#endif
+#endif /* !CURL_DISABLE_SOCKETPAIR */

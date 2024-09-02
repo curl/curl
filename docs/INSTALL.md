@@ -4,7 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# how to install curl and libcurl
+# How to install curl and libcurl
 
 ## Installing Binary Packages
 
@@ -140,7 +140,7 @@ These options are provided to select the TLS backend to use.
  - BearSSL: `--with-bearssl`
  - GnuTLS: `--with-gnutls`.
  - mbedTLS: `--with-mbedtls`
- - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, libressl, and quictls)
+ - OpenSSL: `--with-openssl` (also for BoringSSL, AWS-LC, LibreSSL, and quictls)
  - rustls: `--with-rustls`
  - Schannel: `--with-schannel`
  - Secure Transport: `--with-secure-transport`
@@ -154,7 +154,17 @@ conflicting identical symbol names.
 When you build with multiple TLS backends, you can select the active one at
 runtime when curl starts up.
 
-## configure finding libs in wrong directory
+## MultiSSL and HTTP/3
+
+HTTP/3 needs QUIC and QUIC needs TLS. Building libcurl with HTTP/3 and QUIC
+support is not compatible with the MultiSSL feature: they are mutually
+exclusive. If you need MultiSSL in your build, you cannot have HTTP/3 support
+and vice versa.
+
+libcurl can only use a single TLS library with QUIC and that *same* TLS
+library needs to be used for the other TLS using protocols.
+
+## Configure finding libs in wrong directory
 
 When the configure script checks for third-party libraries, it adds those
 directories to the `LDFLAGS` variable and then tries linking to see if it
@@ -243,7 +253,7 @@ Note: The pre-processor settings can be found using the Visual Studio IDE
 under "Project -> Properties -> Configuration Properties -> C/C++ ->
 Preprocessor".
 
-## Using BSD-style lwIP instead of Winsock TCP/IP stack in Win32 builds
+## Using BSD-style lwIP instead of Winsock TCP/IP stack in Windows builds
 
 In order to compile libcurl and curl using BSD-style lwIP TCP/IP stack it is
 necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
@@ -511,14 +521,14 @@ disabling support for some feature (run `./configure --help` to see them all):
  - `--disable-mime` (MIME API)
  - `--disable-netrc`  (.netrc file)
  - `--disable-ntlm` (NTLM authentication)
- - `--disable-ntlm-wb` (NTLM WinBind)
+ - `--disable-ntlm-wb` (NTLM winbind)
  - `--disable-progress-meter` (graphical progress meter in library)
  - `--disable-proxy` (HTTP and SOCKS proxies)
  - `--disable-pthreads` (multi-threading)
  - `--disable-socketpair` (socketpair for asynchronous name resolving)
  - `--disable-threaded-resolver`  (threaded name resolver)
  - `--disable-tls-srp` (Secure Remote Password authentication for TLS)
- - `--disable-unix-sockets` (UNIX sockets)
+ - `--disable-unix-sockets` (Unix sockets)
  - `--disable-verbose` (eliminates debugging strings and error code strings)
  - `--disable-versioned-symbols` (versioned symbols)
  - `--enable-symbol-hiding` (eliminates unneeded symbols in the shared library)

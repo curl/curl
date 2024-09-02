@@ -15,6 +15,7 @@ Protocol:
   - SMTP
   - SFTP
   - SCP
+Added-in: 8.6.0
 ---
 
 # NAME
@@ -48,6 +49,8 @@ This is the millisecond version of CURLOPT_SERVER_RESPONSE_TIMEOUT(3).
 
 None
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -66,9 +69,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 8.6.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

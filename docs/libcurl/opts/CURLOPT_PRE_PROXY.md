@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_PROXY (3)
 Protocol:
   - All
+Added-in: 7.52.0
 ---
 
 # NAME
@@ -47,15 +48,17 @@ be used. Otherwise SOCKS4 is used as default.
 Setting the pre proxy string to "" (an empty string) explicitly disables the
 use of a pre proxy.
 
+When you set a hostname to use, do not assume that there is any particular
+single port number used widely for proxies. Specify it.
+
 The application does not have to keep the string around after setting this
 option.
 
 # DEFAULT
 
-Default is NULL, meaning no pre proxy is used.
+NULL
 
-When you set a hostname to use, do not assume that there is any particular
-single port number used widely for proxies. Specify it!
+# %PROTOCOLS%
 
 # EXAMPLE
 
@@ -72,9 +75,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.52.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

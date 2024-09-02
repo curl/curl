@@ -12,6 +12,7 @@ See-also:
   - libcurl-ws (3)
 Protocol:
   - WS
+Added-in: 7.86.0
 ---
 
 # NAME
@@ -52,6 +53,10 @@ If **CURLWS_RAW_MODE** is enabled in CURLOPT_WS_OPTIONS(3), the
 To send a message consisting of multiple frames, set the *CURLWS_CONT* bit
 in all frames except the final one.
 
+Warning: while it is possible to invoke this function from a callback,
+such a call is blocking in this situation, e.g. only returns after all data
+has been sent or an error is encountered.
+
 # FLAGS
 
 ## CURLWS_TEXT
@@ -89,6 +94,8 @@ fragment like this, the *fragsize* must be provided with the total
 expected fragment size in the first call and it needs to be zero in subsequent
 calls.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -111,9 +118,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.86.0.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

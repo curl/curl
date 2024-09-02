@@ -29,6 +29,9 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -z "2004 jan 1 12:12:12 UTC"
 
 # Verify data after the test has been "shot"
 <verify>
+<strip>
+QUIT
+</strip>
 <protocol>
 USER anonymous
 PASS ftp@example.com

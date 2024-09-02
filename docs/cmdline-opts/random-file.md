@@ -4,7 +4,7 @@ SPDX-License-Identifier: curl
 Long: random-file
 Arg: <file>
 Help: File for reading random data from
-Category: misc
+Category: deprecated
 Added: 7.7
 Multi: single
 See-also:

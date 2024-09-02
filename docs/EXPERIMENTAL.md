@@ -49,7 +49,7 @@ Graduation requirements:
 
 - Using HTTP/3 with the given build should perform without risking busy-loops
 
-### The rustls backend
+### The Rustls backend
 
 Graduation requirements:
 

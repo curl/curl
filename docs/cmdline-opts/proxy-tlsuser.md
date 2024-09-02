@@ -16,4 +16,8 @@ Example:
 
 # `--proxy-tlsuser`
 
-Same as --tlsuser but used in HTTPS proxy context.
+Set username for use for HTTPS proxy with the TLS authentication method
+specified with --proxy-tlsauthtype. Requires that --proxy-tlspassword also is
+set.
+
+This option does not work with TLS 1.3.

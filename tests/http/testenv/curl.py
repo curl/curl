@@ -27,6 +27,10 @@
 import json
 import logging
 import os
+import sys
+import time
+from threading import Thread
+
 import psutil
 import re
 import shutil
@@ -103,6 +107,85 @@ class RunProfile:
                f'stats={self.stats}]'
 
 
+class RunTcpDump:
+
+    def __init__(self, env, run_dir):
+        self._env = env
+        self._run_dir = run_dir
+        self._proc = None
+        self._stdoutfile = os.path.join(self._run_dir, 'tcpdump.out')
+        self._stderrfile = os.path.join(self._run_dir, 'tcpdump.err')
+
+    @property
+    def stats(self) -> Optional[List[str]]:
+        if self._proc:
+            raise Exception('tcpdump still running')
+        lines = []
+        for l in open(self._stdoutfile).readlines():
+            if re.match(r'.* IP 127\.0\.0\.1\.\d+ [<>] 127\.0\.0\.1\.\d+:.*', l):
+                lines.append(l)
+        return lines
+
+    def stats_excluding(self, src_port) -> Optional[List[str]]:
+        if self._proc:
+            raise Exception('tcpdump still running')
+        lines = []
+        for l in self.stats:
+            if not re.match(r'.* IP 127\.0\.0\.1\.' + str(src_port) + ' >.*', l):
+                lines.append(l)
+        return lines
+
+    @property
+    def stderr(self) -> List[str]:
+        if self._proc:
+            raise Exception('tcpdump still running')
+        lines = []
+        return open(self._stderrfile).readlines()
+
+    def sample(self):
+        # not sure how to make that detection reliable for all platforms
+        local_if = 'lo0' if sys.platform.startswith('darwin') else 'lo'
+        try:
+            tcpdump = self._env.tcpdump()
+            if tcpdump is None:
+                raise Exception('tcpdump not available')
+            # look with tcpdump for TCP RST packets which indicate
+            # we did not shut down connections cleanly
+            args = []
+            # at least on Linux, we need root permissions to run tcpdump
+            if sys.platform.startswith('linux'):
+                args.append('sudo')
+            args.extend([
+                tcpdump, '-i', local_if, '-n', 'tcp[tcpflags] & (tcp-rst)!=0'
+            ])
+            with open(self._stdoutfile, 'w') as cout:
+                with open(self._stderrfile, 'w') as cerr:
+                    self._proc = subprocess.Popen(args, stdout=cout, stderr=cerr,
+                                                  text=True, cwd=self._run_dir,
+                                                  shell=False)
+                    assert self._proc
+                    assert self._proc.returncode is None
+                    while self._proc:
+                        try:
+                            self._proc.wait(timeout=1)
+                        except subprocess.TimeoutExpired:
+                            pass
+        except Exception as e:
+            log.error(f'Tcpdump: {e}')
+
+    def start(self):
+        def do_sample():
+            self.sample()
+        t = Thread(target=do_sample)
+        t.start()
+
+    def finish(self):
+        if self._proc:
+            time.sleep(1)
+            self._proc.terminate()
+            self._proc = None
+
+
 class ExecResult:
 
     def __init__(self, args: List[str], exit_code: int,
@@ -110,13 +193,15 @@ class ExecResult:
                  duration: Optional[timedelta] = None,
                  with_stats: bool = False,
                  exception: Optional[str] = None,
-                 profile: Optional[RunProfile] = None):
+                 profile: Optional[RunProfile] = None,
+                 tcpdump: Optional[RunTcpDump] = None):
         self._args = args
         self._exit_code = exit_code
         self._exception = exception
         self._stdout = stdout
         self._stderr = stderr
         self._profile = profile
+        self._tcpdump = tcpdump
         self._duration = duration if duration is not None else timedelta()
         self._response = None
         self._responses = []
@@ -184,6 +269,10 @@ class ExecResult:
     @property
     def profile(self) -> Optional[RunProfile]:
         return self._profile
+
+    @property
+    def tcpdump(self) -> Optional[RunTcpDump]:
+        return self._tcpdump
 
     @property
     def response(self) -> Optional[Dict]:
@@ -301,7 +390,9 @@ class ExecResult:
                 f'were made\n{self.dump_logs()}'
 
     def check_stats(self, count: int, http_status: Optional[int] = None,
-                    exitcode: Optional[int] = None):
+                    exitcode: Optional[int] = None,
+                    remote_port: Optional[int] = None,
+                    remote_ip: Optional[str] = None):
         if exitcode is None:
             self.check_exit_code(0)
         assert len(self.stats) == count, \
@@ -319,6 +410,18 @@ class ExecResult:
                     assert x['exitcode'] == exitcode, \
                         f'status #{idx} exitcode: expected {exitcode}, '\
                         f'got {x["exitcode"]}\n{self.dump_stat(x)}'
+        if remote_port is not None:
+            for idx, x in enumerate(self.stats):
+                assert 'remote_port' in x, f'remote_port missing\n{self.dump_stat(x)}'
+                assert x['remote_port'] == remote_port, \
+                        f'status #{idx} remote_port: expected {remote_port}, '\
+                        f'got {x["remote_port"]}\n{self.dump_stat(x)}'
+        if remote_ip is not None:
+            for idx, x in enumerate(self.stats):
+                assert 'remote_ip' in x, f'remote_ip missing\n{self.dump_stat(x)}'
+                assert x['remote_ip'] == remote_ip, \
+                        f'status #{idx} remote_ip: expected {remote_ip}, '\
+                        f'got {x["remote_ip"]}\n{self.dump_stat(x)}'
 
     def dump_logs(self):
         lines = ['>>--stdout ----------------------------------------------\n']
@@ -359,8 +462,11 @@ class CurlClient:
         'h3': '--http3-only',
     }
 
-    def __init__(self, env: Env, run_dir: Optional[str] = None,
-                 timeout: Optional[float] = None, silent: bool = False):
+    def __init__(self, env: Env,
+                 run_dir: Optional[str] = None,
+                 timeout: Optional[float] = None,
+                 silent: bool = False,
+                 run_env: Optional[Dict[str, str]] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
@@ -370,6 +476,7 @@ class CurlClient:
         self._headerfile = f'{self._run_dir}/curl.headers'
         self._log_path = f'{self._run_dir}/curl.log'
         self._silent = silent
+        self._run_env = run_env
         self._rmrf(self._run_dir)
         self._mkpath(self._run_dir)
 
@@ -418,18 +525,21 @@ class CurlClient:
                  alpn_proto: Optional[str] = None,
                  def_tracing: bool = True,
                  with_stats: bool = False,
-                 with_profile: bool = False):
+                 with_profile: bool = False,
+                 with_tcpdump: bool = False):
         return self._raw(url, options=extra_args,
                          with_stats=with_stats,
                          alpn_proto=alpn_proto,
                          def_tracing=def_tracing,
-                         with_profile=with_profile)
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
 
     def http_download(self, urls: List[str],
                       alpn_proto: Optional[str] = None,
                       with_stats: bool = True,
                       with_headers: bool = False,
                       with_profile: bool = False,
+                      with_tcpdump: bool = False,
                       no_save: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
@@ -452,13 +562,15 @@ class CurlClient:
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
                          with_headers=with_headers,
-                         with_profile=with_profile)
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
 
     def http_upload(self, urls: List[str], data: str,
                     alpn_proto: Optional[str] = None,
                     with_stats: bool = True,
                     with_headers: bool = False,
                     with_profile: bool = False,
+                    with_tcpdump: bool = False,
                     extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
@@ -472,7 +584,8 @@ class CurlClient:
         return self._raw(urls, alpn_proto=alpn_proto, options=extra_args,
                          with_stats=with_stats,
                          with_headers=with_headers,
-                         with_profile=with_profile)
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
 
     def http_delete(self, urls: List[str],
                     alpn_proto: Optional[str] = None,
@@ -541,6 +654,7 @@ class CurlClient:
     def ftp_get(self, urls: List[str],
                       with_stats: bool = True,
                       with_profile: bool = False,
+                      with_tcpdump: bool = False,
                       no_save: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
@@ -563,11 +677,13 @@ class CurlClient:
         return self._raw(urls, options=extra_args,
                          with_stats=with_stats,
                          with_headers=False,
-                         with_profile=with_profile)
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
 
     def ftp_ssl_get(self, urls: List[str],
                       with_stats: bool = True,
                       with_profile: bool = False,
+                      with_tcpdump: bool = False,
                       no_save: bool = False,
                       extra_args: List[str] = None):
         if extra_args is None:
@@ -577,11 +693,13 @@ class CurlClient:
         ])
         return self.ftp_get(urls=urls, with_stats=with_stats,
                             with_profile=with_profile, no_save=no_save,
+                            with_tcpdump=with_tcpdump,
                             extra_args=extra_args)
 
     def ftp_upload(self, urls: List[str], fupload,
                    with_stats: bool = True,
                    with_profile: bool = False,
+                   with_tcpdump: bool = False,
                    extra_args: List[str] = None):
         if extra_args is None:
             extra_args = []
@@ -595,11 +713,13 @@ class CurlClient:
         return self._raw(urls, options=extra_args,
                          with_stats=with_stats,
                          with_headers=False,
-                         with_profile=with_profile)
+                         with_profile=with_profile,
+                         with_tcpdump=with_tcpdump)
 
     def ftp_ssl_upload(self, urls: List[str], fupload,
                        with_stats: bool = True,
                        with_profile: bool = False,
+                       with_tcpdump: bool = False,
                        extra_args: List[str] = None):
         if extra_args is None:
             extra_args = []
@@ -608,6 +728,7 @@ class CurlClient:
         ])
         return self.ftp_upload(urls=urls, fupload=fupload,
                                with_stats=with_stats, with_profile=with_profile,
+                               with_tcpdump=with_tcpdump,
                                extra_args=extra_args)
 
     def response_file(self, idx: int):
@@ -625,14 +746,18 @@ class CurlClient:
         my_args.extend(args)
         return self._run(args=my_args, with_stats=with_stats, with_profile=with_profile)
 
-    def _run(self, args, intext='', with_stats: bool = False, with_profile: bool = True):
+    def _run(self, args, intext='', with_stats: bool = False,
+             with_profile: bool = True, with_tcpdump: bool = False):
         self._rmf(self._stdoutfile)
         self._rmf(self._stderrfile)
         self._rmf(self._headerfile)
-        started_at = datetime.now()
         exception = None
         profile = None
+        tcpdump = None
         started_at = datetime.now()
+        if with_tcpdump:
+            tcpdump = RunTcpDump(self.env, self._run_dir)
+            tcpdump.start()
         try:
             with open(self._stdoutfile, 'w') as cout:
                 with open(self._stderrfile, 'w') as cerr:
@@ -641,7 +766,8 @@ class CurlClient:
                             if self._timeout else None
                         log.info(f'starting: {args}')
                         p = subprocess.Popen(args, stderr=cerr, stdout=cout,
-                                             cwd=self._run_dir, shell=False)
+                                             cwd=self._run_dir, shell=False,
+                                             env=self._run_env)
                         profile = RunProfile(p.pid, started_at, self._run_dir)
                         if intext is not None and False:
                             p.communicate(input=intext.encode(), timeout=1)
@@ -663,7 +789,8 @@ class CurlClient:
                         p = subprocess.run(args, stderr=cerr, stdout=cout,
                                            cwd=self._run_dir, shell=False,
                                            input=intext.encode() if intext else None,
-                                           timeout=self._timeout)
+                                           timeout=self._timeout,
+                                           env=self._run_env)
                         exitcode = p.returncode
         except subprocess.TimeoutExpired:
             now = datetime.now()
@@ -672,13 +799,15 @@ class CurlClient:
                         f'(configured {self._timeout}s): {args}')
             exitcode = -1
             exception = 'TimeoutExpired'
+        if tcpdump:
+            tcpdump.finish()
         coutput = open(self._stdoutfile).readlines()
         cerrput = open(self._stderrfile).readlines()
         return ExecResult(args=args, exit_code=exitcode, exception=exception,
                           stdout=coutput, stderr=cerrput,
                           duration=datetime.now() - started_at,
                           with_stats=with_stats,
-                          profile=profile)
+                          profile=profile, tcpdump=tcpdump)
 
     def _raw(self, urls, intext='', timeout=None, options=None, insecure=False,
              alpn_proto: Optional[str] = None,
@@ -686,13 +815,14 @@ class CurlClient:
              with_stats=False,
              with_headers=True,
              def_tracing=True,
-             with_profile=False):
+             with_profile=False,
+             with_tcpdump=False):
         args = self._complete_args(
             urls=urls, timeout=timeout, options=options, insecure=insecure,
             alpn_proto=alpn_proto, force_resolve=force_resolve,
             with_headers=with_headers, def_tracing=def_tracing)
         r = self._run(args, intext=intext, with_stats=with_stats,
-                      with_profile=with_profile)
+                      with_profile=with_profile, with_tcpdump=with_tcpdump)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
             if r.json:
@@ -708,6 +838,9 @@ class CurlClient:
             urls = [urls]
 
         args = [self._curl, "-s", "--path-as-is"]
+        if 'CURL_TEST_EVENT' in os.environ:
+            args.append('--test-event')
+
         if with_headers:
             args.extend(["-D", self._headerfile])
         if def_tracing is not False and not self._silent:

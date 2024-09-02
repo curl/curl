@@ -56,22 +56,31 @@ struct Curl_hash {
   Curl_hash_dtor   dtor;
   size_t slots;
   size_t size;
+#ifdef DEBUGBUILD
+  int init;
+#endif
 };
 
 typedef void (*Curl_hash_elem_dtor)(void *key, size_t key_len, void *p);
 
 struct Curl_hash_element {
-  struct Curl_llist_element list;
+  struct Curl_llist_node list;
   void   *ptr;
   Curl_hash_elem_dtor dtor;
   size_t key_len;
+#ifdef DEBUGBUILD
+  int init;
+#endif
   char   key[1]; /* allocated memory following the struct */
 };
 
 struct Curl_hash_iterator {
   struct Curl_hash *hash;
   size_t slot_index;
-  struct Curl_llist_element *current_element;
+  struct Curl_llist_node *current_element;
+#ifdef DEBUGBUILD
+  int init;
+#endif
 };
 
 void Curl_hash_init(struct Curl_hash *h,
@@ -85,8 +94,9 @@ void *Curl_hash_add2(struct Curl_hash *h, void *key, size_t key_len, void *p,
                      Curl_hash_elem_dtor dtor);
 int Curl_hash_delete(struct Curl_hash *h, void *key, size_t key_len);
 void *Curl_hash_pick(struct Curl_hash *, void *key, size_t key_len);
-#define Curl_hash_count(h) ((h)->size)
+
 void Curl_hash_destroy(struct Curl_hash *h);
+size_t Curl_hash_count(struct Curl_hash *h);
 void Curl_hash_clean(struct Curl_hash *h);
 void Curl_hash_clean_with_criterium(struct Curl_hash *h, void *user,
                                     int (*comp)(void *, void *));

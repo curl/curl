@@ -28,7 +28,7 @@ Funny-head: yesyes
 http
 </server>
 <features>
-idn
+IDN
 proxy
 </features>
 <setenv>

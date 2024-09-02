@@ -70,8 +70,9 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  const char *tcp_version;
   const char *client_ip;
+  struct ip_quadruple ipquad;
+  int is_ipv6;
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
@@ -81,19 +82,20 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
     result = Curl_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
   else {
 #endif /* USE_UNIX_SOCKETS */
+  result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
+  if(result)
+    return result;
+
   /* Emit the correct prefix for IPv6 */
-  tcp_version = cf->conn->bits.ipv6 ? "TCP6" : "TCP4";
   if(data->set.str[STRING_HAPROXY_CLIENT_IP])
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
   else
-    client_ip = data->info.primary.local_ip;
+    client_ip = ipquad.local_ip;
 
   result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
-                         tcp_version,
-                         client_ip,
-                         data->info.primary.remote_ip,
-                         data->info.primary.local_port,
-                         data->info.primary.remote_port);
+                         is_ipv6? "TCP6" : "TCP4",
+                         client_ip, ipquad.remote_ip,
+                         ipquad.local_port, ipquad.remote_port);
 
 #ifdef USE_UNIX_SOCKETS
   }
@@ -132,7 +134,7 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
       size_t written;
       result = Curl_conn_send(data, cf->sockindex,
                               Curl_dyn_ptr(&ctx->data_out),
-                              len, &written);
+                              len, FALSE, &written);
       if(result == CURLE_AGAIN) {
         result = CURLE_OK;
         written = 0;
@@ -194,6 +196,7 @@ struct Curl_cftype Curl_cft_haproxy = {
   cf_haproxy_destroy,
   cf_haproxy_connect,
   cf_haproxy_close,
+  Curl_cf_def_shutdown,
   Curl_cf_def_get_host,
   cf_haproxy_adjust_pollset,
   Curl_cf_def_data_pending,

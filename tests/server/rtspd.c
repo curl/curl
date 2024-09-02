@@ -46,9 +46,6 @@
 #include <netinet/tcp.h> /* for TCP_NODELAY */
 #endif
 
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
@@ -106,7 +103,7 @@ struct httprequest {
   bool auth;      /* Authorization header present in the incoming request */
   size_t cl;      /* Content-Length of the incoming request */
   bool digest;    /* Authorization digest header found */
-  bool ntlm;      /* Authorization ntlm header found */
+  bool ntlm;      /* Authorization NTLM header found */
   int pipe;       /* if non-zero, expect this many requests to do a "piped"
                      request/response */
   int skip;       /* if non-zero, the server is instructed to not read this

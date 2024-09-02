@@ -20,7 +20,7 @@ Content-Type: text/1
 #
 # Client-side
 <client>
-<file1 name="%LOGDIR/.curlrc">
+<file1 name="%LOGDIR/curlrc">
 --next
 header = "a: a"
 data = "curlrc read"
@@ -34,7 +34,7 @@ HOME=
 CURL_HOME=
 </setenv>
 <name>
-Verify XDG_CONFIG_HOME use to find .curlrc
+Verify XDG_CONFIG_HOME use to find curlrc
 </name>
 <command option="no-q">
 %HOSTIP:%HTTPPORT/%TESTNUMBER

@@ -52,7 +52,6 @@ if test "$HAVE_PROTO_BSDSOCKET_H" = "1"; then
       LIBS="-lamisslstubs -lamisslauto $LIBS"
       AC_DEFINE(USE_AMISSL, 1, [if AmiSSL is in use])
       AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use])
-      AC_DEFINE_UNQUOTED(HAVE_OPENSSL3, 1, [Define to 1 if using OpenSSL 3 or later.])
       AC_CHECK_HEADERS(openssl/x509.h openssl/rsa.h openssl/crypto.h \
                        openssl/pem.h openssl/ssl.h openssl/err.h)
     ],[

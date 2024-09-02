@@ -10,6 +10,7 @@ Protocol:
 See-also:
   - CURLOPT_HTTP_VERSION (3)
   - CURLOPT_MAXFILESIZE_LARGE (3)
+Added-in: 7.14.1
 ---
 
 # NAME
@@ -45,6 +46,8 @@ Only use this option if strictly necessary.
 
 0
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -62,10 +65,16 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# HISTORY
 
-Added in 7.14.1. Support for FTP added in 7.46.0. This option is not working
-for HTTP when libcurl is built to use the hyper backend.
+Support for FTP added in 7.46.0.
+
+# NOTES
+
+This option is not working for HTTP when libcurl is built to use the hyper
+backend.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 

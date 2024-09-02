@@ -11,6 +11,7 @@ See-also:
   - curl_easy_setopt (3)
 Protocol:
   - All
+Added-in: 7.18.2
 ---
 
 # NAME
@@ -57,6 +58,8 @@ Furthermore if you wait on the socket and it tells you there is data to read,
 curl_easy_recv(3) may return **CURLE_AGAIN** if the only data that was
 read was for internal SSL processing, and no other data is available.
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -85,9 +88,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.18.2.
+# %AVAILABILITY%
 
 # RETURN VALUE
 

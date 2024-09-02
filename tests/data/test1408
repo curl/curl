@@ -40,7 +40,7 @@ Set-Cookie: time=2
 <client>
 <features>
 cookies
-ipv6
+IPv6
 </features>
 <server>
 http-ipv6

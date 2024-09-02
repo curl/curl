@@ -275,7 +275,7 @@ CURLcode Curl_dynhds_h1_cadd_line(struct dynhds *dynhds, const char *line)
   return Curl_dynhds_h1_add_line(dynhds, line, line? strlen(line) : 0);
 }
 
-#ifdef DEBUGBUILD
+#ifdef UNITTESTS
 /* used by unit2602.c */
 
 bool Curl_dynhds_contains(struct dynhds *dynhds,

@@ -33,6 +33,33 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '.'))
 
 from testenv import Env, Nghttpx, Httpd, NghttpxQuic, NghttpxFwd
 
+def pytest_report_header(config):
+    # Env inits its base properties only once, we can report them here
+    env = Env()
+    report = [
+        f'Testing curl {env.curl_version()}',
+        f'  httpd: {env.httpd_version()}, http:{env.http_port} https:{env.https_port}',
+        f'  httpd-proxy: {env.httpd_version()}, http:{env.proxy_port} https:{env.proxys_port}'
+    ]
+    if env.have_h3():
+        report.extend([
+            f'  nghttpx: {env.nghttpx_version()}, h3:{env.https_port}'
+        ])
+    if env.has_caddy():
+        report.extend([
+            f'  Caddy: {env.caddy_version()}, http:{env.caddy_http_port} https:{env.caddy_https_port}'
+        ])
+    if env.has_vsftpd():
+        report.extend([
+            f'  VsFTPD: {env.vsftpd_version()}, ftp:{env.ftp_port}, ftps:{env.ftps_port}'
+        ])
+    return '\n'.join(report)
+
+# TODO: remove this and repeat argument everywhere, pytest-repeat can be used to repeat tests
+def pytest_generate_tests(metafunc):
+    if "repeat" in metafunc.fixturenames:
+        metafunc.parametrize('repeat', [0])
+
 @pytest.fixture(scope="package")
 def env(pytestconfig) -> Env:
     env = Env(pytestconfig=pytestconfig)

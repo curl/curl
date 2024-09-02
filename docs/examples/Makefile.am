@@ -24,7 +24,7 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = README.md Makefile.example Makefile.inc Makefile.mk \
+EXTRA_DIST = README.md Makefile.example Makefile.mk CMakeLists.txt \
   $(COMPLICATED_EXAMPLES) .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and
@@ -50,11 +50,7 @@ endif
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-if USE_EXPLICIT_LIB_DEPS
-LDADD = $(LIBDIR)/libcurl.la @LIBCURL_LIBS@
-else
-LDADD = $(LIBDIR)/libcurl.la
-endif
+LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@

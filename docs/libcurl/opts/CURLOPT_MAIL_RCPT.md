@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_MAIL_FROM (3)
 Protocol:
   - SMTP
+Added-in: 7.20.0
 ---
 
 # NAME
@@ -48,6 +49,8 @@ should be specified using the mailing list name, such as `Friends` or
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -68,9 +71,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Added in 7.20.0. The **VRFY** and **EXPN** logic was added in 7.34.0
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_QUOTE (3)
 Protocol:
   - FTP
+Added-in: 7.9.5
 ---
 
 # NAME
@@ -42,6 +43,8 @@ this option does not.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -65,9 +68,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Along with the protocol support
+# %AVAILABILITY%
 
 # RETURN VALUE
 

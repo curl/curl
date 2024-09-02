@@ -9,6 +9,7 @@ See-also:
   - CURLOPT_TIMEVALUE (3)
 Protocol:
   - HTTP
+Added-in: 7.1
 ---
 
 # NAME
@@ -39,6 +40,8 @@ option can be used after a transfer to learn if a zero-byte successful
 
 CURL_TIMECOND_NONE (0)
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -61,9 +64,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

@@ -228,8 +228,8 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
     if(CURL_WRITEFUNC_PAUSE == nwritten) {
       if(data->conn && data->conn->handler->flags & PROTOPT_NONETWORK) {
         /* Protocols that work without network cannot be paused. This is
-           actually only FILE:// just now, and it can't pause since the
-           transfer isn't done using the "normal" procedure. */
+           actually only FILE:// just now, and it cannot pause since the
+           transfer is not done using the "normal" procedure. */
         failf(data, "Write callback asked for PAUSE when not supported");
         return CURLE_WRITE_ERROR;
       }

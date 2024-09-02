@@ -25,9 +25,6 @@
 
 #include "getpart.h"
 
-#define ENABLE_CURLX_PRINTF
-/* make the curlx header define all printf() functions to use the curlx_*
-   versions instead */
 #include "curlx.h" /* from the private lib dir */
 
 /* just to please curl_base64.h we create a fake struct */
@@ -52,6 +49,7 @@ struct Curl_easy {
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
+#  pragma warning(push)
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
@@ -65,7 +63,7 @@ curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
-#  pragma warning(default:4232) /* MSVC extension, dllimport identity */
+#  pragma warning(pop)
 #endif
 
 

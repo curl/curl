@@ -12,6 +12,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - All
+Added-in: 7.1
 ---
 
 # NAME
@@ -49,6 +50,8 @@ URL you request).
 
 0, the body is transferred
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -67,9 +70,7 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
-
-Always
+# %AVAILABILITY%
 
 # RETURN VALUE
 

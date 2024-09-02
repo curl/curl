@@ -64,8 +64,8 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   long sts;
   short chan;
 
-  /* MSK, 23-JAN-2004, iosbdef.h wasn't in VAX V7.2 or CC 6.4  */
-  /* distribution so I created this.  May revert back later to */
+  /* MSK, 23-JAN-2004, iosbdef.h was not in VAX V7.2 or CC 6.4  */
+  /* distribution so I created this. May revert back later to */
   /* struct _iosb iosb;                                        */
   struct _iosb
      {
@@ -115,7 +115,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   }
   /* since echo is disabled, print a newline */
   fputs("\n", tool_stderr);
-  /* if user didn't hit ENTER, terminate buffer */
+  /* if user did not hit ENTER, terminate buffer */
   if(i == buflen)
     buffer[buflen-1] = '\0';
 
@@ -154,7 +154,7 @@ static bool ttyecho(bool enable, int fd)
     noecho.c_lflag &= ~(tcflag_t)ECHO;
     ioctl(fd, TCSETA, &noecho);
 #else
-    /* neither HAVE_TERMIO_H nor HAVE_TERMIOS_H, we can't disable echo! */
+    /* neither HAVE_TERMIO_H nor HAVE_TERMIOS_H, we cannot disable echo! */
     (void)fd;
     return FALSE; /* not disabled */
 #endif
@@ -180,7 +180,7 @@ char *getpass_r(const char *prompt, /* prompt to display */
   bool disabled;
   int fd = open("/dev/tty", O_RDONLY);
   if(-1 == fd)
-    fd = STDIN_FILENO; /* use stdin if the tty couldn't be used */
+    fd = STDIN_FILENO; /* use stdin if the tty could not be used */
 
   disabled = ttyecho(FALSE, fd); /* disable terminal echo */
 

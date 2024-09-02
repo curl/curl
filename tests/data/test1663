@@ -1,0 +1,23 @@
+<testcase>
+<info>
+<keywords>
+unittest
+interface
+bind
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+</features>
+<name>
+unit tests for interface option parsing
+</name>
+</client>
+</testcase>

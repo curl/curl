@@ -100,18 +100,23 @@ int Curl_thread_join(curl_thread_t *hnd)
 
 #elif defined(USE_THREADS_WIN32)
 
-/* !checksrc! disable SPACEBEFOREPAREN 1 */
-curl_thread_t Curl_thread_create(unsigned int (CURL_STDCALL *func) (void *),
+curl_thread_t Curl_thread_create(
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+                                 DWORD
+#else
+                                 unsigned int
+#endif
+                                 (CURL_STDCALL *func) (void *),
                                  void *arg)
 {
-#ifdef _WIN32_WCE
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
   typedef HANDLE curl_win_thread_handle_t;
 #else
   typedef uintptr_t curl_win_thread_handle_t;
 #endif
   curl_thread_t t;
   curl_win_thread_handle_t thread_handle;
-#ifdef _WIN32_WCE
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
   thread_handle = CreateThread(NULL, 0, func, arg, 0, NULL);
 #else
   thread_handle = _beginthreadex(NULL, 0, func, arg, 0, NULL);

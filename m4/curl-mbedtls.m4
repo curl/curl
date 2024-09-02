@@ -43,14 +43,14 @@ if test "x$OPT_MBEDTLS" != xno; then
 
       AC_CHECK_LIB(mbedtls, mbedtls_havege_init,
       dnl libmbedtls found, set the variable
-       [
-         AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-         AC_SUBST(USE_MBEDTLS, [1])
-         MBEDTLS_ENABLED=1
-         USE_MBEDTLS="yes"
-         ssl_msg="mbedTLS"
-         test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-        ], [], -lmbedx509 -lmbedcrypto)
+      [
+        AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+        AC_SUBST(USE_MBEDTLS, [1])
+        MBEDTLS_ENABLED=1
+        USE_MBEDTLS="yes"
+        ssl_msg="mbedTLS"
+        test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+      ], [], -lmbedx509 -lmbedcrypto)
     fi
 
     addld=""
@@ -66,22 +66,22 @@ if test "x$OPT_MBEDTLS" != xno; then
 
       LDFLAGS="$LDFLAGS $addld"
       if test "$addcflags" != "-I/usr/include"; then
-         CPPFLAGS="$CPPFLAGS $addcflags"
+        CPPFLAGS="$CPPFLAGS $addcflags"
       fi
 
       AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
-       [
-       AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-       AC_SUBST(USE_MBEDTLS, [1])
-       MBEDTLS_ENABLED=1
-       USE_MBEDTLS="yes"
-       ssl_msg="mbedTLS"
-       test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
-       ],
-       [
-         CPPFLAGS=$_cppflags
-         LDFLAGS=$_ldflags
-       ], -lmbedx509 -lmbedcrypto)
+        [
+        AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
+        AC_SUBST(USE_MBEDTLS, [1])
+        MBEDTLS_ENABLED=1
+        USE_MBEDTLS="yes"
+        ssl_msg="mbedTLS"
+        test mbedtls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
+        ],
+        [
+          CPPFLAGS=$_cppflags
+          LDFLAGS=$_ldflags
+        ], -lmbedx509 -lmbedcrypto)
     fi
 
     if test "x$USE_MBEDTLS" = "xyes"; then
@@ -101,6 +101,7 @@ if test "x$OPT_MBEDTLS" != xno; then
           AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])
         fi
       fi
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls"
     fi
 
   fi dnl mbedTLS not disabled

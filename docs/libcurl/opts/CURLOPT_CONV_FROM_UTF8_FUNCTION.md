@@ -9,6 +9,7 @@ Protocol:
 See-also:
   - CURLOPT_CONV_FROM_NETWORK_FUNCTION (3)
   - CURLOPT_CONV_TO_NETWORK_FUNCTION (3)
+Added-in: 7.15.4
 ---
 
 # NAME
@@ -69,6 +70,8 @@ You need to override these definitions if they are different on your system.
 
 NULL
 
+# %PROTOCOLS%
+
 # EXAMPLE
 
 ~~~c
@@ -93,12 +96,14 @@ int main(void)
 }
 ~~~
 
-# AVAILABILITY
+# DEPRECATED
 
 Not available and deprecated since 7.82.0.
 
 Available only if **CURL_DOES_CONVERSIONS** was defined when libcurl was
 built.
+
+# %AVAILABILITY%
 
 # RETURN VALUE
 
