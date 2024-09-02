@@ -28,16 +28,10 @@ http
 POST only a part of --data (first 26 byte, remove the cr/lf/crlf's and send it)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data @%LOGDIR/test%TESTNUMBER.txt!0-25
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --variable foo@%LOGDIR/test%TESTNUMBER.txt!5-25 --expand-data AB{{foo}}XY
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
-%repeat[4 x 1]%
-%repeat[4 x 2]%
-%repeat[4 x 3]%
-%repeat[4 x 4]%
-%repeat[4 x 5]%
-0123456789
-repeat[500 x test]%
+%repeat[5 x 1]%%repeat[5 x 2]%%repeat[5 x 3]%%repeat[5 x 4]%%repeat[5 x 5]%0123456789repeat[500 x test]%
 </file>
 </client>
 
@@ -48,10 +42,10 @@ POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 21
+Content-Length: 25
 Content-Type: application/x-www-form-urlencoded
 
-111122223333444455550
+AB222223333344444555550XY
 </protocol>
 </verify>
 </testcase>

@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
---data @file!0-499
+--data-binary @file!9500-
 Only a part of a file
 </keywords>
 </info>
@@ -25,33 +25,30 @@ blablabla
 http
 </server>
 <name>
-POST only a part of --data (first 26 byte, remove the cr/lf/crlf's and send it)
+POST only a part of --data-binary (all bytes from offset 9500 and forward)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data @%LOGDIR/test%TESTNUMBER.txt!0-25
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!9500-
 </command>
 <file name="%LOGDIR/test%TESTNUMBER.txt">
-%repeat[4 x 1]%
-%repeat[4 x 2]%
-%repeat[4 x 3]%
-%repeat[4 x 4]%
-%repeat[4 x 5]%
-0123456789
-repeat[500 x test]%
+%repeat[9498 x 0]%
+%repeat[500 x 1]%
+%repeat[500 x 2]%
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol nonewline="yes" crlf="yes">
+<protocol crlf="yes">
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 21
+Content-Length: 1004
 Content-Type: application/x-www-form-urlencoded
 
-111122223333444455550
+%repeat[500 x 1]%
+%repeat[500 x 2]%
 </protocol>
 </verify>
 </testcase>

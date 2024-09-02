@@ -39,6 +39,48 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+int filename_extract_limits(char *filename, size_t *start, size_t *end)
+{
+  int have_valid_range = 1;
+  char *ptr_range;
+  int flags_ret = 0;
+  int have_minus = 0;
+
+  ptr_range = filename + strlen(filename) - 1;
+  while(ptr_range > filename) {
+    if(!strchr("0123456789-!", *ptr_range)) {
+      have_valid_range = 0;
+      break;
+    }
+    if(*ptr_range == '-') {
+      have_minus = 1;
+    }
+    if(*ptr_range == '!') {
+      if(*(ptr_range + 1) != '-') {
+        flags_ret = flags_ret | FILELIMIT_START;
+        *start = strtol(ptr_range + 1, NULL, 0);
+      }
+      if(have_minus && flags_ret)
+        *ptr_range = '\0';
+      break;
+    }
+    else if(*ptr_range == '-' && strchr(ptr_range + 1, '-')) {
+      have_valid_range = 0;
+      break;
+    }
+    else if(*ptr_range == '-' && *(ptr_range + 1) != '\0') {
+      flags_ret = FILELIMIT_END;
+      *end = strtol(ptr_range + 1, NULL, 0);
+    }
+    ptr_range--;
+  }
+
+  if(!have_valid_range) {
+    return 0;
+  }
+  return flags_ret;
+}
+
 struct getout *new_getout(struct OperationConfig *config)
 {
   struct getout *node = calloc(1, sizeof(struct getout));
@@ -90,20 +132,45 @@ static size_t memcrlf(char *orig,
 
 #define MAX_FILE2STRING MAX_FILE2MEMORY
 
-ParameterError file2string(char **bufp, FILE *file)
+ParameterError file2string(char **bufp, FILE *file, int filelimit,
+                           size_t start, size_t end)
 {
   struct curlx_dynbuf dyn;
+  size_t rangelen;
+  int rangelen_set = 0;
+
+  if(filelimit == FILELIMIT_START && fseek(file, start, SEEK_SET)) {
+    return PARAM_FSEEK_ERROR;
+  }
+  if(filelimit == FILELIMIT_END && fseek(file, -((long)end), SEEK_END)) {
+    return PARAM_FSEEK_ERROR;
+  }
+  if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
+    if(fseek(file, start, SEEK_SET)) {
+      return PARAM_FSEEK_ERROR;
+    }
+    rangelen = end - start + 1;
+    rangelen_set = 1;
+  }
   curlx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
     do {
       char buffer[4096];
       char *ptr;
-      size_t nread = fread(buffer, 1, sizeof(buffer), file);
+      int elt_cnt;
+      if(rangelen_set && (rangelen < sizeof(buffer))) {
+        elt_cnt = rangelen;
+      }
+      else {
+        elt_cnt = sizeof(buffer);
+      }
+      size_t nread = fread(buffer, 1, elt_cnt, file);
       if(ferror(file)) {
         curlx_dyn_free(&dyn);
         *bufp = NULL;
         return PARAM_READ_ERROR;
       }
+      rangelen = rangelen - nread;
       ptr = buffer;
       while(nread) {
         size_t nlen = memcrlf(ptr, FALSE, nread);
@@ -118,22 +185,50 @@ ParameterError file2string(char **bufp, FILE *file)
           nread -= nlen;
         }
       }
+      if(rangelen_set && rangelen <= 0)
+        break;
     } while(!feof(file));
   }
   *bufp = curlx_dyn_ptr(&dyn);
   return PARAM_OK;
 }
 
-ParameterError file2memory(char **bufp, size_t *size, FILE *file)
+ParameterError file2memory(char **bufp, size_t *size, FILE *file,
+                           int filelimit, size_t start, size_t end)
 {
   if(file) {
     size_t nread;
     struct curlx_dynbuf dyn;
+    size_t rangelen;
+    int rangelen_set = 0;
+
+
+    if(filelimit == FILELIMIT_START && fseek(file, start, SEEK_SET)) {
+      return PARAM_FSEEK_ERROR;
+    }
+    if(filelimit == FILELIMIT_END && fseek(file, -((long)end), SEEK_END)) {
+      return PARAM_FSEEK_ERROR;
+    }
+    if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
+      if(fseek(file, start, SEEK_SET)) {
+        return PARAM_FSEEK_ERROR;
+      }
+      rangelen = end - start + 1;
+      rangelen_set = 1;
+    }
     /* The size needs to fit in an int later */
     curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];
-      nread = fread(buffer, 1, sizeof(buffer), file);
+      int elt_cnt;
+      if(rangelen_set && (rangelen < sizeof(buffer))) {
+        elt_cnt = rangelen;
+      }
+      else {
+        elt_cnt = sizeof(buffer);
+      }
+      nread = fread(buffer, 1, elt_cnt, file);
+      rangelen = rangelen - nread;
       if(ferror(file)) {
         curlx_dyn_free(&dyn);
         *size = 0;
@@ -143,6 +238,10 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
       if(nread)
         if(curlx_dyn_addn(&dyn, buffer, nread))
           return PARAM_NO_MEM;
+
+      if(rangelen_set && rangelen <= 0)
+        break;
+
     } while(!feof(file));
     *size = curlx_dyn_len(&dyn);
     *bufp = curlx_dyn_ptr(&dyn);

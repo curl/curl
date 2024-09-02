@@ -28,9 +28,9 @@ http
 POST only a part of --data (last 500 bytes)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!-500
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data @%LOGDIR/test%TESTNUMBER.txt!-500
 </command>
-<file name="%LOGDIR/test%TESTNUMBER.txt">
+<file name="%LOGDIR/test%TESTNUMBER.txt" nonewline="yes" crlf="yes">
 %repeat[498 x 0]%
 %repeat[498 x 1]%
 %repeat[500 x 2]%
@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUM
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol nonewline="yes" crlf="yes">
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
@@ -47,7 +47,7 @@ Accept: */*
 Content-Length: 500
 Content-Type: application/x-www-form-urlencoded
 
-%repeat[498 x 2]%
+%repeat[500 x 2]%
 </protocol>
 </verify>
 </testcase>

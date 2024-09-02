@@ -122,7 +122,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     else {  /* Not suitable for direct use, buffer stdin data. */
       size_t stdinsize = 0;
 
-      switch(file2memory(&data, &stdinsize, stdin)) {
+      switch(file2memory(&data, &stdinsize, stdin, 0, 0, 0)) {
       case PARAM_NO_MEM:
         return m;
       case PARAM_READ_ERROR:

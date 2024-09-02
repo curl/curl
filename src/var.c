@@ -375,14 +375,14 @@ static ParameterError addvariable(struct GlobalConfig *global,
 }
 
 ParameterError setvariable(struct GlobalConfig *global,
-                           const char *input)
+                           char *input)
 {
   const char *name;
   size_t nlen;
   char *content = NULL;
   size_t clen = 0;
   bool contalloc = FALSE;
-  const char *line = input;
+  char *line = input;
   ParameterError err = PARAM_OK;
   bool import = FALSE;
   char *ge = NULL;
@@ -427,18 +427,27 @@ ParameterError setvariable(struct GlobalConfig *global,
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
+    size_t offset_start, offset_end;
+    int offset_flags;
     line++;
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
       file = stdin;
     else {
+      offset_flags = filename_extract_limits(line, &offset_start, &offset_end);
+      if(offset_flags == (FILELIMIT_END | FILELIMIT_START) &&
+         offset_start > offset_end) {
+        errorf(global, "Filerange can not be negative size.");
+        return PARAM_BAD_USE;
+      }
       file = fopen(line, "rb");
       if(!file) {
         errorf(global, "Failed to open %s", line);
         return PARAM_READ_ERROR;
       }
     }
-    err = file2memory(&content, &clen, file);
+    err = file2memory(&content, &clen, file, offset_flags, offset_start,
+                      offset_end);
     /* in case of out of memory, this should fail the entire operation */
     contalloc = TRUE;
     if(!use_stdin)

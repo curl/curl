@@ -979,7 +979,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             break;
           }
 
-          if((PARAM_OK == file2string(&etag_from_file, file)) &&
+          if((PARAM_OK == file2string(&etag_from_file, file, 0, 0, 0)) &&
              etag_from_file) {
             header = aprintf("If-None-Match: %s", etag_from_file);
             Curl_safefree(etag_from_file);

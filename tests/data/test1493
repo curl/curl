@@ -28,27 +28,24 @@ http
 POST only a part of --data (all bytes from offset 9500 and forward)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data-binary @%LOGDIR/test%TESTNUMBER.txt!9500-
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --data @%LOGDIR/test%TESTNUMBER.txt!9500-
 </command>
-<file name="%LOGDIR/test%TESTNUMBER.txt">
-%repeat[9498 x 0]%
-%repeat[498 x 1]%
-%repeat[500 x 2]%
+<file name="%LOGDIR/test%TESTNUMBER.txt" nonewline="yes" crlf="yes">
+%repeat[9500 x 0]%%repeat[500 x 1]%%repeat[500 x 2]%
 </file>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-<protocol>
+<protocol nonewline="yes" crlf="yes">
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 1002
+Content-Length: 1000
 Content-Type: application/x-www-form-urlencoded
 
-%repeat[498 x 1]%
-%repeat[500 x 2]%
+%repeat[500 x 1]%%repeat[500 x 2]%
 </protocol>
 </verify>
 </testcase>
