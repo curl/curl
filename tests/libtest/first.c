@@ -120,7 +120,7 @@ static void memory_tracking_init(void)
 #endif
 
 /* returns a hexdump in a static memory area */
-char *hexdump(const unsigned char *buffer, size_t len)
+char *hexdump(const unsigned char *buf, size_t len)
 {
   static char dump[200 * 3 + 1];
   char *p = dump;
@@ -128,7 +128,7 @@ char *hexdump(const unsigned char *buffer, size_t len)
   if(len > 200)
     return NULL;
   for(i = 0; i < len; i++, p += 3)
-    msnprintf(p, 4, "%02x ", buffer[i]);
+    msnprintf(p, 4, "%02x ", buf[i]);
   return dump;
 }
 

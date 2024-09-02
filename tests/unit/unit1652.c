@@ -37,7 +37,7 @@
 static struct Curl_easy *data;
 
 static char input[4096];
-static char result[4096];
+static char output[4096];
 
 int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
               void *userptr);
@@ -55,8 +55,8 @@ debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
   (void)type;
   (void)userptr;
 
-  memset(result, '\0', sizeof(result));
-  memcpy(result, buf, size);
+  memset(output, '\0', sizeof(output));
+  memcpy(output, buf, size);
   return 0;
 }
 
@@ -97,47 +97,46 @@ UNITTEST_START
 /* Injecting a simple short string via a format */
 msnprintf(input, sizeof(input), "Simple Test");
 Curl_infof(data, "%s", input);
-fail_unless(verify(result, input) == 0, "Simple string test");
+fail_unless(verify(output, input) == 0, "Simple string test");
 
 /* Injecting a few different variables with a format */
 Curl_infof(data, "%s %u testing %lu", input, 42, 43L);
-fail_unless(verify(result, "Simple Test 42 testing 43\n") == 0,
+fail_unless(verify(output, "Simple Test 42 testing 43\n") == 0,
             "Format string");
 
 /* Variations of empty strings */
 Curl_infof(data, "");
-fail_unless(strlen(result) == 1, "Empty string");
+fail_unless(strlen(output) == 1, "Empty string");
 Curl_infof(data, "%s", (char *)NULL);
-fail_unless(verify(result, "(nil)") == 0, "Passing NULL as string");
+fail_unless(verify(output, "(nil)") == 0, "Passing NULL as string");
 
 /* A string just long enough to not be truncated */
 memset(input, '\0', sizeof(input));
 memset(input, 'A', 2047);
 Curl_infof(data, "%s", input);
-fail_unless(strlen(result) == 2048, "No truncation of infof input");
-fail_unless(verify(result, input) == 0, "No truncation of infof input");
-fail_unless(result[sizeof(result) - 1] == '\0',
+fail_unless(strlen(output) == 2048, "No truncation of infof input");
+fail_unless(verify(output, input) == 0, "No truncation of infof input");
+fail_unless(output[sizeof(output) - 1] == '\0',
             "No truncation of infof input");
 
 /* Just over the limit without newline for truncation via '...' */
 memset(input + 2047, 'A', 4);
 Curl_infof(data, "%s", input);
-fail_unless(strlen(result) == 2051, "Truncation of infof input 1");
-fail_unless(result[sizeof(result) - 1] == '\0', "Truncation of infof input 1");
+fail_unless(strlen(output) == 2051, "Truncation of infof input 1");
+fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 1");
 
 /* Just over the limit with newline for truncation via '...' */
 memset(input + 2047, 'A', 4);
 memset(input + 2047 + 4, '\n', 1);
 Curl_infof(data, "%s", input);
-fail_unless(strlen(result) == 2051, "Truncation of infof input 2");
-fail_unless(result[sizeof(result) - 1] == '\0', "Truncation of infof input 2");
+fail_unless(strlen(output) == 2051, "Truncation of infof input 2");
+fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 2");
 
 /* Way over the limit for truncation via '...' */
 memset(input, '\0', sizeof(input));
 memset(input, 'A', sizeof(input) - 1);
 Curl_infof(data, "%s", input);
-fail_unless(strlen(result) == 2051, "Truncation of infof input 3");
-fail_unless(result[sizeof(result) - 1] == '\0', "Truncation of infof input 3");
-
+fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
+fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
 UNITTEST_STOP

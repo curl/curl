@@ -21,8 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(CMAKE_UNITY_BUILD OFF)
-
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
   set(TEST_NGHTTPX "nghttpx")
