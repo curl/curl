@@ -36,7 +36,7 @@
 static int counter[MAX_EASY_HANDLES];
 static CURL *easy[MAX_EASY_HANDLES];
 static curl_socket_t sockets[MAX_EASY_HANDLES];
-static CURLcode res = CURLE_OK;
+static CURLcode ntlmcb_res = CURLE_OK;
 
 static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
@@ -57,7 +57,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
     fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
             "with code %d (%s)\n",
             __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
-    res = TEST_ERR_MAJOR_BAD;
+    ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
   if(longdata == -1L)
@@ -76,7 +76,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
          tracked one, log and fail right away. Known bug #37. */
       fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
               curlx_sztosi(idx), (int)sockets[idx], (int)sock);
-      res = TEST_ERR_MAJOR_BAD;
+      ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
   }
@@ -91,6 +91,7 @@ enum HandleState {
 
 CURLcode test(char *url)
 {
+  CURLcode res = CURLE_OK;
   CURLM *multi = NULL;
   int running;
   int i;
@@ -152,6 +153,7 @@ CURLcode test(char *url)
       multi_add_handle(multi, easy[num_handles]);
       num_handles += 1;
       state = NeedSocketForNewHandle;
+      res = ntlmcb_res;
     }
 
     multi_perform(multi, &running);
