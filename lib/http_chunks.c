@@ -189,7 +189,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
         else {
           ch->state = CHUNK_DATA;
           CURL_TRC_WRITE(data, "http_chunked, chunk start of %"
-                         CURL_FORMAT_CURL_OFF_T " bytes", ch->datasize);
+                         FMT_OFF_T " bytes", ch->datasize);
         }
       }
 
@@ -226,7 +226,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
       buf += piece;    /* move read pointer forward */
       blen -= piece;   /* decrease space left in this round */
       CURL_TRC_WRITE(data, "http_chunked, write %zu body bytes, %"
-                     CURL_FORMAT_CURL_OFF_T " bytes in chunk remain",
+                     FMT_OFF_T " bytes in chunk remain",
                      piece, ch->datasize);
 
       if(0 == ch->datasize)

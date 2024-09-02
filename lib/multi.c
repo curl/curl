@@ -647,8 +647,8 @@ static void multi_done_locked(struct connectdata *conn,
      ) || conn->bits.close
        || (mdctx->premature && !Curl_conn_is_multiplex(conn, FIRSTSOCKET))) {
     DEBUGF(infof(data, "multi_done, not reusing connection=%"
-                       CURL_FORMAT_CURL_OFF_T ", forbid=%d"
-                       ", close=%d, premature=%d, conn_multiplex=%d",
+                 FMT_OFF_T ", forbid=%d"
+                 ", close=%d, premature=%d, conn_multiplex=%d",
                  conn->connection_id, data->set.reuse_forbid,
                  conn->bits.close, mdctx->premature,
                  Curl_conn_is_multiplex(conn, FIRSTSOCKET)));
@@ -668,8 +668,8 @@ static void multi_done_locked(struct connectdata *conn,
         conn->bits.conn_to_host ? conn->conn_to_host.dispname :
         conn->host.dispname;
       data->state.lastconnect_id = conn->connection_id;
-      infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
-            " to host %s left intact", conn->connection_id, host);
+      infof(data, "Connection #%" FMT_OFF_T " to host %s left intact",
+            conn->connection_id, host);
     }
     else {
       /* connection was removed from the cpool and destroyed. */
@@ -1669,23 +1669,23 @@ static bool multi_handle_timeout(struct Curl_easy *data,
     else
       since = data->progress.t_startop;
     if(data->mstate == MSTATE_RESOLVING)
-      failf(data, "Resolving timed out after %" CURL_FORMAT_TIMEDIFF_T
+      failf(data, "Resolving timed out after %" FMT_TIMEDIFF_T
             " milliseconds", Curl_timediff(*now, since));
     else if(data->mstate == MSTATE_CONNECTING)
-      failf(data, "Connection timed out after %" CURL_FORMAT_TIMEDIFF_T
+      failf(data, "Connection timed out after %" FMT_TIMEDIFF_T
             " milliseconds", Curl_timediff(*now, since));
     else {
       struct SingleRequest *k = &data->req;
       if(k->size != -1) {
-        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
-              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
-              CURL_FORMAT_CURL_OFF_T " bytes received",
+        failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
+              " milliseconds with %" FMT_OFF_T " out of %"
+              FMT_OFF_T " bytes received",
               Curl_timediff(*now, since), k->bytecount, k->size);
       }
       else {
-        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
-              " milliseconds with %" CURL_FORMAT_CURL_OFF_T
-              " bytes received", Curl_timediff(*now, since), k->bytecount);
+        failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
+              " milliseconds with %" FMT_OFF_T " bytes received",
+              Curl_timediff(*now, since), k->bytecount);
       }
     }
     *result = CURLE_OPERATION_TIMEDOUT;
@@ -3019,15 +3019,15 @@ void Curl_multi_closed(struct Curl_easy *data, curl_socket_t s)
   if(data) {
     /* if there is still an easy handle associated with this connection */
     struct Curl_multi *multi = data->multi;
-    DEBUGF(infof(data, "Curl_multi_closed, fd=%" CURL_FORMAT_SOCKET_T
-           " multi is %p", s, (void *)multi));
+    DEBUGF(infof(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
+                 " multi is %p", s, (void *)multi));
     if(multi) {
       /* this is set if this connection is part of a handle that is added to
          a multi handle, and only then this is necessary */
       struct Curl_sh_entry *entry = sh_getentry(&multi->sockhash, s);
 
-      DEBUGF(infof(data, "Curl_multi_closed, fd=%" CURL_FORMAT_SOCKET_T
-             " entry is %p", s, (void *)entry));
+      DEBUGF(infof(data, "Curl_multi_closed, fd=%" FMT_SOCKET_T
+                   " entry is %p", s, (void *)entry));
       if(entry) {
         int rc = 0;
         if(multi->socket_cb) {

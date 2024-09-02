@@ -1236,7 +1236,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
           if(attrs) {
             curl_off_t size = attrs->size;
             if(size < 0) {
-              failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
+              failf(data, "Bad file size (%" FMT_OFF_T ")", size);
               MOVE_TO_ERROR_STATE(CURLE_BAD_DOWNLOAD_RESUME);
               break;
             }
@@ -1621,7 +1621,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         sftp_attributes_free(attrs);
 
         if(size < 0) {
-          failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
+          failf(data, "Bad file size (%" FMT_OFF_T ")", size);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
         if(data->state.use_range) {
@@ -1651,9 +1651,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
             to = size - 1;
           }
           if(from > size) {
-            failf(data, "Offset (%"
-                  CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
-                  CURL_FORMAT_CURL_OFF_T ")", from, size);
+            failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+                  FMT_OFF_T ")", from, size);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           if(from > to) {
@@ -1682,10 +1681,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         if(data->state.resume_from < 0) {
           /* We are supposed to download the last abs(from) bytes */
           if((curl_off_t)size < -data->state.resume_from) {
-            failf(data, "Offset (%"
-                  CURL_FORMAT_CURL_OFF_T ") was beyond file size (%"
-                  CURL_FORMAT_CURL_OFF_T ")",
-                  data->state.resume_from, size);
+            failf(data, "Offset (%" FMT_OFF_T ") was beyond file size (%"
+                  FMT_OFF_T ")", data->state.resume_from, size);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }
           /* download from where? */
@@ -1693,8 +1690,8 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         }
         else {
           if((curl_off_t)size < data->state.resume_from) {
-            failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
-                  ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
+            failf(data, "Offset (%" FMT_OFF_T
+                  ") was beyond file size (%" FMT_OFF_T ")",
                   data->state.resume_from, size);
             return CURLE_BAD_DOWNLOAD_RESUME;
           }

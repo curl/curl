@@ -325,7 +325,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         break;
       /* disconnect the old conn and continue */
       DEBUGF(infof(data, "Discarding connection #%"
-                   CURL_FORMAT_CURL_OFF_T " from %zu to reach destination "
+                   FMT_OFF_T " from %zu to reach destination "
                    "limit of %zu", oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
@@ -343,7 +343,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
         break;
       /* disconnect the old conn and continue */
       DEBUGF(infof(data, "Discarding connection #%"
-                   CURL_FORMAT_CURL_OFF_T " from %zu to reach total "
+                   FMT_OFF_T " from %zu to reach total "
                    "limit of %zu",
                    oldest_idle->connection_id, cpool->num_conn, total_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
@@ -384,7 +384,7 @@ CURLcode Curl_cpool_add_conn(struct Curl_easy *data,
   cpool_bundle_add(bundle, conn);
   conn->connection_id = cpool->next_connection_id++;
   cpool->num_conn++;
-  DEBUGF(infof(data, "Added connection %" CURL_FORMAT_CURL_OFF_T ". "
+  DEBUGF(infof(data, "Added connection %" FMT_OFF_T ". "
                "The cache now contains %zu members",
                conn->connection_id, cpool->num_conn));
 out:
@@ -636,8 +636,8 @@ static void cpool_shutdown_discard_all(struct cpool *cpool)
   while(e) {
     conn = Curl_node_elem(e);
     Curl_node_remove(e);
-    DEBUGF(infof(cpool->idata, "discard connection #%"
-                 CURL_FORMAT_CURL_OFF_T, conn->connection_id));
+    DEBUGF(infof(cpool->idata, "discard connection #%" FMT_OFF_T,
+                 conn->connection_id));
     cpool_close_and_destroy(cpool, conn, NULL, FALSE);
     e = Curl_llist_head(&cpool->shutdowns);
   }
@@ -719,9 +719,9 @@ static void cpool_discard_conn(struct cpool *cpool,
    * are other users of it
    */
   if(CONN_INUSE(conn) && !aborted) {
-    DEBUGF(infof(data, "[CCACHE] not discarding #%" CURL_FORMAT_CURL_OFF_T
-                       " still in use by %zu transfers", conn->connection_id,
-                       CONN_INUSE(conn)));
+    DEBUGF(infof(data, "[CCACHE] not discarding #%" FMT_OFF_T
+                 " still in use by %zu transfers", conn->connection_id,
+                 CONN_INUSE(conn)));
     return;
   }
 
@@ -742,8 +742,8 @@ static void cpool_discard_conn(struct cpool *cpool,
     /* Attempt to shutdown the connection right away. */
     Curl_attach_connection(data, conn);
     cpool_run_conn_shutdown(data, conn, &done);
-    DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
-                       ", done=%d",conn->connection_id, done));
+    DEBUGF(infof(data, "[CCACHE] shutdown #%" FMT_OFF_T ", done=%d",
+                 conn->connection_id, done));
     Curl_detach_connection(data);
   }
 
@@ -770,17 +770,17 @@ static void cpool_discard_conn(struct cpool *cpool,
     memset(&conn->shutdown_poll, 0, sizeof(conn->shutdown_poll));
     if(cpool_update_shutdown_ev(data->multi, cpool->idata, conn)) {
       DEBUGF(infof(data, "[CCACHE] update events for shutdown failed, "
-                         "discarding #%" CURL_FORMAT_CURL_OFF_T,
-                         conn->connection_id));
+                   "discarding #%" FMT_OFF_T,
+                   conn->connection_id));
       cpool_close_and_destroy(cpool, conn, data, FALSE);
       return;
     }
   }
 
   Curl_llist_append(&cpool->shutdowns, conn, &conn->cpool_node);
-  DEBUGF(infof(data, "[CCACHE] added #%" CURL_FORMAT_CURL_OFF_T
-                     " to shutdown list of length %zu", conn->connection_id,
-                     Curl_llist_count(&cpool->shutdowns)));
+  DEBUGF(infof(data, "[CCACHE] added #%" FMT_OFF_T
+               " to shutdown list of length %zu", conn->connection_id,
+               Curl_llist_count(&cpool->shutdowns)));
 }
 
 void Curl_cpool_disconnect(struct Curl_easy *data,
@@ -819,14 +819,13 @@ void Curl_cpool_disconnect(struct Curl_easy *data,
 
   if(data->multi) {
     /* Add it to the multi's cpool for shutdown handling */
-    infof(data, "%s connection #%" CURL_FORMAT_CURL_OFF_T,
+    infof(data, "%s connection #%" FMT_OFF_T,
           aborted? "closing" : "shutting down", conn->connection_id);
     cpool_discard_conn(&data->multi->cpool, data, conn, aborted);
   }
   else {
     /* No multi available. Make a best-effort shutdown + close */
-    infof(data, "closing connection #%" CURL_FORMAT_CURL_OFF_T,
-          conn->connection_id);
+    infof(data, "closing connection #%" FMT_OFF_T, conn->connection_id);
     cpool_close_and_destroy(NULL, conn, data, !aborted);
   }
 
@@ -849,7 +848,7 @@ static void cpool_run_conn_shutdown_handler(struct Curl_easy *data,
 
     if(conn->handler && conn->handler->disconnect) {
       /* This is set if protocol-specific cleanups should be made */
-      DEBUGF(infof(data, "connection #%" CURL_FORMAT_CURL_OFF_T
+      DEBUGF(infof(data, "connection #%" FMT_OFF_T
                    ", shutdown protocol handler (aborted=%d)",
                    conn->connection_id, conn->bits.aborted));
 
@@ -990,8 +989,8 @@ static void cpool_perform(struct cpool *cpool)
     conn = Curl_node_elem(e);
     Curl_attach_connection(data, conn);
     cpool_run_conn_shutdown(data, conn, &done);
-    DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
-                 ", done=%d", conn->connection_id, done));
+    DEBUGF(infof(data, "[CCACHE] shutdown #%" FMT_OFF_T ", done=%d",
+                 conn->connection_id, done));
     Curl_detach_connection(data);
     if(done) {
       Curl_node_remove(e);
@@ -1055,10 +1054,10 @@ static void cpool_close_and_destroy(struct cpool *cpool,
   }
 
   if(cpool)
-    DEBUGF(infof(data, "[CCACHE] closing #%" CURL_FORMAT_CURL_OFF_T,
+    DEBUGF(infof(data, "[CCACHE] closing #%" FMT_OFF_T,
                  conn->connection_id));
   else
-    DEBUGF(infof(data, "closing connection #%" CURL_FORMAT_CURL_OFF_T,
+    DEBUGF(infof(data, "closing connection #%" FMT_OFF_T,
                  conn->connection_id));
   Curl_conn_close(data, SECONDARYSOCKET);
   Curl_conn_close(data, FIRSTSOCKET);
@@ -1109,8 +1108,8 @@ void Curl_cpool_multi_socket(struct Curl_multi *multi,
     if(s == conn->sock[FIRSTSOCKET] || s == conn->sock[SECONDARYSOCKET]) {
       Curl_attach_connection(data, conn);
       cpool_run_conn_shutdown(data, conn, &done);
-      DEBUGF(infof(data, "[CCACHE] shutdown #%" CURL_FORMAT_CURL_OFF_T
-                   ", done=%d", conn->connection_id, done));
+      DEBUGF(infof(data, "[CCACHE] shutdown #%" FMT_OFF_T ", done=%d",
+                   conn->connection_id, done));
       Curl_detach_connection(data);
       if(done || cpool_update_shutdown_ev(multi, data, conn)) {
         Curl_node_remove(e);
@@ -1160,7 +1159,7 @@ static void cpool_shutdown_all(struct cpool *cpool,
   for(conn = cpool_get_live_conn(cpool); conn;
       conn = cpool_get_live_conn(cpool)) {
     /* Move conn from live set to shutdown or destroy right away */
-    DEBUGF(infof(data, "moving connection #%" CURL_FORMAT_CURL_OFF_T
+    DEBUGF(infof(data, "moving connection #%" FMT_OFF_T
                  " to shutdown queue", conn->connection_id));
     cpool_remove_conn(cpool, conn);
     cpool_discard_conn(cpool, data, conn, FALSE);

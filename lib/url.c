@@ -629,8 +629,7 @@ bool Curl_on_disconnect(struct Curl_easy *data,
   /* the transfer must be detached from the connection */
   DEBUGASSERT(!data->conn);
 
-  DEBUGF(infof(data, "Curl_disconnect(conn #%"
-         CURL_FORMAT_CURL_OFF_T ", aborted=%d)",
+  DEBUGF(infof(data, "Curl_disconnect(conn #%" FMT_OFF_T ", aborted=%d)",
          conn->connection_id, aborted));
 
   if(conn->dns_entry)
@@ -721,7 +720,7 @@ static bool conn_maxage(struct Curl_easy *data,
   idletime /= 1000; /* integer seconds is fine */
 
   if(idletime > data->set.maxage_conn) {
-    infof(data, "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
+    infof(data, "Too old connection (%" FMT_TIMEDIFF_T
           " seconds idle), disconnect it", idletime);
     return TRUE;
   }
@@ -731,7 +730,7 @@ static bool conn_maxage(struct Curl_easy *data,
 
   if(data->set.maxlifetime_conn && lifetime > data->set.maxlifetime_conn) {
     infof(data,
-          "Too old connection (%" CURL_FORMAT_TIMEDIFF_T
+          "Too old connection (%" FMT_TIMEDIFF_T
           " seconds since creation), disconnect it", lifetime);
     return TRUE;
   }
@@ -799,7 +798,7 @@ bool Curl_conn_seems_dead(struct connectdata *conn,
 
     if(dead) {
       /* remove connection from cpool */
-      infof(data, "Connection %" CURL_FORMAT_CURL_OFF_T " seems to be dead",
+      infof(data, "Connection %" FMT_OFF_T " seems to be dead",
             conn->connection_id);
       return TRUE;
     }
@@ -914,7 +913,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     if(match->may_multiplex) {
       match->seen_pending_conn = TRUE;
       /* Do not pick a connection that has not connected yet */
-      infof(data, "Connection #%" CURL_FORMAT_CURL_OFF_T
+      infof(data, "Connection #%" FMT_OFF_T
             " is not open enough, cannot reuse", conn->connection_id);
     }
     /* Do not pick a connection that has not connected yet */
@@ -989,7 +988,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
       /* match SSL config to proxy */
       if(!Curl_ssl_conn_config_match(data, conn, TRUE)) {
         DEBUGF(infof(data,
-          "Connection #%" CURL_FORMAT_CURL_OFF_T
+          "Connection #%" FMT_OFF_T
           " has different SSL proxy parameters, cannot reuse",
           conn->connection_id));
         return FALSE;
@@ -1088,7 +1087,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     if((needle->handler->flags & PROTOPT_SSL) &&
        !Curl_ssl_conn_config_match(data, conn, FALSE)) {
       DEBUGF(infof(data,
-                   "Connection #%" CURL_FORMAT_CURL_OFF_T
+                   "Connection #%" FMT_OFF_T
                    " has different SSL parameters, cannot reuse",
                    conn->connection_id));
       return FALSE;
@@ -1931,7 +1930,7 @@ static CURLcode setup_range(struct Curl_easy *data)
       free(s->range);
 
     if(s->resume_from)
-      s->range = aprintf("%" CURL_FORMAT_CURL_OFF_T "-", s->resume_from);
+      s->range = aprintf("%" FMT_OFF_T "-", s->resume_from);
     else
       s->range = strdup(data->set.str[STRING_SET_RANGE]);
 
@@ -3159,7 +3158,7 @@ static CURLcode resolve_server(struct Curl_easy *data,
     *async = TRUE;
   else if(rc == CURLRESOLV_TIMEDOUT) {
     failf(data, "Failed to resolve %s '%s' with timeout after %"
-          CURL_FORMAT_TIMEDIFF_T " ms", peertype, ehost->dispname,
+          FMT_TIMEDIFF_T " ms", peertype, ehost->dispname,
           Curl_timediff(Curl_now(), data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }

@@ -489,8 +489,7 @@ static CURLcode recv_CONNECT_resp(struct Curl_cfilter *cf,
         ts->keepon = KEEPON_IGNORE;
 
         if(ts->cl) {
-          infof(data, "Ignore %" CURL_FORMAT_CURL_OFF_T
-                " bytes of response-body", ts->cl);
+          infof(data, "Ignore %" FMT_OFF_T " bytes of response-body", ts->cl);
         }
         else if(ts->chunked_encoding) {
           infof(data, "Ignore chunked response-body");

@@ -312,7 +312,7 @@ curl_socket_t curl_dbg_socket(int domain, int type, int protocol,
   sockfd = socket(domain, type, protocol);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
-    curl_dbg_log("FD %s:%d socket() = %" CURL_FORMAT_SOCKET_T "\n",
+    curl_dbg_log("FD %s:%d socket() = %" FMT_SOCKET_T "\n",
                  source, line, sockfd);
 
   return sockfd;
@@ -356,8 +356,8 @@ int curl_dbg_socketpair(int domain, int type, int protocol,
 
   if(source && (0 == res))
     curl_dbg_log("FD %s:%d socketpair() = "
-      "%" CURL_FORMAT_SOCKET_T " %" CURL_FORMAT_SOCKET_T "\n",
-      source, line, socket_vector[0], socket_vector[1]);
+                 "%" FMT_SOCKET_T " %" FMT_SOCKET_T "\n",
+                 source, line, socket_vector[0], socket_vector[1]);
 
   return res;
 }
@@ -372,7 +372,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
   curl_socket_t sockfd = accept(s, addr, addrlen);
 
   if(source && (sockfd != CURL_SOCKET_BAD))
-    curl_dbg_log("FD %s:%d accept() = %" CURL_FORMAT_SOCKET_T "\n",
+    curl_dbg_log("FD %s:%d accept() = %" FMT_SOCKET_T "\n",
                  source, line, sockfd);
 
   return sockfd;
@@ -382,7 +382,7 @@ curl_socket_t curl_dbg_accept(curl_socket_t s, void *saddr, void *saddrlen,
 void curl_dbg_mark_sclose(curl_socket_t sockfd, int line, const char *source)
 {
   if(source)
-    curl_dbg_log("FD %s:%d sclose(%" CURL_FORMAT_SOCKET_T ")\n",
+    curl_dbg_log("FD %s:%d sclose(%" FMT_SOCKET_T ")\n",
                  source, line, sockfd);
 }
 

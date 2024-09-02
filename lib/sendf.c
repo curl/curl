@@ -292,8 +292,8 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
     if((type & CLIENTWRITE_EOS) && !data->req.no_body &&
        (data->req.maxdownload > data->req.bytecount)) {
-      failf(data, "end of response with %" CURL_FORMAT_CURL_OFF_T
-            " bytes missing", data->req.maxdownload - data->req.bytecount);
+      failf(data, "end of response with %" FMT_OFF_T " bytes missing",
+            data->req.maxdownload - data->req.bytecount);
       return CURLE_PARTIAL_FILE;
     }
   }
@@ -328,9 +328,9 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       infof(data,
             "Excess found writing body:"
             " excess = %zu"
-            ", size = %" CURL_FORMAT_CURL_OFF_T
-            ", maxdownload = %" CURL_FORMAT_CURL_OFF_T
-            ", bytecount = %" CURL_FORMAT_CURL_OFF_T,
+            ", size = %" FMT_OFF_T
+            ", maxdownload = %" FMT_OFF_T
+            ", bytecount = %" FMT_OFF_T,
             excess_len, data->req.size, data->req.maxdownload,
             data->req.bytecount);
       connclose(data->conn, "excess found in a read");
@@ -338,8 +338,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   }
   else if(nwrite < nbytes) {
     failf(data, "Exceeded the maximum allowed file size "
-          "(%" CURL_FORMAT_CURL_OFF_T ") with %"
-          CURL_FORMAT_CURL_OFF_T " bytes",
+          "(%" FMT_OFF_T ") with %" FMT_OFF_T " bytes",
           data->set.max_filesize, data->req.bytecount);
     return CURLE_FILESIZE_EXCEEDED;
   }
@@ -688,8 +687,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
   case 0:
     if((ctx->total_len >= 0) && (ctx->read_len < ctx->total_len)) {
       failf(data, "client read function EOF fail, "
-            "only %"CURL_FORMAT_CURL_OFF_T"/%"CURL_FORMAT_CURL_OFF_T
-            " of needed bytes read", ctx->read_len, ctx->total_len);
+            "only %"FMT_OFF_T"/%"FMT_OFF_T " of needed bytes read",
+            ctx->read_len, ctx->total_len);
       return CURLE_READ_ERROR;
     }
     *pnread = 0;
@@ -738,8 +737,8 @@ static CURLcode cr_in_read(struct Curl_easy *data,
     *peos = ctx->seen_eos;
     break;
   }
-  CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%"CURL_FORMAT_CURL_OFF_T
-                ", read=%"CURL_FORMAT_CURL_OFF_T") -> %d, nread=%zu, eos=%d",
+  CURL_TRC_READ(data, "cr_in_read(len=%zu, total=%"FMT_OFF_T
+                ", read=%"FMT_OFF_T") -> %d, nread=%zu, eos=%d",
                 blen, ctx->total_len, ctx->read_len, CURLE_OK,
                 *pnread, *peos);
   return CURLE_OK;
@@ -804,8 +803,8 @@ static CURLcode cr_in_resume_from(struct Curl_easy *data,
       if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
         /* this checks for greater-than only to make sure that the
            CURL_READFUNC_ABORT return code still aborts */
-        failf(data, "Could only read %" CURL_FORMAT_CURL_OFF_T
-              " bytes from the input", passed);
+        failf(data, "Could only read %" FMT_OFF_T " bytes from the input",
+              passed);
         return CURLE_READ_ERROR;
       }
     } while(passed < offset);
@@ -1126,8 +1125,8 @@ CURLcode Curl_creader_set_fread(struct Curl_easy *data, curl_off_t len)
   cl_reset_reader(data);
   result = do_init_reader_stack(data, r);
 out:
-  CURL_TRC_READ(data, "add fread reader, len=%"CURL_FORMAT_CURL_OFF_T
-                " -> %d", len, result);
+  CURL_TRC_READ(data, "add fread reader, len=%"FMT_OFF_T " -> %d",
+                len, result);
   return result;
 }
 

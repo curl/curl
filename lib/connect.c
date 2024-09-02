@@ -581,7 +581,7 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->is_done = TRUE;
       }
       else if(Curl_timediff(*now, baller->started) >= baller->timeoutms) {
-        infof(data, "%s connect timeout after %" CURL_FORMAT_TIMEDIFF_T
+        infof(data, "%s connect timeout after %" FMT_TIMEDIFF_T
               "ms, move on!", baller->name, baller->timeoutms);
 #if defined(ETIMEDOUT)
         baller->error = ETIMEDOUT;
@@ -672,7 +672,7 @@ evaluate:
   /* Nothing connected, check the time before we might
    * start new ballers or return ok. */
   if((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0) {
-    failf(data, "Connection timeout after %" CURL_FORMAT_CURL_OFF_T " ms",
+    failf(data, "Connection timeout after %" FMT_OFF_T " ms",
           Curl_timediff(now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -695,8 +695,7 @@ evaluate:
           CURL_TRC_CF(data, cf, "%s done", baller->name);
         }
         else {
-          CURL_TRC_CF(data, cf, "%s starting (timeout=%"
-                      CURL_FORMAT_TIMEDIFF_T "ms)",
+          CURL_TRC_CF(data, cf, "%s starting (timeout=%" FMT_TIMEDIFF_T "ms)",
                       baller->name, baller->timeoutms);
           ++ongoing;
           ++added;
@@ -741,7 +740,7 @@ evaluate:
     hostname = conn->host.name;
 
   failf(data, "Failed to connect to %s port %u after "
-        "%" CURL_FORMAT_TIMEDIFF_T " ms: %s",
+        "%" FMT_TIMEDIFF_T " ms: %s",
         hostname, conn->primary.remote_port,
         Curl_timediff(now, data->progress.t_startsingle),
         curl_easy_strerror(result));
@@ -834,8 +833,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                           timeout_ms,  EXPIRE_DNS_PER_NAME);
   if(result)
     return result;
-  CURL_TRC_CF(data, cf, "created %s (timeout %"
-              CURL_FORMAT_TIMEDIFF_T "ms)",
+  CURL_TRC_CF(data, cf, "created %s (timeout %" FMT_TIMEDIFF_T "ms)",
               ctx->baller[0]->name, ctx->baller[0]->timeoutms);
   if(addr1) {
     /* second one gets a delayed start */
@@ -846,8 +844,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                             timeout_ms,  EXPIRE_DNS_PER_NAME2);
     if(result)
       return result;
-    CURL_TRC_CF(data, cf, "created %s (timeout %"
-                CURL_FORMAT_TIMEDIFF_T "ms)",
+    CURL_TRC_CF(data, cf, "created %s (timeout %" FMT_TIMEDIFF_T "ms)",
                 ctx->baller[1]->name, ctx->baller[1]->timeoutms);
     Curl_expire(data, data->set.happy_eyeballs_timeout,
                 EXPIRE_HAPPY_EYEBALLS);

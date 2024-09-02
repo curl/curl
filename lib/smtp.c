@@ -723,7 +723,7 @@ static CURLcode smtp_perform_mail(struct Curl_easy *data)
 
   /* Calculate the optional SIZE parameter */
   if(conn->proto.smtpc.size_supported && data->state.infilesize > 0) {
-    size = aprintf("%" CURL_FORMAT_CURL_OFF_T, data->state.infilesize);
+    size = aprintf("%" FMT_OFF_T, data->state.infilesize);
 
     if(!size) {
       result = CURLE_OUT_OF_MEMORY;

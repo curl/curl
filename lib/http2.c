@@ -2012,7 +2012,7 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
      * a read() is called anyway. It is not clear what the calling sequence
      * is for such a case. */
     failf(data, "http/2 recv on a transfer never opened "
-          "or already cleared, mid=%" CURL_FORMAT_CURL_OFF_T, data->mid);
+          "or already cleared, mid=%" FMT_OFF_T, data->mid);
     *err = CURLE_HTTP2;
     return -1;
   }

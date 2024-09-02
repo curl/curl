@@ -479,14 +479,13 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         else
           ev->list = nxt;
         free(m);
-        infof(easy, "socket cb: socket %" CURL_FORMAT_SOCKET_T
-              " REMOVED", s);
+        infof(easy, "socket cb: socket %" FMT_SOCKET_T " REMOVED", s);
       }
       else {
         /* The socket 's' is already being monitored, update the activity
            mask. Convert from libcurl bitmask to the poll one. */
         m->socket.events = socketcb2poll(what);
-        infof(easy, "socket cb: socket %" CURL_FORMAT_SOCKET_T
+        infof(easy, "socket cb: socket %" FMT_SOCKET_T
               " UPDATED as %s%s", s,
               (what&CURL_POLL_IN)?"IN":"",
               (what&CURL_POLL_OUT)?"OUT":"");
@@ -501,7 +500,7 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
     if(what == CURL_POLL_REMOVE) {
       /* should not happen if our logic is correct, but is no drama. */
       DEBUGF(infof(easy, "socket cb: asked to REMOVE socket %"
-                   CURL_FORMAT_SOCKET_T "but not present!", s));
+                   FMT_SOCKET_T "but not present!", s));
       DEBUGASSERT(0);
     }
     else {
@@ -512,8 +511,7 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         m->socket.events = socketcb2poll(what);
         m->socket.revents = 0;
         ev->list = m;
-        infof(easy, "socket cb: socket %" CURL_FORMAT_SOCKET_T
-              " ADDED as %s%s", s,
+        infof(easy, "socket cb: socket %" FMT_SOCKET_T " ADDED as %s%s", s,
               (what&CURL_POLL_IN)?"IN":"",
               (what&CURL_POLL_OUT)?"OUT":"");
       }
@@ -626,7 +624,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
 
           /* sending infof "randomly" to the first easy handle */
           infof(data, "call curl_multi_socket_action(socket "
-                "%" CURL_FORMAT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
+                "%" FMT_SOCKET_T ")", (curl_socket_t)fds[i].fd);
           mcode = curl_multi_socket_action(multi, fds[i].fd, act,
                                            &ev->running_handles);
         }

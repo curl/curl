@@ -856,8 +856,8 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(blocking && 0 == what) {
-      failf(data, "rustls: connection timeout after %"
-        CURL_FORMAT_TIMEDIFF_T " ms", socket_check_timeout);
+      failf(data, "rustls: connection timeout after %" FMT_TIMEDIFF_T " ms",
+            socket_check_timeout);
       return CURLE_OPERATION_TIMEDOUT;
     }
     if(0 == what) {

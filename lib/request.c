@@ -264,14 +264,14 @@ CURLcode Curl_req_set_upload_done(struct Curl_easy *data)
   if(data->req.upload_aborted) {
     Curl_bufq_reset(&data->req.sendbuf);
     if(data->req.writebytecount)
-      infof(data, "abort upload after having sent %" CURL_FORMAT_CURL_OFF_T
-            " bytes", data->req.writebytecount);
+      infof(data, "abort upload after having sent %" FMT_OFF_T " bytes",
+            data->req.writebytecount);
     else
       infof(data, "abort upload");
   }
   else if(data->req.writebytecount)
-    infof(data, "upload completely sent off: %" CURL_FORMAT_CURL_OFF_T
-          " bytes", data->req.writebytecount);
+    infof(data, "upload completely sent off: %" FMT_OFF_T " bytes",
+          data->req.writebytecount);
   else if(!data->req.download_done) {
     DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
     infof(data, Curl_creader_total_length(data)?

@@ -2388,8 +2388,8 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
       if(data->state.resume_from< 0) {
         /* We are supposed to download the last abs(from) bytes */
         if(filesize < -data->state.resume_from) {
-          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
-                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
+          failf(data, "Offset (%" FMT_OFF_T
+                ") was beyond file size (%" FMT_OFF_T ")",
                 data->state.resume_from, filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -2400,8 +2400,8 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
       }
       else {
         if(filesize < data->state.resume_from) {
-          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
-                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
+          failf(data, "Offset (%" FMT_OFF_T
+                ") was beyond file size (%" FMT_OFF_T ")",
                 data->state.resume_from, filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -2423,10 +2423,10 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
     }
 
     /* Set resume file transfer offset */
-    infof(data, "Instructs server to resume from offset %"
-          CURL_FORMAT_CURL_OFF_T, data->state.resume_from);
+    infof(data, "Instructs server to resume from offset %" FMT_OFF_T,
+          data->state.resume_from);
 
-    result = Curl_pp_sendf(data, &ftpc->pp, "REST %" CURL_FORMAT_CURL_OFF_T,
+    result = Curl_pp_sendf(data, &ftpc->pp, "REST %" FMT_OFF_T,
                            data->state.resume_from);
     if(!result)
       ftp_state(data, FTP_RETR_REST);
@@ -2484,7 +2484,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     if(-1 != filesize) {
       char clbuf[128];
       int clbuflen = msnprintf(clbuf, sizeof(clbuf),
-                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
+                "Content-Length: %" FMT_OFF_T "\r\n", filesize);
       result = client_write_header(data, clbuf, clbuflen);
       if(result)
         return result;
@@ -2664,12 +2664,10 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
     else if((instate != FTP_LIST) && (data->state.prefer_ascii))
       size = -1; /* kludge for servers that understate ASCII mode file size */
 
-    infof(data, "Maxdownload = %" CURL_FORMAT_CURL_OFF_T,
-          data->req.maxdownload);
+    infof(data, "Maxdownload = %" FMT_OFF_T, data->req.maxdownload);
 
     if(instate != FTP_LIST)
-      infof(data, "Getting file with size: %" CURL_FORMAT_CURL_OFF_T,
-            size);
+      infof(data, "Getting file with size: %" FMT_OFF_T, size);
 
     /* FTP download: */
     conn->proto.ftpc.state_saved = instate;
@@ -3534,8 +3532,8 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
        (data->state.infilesize != data->req.writebytecount) &&
        !data->set.crlf &&
        (ftp->transfer == PPTRANSFER_BODY)) {
-      failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
-            " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
+      failf(data, "Uploaded unaligned file size (%" FMT_OFF_T
+            " out of %" FMT_OFF_T " bytes)",
             data->req.writebytecount, data->state.infilesize);
       result = CURLE_PARTIAL_FILE;
     }
@@ -3544,8 +3542,8 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
     if((-1 != data->req.size) &&
        (data->req.size != data->req.bytecount) &&
        (data->req.maxdownload != data->req.bytecount)) {
-      failf(data, "Received only partial file: %" CURL_FORMAT_CURL_OFF_T
-            " bytes", data->req.bytecount);
+      failf(data, "Received only partial file: %" FMT_OFF_T " bytes",
+            data->req.bytecount);
       result = CURLE_PARTIAL_FILE;
     }
     else if(!ftpc->dont_check &&
