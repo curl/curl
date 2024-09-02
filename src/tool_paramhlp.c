@@ -157,14 +157,16 @@ ParameterError file2string(char **bufp, FILE *file, int filelimit,
     do {
       char buffer[4096];
       char *ptr;
-      int elt_cnt;
+      size_t elt_cnt;
+      size_t nread;
+
       if(rangelen_set && (rangelen < sizeof(buffer))) {
         elt_cnt = rangelen;
       }
       else {
         elt_cnt = sizeof(buffer);
       }
-      size_t nread = fread(buffer, 1, elt_cnt, file);
+      nread = fread(buffer, 1, elt_cnt, file);
       if(ferror(file)) {
         curlx_dyn_free(&dyn);
         *bufp = NULL;
@@ -199,7 +201,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
   if(file) {
     size_t nread;
     struct curlx_dynbuf dyn;
-    size_t rangelen;
+    size_t rangelen = 0;
     int rangelen_set = 0;
 
 
@@ -220,7 +222,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
     curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];
-      int elt_cnt;
+      size_t elt_cnt;
       if(rangelen_set && (rangelen < sizeof(buffer))) {
         elt_cnt = rangelen;
       }
