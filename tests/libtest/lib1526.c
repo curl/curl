@@ -31,17 +31,17 @@
 
 #include "memdebug.h"
 
-static char data [] = "Hello Cloud!\n";
+static char testdata[] = "Hello Cloud!\n";
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
-  if(amount < strlen(data)) {
-    return strlen(data);
+  if(amount < strlen(testdata)) {
+    return strlen(testdata);
   }
   (void)stream;
-  memcpy(ptr, data, strlen(data));
-  return strlen(data);
+  memcpy(ptr, testdata, strlen(testdata));
+  return strlen(testdata);
 }
 
 CURLcode test(char *URL)
@@ -87,7 +87,7 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
   test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(data));
+  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testdata));
 
   res = curl_easy_perform(curl);
 

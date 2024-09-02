@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char data[]=
+static char testdata[]=
   "dummy\n";
 
 struct WriteThis {
@@ -67,9 +67,9 @@ static CURLcode once(char *URL, bool oldstyle)
   struct WriteThis pooh2;
   curl_off_t datasize = -1;
 
-  pooh.readptr = data;
+  pooh.readptr = testdata;
 #ifndef LIB645
-  datasize = (curl_off_t)strlen(data);
+  datasize = (curl_off_t)strlen(testdata);
 #endif
   pooh.sizeleft = datasize;
 
@@ -122,9 +122,9 @@ static CURLcode once(char *URL, bool oldstyle)
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
-  pooh2.readptr = data;
+  pooh2.readptr = testdata;
 #ifndef LIB645
-  datasize = (curl_off_t)strlen(data);
+  datasize = (curl_off_t)strlen(testdata);
 #endif
   pooh2.sizeleft = datasize;
 

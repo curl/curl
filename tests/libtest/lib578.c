@@ -26,9 +26,9 @@
 #include "memdebug.h"
 
 /* The size of data should be kept below MAX_INITIAL_POST_SIZE! */
-static char data[]="this is a short string.\n";
+static char testdata[]="this is a short string.\n";
 
-static size_t data_size = sizeof(data) / sizeof(char);
+static size_t data_size = sizeof(testdata) / sizeof(char);
 
 static int progress_callback(void *clientp, double dltotal, double dlnow,
                              double ultotal, double ulnow)
@@ -75,7 +75,7 @@ CURLcode test(char *URL)
 
   /* Set the expected POST size */
   test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)data_size);
-  test_setopt(curl, CURLOPT_POSTFIELDS, data);
+  test_setopt(curl, CURLOPT_POSTFIELDS, testdata);
 
   /* we want to use our own progress function */
   CURL_IGNORE_DEPRECATION(

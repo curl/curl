@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char data[]=
+static char testdata[]=
   "this is what we post to the silly web server\n";
 
 struct WriteThis {
@@ -70,8 +70,8 @@ static CURLcode once(char *URL, bool oldstyle)
   struct WriteThis pooh;
   struct WriteThis pooh2;
 
-  pooh.readptr = data;
-  pooh.sizeleft = strlen(data);
+  pooh.readptr = testdata;
+  pooh.sizeleft = strlen(testdata);
 
   /* Fill in the file upload field */
   if(oldstyle) {
@@ -104,8 +104,8 @@ static CURLcode once(char *URL, bool oldstyle)
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
-  pooh2.readptr = data;
-  pooh2.sizeleft = strlen(data);
+  pooh2.readptr = testdata;
+  pooh2.sizeleft = strlen(testdata);
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in the file upload field */
