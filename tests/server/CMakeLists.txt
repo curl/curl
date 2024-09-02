@@ -26,6 +26,8 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+set_source_files_properties("../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+
 foreach(_target IN LISTS noinst_PROGRAMS)
   set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
