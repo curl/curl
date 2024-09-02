@@ -21,12 +21,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_NO_FMT_CHECKS
-
 #include "curlcheck.h"
 
 #include "urldata.h"
 #include "sendf.h"
+
+#ifdef __GNUC__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wformat"
+#endif
 
 /*
  * This test hardcodes the knowledge of the buffer size which is internal to
@@ -140,3 +143,7 @@ fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
 UNITTEST_STOP
+
+#ifdef __GNUC__
+#pragma clang diagnostic pop
+#endif
