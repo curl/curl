@@ -28,6 +28,37 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 set_source_files_properties("../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
+add_custom_command(
+  OUTPUT "lib1521.c"
+  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${CURL_SOURCE_DIR}/include/curl/curl.h" > "lib1521.c"
+  DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
+    "${CURL_SOURCE_DIR}/include/curl/curl.h"
+  VERBATIM)
+
+option(CURL_TEST_USE_BUNDLE "Bundle tests into a single binary" ON)
+if(CURL_TEST_USE_BUNDLE)
+  unset(_allsources)
+  foreach(_target IN LISTS noinst_PROGRAMS)
+    if(DEFINED ${_target}_SOURCES)
+      list(APPEND _allsources ${${_target}_SOURCES})
+    else()
+      list(APPEND _allsources ${nodist_${_target}_SOURCES})
+    endif()
+  endforeach()
+  list(REMOVE_DUPLICATES _allsources)
+
+  add_custom_command(
+    OUTPUT "libtests.c"
+    COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
+    DEPENDS
+      "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
+    VERBATIM)
+    set(noinst_PROGRAMS "libtests")
+    set(libtests_SOURCES "libtests.c")
+endif()
+
 foreach(_target IN LISTS noinst_PROGRAMS)
   if(DEFINED ${_target}_SOURCES)
     set(_sources ${${_target}_SOURCES})
@@ -55,11 +86,3 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test libtest ${_target}")
 endforeach()
-
-add_custom_command(
-  OUTPUT "lib1521.c"
-  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${CURL_SOURCE_DIR}/include/curl/curl.h" > "lib1521.c"
-  DEPENDS
-    "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
-    "${CURL_SOURCE_DIR}/include/curl/curl.h"
-  VERBATIM)
