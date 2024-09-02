@@ -36,13 +36,6 @@
 /* Define this to enable lots of debugging for mbedTLS */
 /* #define MBEDTLS_DEBUG */
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-/* mbedTLS (as of v3.5.1) has a duplicate function declaration
-   in its public headers. Disable the warning that detects it. */
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#endif
-
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
@@ -61,10 +54,6 @@
 #  ifdef MBEDTLS_DEBUG
 #    include <mbedtls/debug.h>
 #  endif
-#endif
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
 #endif
 
 #include "cipher_suite.h"

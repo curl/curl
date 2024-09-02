@@ -96,7 +96,7 @@ ifneq ($(findstring -sync,$(CFG)),)
 else ifneq ($(findstring -ares,$(CFG)),)
   LIBCARES_PATH ?= $(PROOT)/../c-ares
   CPPFLAGS += -DUSE_ARES
-  CPPFLAGS += -I"$(LIBCARES_PATH)/include"
+  CPPFLAGS += -isystem "$(LIBCARES_PATH)/include"
   LDFLAGS += -L"$(LIBCARES_PATH)/lib"
   LIBS += -lcares
 endif
@@ -104,7 +104,7 @@ endif
 ifneq ($(findstring -rtmp,$(CFG)),)
   LIBRTMP_PATH ?= $(PROOT)/../librtmp
   CPPFLAGS += -DUSE_LIBRTMP
-  CPPFLAGS += -I"$(LIBRTMP_PATH)"
+  CPPFLAGS += -isystem "$(LIBRTMP_PATH)"
   LDFLAGS += -L"$(LIBRTMP_PATH)/librtmp"
   LIBS += -lrtmp
   ZLIB := 1
@@ -113,19 +113,19 @@ endif
 ifneq ($(findstring -ssh2,$(CFG)),)
   LIBSSH2_PATH ?= $(PROOT)/../libssh2
   CPPFLAGS += -DUSE_LIBSSH2
-  CPPFLAGS += -I"$(LIBSSH2_PATH)/include"
+  CPPFLAGS += -isystem "$(LIBSSH2_PATH)/include"
   LDFLAGS += -L"$(LIBSSH2_PATH)/lib"
   LIBS += -lssh2
 else ifneq ($(findstring -libssh,$(CFG)),)
   LIBSSH_PATH ?= $(PROOT)/../libssh
   CPPFLAGS += -DUSE_LIBSSH
-  CPPFLAGS += -I"$(LIBSSH_PATH)/include"
+  CPPFLAGS += -isystem "$(LIBSSH_PATH)/include"
   LDFLAGS += -L"$(LIBSSH_PATH)/lib"
   LIBS += -lssh
 else ifneq ($(findstring -wolfssh,$(CFG)),)
   WOLFSSH_PATH ?= $(PROOT)/../wolfssh
   CPPFLAGS += -DUSE_WOLFSSH
-  CPPFLAGS += -I"$(WOLFSSH_PATH)/include"
+  CPPFLAGS += -isystem "$(WOLFSSH_PATH)/include"
   LDFLAGS += -L"$(WOLFSSH_PATH)/lib"
   LIBS += -lwolfssh
 endif
@@ -136,7 +136,7 @@ ifneq ($(findstring -ssl,$(CFG)),)
   CPPFLAGS += -DCURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG
   OPENSSL_INCLUDE ?= $(OPENSSL_PATH)/include
   OPENSSL_LIBPATH ?= $(OPENSSL_PATH)/lib
-  CPPFLAGS += -I"$(OPENSSL_INCLUDE)"
+  CPPFLAGS += -isystem "$(OPENSSL_INCLUDE)"
   LDFLAGS += -L"$(OPENSSL_LIBPATH)"
   OPENSSL_LIBS ?= -lssl -lcrypto
   LIBS += $(OPENSSL_LIBS)
@@ -153,7 +153,7 @@ ifneq ($(findstring -wolfssl,$(CFG)),)
   WOLFSSL_PATH ?= $(PROOT)/../wolfssl
   CPPFLAGS += -DUSE_WOLFSSL
   CPPFLAGS += -DSIZEOF_LONG_LONG=8
-  CPPFLAGS += -I"$(WOLFSSL_PATH)/include"
+  CPPFLAGS += -isystem "$(WOLFSSL_PATH)/include"
   LDFLAGS += -L"$(WOLFSSL_PATH)/lib"
   LIBS += -lwolfssl
   SSLLIBS += 1
@@ -161,16 +161,24 @@ endif
 ifneq ($(findstring -mbedtls,$(CFG)),)
   MBEDTLS_PATH ?= $(PROOT)/../mbedtls
   CPPFLAGS += -DUSE_MBEDTLS
-  CPPFLAGS += -I"$(MBEDTLS_PATH)/include"
+  CPPFLAGS += -isystem "$(MBEDTLS_PATH)/include"
   LDFLAGS += -L"$(MBEDTLS_PATH)/lib"
   LIBS += -lmbedtls -lmbedx509 -lmbedcrypto
+  SSLLIBS += 1
+endif
+ifneq ($(findstring -bearssl,$(CFG)),)
+  BEARSSL_PATH ?= $(PROOT)/../bearssl
+  CPPFLAGS += -DUSE_BEARSSL
+  CPPFLAGS += -isystem "$(BEARSSL_PATH)/inc"
+  LDFLAGS += -L"$(BEARSSL_PATH)/build"
+  LIBS += -lbearssl
   SSLLIBS += 1
 endif
 
 ifneq ($(findstring -nghttp2,$(CFG)),)
   NGHTTP2_PATH ?= $(PROOT)/../nghttp2
   CPPFLAGS += -DUSE_NGHTTP2
-  CPPFLAGS += -I"$(NGHTTP2_PATH)/include"
+  CPPFLAGS += -isystem "$(NGHTTP2_PATH)/include"
   LDFLAGS += -L"$(NGHTTP2_PATH)/lib"
   LIBS += -lnghttp2
 endif
@@ -178,13 +186,13 @@ endif
 ifeq ($(findstring -nghttp3,$(CFG))$(findstring -ngtcp2,$(CFG)),-nghttp3-ngtcp2)
   NGHTTP3_PATH ?= $(PROOT)/../nghttp3
   CPPFLAGS += -DUSE_NGHTTP3
-  CPPFLAGS += -I"$(NGHTTP3_PATH)/include"
+  CPPFLAGS += -isystem "$(NGHTTP3_PATH)/include"
   LDFLAGS += -L"$(NGHTTP3_PATH)/lib"
   LIBS += -lnghttp3
 
   NGTCP2_PATH ?= $(PROOT)/../ngtcp2
   CPPFLAGS += -DUSE_NGTCP2
-  CPPFLAGS += -I"$(NGTCP2_PATH)/include"
+  CPPFLAGS += -isystem "$(NGTCP2_PATH)/include"
   LDFLAGS += -L"$(NGTCP2_PATH)/lib"
 
   NGTCP2_LIBS ?=
@@ -207,7 +215,7 @@ ifneq ($(findstring -zlib,$(CFG))$(ZLIB),)
   ZLIB_PATH ?= $(PROOT)/../zlib
   # These CPPFLAGS are also required when compiling the curl tool via 'src'.
   CPPFLAGS += -DHAVE_LIBZ
-  CPPFLAGS += -I"$(ZLIB_PATH)/include"
+  CPPFLAGS += -isystem "$(ZLIB_PATH)/include"
   LDFLAGS += -L"$(ZLIB_PATH)/lib"
   ZLIB_LIBS ?= -lz
   LIBS += $(ZLIB_LIBS)
@@ -216,7 +224,7 @@ endif
 ifneq ($(findstring -zstd,$(CFG)),)
   ZSTD_PATH ?= $(PROOT)/../zstd
   CPPFLAGS += -DHAVE_ZSTD
-  CPPFLAGS += -I"$(ZSTD_PATH)/include"
+  CPPFLAGS += -isystem "$(ZSTD_PATH)/include"
   LDFLAGS += -L"$(ZSTD_PATH)/lib"
   ZSTD_LIBS ?= -lzstd
   LIBS += $(ZSTD_LIBS)
@@ -224,7 +232,7 @@ endif
 ifneq ($(findstring -brotli,$(CFG)),)
   BROTLI_PATH ?= $(PROOT)/../brotli
   CPPFLAGS += -DHAVE_BROTLI
-  CPPFLAGS += -I"$(BROTLI_PATH)/include"
+  CPPFLAGS += -isystem "$(BROTLI_PATH)/include"
   LDFLAGS += -L"$(BROTLI_PATH)/lib"
   BROTLI_LIBS ?= -lbrotlidec -lbrotlicommon
   LIBS += $(BROTLI_LIBS)
@@ -232,7 +240,7 @@ endif
 ifneq ($(findstring -gsasl,$(CFG)),)
   LIBGSASL_PATH ?= $(PROOT)/../gsasl
   CPPFLAGS += -DUSE_GSASL
-  CPPFLAGS += -I"$(LIBGSASL_PATH)/include"
+  CPPFLAGS += -isystem "$(LIBGSASL_PATH)/include"
   LDFLAGS += -L"$(LIBGSASL_PATH)/lib"
   LIBS += -lgsasl
 endif
@@ -240,14 +248,14 @@ endif
 ifneq ($(findstring -idn2,$(CFG)),)
   LIBIDN2_PATH ?= $(PROOT)/../libidn2
   CPPFLAGS += -DHAVE_LIBIDN2 -DHAVE_IDN2_H
-  CPPFLAGS += -I"$(LIBIDN2_PATH)/include"
+  CPPFLAGS += -isystem "$(LIBIDN2_PATH)/include"
   LDFLAGS += -L"$(LIBIDN2_PATH)/lib"
   LIBS += -lidn2
 
 ifneq ($(findstring -psl,$(CFG)),)
   LIBPSL_PATH ?= $(PROOT)/../libpsl
   CPPFLAGS += -DUSE_LIBPSL
-  CPPFLAGS += -I"$(LIBPSL_PATH)/include"
+  CPPFLAGS += -isystem "$(LIBPSL_PATH)/include"
   LDFLAGS += -L"$(LIBPSL_PATH)/lib"
   LIBS += -lpsl
 endif
@@ -259,7 +267,7 @@ endif
 
 ifneq ($(findstring -watt,$(CFG))$(MSDOS),)
   WATT_PATH ?= $(PROOT)/../watt
-  CPPFLAGS += -I"$(WATT_PATH)/inc"
+  CPPFLAGS += -isystem "$(WATT_PATH)/inc"
   LDFLAGS += -L"$(WATT_PATH)/lib"
   LIBS += -lwatt
 endif
