@@ -11,7 +11,7 @@ See-also:
   - config
 Example:
   - --variable name=smith --expand-url "$URL/{{name}}"
-  - --variable foo@file!50-99 --expand-data 'second 50 bytes: {{foo}}'
+  - --variable foo@file!50-99 --expand-data 'second 50 bytes {{foo}}'
 ---
 
 # `--variable`
