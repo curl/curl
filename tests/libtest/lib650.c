@@ -25,10 +25,10 @@
 
 #include "memdebug.h"
 
-static char data[] =
+static char testdata[] =
   "this is what we post to the silly web server";
 
-static const char name[] = "fieldname";
+static const char testname[] = "fieldname";
 
 
 /* This test attempts to use all form API features that are not
@@ -81,8 +81,8 @@ CURLcode test(char *URL)
   headers = headers2;
   CURL_IGNORE_DEPRECATION(
     formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, &name,
-                          CURLFORM_COPYCONTENTS, &data,
+                          CURLFORM_COPYNAME, &testname,
+                          CURLFORM_COPYCONTENTS, &testdata,
                           CURLFORM_CONTENTHEADER, headers,
                           CURLFORM_END);
   )
@@ -91,20 +91,20 @@ CURLcode test(char *URL)
     goto test_cleanup;
   }
 
-  contentlength = (long)(strlen(data) - 1);
+  contentlength = (long)(strlen(testdata) - 1);
 
   CURL_IGNORE_DEPRECATION(
     /* Use a form array for the non-copy test. */
     formarray[0].option = CURLFORM_PTRCONTENTS;
-    formarray[0].value = data;
+    formarray[0].value = testdata;
     formarray[1].option = CURLFORM_CONTENTSLENGTH;
     formarray[1].value = (char *)(size_t)contentlength;
     formarray[2].option = CURLFORM_END;
     formarray[2].value = NULL;
     formrc = curl_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_PTRNAME, name,
-                          CURLFORM_NAMELENGTH, strlen(name) - 1,
+                          CURLFORM_PTRNAME, testname,
+                          CURLFORM_NAMELENGTH, strlen(testname) - 1,
                           CURLFORM_ARRAY, formarray,
                           CURLFORM_FILENAME, "remotefile.txt",
                           CURLFORM_END);
@@ -117,7 +117,7 @@ CURLcode test(char *URL)
   /* Now change in-memory data to affect CURLOPT_PTRCONTENTS value.
      Copied values (first field) must not be affected.
      CURLOPT_PTRNAME actually copies the name thus we do not test this here. */
-  data[0]++;
+  testdata[0]++;
 
   CURL_IGNORE_DEPRECATION(
     /* Check multi-files and content type propagation. */

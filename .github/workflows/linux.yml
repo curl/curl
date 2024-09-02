@@ -498,7 +498,7 @@ jobs:
 
       - run: |
           ${{ matrix.build.configure-prefix }} \
-          ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+          ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             ${{ matrix.build.configure }}
         if: ${{ matrix.build.configure }}
         name: 'configure (autotools)'

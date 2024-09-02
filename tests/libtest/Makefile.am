@@ -34,7 +34,8 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/tests/libtest
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
   notexists.pl CMakeLists.txt mk-lib1521.pl .checksrc
@@ -55,7 +56,7 @@ TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 LDADD = $(SUPPORTFILES_LIBS)
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
-# noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
+# LIBTESTPROGS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc
 
 noinst_LTLIBRARIES =
@@ -87,6 +88,26 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
+if USE_TEST_BUNDLES
+AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
+
+libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
+
+noinst_PROGRAMS = libtests
+nodist_libtests_SOURCES = libtest_bundle.c
+libtests_SOURCES = $(TESTUTIL) $(TSTTRACE)
+libtests_LDADD = $(TESTUTIL_LIBS)
+CLEANFILES += libtest_bundle.c
+
+if USE_CPPFLAG_CURL_STATICLIB
+else
+# These are part of the libcurl static lib. Add them here when linking shared.
+libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(TIMEDIFF) $(THREADS)
+endif
+else
+noinst_PROGRAMS = $(LIBTESTPROGS)
+endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h > lib1521.c

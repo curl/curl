@@ -79,7 +79,7 @@ jobs:
         run: |
           mkdir bld-1
           cd bld-1
-          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON -DENABLE_WEBSOCKETS=ON
           make install
           src/curl --disable --version
@@ -88,7 +88,7 @@ jobs:
         run: |
           mkdir bld-cares
           cd bld-cares
-          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
+          cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_LIBRTMP=ON -DENABLE_WEBSOCKETS=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
@@ -113,7 +113,7 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+          ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --with-librtmp --enable-websockets \
             --prefix="$PWD"/../install-am
 

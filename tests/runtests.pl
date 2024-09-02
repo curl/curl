@@ -869,8 +869,9 @@ sub checksystemfeatures {
                "*\n");
     }
 
-    logmsg sprintf("* Env: %s%s%s", $valgrind?"Valgrind ":"",
+    logmsg sprintf("* Env: %s%s%s%s", $valgrind?"Valgrind ":"",
                    $run_event_based?"event-based ":"",
+                   $bundle?"bundle ":"",
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
@@ -2240,6 +2241,10 @@ while(@ARGV) {
         $ACURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
+    elsif ($ARGV[0] eq "-bundle") {
+        # use test bundles
+        $bundle=1;
+    }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;
@@ -2417,6 +2422,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
+  -bundle  use test bundles
   -c path  use this curl executable
   -d       display server debug info
   -e       event-based execution

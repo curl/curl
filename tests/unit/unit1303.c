@@ -27,15 +27,15 @@
 #include "connect.h"
 #include "memdebug.h" /* LAST include file */
 
-static struct Curl_easy *data;
+static struct Curl_easy *testdata;
 
 static CURLcode unit_setup(void)
 {
   CURLcode res = CURLE_OK;
 
   global_init(CURL_GLOBAL_ALL);
-  data = curl_easy_init();
-  if(!data) {
+  testdata = curl_easy_init();
+  if(!testdata) {
     curl_global_cleanup();
     return CURLE_OUT_OF_MEMORY;
   }
@@ -44,7 +44,7 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
-  curl_easy_cleanup(data);
+  curl_easy_cleanup(testdata);
   curl_global_cleanup();
 }
 
@@ -55,7 +55,8 @@ static void unit_stop(void)
 /* macro to set the pretended current time */
 #define NOW(x,y) now.tv_sec = x; now.tv_usec = y
 /* macro to set the millisecond based timeouts to use */
-#define TIMEOUTS(x,y) data->set.timeout = x; data->set.connecttimeout = y
+#define TIMEOUTS(x,y) testdata->set.timeout = x; \
+                      testdata->set.connecttimeout = y
 
 /*
  * To test:
@@ -136,16 +137,16 @@ UNITTEST_START
   };
 
   /* this is the pretended start time of the transfer */
-  data->progress.t_startsingle.tv_sec = BASE;
-  data->progress.t_startsingle.tv_usec = 0;
-  data->progress.t_startop.tv_sec = BASE;
-  data->progress.t_startop.tv_usec = 0;
+  testdata->progress.t_startsingle.tv_sec = BASE;
+  testdata->progress.t_startsingle.tv_usec = 0;
+  testdata->progress.t_startop.tv_sec = BASE;
+  testdata->progress.t_startop.tv_usec = 0;
 
   for(i = 0; i < sizeof(run)/sizeof(run[0]); i++) {
     timediff_t timeout;
     NOW(run[i].now_s, run[i].now_us);
     TIMEOUTS(run[i].timeout_ms, run[i].connecttimeout_ms);
-    timeout =  Curl_timeleft(data, &now, run[i].connecting);
+    timeout =  Curl_timeleft(testdata, &now, run[i].connecting);
     if(timeout != run[i].result)
       fail(run[i].comment);
   }

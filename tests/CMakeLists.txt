@@ -21,6 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
+option(CURL_TEST_BUNDLES "Bundle libtests/unittests into single binaries" OFF)
+
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
   set(TEST_NGHTTPX "nghttpx")
@@ -38,6 +40,9 @@ add_subdirectory(unit)
 add_subdirectory(certs EXCLUDE_FROM_ALL)
 
 function(add_runtests _targetname _test_flags)
+  if(CURL_TEST_BUNDLES)
+    set(_test_flags "${_test_flags} -bundle")
+  endif()
   # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by

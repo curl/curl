@@ -38,8 +38,8 @@ struct userdata {
 };
 
 /* lock callback */
-static void my_lock(CURL *handle, curl_lock_data data,
-                    curl_lock_access laccess, void *useptr)
+static void test_lock(CURL *handle, curl_lock_data data,
+                      curl_lock_access laccess, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -69,7 +69,7 @@ static void my_lock(CURL *handle, curl_lock_data data,
 }
 
 /* unlock callback */
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -96,7 +96,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
 }
 
 /* the dummy thread function */
-static void *fire(void *ptr)
+static void *test_fire(void *ptr)
 {
   CURLcode code;
   struct Tdata *tdata = (struct Tdata*)ptr;
@@ -160,11 +160,11 @@ CURLcode test(char *URL)
 
   if(CURLSHE_OK == scode) {
     printf("CURLSHOPT_LOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
+    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
   }
   if(CURLSHE_OK == scode) {
     printf("CURLSHOPT_UNLOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, my_unlock);
+    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
   }
   if(CURLSHE_OK == scode) {
     printf("CURLSHOPT_USERDATA\n");
@@ -193,7 +193,7 @@ CURLcode test(char *URL)
 
     /* simulate thread, direct call of "thread" function */
     printf("*** run %d\n",i);
-    fire(&tdata);
+    test_fire(&tdata);
   }
 
 

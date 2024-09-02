@@ -103,7 +103,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         run: |
-          mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
             --with-openssl \
@@ -196,7 +196,7 @@ jobs:
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON \
@@ -329,7 +329,7 @@ jobs:
             '-GMSYS Makefiles' \
             -DCMAKE_C_COMPILER=gcc \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_USE_LIBPSL=OFF \
@@ -415,7 +415,7 @@ jobs:
       - name: 'autotools configure'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --host=${TRIPLET} \
             --with-schannel --with-winidn \
             --without-libpsl \
@@ -429,6 +429,10 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5
 
+      - name: 'autotools build tests'
+        if: ${{ matrix.build == 'autotools' }}
+        run: make -C bld -j5 -C tests
+
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5 examples
@@ -440,7 +444,7 @@ jobs:
             -DCMAKE_SYSTEM_NAME=Windows \
             -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
             -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
-            -DCMAKE_UNITY_BUILD=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
             -DCURL_USE_LIBPSL=OFF
@@ -452,6 +456,10 @@ jobs:
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         run: cmake --build bld --parallel 5
+
+      - name: 'cmake build tests'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cmake --build bld --parallel 5 --target testdeps
 
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
@@ -565,7 +573,7 @@ jobs:
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
             -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \

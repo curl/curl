@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char data[]=
+static char testdata[]=
   "dummy\n";
 
 struct WriteThis {
@@ -94,8 +94,8 @@ CURLcode test(char *URL)
   test_setopt(easy, CURLOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
-  pooh.readptr = data;
-  pooh.sizeleft = (curl_off_t) strlen(data);
+  pooh.readptr = testdata;
+  pooh.sizeleft = (curl_off_t) strlen(testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */

@@ -31,24 +31,24 @@
 #include <stdio.h>
 #include "memdebug.h"
 
-static char data [] = "Hello Cloud!\r\n";
+static char testdata[] = "Hello Cloud!\r\n";
 static size_t consumed = 0;
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
   size_t  amount = nmemb * size; /* Total bytes curl wants */
 
-  if(consumed == strlen(data)) {
+  if(consumed == strlen(testdata)) {
     return 0;
   }
 
-  if(amount > strlen(data)-consumed) {
-    amount = strlen(data);
+  if(amount > strlen(testdata)-consumed) {
+    amount = strlen(testdata);
   }
 
   consumed += amount;
   (void)stream;
-  memcpy(ptr, data, amount);
+  memcpy(ptr, testdata, amount);
   return amount;
 }
 

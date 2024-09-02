@@ -40,7 +40,7 @@ static CURL *pending_handles[CONN_NUM];
 static int pending_num = 0;
 static CURLcode test_failure = CURLE_OK;
 
-static CURLM *multi = NULL;
+static CURLM *testmulti = NULL;
 static const char *url;
 
 static void *run_thread(void *ptr)
@@ -72,7 +72,7 @@ static void *run_thread(void *ptr)
 
     pthread_mutex_unlock(&lock);
 
-    res_multi_wakeup(multi);
+    res_multi_wakeup(testmulti);
   }
 
 test_cleanup:
@@ -107,7 +107,7 @@ CURLcode test(char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  multi_init(multi);
+  multi_init(testmulti);
 
   url = URL;
 
@@ -121,16 +121,16 @@ CURLcode test(char *URL)
   }
 
   while(1) {
-    multi_perform(multi, &still_running);
+    multi_perform(testmulti, &still_running);
 
     abort_on_test_timeout();
 
-    while((message = curl_multi_info_read(multi, &num))) {
+    while((message = curl_multi_info_read(testmulti, &num))) {
       if(message->msg == CURLMSG_DONE) {
         res = message->data.result;
         if(res)
           goto test_cleanup;
-        multi_remove_handle(multi, message->easy_handle);
+        multi_remove_handle(testmulti, message->easy_handle);
         finished_num++;
       }
       else {
@@ -146,14 +146,14 @@ CURLcode test(char *URL)
     if(CONN_NUM == finished_num)
       break;
 
-    multi_poll(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    multi_poll(testmulti, NULL, 0, TEST_HANG_TIMEOUT, &num);
 
     abort_on_test_timeout();
 
     pthread_mutex_lock(&lock);
 
     while(pending_num > 0) {
-      res_multi_add_handle(multi, pending_handles[pending_num - 1]);
+      res_multi_add_handle(testmulti, pending_handles[pending_num - 1]);
       if(res) {
         pthread_mutex_unlock(&lock);
         goto test_cleanup;
@@ -191,7 +191,7 @@ test_cleanup:
   if(tid_valid)
     pthread_join(tid, NULL);
 
-  curl_multi_cleanup(multi);
+  curl_multi_cleanup(testmulti);
   for(i = 0; i < pending_num; i++)
     curl_easy_cleanup(pending_handles[i]);
   for(i = 0; i < started_num; i++)

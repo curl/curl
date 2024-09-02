@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char buffer[17000]; /* more than 16K */
+static char testbuf[17000]; /* more than 16K */
 
 CURLcode test(char *URL)
 {
@@ -37,12 +37,12 @@ CURLcode test(char *URL)
 
   /* create a buffer with AAAA...BBBBB...CCCC...etc */
   int i;
-  int size = (int)sizeof(buffer)/1000;
+  int size = (int)sizeof(testbuf)/1000;
 
   for(i = 0; i < size ; i++)
-    memset(&buffer[i * 1000], 65 + i, 1000);
+    memset(&testbuf[i * 1000], 65 + i, 1000);
 
-  buffer[ sizeof(buffer)-1] = 0; /* null-terminate */
+  testbuf[sizeof(testbuf)-1] = 0; /* null-terminate */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -53,7 +53,7 @@ CURLcode test(char *URL)
     /* Check proper name and data copying. */
     formrc = curl_formadd(&formpost, &lastptr,
                           CURLFORM_COPYNAME, "hello",
-                          CURLFORM_COPYCONTENTS, buffer,
+                          CURLFORM_COPYCONTENTS, testbuf,
                           CURLFORM_END);
   )
   if(formrc)

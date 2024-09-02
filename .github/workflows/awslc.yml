@@ -142,7 +142,9 @@ jobs:
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - run: cmake -Bbuild -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON .
+      - run: |
+          cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+            -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON
         name: 'cmake generate out-of-tree'
 
       - run: cmake --build build --parallel
@@ -150,3 +152,6 @@ jobs:
 
       - run: cmake --install build --prefix $HOME/curl --strip
         name: 'cmake install'
+
+      - run: cmake --build build --parallel --target testdeps
+        name: 'cmake build tests'

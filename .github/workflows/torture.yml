@@ -69,7 +69,7 @@ jobs:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - run: |
-          cmake -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+          cmake -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
             ${{ matrix.build.generate }}
         name: 'cmake configure'

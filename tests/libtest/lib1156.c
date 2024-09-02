@@ -47,7 +47,7 @@ struct testparams {
   CURLcode result; /* Code that should be returned by curl_easy_perform(). */
 };
 
-static const struct testparams params[] = {
+static const struct testparams testparams[] = {
   { 0,                                                             CURLE_OK },
   {                                 F_CONTENTRANGE,                CURLE_OK },
   {                        F_FAIL,                                 CURLE_OK },
@@ -143,7 +143,7 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < sizeof(params) / sizeof(params[0]); i++) {
+  for(i = 0; i < sizeof(testparams) / sizeof(testparams[0]); i++) {
     curl = curl_easy_init();
     if(!curl) {
       fprintf(stderr, "curl_easy_init() failed\n");
@@ -156,7 +156,7 @@ CURLcode test(char *URL)
 #ifdef SINGLETEST
     if(SINGLETEST == i)
 #endif
-      status |= onetest(curl, URL, params + i, i);
+      status |= onetest(curl, URL, testparams + i, i);
     curl_easy_cleanup(curl);
   }
 

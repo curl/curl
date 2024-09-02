@@ -848,10 +848,11 @@ sub singletest_run {
 
     my @codepieces = getpart("client", "tool");
     my $tool="";
+    my $tool_name="";  # without exe extension
     if(@codepieces) {
-        $tool = $codepieces[0];
-        chomp $tool;
-        $tool .= exe_ext('TOOL');
+        $tool_name = $codepieces[0];
+        chomp $tool_name;
+        $tool = $tool_name . exe_ext('TOOL');
     }
 
     my $disablevalgrind;
@@ -904,20 +905,36 @@ sub singletest_run {
 
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
-            $tool="unit$testnum";
+            $tool_name="unit$testnum";
+            $tool = $tool_name;
         }
 
         if($tool =~ /^lib/) {
-            $CMDLINE="$LIBDIR/$tool";
+            if($bundle) {
+                $CMDLINE="$LIBDIR/libtests";
+            }
+            else {
+                $CMDLINE="$LIBDIR/$tool";
+            }
         }
         elsif($tool =~ /^unit/) {
-            $CMDLINE="$UNITDIR/$tool";
+            if($bundle) {
+                $CMDLINE="$UNITDIR/units";
+            }
+            else {
+                $CMDLINE="$UNITDIR/$tool";
+            }
         }
 
         if(! -f $CMDLINE) {
             logmsg " $testnum: IGNORED: The tool set in the test case for this: '$tool' does not exist\n";
             return (-1, 0, 0, "", "", 0);
         }
+
+        if($bundle) {
+            $CMDLINE.=" $tool_name";
+        }
+
         $DBGCURL=$CMDLINE;
     }
 

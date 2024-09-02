@@ -193,7 +193,7 @@ jobs:
             options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
             CFLAGS+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
-          mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --disable-dependency-tracking \
             --with-libpsl=$(brew --prefix libpsl) \
             ${{ matrix.configure }} ${options}
@@ -343,7 +343,7 @@ jobs:
               fi
             done
           fi
-          cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+          cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             ${{ matrix.build.generate }}
@@ -608,7 +608,7 @@ jobs:
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
-            mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
@@ -618,7 +618,7 @@ jobs:
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             # would pick up nghttp2, libidn2, and libssh2
-            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \

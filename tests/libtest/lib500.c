@@ -28,7 +28,7 @@
 
 #ifdef LIB585
 
-static int counter;
+static int testcounter;
 
 static curl_socket_t tst_opensocket(void *clientp,
                                     curlsocktype purpose,
@@ -36,14 +36,14 @@ static curl_socket_t tst_opensocket(void *clientp,
 {
   (void)clientp;
   (void)purpose;
-  printf("[OPEN] counter: %d\n", ++counter);
+  printf("[OPEN] counter: %d\n", ++testcounter);
   return socket(addr->family, addr->socktype, addr->protocol);
 }
 
 static int tst_closesocket(void *clientp, curl_socket_t sock)
 {
   (void)clientp;
-  printf("[CLOSE] counter: %d\n", counter--);
+  printf("[CLOSE] counter: %d\n", testcounter--);
   return sclose(sock);
 }
 
@@ -51,7 +51,7 @@ static void setupcallbacks(CURL *curl)
 {
   curl_easy_setopt(curl, CURLOPT_OPENSOCKETFUNCTION, tst_opensocket);
   curl_easy_setopt(curl, CURLOPT_CLOSESOCKETFUNCTION, tst_closesocket);
-  counter = 0;
+  testcounter = 0;
 }
 
 #else
@@ -174,3 +174,5 @@ test_cleanup:
 
   return res;
 }
+
+#undef setupcallbacks

@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char data[]=
+static char testdata[]=
   "this is what we post to the silly web server\n";
 
 struct WriteThis {
@@ -59,7 +59,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 #endif
 }
 
-static CURLcode once(char *URL, bool oldstyle)
+static CURLcode test_once(char *URL, bool oldstyle)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -70,8 +70,8 @@ static CURLcode once(char *URL, bool oldstyle)
   struct WriteThis pooh;
   struct WriteThis pooh2;
 
-  pooh.readptr = data;
-  pooh.sizeleft = strlen(data);
+  pooh.readptr = testdata;
+  pooh.sizeleft = strlen(testdata);
 
   /* Fill in the file upload field */
   if(oldstyle) {
@@ -104,8 +104,8 @@ static CURLcode once(char *URL, bool oldstyle)
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
-  pooh2.readptr = data;
-  pooh2.sizeleft = strlen(data);
+  pooh2.readptr = testdata;
+  pooh2.sizeleft = strlen(testdata);
 
   CURL_IGNORE_DEPRECATION(
     /* Fill in the file upload field */
@@ -213,9 +213,9 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = once(URL, TRUE); /* old */
+  res = test_once(URL, TRUE); /* old */
   if(!res)
-    res = once(URL, FALSE); /* new */
+    res = test_once(URL, FALSE); /* new */
 
   curl_global_cleanup();
 

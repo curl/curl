@@ -30,7 +30,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct data {
+struct testdata {
   char trace_ascii; /* 1 or 0 */
 };
 
@@ -89,7 +89,7 @@ int my_trace(CURL *handle, curl_infotype type,
              char *data, size_t size,
              void *userp)
 {
-  struct data *config = (struct data *)userp;
+  struct testdata *config = (struct testdata *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
@@ -170,7 +170,7 @@ CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct data config;
+  struct testdata config;
   size_t i;
   static const char fill[] = "test data";
 
