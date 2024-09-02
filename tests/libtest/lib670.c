@@ -30,7 +30,7 @@
 #define PAUSE_TIME      5
 
 
-static const char name[] = "field";
+static const char testname[] = "field";
 
 struct ReadThis {
   CURL *easy;
@@ -139,7 +139,7 @@ CURLcode test(char *URL)
   /* Build the mime tree. */
   mime = curl_mime_init(pooh.easy);
   part = curl_mime_addpart(mime);
-  res = curl_mime_name(part, name);
+  res = curl_mime_name(part, testname);
   if(res != CURLE_OK) {
     fprintf(stderr,
             "Something went wrong when building the mime structure: %d\n",
@@ -157,7 +157,7 @@ CURLcode test(char *URL)
   CURL_IGNORE_DEPRECATION(
     /* Build the form. */
     formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, name,
+                          CURLFORM_COPYNAME, testname,
                           CURLFORM_STREAM, &pooh,
                           CURLFORM_CONTENTLEN, (curl_off_t) 2,
                           CURLFORM_END);

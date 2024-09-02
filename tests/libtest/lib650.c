@@ -28,7 +28,7 @@
 static char data[] =
   "this is what we post to the silly web server";
 
-static const char name[] = "fieldname";
+static const char testname[] = "fieldname";
 
 
 /* This test attempts to use all form API features that are not
@@ -81,7 +81,7 @@ CURLcode test(char *URL)
   headers = headers2;
   CURL_IGNORE_DEPRECATION(
     formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, &name,
+                          CURLFORM_COPYNAME, &testname,
                           CURLFORM_COPYCONTENTS, &data,
                           CURLFORM_CONTENTHEADER, headers,
                           CURLFORM_END);
@@ -103,8 +103,8 @@ CURLcode test(char *URL)
     formarray[2].value = NULL;
     formrc = curl_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_PTRNAME, name,
-                          CURLFORM_NAMELENGTH, strlen(name) - 1,
+                          CURLFORM_PTRNAME, testname,
+                          CURLFORM_NAMELENGTH, strlen(testname) - 1,
                           CURLFORM_ARRAY, formarray,
                           CURLFORM_FILENAME, "remotefile.txt",
                           CURLFORM_END);
