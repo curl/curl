@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: variable
-Arg: <[%]name=text/@file>
+Arg: <[%]name=text/@file[![start]-[end]]>
 Help: Set variable
 Category: curl
 Added: 8.3.0
@@ -11,6 +11,7 @@ See-also:
   - config
 Example:
   - --variable name=smith --expand-url "$URL/{{name}}"
+  - --variable foo@file!50-99 --expand-data 'second 50 bytes: {{foo}}'
 ---
 
 # `--variable`

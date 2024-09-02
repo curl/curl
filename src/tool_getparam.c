@@ -891,7 +891,7 @@ static ParameterError set_data(cmdline_t cmd,
                         offset_end);
 
       if(err == PARAM_FSEEK_ERROR)
-        errorf(global, "Cant move to te selected Offset of %s: %s", nextarg,
+        errorf(global, "Can't move to te selected Offset of %s: %s", nextarg,
                strerror(errno));
     }
 
