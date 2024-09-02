@@ -136,17 +136,17 @@ ParameterError file2string(char **bufp, FILE *file, int filelimit,
                            size_t start, size_t end)
 {
   struct curlx_dynbuf dyn;
-  size_t rangelen;
+  size_t rangelen = 0;
   int rangelen_set = 0;
 
-  if(filelimit == FILELIMIT_START && fseek(file, start, SEEK_SET)) {
+  if(filelimit == FILELIMIT_START && fseek(file, (long)start, SEEK_SET)) {
     return PARAM_FSEEK_ERROR;
   }
   if(filelimit == FILELIMIT_END && fseek(file, -((long)end), SEEK_END)) {
     return PARAM_FSEEK_ERROR;
   }
   if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
-    if(fseek(file, start, SEEK_SET)) {
+    if(fseek(file, (long)start, SEEK_SET)) {
       return PARAM_FSEEK_ERROR;
     }
     rangelen = end - start + 1;
@@ -205,14 +205,14 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
     int rangelen_set = 0;
 
 
-    if(filelimit == FILELIMIT_START && fseek(file, start, SEEK_SET)) {
+    if(filelimit == FILELIMIT_START && fseek(file, (long)start, SEEK_SET)) {
       return PARAM_FSEEK_ERROR;
     }
     if(filelimit == FILELIMIT_END && fseek(file, -((long)end), SEEK_END)) {
       return PARAM_FSEEK_ERROR;
     }
     if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
-      if(fseek(file, start, SEEK_SET)) {
+      if(fseek(file, (long)start, SEEK_SET)) {
         return PARAM_FSEEK_ERROR;
       }
       rangelen = end - start + 1;

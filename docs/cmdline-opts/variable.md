@@ -2,7 +2,7 @@
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: variable
-Arg: <[%]name=text/@file[![start]-[end]]>
+Arg: <[%]name=text/@file>
 Help: Set variable
 Category: curl
 Added: 8.3.0
@@ -20,6 +20,11 @@ Set a variable with `name=content` or `name@file` (where `file` can be stdin
 if set to a single dash (`-`)). The name is a case sensitive identifier that
 must consist of no other letters than a-z, A-Z, 0-9 or underscore. The
 specified content is then associated with this identifier.
+
+If you enter an exclamation mark after the filename followed by one or two
+numbers separated by a minus sign, only the bytes from the file that are
+within the limits of those numbers is sent. The notation is the same as
+that used by the '--range' and '--data' option.
 
 Setting the same variable name again overwrites the old contents with the new.
 
