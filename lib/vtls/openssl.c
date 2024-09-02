@@ -2924,7 +2924,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 
     Curl_ssl_sessionid_lock(data);
     result = Curl_ssl_set_sessionid(cf, data, peer, der_session_buf,
-     der_session_size, ossl_session_free);
+                                    der_session_size, ossl_session_free);
     Curl_ssl_sessionid_unlock(data);
   }
 
@@ -4002,8 +4002,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         octx->reused_session = TRUE;
       }
       else {
-          Curl_ssl_sessionid_unlock(data);
-          return CURLE_SSL_CONNECT_ERROR;
+        Curl_ssl_sessionid_unlock(data);
+        return CURLE_SSL_CONNECT_ERROR;
       }
     }
     Curl_ssl_sessionid_unlock(data);

@@ -214,11 +214,11 @@ CURLcode test(char *URL)
       res = ctx[i].result;
     }
     else {
-        struct curl_slist *item = ctx[i].contents;
-        while(item) {
-          printf("%s", item->data);
-          item = item->next;
-        }
+      struct curl_slist *item = ctx[i].contents;
+      while(item) {
+        printf("%s", item->data);
+        item = item->next;
+      }
     }
     curl_slist_free_all(ctx[i].contents);
   }
