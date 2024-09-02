@@ -131,17 +131,17 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
   case HAPROXY_SEND:
     len = Curl_dyn_len(&ctx->data_out);
     if(len > 0) {
-      size_t written;
-      result = Curl_conn_send(data, cf->sockindex,
-                              Curl_dyn_ptr(&ctx->data_out),
-                              len, FALSE, &written);
-      if(result == CURLE_AGAIN) {
+      ssize_t nwritten;
+      nwritten = Curl_conn_cf_send(cf->next, data,
+                                   Curl_dyn_ptr(&ctx->data_out), len, FALSE,
+                                   &result);
+      if(nwritten < 0) {
+        if(result != CURLE_AGAIN)
+          goto out;
         result = CURLE_OK;
-        written = 0;
+        nwritten = 0;
       }
-      else if(result)
-        goto out;
-      Curl_dyn_tail(&ctx->data_out, len - written);
+      Curl_dyn_tail(&ctx->data_out, len - (size_t)nwritten);
       if(Curl_dyn_len(&ctx->data_out) > 0) {
         result = CURLE_OK;
         goto out;
