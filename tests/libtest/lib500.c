@@ -174,3 +174,5 @@ test_cleanup:
 
   return res;
 }
+
+#undef setupcallbacks
