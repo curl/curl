@@ -33,25 +33,25 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 #define MAX_EASY_HANDLES 3
 
-static int counter[MAX_EASY_HANDLES];
-static CURL *easy[MAX_EASY_HANDLES];
-static curl_socket_t sockets[MAX_EASY_HANDLES];
+static int ntlm_counter[MAX_EASY_HANDLES];
+static CURL *ntlm_easy[MAX_EASY_HANDLES];
+static curl_socket_t ntlm_sockets[MAX_EASY_HANDLES];
 static CURLcode ntlmcb_res = CURLE_OK;
 
 static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
-  ssize_t idx = ((CURL **) data) - easy;
+  ssize_t idx = ((CURL **) data) - ntlm_easy;
   curl_socket_t sock;
   long longdata;
   CURLcode code;
   const size_t failure = (size && nmemb) ? 0 : 1;
   (void)ptr;
 
-  counter[idx] += (int)(size * nmemb);
+  ntlm_counter[idx] += (int)(size * nmemb);
 
   /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
   CURL_IGNORE_DEPRECATION(
-    code = curl_easy_getinfo(easy[idx], CURLINFO_LASTSOCKET, &longdata);
+    code = curl_easy_getinfo(ntlm_easy[idx], CURLINFO_LASTSOCKET, &longdata);
   )
   if(CURLE_OK != code) {
     fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
@@ -67,15 +67,15 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 
   if(sock != CURL_SOCKET_BAD) {
     /* Track relationship between this easy handle and the socket. */
-    if(sockets[idx] == CURL_SOCKET_BAD) {
+    if(ntlm_sockets[idx] == CURL_SOCKET_BAD) {
       /* An easy handle without previous socket, record the socket. */
-      sockets[idx] = sock;
+      ntlm_sockets[idx] = sock;
     }
-    else if(sock != sockets[idx]) {
+    else if(sock != ntlm_sockets[idx]) {
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
       fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
-              curlx_sztosi(idx), (int)sockets[idx], (int)sock);
+              curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
       ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
@@ -108,8 +108,8 @@ CURLcode test(char *url)
   }
 
   for(i = 0; i < MAX_EASY_HANDLES; ++i) {
-    easy[i] = NULL;
-    sockets[i] = CURL_SOCKET_BAD;
+    ntlm_easy[i] = NULL;
+    ntlm_sockets[i] = CURL_SOCKET_BAD;
   }
 
   res_global_init(CURL_GLOBAL_ALL);
@@ -131,26 +131,28 @@ CURLcode test(char *url)
 
     /* Start a new handle if we aren't at the max */
     if(state == ReadyForNewHandle) {
-      easy_init(easy[num_handles]);
+      easy_init(ntlm_easy[num_handles]);
 
       if(num_handles % 3 == 2) {
         msnprintf(full_url, urllen, "%s0200", url);
-        easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
+        easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
       }
       else {
         msnprintf(full_url, urllen, "%s0100", url);
-        easy_setopt(easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
       }
-      easy_setopt(easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);
-      easy_setopt(easy[num_handles], CURLOPT_URL, full_url);
-      easy_setopt(easy[num_handles], CURLOPT_VERBOSE, 1L);
-      easy_setopt(easy[num_handles], CURLOPT_HTTPGET, 1L);
-      easy_setopt(easy[num_handles], CURLOPT_USERPWD, "testuser:testpass");
-      easy_setopt(easy[num_handles], CURLOPT_WRITEFUNCTION, callback);
-      easy_setopt(easy[num_handles], CURLOPT_WRITEDATA, easy + num_handles);
-      easy_setopt(easy[num_handles], CURLOPT_HEADER, 1L);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_URL, full_url);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_VERBOSE, 1L);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPGET, 1L);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_USERPWD,
+                  "testuser:testpass");
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEFUNCTION, callback);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEDATA,
+                  ntlm_easy + num_handles);
+      easy_setopt(ntlm_easy[num_handles], CURLOPT_HEADER, 1L);
 
-      multi_add_handle(multi, easy[num_handles]);
+      multi_add_handle(multi, ntlm_easy[num_handles]);
       num_handles += 1;
       state = NeedSocketForNewHandle;
       res = ntlmcb_res;
@@ -225,9 +227,9 @@ test_cleanup:
   /* proper cleanup sequence - type PB */
 
   for(i = 0; i < MAX_EASY_HANDLES; i++) {
-    printf("Data connection %d: %d\n", i, counter[i]);
-    curl_multi_remove_handle(multi, easy[i]);
-    curl_easy_cleanup(easy[i]);
+    printf("Data connection %d: %d\n", i, ntlm_counter[i]);
+    curl_multi_remove_handle(multi, ntlm_easy[i]);
+    curl_easy_cleanup(ntlm_easy[i]);
   }
 
   curl_multi_cleanup(multi);
