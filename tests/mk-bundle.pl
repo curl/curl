@@ -98,7 +98,6 @@ close $fh;
 # Name, pointer table
 print "static const struct onetest s_tests[] = {\n";
 print "$tlist";
-#print "  { NULL, NULL }\n";
 print "};\n\n";
 
 print '#include "first.c"' . "\n";
