@@ -36,8 +36,7 @@ add_custom_command(
     "${CURL_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
-option(CURL_TEST_USE_BUNDLE "Bundle tests into a single binary" ON)
-if(CURL_TEST_USE_BUNDLE)
+if(CURL_TEST_USE_BUNDLES)
   unset(_allsources)
   foreach(_target IN LISTS noinst_PROGRAMS)
     if(DEFINED ${_target}_SOURCES)
