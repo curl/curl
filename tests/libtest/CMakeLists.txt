@@ -50,9 +50,9 @@ if(CURL_TEST_USE_BUNDLE)
 
   add_custom_command(
     OUTPUT "libtests.c"
-    COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl" "libtest" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "libtest" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
     DEPENDS
-      "${CMAKE_CURRENT_SOURCE_DIR}/mk-bundle.pl"
+      "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
     VERBATIM)
     set(noinst_PROGRAMS "libtests")
