@@ -49,6 +49,11 @@
 
 #define CURL_MT_LOGFNAME_BUFSIZE 512
 
+/* Extra guard to avoid multiple definition compiler warnings, when
+   force-including this header a second time to re-apply the redefines.
+   Necessary for Unity builds. */
+#ifndef HEADER_CURL_MEMDEBUG_H_DECLS
+#define HEADER_CURL_MEMDEBUG_H_DECLS
 extern FILE *curl_dbg_logfile;
 
 /* memory functions */
@@ -108,6 +113,7 @@ CURL_EXTERN ALLOC_FUNC FILE *curl_dbg_fdopen(int filedes, const char *mode,
                                              int line, const char *source);
 
 CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
+#endif /* HEADER_CURL_MEMDEBUG_H_DECLS */
 
 #ifndef MEMDEBUG_NODEFINES
 
