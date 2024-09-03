@@ -43,4 +43,4 @@ decent random value:
 
 If neither of those are present, then curl using Rustls falls back to **weak
 pseudo-random values**, and thus weakening several curl authentication
-implementaions.
+implementations.
