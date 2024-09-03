@@ -35,12 +35,12 @@ Now configure and build curl with Rustls:
 Every TLS libcurl curl supports - *except* rustls - provides a function for
 curl to extract cryptographicly safe random numbers with.
 
-When you build curl with rustls, curl will use its own internal attempts to
-get a decent random value:
+When you build curl with rustls, curl uses its own internal attempts to get a
+decent random value:
 
 1. Windows specific APIs
 2. arc4random
 
-If neither of those are present, then using rustls will fall-back to **weak
+If neither of those are present, then curl using rustls falls back to **weak
 pseudo-random values**, and thus weakening several curl authentication
 implementaions.
