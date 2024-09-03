@@ -69,8 +69,9 @@ while(my $line = <$fh>) {
                 "Tdata", "curlSocketCallback", "curlTimerCallback", "checkForCompletion",
                 "getMicroSecondTimeout", "removeFd", "addFd", "updateFdSet", "checkFdSet",
                 "curl", "buffer", "userdata", "buf", "suburl", "post", "params",
-                "testname", "testdata", "testfd", "teststring", "testeh",
+                "testname", "testdata", "testfd", "teststring", "testeh", "test_failure",
                 "xferinfo", "cyclic_add", "geterr", "test_once", "fire",
+                "websocket_close", "websocket", "run_thread",
                 "unit_setup", "unit_stop", "mydtor", "testcase", "tests", "test_parse", "password", "easy") {  # unit
             print "#undef $symb\n";
             print "#define $symb ${symb}_$nam\n";
