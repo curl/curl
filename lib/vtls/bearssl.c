@@ -25,18 +25,7 @@
 
 #ifdef USE_BEARSSL
 
-/* Necessary for BearSSL <=0.6 */
-#ifdef __clang__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wundef"
-#pragma clang diagnostic ignored "-Wimplicit-int-conversion"
-#endif /* __clang__ */
-
 #include <bearssl.h>
-
-#ifdef __clang__
-#pragma clang diagnostic pop
-#endif /* __clang__ */
 
 #include "bearssl.h"
 #include "cipher_suite.h"
