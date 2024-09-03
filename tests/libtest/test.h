@@ -497,8 +497,10 @@ extern int unitfail;
 
 #endif /* HEADER_CURL_TEST_H */
 
+#ifdef CURLTESTS_BUNDLED
 extern CURLcode test(char *URL); /* the actual test function provided by each
                                     individual libXXX.c file */
+#endif
 
 #undef NO_SUPPORT_BUILT_IN
 #define NO_SUPPORT_BUILT_IN                     \
