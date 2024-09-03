@@ -36,14 +36,14 @@ static curl_socket_t tst_opensocket(void *clientp,
 {
   (void)clientp;
   (void)purpose;
-  printf("[OPEN] testcounter: %d\n", ++testcounter);
+  printf("[OPEN] counter: %d\n", ++testcounter);
   return socket(addr->family, addr->socktype, addr->protocol);
 }
 
 static int tst_closesocket(void *clientp, curl_socket_t sock)
 {
   (void)clientp;
-  printf("[CLOSE] testcounter: %d\n", testcounter--);
+  printf("[CLOSE] counter: %d\n", testcounter--);
   return sclose(sock);
 }
 
