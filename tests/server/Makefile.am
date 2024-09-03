@@ -45,7 +45,6 @@ LIBS = $(BLANK_AT_MAKETIME)
 if DOING_NATIVE_WINDOWS
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
-AM_CPPFLAGS += -DMEMDEBUG_NODEFINES
 
 # Makefile.inc provides neat definitions
 include Makefile.inc

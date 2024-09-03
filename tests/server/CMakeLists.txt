@@ -47,7 +47,6 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   if(WIN32)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
-  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "MEMDEBUG_NODEFINES")
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test server ${_target}")
