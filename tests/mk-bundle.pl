@@ -35,7 +35,8 @@ if(@ARGV < 1) {
 
 my $src_dir = $ARGV[0] // ".";
 
-print "#define CURLTESTS_BUNDLED\n\n";
+print "#define CURLTESTS_BUNDLED\n";
+print "#define CURLTESTS_BUNDLED_TEST_H\n\n";
 
 # Extra sources to include
 foreach my $src (@ARGV[1..$#ARGV]) {
@@ -101,5 +102,7 @@ close $fh;
 print "static const struct onetest s_tests[] = {\n";
 print "$tlist";
 print "};\n\n";
+
+print "#undef CURLTESTS_BUNDLED_TEST_H\n\n";
 
 print '#include "first.c"' . "\n";

@@ -497,10 +497,9 @@ extern int unitfail;
 
 #endif /* HEADER_CURL_TEST_H */
 
-#ifdef CURLTESTS_BUNDLED
+#ifdef CURLTESTS_BUNDLED_TEST_H
 extern CURLcode test(char *URL); /* the actual test function provided by each
                                     individual libXXX.c file */
-#endif
 
 #undef NO_SUPPORT_BUILT_IN
 #define NO_SUPPORT_BUILT_IN                     \
@@ -510,7 +509,4 @@ extern CURLcode test(char *URL); /* the actual test function provided by each
     fprintf(stderr, "Missing support\n");       \
     return (CURLcode)1;                         \
   }
-
-/* ---------------------------------------------------------------- */
-
-#endif /* HEADER_CURL_TEST_H */
+#endif
