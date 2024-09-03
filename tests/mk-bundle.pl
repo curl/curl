@@ -81,6 +81,7 @@ while(my $line = <$fh>) {
         print "#undef $namu\n";
         # Reset macros used by multiple tests
         foreach my $undef (
+                "test",
                 "HEADER_REQUEST",
                 "NUM_HANDLES",
                 "SAFETY_MARGIN",
