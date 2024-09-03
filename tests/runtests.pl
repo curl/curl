@@ -2240,6 +2240,10 @@ while(@ARGV) {
         $ACURL=shell_quote($ARGV[1]);
         shift @ARGV;
     }
+    elsif ($ARGV[0] eq "-bundle") {
+        # use test bundles
+        $bundle=1;
+    }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
         $debugprotocol=1;

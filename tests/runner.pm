@@ -64,6 +64,7 @@ BEGIN {
         $tortalloc
         $valgrind_logfile
         $valgrind_tool
+        $bundle
     );
 
     # these are for debugging only
@@ -119,6 +120,7 @@ our $valgrind_tool="--tool=memcheck";
 our $gdb = checktestcmd("gdb");
 our $gdbthis = 0;  # run test case with debugger (gdb or lldb)
 our $gdbxwin;      # use windowed gdb when using gdb
+our $bundle = 0;
 
 # torture test variables
 our $shallow;
@@ -908,16 +910,31 @@ sub singletest_run {
         }
 
         if($tool =~ /^lib/) {
-            $CMDLINE="$LIBDIR/$tool";
+            if($bundle) {
+                $CMDLINE="$LIBDIR/libtests";
+            }
+            else {
+                $CMDLINE="$LIBDIR/$tool";
+            }
         }
         elsif($tool =~ /^unit/) {
-            $CMDLINE="$UNITDIR/$tool";
+            if($bundle) {
+                $CMDLINE="$UNITDIR/units";
+            }
+            else {
+                $CMDLINE="$UNITDIR/$tool";
+            }
         }
 
         if(! -f $CMDLINE) {
             logmsg " $testnum: IGNORED: The tool set in the test case for this: '$tool' does not exist\n";
             return (-1, 0, 0, "", "", 0);
         }
+
+        if($bundle) {
+            $CMDLINE.=" $tool";
+        }
+
         $DBGCURL=$CMDLINE;
     }
 

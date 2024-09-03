@@ -91,6 +91,11 @@ Provide a path to a curl binary to talk to APIs (currently only CI test APIs).
 
 Display test results in automake style output (`PASS/FAIL: [number] [name]`).
 
+## `-bundle`
+
+Run tests via bundled test binaries. Bundled test binaries contain all tests,
+and the test name passed as the first argument selects which test run.
+
 ## `-c\<curl\>`
 
 Provide a path to a custom curl binary to run the tests with. Default is the
