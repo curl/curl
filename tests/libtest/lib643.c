@@ -56,7 +56,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode once(char *URL, bool oldstyle)
+static CURLcode test_once(char *URL, bool oldstyle)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -256,9 +256,9 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = once(URL, TRUE); /* old */
+  res = test_once(URL, TRUE); /* old */
   if(!res)
-    res = once(URL, FALSE); /* new */
+    res = test_once(URL, FALSE); /* new */
 
   if(!res)
     res = cyclic_add();

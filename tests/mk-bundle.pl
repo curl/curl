@@ -70,7 +70,7 @@ while(my $line = <$fh>) {
                 "getMicroSecondTimeout", "removeFd", "addFd", "updateFdSet", "checkFdSet",
                 "curl", "buffer", "userdata", "buf", "suburl", "post", "params",
                 "testname", "testdata", "testfd", "teststring", "testeh",
-                "xferinfo", "cyclic_add", "geterr", "once", "fire",
+                "xferinfo", "cyclic_add", "geterr", "test_once", "fire",
                 "unit_setup", "unit_stop", "mydtor", "testcase", "tests", "test_parse", "password", "easy") {  # unit
             print "#undef $symb\n";
             print "#define $symb ${symb}_$nam\n";
