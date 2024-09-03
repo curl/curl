@@ -23,6 +23,9 @@
 #
 ###########################################################################
 
+# Bundle up individual tests into a single binary. The resulting binary can run
+# individual tests by passing their name (without '.c') as the first argument.
+
 use strict;
 use warnings;
 
