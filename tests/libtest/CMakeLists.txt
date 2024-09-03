@@ -86,6 +86,9 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
+  if(CURL_TEST_USE_BUNDLES)
+    set_target_properties(${_target_name} PROPERTIES UNITY_BUILD OFF)
+  endif()
   set_target_properties(${_target_name} PROPERTIES
     COMPILE_DEFINITIONS ${_upper_target}
     OUTPUT_NAME "${_target}"
