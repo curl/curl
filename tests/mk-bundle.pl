@@ -27,16 +27,15 @@ use strict;
 use warnings;
 
 if(@ARGV < 1) {
-    die "Usage: $0 {libtest|unit} [<directory>] [<extra sources>]\n";
+    die "Usage: $0 [<directory>] [<extra sources>]\n";
 }
 
-my $mode = $ARGV[0];  # unused for now
-my $src_dir = $ARGV[1] // ".";
+my $src_dir = $ARGV[0] // ".";
 
 print "#define CURLTESTS_BUNDLED\n\n";
 
 # Extra sources to include
-foreach my $src (@ARGV[2..$#ARGV]) {
+foreach my $src (@ARGV[1..$#ARGV]) {
     if($src =~ /\.c$/) {
         print "#include \"$src\"\n";
     }

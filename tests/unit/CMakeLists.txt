@@ -35,7 +35,7 @@ if(CURL_TEST_USE_BUNDLES)
 
   add_custom_command(
     OUTPUT "units.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "unit" "${CMAKE_CURRENT_SOURCE_DIR}" > "units.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "units.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
