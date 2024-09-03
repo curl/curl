@@ -34,8 +34,6 @@ struct onetest {
   const char *id;
   test_func_t ptr;
 };
-
-static const struct onetest s_tests[];
 #endif
 
 #endif /* HEADER_LIBTEST_FIRST_H */
