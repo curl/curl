@@ -22,13 +22,13 @@
 #
 ###########################################################################
 
-# Get 'UNITPROGS', 'UNITFILES' variables
+# Get 'UNITPROGS', '*_SOURCES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 foreach(_target IN LISTS UNITPROGS)
   set(_target_name "${_target}")
-  add_executable(${_target_name} EXCLUDE_FROM_ALL "${_target}.c" ${UNITFILES})
+  add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})
   target_link_libraries(${_target_name} curltool curlu)
   target_include_directories(${_target_name} PRIVATE
