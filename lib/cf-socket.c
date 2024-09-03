@@ -950,6 +950,7 @@ struct cf_socket_ctx {
   size_t recv_max;                  /* max enforced read size */
 #endif
   BIT(got_first_byte);               /* if first byte was received */
+  BIT(listening);                    /* socket is listening */
   BIT(accepted);                     /* socket was accepted, not connected */
   BIT(sock_connected);               /* socket is "connected", e.g. in UDP */
   BIT(active);
@@ -1409,9 +1410,16 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
 
   if(ctx->sock != CURL_SOCKET_BAD) {
     if(!cf->connected) {
-      Curl_pollset_set_out_only(data, ps, ctx->sock);
-      CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
-                  FMT_SOCKET_T, ctx->sock);
+      if(ctx->listening) {
+        Curl_pollset_set_in_only(data, ps, ctx->sock);
+        CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
+                    FMT_SOCKET_T, ctx->sock);
+      }
+      else {
+        Curl_pollset_set_out_only(data, ps, ctx->sock);
+        CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
+                    FMT_SOCKET_T, ctx->sock);
+      }
     }
     else if(!ctx->active) {
       Curl_pollset_add_in(data, ps, ctx->sock);
@@ -2054,6 +2062,7 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
   }
   ctx->transport = conn->transport;
   ctx->sock = *s;
+  ctx->listening = TRUE;
   ctx->accepted = FALSE;
   result = Curl_cf_create(&cf, &Curl_cft_tcp_accept, ctx);
   if(result)
@@ -2120,8 +2129,10 @@ CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
     return CURLE_FAILED_INIT;
 
   ctx = cf->ctx;
+  DEBUGASSERT(ctx->listening);
   /* discard the listen socket */
   socket_close(data, conn, TRUE, ctx->sock);
+  ctx->listening = FALSE;
   ctx->sock = *s;
   conn->sock[sockindex] = ctx->sock;
   set_accepted_remote_ip(cf, data);
