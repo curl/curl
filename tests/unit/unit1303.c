@@ -55,7 +55,8 @@ static void unit_stop(void)
 /* macro to set the pretended current time */
 #define NOW(x,y) now.tv_sec = x; now.tv_usec = y
 /* macro to set the millisecond based timeouts to use */
-#define TIMEOUTS(x,y) testdata->set.timeout = x; testdata->set.connecttimeout = y
+#define TIMEOUTS(x,y) testdata->set.timeout = x; \
+                      testdata->set.connecttimeout = y
 
 /*
  * To test:
