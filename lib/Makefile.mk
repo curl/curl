@@ -166,6 +166,14 @@ ifneq ($(findstring -mbedtls,$(CFG)),)
   LIBS += -lmbedtls -lmbedx509 -lmbedcrypto
   SSLLIBS += 1
 endif
+ifneq ($(findstring -bearssl,$(CFG)),)
+  BEARSSL_PATH ?= $(PROOT)/../bearssl
+  CPPFLAGS += -DUSE_BEARSSL
+  CPPFLAGS += -isystem "$(BEARSSL_PATH)/inc"
+  LDFLAGS += -L"$(BEARSSL_PATH)/build"
+  LIBS += -lbearssl
+  SSLLIBS += 1
+endif
 
 ifneq ($(findstring -nghttp2,$(CFG)),)
   NGHTTP2_PATH ?= $(PROOT)/../nghttp2
