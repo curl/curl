@@ -70,8 +70,10 @@ extern int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
 
 extern void wait_ms(int ms); /* wait this many milliseconds */
 
+#ifndef CURLTESTS_BUNDLED
 extern CURLcode test(char *URL); /* the actual test function provided by each
                                     individual libXXX.c file */
+#endif
 
 extern char *hexdump(const unsigned char *buffer, size_t len);
 
@@ -491,6 +493,14 @@ extern int unitfail;
 #define global_init(A) \
   chk_global_init((A), (__FILE__), (__LINE__))
 
+/* ---------------------------------------------------------------- */
+
+#endif /* HEADER_CURL_TEST_H */
+
+extern CURLcode test(char *URL); /* the actual test function provided by each
+                                    individual libXXX.c file */
+
+#undef NO_SUPPORT_BUILT_IN
 #define NO_SUPPORT_BUILT_IN                     \
   CURLcode test(char *URL)                      \
   {                                             \
