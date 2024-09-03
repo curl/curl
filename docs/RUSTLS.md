@@ -33,7 +33,7 @@ Now configure and build curl with Rustls:
 ## Randomness
 
 Every TLS libcurl curl supports - *except* rustls - provides a function for
-curl to extract cryptographicly safe random numbers with.
+curl to extract cryptographically safe random numbers with.
 
 When you build curl with rustls, curl uses its own internal attempts to get a
 decent random value:
