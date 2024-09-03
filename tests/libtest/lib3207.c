@@ -142,7 +142,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
   Curl_mutex_release(&mutexes[data]);
 }
 
-static void execute(struct Curl_share *share, struct Ctx *ctx)
+static void execute(CURLSH *share, struct Ctx *ctx)
 {
   int i;
   curl_mutex_t mutexes[CURL_LOCK_DATA_LAST - 1];
@@ -173,7 +173,7 @@ static void execute(struct Curl_share *share, struct Ctx *ctx)
 
 #else /* without pthread, run serially */
 
-static void execute(struct Curl_share *share, struct Ctx *ctx)
+static void execute(CURLSH *share, struct Ctx *ctx)
 {
   int i;
   (void) share;
