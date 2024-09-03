@@ -1609,6 +1609,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   socklen_t len = sizeof(struct quic_transport_param);
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr = NULL;
+  struct quic_config config = {};
   int rc;
 
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
@@ -1647,10 +1648,15 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return CURLE_QUIC_CONNECT_ERROR;
 
   ctx->transport_params.max_idle_timeout = CURL_QUIC_MAX_IDLE_MS * 1000;
-  ctx->transport_params.plpmtud_probe_timeout = 5000000;
   ctx->transport_params.grease_quic_bit = 1;
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM,
                   &ctx->transport_params, len);
+  if(rc)
+    return CURLE_FAILED_INIT;
+
+  config.plpmtud_probe_interval = 5000000;
+  rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_CONFIG,
+                  &config, sizeof(config));
   if(rc)
     return CURLE_FAILED_INIT;
 
