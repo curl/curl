@@ -1433,8 +1433,8 @@ success:
 
 #define data_or_ctrl(x) ((x)?"DATA":"CTRL")
 
-#define CTRL  0
-#define DATA  1
+#define SWS_CTRL  0
+#define SWS_DATA  1
 
 static void http_connect(curl_socket_t *infdp,
                          curl_socket_t rootfd,
@@ -1454,13 +1454,13 @@ static void http_connect(curl_socket_t *infdp,
   bool poll_server_wr[2] = { TRUE, TRUE };
   bool primary = FALSE;
   bool secondary = FALSE;
-  int max_tunnel_idx; /* CTRL or DATA */
+  int max_tunnel_idx; /* SWS_CTRL or SWS_DATA */
   int loop;
   int i;
   int timeout_count = 0;
 
   /* primary tunnel client endpoint already connected */
-  clientfd[CTRL] = *infdp;
+  clientfd[SWS_CTRL] = *infdp;
 
   /* Sleep here to make sure the client reads CONNECT response's
      'end of headers' separate from the server data that follows.
@@ -1470,8 +1470,8 @@ static void http_connect(curl_socket_t *infdp,
   if(got_exit_signal)
     goto http_connect_cleanup;
 
-  serverfd[CTRL] = connect_to(ipaddr, ipport);
-  if(serverfd[CTRL] == CURL_SOCKET_BAD)
+  serverfd[SWS_CTRL] = connect_to(ipaddr, ipport);
+  if(serverfd[SWS_CTRL] == CURL_SOCKET_BAD)
     goto http_connect_cleanup;
 
   /* Primary tunnel socket endpoints are now connected. Tunnel data back and
@@ -1479,7 +1479,7 @@ static void http_connect(curl_socket_t *infdp,
      tunnel, simultaneously allowing establishment, operation and teardown of
      a secondary tunnel that may be used for passive FTP data connection. */
 
-  max_tunnel_idx = CTRL;
+  max_tunnel_idx = SWS_CTRL;
   primary = TRUE;
 
   while(!got_exit_signal) {
@@ -1493,10 +1493,10 @@ static void http_connect(curl_socket_t *infdp,
     FD_ZERO(&input);
     FD_ZERO(&output);
 
-    if((clientfd[DATA] == CURL_SOCKET_BAD) &&
-       (serverfd[DATA] == CURL_SOCKET_BAD) &&
-       poll_client_rd[CTRL] && poll_client_wr[CTRL] &&
-       poll_server_rd[CTRL] && poll_server_wr[CTRL]) {
+    if((clientfd[SWS_DATA] == CURL_SOCKET_BAD) &&
+       (serverfd[SWS_DATA] == CURL_SOCKET_BAD) &&
+       poll_client_rd[SWS_CTRL] && poll_client_wr[SWS_CTRL] &&
+       poll_server_rd[SWS_CTRL] && poll_server_wr[SWS_CTRL]) {
       /* listener socket is monitored to allow client to establish
          secondary tunnel only when this tunnel is not established
          and primary one is fully operational */
@@ -1557,8 +1557,8 @@ static void http_connect(curl_socket_t *infdp,
       /* ---------------------------------------------------------- */
 
       /* passive mode FTP may establish a secondary tunnel */
-      if((clientfd[DATA] == CURL_SOCKET_BAD) &&
-         (serverfd[DATA] == CURL_SOCKET_BAD) && FD_ISSET(rootfd, &input)) {
+      if((clientfd[SWS_DATA] == CURL_SOCKET_BAD) &&
+         (serverfd[SWS_DATA] == CURL_SOCKET_BAD) && FD_ISSET(rootfd, &input)) {
         /* a new connection on listener socket (most likely from client) */
         curl_socket_t datafd = accept(rootfd, NULL, NULL);
         if(datafd != CURL_SOCKET_BAD) {
@@ -1598,19 +1598,19 @@ static void http_connect(curl_socket_t *infdp,
                 wait_ms(250);
               if(!got_exit_signal) {
                 /* connect to the server */
-                serverfd[DATA] = connect_to(ipaddr, req2->connect_port);
-                if(serverfd[DATA] != CURL_SOCKET_BAD) {
+                serverfd[SWS_DATA] = connect_to(ipaddr, req2->connect_port);
+                if(serverfd[SWS_DATA] != CURL_SOCKET_BAD) {
                   /* secondary tunnel established, now we have two
                      connections */
-                  poll_client_rd[DATA] = TRUE;
-                  poll_client_wr[DATA] = TRUE;
-                  poll_server_rd[DATA] = TRUE;
-                  poll_server_wr[DATA] = TRUE;
-                  max_tunnel_idx = DATA;
+                  poll_client_rd[SWS_DATA] = TRUE;
+                  poll_client_wr[SWS_DATA] = TRUE;
+                  poll_server_rd[SWS_DATA] = TRUE;
+                  poll_server_wr[SWS_DATA] = TRUE;
+                  max_tunnel_idx = SWS_DATA;
                   secondary = TRUE;
-                  toc[DATA] = 0;
-                  tos[DATA] = 0;
-                  clientfd[DATA] = datafd;
+                  toc[SWS_DATA] = 0;
+                  tos[SWS_DATA] = 0;
+                  clientfd[SWS_DATA] = datafd;
                   datafd = CURL_SOCKET_BAD;
                 }
               }
@@ -1761,7 +1761,7 @@ static void http_connect(curl_socket_t *infdp,
               clientfd[i] = CURL_SOCKET_BAD;
               if(serverfd[i] == CURL_SOCKET_BAD) {
                 logmsg("[%s] ENDING", data_or_ctrl(i));
-                if(i == DATA)
+                if(i == SWS_DATA)
                   secondary = FALSE;
                 else
                   primary = FALSE;
@@ -1775,7 +1775,7 @@ static void http_connect(curl_socket_t *infdp,
               serverfd[i] = CURL_SOCKET_BAD;
               if(clientfd[i] == CURL_SOCKET_BAD) {
                 logmsg("[%s] ENDING", data_or_ctrl(i));
-                if(i == DATA)
+                if(i == SWS_DATA)
                   secondary = FALSE;
                 else
                   primary = FALSE;
@@ -1787,7 +1787,7 @@ static void http_connect(curl_socket_t *infdp,
 
       /* ---------------------------------------------------------- */
 
-      max_tunnel_idx = secondary ? DATA : CTRL;
+      max_tunnel_idx = secondary ? SWS_DATA : SWS_CTRL;
 
       if(!primary)
         /* exit loop upon primary tunnel teardown */
@@ -1805,7 +1805,7 @@ static void http_connect(curl_socket_t *infdp,
 
 http_connect_cleanup:
 
-  for(i = DATA; i >= CTRL; i--) {
+  for(i = SWS_DATA; i >= SWS_CTRL; i--) {
     if(serverfd[i] != CURL_SOCKET_BAD) {
       logmsg("[%s] CLOSING server socket (cleanup)", data_or_ctrl(i));
       shutdown(serverfd[i], SHUT_RDWR);
