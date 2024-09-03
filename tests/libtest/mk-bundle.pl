@@ -23,21 +23,22 @@
 #
 ###########################################################################
 
-# Usage:
-#   perl mk-bundle.pl > bundle.c
-
 use strict;
 use warnings;
 
-my $src_dir = ".";
-if(@ARGV) {
-    $src_dir = $ARGV[0];
+if(@ARGV < 1) {
+    die "Usage: $0 {libtest|unit} [<directory>]\n";
 }
+
+my $mode = $ARGV[0];
+my $src_dir = $ARGV[1] // ".";
 
 print "#define CURLTESTS_BUNDLED\n";
 
-print '#include "testutil.c"' . "\n";
-print '#include "testtrace.c"' . "\n";
+if($mode eq "libtest") {
+  print '#include "testutil.c"' . "\n";
+  print '#include "testtrace.c"' . "\n";
+}
 print '#include "first.h"' . "\n\n";
 
 my $tlist = "";
@@ -65,7 +66,8 @@ while(my $line = <$fh>) {
                 "getMicroSecondTimeout", "removeFd", "addFd", "updateFdSet", "checkFdSet",
                 "curl", "buffer", "userdata", "buf", "suburl", "post", "params",
                 "testname", "testdata", "testfd", "teststring", "testeh",
-                "xferinfo", "cyclic_add", "geterr", "once", "fire") {
+                "xferinfo", "cyclic_add", "geterr", "once", "fire",
+                "unit_setup", "unit_stop", "mydtor", "testcase", "tests", "test_parse", "password", "easy") {  # unit
             print "#undef $symb\n";
             print "#define $symb ${symb}_$nam\n";
         }
