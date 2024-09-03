@@ -40,6 +40,7 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-extra-args"
 #endif
 
 #if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
