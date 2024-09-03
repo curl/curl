@@ -29,3 +29,18 @@ Now configure and build curl with Rustls:
     % autoreconf -fi
     % ./configure --with-rustls=${HOME}/rustls-ffi-built
     % make
+
+## Randomness
+
+Every TLS libcurl curl supports - *except* rustls - provides a function for
+curl to extract cryptographicly safe random numbers with.
+
+When you build curl with rustls, curl will use its own internal attempts to
+get a decent random value:
+
+1. Windows specific APIs
+2. arc4random
+
+If neither of those are present, then using rustls will fall-back to **weak
+pseudo-random values**, and thus weakening several curl authentication
+implementaions.
