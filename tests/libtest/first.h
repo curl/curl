@@ -24,6 +24,9 @@
  *
  ***************************************************************************/
 
+#include "curl_setup.h"
+#include <curl/curl.h>
+
 typedef CURLcode (*test_func_t)(char *);
 
 #ifdef CURLTESTS_BUNDLED
