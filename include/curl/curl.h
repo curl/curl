@@ -721,6 +721,8 @@ typedef enum {
    with them. */
 #define CURLOPT_WRITEINFO CURLOPT_OBSOLETE40
 #define CURLOPT_CLOSEPOLICY CURLOPT_OBSOLETE72
+#define CURLOPT_OBSOLETE72 9999
+#define CURLOPT_OBSOLETE40 9999
 
 #endif /* !CURL_NO_OLDIES */
 
@@ -3234,7 +3236,9 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #include "options.h"
 #include "header.h"
 #include "websockets.h"
+#ifndef CURL_SKIP_INCLUDE_MPRINTF
 #include "mprintf.h"
+#endif
 
 /* the typechecker does not work in C++ (yet) */
 #if defined(__GNUC__) && defined(__GNUC_MINOR__) && \

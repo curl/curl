@@ -48,13 +48,8 @@ CLEANFILES = lib1521.c
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-if USE_EXPLICIT_LIB_DEPS
 SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-else
-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_LIBS@
-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @CURL_NETWORK_AND_TIME_LIBS@
-endif
 
 # Dependencies (may need to be overridden)
 LDADD = $(SUPPORTFILES_LIBS)
@@ -63,14 +58,7 @@ LDADD = $(SUPPORTFILES_LIBS)
 # noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc
 
-# Preloading of libhostname allows host name overriding,
-# this is used to make some tests machine independent.
-
-if BUILD_LIBHOSTNAME
-noinst_LTLIBRARIES = libhostname.la
-else
 noinst_LTLIBRARIES =
-endif
 
 if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
@@ -79,34 +67,11 @@ endif
 AM_LDFLAGS =
 AM_CFLAGS =
 
-libhostname_la_CPPFLAGS_EXTRA =
-libhostname_la_LDFLAGS_EXTRA = -module -avoid-version -rpath /nowhere
-libhostname_la_CFLAGS_EXTRA =
-
 libstubgss_la_LDFLAGS_EXTRA =
 
 if CURL_LT_SHLIB_USE_NO_UNDEFINED
-libhostname_la_LDFLAGS_EXTRA += -no-undefined
 libstubgss_la_LDFLAGS_EXTRA += -no-undefined
 endif
-
-if CURL_LT_SHLIB_USE_MIMPURE_TEXT
-libhostname_la_LDFLAGS_EXTRA += -mimpure-text
-endif
-
-if DOING_CURL_SYMBOL_HIDING
-libhostname_la_CPPFLAGS_EXTRA += -DCURL_HIDDEN_SYMBOLS
-libhostname_la_CFLAGS_EXTRA += $(CFLAG_CURL_SYMBOL_HIDING)
-endif
-
-libhostname_la_CPPFLAGS = $(AM_CPPFLAGS) $(libhostname_la_CPPFLAGS_EXTRA)
-libhostname_la_LDFLAGS = $(AM_LDFLAGS) $(libhostname_la_LDFLAGS_EXTRA)
-libhostname_la_CFLAGS = $(AM_CFLAGS) $(libhostname_la_CFLAGS_EXTRA)
-
-libhostname_la_SOURCES = sethostname.c
-
-libhostname_la_LIBADD =
-libhostname_la_DEPENDENCIES =
 
 # Build a stub gssapi implementation for testing
 if BUILD_STUB_GSS

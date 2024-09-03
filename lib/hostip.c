@@ -1449,8 +1449,7 @@ CURLcode Curl_once_resolved(struct Curl_easy *data, bool *protocol_done)
 
   if(result) {
     Curl_detach_connection(data);
-    Curl_conncache_remove_conn(data, conn, TRUE);
-    Curl_disconnect(data, conn, TRUE);
+    Curl_cpool_disconnect(data, conn, TRUE);
   }
   return result;
 }

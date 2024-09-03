@@ -1028,6 +1028,8 @@ Curl_cookie_add(struct Curl_easy *data,
    * must also check that the data handle is not NULL since the psl code will
    * dereference it.
    */
+  DEBUGF(infof(data, "PSL check set-cookie '%s' for domain=%s in %s",
+         co->name, co->domain, domain));
   if(data && (domain && co->domain && !Curl_host_is_ipnum(co->domain))) {
     bool acceptable = FALSE;
     char lcase[256];
@@ -1054,6 +1056,9 @@ Curl_cookie_add(struct Curl_easy *data,
       return NULL;
     }
   }
+#else
+  DEBUGF(infof(data, "NO PSL to check set-cookie '%s' for domain=%s in %s",
+         co->name, co->domain, domain));
 #endif
 
   /* A non-secure cookie may not overlay an existing secure cookie. */
@@ -1165,7 +1170,7 @@ Curl_cookie_add(struct Curl_easy *data,
   if(c->running)
     /* Only show this when NOT reading the cookies from a file */
     infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
-          "expire %" CURL_FORMAT_CURL_OFF_T,
+          "expire %" FMT_OFF_T,
           replace_old?"Replaced":"Added", co->name, co->value,
           co->domain, co->path, co->expires);
 
@@ -1584,7 +1589,7 @@ static char *get_netscape_format(const struct Cookie *co)
     "%s\t"   /* tailmatch */
     "%s\t"   /* path */
     "%s\t"   /* secure */
-    "%" CURL_FORMAT_CURL_OFF_T "\t"   /* expires */
+    "%" FMT_OFF_T "\t"   /* expires */
     "%s\t"   /* name */
     "%s",    /* value */
     co->httponly?"#HttpOnly_":"",

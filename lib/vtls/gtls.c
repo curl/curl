@@ -1778,28 +1778,44 @@ static bool gtls_data_pending(struct Curl_cfilter *cf,
 
 static ssize_t gtls_send(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
-                         const void *mem,
-                         size_t len,
+                         const void *buf,
+                         size_t blen,
                          CURLcode *curlcode)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct gtls_ssl_backend_data *backend =
     (struct gtls_ssl_backend_data *)connssl->backend;
   ssize_t rc;
+  size_t nwritten, total_written = 0;
 
   (void)data;
   DEBUGASSERT(backend);
-  backend->gtls.io_result = CURLE_OK;
-  rc = gnutls_record_send(backend->gtls.session, mem, len);
+  while(blen) {
+    backend->gtls.io_result = CURLE_OK;
+    rc = gnutls_record_send(backend->gtls.session, buf, blen);
 
-  if(rc < 0) {
-    *curlcode = (rc == GNUTLS_E_AGAIN)?
-      CURLE_AGAIN :
-      (backend->gtls.io_result? backend->gtls.io_result : CURLE_SEND_ERROR);
+    if(rc < 0) {
+      if(total_written && (rc == GNUTLS_E_AGAIN)) {
+        *curlcode = CURLE_OK;
+        rc = (ssize_t)total_written;
+        goto out;
+      }
+      *curlcode = (rc == GNUTLS_E_AGAIN)?
+        CURLE_AGAIN :
+        (backend->gtls.io_result? backend->gtls.io_result : CURLE_SEND_ERROR);
 
-    rc = -1;
+      rc = -1;
+      goto out;
+    }
+    nwritten = (size_t)rc;
+    total_written += nwritten;
+    DEBUGASSERT(nwritten <= blen);
+    buf = (char *)buf + nwritten;
+    blen -= nwritten;
   }
+  rc = total_written;
 
+out:
   return rc;
 }
 

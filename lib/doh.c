@@ -218,7 +218,7 @@ static int doh_done(struct Curl_easy *doh, CURLcode result)
 
   data = Curl_multi_get_handle(doh->multi, doh->set.dohfor_mid);
   if(!data) {
-    DEBUGF(infof(doh, "doh_done: xfer for mid=%" CURL_FORMAT_CURL_OFF_T
+    DEBUGF(infof(doh, "doh_done: xfer for mid=%" FMT_OFF_T
                  " not found", doh->set.dohfor_mid));
     DEBUGASSERT(0);
   }
@@ -1437,7 +1437,7 @@ void Curl_doh_close(struct Curl_easy *data)
       probe_data = data->multi? Curl_multi_get_handle(data->multi, mid) : NULL;
       if(!probe_data) {
         DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%"
-                     CURL_FORMAT_CURL_OFF_T " not found!",
+                     FMT_OFF_T " not found!",
                      doh->probe[slot].easy_mid));
         continue;
       }

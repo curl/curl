@@ -46,20 +46,11 @@ if USE_CPPFLAG_CURL_STATICLIB
 AM_CPPFLAGS += -DCURL_STATICLIB
 endif
 
-if HAVE_MINGW
-# For mingw-w64 7.0.0 and earlier to avoid '-Wformat='
-AM_CPPFLAGS += -D__USE_MINGW_ANSI_STDIO=1
-endif
-
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
 # Dependencies
-if USE_EXPLICIT_LIB_DEPS
 LDADD = $(LIBDIR)/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-else
-LDADD = $(LIBDIR)/libcurl.la
-endif
 
 # This might hold -Werror
 CFLAGS += @CURL_CFLAG_EXTRAS@

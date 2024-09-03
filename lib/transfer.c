@@ -306,11 +306,18 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
     nread = Curl_xfer_recv_resp(data, buf, bytestoread,
                                 is_multiplex, &result);
     if(nread < 0) {
-      if(CURLE_AGAIN == result) {
-        result = CURLE_OK;
-        break; /* get out of loop */
+      if(CURLE_AGAIN != result)
+        goto out; /* real error */
+      result = CURLE_OK;
+      if(data->req.download_done && data->req.no_body &&
+         !data->req.resp_trailer) {
+        DEBUGF(infof(data, "EAGAIN, download done, no trailer announced, "
+               "not waiting for EOS"));
+        nread = 0;
+        /* continue as if we read the EOS */
       }
-      goto out; /* real error */
+      else
+        break; /* get out of loop */
     }
 
     /* We only get a 0-length read on EndOfStream */
@@ -489,15 +496,15 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   if(k->keepon) {
     if(0 > Curl_timeleft(data, nowp, FALSE)) {
       if(k->size != -1) {
-        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
-              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " out of %"
-              CURL_FORMAT_CURL_OFF_T " bytes received",
+        failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
+              " milliseconds with %" FMT_OFF_T " out of %"
+              FMT_OFF_T " bytes received",
               Curl_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount, k->size);
       }
       else {
-        failf(data, "Operation timed out after %" CURL_FORMAT_TIMEDIFF_T
-              " milliseconds with %" CURL_FORMAT_CURL_OFF_T " bytes received",
+        failf(data, "Operation timed out after %" FMT_TIMEDIFF_T
+              " milliseconds with %" FMT_OFF_T " bytes received",
               Curl_timediff(*nowp, data->progress.t_startsingle),
               k->bytecount);
       }
@@ -511,16 +518,8 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
      * returning.
      */
     if(!(data->req.no_body) && (k->size != -1) &&
-       (k->bytecount != k->size) &&
-#ifdef CURL_DO_LINEEND_CONV
-       /* Most FTP servers do not adjust their file SIZE response for CRLFs,
-          so we will check to see if the discrepancy can be explained
-          by the number of CRLFs we have changed to LFs.
-       */
-       (k->bytecount != (k->size + data->state.crlf_conversions)) &&
-#endif /* CURL_DO_LINEEND_CONV */
-       !k->newurl) {
-      failf(data, "transfer closed with %" CURL_FORMAT_CURL_OFF_T
+       (k->bytecount != k->size) && !k->newurl) {
+      failf(data, "transfer closed with %" FMT_OFF_T
             " bytes remaining to read", k->size - k->bytecount);
       result = CURLE_PARTIAL_FILE;
       goto out;

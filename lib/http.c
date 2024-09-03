@@ -462,16 +462,15 @@ static CURLcode http_perhapsrewind(struct Curl_easy *data,
 
   if(abort_upload) {
     if(upload_remain >= 0)
-      infof(data, "%s%sclose instead of sending %"
-        CURL_FORMAT_CURL_OFF_T " more bytes",
-        ongoing_auth? ongoing_auth : "",
-        ongoing_auth? " send, " : "",
-        upload_remain);
+      infof(data, "%s%sclose instead of sending %" FMT_OFF_T " more bytes",
+            ongoing_auth? ongoing_auth : "",
+            ongoing_auth? " send, " : "",
+            upload_remain);
     else
       infof(data, "%s%sclose instead of sending unknown amount "
-        "of more bytes",
-        ongoing_auth? ongoing_auth : "",
-        ongoing_auth? " send, " : "");
+            "of more bytes",
+            ongoing_auth? ongoing_auth : "",
+            ongoing_auth? " send, " : "");
     /* We decided to abort the ongoing transfer */
     streamclose(conn, "Mid-auth HTTP and much data left to send");
     /* FIXME: questionable manipulation here, can we do this differently? */
@@ -2049,7 +2048,7 @@ static CURLcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
       CURLcode result;
       result = Curl_creader_resume_from(data, data->state.resume_from);
       if(result) {
-        failf(data, "Unable to resume from offset %" CURL_FORMAT_CURL_OFF_T,
+        failf(data, "Unable to resume from offset %" FMT_OFF_T,
               data->state.resume_from);
         return result;
       }
@@ -2186,9 +2185,8 @@ CURLcode Curl_http_req_complete(struct Curl_easy *data,
         !Curl_checkheaders(data, STRCONST("Content-Length")))) {
       /* we allow replacing this header if not during auth negotiation,
          although it is not very wise to actually set your own */
-      result = Curl_dyn_addf(r,
-                             "Content-Length: %" CURL_FORMAT_CURL_OFF_T
-                             "\r\n", req_clen);
+      result = Curl_dyn_addf(r, "Content-Length: %" FMT_OFF_T "\r\n",
+                             req_clen);
     }
     if(result)
       goto out;
@@ -2343,8 +2341,7 @@ CURLcode Curl_http_range(struct Curl_easy *data,
            remote part so we tell the server (and act accordingly) that we
            upload the whole file (again) */
         data->state.aptr.rangeline =
-          aprintf("Content-Range: bytes 0-%" CURL_FORMAT_CURL_OFF_T
-                  "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
+          aprintf("Content-Range: bytes 0-%" FMT_OFF_T "/%" FMT_OFF_T "\r\n",
                   req_clen - 1, req_clen);
 
       }
@@ -2357,15 +2354,14 @@ CURLcode Curl_http_range(struct Curl_easy *data,
                                data->state.infilesize :
                                (data->state.resume_from + req_clen);
         data->state.aptr.rangeline =
-          aprintf("Content-Range: bytes %s%" CURL_FORMAT_CURL_OFF_T
-                  "/%" CURL_FORMAT_CURL_OFF_T "\r\n",
+          aprintf("Content-Range: bytes %s%" FMT_OFF_T "/%" FMT_OFF_T "\r\n",
                   data->state.range, total_len-1, total_len);
       }
       else {
         /* Range was selected and then we just pass the incoming range and
            append total size */
         data->state.aptr.rangeline =
-          aprintf("Content-Range: bytes %s/%" CURL_FORMAT_CURL_OFF_T "\r\n",
+          aprintf("Content-Range: bytes %s/%" FMT_OFF_T "\r\n",
                   data->state.range, req_clen);
       }
       if(!data->state.aptr.rangeline)
@@ -3154,6 +3150,11 @@ CURLcode Curl_http_header(struct Curl_easy *data,
       }
       return CURLE_OK;
     }
+    v = HD_VAL(hd, hdlen, "Trailer:");
+    if(v) {
+      data->req.resp_trailer = TRUE;
+      return CURLE_OK;
+    }
     break;
   case 'w':
   case 'W':
@@ -3241,9 +3242,6 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
   else if(k->httpversion == 20 ||
           (k->upgr101 == UPGR101_H2 && k->httpcode == 101)) {
     DEBUGF(infof(data, "HTTP/2 found, allow multiplexing"));
-    /* HTTP/2 cannot avoid multiplexing since it is a core functionality
-       of the protocol */
-    conn->bundle->multiuse = BUNDLE_MULTIPLEX;
   }
 
   k->http_bodyless = k->httpcode >= 100 && k->httpcode < 200;
@@ -3393,9 +3391,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
     if(conn->httpversion != 20)
       infof(data, "Lying server, not serving HTTP/2");
   }
-  if(conn->httpversion < 20) {
-    conn->bundle->multiuse = BUNDLE_NO_MULTIUSE;
-  }
 
   if(k->httpcode < 200 && last_hd) {
     /* Intermediate responses might trigger processing of more
@@ -3440,6 +3435,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
         /* Switching to HTTP/2, where we will get more responses */
         infof(data, "Received 101, Switching to HTTP/2");
         k->upgr101 = UPGR101_RECEIVED;
+        data->conn->bits.asks_multiplex = FALSE;
         /* We expect more response from HTTP/2 later */
         k->header = TRUE;
         k->headerline = 0; /* restart the header line counter */
@@ -3486,6 +3482,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   if(k->upgr101 == UPGR101_H2) {
     /* A requested upgrade was denied, poke the multi handle to possibly
        allow a pending pipewait to continue */
+    data->conn->bits.asks_multiplex = FALSE;
     Curl_multi_connchanged(data->multi);
   }
 

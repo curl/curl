@@ -42,6 +42,7 @@
 #include "multiif.h"
 #include "connect.h" /* for the connect timeout */
 #include "cipher_suite.h"
+#include "rand.h"
 
 struct rustls_ssl_backend_data
 {
@@ -855,8 +856,8 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_SSL_CONNECT_ERROR;
     }
     if(blocking && 0 == what) {
-      failf(data, "rustls: connection timeout after %"
-        CURL_FORMAT_TIMEDIFF_T " ms", socket_check_timeout);
+      failf(data, "rustls: connection timeout after %" FMT_TIMEDIFF_T " ms",
+            socket_check_timeout);
       return CURLE_OPERATION_TIMEDOUT;
     }
     if(0 == what) {
@@ -1037,7 +1038,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_check_cxn,             /* check_cxn */
   cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
-  Curl_none_random,                /* random */
+  Curl_weak_random,                /* random */
   Curl_none_cert_status_request,   /* cert_status_request */
   cr_connect_blocking,             /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */

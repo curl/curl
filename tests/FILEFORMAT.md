@@ -692,8 +692,11 @@ content
 
 ### `<stripfile4>`
 
-### `<upload>`
+### `<upload [crlf="yes"]>`
 the contents of the upload data curl should have sent
+
+`crlf=yes` forces *upload* newlines to become CRLF even if not written so in
+the source file.
 
 ### `<valgrind>`
 disable - disables the valgrind log check for this test

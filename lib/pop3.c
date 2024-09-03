@@ -83,6 +83,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef ARRAYSIZE
+#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
+#endif
+
 /* Local API functions */
 static CURLcode pop3_regular_transfer(struct Curl_easy *data, bool *done);
 static CURLcode pop3_do(struct Curl_easy *data, bool *done);
@@ -198,6 +202,53 @@ static void pop3_to_pop3s(struct connectdata *conn)
 #else
 #define pop3_to_pop3s(x) Curl_nop_stmt
 #endif
+
+struct pop3_cmd {
+  const char *name;
+  unsigned short nlen;
+  BIT(multiline); /* response is multi-line with last '.' line */
+  BIT(multiline_with_args); /* is multi-line when command has args */
+};
+
+static const struct pop3_cmd pop3cmds[] = {
+  { "APOP", 4, FALSE, FALSE },
+  { "AUTH", 4, FALSE, FALSE },
+  { "CAPA", 4, TRUE, TRUE },
+  { "DELE", 4, FALSE, FALSE },
+  { "LIST", 4, TRUE, TRUE },
+  { "MSG",  3, TRUE, TRUE },
+  { "NOOP", 4, FALSE, FALSE },
+  { "PASS", 4, FALSE, FALSE },
+  { "QUIT", 4, FALSE, FALSE },
+  { "RETR", 4, TRUE, TRUE },
+  { "RSET", 4, FALSE, FALSE },
+  { "STAT", 4, FALSE, FALSE },
+  { "STLS", 4, FALSE, FALSE },
+  { "TOP",  3, TRUE, TRUE },
+  { "UIDL", 4, TRUE, FALSE },
+  { "USER", 4, FALSE, FALSE },
+  { "UTF8", 4, FALSE, FALSE },
+  { "XTND", 4, TRUE, TRUE },
+};
+
+/* Return iff a command is defined as "multi-line" (RFC 1939),
+ * has a response terminated by a last line with a '.'.
+ */
+static bool pop3_is_multiline(const char *cmdline)
+{
+  size_t i;
+  for(i = 0; i < ARRAYSIZE(pop3cmds); ++i) {
+    if(strncasecompare(pop3cmds[i].name, cmdline, pop3cmds[i].nlen)) {
+      if(!cmdline[pop3cmds[i].nlen])
+        return pop3cmds[i].multiline;
+      else if(cmdline[pop3cmds[i].nlen] == ' ')
+        return pop3cmds[i].multiline_with_args;
+    }
+  }
+  /* Unknown command, assume multi-line for backward compatibility with
+   * earlier curl versions that only could do multi-line responses. */
+  return TRUE;
+}
 
 /***********************************************************************
  *
@@ -614,18 +665,20 @@ static CURLcode pop3_perform_command(struct Curl_easy *data)
   else
     command = "RETR";
 
+  if(pop3->custom && pop3->custom[0] != '\0')
+    command = pop3->custom;
+
   /* Send the command */
   if(pop3->id[0] != '\0')
     result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s %s",
-                           (pop3->custom && pop3->custom[0] != '\0' ?
-                            pop3->custom : command), pop3->id);
+                           command, pop3->id);
   else
-    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s",
-                           (pop3->custom && pop3->custom[0] != '\0' ?
-                            pop3->custom : command));
+    result = Curl_pp_sendf(data, &conn->proto.pop3c.pp, "%s", command);
 
-  if(!result)
+  if(!result) {
     pop3_state(data, POP3_COMMAND);
+    data->req.no_body = !pop3_is_multiline(command);
+  }
 
   return result;
 }

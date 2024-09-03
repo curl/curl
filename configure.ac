@@ -501,14 +501,6 @@ fi
 AC_SUBST([LIBCURL_PC_CFLAGS])
 
 
-# Determine whether all dependent libraries must be specified when linking
-if test "X$enable_shared" = "Xyes" -a "X$link_all_deplibs" = "Xno"; then
-  require_lib_deps=no
-else
-  require_lib_deps=yes
-fi
-AM_CONDITIONAL(USE_EXPLICIT_LIB_DEPS, test x$require_lib_deps = xyes)
-
 dnl **********************************************************************
 dnl platform/compiler/architecture specific checks/flags
 dnl **********************************************************************
@@ -604,16 +596,6 @@ case $host_os in
     CURL_SUPPORTS_BUILTIN_AVAILABLE
     ;;
 esac
-
-have_mingw='no'
-case $host_os in
-  mingw*)
-    have_mingw='yes'
-    ;;
-esac
-
-AM_CONDITIONAL([HAVE_MINGW],
-  [test "$curl_cv_native_windows" = 'yes' -a "$have_mingw" = 'yes'])
 
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
@@ -2564,12 +2546,10 @@ dnl ----------------------------
 want_winuni="no"
 if test "$curl_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
-  OPT_WINUNI="default"
-  AC_ARG_WITH(windows-unicode,
-  AS_HELP_STRING([--with-windows-unicode],[enable Windows Unicode])
-  AS_HELP_STRING([--without-windows-unicode], [disable Windows Unicode (default)]),
-    OPT_WINUNI=$withval)
-  case "$OPT_WINUNI" in
+  AC_ARG_ENABLE(windows-unicode,
+AS_HELP_STRING([--enable-windows-unicode],[Enable Windows Unicode])
+AS_HELP_STRING([--disable-windows-unicode],[Disable Windows Unicode (default)]),
+  [ case "$enableval" in
     yes)
       CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
       want_winuni="yes"
@@ -2578,7 +2558,9 @@ if test "$curl_cv_native_windows" = "yes"; then
     *)
       AC_MSG_RESULT([no])
       ;;
-  esac
+    esac ],
+      AC_MSG_RESULT([no])
+  )
 fi
 
 AM_CONDITIONAL([USE_UNICODE], [test "$want_winuni" = "yes"])
@@ -2592,8 +2574,8 @@ if test "$curl_cv_native_windows" = 'yes'; then
   AC_MSG_CHECKING([whether to enable Windows native IDN (Windows native builds only)])
   OPT_WINIDN="default"
   AC_ARG_WITH(winidn,
-  AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
-  AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
+AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
+AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     OPT_WINIDN=$withval)
   case "$OPT_WINIDN" in
     no|default)
@@ -2617,7 +2599,6 @@ if test "$curl_cv_native_windows" = 'yes'; then
 
   if test "$want_winidn" = "yes"; then
     dnl WinIDN library support has been requested
-    clean_CFLAGS="$CFLAGS"
     clean_CPPFLAGS="$CPPFLAGS"
     clean_LDFLAGS="$LDFLAGS"
     clean_LIBS="$LIBS"
@@ -2629,26 +2610,7 @@ if test "$curl_cv_native_windows" = 'yes'; then
       dnl pkg-config not available or provides no info
       WINIDN_LDFLAGS="-L$want_winidn_path/lib$libsuff"
       WINIDN_CPPFLAGS="-I$want_winidn_path/include"
-      WINIDN_DIR="$want_winidn_path/lib$libsuff"
     fi
-    #
-    dnl WinIDN requires a minimum supported OS version of at least Vista (0x0600)
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        #include <windows.h>
-      ]],[[
-        #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
-        #error
-        #endif
-      ]])
-    ],[
-    ],[
-      CFLAGS=`echo $CFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-      CFLAGS=`echo $CFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-      CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-DWINVER=[[^ ]]*//g'`
-      CPPFLAGS=`echo $CPPFLAGS | $SED -e 's/-D_WIN32_WINNT=[[^ ]]*//g'`
-      WINIDN_CPPFLAGS="$WINIDN_CPPFLAGS -DWINVER=0x0600"
-    ])
     #
     CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
     LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
@@ -2659,6 +2621,14 @@ if test "$curl_cv_native_windows" = 'yes'; then
       AC_LANG_PROGRAM([[
         #include <windows.h>
       ]],[[
+        #if (!defined(_WIN32_WINNT) || _WIN32_WINNT < 0x600) && \
+          (!defined(WINVER) || WINVER < 0x600)
+        WINBASEAPI int WINAPI IdnToUnicode(DWORD dwFlags,
+                                           const WCHAR *lpASCIICharStr,
+                                           int cchASCIIChar,
+                                           WCHAR *lpUnicodeCharStr,
+                                           int cchUnicodeChar);
+        #endif
         IdnToUnicode(0, NULL, 0, NULL, 0);
       ]])
     ],[
@@ -2675,7 +2645,6 @@ if test "$curl_cv_native_windows" = 'yes'; then
       curl_idn_msg="enabled (Windows-native)"
     else
       AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
-      CFLAGS="$clean_CFLAGS"
       CPPFLAGS="$clean_CPPFLAGS"
       LDFLAGS="$clean_LDFLAGS"
       LIBS="$clean_LIBS"
@@ -2693,8 +2662,8 @@ case $host_os in
     AC_MSG_CHECKING([whether to build with Apple IDN])
     OPT_IDN="default"
     AC_ARG_WITH(apple-idn,
-    AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
-    AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
+AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
+AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
       [OPT_IDN=$withval])
     case "$OPT_IDN" in
       yes)
@@ -4118,14 +4087,6 @@ AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
 CURL_CHECK_LIB_ARES
 
-if test "x$curl_cv_native_windows" != "xyes" &&
-   test "x$enable_shared" = "xyes"; then
-  build_libhostname=yes
-else
-  build_libhostname=no
-fi
-AM_CONDITIONAL(BUILD_LIBHOSTNAME, test x$build_libhostname = xyes)
-
 if test "x$want_ares" != xyes; then
   CURL_CHECK_OPTION_THREADED_RESOLVER
 
@@ -4730,6 +4691,25 @@ AS_HELP_STRING([--disable-progress-meter],[Disable progress-meter]),
 )
 
 dnl ************************************************************
+dnl disable SHA-512/256 hash algorithm
+dnl
+AC_MSG_CHECKING([whether to support the SHA-512/256 hash algorithm])
+AC_ARG_ENABLE(sha512-256,
+AS_HELP_STRING([--enable-sha512-256],[Enable SHA-512/256 hash algorithm (default)])
+AS_HELP_STRING([--disable-sha512-256],[Disable SHA-512/256 hash algorithm]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_SHA512_256, 1, [disable SHA-512/256 hash algorithm])
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+    ;;
+  esac ],
+    AC_MSG_RESULT(yes)
+)
+
+dnl ************************************************************
 dnl disable shuffle DNS support
 dnl
 AC_MSG_CHECKING([whether to support DNS shuffling])
@@ -5021,7 +5001,7 @@ if test "x$curl_psl_msg" = "xenabled"; then
 fi
 
 if test "x$curl_gsasl_msg" = "xenabled"; then
-  SUPPORT_FEATURES="$SUPPORT_FEATURES GSASL"
+  SUPPORT_FEATURES="$SUPPORT_FEATURES gsasl"
 fi
 
 if test "x$enable_altsvc" = "xyes"; then

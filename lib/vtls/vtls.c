@@ -71,6 +71,7 @@
 #include "connect.h"
 #include "select.h"
 #include "strdup.h"
+#include "rand.h"
 
 /* The last #include files should be: */
 #include "curl_memory.h"
@@ -783,13 +784,13 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(sock != CURL_SOCKET_BAD) {
       if(connssl->io_need & CURL_SSL_IO_NEED_SEND) {
         Curl_pollset_set_out_only(data, ps, sock);
-        CURL_TRC_CF(data, cf, "adjust_pollset, POLLOUT fd=%"
-                    CURL_FORMAT_SOCKET_T, sock);
+        CURL_TRC_CF(data, cf, "adjust_pollset, POLLOUT fd=%" FMT_SOCKET_T,
+                    sock);
       }
       else {
         Curl_pollset_set_in_only(data, ps, sock);
-        CURL_TRC_CF(data, cf, "adjust_pollset, POLLIN fd=%"
-                    CURL_FORMAT_SOCKET_T, sock);
+        CURL_TRC_CF(data, cf, "adjust_pollset, POLLIN fd=%" FMT_SOCKET_T,
+                    sock);
       }
     }
   }
@@ -919,11 +920,16 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   return result;
 }
 
+/* get 32 bits of random */
 CURLcode Curl_ssl_random(struct Curl_easy *data,
                          unsigned char *entropy,
                          size_t length)
 {
-  return Curl_ssl->random(data, entropy, length);
+  DEBUGASSERT(length == sizeof(int));
+  if(Curl_ssl->random)
+    return Curl_ssl->random(data, entropy, length);
+  else
+    return CURLE_NOT_BUILT_IN;
 }
 
 /*
@@ -1193,16 +1199,6 @@ int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data)
   return -1;
 }
 
-CURLcode Curl_none_random(struct Curl_easy *data UNUSED_PARAM,
-                          unsigned char *entropy UNUSED_PARAM,
-                          size_t length UNUSED_PARAM)
-{
-  (void)data;
-  (void)entropy;
-  (void)length;
-  return CURLE_NOT_BUILT_IN;
-}
-
 void Curl_none_close_all(struct Curl_easy *data UNUSED_PARAM)
 {
   (void)data;
@@ -1329,7 +1325,7 @@ static const struct Curl_ssl Curl_ssl_multi = {
   Curl_none_check_cxn,               /* check_cxn */
   Curl_none_shutdown,                /* shutdown */
   Curl_none_data_pending,            /* data_pending */
-  Curl_none_random,                  /* random */
+  NULL,                              /* random */
   Curl_none_cert_status_request,     /* cert_status_request */
   multissl_connect,                  /* connect */
   multissl_connect_nonblocking,      /* connect_nonblocking */
@@ -2222,7 +2218,6 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   const unsigned char *proto,
                                   size_t proto_len)
 {
-  int can_multi = 0;
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
     (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf))?
@@ -2241,14 +2236,12 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     else if(proto_len == ALPN_H2_LENGTH &&
             !memcmp(ALPN_H2, proto, ALPN_H2_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_2;
-      can_multi = 1;
     }
 #endif
 #ifdef USE_HTTP3
     else if(proto_len == ALPN_H3_LENGTH &&
             !memcmp(ALPN_H3, proto, ALPN_H3_LENGTH)) {
       *palpn = CURL_HTTP_VERSION_3;
-      can_multi = 1;
     }
 #endif
     else {
@@ -2267,9 +2260,6 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   }
 
 out:
-  if(!Curl_ssl_cf_is_proxy(cf))
-    Curl_multiuse_state(data, can_multi?
-                        BUNDLE_MULTIPLEX : BUNDLE_NO_MULTIUSE);
   return CURLE_OK;
 }
 

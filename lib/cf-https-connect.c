@@ -210,8 +210,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   }
   ctx->state = CF_HC_SUCCESS;
   cf->connected = TRUE;
-  Curl_conn_cf_cntrl(cf->next, data, TRUE,
-                     CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
   return result;
 }
 

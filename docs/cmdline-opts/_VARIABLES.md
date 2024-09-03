@@ -11,12 +11,12 @@ variable `name` inserted, or a blank if the name does not exist as a
 variable. Insert `{{` verbatim in the string by prefixing it with a backslash,
 like `\{{`.
 
-You an access and expand environment variables by first importing them. You
-can select to either require the environment variable to be set or you can
-provide a default value in case it is not already set. Plain --variable %name
-imports the variable called 'name' but exits with an error if that environment
+You access and expand environment variables by first importing them. You
+select to either require the environment variable to be set or you can provide
+a default value in case it is not already set. Plain `--variable %name`
+imports the variable called `name` but exits with an error if that environment
 variable is not already set. To provide a default value if it is not set, use
---variable %name=content or --variable %name@content.
+`--variable %name=content` or `--variable %name@content`.
 
 Example. Get the USER environment variable into the URL, fail if USER is not
 set:

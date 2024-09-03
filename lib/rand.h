@@ -36,6 +36,11 @@ CURLcode Curl_rand_bytes(struct Curl_easy *data,
 #define Curl_rand(a,b,c)   Curl_rand_bytes((a), (b), (c))
 #endif
 
+/* ---- non-cryptographic version following ---- */
+CURLcode Curl_weak_random(struct Curl_easy *data,
+                          unsigned char *rnd,
+                          size_t length);
+
 /*
  * Curl_rand_hex() fills the 'rnd' buffer with a given 'num' size with random
  * hexadecimal digits PLUS a null-terminating byte. It must be an odd number

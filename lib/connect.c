@@ -208,31 +208,6 @@ bool Curl_shutdown_started(struct Curl_easy *data, int sockindex)
   return (pt->tv_sec > 0) || (pt->tv_usec > 0);
 }
 
-/* Copies connection info into the transfer handle to make it available when
-   the transfer handle is no longer associated with the connection. */
-void Curl_persistconninfo(struct Curl_easy *data, struct connectdata *conn,
-                          struct ip_quadruple *ip)
-{
-  if(ip)
-    data->info.primary = *ip;
-  else {
-    memset(&data->info.primary, 0, sizeof(data->info.primary));
-    data->info.primary.remote_port = -1;
-    data->info.primary.local_port = -1;
-  }
-  data->info.conn_scheme = conn->handler->scheme;
-  /* conn_protocol can only provide "old" protocols */
-  data->info.conn_protocol = (conn->handler->protocol) & CURLPROTO_MASK;
-  data->info.conn_remote_port = conn->remote_port;
-  data->info.used_proxy =
-#ifdef CURL_DISABLE_PROXY
-    0
-#else
-    conn->bits.proxy
-#endif
-    ;
-}
-
 static const struct Curl_addrinfo *
 addr_first_match(const struct Curl_addrinfo *addr, int family)
 {
@@ -312,23 +287,6 @@ bool Curl_addr2string(struct sockaddr *sa, curl_socklen_t salen,
   return FALSE;
 }
 
-struct connfind {
-  curl_off_t id_tofind;
-  struct connectdata *found;
-};
-
-static int conn_is_conn(struct Curl_easy *data,
-                        struct connectdata *conn, void *param)
-{
-  struct connfind *f = (struct connfind *)param;
-  (void)data;
-  if(conn->connection_id == f->id_tofind) {
-    f->found = conn;
-    return 1;
-  }
-  return 0;
-}
-
 /*
  * Used to extract socket and connectdata struct for the most recent
  * transfer on the given Curl_easy.
@@ -345,30 +303,19 @@ curl_socket_t Curl_getconnectinfo(struct Curl_easy *data,
    * - that is associated with a multi handle, and whose connection
    *   was detached with CURLOPT_CONNECT_ONLY
    */
-  if((data->state.lastconnect_id != -1) && (data->multi_easy || data->multi)) {
-    struct connectdata *c;
-    struct connfind find;
-    find.id_tofind = data->state.lastconnect_id;
-    find.found = NULL;
+  if(data->state.lastconnect_id != -1) {
+    struct connectdata *conn;
 
-    Curl_conncache_foreach(data,
-                           data->share && (data->share->specifier
-                           & (1<< CURL_LOCK_DATA_CONNECT))?
-                           &data->share->conn_cache:
-                           data->multi_easy?
-                           &data->multi_easy->conn_cache:
-                           &data->multi->conn_cache, &find, conn_is_conn);
-
-    if(!find.found) {
+    conn = Curl_cpool_get_conn(data, data->state.lastconnect_id);
+    if(!conn) {
       data->state.lastconnect_id = -1;
       return CURL_SOCKET_BAD;
     }
 
-    c = find.found;
     if(connp)
       /* only store this if the caller cares for it */
-      *connp = c;
-    return c->sock[FIRSTSOCKET];
+      *connp = conn;
+    return conn->sock[FIRSTSOCKET];
   }
   return CURL_SOCKET_BAD;
 }
@@ -634,7 +581,7 @@ static CURLcode baller_connect(struct Curl_cfilter *cf,
         baller->is_done = TRUE;
       }
       else if(Curl_timediff(*now, baller->started) >= baller->timeoutms) {
-        infof(data, "%s connect timeout after %" CURL_FORMAT_TIMEDIFF_T
+        infof(data, "%s connect timeout after %" FMT_TIMEDIFF_T
               "ms, move on!", baller->name, baller->timeoutms);
 #if defined(ETIMEDOUT)
         baller->error = ETIMEDOUT;
@@ -725,7 +672,7 @@ evaluate:
   /* Nothing connected, check the time before we might
    * start new ballers or return ok. */
   if((ongoing || not_started) && Curl_timeleft(data, &now, TRUE) < 0) {
-    failf(data, "Connection timeout after %" CURL_FORMAT_CURL_OFF_T " ms",
+    failf(data, "Connection timeout after %" FMT_OFF_T " ms",
           Curl_timediff(now, data->progress.t_startsingle));
     return CURLE_OPERATION_TIMEDOUT;
   }
@@ -748,8 +695,7 @@ evaluate:
           CURL_TRC_CF(data, cf, "%s done", baller->name);
         }
         else {
-          CURL_TRC_CF(data, cf, "%s starting (timeout=%"
-                      CURL_FORMAT_TIMEDIFF_T "ms)",
+          CURL_TRC_CF(data, cf, "%s starting (timeout=%" FMT_TIMEDIFF_T "ms)",
                       baller->name, baller->timeoutms);
           ++ongoing;
           ++added;
@@ -794,7 +740,7 @@ evaluate:
     hostname = conn->host.name;
 
   failf(data, "Failed to connect to %s port %u after "
-        "%" CURL_FORMAT_TIMEDIFF_T " ms: %s",
+        "%" FMT_TIMEDIFF_T " ms: %s",
         hostname, conn->primary.remote_port,
         Curl_timediff(now, data->progress.t_startsingle),
         curl_easy_strerror(result));
@@ -821,9 +767,9 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   struct cf_he_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
   CURLcode result = CURLE_COULDNT_CONNECT;
-  int ai_family0, ai_family1;
+  int ai_family0 = 0, ai_family1 = 0;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
-  const struct Curl_addrinfo *addr0, *addr1;
+  const struct Curl_addrinfo *addr0 = NULL, *addr1 = NULL;
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */
@@ -842,33 +788,31 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
    * the 2 connect attempt ballers to try different families, if possible.
    *
    */
-  if(conn->ip_version == CURL_IPRESOLVE_WHATEVER) {
-    /* any IP version is allowed */
-    ai_family0 = remotehost->addr?
-      remotehost->addr->ai_family : 0;
+  if(conn->ip_version == CURL_IPRESOLVE_V6) {
 #ifdef USE_IPV6
-    ai_family1 = ai_family0 == AF_INET6 ?
-      AF_INET : AF_INET6;
-#else
-    ai_family1 = AF_UNSPEC;
+    ai_family0 = AF_INET6;
+    addr0 = addr_first_match(remotehost->addr, ai_family0);
 #endif
+  }
+  else if(conn->ip_version == CURL_IPRESOLVE_V4) {
+    ai_family0 = AF_INET;
+    addr0 = addr_first_match(remotehost->addr, ai_family0);
   }
   else {
-    /* only one IP version is allowed */
-    ai_family0 = (conn->ip_version == CURL_IPRESOLVE_V4) ?
-      AF_INET :
-#ifdef USE_IPV6
-      AF_INET6;
-#else
-      AF_UNSPEC;
-#endif
-    ai_family1 = AF_UNSPEC;
+    /* no user preference, we try ipv6 always first when available */
+    ai_family0 = AF_INET6;
+    addr0 = addr_first_match(remotehost->addr, ai_family0);
+    /* next candidate is ipv4 */
+    ai_family1 = AF_INET;
+    addr1 = addr_first_match(remotehost->addr, ai_family1);
+    /* no ip address families, probably AF_UNIX or something, use the
+     * address family given to us */
+    if(!addr1  && !addr0 && remotehost->addr) {
+      ai_family0 = remotehost->addr->ai_family;
+      addr0 = addr_first_match(remotehost->addr, ai_family0);
+    }
   }
 
-  /* Get the first address in the list that matches the family,
-   * this might give NULL, if we do not have any matches. */
-  addr0 = addr_first_match(remotehost->addr, ai_family0);
-  addr1 = addr_first_match(remotehost->addr, ai_family1);
   if(!addr0 && addr1) {
     /* switch around, so a single baller always uses addr0 */
     addr0 = addr1;
@@ -887,8 +831,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                           timeout_ms,  EXPIRE_DNS_PER_NAME);
   if(result)
     return result;
-  CURL_TRC_CF(data, cf, "created %s (timeout %"
-              CURL_FORMAT_TIMEDIFF_T "ms)",
+  CURL_TRC_CF(data, cf, "created %s (timeout %" FMT_TIMEDIFF_T "ms)",
               ctx->baller[0]->name, ctx->baller[0]->timeoutms);
   if(addr1) {
     /* second one gets a delayed start */
@@ -899,8 +842,7 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
                             timeout_ms,  EXPIRE_DNS_PER_NAME2);
     if(result)
       return result;
-    CURL_TRC_CF(data, cf, "created %s (timeout %"
-                CURL_FORMAT_TIMEDIFF_T "ms)",
+    CURL_TRC_CF(data, cf, "created %s (timeout %" FMT_TIMEDIFF_T "ms)",
                 ctx->baller[1]->name, ctx->baller[1]->timeoutms);
     Curl_expire(data, data->set.happy_eyeballs_timeout,
                 EXPIRE_HAPPY_EYEBALLS);
@@ -1020,8 +962,6 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
         cf->next = ctx->winner->cf;
         ctx->winner->cf = NULL;
         cf_he_ctx_clear(cf, data);
-        Curl_conn_cf_cntrl(cf->next, data, TRUE,
-                           CF_CTRL_CONN_INFO_UPDATE, 0, NULL);
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */

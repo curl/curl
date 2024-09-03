@@ -28,6 +28,9 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Tell "curl/curl.h" not to include "curl/mprintf.h" */
+#define CURL_SKIP_INCLUDE_MPRINTF
+
 /* FIXME: Delete this once the warnings have been fixed. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
 #ifdef __GNUC__
@@ -345,6 +348,9 @@
 #define CURL_PRINTF(fmt, arg)
 #endif
 
+/* Override default printf mask check rules in "curl/mprintf.h" */
+#define CURL_TEMP_PRINTF CURL_PRINTF
+
 /* Workaround for mainline llvm v16 and earlier missing a built-in macro
    expected by macOS SDK v14 / Xcode v15 (2023) and newer.
    gcc (as of v14) is also missing it. */
@@ -513,11 +519,11 @@
 #endif
 
 #if SIZEOF_CURL_SOCKET_T < 8
-#  define CURL_FORMAT_SOCKET_T "d"
+#  define FMT_SOCKET_T "d"
 #elif defined(__MINGW32__)
-#  define CURL_FORMAT_SOCKET_T "zd"
+#  define FMT_SOCKET_T "zd"
 #else
-#  define CURL_FORMAT_SOCKET_T "qd"
+#  define FMT_SOCKET_T "qd"
 #endif
 
 /*
@@ -565,9 +571,12 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-# define CURL_PRId64  CURL_FORMAT_CURL_OFF_T
-# define CURL_PRIu64  CURL_FORMAT_CURL_OFF_TU
+# define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
+# define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
 #endif
+
+#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
+#define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED

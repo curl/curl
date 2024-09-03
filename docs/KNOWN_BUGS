@@ -86,6 +86,7 @@ problems may have been fixed or changed somewhat since this was written.
  11.4 HTTP test server 'connection-monitor' problems
  11.5 Connection information when using TCP Fast Open
  11.6 test cases sometimes timeout
+ 11.7 CURLOPT_CONNECT_TO does not work for HTTPS proxy
  11.8 WinIDN test failures
 
  12. LDAP
@@ -534,6 +535,13 @@ problems may have been fixed or changed somewhat since this was written.
  Occasionally, one of the tests timeouts. Inexplicably.
 
  See https://github.com/curl/curl/issues/13350
+
+11.7 CURLOPT_CONNECT_TO does not work for HTTPS proxy
+
+ It is unclear if the same option should even cover the proxy connection or if
+ if requires a separate option.
+
+ See https://github.com/curl/curl/issues/14481
 
 11.8 WinIDN test failures
 

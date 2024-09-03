@@ -45,6 +45,32 @@ env:
   DOCKER_CONTENT_TRUST: '1'
 
 jobs:
+  linux-glibc-llvm:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+        with:
+          path: 'curl'
+          fetch-depth: 8
+      - name: 'build'
+        run: |
+          git clone --depth 1 https://github.com/curl/curl-for-win
+          mv curl-for-win/* .
+          export CW_CONFIG='-main-werror-linux-a64-x64'
+          export CW_REVISION='${{ github.sha }}'
+          DOCKER_IMAGE='debian:bookworm-slim'
+          export CW_CCSUFFIX='-15'
+          export CW_GCCSUFFIX='-12'
+          docker trust inspect --pretty "${DOCKER_IMAGE}"
+          time docker pull "${DOCKER_IMAGE}"
+          docker images --digests
+          time docker run --volume "$(pwd):$(pwd)" --workdir "$(pwd)" \
+            --env-file <(env | grep -a -E \
+              '^(CW_|GITHUB_)') \
+            "${DOCKER_IMAGE}" \
+            sh -c ./_ci-linux-debian.sh
+
   linux-musl-llvm:
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -57,7 +83,7 @@ jobs:
         run: |
           git clone --depth 1 https://github.com/curl/curl-for-win
           mv curl-for-win/* .
-          export CW_CONFIG='-main-werror-linux-musl-x64'
+          export CW_CONFIG='-main-werror-linux-musl-r64-x64'
           export CW_REVISION='${{ github.sha }}'
           . ./_versions.sh
           docker trust inspect --pretty "${DOCKER_IMAGE}"

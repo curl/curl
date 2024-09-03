@@ -105,6 +105,22 @@ sub pidfromfile {
 }
 
 #######################################################################
+# return Cygwin pid from virtual pid
+#
+sub winpid_to_pid {
+    my $vpid = $_[0];
+    if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
+        my $pid = Cygwin::winpid_to_pid($vpid - 65536);
+        if($pid) {
+            return $pid;
+        } else {
+            return $vpid
+        }
+    }
+    return $vpid;
+}
+
+#######################################################################
 # pidexists checks if a process with a given pid exists and is alive.
 # This will return the positive pid if the process exists and is alive.
 # This will return the negative pid if the process exists differently.
@@ -115,6 +131,7 @@ sub pidexists {
 
     if($pid > 0) {
         # verify if currently existing Windows process
+        $pid = winpid_to_pid($pid);
         if ($pid > 65536 && os_is_win()) {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
@@ -144,6 +161,7 @@ sub pidterm {
 
     if($pid > 0) {
         # request the process to quit
+        $pid = winpid_to_pid($pid);
         if ($pid > 65536 && os_is_win()) {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
@@ -169,13 +187,14 @@ sub pidkill {
 
     if($pid > 0) {
         # request the process to quit
+        $pid = winpid_to_pid($pid);
         if ($pid > 65536 && os_is_win()) {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
                 if(index($result, "$pid") != -1) {
-                    system("taskkill -f -fi \"$filter\" >nul 2>&1");
+                    system("taskkill -f -t -fi \"$filter\" >nul 2>&1");
                     # Windows XP Home compatibility
                     system("tskill $pid >nul 2>&1");
                 }
@@ -195,6 +214,7 @@ sub pidwait {
     my $pid = $_[0];
     my $flags = $_[1];
 
+    $pid = winpid_to_pid($pid);
     # check if the process exists
     if ($pid > 65536 && os_is_win()) {
         if($flags == &WNOHANG) {

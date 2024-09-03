@@ -501,9 +501,6 @@ struct ConnectBits {
                          This is implicit when SSL-protocols are used through
                          proxies, but can also be enabled explicitly by
                          apps */
-  BIT(proxy_connect_closed); /* TRUE if a proxy disconnected the connection
-                                in a CONNECT request with auth, so that
-                                libcurl should reconnect and continue. */
   BIT(proxy); /* if set, this transfer is done through a proxy - any type */
 #endif
   /* always modify bits.close with the connclose() and connkeep() macros! */
@@ -538,6 +535,7 @@ struct ConnectBits {
 #endif
   BIT(bound); /* set true if bind() has already been done on this socket/
                  connection */
+  BIT(asks_multiplex); /* connection asks for multiplexing, but is not yet */
   BIT(multiplex); /* connection is multiplexed */
   BIT(tcp_fastopen); /* use TCP Fast Open */
   BIT(tls_enable_alpn); /* TLS ALPN extension? */
@@ -555,6 +553,7 @@ struct ConnectBits {
   BIT(aborted); /* connection was aborted, e.g. in unclean state */
   BIT(shutdown_handler); /* connection shutdown: handler shut down */
   BIT(shutdown_filters); /* connection shutdown: filters shut down */
+  BIT(in_cpool);     /* connection is kept in a connection pool */
 };
 
 struct hostname {
@@ -802,12 +801,12 @@ struct ldapconninfo;
  * unique for an entire connection.
  */
 struct connectdata {
-  struct Curl_llist_node bundle_node; /* conncache */
+  struct Curl_llist_node cpool_node; /* conncache lists */
 
   curl_closesocket_callback fclosesocket; /* function closing the socket(s) */
   void *closesocket_client;
 
-  /* This is used by the connection cache logic. If this returns TRUE, this
+  /* This is used by the connection pool logic. If this returns TRUE, this
      handle is still used by one or more easy handles and can only used by any
      other easy handle without careful consideration (== only for
      multiplexing) and it cannot be used by another multi handle! */
@@ -816,6 +815,8 @@ struct connectdata {
   /**** Fields set when inited and not modified again */
   curl_off_t connection_id; /* Contains a unique number to make it easier to
                                track the connections in the log output */
+  char *destination; /* string carrying normalized hostname+port+scope */
+  size_t destination_len; /* strlen(destination) + 1 */
 
   /* 'dns_entry' is the particular host we use. This points to an entry in the
      DNS cache and it will not get pruned while locked. It gets unlocked in
@@ -851,7 +852,7 @@ struct connectdata {
   char *oauth_bearer; /* OAUTH2 bearer, allocated */
   struct curltime now;     /* "current" time */
   struct curltime created; /* creation time */
-  struct curltime lastused; /* when returned to the connection cache */
+  struct curltime lastused; /* when returned to the connection poolas idle */
   curl_socket_t sock[2]; /* two sockets, the second is used for the data
                             transfer when doing FTP */
   Curl_recv *recv[2];
@@ -971,7 +972,6 @@ struct connectdata {
     unsigned int unused:1; /* avoids empty union */
   } proto;
 
-  struct connectbundle *bundle; /* The bundle we are member of */
 #ifdef USE_UNIX_SOCKETS
   char *unix_domain_socket;
 #endif
@@ -1050,7 +1050,7 @@ struct PureInfo {
      even when the session handle is no longer associated with a connection,
      and also allow curl_easy_reset() to clear this information from the
      session handle without disturbing information which is still alive, and
-     that might be reused, in the connection cache. */
+     that might be reused, in the connection pool. */
   struct ip_quadruple primary;
   int conn_remote_port;  /* this is the "remote port", which is the port
                             number of the used URL, independent of proxy or
@@ -1218,8 +1218,6 @@ struct urlpieces {
 };
 
 struct UrlState {
-  /* Points to the connection cache */
-  struct conncache *conn_cache;
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
 
@@ -1271,12 +1269,6 @@ struct UrlState {
 
   /* a place to store the most recently set (S)FTP entrypath */
   char *most_recent_ftp_entrypath;
-#if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
-/* do FTP line-end conversions on most platforms */
-#define CURL_DO_LINEEND_CONV
-  /* for FTP downloads: how many CRLFs did we converted to LFs? */
-  curl_off_t crlf_conversions;
-#endif
   char *range; /* range, if used. See README for detailed specification on
                   this syntax. */
   curl_off_t resume_from; /* continue [ftp] transfer from here */
@@ -1369,9 +1361,6 @@ struct UrlState {
   unsigned char select_bits; /* != 0 -> bitmask of socket events for this
                                  transfer overriding anything the socket may
                                  report */
-#ifdef DEBUGBUILD
-  BIT(conncache_lock);
-#endif
   /* when curl_easy_perform() is called, the multi handle is "owned" by
      the easy handle so curl_easy_cleanup() on such an easy handle will
      also close the multi handle! */
@@ -1907,13 +1896,13 @@ struct Curl_easy {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   unsigned int magic;
-  /* once an easy handle is tied to a connection cache
+  /* once an easy handle is tied to a connection pool
      a non-negative number to distinguish this transfer from
-     other using the same cache. For easier tracking
+     other using the same pool. For easier tracking
      in log output.
      This may wrap around after LONG_MAX to 0 again, so it
      has no uniqueness guarantee for very large processings.
-     Note: it has no uniqueness either IFF more than one connection cache
+     Note: it has no uniqueness either IFF more than one connection pool
      is used by the libcurl application. */
   curl_off_t id;
   /* once an easy handle is added to a multi, either explicitly by the

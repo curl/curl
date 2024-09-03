@@ -27,7 +27,7 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 function(add_manual_pages _listname)
   # Maximum number of files per command to stay within shell/OS limits
-  if(UNIX)
+  if(CMAKE_HOST_UNIX)
     set(_files_per_batch 10000)
   else()  # e.g. Windows with cmd.exe and other obsolete/unidentified shells
     set(_files_per_batch 200)

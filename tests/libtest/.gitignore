@@ -2,7 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 
-chkhostname
 lib[1234][0-9][0-9][0-9]
 lib[56][0-9][0-9]
 lib1521.c

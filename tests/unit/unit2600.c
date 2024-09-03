@@ -377,8 +377,8 @@ static struct test_case TEST_CASES[] = {
   /* 2 ipv6, fails after ~400ms, reports COULDNT_CONNECT   */
 
   { 5, TURL, "test.com:123:192.0.2.1,::1", CURL_IPRESOLVE_WHATEVER,
-    CNCT_TMOT, 150, 200, 200,     1,  1,      350,  TC_TMOT,  R_FAIL, "v4" },
-  /* mixed ip4+6, v4 starts, v6 kicks in on HE, fails after ~350ms */
+    CNCT_TMOT, 150, 200, 200,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6" },
+  /* mixed ip4+6, v6 always first, v4 kicks in on HE, fails after ~350ms */
   { 6, TURL, "test.com:123:::1,192.0.2.1", CURL_IPRESOLVE_WHATEVER,
     CNCT_TMOT, 150, 200, 200,     1,  1,      350,  TC_TMOT,  R_FAIL, "v6" },
   /* mixed ip6+4, v6 starts, v4 never starts due to high HE, TIMEOUT */

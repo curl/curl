@@ -281,7 +281,7 @@ static ssize_t wsftp_send(struct Curl_easy *data, int sockindex,
     return -1;
   }
   DEBUGASSERT(rc == (int)len);
-  infof(data, "sent %zu bytes SFTP from offset %" CURL_FORMAT_CURL_OFF_T,
+  infof(data, "sent %zu bytes SFTP from offset %" FMT_OFF_T,
         len, sshc->offset);
   sshc->offset += len;
   return (ssize_t)rc;
@@ -578,7 +578,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
           else {
             curl_off_t size = ((curl_off_t)attrs.sz[1] << 32) | attrs.sz[0];
             if(size < 0) {
-              failf(data, "Bad file size (%" CURL_FORMAT_CURL_OFF_T ")", size);
+              failf(data, "Bad file size (%" FMT_OFF_T ")", size);
               return CURLE_BAD_DOWNLOAD_RESUME;
             }
             data->state.resume_from = size;
@@ -769,7 +769,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
       data->req.maxdownload = size;
       Curl_pgrsSetDownloadSize(data, size);
 
-      infof(data, "SFTP download %" CURL_FORMAT_CURL_OFF_T " bytes", size);
+      infof(data, "SFTP download %" FMT_OFF_T " bytes", size);
 
       /* We cannot seek with wolfSSH so resuming and range requests are not
          possible */

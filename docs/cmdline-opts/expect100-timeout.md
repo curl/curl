@@ -21,5 +21,5 @@ response when curl emits an Expects: 100-continue header in its request. By
 default curl waits one second. This option accepts decimal values. When curl
 stops waiting, it continues as if a response was received.
 
-The decimal value needs to provided using a dot (`.`) as decimal separator -
+The decimal value needs to be provided using a dot (`.`) as decimal separator -
 not the local version even if it might be using another separator.

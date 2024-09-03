@@ -468,8 +468,7 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
     static const char accept_ranges[]= { "Accept-ranges: bytes\r\n" };
     if(expected_size >= 0) {
       headerlen =
-        msnprintf(header, sizeof(header),
-                  "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n",
+        msnprintf(header, sizeof(header), "Content-Length: %" FMT_OFF_T "\r\n",
                   expected_size);
       result = Curl_client_write(data, CLIENTWRITE_HEADER, header, headerlen);
       if(result)

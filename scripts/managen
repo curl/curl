@@ -374,7 +374,9 @@ sub render {
         elsif($d =~ /^    (.*)/) {
             my $word = $1;
             if(!$quote && $manpage) {
+                push @desc, "\n" if($blankline);
                 push @desc, ".nf\n";
+                $blankline = 0;
             }
             $quote = 1;
             $d = "$word\n";
@@ -801,7 +803,7 @@ sub single {
                 $e =~ s!\$URL!https://example.com!g;
                 # convert single backslahes to doubles
                 $e =~ s/\\/\\\\/g;
-                print " curl $e\n";
+                print "curl $e\n";
             }
             print ".fi\n";
         }

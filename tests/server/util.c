@@ -466,6 +466,13 @@ long timediff(struct timeval newer, struct timeval older)
 
 typedef void (*SIGHANDLER_T)(int);
 
+#if defined(_MSC_VER) && _MSC_VER == 1600
+/* Workaround for warning C4306:
+   'type cast' : conversion from 'int' to 'void (__cdecl *)(int)' */
+#undef SIG_ERR
+#define SIG_ERR  ((SIGHANDLER_T)(size_t)-1)
+#endif
+
 #ifdef SIGHUP
 static SIGHANDLER_T old_sighup_handler  = SIG_ERR;
 #endif

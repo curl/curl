@@ -13,11 +13,9 @@ name: Source
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '**/CMakeLists.txt'
       - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
-      - 'CMake/**'
       - 'plan9/**'
       - 'tests/data/**'
       - 'winbuild/**'
@@ -26,11 +24,9 @@ name: Source
       - master
     paths-ignore:
       - '**/*.md'
-      - '**/CMakeLists.txt'
       - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
-      - 'CMake/**'
       - 'plan9/**'
       - 'tests/data/**'
       - 'winbuild/**'
@@ -47,7 +43,7 @@ jobs:
       - name: check
         run: git ls-files -z "*.[ch]" | xargs -0 -n1 ./scripts/checksrc.pl
 
-  codespell:
+  codespell-cmakelint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -57,10 +53,14 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
-          sudo apt-get install codespell
+          sudo apt-get install codespell python3-pip
+          python3 -m pip install cmakelint==1.4.3
 
       - name: spellcheck
         run: codespell --skip src/tool_hugehelp.c -I .github/scripts/codespell-ignore.txt include src lib
+
+      - name: cmakelint
+        run: scripts/cmakelint.sh
 
   reuse:
     runs-on: ubuntu-latest

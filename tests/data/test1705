@@ -222,8 +222,8 @@ sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.
 
 End with a quote
-.nf
 
+.nf
 hello
 .fi
 
@@ -234,7 +234,7 @@ Disable it again with \-\-no-fakeitreal.
 
 Example:
 .nf
- curl --verbose https://example.com
+curl --verbose https://example.com
 .fi
 
 This option is mutually exclusive with \fI\-\-trace\fP and \fI\-\-trace\-ascii\fP.
@@ -272,7 +272,7 @@ If --proto is provided several times, the last set value is used.
 
 Example:
 .nf
- curl --proto =http,https,sftp https://example.com
+curl --proto =http,https,sftp https://example.com
 .fi
 
 See also \fI-v, \-\-fakeitreal\fP and \fI\-\-proto\-default\fP.

@@ -70,8 +70,9 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
 {
   struct cf_haproxy_ctx *ctx = cf->ctx;
   CURLcode result;
-  const char *tcp_version;
   const char *client_ip;
+  struct ip_quadruple ipquad;
+  int is_ipv6;
 
   DEBUGASSERT(ctx);
   DEBUGASSERT(ctx->state == HAPROXY_INIT);
@@ -81,19 +82,20 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
     result = Curl_dyn_addn(&ctx->data_out, STRCONST("PROXY UNKNOWN\r\n"));
   else {
 #endif /* USE_UNIX_SOCKETS */
+  result = Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad);
+  if(result)
+    return result;
+
   /* Emit the correct prefix for IPv6 */
-  tcp_version = cf->conn->bits.ipv6 ? "TCP6" : "TCP4";
   if(data->set.str[STRING_HAPROXY_CLIENT_IP])
     client_ip = data->set.str[STRING_HAPROXY_CLIENT_IP];
   else
-    client_ip = data->info.primary.local_ip;
+    client_ip = ipquad.local_ip;
 
   result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
-                         tcp_version,
-                         client_ip,
-                         data->info.primary.remote_ip,
-                         data->info.primary.local_port,
-                         data->info.primary.remote_port);
+                         is_ipv6? "TCP6" : "TCP4",
+                         client_ip, ipquad.remote_ip,
+                         ipquad.local_port, ipquad.remote_port);
 
 #ifdef USE_UNIX_SOCKETS
   }
@@ -129,17 +131,17 @@ static CURLcode cf_haproxy_connect(struct Curl_cfilter *cf,
   case HAPROXY_SEND:
     len = Curl_dyn_len(&ctx->data_out);
     if(len > 0) {
-      size_t written;
-      result = Curl_conn_send(data, cf->sockindex,
-                              Curl_dyn_ptr(&ctx->data_out),
-                              len, FALSE, &written);
-      if(result == CURLE_AGAIN) {
+      ssize_t nwritten;
+      nwritten = Curl_conn_cf_send(cf->next, data,
+                                   Curl_dyn_ptr(&ctx->data_out), len, FALSE,
+                                   &result);
+      if(nwritten < 0) {
+        if(result != CURLE_AGAIN)
+          goto out;
         result = CURLE_OK;
-        written = 0;
+        nwritten = 0;
       }
-      else if(result)
-        goto out;
-      Curl_dyn_tail(&ctx->data_out, len - written);
+      Curl_dyn_tail(&ctx->data_out, len - (size_t)nwritten);
       if(Curl_dyn_len(&ctx->data_out) > 0) {
         result = CURLE_OK;
         goto out;

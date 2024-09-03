@@ -89,6 +89,9 @@
 /* disables HTTP */
 #cmakedefine CURL_DISABLE_HTTP 1
 
+/* disabled all HTTP authentication methods */
+#cmakedefine CURL_DISABLE_HTTP_AUTH 1
+
 /* disables IMAP */
 #cmakedefine CURL_DISABLE_IMAP 1
 
@@ -130,6 +133,12 @@
 
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
+
+/* disables SHA-512/256 hash algorithm */
+#cmakedefine CURL_DISABLE_SHA512_256 1
+
+/* disabled shuffle DNS feature */
+#cmakedefine CURL_DISABLE_SHUFFLE_DNS 1
 
 /* disables SMB */
 #cmakedefine CURL_DISABLE_SMB 1
@@ -628,9 +637,6 @@
 
 /* Define to the version of this package. */
 #cmakedefine PACKAGE_VERSION ${PACKAGE_VERSION}
-
-/* a suitable file to read random data from */
-#cmakedefine RANDOM_FILE "${RANDOM_FILE}"
 
 /*
  Note: SIZEOF_* variables are fetched with CMake through check_type_size().

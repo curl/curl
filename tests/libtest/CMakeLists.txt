@@ -35,7 +35,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
 
   if(LIB_SELECTED STREQUAL LIB_STATIC)
     # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM _sources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF})
+    list(REMOVE_ITEM _sources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
   endif()
 
   string(TOUPPER ${_target} _upper_target)
@@ -53,25 +53,6 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test libtest ${_target}")
 endforeach()
-
-# Allows for hostname override to make tests machine independent.
-# TODO: this cmake build assumes a shared build, detect static linking here!
-if(NOT WIN32)
-  add_library(hostname MODULE EXCLUDE_FROM_ALL "sethostname.c")
-  add_dependencies(testdeps hostname)
-  target_include_directories(hostname PRIVATE
-    "${CURL_BINARY_DIR}/lib"  # for "curl_config.h"
-    "${CURL_SOURCE_DIR}/lib"  # for "curl_setup.h"
-  )
-  # Output to .libs for compatibility with autotools, the test data expects a
-  # library at (tests)/libtest/.libs/libhostname.so
-  set_target_properties(hostname PROPERTIES
-    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/.libs")
-  if(CURL_HIDES_PRIVATE_SYMBOLS)
-    set_property(TARGET hostname APPEND PROPERTY COMPILE_DEFINITIONS "CURL_HIDDEN_SYMBOLS")
-    set_property(TARGET hostname APPEND PROPERTY COMPILE_FLAGS ${CURL_CFLAG_SYMBOLS_HIDE})
-  endif()
-endif()
 
 add_custom_command(
   OUTPUT "lib1521.c"

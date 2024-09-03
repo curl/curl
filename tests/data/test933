@@ -34,18 +34,9 @@ SSL
 <name>
 SMTP NTLM graceful cancellation
 </name>
- <setenv>
-# we force our own host name, in order to make the test machine independent
-CURL_GETHOSTNAME=curlhost
-# we try to use the LD_PRELOAD hack, if not a debug build
-LD_PRELOAD=%PWD/libtest/.libs/libhostname.so
- </setenv>
 <command>
 smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-from sender@example.com -u testuser:testpass -T -
 </command>
-<precheck>
-chkhostname curlhost
-</precheck>
 </client>
 
 #

@@ -37,8 +37,10 @@ MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
 SUPPORTFILES = $(TIMEDIFF) first.c test.h
 
+THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
+
 # These are all libcurl test programs
-noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
+noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
  lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532   \
@@ -78,16 +80,13 @@ noinst_PROGRAMS = chkhostname libauthretry libntlmconnect libprereq      \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
- lib3100 lib3101 lib3102 lib3103
-
-chkhostname_SOURCES = chkhostname.c ../../lib/curl_gethostname.c
-chkhostname_LDADD = @CURL_NETWORK_LIBS@
-chkhostname_DEPENDENCIES =
+ lib3100 lib3101 lib3102 lib3103 lib3207
 
 libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
 
 libauthretry_SOURCES = libauthretry.c $(SUPPORTFILES)
+libauthretry_LDADD = $(TESTUTIL_LIBS)
 
 libprereq_SOURCES = libprereq.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libprereq_LDADD = $(TESTUTIL_LIBS)
@@ -719,3 +718,6 @@ lib3102_LDADD = $(TESTUTIL_LIBS)
 
 lib3103_SOURCES = lib3103.c $(SUPPORTFILES)
 lib3103_LDADD = $(TESTUTIL_LIBS)
+
+lib3207_SOURCES = lib3207.c $(SUPPORTFILES) $(TESTUTIL) $(THREADS) $(WARNLESS) $(MULTIBYTE)
+lib3207_LDADD = $(TESTUTIL_LIBS)

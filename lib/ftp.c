@@ -327,7 +327,6 @@ static void freedirs(struct ftp_conn *ftpc)
   Curl_safefree(ftpc->newhost);
 }
 
-#ifdef CURL_DO_LINEEND_CONV
 /***********************************************************************
  *
  * Lineend Conversions
@@ -369,7 +368,6 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
       }
       /* either we just wrote the newline or it is part of the next
        * chunk of bytes we write. */
-      data->state.crlf_conversions++;
       ctx->newline_pending = FALSE;
     }
 
@@ -400,7 +398,6 @@ static CURLcode ftp_cw_lc_write(struct Curl_easy *data,
     /* EndOfStream, if we have a trailing cr, now is the time to write it */
     if(ctx->newline_pending) {
       ctx->newline_pending = FALSE;
-      data->state.crlf_conversions++;
       return Curl_cwriter_write(data, writer->next, type, &nl, 1);
     }
     /* Always pass on the EOS type indicator */
@@ -418,7 +415,6 @@ static const struct Curl_cwtype ftp_cw_lc = {
   sizeof(struct ftp_cw_lc_ctx)
 };
 
-#endif /* CURL_DO_LINEEND_CONV */
 /***********************************************************************
  *
  * AcceptServerConnect()
@@ -2082,7 +2078,6 @@ static CURLcode ftp_state_pasv_resp(struct Curl_easy *data,
 
     /* postponed address resolution in case of tcp fastopen */
     if(conn->bits.tcp_fastopen && !conn->bits.reuse && !ftpc->newhost[0]) {
-      Curl_conn_ev_update_info(data, conn);
       Curl_safefree(ftpc->newhost);
       ftpc->newhost = strdup(control_address(conn));
       if(!ftpc->newhost)
@@ -2393,8 +2388,8 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
       if(data->state.resume_from< 0) {
         /* We are supposed to download the last abs(from) bytes */
         if(filesize < -data->state.resume_from) {
-          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
-                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
+          failf(data, "Offset (%" FMT_OFF_T
+                ") was beyond file size (%" FMT_OFF_T ")",
                 data->state.resume_from, filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -2405,8 +2400,8 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
       }
       else {
         if(filesize < data->state.resume_from) {
-          failf(data, "Offset (%" CURL_FORMAT_CURL_OFF_T
-                ") was beyond file size (%" CURL_FORMAT_CURL_OFF_T ")",
+          failf(data, "Offset (%" FMT_OFF_T
+                ") was beyond file size (%" FMT_OFF_T ")",
                 data->state.resume_from, filesize);
           return CURLE_BAD_DOWNLOAD_RESUME;
         }
@@ -2428,10 +2423,10 @@ static CURLcode ftp_state_retr(struct Curl_easy *data,
     }
 
     /* Set resume file transfer offset */
-    infof(data, "Instructs server to resume from offset %"
-          CURL_FORMAT_CURL_OFF_T, data->state.resume_from);
+    infof(data, "Instructs server to resume from offset %" FMT_OFF_T,
+          data->state.resume_from);
 
-    result = Curl_pp_sendf(data, &ftpc->pp, "REST %" CURL_FORMAT_CURL_OFF_T,
+    result = Curl_pp_sendf(data, &ftpc->pp, "REST %" FMT_OFF_T,
                            data->state.resume_from);
     if(!result)
       ftp_state(data, FTP_RETR_REST);
@@ -2489,7 +2484,7 @@ static CURLcode ftp_state_size_resp(struct Curl_easy *data,
     if(-1 != filesize) {
       char clbuf[128];
       int clbuflen = msnprintf(clbuf, sizeof(clbuf),
-                "Content-Length: %" CURL_FORMAT_CURL_OFF_T "\r\n", filesize);
+                "Content-Length: %" FMT_OFF_T "\r\n", filesize);
       result = client_write_header(data, clbuf, clbuflen);
       if(result)
         return result;
@@ -2669,12 +2664,10 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
     else if((instate != FTP_LIST) && (data->state.prefer_ascii))
       size = -1; /* kludge for servers that understate ASCII mode file size */
 
-    infof(data, "Maxdownload = %" CURL_FORMAT_CURL_OFF_T,
-          data->req.maxdownload);
+    infof(data, "Maxdownload = %" FMT_OFF_T, data->req.maxdownload);
 
     if(instate != FTP_LIST)
-      infof(data, "Getting file with size: %" CURL_FORMAT_CURL_OFF_T,
-            size);
+      infof(data, "Getting file with size: %" FMT_OFF_T, size);
 
     /* FTP download: */
     conn->proto.ftpc.state_saved = instate;
@@ -3539,8 +3532,8 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
        (data->state.infilesize != data->req.writebytecount) &&
        !data->set.crlf &&
        (ftp->transfer == PPTRANSFER_BODY)) {
-      failf(data, "Uploaded unaligned file size (%" CURL_FORMAT_CURL_OFF_T
-            " out of %" CURL_FORMAT_CURL_OFF_T " bytes)",
+      failf(data, "Uploaded unaligned file size (%" FMT_OFF_T
+            " out of %" FMT_OFF_T " bytes)",
             data->req.writebytecount, data->state.infilesize);
       result = CURLE_PARTIAL_FILE;
     }
@@ -3548,17 +3541,9 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
   else {
     if((-1 != data->req.size) &&
        (data->req.size != data->req.bytecount) &&
-#ifdef CURL_DO_LINEEND_CONV
-       /* Most FTP servers do not adjust their file SIZE response for CRLFs,
-        * so we will check to see if the discrepancy can be explained by the
-        * number of CRLFs we have changed to LFs.
-        */
-       ((data->req.size + data->state.crlf_conversions) !=
-        data->req.bytecount) &&
-#endif /* CURL_DO_LINEEND_CONV */
        (data->req.maxdownload != data->req.bytecount)) {
-      failf(data, "Received only partial file: %" CURL_FORMAT_CURL_OFF_T
-            " bytes", data->req.bytecount);
+      failf(data, "Received only partial file: %" FMT_OFF_T " bytes",
+            data->req.bytecount);
       result = CURLE_PARTIAL_FILE;
     }
     else if(!ftpc->dont_check &&
@@ -4153,27 +4138,22 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   CURLcode result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct ftp_conn *ftpc = &conn->proto.ftpc;
+  /* FTP data may need conversion. */
+  struct Curl_cwriter *ftp_lc_writer;
 
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-#ifdef CURL_DO_LINEEND_CONV
-  {
-    /* FTP data may need conversion. */
-    struct Curl_cwriter *ftp_lc_writer;
+  result = Curl_cwriter_create(&ftp_lc_writer, data, &ftp_cw_lc,
+                               CURL_CW_CONTENT_DECODE);
+  if(result)
+    return result;
 
-    result = Curl_cwriter_create(&ftp_lc_writer, data, &ftp_cw_lc,
-                                 CURL_CW_CONTENT_DECODE);
-    if(result)
-      return result;
-
-    result = Curl_cwriter_add(data, ftp_lc_writer);
-    if(result) {
-      Curl_cwriter_free(data, ftp_lc_writer);
-      return result;
-    }
+  result = Curl_cwriter_add(data, ftp_lc_writer);
+  if(result) {
+    Curl_cwriter_free(data, ftp_lc_writer);
+    return result;
   }
-#endif /* CURL_DO_LINEEND_CONV */
 
   if(data->state.wildcardmatch) {
     result = wc_statemach(data);

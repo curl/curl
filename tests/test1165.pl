@@ -31,6 +31,8 @@ use warnings;
 my %disable;
 # the DISABLE options that can be set by CMakeLists.txt
 my %disable_cmake;
+# the DISABLE options propagated via curl_config.h.cmake
+my %disable_cmake_config_h;
 # the DISABLE options that are used in C files
 my %file;
 # the DISABLE options that are documented
@@ -64,13 +66,13 @@ sub scan_configure {
 }
 
 sub scanconf_cmake {
-    my ($f)=@_;
+    my ($hashr, $f)=@_;
     open S, "<$f";
     while(<S>) {
         if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
             if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_TESTS|CURL_DISABLE_SRP)$/) {
-                $disable_cmake{$sym} = 1;
+                $hashr->{$sym} = 1;
             }
         }
     }
@@ -78,7 +80,11 @@ sub scanconf_cmake {
 }
 
 sub scan_cmake {
-    scanconf_cmake("$root/CMakeLists.txt");
+    scanconf_cmake(\%disable_cmake, "$root/CMakeLists.txt");
+}
+
+sub scan_cmake_config_h {
+    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
 }
 
 sub scan_file {
@@ -87,9 +93,7 @@ sub scan_file {
     while(<F>) {
         while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
             my ($sym)=($1);
-            if(not $sym =~ /^(CURL_DISABLE_SHA512_256)/) { # Skip this symbol, to be implemented
-                $file{$sym} = $source;
-            }
+            $file{$sym} = $source;
         }
     }
     close F;
@@ -127,6 +131,7 @@ sub scan_docs {
 
 scan_configure();
 scan_cmake();
+scan_cmake_config_h();
 scan_sources();
 scan_docs();
 
@@ -152,6 +157,14 @@ for my $s (sort keys %disable_cmake) {
     }
     if(!$docs{$s}) {
         printf "Present in CMakeLists.txt, not documented in $DOCS: %s\n", $s;
+        $error++;
+    }
+}
+
+# Check the CMakeLists.txt symbols for use in curl_config.h.cmake
+for my $s (sort keys %disable_cmake) {
+    if(!$disable_cmake_config_h{$s}) {
+        printf "Present in CMakeLists.txt, not propagated via curl_config.h.cmake: %s\n", $s;
         $error++;
     }
 }

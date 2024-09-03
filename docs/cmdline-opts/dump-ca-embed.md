@@ -6,7 +6,7 @@ Help: Write the embedded CA bundle to standard output
 Protocols: TLS
 Category: http proxy tls
 Added: 8.10.0
-Multi: single
+Multi: boolean
 See-also:
   - ca-native
   - cacert

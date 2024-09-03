@@ -253,6 +253,7 @@ jobs:
         run: make -C bld V=1 -C tests
 
       - name: 'run tests'
+        timeout-minutes: 20
         run: |
           export TFLAGS='${{ matrix.tflags }} -j10'
           TFLAGS+=' ~2037 ~2041'  # flaky
@@ -298,15 +299,15 @@ jobs:
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON -DBUILD_EXAMPLES=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DBUILD_EXAMPLES=ON
             macos-version-min: '10.15'
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
-            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON -DCURL_DISABLE_LDAPS=ON
+            generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
@@ -385,6 +386,7 @@ jobs:
         run: make -C bld testdeps
 
       - name: 'cmake run tests'
+        timeout-minutes: 10
         run: |
           export TFLAGS='${{ matrix.build.tflags }} -j10'
           TFLAGS+=' ~2037 ~2041'  # flaky
@@ -609,7 +611,7 @@ jobs:
             mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
-              --without-nghttp2 --without-libidn2 --without-apple-idn \
+              --without-nghttp2 --without-libidn2 \
               --without-libpsl \
               ${options}
           else
@@ -621,7 +623,7 @@ jobs:
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
-              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF -DUSE_APPLE_IDN=OFF \
+              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
               ${options}
           fi

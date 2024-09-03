@@ -998,12 +998,6 @@ static CURLcode ossl_seed(struct Curl_easy *data)
   return CURLE_SSL_CONNECT_ERROR;
 #else
 
-#ifdef RANDOM_FILE
-  RAND_load_file(RANDOM_FILE, RAND_LOAD_LENGTH);
-  if(rand_enough())
-    return CURLE_OK;
-#endif
-
   /* fallback to a custom seeding of the PRNG using a hash based on a current
      time */
   do {
@@ -2010,7 +2004,7 @@ static void ossl_session_free(void *sessionid, size_t idsize)
 {
   /* free the ID */
   (void)idsize;
-  SSL_SESSION_free(sessionid);
+  free(sessionid);
 }
 
 /*
@@ -2875,6 +2869,9 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 {
   const struct ssl_config_data *config;
   CURLcode result = CURLE_OK;
+  size_t der_session_size;
+  unsigned char *der_session_buf;
+  unsigned char *der_session_ptr;
 
   if(!cf || !data)
     goto out;
@@ -2882,16 +2879,32 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
   config = Curl_ssl_cf_get_config(cf, data);
   if(config->primary.cache_session) {
 
+    der_session_size = i2d_SSL_SESSION(session, NULL);
+    if(der_session_size == 0) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+
+    der_session_buf = der_session_ptr = malloc(der_session_size);
+    if(!der_session_buf) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+
+    der_session_size = i2d_SSL_SESSION(session, &der_session_ptr);
+    if(der_session_size == 0) {
+      result = CURLE_OUT_OF_MEMORY;
+      free(der_session_buf);
+      goto out;
+    }
+
     Curl_ssl_sessionid_lock(data);
-    result = Curl_ssl_set_sessionid(cf, data, peer, session, 0,
-                                    ossl_session_free);
-    session = NULL; /* call has taken ownership */
+    result = Curl_ssl_set_sessionid(cf, data, peer, der_session_buf,
+     der_session_size, ossl_session_free);
     Curl_ssl_sessionid_unlock(data);
   }
 
 out:
-  if(session)
-    ossl_session_free(session, 0);
   return result;
 }
 
@@ -2908,7 +2921,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   connssl = cf? cf->ctx : NULL;
   data = connssl? CF_DATA_CURRENT(cf) : NULL;
   Curl_ossl_add_session(cf, data, &connssl->peer, ssl_sessionid);
-  return 1;
+  return 0;
 }
 
 static CURLcode load_cacert_from_memory(X509_STORE *store,
@@ -3458,7 +3471,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   const char *ciphers;
   SSL_METHOD_QUAL SSL_METHOD *req_method = NULL;
   ctx_option_t ctx_options = 0;
-  void *ssl_sessionid = NULL;
+  SSL_SESSION *ssl_session = NULL;
+  const unsigned char *der_sessionid = NULL;
+  size_t der_sessionid_size = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const long int ssl_version_min = conn_config->version;
@@ -3943,18 +3958,29 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session && transport == TRNSPRT_TCP) {
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, peer, &ssl_sessionid, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, peer, (void **)&der_sessionid,
+      &der_sessionid_size)) {
       /* we got a session id, use it! */
-      if(!SSL_set_session(octx->ssl, ssl_sessionid)) {
-        Curl_ssl_sessionid_unlock(data);
-        failf(data, "SSL: SSL_set_session failed: %s",
-              ossl_strerror(ERR_get_error(), error_buffer,
-                            sizeof(error_buffer)));
-        return CURLE_SSL_CONNECT_ERROR;
+      ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
+        (long)der_sessionid_size);
+      if(ssl_session) {
+        if(!SSL_set_session(octx->ssl, ssl_session)) {
+          Curl_ssl_sessionid_unlock(data);
+          SSL_SESSION_free(ssl_session);
+          failf(data, "SSL: SSL_set_session failed: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          return CURLE_SSL_CONNECT_ERROR;
+        }
+        SSL_SESSION_free(ssl_session);
+        /* Informational message */
+        infof(data, "SSL reusing session ID");
+        octx->reused_session = TRUE;
       }
-      /* Informational message */
-      infof(data, "SSL reusing session ID");
-      octx->reused_session = TRUE;
+      else {
+          Curl_ssl_sessionid_unlock(data);
+          return CURLE_SSL_CONNECT_ERROR;
+      }
     }
     Curl_ssl_sessionid_unlock(data);
   }

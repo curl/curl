@@ -1,0 +1,175 @@
+<testcase>
+<info>
+<keywords>
+HTTPS
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Content-Length: 29
+
+run 1: foobar and so on fun!
+</data>
+<datacheck>
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+run 1: foobar and so on fun!
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<features>
+SSL
+OpenSSL
+</features>
+<server>
+https
+</server>
+<name>
+concurrent HTTPS GET using shared ssl session cache
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+# provide URL and ca-cert
+<command>
+https://localhost:%HTTPSPORT/%TESTNUMBER  %SRCDIR/certs/EdelCurlRoot-ca.crt
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+</verify>
+</testcase>
