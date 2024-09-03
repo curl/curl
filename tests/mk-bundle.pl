@@ -27,22 +27,19 @@ use strict;
 use warnings;
 
 if(@ARGV < 1) {
-    die "Usage: $0 {libtest|unit} [<directory>]\n";
+    die "Usage: $0 {libtest|unit} [<directory>] [<extra sources>]\n";
 }
 
-my $mode = $ARGV[0];
+my $mode = $ARGV[0];  # unused for now
 my $src_dir = $ARGV[1] // ".";
 
-my @extra_c_sources;
+print "#define CURLTESTS_BUNDLED\n\n";
+
+# Extra sources to include
 foreach my $src (@ARGV[2..$#ARGV]) {
     if($src =~ /\.c$/) {
-        push @extra_c_sources, $src;
+        print "#include \"$src\"\n";
     }
-}
-
-print "#define CURLTESTS_BUNDLED\n";
-foreach my $src (@extra_c_sources) {
-    print "#include \"$src\"\n";
 }
 print '#include "first.h"' . "\n\n";
 

@@ -47,11 +47,10 @@ if(CURL_TEST_USE_BUNDLES)
   endforeach()
   list(REMOVE_DUPLICATES _allsources)
 
-  unset(_extrasources)
-  list(APPEND _extrasources ${TESTUTIL} ${TSTTRACE} ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
-  if(LIB_SELECTED STREQUAL LIB_STATIC)
-    # These are part of the libcurl static lib. Do not compile/link them again.
-    list(REMOVE_ITEM _extrasources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
+  set(_extrasources ${TESTUTIL} ${TSTTRACE})
+  if(LIB_SELECTED STREQUAL LIB_SHARED)
+    # These are part of the libcurl static lib. Add them here when linking shared.
+    list(APPEND _extrasources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
   endif()
 
   add_custom_command(
