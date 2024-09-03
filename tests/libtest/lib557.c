@@ -38,8 +38,8 @@
 #include "memdebug.h"
 
 #ifdef __GNUC__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
 #endif
 
 #if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
@@ -1512,5 +1512,5 @@ CURLcode test(char *URL)
 }
 
 #ifdef __GNUC__
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif

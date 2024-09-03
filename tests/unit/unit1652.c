@@ -27,8 +27,8 @@
 #include "sendf.h"
 
 #ifdef __GNUC__
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat"
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
 #endif
 
 /*
@@ -145,5 +145,5 @@ fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 UNITTEST_STOP
 
 #ifdef __GNUC__
-#pragma clang diagnostic pop
+#pragma GCC diagnostic pop
 #endif
