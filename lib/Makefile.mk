@@ -161,7 +161,7 @@ endif
 ifneq ($(findstring -mbedtls,$(CFG)),)
   MBEDTLS_PATH ?= $(PROOT)/../mbedtls
   CPPFLAGS += -DUSE_MBEDTLS
-  CPPFLAGS += -I"$(MBEDTLS_PATH)/include"
+  CPPFLAGS += -isystem "$(MBEDTLS_PATH)/include"
   LDFLAGS += -L"$(MBEDTLS_PATH)/lib"
   LIBS += -lmbedtls -lmbedx509 -lmbedcrypto
   SSLLIBS += 1
