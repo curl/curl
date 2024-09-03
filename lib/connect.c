@@ -767,9 +767,9 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   struct cf_he_ctx *ctx = cf->ctx;
   struct connectdata *conn = cf->conn;
   CURLcode result = CURLE_COULDNT_CONNECT;
-  int ai_family0, ai_family1;
+  int ai_family0 = 0, ai_family1 = 0;
   timediff_t timeout_ms = Curl_timeleft(data, NULL, TRUE);
-  const struct Curl_addrinfo *addr0, *addr1;
+  const struct Curl_addrinfo *addr0 = NULL, *addr1 = NULL;
 
   if(timeout_ms < 0) {
     /* a precaution, no need to continue if time already is up */
@@ -788,33 +788,31 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
    * the 2 connect attempt ballers to try different families, if possible.
    *
    */
-  if(conn->ip_version == CURL_IPRESOLVE_WHATEVER) {
-    /* any IP version is allowed */
-    ai_family0 = remotehost->addr?
-      remotehost->addr->ai_family : 0;
+  if(conn->ip_version == CURL_IPRESOLVE_V6) {
 #ifdef USE_IPV6
-    ai_family1 = ai_family0 == AF_INET6 ?
-      AF_INET : AF_INET6;
-#else
-    ai_family1 = AF_UNSPEC;
+    ai_family0 = AF_INET6;
+    addr0 = addr_first_match(remotehost->addr, ai_family0);
 #endif
+  }
+  else if(conn->ip_version == CURL_IPRESOLVE_V4) {
+    ai_family0 = AF_INET;
+    addr0 = addr_first_match(remotehost->addr, ai_family0);
   }
   else {
-    /* only one IP version is allowed */
-    ai_family0 = (conn->ip_version == CURL_IPRESOLVE_V4) ?
-      AF_INET :
-#ifdef USE_IPV6
-      AF_INET6;
-#else
-      AF_UNSPEC;
-#endif
-    ai_family1 = AF_UNSPEC;
+    /* no user preference, we try ipv6 always first when available */
+    ai_family0 = AF_INET6;
+    addr0 = addr_first_match(remotehost->addr, ai_family0);
+    /* next candidate is ipv4 */
+    ai_family1 = AF_INET;
+    addr1 = addr_first_match(remotehost->addr, ai_family1);
+    /* no ip address families, probably AF_UNIX or something, use the
+     * address family given to us */
+    if(!addr1  && !addr0 && remotehost->addr) {
+      ai_family0 = remotehost->addr->ai_family;
+      addr0 = addr_first_match(remotehost->addr, ai_family0);
+    }
   }
 
-  /* Get the first address in the list that matches the family,
-   * this might give NULL, if we do not have any matches. */
-  addr0 = addr_first_match(remotehost->addr, ai_family0);
-  addr1 = addr_first_match(remotehost->addr, ai_family1);
   if(!addr0 && addr1) {
     /* switch around, so a single baller always uses addr0 */
     addr0 = addr1;
