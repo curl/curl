@@ -69,8 +69,6 @@ while(my $line = <$fh>) {
             print "#undef $symb\n";
             print "#define $symb ${symb}_$nam\n";
         }
-        print "#undef tname\n";
-        print "#define tname \"lib$nam\"\n";
         print "#define $namu\n";
         print "#include \"$src\"\n";
         print "#undef $namu\n";
