@@ -88,9 +88,10 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   )
   if(CURL_TEST_USE_BUNDLES)
     set_target_properties(${_target_name} PROPERTIES UNITY_BUILD OFF)
+  else()
+    set_target_properties(${_target_name} PROPERTIES COMPILE_DEFINITIONS ${_upper_target})
   endif()
   set_target_properties(${_target_name} PROPERTIES
-    COMPILE_DEFINITIONS ${_upper_target}
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test libtest ${_target}")
 endforeach()
