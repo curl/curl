@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'noinst_PROGRAMS', '*_SOURCES', WARNLESS, MULTIBYTE, TIMEDIFF variables
+# Get 'noinst_PROGRAMS', '*_SOURCES', TESTUTIL, TSTTRACE, WARNLESS, MULTIBYTE, TIMEDIFF, THREADS variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -47,9 +47,16 @@ if(CURL_TEST_USE_BUNDLES)
   endforeach()
   list(REMOVE_DUPLICATES _allsources)
 
+  unset(_extrasources)
+  list(APPEND _extrasources ${TESTUTIL} ${TSTTRACE} ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
+  if(LIB_SELECTED STREQUAL LIB_STATIC)
+    # These are part of the libcurl static lib. Do not compile/link them again.
+    list(REMOVE_ITEM _extrasources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
+  endif()
+
   add_custom_command(
     OUTPUT "libtests.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "libtest" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "libtest" "${CMAKE_CURRENT_SOURCE_DIR}" ${_extrasources} > "libtests.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}

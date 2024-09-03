@@ -33,11 +33,16 @@ if(@ARGV < 1) {
 my $mode = $ARGV[0];
 my $src_dir = $ARGV[1] // ".";
 
-print "#define CURLTESTS_BUNDLED\n";
+my @extra_c_sources;
+foreach my $src (@ARGV[2..$#ARGV]) {
+    if($src =~ /\.c$/) {
+        push @extra_c_sources, $src;
+    }
+}
 
-if($mode eq "libtest") {
-  print '#include "testutil.c"' . "\n";
-  print '#include "testtrace.c"' . "\n";
+print "#define CURLTESTS_BUNDLED\n";
+foreach my $src (@extra_c_sources) {
+    print "#include \"$src\"\n";
 }
 print '#include "first.h"' . "\n\n";
 
