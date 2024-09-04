@@ -51,7 +51,7 @@ permissions: {}
 
 env:
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
-  MAKEFLAGS: -j 4
+  MAKEFLAGS: -j 1
 
 jobs:
   autotools:
