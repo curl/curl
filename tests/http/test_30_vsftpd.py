@@ -163,6 +163,32 @@ class TestVsFTPD:
         assert r.tcpdump
         assert len(r.tcpdump.stats) == 0, f'Unexpected TCP RSTs packets'
 
+    def test_30_08_active_download(self, env: Env, vsftpd: VsFTPD):
+        docname = 'data-10k'
+        curl = CurlClient(env=env)
+        srcfile = os.path.join(vsftpd.docs_dir, f'{docname}')
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/{docname}?[0-{count-1}]'
+        r = curl.ftp_get(urls=[url], with_stats=True, extra_args=[
+            '--ftp-port', '127.0.0.1'
+        ])
+        r.check_stats(count=count, http_status=226)
+        self.check_downloads(curl, srcfile, count)
+
+    def test_30_09_active_upload(self, env: Env, vsftpd: VsFTPD):
+        docname = 'upload-1k'
+        curl = CurlClient(env=env)
+        srcfile = os.path.join(env.gen_dir, docname)
+        dstfile = os.path.join(vsftpd.docs_dir, docname)
+        self._rmf(dstfile)
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpd.port}/'
+        r = curl.ftp_upload(urls=[url], fupload=f'{srcfile}', with_stats=True, extra_args=[
+            '--ftp-port', '127.0.0.1'
+        ])
+        r.check_stats(count=count, http_status=226)
+        self.check_upload(env, vsftpd, docname=docname)
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
