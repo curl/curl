@@ -165,7 +165,7 @@ int main(int argc, char **argv)
 
 #ifdef CURLTESTS_BUNDLED
   {
-    char *test_id;
+    char *test_name;
 
     --test_argc;
     ++test_argv;
@@ -173,16 +173,16 @@ int main(int argc, char **argv)
     basearg = 2;
 
     if(argc < (basearg + 1)) {
-      fprintf(stderr, "Pass test-ID and URL as arguments please\n");
+      fprintf(stderr, "Pass testname and URL as arguments please\n");
       return 1;
     }
 
-    test_id = argv[basearg - 1];
+    test_name = argv[basearg - 1];
     testfunc = NULL;
     {
       size_t tmp;
       for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
-        if(strcmp(test_id, s_tests[tmp].id) == 0) {
+        if(strcmp(test_name, s_tests[tmp].id) == 0) {
           testfunc = s_tests[tmp].ptr;
           break;
         }
@@ -190,11 +190,11 @@ int main(int argc, char **argv)
     }
 
     if(!testfunc) {
-      fprintf(stderr, "Test '%s' not found.\n", test_id);
+      fprintf(stderr, "Test '%s' not found.\n", test_name);
       return 1;
     }
 
-    fprintf(stderr, "Test: %s\n", test_id);
+    fprintf(stderr, "Test: %s\n", test_name);
   }
 #else
   basearg = 1;
