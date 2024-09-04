@@ -869,8 +869,9 @@ sub checksystemfeatures {
                "*\n");
     }
 
-    logmsg sprintf("* Env: %s%s%s", $valgrind?"Valgrind ":"",
+    logmsg sprintf("* Env: %s%s%s%s", $valgrind?"Valgrind ":"",
                    $run_event_based?"event-based ":"",
+                   $bundle?"bundle ":"",
                    $nghttpx_h3);
     logmsg sprintf("%s\n", $libtool?"Libtool ":"");
     logmsg ("* Seed: $randseed\n");
