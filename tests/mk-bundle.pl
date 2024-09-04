@@ -55,7 +55,9 @@ while(my $line = <$fh>) {
         # TODO: Some of these might be subject for de-duplication or sync.
         # TODO: Perhaps (part of) the list could be generated automatically
         #       looking for patterns with hits in multiple sources.
-        #       git grep -E '^ *(static|struct) +' | grep -E '^(libtest|unit)/' | grep -E '\.(c|pl): *(static|struct) +' | grep -o -E '[a-zA-z_][a-zA-Z0-9_]+ *[=;[({]' | tr -d '=;[({ ' | sort | uniq -c | sort | grep -v -E '^ +1 '
+        #       # Misses clashes in sources reused for multiple tests (e.g. lib525, lib526),
+        #       # also picks up false-positives:
+        #       $ git grep -E '^ *(static|struct) +' | grep -E '^(libtest|unit)/' | grep -E '\.(c|pl): *(static|struct) +' | grep -o -E '[a-zA-Z_][a-zA-Z0-9_]+ *[=;[({]' | tr -d '=;[({ ' | sort | uniq -c | sort | grep -v -E '^ +1 '
         foreach my $symb (
                 "test",
                 "ReadThis",
@@ -126,12 +128,13 @@ while(my $line = <$fh>) {
         print "#include \"$src\"\n";
         print "#undef $namu\n";
         # Reset macros used by multiple tests
+        # $ git grep -E '^ *# *define +' | grep -E '^(libtest|unit)/' | grep -o -E '.+\.(c|pl): *# *define +[A-Z_][A-Z0-9_]+ ' | sort -u | grep -o -E '[A-Z_][A-Z0-9_]+ ' | tr -d ' ' | sort | uniq -c | sort | grep -v -E '^ +1 '
         foreach my $undef (
                 "test",
                 "HEADER_REQUEST",
                 "NUM_HANDLES",
                 "SAFETY_MARGIN",
-                "TEST_HANG_TIMEOUT"
+                "TEST_HANG_TIMEOUT",
                 ) {
             print "#undef $undef\n";
         }
