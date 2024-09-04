@@ -63,7 +63,7 @@ while(my $line = <$fh>) {
                 "Tdata", "curlSocketCallback", "curlTimerCallback", "checkForCompletion",
                 "getMicroSecondTimeout", "removeFd", "addFd", "updateFdSet", "checkFdSet",
                 "curl", "buffer", "userdata", "buf", "suburl", "post", "params",
-                "testname", "testdata", "testfd", "teststring", "testeh", "test_failure",
+                "testname", "testdata", "testbuf", "testfd", "teststring", "testeh", "test_failure",
                 "xferinfo", "cyclic_add", "geterr", "test_once", "fire",
                 "websocket_close", "websocket", "run_thread", "num_open", "msgbuff",
                 "unit_setup", "unit_stop", "mydtor", "testcase", "tests", "test_parse", "password", "easy", "hash_static") {  # unit
