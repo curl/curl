@@ -968,7 +968,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
                                          SECPKG_CRED_OUTBOUND, NULL,
                                          &credentials, NULL, NULL,
                                          &backend->cred->cred_handle,
@@ -1015,7 +1015,7 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 #endif
 
     sspi_status =
-      s_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
+      Curl_pSecFn->AcquireCredentialsHandle(NULL, (TCHAR*)UNISP_NAME,
                                          SECPKG_CRED_OUTBOUND, NULL,
                                          &schannel_cred, NULL, NULL,
                                          &backend->cred->cred_handle,
@@ -1245,7 +1245,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
      use it for that, and WINE (for which we currently disable ALPN) is giving
      us problems with inbuf regardless. https://github.com/curl/curl/issues/983
   */
-  sspi_status = s_pSecFn->InitializeSecurityContext(
+  sspi_status = Curl_pSecFn->InitializeSecurityContext(
     &backend->cred->cred_handle, NULL, backend->cred->sni_hostname,
     backend->req_flags, 0, 0,
     (backend->use_alpn ? &inbuf_desc : NULL),
@@ -1289,7 +1289,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   written = Curl_conn_cf_send(cf->next, data,
                               outbuf.pvBuffer, outbuf.cbBuffer, FALSE,
                               &result);
-  s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
+  Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
   if((result != CURLE_OK) || (outbuf.cbBuffer != (size_t) written)) {
     failf(data, "schannel: failed to send initial handshake data: "
           "sent %zd of %lu bytes", written, outbuf.cbBuffer);
@@ -1436,7 +1436,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     memcpy(inbuf[0].pvBuffer, backend->encdata_buffer,
            backend->encdata_offset);
 
-    sspi_status = s_pSecFn->InitializeSecurityContext(
+    sspi_status = Curl_pSecFn->InitializeSecurityContext(
       &backend->cred->cred_handle, &backend->ctxt->ctxt_handle,
       backend->cred->sni_hostname, backend->req_flags,
       0, 0, &inbuf_desc, 0, NULL,
@@ -1488,7 +1488,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
         /* free obsolete buffer */
         if(outbuf[i].pvBuffer) {
-          s_pSecFn->FreeContextBuffer(outbuf[i].pvBuffer);
+          Curl_pSecFn->FreeContextBuffer(outbuf[i].pvBuffer);
         }
       }
     }
@@ -1684,7 +1684,7 @@ static void schannel_session_free(void *sessionid, size_t idsize)
   if(cred) {
     cred->refcount--;
     if(cred->refcount == 0) {
-      s_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
+      Curl_pSecFn->FreeCredentialsHandle(&cred->cred_handle);
       curlx_unicodefree(cred->sni_hostname);
 #ifdef HAS_CLIENT_CERT_PATH
       if(cred->client_cert_store) {
@@ -1739,7 +1739,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef HAS_ALPN
   if(backend->use_alpn) {
     sspi_status =
-      s_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
+      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
                                        SECPKG_ATTR_APPLICATION_PROTOCOL,
                                        &alpn_result);
 
@@ -1787,7 +1787,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(data->set.ssl.certinfo) {
     int certs_count = 0;
     sspi_status =
-      s_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
+      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                        &ccert_context);
 
@@ -1955,7 +1955,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   /* check if the maximum stream sizes were queried */
   if(backend->stream_sizes.cbMaximumMessage == 0) {
-    sspi_status = s_pSecFn->QueryContextAttributes(
+    sspi_status = Curl_pSecFn->QueryContextAttributes(
       &backend->ctxt->ctxt_handle,
       SECPKG_ATTR_STREAM_SIZES,
       &backend->stream_sizes);
@@ -1994,7 +1994,7 @@ schannel_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   memcpy(outbuf[1].pvBuffer, buf, len);
 
   /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375390.aspx */
-  sspi_status = s_pSecFn->EncryptMessage(&backend->ctxt->ctxt_handle, 0,
+  sspi_status = Curl_pSecFn->EncryptMessage(&backend->ctxt->ctxt_handle, 0,
                                          &outbuf_desc, 0);
 
   /* check if the message was encrypted */
@@ -2211,7 +2211,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     /* https://msdn.microsoft.com/en-us/library/windows/desktop/aa375348.aspx
      */
-    sspi_status = s_pSecFn->DecryptMessage(&backend->ctxt->ctxt_handle,
+    sspi_status = Curl_pSecFn->DecryptMessage(&backend->ctxt->ctxt_handle,
                                            &inbuf_desc, 0, NULL);
 
     /* check if everything went fine (server may want to renegotiate
@@ -2498,7 +2498,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     InitSecBuffer(&Buffer, SECBUFFER_TOKEN, &dwshut, sizeof(dwshut));
     InitSecBufferDesc(&BuffDesc, &Buffer, 1);
 
-    sspi_status = s_pSecFn->ApplyControlToken(&backend->ctxt->ctxt_handle,
+    sspi_status = Curl_pSecFn->ApplyControlToken(&backend->ctxt->ctxt_handle,
                                               &BuffDesc);
 
     if(sspi_status != SEC_E_OK) {
@@ -2513,7 +2513,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     InitSecBuffer(&outbuf, SECBUFFER_EMPTY, NULL, 0);
     InitSecBufferDesc(&outbuf_desc, &outbuf, 1);
 
-    sspi_status = s_pSecFn->InitializeSecurityContext(
+    sspi_status = Curl_pSecFn->InitializeSecurityContext(
       &backend->cred->cred_handle,
       &backend->ctxt->ctxt_handle,
       backend->cred->sni_hostname,
@@ -2532,7 +2532,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       ssize_t written = Curl_conn_cf_send(cf->next, data,
                                           outbuf.pvBuffer, outbuf.cbBuffer,
                                           FALSE, &result);
-      s_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
+      Curl_pSecFn->FreeContextBuffer(outbuf.pvBuffer);
       if(!result) {
         if(written < (ssize_t)outbuf.cbBuffer) {
           /* TODO: handle partial sends */
@@ -2605,7 +2605,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* free SSPI Schannel API security context handle */
   if(backend->ctxt) {
     DEBUGF(infof(data, "schannel: clear security context handle"));
-    s_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);
+    Curl_pSecFn->DeleteSecurityContext(&backend->ctxt->ctxt_handle);
     Curl_safefree(backend->ctxt);
   }
 
@@ -2682,7 +2682,7 @@ static CURLcode schannel_pkp_pin_peer_pubkey(struct Curl_cfilter *cf,
     struct Curl_asn1Element *pubkey;
 
     sspi_status =
-      s_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
+      Curl_pSecFn->QueryContextAttributes(&backend->ctxt->ctxt_handle,
                                        SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                        &pCertContextServer);
 

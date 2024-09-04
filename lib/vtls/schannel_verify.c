@@ -483,7 +483,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   DWORD actual_len = 0;
 
   sspi_status =
-    s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+    Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                      &pCertContextServer);
 
@@ -612,7 +612,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   DEBUGASSERT(BACKEND);
 
   sspi_status =
-    s_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
+    Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
                                      SECPKG_ATTR_REMOTE_CERT_CONTEXT,
                                      &pCertContextServer);
 
