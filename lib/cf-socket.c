@@ -1409,17 +1409,19 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
   if(ctx->sock != CURL_SOCKET_BAD) {
-    if(!cf->connected) {
-      if(ctx->listening) {
-        Curl_pollset_set_in_only(data, ps, ctx->sock);
-        CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
-                    FMT_SOCKET_T, ctx->sock);
-      }
-      else {
-        Curl_pollset_set_out_only(data, ps, ctx->sock);
-        CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
-                    FMT_SOCKET_T, ctx->sock);
-      }
+    /* A listening socket filter needs to be connected before the accept
+     * for some weird FTP interaction. This should be rewritten, so that
+     * FTP no longer does the socket checks and accept calls and delegates
+     * all that to the filter. TODO. */
+    if(ctx->listening) {
+      Curl_pollset_set_in_only(data, ps, ctx->sock);
+      CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
+                  FMT_SOCKET_T, ctx->sock);
+    }
+    else if(!cf->connected) {
+      Curl_pollset_set_out_only(data, ps, ctx->sock);
+      CURL_TRC_CF(data, cf, "adjust_pollset, !connected, POLLOUT fd=%"
+                  FMT_SOCKET_T, ctx->sock);
     }
     else if(!ctx->active) {
       Curl_pollset_add_in(data, ps, ctx->sock);
