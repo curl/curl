@@ -320,17 +320,6 @@
 #define CURL_CONC_MACROS_(A,B) A ## B
 #define CURL_CONC_MACROS(A,B) CURL_CONC_MACROS_(A,B)
 
-/* curl uses its own printf() function internally. It understands the GNU
- * format. Use this format, so that is matches the GNU format attribute we
- * use with the MinGW compiler, allowing it to verify them at compile-time.
- */
-#ifdef  __MINGW32__
-#  undef CURL_FORMAT_CURL_OFF_T
-#  undef CURL_FORMAT_CURL_OFF_TU
-#  define CURL_FORMAT_CURL_OFF_T   "lld"
-#  define CURL_FORMAT_CURL_OFF_TU  "llu"
-#endif
-
 /* based on logic in "curl/mprintf.h" */
 
 #if (defined(__GNUC__) || defined(__clang__) ||                         \
@@ -561,6 +550,18 @@
 #endif
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
 
+/* curl uses its own printf() function internally. It understands the GNU
+ * format. Use this format, so that is matches the GNU format attribute we
+ * use with the MinGW compiler, allowing it to verify them at compile-time.
+ */
+#ifdef  __MINGW32__
+#  define FMT_OFF_T  "lld"
+#  define FMT_OFF_TU "llu"
+#else
+#  define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
+#  define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
+#endif
+
 #if (SIZEOF_CURL_OFF_T != 8)
 #  error "curl_off_t must be exactly 64 bits"
 #else
@@ -571,12 +572,9 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-# define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-# define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
+# define FMT_PRId64  FMT_OFF_T
+# define FMT_PRIu64  FMT_OFF_TU
 #endif
-
-#define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
-#define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
 
 #if (SIZEOF_TIME_T == 4)
 #  ifdef HAVE_TIME_T_UNSIGNED
