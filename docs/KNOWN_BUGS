@@ -12,8 +12,6 @@ check the changelog of the current development status, as one or more of these
 problems may have been fixed or changed somewhat since this was written.
 
  1. HTTP
- 1.2 hyper is slow
- 1.5 Expect-100 meets 417
 
  2. TLS
  2.1 IMAPS connection fails with Rustls error
@@ -27,7 +25,6 @@ problems may have been fixed or changed somewhat since this was written.
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
  3.2 No disconnect command
- 3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
  3.4 AUTH PLAIN for SMTP is not working on all servers
  3.5 APOP authentication fails on POP3
  3.6 POP3 issue when reading small chunks
@@ -39,17 +36,13 @@ problems may have been fixed or changed somewhat since this was written.
  5. Build and portability issues
  5.1 OS400 port requires deprecated IBM library
  5.2 curl-config --libs contains private details
- 5.3 building for old macOS fails with gcc
- 5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
  5.6 Cygwin: make install installs curl-config.1 twice
  5.11 configure --with-gssapi with Heimdal is ignored on macOS
  5.12 flaky CI builds
  5.13 long paths are not fully supported on Windows
- 5.14 Windows Unicode builds use homedir in current locale
  5.15 Unicode on Windows
 
  6. Authentication
- 6.1 NTLM authentication and Unicode
  6.2 MIT Kerberos for Windows build
  6.3 NTLM in system context uses wrong name
  6.5 NTLM does not support password with § character
@@ -63,9 +56,6 @@ problems may have been fixed or changed somewhat since this was written.
  6.13 Negotiate against Hadoop HDFS
 
  7. FTP
- 7.1 FTP upload fails if remembered directory is deleted
- 7.2 Implicit FTPS upload timeout
- 7.3 FTP with NOBODY and FAILONERROR
  7.4 FTP with ACCT
  7.12 FTPS directory listing hangs on Windows with Schannel
 
@@ -77,7 +67,6 @@ problems may have been fixed or changed somewhat since this was written.
  9.5 Cygwin: "WARNING: UNPROTECTED PRIVATE KEY FILE!"
 
  10. SOCKS
- 10.3 FTPS over SOCKS
 
  11. Internals
  11.1 gssapi library name + version is missing in curl_version_info()
@@ -104,7 +93,6 @@ problems may have been fixed or changed somewhat since this was written.
  15.3 unusable tool_hugehelp.c with MinGW
  15.6 uses -lpthread instead of Threads::Threads
  15.7 generated .pc file contains strange entries
- 15.11 ExternalProject_Add does not set CURL_CA_PATH
  15.13 CMake build with MIT Kerberos does not work
 
  16. aws-sigv4
@@ -128,19 +116,6 @@ problems may have been fixed or changed somewhat since this was written.
 ==============================================================================
 
 1. HTTP
-
-1.2 hyper is slow
-
- When curl is built to use hyper for HTTP, it is unnecessary slow.
-
- https://github.com/curl/curl/issues/11203
-
-1.5 Expect-100 meets 417
-
- If an upload using Expect: 100-continue receives an HTTP 417 response, it
- ought to be automatically resent without the Expect:. A workaround is for
- the client application to redo the transfer after disabling Expect:.
- https://curl.se/mail/archive-2008-02/0043.html
 
 2. TLS
 
@@ -196,12 +171,6 @@ problems may have been fixed or changed somewhat since this was written.
  The disconnect commands (LOGOUT and QUIT) may not be sent by IMAP, POP3 and
  SMTP if a failure occurs during the authentication phase of a connection.
 
-3.3 POP3 expects "CRLF.CRLF" eob for some single-line responses
-
- You have to tell libcurl not to expect a body, when dealing with one line
- response commands. Please see the POP3 examples and test cases which show
- this for the NOOP and DELE commands. https://curl.se/bug/?i=740
-
 3.4 AUTH PLAIN for SMTP is not working on all servers
 
  Specifying "--login-options AUTH=PLAIN" on the command line does not seem to
@@ -256,26 +225,6 @@ problems may have been fixed or changed somewhat since this was written.
  that might be needed only for building libcurl. Further, curl-config --cflags
  suffers from the same effects with CFLAGS/CPPFLAGS.
 
-5.3 building for old macOS fails with gcc
-
- Building curl for certain old macOS versions fails when gcc is used. We
- command using clang in those cases.
-
- See https://github.com/curl/curl/issues/11441
-
-5.5 cannot handle Unicode arguments in non-Unicode builds on Windows
-
- If a URL or filename cannot be encoded using the user's current codepage then
- it can only be encoded properly in the Unicode character set. Windows uses
- UTF-16 encoding for Unicode and stores it in wide characters, however curl
- and libcurl are not equipped for that at the moment except when built with
- _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as
- a locale.
-
-  https://curl.se/bug/?i=345
-  https://curl.se/bug/?i=731
-  https://curl.se/bug/?i=3747
-
 5.6 Cygwin: make install installs curl-config.1 twice
 
  https://github.com/curl/curl/issues/8839
@@ -299,21 +248,11 @@ problems may have been fixed or changed somewhat since this was written.
 5.13 long paths are not fully supported on Windows
 
  curl on Windows cannot access long paths (paths longer than 260 characters).
- However, as a workaround, the Windows path prefix \\?\ which disables all path
- interpretation may work to allow curl to access the path. For example:
+ However, as a workaround, the Windows path prefix \\?\ which disables all
+ path interpretation may work to allow curl to access the path. For example:
  \\?\c:\longpath.
 
  See https://github.com/curl/curl/issues/8361
-
-5.14 Windows Unicode builds use homedir in current locale
-
- The Windows Unicode builds of curl use the current locale, but expect Unicode
- UTF-8 encoded paths for internal use such as open, access and stat. The user's
- home directory is retrieved via curl_getenv in the current locale and not as
- UTF-8 encoded Unicode.
-
- See https://github.com/curl/curl/pull/7252 and
-     https://github.com/curl/curl/pull/7281
 
 5.15 Unicode on Windows
 
@@ -325,18 +264,41 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/12231
 
-6. Authentication
+ Windows Unicode builds use homedir in current locale
 
-6.1 NTLM authentication and Unicode
+ The Windows Unicode builds of curl use the current locale, but expect Unicode
+ UTF-8 encoded paths for internal use such as open, access and stat. The
+ user's home directory is retrieved via curl_getenv in the current locale and
+ not as UTF-8 encoded Unicode.
+
+ See https://github.com/curl/curl/pull/7252 and
+     https://github.com/curl/curl/pull/7281
+
+ Cannot handle Unicode arguments in non-Unicode builds on Windows
+
+ If a URL or filename cannot be encoded using the user's current codepage then
+ it can only be encoded properly in the Unicode character set. Windows uses
+ UTF-16 encoding for Unicode and stores it in wide characters, however curl
+ and libcurl are not equipped for that at the moment except when built with
+ _UNICODE and UNICODE defined. Except for Cygwin, Windows cannot use UTF-8 as
+ a locale.
+
+  https://curl.se/bug/?i=345
+  https://curl.se/bug/?i=731
+  https://curl.se/bug/?i=3747
+
+ NTLM authentication and Unicode
 
  NTLM authentication involving Unicode username or password only works
- properly if built with UNICODE defined together with the Schannel
- backend. The original problem was mentioned in:
+ properly if built with UNICODE defined together with the Schannel backend.
+ The original problem was mentioned in:
  https://curl.se/mail/lib-2009-10/0024.html
  https://curl.se/bug/view.cgi?id=896
 
  The Schannel version verified to work as mentioned in
  https://curl.se/mail/lib-2012-07/0073.html
+
+6. Authentication
 
 6.2 MIT Kerberos for Windows build
 
@@ -411,24 +373,6 @@ problems may have been fixed or changed somewhat since this was written.
 
 7. FTP
 
-7.1 FTP upload fails if remembered directory is deleted
-
- curl's FTP code assumes that the directory it entered in a previous transfer
- still exists when it comes back to do a second transfer, and does not respond
- well if it was indeed deleted in the mean time.
-
- https://github.com/curl/curl/issues/12181
-
-7.2 Implicit FTPS upload timeout
-
- https://github.com/curl/curl/issues/11720
-
-7.3 FTP with NOBODY and FAILONERROR
-
- It seems sensible to be able to use CURLOPT_NOBODY and CURLOPT_FAILONERROR
- with FTP to detect if a file exists or not, but it is not working:
- https://curl.se/mail/lib-2008-07/0295.html
-
 7.4 FTP with ACCT
 
  When doing an operation over FTP that requires the ACCT command (but not when
@@ -487,11 +431,6 @@ problems may have been fixed or changed somewhat since this was written.
  https://github.com/curl/curl/issues/11244
 
 10. SOCKS
-
-10.3 FTPS over SOCKS
-
- libcurl does not support FTPS over a SOCKS proxy.
-
 
 11. Internals
 
@@ -601,12 +540,6 @@ problems may have been fixed or changed somewhat since this was written.
 
  https://github.com/curl/curl/issues/11158
 
-15.2 support build with GnuTLS
-
-15.3 unusable tool_hugehelp.c with MinGW
-
- see https://github.com/curl/curl/issues/3125
-
 15.6 uses -lpthread instead of Threads::Threads
 
  See https://github.com/curl/curl/issues/6166
@@ -617,13 +550,6 @@ problems may have been fixed or changed somewhat since this was written.
  -lgcc -lgcc_s
 
  See https://github.com/curl/curl/issues/6167
-
-15.11 ExternalProject_Add does not set CURL_CA_PATH
-
- CURL_CA_BUNDLE and CURL_CA_PATH are not set properly when cmake's
- ExternalProject_Add is used to build curl as a dependency.
-
- See https://github.com/curl/curl/issues/6313
 
 15.13 CMake build with MIT Kerberos does not work
 
