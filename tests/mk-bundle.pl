@@ -55,6 +55,7 @@ while(my $line = <$fh>) {
         # TODO: Some of these might be subject for de-duplication or sync.
         # TODO: Perhaps (part of) the list could be generated automatically
         #       looking for patterns with hits in multiple sources.
+        #       git grep -E '^ *(static|struct) +' | grep -E '^(libtest|unit)/' | grep -E '\.(c|pl): *(static|struct) +' | grep -o -E '[a-zA-z_][a-zA-Z0-9_]+ *[=;[({]' | tr -d '=;[({ ' | sort | uniq -c | sort | grep -v -E '^ +1 '
         foreach my $symb (
                 "test",
                 "ReadThis",
@@ -90,11 +91,10 @@ while(my $line = <$fh>) {
                 "showem",
                 "store_errmsg",
                 "suburl",
-                "test_failure",
+                "test_failure",  # shadow
                 "test_once",
                 "testbuf",
                 "testdata",
-                "testeh",
                 "testfd",
                 "testname",
                 "testpost",
