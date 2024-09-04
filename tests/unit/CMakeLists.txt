@@ -58,7 +58,6 @@ foreach(_target IN LISTS UNITPROGS)
   )
   if(CURL_TEST_USE_BUNDLES)
     target_include_directories(${_target_name} PRIVATE "${CURL_SOURCE_DIR}/tests/unit")
-    set_target_properties(${_target_name} PROPERTIES UNITY_BUILD OFF)
   endif()
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
