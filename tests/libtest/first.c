@@ -139,7 +139,6 @@ int main(int argc, char **argv)
   char *URL;
   CURLcode result;
   int basearg;
-  char *test_id;
   test_func_t testfunc;
 
 #ifdef O_BINARY
@@ -165,34 +164,38 @@ int main(int argc, char **argv)
   test_argv = argv;
 
 #ifdef CURLTESTS_BUNDLED
-  --test_argc;
-  ++test_argv;
-
-  basearg = 2;
-
-  if(argc < (basearg + 1)) {
-    fprintf(stderr, "Pass test-ID and URL as arguments please\n");
-    return 1;
-  }
-
-  test_id = argv[basearg - 1];
-  testfunc = NULL;
   {
-    size_t tmp;
-    for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
-      if(strcmp(test_id, s_tests[tmp].id) == 0) {
-        testfunc = s_tests[tmp].ptr;
-        break;
+    char *test_id;
+
+    --test_argc;
+    ++test_argv;
+
+    basearg = 2;
+
+    if(argc < (basearg + 1)) {
+      fprintf(stderr, "Pass test-ID and URL as arguments please\n");
+      return 1;
+    }
+
+    test_id = argv[basearg - 1];
+    testfunc = NULL;
+    {
+      size_t tmp;
+      for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
+        if(strcmp(test_id, s_tests[tmp].id) == 0) {
+          testfunc = s_tests[tmp].ptr;
+          break;
+        }
       }
     }
-  }
 
-  if(!testfunc) {
-    fprintf(stderr, "Test '%s' not found.\n", test_id);
-    return 1;
-  }
+    if(!testfunc) {
+      fprintf(stderr, "Test '%s' not found.\n", test_id);
+      return 1;
+    }
 
-  fprintf(stderr, "Test: %s\n", test_id);
+    fprintf(stderr, "Test: %s\n", test_id);
+  }
 #else
   basearg = 1;
 
@@ -201,7 +204,6 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  (void)test_id;
   testfunc = test;
 #endif
 
