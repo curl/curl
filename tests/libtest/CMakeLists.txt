@@ -87,7 +87,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
   if(NOT CURL_TEST_USE_BUNDLES)
-    set_target_properties(${_target_name} PROPERTIES COMPILE_DEFINITIONS ${_upper_target})
+    set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
   endif()
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
