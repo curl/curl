@@ -96,7 +96,7 @@ static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
 }
 
 /* the dummy thread function */
-static void *fire(void *ptr)
+static void *my_fire(void *ptr)
 {
   CURLcode code;
   struct Tdata *tdata = (struct Tdata*)ptr;
@@ -193,7 +193,7 @@ CURLcode test(char *URL)
 
     /* simulate thread, direct call of "thread" function */
     printf("*** run %d\n",i);
-    fire(&tdata);
+    my_fire(&tdata);
   }
 
 
