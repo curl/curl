@@ -52,8 +52,9 @@ while(my $line = <$fh>) {
         my $src = "$2.c";
 
         # Make common symbols unique
-        # TODO: Some of these might be subject for de-duplication or sync,
-        #       to shorten the list?
+        # TODO: Some of these might be subject for de-duplication or sync.
+        # TODO: Perhaps (part of) the list could be generated automatically
+        #       looking for patterns with hits in multiple sources.
         foreach my $symb (
                 "test",
                 "ReadThis",
