@@ -21,13 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* Hack for Unity mode */
-#ifdef HEADER_CURL_MEMDEBUG_H
-#undef HEADER_CURL_MEMDEBUG_H
-#undef freeaddrinfo
-#undef getaddrinfo
-#endif
-
 #include "server_setup.h"
 
 #include <signal.h>
