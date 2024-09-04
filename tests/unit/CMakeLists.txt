@@ -27,18 +27,12 @@ transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(CURL_USE_TEST_BUNDLES)
-  unset(_allsources)
-  foreach(_target IN LISTS UNITPROGS)
-    list(APPEND _allsources ${${_target}_SOURCES})
-  endforeach()
-  list(REMOVE_DUPLICATES _allsources)
-
   add_custom_command(
     OUTPUT "units.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "units.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
+      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
   set(UNITPROGS "units")

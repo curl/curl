@@ -37,22 +37,12 @@ add_custom_command(
   VERBATIM)
 
 if(CURL_USE_TEST_BUNDLES)
-  unset(_allsources)
-  foreach(_target IN LISTS noinst_PROGRAMS)
-    if(DEFINED ${_target}_SOURCES)
-      list(APPEND _allsources ${${_target}_SOURCES})
-    else()
-      list(APPEND _allsources ${nodist_${_target}_SOURCES})
-    endif()
-  endforeach()
-  list(REMOVE_DUPLICATES _allsources)
-
   add_custom_command(
     OUTPUT "libtests.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
-      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
+      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
   set(noinst_PROGRAMS "libtests")
