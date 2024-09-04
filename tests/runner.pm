@@ -907,7 +907,8 @@ sub singletest_run {
 
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
-            $tool="unit$testnum";
+            $tool_name="unit$testnum";
+            $tool = $tool_name;
         }
 
         if($tool =~ /^lib/) {
