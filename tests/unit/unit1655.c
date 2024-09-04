@@ -108,9 +108,9 @@ do {
     victim.canary1 = 87; /* magic numbers, arbitrarily picked */
     victim.canary2 = 35;
     victim.canary3 = 41;
-    d = doh_encode(name, DNS_TYPE_A, victim.dohbuffer,
-                   sizeof(struct demo), /* allow room for overflow */
-                   &olen);
+    d = doh_req_encode(name, DNS_TYPE_A, victim.dohbuffer,
+                       sizeof(struct demo), /* allow room for overflow */
+                       &olen);
 
     fail_unless(d == playlist[i].expected_result,
                 "result returned was not as expected");
@@ -151,31 +151,31 @@ do {
   DOHcode ret2;
   size_t olen;
 
-  DOHcode ret = doh_encode(sunshine1, dnstype, buffer, buflen, &olen1);
+  DOHcode ret = doh_req_encode(sunshine1, dnstype, buffer, buflen, &olen1);
   fail_unless(ret == DOH_OK, "sunshine case 1 should pass fine");
   fail_if(olen1 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 > strlen(sunshine1), "bad out length");
 
   /* with a trailing dot, the response should have the same length */
   olen2 = magic1;
-  ret2 = doh_encode(dotshine1, dnstype, buffer, buflen, &olen2);
+  ret2 = doh_req_encode(dotshine1, dnstype, buffer, buflen, &olen2);
   fail_unless(ret2 == DOH_OK, "dotshine case should pass fine");
   fail_if(olen2 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 == olen2, "olen should not grow for a trailing dot");
 
   /* add one letter, the response should be one longer */
   olen2 = magic1;
-  ret2 = doh_encode(sunshine2, dnstype, buffer, buflen, &olen2);
+  ret2 = doh_req_encode(sunshine2, dnstype, buffer, buflen, &olen2);
   fail_unless(ret2 == DOH_OK, "sunshine case 2 should pass fine");
   fail_if(olen2 == magic1, "olen has not been assigned properly");
   fail_unless(olen1 + 1 == olen2, "olen should grow with the hostname");
 
   /* pass a short buffer, should fail */
-  ret = doh_encode(sunshine1, dnstype, buffer, olen1 - 1, &olen);
+  ret = doh_req_encode(sunshine1, dnstype, buffer, olen1 - 1, &olen);
   fail_if(ret == DOH_OK, "short buffer should have been noticed");
 
   /* pass a minimum buffer, should succeed */
-  ret = doh_encode(sunshine1, dnstype, buffer, olen1, &olen);
+  ret = doh_req_encode(sunshine1, dnstype, buffer, olen1, &olen);
   fail_unless(ret == DOH_OK, "minimal length buffer should be long enough");
   fail_unless(olen == olen1, "bad buffer length");
 } while(0);

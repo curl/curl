@@ -231,7 +231,7 @@ purpose. This code also implements the opportunistic (``--ech true``) or hard-fa
 
 Other than that, the main additions are in ``lib/doh.c``
 where we re-use ``dohprobe()`` to retrieve an HTTPS RR value for the target
-domain. If such a value is found, that is stored using a new ``store_https()``
+domain. If such a value is found, that is stored using a new ``doh_store_https()``
 function in a new field in the ``dohentry`` structure.
 
 The qname for the DoH query is modified if the port number is not 443, as

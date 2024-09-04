@@ -161,8 +161,8 @@ UNITTEST_START
   unsigned char *p;
 
   for(i = 0; i < sizeof(req) / sizeof(req[0]); i++) {
-    DOHcode rc = doh_encode(req[i].name, req[i].type,
-                            buffer, sizeof(buffer), &size);
+    DOHcode rc = doh_req_encode(req[i].name, req[i].type,
+                                buffer, sizeof(buffer), &size);
     if(rc != req[i].rc) {
       fprintf(stderr, "req %zu: Expected return code %d got %d\n", i,
               req[i].rc, rc);
@@ -190,8 +190,8 @@ UNITTEST_START
     size_t len;
     int u;
     de_init(&d);
-    rc = doh_decode((const unsigned char *)resp[i].packet, resp[i].size,
-                    resp[i].type, &d);
+    rc = doh_resp_decode((const unsigned char *)resp[i].packet, resp[i].size,
+                         resp[i].type, &d);
     if(rc != resp[i].rc) {
       fprintf(stderr, "resp %zu: Expected return code %d got %d\n", i,
               resp[i].rc, rc);
@@ -245,7 +245,7 @@ UNITTEST_START
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
-    rc = doh_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)full49, i, DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
       fprintf(stderr, "%zu: %d\n", i, rc);
@@ -258,8 +258,8 @@ UNITTEST_START
     struct dohentry d;
     DOHcode rc;
     memset(&d, 0, sizeof(d));
-    rc = doh_decode((const unsigned char *)&full49[i], sizeof(full49)-i-1,
-                    DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)&full49[i], sizeof(full49)-i-1,
+                         DNS_TYPE_A, &d);
     if(!rc) {
       /* none of them should work */
       fprintf(stderr, "2 %zu: %d\n", i, rc);
@@ -272,8 +272,8 @@ UNITTEST_START
     struct dohentry d;
     struct dohaddr *a;
     memset(&d, 0, sizeof(d));
-    rc = doh_decode((const unsigned char *)full49, sizeof(full49)-1,
-                    DNS_TYPE_A, &d);
+    rc = doh_resp_decode((const unsigned char *)full49, sizeof(full49)-1,
+                         DNS_TYPE_A, &d);
     fail_if(d.numaddr != 1, "missing address");
     a = &d.addr[0];
     p = &a->ip.v4[0];
