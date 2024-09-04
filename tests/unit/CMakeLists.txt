@@ -26,7 +26,7 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(CURL_TEST_USE_BUNDLES)
+if(CURL_USE_TEST_BUNDLES)
   unset(_allsources)
   foreach(_target IN LISTS UNITPROGS)
     list(APPEND _allsources ${${_target}_SOURCES})
@@ -56,7 +56,7 @@ foreach(_target IN LISTS UNITPROGS)
     "${CURL_SOURCE_DIR}/src"
     "${CURL_SOURCE_DIR}/tests/libtest"
   )
-  if(CURL_TEST_USE_BUNDLES)
+  if(CURL_USE_TEST_BUNDLES)
     target_include_directories(${_target_name} PRIVATE "${CURL_SOURCE_DIR}/tests/unit")
   endif()
   set_target_properties(${_target_name} PROPERTIES

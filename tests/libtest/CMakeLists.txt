@@ -36,7 +36,7 @@ add_custom_command(
     "${CURL_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
-if(CURL_TEST_USE_BUNDLES)
+if(CURL_USE_TEST_BUNDLES)
   unset(_allsources)
   foreach(_target IN LISTS noinst_PROGRAMS)
     if(DEFINED ${_target}_SOURCES)
@@ -86,7 +86,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
     "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
-  if(NOT CURL_TEST_USE_BUNDLES)
+  if(NOT CURL_USE_TEST_BUNDLES)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
   endif()
   set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_GETADDRINFO_OVERRIDE")
