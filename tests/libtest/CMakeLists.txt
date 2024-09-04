@@ -41,7 +41,7 @@ if(CURL_USE_TEST_BUNDLES)
     OUTPUT "libtests.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
     DEPENDS
-      "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
+      "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "lib1521.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
