@@ -55,12 +55,12 @@ bool Curl_auth_is_ntlm_supported(void)
   SECURITY_STATUS status;
 
   /* Query the security package for NTLM */
-  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
+  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
                                               &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
   if(status == SEC_E_OK) {
-    s_pSecFn->FreeContextBuffer(SecurityPackage);
+    Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
   return (status == SEC_E_OK ? TRUE : FALSE);
@@ -103,7 +103,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   Curl_auth_cleanup_ntlm(ntlm);
 
   /* Query the security package for NTLM */
-  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
+  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *) TEXT(SP_NAME_NTLM),
                                               &SecurityPackage);
   if(status != SEC_E_OK) {
     failf(data, "SSPI: could not get auth info");
@@ -113,7 +113,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   ntlm->token_max = SecurityPackage->cbMaxToken;
 
   /* Release the package buffer as it is not required anymore */
-  s_pSecFn->FreeContextBuffer(SecurityPackage);
+  Curl_pSecFn->FreeContextBuffer(SecurityPackage);
 
   /* Allocate our output buffer */
   ntlm->output_token = malloc(ntlm->token_max);
@@ -141,7 +141,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
     return CURLE_OUT_OF_MEMORY;
 
   /* Acquire our credentials handle */
-  status = s_pSecFn->AcquireCredentialsHandle(NULL,
+  status = Curl_pSecFn->AcquireCredentialsHandle(NULL,
                                               (TCHAR *) TEXT(SP_NAME_NTLM),
                                               SECPKG_CRED_OUTBOUND, NULL,
                                               ntlm->p_identity, NULL, NULL,
@@ -167,7 +167,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
   type_1_buf.cbBuffer   = curlx_uztoul(ntlm->token_max);
 
   /* Generate our type-1 message */
-  status = s_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
+  status = Curl_pSecFn->InitializeSecurityContext(ntlm->credentials, NULL,
                                                ntlm->spn,
                                                0, 0, SECURITY_NETWORK_DREP,
                                                NULL, 0,
@@ -175,7 +175,7 @@ CURLcode Curl_auth_create_ntlm_type1_message(struct Curl_easy *data,
                                                &attrs, &expiry);
   if(status == SEC_I_COMPLETE_NEEDED ||
     status == SEC_I_COMPLETE_AND_CONTINUE)
-    s_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
+    Curl_pSecFn->CompleteAuthToken(ntlm->context, &type_1_desc);
   else if(status == SEC_E_INSUFFICIENT_MEMORY)
     return CURLE_OUT_OF_MEMORY;
   else if(status != SEC_E_OK && status != SEC_I_CONTINUE_NEEDED)
@@ -282,7 +282,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
     SEC_CHANNEL_BINDINGS channelBindings;
     SecPkgContext_Bindings pkgBindings;
     pkgBindings.Bindings = &channelBindings;
-    status = s_pSecFn->QueryContextAttributes(
+    status = Curl_pSecFn->QueryContextAttributes(
       ntlm->sslContext,
       SECPKG_ATTR_ENDPOINT_BINDINGS,
       &pkgBindings
@@ -305,7 +305,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   type_3_buf.cbBuffer   = curlx_uztoul(ntlm->token_max);
 
   /* Generate our type-3 message */
-  status = s_pSecFn->InitializeSecurityContext(ntlm->credentials,
+  status = Curl_pSecFn->InitializeSecurityContext(ntlm->credentials,
                                                ntlm->context,
                                                ntlm->spn,
                                                0, 0, SECURITY_NETWORK_DREP,
@@ -343,14 +343,14 @@ void Curl_auth_cleanup_ntlm(struct ntlmdata *ntlm)
 {
   /* Free our security context */
   if(ntlm->context) {
-    s_pSecFn->DeleteSecurityContext(ntlm->context);
+    Curl_pSecFn->DeleteSecurityContext(ntlm->context);
     free(ntlm->context);
     ntlm->context = NULL;
   }
 
   /* Free our credentials handle */
   if(ntlm->credentials) {
-    s_pSecFn->FreeCredentialsHandle(ntlm->credentials);
+    Curl_pSecFn->FreeCredentialsHandle(ntlm->credentials);
     free(ntlm->credentials);
     ntlm->credentials = NULL;
   }

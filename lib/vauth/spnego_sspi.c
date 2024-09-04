@@ -57,13 +57,13 @@ bool Curl_auth_is_spnego_supported(void)
   SECURITY_STATUS status;
 
   /* Query the security package for Negotiate */
-  status = s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+  status = Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
                                               TEXT(SP_NAME_NEGOTIATE),
                                               &SecurityPackage);
 
   /* Release the package buffer as it is not required anymore */
   if(status == SEC_E_OK) {
-    s_pSecFn->FreeContextBuffer(SecurityPackage);
+    Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
 
@@ -128,7 +128,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(!nego->output_token) {
     /* Query the security package for Negotiate */
-    nego->status = (DWORD)s_pSecFn->QuerySecurityPackageInfo((TCHAR *)
+    nego->status = (DWORD)Curl_pSecFn->QuerySecurityPackageInfo((TCHAR *)
                                                        TEXT(SP_NAME_NEGOTIATE),
                                                        &SecurityPackage);
     if(nego->status != SEC_E_OK) {
@@ -139,7 +139,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
     nego->token_max = SecurityPackage->cbMaxToken;
 
     /* Release the package buffer as it is not required anymore */
-    s_pSecFn->FreeContextBuffer(SecurityPackage);
+    Curl_pSecFn->FreeContextBuffer(SecurityPackage);
 
     /* Allocate our output buffer */
     nego->output_token = malloc(nego->token_max);
@@ -169,7 +169,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
     /* Acquire our credentials handle */
     nego->status = (DWORD)
-      s_pSecFn->AcquireCredentialsHandle(NULL,
+      Curl_pSecFn->AcquireCredentialsHandle(NULL,
                                          (TCHAR *)TEXT(SP_NAME_NEGOTIATE),
                                          SECPKG_CRED_OUTBOUND, NULL,
                                          nego->p_identity, NULL, NULL,
@@ -218,7 +218,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
       SEC_CHANNEL_BINDINGS channelBindings;
       SecPkgContext_Bindings pkgBindings;
       pkgBindings.Bindings = &channelBindings;
-      nego->status = (DWORD)s_pSecFn->QueryContextAttributes(
+      nego->status = (DWORD)Curl_pSecFn->QueryContextAttributes(
           nego->sslContext,
           SECPKG_ATTR_ENDPOINT_BINDINGS,
           &pkgBindings
@@ -242,16 +242,16 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
   resp_buf.cbBuffer   = curlx_uztoul(nego->token_max);
 
   /* Generate our challenge-response message */
-  nego->status = (DWORD)s_pSecFn->InitializeSecurityContext(nego->credentials,
-                                                     chlg ? nego->context :
-                                                            NULL,
-                                                     nego->spn,
-                                                     ISC_REQ_CONFIDENTIALITY,
-                                                     0, SECURITY_NATIVE_DREP,
-                                                     chlg ? &chlg_desc : NULL,
-                                                     0, nego->context,
-                                                     &resp_desc, &attrs,
-                                                     &expiry);
+  nego->status =
+    (DWORD)Curl_pSecFn->InitializeSecurityContext(nego->credentials,
+                                                  chlg ? nego->context : NULL,
+                                                  nego->spn,
+                                                  ISC_REQ_CONFIDENTIALITY,
+                                                  0, SECURITY_NATIVE_DREP,
+                                                  chlg ? &chlg_desc : NULL,
+                                                  0, nego->context,
+                                                  &resp_desc, &attrs,
+                                                  &expiry);
 
   /* Free the decoded challenge as it is not required anymore */
   free(chlg);
@@ -269,7 +269,7 @@ CURLcode Curl_auth_decode_spnego_message(struct Curl_easy *data,
 
   if(nego->status == SEC_I_COMPLETE_NEEDED ||
      nego->status == SEC_I_COMPLETE_AND_CONTINUE) {
-    nego->status = (DWORD)s_pSecFn->CompleteAuthToken(nego->context,
+    nego->status = (DWORD)Curl_pSecFn->CompleteAuthToken(nego->context,
                                                       &resp_desc);
     if(GSS_ERROR(nego->status)) {
       char buffer[STRERROR_LEN];
@@ -333,14 +333,14 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
 {
   /* Free our security context */
   if(nego->context) {
-    s_pSecFn->DeleteSecurityContext(nego->context);
+    Curl_pSecFn->DeleteSecurityContext(nego->context);
     free(nego->context);
     nego->context = NULL;
   }
 
   /* Free our credentials handle */
   if(nego->credentials) {
-    s_pSecFn->FreeCredentialsHandle(nego->credentials);
+    Curl_pSecFn->FreeCredentialsHandle(nego->credentials);
     free(nego->credentials);
     nego->credentials = NULL;
   }
