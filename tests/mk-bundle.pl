@@ -62,7 +62,6 @@ while(my $line = <$fh>) {
                 "Tdata",
                 "WriteThis",
                 "addFd",
-                "buf",
                 "buffer",
                 "checkFdSet",
                 "checkForCompletion",
