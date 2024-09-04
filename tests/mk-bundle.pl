@@ -80,7 +80,6 @@ while(my $line = <$fh>) {
                 "my_rlimit",
                 "my_unlock",
                 "num_open",
-                "params",
                 "post",
                 "progress_callback",
                 "read_callback",
