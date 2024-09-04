@@ -30,20 +30,13 @@ use strict;
 use warnings;
 
 if(@ARGV < 1) {
-    die "Usage: $0 [<directory>] [<extra sources>]\n";
+    die "Usage: $0 [<directory>]\n";
 }
 
 my $src_dir = $ARGV[0] // ".";
 
 print "#define CURLTESTS_BUNDLED\n";
-print "#define CURLTESTS_BUNDLED_TEST_H\n\n";
-
-# Extra sources to include
-foreach my $src (@ARGV[1..$#ARGV]) {
-    if($src =~ /\.c$/) {
-        print "#include \"$src\"\n";
-    }
-}
+print "#define CURLTESTS_BUNDLED_TEST_H\n";
 print '#include "first.h"' . "\n\n";
 
 my $tlist = "";
