@@ -40,8 +40,9 @@ if(CURL_TEST_USE_BUNDLES)
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
     VERBATIM)
-    set(UNITPROGS "units")
-    set(units_SOURCES "units.c")
+
+  set(UNITPROGS "units")
+  set(units_SOURCES "units.c")
 endif()
 
 foreach(_target IN LISTS UNITPROGS)

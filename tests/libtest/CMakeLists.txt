@@ -60,8 +60,9 @@ if(CURL_TEST_USE_BUNDLES)
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
     VERBATIM)
-    set(noinst_PROGRAMS "libtests")
-    set(libtests_SOURCES "libtests.c")
+
+  set(noinst_PROGRAMS "libtests")
+  set(libtests_SOURCES "libtests.c")
 endif()
 
 foreach(_target IN LISTS noinst_PROGRAMS)
