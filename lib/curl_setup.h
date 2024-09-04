@@ -551,10 +551,16 @@
 #define CURL_OFF_T_MIN (-CURL_OFF_T_MAX - CURL_OFF_T_C(1))
 
 /* curl uses its own printf() function internally. It understands the GNU
- * format. Use this format exclusively.
+ * format. Use this format, so that is matches the GNU format attribute we
+ * use with the MinGW compiler, allowing it to verify them at compile-time.
  */
-#define FMT_OFF_T  "lld"
-#define FMT_OFF_TU "llu"
+#ifdef  __MINGW32__
+#  define FMT_OFF_T  "lld"
+#  define FMT_OFF_TU "llu"
+#else
+#  define FMT_OFF_T  CURL_FORMAT_CURL_OFF_T
+#  define FMT_OFF_TU CURL_FORMAT_CURL_OFF_TU
+#endif
 
 #if (SIZEOF_CURL_OFF_T != 8)
 #  error "curl_off_t must be exactly 64 bits"
