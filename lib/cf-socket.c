@@ -1412,7 +1412,7 @@ static void cf_socket_adjust_pollset(struct Curl_cfilter *cf,
     /* A listening socket filter needs to be connected before the accept
      * for some weird FTP interaction. This should be rewritten, so that
      * FTP no longer does the socket checks and accept calls and delegates
-     * all that to the filter. TOOD. */
+     * all that to the filter. TODO. */
     if(ctx->listening) {
       Curl_pollset_set_in_only(data, ps, ctx->sock);
       CURL_TRC_CF(data, cf, "adjust_pollset, listening, POLLIN fd=%"
