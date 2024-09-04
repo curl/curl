@@ -112,7 +112,6 @@ while(my $line = <$fh>) {
                 "easy",
                 "hash_static",
                 "mydtor",
-                "password",
                 "test_parse",
                 "testcase",
                 "tests",
