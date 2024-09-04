@@ -850,10 +850,11 @@ sub singletest_run {
 
     my @codepieces = getpart("client", "tool");
     my $tool="";
+    my $tool_name="";  # without exe extension
     if(@codepieces) {
-        $tool = $codepieces[0];
-        chomp $tool;
-        $tool .= exe_ext('TOOL');
+        $tool_name = $codepieces[0];
+        chomp $tool_name;
+        $tool = $tool_name . exe_ext('TOOL');
     }
 
     my $disablevalgrind;
@@ -932,7 +933,7 @@ sub singletest_run {
         }
 
         if($bundle) {
-            $CMDLINE.=" $tool";
+            $CMDLINE.=" $tool_name";
         }
 
         $DBGCURL=$CMDLINE;
