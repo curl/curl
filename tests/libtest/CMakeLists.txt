@@ -47,15 +47,9 @@ if(CURL_TEST_USE_BUNDLES)
   endforeach()
   list(REMOVE_DUPLICATES _allsources)
 
-  set(_extrasources ${TESTUTIL} ${TSTTRACE})
-  if(LIB_SELECTED STREQUAL LIB_SHARED)
-    # These are part of the libcurl static lib. Add them here when linking shared.
-    list(APPEND _extrasources ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
-  endif()
-
   add_custom_command(
     OUTPUT "libtests.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" ${_extrasources} > "libtests.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc" ${_allsources}
@@ -63,6 +57,11 @@ if(CURL_TEST_USE_BUNDLES)
 
   set(noinst_PROGRAMS "libtests")
   set(libtests_SOURCES "libtests.c")
+  list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
+  if(LIB_SELECTED STREQUAL LIB_SHARED)
+    # These are part of the libcurl static lib. Add them here when linking shared.
+    list(APPEND libtests_SOURCES ${WARNLESS} ${MULTIBYTE} ${TIMEDIFF} ${THREADS})
+  endif()
 endif()
 
 foreach(_target IN LISTS noinst_PROGRAMS)
