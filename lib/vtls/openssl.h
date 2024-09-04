@@ -74,18 +74,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #define SSL_get1_peer_certificate SSL_get_peer_certificate
 #endif
 
-CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              struct ssl_peer *peer, X509 *server_cert);
 extern const struct Curl_ssl Curl_ssl_openssl;
-
-CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data,
-                                   SSL_CTX *ctx, char *cert_file,
-                                   const struct curl_blob *cert_blob,
-                                   const char *cert_type, char *key_file,
-                                   const struct curl_blob *key_blob,
-                                   const char *key_type, char *key_passwd);
-
-CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
 /**
  * Setup the OpenSSL X509_STORE in `ssl_ctx` for the cfilter `cf` and
