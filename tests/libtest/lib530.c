@@ -38,15 +38,13 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-struct Sockets
-{
+struct Sockets {
   curl_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
   int max_count;  /* max number of sockets that fit in allocated array */
 };
 
-struct ReadWriteSockets
-{
+struct ReadWriteSockets {
   struct Sockets read, write;
 };
 

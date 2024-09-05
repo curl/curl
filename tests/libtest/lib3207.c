@@ -38,8 +38,7 @@
 #define THREAD_SIZE 16
 #define PER_THREAD_SIZE 8
 
-struct Ctx
-{
+struct Ctx {
   const char *URL;
   CURLSH *share;
   int result;
