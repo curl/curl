@@ -1571,8 +1571,8 @@ AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
   if test "$curl_cv_native_windows" = 'yes'; then
     curl_pflags="${curl_pflags} WIN32"
   else
-    case $host_ in
-      *-*-*bsd*|*-*-aix*|*-*-freebsd*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-midnightbsd*|*-*-netbsd*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
+    case $host in
+      *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
         curl_pflags="${curl_pflags} UNIX";;
     esac
   fi
