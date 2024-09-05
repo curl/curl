@@ -93,7 +93,9 @@ int main(int argc, char *argv[])
     if((argc == 2) && (!strcmp(argv[1], "noexpectheader")))
       /* only disable 100-continue header if explicitly requested */
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    CURL_IGNORE_DEPRECATION(
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    )
 
     /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);

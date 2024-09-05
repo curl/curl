@@ -85,7 +85,9 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
 
     curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    CURL_IGNORE_DEPRECATION(
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    )
 
     curl_multi_add_handle(multi_handle, curl);
 
