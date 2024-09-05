@@ -40,7 +40,7 @@ jobs:
 
       - name: 'maketgz'
         run: |
-          SOURCE_DATE_EPOCH=1711526400 ./maketgz 99.98.97
+          SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
       - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
         with:
