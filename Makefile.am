@@ -84,7 +84,7 @@ PLAN9_DIST = plan9/include/mkfile \
 
 EXTRA_DIST = CHANGES.md COPYING maketgz Makefile.dist curl-config.in    \
  RELEASE-NOTES libcurl.pc.in $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
- $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat libcurl.def Dockerfile
+ $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat Dockerfile
 
 CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
  $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)       \
