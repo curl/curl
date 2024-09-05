@@ -34,8 +34,7 @@ EXTRA_DIST = README.md Makefile.example Makefile.mk CMakeLists.txt \
 #
 # $(top_srcdir)/include is for libcurl's external include files
 
-AM_CPPFLAGS = -I$(top_srcdir)/include   \
-              -DCURL_DISABLE_DEPRECATION
+AM_CPPFLAGS = -I$(top_srcdir)/include
 
 LIBDIR = $(top_builddir)/lib
 
