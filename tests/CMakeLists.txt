@@ -109,6 +109,7 @@ configure.tool: cmake
 configure.command: ${CMAKE_COMMAND}
 configure.version: ${CMAKE_VERSION}
 configure.os: ${CMAKE_SYSTEM}
+configure.args:${_cmake_args}
 configure.generator: ${CMAKE_GENERATOR}
 host.os: ${CMAKE_HOST_SYSTEM_NAME}
 host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}

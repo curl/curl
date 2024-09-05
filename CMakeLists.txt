@@ -46,6 +46,23 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
+# Collect command-line arguments for buildinfo.txt.
+# Must reside at the top of the script to work as expected.
+get_cmake_property(_cache_vars CACHE_VARIABLES)
+unset(_cmake_args)
+foreach(_cache_var ${_cache_vars})
+  get_property(_cache_var_helpstring CACHE ${_cache_var} PROPERTY HELPSTRING)
+  if(_cache_var_helpstring STREQUAL "No help, variable specified on the command line.")
+    get_property(_cache_var_type CACHE ${_cache_var} PROPERTY TYPE)
+    if(_cache_var_type STREQUAL "UNINITIALIZED")
+      set(_cache_var_type)
+    else()
+      set(_cache_var_type ":${_cache_var_type}")
+    endif()
+    set(_cmake_args "${_cmake_args} -D${_cache_var}${_cache_var_type}=\"${${_cache_var}}\"")
+  endif()
+endforeach()
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
