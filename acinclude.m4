@@ -1571,8 +1571,9 @@ AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
   if test "$curl_cv_native_windows" = 'yes'; then
     tf="${tf} WIN32"
   else
-    case $host_os in
-      cygwin*|msys*) tf="${tf} UNIX";;
+    case $host_ in
+      *-*-*bsd*|*-*-aix*|*-*-freebsd*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-midnightbsd*|*-*-netbsd*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
+        tf="${tf} UNIX";;
     esac
   fi
   case $host_os in
