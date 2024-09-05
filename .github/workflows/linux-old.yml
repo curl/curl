@@ -102,5 +102,8 @@ jobs:
       - name: 'install'
         run: make -C bld-cares install
 
-      - name: 'tests'
+      - name: 'build tests'
+        run: make -C bld-cares testdeps
+
+      - name: 'run tests'
         run: make -C bld-cares test-ci
