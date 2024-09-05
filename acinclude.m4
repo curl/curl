@@ -1558,6 +1558,57 @@ use vars qw(
 _EOF
 ])
 
+
+dnl CURL_GENERATE_BUILDINFO_TXT
+dnl -------------------------------------------------
+dnl Generate build info for test runner to pick up and log
+
+AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
+  tf=""
+  case $host in
+    *-apple-*) tf="${tf} APPLE";;
+  esac
+  if test "$curl_cv_native_windows" = 'yes'; then
+    tf="${tf} WIN32"
+  else
+    case $host_os in
+      cygwin*|msys*) tf="${tf} UNIX";;
+    esac
+  fi
+  case $host_os in
+    cygwin*) tf="${tf} CYGWIN";;
+  esac
+  case $host_os in
+    msys*) tf="${tf} MSYS";;
+  esac
+  if test "x$compiler_id" = 'xGNU_C'; then
+    tf="${tf} GCC"
+  fi
+  case $host_os in
+    mingw*) tf="${tf} MINGW";;
+  esac
+  if test "x$cross_compiling" = 'xyes'; then
+    tf="${tf} CROSS"
+  fi
+  cat >./tests/buildinfo.txt <<_EOF
+[@%:@] This is a generated file.  Do not edit.
+configure.tool: configure
+configure.args: $ac_configure_args
+host: $build
+host.os: $build_os
+host.cpu: $build_cpu
+host.vendor: $build_vendor
+target: $host
+target.os: $host_os
+target.cpu: $host_cpu
+target.vendor: $host_vendor
+target.flags:$tf
+compiler: $compiler_id
+compiler.version: $compiler_num
+_EOF
+])
+
+
 dnl CURL_CPP_P
 dnl
 dnl Check if $cpp -P should be used for extract define values due to gcc 5

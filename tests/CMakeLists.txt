@@ -102,3 +102,19 @@ add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
 add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
 add_runtests(test-torture   "-a -t")
 add_runtests(test-event     "-a -e")
+
+# Generate build info for test runner to pick up and log
+file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.
+configure.tool: cmake
+configure.command: ${CMAKE_COMMAND}
+configure.version: ${CMAKE_VERSION}
+configure.os: ${CMAKE_SYSTEM}
+host.os: ${CMAKE_HOST_SYSTEM_NAME}
+host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
+target: ${CMAKE_C_COMPILER_TARGET}
+target.os: ${CMAKE_SYSTEM_NAME}
+target.cpu: ${CMAKE_SYSTEM_PROCESSOR}
+target.flags:${_target_flags}
+compiler: ${CMAKE_C_COMPILER_ID}
+compiler.version: ${CMAKE_C_COMPILER_VERSION}
+")
