@@ -21,11 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-
-#if !defined(LIB670) && !defined(LIB671)
-#define CURL_DISABLE_DEPRECATION  /* Using and testing the form api */
-#endif
-
 #include "test.h"
 
 #include <time.h>
@@ -159,12 +154,14 @@ CURLcode test(char *URL)
   if(res == CURLE_OK)
     test_setopt(pooh.easy, CURLOPT_MIMEPOST, mime);
 #else
-  /* Build the form. */
-  formrc = curl_formadd(&formpost, &lastptr,
-                        CURLFORM_COPYNAME, name,
-                        CURLFORM_STREAM, &pooh,
-                        CURLFORM_CONTENTLEN, (curl_off_t) 2,
-                        CURLFORM_END);
+  CURL_IGNORE_DEPRECATION(
+    /* Build the form. */
+    formrc = curl_formadd(&formpost, &lastptr,
+                          CURLFORM_COPYNAME, name,
+                          CURLFORM_STREAM, &pooh,
+                          CURLFORM_CONTENTLEN, (curl_off_t) 2,
+                          CURLFORM_END);
+  )
   if(formrc) {
     fprintf(stderr, "curl_formadd() = %d\n", (int) formrc);
     goto test_cleanup;
@@ -253,7 +250,9 @@ test_cleanup:
 #if defined(LIB670) || defined(LIB671)
   curl_mime_free(mime);
 #else
-  curl_formfree(formpost);
+  CURL_IGNORE_DEPRECATION(
+    curl_formfree(formpost);
+  )
 #endif
 
   curl_global_cleanup();

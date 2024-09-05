@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION  /* Using and testing the form api */
 #include "test.h"
 
 #include "memdebug.h"
@@ -50,12 +49,13 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* Check proper name and data copying. */
-  formrc = curl_formadd(&formpost, &lastptr,
-                        CURLFORM_COPYNAME, "hello",
-                        CURLFORM_COPYCONTENTS, buffer,
-                        CURLFORM_END);
-
+  CURL_IGNORE_DEPRECATION(
+    /* Check proper name and data copying. */
+    formrc = curl_formadd(&formpost, &lastptr,
+                          CURLFORM_COPYNAME, "hello",
+                          CURLFORM_COPYCONTENTS, buffer,
+                          CURLFORM_END);
+  )
   if(formrc)
     printf("curl_formadd(1) = %d\n", (int) formrc);
 
@@ -88,8 +88,10 @@ test_cleanup:
   /* always cleanup */
   curl_easy_cleanup(curl);
 
-  /* now cleanup the formpost chain */
-  curl_formfree(formpost);
+  CURL_IGNORE_DEPRECATION(
+    /* now cleanup the formpost chain */
+    curl_formfree(formpost);
+  )
 
   curl_global_cleanup();
 
