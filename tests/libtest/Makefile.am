@@ -45,6 +45,9 @@ CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
 CLEANFILES = lib1521.c
+if USE_TEST_BUNDLES
+CLEANFILES += libtests.c
+endif
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
