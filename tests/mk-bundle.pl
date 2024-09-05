@@ -36,7 +36,7 @@ my $src_dir = @ARGV ? $ARGV[0] : ".";
 # Read list of tests
 open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
 
-print "/* !checksrc! disable INCLUDEDUP 1 */\n\n";
+print "/* !checksrc! disable INCLUDEDUP all */\n\n";
 
 print "#define CURLTESTS_BUNDLED\n";
 print "#define CURLTESTS_BUNDLED_TEST_H\n";
