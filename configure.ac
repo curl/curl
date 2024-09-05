@@ -646,6 +646,7 @@ AS_HELP_STRING([--disable-test-bundles],[Disable test bundles (default)]),
     AC_MSG_RESULT([yes])
     ;;
   esac ],
+    want_test_bundles='yes'
     AC_MSG_RESULT([yes])
 )
 
