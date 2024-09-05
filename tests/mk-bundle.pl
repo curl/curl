@@ -36,11 +36,15 @@ my $src_dir = @ARGV ? $ARGV[0] : ".";
 # Read list of tests
 open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
 
-print "/* !checksrc! disable INCLUDEDUP all */\n\n";
+print <<HEADER
+/* !checksrc! disable COPYRIGHT all */
+/* !checksrc! disable INCLUDEDUP all */
 
-print "#define CURLTESTS_BUNDLED\n";
-print "#define CURLTESTS_BUNDLED_TEST_H\n";
-print '#include "first.h"' . "\n\n";
+#define CURLTESTS_BUNDLED
+#define CURLTESTS_BUNDLED_TEST_H
+#include "first.h"
+HEADER
+    ;
 
 # TODO: Some of these might be subject for de-duplication or sync.
 my @reused_symbols = (
@@ -147,11 +151,13 @@ while(my $line = <$fh>) {
 
 close $fh;
 
-# Name, pointer table
-print "static const struct onetest s_tests[] = {\n";
-print "$tlist";
-print "};\n\n";
+print <<FOOTER
+static const struct onetest s_tests[] = {
+$tlist
+};
 
-print "#undef CURLTESTS_BUNDLED_TEST_H\n\n";
+#undef CURLTESTS_BUNDLED_TEST_H
 
-print '#include "first.c"' . "\n";
+#include "first.c"
+FOOTER
+    ;
