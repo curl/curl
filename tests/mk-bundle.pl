@@ -51,7 +51,7 @@ my @reused_symbols = (
     "checkFdSet",
     "checkForCompletion",
     "close_file_descriptors",
-    "curl",
+    "curl",  # shadow
     "curlSocketCallback",
     "curlTimerCallback",
     "cyclic_add",
