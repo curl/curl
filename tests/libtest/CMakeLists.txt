@@ -43,6 +43,7 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${_sources})
   add_dependencies(testdeps ${_target_name})
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
+  target_compile_definitions(${_target_name} PRIVATE "CURL_DISABLE_DEPRECATION")
   target_include_directories(${_target_name} PRIVATE
     "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
     "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"

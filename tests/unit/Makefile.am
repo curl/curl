@@ -50,6 +50,7 @@ LDADD = $(top_builddir)/src/libcurltool.la   \
         @LDFLAGS@ @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
+AM_CPPFLAGS += -DCURL_DISABLE_DEPRECATION
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
