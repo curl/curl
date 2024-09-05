@@ -2,6 +2,10 @@
 # This test case is primarily meant to verify that parsing and adding the 100K
 # files is a swift operation.
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 HTTP PUT

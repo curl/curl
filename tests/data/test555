@@ -3,6 +3,10 @@
 # multi interface instead of easy, but that shouldn't be noticeable at all in
 # this file!
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 HTTP POST

@@ -3,6 +3,10 @@
 # This case with an unexpected 1xx response used to cause a "hang" before the fix
 # got 7.19.0
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 HTTP GET

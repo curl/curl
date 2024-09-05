@@ -2,6 +2,10 @@
 # Based on test900
 # N.B. --libcurl output not sufficient to deal with uploaded files.
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 SMTP
 --libcurl

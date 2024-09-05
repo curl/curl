@@ -1,5 +1,9 @@
 <testcase>
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 # this test is meant to be exactly like 547 but using Digest instead of NTLM
 <keywords>
 HTTP

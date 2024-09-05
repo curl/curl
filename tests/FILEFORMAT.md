@@ -197,6 +197,10 @@ that are checked/used if specified.
 
 ## `<info>`
 
+### `<reuse>`
+
+This section is for copyright and license information for this specific file.
+
 ### `<keywords>`
 A newline-separated list of keywords describing what this test case uses and
 tests. Try to use already used keywords. These keywords are used for

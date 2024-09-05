@@ -3,6 +3,10 @@
 # This test is like 585 but uses passive FTP instead of HTTP
 #
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 FTP
 </keywords>

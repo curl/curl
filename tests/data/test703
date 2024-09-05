@@ -1,6 +1,10 @@
 <testcase>
 #based off  19
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 SOCKS5

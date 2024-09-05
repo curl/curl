@@ -1,5 +1,9 @@
 <testcase>
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 # this test is meant to be exactly like 551 but is based on the debug code
 # submitted in bug report #1850730, which sends >64K data and we verify the
 # ioctl rewind callback getting used

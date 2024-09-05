@@ -1,6 +1,10 @@
 <testcase>
 # Based on tests 186 and 1053
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 HTTP FORMPOST

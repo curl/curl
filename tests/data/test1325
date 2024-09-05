@@ -1,6 +1,10 @@
 <testcase>
 # https://greenbytes.de/tech/webdav/draft-reschke-http-status-308-latest.html
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 HTTP GET

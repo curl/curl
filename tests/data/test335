@@ -1,6 +1,10 @@
 <testcase>
 # Mostly a duplicate of test168
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 HTTP
 HTTP GET

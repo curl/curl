@@ -6,6 +6,10 @@
 #   2) Giving evil content (SDP starting with $)
 #   3) packing rtp after headers, after content, and at the start
 <info>
+<reuse>
+Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+SPDX-License-Identifier: curl
+</reuse>
 <keywords>
 RTSP
 RTP
