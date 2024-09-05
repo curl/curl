@@ -80,7 +80,7 @@ build:
               plan9/**,\
               projects/**,\
               winbuild/**,\
-              libcurl.def\
+              lib/libcurl.def\
               }"
 
 CI:
@@ -539,5 +539,5 @@ Windows:
               projects/**,\
               src/tool_doswin.c,\
               winbuild/**,\
-              libcurl.def\
+              lib/libcurl.def\
               }"
