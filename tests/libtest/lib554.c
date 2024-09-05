@@ -175,8 +175,10 @@ static CURLcode once(char *URL, bool oldstyle)
   /* we want to use our own read function */
   test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
 
-  /* send a multi-part formpost */
-  test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  CURL_IGNORE_DEPRECATION(
+    /* send a multi-part formpost */
+    test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  )
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
@@ -194,8 +196,10 @@ test_cleanup:
     curl_easy_cleanup(curl);
   )
 
-  /* now cleanup the formpost chain */
-  curl_formfree(formpost);
+  CURL_IGNORE_DEPRECATION(
+    /* now cleanup the formpost chain */
+    curl_formfree(formpost);
+  )
 
   return res;
 }

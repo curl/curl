@@ -93,14 +93,14 @@ CURLcode test(char *URL)
 
   contentlength = (long)(strlen(data) - 1);
 
-  /* Use a form array for the non-copy test. */
-  formarray[0].option = CURLFORM_PTRCONTENTS;
-  formarray[0].value = data;
-  formarray[1].option = CURLFORM_CONTENTSLENGTH;
-  formarray[1].value = (char *)(size_t)contentlength;
-  formarray[2].option = CURLFORM_END;
-  formarray[2].value = NULL;
   CURL_IGNORE_DEPRECATION(
+    /* Use a form array for the non-copy test. */
+    formarray[0].option = CURLFORM_PTRCONTENTS;
+    formarray[0].value = data;
+    formarray[1].option = CURLFORM_CONTENTSLENGTH;
+    formarray[1].value = (char *)(size_t)contentlength;
+    formarray[2].option = CURLFORM_END;
+    formarray[2].value = NULL;
     formrc = curl_formadd(&formpost,
                           &lastptr,
                           CURLFORM_PTRNAME, name,
@@ -192,8 +192,10 @@ CURLcode test(char *URL)
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* send a multi-part formpost */
-  test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  CURL_IGNORE_DEPRECATION(
+    /* send a multi-part formpost */
+    test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  )
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);

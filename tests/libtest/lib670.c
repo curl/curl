@@ -170,8 +170,10 @@ CURLcode test(char *URL)
   /* We want to use our own read function. */
   test_setopt(pooh.easy, CURLOPT_READFUNCTION, read_callback);
 
-  /* Send a multi-part formpost. */
-  test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
+  CURL_IGNORE_DEPRECATION(
+    /* Send a multi-part formpost. */
+    test_setopt(pooh.easy, CURLOPT_HTTPPOST, formpost);
+  )
 #endif
 
 #if defined(LIB670) || defined(LIB672)

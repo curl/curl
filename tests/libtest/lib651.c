@@ -63,7 +63,9 @@ CURLcode test(char *URL)
   curl = curl_easy_init();
   if(!curl) {
     fprintf(stderr, "curl_easy_init() failed\n");
-    curl_formfree(formpost);
+    CURL_IGNORE_DEPRECATION(
+      curl_formfree(formpost);
+    )
     curl_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
@@ -71,8 +73,10 @@ CURLcode test(char *URL)
   /* First set the URL that is about to receive our POST. */
   test_setopt(curl, CURLOPT_URL, URL);
 
-  /* send a multi-part formpost */
-  test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  CURL_IGNORE_DEPRECATION(
+    /* send a multi-part formpost */
+    test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+  )
 
   /* get verbose debug output please */
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
