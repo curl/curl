@@ -35,8 +35,6 @@ my $src_dir = $ARGV[0] // ".";
 
 print "#define CURLTESTS_BUNDLED\n";
 print "#define CURLTESTS_BUNDLED_TEST_H\n";
-# Some tests need it. Must be set before the first "curl/curl.h" include.
-print "#define CURL_DISABLE_DEPRECATION\n";
 print '#include "first.h"' . "\n\n";
 
 my $tlist = "";
