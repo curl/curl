@@ -638,15 +638,15 @@ AC_ARG_ENABLE(test-bundles,
 AS_HELP_STRING([--enable-test-bundles],[Enable test bundles])
 AS_HELP_STRING([--disable-test-bundles],[Disable test bundles (default)]),
 [ case "$enableval" in
-  yes)
+  no)
+    AC_MSG_RESULT([no])
+    ;;
+  *)
     want_test_bundles='yes'
     AC_MSG_RESULT([yes])
     ;;
-  *)
-    AC_MSG_RESULT([no])
-    ;;
   esac ],
-    AC_MSG_RESULT([no])
+    AC_MSG_RESULT([yes])
 )
 
 AM_CONDITIONAL([USE_TEST_BUNDLES], [test "$want_test_bundles" = 'yes'])
