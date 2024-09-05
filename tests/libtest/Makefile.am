@@ -87,6 +87,15 @@ libstubgss_la_LIBADD =
 libstubgss_la_DEPENDENCIES =
 endif
 
+if USE_TEST_BUNDLES
+libtests.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
+	@PERL@  $(top_srcdir)/tests/mk-bundle.pl > libtests.c
+
+noinst_PROGRAMS = libtests
+
+libtests_SOURCES = libtests.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS) $(MULTIBYTE)
+libtests_LDADD = $(TESTUTIL_LIBS)
+endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
 	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h > lib1521.c
