@@ -1564,33 +1564,34 @@ dnl -------------------------------------------------
 dnl Generate build info for test runner to pick up and log
 
 AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
-  tf=""
+  curl_pflags=""
   case $host in
-    *-apple-*) tf="${tf} APPLE";;
+    *-apple-*) curl_pflags="${curl_pflags} APPLE";;
   esac
   if test "$curl_cv_native_windows" = 'yes'; then
-    tf="${tf} WIN32"
+    curl_pflags="${curl_pflags} WIN32"
   else
     case $host_ in
       *-*-*bsd*|*-*-aix*|*-*-freebsd*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-midnightbsd*|*-*-netbsd*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
-        tf="${tf} UNIX";;
+        curl_pflags="${curl_pflags} UNIX";;
     esac
   fi
   case $host_os in
-    cygwin*) tf="${tf} CYGWIN";;
+    cygwin*) curl_pflags="${curl_pflags} CYGWIN";;
   esac
   case $host_os in
-    msys*) tf="${tf} MSYS";;
+    msys*) curl_pflags="${curl_pflags} MSYS";;
   esac
   if test "x$compiler_id" = 'xGNU_C'; then
-    tf="${tf} GCC"
+    curl_pflags="${curl_pflags} GCC"
   fi
   case $host_os in
-    mingw*) tf="${tf} MINGW";;
+    mingw*) curl_pflags="${curl_pflags} MINGW";;
   esac
   if test "x$cross_compiling" = 'xyes'; then
-    tf="${tf} CROSS"
+    curl_pflags="${curl_pflags} CROSS"
   fi
+  squeeze curl_pflags
   cat >./tests/buildinfo.txt <<_EOF
 [@%:@] This is a generated file.  Do not edit.
 configure.tool: configure
@@ -1603,7 +1604,7 @@ target: $host
 target.os: $host_os
 target.cpu: $host_cpu
 target.vendor: $host_vendor
-target.flags:$tf
+target.flags: $curl_pflags
 compiler: $compiler_id
 compiler.version: $compiler_num
 _EOF
