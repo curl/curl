@@ -1792,155 +1792,148 @@ if(BUILD_TESTING)
   add_subdirectory(tests)
 endif()
 
-if(NOT CURL_DISABLE_INSTALL)
-
-  install(FILES "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    PERMISSIONS
-      OWNER_READ OWNER_WRITE OWNER_EXECUTE
-      GROUP_READ GROUP_EXECUTE
-      WORLD_READ WORLD_EXECUTE)
-
-  # Helper to populate a list (_items) with a label when conditions
-  # (the remaining args) are satisfied
-  macro(_add_if _label)
-    # Needs to be a macro to allow this indirection
-    if(${ARGN})
-      set(_items ${_items} "${_label}")
-    endif()
-  endmacro()
-
-  # NTLM support requires crypto functions from various SSL libs.
-  # These conditions must match those in lib/curl_setup.h.
-  if(NOT CURL_DISABLE_NTLM AND
-     (USE_OPENSSL OR
-      USE_MBEDTLS OR
-      USE_GNUTLS OR
-      USE_SECTRANSP OR
-      USE_WIN32_CRYPTO OR
-      (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
-    set(_use_curl_ntlm_core ON)
+# Helper to populate a list (_items) with a label when conditions
+# (the remaining args) are satisfied
+macro(_add_if _label)
+  # Needs to be a macro to allow this indirection
+  if(${ARGN})
+    set(_items ${_items} "${_label}")
   endif()
+endmacro()
 
-  # Clear list and try to detect available protocols
-  unset(_items)
-  _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
-  _add_if("IPFS"          NOT CURL_DISABLE_HTTP)
-  _add_if("IPNS"          NOT CURL_DISABLE_HTTP)
-  _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
-  _add_if("FTP"           NOT CURL_DISABLE_FTP)
-  _add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
-  _add_if("FILE"          NOT CURL_DISABLE_FILE)
-  _add_if("TELNET"        NOT CURL_DISABLE_TELNET)
-  _add_if("LDAP"          NOT CURL_DISABLE_LDAP)
-  # CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
-  _add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
-                          ((USE_OPENLDAP AND _ssl_enabled) OR
-                          (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
-  _add_if("DICT"          NOT CURL_DISABLE_DICT)
-  _add_if("TFTP"          NOT CURL_DISABLE_TFTP)
-  _add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
-  _add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
-  _add_if("POP3"          NOT CURL_DISABLE_POP3)
-  _add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
-  _add_if("IMAP"          NOT CURL_DISABLE_IMAP)
-  _add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
-  _add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                          _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-  _add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
-                          _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-  _add_if("SMTP"          NOT CURL_DISABLE_SMTP)
-  _add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
-  _add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-  _add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-  _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
-  _add_if("RTMP"          USE_LIBRTMP)
-  _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
-  _add_if("WS"            USE_WEBSOCKETS)
-  _add_if("WSS"           USE_WEBSOCKETS AND _ssl_enabled)
-  if(_items)
+# NTLM support requires crypto functions from various SSL libs.
+# These conditions must match those in lib/curl_setup.h.
+if(NOT CURL_DISABLE_NTLM AND
+   (USE_OPENSSL OR
+    USE_MBEDTLS OR
+    USE_GNUTLS OR
+    USE_SECTRANSP OR
+    USE_WIN32_CRYPTO OR
+    (USE_WOLFSSL AND HAVE_WOLFSSL_DES_ECB_ENCRYPT)))
+  set(_use_curl_ntlm_core ON)
+endif()
+
+# Clear list and try to detect available protocols
+unset(_items)
+_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+_add_if("IPFS"          NOT CURL_DISABLE_HTTP)
+_add_if("IPNS"          NOT CURL_DISABLE_HTTP)
+_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
+_add_if("FTP"           NOT CURL_DISABLE_FTP)
+_add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
+_add_if("FILE"          NOT CURL_DISABLE_FILE)
+_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
+_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
+# CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
+_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
+                        ((USE_OPENLDAP AND _ssl_enabled) OR
+                        (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
+_add_if("DICT"          NOT CURL_DISABLE_DICT)
+_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
+_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
+_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
+_add_if("POP3"          NOT CURL_DISABLE_POP3)
+_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
+_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
+_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
+_add_if("SMB"           NOT CURL_DISABLE_SMB AND
+                        _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+_add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
+                        _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
+_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
+_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
+_add_if("RTMP"          USE_LIBRTMP)
+_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+_add_if("WS"            USE_WEBSOCKETS)
+_add_if("WSS"           USE_WEBSOCKETS AND _ssl_enabled)
+if(_items)
+  list(SORT _items)
+endif()
+string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
+string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
+message(STATUS "Protocols: ${_support_protocols_lower}")
+
+# Clear list and try to detect available features
+unset(_items)
+_add_if("SSL"           _ssl_enabled)
+_add_if("IPv6"          ENABLE_IPV6)
+_add_if("UnixSockets"   USE_UNIX_SOCKETS)
+_add_if("libz"          HAVE_LIBZ)
+_add_if("brotli"        HAVE_BROTLI)
+_add_if("gsasl"         USE_GSASL)
+_add_if("zstd"          HAVE_ZSTD)
+_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
+_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
+                        USE_WIN32_IDN OR
+                        USE_APPLE_IDN)
+_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
+                        ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
+_add_if("SSPI"          USE_WINDOWS_SSPI)
+_add_if("GSS-API"       HAVE_GSSAPI)
+_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
+_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
+_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
+                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
+                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
+                        (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
+_add_if("TLS-SRP"       USE_TLS_SRP)
+_add_if("HTTP2"         USE_NGHTTP2)
+_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
+_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
+_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
+                        OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
+                        USE_MBEDTLS OR USE_SECTRANSP OR
+                        (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
+_add_if("Unicode"       ENABLE_UNICODE)
+_add_if("threadsafe"    HAVE_ATOMIC OR
+                        (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
+                        (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
+_add_if("Debug"         ENABLE_DEBUG)
+_add_if("TrackMemory"   ENABLE_CURLDEBUG)
+_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
+_add_if("PSL"           USE_LIBPSL)
+_add_if("CAcert"        CURL_CA_EMBED_SET)
+if(_items)
+  if(NOT CMAKE_VERSION VERSION_LESS 3.13)
+    list(SORT _items CASE INSENSITIVE)
+  else()
     list(SORT _items)
   endif()
-  string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
-  string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
-  message(STATUS "Protocols: ${_support_protocols_lower}")
+endif()
+string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
+message(STATUS "Features: ${SUPPORT_FEATURES}")
 
-  # Clear list and try to detect available features
-  unset(_items)
-  _add_if("SSL"           _ssl_enabled)
-  _add_if("IPv6"          ENABLE_IPV6)
-  _add_if("UnixSockets"   USE_UNIX_SOCKETS)
-  _add_if("libz"          HAVE_LIBZ)
-  _add_if("brotli"        HAVE_BROTLI)
-  _add_if("gsasl"         USE_GSASL)
-  _add_if("zstd"          HAVE_ZSTD)
-  _add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-  _add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
-                          USE_WIN32_IDN OR
-                          USE_APPLE_IDN)
-  _add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
-                          ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-  _add_if("SSPI"          USE_WINDOWS_SSPI)
-  _add_if("GSS-API"       HAVE_GSSAPI)
-  _add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
-  _add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-  _add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
-                          (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-  _add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
-                          (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-  _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                          (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-  _add_if("TLS-SRP"       USE_TLS_SRP)
-  _add_if("HTTP2"         USE_NGHTTP2)
-  _add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
-  _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-  _add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
-                          OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
-                          USE_MBEDTLS OR USE_SECTRANSP OR
-                          (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
-  _add_if("Unicode"       ENABLE_UNICODE)
-  _add_if("threadsafe"    HAVE_ATOMIC OR
-                          (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                          (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
-  _add_if("Debug"         ENABLE_DEBUG)
-  _add_if("TrackMemory"   ENABLE_CURLDEBUG)
-  _add_if("ECH"           _ssl_enabled AND HAVE_ECH)
-  _add_if("PSL"           USE_LIBPSL)
-  _add_if("CAcert"        CURL_CA_EMBED_SET)
-  if(_items)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.13)
-      list(SORT _items CASE INSENSITIVE)
-    else()
-      list(SORT _items)
-    endif()
-  endif()
-  string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
-  message(STATUS "Features: ${SUPPORT_FEATURES}")
+# Clear list and collect SSL backends
+unset(_items)
+_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
+_add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
+_add_if("OpenSSL v3+"      _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
+_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
+_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
+_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
+_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
+_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
+_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
 
-  # Clear list and collect SSL backends
-  unset(_items)
-  _add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
-  _add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
-  _add_if("OpenSSL v3+"      _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
-  _add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
-  _add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
-  _add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
-  _add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
-  _add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
-  _add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
+if(_items)
+  if(NOT CMAKE_VERSION VERSION_LESS 3.13)
+    list(SORT _items CASE INSENSITIVE)
+  else()
+    list(SORT _items)
+  endif()
+endif()
+string(REPLACE ";" " " SSL_BACKENDS "${_items}")
+message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
+if(CURL_DEFAULT_SSL_BACKEND)
+  message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
+endif()
 
-  if(_items)
-    if(NOT CMAKE_VERSION VERSION_LESS 3.13)
-      list(SORT _items CASE INSENSITIVE)
-    else()
-      list(SORT _items)
-    endif()
-  endif()
-  string(REPLACE ";" " " SSL_BACKENDS "${_items}")
-  message(STATUS "Enabled SSL backends: ${SSL_BACKENDS}")
-  if(CURL_DEFAULT_SSL_BACKEND)
-    message(STATUS "Default SSL backend: ${CURL_DEFAULT_SSL_BACKEND}")
-  endif()
+if(NOT CURL_DISABLE_INSTALL)
 
   # curl-config needs the following options to be set.
   set(CC                      "${CMAKE_C_COMPILER}")
@@ -2161,4 +2154,11 @@ if(NOT CURL_DISABLE_INSTALL)
     add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
+
+  install(FILES "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE)
 endif()
