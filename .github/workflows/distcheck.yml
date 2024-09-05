@@ -46,6 +46,7 @@ jobs:
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
+          retention-days: 1
 
       - run: |
           echo "::stop-commands::$(uuidgen)"
