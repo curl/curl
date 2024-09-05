@@ -43,7 +43,9 @@ if [ "$more" = '1' ]; then
 fi
 
 # Look for symbols possibly re-used in multiple sources.
-# May pick up false-positives, and may miss obscure cases.
+#
+# Falsely picks ups symbols in re-used sources, but guarded for a single use.
+# Misses shadowed variables.
 grep -E '^ *(static|struct) +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name 'unit*.c' -o -name 'mk-*.pl') \
   | grep -E '^(libtest|unit)/' \
   | grep -E '\.(c|pl):(static|struct)( +[a-zA-Z_* ]+)? +[a-zA-Z_][a-zA-Z0-9_]+ *' | sort -u \
@@ -54,10 +56,9 @@ grep -E '^ *(static|struct) +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o
 
 echo '---'
 
-# Extract list of macros that may be re-used by multiple tests:
-# Misses clashes in macros reused for multiple tests (e.g. lib1940).
-# May pick up false-positive when the macro is defined to the same
-# value everywhere.
+# Extract list of macros that may be re-used by multiple tests.
+#
+# Picks up false-positive when the macro is defined to the same value everywhere.
 grep -E '^ *# *define +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name 'unit*.c' -o -name 'mk-*.pl') \
   | grep -E '^(libtest|unit)/' \
   | grep -o -E '.+\.(c|pl): *# *define +[A-Z_][A-Z0-9_]+' | sort -u \
