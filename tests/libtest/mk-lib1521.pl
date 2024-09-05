@@ -195,7 +195,6 @@ print <<HEADER
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION  /* Deprecated options are tested too */
 #include "test.h"
 #include "memdebug.h"
 #include <limits.h>
