@@ -27,7 +27,7 @@
 #ifdef USE_WEBSOCKETS
 #if 0
 
-static CURLcode ping(CURL *curl, const char *send_payload)
+static CURLcode send_ping(CURL *curl, const char *send_payload)
 {
   size_t sent;
   CURLcode result =
@@ -80,7 +80,7 @@ static void websocket(CURL *curl)
   int i = 0;
   fprintf(stderr, "ws: websocket() starts\n");
   do {
-    if(ping(curl, "foobar"))
+    if(send_ping(curl, "foobar"))
       return;
     if(recv_pong(curl, "foobar"))
       return;
