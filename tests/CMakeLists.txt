@@ -111,6 +111,7 @@ configure.version: ${CMAKE_VERSION}
 configure.os: ${CMAKE_SYSTEM}
 configure.args:${_cmake_args}
 configure.generator: ${CMAKE_GENERATOR}
+configure.make: ${CMAKE_MAKE_PROGRAM}
 host.os: ${CMAKE_HOST_SYSTEM_NAME}
 host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
 target: ${CMAKE_C_COMPILER_TARGET}
