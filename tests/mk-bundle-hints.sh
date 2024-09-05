@@ -23,26 +23,49 @@
 #
 ###########################################################################
 
+more=1
+
+if [ "$more" = '1' ]; then
+  # Make symlinks for all re-used sources
+  grep -E '^(lib|unit)[0-9]+_SOURCES = ' libtest/Makefile.inc unit/Makefile.inc \
+    | sed -E 's@^([a-z]+)/[a-zA-Z.]+:(lib|unit)([0-9]+)_SOURCES = (lib|unit)([0-9]+).+@\1 \2 \3 \5@g' | \
+  while read -r l; do
+    if [[ "${l}" =~ ([a-z]+)\ ([a-z]+)\ ([0-9]+)\ ([0-9]+) ]]; then
+      trg="${BASH_REMATCH[3]}"
+      src="${BASH_REMATCH[4]}"
+      if [ "${trg}" != "${src}" ]; then
+        dir="${BASH_REMATCH[1]}"
+        pfx="${BASH_REMATCH[2]}"
+        ln -s "${pfx}${src}.c" "${dir}/${pfx}${trg}.c"
+      fi
+    fi
+  done
+fi
+
 # Look for symbols possibly re-used in multiple sources.
-# Misses clashes in sources reused for multiple tests (e.g. lib525, lib526).
-# May pick up false-positive when the symbol is defined multiple times in
-# the same source.
-git grep -E '^ *(static|struct) +' \
+# May pick up false-positives, and may miss obscure cases.
+grep -E '^ *(static|struct) +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name 'unit*.c' -o -name 'mk-*.pl') \
   | grep -E '^(libtest|unit)/' \
-  | grep -E '\.(c|pl):(static|struct) +' \
+  | grep -E '\.(c|pl):(static|struct)( +[a-zA-Z_* ]+)? +[a-zA-Z_][a-zA-Z0-9_]+ *' | sort -u \
   | grep -o -E '[a-zA-Z_][a-zA-Z0-9_]+ *[=;[({]' | tr -d '=;[({ ' \
-  | grep -v -E '^(NULL$|CURLE_)' \
+  | grep -v -E '^(NULL$|sizeof$|CURLE_)' \
   | sort | uniq -c | sort -k 2 | grep -v -E '^ +1 ' \
   | awk '{print "    \"" $2 "\","}'
 
 echo '---'
 
 # Extract list of macros that may be re-used by multiple tests:
+# Misses clashes in macros reused for multiple tests (e.g. lib1940).
 # May pick up false-positive when the macro is defined to the same
 # value everywhere.
-git grep -E '^ *# *define +' \
+grep -E '^ *# *define +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name 'unit*.c' -o -name 'mk-*.pl') \
   | grep -E '^(libtest|unit)/' \
   | grep -o -E '.+\.(c|pl): *# *define +[A-Z_][A-Z0-9_]+' | sort -u \
   | grep -o -E '[A-Z_][A-Z0-9_]+' \
   | sort | uniq -c | sort -k 2 | grep -v -E '^ +1 ' \
   | awk '{print "    \"" $2 "\","}'
+
+if [ "$more" = '1' ]; then
+  # Delete symlinks for all re-used sources
+  find libtest unit -type l -delete
+fi
