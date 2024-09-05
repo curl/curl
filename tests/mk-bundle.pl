@@ -31,16 +31,16 @@
 use strict;
 use warnings;
 
-my $src_dir = $ARGV[0] // ".";
+my $src_dir = @ARGV ? $ARGV[0] : ".";
+
+# Read list of tests
+open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
 
 print "#define CURLTESTS_BUNDLED\n";
 print "#define CURLTESTS_BUNDLED_TEST_H\n";
 print '#include "first.h"' . "\n\n";
 
 my $tlist = "";
-
-# Read list of tests
-open my $fh, "<", "$src_dir/Makefile.inc" or die "Could not open '$src_dir/Makefile.inc': $!";
 
 while(my $line = <$fh>) {
     chomp $line;
@@ -49,7 +49,7 @@ while(my $line = <$fh>) {
         my $namu = uc($nam);
         my $src = "$2.c";
 
-        # Make common symbols unique
+        # Make common symbols unique across test sources
         # TODO: Some of these might be subject for de-duplication or sync.
         # TODO: Perhaps (part of) the list could be generated automatically
         #       looking for patterns with hits in multiple sources.
@@ -122,10 +122,12 @@ while(my $line = <$fh>) {
             print "#undef $symb\n";
             print "#define $symb ${symb}_$nam\n";
         }
+
         print "#define $namu\n";
         print "#include \"$src\"\n";
         print "#undef $namu\n";
-        # Reset macros used by multiple tests
+
+        # Reset macros re-used by multiple tests
         # $ git grep -E '^ *# *define +' | grep -E '^(libtest|unit)/' | grep -o -E '.+\.(c|pl): *# *define +[A-Z_][A-Z0-9_]+ ' | sort -u | grep -o -E '[A-Z_][A-Z0-9_]+ ' | tr -d ' ' | sort | uniq -c | sort | grep -v -E '^ +1 '
         foreach my $undef (
                 "test",
@@ -136,6 +138,7 @@ while(my $line = <$fh>) {
                 ) {
             print "#undef $undef\n";
         }
+
         print "\n";
 
         $tlist .= "  { \"$nam\", test_$nam },\n";
