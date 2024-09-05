@@ -21,9 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#ifndef CURL_DISABLE_DEPRECATION
 #define CURL_DISABLE_DEPRECATION  /* Using and testing the form api */
-#endif
 #include "test.h"
 
 CURLcode test(char *URL)
