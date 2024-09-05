@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -46,6 +46,7 @@ fi
 #
 # Falsely picks ups symbols in re-used sources, but guarded for a single use.
 # Misses shadowed variables.
+# shellcheck disable=SC2046
 grep -E '^ *(static|struct) +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name 'unit*.c' -o -name 'mk-*.pl') \
   | grep -E '^(libtest|unit)/' \
   | grep -E '\.(c|pl):(static|struct)( +[a-zA-Z_* ]+)? +[a-zA-Z_][a-zA-Z0-9_]+ *' | sort -u \
@@ -59,6 +60,7 @@ echo '---'
 # Extract list of macros that may be re-used by multiple tests.
 #
 # Picks up false-positive when the macro is defined to the same value everywhere.
+# shellcheck disable=SC2046
 grep -E '^ *# *define +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name 'unit*.c' -o -name 'mk-*.pl') \
   | grep -E '^(libtest|unit)/' \
   | grep -o -E '.+\.(c|pl): *# *define +[A-Z_][A-Z0-9_]+' | sort -u \
