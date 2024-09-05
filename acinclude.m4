@@ -1561,7 +1561,7 @@ _EOF
 
 dnl CURL_GENERATE_BUILDINFO_TXT
 dnl -------------------------------------------------
-dnl Generate build info for test runner to pick up and log
+dnl Save build info for test runner to pick up and log
 
 AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
   curl_pflags=""

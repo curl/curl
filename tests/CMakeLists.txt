@@ -94,16 +94,7 @@ use vars qw(
 1;
 ")
 
-add_runtests(test-quiet     "-a -s")
-add_runtests(test-am        "-a -am")
-add_runtests(test-full      "-a -p -r")
-# ~flaky means that it ignores results of tests using the flaky keyword
-add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
-add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
-add_runtests(test-torture   "-a -t")
-add_runtests(test-event     "-a -e")
-
-# Generate build info for test runner to pick up and log
+# Save build info for test runner to pick up and log
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.
 configure.tool: cmake
 configure.command: ${CMAKE_COMMAND}
@@ -121,3 +112,12 @@ target.flags:${_target_flags}
 compiler: ${CMAKE_C_COMPILER_ID}
 compiler.version: ${CMAKE_C_COMPILER_VERSION}
 ")
+
+add_runtests(test-quiet     "-a -s")
+add_runtests(test-am        "-a -am")
+add_runtests(test-full      "-a -p -r")
+# ~flaky means that it ignores results of tests using the flaky keyword
+add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
+add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
+add_runtests(test-torture   "-a -t")
+add_runtests(test-event     "-a -e")
