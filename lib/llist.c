@@ -209,6 +209,7 @@ struct Curl_llist_node *Curl_llist_head(struct Curl_llist *list)
   return VERIFYNODE(list->_head);
 }
 
+#ifdef UNITTESTS
 /* Curl_llist_tail() returns the last 'struct Curl_llist_node *', which
    might be NULL */
 struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list)
@@ -217,6 +218,7 @@ struct Curl_llist_node *Curl_llist_tail(struct Curl_llist *list)
   DEBUGASSERT(list->_init == LLISTINIT);
   return VERIFYNODE(list->_tail);
 }
+#endif
 
 /* Curl_llist_count() returns a size_t the number of nodes in the list */
 size_t Curl_llist_count(struct Curl_llist *list)
@@ -243,7 +245,7 @@ struct Curl_llist_node *Curl_node_next(struct Curl_llist_node *n)
   return VERIFYNODE(n->_next);
 }
 
-#ifdef UNITTEST
+#ifdef UNITTESTS
 
 /* Curl_node_prev() returns the previous element in a list from a given
    Curl_llist_node */
