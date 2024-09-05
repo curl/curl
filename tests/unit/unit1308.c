@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION  /* Testing the form api */
 #include "curlcheck.h"
 
 #include <curl/curl.h>
@@ -51,49 +50,60 @@ UNITTEST_START
   size_t total_size = 0;
   char buffer[] = "test buffer";
 
-  rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
-                    CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
-
+  CURL_IGNORE_DEPRECATION(
+    rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name",
+                      CURLFORM_COPYCONTENTS, "content", CURLFORM_END);
+  )
   fail_unless(rc == 0, "curl_formadd returned error");
 
   /* after the first curl_formadd when there's a single entry, both pointers
      should point to the same struct */
   fail_unless(post == last, "post and last weren't the same");
 
-  rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "htmlcode",
-                    CURLFORM_COPYCONTENTS, "<HTML></HTML>",
-                    CURLFORM_CONTENTTYPE, "text/html", CURLFORM_END);
-
+  CURL_IGNORE_DEPRECATION(
+    rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "htmlcode",
+                      CURLFORM_COPYCONTENTS, "<HTML></HTML>",
+                      CURLFORM_CONTENTTYPE, "text/html", CURLFORM_END);
+  )
   fail_unless(rc == 0, "curl_formadd returned error");
 
-  rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name_for_ptrcontent",
-                   CURLFORM_PTRCONTENTS, buffer, CURLFORM_END);
-
+  CURL_IGNORE_DEPRECATION(
+    rc = curl_formadd(&post, &last, CURLFORM_COPYNAME, "name_for_ptrcontent",
+                     CURLFORM_PTRCONTENTS, buffer, CURLFORM_END);
+  )
   fail_unless(rc == 0, "curl_formadd returned error");
 
-  res = curl_formget(post, &total_size, print_httppost_callback);
-
+  CURL_IGNORE_DEPRECATION(
+    res = curl_formget(post, &total_size, print_httppost_callback);
+  )
   fail_unless(res == 0, "curl_formget returned error");
 
   fail_unless(total_size == 518, "curl_formget got wrong size back");
 
-  curl_formfree(post);
+  CURL_IGNORE_DEPRECATION(
+    curl_formfree(post);
+  )
 
   /* start a new formpost with a file upload and formget */
   post = last = NULL;
 
-  rc = curl_formadd(&post, &last,
-                    CURLFORM_PTRNAME, "name of file field",
-                    CURLFORM_FILE, arg,
-                    CURLFORM_FILENAME, "custom named file",
-                    CURLFORM_END);
-
+  CURL_IGNORE_DEPRECATION(
+    rc = curl_formadd(&post, &last,
+                      CURLFORM_PTRNAME, "name of file field",
+                      CURLFORM_FILE, arg,
+                      CURLFORM_FILENAME, "custom named file",
+                      CURLFORM_END);
+  )
   fail_unless(rc == 0, "curl_formadd returned error");
 
-  res = curl_formget(post, &total_size, print_httppost_callback);
+  CURL_IGNORE_DEPRECATION(
+    res = curl_formget(post, &total_size, print_httppost_callback);
+  )
   fail_unless(res == 0, "curl_formget returned error");
   fail_unless(total_size == 899, "curl_formget got wrong size back");
 
-  curl_formfree(post);
+  CURL_IGNORE_DEPRECATION(
+    curl_formfree(post);
+  )
 
 UNITTEST_STOP
