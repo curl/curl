@@ -2017,10 +2017,84 @@ out:
   return result;
 }
 
+static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+  timediff_t timeout_ms = DEFAULT_ACCEPT_TIMEOUT;
+  timediff_t other;
+  struct curltime now;
+
+#ifndef CURL_DISABLE_FTP
+  if(data->set.accepttimeout > 0)
+    timeout_ms = data->set.accepttimeout;
+#endif
+
+  now = Curl_now();
+  /* check if the generic timeout possibly is set shorter */
+  other = Curl_timeleft(data, &now, FALSE);
+  if(other && (other < timeout_ms))
+    /* note that this also works fine for when other happens to be negative
+       due to it already having elapsed */
+    timeout_ms = other;
+  else {
+    /* subtract elapsed time */
+    timeout_ms -= Curl_timediff(now, ctx->started_at);
+    if(!timeout_ms)
+      /* avoid returning 0 as that means no timeout! */
+      timeout_ms = -1;
+  }
+  return timeout_ms;
+}
+
+static void cf_tcp_set_accepted_remote_ip(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data)
+{
+  struct cf_socket_ctx *ctx = cf->ctx;
+#ifdef HAVE_GETPEERNAME
+  char buffer[STRERROR_LEN];
+  struct Curl_sockaddr_storage ssrem;
+  curl_socklen_t plen;
+
+  ctx->ip.remote_ip[0] = 0;
+  ctx->ip.remote_port = 0;
+  plen = sizeof(ssrem);
+  memset(&ssrem, 0, plen);
+  if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
+    int error = SOCKERRNO;
+    failf(data, "getpeername() failed with errno %d: %s",
+          error, Curl_strerror(error, buffer, sizeof(buffer)));
+    return;
+  }
+  if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
+                       ctx->ip.remote_ip, &ctx->ip.remote_port)) {
+    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
+          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
+    return;
+  }
+#else
+  ctx->ip.remote_ip[0] = 0;
+  ctx->ip.remote_port = 0;
+  (void)data;
+#endif
+}
+
 static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       bool blocking, bool *done)
 {
+  struct cf_socket_ctx *ctx = cf->ctx;
+#ifdef USE_IPV6
+  struct Curl_sockaddr_storage add;
+#else
+  struct sockaddr_in add;
+#endif
+  curl_socklen_t size = (curl_socklen_t) sizeof(add);
+  curl_socket_t s_accepted = CURL_SOCKET_BAD;
+  timediff_t timeout_ms;
+  int socketstate = 0;
+  bool incoming = FALSE;
+
   /* we start accepted, if we ever close, we cannot go on */
   (void)data;
   (void)blocking;
@@ -2028,7 +2102,79 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
     *done = TRUE;
     return CURLE_OK;
   }
-  return CURLE_FAILED_INIT;
+
+  timeout_ms = cf_tcp_accept_timeleft(cf, data);
+  if(timeout_ms < 0) {
+    /* if a timeout was already reached, bail out */
+    failf(data, "Accept timeout occurred while waiting server connect");
+    return CURLE_FTP_ACCEPT_TIMEOUT;
+  }
+
+  CURL_TRC_CF(data, cf, "Checking for incoming on fd=%" FMT_SOCKET_T
+              " ip=%s:%d", ctx->sock, ctx->ip.local_ip, ctx->ip.local_port);
+  socketstate = Curl_socket_check(ctx->sock, CURL_SOCKET_BAD,
+                                  CURL_SOCKET_BAD, 0);
+  CURL_TRC_CF(data, cf, "socket_check -> %x", socketstate);
+  switch(socketstate) {
+  case -1: /* error */
+    /* let's die here */
+    failf(data, "Error while waiting for server connect");
+    return CURLE_FTP_ACCEPT_FAILED;
+  default:
+    if(socketstate & CURL_CSELECT_IN) {
+      infof(data, "Ready to accept data connection from server");
+      incoming = TRUE;
+    }
+    break;
+  }
+
+  if(!incoming) {
+    CURL_TRC_CF(data, cf, "nothing heard from the server yet");
+    *done = FALSE;
+    return CURLE_OK;
+  }
+
+  if(0 == getsockname(ctx->sock, (struct sockaddr *) &add, &size)) {
+    size = sizeof(add);
+    s_accepted = accept(ctx->sock, (struct sockaddr *) &add, &size);
+  }
+
+  if(CURL_SOCKET_BAD == s_accepted) {
+    failf(data, "Error accept()ing server connect");
+    return CURLE_FTP_PORT_FAILED;
+  }
+
+  infof(data, "Connection accepted from server");
+  (void)curlx_nonblock(s_accepted, TRUE); /* enable non-blocking */
+  /* Replace any filter on SECONDARY with one listening on this socket */
+  ctx->listening = FALSE;
+  ctx->accepted = TRUE;
+  socket_close(data, cf->conn, TRUE, ctx->sock);
+  ctx->sock = s_accepted;
+
+  cf->conn->sock[cf->sockindex] = ctx->sock;
+  cf_tcp_set_accepted_remote_ip(cf, data);
+  set_local_ip(cf, data);
+  ctx->active = TRUE;
+  ctx->connected_at = Curl_now();
+  cf->connected = TRUE;
+  CURL_TRC_CF(data, cf, "accepted_set(sock=%" FMT_SOCKET_T
+              ", remote=%s port=%d)",
+              ctx->sock, ctx->ip.remote_ip, ctx->ip.remote_port);
+
+  if(data->set.fsockopt) {
+    int error = 0;
+
+    /* activate callback for setting socket options */
+    Curl_set_in_callback(data, true);
+    error = data->set.fsockopt(data->set.sockopt_client,
+                               ctx->sock, CURLSOCKTYPE_ACCEPT);
+    Curl_set_in_callback(data, false);
+
+    if(error)
+      return CURLE_ABORTED_BY_CALLBACK;
+  }
+  return CURLE_OK;
 }
 
 struct Curl_cftype Curl_cft_tcp_accept = {
@@ -2076,13 +2222,12 @@ CURLcode Curl_conn_tcp_listen_set(struct Curl_easy *data,
     goto out;
   Curl_conn_cf_add(data, conn, sockindex, cf);
 
+  ctx->started_at = Curl_now();
   conn->sock[sockindex] = ctx->sock;
   set_local_ip(cf, data);
-  ctx->active = TRUE;
-  ctx->connected_at = Curl_now();
-  cf->connected = TRUE;
-  CURL_TRC_CF(data, cf, "Curl_conn_tcp_listen_set(%" FMT_SOCKET_T ")",
-              ctx->sock);
+  CURL_TRC_CF(data, cf, "set filter for listen socket fd=%" FMT_SOCKET_T
+              " ip=%s:%d", ctx->sock,
+              ctx->ip.local_ip, ctx->ip.local_port);
 
 out:
   if(result) {
@@ -2092,67 +2237,16 @@ out:
   return result;
 }
 
-static void set_accepted_remote_ip(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+bool Curl_conn_is_tcp_listen(struct Curl_easy *data,
+                             int sockindex)
 {
-  struct cf_socket_ctx *ctx = cf->ctx;
-#ifdef HAVE_GETPEERNAME
-  char buffer[STRERROR_LEN];
-  struct Curl_sockaddr_storage ssrem;
-  curl_socklen_t plen;
-
-  ctx->ip.remote_ip[0] = 0;
-  ctx->ip.remote_port = 0;
-  plen = sizeof(ssrem);
-  memset(&ssrem, 0, plen);
-  if(getpeername(ctx->sock, (struct sockaddr*) &ssrem, &plen)) {
-    int error = SOCKERRNO;
-    failf(data, "getpeername() failed with errno %d: %s",
-          error, Curl_strerror(error, buffer, sizeof(buffer)));
-    return;
+  struct Curl_cfilter *cf = data->conn->cfilter[sockindex];
+  while(cf) {
+    if(cf->cft == &Curl_cft_tcp_accept)
+      return TRUE;
+    cf = cf->next;
   }
-  if(!Curl_addr2string((struct sockaddr*)&ssrem, plen,
-                       ctx->ip.remote_ip, &ctx->ip.remote_port)) {
-    failf(data, "ssrem inet_ntop() failed with errno %d: %s",
-          errno, Curl_strerror(errno, buffer, sizeof(buffer)));
-    return;
-  }
-#else
-  ctx->ip.remote_ip[0] = 0;
-  ctx->ip.remote_port = 0;
-  (void)data;
-#endif
-}
-
-CURLcode Curl_conn_tcp_accepted_set(struct Curl_easy *data,
-                                    struct connectdata *conn,
-                                    int sockindex, curl_socket_t *s)
-{
-  struct Curl_cfilter *cf = NULL;
-  struct cf_socket_ctx *ctx = NULL;
-
-  cf = conn->cfilter[sockindex];
-  if(!cf || cf->cft != &Curl_cft_tcp_accept)
-    return CURLE_FAILED_INIT;
-
-  ctx = cf->ctx;
-  DEBUGASSERT(ctx->listening);
-  /* discard the listen socket */
-  socket_close(data, conn, TRUE, ctx->sock);
-  ctx->listening = FALSE;
-  ctx->sock = *s;
-  conn->sock[sockindex] = ctx->sock;
-  set_accepted_remote_ip(cf, data);
-  set_local_ip(cf, data);
-  ctx->active = TRUE;
-  ctx->accepted = TRUE;
-  ctx->connected_at = Curl_now();
-  cf->connected = TRUE;
-  CURL_TRC_CF(data, cf, "accepted_set(sock=%" FMT_SOCKET_T
-              ", remote=%s port=%d)",
-              ctx->sock, ctx->ip.remote_ip, ctx->ip.remote_port);
-
-  return CURLE_OK;
+  return FALSE;
 }
 
 /**
