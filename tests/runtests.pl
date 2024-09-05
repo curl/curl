@@ -2584,6 +2584,21 @@ if(!$listonly) {
 }
 
 #######################################################################
+# Output information about the curl build
+#
+if(!$listonly) {
+    if(open(my $fd, "<", "buildinfo.txt")) {
+        while(my $line = <$fd>) {
+            chomp $line;
+            if($line && $line !~ /^#/) {
+                logmsg("* buildinfo.$line\n");
+            }
+        }
+        close($fd);
+    }
+}
+
+#######################################################################
 # initialize configuration needed to set up servers
 # TODO: rearrange things so this can be called only in runner_init()
 #

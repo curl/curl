@@ -1558,6 +1558,59 @@ use vars qw(
 _EOF
 ])
 
+
+dnl CURL_GENERATE_BUILDINFO_TXT
+dnl -------------------------------------------------
+dnl Save build info for test runner to pick up and log
+
+AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
+  curl_pflags=""
+  case $host in
+    *-apple-*) curl_pflags="${curl_pflags} APPLE";;
+  esac
+  if test "$curl_cv_native_windows" = 'yes'; then
+    curl_pflags="${curl_pflags} WIN32"
+  else
+    case $host in
+      *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
+        curl_pflags="${curl_pflags} UNIX";;
+    esac
+  fi
+  case $host_os in
+    cygwin*|msys*) curl_pflags="${curl_pflags} CYGWIN";;
+  esac
+  case $host_os in
+    msys*) curl_pflags="${curl_pflags} MSYS";;
+  esac
+  if test "x$compiler_id" = 'xGNU_C'; then
+    curl_pflags="${curl_pflags} GCC"
+  fi
+  case $host_os in
+    mingw*) curl_pflags="${curl_pflags} MINGW";;
+  esac
+  if test "x$cross_compiling" = 'xyes'; then
+    curl_pflags="${curl_pflags} CROSS"
+  fi
+  squeeze curl_pflags
+  cat >./tests/buildinfo.txt <<_EOF
+[@%:@] This is a generated file.  Do not edit.
+configure.tool: configure
+configure.args: $ac_configure_args
+host: $build
+host.os: $build_os
+host.cpu: $build_cpu
+host.vendor: $build_vendor
+target: $host
+target.os: $host_os
+target.cpu: $host_cpu
+target.vendor: $host_vendor
+target.flags: $curl_pflags
+compiler: $compiler_id
+compiler.version: $compiler_num
+_EOF
+])
+
+
 dnl CURL_CPP_P
 dnl
 dnl Check if $cpp -P should be used for extract define values due to gcc 5
