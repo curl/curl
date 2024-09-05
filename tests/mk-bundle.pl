@@ -153,8 +153,7 @@ close $fh;
 
 print <<FOOTER
 static const struct onetest s_tests[] = {
-$tlist
-};
+$tlist};
 
 #undef CURLTESTS_BUNDLED_TEST_H
 
