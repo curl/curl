@@ -34,10 +34,11 @@
 #endif
 
 /* Compile-time deprecation macros. */
-#if (defined(__GNUC__) &&                                               \
-  ((__GNUC__ > 12) || ((__GNUC__ == 12) && (__GNUC_MINOR__ >= 1 ))) ||  \
-  defined(__IAR_SYSTEMS_ICC__)) &&                                      \
-  !defined(__INTEL_COMPILER) &&                                         \
+#if (defined(__GNUC__) &&                                              \
+  ((__GNUC__ > 12) || ((__GNUC__ == 12) && (__GNUC_MINOR__ >= 1))) ||  \
+  (defined(__clang__) && __clang_major__ >= 3) ||                      \
+  defined(__IAR_SYSTEMS_ICC__)) &&                                     \
+  !defined(__INTEL_COMPILER) &&                                        \
   !defined(CURL_DISABLE_DEPRECATION) && !defined(BUILDING_LIBCURL)
 #define CURL_DEPRECATED(version, message)                       \
   __attribute__((deprecated("since " # version ". " message)))
