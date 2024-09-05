@@ -1592,7 +1592,7 @@ AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
     curl_pflags="${curl_pflags} CROSS"
   fi
   squeeze curl_pflags
-  cat >./tests/buildinfo.txt <<_EOF
+  cat >./buildinfo.txt <<_EOF
 [@%:@] This is a generated file.  Do not edit.
 configure.tool: configure
 configure.args: $ac_configure_args
