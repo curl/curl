@@ -45,7 +45,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#define CURL_DISABLE_DEPRECATION
 #include <curl/curl.h>
 
 int main(int argc, char *argv[])
@@ -60,27 +59,29 @@ int main(int argc, char *argv[])
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  /* Fill in the file upload field */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "sendfile",
-               CURLFORM_FILE, "postit2-formadd.c",
-               CURLFORM_END);
+  CURL_IGNORE_DEPRECATION(
+    /* Fill in the file upload field */
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "sendfile",
+                 CURLFORM_FILE, "postit2-formadd.c",
+                 CURLFORM_END);
 
-  /* Fill in the filename field */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "filename",
-               CURLFORM_COPYCONTENTS, "postit2-formadd.c",
-               CURLFORM_END);
+    /* Fill in the filename field */
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "filename",
+                 CURLFORM_COPYCONTENTS, "postit2-formadd.c",
+                 CURLFORM_END);
 
 
-  /* Fill in the submit field too, even if this is rarely needed */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "submit",
-               CURLFORM_COPYCONTENTS, "send",
-               CURLFORM_END);
+    /* Fill in the submit field too, even if this is rarely needed */
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "submit",
+                 CURLFORM_COPYCONTENTS, "send",
+                 CURLFORM_END);
+  )
 
   curl = curl_easy_init();
   /* initialize custom header list (stating that Expect: 100-continue is not
@@ -104,8 +105,11 @@ int main(int argc, char *argv[])
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    /* then cleanup the formpost chain */
-    curl_formfree(formpost);
+    CURL_IGNORE_DEPRECATION(
+      /* then cleanup the formpost chain */
+      curl_formfree(formpost);
+    )
+
     /* free slist */
     curl_slist_free_all(headerlist);
   }
