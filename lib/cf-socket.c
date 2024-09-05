@@ -2025,8 +2025,10 @@ static timediff_t cf_tcp_accept_timeleft(struct Curl_cfilter *cf,
   timediff_t other;
   struct curltime now;
 
+#ifndef CURL_DISABLE_FTP
   if(data->set.accepttimeout > 0)
     timeout_ms = data->set.accepttimeout;
+#endif
 
   now = Curl_now();
   /* check if the generic timeout possibly is set shorter */
