@@ -195,7 +195,6 @@ print <<HEADER
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#define CURL_DISABLE_DEPRECATION  /* Deprecated options are tested too */
 #include "test.h"
 #include "memdebug.h"
 #include <limits.h>
@@ -352,6 +351,8 @@ CURLcode test(char *URL)
     res = CURLE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
+
+  CURL_IGNORE_DEPRECATION(
 HEADER
     ;
 
@@ -584,6 +585,8 @@ MOO
 
 
 print <<FOOTER
+  )
+
   curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:

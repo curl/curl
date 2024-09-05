@@ -35,8 +35,7 @@ EXTRA_DIST = CMakeLists.txt
 
 AM_CPPFLAGS = -I$(top_srcdir)/include   \
               -I$(top_builddir)/lib     \
-              -I$(top_srcdir)/lib       \
-              -DCURL_DISABLE_DEPRECATION
+              -I$(top_srcdir)/lib
 
 LIBDIR = $(top_builddir)/lib
 
