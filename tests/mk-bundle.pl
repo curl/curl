@@ -124,14 +124,14 @@ my $tlist = "";
 while(my $line = <$fh>) {
     chomp $line;
     if($line =~ /([a-z0-9]+)_SOURCES\ =\ ([a-z0-9]+)\.c/) {
-        my $nam = $1;
-        my $namu = uc($nam);
+        my $name = $1;
+        my $namu = uc($name);
         my $src = "$2.c";
 
         # Make common symbols unique across test sources
         foreach my $symb ("test", @reused_symbols) {
             print "#undef $symb\n";
-            print "#define $symb ${symb}_$nam\n";
+            print "#define $symb ${symb}_$name\n";
         }
 
         print "#define $namu\n";
@@ -145,7 +145,7 @@ while(my $line = <$fh>) {
 
         print "\n";
 
-        $tlist .= "  { \"$nam\", test_$nam },\n";
+        $tlist .= "  { \"$name\", test_$name },\n";
     }
 }
 
