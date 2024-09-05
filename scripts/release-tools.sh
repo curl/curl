@@ -70,6 +70,6 @@ cat <<MOO
 ## Generate the tarball with the same timestamp
 
 - export SOURCE_DATE_EPOCH=$timestamp
-- ./maketgz [version]
+- ./scripts/maketgz [version]
 
 MOO

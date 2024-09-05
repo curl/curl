@@ -13,7 +13,7 @@
 #   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl autoreconf -fi
 #   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl ./configure --without-ssl --without-libpsl
 #   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl make
-#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl ./maketgz 8.7.1
+#   docker run --rm -it -u $(id -u):$(id -g) -v $(pwd):/usr/src -w /usr/src curl/curl ./scripts/maketgz 8.7.1
 #
 # or get into a shell in the build environment, for example
 #
@@ -21,7 +21,7 @@
 #   $ autoreconf -fi
 #   $ ./configure --without-ssl --without-libpsl
 #   $ make
-#   $ ./maketgz 8.7.1
+#   $ ./scripts/maketgz 8.7.1
 
 # To update, get the latest digest e.g. from https://hub.docker.com/_/debian/tags
 FROM debian:bookworm-slim@sha256:903d3225acecaa272bbdd7273c6c312c2af8b73644058838d23a8c9e6e5c82cf

@@ -51,4 +51,4 @@ docker run --rm -u "$(id -u):$(id -g)" \
   autoreconf -fi
   ./configure --without-ssl --without-libpsl
   make -sj8
-  ./maketgz $version"
+  ./scripts/maketgz $version"
