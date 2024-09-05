@@ -55,9 +55,11 @@ my @reused_symbols = (
     "curlSocketCallback",
     "curlTimerCallback",
     "cyclic_add",
+    "easy",  # unit
     "fopen_works",
     "getMicroSecondTimeout",
     "geterr",
+    "hash_static",  # unit
     "header_callback",
     "ioctlcallback",
     "msgbuff",
@@ -65,6 +67,7 @@ my @reused_symbols = (
     "my_lock",
     "my_rlimit",
     "my_unlock",
+    "mydtor",  # unit
     "num_open",
     "progress_callback",
     "read_callback",
@@ -77,14 +80,19 @@ my @reused_symbols = (
     "suburl",
     "test_failure",  # shadow
     "test_once",
+    "test_parse",  # unit
     "testbuf",
+    "testcase",  # unit
     "testdata",
     "testfd",
     "testname",
     "testpost",
+    "tests",  # unit
     "teststring",
     "trailers_callback",
     "transfer_status",
+    "unit_setup",  # unit
+    "unit_stop",  # unit
     "updateFdSet",
     "userdata",
     "websocket",
@@ -93,15 +101,6 @@ my @reused_symbols = (
     "write_cb",
     "writecb",
     "xferinfo",
-    # unit
-    "easy",
-    "hash_static",
-    "mydtor",
-    "test_parse",
-    "testcase",
-    "tests",
-    "unit_setup",
-    "unit_stop",
     );
 
 # TODO: Some of these may be #undef-ed manually at the end of each source
