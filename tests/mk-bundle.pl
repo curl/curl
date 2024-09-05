@@ -40,6 +40,78 @@ print "#define CURLTESTS_BUNDLED\n";
 print "#define CURLTESTS_BUNDLED_TEST_H\n";
 print '#include "first.h"' . "\n\n";
 
+# TODO: Some of these might be subject for de-duplication or sync.
+my @reused_symbols = (
+    "ReadThis",
+    "ReadWriteSockets",
+    "Sockets",
+    "Tdata",
+    "WriteThis",
+    "addFd",
+    "checkFdSet",
+    "checkForCompletion",
+    "close_file_descriptors",
+    "curl",
+    "curlSocketCallback",
+    "curlTimerCallback",
+    "cyclic_add",
+    "fopen_works",
+    "getMicroSecondTimeout",
+    "geterr",
+    "header_callback",
+    "ioctlcallback",
+    "msgbuff",
+    "my_fire",
+    "my_lock",
+    "my_rlimit",
+    "my_unlock",
+    "num_open",
+    "progress_callback",
+    "read_callback",
+    "readcallback",
+    "removeFd",
+    "rlim2str",
+    "run_thread",
+    "showem",
+    "store_errmsg",
+    "suburl",
+    "test_failure",  # shadow
+    "test_once",
+    "testbuf",
+    "testdata",
+    "testfd",
+    "testname",
+    "testpost",
+    "teststring",
+    "trailers_callback",
+    "transfer_status",
+    "updateFdSet",
+    "userdata",
+    "websocket",
+    "websocket_close",
+    "write_callback",
+    "write_cb",
+    "writecb",
+    "xferinfo",
+    # unit
+    "easy",
+    "hash_static",
+    "mydtor",
+    "test_parse",
+    "testcase",
+    "tests",
+    "unit_setup",
+    "unit_stop",
+    );
+
+# TODO: Some of these may be #undef-ed manually at the end of each source
+my @reused_macros = (
+    "HEADER_REQUEST",
+    "NUM_HANDLES",
+    "SAFETY_MARGIN",
+    "TEST_HANG_TIMEOUT",
+    );
+
 my $tlist = "";
 
 while(my $line = <$fh>) {
@@ -50,69 +122,7 @@ while(my $line = <$fh>) {
         my $src = "$2.c";
 
         # Make common symbols unique across test sources
-        # TODO: Some of these might be subject for de-duplication or sync.
-        foreach my $symb ("test",
-                "ReadThis",
-                "ReadWriteSockets",
-                "Sockets",
-                "Tdata",
-                "WriteThis",
-                "addFd",
-                "checkFdSet",
-                "checkForCompletion",
-                "close_file_descriptors",
-                "curl",
-                "curlSocketCallback",
-                "curlTimerCallback",
-                "cyclic_add",
-                "fopen_works",
-                "getMicroSecondTimeout",
-                "geterr",
-                "header_callback",
-                "ioctlcallback",
-                "msgbuff",
-                "my_fire",
-                "my_lock",
-                "my_rlimit",
-                "my_unlock",
-                "num_open",
-                "progress_callback",
-                "read_callback",
-                "readcallback",
-                "removeFd",
-                "rlim2str",
-                "run_thread",
-                "showem",
-                "store_errmsg",
-                "suburl",
-                "test_failure",  # shadow
-                "test_once",
-                "testbuf",
-                "testdata",
-                "testfd",
-                "testname",
-                "testpost",
-                "teststring",
-                "trailers_callback",
-                "transfer_status",
-                "updateFdSet",
-                "userdata",
-                "websocket",
-                "websocket_close",
-                "write_callback",
-                "write_cb",
-                "writecb",
-                "xferinfo",
-                # unit
-                "easy",
-                "hash_static",
-                "mydtor",
-                "test_parse",
-                "testcase",
-                "tests",
-                "unit_setup",
-                "unit_stop",
-                 ) {
+        foreach my $symb ("test", @reused_symbols) {
             print "#undef $symb\n";
             print "#define $symb ${symb}_$nam\n";
         }
@@ -122,12 +132,7 @@ while(my $line = <$fh>) {
         print "#undef $namu\n";
 
         # Reset macros re-used by multiple tests
-        foreach my $undef ("test",
-                "HEADER_REQUEST",
-                "NUM_HANDLES",
-                "SAFETY_MARGIN",
-                "TEST_HANG_TIMEOUT",
-                ) {
+        foreach my $undef ("test", @reused_macros) {
             print "#undef $undef\n";
         }
 
