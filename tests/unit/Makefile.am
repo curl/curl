@@ -36,7 +36,8 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/src            \
-              -I$(top_srcdir)/tests/libtest
+              -I$(top_srcdir)/tests/libtest  \
+              -I$(top_srcdir)/tests/unit
 
 EXTRA_DIST = CMakeLists.txt README.md
 
@@ -50,6 +51,14 @@ LDADD = $(top_builddir)/src/libcurltool.la   \
         @LDFLAGS@ @LIBCURL_PC_LIBS_PRIVATE@
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
+
+if USE_TEST_BUNDLES
+units.c: $(top_srcdir)/tests/mk-bundle.pl
+	@PERL@  $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > units.c
+
+UNITPROGS = units
+units_SOURCES = units.c
+endif
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;

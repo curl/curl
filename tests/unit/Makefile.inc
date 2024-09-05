@@ -28,6 +28,8 @@ UNITFILES = curlcheck.h \
  ../libtest/test.h \
  ../libtest/first.c
 
+if USE_TEST_BUNDLES
+else
 # These are all unit test programs
 UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit1308 unit1309 unit1323 \
@@ -41,6 +43,7 @@ UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \
  unit2600 unit2601 unit2602 unit2603 unit2604 \
  unit3200 \
  unit3205
+endif
 
 unit1300_SOURCES = unit1300.c $(UNITFILES)
 
