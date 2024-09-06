@@ -62,32 +62,25 @@ TOCLEAN := $(curl_OBJECTS)
 
 ### Rules
 
-PERL  ?= perl
+PERL ?= perl
 
 ifneq ($(wildcard tool_hugehelp.c.cvs),)
-NROFF ?= groff
-
 TOCLEAN += tool_hugehelp.c
-
-ifneq ($(shell $(call WHICH, $(NROFF))),)
-$(PROOT)/docs/curl.1: $(wildcard $(PROOT)/docs/cmdline-opts/*.d)
-	cd $(PROOT)/docs/cmdline-opts && \
-	$(PERL) gen.pl mainpage $(notdir $^) > ../curl.1
-
+# Load DPAGES
+include $(PROOT)/docs/cmdline-opts/Makefile.inc
+$(PROOT)/docs/cmdline-opts/curl.txt: $(addprefix $(PROOT)/docs/cmdline-opts/,$(DPAGES)) $(PROOT)/scripts/managen
+	cd $(PROOT)/docs/cmdline-opts && $(PERL) ../../scripts/managen ascii $(DPAGES) > curl.txt
 # Necessary for the generated tools_hugehelp.c
 CPPFLAGS += -DUSE_MANUAL
-
 ifdef ZLIB
 _MKHELPOPT += -c
 endif
-tool_hugehelp.c: $(PROOT)/docs/curl.1 mkhelp.pl
-	$(NROFF) -man -Tascii $(MANOPT) $< | \
-	$(PERL) mkhelp.pl $(_MKHELPOPT) $< > $@
+tool_hugehelp.c: $(PROOT)/docs/cmdline-opts/curl.txt mkhelp.pl
+	$(PERL) mkhelp.pl $(_MKHELPOPT) < $< > $@
 else
 tool_hugehelp.c:
 	@echo Creating $@
 	@$(call COPY, $@.cvs, $@)
-endif
 endif
 
 ifneq ($(CURL_CA_EMBED),)
