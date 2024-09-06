@@ -70,7 +70,7 @@ TOCLEAN += tool_hugehelp.c
 # Load DPAGES
 include $(PROOT)/docs/cmdline-opts/Makefile.inc
 
-$(PROOT)/docs/cmdline-opts/curl.txt: $(addprefix $(PROOT)/docs/cmdline-opts/,$(DPAGES))
+$(PROOT)/docs/cmdline-opts/curl.txt: $(addprefix $(PROOT)/docs/cmdline-opts/,$(DPAGES)) $(PROOT)/scripts/managen
 	cd $(PROOT)/docs/cmdline-opts && $(PERL) ../../scripts/managen ascii $(DPAGES) > curl.txt
 
 # Necessary for the generated tools_hugehelp.c
