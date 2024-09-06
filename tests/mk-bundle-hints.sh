@@ -23,9 +23,9 @@
 #
 ###########################################################################
 
-more=1
+detect_in_reused_sources=1
 
-if [ "$more" = '1' ]; then
+if [ "$detect_in_reused_sources" = '1' ]; then
   # Make symlinks for all re-used sources
   grep -E '^(lib|unit)[0-9]+_SOURCES = ' libtest/Makefile.inc unit/Makefile.inc \
     | sed -E 's@^([a-z]+)/[a-zA-Z.]+:(lib|unit)([0-9]+)_SOURCES = (lib|unit)([0-9]+).+@\1 \2 \3 \5@g' | \
@@ -68,7 +68,7 @@ grep -E '^ *# *define +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o -name
   | sort | uniq -c | sort -k 2 | grep -v -E '^ +1 ' \
   | awk '{print "    \"" $2 "\","}'
 
-if [ "$more" = '1' ]; then
+if [ "$detect_in_reused_sources" = '1' ]; then
   # Delete symlinks for all re-used sources
   find libtest unit -type l -delete
 fi
