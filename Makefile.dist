@@ -66,6 +66,6 @@ ca-bundle: scripts/mk-ca-bundle.pl
 	@echo "generate a fresh ca-bundle.crt"
 	@perl $< -b -l -u lib/ca-bundle.crt
 
-ca-firefox: lib/firefox-db2pem.sh
+ca-firefox: scripts/firefox-db2pem.sh
 	@echo "generate a fresh ca-bundle.crt"
-	./lib/firefox-db2pem.sh lib/ca-bundle.crt
+	./scripts/firefox-db2pem.sh lib/ca-bundle.crt
