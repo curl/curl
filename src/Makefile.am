@@ -87,8 +87,6 @@ libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
-CLEANFILES = tool_hugehelp.c
-
 # Use absolute directory to disable VPATH
 ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/curl.txt
 MKHELP=$(top_srcdir)/src/mkhelp.pl
@@ -128,6 +126,8 @@ else # USE_MANUAL
 $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
+
+CLEANFILES = $(HUGE)
 
 CA_EMBED_CSOURCE = tool_ca_embed.c
 CURL_CFILES += $(CA_EMBED_CSOURCE)
