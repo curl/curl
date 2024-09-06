@@ -1128,7 +1128,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* increment the reference counter of the credential/session handle */
       backend->cred->refcount++;
       CURL_TRC_CF(data, cf, "incremented credential handle refcount = %d",
-                  backend->cred->refcount));
+                  backend->cred->refcount);
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -1287,7 +1287,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   CURL_TRC_CF(data, cf, "sent initial handshake data: sent %zd bytes",
-              written));
+              written);
 
   backend->recv_unrecoverable_err = CURLE_OK;
   backend->recv_sspi_close_notify = false;
