@@ -99,11 +99,6 @@ HUGEIT_0 = @echo "  HUGE    " $@;
 HUGEIT_1 =
 HUGEIT_ = $(HUGEIT_0)
 
-CHECKSRC = $(CS_$(V))
-CS_0 = @echo "  RUN     " $@;
-CS_1 =
-CS_ = $(CS_0)
-
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
 AM_CPPFLAGS += -DUSE_MANUAL
@@ -146,6 +141,11 @@ else
 $(CA_EMBED_CSOURCE):
 	echo 'extern const void *curl_ca_embed; const void *curl_ca_embed;' > $(CA_EMBED_CSOURCE)
 endif
+
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
 checksrc:
