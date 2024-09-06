@@ -2494,7 +2494,11 @@ AC_ARG_ENABLE(versioned-symbols,
 AS_HELP_STRING([--enable-versioned-symbols], [Enable versioned symbols in shared library])
 AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shared library]),
 [ case "$enableval" in
-  yes) AC_MSG_RESULT(yes)
+  no)
+    AC_MSG_RESULT(no)
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
     AC_MSG_CHECKING([if libraries can be versioned])
     GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
     if test -z "$GLD"; then
@@ -2502,7 +2506,9 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
       AC_MSG_WARN([You need an ld version supporting the --version-script option])
     else
       AC_MSG_RESULT(yes)
-      if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+      if test "x$enableval" != "xyes"; then
+        versioned_symbols_flavour="$enableval"
+      elif test "x$CURL_WITH_MULTI_SSL" = "x1"; then
         versioned_symbols_flavour="MULTISSL_"
       elif test "x$OPENSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="OPENSSL_"
@@ -2523,9 +2529,6 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
     fi
     ;;
 
-  *)
-    AC_MSG_RESULT(no)
-    ;;
   esac
 ], [
 AC_MSG_RESULT(no)
