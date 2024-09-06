@@ -1743,14 +1743,7 @@ endif()
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
 function(transform_makefile_inc _input_file _output_file)
-  file(STRINGS "${_input_file}" _makefile_inc_lines)
-  set(_makefile_inc_text "")
-  foreach(_line IN LISTS _makefile_inc_lines)
-    if(NOT _line MATCHES "^(if |else|endif)")
-      set(_makefile_inc_text "${_makefile_inc_text}${_line}\n")
-    endif()
-  endforeach()
-
+  file(READ ${_input_file} _makefile_inc_text)
   string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 

@@ -59,7 +59,7 @@ TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 LDADD = $(SUPPORTFILES_LIBS)
 
 # Makefile.inc provides the source defines (TESTUTIL, SUPPORTFILES,
-# noinst_PROGRAMS, lib*_SOURCES, and lib*_CFLAGS)
+# LIBTESTPROGS, lib*_SOURCES, and lib*_CFLAGS)
 include Makefile.inc
 
 noinst_LTLIBRARIES =
@@ -106,6 +106,8 @@ else
 # These are part of the libcurl static lib. Add them here when linking shared.
 libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(TIMEDIFF) $(THREADS)
 endif
+else
+noinst_PROGRAMS = $(LIBTESTPROGS)
 endif
 
 lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h

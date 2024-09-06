@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'noinst_PROGRAMS', '*_SOURCES', TESTUTIL, TSTTRACE, WARNLESS, MULTIBYTE, TIMEDIFF, THREADS variables
+# Get 'LIBTESTPROGS', '*_SOURCES', TESTUTIL, TSTTRACE, WARNLESS, MULTIBYTE, TIMEDIFF, THREADS variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -45,7 +45,7 @@ if(CURL_USE_TEST_BUNDLES)
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
-  set(noinst_PROGRAMS "libtests")
+  set(LIBTESTPROGS "libtests")
   set(libtests_SOURCES "libtests.c")
   list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
   if(LIB_SELECTED STREQUAL LIB_SHARED)
@@ -54,7 +54,7 @@ if(CURL_USE_TEST_BUNDLES)
   endif()
 endif()
 
-foreach(_target IN LISTS noinst_PROGRAMS)
+foreach(_target IN LISTS LIBTESTPROGS)
   if(DEFINED ${_target}_SOURCES)
     set(_sources ${${_target}_SOURCES})
   else()

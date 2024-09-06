@@ -39,10 +39,8 @@ SUPPORTFILES = $(TIMEDIFF) first.c first.h test.h
 
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
-if USE_TEST_BUNDLES
-else
 # These are all libcurl test programs
-noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
+LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
  lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532   \
@@ -83,7 +81,6 @@ noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
  lib3100 lib3101 lib3102 lib3103 lib3207
-endif
 
 libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
