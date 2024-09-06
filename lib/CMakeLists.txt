@@ -242,7 +242,7 @@ if(BUILD_SHARED_LIBS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "RUSTLS_")
       endif()
     endif()
-    # Generate linker input file for versioned symbols.
+    # Generate version script for the linker, for versioned symbols.
     # Consumed variables:
     #   CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX
     #   CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME
