@@ -53,7 +53,7 @@ env:
 
 jobs:
   cmake:
-    name: linux (cmake)
+    name: linux (cmake & autoconf)
     runs-on: 'ubuntu-latest'
     container: 'debian:stretch'
 
@@ -69,7 +69,7 @@ jobs:
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
           apt-get update
-          apt-get install -y --no-install-suggests --no-install-recommends cmake make gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev stunnel4 groff
+          apt-get install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev stunnel4 groff
           # GitHub's actions/checkout needs a newer glibc. This one is the
           # latest available for buster, the next stable release after stretch.
           httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u4_amd64.deb
@@ -94,16 +94,36 @@ jobs:
             -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
-      - name: 'build'
+      - name: 'cmake build'
         run: |
           make -C bld-cares
           bld-cares/src/curl --disable --version
 
-      - name: 'install'
+      - name: 'cmake install'
         run: make -C bld-cares install
 
-      - name: 'build tests'
+      - name: 'cmake build tests'
         run: make -C bld-cares testdeps
 
-      - name: 'run tests'
+      - name: 'cmake run tests'
         run: make -C bld-cares test-ci
+
+      - name: 'autoreconf'
+        run: autoreconf -if
+
+      - name: 'configure (out-of-tree, libssh2)'
+        run: |
+          mkdir bld-am
+          cd bld-am
+          ../configure --disable-dependency-tracking --enable-warnings --enable-werror --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --prefix="$PWD"/../install-am
+
+      - name: 'autoconf build'
+        run: |
+          make -C bld-am
+          bld-am/src/curl --disable --version
+
+      - name: 'autoconf install'
+        run: make -C bld-am install
+
+      - name: 'autoconf build tests'
+        run: make -C bld-am/tests all
