@@ -1,10 +1,4 @@
-HIDDEN
-{
-  local:
-    __*;
-    _rest*;
-    _save*;
-};
+HIDDEN {};
 
 CURL_@CURL_LT_SHLIB_VERSIONED_FLAVOUR@4
 {
