@@ -2546,7 +2546,11 @@ AC_ARG_ENABLE(versioned-symbols,
 AS_HELP_STRING([--enable-versioned-symbols], [Enable versioned symbols in shared library])
 AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shared library]),
 [ case "$enableval" in
-  yes) AC_MSG_RESULT(yes)
+  no)
+    AC_MSG_RESULT(no)
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
     AC_MSG_CHECKING([if libraries can be versioned])
     GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
     if test -z "$GLD"; then
@@ -2554,7 +2558,9 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
       AC_MSG_WARN([You need an ld version supporting the --version-script option])
     else
       AC_MSG_RESULT(yes)
-      if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+      if test "x$enableval" != "xyes"; then
+        versioned_symbols_flavour="$enableval"
+      elif test "x$CURL_WITH_MULTI_SSL" = "x1"; then
         versioned_symbols_flavour="MULTISSL_"
       elif test "x$OPENSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="OPENSSL_"
@@ -2562,14 +2568,12 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         versioned_symbols_flavour="MBEDTLS_"
       elif test "x$BEARSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="BEARSSL_"
-      elif test "x$GNUTLS_ENABLED" = "x1"; then
-        versioned_symbols_flavour="GNUTLS_"
       elif test "x$WOLFSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="WOLFSSL_"
-      elif test "x$SCHANNEL_ENABLED" = "x1"; then
-        versioned_symbols_flavour="SCHANNEL_"
-      elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then
-        versioned_symbols_flavour="SECURE_TRANSPORT_"
+      elif test "x$GNUTLS_ENABLED" = "x1"; then
+        versioned_symbols_flavour="GNUTLS_"
+      elif test "x$RUSTLS_ENABLED" = "x1"; then
+        versioned_symbols_flavour="RUSTLS_"
       else
         versioned_symbols_flavour=""
       fi
@@ -2577,17 +2581,14 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
     fi
     ;;
 
-  *)
-    AC_MSG_RESULT(no)
-    ;;
   esac
 ], [
 AC_MSG_RESULT(no)
 ]
 )
 
-AC_SUBST([CURL_LT_SHLIB_VERSIONED_FLAVOUR],
-  ["$versioned_symbols_flavour"])
+AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavour"])
+AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with VERSIONCHANGE - VERSIONDEL in lib/Makefile.soname
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "x$versioned_symbols" = 'xyes'])
 
