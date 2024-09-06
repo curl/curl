@@ -2151,7 +2151,6 @@ static CURLcode cf_tcp_accept_connect(struct Curl_cfilter *cf,
   ctx->accepted = TRUE;
   socket_close(data, cf->conn, TRUE, ctx->sock);
   ctx->sock = s_accepted;
-  s_accepted = CURL_SOCKET_BAD;
 
   cf->conn->sock[cf->sockindex] = ctx->sock;
   cf_tcp_set_accepted_remote_ip(cf, data);
