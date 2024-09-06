@@ -1138,8 +1138,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_CHECK_LIB(watt, gethostbyname,
     [
       HAVE_GETHOSTBYNAME="1"
-      CPPFLAGS="-I/dev/env/WATT_ROOT/inc"
-      LDFLAGS="-L/dev/env/WATT_ROOT/lib"
+      CPPFLAGS="-I${WATT_ROOT}/inc"
+      LDFLAGS="-L${WATT_ROOT}/lib"
       LIBS="-lwatt $LIBS"
     ]
   )
@@ -4059,7 +4059,17 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
     want_pthreads=yes
     ;;
   esac ], [
+    default_pthreads=1
     if test "$curl_cv_native_windows" = "yes"; then
+      default_pthreads=0
+    else
+      case $host_os in
+        msdos*)
+          default_pthreads=0
+          ;;
+      esac
+    fi
+    if test "$default_pthreads" = '0'; then
       AC_MSG_RESULT(no)
       want_pthreads=no
     else
