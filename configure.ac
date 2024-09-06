@@ -2583,7 +2583,7 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
 
   esac
 ], [
-AC_MSG_RESULT(no)
+  AC_MSG_RESULT(no)
 ]
 )
 
