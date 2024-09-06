@@ -101,9 +101,9 @@ jobs:
           mkdir build
           pushd build
           ../configure --without-ssl --enable-debug "--prefix=${PWD}/pkg" --without-libpsl
-          make -j5
-          make -j5 test-ci
-          make -j5 install
+          make -j5 V=1
+          make -j5 V=1 test-ci
+          make -j5 V=1 install
         name: 'verify out-of-tree autotools debug build'
 
   verify-out-of-tree-cmake:
