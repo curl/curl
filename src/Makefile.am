@@ -102,8 +102,7 @@ curl_LDADD = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
 # if unit tests are enabled, build a static library to link them with
 if BUILD_UNITTESTS
 noinst_LTLIBRARIES = libcurltool.la
-libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) \
-                          -DCURL_STATICLIB -DUNITTESTS
+libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 if USE_UNITY
