@@ -55,42 +55,24 @@ endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
 if(MSVC OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  set(_cpp_cmd "\"${CMAKE_C_COMPILER}\" -E")
+  set(CURL_CPP "\"${CMAKE_C_COMPILER}\" -E")
   if(APPLE AND CMAKE_OSX_SYSROOT)
-    set(_cpp_cmd "${_cpp_cmd} -isysroot ${CMAKE_OSX_SYSROOT}")
+    set(CURL_CPP "${CURL_CPP} -isysroot ${CMAKE_OSX_SYSROOT}")
   endif()
   # Add header directories, like autotools builds do.
   get_property(_include_dirs TARGET ${LIB_SELECTED} PROPERTY INCLUDE_DIRECTORIES)
   foreach(_include_dir IN LISTS _include_dirs)
-    set(_cpp_cmd "${_cpp_cmd} -I${_include_dir}")
+    set(CURL_CPP "${CURL_CPP} -I${_include_dir}")
   endforeach()
 else()
-  set(_cpp_cmd "cpp")
+  set(CURL_CPP "cpp")
 endif()
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
-
-package configurehelp;
-
-use strict;
-use warnings;
-use Exporter;
-
-use vars qw(
-    @ISA
-    @EXPORT_OK
-    \$Cpreprocessor
-    );
-
-@ISA = qw(Exporter);
-
-@EXPORT_OK = qw(
-    \$Cpreprocessor
-    );
-
-\$Cpreprocessor = '${_cpp_cmd}';
-
-1;
-")
+# Generate version script for the linker, for versioned symbols.
+# Consumed variable:
+#   CURL_CPP
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/configurehelp.pm.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" @ONLY)
 
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")

@@ -95,8 +95,6 @@ EXTRA_DIST =        \
  $(TESTSCRIPTS)     \
  $(CURLPAGES)
 
-DISTCLEANFILES = configurehelp.pm
-
 # we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
