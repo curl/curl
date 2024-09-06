@@ -2327,7 +2327,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->encdata_is_incomplete = true;
       if(!*err)
         *err = CURLE_AGAIN;
-      infof(data, "schannel: failed to decrypt data, need more data");
+      else
+        infof(data, "schannel: failed to decrypt data, need more data");
       goto cleanup;
     }
     else {
