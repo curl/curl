@@ -85,9 +85,6 @@ libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
 CLEANFILES = tool_hugehelp.c
-# Use the C locale to ensure that only ASCII characters appear in the
-# embedded text.
-NROFF=env LC_ALL=C @NROFF@ @MANOPT@ 2>/dev/null # figured out by the configure script
 
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
  Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
