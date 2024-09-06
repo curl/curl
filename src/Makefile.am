@@ -26,6 +26,9 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # remove targets if the command fails
 .DELETE_ON_ERROR:
 
+EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
+ Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
+
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
@@ -85,9 +88,6 @@ libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
 CLEANFILES = tool_hugehelp.c
-
-EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
- Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
 
 # Use absolute directory to disable VPATH
 ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/curl.txt
