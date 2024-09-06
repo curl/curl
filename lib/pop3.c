@@ -215,7 +215,7 @@ static const struct pop3_cmd pop3cmds[] = {
   { "AUTH", 4, FALSE, FALSE },
   { "CAPA", 4, TRUE, TRUE },
   { "DELE", 4, FALSE, FALSE },
-  { "LIST", 4, TRUE, TRUE },
+  { "LIST", 4, TRUE, FALSE },
   { "MSG",  3, TRUE, TRUE },
   { "NOOP", 4, FALSE, FALSE },
   { "PASS", 4, FALSE, FALSE },
