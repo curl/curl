@@ -1123,7 +1123,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
                               (void **)&old_cred, NULL)) {
       backend->cred = old_cred;
-      CURL_TRC_CF(data, cf, "reusing existing credential handle"));
+      CURL_TRC_CF(data, cf, "reusing existing credential handle");
 
       /* increment the reference counter of the credential/session handle */
       backend->cred->refcount++;
@@ -1396,7 +1396,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* increase encrypted data buffer offset */
       backend->encdata_offset += nread;
       backend->encdata_is_incomplete = false;
-      CURL_TRC_CF(data, cf, "encrypted data got %zd", nread));
+      CURL_TRC_CF(data, cf, "encrypted data got %zd", nread);
     }
 
     CURL_TRC_CF(data, cf, "encrypted data buffer: offset %zu length %zu",
@@ -1699,7 +1699,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
 
   CURL_TRC_CF(data, cf, "SSL/TLS connection with %s port %d (step 3/3)",
-              connssl->peer.hostname, connssl->peer.port));
+              connssl->peer.hostname, connssl->peer.port);
 
   if(!backend->cred)
     return CURLE_SSL_CONNECT_ERROR;
