@@ -277,13 +277,11 @@ DEL   = rm -f $1
 COPY  = -cp -afv $1 $2
 MKDIR = mkdir -p $1
 RMDIR = rm -fr $1
-WHICH = $(SHELL) -c "command -v $1"
 else
 DEL   = -del 2>NUL /q /f $(subst /,\,$1)
 COPY  = -copy 2>NUL /y $(subst /,\,$1) $(subst /,\,$2)
 MKDIR = -md 2>NUL $(subst /,\,$1)
 RMDIR = -rd 2>NUL /q /s $(subst /,\,$1)
-WHICH = where $1
 endif
 
 all: $(TARGETS)
