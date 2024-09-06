@@ -1329,11 +1329,12 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     return CURLE_QUIC_CONNECT_ERROR;
 
   ctx->qconn = quiche_conn_new_with_tls((const uint8_t *)ctx->scid,
-                                      sizeof(ctx->scid), NULL, 0,
-                                      (struct sockaddr *)&ctx->q.local_addr,
-                                      ctx->q.local_addrlen,
-                                      &sockaddr->sa_addr, sockaddr->addrlen,
-                                      ctx->cfg, ctx->tls.ossl.ssl, false);
+                                        sizeof(ctx->scid), NULL, 0,
+                                        (struct sockaddr *)&ctx->q.local_addr,
+                                        ctx->q.local_addrlen,
+                                        &sockaddr->curl_sa_addr,
+                                        sockaddr->addrlen,
+                                        ctx->cfg, ctx->tls.ossl.ssl, false);
   if(!ctx->qconn) {
     failf(data, "cannot create quiche connection");
     return CURLE_OUT_OF_MEMORY;

@@ -2256,7 +2256,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
                    (struct sockaddr *)&ctx->q.local_addr,
                    ctx->q.local_addrlen);
   ngtcp2_addr_init(&ctx->connected_path.remote,
-                   &sockaddr->sa_addr, (socklen_t)sockaddr->addrlen);
+                   &sockaddr->curl_sa_addr, (socklen_t)sockaddr->addrlen);
 
   rc = ngtcp2_conn_client_new(&ctx->qconn, &ctx->dcid, &ctx->scid,
                               &ctx->connected_path,

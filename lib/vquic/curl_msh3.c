@@ -826,7 +826,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   verify = !!conn_config->verifypeer;
 
-  memcpy(&addr, &ctx->addr.sa_addr, ctx->addr.addrlen);
+  memcpy(&addr, &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
   MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
 
   if(verify && (conn_config->CAfile || conn_config->CApath)) {

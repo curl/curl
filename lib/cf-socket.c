@@ -336,7 +336,7 @@ void Curl_sock_assign_addr(struct Curl_sockaddr_ex *dest,
 
   if(dest->addrlen > sizeof(struct Curl_sockaddr_storage))
     dest->addrlen = sizeof(struct Curl_sockaddr_storage);
-  memcpy(&dest->sa_addr, ai->ai_addr, dest->addrlen);
+  memcpy(&dest->curl_sa_addr, ai->ai_addr, dest->addrlen);
 }
 
 static CURLcode socket_open(struct Curl_easy *data,
@@ -372,7 +372,7 @@ static CURLcode socket_open(struct Curl_easy *data,
 
 #if defined(USE_IPV6) && defined(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID)
   if(data->conn->scope_id && (addr->family == AF_INET6)) {
-    struct sockaddr_in6 * const sa6 = (void *)&addr->sa_addr;
+    struct sockaddr_in6 * const sa6 = (void *)&addr->curl_sa_addr;
     sa6->sin6_scope_id = data->conn->scope_id;
   }
 #endif
@@ -1088,13 +1088,14 @@ static CURLcode set_remote_ip(struct Curl_cfilter *cf,
   struct cf_socket_ctx *ctx = cf->ctx;
 
   /* store remote address and port used in this connection attempt */
-  if(!Curl_addr2string(&ctx->addr.sa_addr, (curl_socklen_t)ctx->addr.addrlen,
+  if(!Curl_addr2string(&ctx->addr.curl_sa_addr,
+                       (curl_socklen_t)ctx->addr.addrlen,
                        ctx->ip.remote_ip, &ctx->ip.remote_port)) {
     char buffer[STRERROR_LEN];
 
     ctx->error = errno;
     /* malformed address or bug in inet_ntop, try next address */
-    failf(data, "sa_addr inet_ntop() failed with errno %d: %s",
+    failf(data, "curl_sa_addr inet_ntop() failed with errno %d: %s",
           errno, Curl_strerror(errno, buffer, sizeof(buffer)));
     return CURLE_FAILED_INIT;
   }
@@ -1185,7 +1186,7 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 #endif
     ) {
     result = bindlocal(data, cf->conn, ctx->sock, ctx->addr.family,
-                       Curl_ipv6_scope(&ctx->addr.sa_addr));
+                       Curl_ipv6_scope(&ctx->addr.curl_sa_addr));
     if(result) {
       if(result == CURLE_UNSUPPORTED_PROTOCOL) {
         /* The address family is not supported on this interface.
@@ -1257,7 +1258,7 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
       endpoints.sae_srcif = 0;
       endpoints.sae_srcaddr = NULL;
       endpoints.sae_srcaddrlen = 0;
-      endpoints.sae_dstaddr = &ctx->addr.sa_addr;
+      endpoints.sae_dstaddr = &ctx->addr.curl_sa_addr;
       endpoints.sae_dstaddrlen = ctx->addr.addrlen;
 
       rc = connectx(ctx->sock, &endpoints, SAE_ASSOCID_ANY,
@@ -1265,10 +1266,10 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
                     NULL, 0, NULL, NULL);
     }
     else {
-      rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+      rc = connect(ctx->sock, &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
     }
 #  else
-    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+    rc = connect(ctx->sock, &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
 #  endif /* HAVE_BUILTIN_AVAILABLE */
 #elif defined(TCP_FASTOPEN_CONNECT) /* Linux >= 4.11 */
     if(setsockopt(ctx->sock, IPPROTO_TCP, TCP_FASTOPEN_CONNECT,
@@ -1276,16 +1277,16 @@ static int do_connect(struct Curl_cfilter *cf, struct Curl_easy *data,
       infof(data, "Failed to enable TCP Fast Open on fd %" FMT_SOCKET_T,
             ctx->sock);
 
-    rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+    rc = connect(ctx->sock, &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
 #elif defined(MSG_FASTOPEN) /* old Linux */
     if(cf->conn->given->flags & PROTOPT_SSL)
-      rc = connect(ctx->sock, &ctx->addr.sa_addr, ctx->addr.addrlen);
+      rc = connect(ctx->sock, &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
     else
       rc = 0; /* Do nothing */
 #endif
   }
   else {
-    rc = connect(ctx->sock, &ctx->addr.sa_addr,
+    rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,
                  (curl_socklen_t)ctx->addr.addrlen);
   }
   return rc;
@@ -1507,7 +1508,7 @@ static ssize_t cf_socket_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #if defined(MSG_FASTOPEN) && !defined(TCP_FASTOPEN_CONNECT) /* Linux */
   if(cf->conn->bits.tcp_fastopen) {
     nwritten = sendto(ctx->sock, buf, len, MSG_FASTOPEN,
-                      &cf->conn->remote_addr->sa_addr,
+                      &cf->conn->remote_addr->curl_sa_addr,
                       cf->conn->remote_addr->addrlen);
     cf->conn->bits.tcp_fastopen = FALSE;
   }
@@ -1827,7 +1828,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
-  rc = connect(ctx->sock, &ctx->addr.sa_addr,
+  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,
                (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);

@@ -52,7 +52,7 @@ struct Curl_sockaddr_ex {
     struct Curl_sockaddr_storage buff;
   } _sa_ex_u;
 };
-#define sa_addr _sa_ex_u.addr
+#define curl_sa_addr _sa_ex_u.addr
 
 /*
  * Parse interface option, and return the interface name and the host part.
