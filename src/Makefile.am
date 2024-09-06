@@ -26,6 +26,9 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # remove targets if the command fails
 .DELETE_ON_ERROR:
 
+EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
+ Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
+
 # Specify our include paths here, and do it relative to $(top_srcdir) and
 # $(top_builddir), to ensure that these paths which belong to the library
 # being currently built and tested are searched before the library which
@@ -84,11 +87,6 @@ libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
 libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
-CLEANFILES = tool_hugehelp.c
-
-EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
- Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
-
 # Use absolute directory to disable VPATH
 ASCIIPAGE=$(top_builddir)/docs/cmdline-opts/curl.txt
 MKHELP=$(top_srcdir)/src/mkhelp.pl
@@ -98,11 +96,6 @@ HUGECMD = $(HUGEIT_$(V))
 HUGEIT_0 = @echo "  HUGE    " $@;
 HUGEIT_1 =
 HUGEIT_ = $(HUGEIT_0)
-
-CHECKSRC = $(CS_$(V))
-CS_0 = @echo "  RUN     " $@;
-CS_1 =
-CS_ = $(CS_0)
 
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
@@ -134,6 +127,8 @@ $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
+CLEANFILES = $(HUGE)
+
 CA_EMBED_CSOURCE = tool_ca_embed.c
 CURL_CFILES += $(CA_EMBED_CSOURCE)
 CLEANFILES += $(CA_EMBED_CSOURCE)
@@ -146,6 +141,11 @@ else
 $(CA_EMBED_CSOURCE):
 	echo 'extern const void *curl_ca_embed; const void *curl_ca_embed;' > $(CA_EMBED_CSOURCE)
 endif
+
+CHECKSRC = $(CS_$(V))
+CS_0 = @echo "  RUN     " $@;
+CS_1 =
+CS_ = $(CS_0)
 
 # ignore generated C files since they play by slightly different rules!
 checksrc:
