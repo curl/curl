@@ -496,7 +496,10 @@ jobs:
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: ${{ matrix.build.configure-prefix }} ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: |
+          ${{ matrix.build.configure-prefix }} \
+          ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+            ${{ matrix.build.configure }}
         if: ${{ matrix.build.configure }}
         name: 'configure (autotools)'
 
@@ -555,8 +558,7 @@ jobs:
       - if: contains(matrix.build.install_steps, 'pytest')
         # run for `tests/http` directory, so pytest does not pick up any other
         # packages we might have built here
-        run:
-          pytest -v tests/http
+        run: pytest -v tests/http
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"

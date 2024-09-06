@@ -605,6 +605,29 @@ if test "$curl_cv_native_windows" = "yes"; then
     [AC_MSG_ERROR([windres not found in PATH. Windows builds require windres. Cannot continue.])])
 fi
 
+dnl ----------------------------------------
+dnl whether use "unity" mode for lib and src
+dnl ----------------------------------------
+
+want_unity='no'
+AC_MSG_CHECKING([whether to build libcurl and curl in "unity" mode])
+AC_ARG_ENABLE(unity,
+AS_HELP_STRING([--enable-unity],[Enable unity mode])
+AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
+[ case "$enableval" in
+  yes)
+    want_unity='yes'
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+  esac ],
+    AC_MSG_RESULT([no])
+)
+
+AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
+
 dnl ************************************************************
 dnl switch off particular protocols
 dnl

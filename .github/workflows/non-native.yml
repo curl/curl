@@ -136,7 +136,7 @@ jobs:
               pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
-            mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --enable-websockets \
               --with-openssl \
@@ -198,7 +198,7 @@ jobs:
           run: |
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --enable-websockets \
               --with-openssl \

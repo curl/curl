@@ -81,7 +81,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
             --with-openssl \

@@ -451,7 +451,7 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --disable-dependency-tracking ${{ matrix.build.configure }}
+      - run: ./configure --disable-dependency-tracking --enable-unity ${{ matrix.build.configure }}
         name: 'configure'
 
       - run: make V=1
