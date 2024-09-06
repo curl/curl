@@ -5233,6 +5233,7 @@ AC_CONFIG_FILES([\
   lib/libcurl.vers \
   tests/Makefile \
   tests/config \
+  tests/configurehelp.pm \
   tests/certs/Makefile \
   tests/certs/scripts/Makefile \
   tests/data/Makefile \
