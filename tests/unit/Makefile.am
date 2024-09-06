@@ -58,7 +58,7 @@ unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > unit_bundle.c
 
 noinst_PROGRAMS = units
-units_SOURCES = unit_bundle.c
+nodist_units_SOURCES = unit_bundle.c
 CLEANFILES = unit_bundle.c
 else
 # Makefile.inc provides neat definitions
