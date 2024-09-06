@@ -2514,6 +2514,8 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         versioned_symbols_flavour="WOLFSSL_"
       elif test "x$GNUTLS_ENABLED" = "x1"; then
         versioned_symbols_flavour="GNUTLS_"
+      elif test "x$RUSTLS_ENABLED" = "x1"; then
+        versioned_symbols_flavour="RUSTLS_"
       elif test "x$SCHANNEL_ENABLED" = "x1"; then
         versioned_symbols_flavour="SCHANNEL_"
       elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then

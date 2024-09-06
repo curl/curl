@@ -238,6 +238,8 @@ if(BUILD_SHARED_LIBS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "WOLFSSL_")
       elseif(CURL_USE_GNUTLS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "GNUTLS_")
+      elseif(CURL_USE_RUSTLS)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "RUSTLS_")
       endif()
     endif()
     # Generate linker input file for versioned symbols.
