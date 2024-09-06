@@ -45,9 +45,6 @@ CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 CFLAGS += @CURL_CFLAG_EXTRAS@
 
 CLEANFILES = lib1521.c
-if USE_TEST_BUNDLES
-CLEANFILES += libtests.c
-endif
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -100,6 +97,7 @@ libtests.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
 noinst_PROGRAMS = libtests
 libtests_SOURCES = libtests.c $(TESTUTIL) $(TSTTRACE)
 libtests_LDADD = $(TESTUTIL_LIBS)
+CLEANFILES += libtests.c
 
 if USE_CPPFLAG_CURL_STATICLIB
 else

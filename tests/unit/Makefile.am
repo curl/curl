@@ -59,6 +59,7 @@ units.c: $(top_srcdir)/tests/mk-bundle.pl
 
 noinst_PROGRAMS = units
 units_SOURCES = units.c
+CLEANFILES = units.c
 else
 # Makefile.inc provides neat definitions
 include Makefile.inc
