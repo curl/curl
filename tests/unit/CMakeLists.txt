@@ -28,15 +28,15 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(CURL_USE_TEST_BUNDLES)
   add_custom_command(
-    OUTPUT "units.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "units.c"
+    OUTPUT "unit_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "unit_bundle.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
   set(UNITPROGS "units")
-  set(units_SOURCES "units.c")
+  set(units_SOURCES "unit_bundle.c")
 endif()
 
 foreach(_target IN LISTS UNITPROGS)

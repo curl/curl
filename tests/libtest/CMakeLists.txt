@@ -38,15 +38,15 @@ add_custom_command(
 
 if(CURL_USE_TEST_BUNDLES)
   add_custom_command(
-    OUTPUT "libtests.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtests.c"
+    OUTPUT "libtest_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "lib1521.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
   set(LIBTESTPROGS "libtests")
-  set(libtests_SOURCES "libtests.c")
+  set(libtests_SOURCES "libtest_bundle.c")
   list(APPEND libtests_SOURCES ${TESTUTIL} ${TSTTRACE})
   if(LIB_SELECTED STREQUAL LIB_SHARED)
     # These are part of the libcurl static lib. Add them here when linking shared.

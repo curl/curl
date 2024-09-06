@@ -91,13 +91,13 @@ endif
 if USE_TEST_BUNDLES
 AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
 
-libtests.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
-	@PERL@  $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtests.c
+libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
 
 noinst_PROGRAMS = libtests
-libtests_SOURCES = libtests.c $(TESTUTIL) $(TSTTRACE)
+libtests_SOURCES = libtest_bundle.c $(TESTUTIL) $(TSTTRACE)
 libtests_LDADD = $(TESTUTIL_LIBS)
-CLEANFILES += libtests.c
+CLEANFILES += libtest_bundle.c
 
 if USE_CPPFLAG_CURL_STATICLIB
 else

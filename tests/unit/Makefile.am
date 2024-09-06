@@ -54,12 +54,12 @@ AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 
 if BUILD_UNITTESTS
 if USE_TEST_BUNDLES
-units.c: $(top_srcdir)/tests/mk-bundle.pl
-	@PERL@  $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > units.c
+unit_bundle.c: $(top_srcdir)/tests/mk-bundle.pl
+	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > unit_bundle.c
 
 noinst_PROGRAMS = units
-units_SOURCES = units.c
-CLEANFILES = units.c
+units_SOURCES = unit_bundle.c
+CLEANFILES = unit_bundle.c
 else
 # Makefile.inc provides neat definitions
 include Makefile.inc
