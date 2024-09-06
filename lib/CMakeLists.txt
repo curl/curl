@@ -240,13 +240,14 @@ if(BUILD_SHARED_LIBS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "GNUTLS_")
       endif()
     endif()
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" "
-      HIDDEN {};
-      CURL_${CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX}${_cmakesoname}
-      {
-        global: curl_*;
-        local: *;
-      };")
+    # Generate linker input file for versioned symbols.
+    # Consumed variables:
+    #   CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX
+    #   CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME
+    set(CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME ${_cmakesoname})
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/libcurl.vers.in"
+      "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" @ONLY)
     include(CheckCSourceCompiles)
     set(CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers")
     check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)
