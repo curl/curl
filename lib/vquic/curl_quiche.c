@@ -268,8 +268,8 @@ static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void drain_stream(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
+static void h3_drain_stream(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
 {
   struct cf_quiche_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -584,7 +584,7 @@ static CURLcode cf_poll_events(struct Curl_cfilter *cf,
     }
     else {
       result = h3_process_event(cf, sdata, stream, ev);
-      drain_stream(cf, sdata);
+      h3_drain_stream(cf, sdata);
       if(result) {
         CURL_TRC_CF(data, cf, "error processing event %s "
                     "for [%"FMT_PRIu64"] -> %d", cf_ev_name(ev),
@@ -882,7 +882,7 @@ static ssize_t cf_quiche_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   if(nread > 0) {
     if(stream->closed)
-      drain_stream(cf, data);
+      h3_drain_stream(cf, data);
   }
   else {
     if(stream->closed) {
@@ -1207,7 +1207,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
   /* TODO: there seems right now no API in quiche to shrink/enlarge
    * the streams windows. As we do in HTTP/2. */
   if(!pause) {
-    drain_stream(cf, data);
+    h3_drain_stream(cf, data);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
   return CURLE_OK;
@@ -1329,11 +1329,12 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
     return CURLE_QUIC_CONNECT_ERROR;
 
   ctx->qconn = quiche_conn_new_with_tls((const uint8_t *)ctx->scid,
-                                      sizeof(ctx->scid), NULL, 0,
-                                      (struct sockaddr *)&ctx->q.local_addr,
-                                      ctx->q.local_addrlen,
-                                      &sockaddr->sa_addr, sockaddr->addrlen,
-                                      ctx->cfg, ctx->tls.ossl.ssl, false);
+                                        sizeof(ctx->scid), NULL, 0,
+                                        (struct sockaddr *)&ctx->q.local_addr,
+                                        ctx->q.local_addrlen,
+                                        &sockaddr->curl_sa_addr,
+                                        sockaddr->addrlen,
+                                        ctx->cfg, ctx->tls.ossl.ssl, false);
   if(!ctx->qconn) {
     failf(data, "cannot create quiche connection");
     return CURLE_OUT_OF_MEMORY;
