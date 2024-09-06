@@ -50,7 +50,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
-    - job_name: 'CMake, VS2008, Debug, x86, Schannel, Build-only'
+    - job_name: 'CMake, VS2008, Debug, x86, Schannel, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 9 2008'
@@ -84,7 +84,7 @@ environment:
       DEBUG: 'OFF'
       CURLDEBUG: 'ON'
       TFLAGS: 'skiprun'
-    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Static, Build-only'
+    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 10 2010 Win64'
