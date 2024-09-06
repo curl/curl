@@ -52,12 +52,20 @@ LDADD = $(top_builddir)/src/libcurltool.la   \
 
 AM_CPPFLAGS += -DCURL_STATICLIB -DUNITTESTS
 
+if BUILD_UNITTESTS
 if USE_TEST_BUNDLES
 units.c: $(top_srcdir)/tests/mk-bundle.pl
 	@PERL@  $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > units.c
 
-UNITPROGS = units
+noinst_PROGRAMS = units
 units_SOURCES = units.c
+else
+# Makefile.inc provides neat definitions
+include Makefile.inc
+noinst_PROGRAMS = $(UNITPROGS)
+endif
+else
+noinst_PROGRAMS =
 endif
 
 CHECKSRC = $(CS_$(V))
@@ -67,12 +75,3 @@ CS_ = $(CS_0)
 
 checksrc:
 	$(CHECKSRC)@PERL@ $(top_srcdir)/scripts/checksrc.pl $(srcdir)/*.[ch]
-
-# Makefile.inc provides neat definitions
-include Makefile.inc
-
-if BUILD_UNITTESTS
-noinst_PROGRAMS = $(UNITPROGS)
-else
-noinst_PROGRAMS =
-endif
