@@ -2305,7 +2305,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->encdata_is_incomplete = true;
       if(!*err)
         *err = CURLE_AGAIN;
-      CURL_TRC_CF(data, cf, "incomplete message, EAGAIN");
       goto cleanup;
     }
     else {
