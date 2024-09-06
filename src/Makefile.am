@@ -60,8 +60,30 @@ endif
 
 include Makefile.inc
 
+CLEANFILES =
+
+if USE_UNITY
+curl_EXCLUDE =
+if DEBUGBUILD
+# We must compile this source separately to avoid memdebug.h redefinitions
+# applying to them.
+curl_EXCLUDE += ../lib/curl_multibyte.c
+endif
+if USE_CPPFLAG_CURL_STATICLIB
+curl_CURLX = $(CURLTOOL_LIBCURL_CFILES)
+else
+curl_CURLX = $(CURLX_CFILES)
+endif
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
+	@PERL@  $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
+
+nodist_curl_SOURCES = curltool_unity.c
+curl_SOURCES = $(curl_EXCLUDE)
+CLEANFILES += curltool_unity.c
+else
 # CURL_FILES comes from Makefile.inc
 curl_SOURCES = $(CURL_FILES)
+endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
 $(CURL_RCFILES): tool_version.h
@@ -84,7 +106,16 @@ libcurltool_la_CPPFLAGS = $(AM_CPPFLAGS) \
                           -DCURL_STATICLIB -DUNITTESTS
 libcurltool_la_CFLAGS =
 libcurltool_la_LDFLAGS = -static $(LINKFLAGS)
+if USE_UNITY
+libcurltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(CURLTOOL_LIBCURL_CFILES) --exclude $(curl_EXCLUDE) > libcurltool_unity.c
+
+nodist_libcurltool_la_SOURCES = libcurltool_unity.c
+libcurltool_la_SOURCES = $(curl_EXCLUDE)
+CLEANFILES += libcurltool_unity.c
+else
 libcurltool_la_SOURCES = $(CURL_FILES)
+endif
 endif
 
 # Use absolute directory to disable VPATH
@@ -127,7 +158,7 @@ $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
-CLEANFILES = $(HUGE)
+CLEANFILES += $(HUGE)
 
 CA_EMBED_CSOURCE = tool_ca_embed.c
 CURL_CFILES += $(CA_EMBED_CSOURCE)
