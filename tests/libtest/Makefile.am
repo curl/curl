@@ -95,7 +95,7 @@ libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
 
 noinst_PROGRAMS = libtests
-libtests_SOURCES = libtest_bundle.c $(TESTUTIL) $(TSTTRACE)
+nodist_libtests_SOURCES = libtest_bundle.c $(TESTUTIL) $(TSTTRACE)
 libtests_LDADD = $(TESTUTIL_LIBS)
 CLEANFILES += libtest_bundle.c
 
