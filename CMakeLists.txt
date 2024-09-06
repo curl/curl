@@ -2154,4 +2154,13 @@ if(NOT CURL_DISABLE_INSTALL)
     add_custom_target(curl_uninstall
       COMMAND ${CMAKE_COMMAND} -P "${CMAKE_CURRENT_BINARY_DIR}/CMake/cmake_uninstall.cmake")
   endif()
+
+  if(_curl_ca_bundle_supported)
+    install(FILES "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
+      DESTINATION ${CMAKE_INSTALL_BINDIR}
+      PERMISSIONS
+        OWNER_READ OWNER_WRITE OWNER_EXECUTE
+        GROUP_READ GROUP_EXECUTE
+        WORLD_READ WORLD_EXECUTE)
+  endif()
 endif()
