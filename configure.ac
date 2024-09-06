@@ -4132,7 +4132,7 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
       AC_MSG_RESULT(auto)
       want_pthreads=auto
     fi
-    ]
+  ]
 )
 
 dnl turn off pthreads if rt is disabled
