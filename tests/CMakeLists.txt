@@ -104,7 +104,6 @@ configure.generator: ${CMAKE_GENERATOR}
 configure.make: ${CMAKE_MAKE_PROGRAM}
 host.os: ${CMAKE_HOST_SYSTEM_NAME}
 host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
-target: ${CMAKE_C_COMPILER_TARGET}
 target.os: ${CMAKE_SYSTEM_NAME}
 target.cpu: ${CMAKE_SYSTEM_PROCESSOR}
 target.flags:${_target_flags}
