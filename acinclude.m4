@@ -1527,11 +1527,11 @@ dnl harness needs information on how to run the C preprocessor.
 
 AC_DEFUN([CURL_GENERATE_CONFIGUREHELP_PM], [
   AC_REQUIRE([AC_PROG_CPP])dnl
-  CURL_CPP=`eval echo "$ac_cpp" 2>/dev/null`
-  if test -z "$CURL_CPP"; then
-    CURL_CPP='cpp'
+  tmp_cpp=`eval echo "$ac_cpp" 2>/dev/null`
+  if test -z "$tmp_cpp"; then
+    tmp_cpp='cpp'
   fi
-  AC_SUBST(CURL_CPP)
+  AC_SUBST(CURL_CPP, $tmp_cpp)
 ])
 
 

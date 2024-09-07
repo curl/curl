@@ -5218,6 +5218,8 @@ if test "x$want_curldebug_assumed" = "xyes" &&
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
+CURL_GENERATE_CONFIGUREHELP_PM
+
 AC_CONFIG_FILES([\
   Makefile \
   docs/Makefile \
@@ -5249,8 +5251,6 @@ AC_CONFIG_FILES([\
   libcurl.pc
 ])
 AC_OUTPUT
-
-CURL_GENERATE_CONFIGUREHELP_PM
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
