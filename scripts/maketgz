@@ -156,13 +156,13 @@ else
   automake --include-deps Makefile >/dev/null
 fi
 
-echo "produce RELEASE-TOOLS.md"
-./scripts/release-tools.sh "$timestamp" "$version" > docs/RELEASE-TOOLS.md.dist
-
 if test -n "$commit"; then
   echo "produce docs/tarball-commit.txt"
   git rev-parse HEAD >docs/tarball-commit.txt.dist
 fi
+
+echo "produce RELEASE-TOOLS.md"
+./scripts/release-tools.sh "$timestamp" "$version" "$commit" > docs/RELEASE-TOOLS.md.dist
 
 ############################################################################
 #
