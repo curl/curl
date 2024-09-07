@@ -33,6 +33,7 @@ dnl Verify if the C compiler being used is known.
 AC_DEFUN([CURL_CHECK_COMPILER], [
   #
   compiler_id="unknown"
+  compiler_ver=""
   compiler_num="0"
   #
   flags_dbg_yes="unknown"
@@ -115,6 +116,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
     fi
     clangvhi=`echo $clangver | cut -d . -f1`
     clangvlo=`echo $clangver | cut -d . -f2`
+    compiler_ver="$clangver"
     compiler_num=`(expr $clangvhi "*" 100 + $clangvlo) 2>/dev/null`
     if test "$appleclang" = '1' && test "$oldapple" = '0'; then
       dnl Starting with Xcode 7 / clang 3.7, Apple clang won't tell its upstream version
@@ -196,6 +198,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_GNU_C], [
     else
       gccvlo="0"
     fi
+    compiler_ver="$gccver"
     compiler_num=`(expr $gccvhi "*" 100 + $gccvlo) 2>/dev/null`
     AC_MSG_RESULT([gcc '$compiler_num' (raw: '$gccver')])
     flags_dbg_yes="-g"
@@ -268,6 +271,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_INTEL_C], [
     AC_MSG_RESULT([yes])
     AC_MSG_CHECKING([compiler version])
     compiler_num="$curl_cv_def___INTEL_COMPILER"
+    compiler_ver=`echo "$compiler_num" | cut -c -2 | $SED 's/^0//'`.`echo "$compiler_num" | cut -c 3-4 | $SED 's/^0//'`
     AC_MSG_RESULT([Intel C '$compiler_num'])
     CURL_CHECK_DEF([__unix__], [], [silent])
     if test "$curl_cv_have_def___unix__" = "yes"; then
