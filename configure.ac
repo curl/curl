@@ -533,7 +533,7 @@ if test X"$want_werror" = Xyes; then
     if test "$compiler_num" -ge "500"; then
       CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
     fi
-  elif test "$compiler_id" = "CLANG"; then
+  elif test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
     CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
   fi
 fi
@@ -5250,7 +5250,6 @@ AC_CONFIG_FILES([\
 AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
-CURL_GENERATE_BUILDINFO_TXT
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
@@ -5317,4 +5316,10 @@ if test -n "$experimental"; then
   for a in $experimental; do
     AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])
   done
+fi
+
+CURL_PREPARE_BUILDINFO
+echo "[@%:@] This is a generated file.  Do not edit.${curl_buildinfo}" > ./buildinfo.txt
+if test -n "$CURL_BUILDINFO$CURL_CI$CI"; then
+  AC_MSG_NOTICE([${curl_buildinfo}])
 fi
