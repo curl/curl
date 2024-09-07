@@ -31,15 +31,15 @@ use Exporter;
 use vars qw(
     @ISA
     @EXPORT_OK
-    \$Cpreprocessor
+    $Cpreprocessor
     );
 
 @ISA = qw(Exporter);
 
 @EXPORT_OK = qw(
-    \$Cpreprocessor
+    $Cpreprocessor
     );
 
-\$Cpreprocessor = '@CURL_CPP@';
+$Cpreprocessor = '@CURL_CPP@';
 
 1;
