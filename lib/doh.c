@@ -542,8 +542,8 @@ static unsigned int doh_get32bit(const unsigned char *doh, unsigned int index)
          ((unsigned)doh[2] << 8) | doh[3];
 }
 
-static DOHcode doh_store_a(const unsigned char *doh, int index,
-                           struct dohentry *d)
+static void doh_store_a(const unsigned char *doh, int index,
+                        struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
   if(d->numaddr < DOH_MAX_ADDR) {
@@ -552,10 +552,9 @@ static DOHcode doh_store_a(const unsigned char *doh, int index,
     memcpy(&a->ip.v4, &doh[index], 4);
     d->numaddr++;
   }
-  return DOH_OK;
 }
 
-static DOHcode doh_store_aaaa(const unsigned char *doh, int index,
+static void doh_store_aaaa(const unsigned char *doh, int index,
                               struct dohentry *d)
 {
   /* silently ignore addresses over the limit */
@@ -565,7 +564,6 @@ static DOHcode doh_store_aaaa(const unsigned char *doh, int index,
     memcpy(&a->ip.v6, &doh[index], 16);
     d->numaddr++;
   }
-  return DOH_OK;
 }
 
 #ifdef USE_HTTPSRR
@@ -653,16 +651,12 @@ static DOHcode doh_rdata(const unsigned char *doh,
   case DNS_TYPE_A:
     if(rdlength != 4)
       return DOH_DNS_RDATA_LEN;
-    rc = doh_store_a(doh, index, d);
-    if(rc)
-      return rc;
+    doh_store_a(doh, index, d);
     break;
   case DNS_TYPE_AAAA:
     if(rdlength != 16)
       return DOH_DNS_RDATA_LEN;
-    rc = doh_store_aaaa(doh, index, d);
-    if(rc)
-      return rc;
+    doh_store_aaaa(doh, index, d);
     break;
 #ifdef USE_HTTPSRR
   case DNS_TYPE_HTTPS:
