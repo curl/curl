@@ -5247,7 +5247,6 @@ AC_CONFIG_FILES([\
 AC_OUTPUT
 
 CURL_GENERATE_CONFIGUREHELP_PM
-CURL_GENERATE_BUILDINFO_TXT
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
@@ -5314,4 +5313,10 @@ if test -n "$experimental"; then
   for a in $experimental; do
     AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])
   done
+fi
+
+CURL_PREPARE_BUILDINFO
+echo "[@%:@] This is a generated file.  Do not edit.${curl_buildinfo}" > ./buildinfo.txt
+if test -n "$CI$BUILD_BUILDID"; then
+  AC_MSG_NOTICE([${curl_buildinfo}])
 fi

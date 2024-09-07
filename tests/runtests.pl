@@ -2602,7 +2602,7 @@ if(!$listonly) {
         while(my $line = <$fd>) {
             chomp $line;
             if($line && $line !~ /^#/) {
-                logmsg("* buildinfo.$line\n");
+                logmsg("* $line\n");
             }
         }
         close($fd);

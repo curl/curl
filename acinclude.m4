@@ -1559,11 +1559,11 @@ _EOF
 ])
 
 
-dnl CURL_GENERATE_BUILDINFO_TXT
+dnl CURL_PREPARE_BUILDINFO
 dnl -------------------------------------------------
 dnl Save build info for test runner to pick up and log
 
-AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
+AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   curl_pflags=""
   case $host in
     *-apple-*) curl_pflags="${curl_pflags} APPLE";;
@@ -1592,20 +1592,18 @@ AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
     curl_pflags="${curl_pflags} CROSS"
   fi
   squeeze curl_pflags
-  cat >./buildinfo.txt <<_EOF
-[@%:@] This is a generated file.  Do not edit.
-configure.tool: configure
-configure.args: $ac_configure_args
-host: $build
-host.os: $build_os
-host.cpu: $build_cpu
-target: $host
-target.os: $host_os
-target.cpu: $host_cpu
-target.flags: $curl_pflags
-compiler: $compiler_id
-compiler.version: $compiler_ver
-_EOF
+  curl_buildinfo="
+buildinfo.configure.tool: configure
+buildinfo.configure.args: $ac_configure_args
+buildinfo.host: $build
+buildinfo.host.os: $build_os
+buildinfo.host.cpu: $build_cpu
+buildinfo.target: $host
+buildinfo.target.os: $host_os
+buildinfo.target.cpu: $host_cpu
+buildinfo.target.flags: $curl_pflags
+buildinfo.compiler: $compiler_id
+buildinfo.compiler.version: $compiler_ver"
 ])
 
 
