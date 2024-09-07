@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* lib/curl_config.h.in. Generated somehow by cmake.  */
 
 /* Location of default ca bundle */
 #cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
