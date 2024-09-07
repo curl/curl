@@ -99,7 +99,6 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated fi
 configure.tool: cmake
 configure.command: ${CMAKE_COMMAND}
 configure.version: ${CMAKE_VERSION}
-configure.os: ${CMAKE_SYSTEM}
 configure.args:${_cmake_args}
 configure.generator: ${CMAKE_GENERATOR}
 configure.make: ${CMAKE_MAKE_PROGRAM}
