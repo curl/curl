@@ -1597,7 +1597,11 @@ AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
 configure.tool: configure
 configure.args: $ac_configure_args
 host: $build
+host.os: $build_os
+host.cpu: $build_cpu
 target: $host
+target.os: $host_os
+target.cpu: $host_cpu
 target.flags: $curl_pflags
 compiler: $compiler_id
 compiler.version: $compiler_ver
