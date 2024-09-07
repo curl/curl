@@ -95,13 +95,17 @@ AC_DEFUN([CURL_CHECK_COMPILER_CLANG], [
       AC_MSG_RESULT([no])
       compiler_id="CLANG"
     fi
-    AC_MSG_CHECKING([compiler version])
+    AC_MSG_CHECKING([if compiler is Apple clang])
     fullclangver=`$CC -v 2>&1 | grep version`
     if echo $fullclangver | grep 'Apple' >/dev/null; then
+      AC_MSG_RESULT([yes])
       appleclang=1
+      compiler_id="APPLECLANG"
     else
+      AC_MSG_RESULT([no])
       appleclang=0
     fi
+    AC_MSG_CHECKING([compiler version])
     clangver=`echo $fullclangver | grep "based on LLVM " | "$SED" 's/.*(based on LLVM \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*)/\1/'`
     if test -z "$clangver"; then
       clangver=`echo $fullclangver | "$SED" 's/.*version \(@<:@0-9@:>@*\.@<:@0-9@:>@*\).*/\1/'`
@@ -386,7 +390,7 @@ AC_DEFUN([CURL_CONVERT_INCLUDE_TO_ISYSTEM], [
   AC_REQUIRE([CURL_CHECK_COMPILER])dnl
   AC_MSG_CHECKING([convert -I options to -isystem])
   if test "$compiler_id" = "GNU_C" ||
-    test "$compiler_id" = "CLANG"; then
+    test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
     AC_MSG_RESULT([yes])
     tmp_has_include="no"
     tmp_chg_FLAGS="$CFLAGS"
@@ -513,7 +517,7 @@ AC_DEFUN([CURL_SET_COMPILER_BASIC_OPTS], [
     #
     case "$compiler_id" in
         #
-      CLANG)
+      CLANG|APPLECLANG)
         #
         dnl Disable warnings for unused arguments, otherwise clang will
         dnl warn about compile-time arguments used during link-time, like
@@ -782,7 +786,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
     #
     case "$compiler_id" in
         #
-      CLANG)
+      CLANG|APPLECLANG)
         #
         if test "$want_warnings" = "yes"; then
           tmp_CFLAGS="$tmp_CFLAGS -pedantic"
@@ -1370,7 +1374,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
   tmp_CFLAGS=""
   tmp_EXTERN=""
   case "$compiler_id" in
-    CLANG)
+    CLANG|APPLECLANG)
       dnl All versions of clang support -fvisibility=
       tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
       tmp_CFLAGS="-fvisibility=hidden"

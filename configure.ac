@@ -533,7 +533,7 @@ if test X"$want_werror" = Xyes; then
     if test "$compiler_num" -ge "500"; then
       CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
     fi
-  elif test "$compiler_id" = "CLANG"; then
+  elif test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
     CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
   fi
 fi
