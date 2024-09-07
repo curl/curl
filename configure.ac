@@ -5317,3 +5317,6 @@ fi
 
 CURL_PREPARE_BUILDINFO
 echo "[@%:@] This is a generated file.  Do not edit.${curl_buildinfo}" > ./buildinfo.txt
+if test -n "$CI$BUILD_BUILDID"; then
+  AC_MSG_NOTICE([${curl_buildinfo}])
+fi
