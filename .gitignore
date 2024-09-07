@@ -36,6 +36,7 @@ TAGS
 aclocal.m4
 aclocal.m4.bak
 autom4te.cache
+buildinfo.txt
 compile
 config.cache
 config.guess

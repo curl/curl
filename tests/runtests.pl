@@ -2598,7 +2598,7 @@ if(!$listonly) {
 # Output information about the curl build
 #
 if(!$listonly) {
-    if(open(my $fd, "<", "buildinfo.txt")) {
+    if(open(my $fd, "<", "../buildinfo.txt")) {
         while(my $line = <$fd>) {
             chomp $line;
             if($line && $line !~ /^#/) {

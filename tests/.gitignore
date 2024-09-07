@@ -4,7 +4,6 @@
 
 *pid
 *.1.dist
-buildinfo.txt
 configurehelp.pm
 curl_client_key
 curl_client_key.pub
