@@ -1600,7 +1600,7 @@ host: $build
 target: $host
 target.flags: $curl_pflags
 compiler: $compiler_id
-compiler.version: $compiler_num
+compiler.version: $compiler_ver
 _EOF
 ])
 
