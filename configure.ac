@@ -5218,7 +5218,7 @@ if test "x$want_curldebug_assumed" = "xyes" &&
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
-CURL_GENERATE_CONFIGUREHELP_PM
+CURL_PREPARE_CONFIGUREHELP_PM
 
 AC_CONFIG_FILES([\
   Makefile \

@@ -1518,14 +1518,14 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
 ])
 
 
-dnl CURL_GENERATE_CONFIGUREHELP_PM
+dnl CURL_PREPARE_CONFIGUREHELP_PM
 dnl -------------------------------------------------
-dnl Generate test harness configurehelp.pm module, defining and
+dnl Prepare test harness configurehelp.pm module, defining and
 dnl initializing some perl variables with values which are known
 dnl when the configure script runs. For portability reasons, test
 dnl harness needs information on how to run the C preprocessor.
 
-AC_DEFUN([CURL_GENERATE_CONFIGUREHELP_PM], [
+AC_DEFUN([CURL_PREPARE_CONFIGUREHELP_PM], [
   AC_REQUIRE([AC_PROG_CPP])dnl
   tmp_cpp=`eval echo "$ac_cpp" 2>/dev/null`
   if test -z "$tmp_cpp"; then
