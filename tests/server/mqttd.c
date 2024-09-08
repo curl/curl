@@ -927,6 +927,8 @@ int main(int argc, char *argv[])
   int error;
   int arg = 1;
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("mqttd IPv4%s\n",

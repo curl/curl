@@ -56,7 +56,7 @@
 #include "timeval.h"
 #include "timediff.h"
 
-const char *serverlogfile = DEFAULT_LOGFILE;
+const char *serverlogfile = NULL;  /* needs init from main() */
 
 static struct timeval tvnow(void);
 
