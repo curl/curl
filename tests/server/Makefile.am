@@ -52,6 +52,18 @@ include Makefile.inc
 
 EXTRA_DIST = base64.pl CMakeLists.txt
 
+if USE_TEST_BUNDLES
+server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl
+	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl --main $(noinst_PROGRAMS) > server_bundle.c
+
+noinst_PROGRAMS = servers
+nodist_servers_SOURCES = server_bundle.c
+servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(UTIL)
+CLEANFILES += server_bundle.c
+else
+noinst_PROGRAMS = $(LIBTESTPROGS)
+endif
+
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
 CS_1 =
