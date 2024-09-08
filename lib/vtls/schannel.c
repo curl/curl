@@ -59,6 +59,17 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+/* Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
+ * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These
+ * messages are extra verbose and intended for curl developers debugging
+ * Schannel recv decryption.
+ */
+#ifdef CURL_SCHANNEL_DEV_DEBUG
+#define SCH_DEV(x) x
+#else
+#define SCH_DEV(x) do { } while(0)
+#endif
+
 /* ALPN requires version 8.1 of the Windows SDK, which was
    shipped with Visual Studio 2013, aka _MSC_VER 1800:
 
@@ -1408,12 +1419,12 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       /* increase encrypted data buffer offset */
       backend->encdata_offset += nread;
       backend->encdata_is_incomplete = FALSE;
-      DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
+      SCH_DEV(infof(data, "schannel: encrypted data got %zd", nread));
     }
 
-    DEBUGF(infof(data,
-                 "schannel: encrypted data buffer: offset %zu length %zu",
-                 backend->encdata_offset, backend->encdata_length));
+    SCH_DEV(infof(data,
+                  "schannel: encrypted data buffer: offset %zu length %zu",
+                  backend->encdata_offset, backend->encdata_length));
 
     /* setup input buffers */
     InitSecBuffer(&inbuf[0], SECBUFFER_TOKEN, malloc(backend->encdata_offset),
@@ -1527,8 +1538,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* check if there was additional remaining encrypted data */
     if(inbuf[1].BufferType == SECBUFFER_EXTRA && inbuf[1].cbBuffer > 0) {
-      DEBUGF(infof(data, "schannel: encrypted data length: %lu",
-                   inbuf[1].cbBuffer));
+      SCH_DEV(infof(data, "schannel: encrypted data length: %lu",
+                    inbuf[1].cbBuffer));
       /*
         There are two cases where we could be getting extra data here:
         1) If we are renegotiating a connection and the handshake is already
@@ -2110,17 +2121,23 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
    * cleanup. The pattern for return error is set *err, optional infof, goto
    * cleanup.
    *
+   * Some verbose debug messages are wrapped by SCH_DEV() instead of DEBUGF()
+   * and only shown if CURL_SCHANNEL_DEV_DEBUG was defined at build time. These
+   * messages are extra verbose and intended for curl developers debugging
+   * Schannel recv decryption.
+   *
    * Our priority is to always return as much decrypted data to the caller as
    * possible, even if an error occurs. The state of the decrypted buffer must
    * always be valid. Transfer of decrypted data to the caller's buffer is
    * handled in the cleanup.
    */
 
-  DEBUGF(infof(data, "schannel: client wants to read %zu bytes", len));
+  SCH_DEV(infof(data, "schannel: client wants to read %zu bytes", len));
   *err = CURLE_OK;
 
   if(len && len <= backend->decdata_offset) {
-    infof(data, "schannel: enough decrypted data is already available");
+    SCH_DEV(infof(data,
+                  "schannel: enough decrypted data is already available"));
     goto cleanup;
   }
   else if(backend->recv_unrecoverable_err) {
@@ -2158,13 +2175,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->encdata_buffer = reallocated_buffer;
       backend->encdata_length = reallocated_length;
       size = backend->encdata_length - backend->encdata_offset;
-      DEBUGF(infof(data, "schannel: encdata_buffer resized %zu",
-                   backend->encdata_length));
+      SCH_DEV(infof(data, "schannel: encdata_buffer resized %zu",
+                    backend->encdata_length));
     }
 
-    DEBUGF(infof(data,
-                 "schannel: encrypted data buffer: offset %zu length %zu",
-                 backend->encdata_offset, backend->encdata_length));
+    SCH_DEV(infof(data,
+                  "schannel: encrypted data buffer: offset %zu length %zu",
+                  backend->encdata_offset, backend->encdata_length));
 
     /* read encrypted data from socket */
     nread = Curl_conn_cf_recv(cf->next, data,
@@ -2174,8 +2191,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(*err) {
       nread = -1;
       if(*err == CURLE_AGAIN)
-        DEBUGF(infof(data,
-                     "schannel: recv returned CURLE_AGAIN"));
+        SCH_DEV(infof(data, "schannel: recv returned CURLE_AGAIN"));
       else if(*err == CURLE_RECV_ERROR)
         infof(data, "schannel: recv returned CURLE_RECV_ERROR");
       else
@@ -2188,13 +2204,12 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     else if(nread > 0) {
       backend->encdata_offset += (size_t)nread;
       backend->encdata_is_incomplete = FALSE;
-      DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
+      SCH_DEV(infof(data, "schannel: encrypted data got %zd", nread));
     }
   }
 
-  DEBUGF(infof(data,
-               "schannel: encrypted data buffer: offset %zu length %zu",
-               backend->encdata_offset, backend->encdata_length));
+  SCH_DEV(infof(data, "schannel: encrypted data buffer: offset %zu length %zu",
+                backend->encdata_offset, backend->encdata_length));
 
   /* decrypt loop */
   while(backend->encdata_offset > 0 && sspi_status == SEC_E_OK &&
@@ -2222,8 +2237,8 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       /* check for successfully decrypted data, even before actual
          renegotiation or shutdown of the connection context */
       if(inbuf[1].BufferType == SECBUFFER_DATA) {
-        DEBUGF(infof(data, "schannel: decrypted data length: %lu",
-                     inbuf[1].cbBuffer));
+        SCH_DEV(infof(data, "schannel: decrypted data length: %lu",
+                      inbuf[1].cbBuffer));
 
         /* increase buffer in order to fit the received amount of data */
         size = inbuf[1].cbBuffer > CURL_SCHANNEL_BUFFER_FREE_SIZE ?
@@ -2255,16 +2270,16 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           backend->decdata_offset += size;
         }
 
-        DEBUGF(infof(data, "schannel: decrypted data added: %zu", size));
-        DEBUGF(infof(data,
-                     "schannel: decrypted cached: offset %zu length %zu",
-                     backend->decdata_offset, backend->decdata_length));
+        SCH_DEV(infof(data, "schannel: decrypted data added: %zu", size));
+        SCH_DEV(infof(data,
+                      "schannel: decrypted cached: offset %zu length %zu",
+                      backend->decdata_offset, backend->decdata_length));
       }
 
       /* check for remaining encrypted data */
       if(inbuf[3].BufferType == SECBUFFER_EXTRA && inbuf[3].cbBuffer > 0) {
-        DEBUGF(infof(data, "schannel: encrypted data length: %lu",
-                     inbuf[3].cbBuffer));
+        SCH_DEV(infof(data, "schannel: encrypted data length: %lu",
+                      inbuf[3].cbBuffer));
 
         /* check if the remaining data is less than the total amount
          * and therefore begins after the already processed data
@@ -2278,9 +2293,9 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
           backend->encdata_offset = inbuf[3].cbBuffer;
         }
 
-        DEBUGF(infof(data,
-                     "schannel: encrypted cached: offset %zu length %zu",
-                     backend->encdata_offset, backend->encdata_length));
+        SCH_DEV(infof(data,
+                      "schannel: encrypted cached: offset %zu length %zu",
+                      backend->encdata_offset, backend->encdata_length));
       }
       else {
         /* reset encrypted buffer offset, because there is no data remaining */
@@ -2333,13 +2348,13 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       backend->encdata_is_incomplete = TRUE;
       if(!*err)
         *err = CURLE_AGAIN;
-      infof(data, "schannel: failed to decrypt data, need more data");
+      SCH_DEV(infof(data, "schannel: failed to decrypt data, need more data"));
       goto cleanup;
     }
     else {
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
       char buffer[STRERROR_LEN];
-      infof(data, "schannel: failed to read data from server: %s",
+      failf(data, "schannel: failed to read data from server: %s",
             Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
 #endif
       *err = CURLE_RECV_ERROR;
@@ -2347,17 +2362,15 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
   }
 
-  DEBUGF(infof(data,
-               "schannel: encrypted data buffer: offset %zu length %zu",
-               backend->encdata_offset, backend->encdata_length));
+  SCH_DEV(infof(data, "schannel: encrypted data buffer: offset %zu length %zu",
+                backend->encdata_offset, backend->encdata_length));
 
-  DEBUGF(infof(data,
-               "schannel: decrypted data buffer: offset %zu length %zu",
-               backend->decdata_offset, backend->decdata_length));
+  SCH_DEV(infof(data, "schannel: decrypted data buffer: offset %zu length %zu",
+                backend->decdata_offset, backend->decdata_length));
 
 cleanup:
   /* Warning- there is no guarantee the encdata state is valid at this point */
-  DEBUGF(infof(data, "schannel: schannel_recv cleanup"));
+  SCH_DEV(infof(data, "schannel: schannel_recv cleanup"));
 
   /* Error if the connection has closed without a close_notify.
 
@@ -2379,7 +2392,7 @@ cleanup:
       backend->recv_sspi_close_notify = TRUE;
     else {
       *err = CURLE_RECV_ERROR;
-      infof(data, "schannel: server closed abruptly (missing close_notify)");
+      failf(data, "schannel: server closed abruptly (missing close_notify)");
     }
   }
 
@@ -2393,10 +2406,10 @@ cleanup:
     memmove(backend->decdata_buffer, backend->decdata_buffer + size,
             backend->decdata_offset - size);
     backend->decdata_offset -= size;
-    DEBUGF(infof(data, "schannel: decrypted data returned %zu", size));
-    DEBUGF(infof(data,
-                 "schannel: decrypted data buffer: offset %zu length %zu",
-                 backend->decdata_offset, backend->decdata_length));
+    SCH_DEV(infof(data, "schannel: decrypted data returned %zu", size));
+    SCH_DEV(infof(data,
+                  "schannel: decrypted data buffer: offset %zu length %zu",
+                  backend->decdata_offset, backend->decdata_length));
     *err = CURLE_OK;
     return (ssize_t)size;
   }
@@ -2542,7 +2555,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       if(!result) {
         if(written < (ssize_t)outbuf.cbBuffer) {
           /* TODO: handle partial sends */
-          infof(data, "schannel: failed to send close msg: %s"
+          failf(data, "schannel: failed to send close msg: %s"
                 " (bytes written: %zd)", curl_easy_strerror(result), written);
           result = CURLE_SEND_ERROR;
           goto out;
@@ -2557,7 +2570,7 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
       }
       else {
         if(!backend->recv_connection_closed) {
-          infof(data, "schannel: error sending close msg: %d", result);
+          failf(data, "schannel: error sending close msg: %d", result);
           result = CURLE_SEND_ERROR;
           goto out;
         }
