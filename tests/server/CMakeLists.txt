@@ -22,11 +22,30 @@
 #
 ###########################################################################
 
-# Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
+# Get 'noinst_PROGRAMS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'UTIL'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+
+if(CURL_USE_TEST_BUNDLES)
+  unset(_csources)
+  foreach(_src IN LISTS noinst_PROGRAMS)
+    list(APPEND _csources "${src}.c")
+  endforeach()
+
+  add_custom_command(
+    OUTPUT "server_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" --main ${_csources} > "server_bundle.c"
+    DEPENDS
+      "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl"
+      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    VERBATIM)
+
+  set(noinst_PROGRAMS "servers")
+  set(servers_SOURCES "server_bundle.c")
+  list(APPEND servers_SOURCES ${CURLX_SRCS} ${USEFUL} ${UTIL})
+endif()
 
 foreach(_target IN LISTS noinst_PROGRAMS)
   set(_target_name "${_target}")
