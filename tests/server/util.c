@@ -56,6 +56,8 @@
 #define EINVAL  22 /* errno.h value */
 #endif
 
+const char *serverlogfile = DEFAULT_LOGFILE;
+
 static struct timeval tvnow(void);
 
 /* This function returns a pointer to STATIC memory. It converts the given

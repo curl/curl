@@ -127,7 +127,6 @@ static void storerequest(char *reqbuf, size_t totalsize);
 #define DEFAULT_LOGFILE "log/rtspd.log"
 #endif
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 
