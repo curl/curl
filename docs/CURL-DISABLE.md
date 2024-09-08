@@ -142,7 +142,8 @@ Disable support for proxies
 
 ## `CURL_DISABLE_IPFS`
 
-Disable the IPFS/IPNS protocols.
+Disable the IPFS/IPNS protocols. This affects the curl tool only, where
+IPFS/IPNS protocol support is implemented.
 
 ## `CURL_DISABLE_RTSP`
 
