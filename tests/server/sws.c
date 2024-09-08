@@ -181,13 +181,6 @@ const char *cmdfile = DEFAULT_CMDFILE;
 
 #define END_OF_HEADERS "\r\n\r\n"
 
-enum {
-  DOCNUMBER_NOTHING = -4,
-  DOCNUMBER_QUIT    = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
-
 static const char *end_of_headers = END_OF_HEADERS;
 
 /* sent as reply to a QUIT */
