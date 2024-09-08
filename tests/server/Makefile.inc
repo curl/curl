@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-noinst_PROGRAMS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
+SERVERPROGS = resolve rtspd sockfilt sws tftpd socksd disabled mqttd
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
@@ -70,6 +70,10 @@ UTIL = \
  ../../lib/strerror.c \
  ../../lib/strerror.h
 
+UTIL_BUNDLE = \
+ first.c \
+ first.h
+
 resolve_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  resolve.c
 resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
@@ -88,12 +92,14 @@ sockfilt_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 sockfilt_CFLAGS = $(AM_CFLAGS)
 
 socksd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) $(INET_PTON) \
- server_sockaddr.h socksd.c
+ server_sockaddr.h \
+ socksd.c
 socksd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 socksd_CFLAGS = $(AM_CFLAGS)
 
 mqttd_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
- server_sockaddr.h mqttd.c
+ server_sockaddr.h \
+ mqttd.c
 mqttd_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
 mqttd_CFLAGS = $(AM_CFLAGS)
 
