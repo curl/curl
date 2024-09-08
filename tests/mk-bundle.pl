@@ -69,9 +69,7 @@ my @reused_symbols = (
     "header_callback",
     "ioctlcallback",
     "msgbuff",
-    "my_lock",
     "my_rlimit",
-    "my_unlock",
     "mydtor",  # unit
     "num_open",
     "progress_callback",
@@ -87,8 +85,10 @@ my @reused_symbols = (
     "suburl",
     "test_failure",  # shadow
     "test_fire",
+    "test_lock",
     "test_once",
     "test_parse",  # unit
+    "test_unlock",
     "testbuf",
     "testcase",  # unit
     "testdata",

@@ -125,8 +125,8 @@ test_cleanup:
 
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
-static void my_lock(CURL *handle, curl_lock_data data,
-                    curl_lock_access laccess, void *useptr)
+static void test_lock(CURL *handle, curl_lock_data data,
+                      curl_lock_access laccess, void *useptr)
 {
   curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
   (void)handle;
@@ -134,7 +134,7 @@ static void my_lock(CURL *handle, curl_lock_data data,
   Curl_mutex_acquire(&mutexes[data]);
 }
 
-static void my_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 {
   curl_mutex_t *mutexes = (curl_mutex_t*) useptr;
   (void)handle;
@@ -149,8 +149,8 @@ static void execute(CURLSH *share, struct Ctx *ctx)
   for(i = 0; i < CURL_LOCK_DATA_LAST - 1; i++) {
     Curl_mutex_init(&mutexes[i]);
   }
-  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, my_lock);
-  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, my_unlock);
+  curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
+  curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
   curl_share_setopt(share, CURLSHOPT_USERDATA, (void *)mutexes);
   curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
 
