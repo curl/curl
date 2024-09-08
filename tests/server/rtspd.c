@@ -153,16 +153,6 @@ static char loglockfile[256];
 
 #define END_OF_HEADERS "\r\n\r\n"
 
-enum {
-  DOCNUMBER_NOTHING = -7,
-  DOCNUMBER_QUIT    = -6,
-  DOCNUMBER_BADCONNECT = -5,
-  DOCNUMBER_INTERNAL = -4,
-  DOCNUMBER_CONNECT = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
-
 
 /* sent as reply to a QUIT */
 static const char *docquit =

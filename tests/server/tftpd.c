@@ -187,7 +187,7 @@ static int current;     /* index of buffer in use */
 static int newline = 0;    /* fillbuf: in middle of newline expansion */
 static int prevchar = -1;  /* putbuf: previous char (cr check) */
 
-static tftphdr_storage_t buf;
+static tftphdr_storage_t buff;
 static tftphdr_storage_t ackbuf;
 
 static srvr_sockaddr_union_t from;
@@ -769,7 +769,7 @@ int main(int argc, char **argv)
     else
       fromlen = sizeof(from.sa6);
 #endif
-    n = (ssize_t)recvfrom(sock, &buf.storage[0], sizeof(buf.storage), 0,
+    n = (ssize_t)recvfrom(sock, &buff.storage[0], sizeof(buff.storage), 0,
                           &from.sa, &fromlen);
     if(got_exit_signal)
       break;
@@ -817,7 +817,7 @@ int main(int argc, char **argv)
 
     maxtimeout = 5*TIMEOUT;
 
-    tp = &buf.hdr;
+    tp = &buff.hdr;
     tp->th_opcode = ntohs(tp->th_opcode);
     if(tp->th_opcode == opcode_RRQ || tp->th_opcode == opcode_WRQ) {
       memset(&test, 0, sizeof(test));
@@ -916,7 +916,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
   filename = cp;
   do {
     bool endofit = true;
-    while(cp < &buf.storage[size]) {
+    while(cp < &buff.storage[size]) {
       if(*cp == '\0') {
         endofit = false;
         break;
@@ -929,7 +929,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
 
     /* before increasing pointer, make sure it is still within the legal
        space */
-    if((cp + 1) < &buf.storage[size]) {
+    if((cp + 1) < &buff.storage[size]) {
       ++cp;
       if(first) {
         /* store the mode since we need it later */
@@ -1324,7 +1324,7 @@ send_ack:
   alarm(rexmtval);
 #endif
   /* normally times out and quits */
-  n = sread(peer, &buf.storage[0], sizeof(buf.storage));
+  n = sread(peer, &buff.storage[0], sizeof(buff.storage));
 #ifdef HAVE_ALARM
   alarm(0);
 #endif
@@ -1354,7 +1354,7 @@ static void nak(int error)
   int length;
   struct errmsg *pe;
 
-  tp = &buf.hdr;
+  tp = &buff.hdr;
   tp->th_opcode = htons(opcode_ERROR);
   tp->th_code = htons((unsigned short)error);
   for(pe = errmsgs; pe->e_code >= 0; pe++)
@@ -1370,6 +1370,6 @@ static void nak(int error)
    * report from glibc with FORTIFY_SOURCE */
   memcpy(tp->th_msg, pe->e_msg, length + 1);
   length += 5;
-  if(swrite(peer, &buf.storage[0], length) != length)
+  if(swrite(peer, &buff.storage[0], length) != length)
     logmsg("nak: fail\n");
 }
