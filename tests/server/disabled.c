@@ -34,7 +34,6 @@
 #include "curl_setup.h"
 #include "multihandle.h" /* for ENABLE_WAKEUP */
 #include "tool_xattr.h" /* for USE_XATTR */
-#include "curl_sha512_256.h" /* for CURL_HAVE_SHA512_256 */
 #include <stdio.h>
 
 static const char *disabled[]={
@@ -104,7 +103,7 @@ static const char *disabled[]={
 #if (SIZEOF_SIZE_T < 5)
   "large-size",
 #endif
-#ifndef CURL_HAVE_SHA512_256
+#ifndef CURL_DISABLE_SHA512_256
   "sha512-256",
 #endif
 #ifdef _WIN32
