@@ -793,6 +793,9 @@ static CURLcode url_proto(char **url,
                        CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME) &&
          !curl_url_get(uh, CURLUPART_SCHEME, &schemep,
                        CURLU_DEFAULT_SCHEME)) {
+#ifdef CURL_DISABLE_IPFS
+        (void)config;
+#else
         if(curl_strequal(schemep, proto_ipfs) ||
            curl_strequal(schemep, proto_ipns)) {
           result = ipfs_url_rewrite(uh, schemep, url, config);
@@ -805,6 +808,7 @@ static CURLcode url_proto(char **url,
             config->synthetic_error = TRUE;
         }
         else
+#endif /* !CURL_DISABLE_IPFS */
           proto = proto_token(schemep);
 
         curl_free(schemep);

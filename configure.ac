@@ -168,6 +168,7 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
+   curl_ipfs_msg="no      (--enable-ipfs)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
     curl_psl_msg="no      (--with-libpsl)"
@@ -640,8 +641,10 @@ AS_HELP_STRING([--disable-http],[Disable HTTP support]),
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
     disable_http="yes"
-    AC_MSG_WARN([disable HTTP disables FTP over proxy and RTSP])
+    AC_MSG_WARN([disable HTTP disables FTP over proxy, IPFS and RTSP])
     AC_SUBST(CURL_DISABLE_HTTP, [1])
+    AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
+    AC_SUBST(CURL_DISABLE_IPFS, [1])
     AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
     AC_SUBST(CURL_DISABLE_RTSP, [1])
     dnl toggle off alt-svc too when HTTP is disabled
@@ -690,6 +693,32 @@ AS_HELP_STRING([--disable-file],[Disable FILE support]),
     ;;
   esac ],
     AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support IPFS])
+AC_ARG_ENABLE(ipfs,
+AS_HELP_STRING([--enable-ipfs],[Enable IPFS support])
+AS_HELP_STRING([--disable-ipfs],[Disable IPFS support]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
+    AC_SUBST(CURL_DISABLE_IPFS, [1])
+    ;;
+  *)
+    if test x$CURL_DISABLE_HTTP = x1; then
+      AC_MSG_ERROR(HTTP support needs to be enabled in order to enable IPFS support!)
+    else
+      AC_MSG_RESULT(yes)
+      curl_ipfs_msg="enabled"
+    fi
+    ;;
+  esac ],
+    if test "x$CURL_DISABLE_HTTP" != "x1"; then
+      AC_MSG_RESULT(yes)
+      curl_ipfs_msg="enabled"
+    else
+      AC_MSG_RESULT(no)
+    fi
 )
 AC_MSG_CHECKING([whether to support ldap])
 AC_ARG_ENABLE(ldap,
@@ -5125,7 +5154,7 @@ AC_SUBST(SUPPORT_FEATURES)
 
 dnl For supported protocols in pkg-config file
 if test "x$CURL_DISABLE_HTTP" != "x1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTP IPFS IPNS"
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTP"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTPS"
   fi
@@ -5201,6 +5230,9 @@ if test "x$USE_LIBSSH" = "x1"; then
 fi
 if test "x$USE_WOLFSSH" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
+fi
+if test "x$CURL_DISABLE_IPFS" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IPFS IPNS"
 fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
@@ -5312,6 +5344,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   ca fallback:      ${with_ca_fallback}
   LDAP:             ${curl_ldap_msg}
   LDAPS:            ${curl_ldaps_msg}
+  IPFS/IPNS:        ${curl_ipfs_msg}
   RTSP:             ${curl_rtsp_msg}
   RTMP:             ${curl_rtmp_msg}
   PSL:              ${curl_psl_msg}

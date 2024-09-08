@@ -131,6 +131,9 @@
 /* disables proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
 
+/* disables IPFS from the curl tool */
+#cmakedefine CURL_DISABLE_IPFS 1
+
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
