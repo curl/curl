@@ -47,9 +47,10 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})
   target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
-    "${PROJECT_SOURCE_DIR}/src"  # for "tool_binmod.h", "tool_xattr.h"
+    "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
+    "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/src"           # for "tool_binmod.h", "tool_xattr.h"
+    "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
   )
   target_link_libraries(${_target_name} ${CURL_LIBS})
   # Test servers simply are standalone programs that do not use libcurl
