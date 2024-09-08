@@ -1596,11 +1596,11 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
 buildinfo.configure.tool: configure
 buildinfo.configure.args: $ac_configure_args
 buildinfo.host: $build
-buildinfo.host.os: $build_os
 buildinfo.host.cpu: $build_cpu
+buildinfo.host.os: $build_os
 buildinfo.target: $host
-buildinfo.target.os: $host_os
 buildinfo.target.cpu: $host_cpu
+buildinfo.target.os: $host_os
 buildinfo.target.flags: $curl_pflags
 buildinfo.compiler: $compiler_id
 buildinfo.compiler.version: $compiler_ver"

@@ -2194,10 +2194,10 @@ buildinfo.configure.version: ${CMAKE_VERSION}
 buildinfo.configure.args:${_cmake_args}
 buildinfo.configure.generator: ${CMAKE_GENERATOR}
 buildinfo.configure.make: ${CMAKE_MAKE_PROGRAM}
-buildinfo.host.os: ${CMAKE_HOST_SYSTEM_NAME}
 buildinfo.host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
-buildinfo.target.os: ${CMAKE_SYSTEM_NAME}
+buildinfo.host.os: ${CMAKE_HOST_SYSTEM_NAME}
 buildinfo.target.cpu: ${CMAKE_SYSTEM_PROCESSOR}
+buildinfo.target.os: ${CMAKE_SYSTEM_NAME}
 buildinfo.target.flags:${_target_flags}
 buildinfo.compiler: ${CMAKE_C_COMPILER_ID}
 buildinfo.compiler.version: ${CMAKE_C_COMPILER_VERSION}
