@@ -72,6 +72,8 @@ my @reused_symbols = (
     "socket_type",
     "storerequest",
     "use_ipv6",
+    "wrotepidfile",
+    "wroteportfile",
     );
 
 # TODO: Some of these may be #undef-ed manually at the end of each source
