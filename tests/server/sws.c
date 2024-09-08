@@ -133,7 +133,6 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 #define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 
