@@ -500,9 +500,17 @@ cmake_dependent_option(CURL_USE_WOLFSSL "Enable wolfSSL for SSL/TLS" OFF CURL_EN
 cmake_dependent_option(CURL_USE_GNUTLS "Enable GnuTLS for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 cmake_dependent_option(CURL_USE_RUSTLS "Enable Rustls for SSL/TLS" OFF CURL_ENABLE_SSL OFF)
 
-set(_openssl_default ON)
-if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_USE_WOLFSSL)
+if(WIN32 OR
+   CURL_USE_SECTRANSP OR
+   CURL_USE_SCHANNEL OR
+   CURL_USE_MBEDTLS OR
+   CURL_USE_BEARSSL OR
+   CURL_USE_WOLFSSL OR
+   CURL_USE_GNUTLS OR
+   CURL_USE_RUSTLS)
   set(_openssl_default OFF)
+else()
+  set(_openssl_default ON)
 endif()
 cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} CURL_ENABLE_SSL OFF)
 option(USE_OPENSSL_QUIC "Use OpenSSL and nghttp3 libraries for HTTP/3 support" OFF)
