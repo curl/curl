@@ -85,16 +85,7 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#endif
-
 #define DEFAULT_PORT 8905
-
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/socksd.log"
-#endif
 
 #ifndef DEFAULT_REQFILE
 #define DEFAULT_REQFILE "log/socksd-request.log"
@@ -134,7 +125,6 @@ struct configurable {
 
 static struct configurable config;
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *reqlogfile = DEFAULT_REQFILE;
 static const char *configfile = DEFAULT_CONFIG;
 
@@ -978,6 +968,8 @@ int main(int argc, char *argv[])
   const char *unix_socket = NULL;
   bool unlink_socket = false;
 #endif
+
+  serverlogfile = "log/socksd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

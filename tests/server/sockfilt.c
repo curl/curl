@@ -114,28 +114,11 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ENOMEM
-#define ENOMEM  12 /* errno.h value */
-#undef  EINVAL
-#define EINVAL  22 /* errno.h value */
-#endif
-
 #define DEFAULT_PORT 8999
-
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/sockfilt.log"
-#endif
 
 /* buffer is this excessively large only to be able to support things like
   test 1003 which tests exceedingly large server response lines */
 #define BUFFER_SIZE 17010
-
-const char *serverlogfile = DEFAULT_LOGFILE;
 
 static bool verbose = FALSE;
 static bool bind_only = FALSE;
@@ -1405,6 +1388,8 @@ int main(int argc, char *argv[])
   int arg = 1;
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
+
+  serverlogfile = "log/sockfilt.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

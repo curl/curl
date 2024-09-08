@@ -150,10 +150,6 @@ struct bf {
 #undef MIN
 #define MIN(x,y) ((x)<(y)?(x):(y))
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/tftpd.log"
-#endif
-
 #define REQUEST_DUMP  "server.input"
 
 #define DEFAULT_PORT 8999 /* UDP */
@@ -205,7 +201,6 @@ static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 static const char *pidname = ".tftpd.pid";
@@ -563,6 +558,8 @@ int main(int argc, char **argv)
   int result = 0;
 
   memset(&test, 0, sizeof(test));
+
+  serverlogfile = "log/tftpd.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

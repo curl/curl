@@ -58,15 +58,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#ifdef USE_WINSOCK
-#undef  EINTR
-#define EINTR    4 /* errno.h value */
-#undef  EAGAIN
-#define EAGAIN  11 /* errno.h value */
-#undef  ERANGE
-#define ERANGE  34 /* errno.h value */
-#endif
-
 static int socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
@@ -131,11 +122,6 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 
 #define DEFAULT_PORT 8999
 
-#ifndef DEFAULT_LOGFILE
-#define DEFAULT_LOGFILE "log/sws.log"
-#endif
-
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 
@@ -151,7 +137,7 @@ static char loglockfile[256];
 
 /* file in which additional instructions may be found */
 #define DEFAULT_CMDFILE "log/server.cmd"
-const char *cmdfile = DEFAULT_CMDFILE;
+static const char *cmdfile = DEFAULT_CMDFILE;
 
 /* very-big-path support */
 #define MAXDOCNAMELEN 140000
@@ -184,13 +170,6 @@ const char *cmdfile = DEFAULT_CMDFILE;
 #define CMD_NOEXPECT "no-expect"
 
 #define END_OF_HEADERS "\r\n\r\n"
-
-enum {
-  DOCNUMBER_NOTHING = -4,
-  DOCNUMBER_QUIT    = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
 
 static const char *end_of_headers = END_OF_HEADERS;
 
@@ -2059,6 +2038,8 @@ int main(int argc, char *argv[])
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
+
+  serverlogfile = "log/sws.log";
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

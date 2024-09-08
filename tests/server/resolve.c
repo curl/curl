@@ -53,8 +53,6 @@
 static bool use_ipv6 = FALSE;
 static const char *ipv_inuse = "IPv4";
 
-const char *serverlogfile = ""; /* for a util.c function we don't use */
-
 int main(int argc, char *argv[])
 {
   int arg = 1;
