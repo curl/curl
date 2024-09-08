@@ -793,7 +793,9 @@ static CURLcode url_proto(char **url,
                        CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME) &&
          !curl_url_get(uh, CURLUPART_SCHEME, &schemep,
                        CURLU_DEFAULT_SCHEME)) {
-#ifndef CURL_DISABLE_IPFS
+#ifdef CURL_DISABLE_IPFS
+        (void)config;
+#else
         if(curl_strequal(schemep, proto_ipfs) ||
            curl_strequal(schemep, proto_ipns)) {
           result = ipfs_url_rewrite(uh, schemep, url, config);
