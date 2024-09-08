@@ -69,7 +69,6 @@ my @reused_symbols = (
     "header_callback",
     "ioctlcallback",
     "msgbuff",
-    "my_rlimit",
     "mydtor",  # unit
     "num_open",
     "progress_callback",
@@ -88,6 +87,7 @@ my @reused_symbols = (
     "test_lock",
     "test_once",
     "test_parse",  # unit
+    "test_rlimit",
     "test_unlock",
     "testbuf",
     "testcase",  # unit

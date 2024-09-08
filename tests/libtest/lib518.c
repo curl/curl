@@ -120,7 +120,7 @@ static void rlim2str(char *buf, size_t len, rlim_t val)
   }
 }
 
-static int my_rlimit(int keep_open)
+static int test_rlimit(int keep_open)
 {
   rlim_t nitems, i;
   int *memchunk = NULL;
@@ -239,7 +239,7 @@ static int my_rlimit(int keep_open)
    * avoid a low memory condition once the file descriptors are
    * open. System conditions that could make the test fail should
    * be addressed in the precheck phase. This chunk of memory shall
-   * be always free()ed before exiting the my_rlimit() function so
+   * be always free()ed before exiting the test_rlimit() function so
    * that it becomes available to the test.
    */
 
@@ -452,14 +452,14 @@ CURLcode test(char *URL)
 
   if(!strcmp(URL, "check")) {
     /* used by the test script to ask if we can run this test or not */
-    if(my_rlimit(FALSE)) {
-      fprintf(stdout, "my_rlimit problem: %s\n", msgbuff);
+    if(test_rlimit(FALSE)) {
+      fprintf(stdout, "test_rlimit problem: %s\n", msgbuff);
       return (CURLcode)1;
     }
     return CURLE_OK; /* sure, run this! */
   }
 
-  if(my_rlimit(TRUE)) {
+  if(test_rlimit(TRUE)) {
     /* failure */
     return TEST_ERR_MAJOR_BAD;
   }
