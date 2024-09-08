@@ -35,7 +35,8 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
-              -I$(top_srcdir)/src
+              -I$(top_srcdir)/src            \
+              -I$(top_srcdir)/test/servers
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -50,6 +51,18 @@ endif
 include Makefile.inc
 
 EXTRA_DIST = base64.pl CMakeLists.txt .checksrc
+
+if USE_TEST_BUNDLES
+server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl
+	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(noinst_PROGRAMS) > server_bundle.c
+
+noinst_PROGRAMS = servers
+nodist_servers_SOURCES = server_bundle.c
+servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(UTIL)
+CLEANFILES += server_bundle.c
+else
+noinst_PROGRAMS = $(LIBTESTPROGS)
+endif
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
