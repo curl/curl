@@ -917,6 +917,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   return sock;
 }
 
+static const char *pidname = ".mqttd.pid";
+static const char *portname = ".mqttd.port";
 
 int main(int argc, char *argv[])
 {
@@ -924,8 +926,6 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
-  const char *pidname = ".mqttd.pid";
-  const char *portname = ".mqttd.port";
   bool juggle_again;
   int error;
   int arg = 1;
