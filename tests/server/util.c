@@ -56,7 +56,7 @@
 #define EINVAL  22 /* errno.h value */
 #endif
 
-const char *serverlogfile = DEFAULT_LOGFILE;
+const char *serverlogfile = "log/server_default.log";
 
 static struct timeval tvnow(void);
 
