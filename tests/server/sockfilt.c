@@ -131,8 +131,6 @@
   test 1003 which tests exceedingly large server response lines */
 #define BUFFER_SIZE 17010
 
-const char *serverlogfile = DEFAULT_LOGFILE;
-
 static bool verbose = FALSE;
 static bool bind_only = FALSE;
 #ifdef USE_IPV6
