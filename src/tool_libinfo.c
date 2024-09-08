@@ -49,8 +49,10 @@ const char *proto_rtsp = NULL;
 const char *proto_scp = NULL;
 const char *proto_sftp = NULL;
 const char *proto_tftp = NULL;
+#ifndef CURL_DISABLE_IPFS
 const char *proto_ipfs = "ipfs";
 const char *proto_ipns = "ipns";
+#endif /* !CURL_DISABLE_IPFS */
 
 static struct proto_name_tokenp {
   const char   *proto_name;
