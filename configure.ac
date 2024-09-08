@@ -690,8 +690,12 @@ AS_HELP_STRING([--disable-ipfs],[Disable IPFS support]),
     fi
     ;;
   esac ],
-    AC_MSG_RESULT(yes)
-    curl_ipfs_msg="enabled"
+    if test "x$CURL_DISABLE_HTTP" != "x1"; then
+      AC_MSG_RESULT(yes)
+      curl_ipfs_msg="enabled"
+    else
+      AC_MSG_RESULT(no)
+    fi
 )
 AC_MSG_CHECKING([whether to support ldap])
 AC_ARG_ENABLE(ldap,
