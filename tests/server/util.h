@@ -25,6 +25,16 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+static enum {
+  socket_domain_inet = AF_INET
+#ifdef USE_IPV6
+  , socket_domain_inet6 = AF_INET6
+#endif
+#ifdef USE_UNIX_SOCKETS
+  , socket_domain_unix = AF_UNIX
+#endif
+} socket_domain = AF_INET;
+
 char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 long timediff(struct timeval newer, struct timeval older);
