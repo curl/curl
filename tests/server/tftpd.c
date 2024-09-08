@@ -562,6 +562,8 @@ int main(int argc, char **argv)
 
   memset(&test, 0, sizeof(test));
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("tftpd IPv4%s\n",

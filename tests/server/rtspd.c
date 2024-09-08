@@ -1055,6 +1055,8 @@ int main(int argc, char *argv[])
 
   memset(&req, 0, sizeof(req));
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("rtspd IPv4%s"
