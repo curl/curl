@@ -26,29 +26,14 @@
 # Bundle up individual tests into a single binary. The resulting binary can run
 # individual tests by passing their name (without '.c') as the first argument.
 #
-# Usage: mk-bundle-server.pl [<src>] --main <server.c>
+# Usage: mk-bundle-server.pl [<server_c>]
 
 use strict;
 use warnings;
 
-# Specific sources to exclude or add as an extra source file
 my @src;
-my %main;
-my $in_main = 0;
 foreach my $src (@ARGV) {
-    if($src eq "--endmain") {
-        $in_main = 0;
-    }
-    elsif($in_main) {
-        $main{$src} = 1;
-        push @src, $src;
-    }
-    elsif($src eq "--main") {
-        $in_main = 1;
-    }
-    else {
-        push @src, $src;
-    }
+    push @src, $src;
 }
 
 print <<HEADER
@@ -96,35 +81,24 @@ my @reused_macros = (
 my $tlist = "";
 
 foreach my $src (@src) {
-    if($src =~ /\.c$/g) {
-        my $nams = $src;
-        $nams =~ s/\.[^.]+$//;
-        if($src eq $nams) {
-            $src .= ".c";
-        }
+    my $nams = $src;
 
-        if(exists $main{$src}) {
-            # Make common symbols unique across test sources
-            foreach my $symb ("main", @reused_symbols) {
-                print "#undef $symb\n";
-                print "#define $symb ${symb}_$nams\n";
-            }
-            print "int main_$nams(int argc, char **argv);\n";
-        }
-
-        print "#include \"$src\"\n";
-
-        if(exists $main{$src}) {
-            # Reset macros re-used by multiple tests
-            foreach my $undef ("main", @reused_macros) {
-                print "#undef $undef\n";
-            }
-
-            print "\n";
-
-            $tlist .= "  { \"$nams\", main_$nams },\n";
-        }
+    # Make common symbols unique across server sources
+    foreach my $symb ("main", @reused_symbols) {
+        print "#undef $symb\n";
+        print "#define $symb ${symb}_$nams\n";
     }
+    print "int main_$nams(int argc, char **argv);\n";
+    print "#include \"$src.c\"\n";
+
+    # Reset macros re-used by multiple servers
+    foreach my $undef ("main", @reused_macros) {
+        print "#undef $undef\n";
+    }
+
+    print "\n";
+
+    $tlist .= "  { \"$nams\", main_$nams },\n";
 }
 
 print <<FOOTER
