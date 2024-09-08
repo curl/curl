@@ -127,7 +127,7 @@ static struct curl_slist *sethost(struct curl_slist *headers)
 
 
 /* the dummy thread function */
-static void *my_fire(void *ptr)
+static void *test_fire(void *ptr)
 {
   CURLcode code;
   struct curl_slist *headers;
@@ -272,7 +272,7 @@ CURLcode test(char *URL)
 
     /* simulate thread, direct call of "thread" function */
     printf("*** run %d\n",i);
-    my_fire(&tdata);
+    test_fire(&tdata);
 
     curl_free(tdata.url);
   }

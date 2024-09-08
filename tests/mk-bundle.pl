@@ -69,7 +69,6 @@ my @reused_symbols = (
     "header_callback",
     "ioctlcallback",
     "msgbuff",
-    "my_fire",
     "my_lock",
     "my_rlimit",
     "my_unlock",
@@ -87,6 +86,7 @@ my @reused_symbols = (
     "store_errmsg",
     "suburl",
     "test_failure",  # shadow
+    "test_fire",
     "test_once",
     "test_parse",  # unit
     "testbuf",
