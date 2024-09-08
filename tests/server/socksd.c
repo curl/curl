@@ -138,7 +138,6 @@ struct configurable {
 
 static struct configurable config;
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *reqlogfile = DEFAULT_REQFILE;
 static const char *configfile = DEFAULT_CONFIG;
 

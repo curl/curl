@@ -203,7 +203,6 @@ static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 static const char *pidname = ".tftpd.pid";
