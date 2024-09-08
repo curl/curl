@@ -1405,6 +1405,8 @@ int main(int argc, char *argv[])
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("sockfilt IPv4%s\n",

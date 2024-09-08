@@ -978,6 +978,8 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("socksd IPv4%s\n",
