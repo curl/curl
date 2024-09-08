@@ -99,6 +99,9 @@ foreach my $src (@src) {
     if($src =~ /\.c$/g) {
         my $nams = $src;
         $nams =~ s/\.[^.]+$//;
+        if($src eq $nams) {
+            $src .= ".c";
+        }
 
         if(exists $main{$src}) {
             # Make common symbols unique across test sources
