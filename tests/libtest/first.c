@@ -139,7 +139,7 @@ int main(int argc, char **argv)
   char *URL;
   CURLcode result;
   int basearg;
-  test_func_t testfunc;
+  test_func_t test_func;
 
 #ifdef O_BINARY
 #  ifdef __HIGHC__
@@ -178,18 +178,18 @@ int main(int argc, char **argv)
     }
 
     test_name = argv[basearg - 1];
-    testfunc = NULL;
+    test_func = NULL;
     {
       size_t tmp;
       for(tmp = 0; tmp < (sizeof(s_tests)/sizeof((s_tests)[0])); ++tmp) {
-        if(strcmp(test_name, s_tests[tmp].id) == 0) {
-          testfunc = s_tests[tmp].ptr;
+        if(strcmp(test_name, s_tests[tmp].name) == 0) {
+          test_func = s_tests[tmp].ptr;
           break;
         }
       }
     }
 
-    if(!testfunc) {
+    if(!test_func) {
       fprintf(stderr, "Test '%s' not found.\n", test_name);
       return 1;
     }
@@ -204,7 +204,7 @@ int main(int argc, char **argv)
     return 1;
   }
 
-  testfunc = test;
+  test_func = test;
 #endif
 
   if(argc > (basearg + 1))
@@ -217,7 +217,7 @@ int main(int argc, char **argv)
 
   fprintf(stderr, "URL: %s\n", URL);
 
-  result = testfunc(URL);
+  result = test_func(URL);
   fprintf(stderr, "Test ended with result %d\n", result);
 
 #ifdef _WIN32

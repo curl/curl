@@ -30,7 +30,7 @@ typedef CURLcode (*test_func_t)(char *);
 
 #ifdef CURLTESTS_BUNDLED
 struct onetest {
-  const char *id;
+  const char *name;
   test_func_t ptr;
 };
 #endif
