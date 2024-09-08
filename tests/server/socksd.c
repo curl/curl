@@ -958,8 +958,6 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   return sock;
 }
 
-static const char *pidname = ".socksd.pid";
-static const char *portname = NULL; /* none by default */
 
 int main(int argc, char *argv[])
 {
@@ -967,6 +965,8 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
+  const char *pidname = ".socksd.pid";
+  const char *portname = NULL; /* none by default */
   bool juggle_again;
   int error;
   int arg = 1;
