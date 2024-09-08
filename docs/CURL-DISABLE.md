@@ -140,6 +140,10 @@ Disable the built-in progress meter
 
 Disable support for proxies
 
+## `CURL_DISABLE_IPFS`
+
+Disable the IPFS/IPNS protocols.
+
 ## `CURL_DISABLE_RTSP`
 
 Disable the RTSP protocol.
