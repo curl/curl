@@ -2,6 +2,8 @@
 #
 # SPDX-License-Identifier: curl
 
+server_bundle.c
+
 disabled
 mqttd
 resolve
