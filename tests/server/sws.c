@@ -2026,6 +2026,9 @@ static int service_connection(curl_socket_t msgsock, struct httprequest *req,
   return -1;
 }
 
+static const char *pidname = ".http.pid";
+static const char *portname = ".http.port";
+
 int main(int argc, char *argv[])
 {
   srvr_sockaddr_union_t me;
@@ -2038,8 +2041,6 @@ int main(int argc, char *argv[])
   const char *unix_socket = NULL;
   bool unlink_socket = false;
 #endif
-  const char *pidname = ".http.pid";
-  const char *portname = ".http.port";
   struct httprequest *req = NULL;
   int rc = 0;
   int error;
