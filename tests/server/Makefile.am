@@ -55,7 +55,7 @@ EXTRA_DIST = base64.pl CMakeLists.txt
 
 if USE_TEST_BUNDLES
 server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl
-	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl --main $(noinst_PROGRAMS) > server_bundle.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(noinst_PROGRAMS) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c
