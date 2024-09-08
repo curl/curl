@@ -1036,8 +1036,6 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   return 0;
 }
 
-static const char *pidname = ".rtsp.pid";
-static const char *portname = NULL; /* none by default */
 
 int main(int argc, char *argv[])
 {
@@ -1048,6 +1046,8 @@ int main(int argc, char *argv[])
   int wroteportfile = 0;
   int flag;
   unsigned short port = DEFAULT_PORT;
+  const char *pidname = ".rtsp.pid";
+  const char *portname = NULL; /* none by default */
   struct httprequest req;
   int rc;
   int error;

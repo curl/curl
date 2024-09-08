@@ -59,8 +59,6 @@ my @reused_symbols = (
     "logdir",
     "loghex",
     "parse_servercmd",
-    "pidname",
-    "portname",
     "prevbounce",
     "prevpartno",
     "prevtestno",
