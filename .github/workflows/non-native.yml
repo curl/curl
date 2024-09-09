@@ -185,7 +185,7 @@ jobs:
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: 'autotools'
-        uses: vmactions/omnios-vm@a61ca1ebafdcb14a9d986928d070c9834ee66fd3 # v1
+        uses: vmactions/omnios-vm@3d6dfd27a493c48c54a9e7ff92bd6b0cc39f3c72 # v1
         with:
           usesh: true
           # https://pkg.omnios.org/r151050/core/en/index.shtml
