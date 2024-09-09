@@ -909,18 +909,18 @@ static CURLcode error_do_write(struct Curl_easy *data,
                                      struct Curl_cwriter *writer, int type,
                                      const char *buf, size_t nbytes)
 {
-  char all[256];
-  (void)Curl_all_content_encodings(all, sizeof(all));
-
   (void) writer;
   (void) buf;
   (void) nbytes;
 
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
-
-  failf(data, "Unrecognized content encoding type. "
-        "libcurl understands %s content encodings.", all);
+  else {
+    char all[256];
+    (void)Curl_all_content_encodings(all, sizeof(all));
+    failf(data, "Unrecognized content encoding type. "
+          "libcurl understands %s content encodings.", all);
+  }
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
