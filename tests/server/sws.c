@@ -1319,6 +1319,14 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   }
 #endif
 
+  if(0 != curlx_nonblock(serverfd, TRUE)) {
+    error = SOCKERRNO;
+    logmsg("curlx_nonblock failed with error: (%d) %s",
+           error, sstrerror(error));
+    sclose(serverfd);
+    return CURL_SOCKET_BAD;
+  }
+
   switch(socket_domain) {
   case AF_INET:
     memset(&serveraddr.sa4, 0, sizeof(serveraddr.sa4));
@@ -1360,12 +1368,39 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   if(rc) {
     error = SOCKERRNO;
+    if(error == EINPROGRESS) {
+      fd_set output;
+      struct timeval timeout = {1, 0}; /* 1000 ms */
+
+      FD_ZERO(&output);
+      FD_SET(serverfd, &output);
+      while(1) {
+        rc = select((int)serverfd + 1, NULL, &output, NULL, &timeout);
+        if(rc < 0 && SOCKERRNO != EINTR)
+          goto error;
+        else if(rc > 0) {
+          curl_socklen_t errSize = sizeof(error);
+          if(0 != getsockopt(serverfd, SOL_SOCKET, SO_ERROR,
+                             (void *)&error, &errSize))
+            error = SOCKERRNO;
+          if((0 == error) || (EISCONN == error))
+            goto success;
+          goto error;
+        }
+        else if(!rc) {
+          logmsg("Timeout connecting to server port %hu", port);
+          sclose(serverfd);
+          return CURL_SOCKET_BAD;
+        }
+      }
+    }
+error:
     logmsg("Error connecting to server port %hu: (%d) %s",
            port, error, sstrerror(error));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
   }
-
+success:
   logmsg("connected fine to %s%s%s:%hu, now tunnel",
          op_br, ipaddr, cl_br, port);
 
