@@ -142,8 +142,8 @@ static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
 static unsigned short server_port = DEFAULT_PORT;
-static unsigned short my_connectport = 0; /* if non-zero,
-                                             we activate this mode */
+static unsigned short server_connectport = 0; /* if non-zero,
+                                                 we activate this mode */
 
 enum sockmode {
   PASSIVE_LISTEN,    /* as a server waiting for connections */
@@ -1479,7 +1479,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        my_connectport = util_ultous(ulnum);
+        server_connectport = util_ultous(ulnum);
         arg++;
       }
     }
@@ -1535,7 +1535,7 @@ int main(int argc, char *argv[])
     goto sockfilt_cleanup;
   }
 
-  if(my_connectport) {
+  if(server_connectport) {
     /* Active mode, we should connect to the given port number */
     mode = ACTIVE;
 #ifdef USE_IPV6
@@ -1543,7 +1543,7 @@ int main(int argc, char *argv[])
 #endif
       memset(&me.sa4, 0, sizeof(me.sa4));
       me.sa4.sin_family = AF_INET;
-      me.sa4.sin_port = htons(my_connectport);
+      me.sa4.sin_port = htons(server_connectport);
       me.sa4.sin_addr.s_addr = INADDR_ANY;
       if(!addr)
         addr = "127.0.0.1";
@@ -1555,7 +1555,7 @@ int main(int argc, char *argv[])
     else {
       memset(&me.sa6, 0, sizeof(me.sa6));
       me.sa6.sin6_family = AF_INET6;
-      me.sa6.sin6_port = htons(my_connectport);
+      me.sa6.sin6_port = htons(server_connectport);
       if(!addr)
         addr = "::1";
       Curl_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
@@ -1566,7 +1566,7 @@ int main(int argc, char *argv[])
     if(rc) {
       error = SOCKERRNO;
       logmsg("Error connecting to port %hu: (%d) %s",
-             my_connectport, error, sstrerror(error));
+             server_connectport, error, sstrerror(error));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }
@@ -1585,8 +1585,8 @@ int main(int argc, char *argv[])
 
   logmsg("Running %s version", ipv_inuse);
 
-  if(my_connectport)
-    logmsg("Connected to port %hu", my_connectport);
+  if(server_connectport)
+    logmsg("Connected to port %hu", server_connectport);
   else if(bind_only)
     logmsg("Bound without listening on port %hu", server_port);
   else
