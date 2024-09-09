@@ -103,12 +103,12 @@ foreach my $src (@src) {
 
     print "\n";
 
-    $tlist .= "  { \"$nams\", main_$nams },\n";
+    $tlist .= "  {\"$nams\", main_$nams},\n";
 }
 
 print <<FOOTER
-static const struct onemain s_mains[] = {
-$tlist};
-#include "first.c"
+const struct onemain p_mains[] = {
+${tlist}  {NULL, NULL}
+};
 FOOTER
     ;

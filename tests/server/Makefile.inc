@@ -67,6 +67,10 @@ UTIL = \
  ../../lib/strerror.c \
  ../../lib/strerror.h
 
+UTIL_BUNDLE = \
+ first.c \
+ first.h
+
 resolve_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) $(UTIL) \
  resolve.c
 resolve_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
