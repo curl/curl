@@ -340,6 +340,8 @@ issue.
 - `RETRSIZE [size]` - Force RETR response to contain the specified size
 - `NOSAVE` - Do not actually save what is received
 - `SLOWDOWN` - Send FTP responses with 0.01 sec delay between each byte
+- `SLOWDOWNDATA` - Send FTP responses with 0.01 sec delay between each data
+  byte
 - `PASVBADIP` - makes PASV send back an illegal IP in its 227 response
 - `CAPA [capabilities]` - Enables support for and specifies a list of space
    separated capabilities to return to the client for the IMAP `CAPABILITY`,

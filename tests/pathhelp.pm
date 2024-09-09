@@ -326,7 +326,8 @@ sub sys_native_abs_path {
         # prevent transforming and may be not processed.
         $path =~ s{^([\\/])[\\/]+}{$1}g;
 
-        print "Inter result: \"$path\"\n";
+        # some debugging? enable on need
+        # print "Inter result: \"$path\"\n";
         # Use 'cygpath', '-m' means Windows path with forward slashes,
         # '-a' means absolute path
         chomp($path = `cygpath -m -a '$path'`);

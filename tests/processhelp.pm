@@ -327,6 +327,8 @@ sub killpid {
                 }
             }
             last if(not scalar(@signalled));
+            # give any zombies of us a chance to move on to the afterlife
+            pidwait(0, &WNOHANG);
             portable_sleep(0.05);
         }
     }

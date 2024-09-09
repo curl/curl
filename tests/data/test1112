@@ -7,17 +7,15 @@ EPSV
 RETR
 timeout
 FAILURE
-SLOWDOWN
+SLOWDOWNDATA
 timing-dependent
 </keywords>
 </info>
 
 # Server-side
 <reply>
-# Overload some standard FTP responses to make them shorter and faster
-# to avoid wasting time waiting for the data phase to start
 <servercmd>
-SLOWDOWN
+SLOWDOWNDATA
 REPLY welcome 220 Hey
 REPLY USER 331 OK
 REPLY PASS 230 OK
@@ -93,7 +91,7 @@ ftps
 FTPS download with strict timeout and slow data transfer
 </name>
 <command>
--k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 16
+-k --ftp-ssl-control ftps://%HOSTIP:%FTPSPORT/%TESTNUMBER -m 5
 </command>
 </client>
 
