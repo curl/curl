@@ -53,8 +53,7 @@ authentication:
               lib/http_aws*,\
               lib/http_digest.*,\
               lib/http_negotiate.*,\
-              lib/vauth/**,\
-              tests/server/fake_ntlm.c\
+              lib/vauth/**\
               }"
 
 build:
