@@ -1385,7 +1385,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
             error = SOCKERRNO;
           if((0 == error) || (EISCONN == error))
             goto success;
-          goto error;
+          else if(error != EINPROGRESS)
+            goto error;
         }
         else if(!rc) {
           logmsg("Timeout connecting to server port %hu", port);
