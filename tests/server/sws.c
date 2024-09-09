@@ -1368,7 +1368,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
 
   if(rc) {
     error = SOCKERRNO;
-    if(error == EINPROGRESS) {
+    if((error == EINPROGRESS) || (error == EWOULDBLOCK)) {
       fd_set output;
       struct timeval timeout = {1, 0}; /* 1000 ms */
 
@@ -1385,7 +1385,7 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
             error = SOCKERRNO;
           if((0 == error) || (EISCONN == error))
             goto success;
-          else if(error != EINPROGRESS)
+          else if((error != EINPROGRESS) && (error != EWOULDBLOCK))
             goto error;
         }
         else if(!rc) {
