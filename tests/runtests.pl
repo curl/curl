@@ -2268,6 +2268,7 @@ while(@ARGV) {
     elsif ($ARGV[0] eq "-bundle") {
         # use test bundles
         $bundle=1;
+        $ENV{'CURL_TEST_BUNDLES'} = 1;
     }
     elsif ($ARGV[0] eq "-d") {
         # have the servers display protocol output
