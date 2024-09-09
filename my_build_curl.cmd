@@ -16,7 +16,8 @@ rem Because vcvarsall.bat cannot be ran twice in the same cmd we use a different
 rem 
 
 set CURL_DIR=%~dp0
-set VS=C:\Program Files\Microsoft Visual Studio\2022\Professional
+set STUDIO_TYPE=Enterprise
+set VS=C:\Program Files\Microsoft Visual Studio\2022\%STUDIO_TYPE%
 set VCVARSALL="%VS%\VC\Auxiliary\Build\vcvarsall.bat"
 set COMPILED_FOLDER=%CURL_DIR%Compiled
 set MARK=%~nx0 --------------------------------------------------------------
@@ -31,6 +32,7 @@ echo Creating configuration
 call buildconf.bat && cd %CURL_DIR%\winbuild || ( call :last_message "buildconf.bat failed with %ERRORLEVEL%" & exit /b 2 )
 echo.
 
+echo "VCVARSALL is " %VCVARSALL%
 
 echo Building x86 config in a different window, please stand by ...
 rem if you need to see something from the output just ad an ^&^& pause  after nmake command
@@ -43,10 +45,19 @@ start /wait cmd /c call %VCVARSALL% x64 ^&^& nmake /f Makefile.vc mode=dll RTLIB
 
 echo.
 echo Populating Compiled folder
+
+echo "- remove curl folder"
 rmdir /s /q %COMPILED_FOLDER%\curl      > nul 2>&1
+echo "- remove all libs"
 del /q %COMPILED_FOLDER%\*.lib          > nul 2>&1
+
+echo "- remove all dlls"
 del /q %COMPILED_FOLDER%\*.dll          > nul 2>&1
+
+echo "- remove all pdbs"
 del /q %COMPILED_FOLDER%\*.pdb          > nul 2>&1
+
+echo "- create folder"
 mkdir %COMPILED_FOLDER%\curl            || ( call :last_message "cannot create curl inlcude dir" & exit /b 24 )
 
 
