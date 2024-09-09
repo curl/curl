@@ -26,6 +26,9 @@ wait 10
 <server>
 http
 </server>
+<killserver>
+http
+</killserver>
 <name>
 HTTP with 2 secs timeout
 </name>

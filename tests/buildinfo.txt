@@ -1,0 +1,14 @@
+# This is a generated file.  Do not edit.
+configure.tool: configure
+configure.args:  '--prefix=/opt/quic' '--enable-warnings' '--with-test-nghttpx=/opt/quic/bin/nghttpx' '--with-test-httpd=/opt/apache-2.4.x/' '--with-test-caddy=/opt/quic/bin/caddy' '--with-test-vsftpd=/Users/sei/projects/vsftpd/vsftpd-3.0.5/vsftpd' '--enable-debug' '--enable-websockets' '--with-libssh2' '--enable-ares' '--with-gssapi' '--with-libuv' 'PKG_CONFIG_PATH=/opt/quic/openssl/lib/pkgconfig:/opt/quic/lib/pkgconfig:/usr/local/lib/pkgconfig' '--with-ngtcp2' '--with-openssl' --enable-curldebug
+host: x86_64-apple-darwin23.6.0
+host.os: darwin23.6.0
+host.cpu: x86_64
+host.vendor: apple
+target: x86_64-apple-darwin23.6.0
+target.os: darwin23.6.0
+target.cpu: x86_64
+target.vendor: apple
+target.flags: APPLE UNIX
+compiler: CLANG
+compiler.version: 1200

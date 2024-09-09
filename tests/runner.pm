@@ -1066,7 +1066,10 @@ sub singletest_clean {
         }
     }
 
-    waitlockunlock($serverlogslocktimeout);
+    my @killtestservers = getpart("client", "killserver");
+    if(!@killtestservers) { # we are not killing it anyway
+        waitlockunlock($serverlogslocktimeout);
+    }
 
     # Test harness ssh server does not have this synchronization mechanism,
     # this implies that some ssh server based tests might need a small delay
@@ -1091,13 +1094,18 @@ sub singletest_clean {
     # test definition might instruct to stop some servers
     # stop also all servers relative to the given one
 
-    my @killtestservers = getpart("client", "killserver");
     if(@killtestservers) {
         foreach my $server (@killtestservers) {
             chomp $server;
             if(stopserver($server)) {
                 logmsg " $testnum: killserver FAILED\n";
                 return 1; # normal error if asked to fail on unexpected alive
+            }
+            else {
+                if (-f "$LOGDIR/$LOCKDIR/$server.lock") {
+                    logmsg " $testnum: $server lockfile still exists, removing it.\n";
+                    unlink("$LOGDIR/$LOCKDIR/$server.lock");
+                }
             }
         }
     }

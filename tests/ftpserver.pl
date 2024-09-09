@@ -488,7 +488,7 @@ sub sendcontrol {
 
         for(@a) {
             sockfilt $_;
-            portable_sleep(0.01);
+            portable_sleep($ctrldelay);
         }
     }
     my $log;
@@ -525,7 +525,7 @@ sub senddata {
             # pause between each byte
             for (split(//,$l)) {
                 sockfiltsecondary $_;
-                portable_sleep(0.01);
+                portable_sleep($datadelay);
             }
         }
     }
@@ -2808,6 +2808,7 @@ sub nodataconn_str {
 # On success returns 1, otherwise zero.
 #
 sub customize {
+    my($cmdfile) = @_;
     $ctrldelay = 0;     # default is no throttling of the ctrl stream
     $datadelay = 0;     # default is no throttling of the data stream
     $retrweirdo = 0;    # default is no use of RETRWEIRDO
@@ -2867,9 +2868,14 @@ sub customize {
             logmsg "FTPD: read POSTFETCH header data\n";
             $postfetch = $1;
         }
+        elsif($_ =~ /SLOWDOWNDATA/) {
+            $ctrldelay=0;
+            $datadelay=0.005;
+            logmsg "FTPD: send response data with 0.01 sec delay per byte\n";
+        }
         elsif($_ =~ /SLOWDOWN/) {
-            $ctrldelay=1;
-            $datadelay=1;
+            $ctrldelay=0.005;
+            $datadelay=0.005;
             logmsg "FTPD: send response with 0.01 sec delay between each byte\n";
         }
         elsif($_ =~ /RETRWEIRDO/) {
