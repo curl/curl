@@ -71,7 +71,7 @@ CFLAGS_LIBCURL_STATIC  = /DCURL_STATICLIB
 
 WIN_LIBS    = ws2_32.lib wldap32.lib advapi32.lib crypt32.lib
 
-BASE_NAME              = libcurl
+BASE_NAME              = libcurl_$(MACHINE)
 BASE_NAME_DEBUG        = $(BASE_NAME)_debug
 BASE_NAME_STATIC       = $(BASE_NAME)_a
 BASE_NAME_STATIC_DEBUG = $(BASE_NAME_STATIC)_debug
@@ -427,12 +427,17 @@ CFGSET = true
 
 # CURL_XX macros are for the curl.exe command
 
+P_ARCH = x86
+!IF "$(MACHINE)"=="x64"
+P_ARCH = ia64
+!ENDIF
+
 !IF "$(DEBUG)"=="yes"
-RC_FLAGS = /d_DEBUG /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+RC_FLAGS = /dMACHINE=$(MACHINE) /dP_ARCH=$(P_ARCH) /d_DEBUG /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CURL_CC       = $(CC_DEBUG) $(RTLIB_DEBUG)
 CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /d_DEBUG /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ELSE
-RC_FLAGS = /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
+RC_FLAGS = /dMACHINE=$(MACHINE) /dP_ARCH=$(P_ARCH) /Fo $@ $(LIBCURL_SRC_DIR)\libcurl.rc
 CURL_CC       = $(CC_NODEBUG) $(RTLIB)
 CURL_RC_FLAGS = $(CURL_RC_FLAGS) /i../include /Fo $@ $(CURL_SRC_DIR)\curl.rc
 !ENDIF

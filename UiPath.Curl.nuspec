@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>UiPath.Curl</id>
+    <version>8.9.1.1</version>
+    <title>UiPath.Curl</title>
+    <authors>UiPath</authors>
+    <owners>UiPath</owners>
+    <summary>Curl for Windows platform</summary>
+    <description>Curl for Windows platform</description>
+    <language>en-US</language>
+    <requireLicenseAcceptance>true</requireLicenseAcceptance>
+    <licenseUrl>https://curl.se/docs/copyright.html</licenseUrl>
+    <projectUrl>https://curl.se/</projectUrl>
+    <repository url="https://github.com/paul-neata-uipath/curl" branch="8_9_1_0_uipath_setup" />
+    <iconUrl>https://curl.se/favicon.ico</iconUrl>
+    <tags>curl</tags>
+  </metadata>
+  <files>
+    
+    <!--tools-->
+    <file src="$OutputPath$curl.targets" target="build\curl" />
+
+    <!--x86-->
+    <file src="$OutputPath$libcurl_x86.dll" target="build\curl\lib\release_x86" />
+    <file src="$OutputPath$libcurl_x86.lib" target="build\curl\lib\release_x86" />
+    <file src="$OutputPath$libcurl_x86.pdb" target="build\curl\lib\release_x86" />
+	
+	<!--x64-->
+    <file src="$OutputPath$libcurl_x64.dll" target="build\curl\lib\release_x64" />
+    <file src="$OutputPath$libcurl_x64.lib" target="build\curl\lib\release_x64" />
+    <file src="$OutputPath$libcurl_x64.pdb" target="build\curl\lib\release_x64" />
+	
+	<!--include-->
+	<file src="$OutputPath$curl\**" target="build\curl\include\curl\" />
+
+	<!--Placehoder file to create lib folder in package-->
+    <!--file src="nuget\_._" target="lib" /-->
+		
+  </files>
+</package>

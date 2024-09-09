@@ -26,7 +26,7 @@
 
 LANGUAGE  0, 0
 
-#define RC_VERSION  LIBCURL_VERSION_MAJOR, LIBCURL_VERSION_MINOR, LIBCURL_VERSION_PATCH, 0
+#define RC_VERSION  LIBCURL_VERSION_MAJOR, LIBCURL_VERSION_MINOR, LIBCURL_VERSION_PATCH, LIBCURL_VERSION_SUB_PATCH
 
 VS_VERSION_INFO VERSIONINFO
   FILEVERSION     RC_VERSION
@@ -63,3 +63,47 @@ BEGIN
     VALUE "Translation", 0x409, 1200
   END
 END
+
+
+
+
+
+/*
+  Copyied from curl.rc.
+  It's not something nice that, when we write the version in the manifest, we hardcode the forth number, but it's the only choice:
+  - cUrl has only 3 version numbers (major, minor, patch)
+  - for the forth number there is no macro used and we won't modify the build system only for that
+
+  Use manifest id 2 as said in https://docs.microsoft.com/en-us/cpp/build/reference/manifest-create-side-by-side-assembly-manifest?view=vs-2019
+  */
+#if 1
+
+/* String escaping rules:
+     https://msdn.microsoft.com/library/aa381050
+   Application Manifest doc, including the list of 'supportedOS Id's:
+     https://msdn.microsoft.com/library/aa374191 */
+
+#ifndef CREATEPROCESS_MANIFEST_RESOURCE_ID
+#define CREATEPROCESS_MANIFEST_RESOURCE_ID  2
+#endif
+#ifndef RT_MANIFEST
+#define RT_MANIFEST  24
+#endif
+
+#define _STR(macro)   _STR_(macro)
+#define _STR_(macro)  #macro
+
+CREATEPROCESS_MANIFEST_RESOURCE_ID RT_MANIFEST
+BEGIN
+  "<?xml version=""1.0"" encoding=""UTF-8"" standalone=""yes""?>"
+  "<assembly xmlns=""urn:schemas-microsoft-com:asm.v1"" manifestVersion=""1.0"">"
+    "<assemblyIdentity name=""libcurl_" _STR(LIBCURL_NAME_SUFFIX) """ version="""
+      _STR(LIBCURL_VERSION_MAJOR) "."
+      _STR(LIBCURL_VERSION_MINOR) "."
+      _STR(LIBCURL_VERSION_PATCH) "."
+      _STR(LIBCURL_VERSION_SUB_PATCH) """ type=""win32"" processorArchitecture=""" _STR(LIBCURL_P_ARCH)  """/>"
+    "<file name=""libcurl_" _STR(LIBCURL_NAME_SUFFIX) ".dll""/>"
+  "</assembly>"
+END
+
+#endif

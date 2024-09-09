@@ -1,0 +1,37 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <CurlLibDir>$(MSBuildThisFileDirectory)..\..\build\curl\lib\Release_$(PlatformTarget)\</CurlLibDir>
+    <CurlIncludeDir>$(MSBuildThisFileDirectory)..\..\build\curl\include\</CurlIncludeDir>
+    <CurlSystemLibs></CurlSystemLibs>
+    <CurlLibs>
+        $(CurlLibDir)libcurl_$(PlatformTarget).lib;
+    </CurlLibs>
+  </PropertyGroup>
+
+  <!-- Adding include path for compiler -->
+  <ItemDefinitionGroup>
+    <ClCompile><AdditionalIncludeDirectories>%(AdditionalIncludeDirectories);$(CurlIncludeDir)</AdditionalIncludeDirectories></ClCompile>
+  </ItemDefinitionGroup>
+
+  <!-- Adding static libraries for linker -->
+  <!-- These entries are appended and not prepended to allow replacements for object files (linker searches libs in order) -->
+  <!-- E.g.: logging.cc can be compiled in your project or a static library dependency if you want to change some logging behaviour -->
+  <ItemDefinitionGroup>
+    <Link><AdditionalDependencies>%(AdditionalDependencies);$(CurlLibs)</AdditionalDependencies></Link>
+  </ItemDefinitionGroup>
+
+  <!-- Disabling warning for missing pdbs -->
+  <ItemDefinitionGroup>
+    <Link><!--AdditionalOptions>/ignore:4099 %(AdditionalOptions)</AdditionalOptions--></Link>
+  </ItemDefinitionGroup>
+  
+  <!-- Copy *.dll to output folders -->
+  <!-- https://stackoverflow.com/questions/19478775/add-native-files-from-nuget-package-to-project-output-directory/30316946 -->
+  <ItemGroup>
+	<NativeLibs Include="$(MSBuildThisFileDirectory)**\*.dll" />
+	<None Include="@(NativeLibs)">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>
