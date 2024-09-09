@@ -93,7 +93,7 @@ CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
 void Curl_ssl_conn_config_cleanup(struct connectdata *conn);
 
 /**
- * Return TRUE iff SSL configuration from `conn` is functionally the
+ * Return TRUE iff SSL configuration from `data` is functionally the
  * same as the one on `candidate`.
  * @param proxy   match the proxy SSL config or the main one
  */
