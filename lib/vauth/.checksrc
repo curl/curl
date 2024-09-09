@@ -1,0 +1,2 @@
+enable STRERROR
+enable STRNCPY
