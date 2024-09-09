@@ -145,7 +145,7 @@ while(my $line = <$fh>) {
 
         print "\n";
 
-        $tlist .= "  { \"$name\", test_$name },\n";
+        $tlist .= "  {\"$name\", test_$name},\n";
     }
 }
 
