@@ -138,7 +138,8 @@ static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
 static unsigned short server_port = DEFAULT_PORT;
-static unsigned short my_connectport = 0; /* if non-zero, we activate this mode */
+static unsigned short my_connectport = 0; /* if non-zero,
+                                             we activate this mode */
 
 enum sockmode {
   PASSIVE_LISTEN,    /* as a server waiting for connections */
