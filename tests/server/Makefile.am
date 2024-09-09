@@ -49,7 +49,7 @@ AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = base64.pl CMakeLists.txt .checksrc
+EXTRA_DIST = base64.pl CMakeLists.txt .checksrc first.c first.h
 
 if USE_TEST_BUNDLES
 server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl
