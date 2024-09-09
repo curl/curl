@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'noinst_PROGRAMS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'UTIL'
+# Get 'SERVERPROGS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'UTIL'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -31,18 +31,18 @@ set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" 
 if(CURL_USE_TEST_BUNDLES)
   add_custom_command(
     OUTPUT "server_bundle.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${noinst_PROGRAMS} > "server_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${SERVERPROGS} > "server_bundle.c"
     DEPENDS
       "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
-  set(noinst_PROGRAMS "servers")
+  set(SERVERPROGS "servers")
   set(servers_SOURCES "server_bundle.c")
   list(APPEND servers_SOURCES ${CURLX_SRCS} ${USEFUL} ${UTIL})
 endif()
 
-foreach(_target IN LISTS noinst_PROGRAMS)
+foreach(_target IN LISTS SERVERPROGS)
   set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})

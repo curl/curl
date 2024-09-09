@@ -31,12 +31,13 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
+# $(top_srcdir)/src for "tool_binmod.h", "tool_xattr.h"
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
               -I$(top_srcdir)/src            \
-              -I$(top_srcdir)/test/servers
+              -I$(top_srcdir)/tests/server
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -54,14 +55,14 @@ EXTRA_DIST = base64.pl CMakeLists.txt .checksrc first.c first.h
 
 if USE_TEST_BUNDLES
 server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl
-	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(noinst_PROGRAMS) > server_bundle.c
+	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(SERVERPROGS) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c
 servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(UTIL)
-CLEANFILES += server_bundle.c
+CLEANFILES = server_bundle.c
 else
-noinst_PROGRAMS = $(LIBTESTPROGS)
+noinst_PROGRAMS = $(SERVERPROGS)
 endif
 
 CHECKSRC = $(CS_$(V))

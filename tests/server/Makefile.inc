@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-noinst_PROGRAMS = testpart resolve rtspd sockfilt sws tftpd    \
+SERVERPROGS = testpart resolve rtspd sockfilt sws tftpd    \
  socksd disabled mqttd
 
 CURLX_SRCS = \
