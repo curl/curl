@@ -3,7 +3,8 @@
 #
 # SPDX-License-Identifier: curl
 
-# Sort list of libs, libpaths, cflags found in libcurl.pc and curl-config files.
+# Sort list of libs, libpaths, cflags found in libcurl.pc and curl-config files,
+# then diff the autotools and cmake generated ones.
 
 sort_lists() {
   prevline=''
