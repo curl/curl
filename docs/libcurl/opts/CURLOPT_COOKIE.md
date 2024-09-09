@@ -35,8 +35,8 @@ NAME=CONTENTS, where NAME is the cookie name and CONTENTS is what the cookie
 should contain.
 
 To set multiple cookies, set them all using a single option concatenated like
-this: "name1=content1; name2=content2;" etc. libcurl will not syntax check the
-data but assumes the applications gives it what it wants to send.
+this: "name1=content1; name2=content2;" etc. libcurl does not syntax check the
+data but assumes the applications gives it what it needs to send.
 
 This option sets the cookie header explicitly in the outgoing request(s). If
 multiple requests are done due to authentication, followed redirections or
