@@ -29,8 +29,8 @@ int main(int argc, char **argv)
   main_func_t main_func;
   char *main_name;
 
-  if(argc < 1) {
-    fprintf(stderr, "Pass servernam as first argument\n");
+  if(argc < 2) {
+    fprintf(stderr, "Pass servername as first argument\n");
     return 1;
   }
 
