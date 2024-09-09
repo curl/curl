@@ -60,6 +60,10 @@ UTIL = \
  util.c \
  util.h
 
+UTIL_BUNDLE = \
+ first.c \
+ first.h
+
 testpart_SOURCES = $(CURLX_SRCS) $(CURLX_HDRS) $(USEFUL) \
  testpart.c
 testpart_LDADD = @CURL_NETWORK_AND_TIME_LIBS@

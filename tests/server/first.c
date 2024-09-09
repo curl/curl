@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include <stdio.h>
+#include <string.h>
 #include "first.h"
 
 int main(int argc, char **argv)
@@ -38,9 +39,9 @@ int main(int argc, char **argv)
   main_func = NULL;
   {
     size_t tmp;
-    for(tmp = 0; tmp < (sizeof(s_mains)/sizeof((s_mains)[0])); ++tmp) {
-      if(strcmp(main_name, s_mains[tmp].name) == 0) {
-        main_func = s_mains[tmp].ptr;
+    for(tmp = 0; p_mains[tmp].ptr; ++tmp) {
+      if(strcmp(main_name, p_mains[tmp].name) == 0) {
+        main_func = p_mains[tmp].ptr;
         break;
       }
     }

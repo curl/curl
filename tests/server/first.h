@@ -30,4 +30,6 @@ struct onemain {
   main_func_t ptr;
 };
 
+extern const struct onemain p_mains[];
+
 #endif /* HEADER_SERVER_FIRST_H */
