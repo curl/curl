@@ -50,15 +50,15 @@ AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = base64.pl CMakeLists.txt .checksrc first.c first.h
+EXTRA_DIST = base64.pl CMakeLists.txt .checksrc
 
 if USE_TEST_BUNDLES
-server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl
+server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl $(CURLX_SRCS) $(USEFUL) $(UTIL) $(UTIL_BUNDLE)
 	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(SERVERPROGS) > server_bundle.c
 
 noinst_PROGRAMS = servers
 nodist_servers_SOURCES = server_bundle.c
-servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(UTIL)
+servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(UTIL) $(UTIL_BUNDLE)
 CLEANFILES = server_bundle.c
 else
 noinst_PROGRAMS = $(SERVERPROGS)
