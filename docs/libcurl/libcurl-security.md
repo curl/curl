@@ -462,6 +462,8 @@ libcurl itself uses *fork()* and *execl()* if told to use the
 command in a child process with file descriptors duplicated. Make sure that
 only the trusted and reliable helper program is invoked!
 
+This feature was removed from curl in 8.8.0.
+
 # Secrets in memory
 
 When applications pass usernames, passwords or other sensitive data to

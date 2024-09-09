@@ -177,7 +177,7 @@ CURL_VERSION_LARGEFILE          7.11.1
 CURL_VERSION_LIBZ               7.10
 CURL_VERSION_MULTI_SSL          7.56.0
 CURL_VERSION_NTLM               7.10.6
-CURL_VERSION_NTLM_WB            7.22.0
+CURL_VERSION_NTLM_WB            7.22.0                    8.8.0
 CURL_VERSION_PSL                7.47.0
 CURL_VERSION_SPNEGO             7.10.8
 CURL_VERSION_SSL                7.10
@@ -210,7 +210,7 @@ CURLAUTH_GSSNEGOTIATE           7.10.6       7.38.0
 CURLAUTH_NEGOTIATE              7.38.0
 CURLAUTH_NONE                   7.10.6
 CURLAUTH_NTLM                   7.10.6
-CURLAUTH_NTLM_WB                7.22.0
+CURLAUTH_NTLM_WB                7.22.0                    8.8.0
 CURLAUTH_ONLY                   7.21.3
 CURLCLOSEPOLICY_CALLBACK        7.7          7.16.1
 CURLCLOSEPOLICY_LEAST_RECENTLY_USED 7.7      7.16.1

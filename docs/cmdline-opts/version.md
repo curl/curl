@@ -92,6 +92,7 @@ NTLM authentication is supported.
 
 ## `NTLM_WB`
 NTLM delegation to winbind helper is supported.
+This feature was removed from curl in 8.8.0.
 
 ## `PSL`
 PSL is short for Public Suffix List and means that this curl has been built
