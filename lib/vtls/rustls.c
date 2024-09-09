@@ -508,7 +508,7 @@ add_ciphers:
       struct rustls_str s;
       entry = rustls_default_ciphersuites_get_entry(j);
       s = rustls_supported_ciphersuite_get_name(entry);
-      if(s.len < 5 || strncmp(s.data, "TLS13", 5) == 0)
+      if(s.len >= 5 && strncmp(s.data, "TLS13", 5) == 0)
         continue;
 
       /* No duplicates allowed (so selected cannot overflow) */
