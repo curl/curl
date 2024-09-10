@@ -37,16 +37,19 @@ be at least **CURL_ERROR_SIZE** bytes big.
 
 You must keep the associated buffer available until libcurl no longer needs
 it. Failing to do so might cause odd behavior or even crashes. libcurl might
-need it until you call curl_easy_cleanup(3) or you set the same option
-again to use a different pointer.
+need it until you call curl_easy_cleanup(3) or you set the same option again
+to use a different pointer.
 
 Do not rely on the contents of the buffer unless an error code was returned.
 Since 7.60.0 libcurl initializes the contents of the error buffer to an empty
 string before performing the transfer. For earlier versions if an error code
 was returned but there was no error detail then the buffer was untouched.
 
-Consider CURLOPT_VERBOSE(3) and CURLOPT_DEBUGFUNCTION(3) to better
-debug and trace why errors happen.
+Consider CURLOPT_VERBOSE(3) and CURLOPT_DEBUGFUNCTION(3) to better debug and
+trace why errors happen.
+
+Using this option multiple times makes the last set pointer override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

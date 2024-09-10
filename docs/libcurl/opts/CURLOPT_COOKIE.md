@@ -54,14 +54,14 @@ Since this custom cookie is appended to the Cookie: header in addition to any
 cookies set by the cookie engine, there is a risk that the header ends up too
 long and thereby getting the entire request rejected by the server.
 
+The application does not have to keep the string around after setting this
+option.
+
 Using this option multiple times makes the last set string override the
-previous ones.
+previous ones. Set it to NULL to disable its use again.
 
 This option does not enable the cookie engine. Use CURLOPT_COOKIEFILE(3) or
 CURLOPT_COOKIEJAR(3) to enable parsing and sending cookies automatically.
-
-The application does not have to keep the string around after setting this
-option.
 
 # DEFAULT
 

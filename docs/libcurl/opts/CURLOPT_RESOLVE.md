@@ -34,11 +34,12 @@ list of **struct curl_slist** structs properly filled in. Use
 curl_slist_append(3) to create the list and curl_slist_free_all(3) to clean up
 an entire list.
 
+libcurl does not copy the list, it needs to be kept around until after the
+transfer has completed.
+
 Each resolve rule to add should be written using the format
 
-~~~c
- [+]HOST:PORT:ADDRESS[,ADDRESS]
-~~~
+    [+]HOST:PORT:ADDRESS[,ADDRESS]
 
 HOST is the name libcurl wants to resolve, PORT is the port number of the
 service where libcurl wants to connect to the HOST and ADDRESS is one or more
@@ -67,12 +68,13 @@ setting of CURLOPT_IPRESOLVE(3) to a different IP version.
 To remove names from the DNS cache again, to stop providing these fake
 resolves, include a string in the linked list that uses the format
 
-~~~
-  -HOST:PORT
-~~~
+    -HOST:PORT
 
 The entry to remove must be prefixed with a dash, and the hostname and port
 number must exactly match what was added previously.
+
+Using this option multiple times makes the last set list override the previous
+ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

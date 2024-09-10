@@ -34,14 +34,18 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_CUSTOMREQUEST, char *method);
 
 Pass a pointer to a null-terminated string as parameter.
 
-When changing the request *method* by setting CURLOPT_CUSTOMREQUEST(3), you
-do not actually change how libcurl behaves or acts: you only change the actual
+When changing the request *method* by setting CURLOPT_CUSTOMREQUEST(3), you do
+not actually change how libcurl behaves or acts: you only change the actual
 string sent in the request.
 
 libcurl passes on the verbatim string in its request without any filter or
 other safe guards. That includes white space and control characters.
 
-Restore to the internal default by setting this to NULL.
+The application does not have to keep the string around after setting this
+option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Restore to the internal default by setting this to NULL.
 
 This option can be used to specify the request:
 

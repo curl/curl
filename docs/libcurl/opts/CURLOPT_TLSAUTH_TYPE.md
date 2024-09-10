@@ -32,6 +32,12 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_TLSAUTH_TYPE, char *type);
 Pass a pointer to a null-terminated string as parameter. The string should be
 the method of the TLS authentication. Supported method is "SRP".
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to restore to internal default.
+
+The application does not have to keep the string around after setting this
+option.
+
 ## SRP
 
 TLS-SRP authentication. Secure Remote Password authentication for TLS is

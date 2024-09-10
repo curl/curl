@@ -44,6 +44,9 @@ files.
 The application does not have to keep the string around after setting this
 option.
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL restores back to internal default.
+
 # DEFAULT
 
 "PEM"

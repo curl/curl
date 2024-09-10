@@ -41,7 +41,11 @@ To find the DoH server itself, which might be specified using a name, libcurl
 uses the default name lookup function. You can bootstrap that by providing the
 address for the DoH server with CURLOPT_RESOLVE(3).
 
-Disable DoH use again by setting this option to NULL.
+The application does not have to keep the string around after setting this
+option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # INHERIT OPTIONS
 

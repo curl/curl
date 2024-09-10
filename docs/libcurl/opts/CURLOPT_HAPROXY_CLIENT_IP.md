@@ -31,8 +31,14 @@ When this parameter is set to a valid IPv4 or IPv6 numerical address, the
 library sends this address as client address in the HAProxy PROXY protocol v1
 header at beginning of the connection.
 
-This option is an alternative to CURLOPT_HAPROXYPROTOCOL(3) as that one
-cannot use a specified address.
+This option is an alternative to CURLOPT_HAPROXYPROTOCOL(3) as that one cannot
+use a specified address.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
+
+The application does not have to keep the string around after setting this
+option.
 
 # DEFAULT
 

@@ -42,19 +42,19 @@ built-in supported encodings.
 
 Alternatively, you can specify exactly the encoding or list of encodings you
 want in the response. The following encodings are supported: *identity*,
-meaning non-compressed, *deflate* which requests the server to compress
-its response using the zlib algorithm, *gzip* which requests the gzip
-algorithm, (since curl 7.57.0) *br* which is brotli and (since curl
-7.72.0) *zstd* which is zstd. Provide them in the string as a
-comma-separated list of accepted encodings, like: **"br, gzip, deflate"**.
+meaning non-compressed, *deflate* which requests the server to compress its
+response using the zlib algorithm, *gzip* which requests the gzip algorithm,
+(since curl 7.57.0) *br* which is brotli and (since curl 7.72.0) *zstd* which
+is zstd. Provide them in the string as a comma-separated list of accepted
+encodings, like: **"br, gzip, deflate"**.
 
-Set CURLOPT_ACCEPT_ENCODING(3) to NULL to explicitly disable it, which
-makes libcurl not send an Accept-Encoding: header and not decompress received
+Set CURLOPT_ACCEPT_ENCODING(3) to NULL to explicitly disable it, which makes
+libcurl not send an Accept-Encoding: header and not decompress received
 contents automatically.
 
 You can also opt to just include the Accept-Encoding: header in your request
-with CURLOPT_HTTPHEADER(3) but then there is no automatic decompressing
-when receiving data.
+with CURLOPT_HTTPHEADER(3) but then there is no automatic decompressing when
+receiving data.
 
 This is a request, not an order; the server may or may not do it. This option
 must be set (to any non-NULL value) or else any unsolicited encoding done by
@@ -71,6 +71,9 @@ sending the length of the non-compressed content is a common server mistake).
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones.
 
 # HISTORY
 
