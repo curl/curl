@@ -34,7 +34,7 @@ BEGIN {
 use File::Basename;
 
 use processhelp qw(
-    server_prog
+    server_exe
     );
 
 use serverhelp qw(
@@ -191,8 +191,8 @@ if($ipvnum eq 'unix') {
 $flags .= "--srcdir \"$srcdir\"";
 
 if($verbose) {
-    print STDERR "RUN: ".server_prog("sws")." $flags\n";
+    print STDERR "RUN: ".server_exe("sws")." $flags\n";
 }
 
 $| = 1;
-exec("exec ".server_prog("sws")." $flags");
+exec("exec ".server_exe("sws")." $flags");

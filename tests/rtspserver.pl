@@ -32,7 +32,7 @@ BEGIN {
 }
 
 use processhelp qw(
-    server_prog
+    server_exe
     );
 
 use serverhelp qw(
@@ -137,4 +137,4 @@ $flags .= "--pidfile \"$pidfile\" ".
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec ".server_prog("rtspd")." $flags");
+exec("exec ".server_exe("rtspd")." $flags");
