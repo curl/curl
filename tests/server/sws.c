@@ -22,6 +22,7 @@
  *
  ***************************************************************************/
 #include "server_setup.h"
+#include "util.h"
 
 /* sws.c: simple (silly?) web server
 
