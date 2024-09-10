@@ -64,7 +64,6 @@ BEGIN {
         $tortalloc
         $valgrind_logfile
         $valgrind_tool
-        $bundle
     );
 
     # these are for debugging only
@@ -120,7 +119,6 @@ our $valgrind_tool="--tool=memcheck";
 our $gdb = checktestcmd("gdb");
 our $gdbthis = 0;  # run test case with debugger (gdb or lldb)
 our $gdbxwin;      # use windowed gdb when using gdb
-our $bundle = 0;
 
 # torture test variables
 our $shallow;
