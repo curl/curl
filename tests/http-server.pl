@@ -33,6 +33,10 @@ BEGIN {
 
 use File::Basename;
 
+use processhelp qw(
+    server_prog
+    );
+
 use serverhelp qw(
     server_pidfilename
     server_logfilename
