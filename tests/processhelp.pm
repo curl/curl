@@ -55,6 +55,10 @@ BEGIN {
     }
 }
 
+use globalconfig qw(
+    $bundle
+    );
+
 use serverhelp qw(
     servername_id
     mainsockf_pidfilename
@@ -65,6 +69,22 @@ use serverhelp qw(
 use pathhelp qw(
     os_is_win
     );
+
+#######################################################################
+# return the command to invoke the server passed as the argument.
+#
+sub server_prog {
+    my ($name, $ext) = @_;
+    if(!defined $ext) {
+        $ext = 'SRV';
+    }
+    if($bundle) {
+        return "server/servers" . exe_ext($ext) . " " . $name
+    }
+    else {
+        return "server/" . $name . exe_ext($ext)
+    }
+}
 
 #######################################################################
 # portable_sleep uses Time::HiRes::sleep if available and falls back
