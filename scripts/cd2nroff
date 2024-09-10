@@ -178,6 +178,7 @@ my %knownprotos = (
     'WSS' => 1,
     'TLS' => 1,
     'TCP' => 1,
+    'QUIC' => 1,
     'All' => 1
     );
 
