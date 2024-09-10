@@ -41,7 +41,7 @@ BEGIN {
         killallsockfilters
         set_advisor_read_lock
         clear_advisor_read_lock
-        server_prog
+        server_exe
     );
 
     # portable sleeping needs Time::HiRes
@@ -75,7 +75,7 @@ use pathhelp qw(
 #######################################################################
 # return the command to invoke the server passed as the argument.
 #
-sub server_prog {
+sub server_exe {
     my ($name, $ext) = @_;
     if(!defined $ext) {
         $ext = 'SRV';
