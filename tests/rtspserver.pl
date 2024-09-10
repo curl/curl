@@ -31,13 +31,10 @@ BEGIN {
     push(@INC, ".");
 }
 
-use processhelp qw(
-    server_exe
-    );
-
 use serverhelp qw(
     server_pidfilename
     server_logfilename
+    server_exe
     );
 
 use pathhelp qw(

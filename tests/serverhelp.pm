@@ -45,6 +45,7 @@ BEGIN {
         server_cmdfilename
         server_inputfilename
         server_outputfilename
+        server_exe
         mainsockf_pidfilename
         mainsockf_logfilename
         datasockf_pidfilename
@@ -59,6 +60,13 @@ BEGIN {
     }
 }
 
+use globalconfig qw(
+    $bundle
+    );
+
+use pathhelp qw(
+    ext_ext
+    );
 
 our $logfile;  # server log file name, for logmsg
 
@@ -227,6 +235,23 @@ sub server_outputfilename {
     my ($logdir, $proto, $ipver, $idnum) = @_;
     my $trailer = '_server.output';
     return "${logdir}/". servername_canon($proto, $ipver, $idnum) ."$trailer";
+}
+
+
+#######################################################################
+# return the command to invoke the server passed as the argument.
+#
+sub server_exe {
+    my ($name, $ext) = @_;
+    if(!defined $ext) {
+        $ext = 'SRV';
+    }
+    if($bundle) {
+        return "server/servers" . exe_ext($ext) . " " . $name
+    }
+    else {
+        return "server/" . $name . exe_ext($ext)
+    }
 }
 
 
