@@ -1091,10 +1091,6 @@ sub singletest_clean {
                 logmsg " $testnum: killserver FAILED\n";
                 return 1; # normal error if asked to fail on unexpected alive
             }
-            if (-f "$LOGDIR/$LOCKDIR/$server.lock") {
-                logmsg " $testnum: $server lockfile still exists, removing it.\n";
-                unlink("$LOGDIR/$LOCKDIR/$server.lock");
-            }
         }
     }
 

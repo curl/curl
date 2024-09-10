@@ -445,6 +445,7 @@ sub protoport {
 #
 sub stopserver {
     my ($server, $pidlist) = @_;
+    my $ipvnum = 4;
 
     #
     # kill sockfilter processes for pingpong relative server
@@ -452,7 +453,7 @@ sub stopserver {
     if($server =~ /^(ftp|imap|pop3|smtp)s?(\d*)(-ipv6|)$/) {
         my $proto  = $1;
         my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
-        my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
+        $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
         killsockfilters("$LOGDIR/$PIDDIR", $proto, $ipvnum, $idnum, $verbose);
     }
     #
@@ -502,6 +503,23 @@ sub stopserver {
     foreach my $server (@killservers) {
         my $pidfile = $serverpidfile{$server};
         unlink($pidfile) if(-f $pidfile);
+    }
+    #
+    # cleanup server lock files
+    #
+    foreach my $server (@killservers) {
+        # servers seem to produce (some of) these lock files
+        my @lockfiles = (
+            "$LOGDIR/$LOCKDIR/$server.lock",
+            "$LOGDIR/$LOCKDIR/$server-IPv$ipvnum.lock",
+            "$LOGDIR/$LOCKDIR/sws-".uc($server)."-IPv$ipvnum.lock"
+            );
+        foreach my $lockfile (@lockfiles) {
+            if(-f $lockfile) {
+                unlink($lockfile);
+                logmsg "RUN: kill $server, cleaned up $lockfile\n" if ($verbose);
+            }
+        }
     }
 
     return $result;
