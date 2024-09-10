@@ -410,7 +410,7 @@ sub sysread_or_die {
 }
 
 sub startsf {
-    my @mainsockfcmd = ("./".server_prog("sockfilt"),
+    my @mainsockfcmd = ("./".server_exe("sockfilt"),
         "--ipv$ipvnum",
         "--port", $port,
         "--pidfile", $mainsockf_pidfile,
@@ -2472,7 +2472,7 @@ sub PASV_ftp {
     logmsg "DATA sockfilt for passive data channel starting...\n";
 
     # We fire up a new sockfilt to do the data transfer for us.
-    my @datasockfcmd = ("./".server_prog("sockfilt"),
+    my @datasockfcmd = ("./".server_exe("sockfilt"),
         "--ipv$ipvnum", "--port", 0,
         "--pidfile", $datasockf_pidfile,
         "--logfile",  $datasockf_logfile);
@@ -2694,7 +2694,7 @@ sub PORT_ftp {
     logmsg "DATA sockfilt for active data channel starting...\n";
 
     # We fire up a new sockfilt to do the data transfer for us.
-    my @datasockfcmd = ("./".server_prog("sockfilt"),
+    my @datasockfcmd = ("./".server_exe("sockfilt"),
         "--ipv$ipvnum", "--connect", $port, "--addr", $addr,
         "--pidfile", $datasockf_pidfile,
         "--logfile", $datasockf_logfile);
