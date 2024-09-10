@@ -34,7 +34,7 @@
  * * GnuTLS
  * * wolfSSL
  * * Schannel SSPI
- * * SecureTransport (Darwin)
+ * * Secure Transport (Darwin)
  * * mbedTLS
  * * BearSSL
  * * Rustls
