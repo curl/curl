@@ -34,7 +34,7 @@ https Server-localhost-lastSAN-sv.pem
 HTTPS GET to localhost, last subject alt name matches, CN does not match (Schannel variant)
 </name>
 <setenv>
-# This test is pointless if we're not using the schannel backend
+# This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
 </setenv>
 <command>

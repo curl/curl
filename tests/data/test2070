@@ -34,7 +34,7 @@ https Server-localhost-sv.pem
 Ignore certificate revocation "best effort" strategy
 </name>
   <setenv>
-# This test is pointless if we're not using the schannel backend
+# This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
  </setenv>
 <command>

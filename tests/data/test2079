@@ -35,7 +35,7 @@ https Server-localhost-sv.pem
 simple HTTPS GET with PEM public key pinning (Schannel variant)
 </name>
  <setenv>
-# This test is pointless if we're not using the schannel backend
+# This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
  </setenv>
 <command>

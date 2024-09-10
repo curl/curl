@@ -39,11 +39,11 @@ permissions: {}
 # deprecation warnings with llvm/clang:
 #
 # - 10.7  Lion (2011)          - GSS
-# - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl SecureTransport code)
+# - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl Secure Transport code)
 # - 10.9  Maverick (2013)      - LDAP
-# - 10.14 Mojave (2018)        - SecureTransport
+# - 10.14 Mojave (2018)        - Secure Transport
 #
-# For SecureTransport, curl implements features that require a target
+# For Secure Transport, curl implements features that require a target
 # newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
 # In this case `-Wno-deprecated-declarations` still comes handy to pacify
 # deprecation warnings, though the real solution would be to avoid calling
@@ -238,14 +238,14 @@ jobs:
             TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
             if [[ '${{ matrix.configure }}' = *'--with-secure-transport'* ]]; then
               TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
             else
-              TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+              TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
             fi
           fi
           if [[ '${{ matrix.configure }}' = *'--with-secure-transport'* ]]; then
-            TFLAGS+=' ~313'  # SecureTransport does not support crl file
-            TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
+            TFLAGS+=' ~313'  # Secure Transport does not support crl file
+            TFLAGS+=' ~1631 ~1632'  # Secure Transport is not able to shutdown ftp over https gracefully yet
           fi
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
@@ -389,14 +389,14 @@ jobs:
               TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
               if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
                 TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
               else
-                TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+                TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
               fi
             fi
             if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-              TFLAGS+=' ~313'  # SecureTransport does not support crl file
-              TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
+              TFLAGS+=' ~313'  # Secure Transport does not support crl file
+              TFLAGS+=' ~1631 ~1632'  # Secure Transport is not able to shutdown ftp over https gracefully yet
             fi
           fi
           source $HOME/venv/bin/activate
@@ -407,7 +407,7 @@ jobs:
         if: ${{ contains(matrix.name, '+examples') }}
         run: make -C bld VERBOSE=1
 
-  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
+  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, Secure Transport/not, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}

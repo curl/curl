@@ -945,7 +945,7 @@
 
 15.4 Add option to allow abrupt server closure
 
- libcurl w/schannel errors without a known termination point from the server
+ libcurl with Schannel errors without a known termination point from the server
  (such as length of transfer, or SSL "close notify" alert) to prevent against
  a truncation attack. Really old servers may neglect to send any termination
  point. An option could be added to ignore such abrupt closures.

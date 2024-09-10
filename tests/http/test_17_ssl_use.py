@@ -231,7 +231,7 @@ class TestSSLUse:
             tls_proto = 'TLSv1.2'
         elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
             if tls_proto == 'TLSv1.3':
-                pytest.skip('SecureTransport does not support TLSv1.3')
+                pytest.skip('Secure Transport does not support TLSv1.3')
             tls_proto = 'TLSv1.2'
         # test
         extra_args = ['--tls13-ciphers', ':'.join(ciphers13)] if ciphers13 else []
