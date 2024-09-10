@@ -2422,6 +2422,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
   -ac path use this curl only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
+  -bundle  use test bundles
   -c path  use this curl executable
   -d       display server debug info
   -e       event-based execution
