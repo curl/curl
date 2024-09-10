@@ -1069,8 +1069,10 @@ static void xfer_setup(
   bool getheader,           /* TRUE if header parsing is wanted */
   int writesockindex,       /* socket index to write to, it may very well be
                                the same we read from. -1 disables */
-  bool shutdown             /* shutdown connection at transfer end. Only
+  bool shutdown,            /* shutdown connection at transfer end. Only
                              * supported when sending OR receiving. */
+  bool shutdown_err_ignore  /* errors during shutdown do not fail the
+                             * transfer */
   )
 {
   struct SingleRequest *k = &data->req;
@@ -1102,6 +1104,7 @@ static void xfer_setup(
   k->getheader = getheader;
   k->size = size;
   k->shutdown = shutdown;
+  k->shutdown_err_ignore = shutdown_err_ignore;
 
   /* The code sequence below is placed in this function just because all
      necessary input is not always known in do_complete() as this function may
@@ -1126,7 +1129,7 @@ static void xfer_setup(
 
 void Curl_xfer_setup_nop(struct Curl_easy *data)
 {
-  xfer_setup(data, -1, -1, FALSE, -1, FALSE);
+  xfer_setup(data, -1, -1, FALSE, -1, FALSE, FALSE);
 }
 
 void Curl_xfer_setup1(struct Curl_easy *data,
@@ -1137,18 +1140,20 @@ void Curl_xfer_setup1(struct Curl_easy *data,
   int recv_index = (send_recv & CURL_XFER_RECV) ? FIRSTSOCKET : -1;
   int send_index = (send_recv & CURL_XFER_SEND) ? FIRSTSOCKET : -1;
   DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
-  xfer_setup(data, recv_index, recv_size, getheader, send_index, FALSE);
+  xfer_setup(data, recv_index, recv_size, getheader, send_index, FALSE, FALSE);
 }
 
 void Curl_xfer_setup2(struct Curl_easy *data,
                       int send_recv,
                       curl_off_t recv_size,
-                      bool shutdown)
+                      bool shutdown,
+                      bool shutdown_err_ignore)
 {
   int recv_index = (send_recv & CURL_XFER_RECV) ? SECONDARYSOCKET : -1;
   int send_index = (send_recv & CURL_XFER_SEND) ? SECONDARYSOCKET : -1;
   DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
-  xfer_setup(data, recv_index, recv_size, FALSE, send_index, shutdown);
+  xfer_setup(data, recv_index, recv_size, FALSE, send_index,
+             shutdown, shutdown_err_ignore);
 }
 
 CURLcode Curl_xfer_write_resp(struct Curl_easy *data,

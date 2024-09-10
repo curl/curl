@@ -210,7 +210,8 @@ CURLcode Curl_conn_shutdown(struct Curl_easy *data, int sockindex, bool *done)
   else {
     timeout_ms = Curl_shutdown_timeleft(data->conn, sockindex, &now);
     if(timeout_ms < 0) {
-      failf(data, "SSL shutdown timeout");
+      /* info message, since this might be regarded as acceptable */
+      infof(data, "shutdown timeout");
       return CURLE_OPERATION_TIMEDOUT;
     }
   }

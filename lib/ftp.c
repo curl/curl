@@ -653,12 +653,14 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbuf_init(conn->sock[SECONDARYSOCKET]);
 
-    Curl_xfer_setup2(data, CURL_XFER_SEND, -1, TRUE);
+    /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
+     * on the server response on the CONTROL connection. */
+    Curl_xfer_setup2(data, CURL_XFER_SEND, -1, TRUE, TRUE);
   }
   else {
-    /* FTP download: */
+    /* FTP download, shutdown, do not ignore errors */
     Curl_xfer_setup2(data, CURL_XFER_RECV,
-                     conn->proto.ftpc.retr_size_saved, TRUE);
+                     conn->proto.ftpc.retr_size_saved, TRUE, FALSE);
   }
 
   conn->proto.ftpc.pp.pending_resp = TRUE; /* expect server response */
