@@ -58,6 +58,7 @@ my @reused_symbols = (
     "ipv_inuse",
     "logdir",
     "loghex",
+    "loglockfile",
     "parse_servercmd",
     "pidname",
     "portname",
