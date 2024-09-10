@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'LIBTESTPROGS', '*_SOURCES', TESTUTIL, TSTTRACE, WARNLESS, MULTIBYTE, TIMEDIFF, THREADS variables
+# Get 'LIBTESTPROGS', '*_SOURCES', 'TESTUTIL', 'TSTTRACE', 'WARNLESS', 'MULTIBYTE', 'TIMEDIFF', 'THREADS' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
