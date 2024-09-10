@@ -38,7 +38,6 @@ foreach my $src (@ARGV) {
 
 print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
-/* !checksrc! disable INCLUDEDUP all */
 
 #include "first.h"
 HEADER
