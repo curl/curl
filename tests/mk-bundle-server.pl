@@ -70,6 +70,7 @@ my @reused_symbols = (
     "server_port",
     "serverlogslocked",
     "sockdaemon",
+    "socket_domain",
     "socket_type",
     "storerequest",
     "use_ipv6",
