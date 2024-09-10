@@ -26,16 +26,6 @@
 #include "server_setup.h"
 
 enum {
-  socket_domain_inet = AF_INET
-#ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
-#endif
-#ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
-#endif
-} socket_domain = AF_INET;
-
-enum {
   DOCNUMBER_NOTHING = -7,
   DOCNUMBER_QUIT    = -6,
   DOCNUMBER_BADCONNECT = -5,
