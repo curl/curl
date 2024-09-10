@@ -389,9 +389,9 @@ jobs:
               TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
               if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
                 TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
               else
-                TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+                TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
               fi
             fi
             if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then

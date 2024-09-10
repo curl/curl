@@ -2463,7 +2463,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
     }
     else {
       /* We would like to read the close notify from the server using
-       * secure transport, however SSLRead() no longer works after we
+       * Secure Transport, however SSLRead() no longer works after we
        * sent the notify from our side. So, we just read from the
        * underlying filter and hope it will end. */
       nread = Curl_conn_cf_recv(cf->next, data, buf, sizeof(buf), &result);
