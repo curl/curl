@@ -85,13 +85,16 @@ use Digest::MD5 qw(md5);
 use List::Util 'sum';
 use I18N::Langinfo qw(langinfo CODESET);
 
+use serverhelp qw(
+    server_exe
+    );
+
 use pathhelp qw(
     exe_ext
     sys_native_current_path
     );
 use processhelp qw(
     portable_sleep
-    server_exe
     );
 
 use appveyor;
