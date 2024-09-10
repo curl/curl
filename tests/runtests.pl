@@ -91,6 +91,7 @@ use pathhelp qw(
     );
 use processhelp qw(
     portable_sleep
+    server_prog
     );
 
 use appveyor;

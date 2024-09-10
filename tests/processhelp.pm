@@ -41,6 +41,7 @@ BEGIN {
         killallsockfilters
         set_advisor_read_lock
         clear_advisor_read_lock
+        server_prog
     );
 
     # portable sleeping needs Time::HiRes
@@ -68,6 +69,7 @@ use serverhelp qw(
 
 use pathhelp qw(
     os_is_win
+    exe_ext
     );
 
 #######################################################################
