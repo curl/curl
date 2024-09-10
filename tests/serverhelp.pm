@@ -65,7 +65,7 @@ use globalconfig qw(
     );
 
 use pathhelp qw(
-    ext_ext
+    exe_ext
     );
 
 our $logfile;  # server log file name, for logmsg
