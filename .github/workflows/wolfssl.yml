@@ -54,11 +54,11 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: wolfssl (configured with --enable-all)
+          - name: wolfssl (with --enable-all)
             install:
             configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
             wolfssl-configure: --enable-all
-          - name: wolfssl (configured with --enable-opensslextra)
+          - name: wolfssl (with --enable-opensslextra) valgrind
             install: valgrind
             configure: LDFLAGS="-Wl,-rpath,$HOME/wssl/lib" --with-wolfssl=$HOME/wssl --enable-debug
             wolfssl-configure: --enable-opensslextra

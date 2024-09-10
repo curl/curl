@@ -66,73 +66,73 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: bearssl
+          - name: bearssl valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: bearssl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
 
-          - name: bearssl-clang
+          - name: bearssl clang
             install_packages: zlib1g-dev clang
             install_steps: bearssl
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
 
-          - name: libressl heimdal
+          - name: libressl heimdal valgrind
             install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
             singleuse: --unit
 
-          - name: libressl heimdal
+          - name: libressl heimdal valgrind
             install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
             generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
             singleuse: --unit
 
-          - name: libressl-clang
+          - name: libressl clang
             install_packages: zlib1g-dev clang
             install_steps: libressl
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
             singleuse: --unit
 
-          - name: mbedtls
+          - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
             install_steps: mbedtls pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
             singleuse: --unit
 
-          - name: mbedtls-clang
+          - name: mbedtls clang
             install_packages: libnghttp2-dev clang
             install_steps: mbedtls
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
             singleuse: --unit
 
-          - name: msh3
+          - name: msh3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: quictls msh3
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
             singleuse: --unit
 
-          - name: openssl3
+          - name: openssl3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3 pytest
             configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-O3
+          - name: openssl3-O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-clang krb5
+          - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-clang krb5
+          - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
             generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DENABLE_WEBSOCKETS=ON
@@ -170,35 +170,35 @@ jobs:
               --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: event-based
+          - name: event-based valgrind
             install_packages: libssh-dev valgrind
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n -e '!TLS-SRP'
             singleuse: --unit
 
-          - name: hyper
+          - name: hyper valgrind
             install_steps: rust hyper valgrind
             configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: rustls
+          - name: rustls valgrind
             install_steps: rust rustls pytest valgrind libpsl-dev
             configure: --with-rustls=$HOME/rustls --enable-debug
             singleuse: --unit
 
-          - name: Intel compiler - without SSL
+          - name: IntelC !SSL valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: intel
             configure: CC=icc --enable-debug --without-ssl
             singleuse: --unit
 
-          - name: Intel compiler - OpenSSL
+          - name: IntelC openssl valgrind
             install_packages: zlib1g-dev libssl-dev valgrind
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
             singleuse: --unit
 
-          - name: Slackware-openssl-with-gssapi-gcc
+          - name: Slackware openssl gssapi gcc
             # These are essentially the same flags used to build the curl Slackware package
             # https://ftpmirror.infania.net/slackware/slackware64-current/source/n/curl/curl.SlackBuild
             configure: --with-openssl --with-libssh2 --with-gssapi --enable-ares --enable-static=no --without-ca-bundle --with-ca-path=/etc/ssl/certs
