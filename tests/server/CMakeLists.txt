@@ -33,7 +33,7 @@ if(CURL_USE_TEST_BUNDLES)
     OUTPUT "server_bundle.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${SERVERPROGS} > "server_bundle.c"
     DEPENDS
-      "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl"
+      "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${UTIL_BUNDLE}
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
