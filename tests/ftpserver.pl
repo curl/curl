@@ -75,10 +75,6 @@ use serverhelp qw(
     datasockf_logfilename
     );
 
-use pathhelp qw(
-    exe_ext
-    );
-
 use globalconfig qw(
     $SERVERCMD
     $LOCKDIR
