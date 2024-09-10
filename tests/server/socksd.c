@@ -22,7 +22,6 @@
  *
  ***************************************************************************/
 #include "server_setup.h"
-#include "util.h"
 #include <stdlib.h>
 
 /* Function
