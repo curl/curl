@@ -187,8 +187,8 @@ if($ipvnum eq 'unix') {
 $flags .= "--srcdir \"$srcdir\"";
 
 if($verbose) {
-    print STDERR "RUN: server/servers".exe_ext('SRV')." sws $flags\n";
+    print STDERR "RUN: ".server_prog("sws")." $flags\n";
 }
 
 $| = 1;
-exec("exec server/servers".exe_ext('SRV')." sws $flags");
+exec("exec ".server_prog("sws")." $flags");
