@@ -3036,11 +3036,13 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
      * no environment-specified filename is found then check for CA bundle
      * default filename curl-ca-bundle.crt in the user's PATH.
      *
-     * If Schannel is the selected SSL backend then these locations are
-     * ignored. We allow setting CA location for schannel only when explicitly
-     * specified by the user via CURLOPT_CAINFO / --cacert.
+     * If Schannel or SecureTransport is the selected SSL backend then these
+     * locations are ignored. We allow setting CA location for Schannel and
+     * SecureTransport when explicitly specified by the user via
+     *  CURLOPT_CAINFO / --cacert.
      */
-    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
+    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL &&
+       tls_backend_info->backend != CURLSSLBACKEND_SECURETRANSPORT) {
       char *env;
       env = curl_getenv("CURL_CA_BUNDLE");
       if(env) {
