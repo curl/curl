@@ -3014,7 +3014,8 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
    * too. Just for the sake of it.
    */
   capath_from_env = false;
-  if(!config->cacert &&
+  if(feature_ssl &&
+     !config->cacert &&
      !config->capath &&
      (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
     CURL *curltls = curl_easy_init();
@@ -3078,8 +3079,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
       }
 
 #ifdef _WIN32
-       /* Search and set cert file only if libcurl supports SSL. */
-      if(!env && feature_ssl)
+      if(!env)
         result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
 #endif
     }
