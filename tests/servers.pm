@@ -1959,8 +1959,7 @@ sub runmqttserver {
     my $logfile = server_logfilename($LOGDIR, $proto, $ipvnum, $idnum);
 
     # start our MQTT server - on a random port!
-    my $cmd="server/servers".exe_ext('SRV').
-        " mqttd" .
+    my $cmd=server_prog("mqttd").
         " --port 0".
         " --pidfile $pidfile".
         " --portfile $portfile".
@@ -2018,8 +2017,7 @@ sub runsocksserver {
     # start our socks server, get commands from the FTP cmd file
     my $cmd="";
     if($is_unix) {
-        $cmd="server/servers".exe_ext('SRV').
-            " socksd".
+        $cmd=server_prog("socksd").
             " --pidfile $pidfile".
             " --reqfile $LOGDIR/$SOCKSIN".
             " --logfile $logfile".
@@ -2027,8 +2025,7 @@ sub runsocksserver {
             " --backend $HOSTIP".
             " --config $LOGDIR/$SERVERCMD";
     } else {
-        $cmd="server/servers".exe_ext('SRV').
-            " socksd".
+        $cmd=server_prog("socksd").
             " --port 0".
             " --pidfile $pidfile".
             " --portfile $portfile".

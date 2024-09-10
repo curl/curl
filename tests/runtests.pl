@@ -510,7 +510,7 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", "server/servers".exe_ext('TOOL') . " disabled");
+    open(my $disabledh, "-|", server_prog("disabled", 'TOOL'));
     @disabled = <$disabledh>;
     close($disabledh);
 
@@ -766,7 +766,7 @@ sub checksystemfeatures {
         # client has IPv6 support
 
         # check if the HTTP server has it!
-        my $cmd = "server/servers".exe_ext('SRV')." sws --version";
+        my $cmd = server_prog("sws")." --version";
         my @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
@@ -774,7 +774,7 @@ sub checksystemfeatures {
         }
 
         # check if the FTP server has it!
-        $cmd = "server/servers".exe_ext('SRV')." sockfilt --version";
+        $cmd = server_prog("sockfilt")." --version";
         @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
@@ -784,7 +784,7 @@ sub checksystemfeatures {
 
     if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
-        my $cmd = "server/servers".exe_ext('SRV')." sws --version";
+        my $cmd = server_prog("sws")." --version";
         my @sws = `$cmd`;
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
