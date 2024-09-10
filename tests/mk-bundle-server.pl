@@ -109,6 +109,7 @@ foreach my $src (@src) {
 
 print <<FOOTER
 const struct onemain p_mains[] = {
-${tlist}  {NULL, NULL}};
+${tlist}  {NULL, NULL}
+};
 FOOTER
     ;
