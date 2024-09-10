@@ -56,12 +56,12 @@ if USE_TEST_BUNDLES
 server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl $(CURLX_SRCS) $(USEFUL) $(UTIL) $(UTIL_BUNDLE)
 	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(SERVERPROGS) > server_bundle.c
 
-noinst_PROGRAMS = servers
+noinst_PROGRAMS = servers $(OTHERPROGS)
 nodist_servers_SOURCES = server_bundle.c
 servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(UTIL) $(UTIL_BUNDLE)
 CLEANFILES = server_bundle.c
 else
-noinst_PROGRAMS = $(SERVERPROGS)
+noinst_PROGRAMS = $(SERVERPROGS) $(OTHERPROGS)
 endif
 
 CHECKSRC = $(CS_$(V))

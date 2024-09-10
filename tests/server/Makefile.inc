@@ -22,8 +22,8 @@
 #
 ###########################################################################
 
-SERVERPROGS = testpart resolve rtspd sockfilt sws tftpd    \
- socksd disabled mqttd
+SERVERPROGS = testpart rtspd sockfilt sws tftpd socksd disabled mqttd
+OTHERPROGS = resolve
 
 CURLX_SRCS = \
  ../../lib/mprintf.c \
