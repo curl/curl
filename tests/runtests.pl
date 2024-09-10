@@ -90,7 +90,7 @@ use pathhelp qw(
     );
 use processhelp qw(
     portable_sleep
-    server_prog
+    server_exe
     );
 
 use appveyor;
@@ -511,7 +511,7 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", server_prog("disabled", 'TOOL'));
+    open(my $disabledh, "-|", server_exe("disabled", 'TOOL'));
     @disabled = <$disabledh>;
     close($disabledh);
 
@@ -767,7 +767,7 @@ sub checksystemfeatures {
         # client has IPv6 support
 
         # check if the HTTP server has it!
-        my $cmd = server_prog("sws")." --version";
+        my $cmd = server_exe("sws")." --version";
         my @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
@@ -775,7 +775,7 @@ sub checksystemfeatures {
         }
 
         # check if the FTP server has it!
-        $cmd = server_prog("sockfilt")." --version";
+        $cmd = server_exe("sockfilt")." --version";
         @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
@@ -785,7 +785,7 @@ sub checksystemfeatures {
 
     if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
-        my $cmd = server_prog("sws")." --version";
+        my $cmd = server_exe("sws")." --version";
         my @sws = `$cmd`;
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
