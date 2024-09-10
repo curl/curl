@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'UNITPROGS', '*_SOURCES' variables
+# Get 'UNITPROGS', '*_SOURCES', 'FIRSTFILES' variables
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -31,7 +31,7 @@ if(CURL_USE_TEST_BUNDLES)
     OUTPUT "unit_bundle.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "unit_bundle.c"
     DEPENDS
-      "${CURL_SOURCE_DIR}/tests/mk-bundle.pl"
+      "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES}
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
