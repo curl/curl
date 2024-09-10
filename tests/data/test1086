@@ -14,8 +14,6 @@ timing-dependent
 
 # Server-side
 <reply>
-# Overload some standard FTP responses to make them shorter and faster
-# to avoid wasting time waiting for the data phase to start
 <servercmd>
 SLOWDOWNDATA
 REPLY welcome 220 Hey

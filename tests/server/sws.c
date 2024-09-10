@@ -1319,9 +1319,12 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
   }
 #endif
 
+  /* We want to do the connect() in a non-blocking mode, since
+   * Windows has an internal retry logic that may lead to long
+   * timeouts if the peer is not listening. */
   if(0 != curlx_nonblock(serverfd, TRUE)) {
     error = SOCKERRNO;
-    logmsg("curlx_nonblock failed with error: (%d) %s",
+    logmsg("curlx_nonblock(TRUE) failed with error: (%d) %s",
            error, sstrerror(error));
     sclose(serverfd);
     return CURL_SOCKET_BAD;
@@ -1404,6 +1407,14 @@ error:
 success:
   logmsg("connected fine to %s%s%s:%hu, now tunnel",
          op_br, ipaddr, cl_br, port);
+
+  if(0 != curlx_nonblock(serverfd, FALSE)) {
+    error = SOCKERRNO;
+    logmsg("curlx_nonblock(FALSE) failed with error: (%d) %s",
+           error, sstrerror(error));
+    sclose(serverfd);
+    return CURL_SOCKET_BAD;
+  }
 
   return serverfd;
 }

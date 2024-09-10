@@ -2871,12 +2871,12 @@ sub customize {
         elsif($_ =~ /SLOWDOWNDATA/) {
             $ctrldelay=0;
             $datadelay=0.005;
-            logmsg "FTPD: send response data with 0.01 sec delay per byte\n";
+            logmsg "FTPD: send response data with 5ms delay per byte\n";
         }
         elsif($_ =~ /SLOWDOWN/) {
             $ctrldelay=0.005;
             $datadelay=0.005;
-            logmsg "FTPD: send response with 0.01 sec delay between each byte\n";
+            logmsg "FTPD: send response with 5ms delay between each byte\n";
         }
         elsif($_ =~ /RETRWEIRDO/) {
             logmsg "FTPD: instructed to use RETRWEIRDO\n";
