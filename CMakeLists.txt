@@ -2187,6 +2187,11 @@ if(NOT CURL_DISABLE_INSTALL)
 endif()
 
 # Save build info for test runner to pick up and log
+if(CMAKE_OSX_SYSROOT)
+  set(_cmake_sysroot ${CMAKE_OSX_SYSROOT})
+elseif(CMAKE_SYSROOT)
+  set(_cmake_sysroot ${CMAKE_SYSROOT})
+endif()
 set(_buildinfo "\
 buildinfo.configure.tool: cmake
 buildinfo.configure.command: ${CMAKE_COMMAND}
@@ -2201,6 +2206,7 @@ buildinfo.target.os: ${CMAKE_SYSTEM_NAME}
 buildinfo.target.flags:${_target_flags}
 buildinfo.compiler: ${CMAKE_C_COMPILER_ID}
 buildinfo.compiler.version: ${CMAKE_C_COMPILER_VERSION}
+buildinfo.sysroot: ${_cmake_sysroot}
 ")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
 if(NOT "$ENV{CURL_BUILDINFO}$ENV{CI}$ENV{BUILD_BUILDID}" STREQUAL "")

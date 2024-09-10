@@ -1603,7 +1603,8 @@ buildinfo.target.cpu: $host_cpu
 buildinfo.target.os: $host_os
 buildinfo.target.flags: $curl_pflags
 buildinfo.compiler: $compiler_id
-buildinfo.compiler.version: $compiler_ver"
+buildinfo.compiler.version: $compiler_ver
+buildinfo.sysroot: $lt_sysroot"
 ])
 
 
