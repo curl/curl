@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "server_setup.h"
 
-static enum {
+enum {
   socket_domain_inet = AF_INET
 #ifdef USE_IPV6
   , socket_domain_inet6 = AF_INET6
