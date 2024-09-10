@@ -66,7 +66,7 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: bearssl v
+          - name: bearssl valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: bearssl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
@@ -78,13 +78,13 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
 
-          - name: libressl heimdal v
+          - name: libressl heimdal valgrind
             install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
             singleuse: --unit
 
-          - name: libressl heimdal v
+          - name: libressl heimdal valgrind
             install_packages: zlib1g-dev heimdal-dev valgrind
             install_steps: libressl pytest
             generate: -DOPENSSL_ROOT_DIR=$HOME/libressl -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
@@ -96,7 +96,7 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
             singleuse: --unit
 
-          - name: mbedtls v
+          - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
             install_steps: mbedtls pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
@@ -108,19 +108,19 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
             singleuse: --unit
 
-          - name: msh3 v
+          - name: msh3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: quictls msh3
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
             singleuse: --unit
 
-          - name: openssl3 v
+          - name: openssl3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3 pytest
             configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-O3 v
+          - name: openssl3-O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
@@ -170,29 +170,29 @@ jobs:
               --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: event-based v
+          - name: event-based valgrind
             install_packages: libssh-dev valgrind
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n -e '!TLS-SRP'
             singleuse: --unit
 
-          - name: hyper v
+          - name: hyper valgrind
             install_steps: rust hyper valgrind
             configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: rustls v
+          - name: rustls valgrind
             install_steps: rust rustls pytest valgrind libpsl-dev
             configure: --with-rustls=$HOME/rustls --enable-debug
             singleuse: --unit
 
-          - name: Intel compiler - without SSL v
+          - name: IntelC !SSL valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: intel
             configure: CC=icc --enable-debug --without-ssl
             singleuse: --unit
 
-          - name: Intel compiler - OpenSSL v
+          - name: IntelC OpenSSL valgrind
             install_packages: zlib1g-dev libssl-dev valgrind
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
