@@ -576,6 +576,11 @@ sub checksystemfeatures {
                $feature{"OpenSSL"} = 1;
                $feature{"SSLpinning"} = 1;
            }
+           elsif ($libcurl =~ /\squictls\b/i) {
+               # OpenSSL compatible API
+               $feature{"OpenSSL"} = 1;
+               $feature{"SSLpinning"} = 1;
+           }
            elsif ($libcurl =~ /\smbedTLS\b/i) {
                $feature{"mbedtls"} = 1;
                $feature{"SSLpinning"} = 1;
