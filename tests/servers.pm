@@ -77,6 +77,7 @@ use serverhelp qw(
     server_pidfilename
     server_portfilename
     server_logfilename
+    server_exe
     );
 
 use sshhelp qw(
