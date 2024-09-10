@@ -428,7 +428,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
    *
    * If Schannel or SecureTransport is the selected SSL backend then these
    * locations are ignored. We allow setting CA location for Schannel and
-   * securetransport when explicitly specified by the user via
+   * SecureTransport when explicitly specified by the user via
    *  CURLOPT_CAINFO / --cacert.
    */
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL &&
