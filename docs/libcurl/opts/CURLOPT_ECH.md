@@ -70,6 +70,14 @@ If the string starts with `pn:` then the remainder of the string should be a
 DNS/hostname that is used to over-ride the public_name field of the
 ECHConfigList that is used for ECH.
 
+##
+
+The application does not have to keep the string around after setting this
+option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL or "false" to disable its use again.
+
 # DEFAULT
 
 NULL, meaning ECH is disabled.

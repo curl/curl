@@ -71,6 +71,10 @@ transfer is started.
 The application does not have to keep the string around after setting this
 option.
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again. Note however that
+libcurl needs a URL set to be able to performed a transfer.
+
 The parser used for handling the URL set with CURLOPT_URL(3) is the same
 that curl_url_set(3) uses.
 

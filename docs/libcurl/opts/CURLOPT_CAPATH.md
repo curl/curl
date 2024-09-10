@@ -45,6 +45,9 @@ to some limitation in OpenSSL.
 The application does not have to keep the string around after setting this
 option.
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
+
 The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 # DEFAULT

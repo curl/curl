@@ -33,8 +33,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIR_PROTOCOLS_STR,
 Pass a pointer to a string that holds a comma-separated list of case
 insensitive protocol names (URL schemes). That list limits what protocols
 libcurl may use in a transfer that it follows to in a redirect when
-CURLOPT_FOLLOWLOCATION(3) is enabled. This option allows applications to
-limit specific transfers to only be allowed to use a subset of protocols in
+CURLOPT_FOLLOWLOCATION(3) is enabled. This option allows applications to limit
+specific transfers to only be allowed to use a subset of protocols in
 redirections.
 
 Protocols denied by CURLOPT_PROTOCOLS_STR(3) are not overridden by this
@@ -55,6 +55,12 @@ but are introduced in a future libcurl version.
 
 If trying to set a non-existing protocol or if no matching protocol at all is
 set, it returns error.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to restore to internal default.
+
+The application does not have to keep the string around after setting this
+option.
 
 # DEFAULT
 
