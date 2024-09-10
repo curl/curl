@@ -3078,7 +3078,8 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
       }
 
 #ifdef _WIN32
-      if(!env)
+       /* Search and set cert file only if libcurl supports SSL. */
+      if(!env && feature_ssl)
         result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
 #endif
     }

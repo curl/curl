@@ -624,25 +624,21 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
   (void)config;
   (void)bundle_file;
 #else
-  /* Search and set cert file only if libcurl supports SSL. */
-  if(feature_ssl) {
+  DWORD res_len;
+  TCHAR buf[PATH_MAX];
+  TCHAR *ptr = NULL;
 
-    DWORD res_len;
-    TCHAR buf[PATH_MAX];
-    TCHAR *ptr = NULL;
+  buf[0] = TEXT('\0');
 
-    buf[0] = TEXT('\0');
-
-    res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
-    if(res_len > 0) {
-      char *mstr = curlx_convert_tchar_to_UTF8(buf);
-      Curl_safefree(config->cacert);
-      if(mstr)
-        config->cacert = strdup(mstr);
-      curlx_unicodefree(mstr);
-      if(!config->cacert)
-        result = CURLE_OUT_OF_MEMORY;
-    }
+  res_len = SearchPath(NULL, bundle_file, NULL, PATH_MAX, buf, &ptr);
+  if(res_len > 0) {
+    char *mstr = curlx_convert_tchar_to_UTF8(buf);
+    Curl_safefree(config->cacert);
+    if(mstr)
+      config->cacert = strdup(mstr);
+    curlx_unicodefree(mstr);
+    if(!config->cacert)
+      result = CURLE_OUT_OF_MEMORY;
   }
 #endif
 
