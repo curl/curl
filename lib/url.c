@@ -734,8 +734,6 @@ static bool conn_maxage(struct Curl_easy *data,
           " seconds since creation), disconnect it", lifetime);
     return TRUE;
   }
-
-
   return FALSE;
 }
 
