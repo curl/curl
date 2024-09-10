@@ -45,8 +45,8 @@
 
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0 and newer (as of 14.1.0)
    that started advertising the `availability` attribute, which then gets used
-   by Apple SDK, but, in a way incompatible with gcc, resulting in a misc
-   errors inside SDK headers, e.g.:
+   by Apple SDK, but, in a way incompatible with gcc, resulting in misc errors
+   inside SDK headers, e.g.:
      error: attributes should be specified before the declarator in a function
             definition
      error: expected ',' or '}' before
