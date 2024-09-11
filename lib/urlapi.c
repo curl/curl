@@ -34,7 +34,6 @@
 #include "inet_ntop.h"
 #include "strdup.h"
 #include "idn.h"
-#include "curl_memrchr.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
