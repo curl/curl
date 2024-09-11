@@ -409,6 +409,12 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
     # Make sure that permissions are restricted so openssh doesn't complain
+    if(pathhelp::os_is_win()) {
+      # https://ss64.com/nt/icacls.html
+      system("icacls $hstprvkeyf /reset");
+      system("icacls $hstprvkeyf /grant:r $ENV{USERNAME}:(R)");
+      system("icacls $hstprvkeyf /inheritance:r");
+    }
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
     # Save md5 and sha256 hashes of public host key
