@@ -96,7 +96,6 @@ struct cf_quiche_ctx {
   uint8_t scid[QUICHE_MAX_CONN_ID_LEN];
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct Curl_hash streams;          /* hash `data->mid` to `stream_ctx` */
   curl_off_t data_recvd;
@@ -1405,13 +1404,6 @@ static CURLcode cf_quiche_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   vquic_ctx_update_time(&ctx->q);
-
-  if(ctx->reconnect_at.tv_sec &&
-     Curl_timediff(ctx->q.last_op, ctx->reconnect_at) < 0) {
-    /* Not time yet to attempt the next connect */
-    CURL_TRC_CF(data, cf, "waiting for reconnect time");
-    goto out;
-  }
 
   if(!ctx->qconn) {
     result = cf_quiche_ctx_open(cf, data);

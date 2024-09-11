@@ -36,7 +36,6 @@ from testenv import Env, CurlClient, ExecResult
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
 class TestGoAway:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -83,8 +82,6 @@ class TestGoAway:
         proto = 'h3'
         if proto == 'h3' and env.curl_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
-            pytest.skip("does not work in CI, but locally for some reason")
         if proto == 'h3' and env.curl_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
         count = 3
