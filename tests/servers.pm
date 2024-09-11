@@ -290,6 +290,9 @@ sub clearlocks {
                 }
             }
         }
+        else {
+            logmsg "Warning: 'handle' tool not found.\n";
+        }
     }
     return $done;
 }
