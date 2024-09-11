@@ -487,6 +487,8 @@ jobs:
         timeout-minutes: 1
         run: |
           python3 -m pip install impacket
+          curl --disable --user-agent 'curl' --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 'https://live.sysinternals.com/handle64.exe' --output /bin/handle64.exe
+          handle64 /testing -accepteula -nobanner
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
