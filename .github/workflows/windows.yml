@@ -145,7 +145,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh systinternals --force
-          PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
@@ -226,7 +226,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh systinternals --force
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
@@ -342,7 +342,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh systinternals --force
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   linux-cross-mingw-w64:
@@ -554,5 +554,5 @@ jobs:
             #/c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh systinternals --force
             /c/ProgramData/chocolatey/choco.exe install --yes --timeout 180 stunnel openssh systinternals --force
           fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
