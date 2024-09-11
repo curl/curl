@@ -486,8 +486,6 @@ jobs:
       - name: 'vcpkg versions'
         timeout-minutes: 1
         run: |
-          echo "$PATH"
-          env
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
