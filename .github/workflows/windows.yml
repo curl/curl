@@ -480,14 +480,14 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            echo "$PATH"
-            env
             core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: 'vcpkg versions'
         timeout-minutes: 1
         run: |
+          echo "$PATH"
+          env
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
