@@ -286,7 +286,7 @@ sub clearlocks {
                     if("$3" eq "File" && "$1" ne "tstunnel.exe") {
                         logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
                         # https://ss64.com/nt/taskkill.html
-                        system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
+                        system("taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
                         $done = 1;
                     }
                 }
