@@ -150,7 +150,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh --force
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --user-agent 'curl' --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python -m venv _venv
           _venv/bin/python -m pip --disable-pip-version-check --no-cache-dir install impacket
@@ -234,7 +234,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh --force
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --user-agent 'curl' --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python -m venv _venv
           _venv/bin/python -m pip --disable-pip-version-check --no-cache-dir install impacket
@@ -353,7 +353,7 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh --force
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --user-agent 'curl' --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$PWD/_venv/bin"
@@ -565,7 +565,7 @@ jobs:
           # GnuTLS is not fully functional on Windows, so skip the tests
           # https://github.com/ShiftMediaProject/gnutls/issues/23
           if [ '${{ matrix.name }}' != 'gnutls' ]; then
-            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel openssh --force
+            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           fi
           curl --disable --user-agent 'curl' --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
