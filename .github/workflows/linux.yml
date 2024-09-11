@@ -153,7 +153,7 @@ jobs:
               --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
             singleuse: --unit
 
-          - name: !ssl !http !smtp !imap
+          - name: '!ssl !http !smtp !imap'
             install_steps: gcc-11
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap
             singleuse: --unit
