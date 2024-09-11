@@ -412,9 +412,9 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     if(pathhelp::os_is_win()) {
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
-      system("icacls $hstprvkeyf /reset");
-      system("icacls $hstprvkeyf /grant:r \"$ENV{USERNAME}:(R)\"");
-      system("icacls $hstprvkeyf /inheritance:r");
+      system("icacls \"" . pp($hstprvkeyf) . "\" /reset");
+      system("icacls \"" . pp($hstprvkeyf) . "\" /grant:r \"$ENV{USERNAME}:(R)\"");
+      system("icacls \"" . pp($hstprvkeyf) . "\" /inheritance:r");
     }
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
