@@ -145,6 +145,15 @@ static int rlimit(int keep_open)
   rlim2str(strbuff, sizeof(strbuff), rl.rlim_max);
   fprintf(stderr, "initial hard limit: %s\n", strbuff);
 
+  /* If the OS allows a HUGE number of open files, we do not run.
+   * Modern debian sid reports a limit of 134217724 and this tests
+   * takes minutes. */
+#define LIMIT_CAP     (256*1024)
+  if(rl.rlim_cur > LIMIT_CAP) {
+    fprintf(stderr, "soft limit above %ld, not running\n", (long)LIMIT_CAP);
+    return -2;
+  }
+
   /*
    * if soft limit and hard limit are different we ask the
    * system to raise soft limit all the way up to the hard
