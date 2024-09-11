@@ -200,9 +200,6 @@ sub pidkill {
                 if(index($result, "$pid") != -1) {
                     # https://ss64.com/nt/taskkill.html
                     system("taskkill -f -t -fi \"$filter\" >nul 2>&1");
-                    # Windows XP Home compatibility
-                    # https://ss64.com/nt/tskill.html
-                    system("tskill $pid >nul 2>&1");
                 }
                 return;
             }
