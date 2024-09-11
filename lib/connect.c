@@ -800,8 +800,10 @@ static CURLcode start_connect(struct Curl_cfilter *cf,
   }
   else {
     /* no user preference, we try ipv6 always first when available */
+#ifdef USE_IPV6
     ai_family0 = AF_INET6;
     addr0 = addr_first_match(remotehost->addr, ai_family0);
+#endif
     /* next candidate is ipv4 */
     ai_family1 = AF_INET;
     addr1 = addr_first_match(remotehost->addr, ai_family1);
