@@ -2723,6 +2723,7 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
       return CURLM_RECURSIVE_API_CALL;
 
     multi->magic = 0; /* not good anymore */
+    multi->socket_cb = NULL; /* no callbacks when shutting down */
 
     /* move the pending and msgsent entries back to process
        so that there is just one list to iterate over */
