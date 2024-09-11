@@ -411,6 +411,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     # Make sure that permissions are restricted so openssh doesn't complain
     if(pathhelp::os_is_win()) {
       # https://ss64.com/nt/icacls.html
+      $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
       system("icacls $hstprvkeyf /reset");
       system("icacls $hstprvkeyf /grant:r \"$ENV{USERNAME}:(R)\"");
       system("icacls $hstprvkeyf /inheritance:r");
