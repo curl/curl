@@ -156,7 +156,6 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             install_steps: gcc-11
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap
-            singleuse: --unit
 
           - name: scanbuild
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
