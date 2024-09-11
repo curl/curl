@@ -1749,7 +1749,11 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
   case CF_QUERY_IP_INFO:
+#ifdef USE_IPV6
     *pres1 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
+#else
+    *pres1 = FALSE;
+#endif
     *(struct ip_quadruple *)pres2 = ctx->ip;
     return CURLE_OK;
   default:
