@@ -136,6 +136,7 @@ sub pidexists {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
+                # https://ss64.com/nt/tasklist.html
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
                 if(index($result, "$pid") != -1) {
                     return -$pid;
@@ -166,8 +167,10 @@ sub pidterm {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
+                # https://ss64.com/nt/tasklist.html
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
                 if(index($result, "$pid") != -1) {
+                    # https://ss64.com/nt/taskkill.html
                     system("taskkill -fi \"$filter\" >nul 2>&1");
                 }
                 return;
@@ -192,10 +195,13 @@ sub pidkill {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
+                # https://ss64.com/nt/tasklist.html
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
                 if(index($result, "$pid") != -1) {
+                    # https://ss64.com/nt/taskkill.html
                     system("taskkill -f -t -fi \"$filter\" >nul 2>&1");
                     # Windows XP Home compatibility
+                    # https://ss64.com/nt/tskill.html
                     system("tskill $pid >nul 2>&1");
                 }
                 return;
