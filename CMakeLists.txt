@@ -900,7 +900,7 @@ if(USE_MSH3)
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libmsh3")
 endif()
 
-option(USE_OPENSSL_QUIC "Use openssl and nghttp3 libraries for HTTP/3 support" OFF)
+option(USE_OPENSSL_QUIC "Use OpenSSL and nghttp3 libraries for HTTP/3 support" OFF)
 if(USE_OPENSSL AND USE_OPENSSL_QUIC)
   if(USE_NGTCP2 OR USE_QUICHE OR USE_MSH3)
     message(FATAL_ERROR "Only one HTTP/3 backend can be selected!")
