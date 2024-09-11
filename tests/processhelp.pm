@@ -59,6 +59,7 @@ use serverhelp qw(
     servername_id
     mainsockf_pidfilename
     datasockf_pidfilename
+    logmsg
     );
 
 use pathhelp qw(
