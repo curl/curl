@@ -80,18 +80,9 @@ stages:
               name: default
               install:
               configure: --enable-debug --with-openssl
-            disable_ipv6:
-              name: w/o IPv6
-              configure: --disable-ipv6 --with-openssl
-            disable_http_smtp_imap:
-              name: w/o HTTP/SMTP/IMAP
-              configure: --disable-http --disable-smtp --disable-imap --without-ssl
             disable_threadres:
               name: sync resolver
               configure: --disable-threaded-resolver --with-openssl
-            https_only:
-              name: HTTPS only
-              configure: --disable-dict --disable-file --disable-ftp --disable-gopher --disable-imap --disable-ldap --disable-pop3 --disable-rtmp --disable-rtsp --disable-scp --disable-sftp --disable-smb --disable-smtp --disable-telnet --disable-tftp --with-openssl
             torture:
               name: torture
               install: libnghttp2-dev
@@ -113,33 +104,6 @@ stages:
             env:
               AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
               TFLAGS: "-j0 -ac /usr/bin/curl -r $(tests)"
-
-  - stage: scanbuild
-    dependsOn: []
-    jobs:
-      - job: ubuntu
-        timeoutInMinutes: 30
-        pool:
-          vmImage: 'ubuntu-latest'
-        steps:
-          - script: sudo apt-get update && sudo apt-get install -y clang-tools clang libssl-dev libssh2-1-dev libpsl-dev libbrotli-dev libzstd-dev
-            displayName: 'apt install'
-            retryCountOnTaskFailure: 3
-
-          - script: autoreconf -fi
-            displayName: 'autoreconf'
-
-          - script: scan-build ./configure --disable-dependency-tracking --enable-debug --enable-werror --with-openssl --with-libssh2
-            displayName: 'configure'
-            env:
-              CC: "clang"
-              CCX: "clang++"
-
-          - script: scan-build --status-bugs make
-            displayName: 'make'
-
-          - script: scan-build --status-bugs make examples
-            displayName: 'make examples'
 
   ##########################################
   ### Windows jobs below
