@@ -74,7 +74,8 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
-          install: gcc ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }} python-pip openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+          install: gcc ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }} openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+
       - uses: msys2/setup-msys2@ddf331adaebd714795f1042345e6ca57bd66cea8 # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
@@ -82,7 +83,6 @@ jobs:
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
-            mingw-w64-${{ matrix.env }}-python-pip
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
