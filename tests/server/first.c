@@ -25,6 +25,11 @@
 #include <string.h>
 #include "first.h"
 
+#ifdef CURLDEBUG
+#  define MEMDEBUG_NODEFINES
+#  include "memdebug.h"
+#endif
+
 int main(int argc, char **argv)
 {
   main_func_t main_func;

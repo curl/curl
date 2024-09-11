@@ -39,6 +39,7 @@ foreach my $src (@ARGV) {
 print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
 
+#define MEMDEBUG_NODEFINES
 #include "first.h"
 HEADER
     ;
