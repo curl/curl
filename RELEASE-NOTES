@@ -4,7 +4,7 @@ curl and libcurl 8.10.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3240
+ Contributors:                 3239
 
 This release includes the following changes:
 
@@ -27,6 +27,8 @@ This release includes the following changes:
 
 This release includes the following bugfixes:
 
+ o asyn-thread: stop using GetAddrInfoExW on Windows [241]
+ o autotools: fix MS-DOS builds [249]
  o autotools: fix typo in tests/data target [30]
  o aws_sigv4: fix canon order for headers with same prefix [74]
  o bearssl: fix setting tls version [203]
@@ -37,7 +39,9 @@ This release includes the following bugfixes:
  o build: add options to disable SHA-512/256 hash algo [239]
  o build: check OS-native IDN first, then libidn2 [223]
  o build: delete unused `REQUIRE_LIB_DEPS` [226]
+ o build: drop unused `NROFF` reference [253]
  o build: drop unused feature-detection code for Apple `poll()` [227]
+ o build: generate `buildinfo.txt` for test logs [256]
  o build: improve compiler version detection portability
  o build: make `CURL_FORMAT_CURL_OFF_T[U]` work with mingw-w64 <=7.0.0 [207]
  o build: silence C4232 MSVC warnings in vcpkg ngtcp2 builds [137]
@@ -130,6 +134,7 @@ This release includes the following bugfixes:
  o docs: remove ALTSVC.md, HSTS.md, HTTP2.md and PARALLEL-TRANSFERS.md [105]
  o docs: update CIPHERS.md [140]
  o doh-url.md: point out DOH server IP pinning [37]
+ o doh: remove redundant checks [242]
  o easy: fix curl_easy_upkeep for shared connection caches [52]
  o escape: allow curl_easy_escape to generate 3*input length output [39]
  o FEATURES.md: fix typo [180]
@@ -164,15 +169,18 @@ This release includes the following bugfixes:
  o lib: fix building with wolfSSL without DES support [134]
  o lib: make SSPI global symbols use Curl_ prefix [251]
  o lib: prefer `CURL_SHA256_DIGEST_LENGTH` over the unprefixed name [132]
+ o lib: remove the final strncpy() calls [240]
  o lib: remove use of RANDOM_FILE [235]
  o libcurl.def: move from / into lib [238]
  o libcurl.pc: add `Cflags.private` [10]
  o libcurl.pc: add reference to `libgsasl` [150]
  o libcurl/docs: expand on redirect following and secrets to other hosts [85]
  o llist: remove direct struct accesses, use only functions [72]
+ o Makefile.dist: fix `ca-firefox` target [254]
  o Makefile.mk: fixup enabling libidn2 [61]
  o Makefile: remove 'scripts' duplicate from DIST_SUBDIRS
  o maketgz: accept option to include latest commit hash [5]
+ o maketgz: fix RELEASE-TOOLS.md for daily tarballs [243]
  o maketgz: move from / into scripts [237]
  o managen: fix superfluous leading blank line in quoted sections [211]
  o managen: in man output, remove the leading space from examples [198]
@@ -287,16 +295,16 @@ advice from friends like these:
   Benjamin Riefenstahl Mecom, Bo Anderson, Chris Swan, Christoph Reiter,
   Dan Fandrich, Daniel Stenberg, David Sardari, dependabot[bot],
   Emanuele Torre, Eric Norris, feelingseas on github, Gruber Glass,
-  Hiroki Kurosawa, janedenone on github, Jan Venekamp, Jason Hood, Jiacai Liu,
-  Joe Birr-Pixton, John Haugabook, Joshix-1 on github, Justin Maggard,
-  Kai Pastor, kit-ty-kate on github, lolbinarycat on github,
+  Hiroki Kurosawa, Ionuț-Francisc Oancea, janedenone on github, Jan Venekamp,
+  Jason Hood, Jiacai Liu, Joe Birr-Pixton, John Haugabook, Joshix-1 on github,
+  Justin Maggard, Kai Pastor, kit-ty-kate on github, lolbinarycat on github,
   MasterInQuestion on github, Matt Jolly, Max Faxälv, Micah Snyder,
   Moritz Buhl, Pete Cordell, ralfjunker on github, Rasmus Thomsen, Ray Satiro,
-  renovate[bot], Ryan Carsten Schmidt, Sam Jessup, Sergio Durigan Junior,
-  Slaven Rezić, Stanislav Lange, Stefan Eissing, Steffen Kieß, Tal Regev,
-  Tim Yuer, Venkat Krishna R, Viktor Petersson, Viktor Szakats, XYenon,
-  Yedaya Katsman, Yoshimasa Ohno, наб, 罗朝辉
-  (55 contributors)
+  Razvan Pricope, renovate[bot], Ryan Carsten Schmidt, Sam Jessup,
+  Sergio Durigan Junior, Slaven Rezić, Stanislav Lange, Stefan Eissing,
+  Steffen Kieß, Tal Regev, Tim Yuer, Venkat Krishna R, Viktor Petersson,
+  Viktor Szakats, XYenon, Yedaya Katsman, Yoshimasa Ohno, наб, 罗朝辉
+  (57 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -538,10 +546,18 @@ References to bug reports and discussions on issues:
  [237] = https://curl.se/bug/?i=14797
  [238] = https://curl.se/bug/?i=14796
  [239] = https://curl.se/bug/?i=14753
+ [240] = https://curl.se/bug/?i=14830
+ [241] = https://curl.se/bug/?i=13509
+ [242] = https://curl.se/bug/?i=14823
+ [243] = https://curl.se/bug/?i=14820
  [244] = https://curl.se/bug/?i=14714
  [246] = https://curl.se/bug/?i=14784
  [247] = https://curl.se/bug/?i=14777
  [248] = https://curl.se/bug/?i=14785
+ [249] = https://curl.se/bug/?i=14814
  [250] = https://curl.se/bug/?i=14780
  [251] = https://curl.se/bug/?i=14776
  [252] = https://curl.se/bug/?i=14770
+ [253] = https://curl.se/bug/?i=14812
+ [254] = https://curl.se/bug/?i=14804
+ [256] = https://curl.se/bug/?i=14802
