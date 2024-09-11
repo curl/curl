@@ -185,10 +185,7 @@ jobs:
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-      - name: 'run pytest'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 15
-        run: |
-          python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
-          PATH="$PWD/bld/lib:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+      - name: 'cmake build examples'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
