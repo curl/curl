@@ -412,7 +412,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     if(pathhelp::os_is_win()) {
       # https://ss64.com/nt/icacls.html
       system("icacls $hstprvkeyf /reset");
-      system("icacls $hstprvkeyf /grant:r $ENV{USERNAME}:(R)");
+      system("icacls $hstprvkeyf /grant:r \"$ENV{USERNAME}:(R)\"");
       system("icacls $hstprvkeyf /inheritance:r");
     }
     system "chmod 600 " . pp($hstprvkeyf);
