@@ -11,7 +11,6 @@ name: Linux
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -23,7 +22,6 @@ name: Linux
       - master
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -114,6 +112,17 @@ jobs:
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
             singleuse: --unit
 
+          - name: openssl default
+            install_steps: pytest
+            configure: --with-openssl --enable-debug
+            singleuse: --unit
+
+          - name: openssl libssh2 sync-resolver valgrind
+            install_packages: zlib1g-dev libssh2-1-dev valgrind
+            install_steps: pytest
+            configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
+            singleuse: --unit
+
           - name: openssl3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3 pytest
@@ -136,6 +145,34 @@ jobs:
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
             generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DENABLE_WEBSOCKETS=ON
+            singleuse: --unit
+
+          - name: openssl3 !ipv6
+            install_steps: gcc-11 openssl3
+            configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-ipv6
+            singleuse: --unit
+
+          - name: openssl3 https-only
+            install_steps: gcc-11 openssl3
+            configure: >
+              LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
+              --disable-dict --disable-gopher --disable-ldap --disable-telnet
+              --disable-imap --disable-pop3 --disable-smtp
+              --disable-rtmp --disable-rtsp
+              --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
+            singleuse: --unit
+
+          - name: '!ssl !http !smtp !imap'
+            install_steps: gcc-11
+            configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap
+            singleuse: --unit
+
+          - name: scanbuild
+            install_packages: clang-tools clang libssl-dev libssh2-1-dev
+            install_steps: skipall
+            configure: --with-openssl --enable-debug --with-libssh2
+            configure-prefix: CC=clang scan-build
+            make-prefix: scan-build --status-bugs
             singleuse: --unit
 
           - name: address-sanitizer
@@ -459,7 +496,7 @@ jobs:
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: ${{ matrix.build.configure-prefix }} ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
         if: ${{ matrix.build.configure }}
         name: 'configure (autotools)'
 
@@ -482,7 +519,7 @@ jobs:
           cat tests/config || true
           cat tests/http/config.ini || true
 
-      - run: make V=1 VERBOSE=1
+      - run: ${{ matrix.build.make-prefix }} make V=1 VERBOSE=1
         name: 'make'
 
       - run: |
@@ -498,19 +535,20 @@ jobs:
       - run: ./src/curl -V
         name: 'check curl -V output'
 
-      - run: make V=1 examples
+      - run: ${{ matrix.build.make-prefix }} make V=1 examples
         if: ${{ matrix.build.configure }}
         name: 'make examples'
 
       - run: make V=1 -C tests
-        if: ${{ matrix.build.configure }}
+        if: ${{ matrix.build.configure && matrix.build.install_steps != 'skipall' }}
         name: 'make tests (autotools)'
 
       - run: make VERBOSE=1 testdeps
-        if: ${{ matrix.build.generate }}
+        if: ${{ matrix.build.generate && matrix.build.install_steps != 'skipall' }}
         name: 'make tests (cmake)'
 
       - name: 'run tests'
+        if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then

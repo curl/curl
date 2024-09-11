@@ -86,7 +86,6 @@ CI:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '.azure-pipelines.yml'
               - '.circleci/**'
               - '.github/**'
               - 'appveyor.*'

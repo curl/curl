@@ -274,7 +274,10 @@ sub clearlocks {
             $handle = "handle64";
         }
         if(checkcmd($handle)) {
-            my @handles = `$handle $dir -accepteula -nobanner`;
+            # https://learn.microsoft.com/sysinternals/downloads/handle#usage
+            my $cmd = "$handle $dir -accepteula -nobanner";
+            logmsg "Executing: '$cmd'\n";
+            my @handles = `$cmd`;
             for my $tryhandle (@handles) {
                 # Skip the "No matching handles found." warning when returned
                 if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
@@ -282,11 +285,17 @@ sub clearlocks {
                     # Ignore stunnel since we cannot do anything about its locks
                     if("$3" eq "File" && "$1" ne "tstunnel.exe") {
                         logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
-                        system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
+                        # https://ss64.com/nt/taskkill.html
+                        my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
+                        logmsg "Executing: '$cmd'\n";
+                        system($cmd);
                         $done = 1;
                     }
                 }
             }
+        }
+        else {
+            logmsg "Warning: 'handle' tool not found.\n";
         }
     }
     return $done;

@@ -28,6 +28,7 @@ Alt-Svc: h1="[ffff::1]:8181"
 <features>
 Debug
 alt-svc
+IPv6
 </features>
 <server>
 http
