@@ -275,7 +275,9 @@ sub clearlocks {
         }
         if(checkcmd($handle)) {
             # https://learn.microsoft.com/sysinternals/downloads/handle#usage
-            my @handles = `$handle $dir -accepteula -nobanner`;
+            my $cmd = "$handle $dir -accepteula -nobanner";
+            logmsg "Executing: '$cmd'\n";
+            my @handles = `$cmd`;
             for my $tryhandle (@handles) {
                 # Skip the "No matching handles found." warning when returned
                 if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
