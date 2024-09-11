@@ -196,12 +196,12 @@ sub pidkill {
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/tasklist.html
-                my $cmd = "tasklist -fi \"$filter\" 2>nul"
+                my $cmd = "tasklist -fi \"$filter\" 2>nul";
                 logmsg "Executing: '$cmd'\n";
                 my $result = `$cmd`;
                 if(index($result, "$pid") != -1) {
                     # https://ss64.com/nt/taskkill.html
-                    my $cmd = "taskkill -f -t -fi \"$filter\" >nul 2>&1"
+                    my $cmd = "taskkill -f -t -fi \"$filter\" >nul 2>&1";
                     logmsg "Executing: '$cmd'\n";
                     system($cmd);
                 }
