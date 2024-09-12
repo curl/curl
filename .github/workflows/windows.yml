@@ -148,9 +148,12 @@ jobs:
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 14
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
+            TFLAGS+=' ~612 ~616 ~618'  # SFTP
+          else
+            TFLAGS+=' ~SFTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -230,9 +233,12 @@ jobs:
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 14
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
+            TFLAGS+=' ~612 ~616 ~618'  # SFTP
+          else
+            TFLAGS+=' ~SFTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -562,7 +568,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 16
         run: |
-          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ~SCP ~612 ${{ matrix.tflags }}'
           # GnuTLS is not fully functional on Windows, so skip the tests
           # https://github.com/ShiftMediaProject/gnutls/issues/23
           if [ '${{ matrix.name }}' != 'gnutls' ]; then
