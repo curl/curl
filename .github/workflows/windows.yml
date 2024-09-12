@@ -165,8 +165,11 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python -m venv _venv
           _venv/bin/python -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSTEM=MSYS2
           export MSYSCON=defterm
+          export MSYS2_PATH_TYPE=inherit
+          echo "MSYS: |${MSYS}|"
+          echo "MSYSTEM: |${MSYSTEM}|"
+          echo "MSYSCON: |${MSYSCON}|"
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="$PWD/_venv/bin:${PATH}"
@@ -263,8 +266,11 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python -m venv _venv
           _venv/bin/python -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSTEM=MSYS2
           export MSYSCON=defterm
+          export MSYS2_PATH_TYPE=inherit
+          echo "MSYS: |${MSYS}|"
+          echo "MSYSTEM: |${MSYSTEM}|"
+          echo "MSYSCON: |${MSYSCON}|"
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="$PWD/_venv/bin:${PATH}"
@@ -395,8 +401,11 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSTEM=MSYS2
           export MSYSCON=defterm
+          export MSYS2_PATH_TYPE=inherit
+          echo "MSYS: |${MSYS}|"
+          echo "MSYSTEM: |${MSYSTEM}|"
+          echo "MSYSCON: |${MSYSCON}|"
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
@@ -623,8 +632,11 @@ jobs:
           fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSTEM=MSYS2
           export MSYSCON=defterm
+          export MSYS2_PATH_TYPE=inherit
+          echo "MSYS: |${MSYS}|"
+          echo "MSYSTEM: |${MSYSTEM}|"
+          echo "MSYSCON: |${MSYSCON}|"
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
