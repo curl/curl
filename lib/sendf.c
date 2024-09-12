@@ -1008,8 +1008,8 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
 
     /* at least one \n might need conversion to '\r\n', place into ctx->buf */
     for(i = start = 0; i < nread; ++i) {
-      /* if this byte is not an LF character, or if the preceeding character
-         is a CR (meaning this already is a CRLF pair), go to next */
+      /* if this byte is not an LF character, or if the preceding character is
+         a CR (meaning this already is a CRLF pair), go to next */
       if((buf[i] != '\n') || ctx->prev_cr) {
         ctx->prev_cr = (buf[i] == '\r');
         continue;
