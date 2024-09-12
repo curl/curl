@@ -71,7 +71,17 @@ jobs:
         with:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
-          install: gcc ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }} openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+          install: >-
+            gcc
+            ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
+            python-pip
+            python-wheel
+            openssl-devel
+            zlib-devel
+            brotli-devel
+            libnghttp2-devel
+            libpsl-devel
+            libssh2-devel
 
       - uses: msys2/setup-msys2@ddf331adaebd714795f1042345e6ca57bd66cea8 # v2
         if: ${{ matrix.sys != 'msys' }}
@@ -80,6 +90,10 @@ jobs:
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
+            mingw-w64-${{ matrix.env }}-python-pip
+            mingw-w64-${{ matrix.env }}-python-wheel
+            mingw-w64-${{ matrix.env }}-python-cryptography
+            mingw-w64-${{ matrix.env }}-python-pyopenssl
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
@@ -149,11 +163,13 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          python -m venv _venv
+          _venv/bin/python -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           export MSYSTEM=MSYS2
           export MSYSCON=defterm
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
-          OPATH="${PATH}"
+          OPATH="$PWD/_venv/bin:${PATH}"
           PATH="$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           echo '======== after PATH ========'
           for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
@@ -245,11 +261,13 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          python -m venv _venv
+          _venv/bin/python -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           export MSYSTEM=MSYS2
           export MSYSCON=defterm
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
-          OPATH="${PATH}"
+          OPATH="$PWD/_venv/bin:${PATH}"
           PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           echo '======== after PATH ========'
           for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
