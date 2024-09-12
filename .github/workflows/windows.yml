@@ -523,6 +523,7 @@ jobs:
             -DENABLE_WEBSOCKETS=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
+            "-DPERL_EXECUTABLE=$(cygpath -w /usr/bin/perl)" \
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
