@@ -152,6 +152,8 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          echo "USER: |${USER}|"
+          echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
           PATH="$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           echo '======== after PATH ========'
@@ -244,6 +246,8 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          echo "USER: |${USER}|"
+          echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
           PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           echo '======== after PATH ========'
@@ -372,6 +376,8 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
+          echo "USER: |${USER}|"
+          echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
           PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin"
           echo '======== after PATH ========'
@@ -596,6 +602,8 @@ jobs:
           fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
+          echo "USER: |${USER}|"
+          echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
           PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           echo '======== after PATH ========'
