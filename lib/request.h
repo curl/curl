@@ -130,6 +130,7 @@ struct SingleRequest {
   BIT(download_done); /* set to TRUE when download is complete */
   BIT(eos_written);   /* iff EOS has been written to client */
   BIT(eos_read);      /* iff EOS has been read from the client */
+  BIT(eos_sent);      /* iff EOS has been sent to the server */
   BIT(rewind_read);   /* iff reader needs rewind at next start */
   BIT(upload_done);   /* set to TRUE when all request data has been sent */
   BIT(upload_aborted); /* set to TRUE when upload was aborted. Will also
