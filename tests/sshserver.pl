@@ -253,7 +253,7 @@ if(!$sshdid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose || os_is_win());
+logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
@@ -292,7 +292,7 @@ if(!$sftpsrv) {
     logmsg "cannot find $sftpsrvexe\n";
     exit 1;
 }
-logmsg "sftp server plugin found $sftpsrv\n" if($verbose || os_is_win());
+logmsg "sftp server plugin found $sftpsrv\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
@@ -303,7 +303,7 @@ if(!$sftp) {
     logmsg "cannot find $sftpexe\n";
     exit 1;
 }
-logmsg "sftp client found $sftp\n" if($verbose || os_is_win());
+logmsg "sftp client found $sftp\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
@@ -314,7 +314,7 @@ if(!$sshkeygen) {
     logmsg "cannot find $sshkeygenexe\n";
     exit 1;
 }
-logmsg "ssh keygen found $sshkeygen\n" if($verbose || os_is_win());
+logmsg "ssh keygen found $sshkeygen\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
@@ -337,7 +337,7 @@ if(!$sshid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-logmsg "ssh client found $ssh is $sshverstr ($sshvernum)\n" if($verbose || os_is_win());
+logmsg "ssh client found $ssh is $sshverstr ($sshvernum)\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
