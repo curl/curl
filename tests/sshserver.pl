@@ -409,6 +409,8 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
         exit 1;
     }
     # Make sure that permissions are restricted so openssh doesn't complain
+    system "chmod 600 " . pp($hstprvkeyf);
+    system "chmod 600 " . pp($cliprvkeyf);
     if(pathhelp::os_is_win()) {
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
@@ -416,8 +418,6 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
       system("icacls \"" . pp($hstprvkeyf) . "\" /grant:r \"$username:(R)\"");
       system("icacls \"" . pp($hstprvkeyf) . "\" /inheritance:r");
     }
-    system "chmod 600 " . pp($hstprvkeyf);
-    system "chmod 600 " . pp($cliprvkeyf);
     # Save md5 and sha256 hashes of public host key
     open(my $rsakeyfile, "<", pp($hstpubkeyf));
     my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
