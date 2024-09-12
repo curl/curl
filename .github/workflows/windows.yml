@@ -401,24 +401,7 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSCON=defterm
-          export MSYS2_PATH_TYPE=inherit
-          echo "MSYS: |${MSYS}|"
-          echo "MSYSTEM: |${MSYSTEM}|"
-          echo "MSYSCON: |${MSYSCON}|"
-          echo "USER: |${USER}|"
-          echo "USERNAME: |${USERNAME}|"
-          OPATH="${PATH}"
-          PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin"
-          echo '======== after PATH ========'
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
-          echo '======== before PATH ========'
-          PATH="$PWD/bld/lib:/c/Program Files (x86)/stunnel/bin:$OPATH"
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   linux-cross-mingw-w64:
