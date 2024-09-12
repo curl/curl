@@ -2579,6 +2579,13 @@ sub startservers {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
             }
+            if($run{'https'} &&
+               !responsive_http_server("https", $verbose, 0,
+                                       protoport('https'))) {
+               if(stopserver('https')) {
+                   return ("failed stopping unresponsive HTTPS server", 3);
+               }
+            }
             if($run{'http'} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
