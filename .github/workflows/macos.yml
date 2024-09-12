@@ -132,6 +132,11 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
             macos-version-min: '10.9'
+          - name: 'OpenSSL event-based'
+            compiler: clang
+            configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
+            macos-version-min: '10.9'
+            tflags: -e
           - name: 'OpenSSL torture !FTP'
             compiler: clang
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
