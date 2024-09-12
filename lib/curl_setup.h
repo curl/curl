@@ -208,6 +208,11 @@
 /*  please, do it beyond the point further indicated in this file.  */
 /* ================================================================ */
 
+/* Give calloc a chance to be dragging in early, so we do not redefine */
+#if defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)
+#  include <pthread.h>
+#endif
+
 /*
  * Disable other protocols when http is the only one desired.
  */
