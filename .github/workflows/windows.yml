@@ -528,7 +528,6 @@ jobs:
             -DENABLE_WEBSOCKETS=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
-            "-DPERL_EXECUTABLE=$(cygpath -w /usr/bin/perl)" \
             ${{ matrix.config }}
 
       - name: 'cmake configure log'
@@ -571,23 +570,5 @@ jobs:
           fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSCON=defterm
-          export MSYS2_PATH_TYPE=inherit
-          echo "MSYS: |${MSYS}|"
-          echo "MSYSTEM: |${MSYSTEM}|"
-          echo "MSYSCON: |${MSYSCON}|"
-          echo "USER: |${USER}|"
-          echo "USERNAME: |${USERNAME}|"
-          export MSYS=''  # TESTING
-          OPATH="${PATH}"
-          PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          echo '======== after PATH ========'
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
-          echo '======== before PATH ========'
-          PATH="$PWD/bld/lib:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$OPATH"
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
