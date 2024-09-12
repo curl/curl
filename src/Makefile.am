@@ -140,7 +140,7 @@ CLEANFILES += $(CA_EMBED_CSOURCE)
 if CURL_CA_EMBED_SET
 AM_CPPFLAGS += -DCURL_CA_EMBED
 MK_FILE_EMBED = $(top_srcdir)/src/mk-file-embed.pl
-$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED)
+$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED) $(CURL_CA_EMBED)
 	$(PERL) $(MK_FILE_EMBED) --var curl_ca_embed < $(CURL_CA_EMBED) > $(CA_EMBED_CSOURCE)
 else
 $(CA_EMBED_CSOURCE):
@@ -174,3 +174,6 @@ if HAVE_WINDRES
 .rc.o:
 	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
 endif
+
+dist-hook:
+	rm -f $(distdir)/$(CA_EMBED_CSOURCE)

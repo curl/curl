@@ -1360,7 +1360,7 @@ AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle]),
 
   CURL_CA_EMBED=''
   if test "x$want_ca_embed" != "xno" -a "x$want_ca_embed" != "xunset" -a -f "$want_ca_embed"; then
-    CURL_CA_EMBED='"'$want_ca_embed'"'
+    CURL_CA_EMBED="$want_ca_embed"
     AC_SUBST(CURL_CA_EMBED)
     AC_MSG_RESULT([$want_ca_embed])
   else
