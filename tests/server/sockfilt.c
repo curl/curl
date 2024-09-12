@@ -149,7 +149,7 @@ enum sockmode {
   ACTIVE_DISCONNECT  /* as a client, disconnected from server */
 };
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /*
  * read-wrapper to support reading from stdin on Windows.
  */
@@ -426,7 +426,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 }
 
 
-#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_APP)
+#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
 /*
  * Winsock select() does not support standard file descriptors,
  * it can only check SOCKETs. The following function is an attempt

@@ -346,7 +346,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   DWORD length)
 {
   DWORD actual_length = 0;
-#if defined(CURL_WINDOWS_APP)
+#if defined(CURL_WINDOWS_UWP)
   (void)data;
   (void)cert_context;
   (void)host_names;

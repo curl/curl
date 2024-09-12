@@ -2732,7 +2732,7 @@ static void schannel_checksum(const unsigned char *input,
                               DWORD provType,
                               const unsigned int algId)
 {
-#ifdef CURL_WINDOWS_APP
+#ifdef CURL_WINDOWS_UWP
   (void)input;
   (void)inputlen;
   (void)provType;
@@ -2952,7 +2952,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
 #ifdef HAS_MANUAL_VERIFY_API
   SSLSUPP_CAINFO_BLOB |
 #endif
-#ifndef CURL_WINDOWS_APP
+#ifndef CURL_WINDOWS_UWP
   SSLSUPP_PINNEDPUBKEY |
 #endif
   SSLSUPP_TLS13_CIPHERSUITES |

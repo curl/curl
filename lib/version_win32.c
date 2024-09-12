@@ -79,7 +79,7 @@ bool curlx_verify_windows_version(const unsigned int majorVersion,
 {
   bool matched = FALSE;
 
-#if defined(CURL_WINDOWS_APP)
+#if defined(CURL_WINDOWS_UWP)
   /* We have no way to determine the Windows version from Windows apps,
      so let's assume we are running on the target Windows version. */
   const WORD fullVersion = MAKEWORD(minorVersion, majorVersion);

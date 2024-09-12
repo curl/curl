@@ -53,7 +53,7 @@
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
 
 curl_thread_t Curl_thread_create(
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
                                  DWORD
 #else
                                  unsigned int

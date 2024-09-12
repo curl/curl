@@ -497,7 +497,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 #ifdef _WIN32_WCE
 static DWORD thread_main_id = 0;
 #else
@@ -587,7 +587,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -754,7 +754,7 @@ void install_signal_handlers(bool keep_sigalrm)
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 
-#ifndef CURL_WINDOWS_APP
+#ifndef CURL_WINDOWS_UWP
   {
 #ifdef _WIN32_WCE
     typedef HANDLE curl_win_thread_handle_t;
@@ -809,7 +809,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#ifndef CURL_WINDOWS_APP
+#ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
