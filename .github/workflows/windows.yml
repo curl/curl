@@ -639,6 +639,7 @@ jobs:
           echo "MSYSCON: |${MSYSCON}|"
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
+          export MSYS=''  # TESTING
           OPATH="${PATH}"
           PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           echo '======== after PATH ========'
