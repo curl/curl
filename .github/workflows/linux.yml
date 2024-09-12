@@ -114,6 +114,23 @@ jobs:
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
             singleuse: --unit
 
+          - name: openssl default
+            install_steps: pytest
+            configure: --with-openssl --enable-debug
+            singleuse: --unit
+
+          - name: openssl sync resolver
+            install_steps: pytest
+            configure: --with-openssl --enable-debug --disable-threaded-resolver
+            singleuse: --unit
+
+          - name: openssl torture
+            install_packages: libnghttp2-dev
+            install_steps: pytest
+            configure: --with-openssl --enable-debug --disable-threaded-resolver --disable-shared
+            tflags: '-n -t --shallow=25 !FTP'
+            singleuse: --unit
+
           - name: openssl3 libssh2 valgrind
             install_packages: zlib1g-dev libssh2-1-dev valgrind
             install_steps: gcc-11 openssl3 pytest

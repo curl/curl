@@ -59,53 +59,6 @@ variables:
 stages:
 
   ##########################################
-  ### Linux jobs first
-  ##########################################
-
-  - stage: linux
-    dependsOn: []
-    jobs:
-      - job: ubuntu
-        # define defaults to make sure variables are always expanded/replaced
-        variables:
-          install: ''
-          configure: ''
-          tests: '!433'
-        timeoutInMinutes: 60
-        pool:
-          vmImage: 'ubuntu-latest'
-        strategy:
-          matrix:
-            default:
-              name: default
-              install:
-              configure: --enable-debug --with-openssl
-            disable_threadres:
-              name: sync resolver
-              configure: --disable-threaded-resolver --with-openssl
-            torture:
-              name: torture
-              install: libnghttp2-dev
-              configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl
-              tests: -n -t --shallow=25 !FTP
-        steps:
-          - script: sudo apt-get update && sudo apt-get install -y stunnel4 python3-impacket libzstd-dev libbrotli-dev libpsl-dev $(install)
-            displayName: 'apt install'
-            retryCountOnTaskFailure: 3
-
-          - script: autoreconf -fi && ./configure --disable-dependency-tracking --enable-warnings --enable-werror $(configure)
-            displayName: 'configure $(name)'
-
-          - script: make V=1 && make V=1 examples && cd tests && make V=1
-            displayName: 'compile'
-
-          - script: make V=1 test-ci
-            displayName: 'test'
-            env:
-              AZURE_ACCESS_TOKEN: "$(System.AccessToken)"
-              TFLAGS: "-j0 -ac /usr/bin/curl -r $(tests)"
-
-  ##########################################
   ### Windows jobs below
   ##########################################
 
