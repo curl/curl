@@ -4,15 +4,26 @@ curl and libcurl 8.10.1
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3239
+ Contributors:                 3243
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
- o runtests: accecpt 'quictls' as OpenSSL compatible [2]
+ o autotools: fix `--with-ca-embed` build rule [3]
+ o cmake: ensure `CURL_USE_OPENSSL`/`USE_OPENSSL_QUIC` are set in sync [8]
+ o CURLMOPT_TIMERFUNCTION.m: emphasize that only a single timer should run [5]
+ o http2: when uploading data from stdin, fix eos forwarding [7]
+ o lib: fix AF_INET6 use outside of USE_IPV6 [13]
  o libcurl-docs: CURLINFO_LOCAL_* work for QUIC as well as TCP [1]
+ o multi: check that the multi handle is valid in curl_multi_assign [14]
+ o QUIC: on connect, keep on trying on draining server [11]
+ o runtests: accecpt 'quictls' as OpenSSL compatible [2]
+ o rustls: fixed minor logic bug in default cipher selection [12]
+ o setopt: remove superfluous use of ternary expressions [4]
+ o test537: cap the rlimit max this test runs [10]
+ o vtls: fix `Curl_ssl_conn_config_match` doc param [6]
 
 This release includes the following known bugs:
 
@@ -32,10 +43,23 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg
-  (1 contributors)
+  Carlo Cabrera, Daniel McCarney, Daniel Stenberg, Gabriel Marin,
+  Harry Sintonen, Jan Venekamp, nekopsykose on github, rampageX on github,
+  Stefan Eissing, Viktor Szakats
+  (10 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=14852
  [2] = https://curl.se/bug/?i=14850
+ [3] = https://curl.se/bug/?i=14879
+ [4] = https://curl.se/bug/?i=14884
+ [5] = https://curl.se/bug/?i=14886
+ [6] = https://curl.se/bug/?i=14887
+ [7] = https://curl.se/bug/?i=14870
+ [8] = https://curl.se/bug/?i=14872
+ [10] = https://curl.se/bug/?i=14857
+ [11] = https://curl.se/bug/?i=14863
+ [12] = https://curl.se/bug/?i=14840
+ [13] = https://curl.se/bug/?i=14858
+ [14] = https://curl.se/bug/?i=14860
