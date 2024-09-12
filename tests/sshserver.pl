@@ -580,7 +580,9 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 }
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
-push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
+if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
+    push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
+}
 push @cfgarr, "HostKey $hstprvkeyf_config";
 if ($sshdid !~ /OpenSSH-Windows/) {
     push @cfgarr, "PidFile $pidfile_config";
@@ -605,7 +607,6 @@ push @cfgarr, 'HostbasedAuthentication no';
 push @cfgarr, 'HostbasedUsesNameFromPacketOnly no';
 push @cfgarr, 'IgnoreRhosts yes';
 push @cfgarr, 'IgnoreUserKnownHosts yes';
-push @cfgarr, 'KeyRegenerationInterval 0';
 push @cfgarr, 'LoginGraceTime 30';
 push @cfgarr, "LogLevel $loglevel";
 push @cfgarr, 'MaxStartups 5';
@@ -615,13 +616,16 @@ push @cfgarr, 'PermitRootLogin no';
 push @cfgarr, 'PrintLastLog no';
 push @cfgarr, 'PrintMotd no';
 push @cfgarr, 'PubkeyAuthentication yes';
-push @cfgarr, 'RhostsRSAAuthentication no';
-push @cfgarr, 'RSAAuthentication no';
-push @cfgarr, 'ServerKeyBits 768';
 push @cfgarr, 'StrictModes no';
 push @cfgarr, "Subsystem sftp \"$sftpsrv_config\"";
 push @cfgarr, 'SyslogFacility AUTH';
-push @cfgarr, 'UseLogin no';
+if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
+    push @cfgarr, 'KeyRegenerationInterval 0';
+    push @cfgarr, 'RhostsRSAAuthentication no';
+    push @cfgarr, 'RSAAuthentication no';
+    push @cfgarr, 'ServerKeyBits 768';
+    push @cfgarr, 'UseLogin no';
+}
 push @cfgarr, 'X11Forwarding no';
 push @cfgarr, '#';
 
