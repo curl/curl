@@ -152,6 +152,8 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          export MSYSTEM=MSYS2
+          export MSYSCON=defterm
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
@@ -246,6 +248,8 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          export MSYSTEM=MSYS2
+          export MSYSCON=defterm
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
@@ -376,6 +380,8 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
+          export MSYSTEM=MSYS2
+          export MSYSCON=defterm
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
@@ -602,6 +608,8 @@ jobs:
           fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
+          export MSYSTEM=MSYS2
+          export MSYSCON=defterm
           echo "USER: |${USER}|"
           echo "USERNAME: |${USERNAME}|"
           OPATH="${PATH}"
