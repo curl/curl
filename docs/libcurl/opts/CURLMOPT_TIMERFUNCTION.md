@@ -42,7 +42,7 @@ that timer fires, call either curl_multi_socket_action(3) or
 curl_multi_perform(3), depending on which interface you use.
 
 If this callback is called when a timer is already running, this new expire
-time *replaces* the former timeout. The application should then effectly
+time *replaces* the former timeout. The application should then effectively
 cancel the old timeout and set a new timeout using this new expire time.
 
 A **timeout_ms** value of -1 passed to this callback means you should delete
