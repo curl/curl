@@ -949,6 +949,7 @@ struct cr_lc_ctx {
   struct bufq buf;
   BIT(read_eos);  /* we read an EOS from the next reader */
   BIT(eos);       /* we have returned an EOS */
+  BIT(prev_cr);   /* the last byte was a CR */
 };
 
 static CURLcode cr_lc_init(struct Curl_easy *data, struct Curl_creader *reader)
@@ -1009,8 +1010,11 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
     for(i = start = 0; i < nread; ++i) {
       /* if this byte is not an LF character, or if the preceeding character
          is a CR (meaning this already is a CRLF pair), go to next */
-      if((buf[i] != '\n') || (i && (buf[i -1] == '\r')))
+      if((buf[i] != '\n') || ctx->prev_cr) {
+        ctx->prev_cr = (buf[i] == '\r');
         continue;
+      }
+      ctx->prev_cr = false;
       /* on a soft limit bufq, we do not need to check length */
       result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
       if(!result)
