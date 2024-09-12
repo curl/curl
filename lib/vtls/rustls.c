@@ -447,10 +447,9 @@ cr_get_selected_ciphers(struct Curl_easy *data,
   if(!ciphers13) {
     /* Add default TLSv1.3 ciphers to selection */
     for(j = 0; j < default_len; j++) {
-      struct rustls_str s;
       entry = rustls_default_crypto_provider_ciphersuites_get(j);
-      s = rustls_supported_ciphersuite_get_name(entry);
-      if(s.len < 5 || strncmp(s.data, "TLS13", 5) != 0)
+      if(rustls_supported_ciphersuite_protocol_version(entry) !=
+        RUSTLS_TLS_VERSION_TLSV1_3)
         continue;
 
       selected[count++] = entry;
@@ -505,10 +504,9 @@ add_ciphers:
   if(!ciphers12) {
     /* Add default TLSv1.2 ciphers to selection */
     for(j = 0; j < default_len; j++) {
-      struct rustls_str s;
       entry = rustls_default_crypto_provider_ciphersuites_get(j);
-      s = rustls_supported_ciphersuite_get_name(entry);
-      if(s.len >= 5 && strncmp(s.data, "TLS13", 5) == 0)
+      if(rustls_supported_ciphersuite_protocol_version(entry) ==
+          RUSTLS_TLS_VERSION_TLSV1_3)
         continue;
 
       /* No duplicates allowed (so selected cannot overflow) */
