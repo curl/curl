@@ -152,7 +152,7 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          PATH="$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          PATH="/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$PATH"
           make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
@@ -234,7 +234,7 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          PATH="$PWD/bld/lib:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
@@ -352,7 +352,7 @@ jobs:
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          PATH="$PWD/bld/lib:/c/Program Files (x86)/stunnel/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   linux-cross-mingw-w64:
@@ -565,5 +565,5 @@ jobs:
           fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-cache-dir install impacket
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          PATH="$PWD/bld/lib:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
