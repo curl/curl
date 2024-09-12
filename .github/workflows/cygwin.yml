@@ -65,10 +65,6 @@ jobs:
           packages: >-
             autoconf libtool gcc-core gcc-g++ binutils
             ${{ matrix.build }} make ninja
-            python3
-            python-pip
-            python-cryptography
-            python-wheel
             openssh
             libssl-devel
             libssh2-devel
@@ -137,7 +133,6 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
@@ -191,7 +186,6 @@ jobs:
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
