@@ -216,15 +216,15 @@ cr_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     rresult = rustls_connection_read(rconn,
-      (uint8_t *)plainbuf + plain_bytes_copied,
-      plainlen - plain_bytes_copied,
-      &n);
+                                     (uint8_t *)plainbuf + plain_bytes_copied,
+                                     plainlen - plain_bytes_copied,
+                                     &n);
     if(rresult == RUSTLS_RESULT_PLAINTEXT_EMPTY) {
       backend->data_in_pending = FALSE;
     }
     else if(rresult == RUSTLS_RESULT_UNEXPECTED_EOF) {
       failf(data, "rustls: peer closed TCP connection "
-        "without first closing TLS connection");
+            "without first closing TLS connection");
       *err = CURLE_RECV_ERROR;
       nread = -1;
       goto out;
@@ -449,7 +449,7 @@ cr_get_selected_ciphers(struct Curl_easy *data,
     for(j = 0; j < default_len; j++) {
       entry = rustls_default_crypto_provider_ciphersuites_get(j);
       if(rustls_supported_ciphersuite_protocol_version(entry) !=
-        RUSTLS_TLS_VERSION_TLSV1_3)
+         RUSTLS_TLS_VERSION_TLSV1_3)
         continue;
 
       selected[count++] = entry;
@@ -606,10 +606,10 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = rustls_crypto_provider_builder_new_from_default(
-                      &custom_provider_builder);
+      &custom_provider_builder);
     if(result != RUSTLS_RESULT_OK) {
       failf(data,
-        "rustls: failed to create crypto provider builder from default");
+            "rustls: failed to create crypto provider builder from default");
       return CURLE_SSL_ENGINE_INITFAILED;
     }
 
@@ -620,9 +620,9 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
         cipher_suites_len);
     if(result != RUSTLS_RESULT_OK) {
       failf(data,
-        "rustls: failed to set ciphersuites for crypto provider builder");
-        rustls_crypto_provider_builder_free(custom_provider_builder);
-        return CURLE_SSL_ENGINE_INITFAILED;
+            "rustls: failed to set ciphersuites for crypto provider builder");
+      rustls_crypto_provider_builder_free(custom_provider_builder);
+      return CURLE_SSL_ENGINE_INITFAILED;
     }
 
     result = rustls_crypto_provider_builder_build(
@@ -634,9 +634,9 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
     }
 
     result = rustls_client_config_builder_new_custom(custom_provider,
-                                                      tls_versions,
-                                                      tls_versions_len,
-                                                      &config_builder);
+                                                     tls_versions,
+                                                     tls_versions_len,
+                                                     &config_builder);
     free(cipher_suites);
     if(result != RUSTLS_RESULT_OK) {
       failf(data, "rustls: failed to create client config");
@@ -1056,6 +1056,16 @@ static size_t cr_version(char *buffer, size_t size)
   return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
+static CURLcode
+cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+{
+  rustls_result rresult = 0;
+  (void)data;
+  rresult =
+    rustls_default_crypto_provider_random(entropy, length);
+  return map_error(rresult);
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
@@ -1070,7 +1080,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_check_cxn,             /* check_cxn */
   cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
-  Curl_weak_random,                /* random */
+  cr_random,                       /* random */
   Curl_none_cert_status_request,   /* cert_status_request */
   cr_connect_blocking,             /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */
