@@ -25,7 +25,7 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-add_custom_command(OUTPUT "${CURL_MANPAGE}"
+add_custom_command(OUTPUT "${CURL_MANPAGE}" "${CURL_ASCIIPAGE}"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" mainpage ${DPAGES} > "${CURL_MANPAGE}"
   COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" ascii ${DPAGES} > "${CURL_ASCIIPAGE}"
