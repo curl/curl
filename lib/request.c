@@ -327,16 +327,14 @@ static CURLcode req_flush(struct Curl_easy *data)
     if(data->req.shutdown) {
       bool done;
       result = Curl_xfer_send_shutdown(data, &done);
-      if(result == CURLE_OPERATION_TIMEDOUT) {
-        /* Most likely, the server is not shutting down its side properly.
-         * Since we send all upload data properly, it is the server's
-         * burden to react to a shutdown failure. */
-         infof(data, "Shutdown send direction timed out. Broken server? "
-               "Proceeding as if everything is ok.");
-         result = CURLE_OK;
-         done = TRUE;
+      if(result && data->req.shutdown_err_ignore) {
+        infof(data, "Shutdown send direction error: %d. Broken server? "
+              "Proceeding as if everything is ok.", result);
+        result = CURLE_OK;
+        done = TRUE;
       }
-      else if(result)
+
+      if(result)
         return result;
       if(!done)
         return CURLE_AGAIN;
