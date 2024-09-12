@@ -413,7 +413,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
       system("icacls \"" . pp($hstprvkeyf) . "\" /reset");
-      system("icacls \"" . pp($hstprvkeyf) . "\" /grant:r \"$ENV{USERNAME}:(R)\"");
+      system("icacls \"" . pp($hstprvkeyf) . "\" /grant:r \"$username:(R)\"");
       system("icacls \"" . pp($hstprvkeyf) . "\" /inheritance:r");
     }
     system "chmod 600 " . pp($hstprvkeyf);
