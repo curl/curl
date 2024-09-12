@@ -30,18 +30,14 @@ if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
     OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#ifndef HAVE_LIBZ" >> "tool_hugehelp.c"
-    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
-      < "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt" >> "tool_hugehelp.c"
-
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"    < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#else" >> "tool_hugehelp.c"
-    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c
-      < "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt" >> "tool_hugehelp.c"
+    COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl" -c < "${CURL_ASCIIPAGE}" >> "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#endif /* HAVE_LIBZ */" >> "tool_hugehelp.c"
     DEPENDS
-      "generate-curl.1"
-      "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.1"
       "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
+      "${CURL_ASCIIPAGE}"
     VERBATIM)
 else()
   add_custom_command(
@@ -64,8 +60,8 @@ if(CURL_CA_EMBED_SET)
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
         < "${CURL_CA_EMBED}" > "tool_ca_embed.c"
       DEPENDS
-        "${CURL_CA_EMBED}"
         "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl"
+        "${CURL_CA_EMBED}"
       VERBATIM)
     list(APPEND CURL_CFILES "tool_ca_embed.c")
   else()
