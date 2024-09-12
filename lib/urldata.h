@@ -108,7 +108,7 @@ typedef unsigned int curl_prot_t;
 #if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
 /* do FTP line-end CRLF => LF conversions on platforms that prefer LF-only. It
    also means: keep CRLF line endings on the CRLF platforms */
-#define CURL_DO_LINEEND_CONV
+#define CURL_PREFER_LF_LINEENDS
 #endif
 
 /* Convenience defines for checking protocols or their SSL based version. Each

@@ -327,7 +327,7 @@ static void freedirs(struct ftp_conn *ftpc)
   Curl_safefree(ftpc->newhost);
 }
 
-#ifdef CURL_DO_LINEEND_CONV
+#ifdef CURL_PREFER_LF_LINEENDS
 /***********************************************************************
  *
  * Lineend Conversions
@@ -416,7 +416,7 @@ static const struct Curl_cwtype ftp_cw_lc = {
   sizeof(struct ftp_cw_lc_ctx)
 };
 
-#endif /* CURL_DO_LINEEND_CONV */
+#endif /* CURL_PREFER_LF_LINEENDS */
 /***********************************************************************
  *
  * AcceptServerConnect()
@@ -4144,7 +4144,7 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
   *done = FALSE; /* default to false */
   ftpc->wait_data_conn = FALSE; /* default to no such wait */
 
-#ifdef CURL_DO_LINEEND_CONV
+#ifdef CURL_PREFER_LF_LINEENDS
   {
     /* FTP data may need conversion. */
     struct Curl_cwriter *ftp_lc_writer;
@@ -4160,7 +4160,7 @@ static CURLcode ftp_do(struct Curl_easy *data, bool *done)
       return result;
     }
   }
-#endif /* CURL_DO_LINEEND_CONV */
+#endif /* CURL_PREFER_LF_LINEENDS */
 
   if(data->state.wildcardmatch) {
     result = wc_statemach(data);
