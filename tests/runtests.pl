@@ -1497,6 +1497,11 @@ sub singletest_check {
         if($hash{'crlf'}) {
             subnewlines(1, \$_) for @upload;
         }
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the upload data
+            chomp($upload[-1]);
+        }
 
         $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload);
         if ($res) {

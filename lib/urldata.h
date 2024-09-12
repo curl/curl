@@ -105,6 +105,12 @@ typedef unsigned int curl_prot_t;
 #define CURL_DEFAULT_USER "anonymous"
 #define CURL_DEFAULT_PASSWORD "ftp@example.com"
 
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__EMX__)
+/* do FTP line-end CRLF => LF conversions on platforms that prefer LF-only. It
+   also means: keep CRLF line endings on the CRLF platforms */
+#define CURL_PREFER_LF_LINEENDS
+#endif
+
 /* Convenience defines for checking protocols or their SSL based version. Each
    protocol handler should only ever have a single CURLPROTO_ in its protocol
    field. */

@@ -16,8 +16,8 @@ ftp
 <name>
 FTP PASV upload ASCII file already using CRLF
 </name>
-<file name="%LOGDIR/test%TESTNUMBER.txt" crlf="yes">
-%repeat[1750 x a line of text used for verifying this !%0a]%
+<file name="%LOGDIR/test%TESTNUMBER.txt" nonewline="yes">
+%repeat[1750 x a line of text used for verifying this !%0d%0a]%
 </file>
 <command>
 "ftp://%HOSTIP:%FTPPORT/%TESTNUMBER;type=a" -T %LOGDIR/test%TESTNUMBER.txt
@@ -29,7 +29,7 @@ FTP PASV upload ASCII file already using CRLF
 <strip>
 QUIT
 </strip>
-<upload crlf="yes">
+<upload crlf="yes" nonewline="yes">
 %repeat[1750 x a line of text used for verifying this !%0a]%
 </upload>
 <protocol>
