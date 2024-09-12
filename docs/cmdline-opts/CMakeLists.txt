@@ -21,9 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(MANPAGE "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.1")
-set(ASCIIPAGE "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt")
-
 # Get 'DPAGES' variable
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
