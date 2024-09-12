@@ -34,18 +34,3 @@ See the [rustls-ffi README] for more information on cryptography providers and
 their build/platform requirements.
 
 [rustls-ffi README]: https://github.com/rustls/rustls-ffi/blob/main/README.md#cryptography-provide
-
-## Randomness
-
-Every TLS libcurl curl supports - *except* Rustls - provides a function for
-curl to extract cryptographically safe random numbers with.
-
-When you build curl with Rustls, curl uses its own internal attempts to get a
-decent random value:
-
-1. Windows specific APIs
-2. arc4random
-
-If neither of those are present, then curl using Rustls falls back to **weak
-pseudo-random values**, and thus weakening several curl authentication
-implementations.

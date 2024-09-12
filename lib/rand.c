@@ -100,9 +100,9 @@ CURLcode Curl_win32_random(unsigned char *entropy, size_t length)
 }
 #endif
 
-#if !defined(USE_SSL) || defined(USE_RUSTLS)
+#if !defined(USE_SSL)
 /* ---- possibly non-cryptographic version following ---- */
-CURLcode Curl_weak_random(struct Curl_easy *data,
+static CURLcode weak_random(struct Curl_easy *data,
                           unsigned char *entropy,
                           size_t length) /* always 4, size of int */
 {
@@ -151,7 +151,7 @@ CURLcode Curl_weak_random(struct Curl_easy *data,
 #ifdef USE_SSL
 #define _random(x,y,z) Curl_ssl_random(x,y,z)
 #else
-#define _random(x,y,z) Curl_weak_random(x,y,z)
+#define _random(x,y,z) weak_random(x,y,z)
 #endif
 
 static CURLcode randit(struct Curl_easy *data, unsigned int *rnd,

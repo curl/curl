@@ -1056,6 +1056,16 @@ static size_t cr_version(char *buffer, size_t size)
   return msnprintf(buffer, size, "%.*s", (int)ver.len, ver.data);
 }
 
+static CURLcode
+cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
+{
+  rustls_result rresult = 0;
+  (void)data;
+  rresult =
+    rustls_default_crypto_provider_random(entropy, length);
+  return map_error(rresult);
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
@@ -1070,7 +1080,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   Curl_none_check_cxn,             /* check_cxn */
   cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
-  Curl_weak_random,                /* random */
+  cr_random,                       /* random */
   Curl_none_cert_status_request,   /* cert_status_request */
   cr_connect_blocking,             /* connect */
   cr_connect_nonblocking,          /* connect_nonblocking */

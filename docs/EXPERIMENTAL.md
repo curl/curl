@@ -56,7 +56,6 @@ Graduation requirements:
 Graduation requirements:
 
 - a reasonable expectation of a stable API going forward.
-- a sufficient approach to avoid using weak random numbers
 
 ### WebSocket
 
