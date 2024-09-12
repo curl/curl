@@ -216,7 +216,7 @@ static CURLcode xfer_send(struct Curl_easy *data,
   result = Curl_xfer_send(data, buf, blen, eos, pnwritten);
   if(!result) {
     if(eos && (blen == *pnwritten))
-      data->req.eos_written = TRUE;
+      data->req.eos_sent = TRUE;
     if(*pnwritten) {
       if(hds_len)
         Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
@@ -308,16 +308,16 @@ static CURLcode req_flush(struct Curl_easy *data)
     return Curl_xfer_flush(data);
   }
 
-  if(data->req.eos_read && !data->req.eos_written) {
+  if(data->req.eos_read && !data->req.eos_sent) {
     char tmp;
     size_t nwritten;
     result = xfer_send(data, &tmp, 0, 0, &nwritten);
     if(result)
       return result;
-    DEBUGASSERT(data->req.eos_written);
+    DEBUGASSERT(data->req.eos_sent);
   }
 
-  if(!data->req.upload_done && data->req.eos_read && data->req.eos_written) {
+  if(!data->req.upload_done && data->req.eos_read && data->req.eos_sent) {
     DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
     if(data->req.shutdown) {
       bool done;
