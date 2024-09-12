@@ -851,7 +851,8 @@ sub checksystemfeatures {
             "* Disabled: $dis\n",
             "* Host: $hostname\n",
             "* System: $hosttype\n",
-            "* OS: $hostos\n");
+            "* OS: $hostos\n",
+            "* Perl: $^V ($^X)\n");
 
     if($jobs) {
         # Only show if not the default for now
