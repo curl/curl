@@ -60,9 +60,22 @@ jobs:
       - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
           platform: ${{ matrix.platform }}
-          # https://cygwin.com/cgi-bin2/package-grep.cgi
-          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make ninja python3 openssh libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
           site: https://mirrors.kernel.org/sourceware/cygwin/
+          # https://cygwin.com/cgi-bin2/package-grep.cgi
+          packages: >-
+            autoconf libtool gcc-core gcc-g++ binutils
+            ${{ matrix.build }} make ninja
+            python3
+            python-pip
+            python-cryptography
+            python-wheel
+            openssh
+            libssl-devel
+            libssh2-devel
+            libpsl-devel
+            zlib-devel
+            libbrotli-devel
+            libnghttp2-devel
 
       - name: 'autotools autoreconf'
         if: ${{ matrix.build == 'automake' }}
