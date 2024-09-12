@@ -506,8 +506,9 @@ if(WIN32 OR CURL_USE_SECTRANSP OR CURL_USE_SCHANNEL OR CURL_USE_MBEDTLS OR CURL_
 endif()
 cmake_dependent_option(CURL_USE_OPENSSL "Enable OpenSSL for SSL/TLS" ${_openssl_default} CURL_ENABLE_SSL OFF)
 option(USE_OPENSSL_QUIC "Use OpenSSL and nghttp3 libraries for HTTP/3 support" OFF)
-if(NOT CURL_USE_OPENSSL AND USE_OPENSSL_QUIC)
-  set(CURL_USE_OPENSSL ON)
+if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
+  message(WARNING "OpenSSL QUIC has been requested without enabling OpenSSL. Disabling.")
+  set(USE_OPENSSL_QUIC OFF)
 endif()
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
