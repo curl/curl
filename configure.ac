@@ -573,6 +573,14 @@ case $host_os in
     ;;
 esac
 
+# In order to detect support of sendmmsg(), we need to escape the POSIX
+# jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
+case $host_os in
+  linux*)
+    CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+    ;;
+esac
+
 dnl Build unit tests when option --enable-debug is given.
 if test "x$want_debug" = "xyes" &&
    test "x$supports_unittests" = "xyes"; then
@@ -4102,6 +4110,7 @@ AC_CHECK_FUNCS([\
   pipe \
   sched_yield \
   sendmsg \
+  sendmmsg \
   setlocale \
   setmode \
   setrlimit \

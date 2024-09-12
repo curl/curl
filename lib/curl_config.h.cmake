@@ -463,6 +463,9 @@
 /* Define to 1 if you have the sendmsg function. */
 #cmakedefine HAVE_SENDMSG 1
 
+/* Define to 1 if you have the sendmmsg function. */
+#cmakedefine HAVE_SENDMMSG 1
+
 /* Define to 1 if you have the 'fsetxattr' function. */
 #cmakedefine HAVE_FSETXATTR 1
 
