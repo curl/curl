@@ -35,7 +35,7 @@ add_custom_command(OUTPUT "${CURL_MANPAGE}"
   VERBATIM
 )
 
-add_custom_target("generate-curl.1" ALL DEPENDS "${CURL_MANPAGE}")
+add_custom_target(generate-curl.1 ALL DEPENDS "${CURL_MANPAGE}")
 
 if(NOT CURL_DISABLE_INSTALL)
   install(FILES "${CURL_MANPAGE}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
