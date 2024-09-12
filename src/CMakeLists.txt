@@ -40,7 +40,7 @@ if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
       "generate-curl.1"
       "${CMAKE_CURRENT_SOURCE_DIR}/mkhelp.pl"
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
-      "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.1"
+      "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt"
     VERBATIM)
 else()
   add_custom_command(
