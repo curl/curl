@@ -1005,9 +1005,11 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
       goto out;
     }
 
-    /* at least one \n needs conversion to '\r\n', place into ctx->buf */
+    /* at least one \n might need conversion to '\r\n', place into ctx->buf */
     for(i = start = 0; i < nread; ++i) {
-      if(buf[i] != '\n')
+      /* if this byte is not an LF character, or if the preceeding character
+         is a CR (meaning this already is a CRLF pair), go to next */
+      if((buf[i] != '\n') || (i && (buf[i -1] == '\r')))
         continue;
       /* on a soft limit bufq, we do not need to check length */
       result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
