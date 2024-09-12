@@ -23,7 +23,7 @@ CURLMOPT_TIMERFUNCTION - callback to receive timeout values
 
 int timer_callback(CURLM *multi,    /* multi handle */
                    long timeout_ms, /* timeout in number of ms */
-                   void *clientp);    /* private callback pointer */
+                   void *clientp);  /* private callback pointer */
 
 CURLMcode curl_multi_setopt(CURLM *handle, CURLMOPT_TIMERFUNCTION, timer_callback);
 ~~~
