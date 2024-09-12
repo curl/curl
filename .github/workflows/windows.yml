@@ -376,7 +376,7 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off impacket
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           export MSYSTEM=MSYS2
           export MSYSCON=defterm
           echo "USER: |${USER}|"
@@ -604,7 +604,7 @@ jobs:
             /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off impacket
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
           export MSYSTEM=MSYS2
           export MSYSCON=defterm
           echo "USER: |${USER}|"
