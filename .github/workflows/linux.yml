@@ -119,9 +119,10 @@ jobs:
             configure: --with-openssl --enable-debug
             singleuse: --unit
 
-          - name: openssl sync resolver
+          - name: openssl libssh2 sync-resolver
+            install_packages: zlib1g-dev libssh2-1-dev
             install_steps: pytest
-            configure: --with-openssl --enable-debug --disable-threaded-resolver
+            configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
             singleuse: --unit
 
           - name: openssl torture
@@ -131,10 +132,10 @@ jobs:
             tflags: '-n -t --shallow=25 !FTP'
             singleuse: --unit
 
-          - name: openssl3 libssh2 valgrind
-            install_packages: zlib1g-dev libssh2-1-dev valgrind
+          - name: openssl3 valgrind
+            install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3 pytest
-            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-libssh2 --enable-debug --enable-websockets
+            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
           - name: openssl3-O3 valgrind
