@@ -253,7 +253,7 @@ if(!$sshdid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose || pathhelp::os_is_win());
+logmsg "ssh server found $sshd is $sshdverstr ($sshdvernum, $sshdid)\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
@@ -337,7 +337,7 @@ if(!$sshid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-logmsg "ssh client found $ssh is $sshverstr ($sshvernum)\n" if($verbose || pathhelp::os_is_win());
+logmsg "ssh client found $ssh is $sshverstr ($sshvernum, $sshid)\n" if($verbose || pathhelp::os_is_win());
 
 
 #***************************************************************************
