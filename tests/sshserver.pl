@@ -89,7 +89,7 @@ use pathhelp;
 
 #***************************************************************************
 
-my $verbose = 0;              # set to 1 for debugging
+my $verbose = 1;              # set to 1 for debugging
 my $debugprotocol = 0;        # set to 1 for protocol debugging
 my $port = 8999;              # our default SCP/SFTP server port
 my $listenaddr = '127.0.0.1'; # default address on which to listen
@@ -337,7 +337,7 @@ if(!$sshid) {
     logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
+logmsg "ssh client found $ssh is $sshverstr ($sshvernum)\n" if($verbose);
 
 
 #***************************************************************************
