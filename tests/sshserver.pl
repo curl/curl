@@ -480,7 +480,7 @@ my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 #  AllowTcpForwarding               : OpenSSH 2.3.0 and later
 #  AllowUsers                       : OpenSSH 1.2.1 and later
 #  AuthorizedKeysFile               : OpenSSH 2.9.9 and later
-#  AuthorizedKeysFile2              : OpenSSH 2.9.9 and later
+#  AuthorizedKeysFile2              : OpenSSH 2.9.9 till 5.9
 #  Banner                           : OpenSSH 2.5.0 and later
 #  ChallengeResponseAuthentication  : OpenSSH 2.5.0 and later
 #  Ciphers                          : OpenSSH 2.1.0 and later [3]
@@ -508,7 +508,7 @@ my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 #  KerberosOrLocalPasswd            : OpenSSH 1.2.1 and later [1]
 #  KerberosTgtPassing               : OpenSSH 1.2.1 and later [1]
 #  KerberosTicketCleanup            : OpenSSH 1.2.1 and later [1]
-#  KeyRegenerationInterval          : OpenSSH 1.2.1 and later
+#  KeyRegenerationInterval          : OpenSSH 1.2.1 till 7.3
 #  ListenAddress                    : OpenSSH 1.2.1 and later
 #  LoginGraceTime                   : OpenSSH 1.2.1 and later
 #  LogLevel                         : OpenSSH 1.2.1 and later
@@ -531,16 +531,16 @@ my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 #  Protocol                         : OpenSSH 2.1.0 and later
 #  PubkeyAuthentication             : OpenSSH 2.5.0 and later
 #  RhostsAuthentication             : OpenSSH 1.2.1 and later
-#  RhostsRSAAuthentication          : OpenSSH 1.2.1 and later
-#  RSAAuthentication                : OpenSSH 1.2.1 and later
-#  ServerKeyBits                    : OpenSSH 1.2.1 and later
+#  RhostsRSAAuthentication          : OpenSSH 1.2.1 till 7.3
+#  RSAAuthentication                : OpenSSH 1.2.1 till 7.3
+#  ServerKeyBits                    : OpenSSH 1.2.1 till 7.3
 #  SkeyAuthentication               : OpenSSH 1.2.1 and later [1]
 #  StrictModes                      : OpenSSH 1.2.1 and later
 #  Subsystem                        : OpenSSH 2.2.0 and later
 #  SyslogFacility                   : OpenSSH 1.2.1 and later
 #  TCPKeepAlive                     : OpenSSH 3.8.0 and later
 #  UseDNS                           : OpenSSH 3.7.0 and later
-#  UseLogin                         : OpenSSH 1.2.1 and later
+#  UseLogin                         : OpenSSH 1.2.1 till 7.3
 #  UsePAM                           : OpenSSH 3.7.0 and later [1][2]
 #  UsePrivilegeSeparation           : OpenSSH 3.2.2 and later
 #  VerifyReverseMapping             : OpenSSH 3.1.0 and later
