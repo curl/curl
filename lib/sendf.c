@@ -1101,7 +1101,11 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
   clen = r->crt->total_length(data, r);
   /* if we do not have 0 length init, and crlf conversion is wanted,
    * add the reader for it */
-  if(clen && (data->set.crlf || data->state.prefer_ascii)) {
+  if(clen && (data->set.crlf
+#ifdef CURL_DO_LINEEND_CONV
+     || data->state.prefer_ascii
+#endif
+    )) {
     result = cr_lc_add(data);
     if(result)
       return result;
