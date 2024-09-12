@@ -74,8 +74,6 @@ jobs:
           install: >-
             gcc
             ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
-            python-pip
-            python-wheel
             openssl-devel
             zlib-devel
             brotli-devel
@@ -90,10 +88,6 @@ jobs:
           install: >-
             mingw-w64-${{ matrix.env }}-cc
             mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
-            mingw-w64-${{ matrix.env }}-python-pip
-            mingw-w64-${{ matrix.env }}-python-wheel
-            mingw-w64-${{ matrix.env }}-python-cryptography
-            mingw-w64-${{ matrix.env }}-python-pyopenssl
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
@@ -163,26 +157,7 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          python -m venv _venv
-          _venv/bin/python -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSCON=defterm
-          export MSYS2_PATH_TYPE=inherit
-          echo "MSYS: |${MSYS}|"
-          echo "MSYSTEM: |${MSYSTEM}|"
-          echo "MSYSCON: |${MSYSCON}|"
-          echo "USER: |${USER}|"
-          echo "USERNAME: |${USERNAME}|"
-          OPATH="$PWD/_venv/bin:${PATH}"
-          PATH="$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          echo '======== after PATH ========'
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
-          echo '======== before PATH ========'
-          PATH="/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$OPATH"
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
+          PATH="$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           make -C bld -j5 V=1 test-ci
 
       - name: 'cmake configure'
@@ -264,26 +239,7 @@ jobs:
           fi
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          python -m venv _venv
-          _venv/bin/python -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-          export MSYSCON=defterm
-          export MSYS2_PATH_TYPE=inherit
-          echo "MSYS: |${MSYS}|"
-          echo "MSYSTEM: |${MSYSTEM}|"
-          echo "MSYSCON: |${MSYSCON}|"
-          echo "USER: |${USER}|"
-          echo "USERNAME: |${USERNAME}|"
-          OPATH="$PWD/_venv/bin:${PATH}"
-          PATH="$PWD/bld/lib:$OPATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          echo '======== after PATH ========'
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
-          echo '======== before PATH ========'
-          PATH="$PWD/bld/lib:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64:$OPATH"
-          for exe in stunnel tstunnel sshd ssh sftp-server sftp ssh-keygen gnutls-serv; do
-            echo "${exe}: |$(which "${exe}.exe")|"
-          done
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
   old-mingw-w64:
