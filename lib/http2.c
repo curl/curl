@@ -1679,12 +1679,11 @@ static ssize_t req_body_read_callback(nghttp2_session *session,
   CURL_TRC_CF(data_s, cf, "[%d] req_body_read(len=%zu) eos=%d -> %zd, %d",
               stream_id, length, stream->body_eos, nread, result);
 
-  if(nread == 0)
-    return NGHTTP2_ERR_DEFERRED;
-  if(stream->body_eos && Curl_bufq_is_empty(&stream->sendbuf))
+  if(stream->body_eos && Curl_bufq_is_empty(&stream->sendbuf)) {
     *data_flags = NGHTTP2_DATA_FLAG_EOF;
-
-  return nread;
+    return nread;
+  }
+  return (nread == 0)? NGHTTP2_ERR_DEFERRED : nread;
 }
 
 #if !defined(CURL_DISABLE_VERBOSE_STRINGS)
