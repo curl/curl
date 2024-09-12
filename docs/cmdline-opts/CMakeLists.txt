@@ -32,9 +32,14 @@ add_custom_command(OUTPUT "${MANPAGE}"
   WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
   COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" mainpage ${DPAGES} > "${MANPAGE}"
   COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/managen" ascii ${DPAGES} > "${ASCIIPAGE}"
+  DEPENDS
+    "${PROJECT_SOURCE_DIR}/scripts/managen"
+    ${DPAGES}
   VERBATIM
 )
+
 add_custom_target("generate-curl.1" ALL DEPENDS "${MANPAGE}")
+
 if(NOT CURL_DISABLE_INSTALL)
   install(FILES "${MANPAGE}" DESTINATION "${CMAKE_INSTALL_MANDIR}/man1")
 endif()
