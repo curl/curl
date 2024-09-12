@@ -22,18 +22,10 @@
  *
  ***************************************************************************/
 
-/* WIP, experimental: use recvmmsg() on Linux
- * we have no configure check, yet
- * and also it is only available for _GNU_SOURCE, which
- * we do not use otherwise.
-#define HAVE_SENDMMSG
- */
-#if defined(HAVE_SENDMMSG)
+/* We want sendmmsg/recvmmsg if supported. However we only get those
+ * offered as being 'GNU_SOURCE' so the included headers can leave the POSIX
+ * box. Wish this were different. */
 #define _GNU_SOURCE
-#include <sys/socket.h>
-#undef _GNU_SOURCE
-#endif
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_UDP_H

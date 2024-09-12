@@ -4103,6 +4103,7 @@ AC_CHECK_FUNCS([\
   pipe \
   sched_yield \
   sendmsg \
+  sendmmsg \
   setlocale \
   setmode \
   setrlimit \
