@@ -416,7 +416,6 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
       print("HELLO-HELLO-HELLO2|" . $hstprvkeyf . "|" . pp($hstprvkeyf) . "|\n");
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
-      $ENV{'MSYS2_ARG_CONV_EXCL'} = '*';
       system("icacls \"" . pp($hstprvkeyf) . "\" /reset");
       system("icacls \"" . pp($hstprvkeyf) . "\" /grant:r \"$username:(R)\"");
       system("icacls \"" . pp($hstprvkeyf) . "\" /inheritance:r");
