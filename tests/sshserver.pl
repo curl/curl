@@ -601,7 +601,6 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 } else {
     push @cfgarr, "AllowUsers $username";
 }
-printf "|||" . join('|', @cfgarr[-2..-1]) . "|||\n";
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
