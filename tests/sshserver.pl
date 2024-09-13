@@ -591,10 +591,8 @@ push @cfgarr, '#';
             $username_lc = "$userdomain_lc\\$username_lc";
         }
         $username_lc =~ s/ /\?/g; # replace space with ?
-        push @cfgarr, "DenyUsers !$username_lc";
         push @cfgarr, "AllowUsers $username_lc";
     } else {
-        push @cfgarr, "DenyUsers !$username";
         push @cfgarr, "AllowUsers $username";
     }
     printf "|||" . join('|', @cfgarr[-2..-1]) . "|||\n";
