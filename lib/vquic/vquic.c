@@ -22,10 +22,6 @@
  *
  ***************************************************************************/
 
-/* We want sendmmsg/recvmmsg if supported. However we only get those
- * offered as being 'GNU_SOURCE' so the included headers can leave the POSIX
- * box. Wish this were different. */
-#define _GNU_SOURCE
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_UDP_H
