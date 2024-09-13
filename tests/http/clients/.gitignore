@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: curl
 
 h2-serverpush
-h2-download
+hx-download
 ws-data
 ws-pingpong
 h2-upgrade-extreme
