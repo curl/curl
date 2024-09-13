@@ -679,4 +679,3 @@ class TestUpload:
                                                     tofile=dfile,
                                                     n=1))
                 assert not diff, f'download {dfile} differs:\n{diff}'
-
