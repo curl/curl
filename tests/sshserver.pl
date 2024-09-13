@@ -584,7 +584,6 @@ push @cfgarr, '#';
 #if (!exists $ENV{CURL_TEST_SSH_ALLOWALL}) {
     # AllowUsers and DenyUsers options should use lowercase on Windows
     # and do not support quotes around values for some unknown reason.
-    push @cfgarr, "DenyUsers *";
     if ($sshdid =~ /OpenSSH-Windows/) {
         my $username_lc = lc $username;
         if (exists $ENV{USERDOMAIN}) {
@@ -592,10 +591,13 @@ push @cfgarr, '#';
             $username_lc = "$userdomain_lc\\$username_lc";
         }
         $username_lc =~ s/ /\?/g; # replace space with ?
+        push @cfgarr, "DenyUsers !$username_lc";
         push @cfgarr, "AllowUsers $username_lc";
     } else {
+        push @cfgarr, "DenyUsers !$username";
         push @cfgarr, "AllowUsers $username";
     }
+    printf "|||" . join('|', @cfgarr[-2..-1]) . "|||\n";
 #}
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
@@ -657,6 +659,8 @@ if($error) {
     my_logmsg "$error\n";
     exit 1;
 }
+
+display_sshdconfig();    # DEBUG
 
 
 #***************************************************************************
@@ -820,6 +824,7 @@ if($error) {
     exit 1;
 }
 
+display_sshdconfig();    # DEBUG
 
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
@@ -1128,6 +1133,7 @@ if($error) {
     exit 1;
 }
 
+display_sshconfig();    # DEBUG
 
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
