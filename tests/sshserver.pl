@@ -117,7 +117,7 @@ sub pp {
 
 #***************************************************************************
 # Save the message to the log and print it
-sub my_logmsg {
+sub ssh_logmsg {
     my $msg = $_[0];
     logmsg $msg;
     print $msg;
@@ -244,7 +244,7 @@ elsif($username eq 'root') {
     $error = 'Will not run ssh server as root to mitigate security risks';
 }
 if($error) {
-    my_logmsg "$error\n";
+    ssh_logmsg "$error\n";
     exit 1;
 }
 
@@ -254,7 +254,7 @@ if($error) {
 #
 my $sshd = find_sshd();
 if(!$sshd) {
-    my_logmsg "cannot find $sshdexe\n";
+    ssh_logmsg "cannot find $sshdexe\n";
     exit 1;
 }
 
@@ -265,11 +265,11 @@ if(!$sshd) {
 my ($sshdid, $sshdvernum, $sshdverstr, $sshderror) = sshversioninfo($sshd);
 if(!$sshdid) {
     # Not an OpenSSH or SunSSH ssh daemon
-    my_logmsg "$sshderror\n" if($verbose);
-    my_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    ssh_logmsg "$sshderror\n" if($verbose);
+    ssh_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-my_logmsg "ssh server found $sshd is $sshdverstr ($sshdvernum, $sshdid)\n" if($verbose);
+ssh_logmsg "ssh server found $sshd is $sshdverstr ($sshdvernum, $sshdid)\n" if($verbose);
 
 #***************************************************************************
 #  ssh daemon command line options we might use and version support
@@ -294,7 +294,7 @@ my_logmsg "ssh server found $sshd is $sshdverstr ($sshdvernum, $sshdid)\n" if($v
 #
 if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
    (($sshdid =~ /SunSSH/)  && ($sshdvernum < 100))) {
-    my_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    ssh_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
 
@@ -304,10 +304,10 @@ if((($sshdid =~ /OpenSSH/) && ($sshdvernum < 299)) ||
 #
 my $sftpsrv = find_sftpsrv();
 if(!$sftpsrv) {
-    my_logmsg "cannot find $sftpsrvexe\n";
+    ssh_logmsg "cannot find $sftpsrvexe\n";
     exit 1;
 }
-my_logmsg "sftp server plugin found $sftpsrv\n" if($verbose);
+ssh_logmsg "sftp server plugin found $sftpsrv\n" if($verbose);
 
 
 #***************************************************************************
@@ -315,10 +315,10 @@ my_logmsg "sftp server plugin found $sftpsrv\n" if($verbose);
 #
 my $sftp = find_sftp();
 if(!$sftp) {
-    my_logmsg "cannot find $sftpexe\n";
+    ssh_logmsg "cannot find $sftpexe\n";
     exit 1;
 }
-my_logmsg "sftp client found $sftp\n" if($verbose);
+ssh_logmsg "sftp client found $sftp\n" if($verbose);
 
 
 #***************************************************************************
@@ -326,10 +326,10 @@ my_logmsg "sftp client found $sftp\n" if($verbose);
 #
 my $sshkeygen = find_sshkeygen();
 if(!$sshkeygen) {
-    my_logmsg "cannot find $sshkeygenexe\n";
+    ssh_logmsg "cannot find $sshkeygenexe\n";
     exit 1;
 }
-my_logmsg "ssh keygen found $sshkeygen\n" if($verbose);
+ssh_logmsg "ssh keygen found $sshkeygen\n" if($verbose);
 
 
 #***************************************************************************
@@ -337,7 +337,7 @@ my_logmsg "ssh keygen found $sshkeygen\n" if($verbose);
 #
 my $ssh = find_ssh();
 if(!$ssh) {
-    my_logmsg "cannot find $sshexe\n";
+    ssh_logmsg "cannot find $sshexe\n";
     exit 1;
 }
 
@@ -348,11 +348,11 @@ if(!$ssh) {
 my ($sshid, $sshvernum, $sshverstr, $ssherror) = sshversioninfo($ssh);
 if(!$sshid) {
     # Not an OpenSSH or SunSSH ssh client
-    my_logmsg "$ssherror\n" if($verbose);
-    my_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    ssh_logmsg "$ssherror\n" if($verbose);
+    ssh_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-my_logmsg "ssh client found $ssh is $sshverstr ($sshvernum, $sshid)\n" if($verbose);
+ssh_logmsg "ssh client found $ssh is $sshverstr ($sshvernum, $sshid)\n" if($verbose);
 
 
 #***************************************************************************
@@ -380,7 +380,7 @@ my_logmsg "ssh client found $ssh is $sshverstr ($sshvernum, $sshid)\n" if($verbo
 #
 if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
    (($sshid =~ /SunSSH/)  && ($sshvernum < 100))) {
-    my_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
+    ssh_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
 
@@ -413,14 +413,14 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     # Make sure all files are gone so ssh-keygen doesn't complain
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
-    my_logmsg "generating host keys...\n" if($verbose);
+    ssh_logmsg "generating host keys...\n" if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''") {
-        my_logmsg "Could not generate host key\n";
+        ssh_logmsg "Could not generate host key\n";
         exit 1;
     }
-    my_logmsg "generating client keys...\n" if($verbose);
+    ssh_logmsg "generating client keys...\n" if($verbose);
     if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''") {
-        my_logmsg "Could not generate client key\n";
+        ssh_logmsg "Could not generate client key\n";
         exit 1;
     }
     # Make sure that permissions are restricted so openssh doesn't complain
@@ -440,21 +440,21 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
     close($rsakeyfile);
     if(!$rsahostkey[1]) {
-        my_logmsg "Failed parsing base64 encoded RSA host key\n";
+        ssh_logmsg "Failed parsing base64 encoded RSA host key\n";
         exit 1;
     }
     open(my $pubmd5file, ">", pp($hstpubmd5f));
     print $pubmd5file md5_hex(decode_base64($rsahostkey[1]));
     close($pubmd5file);
     if((! -e pp($hstpubmd5f)) || (! -s pp($hstpubmd5f))) {
-        my_logmsg "Failed writing md5 hash of RSA host key\n";
+        ssh_logmsg "Failed writing md5 hash of RSA host key\n";
         exit 1;
     }
     open(my $pubsha256file, ">", pp($hstpubsha256f));
     print $pubsha256file sha256_base64(decode_base64($rsahostkey[1]));
     close($pubsha256file);
     if((! -e pp($hstpubsha256f)) || (! -s pp($hstpubsha256f))) {
-        my_logmsg "Failed writing sha256 hash of RSA host key\n";
+        ssh_logmsg "Failed writing sha256 hash of RSA host key\n";
         exit 1;
     }
 }
@@ -581,7 +581,7 @@ print ">>>4>>>: " . pp($hstprvkeyf) . "<<<\n";
 #***************************************************************************
 # Initialize sshd config with options actually supported in OpenSSH 2.9.9
 #
-my_logmsg "generating ssh server config file...\n" if($verbose);
+ssh_logmsg "generating ssh server config file...\n" if($verbose);
 @cfgarr = ();
 push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
@@ -659,7 +659,7 @@ push @cfgarr, '#';
 #
 $error = dump_array(pp($sshdconfig), @cfgarr);
 if($error) {
-    my_logmsg "$error\n";
+    ssh_logmsg "$error\n";
     exit 1;
 }
 
@@ -681,7 +681,7 @@ sub sshd_supports_opt {
         # ssh daemon supports command line options -t and -f
         $err = dump_array(pp($sshdconfig), (@cfgarr, "$option $value"));
         if($err) {
-            my_logmsg "$err\n";
+            ssh_logmsg "$err\n";
             return 0;
         }
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
@@ -820,7 +820,7 @@ push @cfgarr, '#';
 #
 $error = dump_array(pp($sshdconfig), @cfgarr);
 if($error) {
-    my_logmsg "$error\n";
+    ssh_logmsg "$error\n";
     exit 1;
 }
 
@@ -828,7 +828,7 @@ if($error) {
 # Verify that sshd actually supports our generated configuration file
 #
 if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
-    my_logmsg "sshd configuration file $sshdconfig failed verification\n";
+    ssh_logmsg "sshd configuration file $sshdconfig failed verification\n";
     display_sshdlog();
     display_sshdconfig();
     exit 1;
@@ -839,7 +839,7 @@ if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
 # Generate ssh client host key database file for curl's tests
 #
 if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
-    my_logmsg "generating ssh client known hosts file...\n" if($verbose);
+    ssh_logmsg "generating ssh client known hosts file...\n" if($verbose);
     unlink(pp($knownhosts));
     if(open(my $rsakeyfile, "<", pp($hstpubkeyf))) {
         my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
@@ -862,7 +862,7 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
         $error = "Error: cannot read file $hstpubkeyf";
     }
     if($error) {
-        my_logmsg "$error\n";
+        ssh_logmsg "$error\n";
         exit 1;
     }
 }
@@ -969,7 +969,7 @@ else {
 #***************************************************************************
 # Initialize ssh config with options actually supported in OpenSSH 2.9.9
 #
-my_logmsg "generating ssh client config file...\n" if($verbose);
+ssh_logmsg "generating ssh client config file...\n" if($verbose);
 @cfgarr = ();
 push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshverstr ssh client configuration file for curl testing";
@@ -1127,14 +1127,14 @@ push @cfgarr, '#';
 #
 $error = dump_array(pp($sshconfig), @cfgarr);
 if($error) {
-    my_logmsg "$error\n";
+    ssh_logmsg "$error\n";
     exit 1;
 }
 
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
 #
-my_logmsg "generating sftp client config file...\n" if($verbose);
+ssh_logmsg "generating sftp client config file...\n" if($verbose);
 splice @cfgarr, 1, 1, "# $sshverstr sftp client configuration file for curl testing";
 #
 for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
@@ -1154,7 +1154,7 @@ for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
 #
 $error = dump_array(pp($sftpconfig), @cfgarr);
 if($error) {
-    my_logmsg "$error\n";
+    ssh_logmsg "$error\n";
     exit 1;
 }
 @cfgarr = ();
@@ -1163,12 +1163,12 @@ if($error) {
 #***************************************************************************
 # Generate client sftp commands batch file for sftp server verification
 #
-my_logmsg "generating sftp client commands file...\n" if($verbose);
+ssh_logmsg "generating sftp client commands file...\n" if($verbose);
 push @cfgarr, 'pwd';
 push @cfgarr, 'quit';
 $error = dump_array(pp($sftpcmds), @cfgarr);
 if($error) {
-    my_logmsg "$error\n";
+    ssh_logmsg "$error\n";
     exit 1;
 }
 @cfgarr = ();
@@ -1177,8 +1177,8 @@ if($error) {
 # Prepare command line of ssh server daemon
 #
 my $cmd = "\"$sshd\" -e -D -f $sshdconfig_abs > $sshdlog 2>&1";
-my_logmsg "SCP/SFTP server listening on port $port\n" if($verbose);
-my_logmsg "RUN: $cmd\n" if($verbose);
+ssh_logmsg "SCP/SFTP server listening on port $port\n" if($verbose);
+ssh_logmsg "RUN: $cmd\n" if($verbose);
 
 #***************************************************************************
 # Start the ssh server daemon on Windows without forking it
@@ -1210,14 +1210,14 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 # "exec" avoids the shell process sticking around
 my $rc = system("exec " . $cmd);
 if($rc == -1) {
-    my_logmsg "\"$sshd\" failed with: $!\n";
+    ssh_logmsg "\"$sshd\" failed with: $!\n";
 }
 elsif($rc & 127) {
-    my_logmsg sprintf("\"$sshd\" died with signal %d, and %s coredump\n",
+    ssh_logmsg sprintf("\"$sshd\" died with signal %d, and %s coredump\n",
                    ($rc & 127), ($rc & 128)?'a':'no');
 }
 elsif($verbose && ($rc >> 8)) {
-    my_logmsg sprintf("\"$sshd\" exited with %d\n", $rc >> 8);
+    ssh_logmsg sprintf("\"$sshd\" exited with %d\n", $rc >> 8);
 }
 
 
