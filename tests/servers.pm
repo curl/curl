@@ -1822,6 +1822,7 @@ sub runsshserver {
     $flags .= "--verbose " if($verb);
     $flags .= "--debugprotocol " if($debugprotocol);
     $flags .= "--pidfile \"$pidfile\" ";
+    $flags .= "--logfile \"$logfile\" ";
     $flags .= "--logdir \"$LOGDIR\" ";
     $flags .= "--id $idnum " if($idnum > 1);
     $flags .= "--ipv$ipvnum --addr \"$ip\" ";
