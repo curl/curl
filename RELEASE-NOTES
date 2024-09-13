@@ -4,7 +4,7 @@ curl and libcurl 8.10.1
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3243
+ Contributors:                 3245
 
 This release includes the following changes:
 
@@ -13,16 +13,22 @@ This release includes the following bugfixes:
 
  o autotools: fix `--with-ca-embed` build rule [3]
  o cmake: ensure `CURL_USE_OPENSSL`/`USE_OPENSSL_QUIC` are set in sync [8]
+ o connect: store connection info when really done [9]
  o CURLMOPT_TIMERFUNCTION.m: emphasize that only a single timer should run [5]
  o http2: when uploading data from stdin, fix eos forwarding [7]
  o lib: fix AF_INET6 use outside of USE_IPV6 [13]
  o libcurl-docs: CURLINFO_LOCAL_* work for QUIC as well as TCP [1]
  o multi: check that the multi handle is valid in curl_multi_assign [14]
  o QUIC: on connect, keep on trying on draining server [11]
+ o request: correctly reset the eos_sent flag [21]
  o runtests: accecpt 'quictls' as OpenSSL compatible [2]
  o rustls: fixed minor logic bug in default cipher selection [12]
+ o rustls: rustls-ffi 0.14.0 update [18]
+ o rustls: support strong CSRNG data [16]
  o setopt: remove superfluous use of ternary expressions [4]
  o test537: cap the rlimit max this test runs [10]
+ o tests: tweak lock file handling and timers [22]
+ o transfer: fix sendrecv() without interim poll [15]
  o vtls: fix `Curl_ssl_conn_config_match` doc param [6]
 
 This release includes the following known bugs:
@@ -44,9 +50,10 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Carlo Cabrera, Daniel McCarney, Daniel Stenberg, Gabriel Marin,
-  Harry Sintonen, Jan Venekamp, nekopsykose on github, rampageX on github,
-  Stefan Eissing, Viktor Szakats
-  (10 contributors)
+  Harry Sintonen, Jan Venekamp, Michael Osipov, nekopsykose on github,
+  Patrick Steinhardt, rampageX on github, Stefan Eissing, Victor Kislov,
+  Viktor Szakats
+  (13 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -58,8 +65,14 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=14887
  [7] = https://curl.se/bug/?i=14870
  [8] = https://curl.se/bug/?i=14872
+ [9] = https://curl.se/bug/?i=14897
  [10] = https://curl.se/bug/?i=14857
  [11] = https://curl.se/bug/?i=14863
  [12] = https://curl.se/bug/?i=14840
  [13] = https://curl.se/bug/?i=14858
  [14] = https://curl.se/bug/?i=14860
+ [15] = https://curl.se/bug/?i=14898
+ [16] = https://curl.se/bug/?i=14889
+ [18] = https://curl.se/bug/?i=14889
+ [21] = https://marc.info/?l=git&m=172620452502747&w=2
+ [22] = https://curl.se/bug/?i=14835
