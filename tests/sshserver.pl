@@ -467,7 +467,10 @@ my $clipubkeyf_config;
 my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
+print ">>>1>>>: " . $hstprvkeyf . "<<<\n";
+print ">>>2>>>: " . pp($hstprvkeyf) . "<<<\n";
 if ($sshdid =~ /OpenSSH-Windows/) {
+    print ">>>Z>>>OpenSSH-Windows<<<\n";
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
@@ -475,6 +478,7 @@ if ($sshdid =~ /OpenSSH-Windows/) {
     $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
 }
 elsif (pathhelp::os_is_win()) {
+    print ">>>Z>>>os_is_win<<<\n";
     # Ensure to use MinGW/Cygwin paths
     $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
     $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
@@ -482,12 +486,15 @@ elsif (pathhelp::os_is_win()) {
     $sftpsrv_config = "internal-sftp";
 }
 else {
+    print ">>>Z>>>OTHERWISE<<<\n";
     $clipubkeyf_config = abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = abs_path(pp($hstprvkeyf));
     $pidfile_config = $pidfile;
     $sftpsrv_config = $sftpsrv;
 }
 my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
+print ">>>3>>>: " . $hstprvkeyf . "<<<\n";
+print ">>>4>>>: " . pp($hstprvkeyf) . "<<<\n";
 
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
