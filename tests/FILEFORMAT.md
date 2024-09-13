@@ -694,11 +694,14 @@ content
 
 ### `<stripfile4>`
 
-### `<upload [crlf="yes"]>`
+### `<upload [crlf="yes"] [nonewline="yes"]>`
 the contents of the upload data curl should have sent
 
 `crlf=yes` forces *upload* newlines to become CRLF even if not written so in
 the source file.
+
+`nonewline=yes` means that the last byte (the trailing newline character)
+should be cut off from the upload data before comparing it.
 
 ### `<valgrind>`
 disable - disables the valgrind log check for this test
