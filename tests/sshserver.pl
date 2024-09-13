@@ -480,9 +480,9 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 elsif (pathhelp::os_is_win()) {
     print ">>>Z>>>os_is_win<<<\n";
     # Ensure to use MinGW/Cygwin paths
-    $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
-    $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
-    $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
+    $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf);
+    $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf);
+    $pidfile_config = pathhelp::build_sys_abs_path($pidfile);
     $sftpsrv_config = "internal-sftp";
 }
 else {
