@@ -581,7 +581,7 @@ push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
 
 # Hack for GHA/windows CI jobs to allow logging in from the same machine, same user.
-if (!exists $ENV{CURL_TEST_SSH_ALLOWALL}) {
+#if (!exists $ENV{CURL_TEST_SSH_ALLOWALL}) {
     # AllowUsers and DenyUsers options should use lowercase on Windows
     # and do not support quotes around values for some unknown reason.
     push @cfgarr, "DenyUsers *";
@@ -596,7 +596,7 @@ if (!exists $ENV{CURL_TEST_SSH_ALLOWALL}) {
     } else {
         push @cfgarr, "AllowUsers $username";
     }
-}
+#}
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
