@@ -663,9 +663,6 @@ if($error) {
     exit 1;
 }
 
-display_sshdconfig();    # DEBUG
-
-
 #***************************************************************************
 # Verifies at run time if sshd supports a given configuration file option
 #
@@ -826,8 +823,6 @@ if($error) {
     my_logmsg "$error\n";
     exit 1;
 }
-
-display_sshdconfig();    # DEBUG
 
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
@@ -1135,8 +1130,6 @@ if($error) {
     my_logmsg "$error\n";
     exit 1;
 }
-
-display_sshconfig();    # DEBUG
 
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
