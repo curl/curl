@@ -269,7 +269,8 @@ if(!$sshdid) {
     ssh_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-ssh_logmsg "ssh server found $sshd is $sshdverstr ($sshdvernum, $sshdid)\n" if($verbose);
+ssh_logmsg "ssh server found $sshd is $sshdverstr\n" if($verbose);
+
 
 #***************************************************************************
 #  ssh daemon command line options we might use and version support
@@ -352,7 +353,7 @@ if(!$sshid) {
     ssh_logmsg "SCP and SFTP tests require OpenSSH 2.9.9 or later\n";
     exit 1;
 }
-ssh_logmsg "ssh client found $ssh is $sshverstr ($sshvernum, $sshid)\n" if($verbose);
+ssh_logmsg "ssh client found $ssh is $sshverstr\n" if($verbose);
 
 
 #***************************************************************************
