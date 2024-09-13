@@ -52,7 +52,11 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
 
   req->done = FALSE;
   req->upload_done = FALSE;
+  req->upload_aborted = FALSE;
   req->download_done = FALSE;
+  req->eos_written = FALSE;
+  req->eos_read = FALSE;
+  req->eos_sent = FALSE;
   req->ignorebody = FALSE;
   req->shutdown = FALSE;
   req->bytecount = 0;
@@ -146,6 +150,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->download_done = FALSE;
   req->eos_written = FALSE;
   req->eos_read = FALSE;
+  req->eos_sent = FALSE;
   req->upload_done = FALSE;
   req->upload_aborted = FALSE;
   req->ignorebody = FALSE;
