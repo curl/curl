@@ -392,6 +392,9 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #  -q:  quiet keygen     : SunSSH 1.0.0 and later
 #  -t:  key type         : SunSSH 1.0.0 and later
 
+$sshdconfig = pp($sshdconfig);
+$sshconfig = pp($sshconfig);
+$sftpconfig = pp($sftpconfig);
 
 #***************************************************************************
 # Generate host and client key files for curl's tests
@@ -419,7 +422,6 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
     if(pathhelp::os_is_win()) {
-      print("HELLO-HELLO-HELLO|" . $hstprvkeyf . "|" . pp($hstprvkeyf) . "|\n");
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
       system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /reset");
@@ -459,13 +461,14 @@ my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
 my $sshdconfig_abs;
+
 if ($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
     $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
     $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
-    $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
+    $sshdconfig_abs = pathhelp::sys_native_abs_path($sshdconfig);
 }
 elsif (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
@@ -473,14 +476,14 @@ elsif (pathhelp::os_is_win()) {
     $hstprvkeyf_config = pathhelp::build_sys_abs_path(pp($hstprvkeyf));
     $pidfile_config = pathhelp::build_sys_abs_path($pidfile);
     $sftpsrv_config = "internal-sftp";
-    $sshdconfig_abs = pathhelp::build_sys_abs_path(pp($sshdconfig));
+    $sshdconfig_abs = pathhelp::build_sys_abs_path($sshdconfig);
 }
 else {
     $clipubkeyf_config = abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = abs_path(pp($hstprvkeyf));
     $pidfile_config = $pidfile;
     $sftpsrv_config = $sftpsrv;
-    $sshdconfig_abs = abs_path(pp($sshdconfig));
+    $sshdconfig_abs = abs_path($sshdconfig);
 }
 
 #***************************************************************************
@@ -643,7 +646,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out initial sshd configuration file for curl's tests
 #
-$error = dump_array(pp($sshdconfig), @cfgarr);
+$error = dump_array($sshdconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -665,14 +668,14 @@ sub sshd_supports_opt {
     }
     if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 299)) {
         # ssh daemon supports command line options -t and -f
-        $err = dump_array(pp($sshdconfig), (@cfgarr, "$option $value"));
+        $err = dump_array($sshdconfig, (@cfgarr, "$option $value"));
         if($err) {
             logmsg "$err\n";
             return 0;
         }
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
                     `\"$sshd\" -t -f $sshdconfig_abs 2>&1`;
-        unlink pp($sshdconfig);
+        unlink $sshdconfig;
         return !$err;
     }
     return 0;
@@ -804,9 +807,8 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting sshd configuration file for curl's tests
 #
-print("MYTRACE-1|" . $sshdconfig . "|" . pp($sshdconfig) . "|" . length(@cfgarr) . "|\n");
-print("MYTRACE-2|" . $sshdconfig_abs . "|\n");
-$error = dump_array(pp($sshdconfig), @cfgarr);
+print("MYTRACE-1|" . $sshdconfig . "|" . $sshdconfig_abs . "|" . length(@cfgarr) . "|\n");
+$error = dump_array($sshdconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -1114,7 +1116,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting ssh client configuration file for curl's tests
 #
-$error = dump_array(pp($sshconfig), @cfgarr);
+$error = dump_array($sshconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -1141,7 +1143,7 @@ for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
 #***************************************************************************
 # Write out resulting sftp client configuration file for curl's tests
 #
-$error = dump_array(pp($sftpconfig), @cfgarr);
+$error = dump_array($sftpconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -1215,6 +1217,6 @@ elsif($verbose && ($rc >> 8)) {
 #
 unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f), pp($hstpubsha256f),
        pp($cliprvkeyf), pp($clipubkeyf), pp($knownhosts),
-       pp($sshdconfig), pp($sshconfig), pp($sftpconfig));
+       $sshdconfig, $sshconfig, $sftpconfig);
 
 exit 0;
