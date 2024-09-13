@@ -461,7 +461,6 @@ my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
 my $sshdconfig_abs;
-
 if ($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
@@ -652,6 +651,7 @@ if($error) {
     exit 1;
 }
 
+
 #***************************************************************************
 # Verifies at run time if sshd supports a given configuration file option
 #
@@ -807,17 +807,16 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting sshd configuration file for curl's tests
 #
-print("MYTRACE-1|" . $sshdconfig . "|" . $sshdconfig_abs . "|" . length(@cfgarr) . "|\n");
 $error = dump_array($sshdconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
 }
 
+
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
 #
-print(">>" . "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1" . "\n");
 if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
     logmsg "sshd configuration file $sshdconfig failed verification\n";
     display_sshdlog();
