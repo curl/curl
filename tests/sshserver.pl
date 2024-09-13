@@ -89,8 +89,8 @@ use pathhelp;
 
 #***************************************************************************
 
-my $verbose = 0;              # set to 1 for debugging
-my $debugprotocol = 0;        # set to 1 for protocol debugging
+my $verbose = 1;              # set to 1 for debugging
+my $debugprotocol = 1;        # set to 1 for protocol debugging
 my $port = 8999;              # our default SCP/SFTP server port
 my $listenaddr = '127.0.0.1'; # default address on which to listen
 my $ipvnum = 4;               # default IP version of listener address
@@ -412,8 +412,11 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
     if(pathhelp::os_is_win()) {
+      print("HELLO-HELLO-HELLO1|\n");
+      print("HELLO-HELLO-HELLO2|" . $hstprvkeyf . "|" . pp($hstprvkeyf) . "|\n");
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
+      $ENV{'MSYS2_ARG_CONV_EXCL'} = '*';
       system("icacls \"" . pp($hstprvkeyf) . "\" /reset");
       system("icacls \"" . pp($hstprvkeyf) . "\" /grant:r \"$username:(R)\"");
       system("icacls \"" . pp($hstprvkeyf) . "\" /inheritance:r");
