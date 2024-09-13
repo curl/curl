@@ -437,6 +437,7 @@ CURLcode Curl_conn_connect(struct Curl_easy *data,
       cf_cntrl_update_info(data, data->conn);
       conn_report_connect_stats(data, data->conn);
       data->conn->keepalive = Curl_now();
+      Curl_verboseconnect(data, data->conn, sockindex);
     }
     else if(result) {
       conn_report_connect_stats(data, data->conn);

@@ -1274,6 +1274,21 @@ void Curl_verboseconnect(struct Curl_easy *data,
     infof(data, "Connected to %s (%s) port %u",
           CURL_CONN_HOST_DISPNAME(conn), conn->primary.remote_ip,
           conn->primary.remote_port);
+#if !defined(CURL_DISABLE_HTTP)
+    if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+      switch(conn->alpn) {
+      case CURL_HTTP_VERSION_3:
+        infof(data, "using HTTP/3");
+        break;
+      case CURL_HTTP_VERSION_2:
+        infof(data, "using HTTP/2");
+        break;
+      default:
+        infof(data, "using HTTP/1.x");
+        break;
+      }
+    }
+#endif
 }
 #endif
 
