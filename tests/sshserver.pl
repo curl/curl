@@ -565,21 +565,14 @@ push @cfgarr, '#';
 
 # AllowUsers and DenyUsers options should use lowercase on Windows
 # and do not support quotes around values for some unknown reason.
-my @allowusers = ();
-push @allowusers, $username =~ s/ /\?/gr;  # replace space with ?
 if ($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
-    if($username_lc ne $username) {
-        push @allowusers, $username_lc =~ s/ /\?/gr;
-    }
     if (exists $ENV{USERDOMAIN}) {
         my $userdomain_lc = lc $ENV{USERDOMAIN};
         $username_lc = "$userdomain_lc\\$username_lc";
-        push @allowusers, $username_lc =~ s/ /\?/gr;
     }
+    $username_lc =~ s/ /\?/g; # replace space with ?
 }
-push @cfgarr, "DenyUsers *";
-push @cfgarr, "AllowUsers " . join(' ', @allowusers);
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
 if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
