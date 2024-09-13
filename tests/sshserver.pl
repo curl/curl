@@ -563,23 +563,22 @@ push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
 
-logmsg "TESTING-TESTING-TESTING\n";
-
-# AllowUsers and DenyUsers options should use lowercase on Windows
-# and do not support quotes around values for some unknown reason.
-if (!exists $ENV{CURL_TEST_SSH_ALLOWALL}) {  # Hack for GHA/windows CI jobs
-    push @cfgarr, "DenyUsers *";             # to allow logging in from the
-}                                            # same machine, same user.
-if ($sshdid =~ /OpenSSH-Windows/) {
-    my $username_lc = lc $username;
-    if (exists $ENV{USERDOMAIN}) {
-        my $userdomain_lc = lc $ENV{USERDOMAIN};
-        $username_lc = "$userdomain_lc\\$username_lc";
+# Hack for GHA/windows CI jobs to allow logging in from the same machine, same user.
+if (!exists $ENV{CURL_TEST_SSH_ALLOWALL}) {
+    # AllowUsers and DenyUsers options should use lowercase on Windows
+    # and do not support quotes around values for some unknown reason.
+    push @cfgarr, "DenyUsers *";
+    if ($sshdid =~ /OpenSSH-Windows/) {
+        my $username_lc = lc $username;
+        if (exists $ENV{USERDOMAIN}) {
+            my $userdomain_lc = lc $ENV{USERDOMAIN};
+            $username_lc = "$userdomain_lc\\$username_lc";
+        }
+        $username_lc =~ s/ /\?/g; # replace space with ?
+        push @cfgarr, "AllowUsers $username_lc";
+    } else {
+        push @cfgarr, "AllowUsers $username";
     }
-    $username_lc =~ s/ /\?/g; # replace space with ?
-    push @cfgarr, "AllowUsers $username_lc";
-} else {
-    push @cfgarr, "AllowUsers $username";
 }
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
