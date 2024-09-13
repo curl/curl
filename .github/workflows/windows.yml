@@ -508,10 +508,6 @@ jobs:
       - name: 'vcpkg versions'
         timeout-minutes: 1
         run: |
-          echo '--------------------'
-          ls -l /c/Windows/System32/OpenSSH
-          /c/Windows/System32/OpenSSH/sshd -V
-          echo '--------------------'
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
