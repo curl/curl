@@ -969,7 +969,17 @@ static CURLcode cf_he_connect(struct Curl_cfilter *cf,
 
         if(cf->conn->handler->protocol & PROTO_FAMILY_SSH)
           Curl_pgrsTime(data, TIMER_APPCONNECT); /* we are connected already */
-        Curl_verboseconnect(data, cf->conn, cf->sockindex);
+        if(Curl_trc_cf_is_verbose(cf, data)) {
+          struct ip_quadruple ipquad;
+          int is_ipv6;
+          if(!Curl_conn_cf_get_ip_info(cf->next, data, &is_ipv6, &ipquad)) {
+            const char *host, *disphost;
+            int port;
+            cf->next->cft->get_host(cf->next, data, &host, &disphost, &port);
+            CURL_TRC_CF(data, cf, "Connected to %s (%s) port %u",
+                        disphost, ipquad.remote_ip, ipquad.remote_port);
+          }
+        }
         data->info.numconnects++; /* to track the # of connections made */
       }
       break;
