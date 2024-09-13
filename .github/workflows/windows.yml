@@ -55,7 +55,7 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver', name: 'default' }
           - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '', name: 'default R' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --enable-windows-unicode --enable-ares --enable-sspi', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON -DCURL_WINDOWS_SSPI=ON', type: 'Debug', name: 'schannel c-ares U' }
@@ -495,7 +495,7 @@ jobs:
             #          read its configuration from, making it vulnerable to attacks on
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_GSASL=ON -DUSE_NGTCP2=ON'
+            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_GSASL=ON -DUSE_NGTCP2=ON -DCURL_ZLIB=OFF'
       fail-fast: false
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
