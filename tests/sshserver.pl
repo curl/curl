@@ -1000,7 +1000,7 @@ push @cfgarr, 'PreferredAuthentications publickey';
 push @cfgarr, 'PubkeyAuthentication yes';
 
 # RSA authentication options are not supported by OpenSSH for Windows
-if (!($sshdid =~ /OpenSSH-Windows/)) {
+if (!($sshdid =~ /OpenSSH-Windows/ || pathhelp::os_is_win())) {
     push @cfgarr, 'RhostsRSAAuthentication no';
     push @cfgarr, 'RSAAuthentication no';
 }
