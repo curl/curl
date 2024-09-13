@@ -336,7 +336,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       connclose(data->conn, "excess found in a read");
     }
   }
-  else if(nwrite < nbytes) {
+  else if((nwrite < nbytes) && !data->req.ignorebody) {
     failf(data, "Exceeded the maximum allowed file size "
           "(%" FMT_OFF_T ") with %" FMT_OFF_T " bytes",
           data->set.max_filesize, data->req.bytecount);

@@ -68,6 +68,7 @@
 # 1591, 1943. See https://github.com/hyperium/hyper/issues/2699 for details.
 %if hyper
 266
+477
 500
 579
 587

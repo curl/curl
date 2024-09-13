@@ -3283,10 +3283,13 @@ CURLcode Curl_http_size(struct Curl_easy *data)
   }
   else if(k->size != -1) {
     if(data->set.max_filesize &&
-       k->size > data->set.max_filesize) {
+       !k->ignorebody &&
+       (k->size > data->set.max_filesize)) {
       failf(data, "Maximum file size exceeded");
       return CURLE_FILESIZE_EXCEEDED;
     }
+    if(k->ignorebody)
+      infof(data, "setting size while ignoring");
     Curl_pgrsSetDownloadSize(data, k->size);
     k->maxdownload = k->size;
   }
@@ -3625,13 +3628,6 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   }
 
-  /* This is the last response that we will got for the current request.
-   * Check on the body size and determine if the response is complete.
-   */
-  result = Curl_http_size(data);
-  if(result)
-    goto out;
-
   /* If we requested a "no body", this is a good time to get
    * out and return home.
    */
@@ -3650,6 +3646,12 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   /* final response without error, prepare to receive the body */
   result = Curl_http_firstwrite(data);
+
+  if(!result)
+    /* This is the last response that we get for the current request.
+     * Check on the body size and determine if the response is complete.
+     */
+    result = Curl_http_size(data);
 
 out:
   if(last_hd) {
