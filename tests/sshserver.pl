@@ -583,8 +583,8 @@ push @cfgarr, '# This is a generated file.  Do not edit.';
 push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
 push @cfgarr, '#';
 
-# AllowUsers option should use lowercase on Windows and do not support
-# quotes around values for some unknown reason.
+# AllowUsers and DenyUsers options should use lowercase on Windows
+# and do not support quotes around values for some unknown reason.
 if ($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
     push @cfgarr, "AllowUsers " . $username_lc =~ s/ /\?/gr;
