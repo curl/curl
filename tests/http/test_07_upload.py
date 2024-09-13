@@ -174,6 +174,54 @@ class TestUpload:
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [f'{len(indata)}']
 
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_15_hx_put(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 2
+        upload_size = 128*1024
+        url = f'https://localhost:{env.https_port}/curltest/put?id=[0-{count-1}]'
+        client = LocalClient(name='hx-upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}', '-S', f'{upload_size}', '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        self.check_downloads(client, [f"{upload_size}"], count)
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_16_hx_put_reuse(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 2
+        upload_size = 128*1024
+        url = f'https://localhost:{env.https_port}/curltest/put?id=[0-{count-1}]'
+        client = LocalClient(name='hx-upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}', '-S', f'{upload_size}', '-R', '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        self.check_downloads(client, [f"{upload_size}"], count)
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_17_hx_post_reuse(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 2
+        upload_size = 128*1024
+        url = f'https://localhost:{env.https_port}/curltest/echo?id=[0-{count-1}]'
+        client = LocalClient(name='hx-upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}', '-M', 'POST', '-S', f'{upload_size}', '-R', '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        self.check_downloads(client, ["x" * upload_size], count)
+
     # upload data parallel, check that they were echoed
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_07_20_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
@@ -618,3 +666,16 @@ class TestUpload:
         r.check_response(count=count, http_status=200)
         up_speed = r.stats[0]['speed_upload']
         assert (speed_limit * 0.5) <= up_speed <= (speed_limit * 1.5), f'{r.stats[0]}'
+
+    def check_downloads(self, client, source: str, count: int,
+                        complete: bool = True):
+        for i in range(count):
+            dfile = client.download_file(i)
+            assert os.path.exists(dfile)
+            if complete:
+                diff = "".join(difflib.unified_diff(a=source,
+                                                    b=open(dfile).readlines(),
+                                                    fromfile='-',
+                                                    tofile=dfile,
+                                                    n=1))
+                assert not diff, f'download {dfile} differs:\n{diff}'

@@ -24,7 +24,8 @@
 
 # These are all libcurl example programs to be test compiled
 check_PROGRAMS = \
-  h2-download \
+  hx-download \
+  hx-upload \
   h2-pausing \
   h2-serverpush \
   h2-upgrade-extreme \

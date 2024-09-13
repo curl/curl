@@ -113,7 +113,7 @@ class TestShutdown:
         count = 10
         docname = 'data.json'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env, run_env={
+        client = LocalClient(name='hx-download', env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
             'CURL_DEBUG': 'ssl'
         })
