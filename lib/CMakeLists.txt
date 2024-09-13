@@ -21,8 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(LIB_NAME libcurl)
-set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
+set(LIB_NAME "libcurl")
+set(LIBCURL_OUTPUT_NAME "libcurl" CACHE STRING "Basename of the curl library")
 add_definitions("-DBUILDING_LIBCURL")
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
