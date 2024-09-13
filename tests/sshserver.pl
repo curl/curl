@@ -176,12 +176,6 @@ while(@ARGV) {
             shift @ARGV;
         }
     }
-    elsif($ARGV[0] eq '--logfile') {
-        if($ARGV[1]) {
-            $logfile = $ARGV[1];
-            shift @ARGV;
-        }
-    }
     elsif($ARGV[0] eq '--logdir') {
         if($ARGV[1]) {
             $logdir = "$path/". $ARGV[1];
@@ -224,9 +218,7 @@ else {
 #
 $sshdlog = server_logfilename($logdir, 'ssh', $ipvnum, $idnum);
 $sftplog = server_logfilename($logdir, 'sftp', $ipvnum, $idnum);
-if(!$logfile) {
-    $logfile = "$logdir/sshserver.log";  # used by logmsg
-}
+$logfile = "$logdir/sshserver.log";  # used by logmsg
 
 #***************************************************************************
 # Logging level for ssh server and client
