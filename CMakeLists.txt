@@ -703,11 +703,9 @@ endif()
 # and before calling openssl_check_symbol_exists().
 
 set(HAVE_LIBZ OFF)
-set(USE_ZLIB OFF)
-optional_dependency(ZLIB)
+curl_dependency_option(ZLIB)
 if(ZLIB_FOUND)
   set(HAVE_LIBZ ON)
-  set(USE_ZLIB ON)
 
   # Depend on ZLIB via imported targets. This allows our dependents to
   # get our dependencies transitively.
@@ -2144,7 +2142,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL
-  #   USE_ZLIB
+  #   HAVE_LIBZ
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}

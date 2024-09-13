@@ -35,7 +35,7 @@ include(CMakeFindDependencyMacro)
 if(@USE_OPENSSL@)
   find_dependency(OpenSSL @OPENSSL_VERSION_MAJOR@)
 endif()
-if(@USE_ZLIB@)
+if(@HAVE_LIBZ@)
   find_dependency(ZLIB @ZLIB_VERSION_MAJOR@)
 endif()
 
