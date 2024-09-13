@@ -427,8 +427,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
     if(pathhelp::os_is_win()) {
-      print("HELLO-HELLO-HELLO1|\n");
-      print("HELLO-HELLO-HELLO2|" . $hstprvkeyf . "|" . pp($hstprvkeyf) . "|\n");
+      print("HELLO-HELLO-HELLO|" . $hstprvkeyf . "|" . pp($hstprvkeyf) . "|\n");
       # https://ss64.com/nt/icacls.html
       $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
       system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /reset");
@@ -467,12 +466,14 @@ my $clipubkeyf_config;
 my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
+my $sshdconfig_abs;
 if ($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
     $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
     $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
+    $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 }
 elsif (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
@@ -480,14 +481,15 @@ elsif (pathhelp::os_is_win()) {
     $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf);
     $pidfile_config = pathhelp::build_sys_abs_path($pidfile);
     $sftpsrv_config = "internal-sftp";
+    $sshdconfig_abs = pathhelp::build_sys_abs_path(pp($sshdconfig));
 }
 else {
     $clipubkeyf_config = abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = abs_path(pp($hstprvkeyf));
     $pidfile_config = $pidfile;
     $sftpsrv_config = $sftpsrv;
+    $sshdconfig_abs = abs_path((pp($sshdconfig));
 }
-my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
@@ -810,6 +812,8 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting sshd configuration file for curl's tests
 #
+print("MYTRACE-1|" . $sshdconfig . "|" . pp($sshdconfig) . "|" . length(@cfgarr) . "|\n");
+print("MYTRACE-2|" . $sshdconfig_abs . "|\n");
 $error = dump_array(pp($sshdconfig), @cfgarr);
 if($error) {
     ssh_logmsg "$error\n";
@@ -819,6 +823,7 @@ if($error) {
 #***************************************************************************
 # Verify that sshd actually supports our generated configuration file
 #
+print(">>" . "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1" . "\n");
 if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
     ssh_logmsg "sshd configuration file $sshdconfig failed verification\n";
     display_sshdlog();
