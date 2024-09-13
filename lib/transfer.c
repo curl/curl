@@ -431,8 +431,6 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
     if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      /* DEBUGF(infof(data, "sendrecv, select_bits, early return on PAUSED"));
-      */
       result = CURLE_OK;
       goto out;
     }
@@ -440,15 +438,12 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
     /* DEBUGF(infof(data, "sendrecv, select_bits %x, RUN", select_bits)); */
     select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
   }
-  else if(data->last_poll.num) {
-    /* The transfer wanted something polled. Let's run all available
-     * send/receives. Worst case we EAGAIN on some. */
-    /* DEBUGF(infof(data, "sendrecv, had poll sockets, RUN")); */
+  else {
+    /* try both directions if the transfer wants it. We used to poll
+     * the socket here and on ran send/recv depending on POLLIN/OUT, but
+     * that does not when connections are multiplexed or handshake,
+     * or other direction reversals are happening. */
     select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
-  }
-  else if(data->req.keepon & KEEP_SEND_TIMED) {
-    /* DEBUGF(infof(data, "sendrecv, KEEP_SEND_TIMED, RUN ul")); */
-    select_bits = CURL_CSELECT_OUT;
   }
 
 #ifdef USE_HYPER
