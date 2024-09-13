@@ -481,7 +481,7 @@ else {
     $hstprvkeyf_config = abs_path(pp($hstprvkeyf));
     $pidfile_config = $pidfile;
     $sftpsrv_config = $sftpsrv;
-    $sshdconfig_abs = abs_path((pp($sshdconfig));
+    $sshdconfig_abs = abs_path(pp($sshdconfig));
 }
 
 #***************************************************************************
