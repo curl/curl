@@ -88,8 +88,8 @@ use pathhelp;
 
 #***************************************************************************
 
-my $verbose = 1;              # set to 1 for debugging
-my $debugprotocol = 1;        # set to 1 for protocol debugging
+my $verbose = 0;              # set to 1 for debugging
+my $debugprotocol = 0;        # set to 1 for protocol debugging
 my $port = 8999;              # our default SCP/SFTP server port
 my $listenaddr = '127.0.0.1'; # default address on which to listen
 my $ipvnum = 4;               # default IP version of listener address
