@@ -650,7 +650,6 @@ if($error) {
     logmsg "$error\n";
     exit 1;
 }
-display_sshdconfig();
 
 
 #***************************************************************************
@@ -813,7 +812,6 @@ if($error) {
     logmsg "$error\n";
     exit 1;
 }
-display_sshdconfig();
 
 
 #***************************************************************************
@@ -1122,7 +1120,6 @@ if($error) {
     logmsg "$error\n";
     exit 1;
 }
-display_sshconfig();
 
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
