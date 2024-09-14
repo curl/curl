@@ -2207,7 +2207,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data);
     CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
-    alive = result? FALSE : TRUE;
+    alive = result ? FALSE : TRUE;
   }
 
 out:

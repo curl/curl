@@ -1254,7 +1254,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   else {
 #if CURL_SUPPORT_MAC_10_8
     err = SSLSetEnableCertVerify(backend->ssl_ctx,
-                                 conn_config->verifypeer?true:false);
+                                 conn_config->verifypeer ? true : false);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1263,7 +1263,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   }
 #else
   err = SSLSetEnableCertVerify(backend->ssl_ctx,
-                               conn_config->verifypeer?true:false);
+                               conn_config->verifypeer ? true : false);
   if(err != noErr) {
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
     return CURLE_SSL_CONNECT_ERROR;

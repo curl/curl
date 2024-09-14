@@ -2582,7 +2582,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
 
   p_accept = Curl_checkheaders(data,
-                               STRCONST("Accept"))?NULL:"Accept: */*\r\n";
+                               STRCONST("Accept")) ? NULL : "Accept: */*\r\n";
 
   result = Curl_http_range(data, httpreq);
   if(result)
@@ -3042,8 +3042,8 @@ CURLcode Curl_http_header(struct Curl_easy *data,
         char *persistentauth = Curl_copy_header_value(hd);
         if(!persistentauth)
           return CURLE_OUT_OF_MEMORY;
-        negdata->noauthpersist = checkprefix("false", persistentauth)?
-          TRUE:FALSE;
+        negdata->noauthpersist = checkprefix("false", persistentauth) ?
+          TRUE : FALSE;
         negdata->havenoauthpersist = TRUE;
         infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
               negdata->noauthpersist, persistentauth);
@@ -4095,7 +4095,7 @@ CURLcode Curl_http_req_make(struct httpreq **preq,
 out:
   if(result && req)
     Curl_http_req_free(req);
-  *preq = result? NULL : req;
+  *preq = result ? NULL : req;
   return result;
 }
 
@@ -4253,7 +4253,7 @@ CURLcode Curl_http_req_make2(struct httpreq **preq,
 out:
   if(result && req)
     Curl_http_req_free(req);
-  *preq = result? NULL : req;
+  *preq = result ? NULL : req;
   return result;
 }
 
@@ -4384,7 +4384,7 @@ CURLcode Curl_http_resp_make(struct http_resp **presp,
 out:
   if(result && resp)
     Curl_http_resp_free(resp);
-  *presp = result? NULL : resp;
+  *presp = result ? NULL : resp;
   return result;
 }
 
@@ -4545,7 +4545,7 @@ static void http_exp100_send_anyway(struct Curl_easy *data)
 bool Curl_http_exp100_is_selected(struct Curl_easy *data)
 {
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  return r? TRUE : FALSE;
+  return r ? TRUE : FALSE;
 }
 
 #endif /* CURL_DISABLE_HTTP */

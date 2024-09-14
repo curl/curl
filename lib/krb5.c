@@ -623,7 +623,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
   size_t cmd_size = 0;
   CURLcode error;
   enum protection_level prot_level = conn->data_prot;
-  bool iscmd = (prot_level == PROT_CMD)?TRUE:FALSE;
+  bool iscmd = (prot_level == PROT_CMD) ? TRUE : FALSE;
 
   DEBUGASSERT(prot_level > PROT_NONE && prot_level < PROT_LAST);
 
@@ -655,7 +655,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
 
       socket_write(data, fd, cmd_buffer, cmd_size);
       socket_write(data, fd, "\r\n", 2);
-      infof(data, "Send: %s%s", prot_level == PROT_PRIVATE?enc:mic,
+      infof(data, "Send: %s%s", prot_level == PROT_PRIVATE ? enc : mic,
             cmd_buffer);
       free(cmd_buffer);
     }

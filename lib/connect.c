@@ -1417,7 +1417,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   ctx = NULL;
 
 out:
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   free(ctx);
   return result;
 }

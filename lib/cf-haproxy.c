@@ -231,7 +231,7 @@ static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
 
 out:
   cf_haproxy_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 

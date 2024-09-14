@@ -252,7 +252,7 @@ static int curltest_echo_handler(request_rec *r)
   apr_table_setn(r->subprocess_env, "no-gzip", "1");
 
   ct = apr_table_get(r->headers_in, "content-type");
-  ap_set_content_type(r, ct? ct : "application/octet-stream");
+  ap_set_content_type(r, ct ? ct : "application/octet-stream");
 
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* copy any request body into the response */
@@ -593,7 +593,7 @@ static int curltest_put_handler(request_rec *r)
   apr_table_setn(r->subprocess_env, "no-gzip", "1");
 
   ct = apr_table_get(r->headers_in, "content-type");
-  ap_set_content_type(r, ct? ct : "text/plain");
+  ap_set_content_type(r, ct ? ct : "text/plain");
 
   if(read_delay) {
     apr_sleep(read_delay);
@@ -675,7 +675,7 @@ static int curltest_1_1_required(request_rec *r)
   apr_table_setn(r->subprocess_env, "no-gzip", "1");
 
   ct = apr_table_get(r->headers_in, "content-type");
-  ap_set_content_type(r, ct? ct : "text/plain");
+  ap_set_content_type(r, ct ? ct : "text/plain");
 
   bb = apr_brigade_create(r->pool, c->bucket_alloc);
   /* flush response */

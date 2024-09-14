@@ -1950,7 +1950,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 out:
   if(result)
     cf_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 
@@ -2008,7 +2008,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
 out:
   if(result)
     cf_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 

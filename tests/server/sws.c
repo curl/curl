@@ -1270,7 +1270,7 @@ retry:
     } while(ptr && *ptr);
   }
   free(cmd);
-  req->open = use_gopher?FALSE:persistent;
+  req->open = use_gopher ? FALSE : persistent;
 
   prevtestno = req->testno;
   prevpartno = req->partno;

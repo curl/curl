@@ -404,7 +404,7 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   CURLcode result;
   bool flush_all;
 
-  flush_all = (type & CLIENTWRITE_EOS)? TRUE:FALSE;
+  flush_all = (type & CLIENTWRITE_EOS) ? TRUE : FALSE;
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     result = cw_out_do_write(ctx, data, CW_OUT_BODY, flush_all, buf, blen);

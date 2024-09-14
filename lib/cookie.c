@@ -904,7 +904,7 @@ Curl_cookie_add(struct Curl_easy *data,
          * domain can access the variable. Set TRUE when the cookie says
          * .domain.com and to false when the domain is complete www.domain.com
          */
-        co->tailmatch = strcasecompare(ptr, "TRUE")?TRUE:FALSE;
+        co->tailmatch = strcasecompare(ptr, "TRUE") ? TRUE : FALSE;
         break;
       case 2:
         /* The file format allows the path field to remain not filled in */
@@ -1400,7 +1400,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
 
   while(co) {
     /* if the cookie requires we are secure we must only continue if we are! */
-    if(co->secure?secure:TRUE) {
+    if(co->secure ? secure : TRUE) {
 
       /* now check if the domain is correct */
       if(!co->domain ||
