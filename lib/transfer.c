@@ -424,7 +424,6 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
   int didwhat = 0;
-  int select_bits = 0;
 
   DEBUGASSERT(nowp);
   if(data->state.select_bits) {
@@ -435,37 +434,27 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
       goto out;
     }
     data->state.select_bits = 0;
-    /* DEBUGF(infof(data, "sendrecv, select_bits %x, RUN", select_bits)); */
-    select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
-  }
-  else {
-    /* try both directions if the transfer wants it. We used to poll
-     * the socket here and on ran send/recv depending on POLLIN/OUT, but
-     * that does not when connections are multiplexed or handshake,
-     * or other direction reversals are happening. */
-    select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
   }
 
 #ifdef USE_HYPER
   if(data->conn->datastream) {
-    result = data->conn->datastream(data, data->conn, &didwhat, select_bits);
+    result = data->conn->datastream(data, data->conn, &didwhat,
+                                    CURL_CSELECT_OUT|CURL_CSELECT_IN);
     if(result || data->req.done)
       goto out;
   }
   else {
 #endif
-  /* We go ahead and do a read if we have a readable socket or if
-     the stream was rewound (in which case we have data in a
-     buffer) */
-  if((k->keepon & KEEP_RECV) && (select_bits & CURL_CSELECT_IN)) {
+  /* We go ahead and do a read if we have a readable socket or if the stream
+     was rewound (in which case we have data in a buffer) */
+  if(k->keepon & KEEP_RECV) {
     result = sendrecv_dl(data, k, &didwhat);
     if(result || data->req.done)
       goto out;
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
-  if((Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) &&
-     (select_bits & CURL_CSELECT_OUT)) {
+  if(Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) {
     result = sendrecv_ul(data, &didwhat);
     if(result)
       goto out;
@@ -474,7 +463,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 #endif
 
-  if(select_bits && !didwhat) {
+  if(!didwhat) {
     /* Transfer wanted to send/recv, but nothing was possible. */
     result = Curl_conn_ev_data_idle(data);
     if(result)
