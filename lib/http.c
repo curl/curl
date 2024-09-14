@@ -3285,7 +3285,7 @@ CURLcode Curl_http_size(struct Curl_easy *data)
     if(data->set.max_filesize &&
        !k->ignorebody &&
        (k->size > data->set.max_filesize)) {
-      failf(data, "Maximum **file size exceeded");
+      failf(data, "Maximum file size exceeded");
       return CURLE_FILESIZE_EXCEEDED;
     }
     if(k->ignorebody)
