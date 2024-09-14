@@ -1784,7 +1784,7 @@ endif()
 
 option(BUILD_EXAMPLES "Build libcurl examples" ON)
 if(BUILD_EXAMPLES)
-  add_subdirectory(docs/examples EXCLUDE_FROM_ALL)
+  add_subdirectory(docs/examples)
 endif()
 
 if(BUILD_TESTING)
