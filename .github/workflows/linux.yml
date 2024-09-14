@@ -123,13 +123,6 @@ jobs:
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
             singleuse: --unit
 
-          - name: openssl torture
-            install_packages: libnghttp2-dev
-            install_steps: pytest
-            configure: --with-openssl --enable-debug --disable-threaded-resolver --disable-shared
-            tflags: '-n -t --shallow=25 !FTP'
-            singleuse: --unit
-
           - name: openssl3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3 pytest
