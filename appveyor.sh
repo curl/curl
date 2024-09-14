@@ -149,3 +149,10 @@ if [[ "${TFLAGS}" != 'skipall' ]] && \
     )
   fi
 fi
+
+# build examples
+
+if [[ "${EXAMPLES}" = 'ON' ]] && \
+   [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
+fi
