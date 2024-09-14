@@ -157,28 +157,14 @@ jobs:
         # while running the tests, for example
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
         run: |
-          echo libtool autoconf automake pkg-config libpsl libssh2 nghttp2 openssl stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo autoconf automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
         run: |
-          case "${{ matrix.install }}" in
-            *openssl*)
-              (
-                cd $(brew --prefix openssl)/lib/pkgconfig/
-                for i in libssl.pc libcrypto.pc; do
-                  sudo cp $i $i.orig
-                  sudo sed s,libdir=$(brew --prefix)'/Cellar/openssl@3/3.3.0$',libdir=$(brew --prefix)/Cellar/openssl@3/3.3.0/lib,g < $i.orig > /tmp/$i
-                  sudo cp /tmp/$i $i
-                  cat $i
-                done
-              )
-              ;;
-            *)
-              if test -d $(brew --prefix)/include/openssl; then
-                brew unlink openssl
-              fi;;
-          esac
+          if test -d $(brew --prefix)/include/openssl; then
+            brew unlink openssl
+          fi
 
       - name: 'pip3 install'
         run: |
@@ -320,19 +306,20 @@ jobs:
     steps:
       - name: 'brew install'
         run: |
-          echo libtool autoconf automake pkg-config libpsl libssh2 nghttp2 openssl stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
         run: |
-          case "${{ matrix.build.install }}" in
-            *openssl*)
-              ;;
-            *)
-              if test -d $(brew --prefix)/include/openssl; then
-                brew unlink openssl
-              fi;;
-          esac
+          if test -d $(brew --prefix)/include/openssl; then
+            brew unlink openssl
+          fi
+
+      - name: 'pip3 install'
+        run: |
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -479,7 +466,7 @@ jobs:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          echo autoconf automake libtool openssl | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo autoconf automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
