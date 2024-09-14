@@ -71,7 +71,7 @@
   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); \
   pthread_mutex_init(lock, &attr); \
   pthread_mutexattr_destroy(&attr); \
-}while(0)
+} while(0)
 #define msh3_lock_uninitialize(lock) pthread_mutex_destroy(lock)
 #define msh3_lock_acquire(lock) pthread_mutex_lock(lock)
 #define msh3_lock_release(lock) pthread_mutex_unlock(lock)
