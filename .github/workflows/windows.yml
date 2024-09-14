@@ -151,7 +151,7 @@ jobs:
           export TFLAGS='-j14 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
-            TFLAGS+=' ~612 ~616 ~618'  # SFTP
+            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
           fi
@@ -236,7 +236,7 @@ jobs:
           export TFLAGS='-j14 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
-            TFLAGS+=' ~612 ~616 ~618'  # SFTP
+            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
           fi
