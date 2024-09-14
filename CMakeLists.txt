@@ -1782,7 +1782,7 @@ if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-option(BUILD_EXAMPLES "Build libcurl examples" OFF)
+option(BUILD_EXAMPLES "Build libcurl examples" ON)
 if(BUILD_EXAMPLES)
   add_subdirectory(docs/examples)
 endif()

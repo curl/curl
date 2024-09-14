@@ -121,7 +121,7 @@ jobs:
             compiler: gcc-12
             configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
-          - name: 'LibreSSL'
+          - name: 'LibreSSL +examples'
             compiler: clang
             install: libressl
             configure: --enable-debug --with-openssl=$(brew --prefix libressl) --enable-websockets
@@ -229,9 +229,6 @@ jobs:
       - name: 'curl version'
         run: bld/src/curl --disable --version
 
-      - name: 'make examples'
-        run: make -C bld V=1 examples
-
       - name: 'make tests'
         run: make -C bld V=1 -C tests
 
@@ -264,6 +261,10 @@ jobs:
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
+      - name: 'make examples'
+        if: ${{ contains(matrix.build.name, '+examples') }}
+        run: make -C bld V=1 examples
+
   cmake:
     name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
@@ -287,9 +288,9 @@ jobs:
           - name: 'SecureTransport ws debug+'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
             macos-version-min: '10.8'
-          - name: 'LibreSSL !ldap heimdal c-ares'
+          - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DBUILD_EXAMPLES=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
@@ -398,6 +399,10 @@ jobs:
           PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
           ninja -C bld test-ci
+
+      - name: 'cmake build examples'
+        if: ${{ contains(matrix.name, '+examples') }}
+        run: make -C bld VERBOSE=1
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
