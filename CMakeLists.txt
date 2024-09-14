@@ -1782,9 +1782,9 @@ if(BUILD_CURL_EXE)
   add_subdirectory(src)
 endif()
 
-option(BUILD_EXAMPLES "Build libcurl examples" OFF)
+option(BUILD_EXAMPLES "Build libcurl examples" ON)
 if(BUILD_EXAMPLES)
-  add_subdirectory(docs/examples)
+  add_subdirectory(docs/examples EXCLUDE_FROM_ALL)
 endif()
 
 if(BUILD_TESTING)

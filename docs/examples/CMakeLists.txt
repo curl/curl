@@ -26,6 +26,7 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+set(_all_targets)
 foreach(_target IN LISTS check_PROGRAMS)
   set(_target_name "curl-example-${_target}")
   add_executable(${_target_name} "${_target}.c")
@@ -37,4 +38,7 @@ foreach(_target IN LISTS check_PROGRAMS)
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}" UNITY_BUILD OFF
     PROJECT_LABEL "Example ${_target}")
+  list(APPEND _all_targets ${_target_name})
 endforeach()
+
+add_custom_target("curl-examples" DEPENDS ${_all_targets})
