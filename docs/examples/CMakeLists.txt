@@ -22,14 +22,16 @@
 #
 ###########################################################################
 
+add_custom_target(curl-examples)
+
 # Get 'check_PROGRAMS' variable
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set(_all_targets)
 foreach(_target IN LISTS check_PROGRAMS)
   set(_target_name "curl-example-${_target}")
   add_executable(${_target_name} "${_target}.c")
+  add_dependencies(curl-examples ${_target_name})
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
   target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES")
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
@@ -38,7 +40,4 @@ foreach(_target IN LISTS check_PROGRAMS)
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}" UNITY_BUILD OFF
     PROJECT_LABEL "Example ${_target}")
-  list(APPEND _all_targets ${_target_name})
 endforeach()
-
-add_custom_target("curl-examples" DEPENDS ${_all_targets})
