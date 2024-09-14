@@ -306,7 +306,7 @@ jobs:
     steps:
       - name: 'brew install'
         run: |
-          echo pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo ninja pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
@@ -348,7 +348,7 @@ jobs:
               fi
             done
           fi
-          cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+          cmake -B bld -GNinja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             ${{ matrix.build.generate }}
@@ -365,17 +365,17 @@ jobs:
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON')
         run: |
-          make -C bld/tests/certs clean-certs
-          make -C bld/tests/certs build-certs -j1
+          ninja -C bld clean-certs
+          ninja -C bld build-certs -j 1
 
       - name: 'cmake build'
-        run: make -C bld VERBOSE=1
+        run: ninja -C bld --verbose
 
       - name: 'curl version'
         run: bld/src/curl --disable --version
 
       - name: 'cmake build tests'
-        run: make -C bld testdeps
+        run: ninja -C bld testdeps
 
       - name: 'cmake run tests'
         timeout-minutes: 10
@@ -397,7 +397,7 @@ jobs:
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
           rm -f $HOME/.curlrc
-          make -C bld test-ci
+          ninja -C bld test-ci
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
