@@ -31,6 +31,7 @@
 
 /* curl stuff */
 #include <curl/curl.h>
+#include <curl/mprintf.h>
 
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
@@ -172,7 +173,7 @@ static int server_push_callback(CURL *parent,
 
   (void)parent; /* we have no use for this */
 
-  snprintf(filename, 128, "push%u", count++);
+  curl_msnprintf(filename, 128, "push%u", count++);
 
   /* here's a new stream, save it in a new file for each new push */
   out = fopen(filename, "wb");
