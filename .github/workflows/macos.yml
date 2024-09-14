@@ -365,8 +365,8 @@ jobs:
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON')
         run: |
-          ninja -C bld/tests/certs clean-certs
-          ninja -C bld/tests/certs build-certs -j 1
+          ninja -C bld clean-certs
+          ninja -C bld build-certs -j 1
 
       - name: 'cmake build'
         run: ninja -C bld --verbose
