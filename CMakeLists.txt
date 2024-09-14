@@ -1490,7 +1490,6 @@ check_symbol_exists("stricmp"         "${CURL_INCLUDES};string.h" HAVE_STRICMP)
 check_symbol_exists("strcmpi"         "${CURL_INCLUDES};string.h" HAVE_STRCMPI)
 check_symbol_exists("memrchr"         "${CURL_INCLUDES};string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "${CURL_INCLUDES}" HAVE_ALARM)
-check_symbol_exists("arc4random"      "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
 check_symbol_exists("fcntl"           "${CURL_INCLUDES}" HAVE_FCNTL)
 check_symbol_exists("getppid"         "${CURL_INCLUDES}" HAVE_GETPPID)
 check_symbol_exists("utimes"          "${CURL_INCLUDES}" HAVE_UTIMES)
@@ -1526,6 +1525,10 @@ check_symbol_exists("getrlimit"       "${CURL_INCLUDES}" HAVE_GETRLIMIT)
 check_symbol_exists("setlocale"       "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists("setmode"         "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists("setrlimit"       "${CURL_INCLUDES}" HAVE_SETRLIMIT)
+
+if(NOT _ssl_enabled)
+  check_symbol_exists("arc4random" "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
+endif()
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # Earlier MSVC compilers had faulty snprintf implementations
