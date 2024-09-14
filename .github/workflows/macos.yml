@@ -304,7 +304,7 @@ jobs:
     steps:
       - name: 'brew install'
         run: |
-          echo autoconf automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
           # allow using openssl forks:
           if test -d $(brew --prefix)/include/openssl; then
