@@ -159,9 +159,7 @@ jobs:
         run: |
           echo autoconf automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
-
-      - name: 'brew unlink openssl'
-        run: |
+          # allow using openssl forks:
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
           fi
@@ -308,9 +306,7 @@ jobs:
         run: |
           echo autoconf automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
-
-      - name: 'brew unlink openssl'
-        run: |
+          # allow using openssl forks:
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
           fi
