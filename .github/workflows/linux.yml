@@ -504,7 +504,6 @@ jobs:
           cmake . \
             -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
             -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
-            -DBUILD_EXAMPLES=ON \
             -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
             ${{ matrix.build.generate }}
         if: ${{ matrix.build.generate }}
@@ -535,10 +534,6 @@ jobs:
       - run: ./src/curl -V
         name: 'check curl -V output'
 
-      - run: ${{ matrix.build.make-prefix }} make V=1 examples
-        if: ${{ matrix.build.configure }}
-        name: 'make examples'
-
       - run: make V=1 -C tests
         if: ${{ matrix.build.configure && matrix.build.install_steps != 'skipall' }}
         name: 'make tests (autotools)'
@@ -566,3 +561,11 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
+
+      - run: ${{ matrix.build.make-prefix }} make V=1 examples
+        if: ${{ matrix.build.configure }}
+        name: 'make examples (autotools)'
+
+      - run: ${{ matrix.build.make-prefix }} make VERBOSE=1 curl-examples
+        if: ${{ matrix.build.generate }}
+        name: 'make examples (cmake)'

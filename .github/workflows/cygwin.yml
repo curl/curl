@@ -113,11 +113,6 @@ jobs:
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 5
-        run: make -C bld -j5 V=1 examples
-
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
@@ -133,6 +128,11 @@ jobs:
           fi
           make -C bld -j5 V=1 test-ci
 
+      - name: 'autotools build examples'
+        if: ${{ matrix.build == 'automake' }}
+        timeout-minutes: 5
+        run: make -C bld -j5 V=1 examples
+
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
@@ -141,7 +141,6 @@ jobs:
           cmake -B bld -G Ninja ${options} \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
-            -DBUILD_EXAMPLES=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON \
             ${{ matrix.config }}
@@ -186,3 +185,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
+      - name: 'cmake build examples'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples

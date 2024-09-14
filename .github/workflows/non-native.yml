@@ -58,13 +58,13 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
+            cmake --build bld --config Debug --parallel 3 --target curl-examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j0'  # flakies: ~389 ~392 ~TFTP and more
@@ -93,13 +93,13 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
+            cmake --build bld --config Debug --parallel 3 --target curl-examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
@@ -162,13 +162,13 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
               -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
+            cmake --build bld --config Debug --parallel 3 --target curl-examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j8 ~FTP'
