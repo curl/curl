@@ -553,7 +553,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
   cf_hc_reset(cf, data);
 
 out:
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   free(ctx);
   return result;
 }

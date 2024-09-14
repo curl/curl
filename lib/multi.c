@@ -2374,7 +2374,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
          */
         CURLcode ret = Curl_retry_request(data, &newurl);
         if(!ret)
-          retry = (newurl)?TRUE:FALSE;
+          retry = (newurl) ? TRUE : FALSE;
         else if(!result)
           result = ret;
 

@@ -75,7 +75,7 @@ static void dump_bufq(struct bufq *q, const char *msg)
   }
   fprintf(stderr, "  ]\n");
   terr = tail_err(q);
-  fprintf(stderr, "- tail: %s\n", terr? terr : "ok");
+  fprintf(stderr, "- tail: %s\n", terr ? terr : "ok");
   n = 0;
   chunk = q->spare;
   while(chunk) {

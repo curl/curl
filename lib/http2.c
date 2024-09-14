@@ -2751,7 +2751,7 @@ static CURLcode http2_cfilter_add(struct Curl_cfilter **pcf,
 out:
   if(result)
     cf_h2_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 

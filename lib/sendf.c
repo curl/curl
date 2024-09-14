@@ -398,7 +398,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
   result = cwt->do_init(data, writer);
 
 out:
-  *pwriter = result? NULL : writer;
+  *pwriter = result ? NULL : writer;
   if(result)
     free(writer);
   return result;
@@ -930,7 +930,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
   result = crt->do_init(data, reader);
 
 out:
-  *preader = result? NULL : reader;
+  *preader = result ? NULL : reader;
   if(result)
     free(reader);
   return result;

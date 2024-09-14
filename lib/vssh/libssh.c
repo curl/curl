@@ -2609,7 +2609,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
                               mem, (uint32_t)len,
                               (uint32_t)conn->proto.sshc.sftp_file_index);
 
-      myssh_block2waitfor(conn, (nread == SSH_AGAIN)?TRUE:FALSE);
+      myssh_block2waitfor(conn, (nread == SSH_AGAIN) ? TRUE : FALSE);
 
       if(nread == SSH_AGAIN) {
         *err = CURLE_AGAIN;

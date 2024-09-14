@@ -4356,9 +4356,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         infof(data, "ECH: unexpected status %d",rv);
       }
       infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
-             (status?status:"NULL"),
-             (inner?inner:"NULL"),
-             (outer?outer:"NULL"));
+             (status ? status : "NULL"),
+             (inner ? inner : "NULL"),
+             (outer ? outer : "NULL"));
       OPENSSL_free(inner);
       OPENSSL_free(outer);
       if(rv == SSL_ECH_STATUS_GREASE_ECH) {

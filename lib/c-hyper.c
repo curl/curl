@@ -1035,7 +1035,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   p_accept = Curl_checkheaders(data,
-                               STRCONST("Accept"))?NULL:"Accept: */*\r\n";
+                               STRCONST("Accept")) ? NULL : "Accept: */*\r\n";
   if(p_accept) {
     result = Curl_hyper_header(data, headers, p_accept);
     if(result)
