@@ -145,9 +145,7 @@ jobs:
             make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
-              # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP ~FTP'
+              make test-ci V=1 TFLAGS='-j8 ~FTP'
             fi
 
       - name: 'cmake'
@@ -175,9 +173,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
-              # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              export TFLAGS='-j8 !SFTP !SCP ~FTP'
+              export TFLAGS='-j8 ~FTP'
               cmake --build bld --config Debug --target test-ci
             fi
 
