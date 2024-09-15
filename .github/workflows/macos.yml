@@ -157,7 +157,7 @@ jobs:
         # while running the tests, for example
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
         run: |
-          echo autoconf automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
@@ -343,7 +343,7 @@ jobs:
               fi
             done
           fi
-          cmake -B bld -GNinja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+          cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             ${{ matrix.build.generate }}
@@ -468,7 +468,7 @@ jobs:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          echo autoconf automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
