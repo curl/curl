@@ -61,7 +61,7 @@ jobs:
         with:
           platform: ${{ matrix.platform }}
           # https://cygwin.com/cgi-bin2/package-grep.cgi
-          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+          packages: autoconf libtool ${{ matrix.build }} gcc-core gcc-g++ binutils make ninja libssl-devel zlib-devel libbrotli-devel libnghttp2-devel libpsl-devel libssh2-devel
           site: https://mirrors.kernel.org/sourceware/cygwin/
 
       - name: 'autotools autoreconf'
@@ -131,7 +131,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-          cmake -B bld ${options} \
+          cmake -B bld -G Ninja ${options} \
             -DCMAKE_UNITY_BUILD=ON \
             -DCURL_WERROR=ON \
             -DBUILD_EXAMPLES=ON \
