@@ -262,6 +262,7 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
+          PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
@@ -396,6 +397,7 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
+          PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
           ninja -C bld test-ci
 
