@@ -427,9 +427,11 @@ jobs:
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
-        run: |
-          make -C bld -j5
-          make -C bld -j5 examples
+        run: make -C bld -j5
+
+      - name: 'autotools build examples'
+        if: ${{ matrix.build == 'autotools' }}
+        run: make -C bld -j5 examples
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
@@ -449,9 +451,11 @@ jobs:
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
-        run: |
-          cmake --build bld --parallel 5
-          cmake --build bld --parallel 5 --target curl-examples
+        run: cmake --build bld --parallel 5
+
+      - name: 'cmake build examples'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cmake --build bld --parallel 5 --target curl-examples
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
