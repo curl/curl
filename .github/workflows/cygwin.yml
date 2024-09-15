@@ -186,8 +186,3 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
-
-      - name: 'cmake build examples'
-        if: ${{ matrix.build == 'cmake' }}
-        timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
