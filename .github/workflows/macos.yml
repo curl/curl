@@ -166,12 +166,6 @@ jobs:
             brew unlink openssl
           fi
 
-      - name: 'pip3 install'
-        run: |
-          python3 -m venv $HOME/venv
-          source $HOME/venv/bin/activate
-          python3 -m pip install impacket
-
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - name: 'toolchain versions'
@@ -243,6 +237,12 @@ jobs:
       - name: 'make tests'
         run: make -C bld V=1 -C tests
 
+      - name: 'pip3 install'
+        run: |
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
+
       - name: 'run tests'
         timeout-minutes: 20
         run: |
@@ -262,6 +262,7 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
+          PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
@@ -314,12 +315,6 @@ jobs:
           if test -d $(brew --prefix)/include/openssl; then
             brew unlink openssl
           fi
-
-      - name: 'pip3 install'
-        run: |
-          python3 -m venv $HOME/venv
-          source $HOME/venv/bin/activate
-          python3 -m pip install impacket
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -377,6 +372,12 @@ jobs:
       - name: 'cmake build tests'
         run: ninja -C bld testdeps
 
+      - name: 'pip3 install'
+        run: |
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
+
       - name: 'cmake run tests'
         timeout-minutes: 10
         run: |
@@ -396,6 +397,7 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
+          PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
           ninja -C bld test-ci
 
