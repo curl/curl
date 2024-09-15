@@ -1906,7 +1906,7 @@ _add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
                         (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
 _add_if("TLS-SRP"       USE_TLS_SRP)
 _add_if("HTTP2"         USE_NGHTTP2)
-_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_OPENSSL_QUIC)
+_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
 _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                         OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
