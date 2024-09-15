@@ -157,7 +157,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake ninja \
+            sudo pkg install -y cmake ninja perl5 \
               pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-openssl py311-impacket py311-cryptography
             cmake -B bld -G Ninja \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
