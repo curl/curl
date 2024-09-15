@@ -69,7 +69,9 @@ jobs:
               export TFLAGS='-j0'  # flakies: ~389 ~392 ~TFTP and more
               cmake --build bld --config Debug --target test-ci
             fi
+            echo '::group::build examples'
             cmake --build bld --config Debug --parallel 3 --target curl-examples
+            echo '::endgroup::'
 
   openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
@@ -104,7 +106,9 @@ jobs:
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
+            echo '::group::build examples'
             cmake --build bld --config Debug --parallel 3 --target curl-examples
+            echo '::endgroup::'
 
   freebsd:
     name: 'FreeBSD (${{ matrix.build }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})'
@@ -144,7 +148,9 @@ jobs:
               make -j3 -C tests
               make test-ci V=1 TFLAGS='-j8 ~FTP'
             fi
+            echo '::group::build examples'
             make -j3 examples
+            echo '::endgroup::'
 
       - name: 'cmake'
         if: ${{ matrix.build == 'cmake' }}
@@ -173,7 +179,9 @@ jobs:
               export TFLAGS='-j8 ~FTP'
               cmake --build bld --config Debug --target test-ci
             fi
+            echo '::group::build examples'
             cmake --build bld --config Debug --parallel 3 --target curl-examples
+            echo '::endgroup::'
 
   omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
@@ -199,4 +207,6 @@ jobs:
             src/curl --disable --version
             gmake -j3 -C tests
             gmake test-ci V=1 TFLAGS='-j12 ~MQTT ~FTP'
+            echo '::group::build examples'
             gmake -j3 examples
+            echo '::endgroup::'
