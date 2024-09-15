@@ -358,7 +358,7 @@ jobs:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
       - name: 'install packages'
-        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64
+        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -388,7 +388,7 @@ jobs:
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         run: |
-          cmake -B bld \
+          cmake -B bld -G Ninja \
             -DCMAKE_SYSTEM_NAME=Windows \
             -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
             -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
