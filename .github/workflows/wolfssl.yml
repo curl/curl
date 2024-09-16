@@ -98,5 +98,6 @@ jobs:
 
       - run: make V=1 test-ci
         name: 'run tests'
+        timeout-minutes: ${{ contains(matrix.build.install, 'valgrind') && 30 || 15 }}
         env:
           TFLAGS: "${{ matrix.build.tflags }}"

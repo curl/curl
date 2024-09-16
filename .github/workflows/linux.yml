@@ -549,6 +549,7 @@ jobs:
 
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
+        timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then

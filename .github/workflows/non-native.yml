@@ -53,7 +53,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
+            sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
             cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
@@ -129,7 +129,7 @@ jobs:
           run: |
             # https://ports.freebsd.org/
             sudo pkg install -y autoconf automake libtool \
-              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-openssl py311-impacket py311-cryptography
+              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
@@ -156,7 +156,7 @@ jobs:
           run: |
             # https://ports.freebsd.org/
             sudo pkg install -y cmake ninja perl5 \
-              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-openssl py311-impacket py311-cryptography
+              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             cmake -B bld -G Ninja \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON \
