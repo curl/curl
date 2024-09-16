@@ -53,7 +53,7 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
+            sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py-impacket
             cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
