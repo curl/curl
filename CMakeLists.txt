@@ -2323,6 +2323,10 @@ if(NOT CURL_DISABLE_INSTALL)
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL
   #   HAVE_LIBZ
+  #   USE_ARES
+  #   USE_LIBSSH2
+  #   USE_MBEDTLS
+  #   HAVE_ZSTD
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
