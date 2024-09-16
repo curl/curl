@@ -22,7 +22,7 @@ permissions: {}
 jobs:
   maketgz-and-verify-in-tree:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -64,7 +64,7 @@ jobs:
 
   verify-out-of-tree-docs:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
@@ -87,7 +87,7 @@ jobs:
 
   verify-out-of-tree-autotools-debug:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
@@ -108,7 +108,7 @@ jobs:
 
   verify-out-of-tree-cmake:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
