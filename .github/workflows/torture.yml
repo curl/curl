@@ -85,5 +85,6 @@ jobs:
 
       - run: make V=1 test-torture
         name: 'run tests'
+        timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
