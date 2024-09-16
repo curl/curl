@@ -2209,6 +2209,6 @@ buildinfo.compiler.version: ${CMAKE_C_COMPILER_VERSION}
 buildinfo.sysroot: ${_cmake_sysroot}
 ")
 file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
-if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}$ENV{BUILD_BUILDID}" STREQUAL "")
+if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   message(STATUS "\n${_buildinfo}")
 endif()
