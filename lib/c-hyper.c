@@ -482,7 +482,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
 
       k->deductheadercount =
         (100 <= http_status && 199 >= http_status) ? k->headerbytecount : 0;
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
       if(k->upgr101 == UPGR101_WS) {
         if(http_status == 101) {
           /* verify the response */

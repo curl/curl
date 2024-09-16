@@ -26,7 +26,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 /* just close the connection */
 static void websocket_close(CURL *curl)

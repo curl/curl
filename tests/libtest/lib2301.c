@@ -24,7 +24,7 @@
 
 #include "test.h"
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 #if 0
 
 static CURLcode send_ping(CURL *curl, const char *send_payload)

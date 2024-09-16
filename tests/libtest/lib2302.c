@@ -24,7 +24,7 @@
 
 #include "test.h"
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 struct ws_data {
   CURL *easy;

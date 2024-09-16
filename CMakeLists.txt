@@ -345,6 +345,8 @@ mark_as_advanced(CURL_DISABLE_SMB)
 option(CURL_DISABLE_SMTP "Disable SMTP" OFF)
 mark_as_advanced(CURL_DISABLE_SMTP)
 option(CURL_DISABLE_SOCKETPAIR "Disable use of socketpair for curl_multi_poll" OFF)
+option(CURL_DISABLE_WEBSOCKETS "Disable WebSockets" OFF)
+mark_as_advanced(CURL_DISABLE_WEBSOCKETS)
 mark_as_advanced(CURL_DISABLE_SOCKETPAIR)
 option(CURL_DISABLE_TELNET "Disable Telnet" OFF)
 mark_as_advanced(CURL_DISABLE_TELNET)
@@ -1608,16 +1610,12 @@ unset(CMAKE_REQUIRED_FLAGS)
 
 option(ENABLE_WEBSOCKETS "Enable WebSockets (experimental)" OFF)
 
-if(ENABLE_WEBSOCKETS)
-  if(SIZEOF_CURL_OFF_T GREATER 4)
-    set(USE_WEBSOCKETS ON)
-  else()
-    message(WARNING "curl_off_t is too small to enable WebSockets")
-  endif()
-endif()
-
-curl_internal_test(HAVE_GLIBC_STRERROR_R)
-curl_internal_test(HAVE_POSIX_STRERROR_R)
+foreach(_curl_test IN ITEMS
+    HAVE_GLIBC_STRERROR_R
+    HAVE_POSIX_STRERROR_R
+    )
+  curl_internal_test(${_curl_test})
+endforeach()
 
 # Check for reentrant
 foreach(_curl_test IN ITEMS
@@ -1855,8 +1853,8 @@ _add_if("IPNS"          NOT CURL_DISABLE_IPFS)
 _add_if("RTSP"          NOT CURL_DISABLE_RTSP)
 _add_if("RTMP"          USE_LIBRTMP)
 _add_if("MQTT"          NOT CURL_DISABLE_MQTT)
-_add_if("WS"            USE_WEBSOCKETS)
-_add_if("WSS"           USE_WEBSOCKETS AND _ssl_enabled)
+_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
+_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
 if(_items)
   list(SORT _items)
 endif()

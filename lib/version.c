@@ -384,10 +384,10 @@ static const char * const supported_protocols[] = {
 #ifndef CURL_DISABLE_TFTP
   "tftp",
 #endif
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   "ws",
 #endif
-#if defined(USE_SSL) && defined(USE_WEBSOCKETS)
+#if defined(USE_SSL) && !defined(CURL_DISABLE_WEBSOCKETS)
   "wss",
 #endif
 

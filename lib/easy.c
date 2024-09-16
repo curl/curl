@@ -1247,7 +1247,7 @@ CURLcode curl_easy_recv(struct Curl_easy *data, void *buffer, size_t buflen,
   return CURLE_OK;
 }
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 CURLcode Curl_connect_only_attach(struct Curl_easy *data)
 {
   CURLcode result;
@@ -1264,7 +1264,7 @@ CURLcode Curl_connect_only_attach(struct Curl_easy *data)
 
   return CURLE_OK;
 }
-#endif /* USE_WEBSOCKETS */
+#endif /* !CURL_DISABLE_WEBSOCKETS */
 
 /*
  * Sends data over the connected socket.
