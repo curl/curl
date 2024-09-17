@@ -150,7 +150,6 @@ static int crypto_set_secret(struct cf_linuxq_ctx *ctx, uint8_t level,
 {
   struct quic_crypto_secret secret = {0};
   int rc;
-  DEBUGASSERT(len == 48);
 
   secret.level = level;
   secret.type = type;
