@@ -88,8 +88,10 @@ struct cf_linuxq_ctx {
   struct curltime reconnect_at;      /* time the next attempt should start */
   struct dynbuf scratch;             /* temp buffer for header construction */
   struct Curl_hash streams;          /* hash `data->id` to `h3_stream_ctx` */
+  uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
+  BIT(initialized);
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
@@ -97,6 +99,28 @@ struct cf_linuxq_ctx {
 #undef CF_CTX_CALL_DATA
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_linuxq_ctx *)(cf)->ctx)->call_data
+
+static void h3_stream_hash_free(void *stream);
+
+static void cf_linuxq_ctx_init(struct cf_linuxq_ctx *ctx)
+{
+  DEBUGASSERT(!ctx->initialized);
+  ctx->max_idle_ms = CURL_QUIC_MAX_IDLE_MS;
+  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
+  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->initialized = TRUE;
+}
+
+static void cf_linuxq_ctx_free(struct cf_linuxq_ctx *ctx)
+{
+  if(ctx && ctx->initialized) {
+    Curl_dyn_free(&ctx->scratch);
+    Curl_hash_clean(&ctx->streams);
+    Curl_hash_destroy(&ctx->streams);
+    Curl_ssl_peer_cleanup(&ctx->peer);
+  }
+  free(ctx);
+}
 
 /**
  * All about the H3 internals of a stream
@@ -1377,9 +1401,12 @@ static void cf_linuxq_adjust_pollset(struct Curl_cfilter *cf,
   }
 }
 
-static void cf_linuxq_ctx_clear(struct cf_linuxq_ctx *ctx)
+static void cf_linuxq_ctx_close(struct cf_linuxq_ctx *ctx)
 {
   struct cf_call_data save = ctx->call_data;
+
+  if(!ctx->initialized)
+    return;
 
   Curl_vquic_tls_cleanup(&ctx->tls);
   vquic_ctx_free(&ctx->q);
@@ -1387,12 +1414,6 @@ static void cf_linuxq_ctx_clear(struct cf_linuxq_ctx *ctx)
     nghttp3_conn_del(ctx->h3conn);
   if(ctx->qconn)
     free(ctx->qconn);
-  Curl_dyn_free(&ctx->scratch);
-  Curl_hash_clean(&ctx->streams);
-  Curl_hash_destroy(&ctx->streams);
-  Curl_ssl_peer_cleanup(&ctx->peer);
-
-  memset(ctx, 0, sizeof(*ctx));
   ctx->call_data = save;
 }
 
@@ -1512,7 +1533,7 @@ static void cf_linuxq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   CF_DATA_SAVE(save, cf, data);
   if(ctx && ctx->qconn) {
     cf_linuxq_conn_close(cf, data);
-    cf_linuxq_ctx_clear(ctx);
+    cf_linuxq_ctx_close(ctx);
     CURL_TRC_CF(data, cf, "close");
   }
   cf->connected = FALSE;
@@ -1521,18 +1542,11 @@ static void cf_linuxq_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static void cf_linuxq_destroy(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-  struct cf_call_data save;
-
-  CF_DATA_SAVE(save, cf, data);
   CURL_TRC_CF(data, cf, "destroy");
-  if(ctx) {
-    cf_linuxq_ctx_clear(ctx);
-    free(ctx);
+  if(cf->ctx) {
+    cf_linuxq_ctx_free(cf->ctx);
+    cf->ctx = NULL;
   }
-  cf->ctx = NULL;
-  /* No CF_DATA_RESTORE(cf, save) possible */
-  (void)save;
 }
 
 #ifdef USE_OPENSSL
@@ -1607,9 +1621,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   struct quic_config config = {0};
   int rc;
 
-  Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
-  Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
-
   result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
   if(result)
     return result;
@@ -1642,7 +1653,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
-  ctx->transport_params.max_idle_timeout = CURL_QUIC_MAX_IDLE_MS * 1000;
+  ctx->transport_params.max_idle_timeout = ctx->max_idle_ms * 1000;
   ctx->transport_params.grease_quic_bit = 1;
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM,
                   &ctx->transport_params, len);
@@ -2495,7 +2506,7 @@ CURLcode Curl_cf_linuxq_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_linuxq_ctx_clear(ctx);
+  cf_linuxq_ctx_init(ctx);
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
   if(result)
