@@ -24,7 +24,7 @@ path = [
   "docs/TODO",
   "GIT-INFO.md",
   "lib/libcurl.vers.in",
-  "libcurl.def",
+  "lib/libcurl.def",
   "packages/OS400/README.OS400",
   "packages/vms/build_vms.com",
   "packages/vms/curl_release_note_start.txt",
@@ -43,6 +43,10 @@ path = [
   # checksrc control files
   "docs/examples/.checksrc",
   "lib/.checksrc",
+  "lib/vauth/.checksrc",
+  "lib/vquic/.checksrc",
+  "lib/vssh/.checksrc",
+  "lib/vtls/.checksrc",
   "src/.checksrc",
   "tests/libtest/.checksrc",
 ]

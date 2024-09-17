@@ -424,53 +424,37 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   struct SingleRequest *k = &data->req;
   CURLcode result = CURLE_OK;
   int didwhat = 0;
-  int select_bits = 0;
 
   DEBUGASSERT(nowp);
   if(data->state.select_bits) {
     if(select_bits_paused(data, data->state.select_bits)) {
       /* leave the bits unchanged, so they'll tell us what to do when
        * this transfer gets unpaused. */
-      /* DEBUGF(infof(data, "sendrecv, select_bits, early return on PAUSED"));
-      */
       result = CURLE_OK;
       goto out;
     }
     data->state.select_bits = 0;
-    /* DEBUGF(infof(data, "sendrecv, select_bits %x, RUN", select_bits)); */
-    select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
-  }
-  else if(data->last_poll.num) {
-    /* The transfer wanted something polled. Let's run all available
-     * send/receives. Worst case we EAGAIN on some. */
-    /* DEBUGF(infof(data, "sendrecv, had poll sockets, RUN")); */
-    select_bits = (CURL_CSELECT_OUT|CURL_CSELECT_IN);
-  }
-  else if(data->req.keepon & KEEP_SEND_TIMED) {
-    /* DEBUGF(infof(data, "sendrecv, KEEP_SEND_TIMED, RUN ul")); */
-    select_bits = CURL_CSELECT_OUT;
   }
 
 #ifdef USE_HYPER
   if(data->conn->datastream) {
-    result = data->conn->datastream(data, data->conn, &didwhat, select_bits);
+    result = data->conn->datastream(data, data->conn, &didwhat,
+                                    CURL_CSELECT_OUT|CURL_CSELECT_IN);
     if(result || data->req.done)
       goto out;
   }
   else {
 #endif
-  /* We go ahead and do a read if we have a readable socket or if
-     the stream was rewound (in which case we have data in a
-     buffer) */
-  if((k->keepon & KEEP_RECV) && (select_bits & CURL_CSELECT_IN)) {
+  /* We go ahead and do a read if we have a readable socket or if the stream
+     was rewound (in which case we have data in a buffer) */
+  if(k->keepon & KEEP_RECV) {
     result = sendrecv_dl(data, k, &didwhat);
     if(result || data->req.done)
       goto out;
   }
 
   /* If we still have writing to do, we check if we have a writable socket. */
-  if((Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) &&
-     (select_bits & CURL_CSELECT_OUT)) {
+  if(Curl_req_want_send(data) || (data->req.keepon & KEEP_SEND_TIMED)) {
     result = sendrecv_ul(data, &didwhat);
     if(result)
       goto out;
@@ -479,7 +463,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 #endif
 
-  if(select_bits && !didwhat) {
+  if(!didwhat) {
     /* Transfer wanted to send/recv, but nothing was possible. */
     result = Curl_conn_ev_data_idle(data);
     if(result)
@@ -1253,8 +1237,8 @@ CURLcode Curl_xfer_send(struct Curl_easy *data,
   else if(!result && *pnwritten)
     data->info.request_size += *pnwritten;
 
-  DEBUGF(infof(data, "Curl_xfer_send(len=%zu) -> %d, %zu",
-               blen, result, *pnwritten));
+  DEBUGF(infof(data, "Curl_xfer_send(len=%zu, eos=%d) -> %d, %zu",
+               blen, eos, result, *pnwritten));
   return result;
 }
 

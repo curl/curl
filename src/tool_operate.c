@@ -840,14 +840,14 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         httpgetfields = state->httpgetfields = config->postfields;
         config->postfields = NULL;
         if(SetHTTPrequest(config,
-                          (config->no_body?HTTPREQ_HEAD:HTTPREQ_GET),
+                          (config->no_body?TOOL_HTTPREQ_HEAD:TOOL_HTTPREQ_GET),
                           &config->httpreq)) {
           result = CURLE_FAILED_INIT;
         }
       }
     }
     else {
-      if(SetHTTPrequest(config, HTTPREQ_SIMPLEPOST, &config->httpreq))
+      if(SetHTTPrequest(config, TOOL_HTTPREQ_SIMPLEPOST, &config->httpreq))
         result = CURLE_FAILED_INIT;
     }
     if(result) {
@@ -1051,7 +1051,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             result = CURLE_OUT_OF_MEMORY;
             break;
           }
-          if(SetHTTPrequest(config, HTTPREQ_PUT, &config->httpreq)) {
+          if(SetHTTPrequest(config, TOOL_HTTPREQ_PUT, &config->httpreq)) {
             Curl_safefree(per->uploadfile);
             curl_easy_cleanup(curl);
             result = CURLE_FAILED_INIT;
@@ -1521,7 +1521,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt(curl, CURLOPT_TIMEOUT_MS, config->timeout_ms);
 
         switch(config->httpreq) {
-        case HTTPREQ_SIMPLEPOST:
+        case TOOL_HTTPREQ_SIMPLEPOST:
           if(config->resume_from) {
             errorf(global, "cannot mix --continue-at with --data");
             result = CURLE_FAILED_INIT;
@@ -1533,7 +1533,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                       (curl_off_t)curlx_dyn_len(&config->postdata));
           }
           break;
-        case HTTPREQ_MIMEPOST:
+        case TOOL_HTTPREQ_MIMEPOST:
           /* free previous remainders */
           curl_mime_free(config->mimepost);
           config->mimepost = NULL;

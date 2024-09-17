@@ -274,7 +274,10 @@ sub clearlocks {
             $handle = "handle64";
         }
         if(checkcmd($handle)) {
-            my @handles = `$handle $dir -accepteula -nobanner`;
+            # https://learn.microsoft.com/sysinternals/downloads/handle#usage
+            my $cmd = "$handle $dir -accepteula -nobanner";
+            logmsg "Executing: '$cmd'\n";
+            my @handles = `$cmd`;
             for my $tryhandle (@handles) {
                 # Skip the "No matching handles found." warning when returned
                 if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
@@ -282,11 +285,17 @@ sub clearlocks {
                     # Ignore stunnel since we cannot do anything about its locks
                     if("$3" eq "File" && "$1" ne "tstunnel.exe") {
                         logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
-                        system("taskkill.exe -f -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1");
+                        # https://ss64.com/nt/taskkill.html
+                        my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
+                        logmsg "Executing: '$cmd'\n";
+                        system($cmd);
                         $done = 1;
                     }
                 }
             }
+        }
+        else {
+            logmsg "Warning: 'handle' tool not found.\n";
         }
     }
     return $done;
@@ -445,6 +454,7 @@ sub protoport {
 #
 sub stopserver {
     my ($server, $pidlist) = @_;
+    my $ipvnum = 4;
 
     #
     # kill sockfilter processes for pingpong relative server
@@ -452,7 +462,7 @@ sub stopserver {
     if($server =~ /^(ftp|imap|pop3|smtp)s?(\d*)(-ipv6|)$/) {
         my $proto  = $1;
         my $idnum  = ($2 && ($2 > 1)) ? $2 : 1;
-        my $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
+        $ipvnum = ($3 && ($3 =~ /6$/)) ? 6 : 4;
         killsockfilters("$LOGDIR/$PIDDIR", $proto, $ipvnum, $idnum, $verbose);
     }
     #
@@ -502,6 +512,23 @@ sub stopserver {
     foreach my $server (@killservers) {
         my $pidfile = $serverpidfile{$server};
         unlink($pidfile) if(-f $pidfile);
+    }
+    #
+    # cleanup server lock files
+    #
+    foreach my $server (@killservers) {
+        # servers seem to produce (some of) these lock files
+        my @lockfiles = (
+            "$LOGDIR/$LOCKDIR/$server.lock",
+            "$LOGDIR/$LOCKDIR/$server-IPv$ipvnum.lock",
+            "$LOGDIR/$LOCKDIR/sws-".uc($server)."-IPv$ipvnum.lock"
+            );
+        foreach my $lockfile (@lockfiles) {
+            if(-f $lockfile) {
+                unlink($lockfile);
+                logmsg "RUN: kill $server, cleaned up $lockfile\n" if ($verbose);
+            }
+        }
     }
 
     return $result;
@@ -2326,7 +2353,7 @@ sub startservers {
            ($what eq "ftp") ||
            ($what eq "imap") ||
            ($what eq "smtp")) {
-            if($torture && $run{$what} &&
+            if($run{$what} &&
                !responsive_pingpong_server($what, "", $verbose)) {
                 if(stopserver($what)) {
                     return ("failed stopping unresponsive ".uc($what)." server", 3);
@@ -2342,7 +2369,7 @@ sub startservers {
             }
         }
         elsif($what eq "ftp-ipv6") {
-            if($torture && $run{'ftp-ipv6'} &&
+            if($run{'ftp-ipv6'} &&
                !responsive_pingpong_server("ftp", "", $verbose, "ipv6")) {
                 if(stopserver('ftp-ipv6')) {
                     return ("failed stopping unresponsive FTP-IPv6 server", 3);
@@ -2359,7 +2386,7 @@ sub startservers {
             }
         }
         elsif($what eq "gopher") {
-            if($torture && $run{'gopher'} &&
+            if($run{'gopher'} &&
                !responsive_http_server("gopher", $verbose, 0,
                                        protoport("gopher"))) {
                 if(stopserver('gopher')) {
@@ -2378,7 +2405,7 @@ sub startservers {
             }
         }
         elsif($what eq "gopher-ipv6") {
-            if($torture && $run{'gopher-ipv6'} &&
+            if($run{'gopher-ipv6'} &&
                !responsive_http_server("gopher", $verbose, "ipv6",
                                        protoport("gopher"))) {
                 if(stopserver('gopher-ipv6')) {
@@ -2439,7 +2466,7 @@ sub startservers {
             }
         }
         elsif($what eq "http-proxy") {
-            if($torture && $run{'http-proxy'} &&
+            if($run{'http-proxy'} &&
                !responsive_http_server("http", $verbose, "proxy",
                                        protoport("httpproxy"))) {
                 if(stopserver('http-proxy')) {
@@ -2458,7 +2485,7 @@ sub startservers {
             }
         }
         elsif($what eq "http-ipv6") {
-            if($torture && $run{'http-ipv6'} &&
+            if($run{'http-ipv6'} &&
                !responsive_http_server("http", $verbose, "ipv6",
                                        protoport("http6"))) {
                 if(stopserver('http-ipv6')) {
@@ -2477,7 +2504,7 @@ sub startservers {
             }
         }
         elsif($what eq "rtsp") {
-            if($torture && $run{'rtsp'} &&
+            if($run{'rtsp'} &&
                !responsive_rtsp_server($verbose)) {
                 if(stopserver('rtsp')) {
                     return ("failed stopping unresponsive RTSP server", 3);
@@ -2493,7 +2520,7 @@ sub startservers {
             }
         }
         elsif($what eq "rtsp-ipv6") {
-            if($torture && $run{'rtsp-ipv6'} &&
+            if($run{'rtsp-ipv6'} &&
                !responsive_rtsp_server($verbose, "ipv6")) {
                 if(stopserver('rtsp-ipv6')) {
                     return ("failed stopping unresponsive RTSP-IPv6 server", 3);
@@ -2521,7 +2548,7 @@ sub startservers {
                     return ("failed stopping $what server with different cert", 3);
                 }
             }
-            if($torture && $run{$cproto} &&
+            if($run{$cproto} &&
                !responsive_pingpong_server($cproto, "", $verbose)) {
                 if(stopserver($cproto)) {
                     return ("failed stopping unresponsive $cproto server", 3);
@@ -2561,7 +2588,14 @@ sub startservers {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
             }
-            if($torture && $run{'http'} &&
+            if($run{'https'} &&
+               !responsive_http_server("https", $verbose, 0,
+                                       protoport('https'))) {
+               if(stopserver('https')) {
+                   return ("failed stopping unresponsive HTTPS server", 3);
+               }
+            }
+            if($run{'http'} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
                 if(stopserver('http')) {
@@ -2599,7 +2633,7 @@ sub startservers {
                     return ("failed stopping GOPHERS server with different cert", 3);
                 }
             }
-            if($torture && $run{'gopher'} &&
+            if($run{'gopher'} &&
                !responsive_http_server("gopher", $verbose, 0,
                                        protoport('gopher'))) {
                 if(stopserver('gopher')) {
@@ -2668,7 +2702,7 @@ sub startservers {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
                 return ("no gnutls-serv (with SRP support)", 4);
             }
-            if($torture && $run{'httptls'} &&
+            if($run{'httptls'} &&
                !responsive_httptls_server($verbose, "IPv4")) {
                 if(stopserver('httptls')) {
                     return ("failed stopping unresponsive HTTPTLS server", 3);
@@ -2690,7 +2724,7 @@ sub startservers {
                 # for now, we can't run http TLS-EXT tests without gnutls-serv
                 return ("no gnutls-serv", 4);
             }
-            if($torture && $run{'httptls-ipv6'} &&
+            if($run{'httptls-ipv6'} &&
                !responsive_httptls_server($verbose, "ipv6")) {
                 if(stopserver('httptls-ipv6')) {
                     return ("failed stopping unresponsive HTTPTLS-IPv6 server", 3);
@@ -2708,7 +2742,7 @@ sub startservers {
             }
         }
         elsif($what eq "tftp") {
-            if($torture && $run{'tftp'} &&
+            if($run{'tftp'} &&
                !responsive_tftp_server("", $verbose)) {
                 if(stopserver('tftp')) {
                     return ("failed stopping unresponsive TFTP server", 3);
@@ -2725,7 +2759,7 @@ sub startservers {
             }
         }
         elsif($what eq "tftp-ipv6") {
-            if($torture && $run{'tftp-ipv6'} &&
+            if($run{'tftp-ipv6'} &&
                !responsive_tftp_server("", $verbose, "ipv6")) {
                 if(stopserver('tftp-ipv6')) {
                     return ("failed stopping unresponsive TFTP-IPv6 server", 3);
@@ -2782,7 +2816,7 @@ sub startservers {
             }
         }
         elsif($what eq "http-unix") {
-            if($torture && $run{'http-unix'} &&
+            if($run{'http-unix'} &&
                !responsive_http_server("http", $verbose, "unix", $HTTPUNIXPATH)) {
                 if(stopserver('http-unix')) {
                     return ("failed stopping unresponsive HTTP-unix server", 3);

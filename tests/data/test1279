@@ -24,7 +24,7 @@ Verify libcurl.def against CURL_EXTERN declarations
 </client>
 
 <verify>
-<stdout loadfile="%SRCDIR/../libcurl.def">
+<stdout loadfile="%SRCDIR/../lib/libcurl.def">
 </stdout>
 </verify>
 

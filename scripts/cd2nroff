@@ -178,6 +178,7 @@ my %knownprotos = (
     'WSS' => 1,
     'TLS' => 1,
     'TCP' => 1,
+    'QUIC' => 1,
     'All' => 1
     );
 
@@ -304,7 +305,7 @@ sub single {
                 print STDERR "$f:$line:1:ERROR: no 'Source:' in $f\n";
                 return 2;
             }
-            if(!$addedin) {
+            if(($source eq "libcurl") && !$addedin) {
                 print STDERR "$f:$line:1:ERROR: no 'Added-in:' in $f\n";
                 return 2;
             }

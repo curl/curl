@@ -68,16 +68,7 @@ These are each configured in different files in `.github/workflows`.
 
 ### Azure
 
-The following tests are run in Microsoft Azure CI environment:
-
-- Ubuntu tests with a variety of different compilation options.
-- Windows tests with a variety of different compilation options.
-
-These are all configured in `.azure-pipelines.yml`.
-
-As of November 2021 `@bagder` and `@mback2k` are the only people with
-administrator access to the Azure CI environment. Additional admins/group
-members can be added on request.
+Not used anymore.
 
 ### AppVeyor
 

@@ -12,7 +12,6 @@ name: Fuzzer
     paths-ignore:
       - '**/*.md'
       - '**/CMakeLists.txt'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'CMake/**'
@@ -27,7 +26,6 @@ name: Fuzzer
     paths-ignore:
       - '**/*.md'
       - '**/CMakeLists.txt'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'CMake/**'

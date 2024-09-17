@@ -44,12 +44,15 @@ libcurl does not support using network interface names for this option on
 Windows.
 
 We strongly advise against specifying the interface with a hostname, as it
-causes libcurl to do a blocking name resolve call to retrieve the IP
-address. That name resolve operation does **not** use DNS-over-HTTPS even if
+causes libcurl to do a blocking name resolve call to retrieve the IP address.
+That name resolve operation does **not** use DNS-over-HTTPS even if
 CURLOPT_DOH_URL(3) is set.
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

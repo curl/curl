@@ -79,7 +79,6 @@ use sshhelp qw(
 # Subs imported from serverhelp module
 #
 use serverhelp qw(
-    logmsg
     $logfile
     server_pidfilename
     server_logfilename
@@ -113,6 +112,14 @@ sub pp {
     my $file = $_[0];
     return "$piddir/$file";
     # TODO: do Windows path conversion here
+}
+
+#***************************************************************************
+# Save the message to the log and print it
+sub logmsg {
+    my $msg = $_[0];
+    serverhelp::logmsg $msg;
+    print $msg;
 }
 
 #***************************************************************************
@@ -385,6 +392,9 @@ if((($sshid =~ /OpenSSH/) && ($sshvernum < 299)) ||
 #  -q:  quiet keygen     : SunSSH 1.0.0 and later
 #  -t:  key type         : SunSSH 1.0.0 and later
 
+$sshdconfig = pp($sshdconfig);
+$sshconfig = pp($sshconfig);
+$sftpconfig = pp($sftpconfig);
 
 #***************************************************************************
 # Generate host and client key files for curl's tests
@@ -411,6 +421,13 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     # Make sure that permissions are restricted so openssh doesn't complain
     system "chmod 600 " . pp($hstprvkeyf);
     system "chmod 600 " . pp($cliprvkeyf);
+    if(pathhelp::os_is_win()) {
+      # https://ss64.com/nt/icacls.html
+      $ENV{'MSYS2_ARG_CONV_EXCL'} = '/reset';
+      system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /reset");
+      system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /grant:r \"$username:(R)\"");
+      system("icacls \"" . pathhelp::sys_native_abs_path(pp($hstprvkeyf)) . "\" /inheritance:r");
+    }
     # Save md5 and sha256 hashes of public host key
     open(my $rsakeyfile, "<", pp($hstpubkeyf));
     my @rsahostkey = do { local $/ = ' '; <$rsakeyfile> };
@@ -443,27 +460,30 @@ my $clipubkeyf_config;
 my $hstprvkeyf_config;
 my $pidfile_config;
 my $sftpsrv_config;
+my $sshdconfig_abs;
 if ($sshdid =~ /OpenSSH-Windows/) {
     # Ensure to use native Windows paths with OpenSSH for Windows
     $clipubkeyf_config = pathhelp::sys_native_abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = pathhelp::sys_native_abs_path(pp($hstprvkeyf));
     $pidfile_config = pathhelp::sys_native_abs_path($pidfile);
     $sftpsrv_config = pathhelp::sys_native_abs_path($sftpsrv);
+    $sshdconfig_abs = pathhelp::sys_native_abs_path($sshdconfig);
 }
 elsif (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
-    $clipubkeyf_config = pathhelp::build_sys_abs_path($clipubkeyf_config);
-    $hstprvkeyf_config = pathhelp::build_sys_abs_path($hstprvkeyf_config);
-    $pidfile_config = pathhelp::build_sys_abs_path($pidfile_config);
+    $clipubkeyf_config = pathhelp::build_sys_abs_path(pp($clipubkeyf));
+    $hstprvkeyf_config = pathhelp::build_sys_abs_path(pp($hstprvkeyf));
+    $pidfile_config = pathhelp::build_sys_abs_path($pidfile);
     $sftpsrv_config = "internal-sftp";
+    $sshdconfig_abs = pathhelp::build_sys_abs_path($sshdconfig);
 }
 else {
     $clipubkeyf_config = abs_path(pp($clipubkeyf));
     $hstprvkeyf_config = abs_path(pp($hstprvkeyf));
     $pidfile_config = $pidfile;
     $sftpsrv_config = $sftpsrv;
+    $sshdconfig_abs = abs_path($sshdconfig);
 }
-my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 
 #***************************************************************************
 #  ssh daemon configuration file options we might use and version support
@@ -473,7 +493,7 @@ my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 #  AllowTcpForwarding               : OpenSSH 2.3.0 and later
 #  AllowUsers                       : OpenSSH 1.2.1 and later
 #  AuthorizedKeysFile               : OpenSSH 2.9.9 and later
-#  AuthorizedKeysFile2              : OpenSSH 2.9.9 and later
+#  AuthorizedKeysFile2              : OpenSSH 2.9.9 till 5.9
 #  Banner                           : OpenSSH 2.5.0 and later
 #  ChallengeResponseAuthentication  : OpenSSH 2.5.0 and later
 #  Ciphers                          : OpenSSH 2.1.0 and later [3]
@@ -501,7 +521,7 @@ my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 #  KerberosOrLocalPasswd            : OpenSSH 1.2.1 and later [1]
 #  KerberosTgtPassing               : OpenSSH 1.2.1 and later [1]
 #  KerberosTicketCleanup            : OpenSSH 1.2.1 and later [1]
-#  KeyRegenerationInterval          : OpenSSH 1.2.1 and later
+#  KeyRegenerationInterval          : OpenSSH 1.2.1 till 7.3
 #  ListenAddress                    : OpenSSH 1.2.1 and later
 #  LoginGraceTime                   : OpenSSH 1.2.1 and later
 #  LogLevel                         : OpenSSH 1.2.1 and later
@@ -524,16 +544,16 @@ my $sshdconfig_abs = pathhelp::sys_native_abs_path(pp($sshdconfig));
 #  Protocol                         : OpenSSH 2.1.0 and later
 #  PubkeyAuthentication             : OpenSSH 2.5.0 and later
 #  RhostsAuthentication             : OpenSSH 1.2.1 and later
-#  RhostsRSAAuthentication          : OpenSSH 1.2.1 and later
-#  RSAAuthentication                : OpenSSH 1.2.1 and later
-#  ServerKeyBits                    : OpenSSH 1.2.1 and later
+#  RhostsRSAAuthentication          : OpenSSH 1.2.1 till 7.3
+#  RSAAuthentication                : OpenSSH 1.2.1 till 7.3
+#  ServerKeyBits                    : OpenSSH 1.2.1 till 7.3
 #  SkeyAuthentication               : OpenSSH 1.2.1 and later [1]
 #  StrictModes                      : OpenSSH 1.2.1 and later
 #  Subsystem                        : OpenSSH 2.2.0 and later
 #  SyslogFacility                   : OpenSSH 1.2.1 and later
 #  TCPKeepAlive                     : OpenSSH 3.8.0 and later
 #  UseDNS                           : OpenSSH 3.7.0 and later
-#  UseLogin                         : OpenSSH 1.2.1 and later
+#  UseLogin                         : OpenSSH 1.2.1 till 7.3
 #  UsePAM                           : OpenSSH 3.7.0 and later [1][2]
 #  UsePrivilegeSeparation           : OpenSSH 3.2.2 and later
 #  VerifyReverseMapping             : OpenSSH 3.1.0 and later
@@ -560,20 +580,21 @@ push @cfgarr, '#';
 # and do not support quotes around values for some unknown reason.
 if ($sshdid =~ /OpenSSH-Windows/) {
     my $username_lc = lc $username;
+    push @cfgarr, "AllowUsers " . $username_lc =~ s/ /\?/gr;
     if (exists $ENV{USERDOMAIN}) {
         my $userdomain_lc = lc $ENV{USERDOMAIN};
         $username_lc = "$userdomain_lc\\$username_lc";
+        $username_lc =~ s/ /\?/g; # replace space with ?
+        push @cfgarr, "AllowUsers " . $username_lc =~ s/ /\?/gr;
     }
-    $username_lc =~ s/ /\?/g; # replace space with ?
-    push @cfgarr, "DenyUsers !$username_lc";
-    push @cfgarr, "AllowUsers $username_lc";
 } else {
-    push @cfgarr, "DenyUsers !$username";
     push @cfgarr, "AllowUsers $username";
 }
 
 push @cfgarr, "AuthorizedKeysFile $clipubkeyf_config";
-push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
+if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
+    push @cfgarr, "AuthorizedKeysFile2 $clipubkeyf_config";
+}
 push @cfgarr, "HostKey $hstprvkeyf_config";
 if ($sshdid !~ /OpenSSH-Windows/) {
     push @cfgarr, "PidFile $pidfile_config";
@@ -598,7 +619,6 @@ push @cfgarr, 'HostbasedAuthentication no';
 push @cfgarr, 'HostbasedUsesNameFromPacketOnly no';
 push @cfgarr, 'IgnoreRhosts yes';
 push @cfgarr, 'IgnoreUserKnownHosts yes';
-push @cfgarr, 'KeyRegenerationInterval 0';
 push @cfgarr, 'LoginGraceTime 30';
 push @cfgarr, "LogLevel $loglevel";
 push @cfgarr, 'MaxStartups 5';
@@ -608,13 +628,16 @@ push @cfgarr, 'PermitRootLogin no';
 push @cfgarr, 'PrintLastLog no';
 push @cfgarr, 'PrintMotd no';
 push @cfgarr, 'PubkeyAuthentication yes';
-push @cfgarr, 'RhostsRSAAuthentication no';
-push @cfgarr, 'RSAAuthentication no';
-push @cfgarr, 'ServerKeyBits 768';
 push @cfgarr, 'StrictModes no';
 push @cfgarr, "Subsystem sftp \"$sftpsrv_config\"";
 push @cfgarr, 'SyslogFacility AUTH';
-push @cfgarr, 'UseLogin no';
+if(!($sshdid =~ /OpenSSH/) || ($sshdvernum <= 730)) {
+    push @cfgarr, 'KeyRegenerationInterval 0';
+    push @cfgarr, 'RhostsRSAAuthentication no';
+    push @cfgarr, 'RSAAuthentication no';
+    push @cfgarr, 'ServerKeyBits 768';
+    push @cfgarr, 'UseLogin no';
+}
 push @cfgarr, 'X11Forwarding no';
 push @cfgarr, '#';
 
@@ -622,7 +645,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out initial sshd configuration file for curl's tests
 #
-$error = dump_array(pp($sshdconfig), @cfgarr);
+$error = dump_array($sshdconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -645,14 +668,14 @@ sub sshd_supports_opt {
     }
     if(($sshdid =~ /OpenSSH/) && ($sshdvernum >= 299)) {
         # ssh daemon supports command line options -t and -f
-        $err = dump_array(pp($sshdconfig), (@cfgarr, "$option $value"));
+        $err = dump_array($sshdconfig, (@cfgarr, "$option $value"));
         if($err) {
             logmsg "$err\n";
             return 0;
         }
         $err = grep /((Unsupported)|(Bad configuration)|(Deprecated)) option.*$option/,
                     `\"$sshd\" -t -f $sshdconfig_abs 2>&1`;
-        unlink pp($sshdconfig);
+        unlink $sshdconfig;
         return !$err;
     }
     return 0;
@@ -784,7 +807,7 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting sshd configuration file for curl's tests
 #
-$error = dump_array(pp($sshdconfig), @cfgarr);
+$error = dump_array($sshdconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -847,8 +870,8 @@ if ($sshdid =~ /OpenSSH-Windows/) {
 }
 elsif (pathhelp::os_is_win()) {
     # Ensure to use MinGW/Cygwin paths
-    $identity_config = pathhelp::build_sys_abs_path($identity);
-    $knownhosts_config = pathhelp::build_sys_abs_path($knownhosts);
+    $identity_config = pathhelp::build_sys_abs_path(pp($identity));
+    $knownhosts_config = pathhelp::build_sys_abs_path(pp($knownhosts));
 }
 else {
     $identity_config = abs_path(pp($identity));
@@ -977,7 +1000,7 @@ push @cfgarr, 'PreferredAuthentications publickey';
 push @cfgarr, 'PubkeyAuthentication yes';
 
 # RSA authentication options are not supported by OpenSSH for Windows
-if (!($sshdid =~ /OpenSSH-Windows/)) {
+if (!($sshdid =~ /OpenSSH-Windows/ || pathhelp::os_is_win())) {
     push @cfgarr, 'RhostsRSAAuthentication no';
     push @cfgarr, 'RSAAuthentication no';
 }
@@ -1092,12 +1115,11 @@ push @cfgarr, '#';
 #***************************************************************************
 # Write out resulting ssh client configuration file for curl's tests
 #
-$error = dump_array(pp($sshconfig), @cfgarr);
+$error = dump_array($sshconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
 }
-
 
 #***************************************************************************
 # Initialize client sftp config with options actually supported.
@@ -1120,7 +1142,7 @@ for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
 #***************************************************************************
 # Write out resulting sftp client configuration file for curl's tests
 #
-$error = dump_array(pp($sftpconfig), @cfgarr);
+$error = dump_array($sftpconfig, @cfgarr);
 if($error) {
     logmsg "$error\n";
     exit 1;
@@ -1194,6 +1216,6 @@ elsif($verbose && ($rc >> 8)) {
 #
 unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f), pp($hstpubsha256f),
        pp($cliprvkeyf), pp($clipubkeyf), pp($knownhosts),
-       pp($sshdconfig), pp($sshconfig), pp($sftpconfig));
+       $sshdconfig, $sshconfig, $sftpconfig);
 
 exit 0;

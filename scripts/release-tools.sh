@@ -29,6 +29,11 @@ set -eu
 timestamp=${1:-unknown}
 version=${2:-unknown}
 tag=$(echo "curl-$version" | tr '.' '_')
+commit=${3}
+if [ -n "$commit" ] && [ -r "docs/tarball-commit.txt.dist" ]; then
+  # If commit is given, then the tag likely doesn't actually exist
+  tag="$(cat docs/tarball-commit.txt.dist)"
+fi
 
 cat <<MOO
 # Release tools used for curl $version
@@ -38,10 +43,9 @@ produce this release tarball.
 
 MOO
 
-exists=$(command -v dpkg 2>/dev/null)
-if test ! -e "$exists"; then
-  echo "(unknown, could not find dpkg)"
-  exit
+if ! command -v dpkg >/dev/null; then
+  echo "Error: could not find dpkg" >&2
+  exit 1
 fi
 
 debian() {
@@ -58,7 +62,7 @@ cat <<MOO
 
 # Reproduce the tarball
 
-- Clone the repo and checkout the tag: $tag
+- Clone the repo and checkout the tag/commit: $tag
 - Install the same set of tools + versions as listed above
 
 ## Do a standard build
@@ -70,6 +74,6 @@ cat <<MOO
 ## Generate the tarball with the same timestamp
 
 - export SOURCE_DATE_EPOCH=$timestamp
-- ./maketgz [version]
+- ./scripts/maketgz [version]
 
 MOO

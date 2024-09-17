@@ -50,6 +50,7 @@ my @ignore_line;
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
     'STRERROR',        => 'strerror() detected',
+    'STRNCPY',         => 'strncpy() detected',
     'STDERR',          => 'stderr detected',
     );
 
@@ -746,6 +747,18 @@ sub scanfile {
                 if($1 !~ /^ *\#/) {
                     # skip preprocessor lines
                     checkwarn("STRERROR",
+                              $line, length($1), $file, $ol,
+                              "use of $2 is banned");
+                }
+            }
+        }
+        if($warnings{"STRNCPY"}) {
+            # scan for use of banned strncpy. This is not a BANNEDFUNC to
+            # allow for individual enable/disable of this warning.
+            if($l =~ /^(.*\W)(strncpy)\s*\(/x) {
+                if($1 !~ /^ *\#/) {
+                    # skip preprocessor lines
+                    checkwarn("STRNCPY",
                               $line, length($1), $file, $ol,
                               "use of $2 is banned");
                 }

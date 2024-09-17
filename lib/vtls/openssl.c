@@ -314,29 +314,36 @@ typedef unsigned long sslerr_t;
 #define USE_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #endif /* !LIBRESSL_VERSION_NUMBER */
 
-#define push_certinfo(_label, _num)             \
-do {                              \
-  long info_len = BIO_get_mem_data(mem, &ptr); \
-  Curl_ssl_push_certinfo_len(data, _num, _label, ptr, info_len); \
-  if(1 != BIO_reset(mem))                                        \
-    break;                                                       \
-} while(0)
+static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
-static void pubkey_show(struct Curl_easy *data,
-                        BIO *mem,
-                        int num,
-                        const char *type,
-                        const char *name,
-                        const BIGNUM *bn)
+static CURLcode push_certinfo(struct Curl_easy *data,
+                              BIO *mem, const char *label, int num)
+  WARN_UNUSED_RESULT;
+
+static CURLcode push_certinfo(struct Curl_easy *data,
+                              BIO *mem, const char *label, int num)
 {
   char *ptr;
+  long len = BIO_get_mem_data(mem, &ptr);
+  CURLcode result = Curl_ssl_push_certinfo_len(data, num, label, ptr, len);
+  (void)BIO_reset(mem);
+  return result;
+}
+
+static CURLcode pubkey_show(struct Curl_easy *data,
+                            BIO *mem,
+                            int num,
+                            const char *type,
+                            const char *name,
+                            const BIGNUM *bn)
+{
   char namebuf[32];
 
   msnprintf(namebuf, sizeof(namebuf), "%s(%s)", type, name);
 
   if(bn)
     BN_print(mem, bn);
-  push_certinfo(namebuf, num);
+  return push_certinfo(data, mem, namebuf, num);
 }
 
 #ifdef HAVE_OPAQUE_RSA_DSA_DH
@@ -368,15 +375,16 @@ static int asn1_object_dump(ASN1_OBJECT *a, char *buf, size_t len)
   return 0;
 }
 
-static void X509V3_ext(struct Curl_easy *data,
-                       int certnum,
-                       CONST_EXTS STACK_OF(X509_EXTENSION) *exts)
+static CURLcode X509V3_ext(struct Curl_easy *data,
+                           int certnum,
+                           CONST_EXTS STACK_OF(X509_EXTENSION) *exts)
 {
   int i;
+  CURLcode result = CURLE_OK;
 
   if((int)sk_X509_EXTENSION_num(exts) <= 0)
     /* no extensions, bail out */
-    return;
+    return result;
 
   for(i = 0; i < (int)sk_X509_EXTENSION_num(exts); i++) {
     ASN1_OBJECT *obj;
@@ -386,7 +394,7 @@ static void X509V3_ext(struct Curl_easy *data,
     BIO *bio_out = BIO_new(BIO_s_mem());
 
     if(!bio_out)
-      return;
+      return result;
 
     obj = X509_EXTENSION_get_object(ext);
 
@@ -396,13 +404,16 @@ static void X509V3_ext(struct Curl_easy *data,
       ASN1_STRING_print(bio_out, (ASN1_STRING *)X509_EXTENSION_get_data(ext));
 
     BIO_get_mem_ptr(bio_out, &biomem);
-    Curl_ssl_push_certinfo_len(data, certnum, namebuf, biomem->data,
-                               biomem->length);
+    result = Curl_ssl_push_certinfo_len(data, certnum, namebuf, biomem->data,
+                                        biomem->length);
     BIO_free(bio_out);
+    if(result)
+      break;
   }
+  return result;
 }
 
-CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
+static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 {
   CURLcode result;
   STACK_OF(X509) *sk;
@@ -420,38 +431,43 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
   numcerts = sk_X509_num(sk);
 
   result = Curl_ssl_init_certinfo(data, (int)numcerts);
-  if(result) {
+  if(result)
     return result;
-  }
 
   mem = BIO_new(BIO_s_mem());
-  if(!mem) {
-    return CURLE_OUT_OF_MEMORY;
-  }
+  if(!mem)
+    result = CURLE_OUT_OF_MEMORY;
 
-  for(i = 0; i < (int)numcerts; i++) {
+  for(i = 0; !result && (i < (int)numcerts); i++) {
     ASN1_INTEGER *num;
     X509 *x = sk_X509_value(sk, (ossl_valsize_t)i);
     EVP_PKEY *pubkey = NULL;
     int j;
-    char *ptr;
     const ASN1_BIT_STRING *psig = NULL;
 
     X509_NAME_print_ex(mem, X509_get_subject_name(x), 0, XN_FLAG_ONELINE);
-    push_certinfo("Subject", i);
+    result = push_certinfo(data, mem, "Subject", i);
+    if(result)
+      break;
 
     X509_NAME_print_ex(mem, X509_get_issuer_name(x), 0, XN_FLAG_ONELINE);
-    push_certinfo("Issuer", i);
+    result = push_certinfo(data, mem, "Issuer", i);
+    if(result)
+      break;
 
     BIO_printf(mem, "%lx", X509_get_version(x));
-    push_certinfo("Version", i);
+    result = push_certinfo(data, mem, "Version", i);
+    if(result)
+      break;
 
     num = X509_get_serialNumber(x);
     if(num->type == V_ASN1_NEG_INTEGER)
       BIO_puts(mem, "-");
     for(j = 0; j < num->length; j++)
       BIO_printf(mem, "%02x", num->data[j]);
-    push_certinfo("Serial Number", i);
+    result = push_certinfo(data, mem, "Serial Number", i);
+    if(result)
+      break;
 
 #if defined(HAVE_X509_GET0_SIGNATURE) && defined(HAVE_X509_GET0_EXTENSIONS)
     {
@@ -464,7 +480,9 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
         const ASN1_OBJECT *sigalgoid = NULL;
         X509_ALGOR_get0(&sigalgoid, NULL, NULL, sigalg);
         i2a_ASN1_OBJECT(mem, sigalgoid);
-        push_certinfo("Signature Algorithm", i);
+        result = push_certinfo(data, mem, "Signature Algorithm", i);
+        if(result)
+          break;
       }
 
       xpubkey = X509_get_X509_PUBKEY(x);
@@ -472,11 +490,15 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
         X509_PUBKEY_get0_param(&pubkeyoid, NULL, NULL, NULL, xpubkey);
         if(pubkeyoid) {
           i2a_ASN1_OBJECT(mem, pubkeyoid);
-          push_certinfo("Public Key Algorithm", i);
+          result = push_certinfo(data, mem, "Public Key Algorithm", i);
+          if(result)
+            break;
         }
       }
 
-      X509V3_ext(data, i, X509_get0_extensions(x));
+      result = X509V3_ext(data, i, X509_get0_extensions(x));
+      if(result)
+        break;
     }
 #else
     {
@@ -484,22 +506,32 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
       X509_CINF *cinf = x->cert_info;
 
       i2a_ASN1_OBJECT(mem, cinf->signature->algorithm);
-      push_certinfo("Signature Algorithm", i);
+      result = push_certinfo(data, mem, "Signature Algorithm", i);
 
-      i2a_ASN1_OBJECT(mem, cinf->key->algor->algorithm);
-      push_certinfo("Public Key Algorithm", i);
+      if(!result) {
+        i2a_ASN1_OBJECT(mem, cinf->key->algor->algorithm);
+        result = push_certinfo(data, mem, "Public Key Algorithm", i);
+      }
 
-      X509V3_ext(data, i, cinf->extensions);
+      if(!result)
+        result = X509V3_ext(data, i, cinf->extensions);
+
+      if(result)
+        break;
 
       psig = x->signature;
     }
 #endif
 
     ASN1_TIME_print(mem, X509_get0_notBefore(x));
-    push_certinfo("Start date", i);
+    result = push_certinfo(data, mem, "Start date", i);
+    if(result)
+      break;
 
     ASN1_TIME_print(mem, X509_get0_notAfter(x));
-    push_certinfo("Expire date", i);
+    result = push_certinfo(data, mem, "Expire date", i);
+    if(result)
+      break;
 
     pubkey = X509_get_pubkey(x);
     if(!pubkey)
@@ -512,8 +544,7 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
       pktype = pubkey->type;
 #endif
       switch(pktype) {
-      case EVP_PKEY_RSA:
-      {
+      case EVP_PKEY_RSA: {
 #ifndef HAVE_EVP_PKEY_GET_PARAMS
         RSA *rsa;
 #ifdef HAVE_OPAQUE_EVP_PKEY
@@ -537,7 +568,9 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #else
           BIO_printf(mem, "%d", rsa->n ? BN_num_bits(rsa->n) : 0);
 #endif /* HAVE_OPAQUE_RSA_DSA_DH */
-          push_certinfo("RSA Public Key", i);
+          result = push_certinfo(data, mem, "RSA Public Key", i);
+          if(result)
+            break;
           print_pubkey_BN(rsa, n, i);
           print_pubkey_BN(rsa, e, i);
           FREE_PKEY_PARAM_BIGNUM(n);
@@ -585,8 +618,7 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #endif /* !OPENSSL_NO_DSA */
         break;
       }
-      case EVP_PKEY_DH:
-      {
+      case EVP_PKEY_DH: {
 #ifndef HAVE_EVP_PKEY_GET_PARAMS
         DH *dh;
 #ifdef HAVE_OPAQUE_EVP_PKEY
@@ -629,19 +661,25 @@ CURLcode Curl_ossl_certchain(struct Curl_easy *data, SSL *ssl)
       EVP_PKEY_free(pubkey);
     }
 
-    if(psig) {
+    if(!result && psig) {
       for(j = 0; j < psig->length; j++)
         BIO_printf(mem, "%02x:", psig->data[j]);
-      push_certinfo("Signature", i);
+      result = push_certinfo(data, mem, "Signature", i);
     }
 
-    PEM_write_bio_X509(mem, x);
-    push_certinfo("Cert", i);
+    if(!result) {
+      PEM_write_bio_X509(mem, x);
+      result = push_certinfo(data, mem, "Cert", i);
+    }
   }
 
   BIO_free(mem);
 
-  return CURLE_OK;
+  if(result)
+    /* cleanup all leftovers */
+    Curl_ssl_free_certinfo(data);
+
+  return result;
 }
 
 #endif /* quiche or OpenSSL */
@@ -1641,22 +1679,6 @@ fail:
   return 1;
 }
 
-CURLcode Curl_ossl_set_client_cert(struct Curl_easy *data, SSL_CTX *ctx,
-                                   char *cert_file,
-                                   const struct curl_blob *cert_blob,
-                                   const char *cert_type, char *key_file,
-                                   const struct curl_blob *key_blob,
-                                   const char *key_type, char *key_passwd)
-{
-  int rv = cert_stuff(data, ctx, cert_file, cert_blob, cert_type, key_file,
-                      key_blob, key_type, key_passwd);
-  if(rv != 1) {
-    return CURLE_SSL_CERTPROBLEM;
-  }
-
-  return CURLE_OK;
-}
-
 /* returns non-zero on failure */
 static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
 {
@@ -2078,8 +2100,9 @@ static bool subj_alt_hostcheck(struct Curl_easy *data,
 
    This function is now used from ngtcp2 (QUIC) as well.
 */
-CURLcode Curl_ossl_verifyhost(struct Curl_easy *data, struct connectdata *conn,
-                              struct ssl_peer *peer, X509 *server_cert)
+static CURLcode ossl_verifyhost(struct Curl_easy *data,
+                                struct connectdata *conn,
+                                struct ssl_peer *peer, X509 *server_cert)
 {
   bool matched = FALSE;
   int target; /* target type, GEN_DNS or GEN_IPADD */
@@ -4530,7 +4553,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
 
   if(data->set.ssl.certinfo)
     /* asked to gather certificate info */
-    (void)Curl_ossl_certchain(data, octx->ssl);
+    (void)ossl_certchain(data, octx->ssl);
 
   octx->server_cert = SSL_get1_peer_certificate(octx->ssl);
   if(!octx->server_cert) {
@@ -4567,7 +4590,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   BIO_free(mem);
 
   if(conn_config->verifyhost) {
-    result = Curl_ossl_verifyhost(data, conn, peer, octx->server_cert);
+    result = ossl_verifyhost(data, conn, peer, octx->server_cert);
     if(result) {
       X509_free(octx->server_cert);
       octx->server_cert = NULL;

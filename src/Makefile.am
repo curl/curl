@@ -85,9 +85,6 @@ libcurltool_la_SOURCES = $(CURL_FILES)
 endif
 
 CLEANFILES = tool_hugehelp.c
-# Use the C locale to ensure that only ASCII characters appear in the
-# embedded text.
-NROFF=env LC_ALL=C @NROFF@ @MANOPT@ 2>/dev/null # figured out by the configure script
 
 EXTRA_DIST = mk-file-embed.pl mkhelp.pl \
  Makefile.mk curl.rc Makefile.inc CMakeLists.txt .checksrc
@@ -143,7 +140,7 @@ CLEANFILES += $(CA_EMBED_CSOURCE)
 if CURL_CA_EMBED_SET
 AM_CPPFLAGS += -DCURL_CA_EMBED
 MK_FILE_EMBED = $(top_srcdir)/src/mk-file-embed.pl
-$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED)
+$(CA_EMBED_CSOURCE): $(MK_FILE_EMBED) $(CURL_CA_EMBED)
 	$(PERL) $(MK_FILE_EMBED) --var curl_ca_embed < $(CURL_CA_EMBED) > $(CA_EMBED_CSOURCE)
 else
 $(CA_EMBED_CSOURCE):
@@ -177,3 +174,6 @@ if HAVE_WINDRES
 .rc.o:
 	$(RC) -I$(top_srcdir)/include -DCURL_EMBED_MANIFEST $(RCFLAGS) -i $< -o $@
 endif
+
+dist-hook:
+	rm -f $(distdir)/$(CA_EMBED_CSOURCE)

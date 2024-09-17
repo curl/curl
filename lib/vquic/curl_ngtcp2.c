@@ -129,7 +129,6 @@ struct cf_ngtcp2_ctx {
   nghttp3_settings h3settings;
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
-  struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct dynbuf scratch;             /* temp buffer for header construction */
   struct Curl_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
@@ -2310,12 +2309,6 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
   pktx_init(&pktx, cf, data);
 
   CF_DATA_SAVE(save, cf, data);
-
-  if(ctx->reconnect_at.tv_sec && Curl_timediff(now, ctx->reconnect_at) < 0) {
-    /* Not time yet to attempt the next connect */
-    CURL_TRC_CF(data, cf, "waiting for reconnect time");
-    goto out;
-  }
 
   if(!ctx->qconn) {
     ctx->started_at = now;

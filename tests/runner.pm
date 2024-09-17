@@ -1066,8 +1066,6 @@ sub singletest_clean {
         }
     }
 
-    waitlockunlock($serverlogslocktimeout);
-
     # Test harness ssh server does not have this synchronization mechanism,
     # this implies that some ssh server based tests might need a small delay
     # once that the client command has run to avoid false test failures.
@@ -1085,12 +1083,6 @@ sub singletest_clean {
 
     portable_sleep($postcommanddelay) if($postcommanddelay);
 
-    # timestamp removal of server logs advisor read lock
-    $$testtimings{"timesrvrlog"} = Time::HiRes::time();
-
-    # test definition might instruct to stop some servers
-    # stop also all servers relative to the given one
-
     my @killtestservers = getpart("client", "killserver");
     if(@killtestservers) {
         foreach my $server (@killtestservers) {
@@ -1101,6 +1093,16 @@ sub singletest_clean {
             }
         }
     }
+
+    # wait for any servers left running to release their locks
+    waitlockunlock($serverlogslocktimeout);
+
+    # timestamp removal of server logs advisor read lock
+    $$testtimings{"timesrvrlog"} = Time::HiRes::time();
+
+    # test definition might instruct to stop some servers
+    # stop also all servers relative to the given one
+
     return 0;
 }
 

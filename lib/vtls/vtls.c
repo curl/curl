@@ -901,6 +901,8 @@ CURLcode Curl_ssl_push_certinfo_len(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   struct dynbuf build;
 
+  DEBUGASSERT(certnum < ci->num_of_certs);
+
   Curl_dyn_init(&build, CURL_X509_STR_MAX);
 
   if(Curl_dyn_add(&build, label) ||

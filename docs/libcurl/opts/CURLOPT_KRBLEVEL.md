@@ -35,6 +35,9 @@ string to NULL to disable kerberos support for FTP.
 The application does not have to keep the string around after setting this
 option.
 
+The application does not have to keep the string around after setting this
+option.
+
 # DEFAULT
 
 NULL

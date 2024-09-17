@@ -37,12 +37,12 @@ Use one of these protocol (scheme) names:
 dict, file, ftp, ftps, gopher, http, https, imap, imaps, ldap, ldaps, pop3,
 pop3s, rtsp, scp, sftp, smb, smbs, smtp, smtps, telnet, tftp
 
-An unknown or unsupported protocol causes error
-*CURLE_UNSUPPORTED_PROTOCOL* when libcurl parses a URL without a
-scheme. Parsing happens when curl_easy_perform(3) or
-curl_multi_perform(3) is called. The protocol set supported by libcurl
-vary depending on how it was built. Use curl_version_info(3) if you need
-a list of protocol names supported by the build of libcurl that you are using.
+An unknown or unsupported protocol causes error *CURLE_UNSUPPORTED_PROTOCOL*
+when libcurl parses a URL without a scheme. Parsing happens when
+curl_easy_perform(3) or curl_multi_perform(3) is called. The protocol set
+supported by libcurl vary depending on how it was built. Use
+curl_version_info(3) if you need a list of protocol names supported by the
+build of libcurl that you are using.
 
 This option does not change the default proxy protocol (http).
 
@@ -51,6 +51,9 @@ CURLOPT_URL(3) for details.
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

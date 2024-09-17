@@ -34,11 +34,15 @@
 #endif
 
 #else /* HAVE_MEMRCHR */
+#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)) || \
+  defined(USE_OPENSSL) || \
+  defined(USE_SCHANNEL)
 
 void *Curl_memrchr(const void *s, int c, size_t n);
 
 #define memrchr(x,y,z) Curl_memrchr((x),(y),(z))
 
+#endif
 #endif /* HAVE_MEMRCHR */
 
 #endif /* HEADER_CURL_MEMRCHR_H */

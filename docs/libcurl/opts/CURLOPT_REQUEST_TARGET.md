@@ -34,6 +34,12 @@ instead of the path as extracted from the URL.
 libcurl passes on the verbatim string in its request without any filter or
 other safe guards. That includes white space and control characters.
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
+
+The application does not have to keep the string around after setting this
+option.
+
 # DEFAULT
 
 NULL

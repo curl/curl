@@ -11,7 +11,6 @@ name: Linux AWS-LC
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -23,7 +22,6 @@ name: Linux AWS-LC
       - master
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -104,6 +102,7 @@ jobs:
 
       - run: make -C build V=1 test-ci
         name: 'run tests'
+        timeout-minutes: 15
 
   cmake:
     name: awslc (cmake)

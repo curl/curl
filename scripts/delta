@@ -140,9 +140,9 @@ close(F);
 # Produce the summary
 
 print "== Since $start $taggednice ==\n";
+my $days = $elapsed / 3600 / 24;
 printf "Elapsed time:                   %.1f days (total %d)\n",
-    $elapsed / 3600 / 24,
-    $total / 3600 / 24;
+    $days, $total / 3600 / 24;
 printf "Commits:                        %d (total %d)\n",
     $commits, $acommits;
 printf "Commit authors:                 %d, %d new (total %d)\n",
@@ -156,7 +156,8 @@ printf "New curl_easy_setopt() options: %d (total %d)\n",
 printf "New command line options:       %d (total %d)\n",
     $noptions, $aoptions;
 printf "Changes logged:                 %d\n", $numchanges;
-printf "Bugfixes logged:                %d\n", $numbugfixes;
+printf "Bugfixes logged:                %d (%.2f per day)\n",
+    $numbugfixes, $numbugfixes / $days;
 printf "Added files:                    %d (total %d)\n",
     $creates, $afiles;
 printf "Deleted files:                  %d (delta: %d)\n", $deletes,

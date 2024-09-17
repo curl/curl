@@ -26,6 +26,9 @@
 # It extracts all ca certs it finds in the local Firefox database and converts
 # them all into PEM format.
 #
+# It uses the "certutil" command line tool from the NSS project to perform the
+# conversion. On Debian it comes in the "libnss3-tools" package.
+#
 
 set -eu
 

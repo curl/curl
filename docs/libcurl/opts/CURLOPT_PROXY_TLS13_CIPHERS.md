@@ -44,7 +44,7 @@ separated by colons.
 For setting TLS 1.2 (1.1, 1.0) ciphers see CURLOPT_PROXY_SSL_CIPHER_LIST(3).
 
 A valid example of a cipher list is:
-~~~c
+~~~
 "TLS_AES_128_GCM_SHA256:TLS_CHACHA20_POLY1305_SHA256"
 ~~~
 
@@ -54,6 +54,9 @@ Find more details about cipher lists on this URL:
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

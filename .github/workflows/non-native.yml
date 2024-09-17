@@ -11,7 +11,6 @@ name: non-native
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -23,7 +22,6 @@ name: non-native
       - master
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -55,8 +53,8 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
-            sudo pkgin -y install cmake pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2  # python311 py311-impacket
-            cmake -B bld \
+            sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
+            cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
@@ -90,8 +88,8 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
-            sudo pkg_add cmake perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
-            cmake -B bld \
+            sudo pkg_add cmake ninja perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
+            cmake -B bld -G Ninja \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
@@ -130,7 +128,8 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y autoconf automake libtool pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-openssl py311-impacket py311-cryptography
+            sudo pkg install -y autoconf automake libtool \
+              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
@@ -144,9 +143,7 @@ jobs:
             make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
-              # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP ~FTP'
+              make test-ci V=1 TFLAGS='-j8 ~FTP'
             fi
 
       - name: 'cmake'
@@ -158,8 +155,9 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-openssl py311-impacket py311-cryptography
-            cmake -B bld \
+            sudo pkg install -y cmake ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
+            cmake -B bld -G Ninja \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON \
               -DCURL_WERROR=ON \
@@ -173,9 +171,8 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              # The OpenSSH server instance for the testsuite cannot be started on FreeBSD,
-              # therefore the SFTP and SCP tests are disabled right away from the beginning.
-              make test-ci V=1 TFLAGS='-j8 !SFTP !SCP ~FTP'
+              export TFLAGS='-j8 ~FTP'
+              cmake --build bld --config Debug --target test-ci
             fi
 
   omnios:
@@ -185,7 +182,7 @@ jobs:
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
       - name: 'autotools'
-        uses: vmactions/omnios-vm@a61ca1ebafdcb14a9d986928d070c9834ee66fd3 # v1
+        uses: vmactions/omnios-vm@2f97978b477e0a014767f65ecf3656b933541460 # v1
         with:
           usesh: true
           # https://pkg.omnios.org/r151050/core/en/index.shtml

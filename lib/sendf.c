@@ -336,7 +336,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
       connclose(data->conn, "excess found in a read");
     }
   }
-  else if(nwrite < nbytes) {
+  else if((nwrite < nbytes) && !data->req.ignorebody) {
     failf(data, "Exceeded the maximum allowed file size "
           "(%" FMT_OFF_T ") with %" FMT_OFF_T " bytes",
           data->set.max_filesize, data->req.bytecount);
@@ -949,6 +949,7 @@ struct cr_lc_ctx {
   struct bufq buf;
   BIT(read_eos);  /* we read an EOS from the next reader */
   BIT(eos);       /* we have returned an EOS */
+  BIT(prev_cr);   /* the last byte was a CR */
 };
 
 static CURLcode cr_lc_init(struct Curl_easy *data, struct Curl_creader *reader)
@@ -1005,10 +1006,15 @@ static CURLcode cr_lc_read(struct Curl_easy *data,
       goto out;
     }
 
-    /* at least one \n needs conversion to '\r\n', place into ctx->buf */
+    /* at least one \n might need conversion to '\r\n', place into ctx->buf */
     for(i = start = 0; i < nread; ++i) {
-      if(buf[i] != '\n')
+      /* if this byte is not an LF character, or if the preceding character is
+         a CR (meaning this already is a CRLF pair), go to next */
+      if((buf[i] != '\n') || ctx->prev_cr) {
+        ctx->prev_cr = (buf[i] == '\r');
         continue;
+      }
+      ctx->prev_cr = false;
       /* on a soft limit bufq, we do not need to check length */
       result = Curl_bufq_cwrite(&ctx->buf, buf + start, i - start, &n);
       if(!result)
@@ -1101,7 +1107,11 @@ static CURLcode do_init_reader_stack(struct Curl_easy *data,
   clen = r->crt->total_length(data, r);
   /* if we do not have 0 length init, and crlf conversion is wanted,
    * add the reader for it */
-  if(clen && (data->set.crlf || data->state.prefer_ascii)) {
+  if(clen && (data->set.crlf
+#ifdef CURL_PREFER_LF_LINEENDS
+     || data->state.prefer_ascii
+#endif
+    )) {
     result = cr_lc_add(data);
     if(result)
       return result;

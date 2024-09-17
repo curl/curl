@@ -59,18 +59,39 @@ typedef enum {
 } DNStype;
 
 /* one of these for each DoH request */
-struct dnsprobe {
+struct doh_probe {
   curl_off_t easy_mid; /* multi id of easy handle doing the lookup */
   DNStype dnstype;
-  unsigned char dohbuffer[512];
-  size_t dohlen;
-  struct dynbuf serverdoh;
+  unsigned char req_body[512];
+  size_t req_body_len;
+  struct dynbuf resp_body;
 };
 
-struct dohdata {
-  struct curl_slist *headers;
-  struct dnsprobe probe[DOH_PROBE_SLOTS];
-  unsigned int pending; /* still outstanding requests */
+enum doh_slot_num {
+  /* Explicit values for first two symbols so as to match hard-coded
+   * constants in existing code
+   */
+  DOH_SLOT_IPV4 = 0, /* make 'V4' stand out for readability */
+  DOH_SLOT_IPV6 = 1, /* 'V6' likewise */
+
+  /* Space here for (possibly build-specific) additional slot definitions */
+#ifdef USE_HTTPSRR
+  DOH_SLOT_HTTPS_RR = 2,     /* for HTTPS RR */
+#endif
+
+  /* for example */
+  /* #ifdef WANT_DOH_FOOBAR_TXT */
+  /*   DOH_PROBE_SLOT_FOOBAR_TXT, */
+  /* #endif */
+
+  /* AFTER all slot definitions, establish how many we have */
+  DOH_SLOT_COUNT
+};
+
+struct doh_probes {
+  struct curl_slist *req_hds;
+  struct doh_probe probe[DOH_SLOT_COUNT];
+  unsigned int pending; /* still outstanding probes */
   int port;
   const char *host;
 };
@@ -144,15 +165,15 @@ void Curl_doh_close(struct Curl_easy *data);
 void Curl_doh_cleanup(struct Curl_easy *data);
 
 #ifdef UNITTESTS
-UNITTEST DOHcode doh_encode(const char *host,
-                            DNStype dnstype,
-                            unsigned char *dnsp,  /* buffer */
-                            size_t len,  /* buffer size */
-                            size_t *olen);  /* output length */
-UNITTEST DOHcode doh_decode(const unsigned char *doh,
-                            size_t dohlen,
-                            DNStype dnstype,
-                            struct dohentry *d);
+UNITTEST DOHcode doh_req_encode(const char *host,
+                                DNStype dnstype,
+                                unsigned char *dnsp,  /* buffer */
+                                size_t len,  /* buffer size */
+                                size_t *olen);  /* output length */
+UNITTEST DOHcode doh_resp_decode(const unsigned char *doh,
+                                 size_t dohlen,
+                                 DNStype dnstype,
+                                 struct dohentry *d);
 
 UNITTEST void de_init(struct dohentry *d);
 UNITTEST void de_cleanup(struct dohentry *d);

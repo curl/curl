@@ -11,7 +11,6 @@ name: Windows
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -23,7 +22,6 @@ name: Windows
       - master
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -52,31 +50,45 @@ jobs:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver', name: 'default' }
           - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '', name: 'default R' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no', name: 'default' }
-          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --enable-windows-unicode --enable-ares', name: 'c-ares U' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
+          - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --enable-windows-unicode --enable-ares --enable-sspi', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON -DCURL_WINDOWS_SSPI=ON', type: 'Debug', name: 'schannel c-ares U' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', test: 'uwp', name: 'schannel R' }
+          - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DBUILD_EXAMPLES=OFF', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
         shell: pwsh
+
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+
       - uses: msys2/setup-msys2@ddf331adaebd714795f1042345e6ca57bd66cea8 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
           # https://packages.msys2.org/search
-          install: gcc ${{ matrix.build }} make openssl-devel zlib-devel brotli-devel libnghttp2-devel libpsl-devel libssh2-devel
+          install: >-
+            gcc
+            ${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || 'ninja' }}
+            openssh
+            openssl-devel
+            zlib-devel
+            brotli-devel
+            libnghttp2-devel
+            libpsl-devel
+            libssh2-devel
+
       - uses: msys2/setup-msys2@ddf331adaebd714795f1042345e6ca57bd66cea8 # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
           install: >-
             mingw-w64-${{ matrix.env }}-cc
-            mingw-w64-${{ matrix.env }}-${{ matrix.build }} make
+            mingw-w64-${{ matrix.env }}-${{ matrix.build }} ${{ matrix.build == 'autotools' && 'make' || '' }}
+            openssh
             mingw-w64-${{ matrix.env }}-openssl
             mingw-w64-${{ matrix.env }}-libssh2
             mingw-w64-${{ matrix.env }}-libpsl
@@ -133,18 +145,27 @@ jobs:
         timeout-minutes: 10
         run: make -C bld -j5 V=1 -C tests
 
+      - name: 'install test tools'
+        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+
       - name: 'autotools run tests'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 12
+        timeout-minutes: 14
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
+            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
+          else
+            TFLAGS+=' ~SFTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           make -C bld -j5 V=1 test-ci
 
@@ -171,7 +192,7 @@ jobs:
           fi
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-          cmake -B bld ${options} \
+          cmake -B bld -G Ninja ${options} \
             "-DCMAKE_C_FLAGS=${cflags}" \
             "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
@@ -214,18 +235,27 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
+      - name: 'install test tools'
+        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 12
+        timeout-minutes: 14
         run: |
-          export TFLAGS='-j14 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
             TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
+            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
+          else
+            TFLAGS+=' ~SFTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
@@ -252,7 +282,7 @@ jobs:
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
             type: 'Release'
-            tflags: '~2301 ~2302 ~3027'
+            tflags: '~2301 ~2302 ~3027 ~1451'
           - name: 'schannel !unity'
             env: '6.4.0-i686'
             dir: 'mingw32'
@@ -332,16 +362,23 @@ jobs:
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
+      - name: 'install test tools'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 12
+        timeout-minutes: 14
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~FTP ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
@@ -358,7 +395,7 @@ jobs:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
       - name: 'install packages'
-        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64
+        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -388,7 +425,7 @@ jobs:
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         run: |
-          cmake -B bld \
+          cmake -B bld -G Ninja \
             -DCMAKE_SYSTEM_NAME=Windows \
             -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
             -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
@@ -420,19 +457,19 @@ jobs:
       matrix:
         include:
           - name: 'schannel MultiSSL U'
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls'
+            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls shiftmedia-libgnutls'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON'
+            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON'
           - name: 'openssl'
-            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares'
+            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON -DENABLE_ARES=ON'
+            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_WINDOWS_SSPI=ON'
           - name: 'openssl'
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
             arch: 'x64'
@@ -461,8 +498,8 @@ jobs:
             type: 'Debug'
             tflags: '~1516'
             config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DCURL_USE_GSASL=ON'
-          - name: 'mbedtls'
-            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
+          - name: 'gnutls'
+            install: 'brotli zlib zstd libpsl nghttp2 shiftmedia-libgnutls libssh pkgconf gsasl ngtcp2[gnutls] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
@@ -471,7 +508,7 @@ jobs:
             #          read its configuration from, making it vulnerable to attacks on
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GSASL=ON'
+            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_GSASL=ON -DUSE_NGTCP2=ON'
       fail-fast: false
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -543,15 +580,27 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
-      - name: 'cmake run tests'
+      - name: 'install test tools'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 14
+        timeout-minutes: 5
         run: |
-          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ${{ matrix.tflags }}'
           # GnuTLS is not fully functional on Windows, so skip the tests
           # https://github.com/ShiftMediaProject/gnutls/issues/23
-          if [ '${{ matrix.name }}' != 'gnutls' ]; then
-            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 stunnel --force
+          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
+            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
           fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+
+      - name: 'cmake run tests'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 16
+        run: |
+          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ~SCP ~612 ${{ matrix.tflags }}'
+          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+            TFLAGS+=' ~SFTP'
+          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+          fi
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci

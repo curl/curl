@@ -53,8 +53,7 @@ authentication:
               lib/http_aws*,\
               lib/http_digest.*,\
               lib/http_negotiate.*,\
-              lib/vauth/**,\
-              tests/server/fake_ntlm.c\
+              lib/vauth/**\
               }"
 
 build:
@@ -80,14 +79,13 @@ build:
               plan9/**,\
               projects/**,\
               winbuild/**,\
-              libcurl.def\
+              lib/libcurl.def\
               }"
 
 CI:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '.azure-pipelines.yml'
               - '.circleci/**'
               - '.github/**'
               - 'appveyor.*'
@@ -539,5 +537,5 @@ Windows:
               projects/**,\
               src/tool_doswin.c,\
               winbuild/**,\
-              libcurl.def\
+              lib/libcurl.def\
               }"

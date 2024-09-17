@@ -120,10 +120,6 @@ LDAP tracing is enabled if this variable exists and its value is 1 or greater.
 
 OpenLDAP tracing is separate. Refer to CURL_OPENLDAP_TRACE.
 
-## CURL_NTLM_WB_FILE
-
-Debug-version of the *ntlm-wb* executable.
-
 ## CURL_OPENLDAP_TRACE
 
 OpenLDAP tracing is enabled if this variable exists and its value is 1 or

@@ -576,6 +576,11 @@ sub checksystemfeatures {
                $feature{"OpenSSL"} = 1;
                $feature{"SSLpinning"} = 1;
            }
+           elsif ($libcurl =~ /\squictls\b/i) {
+               # OpenSSL compatible API
+               $feature{"OpenSSL"} = 1;
+               $feature{"SSLpinning"} = 1;
+           }
            elsif ($libcurl =~ /\smbedTLS\b/i) {
                $feature{"mbedtls"} = 1;
                $feature{"SSLpinning"} = 1;
@@ -846,7 +851,8 @@ sub checksystemfeatures {
             "* Disabled: $dis\n",
             "* Host: $hostname\n",
             "* System: $hosttype\n",
-            "* OS: $hostos\n");
+            "* OS: $hostos\n",
+            "* Perl: $^V ($^X)\n");
 
     if($jobs) {
         # Only show if not the default for now
@@ -1491,6 +1497,11 @@ sub singletest_check {
         }
         if($hash{'crlf'}) {
             subnewlines(1, \$_) for @upload;
+        }
+        if($hash{'nonewline'}) {
+            # Yes, we must cut off the final newline from the final line
+            # of the upload data
+            chomp($upload[-1]);
         }
 
         $res = compare($runnerid, $testnum, $testname, "upload", \@out, \@upload);
@@ -2581,6 +2592,21 @@ if(!$jobs) {
 
 if(!$listonly) {
     checksystemfeatures();
+}
+
+#######################################################################
+# Output information about the curl build
+#
+if(!$listonly) {
+    if(open(my $fd, "<", "buildinfo.txt")) {
+        while(my $line = <$fd>) {
+            chomp $line;
+            if($line && $line !~ /^#/) {
+                logmsg("* buildinfo.$line\n");
+            }
+        }
+        close($fd);
+    }
 }
 
 #######################################################################

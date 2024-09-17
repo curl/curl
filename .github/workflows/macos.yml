@@ -11,7 +11,6 @@ name: macOS
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -23,7 +22,6 @@ name: macOS
       - master
     paths-ignore:
       - '**/*.md'
-      - '.azure-pipelines.yml'
       - '.circleci/**'
       - 'appveyor.*'
       - 'packages/**'
@@ -132,6 +130,11 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
             macos-version-min: '10.9'
+          - name: 'OpenSSL event-based'
+            compiler: clang
+            configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
+            macos-version-min: '10.9'
+            tflags: -e
           - name: 'OpenSSL torture !FTP'
             compiler: clang
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
@@ -152,34 +155,14 @@ jobs:
         # while running the tests, for example
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
         run: |
-          echo libtool autoconf automake pkg-config libpsl libssh2 nghttp2 openssl stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo automake libtool pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
         run: |
-          case "${{ matrix.install }}" in
-            *openssl*)
-              (
-                cd $(brew --prefix openssl)/lib/pkgconfig/
-                for i in libssl.pc libcrypto.pc; do
-                  sudo cp $i $i.orig
-                  sudo sed s,libdir=$(brew --prefix)'/Cellar/openssl@3/3.3.0$',libdir=$(brew --prefix)/Cellar/openssl@3/3.3.0/lib,g < $i.orig > /tmp/$i
-                  sudo cp /tmp/$i $i
-                  cat $i
-                done
-              )
-              ;;
-            *)
-              if test -d $(brew --prefix)/include/openssl; then
-                brew unlink openssl
-              fi;;
-          esac
-
-      - name: 'pip3 install'
-        run: |
-          python3 -m venv $HOME/venv
-          source $HOME/venv/bin/activate
-          python3 -m pip install impacket
+          if test -d $(brew --prefix)/include/openssl; then
+            brew unlink openssl
+          fi
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -252,6 +235,12 @@ jobs:
       - name: 'make tests'
         run: make -C bld V=1 -C tests
 
+      - name: 'pip3 install'
+        run: |
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
+
       - name: 'run tests'
         timeout-minutes: 20
         run: |
@@ -271,6 +260,7 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
+          PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
@@ -315,19 +305,14 @@ jobs:
     steps:
       - name: 'brew install'
         run: |
-          echo libtool autoconf automake pkg-config libpsl libssh2 nghttp2 openssl stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo ninja pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
         run: |
-          case "${{ matrix.build.install }}" in
-            *openssl*)
-              ;;
-            *)
-              if test -d $(brew --prefix)/include/openssl; then
-                brew unlink openssl
-              fi;;
-          esac
+          if test -d $(brew --prefix)/include/openssl; then
+            brew unlink openssl
+          fi
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
@@ -356,7 +341,7 @@ jobs:
               fi
             done
           fi
-          cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+          cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             ${{ matrix.build.generate }}
@@ -373,17 +358,23 @@ jobs:
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON')
         run: |
-          make -C bld/tests/certs clean-certs
-          make -C bld/tests/certs build-certs -j1
+          ninja -C bld clean-certs
+          ninja -C bld build-certs -j 1
 
       - name: 'cmake build'
-        run: make -C bld VERBOSE=1
+        run: ninja -C bld --verbose
 
       - name: 'curl version'
         run: bld/src/curl --disable --version
 
       - name: 'cmake build tests'
-        run: make -C bld testdeps
+        run: ninja -C bld testdeps
+
+      - name: 'pip3 install'
+        run: |
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
 
       - name: 'cmake run tests'
         timeout-minutes: 10
@@ -404,8 +395,9 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
+          PATH="$HOME/venv/bin:$PATH"
           rm -f $HOME/.curlrc
-          make -C bld test-ci
+          ninja -C bld test-ci
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
@@ -474,7 +466,7 @@ jobs:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          echo autoconf automake libtool openssl | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4

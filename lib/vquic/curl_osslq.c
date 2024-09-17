@@ -288,7 +288,6 @@ struct cf_osslq_ctx {
   struct curltime started_at;        /* time the current attempt started */
   struct curltime handshake_at;      /* time connect handshake finished */
   struct curltime first_byte_at;     /* when first byte was recvd */
-  struct curltime reconnect_at;      /* time the next attempt should start */
   struct bufc_pool stream_bufcp;     /* chunk pool for streams */
   struct Curl_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
@@ -1685,12 +1684,6 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   now = Curl_now();
   CF_DATA_SAVE(save, cf, data);
-
-  if(ctx->reconnect_at.tv_sec && Curl_timediff(now, ctx->reconnect_at) < 0) {
-    /* Not time yet to attempt the next connect */
-    CURL_TRC_CF(data, cf, "waiting for reconnect time");
-    goto out;
-  }
 
   if(!ctx->tls.ossl.ssl) {
     ctx->started_at = now;

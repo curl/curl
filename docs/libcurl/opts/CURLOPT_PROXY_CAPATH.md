@@ -42,6 +42,10 @@ CURLOPT_PROXY_SSL_VERIFYPEER(3) is enabled (which it is by default).
 The application does not have to keep the string around after setting this
 option.
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again and switch back to
+internal default.
+
 The default value for this can be figured out with CURLINFO_CAPATH(3).
 
 # DEFAULT

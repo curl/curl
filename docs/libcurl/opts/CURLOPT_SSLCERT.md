@@ -48,19 +48,21 @@ in order to avoid confusion with a nickname.
 certificate store. (You can import *PFX* to a store first). You can use
 "\<store location\>\\\<store name\>\\\<thumbprint\>" to refer to a certificate
 in the system certificates store, for example,
-**"CurrentUser\\MY\\934a7ac6f8a5d579285a74fa"**. The thumbprint is usually a
-SHA-1 hex string which you can see in certificate details. Following store
-locations are supported: **CurrentUser**, **LocalMachine**,
-**CurrentService**, **Services**, **CurrentUserGroupPolicy**,
-**LocalMachineGroupPolicy**, **LocalMachineEnterprise**. Schannel also support
-P12 certificate file, with the string `P12` specified with
-CURLOPT_SSLCERTTYPE(3).
+**"CurrentUser\\MY\\934a7ac6f8a5d5"**. The thumbprint is usually a SHA-1 hex
+string which you can see in certificate details. Following store locations are
+supported: **CurrentUser**, **LocalMachine**, **CurrentService**,
+**Services**, **CurrentUserGroupPolicy**, **LocalMachineGroupPolicy**,
+**LocalMachineEnterprise**. Schannel also support P12 certificate file, with
+the string `P12` specified with CURLOPT_SSLCERTTYPE(3).
 
 When using a client certificate, you most likely also need to provide a
 private key with CURLOPT_SSLKEY(3).
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

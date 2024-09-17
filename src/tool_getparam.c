@@ -2165,7 +2165,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
                    &config->mimecurrent,
                    (cmd == C_FORM_STRING)?TRUE:FALSE)) /* literal string */
         err = PARAM_BAD_USE;
-      else if(SetHTTPrequest(config, HTTPREQ_MIMEPOST, &config->httpreq))
+      else if(SetHTTPrequest(config, TOOL_HTTPREQ_MIMEPOST, &config->httpreq))
         err = PARAM_BAD_USE;
       break;
     case C_GLOBOFF: /* --globoff */
@@ -2243,7 +2243,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->no_body = toggle;
       config->show_headers = toggle;
       if(SetHTTPrequest(config,
-                        (config->no_body)?HTTPREQ_HEAD:HTTPREQ_GET,
+                        (config->no_body)?TOOL_HTTPREQ_HEAD:TOOL_HTTPREQ_GET,
                         &config->httpreq))
         err = PARAM_BAD_USE;
       break;

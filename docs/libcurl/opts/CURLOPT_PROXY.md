@@ -41,6 +41,12 @@ defaults to using port 1080 for proxies.
 The proxy string may be prefixed with [scheme]:// to specify which kind of
 proxy is used.
 
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
+
+The application does not have to keep the string around after setting this
+option.
+
 ## http://
 
 HTTP Proxy. Default when no scheme or proxy type is specified.

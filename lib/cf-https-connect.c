@@ -189,7 +189,6 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
 
   switch(cf->conn->alpn) {
   case CURL_HTTP_VERSION_3:
-    infof(data, "using HTTP/3");
     break;
   case CURL_HTTP_VERSION_2:
 #ifdef USE_NGHTTP2
@@ -202,10 +201,8 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
       return result;
     }
 #endif
-    infof(data, "using HTTP/2");
     break;
   default:
-    infof(data, "using HTTP/1.x");
     break;
   }
   ctx->state = CF_HC_SUCCESS;

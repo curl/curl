@@ -28,14 +28,17 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXYPASSWORD, char *pwd);
 
 # DESCRIPTION
 
-Pass a char pointer as parameter, which should be pointing to the null-terminated
-password to use for authentication with the proxy.
+Pass a char pointer as parameter, which should be pointing to the
+null-terminated password to use for authentication with the proxy.
 
-The CURLOPT_PROXYPASSWORD(3) option should be used in conjunction with
-the CURLOPT_PROXYUSERNAME(3) option.
+The CURLOPT_PROXYPASSWORD(3) option should be used in conjunction with the
+CURLOPT_PROXYUSERNAME(3) option.
 
 The application does not have to keep the string around after setting this
 option.
+
+Using this option multiple times makes the last set string override the
+previous ones. Set it to NULL to disable its use again.
 
 # DEFAULT
 

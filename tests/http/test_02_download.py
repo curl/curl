@@ -335,7 +335,7 @@ class TestDownload:
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env)
+        client = LocalClient(name='hx-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -355,7 +355,7 @@ class TestDownload:
         max_parallel = 5
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env)
+        client = LocalClient(name='hx-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -383,7 +383,7 @@ class TestDownload:
             pause_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env)
+        client = LocalClient(name='hx-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -412,7 +412,7 @@ class TestDownload:
             abort_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env)
+        client = LocalClient(name='hx-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -441,7 +441,7 @@ class TestDownload:
             fail_offset = 12 * 1024
         docname = 'data-1m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env)
+        client = LocalClient(name='hx-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[
@@ -558,7 +558,7 @@ class TestDownload:
         count = 2
         docname = 'data-10m'
         url = f'https://localhost:{env.https_port}/{docname}'
-        client = LocalClient(name='h2-download', env=env)
+        client = LocalClient(name='hx-download', env=env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         r = client.run(args=[

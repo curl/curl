@@ -3688,6 +3688,8 @@ CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
                             void *hashp)
 {
   struct Curl_sh_entry *there = NULL;
+  if(!GOOD_MULTI_HANDLE(multi))
+    return CURLM_BAD_HANDLE;
 
   there = sh_getentry(&multi->sockhash, s);
 

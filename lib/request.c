@@ -52,7 +52,11 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
 
   req->done = FALSE;
   req->upload_done = FALSE;
+  req->upload_aborted = FALSE;
   req->download_done = FALSE;
+  req->eos_written = FALSE;
+  req->eos_read = FALSE;
+  req->eos_sent = FALSE;
   req->ignorebody = FALSE;
   req->shutdown = FALSE;
   req->bytecount = 0;
@@ -146,6 +150,7 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->download_done = FALSE;
   req->eos_written = FALSE;
   req->eos_read = FALSE;
+  req->eos_sent = FALSE;
   req->upload_done = FALSE;
   req->upload_aborted = FALSE;
   req->ignorebody = FALSE;
@@ -214,15 +219,19 @@ static CURLcode xfer_send(struct Curl_easy *data,
     eos = TRUE;
   }
   result = Curl_xfer_send(data, buf, blen, eos, pnwritten);
-  if(!result && *pnwritten) {
-    if(hds_len)
-      Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
-                 CURLMIN(hds_len, *pnwritten));
-    if(*pnwritten > hds_len) {
-      size_t body_len = *pnwritten - hds_len;
-      Curl_debug(data, CURLINFO_DATA_OUT, (char *)buf + hds_len, body_len);
-      data->req.writebytecount += body_len;
-      Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
+  if(!result) {
+    if(eos && (blen == *pnwritten))
+      data->req.eos_sent = TRUE;
+    if(*pnwritten) {
+      if(hds_len)
+        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
+                   CURLMIN(hds_len, *pnwritten));
+      if(*pnwritten > hds_len) {
+        size_t body_len = *pnwritten - hds_len;
+        Curl_debug(data, CURLINFO_DATA_OUT, (char *)buf + hds_len, body_len);
+        data->req.writebytecount += body_len;
+        Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
+      }
     }
   }
   return result;
@@ -304,8 +313,17 @@ static CURLcode req_flush(struct Curl_easy *data)
     return Curl_xfer_flush(data);
   }
 
-  if(!data->req.upload_done && data->req.eos_read &&
-     Curl_bufq_is_empty(&data->req.sendbuf)) {
+  if(data->req.eos_read && !data->req.eos_sent) {
+    char tmp;
+    size_t nwritten;
+    result = xfer_send(data, &tmp, 0, 0, &nwritten);
+    if(result)
+      return result;
+    DEBUGASSERT(data->req.eos_sent);
+  }
+
+  if(!data->req.upload_done && data->req.eos_read && data->req.eos_sent) {
+    DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
     if(data->req.shutdown) {
       bool done;
       result = Curl_xfer_send_shutdown(data, &done);

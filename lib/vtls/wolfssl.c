@@ -1176,15 +1176,15 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 static char *wolfssl_strerror(unsigned long error, char *buf,
                               unsigned long size)
 {
-  DEBUGASSERT(size);
+  DEBUGASSERT(size > 40);
   *buf = '\0';
 
   wolfSSL_ERR_error_string_n(error, buf, size);
 
   if(!*buf) {
     const char *msg = error ? "Unknown error" : "No error";
-    strncpy(buf, msg, size - 1);
-    buf[size - 1] = '\0';
+    /* the string fits because the assert above assures this */
+    strcpy(buf, msg);
   }
 
   return buf;
