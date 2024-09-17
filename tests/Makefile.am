@@ -133,7 +133,9 @@ TEST_E = -a -e
 TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm -j2
+# we used to default to 2 runners, is that the hanging problem?
+# TEST_CI = $(TEST_NF) -r -rm -j2
+TEST_CI = $(TEST_NF) -r -rm
 endif
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
