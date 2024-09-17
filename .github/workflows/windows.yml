@@ -290,7 +290,6 @@ jobs:
         timeout-minutes: 5
         run: |
           perl -MCPAN -e 'install Win32::Process' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
 
@@ -383,7 +382,6 @@ jobs:
         timeout-minutes: 5
         run: |
           perl -MCPAN -e 'install Win32::Process' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
 
@@ -516,7 +514,6 @@ jobs:
           # cpanm Module::Name
           # cpanm -iqn Win32::Process Win32::Process::List || true
           perl -MCPAN -e 'install Win32::Process Win32::Process::List' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process Win32::Process::List' || true
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
@@ -801,7 +798,6 @@ jobs:
         timeout-minutes: 5
         run: |
           perl -MCPAN -e 'install Win32::Process' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
           # GnuTLS is not fully functional on Windows, so skip the tests
           # https://github.com/ShiftMediaProject/gnutls/issues/23
           if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
