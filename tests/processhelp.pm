@@ -180,7 +180,7 @@ sub pidterm {
             if($^O ne 'MSWin32') {  # if cygwin || msys
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -t -pid $pid >nul 2>&1";
-                logmsg "Executing: '$cmd'\n";
+                print "pidterm: $^O: Executing: '$cmd'\n";
                 system($cmd);
                 return;
             }
@@ -206,7 +206,7 @@ sub pidkill {
             if($^O ne 'MSWin32') {  # if cygwin || msys
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
-                logmsg "Executing: '$cmd'\n";
+                print "pidkill: $^O: Executing: '$cmd'\n";
                 system($cmd);
                 return;
             }
