@@ -261,12 +261,15 @@ sub processexists {
     # fetch pid from pidfile
     my $pid = pidfromfile($pidfile);
 
+    print "processexists: $^O: init $pidfile =-> $pid\n";
+
     if($pid > 0) {
         # verify if currently alive
         if(pidexists($pid)) {
             return $pid;
         }
         else {
+            print "processexists: $^O: inexisting -> cleaning up\n";
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
