@@ -59,6 +59,7 @@ env:
   quiche-version: 0.22.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
   mod_h2-version: 2.0.29
+  linux-quic-version: main
 
 jobs:
   setup:
@@ -293,6 +294,13 @@ jobs:
               --with-quiche=/home/runner/quiche/target/release
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
+          - name: linux-quic
+            configure: >-
+              PKG_CONFIG_PATH="$HOME/gnutls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/gnutls/build/lib"
+              --with-linux-quic --enable-warnings --enable-werror --enable-debug
+              --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
+              --with-gnutls=$HOME/gnutls/build
+              --with-nghttp3=$HOME/nghttp3/build
 
     steps:
       - run: |
@@ -441,6 +449,28 @@ jobs:
           cd $HOME/mod_h2
           sudo make install
         name: 'install mod_h2'
+
+      - name: cache linux-quic
+        if: matrix.build.name == 'linux-quic'
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-linux-quic
+        env:
+          cache-name: cache-linux-quic
+        with:
+          path: /home/runner/linux-quic
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-linux-quic-${{ env.linux-quic-version }}
+
+      - if: matrix.build.name == 'linux-quic' && steps.cache-linux-quic.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b ${{ env.linux-quic-version }} --recursive https://github.com/lxin/quic.git linux-quic
+          cd linux-quic
+
+          ./autogen.sh
+          ./configure --prefix=/usr
+          make
+          make install
+        name: 'build linux-quic'
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
