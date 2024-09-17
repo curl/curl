@@ -39,44 +39,81 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-int filename_extract_limits(char *filename, size_t *start, size_t *end)
+/* This function compensates the shortcomings of fseek in windows for
+text-mode filestreams: we assume that a user considers a line break as
+one character '\n' and not "\r\n" */
+int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
 {
-  int have_valid_range = 1;
+  int i;
+  curl_off_t pos, newpos;
+
+  if(whence == SEEK_END && fseek(stream, 0, SEEK_END))
+    return -1;
+
+  pos = ftell(stream);
+  if(pos == -1)
+    return -1;
+
+  if(fseek(stream, 0, SEEK_SET))
+    return -1;
+
+  if(whence == SEEK_SET)
+    newpos = offset;
+  else if(whence == SEEK_CUR || whence == SEEK_END)
+    newpos = offset + pos;
+  pos = 0;
+  while(pos < newpos && fgetc(stream) != EOF)
+    pos++;
+
+  return (pos == newpos) ? 0 : -1;
+}
+
+/* filename_extract_limits() examines the entered filename. It starts
+at the end of the string and works its way to the pointer filename. If
+the string ends with "!x-y" or "!x-" or "!-y", then x and/or y is stored
+in the addresses of start and end.
+(1) in case "!x-y", x is stored in the memory of start and y in the
+    memory of end. The return value of filename_extract_limits() here is
+    FILELIMIT_START | FILELIMIT_END.
+(2) in case "-y", y is stored in the memory of end and the
+    filename_extract_limits() function returns FILELIMIT_END.
+(3) in case "x-", x is stored in the memory of start and the
+    filename_extract_limits() function returns FILELIMIT_START.
+(4) if x or y are not numbers, 0 is returned and the memory of start and end
+    remains unchanged. */
+int filename_extract_limits(char *filename, curl_off_t *start, curl_off_t *end)
+{
   char *ptr_range;
   int flags_ret = 0;
-  int have_minus = 0;
+  bool have_minus = FALSE;
 
   ptr_range = filename + strlen(filename) - 1;
   while(ptr_range > filename) {
-    if(!strchr("0123456789-!", *ptr_range)) {
-      have_valid_range = 0;
-      break;
-    }
+    if(!strchr("0123456789-!", *ptr_range))
+      return 0;
+
     if(*ptr_range == '-') {
-      have_minus = 1;
+      have_minus = TRUE;
     }
     if(*ptr_range == '!') {
       if(*(ptr_range + 1) != '-') {
-        flags_ret = flags_ret | FILELIMIT_START;
-        *start = strtol(ptr_range + 1, NULL, 0);
+        flags_ret |= FILELIMIT_START;
+        if(curlx_strtoofft(ptr_range + 1, NULL, 0, start) != CURL_OFFT_OK)
+          return 0;
       }
       if(have_minus && flags_ret)
         *ptr_range = '\0';
       break;
     }
-    else if(*ptr_range == '-' && strchr(ptr_range + 1, '-')) {
-      have_valid_range = 0;
-      break;
-    }
+    else if(*ptr_range == '-' && strchr(ptr_range + 1, '-'))
+      return 0;
+
     else if(*ptr_range == '-' && *(ptr_range + 1) != '\0') {
       flags_ret = FILELIMIT_END;
-      *end = strtol(ptr_range + 1, NULL, 0);
+      if(curlx_strtoofft(ptr_range + 1, NULL, 0, end) != CURL_OFFT_OK)
+        return 0;
     }
     ptr_range--;
-  }
-
-  if(!have_valid_range) {
-    return 0;
   }
   return flags_ret;
 }
@@ -133,20 +170,20 @@ static size_t memcrlf(char *orig,
 #define MAX_FILE2STRING MAX_FILE2MEMORY
 
 ParameterError file2string(char **bufp, FILE *file, int filelimit,
-                           size_t start, size_t end)
+                           curl_off_t start, curl_off_t end)
 {
   struct curlx_dynbuf dyn;
   size_t rangelen = 0;
   int rangelen_set = 0;
 
-  if(filelimit == FILELIMIT_START && fseek(file, (long)start, SEEK_SET)) {
+  if(filelimit == FILELIMIT_START && textmode_fseek(file, start, SEEK_SET)) {
     return PARAM_FSEEK_ERROR;
   }
-  if(filelimit == FILELIMIT_END && fseek(file, -((long)end), SEEK_END)) {
+  if(filelimit == FILELIMIT_END && textmode_fseek(file, -end, SEEK_END)) {
     return PARAM_FSEEK_ERROR;
   }
   if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
-    if(fseek(file, (long)start, SEEK_SET)) {
+    if(textmode_fseek(file, start, SEEK_SET)) {
       return PARAM_FSEEK_ERROR;
     }
     rangelen = end - start + 1;
@@ -196,7 +233,7 @@ ParameterError file2string(char **bufp, FILE *file, int filelimit,
 }
 
 ParameterError file2memory(char **bufp, size_t *size, FILE *file,
-                           int filelimit, size_t start, size_t end)
+                           int filelimit, curl_off_t start, curl_off_t end)
 {
   if(file) {
     size_t nread;
@@ -205,14 +242,14 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
     int rangelen_set = 0;
 
 
-    if(filelimit == FILELIMIT_START && fseek(file, (long)start, SEEK_SET)) {
+    if(filelimit == FILELIMIT_START && fseek(file, start, SEEK_SET)) {
       return PARAM_FSEEK_ERROR;
     }
-    if(filelimit == FILELIMIT_END && fseek(file, -((long)end), SEEK_END)) {
+    if(filelimit == FILELIMIT_END && fseek(file, -end, SEEK_END)) {
       return PARAM_FSEEK_ERROR;
     }
     if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
-      if(fseek(file, (long)start, SEEK_SET)) {
+      if(fseek(file, start, SEEK_SET)) {
         return PARAM_FSEEK_ERROR;
       }
       rangelen = end - start + 1;
