@@ -512,8 +512,8 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          perl -MCPAN -e 'install Win32::Process'
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process'
+          perl -MCPAN -e 'install Win32::Process Win32::Process::List'
+          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process Win32::Process::List'
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
