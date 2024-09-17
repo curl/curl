@@ -31,6 +31,7 @@
 #include "tool_cfgable.h"
 #include "tool_doswin.h"
 #include "tool_operhlp.h"
+#include "tool_msgs.h"
 
 #include "memdebug.h" /* keep this as LAST include */
 
@@ -178,7 +179,8 @@ fail:
  * Returns a pointer to a heap-allocated string or NULL if
  * no name part, at location indicated by first argument.
  */
-CURLcode get_url_file_name(char **filename, const char *url)
+CURLcode get_url_file_name(struct GlobalConfig *global,
+                           char **filename, const char *url)
 {
   CURLU *uh = curl_url();
   char *path = NULL;
@@ -212,9 +214,11 @@ CURLcode get_url_file_name(char **filename, const char *url)
       if(pc)
         /* duplicate the string beyond the slash */
         pc++;
-      else
-        /* no slash => empty string */
-        pc = (char *)"";
+      else {
+        /* no slash => empty string, use default */
+        pc = (char *)"curl_response";
+        warnf(global, "No remote file name, uses \"%s\"", pc);
+      }
 
       *filename = strdup(pc);
       curl_free(path);
