@@ -1181,6 +1181,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
             }
           }
+          DEBUGASSERT(per->outfile);
 
           if(config->output_dir && *config->output_dir) {
             char *d = aprintf("%s/%s", config->output_dir, per->outfile);
@@ -1201,7 +1202,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               break;
           }
 
-          if(per->outfile && config->skip_existing) {
+          if(config->skip_existing) {
             struct_stat fileinfo;
             if(!stat(per->outfile, &fileinfo)) {
               /* file is present */
