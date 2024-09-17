@@ -1928,13 +1928,6 @@ static CURLcode cf_linuxq_recvmsg(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "recvd 1 packet with %zd bytes -> %d", nread, result);
 out:
-  if(!result) {
-    if(!ctx->q.got_first_byte) {
-      ctx->q.got_first_byte = TRUE;
-      ctx->q.first_byte_at = ctx->q.last_op;
-    }
-    ctx->q.last_io = ctx->q.last_op;
-  }
   return result;
 }
 
@@ -1974,8 +1967,13 @@ static ssize_t cf_linuxq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   *err = cf_linuxq_recvmsg(cf, data);
-  if(!*err)
+  if(!*err) {
+    if(!ctx->q.got_first_byte) {
+      ctx->q.got_first_byte = TRUE;
+      ctx->q.first_byte_at = ctx->q.last_op;
+    }
     *err = CURLE_AGAIN;
+  }
 
   nread = -1;
 
@@ -2457,41 +2455,13 @@ static bool cf_linuxq_conn_is_alive(struct Curl_cfilter *cf,
   if(!ctx->qconn || ctx->shutdown_started)
     goto out;
 
-  /* Both sides of the QUIC connection announce they max idle times in
-   * the transport parameters. Look at the minimum of both and if
-   * we exceed this, regard the connection as dead. The other side
-   * may have completely purged it and will no longer respond
-   * to any packets from us. */
-  rp.remote = 1;
-  rc = getsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM, &rp,
-                  &len);
-  if(rc)
-    goto out;
-
-  idle_ms = ctx->transport_params.max_idle_timeout;
-  if(rp.max_idle_timeout && rp.max_idle_timeout < idle_ms)
-    idle_ms = rp.max_idle_timeout;
-  idle_ms /= 1000;
-
-  idletime = Curl_timediff(Curl_now(), ctx->q.last_io);
-  if(idletime > 0 && (uint64_t)idletime > idle_ms)
-    goto out;
-
   if(!cf->next || !cf->next->cft->is_alive(cf->next, data, input_pending))
     goto out;
 
   alive = TRUE;
-  if(*input_pending) {
-    CURLcode result;
-    /* This happens before we have sent off a request and the connection is
-       not in use by any other transfer, there should not be any data here,
-       only "protocol frames" */
-    result = cf_linuxq_recvmsg(cf, data);
-    CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
-    alive = result? FALSE : TRUE;
-  }
-
 out:
+  CURL_TRC_CF(data, cf, "alive -> %d, input_pending -> %d", alive,
+              *input_pending);
   CF_DATA_RESTORE(cf, save);
   return alive;
 }
