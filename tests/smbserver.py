@@ -90,7 +90,7 @@ class ShutdownHandler(threading.Thread):
         signal.signal(signal.SIGINT, signal.SIG_DFL)
         signal.signal(signal.SIGTERM, signal.SIG_DFL)
         # Delete any temporary files created by the server during its run
-        log.info("Deleting %d temporary files", len(self.server.tmpfiles))
+        log.info("Deleting %d temporary file(s)", len(self.server.tmpfiles))
         for f in self.server.tmpfiles:
             os.unlink(f)
 
@@ -123,7 +123,7 @@ def smbserver(options):
     smb_config.set("global", "server_name", "SERVICE")
     smb_config.set("global", "server_os", "UNIX")
     smb_config.set("global", "server_domain", "WORKGROUP")
-    smb_config.set("global", "log_file", "")
+    smb_config.set("global", "log_file", "None")
     smb_config.set("global", "credentials_file", "")
 
     # We need a share which allows us to test that the server is running
@@ -425,7 +425,7 @@ def setup_logging(options):
         root_logger.setLevel(logging.DEBUG)
         add_stdout = True
     else:
-        root_logger.setLevel(logging.INFO)
+        root_logger.setLevel(logging.WARNING)
 
     if add_stdout:
         stdout_handler = logging.StreamHandler(sys.stdout)
