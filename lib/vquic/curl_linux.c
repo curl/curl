@@ -100,8 +100,6 @@ struct cf_linuxq_ctx {
 
 static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
                                     struct Curl_easy *data);
-static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data);
 
 /**
  * All about the H3 internals of a stream
@@ -939,11 +937,6 @@ static void cf_linuxq_stream_close(struct Curl_cfilter *cf,
     einfo.errcode = (uint32_t)NGHTTP3_H3_REQUEST_CANCELLED;
     (void)setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_RESET,
                      &einfo, sizeof(einfo));
-
-    result = cf_progress_egress(cf, data);
-    if(result)
-      CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cancel stream -> %d",
-                  stream->id, result);
   }
 }
 
@@ -2023,6 +2016,97 @@ out:
   return nwritten;
 }
 
+static CURLcode cf_linuxq_sendmsg(struct Curl_cfilter *cf,
+                                   struct Curl_easy *data)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
+  struct quic_stream_info *sinfo;
+  struct cmsghdr *cm;
+  struct quic_errinfo einfo;
+  int64_t stream_id;
+  nghttp3_ssize veccnt;
+  ssize_t sent;
+  uint32_t flags;
+  int fin, rc;
+  struct msghdr msg = {0};
+  nghttp3_vec vec[16];
+  uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_stream_info))];
+
+  msg.msg_iov = (struct iovec *)&vec;
+  msg.msg_control = msg_ctrl;
+  msg.msg_controllen = sizeof(msg_ctrl);
+
+  cm = CMSG_FIRSTHDR(&msg);
+  cm->cmsg_level = IPPROTO_QUIC;
+  cm->cmsg_type = 0;
+  cm->cmsg_len = CMSG_LEN(sizeof(*sinfo));
+
+  sinfo = (struct quic_stream_info *)CMSG_DATA(cm);
+
+  for(;;) {
+    veccnt = 0;
+    stream_id = -1;
+    fin = 0;
+    flags = 0;
+
+    if(ctx->h3conn) {
+      veccnt = nghttp3_conn_writev_stream(ctx->h3conn, &stream_id,
+                                          &fin, vec, sizeof(vec) /
+                                          sizeof(vec[0]));
+      if(veccnt < 0) {
+        failf(data, "nghttp3_conn_writev_stream returned error: %s",
+              nghttp3_strerror((int)veccnt));
+
+        einfo.stream_id = (uint64_t)stream_id;
+        einfo.errcode = (uint32_t)
+                        nghttp3_err_infer_quic_app_error_code((int)veccnt);
+        setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_RESET, &einfo,
+                   sizeof(einfo));
+        return CURLE_SEND_ERROR;
+      }
+
+      if(fin)
+        flags |= MSG_STREAM_FIN;
+      else if(veccnt == 0)
+        goto out;
+    }
+
+    sinfo->stream_id = (uint64_t)stream_id;
+    sinfo->stream_flags = flags;
+    msg.msg_iovlen = veccnt;
+
+    sent = sendmsg(ctx->q.sockfd, &msg, 0);
+    if(sent == 0)
+      goto out;
+
+    if(sent == -1) {
+      switch(SOCKERRNO) {
+      case EAGAIN:
+#if EAGAIN != EWOULDBLOCK
+      case EWOULDBLOCK:
+#endif
+        return CURLE_AGAIN;
+      default:
+        failf(data, "sendmsg() returned %zd (errno %d)", sent, errno);
+        return CURLE_SEND_ERROR;
+      }
+    }
+
+    stream->upload_left -= sent;
+
+    rc = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, sent);
+    if(rc) {
+      failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
+            nghttp3_strerror(rc));
+      return CURLE_SEND_ERROR;
+    }
+  }
+
+out:
+  return CURLE_OK;
+}
+
 static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
                               const void *buf, size_t len, bool eos,
                               CURLcode *err)
@@ -2103,7 +2187,7 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
 
-  result = cf_progress_egress(cf, data);
+  result = cf_linuxq_sendmsg(cf, data);
   if(result) {
     *err = result;
     sent = -1;
@@ -2303,97 +2387,6 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
     ctx->q.last_io = ctx->q.last_op;
   }
   return result;
-}
-
-static CURLcode cf_progress_egress(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
-{
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  struct quic_stream_info *sinfo;
-  struct cmsghdr *cm;
-  struct quic_errinfo einfo;
-  int64_t stream_id;
-  nghttp3_ssize veccnt;
-  ssize_t sent;
-  uint32_t flags;
-  int fin, rc;
-  struct msghdr msg = {0};
-  nghttp3_vec vec[16];
-  uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_stream_info))];
-
-  msg.msg_iov = (struct iovec *)&vec;
-  msg.msg_control = msg_ctrl;
-  msg.msg_controllen = sizeof(msg_ctrl);
-
-  cm = CMSG_FIRSTHDR(&msg);
-  cm->cmsg_level = IPPROTO_QUIC;
-  cm->cmsg_type = 0;
-  cm->cmsg_len = CMSG_LEN(sizeof(*sinfo));
-
-  sinfo = (struct quic_stream_info *)CMSG_DATA(cm);
-
-  for(;;) {
-    veccnt = 0;
-    stream_id = -1;
-    fin = 0;
-    flags = 0;
-
-    if(ctx->h3conn) {
-      veccnt = nghttp3_conn_writev_stream(ctx->h3conn, &stream_id,
-                                          &fin, vec, sizeof(vec) /
-                                          sizeof(vec[0]));
-      if(veccnt < 0) {
-        failf(data, "nghttp3_conn_writev_stream returned error: %s",
-              nghttp3_strerror((int)veccnt));
-
-        einfo.stream_id = (uint64_t)stream_id;
-        einfo.errcode = (uint32_t)
-                        nghttp3_err_infer_quic_app_error_code((int)veccnt);
-        setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_RESET, &einfo,
-                   sizeof(einfo));
-        return CURLE_SEND_ERROR;
-      }
-
-      if(fin)
-        flags |= MSG_STREAM_FIN;
-      else if(veccnt == 0)
-        goto out;
-    }
-
-    sinfo->stream_id = (uint64_t)stream_id;
-    sinfo->stream_flags = flags;
-    msg.msg_iovlen = veccnt;
-
-    sent = sendmsg(ctx->q.sockfd, &msg, 0);
-    if(sent == 0)
-      goto out;
-
-    if(sent == -1) {
-      switch(SOCKERRNO) {
-      case EAGAIN:
-#if EAGAIN != EWOULDBLOCK
-      case EWOULDBLOCK:
-#endif
-        return CURLE_AGAIN;
-      default:
-        failf(data, "sendmsg() returned %zd (errno %d)", sent, errno);
-        return CURLE_SEND_ERROR;
-      }
-    }
-
-    stream->upload_left -= sent;
-
-    rc = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, sent);
-    if(rc) {
-      failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
-            nghttp3_strerror(rc));
-      return CURLE_SEND_ERROR;
-    }
-  }
-
-out:
-  return CURLE_OK;
 }
 
 static CURLcode cf_linuxq_query(struct Curl_cfilter *cf,
