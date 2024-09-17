@@ -156,7 +156,7 @@ static int crypto_set_secret(struct cf_linuxq_ctx *ctx, uint8_t level,
 }
 
 static int crypto_send(struct cf_linuxq_ctx *ctx, const uint8_t *data,
-                       uint32_t len, uint8_t level)
+                       size_t len, uint8_t level)
 {
   struct quic_handshake_info *hsinfo;
   struct cmsghdr *cm;
@@ -528,8 +528,9 @@ static int crypto_gtls_tp_rx(gnutls_session_t session, const uint8_t *data,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   int rc;
 
+  DEBUGASSERT(len <= UINT_MAX);
   rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_TRANSPORT_PARAM_EXT,
-                  data, len);
+                  data, (socklen_t)len);
   return rc;
 }
 
@@ -870,6 +871,8 @@ static CURLcode crypto_handshake(struct Curl_cfilter *cf,
       return rc;
     len = rc;
   }
+
+  return CURLE_OK;
 }
 
 
@@ -926,8 +929,6 @@ static void cf_linuxq_stream_close(struct Curl_cfilter *cf,
   DEBUGASSERT(data);
   DEBUGASSERT(stream);
   if(!stream->closed && ctx->qconn && ctx->h3conn) {
-    CURLcode result;
-
     nghttp3_conn_set_stream_user_data(ctx->h3conn, stream->id, NULL);
     stream->closed = TRUE;
 
@@ -1585,6 +1586,8 @@ static struct linuxq_conn *cf_conn_create(struct Curl_cfilter *cf,
                                           struct Curl_easy *data)
 {
   struct linuxq_conn *ret;
+  (void)cf;
+  (void)data;
   ret = calloc(1, sizeof(*ret));
 
   return ret;
@@ -1600,7 +1603,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   socklen_t len = sizeof(struct quic_transport_param);
   CURLcode result;
   const struct Curl_sockaddr_ex *sockaddr = NULL;
-  struct quic_config config = {};
+  struct quic_config config = {0};
   int rc;
 
   Curl_dyn_init(&ctx->scratch, CURL_MAX_HTTP_HEADER);
@@ -2444,11 +2447,6 @@ static bool cf_linuxq_conn_is_alive(struct Curl_cfilter *cf,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   bool alive = FALSE;
   struct cf_call_data save;
-  timediff_t idletime;
-  uint64_t idle_ms;
-  struct quic_transport_param rp = {0};
-  socklen_t len = sizeof(struct quic_transport_param);
-  int rc;
 
   CF_DATA_SAVE(save, cf, data);
   *input_pending = FALSE;
