@@ -1800,7 +1800,7 @@ static struct cmsghdr *get_cmsg_stream_info(struct msghdr *msg)
 
 static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
                          struct Curl_easy *data, struct msghdr *msg,
-                         size_t pktlen)
+                         size_t len)
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
   struct cmsghdr *cm = NULL;
@@ -1812,18 +1812,18 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
   cm = get_cmsg_stream_info(msg);
 
   if(msg->msg_flags & MSG_NOTIFICATION) {
-    if(pktlen < 1)
+    if(len < 1)
       return CURLE_RECV_ERROR;
 
     switch(pkt[0]) {
     case QUIC_EVENT_CONNECTION_CLOSE:
-      if(pktlen < 1 + sizeof(qev.close))
+      if(len < 1 + sizeof(qev.close))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.close));
       ctx->last_error = qev.close.errcode;
       return CURLE_RECV_ERROR;
     case QUIC_EVENT_STREAM_UPDATE:
-      if(pktlen < 1 + sizeof(qev.update))
+      if(len < 1 + sizeof(qev.update))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.update));
       if(qev.update.errcode) /* XXX: is this correct? */
@@ -1832,7 +1832,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
             qev.update.state, qev.update.errcode);
       return CURLE_OK;
     case QUIC_EVENT_STREAM_MAX_STREAM:
-      if(pktlen < 1 + sizeof(uint64_t))
+      if(len < 1 + sizeof(uint64_t))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.max_stream));
 
@@ -1848,14 +1848,14 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
       }
       return CURLE_OK;
     case QUIC_EVENT_CONNECTION_MIGRATION:
-      if(pktlen < 1 + sizeof(uint8_t))
+      if(len < 1 + sizeof(uint8_t))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.local_migration));
       infof(data, "connection migration local_migration=%hhu",
             qev.local_migration);
       return CURLE_OK;
     case QUIC_EVENT_KEY_UPDATE:
-      if(pktlen < 1 + sizeof(uint8_t))
+      if(len < 1 + sizeof(uint8_t))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.key_update_phase));
       infof(data, "key update key_update_phase=%hhu",
@@ -1876,7 +1876,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
 
   memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
 
-  result = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
+  result = cf_linuxq_recv_stream_data(cf, data, pkt, len, sinfo.stream_id,
                                       sinfo.stream_flags);
   return result;
 }
