@@ -91,6 +91,8 @@ it does not recognize.
 Unless *CURLU_NO_AUTHORITY* is set, a blank hostname is not allowed in
 the URL.
 
+When a full URL is set (parsed), the hostname component is stored URL decoded.
+
 ## CURLUPART_SCHEME
 
 Scheme cannot be URL decoded on set. libcurl only accepts setting schemes up
