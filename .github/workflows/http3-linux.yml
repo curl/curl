@@ -467,7 +467,7 @@ jobs:
           cd linux-quic
 
           ./autogen.sh
-          ./configure --prefix=/usr
+          ./configure --prefix=/usr PKG_CONFIG_PATH="$HOME/gnutls/build/lib/pkgconfig"
           make -C modules
         name: 'build linux-quic'
 
