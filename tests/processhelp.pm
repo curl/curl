@@ -132,10 +132,10 @@ sub pidexists {
 
     if($pid > 0) {
         # verify if currently existing Windows process
-        $pid = winpid_to_pid($pid);
-        if ($pid > 65536 && os_is_win()) {
+        $pid = winpid_to_pid($pid);  # if cygwin || msys
+        if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
             $pid -= 65536;
-            if($^O ne 'MSWin32') {
+            if($^O ne 'MSWin32') {  # if cygwin || msys
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/tasklist.html
                 my $result = `tasklist -fi \"$filter\" 2>nul`;
@@ -163,10 +163,10 @@ sub pidterm {
 
     if($pid > 0) {
         # request the process to quit
-        $pid = winpid_to_pid($pid);
-        if ($pid > 65536 && os_is_win()) {
+        $pid = winpid_to_pid($pid);  # if cygwin || msys
+        if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
             $pid -= 65536;
-            if($^O ne 'MSWin32') {
+            if($^O ne 'MSWin32') {  # if cygwin || msys
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -t -pid $pid >nul 2>&1";
                 logmsg "Executing: '$cmd'\n";
@@ -188,10 +188,10 @@ sub pidkill {
 
     if($pid > 0) {
         # request the process to quit
-        $pid = winpid_to_pid($pid);
-        if ($pid > 65536 && os_is_win()) {
+        $pid = winpid_to_pid($pid);  # if cygwin || msys
+        if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
             $pid -= 65536;
-            if($^O ne 'MSWin32') {
+            if($^O ne 'MSWin32') {  # if cygwin || msys
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
                 logmsg "Executing: '$cmd'\n";
@@ -212,9 +212,9 @@ sub pidwait {
     my $pid = $_[0];
     my $flags = $_[1];
 
-    $pid = winpid_to_pid($pid);
+    $pid = winpid_to_pid($pid);  # if cygwin || msys
     # check if the process exists
-    if ($pid > 65536 && os_is_win()) {
+    if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
         if($flags == &WNOHANG) {
             return pidexists($pid)?0:$pid;
         }
