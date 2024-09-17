@@ -98,9 +98,6 @@ struct cf_linuxq_ctx {
 #define CF_CTX_CALL_DATA(cf)  \
   ((struct cf_linuxq_ctx *)(cf)->ctx)->call_data
 
-static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data);
-
 /**
  * All about the H3 internals of a stream
  */
@@ -1785,6 +1782,162 @@ out:
   return result;
 }
 
+static struct cmsghdr *get_cmsg_stream_info(struct msghdr *msg)
+{
+  struct cmsghdr *cm = NULL;
+
+  for(cm = CMSG_FIRSTHDR(msg); cm != NULL; cm = CMSG_NXTHDR(msg, cm))
+    if(cm->cmsg_len == CMSG_LEN(sizeof(struct quic_stream_info)) &&
+       cm->cmsg_level == IPPROTO_QUIC && cm->cmsg_type == QUIC_STREAM_INFO)
+      break;
+
+  return cm;
+}
+
+static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
+                         struct Curl_easy *data, struct msghdr *msg,
+                         size_t pktlen)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  struct cmsghdr *cm = NULL;
+  const unsigned char *pkt = msg->msg_iov->iov_base;
+  union quic_event *qev;
+  struct quic_stream_info sinfo;
+  int rv;
+
+  cm = get_cmsg_stream_info(msg);
+
+  if(msg->msg_flags & MSG_NOTIFICATION) {
+    if(pktlen < 1)
+      return CURLE_RECV_ERROR;
+
+    switch(pkt[0]) {
+    case QUIC_EVENT_CONNECTION_CLOSE:
+      if(pktlen < 1 + sizeof(struct quic_connection_close))
+        return CURLE_HTTP3;
+      qev = (union quic_event *)&pkt[1];
+      ctx->last_error = qev->close.errcode;
+      return CURLE_RECV_ERROR;
+    case QUIC_EVENT_STREAM_UPDATE:
+      if(pktlen < 1 + sizeof(struct quic_stream_update))
+        return CURLE_HTTP3;
+      qev = (union quic_event *)&pkt[1];
+      if(qev->update.errcode) /* XXX: is this correct? */
+        ctx->last_error = qev->update.errcode;
+      infof(data, "stream update id=%lu state=%u errcode=%u", qev->update.id,
+            qev->update.state, qev->update.errcode);
+      return CURLE_OK;
+    case QUIC_EVENT_STREAM_MAX_STREAM:
+      if(pktlen < 1 + sizeof(uint64_t))
+        return CURLE_HTTP3;
+      qev = (union quic_event *)&pkt[1];
+
+      if(!cm)
+        return CURLE_HTTP3;
+      memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
+
+      if(!(sinfo.stream_id & QUIC_STREAM_TYPE_UNI_MASK)) {
+        ctx->max_bidi_streams = qev->max_stream;
+        CURL_TRC_CF(data, cf, "max bidi streams now %" FMT_PRIu64 ", used %"
+                    FMT_PRIu64, (curl_uint64_t)ctx->max_bidi_streams,
+                    (curl_uint64_t)ctx->used_bidi_streams);
+      }
+      return CURLE_OK;
+    case QUIC_EVENT_CONNECTION_MIGRATION:
+      if(pktlen < 1 + sizeof(uint8_t))
+        return CURLE_HTTP3;
+      qev = (union quic_event *)&pkt[1];
+      infof(data, "connection migration local_migration=%hhu",
+            qev->local_migration);
+      return CURLE_OK;
+    case QUIC_EVENT_KEY_UPDATE:
+      if(pktlen < 1 + sizeof(uint8_t))
+        return CURLE_HTTP3;
+      qev = (union quic_event *)&pkt[1];
+      infof(data, "key update key_update_phase=%hhu",
+            qev->key_update_phase);
+      return CURLE_OK;
+    case QUIC_EVENT_NEW_TOKEN:
+      /* XXX: convert/store token? */
+      infof(data, "new token");
+      return CURLE_OK;
+    default:
+      return CURLE_HTTP3;
+    }
+  }
+
+  if(!cm)
+    return CURLE_RECV_ERROR;
+
+  memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
+
+  rv = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
+                                  sinfo.stream_flags);
+  if(rv) {
+    CURL_TRC_CF(data, cf, "ingress, read_pkt -> %s (%d)",
+                nghttp3_strerror(rv), rv);
+
+    return CURLE_RECV_ERROR;
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode cf_linuxq_recvmsg(struct Curl_cfilter *cf,
+                                  struct Curl_easy *data)
+{
+  struct cf_linuxq_ctx *ctx = cf->ctx;
+  struct cf_quic_ctx *qctx = &ctx->q;
+  struct iovec msg_iov;
+  struct msghdr msg;
+  uint8_t buf[64*1024];
+  ssize_t nread;
+  char errstr[STRERROR_LEN];
+  CURLcode result = CURLE_OK;
+  uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_stream_info))];
+
+  msg_iov.iov_base = buf;
+  msg_iov.iov_len = (int)sizeof(buf);
+
+  memset(&msg, 0, sizeof(msg));
+  msg.msg_iov = &msg_iov;
+  msg.msg_iovlen = 1;
+  msg.msg_control = msg_ctrl;
+  msg.msg_controllen = sizeof(msg_ctrl);
+
+  nread = recvmsg(qctx->sockfd, &msg, 0);
+  if(nread == -1) {
+    if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
+      goto out;
+    if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
+      struct ip_quadruple ip;
+      Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
+      failf(data, "QUIC: connection to %s port %u refused",
+            ip.remote_ip, ip.remote_port);
+      result = CURLE_COULDNT_CONNECT;
+      goto out;
+    }
+    Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
+    failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
+                nread, SOCKERRNO, errstr);
+    result = CURLE_RECV_ERROR;
+    goto out;
+  }
+
+  result = cf_linuxq_recv_pkt(cf, data, &msg, nread);
+
+  CURL_TRC_CF(data, cf, "recvd 1 packet with %zd bytes -> %d", nread, result);
+out:
+  if(!result) {
+    if(!ctx->q.got_first_byte) {
+      ctx->q.got_first_byte = TRUE;
+      ctx->q.first_byte_at = ctx->q.last_op;
+    }
+    ctx->q.last_io = ctx->q.last_op;
+  }
+  return result;
+}
+
 /* incoming data frames on the h3 stream */
 static ssize_t cf_linuxq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                               char *buf, size_t blen, CURLcode *err)
@@ -1820,7 +1973,7 @@ static ssize_t cf_linuxq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     goto out;
   }
 
-  *err = cf_progress_ingress(cf, data);
+  *err = cf_linuxq_recvmsg(cf, data);
   if(!*err)
     *err = CURLE_AGAIN;
 
@@ -2224,172 +2377,6 @@ static bool cf_linuxq_data_pending(struct Curl_cfilter *cf,
   return FALSE;
 }
 
-static struct cmsghdr *get_cmsg_stream_info(struct msghdr *msg)
-{
-  struct cmsghdr *cm = NULL;
-
-  for(cm = CMSG_FIRSTHDR(msg); cm != NULL; cm = CMSG_NXTHDR(msg, cm))
-    if(cm->cmsg_len == CMSG_LEN(sizeof(struct quic_stream_info)) &&
-       cm->cmsg_level == IPPROTO_QUIC && cm->cmsg_type == QUIC_STREAM_INFO)
-      break;
-
-  return cm;
-}
-
-static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
-                         struct Curl_easy *data, struct msghdr *msg,
-                         size_t pktlen)
-{
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-  struct cmsghdr *cm = NULL;
-  const unsigned char *pkt = msg->msg_iov->iov_base;
-  union quic_event *qev;
-  struct quic_stream_info sinfo;
-  int rv;
-
-  cm = get_cmsg_stream_info(msg);
-
-  if(msg->msg_flags & MSG_NOTIFICATION) {
-    if(pktlen < 1)
-      return CURLE_RECV_ERROR;
-
-    switch(pkt[0]) {
-    case QUIC_EVENT_CONNECTION_CLOSE:
-      if(pktlen < 1 + sizeof(struct quic_connection_close))
-        return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-      ctx->last_error = qev->close.errcode;
-      return CURLE_RECV_ERROR;
-    case QUIC_EVENT_STREAM_UPDATE:
-      if(pktlen < 1 + sizeof(struct quic_stream_update))
-        return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-      if(qev->update.errcode) /* XXX: is this correct? */
-        ctx->last_error = qev->update.errcode;
-      infof(data, "stream update id=%lu state=%u errcode=%u", qev->update.id,
-            qev->update.state, qev->update.errcode);
-      return CURLE_OK;
-    case QUIC_EVENT_STREAM_MAX_STREAM:
-      if(pktlen < 1 + sizeof(uint64_t))
-        return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-
-      if(!cm)
-        return CURLE_HTTP3;
-      memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
-
-      if(!(sinfo.stream_id & QUIC_STREAM_TYPE_UNI_MASK)) {
-        ctx->max_bidi_streams = qev->max_stream;
-        CURL_TRC_CF(data, cf, "max bidi streams now %" FMT_PRIu64 ", used %"
-                    FMT_PRIu64, (curl_uint64_t)ctx->max_bidi_streams,
-                    (curl_uint64_t)ctx->used_bidi_streams);
-      }
-      return CURLE_OK;
-    case QUIC_EVENT_CONNECTION_MIGRATION:
-      if(pktlen < 1 + sizeof(uint8_t))
-        return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-      infof(data, "connection migration local_migration=%hhu",
-            qev->local_migration);
-      return CURLE_OK;
-    case QUIC_EVENT_KEY_UPDATE:
-      if(pktlen < 1 + sizeof(uint8_t))
-        return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-      infof(data, "key update key_update_phase=%hhu",
-            qev->key_update_phase);
-      return CURLE_OK;
-    case QUIC_EVENT_NEW_TOKEN:
-      /* XXX: convert/store token? */
-      infof(data, "new token");
-      return CURLE_OK;
-    default:
-      return CURLE_HTTP3;
-    }
-  }
-
-  if(!cm)
-    return CURLE_RECV_ERROR;
-
-  memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
-
-  rv = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
-                                  sinfo.stream_flags);
-  if(rv) {
-    CURL_TRC_CF(data, cf, "ingress, read_pkt -> %s (%d)",
-                nghttp3_strerror(rv), rv);
-
-    return CURLE_RECV_ERROR;
-  }
-
-  return CURLE_OK;
-}
-
-static CURLcode cf_linuxq_recvmsg_packets(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data)
-{
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-  struct cf_quic_ctx *qctx = &ctx->q;
-  struct iovec msg_iov;
-  struct msghdr msg;
-  uint8_t buf[64*1024];
-  ssize_t nread;
-  char errstr[STRERROR_LEN];
-  CURLcode result = CURLE_OK;
-  uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_stream_info))];
-
-  msg_iov.iov_base = buf;
-  msg_iov.iov_len = (int)sizeof(buf);
-
-  memset(&msg, 0, sizeof(msg));
-  msg.msg_iov = &msg_iov;
-  msg.msg_iovlen = 1;
-  msg.msg_control = msg_ctrl;
-  msg.msg_controllen = sizeof(msg_ctrl);
-
-  nread = recvmsg(qctx->sockfd, &msg, 0);
-  if(nread == -1) {
-    if(SOCKERRNO == EAGAIN || SOCKERRNO == EWOULDBLOCK)
-      goto out;
-    if(!cf->connected && SOCKERRNO == ECONNREFUSED) {
-      struct ip_quadruple ip;
-      Curl_cf_socket_peek(cf->next, data, NULL, NULL, &ip);
-      failf(data, "QUIC: connection to %s port %u refused",
-            ip.remote_ip, ip.remote_port);
-      result = CURLE_COULDNT_CONNECT;
-      goto out;
-    }
-    Curl_strerror(SOCKERRNO, errstr, sizeof(errstr));
-    failf(data, "QUIC: recvmsg() unexpectedly returned %zd (errno=%d; %s)",
-                nread, SOCKERRNO, errstr);
-    result = CURLE_RECV_ERROR;
-    goto out;
-  }
-
-  result = cf_linuxq_recv_pkt(cf, data, &msg, nread);
-
-  CURL_TRC_CF(data, cf, "recvd 1 packet with %zd bytes -> %d", nread, result);
-out:
-  return result;
-}
-
-static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data)
-{
-  struct cf_linuxq_ctx *ctx = cf->ctx;
-  CURLcode result = CURLE_OK;
-
-  result = cf_linuxq_recvmsg_packets(cf, data);
-  if(!result) {
-    if(!ctx->q.got_first_byte) {
-      ctx->q.got_first_byte = TRUE;
-      ctx->q.first_byte_at = ctx->q.last_op;
-    }
-    ctx->q.last_io = ctx->q.last_op;
-  }
-  return result;
-}
-
 static CURLcode cf_linuxq_query(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 int query, int *pres1, void *pres2)
@@ -2499,7 +2486,7 @@ static bool cf_linuxq_conn_is_alive(struct Curl_cfilter *cf,
     /* This happens before we have sent off a request and the connection is
        not in use by any other transfer, there should not be any data here,
        only "protocol frames" */
-    result = cf_progress_ingress(cf, data);
+    result = cf_linuxq_recvmsg(cf, data);
     CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
     alive = result? FALSE : TRUE;
   }
