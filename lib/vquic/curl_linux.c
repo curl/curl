@@ -1807,7 +1807,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
   const unsigned char *pkt = msg->msg_iov->iov_base;
   union quic_event *qev;
   struct quic_stream_info sinfo;
-  int rv;
+  CURLcode result;
 
   cm = get_cmsg_stream_info(msg);
 
@@ -1875,16 +1875,9 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
 
   memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
 
-  rv = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
-                                  sinfo.stream_flags);
-  if(rv) {
-    CURL_TRC_CF(data, cf, "ingress, read_pkt -> %s (%d)",
-                nghttp3_strerror(rv), rv);
-
-    return CURLE_RECV_ERROR;
-  }
-
-  return CURLE_OK;
+  result = cf_linuxq_recv_stream_data(cf, data, pkt, pktlen, sinfo.stream_id,
+                                      sinfo.stream_flags);
+  return result;
 }
 
 static CURLcode cf_linuxq_recvmsg(struct Curl_cfilter *cf,
