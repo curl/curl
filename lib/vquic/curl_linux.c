@@ -1866,6 +1866,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
       infof(data, "new token");
       return CURLE_OK;
     default:
+      infof(data, "unknown event: %hhu", pkt[0]);
       return CURLE_HTTP3;
     }
   }
