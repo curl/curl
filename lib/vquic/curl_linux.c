@@ -783,6 +783,7 @@ static CURLcode crypto_do_handshake(struct Curl_cfilter *cf,
 #endif
   return rc;
 }
+
 static ssize_t crypto_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
                             uint8_t *level, uint8_t *buf, unsigned int len)
 {
