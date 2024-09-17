@@ -1457,7 +1457,8 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     ifmissing = CURLUE_NO_HOST;
     punycode = (flags & CURLU_PUNYCODE)?1:0;
     depunyfy = (flags & CURLU_PUNY2IDN)?1:0;
-    urlencode = !punycode && !depunyfy && !urldecode ? TRUE: FALSE;
+    if(!urlencode)
+      urlencode = !punycode && !depunyfy && !urldecode ? TRUE: FALSE;
     break;
   case CURLUPART_ZONEID:
     ptr = u->zoneid;
