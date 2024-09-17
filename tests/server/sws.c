@@ -1021,7 +1021,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   char responsedump[256];
 
   msnprintf(responsedump, sizeof(responsedump), "%s/%s",
-            logdir, is_proxy ? RESPONSE_PROXY_DUMP:RESPONSE_DUMP);
+            logdir, is_proxy ? RESPONSE_PROXY_DUMP : RESPONSE_DUMP);
 
   switch(req->rcmd) {
   default:
