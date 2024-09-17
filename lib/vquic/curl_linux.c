@@ -2051,7 +2051,7 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   struct h3_stream_ctx *stream = NULL;
   int64_t sid;
   struct quic_stream_info sinfo;
-  socklen_t slen;
+  socklen_t slen = sizeof(sinfo);
   struct dynhds h2_headers;
   size_t nheader;
   nghttp3_nv *nva = NULL;
