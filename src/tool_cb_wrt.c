@@ -54,14 +54,11 @@ bool tool_create_output_file(struct OutStruct *outs,
 {
   struct GlobalConfig *global;
   FILE *file = NULL;
-  char *fname = outs->filename;
+  const char *fname = outs->filename;
   DEBUGASSERT(outs);
   DEBUGASSERT(config);
   global = config->global;
-  if(!fname || !*fname) {
-    warnf(global, "Remote filename has no length");
-    return FALSE;
-  }
+  DEBUGASSERT(fname && *fname);
 
   if(config->file_clobber_mode == CLOBBER_ALWAYS ||
      (config->file_clobber_mode == CLOBBER_DEFAULT &&
