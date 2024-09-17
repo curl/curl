@@ -855,20 +855,21 @@ static CURLcode crypto_handshake(struct Curl_cfilter *cf,
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
   size_t len = 0;
-  int rc;
+  CURLcode result;
+  ssize_t rc;
   uint8_t buf[1200];
   uint8_t level = QUIC_CRYPTO_INITIAL;
 
   while(!ctx->qconn->completed) {
-    rc = crypto_do_handshake(cf, data, level, buf, len);
-    if(rc)
-      return rc;
+    result = crypto_do_handshake(cf, data, level, buf, len);
+    if(result)
+      return result;
     if(ctx->qconn->completed)
-      return 0;
+      return CURLE_OK;
 
     rc = crypto_recv(cf, data, &level, buf, sizeof(buf));
     if(rc < 0)
-      return rc;
+      return CURLE_QUIC_CONNECT_ERROR;
     len = rc;
   }
 
@@ -1722,9 +1723,9 @@ static CURLcode cf_linuxq_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  rc = crypto_handshake(cf, data);
-  if(rc)
-    return rc;
+  result = crypto_handshake(cf, data);
+  if(result)
+    return result;
 
   /*
    * XXX: We only use QUIC_EVENT_CONNECTION_CLOSE,
