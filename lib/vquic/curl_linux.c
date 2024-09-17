@@ -1809,12 +1809,11 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
   struct quic_stream_info sinfo;
   CURLcode result;
 
-  cm = get_cmsg_stream_info(msg);
-
   if(msg->msg_flags & MSG_NOTIFICATION) {
     if(len < 1)
       return CURLE_RECV_ERROR;
 
+    CURL_TRC_CF(data, cf, "quic event %hhu, %zd bytes", pkt[0], len);
     switch(pkt[0]) {
     case QUIC_EVENT_CONNECTION_CLOSE:
       if(len < 1 + sizeof(qev.close))
@@ -1828,23 +1827,25 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
       memcpy(&qev, &pkt[1], sizeof(qev.update));
       if(qev.update.errcode) /* XXX: is this correct? */
         ctx->last_error = qev.update.errcode;
-      infof(data, "stream update id=%lu state=%u errcode=%u", qev.update.id,
-            qev.update.state, qev.update.errcode);
+      CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] state=%u errcode=%u",
+                  qev.update.id, qev.update.state, qev.update.errcode);
       return CURLE_OK;
     case QUIC_EVENT_STREAM_MAX_STREAM:
       if(len < 1 + sizeof(uint64_t))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.max_stream));
 
-      if(!cm)
-        return CURLE_HTTP3;
-      memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
-
-      if(!(sinfo.stream_id & QUIC_STREAM_TYPE_UNI_MASK)) {
+      if(!(qev.max_stream & QUIC_STREAM_TYPE_MASK)) {
+        qev.max_stream >>= 2;
+        CURL_TRC_CF(data, cf, "max bidi streams update %" FMT_PRIu64 " -> %"
+                    FMT_PRIu64", using %" FMT_PRIu64, ctx->max_bidi_streams,
+                    qev.max_stream, ctx->used_bidi_streams);
         ctx->max_bidi_streams = qev.max_stream;
-        CURL_TRC_CF(data, cf, "max bidi streams now %" FMT_PRIu64 ", used %"
-                    FMT_PRIu64, (curl_uint64_t)ctx->max_bidi_streams,
-                    (curl_uint64_t)ctx->used_bidi_streams);
+      }
+      else if(qev.max_stream & QUIC_STREAM_TYPE_UNI_MASK) {
+        qev.max_stream >>= 2;
+        CURL_TRC_CF(data, cf, "max uni streams update to %" FMT_PRIu64,
+                    qev.max_stream);
       }
       return CURLE_OK;
     case QUIC_EVENT_CONNECTION_MIGRATION:
@@ -1871,6 +1872,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
     }
   }
 
+  cm = get_cmsg_stream_info(msg);
   if(!cm)
     return CURLE_RECV_ERROR;
 
