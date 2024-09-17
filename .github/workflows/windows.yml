@@ -734,6 +734,10 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
+          /c/Strawberry/perl/bin/perl -V
+          echo '--------------------------'
+          perl -V
+          echo '--------------------------'
           cat $USERPROFILE/.cpan/CPAN/MyConfig.pm || true
           perl -MCPAN -e 'install Win32::Process' || true
           /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
