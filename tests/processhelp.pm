@@ -113,11 +113,14 @@ sub winpid_to_pid {
     if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
         my $pid = Cygwin::winpid_to_pid($vpid - 65536);
         if($pid) {
+            print "winpid_to_pid: $^O: $vpid -> $pid (Cygwin::winpid_to_pid success)\n";
             return $pid;
         } else {
+            print "winpid_to_pid: $^O: $vpid (Cygwin::winpid_to_pid fail)\n";
             return $vpid
         }
     }
+    print "winpid_to_pid: $^O: $vpid (passthrough)\n";
     return $vpid;
 }
 
@@ -138,16 +141,24 @@ sub pidexists {
             if($^O ne 'MSWin32') {  # if cygwin || msys
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/tasklist.html
-                my $result = `tasklist -fi \"$filter\" 2>nul`;
+                my $cmd = "tasklist -fi \"$filter\" 2>nul";
+                print "pidexists: $^O: Executing: '$cmd'\n";
+                my $result = `$cmd`;
                 if(index($result, "$pid") != -1) {
+                    print "pidexists: $^O: pid FOUND in tasklist: $pid\n";
                     return -$pid;
+                }
+                else {
+                    print "pidexists: $^O: pid not found in tasklist: $pid\n";
                 }
                 return 0;
             }
         }
 
         # verify if currently existing and alive
+        print "pidexists: $^O: kill(0, $pid)\n";
         if(kill(0, $pid)) {
+            print "pidexists: $^O: kill(0, $pid) -> exists\n";
             return $pid;
         }
     }
@@ -176,6 +187,7 @@ sub pidterm {
         }
 
         # signal the process to terminate
+        print "pidterm: $^O: kill(\"TERM\", $pid)\n";
         kill("TERM", $pid);
     }
 }
@@ -201,6 +213,7 @@ sub pidkill {
         }
 
         # signal the process to terminate
+        print "pidterm: $^O: kill(\"KILL\", $pid)\n";
         kill("KILL", $pid);
     }
 }
@@ -216,15 +229,20 @@ sub pidwait {
     # check if the process exists
     if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
         if($flags == &WNOHANG) {
+            print "pidwait: $^O: ->pidexists($pid)\n";
             return pidexists($pid)?0:$pid;
         }
+        print "pidwait: $^O: waiting for $pid to disappear\n";
         while(pidexists($pid)) {
             portable_sleep(0.01);
+            print "pidwait: $^O: waiting for $pid to disappear more\n";
         }
+        print "pidwait: $^O: $pid no longer exists\n";
         return $pid;
     }
 
     # wait on the process to terminate
+    print "pidwait: $^O: waitpid($pid, $flags)\n";
     return waitpid($pid, $flags);
 }
 
