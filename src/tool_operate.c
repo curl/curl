@@ -1158,20 +1158,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
           if(!per->outfile) {
             /* extract the filename from the URL */
-            result = get_url_file_name(&per->outfile, per->this_url);
+            result = get_url_file_name(global, &per->outfile, per->this_url);
             if(result) {
-              errorf(global, "Failed to extract a sensible filename"
+              errorf(global, "Failed to extract a filename"
                      " from the URL to use for storage");
               break;
-            }
-            if(!*per->outfile && !config->content_disposition) {
-              free(per->outfile);
-              per->outfile = strdup("curl_response");
-              if(!per->outfile) {
-                result = CURLE_OUT_OF_MEMORY;
-                break;
-              }
-              warnf(global, "No remote file name, uses \"%s\"", per->outfile);
             }
           }
           else if(state->urls) {
