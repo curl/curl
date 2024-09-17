@@ -44,6 +44,9 @@ The *flags* argument is a bitmask with individual features.
 
 The returned content pointer must be freed with curl_free(3) after use.
 
+Components are stored and therefore also returned URL encoded by default,
+except for the full URL's hostname handling.
+
 # FLAGS
 
 The flags argument is zero, one or more bits set in a bitmask.
