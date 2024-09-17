@@ -468,9 +468,15 @@ jobs:
 
           ./autogen.sh
           ./configure --prefix=/usr
-          make
-          make install
+          make -C modules
         name: 'build linux-quic'
+
+      - if: matrix.build.name == 'linux-quic'
+        run: |
+          cd $HOME/linux-quic
+
+          make -C modules install
+        name: 'install linux-quic'
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
