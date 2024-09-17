@@ -1805,7 +1805,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
   struct cf_linuxq_ctx *ctx = cf->ctx;
   struct cmsghdr *cm = NULL;
   const unsigned char *pkt = msg->msg_iov->iov_base;
-  union quic_event *qev;
+  union quic_event qev;
   struct quic_stream_info sinfo;
   CURLcode result;
 
@@ -1817,31 +1817,31 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
 
     switch(pkt[0]) {
     case QUIC_EVENT_CONNECTION_CLOSE:
-      if(pktlen < 1 + sizeof(struct quic_connection_close))
+      if(pktlen < 1 + sizeof(qev.close))
         return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-      ctx->last_error = qev->close.errcode;
+      memcpy(&qev, &pkt[1], sizeof(qev.close));
+      ctx->last_error = qev.close.errcode;
       return CURLE_RECV_ERROR;
     case QUIC_EVENT_STREAM_UPDATE:
-      if(pktlen < 1 + sizeof(struct quic_stream_update))
+      if(pktlen < 1 + sizeof(qev.update))
         return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
-      if(qev->update.errcode) /* XXX: is this correct? */
-        ctx->last_error = qev->update.errcode;
-      infof(data, "stream update id=%lu state=%u errcode=%u", qev->update.id,
-            qev->update.state, qev->update.errcode);
+      memcpy(&qev, &pkt[1], sizeof(qev.update));
+      if(qev.update.errcode) /* XXX: is this correct? */
+        ctx->last_error = qev.update.errcode;
+      infof(data, "stream update id=%lu state=%u errcode=%u", qev.update.id,
+            qev.update.state, qev.update.errcode);
       return CURLE_OK;
     case QUIC_EVENT_STREAM_MAX_STREAM:
       if(pktlen < 1 + sizeof(uint64_t))
         return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
+      memcpy(&qev, &pkt[1], sizeof(qev.max_stream));
 
       if(!cm)
         return CURLE_HTTP3;
       memcpy(&sinfo, CMSG_DATA(cm), sizeof(sinfo));
 
       if(!(sinfo.stream_id & QUIC_STREAM_TYPE_UNI_MASK)) {
-        ctx->max_bidi_streams = qev->max_stream;
+        ctx->max_bidi_streams = qev.max_stream;
         CURL_TRC_CF(data, cf, "max bidi streams now %" FMT_PRIu64 ", used %"
                     FMT_PRIu64, (curl_uint64_t)ctx->max_bidi_streams,
                     (curl_uint64_t)ctx->used_bidi_streams);
@@ -1850,16 +1850,16 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
     case QUIC_EVENT_CONNECTION_MIGRATION:
       if(pktlen < 1 + sizeof(uint8_t))
         return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
+      memcpy(&qev, &pkt[1], sizeof(qev.local_migration));
       infof(data, "connection migration local_migration=%hhu",
-            qev->local_migration);
+            qev.local_migration);
       return CURLE_OK;
     case QUIC_EVENT_KEY_UPDATE:
       if(pktlen < 1 + sizeof(uint8_t))
         return CURLE_HTTP3;
-      qev = (union quic_event *)&pkt[1];
+      memcpy(&qev, &pkt[1], sizeof(qev.key_update_phase));
       infof(data, "key update key_update_phase=%hhu",
-            qev->key_update_phase);
+            qev.key_update_phase);
       return CURLE_OK;
     case QUIC_EVENT_NEW_TOKEN:
       /* XXX: convert/store token? */
