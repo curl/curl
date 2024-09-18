@@ -218,6 +218,10 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
 #define write(a,b,c) write_wincon(a,b,c)
 #endif
 
+/* On Windows, we sometimes get this for a broken pipe, seemingly
+ * when the client just closed stdin? */
+#define CURL_WIN32_EPIPE      109
+
 /*
  * fullread is a wrapper around the read() function. This will repeat the call
  * to read() until it actually has read the complete number of bytes indicated
@@ -243,6 +247,11 @@ static ssize_t fullread(int filedes, void *buffer, size_t nbytes)
       error = errno;
       if((error == EINTR) || (error == EAGAIN))
         continue;
+      if(error == CURL_WIN32_EPIPE) {
+        logmsg("got Windows ERROR_BROKEN_PIPE on fd=%d, treating as close",
+               filedes);
+        return 0;
+      }
       logmsg("reading from file descriptor: %d,", filedes);
       logmsg("unrecoverable read() failure: (%d) %s",
              error, strerror(error));
