@@ -734,9 +734,9 @@ jobs:
         run: |
           '/c/Program Files/Git/usr/bin/perl.exe' -V
           echo '=========================='
-          '/c/Program Files/Git/usr/bin/perl -MCPAN -e 'install Win32::Process' || true
+          '/c/Program Files/Git/usr/bin/perl.exe' -MCPAN -e 'install Win32::Process' || true
           echo '=========================='
-          '/c/Program Files/Git/usr/bin/perl -MCPAN -e 'install Win32::Process::List' || true
+          '/c/Program Files/Git/usr/bin/perl.exe' -MCPAN -e 'install Win32::Process::List' || true
           echo '=========================='
           echo '=========================='
           /c/Strawberry/perl/bin/perl -V
