@@ -168,7 +168,7 @@ sub pidterm {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
                 # https://ss64.com/nt/taskkill.html
-                my $cmd = "taskkill -pid $pid >nul 2>&1";
+                my $cmd = "taskkill -t -pid $pid >nul 2>&1";
                 logmsg "Executing: '$cmd'\n";
                 system($cmd);
                 return;
