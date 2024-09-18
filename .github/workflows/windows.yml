@@ -732,7 +732,7 @@ jobs:
 
       - name: 'install test tools'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
+        timeout-minutes: 30
         run: |
           /c/Strawberry/perl/bin/perl -V
           echo '--------------------------'
