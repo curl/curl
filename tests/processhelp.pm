@@ -167,13 +167,10 @@ sub pidterm {
         if ($pid > 65536 && os_is_win()) {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
-                my $filter = "PID eq $pid";
-                # https://ss64.com/nt/tasklist.html
-                my $result = `tasklist -fi \"$filter\" 2>nul`;
-                if(index($result, "$pid") != -1) {
-                    # https://ss64.com/nt/taskkill.html
-                    system("taskkill -fi \"$filter\" >nul 2>&1");
-                }
+                # https://ss64.com/nt/taskkill.html
+                my $cmd = "taskkill -t -pid $pid >nul 2>&1";
+                logmsg "Executing: '$cmd'\n";
+                system($cmd);
                 return;
             }
         }
@@ -195,17 +192,10 @@ sub pidkill {
         if ($pid > 65536 && os_is_win()) {
             $pid -= 65536;
             if($^O ne 'MSWin32') {
-                my $filter = "PID eq $pid";
-                # https://ss64.com/nt/tasklist.html
-                my $cmd = "tasklist -fi \"$filter\" 2>nul";
+                # https://ss64.com/nt/taskkill.html
+                my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
                 logmsg "Executing: '$cmd'\n";
-                my $result = `$cmd`;
-                if(index($result, "$pid") != -1) {
-                    # https://ss64.com/nt/taskkill.html
-                    my $cmd = "taskkill -f -t -fi \"$filter\" >nul 2>&1";
-                    logmsg "Executing: '$cmd'\n";
-                    system($cmd);
-                }
+                system($cmd);
                 return;
             }
         }
