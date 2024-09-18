@@ -1169,7 +1169,7 @@ sub singletest_shouldrun {
 #######################################################################
 # Print the test name and count tests
 sub singletest_count {
-    my ($testnum, $why) = @_;
+    my ($testnum, $why , $runnerid) = @_;
 
     if($why && !$listonly) {
         # there's a problem, count it as "skipped"
@@ -1188,7 +1188,7 @@ sub singletest_count {
     }
 
     # At this point we've committed to run this test
-    logmsg sprintf("test %04d...", $testnum) if(!$automakestyle);
+    logmsg sprintf("[$runnerid] test %04d...", $testnum) if(!$automakestyle);
 
     # name of the test
     my $testname= (getpart("client", "name"))[0];
@@ -1584,7 +1584,7 @@ sub singletest_check {
                     if(!$rid) {
                         logmsg "ERROR: runner $runnerid seems to have died\n";
                     } else {
-                        logmsg $logs;
+                        logmsg "[$runnerid]: $logs";
                     }
                 }
                 # timestamp test result verification end
@@ -1759,7 +1759,7 @@ sub singletest_check {
     # add 'E' for event-based
     $ok .= $run_event_based ? "E" : "-";
 
-    logmsg "$ok " if(!$short);
+    logmsg "[$runnerid] $ok " if(!$short);
 
     # timestamp test result verification end
     $timevrfyend{$testnum} = Time::HiRes::time();
@@ -1900,7 +1900,7 @@ sub singletest {
 
         #######################################################################
         # Print the test name and count tests
-        $error = singletest_count($testnum, $why);
+        $error = singletest_count($testnum, $why, $runnerid);
         if($error) {
             # Submit the test case result with the CI environment
             citest_finishtest($testnum, $error);
@@ -2854,7 +2854,7 @@ foreach my $testnum (@at) {
     my ($why, $errorreturncode) = singletest_shouldrun($testnum);
     if($why || $listonly) {
         # Display test name now--test will be completely skipped later
-        my $error = singletest_count($testnum, $why);
+        my $error = singletest_count($testnum, $why, 0);
         next;
     }
     $ignoretestcodes{$testnum} = $errorreturncode;
@@ -2998,6 +2998,16 @@ while () {
                 $ok++; # successful test counter
             }
         }
+    }
+    if(!$ridready && scalar(%runnersrunning)) {
+        logmsg "waiting for " . scalar(%runnersrunning) . " test results\n";
+        my $msg = "tests: ";
+        my $sep = "";
+        foreach my $rid (keys %runnersrunning) {
+            $msg .= $sep . $runnersrunning{$rid} . "[$rid]";
+            $sep = ", "
+        }
+        logmsg $msg;
     }
     if($riderror) {
         logmsg "ERROR: runner $riderror is dead! aborting test run\n";
