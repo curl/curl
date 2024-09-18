@@ -3000,7 +3000,7 @@ while () {
             }
         }
     }
-    if(!$ridready && scalar(%runnersrunning)) {
+    if(!$ridready && $runnerwait && scalar(%runnersrunning)) {
         my $msg = "waiting for " . scalar(%runnersrunning) . " results:";
         my $sep = " ";
         foreach my $rid (keys %runnersrunning) {
