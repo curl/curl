@@ -254,7 +254,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
   if(file) {
     size_t nread;
     struct curlx_dynbuf dyn;
-    size_t rangelen = 0;
+    curl_off_t rangelen = 0;
     int rangelen_set = 0;
 
 
