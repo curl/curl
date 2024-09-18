@@ -126,17 +126,17 @@ static void cf_linuxq_ctx_free(struct cf_linuxq_ctx *ctx)
  * All about the H3 internals of a stream
  */
 struct h3_stream_ctx {
+  uint8_t *buf; /* XXX: bad sendbuf */
+  size_t len; /* XXX: bad sendbuf len */
   curl_int64_t id; /* HTTP/3 protocol identifier */
   struct h1_req_parser h1; /* h1 request parsing */
-  size_t upload_blocked_len; /* the amount written last and EGAINed */
   curl_uint64_t error3; /* HTTP/3 stream error code */
-  curl_off_t upload_left; /* number of request bytes left to upload */
   int status_code; /* HTTP status code */
   CURLcode xfer_result; /* result from xfer_resp_write(_hd) */
   bool resp_hds_complete; /* we have a complete, final response */
   bool closed; /* TRUE on stream close */
   bool reset;  /* TRUE on stream reset */
-  bool send_closed; /* stream is local closed */
+  bool eos;
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
@@ -985,7 +985,7 @@ static void h3_drain_stream(struct Curl_cfilter *cf,
 
   (void)cf;
   bits = CURL_CSELECT_IN;
-  if(stream && stream->upload_left && !stream->send_closed)
+  if(stream)
     bits |= CURL_CSELECT_OUT;
   if(data->state.select_bits != bits) {
     data->state.select_bits = bits;
@@ -1047,7 +1047,6 @@ static int cb_h3_stream_close(nghttp3_conn *conn, int64_t sid,
   stream->error3 = (curl_uint64_t)app_error_code;
   if(stream->error3 != NGHTTP3_H3_NO_ERROR) {
     stream->reset = TRUE;
-    stream->send_closed = TRUE;
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] RESET: error %" FMT_PRIu64,
                 stream->id, stream->error3);
   }
@@ -1421,9 +1420,9 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
   struct cf_call_data save;
-  struct quic_connection_close cclose;
+  /* struct quic_connection_close cclose; */
   CURLcode result = CURLE_OK;
-  int rc;
+  /* int rc; */
 
   if(cf->shutdown || !ctx->qconn) {
     *done = TRUE;
@@ -1436,6 +1435,7 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
   if(!ctx->shutdown_started) {
 
     ctx->shutdown_started = TRUE;
+/*  XXX
     memset(&cclose, 0, sizeof(cclose));
     rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_CONNECTION_CLOSE,
                     &cclose, sizeof(cclose));
@@ -1443,12 +1443,13 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
       result = CURLE_WRITE_ERROR;
       goto out;
     }
-    CURL_TRC_CF(data, cf, "start shutdown(err_type=%hu, err_code=%u) -> %d",
-                cclose.frame, cclose.errcode, rc);
+*/
+    /* CURL_TRC_CF(data, cf, "start shutdown(err_type=%hu, err_code=%u) -> %d",
+                cclose.frame, cclose.errcode, rc); */
   }
   *done = TRUE;
 
-out:
+/* out: */
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1491,10 +1492,8 @@ static CURLcode cf_linuxq_data_event(struct Curl_cfilter *cf,
     break;
   case CF_CTRL_DATA_DONE_SEND: {
     struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-    if(stream && !stream->send_closed) {
-      stream->send_closed = TRUE;
+    if(stream)
       (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
-    }
     break;
   }
   case CF_CTRL_DATA_IDLE: {
@@ -1516,7 +1515,6 @@ static CURLcode cf_linuxq_data_event(struct Curl_cfilter *cf,
   CF_DATA_RESTORE(cf, save);
   return result;
 }
-
 static void cf_linuxq_conn_close(struct Curl_cfilter *cf,
                                  struct Curl_easy *data)
 {
@@ -1830,7 +1828,8 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.close));
       ctx->last_error = qev.close.errcode;
-      return CURLE_RECV_ERROR;
+      cf_linuxq_conn_close(cf, data);
+      return CURLE_AGAIN;
     case QUIC_EVENT_STREAM_UPDATE:
       if(len < 1 + sizeof(qev.update))
         return CURLE_HTTP3;
@@ -1839,7 +1838,7 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
         ctx->last_error = qev.update.errcode;
       CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] state=%u errcode=%u",
                   qev.update.id, qev.update.state, qev.update.errcode);
-      return CURLE_OK;
+      return CURLE_AGAIN;
     case QUIC_EVENT_STREAM_MAX_STREAM:
       if(len < 1 + sizeof(uint64_t))
         return CURLE_HTTP3;
@@ -1857,25 +1856,29 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
         CURL_TRC_CF(data, cf, "max uni streams update to %" FMT_PRIu64,
                     qev.max_stream);
       }
-      return CURLE_OK;
+      return CURLE_AGAIN;
     case QUIC_EVENT_CONNECTION_MIGRATION:
       if(len < 1 + sizeof(uint8_t))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.local_migration));
       infof(data, "connection migration local_migration=%hhu",
             qev.local_migration);
-      return CURLE_OK;
+      return CURLE_AGAIN;
     case QUIC_EVENT_KEY_UPDATE:
       if(len < 1 + sizeof(uint8_t))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.key_update_phase));
       infof(data, "key update key_update_phase=%hhu",
             qev.key_update_phase);
-      return CURLE_OK;
+      return CURLE_AGAIN;
     case QUIC_EVENT_NEW_TOKEN:
       /* XXX: convert/store token? */
       infof(data, "new token");
-      return CURLE_OK;
+      return CURLE_AGAIN;
+    case QUIC_EVENT_NEW_SESSION_TICKET:
+      /* XXX: convert/store ticket? */
+      infof(data, "new session ticket");
+      return CURLE_AGAIN;
     default:
       infof(data, "unknown event: %hhu", pkt[0]);
       return CURLE_HTTP3;
@@ -1901,11 +1904,13 @@ static CURLcode cf_linuxq_recvmsg(struct Curl_cfilter *cf,
   struct iovec msg_iov;
   struct msghdr msg;
   uint8_t buf[64*1024];
-  ssize_t nread;
+  size_t npkts = 0;
+  ssize_t nread, total = 0;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
   uint8_t msg_ctrl[CMSG_SPACE(sizeof(struct quic_stream_info))];
 
+again:
   msg_iov.iov_base = buf;
   msg_iov.iov_len = (int)sizeof(buf);
 
@@ -1934,10 +1939,19 @@ static CURLcode cf_linuxq_recvmsg(struct Curl_cfilter *cf,
     goto out;
   }
 
+  npkts++;
+  total += nread;
   result = cf_linuxq_recv_pkt(cf, data, &msg, nread);
+  if(ctx->shutdown_started)
+    goto out;
+  else if(result == CURLE_OK || result == CURLE_AGAIN)
+    goto again;
 
-  CURL_TRC_CF(data, cf, "recvd 1 packet with %zd bytes -> %d", nread, result);
 out:
+  if(total)
+    result = CURLE_OK;
+  CURL_TRC_CF(data, cf, "recvd %zd packet%s with %zd bytes -> %d", npkts,
+              npkts > 1? "s" : "", total, result);
   return result;
 }
 
@@ -2022,19 +2036,22 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
    * Any amount beyond `sendbuf_len_in_flight` we need still to pass
    * to nghttp3. Do that now, if we can. */
 
+  if(!stream->eos && !stream->len)
+    return NGHTTP3_ERR_WOULDBLOCK;
 
   /* When we stopped sending and everything in `sendbuf` is "in flight",
    * we are at the end of the request body. */
-  if(stream->upload_left == 0) {
+  if(stream->eos)
     *pflags = NGHTTP3_DATA_FLAG_EOF;
-    stream->send_closed = TRUE;
+
+  if(stream->len) {
+    nvecs = 1;
+    vec[0].base = stream->buf;
+    vec[0].len = stream->len;
   }
 
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read req body -> "
-              "%d vecs%s (left=%" CURL_FORMAT_CURL_OFF_T ")",
-              stream->id, (int)nvecs,
-              *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
-              stream->upload_left);
+              "%d vecs%s", stream->id, (int)nvecs, stream->eos?" EOF":"");
   return (nghttp3_ssize)nvecs;
 }
 
@@ -2125,23 +2142,9 @@ static ssize_t h3_stream_open(struct Curl_cfilter *cf,
   case HTTPREQ_POST_FORM:
   case HTTPREQ_POST_MIME:
   case HTTPREQ_PUT:
-    /* known request body size or -1 */
-    if(data->state.infilesize != -1)
-      stream->upload_left = data->state.infilesize;
-    else
-      /* data sending without specifying the data amount up front */
-      stream->upload_left = -1; /* unknown */
-    break;
-  default:
-    /* there is not request body */
-    stream->upload_left = 0; /* no request body */
-    break;
-  }
-
-  stream->send_closed = (stream->upload_left == 0);
-  if(!stream->send_closed) {
     reader.read_data = cb_h3_read_req_body;
     preader = &reader;
+    break;
   }
 
   rc = nghttp3_conn_submit_request(ctx->h3conn, stream->id,
@@ -2178,17 +2181,16 @@ out:
   return nwritten;
 }
 
-static CURLcode cf_linuxq_sendmsg(struct Curl_cfilter *cf,
-                                   struct Curl_easy *data)
+static ssize_t cf_linuxq_sendmsg(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data, CURLcode *result)
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
-  struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   struct quic_stream_info *sinfo;
   struct cmsghdr *cm;
   struct quic_errinfo einfo;
   int64_t stream_id;
+  ssize_t sent, total = 0;
   nghttp3_ssize veccnt;
-  ssize_t sent;
   uint32_t flags;
   int fin, rc;
   struct msghdr msg = {0};
@@ -2225,13 +2227,17 @@ static CURLcode cf_linuxq_sendmsg(struct Curl_cfilter *cf,
                         nghttp3_err_infer_quic_app_error_code((int)veccnt);
         setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_RESET, &einfo,
                    sizeof(einfo));
-        return CURLE_SEND_ERROR;
+        /* No additional error handling, we already are returning */
+        *result = CURLE_SEND_ERROR;
+        goto out;
       }
 
       if(fin)
         flags |= MSG_STREAM_FIN;
-      else if(veccnt == 0)
+      else if(veccnt == 0) {
+        *result = CURLE_OK;
         goto out;
+      }
     }
 
     sinfo->stream_id = (uint64_t)stream_id;
@@ -2239,34 +2245,53 @@ static CURLcode cf_linuxq_sendmsg(struct Curl_cfilter *cf,
     msg.msg_iovlen = veccnt;
 
     sent = sendmsg(ctx->q.sockfd, &msg, 0);
-    if(sent == 0)
+    infof(data, "sendmsg() -> %zd", sent);
+    if(sent == 0) {
+      *result = CURLE_OK;
       goto out;
-
-    if(sent == -1) {
+    }
+    else if(sent == -1) {
       switch(SOCKERRNO) {
       case EAGAIN:
 #if EAGAIN != EWOULDBLOCK
       case EWOULDBLOCK:
 #endif
-        return CURLE_AGAIN;
+        *result = CURLE_AGAIN;
+        goto out;
       default:
         failf(data, "sendmsg() returned %zd (errno %d)", sent, errno);
-        return CURLE_SEND_ERROR;
+        *result = CURLE_SEND_ERROR;
+        goto out;
       }
     }
 
-    stream->upload_left -= sent;
+    total += sent;
 
     rc = nghttp3_conn_add_write_offset(ctx->h3conn, stream_id, sent);
     if(rc) {
       failf(data, "nghttp3_conn_add_write_offset returned error: %s\n",
             nghttp3_strerror(rc));
-      return CURLE_SEND_ERROR;
+      *result = CURLE_SEND_ERROR;
+      goto out;
+    }
+    /* With Linux QUIC we do not receive acks. Therefore we cannot report
+     * acknowledgements to the http3 library. However, once we copy data
+     * to the socket it does not need management in the http3 library.
+     * XXX: No idea what will happen if nghttp3 cannot http3-wrap all data. */
+    rc = nghttp3_conn_add_ack_offset(ctx->h3conn, stream_id, sent);
+    if(rc) {
+      failf(data, "nghttp3_conn_add_ack_offset returned error: %s\n",
+            nghttp3_strerror(rc));
+      *result = CURLE_SEND_ERROR;
+      goto out;
     }
   }
 
+  *result = CURLE_OK;
 out:
-  return CURLE_OK;
+  if(total)
+    return total;
+  return sent;
 }
 
 static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -2277,7 +2302,6 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
   ssize_t sent = 0;
   struct cf_call_data save;
-  CURLcode result;
 
   CF_DATA_SAVE(save, cf, data);
   DEBUGASSERT(cf->connected);
@@ -2285,7 +2309,6 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
 
-  (void)eos; /* TODO: use for stream EOF and block handling */
   if(!stream || stream->id < 0) {
     if(ctx->shutdown_started) {
       CURL_TRC_CF(data, cf, "cannot open stream on closed connection");
@@ -2307,21 +2330,6 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     sent = -1;
     goto out;
   }
-  else if(stream->upload_blocked_len) {
-    /* the data in `buf` has already been submitted or added to the
-     * buffers, but have been EAGAINed on the last invocation. */
-    DEBUGASSERT(len >= stream->upload_blocked_len);
-    if(len < stream->upload_blocked_len) {
-      /* Did we get called again with a smaller `len`? This should not
-       * happen. We are not prepared to handle that. */
-      failf(data, "HTTP/3 send again with decreased length");
-      *err = CURLE_HTTP3;
-      sent = -1;
-      goto out;
-    }
-    sent = (ssize_t)stream->upload_blocked_len;
-    stream->upload_blocked_len = 0;
-  }
   else if(stream->closed) {
     if(stream->resp_hds_complete) {
       /* Server decided to close the stream after having sent us a final
@@ -2335,8 +2343,8 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
       sent = (ssize_t)len;
       goto out;
     }
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] send_body(len=%zu) "
-                "-> stream closed", stream->id, len);
+    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] send_body(len=%zu, eos=%d) "
+                "-> stream closed", stream->id, len, eos);
     *err = CURLE_HTTP3;
     sent = -1;
     goto out;
@@ -2349,28 +2357,16 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
   (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
 
-  result = cf_linuxq_sendmsg(cf, data);
-  if(result) {
-    *err = result;
-    sent = -1;
-  }
-
-  if(stream && sent > 0) {
-    /* We have unacknowledged DATA and cannot report success to our
-     * caller. Instead we EAGAIN and remember how much we have already
-     * "written" into our various internal connection buffers. */
-    stream->upload_blocked_len = sent;
-    CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu), "
-                "-> EGAIN", stream->id, len);
-    *err = CURLE_AGAIN;
-    sent = -1;
-  }
+  stream->buf = (uint8_t *)buf; /* XXX: bad sendbuf */
+  stream->len = len;
+  stream->eos = eos;
+  sent = cf_linuxq_sendmsg(cf, data, err);
 
 out:
-  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %zd, %d",
-              stream? stream->id : -1, len, sent, *err);
+  CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu, eos=%d) "
+              "-> %zd, %d", stream? stream->id : -1, len, eos, sent, *err);
   CF_DATA_RESTORE(cf, save);
-  return sent;
+  return stream->len; /* XXX */
 }
 
 /*
