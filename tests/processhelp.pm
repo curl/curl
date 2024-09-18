@@ -113,14 +113,14 @@ sub winpid_to_pid {
     if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
         my $pid = Cygwin::winpid_to_pid($vpid - 65536);
         if($pid) {
-            print "winpid_to_pid: $^O: $vpid -> $pid (Cygwin::winpid_to_pid success)\n";
+            print "winpid_to_pid: $^O: $runnerid: $vpid -> $pid (Cygwin::winpid_to_pid success)\n";
             return $pid;
         } else {
-            print "winpid_to_pid: $^O: $vpid (Cygwin::winpid_to_pid fail)\n";
+            print "winpid_to_pid: $^O: $runnerid: $vpid (Cygwin::winpid_to_pid fail)\n";
             return $vpid
         }
     }
-    print "winpid_to_pid: $^O: $vpid (passthrough)\n";
+    print "winpid_to_pid: $^O: $runnerid: $vpid (passthrough)\n";
     return $vpid;
 }
 
@@ -132,14 +132,14 @@ sub pid_to_winpid {
     if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
         my $pid = Cygwin::pid_to_winpid($vpid - 65536);
         if($pid) {
-            print "pid_to_winpid: $^O: $vpid -> $pid (Cygwin::pid_to_winpid success)\n";
+            print "pid_to_winpid: $^O: $runnerid: $vpid -> $pid (Cygwin::pid_to_winpid success)\n";
             return $pid;
         } else {
-            print "pid_to_winpid: $^O: $vpid (Cygwin::pid_to_winpid fail)\n";
+            print "pid_to_winpid: $^O: $runnerid: $vpid (Cygwin::pid_to_winpid fail)\n";
             return $vpid
         }
     }
-    print "pid_to_winpid: $^O: $vpid (passthrough)\n";
+    print "pid_to_winpid: $^O: $runnerid: $vpid (passthrough)\n";
     return $vpid;
 }
 
@@ -161,23 +161,23 @@ sub pidexists {
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/tasklist.html
                 my $cmd = "tasklist -fi \"$filter\" 2>nul";
-                print "pidexists: $^O: Executing: '$cmd'\n";
+                print "pidexists: $^O: $runnerid: Executing: '$cmd'\n";
                 my $result = `$cmd`;
                 if(index($result, "$pid") != -1) {
-                    print "pidexists: $^O: pid FOUND in tasklist: $pid\n";
+                    print "pidexists: $^O: $runnerid: pid FOUND in tasklist: $pid\n";
                     return -$pid;
                 }
                 else {
-                    print "pidexists: $^O: pid not found in tasklist: $pid\n";
+                    print "pidexists: $^O: $runnerid: pid not found in tasklist: $pid\n";
                 }
                 return 0;
             }
         }
 
         # verify if currently existing and alive
-        print "pidexists: $^O: kill(0, $pid)\n";
+        print "pidexists: $^O: $runnerid: kill(0, $pid)\n";
         if(kill(0, $pid)) {
-            print "pidexists: $^O: kill(0, $pid) -> exists\n";
+            print "pidexists: $^O: $runnerid: kill(0, $pid) -> exists\n";
             return $pid;
         }
     }
@@ -206,7 +206,7 @@ sub pidterm {
         }
 
         # signal the process to terminate
-        print "pidterm: $^O: kill(\"TERM\", $pid)\n";
+        print "pidterm: $^O: $runnerid: kill(\"TERM\", $pid)\n";
         kill("TERM", $pid);
     }
 }
@@ -232,7 +232,7 @@ sub pidkill {
         }
 
         # signal the process to terminate
-        print "pidterm: $^O: kill(\"KILL\", $pid)\n";
+        print "pidterm: $^O: $runnerid: kill(\"KILL\", $pid)\n";
         kill("KILL", $pid);
     }
 }
@@ -248,20 +248,20 @@ sub pidwait {
     # check if the process exists
     if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
         if($flags == &WNOHANG) {
-            print "pidwait: $^O: ->pidexists($pid)\n";
+            print "pidwait: $^O: $runnerid: ->pidexists($pid)\n";
             return pidexists($pid)?0:$pid;
         }
-        print "pidwait: $^O: waiting for $pid to disappear\n";
+        print "pidwait: $^O: $runnerid: waiting for $pid to disappear\n";
         while(pidexists($pid)) {
             portable_sleep(0.01);
-            print "pidwait: $^O: waiting for $pid to disappear more\n";
+            print "pidwait: $^O: $runnerid: waiting for $pid to disappear more\n";
         }
-        print "pidwait: $^O: $pid no longer exists\n";
+        print "pidwait: $^O: $runnerid: $pid no longer exists\n";
         return $pid;
     }
 
     # wait on the process to terminate
-    print "pidwait: $^O: waitpid($pid, $flags)\n";
+    print "pidwait: $^O: $runnerid: waitpid($pid, $flags)\n";
     return waitpid($pid, $flags);
 }
 
@@ -280,7 +280,7 @@ sub processexists {
     # fetch pid from pidfile
     my $pid = pidfromfile($pidfile);
 
-    print "processexists: $^O: init $pidfile =-> $pid\n";
+    print "processexists: $^O: $runnerid: init $pidfile =-> $pid\n";
 
     if($pid > 0) {
         # verify if currently alive
@@ -288,7 +288,7 @@ sub processexists {
             return $pid;
         }
         else {
-            print "processexists: $^O: inexisting -> cleaning up\n";
+            print "processexists: $^O: $runnerid: inexisting -> cleaning up\n";
             # get rid of the certainly invalid pidfile
             unlink($pidfile) if($pid == pidfromfile($pidfile));
             # reap its dead children, if not done yet
