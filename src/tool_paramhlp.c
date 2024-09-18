@@ -181,7 +181,7 @@ ParameterError file2string(char **bufp, FILE *file, int filelimit,
                            curl_off_t start, curl_off_t end)
 {
   struct curlx_dynbuf dyn;
-  size_t rangelen = 0;
+  curl_off_t rangelen = 0;
   int rangelen_set = 0;
 
   if(filelimit == FILELIMIT_START && textmode_fseek(file, start, SEEK_SET)) {
@@ -205,8 +205,8 @@ ParameterError file2string(char **bufp, FILE *file, int filelimit,
       size_t elt_cnt;
       size_t nread;
 
-      if(rangelen_set && (rangelen < sizeof(buffer))) {
-        elt_cnt = rangelen;
+      if(rangelen_set && (rangelen < (curl_off_t)sizeof(buffer))) {
+        elt_cnt = (size_t)rangelen;
       }
       else {
         elt_cnt = sizeof(buffer);
