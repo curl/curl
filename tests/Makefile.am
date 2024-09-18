@@ -125,7 +125,7 @@ TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
 TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
-TEST_T = -a -t
+TEST_T = -a -t -j4
 TEST_E = -a -e
 
 # ~<keyword> means that it will run all tests matching the keyword, but will
@@ -133,7 +133,7 @@ TEST_E = -a -e
 TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm -j2
+TEST_CI = $(TEST_NF) -r -rm -j16
 endif
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@

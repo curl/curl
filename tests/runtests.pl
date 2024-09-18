@@ -3002,15 +3002,17 @@ while () {
         }
     }
     if(!$ridready && $runnerwait && scalar(%runnersrunning)) {
-        my $msg = "waiting for " . scalar(%runnersrunning) . " results:";
-        my $sep = " ";
-        foreach my $rid (keys %runnersrunning) {
-            $msg .= $sep . $runnersrunning{$rid} . "[$rid]";
-            $sep = ", "
-        }
-        logmsg "$msg\n";
         $runner_wait_cnt++;
-        if($runner_wait_cnt > 10) {
+        if($runner_wait_cnt >= 5) {
+            my $msg = "waiting for " . scalar(%runnersrunning) . " results:";
+            my $sep = " ";
+            foreach my $rid (keys %runnersrunning) {
+                $msg .= $sep . $runnersrunning{$rid} . "[$rid]";
+                $sep = ", "
+            }
+            logmsg "$msg\n";
+        }
+        if($runner_wait_cnt >= 10) {
             $runner_wait_cnt = 0;
             foreach my $rid (keys %runnersrunning) {
                 my $testnum = $runnersrunning{$rid};
