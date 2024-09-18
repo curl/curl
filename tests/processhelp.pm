@@ -169,7 +169,9 @@ sub pidterm {
             if($^O ne 'MSWin32') {
                 my $filter = "PID eq $pid";
                 # https://ss64.com/nt/taskkill.html
-                system("taskkill -fi \"$filter\" >nul 2>&1");
+                my $cmd = "taskkill -fi \"$filter\" >nul 2>&1";
+                logmsg "Executing: '$cmd'\n";
+                system($cmd);
                 return;
             }
         }
