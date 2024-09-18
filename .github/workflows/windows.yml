@@ -624,7 +624,6 @@ jobs:
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
-    timeout-minutes: 55
     defaults:
       run:
         shell: C:\msys64\usr\bin\bash.exe {0}
@@ -732,17 +731,24 @@ jobs:
 
       - name: 'install test tools'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 30
         run: |
+          '/c/Program Files/Git/usr/bin/perl.exe' -V
+          echo '=========================='
+          '/c/Program Files/Git/usr/bin/perl -MCPAN -e 'install Win32::Process' || true
+          echo '=========================='
+          '/c/Program Files/Git/usr/bin/perl -MCPAN -e 'install Win32::Process::List' || true
+          echo '=========================='
+          echo '=========================='
           /c/Strawberry/perl/bin/perl -V
           echo '--------------------------'
           perl -V
           echo '--------------------------'
+          find /c/Users/runneradmin -name 'MyConfig.pm'
           find /c/ -name 'MyConfig.pm'
           echo '--------------------------'
           cat $USERPROFILE/.cpan/CPAN/MyConfig.pm || true
           perl -MCPAN -e 'install Win32::Process' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
+          #/c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
           # GnuTLS is not fully functional on Windows, so skip the tests
           # https://github.com/ShiftMediaProject/gnutls/issues/23
           if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
