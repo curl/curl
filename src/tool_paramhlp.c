@@ -49,7 +49,7 @@ int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
   #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
   #define FSEEK(S, O, W) fseeko(S, (off_t)O, W)
   #else
-  #define FSEEK(S, O, W) ((O > LONG_MAX) ? -1 : fseek(S, O, W))
+  #define FSEEK(S, O, W) ((O > LONG_MAX) ? -1 : fseek(S, (long)O, W))
   #endif
   curl_off_t pos, newpos = 0;
 
