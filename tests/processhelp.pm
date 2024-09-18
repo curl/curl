@@ -125,6 +125,25 @@ sub winpid_to_pid {
 }
 
 #######################################################################
+# return virtual pid from Cygwin pid
+#
+sub pid_to_winpid {
+    my $vpid = $_[0];
+    if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
+        my $pid = Cygwin::pid_to_winpid($vpid - 65536);
+        if($pid) {
+            print "pid_to_winpid: $^O: $vpid -> $pid (Cygwin::pid_to_winpid success)\n";
+            return $pid;
+        } else {
+            print "pid_to_winpid: $^O: $vpid (Cygwin::pid_to_winpid fail)\n";
+            return $vpid
+        }
+    }
+    print "pid_to_winpid: $^O: $vpid (passthrough)\n";
+    return $vpid;
+}
+
+#######################################################################
 # pidexists checks if a process with a given pid exists and is alive.
 # This will return the positive pid if the process exists and is alive.
 # This will return the negative pid if the process exists differently.
