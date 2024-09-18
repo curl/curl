@@ -349,7 +349,8 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
     gss_enc = 1;
 
   infof(data, "SOCKS5 server supports GSS-API %s data protection.",
-        (gss_enc == 0)?"no":((gss_enc==1)?"integrity":"confidentiality"));
+        (gss_enc == 0) ? "no" :
+        ((gss_enc == 1) ? "integrity" : "confidentiality"));
   /* force for the moment to no data protection */
   gss_enc = 0;
   /*
@@ -525,8 +526,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
   (void)curlx_nonblock(sock, TRUE);
 
   infof(data, "SOCKS5 access with%s protection granted.",
-        (socksreq[0] == 0)?"out GSS-API data":
-        ((socksreq[0] == 1)?" GSS-API integrity":" GSS-API confidentiality"));
+        (socksreq[0] == 0) ? "out GSS-API data":
+        ((socksreq[0] == 1) ? " GSS-API integrity" :
+         " GSS-API confidentiality"));
 
   conn->socks5_gssapi_enctype = socksreq[0];
   if(socksreq[0] == 0)

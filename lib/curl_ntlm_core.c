@@ -483,7 +483,7 @@ static void time2filetime(struct ms_filetime *ft, time_t t)
      134774 days = 11644473600 seconds = 0x2B6109100 */
   r = ft->dwLowDateTime;
   ft->dwLowDateTime = (ft->dwLowDateTime + 0xB6109100U) & 0xFFFFFFFF;
-  ft->dwHighDateTime += ft->dwLowDateTime < r? 0x03: 0x02;
+  ft->dwHighDateTime += ft->dwLowDateTime < r ? 0x03 : 0x02;
 
   /* Convert to tenths of microseconds. */
   ft->dwHighDateTime *= 10000000;

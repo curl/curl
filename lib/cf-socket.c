@@ -177,7 +177,7 @@ static void
 tcpkeepalive(struct Curl_easy *data,
              curl_socket_t sockfd)
 {
-  int optval = data->set.tcp_keepalive?1:0;
+  int optval = data->set.tcp_keepalive ? 1 : 0;
 
   /* only set IDLE and INTVL if setting KEEPALIVE is successful */
   if(setsockopt(sockfd, SOL_SOCKET, SO_KEEPALIVE,
@@ -603,7 +603,7 @@ static CURLcode bindlocal(struct Curl_easy *data, struct connectdata *conn,
 
   memset(&sa, 0, sizeof(struct Curl_sockaddr_storage));
 
-  if(iface && (strlen(iface)<255) ) {
+  if(iface && (strlen(iface) < 255) ) {
     char myhost[256] = "";
     int done = 0; /* -1 for error, 1 for address found */
     if2ip_result_t if2ip_result = IF2IP_NOT_FOUND;
@@ -1642,7 +1642,7 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->conn->primary = ctx->ip;
     cf->conn->remote_addr = &ctx->addr;
   #ifdef USE_IPV6
-    cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
+    cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6) ? TRUE : FALSE;
   #endif
   }
   else {
@@ -1725,7 +1725,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
       timediff_t ms = Curl_timediff(ctx->first_byte_at, ctx->started_at);
-      *pres1 = (ms < INT_MAX)? (int)ms : INT_MAX;
+      *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
       *pres1 = -1;
@@ -1750,7 +1750,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_IP_INFO:
 #ifdef USE_IPV6
-    *pres1 = (ctx->addr.family == AF_INET6)? TRUE : FALSE;
+    *pres1 = (ctx->addr.family == AF_INET6) ? TRUE : FALSE;
 #else
     *pres1 = FALSE;
 #endif
@@ -1759,7 +1759,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -1806,7 +1806,7 @@ CURLcode Curl_cf_tcp_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_tcp, ctx);
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     Curl_safefree(cf);
     Curl_safefree(ctx);
@@ -1836,7 +1836,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   set_local_ip(cf, data);
   CURL_TRC_CF(data, cf, "%s socket %" FMT_SOCKET_T
               " connected: [%s:%d] -> [%s:%d]",
-              (ctx->transport == TRNSPRT_QUIC)? "QUIC" : "UDP",
+              (ctx->transport == TRNSPRT_QUIC) ? "QUIC" : "UDP",
               ctx->sock, ctx->ip.local_ip, ctx->ip.local_port,
               ctx->ip.remote_ip, ctx->ip.remote_port);
 
@@ -1955,7 +1955,7 @@ CURLcode Curl_cf_udp_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_udp, ctx);
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     Curl_safefree(cf);
     Curl_safefree(ctx);
@@ -2007,7 +2007,7 @@ CURLcode Curl_cf_unix_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_unix, ctx);
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     Curl_safefree(cf);
     Curl_safefree(ctx);

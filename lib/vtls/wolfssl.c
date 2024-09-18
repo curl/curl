@@ -421,7 +421,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   /* load trusted cacert from file if not blob */
 
   CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
-              ssl_cafile? ssl_cafile : "none", !!ca_info_blob);
+              ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
     return CURLE_OUT_OF_MEMORY;
 
@@ -517,9 +517,9 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
   WOLFSSL_X509_STORE *store = NULL;
 
   DEBUGASSERT(multi);
-  share = multi? Curl_hash_pick(&multi->proto_hash,
-                                (void *)MPROTO_WSSL_X509_KEY,
-                                sizeof(MPROTO_WSSL_X509_KEY)-1) : NULL;
+  share = multi ? Curl_hash_pick(&multi->proto_hash,
+                                 (void *)MPROTO_WSSL_X509_KEY,
+                                 sizeof(MPROTO_WSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !cached_x509_store_expired(data, share) &&
      !cached_x509_store_different(cf, share)) {
@@ -960,7 +960,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
    * anyway. In the latter case the result of the verification is checked with
    * SSL_get_verify_result() below. */
   wolfSSL_CTX_set_verify(backend->ctx,
-                         conn_config->verifypeer?SSL_VERIFY_PEER:
+                         conn_config->verifypeer ? SSL_VERIFY_PEER :
                          SSL_VERIFY_NONE, NULL);
 
 #ifdef HAVE_SNI
@@ -1200,8 +1200,8 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     (struct wolfssl_ctx *)connssl->backend;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
 #ifndef CURL_DISABLE_PROXY
-  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
+  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -1213,8 +1213,8 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Enable RFC2818 checks */
   if(conn_config->verifyhost) {
-    char *snihost = connssl->peer.sni?
-                    connssl->peer.sni : connssl->peer.hostname;
+    char *snihost = connssl->peer.sni ?
+      connssl->peer.sni : connssl->peer.hostname;
     if(wolfSSL_check_domain_name(backend->handle, snihost) == SSL_FAILURE)
       return CURLE_SSL_CONNECT_ERROR;
   }
@@ -1762,7 +1762,6 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
   CURLcode result;
   struct ssl_connect_data *connssl = cf->ctx;
   curl_socket_t sockfd = Curl_conn_cf_get_socket(cf, data);
-  int what;
 
   /* check if the connection has already been established */
   if(ssl_connection_complete == connssl->state) {
@@ -1798,14 +1797,12 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
 
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
-
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
-
-      what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking?0:timeout_ms);
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
+      int what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
+                                   nonblocking ? 0 : timeout_ms);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);

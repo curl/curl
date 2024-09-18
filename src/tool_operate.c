@@ -813,7 +813,7 @@ static CURLcode url_proto(char **url,
     curl_url_cleanup(uh);
   }
 
-  *scheme = (char *) (proto? proto: "???");   /* Never match if not found. */
+  *scheme = (char *) (proto ? proto : "???"); /* Never match if not found. */
   return result;
 }
 
@@ -839,9 +839,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* Use the postfields data for an HTTP get */
         httpgetfields = state->httpgetfields = config->postfields;
         config->postfields = NULL;
-        if(SetHTTPrequest(config,
-                          (config->no_body?TOOL_HTTPREQ_HEAD:TOOL_HTTPREQ_GET),
-                          &config->httpreq)) {
+        if(SetHTTPrequest(config, (config->no_body ? TOOL_HTTPREQ_HEAD :
+                                   TOOL_HTTPREQ_GET), &config->httpreq)) {
           result = CURLE_FAILED_INIT;
         }
       }
@@ -900,8 +899,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
     if(!config->globoff && infiles && !inglob) {
       /* Unless explicitly shut off */
       result = glob_url(&inglob, infiles, &state->infilenum,
-                        (!global->silent || global->showerror)?
-                        tool_stderr:NULL);
+                        (!global->silent || global->showerror) ?
+                        tool_stderr : NULL);
       if(result)
         break;
       config->state.inglob = inglob;
@@ -936,8 +935,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           /* Unless explicitly shut off, we expand '{...}' and '[...]'
              expressions and return total number of URLs in pattern set */
           result = glob_url(&state->urls, urlnode->url, &state->urlnum,
-                            (!global->silent || global->showerror)?
-                            tool_stderr:NULL);
+                            (!global->silent || global->showerror) ?
+                            tool_stderr : NULL);
           if(result)
             break;
           urlnum = state->urlnum;
@@ -1284,7 +1283,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
            * If the user has also selected --anyauth or --proxy-anyauth
            * we should warn them.
            */
-          if(config->proxyanyauth || (authbits>1)) {
+          if(config->proxyanyauth || (authbits > 1)) {
             warnf(global,
                   "Using --anyauth or --proxy-anyauth with upload from stdin"
                   " involves a big risk of it not working. Use a temporary"
@@ -1433,7 +1432,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         my_setopt_str(curl, CURLOPT_URL, per->this_url);
         my_setopt(curl, CURLOPT_NOPROGRESS,
-                  global->noprogress || global->silent?1L:0L);
+                  global->noprogress || global->silent ? 1L : 0L);
         if(config->no_body)
           my_setopt(curl, CURLOPT_NOBODY, 1L);
 
@@ -1456,7 +1455,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_PROXYUSERPWD, config->proxyuserpwd);
 
         /* new in libcurl 7.3 */
-        my_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel?1L:0L);
+        my_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, config->proxytunnel ?
+                  1L : 0L);
 
         /* new in libcurl 7.52.0 */
         if(config->preproxy)
@@ -1483,13 +1483,13 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         my_setopt_str(curl, CURLOPT_NOPROXY, config->noproxy);
 
         my_setopt(curl, CURLOPT_SUPPRESS_CONNECT_HEADERS,
-                  config->suppress_connect_headers?1L:0L);
+                  config->suppress_connect_headers ? 1L : 0L);
 
-        my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror?1L:0L);
+        my_setopt(curl, CURLOPT_FAILONERROR, config->failonerror ? 1L : 0L);
         my_setopt(curl, CURLOPT_REQUEST_TARGET, config->request_target);
-        my_setopt(curl, CURLOPT_UPLOAD, per->uploadfile?1L:0L);
-        my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly?1L:0L);
-        my_setopt(curl, CURLOPT_APPEND, config->ftp_append?1L:0L);
+        my_setopt(curl, CURLOPT_UPLOAD, per->uploadfile ? 1L : 0L);
+        my_setopt(curl, CURLOPT_DIRLISTONLY, config->dirlistonly ? 1L : 0L);
+        my_setopt(curl, CURLOPT_APPEND, config->ftp_append ? 1L : 0L);
 
         if(config->netrc_opt)
           my_setopt_enum(curl, CURLOPT_NETRC, (long)CURL_NETRC_OPTIONAL);
@@ -1501,7 +1501,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(config->netrc_file)
           my_setopt_str(curl, CURLOPT_NETRC_FILE, config->netrc_file);
 
-        my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii?1L:0L);
+        my_setopt(curl, CURLOPT_TRANSFERTEXT, config->use_ascii ? 1L : 0L);
         if(config->login_options)
           my_setopt_str(curl, CURLOPT_LOGIN_OPTIONS, config->login_options);
         my_setopt_str(curl, CURLOPT_USERPWD, config->userpwd);
@@ -1564,11 +1564,11 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           long postRedir = 0;
 
           my_setopt(curl, CURLOPT_FOLLOWLOCATION,
-                    config->followlocation?1L:0L);
+                    config->followlocation ? 1L : 0L);
           my_setopt(curl, CURLOPT_UNRESTRICTED_AUTH,
-                    config->unrestricted_auth?1L:0L);
+                    config->unrestricted_auth ? 1L : 0L);
           my_setopt_str(curl, CURLOPT_AWS_SIGV4, config->aws_sigv4);
-          my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer?1L:0L);
+          my_setopt(curl, CURLOPT_AUTOREFERER, config->autoreferer ? 1L : 0L);
 
           /* new in libcurl 7.36.0 */
           if(config->proxyheaders) {
@@ -1972,7 +1972,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt(curl, CURLOPT_FILETIME, 1L);
         }
 
-        my_setopt(curl, CURLOPT_CRLF, config->crlf?1L:0L);
+        my_setopt(curl, CURLOPT_CRLF, config->crlf ? 1L : 0L);
         my_setopt_slist(curl, CURLOPT_QUOTE, config->quote);
         my_setopt_slist(curl, CURLOPT_POSTQUOTE, config->postquote);
         my_setopt_slist(curl, CURLOPT_PREQUOTE, config->prequote);
@@ -2014,7 +2014,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
           my_setopt_str(curl, CURLOPT_COOKIEJAR, config->cookiejar);
 
         /* new in libcurl 7.9.7 */
-        my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession?1L:0L);
+        my_setopt(curl, CURLOPT_COOKIESESSION, config->cookiesession ?
+                  1L : 0L);
 
         my_setopt_enum(curl, CURLOPT_TIMECONDITION, (long)config->timecond);
         my_setopt(curl, CURLOPT_TIMEVALUE_LARGE, config->condtime);
@@ -2118,9 +2119,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         /* new in curl 7.10.7, extended in 7.19.4. Modified to use
            CREATE_DIR_RETRY in 7.49.0 */
         my_setopt(curl, CURLOPT_FTP_CREATE_MISSING_DIRS,
-                  (long)(config->ftp_create_dirs?
-                         CURLFTP_CREATE_DIR_RETRY:
-                         CURLFTP_CREATE_DIR_NONE));
+                  (long)(config->ftp_create_dirs ?
+                         CURLFTP_CREATE_DIR_RETRY : CURLFTP_CREATE_DIR_NONE));
 
         /* new in curl 7.10.8 */
         if(config->max_filesize)
@@ -2167,10 +2167,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* curl 7.13.0 */
         my_setopt_str(curl, CURLOPT_FTP_ACCOUNT, config->ftp_account);
-        my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl?1L:0L);
+        my_setopt(curl, CURLOPT_IGNORE_CONTENT_LENGTH, config->ignorecl ?
+                  1L : 0L);
 
         /* curl 7.14.2 */
-        my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip?1L:0L);
+        my_setopt(curl, CURLOPT_FTP_SKIP_PASV_IP, config->ftp_skip_ip ?
+                  1L : 0L);
 
         /* curl 7.15.1 */
         if(proto_ftp)

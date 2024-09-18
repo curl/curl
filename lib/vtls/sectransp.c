@@ -532,7 +532,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
       keys_list_count = CFArrayGetCount(keys_list);
       *out_cert_and_key = NULL;
       status = 1;
-      for(i = 0; i<keys_list_count; i++) {
+      for(i = 0; i < keys_list_count; i++) {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
         SecIdentityRef identity =
@@ -1285,8 +1285,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
   if(conn_config->verifyhost) {
-    char *server = connssl->peer.sni?
-                   connssl->peer.sni : connssl->peer.hostname;
+    char *server = connssl->peer.sni ?
+      connssl->peer.sni : connssl->peer.hostname;
     err = SSLSetPeerDomainName(backend->ssl_ctx, server, strlen(server));
 
     if(err != noErr) {
@@ -2328,10 +2328,10 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);

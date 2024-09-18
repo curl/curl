@@ -283,9 +283,9 @@ CURLcode Curl_req_set_upload_done(struct Curl_easy *data)
           data->req.writebytecount);
   else if(!data->req.download_done) {
     DEBUGASSERT(Curl_bufq_is_empty(&data->req.sendbuf));
-    infof(data, Curl_creader_total_length(data)?
-                "We are completely uploaded and fine" :
-                "Request completely sent off");
+    infof(data, Curl_creader_total_length(data) ?
+          "We are completely uploaded and fine" :
+          "Request completely sent off");
   }
 
   return Curl_xfer_send_close(data);

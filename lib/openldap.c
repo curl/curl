@@ -276,7 +276,8 @@ static CURLcode oldap_url_parse(struct Curl_easy *data, LDAPURLDesc **ludp)
   if(rc != LDAP_URL_SUCCESS) {
     const char *msg = "url parsing problem";
 
-    result = rc == LDAP_URL_ERR_MEM? CURLE_OUT_OF_MEMORY: CURLE_URL_MALFORMAT;
+    result = rc == LDAP_URL_ERR_MEM ? CURLE_OUT_OF_MEMORY :
+      CURLE_URL_MALFORMAT;
     rc -= LDAP_URL_SUCCESS;
     if((size_t) rc < sizeof(url_errs) / sizeof(url_errs[0]))
       msg = url_errs[rc];
@@ -313,7 +314,7 @@ static CURLcode oldap_parse_login_options(struct connectdata *conn)
       ptr++;
   }
 
-  return result == CURLE_URL_MALFORMAT? CURLE_SETOPT_OPTION_SYNTAX: result;
+  return result == CURLE_URL_MALFORMAT ? CURLE_SETOPT_OPTION_SYNTAX : result;
 }
 
 static CURLcode oldap_setup_connection(struct Curl_easy *data,
@@ -430,8 +431,8 @@ static CURLcode oldap_perform_bind(struct Curl_easy *data, ldapstate newstate)
     oldap_state(data, newstate);
   else
     result = oldap_map_error(rc,
-                             data->state.aptr.user?
-                             CURLE_LOGIN_DENIED: CURLE_LDAP_CANNOT_BIND);
+                             data->state.aptr.user ?
+                             CURLE_LOGIN_DENIED : CURLE_LDAP_CANNOT_BIND);
   return result;
 }
 
@@ -552,9 +553,9 @@ static CURLcode oldap_connect(struct Curl_easy *data, bool *done)
 
   hosturl = aprintf("%s://%s%s%s:%d",
                     conn->handler->scheme,
-                    conn->bits.ipv6_ip? "[": "",
+                    conn->bits.ipv6_ip ? "[" : "",
                     conn->host.name,
-                    conn->bits.ipv6_ip? "]": "",
+                    conn->bits.ipv6_ip ? "]" : "",
                     conn->remote_port);
   if(!hosturl)
     return CURLE_OUT_OF_MEMORY;
@@ -1134,7 +1135,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
 
   ldap_msgfree(msg);
   *err = result;
-  return result? -1: 0;
+  return result ? -1 : 0;
 }
 
 #ifdef USE_SSL

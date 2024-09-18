@@ -140,7 +140,7 @@ long tvdiff(struct timeval newer, struct timeval older)
 int struplocompare(const char *p1, const char *p2)
 {
   if(!p1)
-    return p2? -1: 0;
+    return p2 ? -1 : 0;
   if(!p2)
     return 1;
 #ifdef HAVE_STRCASECMP

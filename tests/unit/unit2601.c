@@ -42,7 +42,7 @@ static const char *tail_err(struct bufq *q)
   struct buf_chunk *chunk;
 
   if(!q->tail) {
-    return q->head? "tail is NULL, but head is not" : NULL;
+    return q->head ? "tail is NULL, but head is not" : NULL;
   }
 
   chunk = q->head;

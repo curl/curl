@@ -50,7 +50,7 @@ void dump(const char *text,
 
   fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stream, "%04zx: ", i);
 
@@ -71,7 +71,7 @@ void dump(const char *text,
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)? ptr[i + c] : '.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {

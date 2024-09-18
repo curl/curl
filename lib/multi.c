@@ -2230,7 +2230,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(!result) {
         if(dophase_done) {
           /* after DO, go DO_DONE or DO_MORE */
-          multistate(data, data->conn->bits.do_more?
+          multistate(data, data->conn->bits.do_more ?
                      MSTATE_DOING_MORE : MSTATE_DID);
           rc = CURLM_CALL_MULTI_PERFORM;
         } /* dophase_done */
@@ -2254,7 +2254,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(control) {
           /* if positive, advance to DO_DONE
              if negative, go back to DOING */
-          multistate(data, control == 1?
+          multistate(data, control == 1 ?
                      MSTATE_DID : MSTATE_DOING);
           rc = CURLM_CALL_MULTI_PERFORM;
         }
@@ -2584,8 +2584,8 @@ statemachine_end:
         streamclose(data->conn, "Aborted by callback");
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
-        multistate(data, (data->mstate < MSTATE_DONE)?
-                   MSTATE_DONE: MSTATE_COMPLETED);
+        multistate(data, (data->mstate < MSTATE_DONE) ?
+                   MSTATE_DONE : MSTATE_COMPLETED);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
     }
@@ -2866,7 +2866,7 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
     if(entry) {
       /* check if new for this transfer */
       unsigned int j;
-      for(j = 0; j< last_ps->num; j++) {
+      for(j = 0; j < last_ps->num; j++) {
         if(s == last_ps->sockets[j]) {
           last_action = last_ps->actions[j];
           break;
@@ -3379,7 +3379,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     multi->timetree = Curl_splay(tv_zero, multi->timetree);
     /* this will not return NULL from a non-emtpy tree, but some compilers
      * are not convinced of that. Analyzers are hard. */
-    *expire_time = multi->timetree? multi->timetree->key : tv_zero;
+    *expire_time = multi->timetree ? multi->timetree->key : tv_zero;
 
     /* 'multi->timetree' will be non-NULL here but the compilers sometimes
        yell at us if we assume so */

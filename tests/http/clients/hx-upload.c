@@ -446,7 +446,7 @@ int main(int argc, char *argv[])
     multi_handle = curl_multi_init();
     curl_multi_setopt(multi_handle, CURLMOPT_PIPELINING, CURLPIPE_MULTIPLEX);
 
-    n = (max_parallel < transfer_count)? max_parallel : transfer_count;
+    n = (max_parallel < transfer_count) ? max_parallel : transfer_count;
     for(i = 0; i < n; ++i) {
       t = &transfers[i];
       t->easy = curl_easy_init();

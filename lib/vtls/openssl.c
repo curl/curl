@@ -1558,7 +1558,8 @@ fail:
       SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type);
       if(cert_use_result != 1) {
         failf(data, "unable to set private key file: '%s' type %s",
-              key_file?key_file:"(memory blob)", key_type?key_type:"PEM");
+              key_file ? key_file : "(memory blob)",
+              key_type ? key_type : "PEM");
         return 0;
       }
       break;
@@ -2685,7 +2686,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 
     txt_len = msnprintf(ssl_buf, sizeof(ssl_buf),
                         "%s (%s), %s, %s (%d):\n",
-                        verstr, direction?"OUT":"IN",
+                        verstr, direction ? "OUT" : "IN",
                         tls_rt_name, msg_name, msg_type);
     if(0 <= txt_len && (unsigned)txt_len < sizeof(ssl_buf)) {
       Curl_debug(data, CURLINFO_TEXT, ssl_buf, (size_t)txt_len);
@@ -2941,8 +2942,8 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   struct ssl_connect_data *connssl;
 
   cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
-  connssl = cf? cf->ctx : NULL;
-  data = connssl? CF_DATA_CURRENT(cf) : NULL;
+  connssl = cf ? cf->ctx : NULL;
+  data = connssl ? CF_DATA_CURRENT(cf) : NULL;
   Curl_ossl_add_session(cf, data, &connssl->peer, ssl_sessionid);
   return 0;
 }
@@ -3167,7 +3168,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   bool imported_ca_info_blob = false;
 
   CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
-              ssl_cafile? ssl_cafile : "none", !!ca_info_blob);
+              ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
     return CURLE_OUT_OF_MEMORY;
 
@@ -3371,9 +3372,9 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
   X509_STORE *store = NULL;
 
   DEBUGASSERT(multi);
-  share = multi? Curl_hash_pick(&multi->proto_hash,
-                                (void *)MPROTO_OSSL_X509_KEY,
-                                sizeof(MPROTO_OSSL_X509_KEY)-1) : NULL;
+  share = multi ? Curl_hash_pick(&multi->proto_hash,
+                                 (void *)MPROTO_OSSL_X509_KEY,
+                                 sizeof(MPROTO_OSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !cached_x509_store_expired(data, share) &&
      !cached_x509_store_different(cf, share)) {
@@ -4312,7 +4313,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
     infof(data, "SSL connection using %s / %s / %s / %s",
           SSL_get_version(octx->ssl),
           SSL_get_cipher(octx->ssl),
-          negotiated_group_name? negotiated_group_name : "[blank]",
+          negotiated_group_name ? negotiated_group_name : "[blank]",
           OBJ_nid2sn(psigtype_nid));
 
 #ifdef USE_ECH
@@ -4356,9 +4357,9 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         infof(data, "ECH: unexpected status %d",rv);
       }
       infof(data, "ECH: result: status is %s, inner is %s, outer is %s",
-             (status ? status : "NULL"),
-             (inner ? inner : "NULL"),
-             (outer ? outer : "NULL"));
+            (status ? status : "NULL"),
+            (inner ? inner : "NULL"),
+            (outer ? outer : "NULL"));
       OPENSSL_free(inner);
       OPENSSL_free(outer);
       if(rv == SSL_ECH_STATUS_GREASE_ECH) {
@@ -4566,11 +4567,11 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   }
 
   infof(data, "%s certificate:",
-        Curl_ssl_cf_is_proxy(cf)? "Proxy" : "Server");
+        Curl_ssl_cf_is_proxy(cf) ? "Proxy" : "Server");
 
   rc = x509_name_oneline(X509_get_subject_name(octx->server_cert),
                          buffer, sizeof(buffer));
-  infof(data, " subject: %s", rc?"[NONE]":buffer);
+  infof(data, " subject: %s", rc ? "[NONE]" : buffer);
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   {
@@ -4735,8 +4736,8 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     result = CURLE_OK;
 
 #ifndef CURL_DISABLE_PROXY
-  ptr = Curl_ssl_cf_is_proxy(cf)?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
+  ptr = Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -4822,11 +4823,10 @@ static CURLcode ossl_connect_common(struct Curl_cfilter *cf,
 
     /* if ssl is expecting something, check if it is available. */
     if(!nonblocking && connssl->io_need) {
-
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                timeout_ms);
@@ -5209,9 +5209,9 @@ static size_t ossl_version(char *buffer, size_t size)
 #else
   return msnprintf(buffer, size, "%s/%lx.%lx.%lx",
                    OSSL_PACKAGE,
-                   (LIBRESSL_VERSION_NUMBER>>28)&0xf,
-                   (LIBRESSL_VERSION_NUMBER>>20)&0xff,
-                   (LIBRESSL_VERSION_NUMBER>>12)&0xff);
+                   (LIBRESSL_VERSION_NUMBER >> 28) & 0xf,
+                   (LIBRESSL_VERSION_NUMBER >> 20) & 0xff,
+                   (LIBRESSL_VERSION_NUMBER >> 12) & 0xff);
 #endif
 #elif defined(OPENSSL_IS_BORINGSSL)
 #ifdef CURL_BORINGSSL_VERSION
@@ -5262,9 +5262,9 @@ static size_t ossl_version(char *buffer, size_t size)
 #endif
                    ,
                    OSSL_PACKAGE,
-                   (ssleay_value>>28)&0xf,
-                   (ssleay_value>>20)&0xff,
-                   (ssleay_value>>12)&0xff,
+                   (ssleay_value >> 28) & 0xf,
+                   (ssleay_value >> 20) & 0xff,
+                   (ssleay_value >> 12) & 0xff,
                    sub);
 #endif /* OPENSSL_IS_BORINGSSL */
 }

@@ -821,7 +821,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
 
     proto = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
     Curl_alpn_set_negotiated(cf, data, (const unsigned char *)proto,
-                             proto? strlen(proto) : 0);
+                             proto ? strlen(proto) : 0);
   }
 
   if(ssl_config->primary.cache_session) {
@@ -941,15 +941,14 @@ static CURLcode bearssl_connect_common(struct Curl_cfilter *cf,
 
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
-
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       CURL_TRC_CF(data, cf, "connect_common, check socket");
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking?0:timeout_ms);
+                               nonblocking ? 0 : timeout_ms);
       CURL_TRC_CF(data, cf, "connect_common, check socket -> %d", what);
       if(what < 0) {
         /* fatal error */

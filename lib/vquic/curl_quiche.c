@@ -818,7 +818,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
   if(stream->reset) {
     failf(data,
           "HTTP/3 stream %" FMT_PRIu64 " reset by server", stream->id);
-    *err = data->req.bytecount? CURLE_PARTIAL_FILE : CURLE_HTTP3;
+    *err = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] cf_recv, was reset -> %d",
                 stream->id, *err);
   }
@@ -1146,7 +1146,7 @@ out:
     nwritten = -1;
   }
   CURL_TRC_CF(data, cf, "[%" FMT_PRIu64 "] cf_send(len=%zu) -> %zd, %d",
-              stream? stream->id : (curl_uint64_t)~0, len, nwritten, *err);
+              stream ? stream->id : (curl_uint64_t)~0, len, nwritten, *err);
   return nwritten;
 }
 
@@ -1546,7 +1546,7 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
     if(!ctx->goaway) {
       max_streams += quiche_conn_peer_streams_left_bidi(ctx->qconn);
     }
-    *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
+    *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     CURL_TRC_CF(data, cf, "query conn[%" FMT_OFF_T "]: "
                 "MAX_CONCURRENT -> %d (%zu in use)",
                 cf->conn->connection_id, *pres1, CONN_INUSE(cf->conn));
@@ -1555,7 +1555,7 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
       timediff_t ms = Curl_timediff(ctx->q.first_byte_at, ctx->started_at);
-      *pres1 = (ms < INT_MAX)? (int)ms : INT_MAX;
+      *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
       *pres1 = -1;
@@ -1575,7 +1575,7 @@ static CURLcode cf_quiche_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -1667,7 +1667,7 @@ CURLcode Curl_cf_quiche_create(struct Curl_cfilter **pcf,
   cf->next = udp_cf;
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
@@ -1682,7 +1682,7 @@ bool Curl_conn_is_quiche(const struct Curl_easy *data,
                          const struct connectdata *conn,
                          int sockindex)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for(; cf; cf = cf->next) {

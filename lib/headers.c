@@ -54,7 +54,7 @@ static void copy_header_external(struct Curl_header_store *hs,
      impossible for applications to do == comparisons, as that would otherwise
      be very tempting and then lead to the reserved bits not being reserved
      anymore. */
-  h->origin = (unsigned int)(hs->type | (1<<27));
+  h->origin = (unsigned int)(hs->type | (1 << 27));
   h->anchor = e;
 }
 

@@ -428,7 +428,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
        array. With N_ENTRIES filled in, we have about N_ENTRIES-1 seconds of
        transfer. Imagine, after one second we have filled in two entries,
        after two seconds we have filled in three entries etc. */
-    countindex = ((p->speeder_c >= CURR_TIME)? CURR_TIME:p->speeder_c) - 1;
+    countindex = ((p->speeder_c >= CURR_TIME) ? CURR_TIME : p->speeder_c) - 1;
 
     /* first of all, we do not do this if there is no counted seconds yet */
     if(countindex) {
@@ -439,7 +439,7 @@ static bool progress_calc(struct Curl_easy *data, struct curltime now)
       /* Get the index position to compare with the 'nowindex' position.
          Get the oldest entry possible. While we have less than CURR_TIME
          entries, the first entry will remain the oldest. */
-      checkindex = (p->speeder_c >= CURR_TIME)? p->speeder_c%CURR_TIME:0;
+      checkindex = (p->speeder_c >= CURR_TIME) ? p->speeder_c%CURR_TIME : 0;
 
       /* Figure out the exact time for the time span */
       span_ms = Curl_timediff(now, p->speeder_time[checkindex]);
@@ -530,14 +530,14 @@ static void progress_meter(struct Curl_easy *data)
   /* Since both happen at the same time, total expected duration is max. */
   total_estm.secs = CURLMAX(ul_estm.secs, dl_estm.secs);
   /* create the three time strings */
-  time2str(time_left, total_estm.secs > 0?(total_estm.secs - cur_secs):0);
+  time2str(time_left, total_estm.secs > 0 ? (total_estm.secs - cur_secs) : 0);
   time2str(time_total, total_estm.secs);
   time2str(time_spent, cur_secs);
 
   /* Get the total amount of data expected to get transferred */
   total_expected_size =
-    ((p->flags & PGRS_UL_SIZE_KNOWN)? p->ul.total_size:p->ul.cur_size) +
-    ((p->flags & PGRS_DL_SIZE_KNOWN)? p->dl.total_size:p->dl.cur_size);
+    ((p->flags & PGRS_UL_SIZE_KNOWN) ? p->ul.total_size : p->ul.cur_size) +
+    ((p->flags & PGRS_DL_SIZE_KNOWN) ? p->dl.total_size : p->dl.cur_size);
 
   /* We have transferred this much so far */
   total_cur_size = p->dl.cur_size + p->ul.cur_size;

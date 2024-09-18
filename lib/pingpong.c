@@ -52,8 +52,8 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   timediff_t timeout_ms; /* in milliseconds */
-  timediff_t response_time = (data->set.server_response_timeout)?
-    data->set.server_response_timeout: pp->response_time;
+  timediff_t response_time = (data->set.server_response_timeout) ?
+    data->set.server_response_timeout : pp->response_time;
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
      remaining time, or use pp->response because SERVER_RESPONSE_TIMEOUT is

@@ -70,7 +70,7 @@ static char *GetEnv(const char *variable)
   }
 #else
   char *env = getenv(variable);
-  return (env && env[0])?strdup(env):NULL;
+  return (env && env[0]) ? strdup(env) : NULL;
 #endif
 }
 

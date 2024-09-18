@@ -127,7 +127,7 @@ char *hexdump(const unsigned char *buffer, size_t len)
   size_t i;
   if(len > 200)
     return NULL;
-  for(i = 0; i<len; i++, p += 3)
+  for(i = 0; i < len; i++, p += 3)
     msnprintf(p, 4, "%02x ", buffer[i]);
   return dump;
 }
@@ -157,7 +157,7 @@ int main(int argc, char **argv)
   setlocale(LC_ALL, "");
 #endif
 
-  if(argc< 2) {
+  if(argc < 2) {
     fprintf(stderr, "Pass URL as argument please\n");
     return 1;
   }
@@ -165,10 +165,10 @@ int main(int argc, char **argv)
   test_argc = argc;
   test_argv = argv;
 
-  if(argc>2)
+  if(argc > 2)
     libtest_arg2 = argv[2];
 
-  if(argc>3)
+  if(argc > 3)
     libtest_arg3 = argv[3];
 
   URL = argv[1]; /* provide this to the rest */

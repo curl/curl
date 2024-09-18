@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
   const char *host = NULL;
   int rc = 0;
 
-  while(argc>arg) {
+  while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("resolve IPv4%s\n",
 #if defined(CURLRES_IPV6)

@@ -44,7 +44,7 @@ curl_share_init(void)
   struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
   if(share) {
     share->magic = CURL_GOOD_SHARE;
-    share->specifier |= (1<<CURL_LOCK_DATA_SHARE);
+    share->specifier |= (1 << CURL_LOCK_DATA_SHARE);
     Curl_init_dnscache(&share->hostcache, 23);
   }
 
@@ -139,13 +139,13 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
       res = CURLSHE_BAD_OPTION;
     }
     if(!res)
-      share->specifier |= (unsigned int)(1<<type);
+      share->specifier |= (unsigned int)(1 << type);
     break;
 
   case CURLSHOPT_UNSHARE:
     /* this is a type this share will no longer share */
     type = va_arg(param, int);
-    share->specifier &= ~(unsigned int)(1<<type);
+    share->specifier &= ~(unsigned int)(1 << type);
     switch(type) {
     case CURL_LOCK_DATA_DNS:
       break;
@@ -271,7 +271,7 @@ Curl_share_lock(struct Curl_easy *data, curl_lock_data type,
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1<<type)) {
+  if(share->specifier & (unsigned int)(1 << type)) {
     if(share->lockfunc) /* only call this if set! */
       share->lockfunc(data, type, accesstype, share->clientdata);
   }
@@ -288,7 +288,7 @@ Curl_share_unlock(struct Curl_easy *data, curl_lock_data type)
   if(!share)
     return CURLSHE_INVALID;
 
-  if(share->specifier & (unsigned int)(1<<type)) {
+  if(share->specifier & (unsigned int)(1 << type)) {
     if(share->unlockfunc) /* only call this if set! */
       share->unlockfunc (data, type, share->clientdata);
   }

@@ -96,7 +96,7 @@ static void fly(struct ProgressData *bar, bool moved)
   if(bar->tick >= 200)
     bar->tick -= 200;
 
-  bar->bar += (moved?bar->barmove:0);
+  bar->bar += (moved ? bar->barmove : 0);
   if(bar->bar >= (bar->width - 6)) {
     bar->barmove = -1;
     bar->bar = bar->width - 6;

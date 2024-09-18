@@ -150,7 +150,7 @@ static int test_unsigned_short_formatting(void)
 
   for(i = 1; i <= num_ushort_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       us_test[i].result[j] = 'X';
     us_test[i].result[BUFSZ-1] = '\0';
 
@@ -224,7 +224,7 @@ static int test_signed_short_formatting(void)
 
   for(i = 1; i <= num_sshort_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       ss_test[i].result[j] = 'X';
     ss_test[i].result[BUFSZ-1] = '\0';
 
@@ -374,7 +374,7 @@ static int test_unsigned_int_formatting(void)
 
   for(i = 1; i <= num_uint_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       ui_test[i].result[j] = 'X';
     ui_test[i].result[BUFSZ-1] = '\0';
 
@@ -602,7 +602,7 @@ static int test_signed_int_formatting(void)
 
   for(i = 1; i <= num_sint_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       si_test[i].result[j] = 'X';
     si_test[i].result[BUFSZ-1] = '\0';
 
@@ -751,7 +751,7 @@ static int test_unsigned_long_formatting(void)
 
   for(i = 1; i <= num_ulong_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       ul_test[i].result[j] = 'X';
     ul_test[i].result[BUFSZ-1] = '\0';
 
@@ -979,7 +979,7 @@ static int test_signed_long_formatting(void)
 
   for(i = 1; i <= num_slong_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       sl_test[i].result[j] = 'X';
     sl_test[i].result[BUFSZ-1] = '\0';
 
@@ -1093,7 +1093,7 @@ static int test_curl_off_t_formatting(void)
 
   for(i = 1; i <= num_cofft_tests; i++) {
 
-    for(j = 0; j<BUFSZ; j++)
+    for(j = 0; j < BUFSZ; j++)
       co_test[i].result[j] = 'X';
     co_test[i].result[BUFSZ-1] = '\0';
 
@@ -1389,7 +1389,7 @@ static int test_float_formatting(void)
   /* very large precisions easily turn into system specific outputs so we only
      check the output buffer length here as we know the internal limit */
 
-  curl_msnprintf(buf, sizeof(buf), "%.*f", (1<<30), 9.2987654);
+  curl_msnprintf(buf, sizeof(buf), "%.*f", (1 << 30), 9.2987654);
   errors += strlen_check(buf, 325);
 
   curl_msnprintf(buf, sizeof(buf), "%10000.10000f", 9.2987654);
@@ -1406,7 +1406,7 @@ static int test_float_formatting(void)
 
   /* curl_msnprintf() limits a single float output to 325 bytes maximum
      width */
-  curl_msnprintf(buf, sizeof(buf), "%*f", (1<<30), 9.1);
+  curl_msnprintf(buf, sizeof(buf), "%*f", (1 << 30), 9.1);
   errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
   curl_msnprintf(buf, sizeof(buf), "%100000f", 9.1);
   errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");

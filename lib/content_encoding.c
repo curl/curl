@@ -154,7 +154,7 @@ static CURLcode process_trailer(struct Curl_easy *data,
 {
   z_stream *z = &zp->z;
   CURLcode result = CURLE_OK;
-  uInt len = z->avail_in < zp->trailerlen? z->avail_in: zp->trailerlen;
+  uInt len = z->avail_in < zp->trailerlen ? z->avail_in : zp->trailerlen;
 
   /* Consume expected trailer bytes. Terminate stream if exhausted.
      Issue an error if unexpected bytes follow. */
@@ -654,7 +654,7 @@ static CURLcode brotli_do_init(struct Curl_easy *data,
   (void) data;
 
   bp->br = BrotliDecoderCreateInstance(NULL, NULL, NULL);
-  return bp->br? CURLE_OK: CURLE_OUT_OF_MEMORY;
+  return bp->br ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
 static CURLcode brotli_do_write(struct Curl_easy *data,
@@ -971,8 +971,8 @@ static const struct Curl_cwtype *find_unencode_writer(const char *name,
 CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
                                      const char *enclist, int is_transfer)
 {
-  Curl_cwriter_phase phase = is_transfer?
-                             CURL_CW_TRANSFER_DECODE:CURL_CW_CONTENT_DECODE;
+  Curl_cwriter_phase phase = is_transfer ?
+    CURL_CW_TRANSFER_DECODE : CURL_CW_CONTENT_DECODE;
   CURLcode result;
 
   do {
@@ -995,7 +995,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
       struct Curl_cwriter *writer;
 
       CURL_TRC_WRITE(data, "looking for %s decoder: %.*s",
-                     is_transfer? "transfer" : "content", (int)namelen, name);
+                     is_transfer ? "transfer" : "content", (int)namelen, name);
       is_chunked = (is_transfer && (namelen == 7) &&
                     strncasecompare(name, "chunked", 7));
       /* if we skip the decoding in this phase, do not look further.
@@ -1046,7 +1046,7 @@ CURLcode Curl_build_unencoding_stack(struct Curl_easy *data,
 
       result = Curl_cwriter_create(&writer, data, cwt, phase);
       CURL_TRC_WRITE(data, "added %s decoder %s -> %d",
-                     is_transfer? "transfer" : "content", cwt->name, result);
+                     is_transfer ? "transfer" : "content", cwt->name, result);
       if(result)
         return result;
 

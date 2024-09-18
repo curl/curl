@@ -2242,9 +2242,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_HEAD: /* --head */
       config->no_body = toggle;
       config->show_headers = toggle;
-      if(SetHTTPrequest(config,
-                        (config->no_body)?TOOL_HTTPREQ_HEAD:TOOL_HTTPREQ_GET,
-                        &config->httpreq))
+      if(SetHTTPrequest(config, (config->no_body) ? TOOL_HTTPREQ_HEAD :
+                        TOOL_HTTPREQ_GET, &config->httpreq))
         err = PARAM_BAD_USE;
       break;
     case C_REMOTE_HEADER_NAME: /* --remote-header-name */
@@ -2303,7 +2302,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->nobuffer = longopt ? !toggle : TRUE;
       break;
     case C_REMOTE_NAME_ALL: /* --remote-name-all */
-      config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+      config->default_node_flags = toggle ? GETOUT_USEREMOTE : 0;
       break;
     case C_OUTPUT_DIR: /* --output-dir */
       err = getstr(&config->output_dir, nextarg, DENY_BLANK);

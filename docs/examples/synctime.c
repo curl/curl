@@ -165,7 +165,7 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
         if(RetVal == 7) {
           int i;
           SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
-          for(i = 0; i<12; i++) {
+          for(i = 0; i < 12; i++) {
             if(strcmp(MthStr[i], TmpStr2) == 0) {
               SYSTime.wMonth = i + 1;
               break;
@@ -250,7 +250,7 @@ int conf_init(conf_t *conf)
   int i;
 
   *conf->http_proxy       = 0;
-  for(i = 0; i<MAX_STRING1; i++)
+  for(i = 0; i < MAX_STRING1; i++)
     conf->proxy_user[i]     = 0;    /* Clean up password from memory */
   *conf->timeserver       = 0;
   return 1;

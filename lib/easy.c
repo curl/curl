@@ -487,8 +487,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         m->socket.events = socketcb2poll(what);
         infof(easy, "socket cb: socket %" FMT_SOCKET_T
               " UPDATED as %s%s", s,
-              (what&CURL_POLL_IN)?"IN":"",
-              (what&CURL_POLL_OUT)?"OUT":"");
+              (what&CURL_POLL_IN) ? "IN" : "",
+              (what&CURL_POLL_OUT) ? "OUT" : "");
       }
       break;
     }
@@ -512,8 +512,8 @@ static int events_socket(struct Curl_easy *easy,      /* easy handle */
         m->socket.revents = 0;
         ev->list = m;
         infof(easy, "socket cb: socket %" FMT_SOCKET_T " ADDED as %s%s", s,
-              (what&CURL_POLL_IN)?"IN":"",
-              (what&CURL_POLL_OUT)?"OUT":"");
+              (what&CURL_POLL_IN) ? "IN" : "",
+              (what&CURL_POLL_OUT) ? "OUT" : "");
       }
       else
         return CURLE_OUT_OF_MEMORY;
@@ -617,7 +617,7 @@ static CURLcode wait_or_timeout(struct Curl_multi *multi, struct events *ev)
       DEBUGASSERT(data);
 
       /* loop over the monitored sockets to see which ones had activity */
-      for(i = 0; i< numfds; i++) {
+      for(i = 0; i < numfds; i++) {
         if(fds[i].revents) {
           /* socket activity, tell libcurl */
           int act = poll2cselect(fds[i].revents); /* convert */
@@ -877,7 +877,7 @@ static CURLcode dupset(struct Curl_easy *dst, struct Curl_easy *src)
   memset(dst->set.blobs, 0, BLOB_LAST * sizeof(struct curl_blob *));
 
   /* duplicate all strings */
-  for(i = (enum dupstring)0; i< STRING_LASTZEROTERMINATED; i++) {
+  for(i = (enum dupstring)0; i < STRING_LASTZEROTERMINATED; i++) {
     result = Curl_setstropt(&dst->set.str[i], src->set.str[i]);
     if(result)
       return result;
@@ -1127,8 +1127,8 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
 
   /* first switch off both pause bits then set the new pause bits */
   newstate = (k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) |
-    ((action & CURLPAUSE_RECV)?KEEP_RECV_PAUSE:0) |
-    ((action & CURLPAUSE_SEND)?KEEP_SEND_PAUSE:0);
+    ((action & CURLPAUSE_RECV) ? KEEP_RECV_PAUSE : 0) |
+    ((action & CURLPAUSE_SEND) ? KEEP_SEND_PAUSE : 0);
 
   keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
   not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
