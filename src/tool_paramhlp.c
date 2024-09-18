@@ -46,14 +46,14 @@ int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
 {
   curl_off_t pos, newpos;
 
-  if(whence == SEEK_END && fseek(stream, 0, SEEK_END))
+  if(whence == SEEK_END && fseeko_wrapper(stream, 0, SEEK_END))
     return -1;
 
-  pos = ftell(stream);
+  pos = ftello(stream);
   if(pos == -1)
     return -1;
 
-  if(fseek(stream, 0, SEEK_SET))
+  if(fseeko_wrapper(stream, 0, SEEK_SET))
     return -1;
 
   if(whence == SEEK_SET)
