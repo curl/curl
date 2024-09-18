@@ -4,7 +4,7 @@ curl and libcurl 8.10.1
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3245
+ Contributors:                 3246
 
 This release includes the following changes:
 
@@ -13,9 +13,12 @@ This release includes the following bugfixes:
 
  o autotools: fix `--with-ca-embed` build rule [3]
  o cmake: ensure `CURL_USE_OPENSSL`/`USE_OPENSSL_QUIC` are set in sync [8]
+ o cmake: fix MSH3 to appear on the feature list [20]
  o connect: store connection info when really done [9]
- o CURLMOPT_TIMERFUNCTION.m: emphasize that only a single timer should run [5]
+ o CURLMOPT_TIMERFUNCTION.md: emphasize that only a single timer should run [5]
+ o FTP: partly revert eeb7c1280742f5c8fa48a4340fc1e1a1a2c7075a [34]
  o http2: when uploading data from stdin, fix eos forwarding [7]
+ o http: make max-filesize check not count ignored bodies [33]
  o lib: fix AF_INET6 use outside of USE_IPV6 [13]
  o libcurl-docs: CURLINFO_LOCAL_* work for QUIC as well as TCP [1]
  o multi: check that the multi handle is valid in curl_multi_assign [14]
@@ -26,8 +29,10 @@ This release includes the following bugfixes:
  o rustls: rustls-ffi 0.14.0 update [18]
  o rustls: support strong CSRNG data [16]
  o setopt: remove superfluous use of ternary expressions [4]
+ o singleuse: drop `Curl_memrchr()` for no-HTTP builds [24]
  o test537: cap the rlimit max this test runs [10]
  o tests: tweak lock file handling and timers [22]
+ o tool_cb_wrt: use "curl_response" if no file name in URL [19]
  o transfer: fix sendrecv() without interim poll [15]
  o vtls: fix `Curl_ssl_conn_config_match` doc param [6]
 
@@ -49,11 +54,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Carlo Cabrera, Daniel McCarney, Daniel Stenberg, Gabriel Marin,
-  Harry Sintonen, Jan Venekamp, Michael Osipov, nekopsykose on github,
-  Patrick Steinhardt, rampageX on github, Stefan Eissing, Victor Kislov,
-  Viktor Szakats
-  (13 contributors)
+  Brian Inglis, Carlo Cabrera, Daniel McCarney, Daniel Stenberg,
+  dependabot[bot], finkjsc on github, Gabriel Marin, Harry Sintonen,
+  Jan Venekamp, Julian K., MasterInQuestion on github, Michael Osipov,
+  nekopsykose on github, Patrick Steinhardt, rampageX on github,
+  Stefan Eissing, Tal Regev, Victor Kislov, Viktor Szakats
+  (19 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -74,5 +80,10 @@ References to bug reports and discussions on issues:
  [15] = https://curl.se/bug/?i=14898
  [16] = https://curl.se/bug/?i=14889
  [18] = https://curl.se/bug/?i=14889
+ [19] = https://curl.se/bug/?i=14939
+ [20] = https://curl.se/bug/?i=14927
  [21] = https://marc.info/?l=git&m=172620452502747&w=2
  [22] = https://curl.se/bug/?i=14835
+ [24] = https://curl.se/bug/?i=14919
+ [33] = https://curl.se/bug/?i=14899
+ [34] = https://curl.se/bug/?i=14873
