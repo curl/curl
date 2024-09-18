@@ -291,8 +291,6 @@ jobs:
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          perl -MCPAN -e 'install Win32::Process' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
 
@@ -386,8 +384,6 @@ jobs:
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          perl -MCPAN -e 'install Win32::Process' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
 
@@ -517,11 +513,6 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
-          # cpan App::cpanminus
-          # cpanm Module::Name
-          # cpanm -iqn Win32::Process Win32::Process::List || true
-          perl -MCPAN -e 'install Win32::Process Win32::Process::List' || true
-          /c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process Win32::Process::List' || true
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
@@ -617,6 +608,7 @@ jobs:
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
+    timeout-minutes: 55
     defaults:
       run:
         shell: bash
@@ -722,31 +714,6 @@ jobs:
     steps:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
-      - name: 'install test tools'
-        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        run: |
-          '/c/Program Files/Git/usr/bin/perl.exe' -V
-          echo '=========================='
-          '/c/Program Files/Git/usr/bin/perl.exe' -MCPAN -e 'install Win32::Process' || true
-          echo '=========================='
-          '/c/Program Files/Git/usr/bin/perl.exe' -MCPAN -e 'install Win32::Process::List' || true
-          echo '=========================='
-          echo '=========================='
-          /c/Strawberry/perl/bin/perl -V
-          echo '--------------------------'
-          perl -V
-          echo '--------------------------'
-          cat $USERPROFILE/.cpan/CPAN/MyConfig.pm || true
-          perl -MCPAN -e 'install Win32::Process' || true
-          #/c/Strawberry/perl/bin/perl -MCPAN -e 'install Win32::Process' || true
-          # GnuTLS is not fully functional on Windows, so skip the tests
-          # https://github.com/ShiftMediaProject/gnutls/issues/23
-          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
-            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
-          fi
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-
       - name: 'vcpkg cache setup'
         uses: actions/github-script@v7
         with:
@@ -818,6 +785,18 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+
+      - name: 'install test tools'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          # GnuTLS is not fully functional on Windows, so skip the tests
+          # https://github.com/ShiftMediaProject/gnutls/issues/23
+          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
+            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
+          fi
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
