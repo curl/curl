@@ -2886,6 +2886,7 @@ createrunners($numrunners);
 #   - if a runner has a response for us, process the response
 
 # run through each candidate test and execute it
+my $runner_wait_cnt = 0;
 while () {
     # check the abort flag
     if($globalabort) {
@@ -2943,7 +2944,7 @@ while () {
     # If we could be running more tests, don't wait so we can schedule a new
     # one immediately. If all runners are busy, wait a fraction of a second
     # for one to finish so we can still loop around to check the abort flag.
-    my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : 0.5;
+    my $runnerwait = scalar(@runnersidle) && scalar(@runtests) ? 0 : 1.0;
     my ($ridready, $riderror) = runnerar_ready($runnerwait);
     if($ridready && ! defined $runnersrunning{$ridready}) {
         # On Linux, a closed pipe still shows up as ready instead of error.
@@ -2964,6 +2965,7 @@ while () {
             $runnersrunning{$ridready} = $testnum;
         } else {
             # Test is complete
+            $runner_wait_cnt = 0;
             runnerready($ridready);
 
             if($error < 0) {
@@ -2996,6 +2998,26 @@ while () {
             }
             elsif(!$error) {
                 $ok++; # successful test counter
+            }
+        }
+    }
+    if(!$ridready && $runnerwait && !$torture && scalar(%runnersrunning)) {
+        $runner_wait_cnt++;
+        if($runner_wait_cnt >= 5) {
+            my $msg = "waiting for " . scalar(%runnersrunning) . " results:";
+            my $sep = " ";
+            foreach my $rid (keys %runnersrunning) {
+                $msg .= $sep . $runnersrunning{$rid} . "[$rid]";
+                $sep = ", "
+            }
+            logmsg "$msg\n";
+        }
+        if($runner_wait_cnt >= 10) {
+            $runner_wait_cnt = 0;
+            foreach my $rid (keys %runnersrunning) {
+                my $testnum = $runnersrunning{$rid};
+                logmsg "current state of test $testnum in [$rid]:\n";
+                displaylogs($rid, $testnum);
             }
         }
     }
