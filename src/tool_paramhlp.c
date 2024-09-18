@@ -281,7 +281,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
       else
         elt_cnt = sizeof(buffer);
 
-      nread = fread(buffer, 1, elt_cnt, file);
+      nread = fread(buffer, 1, (size_t)elt_cnt, file);
       rangelen = rangelen - nread;
       if(ferror(file)) {
         curlx_dyn_free(&dyn);
