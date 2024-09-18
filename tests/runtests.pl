@@ -2886,6 +2886,7 @@ createrunners($numrunners);
 #   - if a runner has a response for us, process the response
 
 # run through each candidate test and execute it
+my $runner_wait_cnt = 0;
 while () {
     # check the abort flag
     if($globalabort) {
@@ -3000,14 +3001,22 @@ while () {
         }
     }
     if(!$ridready && scalar(%runnersrunning)) {
-        logmsg "waiting for " . scalar(%runnersrunning) . " test results\n";
-        my $msg = "tests: ";
-        my $sep = "";
+        my $msg = "waiting for " . scalar(%runnersrunning) . " results:";
+        my $sep = " ";
         foreach my $rid (keys %runnersrunning) {
             $msg .= $sep . $runnersrunning{$rid} . "[$rid]";
             $sep = ", "
         }
-        logmsg $msg;
+        logmsg "$msg\n";
+        $runner_wait_cnt++;
+        if($runner_wait_cnt > 10) {
+            $runner_wait_cnt = 0;
+            foreach my $rid (keys %runnersrunning) {
+                my $testnum = $runnersrunning{$rid};
+                logmsg "current state of test $testnum in [$rid]:\n";
+                displaylogs($rid, $testnum);
+            }
+        }
     }
     if($riderror) {
         logmsg "ERROR: runner $riderror is dead! aborting test run\n";
