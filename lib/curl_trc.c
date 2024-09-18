@@ -399,7 +399,7 @@ static CURLcode trc_opt(const char *config)
 
 CURLcode Curl_trc_opt(const char *config)
 {
-  CURLcode result = config? trc_opt(config) : CURLE_OK;
+  CURLcode result = config ? trc_opt(config) : CURLE_OK;
 #ifdef DEBUGBUILD
   /* CURL_DEBUG can override anything */
   if(!result) {

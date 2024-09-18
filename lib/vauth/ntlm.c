@@ -69,7 +69,7 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_OEM ");
   if(flags & NTLMFLAG_REQUEST_TARGET)
     fprintf(handle, "NTLMFLAG_REQUEST_TARGET ");
-  if(flags & (1<<3))
+  if(flags & (1 << 3))
     fprintf(handle, "NTLMFLAG_UNKNOWN_3 ");
   if(flags & NTLMFLAG_NEGOTIATE_SIGN)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_SIGN ");
@@ -81,7 +81,7 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_LM_KEY ");
   if(flags & NTLMFLAG_NEGOTIATE_NTLM_KEY)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_NTLM_KEY ");
-  if(flags & (1<<10))
+  if(flags & (1 << 10))
     fprintf(handle, "NTLMFLAG_UNKNOWN_10 ");
   if(flags & NTLMFLAG_NEGOTIATE_ANONYMOUS)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_ANONYMOUS ");
@@ -109,15 +109,15 @@ static void ntlm_print_flags(FILE *handle, unsigned long flags)
     fprintf(handle, "NTLMFLAG_REQUEST_NONNT_SESSION_KEY ");
   if(flags & NTLMFLAG_NEGOTIATE_TARGET_INFO)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_TARGET_INFO ");
-  if(flags & (1<<24))
+  if(flags & (1 << 24))
     fprintf(handle, "NTLMFLAG_UNKNOWN_24 ");
-  if(flags & (1<<25))
+  if(flags & (1 << 25))
     fprintf(handle, "NTLMFLAG_UNKNOWN_25 ");
-  if(flags & (1<<26))
+  if(flags & (1 << 26))
     fprintf(handle, "NTLMFLAG_UNKNOWN_26 ");
-  if(flags & (1<<27))
+  if(flags & (1 << 27))
     fprintf(handle, "NTLMFLAG_UNKNOWN_27 ");
-  if(flags & (1<<28))
+  if(flags & (1 << 28))
     fprintf(handle, "NTLMFLAG_UNKNOWN_28 ");
   if(flags & NTLMFLAG_NEGOTIATE_128)
     fprintf(handle, "NTLMFLAG_NEGOTIATE_128 ");

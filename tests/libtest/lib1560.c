@@ -1769,13 +1769,13 @@ static int huge(void)
     char *partp;
     msnprintf(total, sizeof(total),
               "%s://%s:%s@%s/%s?%s#%s",
-              (i == 0)? &bigpart[1] : smallpart,
-              (i == 1)? &bigpart[1] : smallpart,
-              (i == 2)? &bigpart[1] : smallpart,
-              (i == 3)? &bigpart[1] : smallpart,
-              (i == 4)? &bigpart[1] : smallpart,
-              (i == 5)? &bigpart[1] : smallpart,
-              (i == 6)? &bigpart[1] : smallpart);
+              (i == 0) ? &bigpart[1] : smallpart,
+              (i == 1) ? &bigpart[1] : smallpart,
+              (i == 2) ? &bigpart[1] : smallpart,
+              (i == 3) ? &bigpart[1] : smallpart,
+              (i == 4) ? &bigpart[1] : smallpart,
+              (i == 5) ? &bigpart[1] : smallpart,
+              (i == 6) ? &bigpart[1] : smallpart);
     rc = curl_url_set(urlp, CURLUPART_URL, total, CURLU_NON_SUPPORT_SCHEME);
     if((!i && (rc != CURLUE_BAD_SCHEME)) ||
        (i && rc)) {

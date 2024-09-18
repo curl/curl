@@ -56,8 +56,8 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       /* walk the attribute list */
       for(attr = tidyAttrFirst(child); attr; attr = tidyAttrNext(attr) ) {
         printf("%s", tidyAttrName(attr));
-        tidyAttrValue(attr)?printf("=\"%s\" ",
-                                   tidyAttrValue(attr)):printf(" ");
+        tidyAttrValue(attr) ? printf("=\"%s\" ",
+                                     tidyAttrValue(attr)) : printf(" ");
       }
       printf(">\n");
     }
@@ -66,7 +66,7 @@ void dumpNode(TidyDoc doc, TidyNode tnod, int indent)
       TidyBuffer buf;
       tidyBufInit(&buf);
       tidyNodeGetText(doc, child, &buf);
-      printf("%*.*s\n", indent, indent, buf.bp?(char *)buf.bp:"");
+      printf("%*.*s\n", indent, indent, buf.bp ? (char *)buf.bp : "");
       tidyBufFree(&buf);
     }
     dumpNode(doc, child, indent + 4); /* recursive */

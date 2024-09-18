@@ -1020,7 +1020,7 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -1092,7 +1092,7 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     Curl_safefree(cf);
     cf_msh3_ctx_free(ctx);
@@ -1105,7 +1105,7 @@ bool Curl_conn_is_msh3(const struct Curl_easy *data,
                        const struct connectdata *conn,
                        int sockindex)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for(; cf; cf = cf->next) {

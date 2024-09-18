@@ -728,7 +728,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
+  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
   reslv->start = Curl_now();

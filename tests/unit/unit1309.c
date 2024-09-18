@@ -46,7 +46,7 @@ static void splayprint(struct Curl_tree *t, int d, char output)
     return;
 
   splayprint(t->larger, d + 1, output);
-  for(i = 0; i<d; i++)
+  for(i = 0; i < d; i++)
     if(output)
       printf("  ");
 

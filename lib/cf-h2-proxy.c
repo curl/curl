@@ -98,7 +98,8 @@ static CURLcode tunnel_stream_init(struct Curl_cfilter *cf,
     return result;
 
   ts->authority = /* host:port with IPv6 support */
-    aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"", port);
+    aprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+            ipv6_ip ? "]" : "", port);
   if(!ts->authority)
     return CURLE_OUT_OF_MEMORY;
 
@@ -429,7 +430,7 @@ static CURLcode proxy_h2_nw_out_flush(struct Curl_cfilter *cf,
     return result;
   }
   CURL_TRC_CF(data, cf, "[0] nw send buffer flushed");
-  return Curl_bufq_is_empty(&ctx->outbufq)? CURLE_OK: CURLE_AGAIN;
+  return Curl_bufq_is_empty(&ctx->outbufq) ? CURLE_OK : CURLE_AGAIN;
 }
 
 /*
@@ -604,29 +605,27 @@ static int proxy_h2_fr_print(const nghttp2_frame *frame,
       return msnprintf(buffer, blen,
                        "FRAME[SETTINGS, len=%d]", (int)frame->hd.length);
     }
-    case NGHTTP2_PUSH_PROMISE: {
+    case NGHTTP2_PUSH_PROMISE:
       return msnprintf(buffer, blen,
                        "FRAME[PUSH_PROMISE, len=%d, hend=%d]",
                        (int)frame->hd.length,
                        !!(frame->hd.flags & NGHTTP2_FLAG_END_HEADERS));
-    }
-    case NGHTTP2_PING: {
+    case NGHTTP2_PING:
       return msnprintf(buffer, blen,
                        "FRAME[PING, len=%d, ack=%d]",
                        (int)frame->hd.length,
-                       frame->hd.flags&NGHTTP2_FLAG_ACK);
-    }
+                       frame->hd.flags & NGHTTP2_FLAG_ACK);
     case NGHTTP2_GOAWAY: {
       char scratch[128];
       size_t s_len = sizeof(scratch)/sizeof(scratch[0]);
-        size_t len = (frame->goaway.opaque_data_len < s_len)?
-                      frame->goaway.opaque_data_len : s_len-1;
-        if(len)
-          memcpy(scratch, frame->goaway.opaque_data, len);
-        scratch[len] = '\0';
-        return msnprintf(buffer, blen, "FRAME[GOAWAY, error=%d, reason='%s', "
-                         "last_stream=%d]", frame->goaway.error_code,
-                         scratch, frame->goaway.last_stream_id);
+      size_t len = (frame->goaway.opaque_data_len < s_len) ?
+        frame->goaway.opaque_data_len : s_len-1;
+      if(len)
+        memcpy(scratch, frame->goaway.opaque_data, len);
+      scratch[len] = '\0';
+      return msnprintf(buffer, blen, "FRAME[GOAWAY, error=%d, reason='%s', "
+                       "last_stream=%d]", frame->goaway.error_code,
+                       scratch, frame->goaway.last_stream_id);
     }
     case NGHTTP2_WINDOW_UPDATE: {
       return msnprintf(buffer, blen,
@@ -1220,7 +1219,7 @@ static bool cf_h2_proxy_data_pending(struct Curl_cfilter *cf,
      (ctx && ctx->tunnel.state == H2_TUNNEL_ESTABLISHED &&
       !Curl_bufq_is_empty(&ctx->tunnel.recvbuf)))
     return TRUE;
-  return cf->next? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
+  return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
 
 static void cf_h2_proxy_adjust_pollset(struct Curl_cfilter *cf,
@@ -1586,7 +1585,7 @@ static CURLcode cf_h2_proxy_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }

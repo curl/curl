@@ -293,7 +293,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
       p++;
       break;
     case '\0':
-      return *s? CURL_FNMATCH_NOMATCH: CURL_FNMATCH_MATCH;
+      return *s ? CURL_FNMATCH_NOMATCH : CURL_FNMATCH_MATCH;
     case '\\':
       if(p[1])
         p++;

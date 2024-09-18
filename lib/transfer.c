@@ -967,7 +967,7 @@ CURLcode Curl_follow(struct Curl_easy *data,
         !(data->set.keep_post & CURL_REDIR_POST_303))) {
       data->state.httpreq = HTTPREQ_GET;
       infof(data, "Switch to %s",
-            data->req.no_body?"HEAD":"GET");
+            data->req.no_body ? "HEAD" : "GET");
     }
     break;
   case 304: /* Not Modified */
@@ -1096,7 +1096,7 @@ static void xfer_setup(
     conn->sockfd = sockindex == -1 ?
       CURL_SOCKET_BAD : conn->sock[sockindex];
     conn->writesockfd = writesockindex == -1 ?
-      CURL_SOCKET_BAD:conn->sock[writesockindex];
+      CURL_SOCKET_BAD : conn->sock[writesockindex];
   }
 
   k->getheader = getheader;
@@ -1134,8 +1134,8 @@ void Curl_xfer_setup1(struct Curl_easy *data,
                       curl_off_t recv_size,
                       bool getheader)
 {
-  int recv_index = (send_recv & CURL_XFER_RECV)? FIRSTSOCKET : -1;
-  int send_index = (send_recv & CURL_XFER_SEND)? FIRSTSOCKET : -1;
+  int recv_index = (send_recv & CURL_XFER_RECV) ? FIRSTSOCKET : -1;
+  int send_index = (send_recv & CURL_XFER_SEND) ? FIRSTSOCKET : -1;
   DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
   xfer_setup(data, recv_index, recv_size, getheader, send_index, FALSE);
 }
@@ -1145,8 +1145,8 @@ void Curl_xfer_setup2(struct Curl_easy *data,
                       curl_off_t recv_size,
                       bool shutdown)
 {
-  int recv_index = (send_recv & CURL_XFER_RECV)? SECONDARYSOCKET : -1;
-  int send_index = (send_recv & CURL_XFER_SEND)? SECONDARYSOCKET : -1;
+  int recv_index = (send_recv & CURL_XFER_RECV) ? SECONDARYSOCKET : -1;
+  int send_index = (send_recv & CURL_XFER_SEND) ? SECONDARYSOCKET : -1;
   DEBUGASSERT((recv_index >= 0) || (recv_size == -1));
   xfer_setup(data, recv_index, recv_size, FALSE, send_index, shutdown);
 }

@@ -362,7 +362,7 @@ static void lograw(unsigned char *buffer, ssize_t len)
   ssize_t width = 0;
   int left = sizeof(data);
 
-  for(i = 0; i<len; i++) {
+  for(i = 0; i < len; i++) {
     switch(ptr[i]) {
     case '\n':
       msnprintf(optr, left, "\\n");
@@ -378,14 +378,14 @@ static void lograw(unsigned char *buffer, ssize_t len)
       break;
     default:
       msnprintf(optr, left, "%c", (ISGRAPH(ptr[i]) ||
-                                   ptr[i] == 0x20) ?ptr[i]:'.');
+                                   ptr[i] == 0x20) ? ptr[i] : '.');
       width++;
       optr++;
       left--;
       break;
     }
 
-    if(width>60) {
+    if(width > 60) {
       logmsg("'%s'", data);
       width = 0;
       optr = data;
@@ -1366,7 +1366,7 @@ int main(int argc, char *argv[])
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 
-  while(argc>arg) {
+  while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("sockfilt IPv4%s\n",
 #ifdef USE_IPV6
@@ -1383,7 +1383,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--pidfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         pidname = argv[arg++];
     }
     else if(!strcmp("--portfile", argv[arg])) {
@@ -1393,7 +1393,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         serverlogfile = argv[arg++];
     }
     else if(!strcmp("--ipv6", argv[arg])) {
@@ -1417,7 +1417,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--port", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         port = curlx_ultous(ulnum);
@@ -1428,7 +1428,7 @@ int main(int argc, char *argv[])
       /* Asked to actively connect to the specified local port instead of
          doing a passive server-style listening. */
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
@@ -1444,7 +1444,7 @@ int main(int argc, char *argv[])
     else if(!strcmp("--addr", argv[arg])) {
       /* Set an IP address to use with --connect; otherwise use localhost */
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         addr = argv[arg];
         arg++;
       }

@@ -128,7 +128,7 @@ static void showtable(int try, int init, int shift)
       }
     }
     if(!match) {
-      if(!nulls || (nulls>10)) {
+      if(!nulls || (nulls > 10)) {
         printf("\n   ");
         nulls = 0;
       }

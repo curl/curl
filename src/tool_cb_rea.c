@@ -152,5 +152,5 @@ int tool_readbusy_cb(void *clientp,
       tool_go_sleep(25);
   }
 
-  return per->noprogress? 0 : CURL_PROGRESSFUNC_CONTINUE;
+  return per->noprogress ? 0 : CURL_PROGRESSFUNC_CONTINUE;
 }

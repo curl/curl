@@ -512,7 +512,7 @@ static CURLcode canon_string(const char *q, size_t len,
           }
         }
         /* URL encode */
-        out[1] = hex[((unsigned char)*q)>>4];
+        out[1] = hex[((unsigned char)*q) >> 4];
         out[2] = hex[*q & 0xf];
         result = Curl_dyn_addn(dq, out, 3);
         break;

@@ -49,7 +49,7 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
   fprintf(stream, "%s, %10.10lu bytes (0x%8.8lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stream, "%4.4lx: ", (unsigned long)i);
 
@@ -70,7 +70,7 @@ static void dump(const char *text, FILE *stream, unsigned char *ptr,
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {

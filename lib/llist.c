@@ -96,7 +96,7 @@ Curl_llist_insert_next(struct Curl_llist *list,
   }
   else {
     /* if 'e' is NULL here, we insert the new element first in the list */
-    ne->_next = e?e->_next:list->_head;
+    ne->_next = e ? e->_next : list->_head;
     ne->_prev = e;
     if(!e) {
       list->_head->_prev = ne;

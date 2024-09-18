@@ -372,7 +372,7 @@ static int ProcessRequest(struct httprequest *req)
   req->callcount++;
 
   logmsg("Process %zu bytes request%s", req->offset,
-         req->callcount > 1?" [CONTINUED]":"");
+         req->callcount > 1 ? " [CONTINUED]" : "");
 
   /* try to figure out the request characteristics as soon as possible, but
      only once! */
@@ -792,7 +792,7 @@ static void storerequest(const char *reqbuf, size_t totalsize)
   char dumpfile[256];
 
   msnprintf(dumpfile, sizeof(dumpfile), "%s/%s",
-            logdir, is_proxy?REQUEST_PROXY_DUMP:REQUEST_DUMP);
+            logdir, is_proxy ? REQUEST_PROXY_DUMP : REQUEST_DUMP);
 
   if(!reqbuf)
     return;
@@ -1021,7 +1021,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
   char responsedump[256];
 
   msnprintf(responsedump, sizeof(responsedump), "%s/%s",
-            logdir, is_proxy?RESPONSE_PROXY_DUMP:RESPONSE_DUMP);
+            logdir, is_proxy ? RESPONSE_PROXY_DUMP:RESPONSE_DUMP);
 
   switch(req->rcmd) {
   default:
@@ -1084,7 +1084,7 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
 
     /* select the <data> tag for "normal" requests and the <connect> one
        for CONNECT requests (within the <reply> section) */
-    const char *section = req->connect_request?"connect":"data";
+    const char *section = req->connect_request ? "connect" : "data";
 
     if(req->partno)
       msnprintf(partbuf, sizeof(partbuf), "%s%ld", section, req->partno);
@@ -2017,7 +2017,7 @@ int main(int argc, char *argv[])
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
 
-  while(argc>arg) {
+  while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       puts("sws IPv4"
 #ifdef USE_IPV6
@@ -2031,27 +2031,27 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--pidfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         pidname = argv[arg++];
     }
     else if(!strcmp("--portfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         portname = argv[arg++];
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         serverlogfile = argv[arg++];
     }
     else if(!strcmp("--logdir", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         logdir = argv[arg++];
     }
     else if(!strcmp("--cmdfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         cmdfile = argv[arg++];
     }
     else if(!strcmp("--gopher", argv[arg])) {
@@ -2076,7 +2076,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--unix-socket", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
 #ifdef USE_UNIX_SOCKETS
         unix_socket = argv[arg];
         if(strlen(unix_socket) >= sizeof(me.sau.sun_path)) {
@@ -2094,7 +2094,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--port", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
@@ -2109,14 +2109,14 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--srcdir", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         path = argv[arg];
         arg++;
       }
     }
     else if(!strcmp("--keepalive", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         if((endptr != argv[arg] + strlen(argv[arg])) ||
@@ -2134,7 +2134,7 @@ int main(int argc, char *argv[])
          what the client asks for, but also use this as a hint that we run as
          a proxy and do a few different internal choices */
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         connecthost = argv[arg];
         arg++;
         is_proxy = TRUE;

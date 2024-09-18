@@ -359,8 +359,8 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   /* Accept Headers for DESCRIBE requests */
   if(rtspreq == RTSPREQ_DESCRIBE) {
     /* Accept Header */
-    p_accept = Curl_checkheaders(data, STRCONST("Accept"))?
-      NULL:"Accept: application/sdp\r\n";
+    p_accept = Curl_checkheaders(data, STRCONST("Accept")) ?
+      NULL : "Accept: application/sdp\r\n";
 
     /* Accept-Encoding header */
     if(!Curl_checkheaders(data, STRCONST("Accept-Encoding")) &&
@@ -615,7 +615,7 @@ static CURLcode rtp_write_body_junk(struct Curl_easy *data,
   in_body = (data->req.headerline && !rtspc->in_header) &&
             (data->req.size >= 0) &&
             (data->req.bytecount < data->req.size);
-  body_remain = in_body? (data->req.size - data->req.bytecount) : 0;
+  body_remain = in_body ? (data->req.size - data->req.bytecount) : 0;
   DEBUGASSERT(body_remain >= 0);
   if(body_remain) {
     if((curl_off_t)blen > body_remain)
@@ -858,7 +858,7 @@ static CURLcode rtsp_rtp_write_resp(struct Curl_easy *data,
                data->req.size));
   if(!result && (is_eos || blen)) {
     result = Curl_client_write(data, CLIENTWRITE_BODY|
-                               (is_eos? CLIENTWRITE_EOS:0),
+                               (is_eos ? CLIENTWRITE_EOS : 0),
                                (char *)buf, blen);
   }
 

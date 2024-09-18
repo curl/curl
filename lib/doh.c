@@ -165,7 +165,7 @@ UNITTEST DOHcode doh_req_encode(const char *host,
   *dnsp++ = 0; /* append zero-length label for root */
 
   /* There are assigned TYPE codes beyond 255: use range [1..65535]  */
-  *dnsp++ = (unsigned char)(255 & (dnstype>>8)); /* upper 8 bit TYPE */
+  *dnsp++ = (unsigned char)(255 & (dnstype >> 8)); /* upper 8 bit TYPE */
   *dnsp++ = (unsigned char)(255 & dnstype);      /* lower 8 bit TYPE */
 
   *dnsp++ = '\0'; /* upper 8 bit CLASS */
@@ -855,7 +855,7 @@ static void doh_show(struct Curl_easy *data,
       len = sizeof(buffer) - len;
       for(j = 0; j < 16; j += 2) {
         size_t l;
-        msnprintf(ptr, len, "%s%02x%02x", j?":":"", d->addr[i].ip.v6[j],
+        msnprintf(ptr, len, "%s%02x%02x", j ? ":" : "", d->addr[i].ip.v6[j],
                   d->addr[i].ip.v6[j + 1]);
         l = strlen(ptr);
         len -= l;
@@ -1305,7 +1305,7 @@ CURLcode Curl_doh_is_resolved(struct Curl_easy *data,
   if(dohp->probe[DOH_SLOT_IPV4].easy_mid < 0 &&
      dohp->probe[DOH_SLOT_IPV6].easy_mid < 0) {
     failf(data, "Could not DoH-resolve: %s", data->state.async.hostname);
-    return CONN_IS_PROXIED(data->conn)?CURLE_COULDNT_RESOLVE_PROXY:
+    return CONN_IS_PROXIED(data->conn) ? CURLE_COULDNT_RESOLVE_PROXY :
       CURLE_COULDNT_RESOLVE_HOST;
   }
   else if(!dohp->pending) {
@@ -1415,7 +1415,8 @@ void Curl_doh_close(struct Curl_easy *data)
       doh->probe[slot].easy_mid = -1;
       /* should have been called before data is removed from multi handle */
       DEBUGASSERT(data->multi);
-      probe_data = data->multi? Curl_multi_get_handle(data->multi, mid) : NULL;
+      probe_data = data->multi ? Curl_multi_get_handle(data->multi, mid) :
+        NULL;
       if(!probe_data) {
         DEBUGF(infof(data, "Curl_doh_close: xfer for mid=%"
                      FMT_OFF_T " not found!",
