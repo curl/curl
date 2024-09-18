@@ -276,7 +276,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
     do {
       char buffer[4096];
       size_t elt_cnt;
-      if(rangelen_set && (rangelen < sizeof(buffer))) {
+      if(rangelen_set && (rangelen < (curl_off_t)sizeof(buffer))) {
         elt_cnt = rangelen;
       }
       else {
