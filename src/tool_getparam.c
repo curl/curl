@@ -849,8 +849,8 @@ static ParameterError set_data(cmdline_t cmd,
   char *postdata = NULL;
   FILE *file;
   size_t size = 0;
-  size_t offset_start = 0;
-  size_t offset_end = 0;
+  curl_off_t offset_start = 0;
+  curl_off_t offset_end = 0;
   int offset_flags = 0;
   ParameterError err = PARAM_OK;
 

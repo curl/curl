@@ -427,8 +427,8 @@ ParameterError setvariable(struct GlobalConfig *global,
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
-    size_t offset_start = 0;
-    size_t offset_end = 0;
+    curl_off_t offset_start = 0;
+    curl_off_t offset_end = 0;
     int offset_flags = 0;
     line++;
     use_stdin = !strcmp(line, "-");

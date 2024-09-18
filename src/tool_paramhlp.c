@@ -81,7 +81,8 @@ in the addresses of start and end.
     filename_extract_limits() function returns FILELIMIT_START.
 (4) if x or y are not numbers, 0 is returned and the memory of start and end
     remains unchanged. */
-int filename_extract_limits(char *filename, curl_off_t *start, curl_off_t *end)
+int filename_extract_limits(char *filename, curl_off_t *start,
+                            curl_off_t *end)
 {
   char *ptr_range;
   int flags_ret = 0;
