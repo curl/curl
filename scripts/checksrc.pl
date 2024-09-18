@@ -81,6 +81,8 @@ my %warnings = (
     'SPACEBEFORELABEL' => 'labels not at the start of the line',
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     'NOSPACEEQUALS'    => 'equals sign without preceding space',
+    'NOSPACEQ'         => 'missing space around ternary question mark operator',
+    'NOSPACETHAN'      => 'missing space aground less or greater than',
     'NOTEQUALSZERO',   => 'if/while comparison with != 0',
     'ONELINECONDITION' => 'conditional block on the same line as the if()',
     'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
@@ -621,6 +623,37 @@ sub scanfile {
             checkwarn("SPACEAFTERPAREN",
                       $line, length($1)+1, $file, $l,
                       "space after open parenthesis");
+        }
+
+        # check spaces before question mark
+        if($nostr =~ /^(.*)(\w|\)|\]|')\?/i) {
+            my $m = $1;
+            my $e = $nostr;
+            $e =~ s/'?'//g; # ignore these
+            if($e =~ /^(.*)(\w|\)|')\?/i) {
+                checkwarn("NOSPACEQ",
+                          $line, length($m)+1, $file, $l,
+                          "missing space before question mark");
+            }
+        }
+        # check spaces after question mark
+        if($nostr =~ /^(.*)\?\w/i) {
+            checkwarn("NOSPACEQ",
+                      $line, length($1)+1, $file, $l,
+                      "missing space after question mark");
+        }
+
+        # check spaces before less or greater than
+        if($nostr =~ /^(.*)(\w|\)|\])[<>]/) {
+            checkwarn("NOSPACETHAN",
+                      $line, length($1)+1, $file, $l,
+                      "missing space before less or greater than");
+        }
+        # check spaces after less or greater than
+        if($nostr =~ /^(.*)[^-][<>](\w|\(|\[)/) {
+            checkwarn("NOSPACETHAN",
+                      $line, length($1)+1, $file, $l,
+                      "missing space after less or greater than");
         }
 
         # check spaces before close parentheses, unless it was a space or a

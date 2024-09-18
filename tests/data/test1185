@@ -72,10 +72,12 @@ void startfunc(int a, int b) {
 
  int a = sizeof int;
  int a = snprintf(buffer, sizeof(buffer), "%d", 99);
+ int moo = hej?wrong:a>b;
+ int moo2 = wrong2:(a)>(b);
 
  if(a) b++;
 
- // CPP comment?
+ // CPP comment ?
 
  /* comment doesn't end
 
@@ -163,11 +165,29 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:53:10: warning: use of snprintf is banned (SNPRINTF)
   int a = snprintf(buffer, sizeof(buffer), "%d", 99);
           ^
-./%LOGDIR/code1185.c:55:7: warning: conditional block on the same line (ONELINECONDITION)
+./%LOGDIR/code1185.c:54:15: warning: missing space before question mark (NOSPACEQ)
+  int moo = hej?wrong:a>b;
+               ^
+./%LOGDIR/code1185.c:54:16: warning: missing space after question mark (NOSPACEQ)
+  int moo = hej?wrong:a>b;
+                ^
+./%LOGDIR/code1185.c:54:23: warning: missing space before less or greater than (NOSPACETHAN)
+  int moo = hej?wrong:a>b;
+                       ^
+./%LOGDIR/code1185.c:54:23: warning: missing space after less or greater than (NOSPACETHAN)
+  int moo = hej?wrong:a>b;
+                       ^
+./%LOGDIR/code1185.c:55:23: warning: missing space before less or greater than (NOSPACETHAN)
+  int moo2 = wrong2:(a)>(b);
+                       ^
+./%LOGDIR/code1185.c:55:23: warning: missing space after less or greater than (NOSPACETHAN)
+  int moo2 = wrong2:(a)>(b);
+                       ^
+./%LOGDIR/code1185.c:57:7: warning: conditional block on the same line (ONELINECONDITION)
   if(a) b++;
        ^
-./%LOGDIR/code1185.c:57:2: warning: // comment (CPPCOMMENTS)
-  // CPP comment?
+./%LOGDIR/code1185.c:59:2: warning: // comment (CPPCOMMENTS)
+  // CPP comment ?
   ^
 ./%LOGDIR/code1185.c:1:1: error: Missing copyright statement (COPYRIGHT)
  
@@ -175,7 +195,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
  
  ^
-checksrc: 0 errors and 30 warnings
+checksrc: 0 errors and 36 warnings
 </stdout>
 <errorcode>
 5
