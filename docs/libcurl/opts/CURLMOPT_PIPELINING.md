@@ -38,7 +38,7 @@ same connection when doing parallel transfers to the same hosts.
 
 ## CURLPIPE_NOTHING (0)
 
-Default, which means doing no attempts at multiplexing.
+Make no attempts at multiplexing.
 
 ## CURLPIPE_HTTP1 (1)
 
