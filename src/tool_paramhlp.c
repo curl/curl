@@ -44,27 +44,35 @@ text-mode filestreams: we assume that a user considers a line break as
 one character '\n' and not "\r\n" */
 int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
 {
+  #if defined(HAVE__FSEEKI64)
+  #define FSEEK(S, O, W) _fseeki64(S, (__int64)O, W)
+  #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
+  #define FSEEK(S, O, W) fseeko(S, (off_t)O, W)
+  #else
+  #define FSEEK(S, O, W) ((O > LONG_MAX) ? -1 : fseek(S, O, W))
+  #endif
   curl_off_t pos, newpos = 0;
 
-  if(whence == SEEK_END && fseeko_wrapper(stream, 0, SEEK_END))
+  if(whence == SEEK_END && FSEEK(stream, 0, SEEK_END))
     return -1;
 
   pos = ftello(stream);
   if(pos == -1)
     return -1;
 
-  if(fseeko_wrapper(stream, 0, SEEK_SET))
+  if(FSEEK(stream, 0, SEEK_SET))
     return -1;
 
   if(whence == SEEK_SET)
     newpos = offset;
-  else if(whence == SEEK_CUR || whence == SEEK_END)
+  else
     newpos = offset + pos;
   pos = 0;
   while(pos < newpos && fgetc(stream) != EOF)
     pos++;
 
   return (pos == newpos) ? 0 : -1;
+  #undef FSEEK
 }
 
 /* filename_extract_limits() examines the entered filename. It starts
