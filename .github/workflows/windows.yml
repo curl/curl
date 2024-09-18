@@ -304,6 +304,8 @@ jobs:
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           make -C bld -j5 V=1 test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'autotools' && (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}
@@ -395,6 +397,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
@@ -519,6 +523,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'cmake build examples'
         timeout-minutes: 5
@@ -803,6 +809,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'cmake build examples'
         timeout-minutes: 5
