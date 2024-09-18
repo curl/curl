@@ -2965,6 +2965,7 @@ while () {
             $runnersrunning{$ridready} = $testnum;
         } else {
             # Test is complete
+            $runner_wait_cnt = 0;
             runnerready($ridready);
 
             if($error < 0) {
