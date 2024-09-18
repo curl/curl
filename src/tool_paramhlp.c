@@ -44,7 +44,6 @@ text-mode filestreams: we assume that a user considers a line break as
 one character '\n' and not "\r\n" */
 int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
 {
-  int i;
   curl_off_t pos, newpos;
 
   if(whence == SEEK_END && fseek(stream, 0, SEEK_END))
