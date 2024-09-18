@@ -56,7 +56,7 @@ int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
   if(whence == SEEK_END && FSEEK(stream, 0, SEEK_END))
     return -1;
 
-  pos = ftello(stream);
+  pos = (curl_off_t)ftell(stream);
   if(pos == -1)
     return -1;
 
