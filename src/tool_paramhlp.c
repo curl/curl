@@ -257,7 +257,6 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
     curl_off_t rangelen = 0;
     int rangelen_set = 0;
 
-
     if(filelimit == FILELIMIT_START && FSEEK(file, start, SEEK_SET)) {
       return PARAM_FSEEK_ERROR;
     }
@@ -275,13 +274,13 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file,
     curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];
-      size_t elt_cnt;
-      if(rangelen_set && (rangelen < (curl_off_t)sizeof(buffer))) {
+      curl_off_t elt_cnt;
+
+      if(rangelen_set && (rangelen < (curl_off_t)sizeof(buffer)))
         elt_cnt = rangelen;
-      }
-      else {
+      else
         elt_cnt = sizeof(buffer);
-      }
+
       nread = fread(buffer, 1, elt_cnt, file);
       rangelen = rangelen - nread;
       if(ferror(file)) {
