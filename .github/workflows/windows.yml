@@ -748,6 +748,9 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
+          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then  # for testing
+            options+=" -DPERL_EXECUTABLE=/c/Strawberry/perl/bin/perl"
+          fi
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
