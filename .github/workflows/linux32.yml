@@ -60,7 +60,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo dpkg --add-architecture i386
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-suggests --no-install-recommends libtool autoconf automake pkg-config stunnel4 ${{ matrix.build.install_packages }}
+          sudo apt-get install -y --no-install-suggests --no-install-recommends libtool autoconf automake pkgconf stunnel4 ${{ matrix.build.install_packages }}
           sudo python3 -m pip install impacket
         name: 'install prereqs'
 

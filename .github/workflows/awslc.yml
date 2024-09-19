@@ -52,7 +52,7 @@ jobs:
       - run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update
-          sudo apt-get install --yes libtool autoconf automake pkg-config stunnel4 libpsl-dev
+          sudo apt-get install --yes libtool autoconf automake pkgconf stunnel4 libpsl-dev
           # ensure we don't pick up openssl in this build
           sudo apt remove --yes libssl-dev
           sudo python3 -m pip install impacket
