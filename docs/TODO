@@ -93,6 +93,7 @@
 
  9. IMAP
  9.1 Enhanced capability support
+ 9.2 upload unread
 
  10. LDAP
  10.1 SASL based authentication mechanisms
@@ -725,6 +726,12 @@
 
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the CAPABILITY command.
+
+9.2 upload unread
+
+ Uploads over IMAP currently always set the email as "read" (or "seen"). It
+ would be good to offer a way for users to select for uploads to remain
+ unread.
 
 10. LDAP
 
