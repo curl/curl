@@ -82,7 +82,7 @@ my %warnings = (
     'MULTISPACE'       => 'multiple spaces used when not suitable',
     'NOSPACEEQUALS'    => 'equals sign without preceding space',
     'NOSPACEQ'         => 'missing space around ternary question mark operator',
-    'NOSPACETHAN'      => 'missing space aground less or greater than',
+    'NOSPACETHAN'      => 'missing space around less or greater than',
     'NOTEQUALSZERO',   => 'if/while comparison with != 0',
     'ONELINECONDITION' => 'conditional block on the same line as the if()',
     'OPENCOMMENT'      => 'file ended with a /* comment still "open"',
