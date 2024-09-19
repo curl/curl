@@ -2535,6 +2535,10 @@ if(!$randseed) {
         localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
+    print "CWD-1: $pwd\n";
+    print "CWD-2: " . Cwd::cwd() . "\n";
+    print "CWD-3: " . Cwd::getcwd() . "\n";
+    print "CWD-4: " . Cwd::abs_path() . "\n";
     print "Using curl: $CURL\n";
     open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>$dev_null") ||
         die "could not get curl version!";
