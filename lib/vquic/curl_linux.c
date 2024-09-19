@@ -78,7 +78,7 @@ struct cf_linuxq_ctx {
   struct curl_tls_ctx tls;
   struct linuxq_conn *qconn;
   uint32_t version;
-  uint32_t last_error;
+  uint32_t last_error;               /* XXX: only set, not read */
   struct quic_transport_param transport_params;
   struct cf_call_data call_data;
   nghttp3_conn *h3conn;
