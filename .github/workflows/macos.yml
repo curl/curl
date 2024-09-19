@@ -138,12 +138,12 @@ jobs:
           - name: 'OpenSSL torture !FTP'
             compiler: clang
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
-            tflags: -n -t --shallow=25 !FTP -j20
+            tflags: -n -t --shallow=25 !FTP
             macos-version-min: '10.9'
           - name: 'OpenSSL torture FTP'
             compiler: clang
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
-            tflags: -n -t --shallow=20 FTP -j20
+            tflags: -n -t --shallow=20 FTP
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
@@ -244,7 +244,7 @@ jobs:
       - name: 'run tests'
         timeout-minutes: 20
         run: |
-          export TFLAGS='-j10 ${{ matrix.tflags }}'
+          export TFLAGS='${{ matrix.tflags }} -j10'
           TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
@@ -379,7 +379,7 @@ jobs:
       - name: 'cmake run tests'
         timeout-minutes: 10
         run: |
-          export TFLAGS='-j10 ${{ matrix.build.tflags }}'
+          export TFLAGS='${{ matrix.build.tflags }} -j10'
           TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
