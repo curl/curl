@@ -1428,9 +1428,9 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
   struct cf_call_data save;
-  /* struct quic_connection_close cclose; */
+  struct quic_connection_close cclose;
   CURLcode result = CURLE_OK;
-  /* int rc; */
+  int rc;
 
   if(cf->shutdown || !ctx->qconn) {
     *done = TRUE;
@@ -1443,7 +1443,6 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
   if(!ctx->shutdown_started) {
 
     ctx->shutdown_started = TRUE;
-/*  XXX
     memset(&cclose, 0, sizeof(cclose));
     rc = setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_CONNECTION_CLOSE,
                     &cclose, sizeof(cclose));
@@ -1451,13 +1450,15 @@ static CURLcode cf_linuxq_shutdown(struct Curl_cfilter *cf,
       result = CURLE_WRITE_ERROR;
       goto out;
     }
-*/
-    /* CURL_TRC_CF(data, cf, "start shutdown(err_type=%hu, err_code=%u) -> %d",
-                cclose.frame, cclose.errcode, rc); */
+    CURL_TRC_CF(data, cf, "start shutdown(err_type=%hu, err_code=%u) -> %d",
+                cclose.frame, cclose.errcode, result);
+    if(!cf->next || !cf->next->cft->do_shutdown(cf->next, data, done))
+      goto out;
   }
-  *done = TRUE;
+  else
+    *done = TRUE;
 
-/* out: */
+out:
   CF_DATA_RESTORE(cf, save);
   return result;
 }
@@ -1833,13 +1834,14 @@ static CURLcode cf_linuxq_recv_pkt(struct Curl_cfilter *cf,
     if(len < 1)
       return CURLE_RECV_ERROR;
 
-    CURL_TRC_CF(data, cf, "quic event %hhu, %zd bytes", pkt[0], len);
+    infof(data, "quic event %hhu, %zd bytes", pkt[0], len);
     switch(pkt[0]) {
     case QUIC_EVENT_CONNECTION_CLOSE:
       if(len < 1 + sizeof(qev.close))
         return CURLE_HTTP3;
       memcpy(&qev, &pkt[1], sizeof(qev.close));
       ctx->last_error = qev.close.errcode;
+      ctx->shutdown_started = TRUE;
       cf_linuxq_conn_close(cf, data);
       return CURLE_OK;
     case QUIC_EVENT_STREAM_UPDATE:
