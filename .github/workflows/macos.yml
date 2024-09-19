@@ -135,16 +135,6 @@ jobs:
             configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
             macos-version-min: '10.9'
             tflags: -e
-          - name: 'OpenSSL torture !FTP'
-            compiler: clang
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
-            tflags: -n -t --shallow=25 !FTP
-            macos-version-min: '10.9'
-          - name: 'OpenSSL torture FTP'
-            compiler: clang
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
-            tflags: -n -t --shallow=20 FTP
-            macos-version-min: '10.9'
           - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl) --enable-websockets
@@ -241,7 +231,7 @@ jobs:
       - name: 'run tests'
         timeout-minutes: 20
         run: |
-          export TFLAGS='${{ matrix.tflags }} -j10'
+          export TFLAGS='-j10 ${{ matrix.tflags }}'
           TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
@@ -257,7 +247,7 @@ jobs:
             TFLAGS+=' ~313'  # SecureTransport does not support crl file
             TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
           fi
-          PATH="$HOME/venv/bin:$PATH"
+          source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
 
@@ -268,7 +258,7 @@ jobs:
   cmake:
     name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
@@ -285,8 +275,8 @@ jobs:
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
             macos-version-min: '10.9'
-          - name: 'SecureTransport ws debug+'
-            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
+          - name: 'SecureTransport ws debug'
+            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
@@ -300,9 +290,20 @@ jobs:
             install: gnutls nettle krb5
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
+          - name: 'OpenSSL torture !FTP'
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DENABLE_WEBSOCKETS=ON
+            tflags: -t --shallow=25 !FTP
+            macos-version-min: '10.9'
+            torture: true
+          - name: 'OpenSSL torture FTP'
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_BROTLI=ON -DCURL_ZSTD=ON
+            tflags: -t --shallow=20 FTP
+            macos-version-min: '10.9'
+            torture: true
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
           - { compiler: llvm@15, build: { macos-version-min: '10.9' } }
+          - { compiler: gcc-12, build: { torture: true } }
     steps:
       - name: 'brew install'
         run: |
@@ -378,25 +379,27 @@ jobs:
           python3 -m pip install impacket
 
       - name: 'cmake run tests'
-        timeout-minutes: 10
+        timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
         run: |
-          export TFLAGS='${{ matrix.build.tflags }} -j10'
-          TFLAGS+=' ~2037 ~2041'  # flaky
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-            TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
-            TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+          export TFLAGS='-j10 ${{ matrix.build.tflags }}'
+          if [ -z '${{ matrix.build.torture }}' ]; then
+            TFLAGS+=' ~2037 ~2041'  # flaky
+            if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+              TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
+              TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+              if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
+                TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
+                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+              else
+                TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+              fi
+            fi
             if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-              TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
-            else
-              TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+              TFLAGS+=' ~313'  # SecureTransport does not support crl file
+              TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
             fi
           fi
-          if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-            TFLAGS+=' ~313'  # SecureTransport does not support crl file
-            TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
-          fi
-          PATH="$HOME/venv/bin:$PATH"
+          source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           ninja -C bld test-ci
 
@@ -408,7 +411,7 @@ jobs:
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
-    timeout-minutes: 30
+    timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
