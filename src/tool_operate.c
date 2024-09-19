@@ -1090,6 +1090,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
              * OperationConfig, so that it does not need to be opened/closed
              * for every transfer.
              */
+            if(config->create_dirs) {
+              result = create_dir_hierarchy(config->headerfile, global);
+              /* create_dir_hierarchy shows error upon CURLE_WRITE_ERROR */
+              if(result)
+                break;
+            }
             if(!per->prev || per->prev->config != config) {
               newfile = fopen(config->headerfile, "wb");
               if(newfile)
