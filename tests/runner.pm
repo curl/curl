@@ -1361,6 +1361,7 @@ sub runnerar_ready {
     my $rin = "";
     my %idbyfileno;
     my $maxfileno=0;
+    my @ready_runners = ();
     foreach my $p (keys(%controllerr)) {
         my $fd = fileno($controllerr{$p});
         vec($rin, $fd, 1) = 1;
@@ -1383,10 +1384,11 @@ sub runnerar_ready {
                 return (undef, $idbyfileno{$fd});
             }
             if(vec($rout, $fd, 1)) {
-                return ($idbyfileno{$fd}, undef);
+                push(@ready_runners, $idbyfileno{$fd});
             }
         }
-        die "Internal pipe readiness inconsistency\n";
+        die "Internal pipe readiness inconsistency\n" if(!@ready_runners);
+        return (@ready_runners, undef);
     }
     return (undef, undef);
 }
