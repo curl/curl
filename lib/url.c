@@ -3027,9 +3027,10 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 #endif
        )) {
     /* no connect_to match, try alt-svc! */
-    enum alpnid srcalpnid;
+    enum alpnid srcalpnid = ALPN_none;
+    bool use_alt_svc = FALSE;
     bool hit = FALSE;
-    struct altsvc *as;
+    struct altsvc *as = NULL;
     const int allowed_versions = ( ALPN_h1
 #ifdef USE_HTTP2
                                    | ALPN_h2
@@ -3038,7 +3039,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                    | ALPN_h3
 #endif
       ) & data->asi->flags;
-    static int alpn_ids[] = {
+    static enum alpnid alpn_ids[] = {
 #ifdef USE_HTTP3
       ALPN_h3,
 #endif
@@ -3049,15 +3050,53 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     };
     size_t i;
 
+    switch(data->state.httpwant) {
+    case CURL_HTTP_VERSION_1_0:
+      break;
+    case CURL_HTTP_VERSION_1_1:
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_h1; /* only regard alt-svc advice for http/1.1 */
+      break;
+    case CURL_HTTP_VERSION_2_0:
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_h2; /* only regard alt-svc advice for h2 */
+      break;
+    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+      break;
+    case CURL_HTTP_VERSION_3:
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_h3; /* only regard alt-svc advice for h3 */
+      break;
+    case CURL_HTTP_VERSION_3ONLY:
+      break;
+    default: /* no specific HTTP version wanted, look at all of alt-svc */
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_none;
+      break;
+    }
+    if(!use_alt_svc)
+      return CURLE_OK;
+
     host = conn->host.rawalloc;
     DEBUGF(infof(data, "check Alt-Svc for host %s", host));
-    for(i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i) {
-      srcalpnid = alpn_ids[i];
+    if(srcalpnid == ALPN_none) {
+      /* scan all alt-svc protocol ids in order or relevance */
+      for(i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i) {
+        srcalpnid = alpn_ids[i];
+        hit = Curl_altsvc_lookup(data->asi,
+                                 srcalpnid, host, conn->remote_port, /* from */
+                                 &as /* to */,
+                                 allowed_versions);
+      }
+    }
+    else {
+      /* look for a specific alt-svc protocol id */
       hit = Curl_altsvc_lookup(data->asi,
                                srcalpnid, host, conn->remote_port, /* from */
                                &as /* to */,
                                allowed_versions);
     }
+
 
     if(hit) {
       char *hostd = strdup((char *)as->dst.host);
