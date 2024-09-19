@@ -493,6 +493,11 @@ sub checksystemfeatures {
     my @disabled;
     my $dis = "";
 
+    logmsg "CWD-1: $pwd\n";
+    logmsg "CWD-2: " . Cwd::cwd() . "\n";
+    logmsg "CWD-3: " . Cwd::getcwd() . "\n";
+    logmsg "CWD-4: " . Cwd::abs_path() . "\n";
+
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
     my $versioncmd=shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
@@ -540,6 +545,7 @@ sub checksystemfeatures {
                 # This is a Windows MinGW build or native build, we need to use
                 # Windows-style path.
                 $pwd = sys_native_current_path();
+                logmsg "CWD-5: " . $pwd . "\n";
                 $feature{"win32"} = 1;
             }
             if ($libcurl =~ /\s(winssl|schannel)\b/i) {
