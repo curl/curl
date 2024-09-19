@@ -40,52 +40,52 @@ concurrency:
 
 permissions: {}
 
-env:
-  MAKEFLAGS: -j 5
-
 jobs:
-  autotools:
-    name: ${{ matrix.build.name }}
-    runs-on: 'ubuntu-latest'
-    timeout-minutes: 90
+  cmake:
+    name: '${{ matrix.build.name }}'
+    runs-on: 'ubuntu-24.04'
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
         build:
-          - name: torture
+          - name: 'OpenSSL torture !FTP'
             install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
-            configure: --with-openssl --enable-debug --enable-ares --enable-websockets
-            tflags: -n -t --shallow=25 !FTP -j10
-          - name: torture-ftp
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DENABLE_WEBSOCKETS=ON
+            tflags: -t --shallow=25 !FTP
+          - name: 'OpenSSL torture FTP'
             install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
-            configure: --with-openssl --enable-debug --enable-ares
-            tflags: -n -t --shallow=20 FTP -j10
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
+            tflags: -t --shallow=20 FTP
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
-          sudo apt-get install libtool autoconf automake pkgconf stunnel4 ${{ matrix.build.install }}
-          sudo python3 -m pip install impacket
-        name: 'install prereqs and impacket'
+          sudo apt-get install cmake ninja-build pkgconf stunnel4 ${{ matrix.build.install }}
+          python3 -m venv $HOME/venv
+          source $HOME/venv/bin/activate
+          python3 -m pip install impacket
+        name: 'install prereqs'
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
-      - run: autoreconf -fi
-        name: 'autoreconf'
+      - run: |
+          cmake -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+            -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+            ${{ matrix.build.generate }}
+        name: 'cmake configure'
+
+      - run: cmake --build . --verbose
+        name: 'cmake build'
+
+      - run: ./src/curl -V
+        name: 'check curl -V output'
+
+      - run: cmake --build . --verbose --target testdeps
+        name: 'build tests'
 
       - run: |
-          ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
-            ${{ matrix.build.configure }}
-        name: 'configure'
-
-      - run: make V=1
-        name: 'make'
-
-      - run: make V=1 -C tests
-        name: 'make tests'
-
-      - run: make V=1 test-torture
+          source $HOME/venv/bin/activate
+          cmake --build . --verbose --target test-torture
         name: 'run tests'
         env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+          TFLAGS: '-j10 ${{ matrix.build.tflags }}'
