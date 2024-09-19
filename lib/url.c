@@ -3039,7 +3039,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                    | ALPN_h3
 #endif
       ) & data->asi->flags;
-    static int alpn_ids[] = {
+    static enum alpnid alpn_ids[] = {
 #ifdef USE_HTTP3
       ALPN_h3,
 #endif
