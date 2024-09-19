@@ -64,6 +64,8 @@ static enum alpnid alpn2alpnid(char *name)
     return ALPN_h2;
   if(strcasecompare(name, H3VERSION))
     return ALPN_h3;
+  if(strcasecompare(name, "http/1.1"))
+    return ALPN_h1;
   return ALPN_none; /* unknown, probably rubbish input */
 }
 

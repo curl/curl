@@ -1031,13 +1031,25 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 
   /* If looking for HTTP and the HTTP version we want is less
-   * than the HTTP version of conn, continue looking */
+   * than the HTTP version of conn, continue looking.
+   * CURL_HTTP_VERSION_2TLS is default which indicates no preference,
+   * so we take any existing connection. */
   if((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
-     (((conn->httpversion >= 20) &&
-       (data->state.httpwant < CURL_HTTP_VERSION_2_0))
-      || ((conn->httpversion >= 30) &&
-          (data->state.httpwant < CURL_HTTP_VERSION_3))))
-    return FALSE;
+     (data->state.httpwant != CURL_HTTP_VERSION_2TLS)) {
+    if((conn->httpversion >= 20) &&
+       (data->state.httpwant < CURL_HTTP_VERSION_2_0)) {
+      DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
+             " with httpversion=%d, we want a version less than h2",
+             conn->connection_id, conn->httpversion));
+    }
+    if((conn->httpversion >= 30) &&
+       (data->state.httpwant < CURL_HTTP_VERSION_3)) {
+      DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
+             " with httpversion=%d, we want a version less than h3",
+             conn->connection_id, conn->httpversion));
+      return FALSE;
+    }
+  }
 #ifdef USE_SSH
   else if(get_protocol_family(needle->handler) & PROTO_FAMILY_SSH) {
     if(!ssh_config_matches(needle, conn))
@@ -3016,7 +3028,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
        )) {
     /* no connect_to match, try alt-svc! */
     enum alpnid srcalpnid;
-    bool hit;
+    bool hit = FALSE;
     struct altsvc *as;
     const int allowed_versions = ( ALPN_h1
 #ifdef USE_HTTP2
@@ -3026,24 +3038,27 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                    | ALPN_h3
 #endif
       ) & data->asi->flags;
+    static int alpn_ids[] = {
+#ifdef USE_HTTP3
+      ALPN_h3,
+#endif
+#ifdef USE_HTTP2
+      ALPN_h2,
+#endif
+      ALPN_h1,
+    };
+    size_t i;
 
     host = conn->host.rawalloc;
-#ifdef USE_HTTP2
-    /* with h2 support, check that first */
-    srcalpnid = ALPN_h2;
-    hit = Curl_altsvc_lookup(data->asi,
-                             srcalpnid, host, conn->remote_port, /* from */
-                             &as /* to */,
-                             allowed_versions);
-    if(!hit)
-#endif
-    {
-      srcalpnid = ALPN_h1;
+    DEBUGF(infof(data, "check Alt-Svc for host %s", host));
+    for(i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i) {
+      srcalpnid = alpn_ids[i];
       hit = Curl_altsvc_lookup(data->asi,
                                srcalpnid, host, conn->remote_port, /* from */
                                &as /* to */,
                                allowed_versions);
     }
+
     if(hit) {
       char *hostd = strdup((char *)as->dst.host);
       if(!hostd)
