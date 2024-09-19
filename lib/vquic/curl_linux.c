@@ -951,6 +951,7 @@ static void cf_linuxq_stream_close(struct Curl_cfilter *cf,
 {
   struct cf_linuxq_ctx *ctx = cf->ctx;
   struct quic_errinfo einfo;
+  CURLcode result;
 
   DEBUGASSERT(data);
   DEBUGASSERT(stream);
@@ -964,6 +965,7 @@ static void cf_linuxq_stream_close(struct Curl_cfilter *cf,
     (void)setsockopt(ctx->q.sockfd, SOL_QUIC, QUIC_SOCKOPT_STREAM_RESET,
                      &einfo, sizeof(einfo));
   }
+  cf_linuxq_recvmsg(cf, data, &result); /* drain QUIC events */
 }
 
 static void h3_data_done(struct Curl_cfilter *cf, struct Curl_easy *data)
