@@ -750,6 +750,9 @@ jobs:
             # installed on the runner and fails when linking.
             options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
           fi
+          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then  # for testing
+            options+=" -DPERL_EXECUTABLE=/c/Strawberry/perl/bin/perl"
+          fi
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
