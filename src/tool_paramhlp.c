@@ -106,7 +106,7 @@ int filename_extract_limits(char *filename, curl_off_t *start,
     if(*ptr_range == '!') {
       if(*(ptr_range + 1) != '-') {
         flags_ret |= FILELIMIT_START;
-        if(curlx_strtoofft(ptr_range + 1, NULL, 0, start) != CURL_OFFT_OK)
+        if(curlx_strtoofft(ptr_range + 1, NULL, 10, start) != CURL_OFFT_OK)
           return 0;
       }
       if(have_minus && flags_ret)
@@ -118,7 +118,7 @@ int filename_extract_limits(char *filename, curl_off_t *start,
 
     else if(*ptr_range == '-' && *(ptr_range + 1) != '\0') {
       flags_ret = FILELIMIT_END;
-      if(curlx_strtoofft(ptr_range + 1, NULL, 0, end) != CURL_OFFT_OK)
+      if(curlx_strtoofft(ptr_range + 1, NULL, 10, end) != CURL_OFFT_OK)
         return 0;
     }
     ptr_range--;
