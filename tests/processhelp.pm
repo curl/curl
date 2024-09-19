@@ -125,25 +125,6 @@ sub winpid_to_pid {
 }
 
 #######################################################################
-# return virtual pid from Cygwin pid
-#
-sub pid_to_winpid {
-    my $vpid = $_[0];
-    if(($^O eq 'cygwin' || $^O eq 'msys') && $vpid > 65536) {
-        my $pid = Cygwin::pid_to_winpid($vpid - 65536);
-        if($pid) {
-            print "pid_to_winpid: $^O: $runnerid: $vpid -> $pid (Cygwin::pid_to_winpid success)\n";
-            return $pid;
-        } else {
-            print "pid_to_winpid: $^O: $runnerid: $vpid (Cygwin::pid_to_winpid fail)\n";
-            return $vpid
-        }
-    }
-    print "pid_to_winpid: $^O: $runnerid: $vpid (passthrough)\n";
-    return $vpid;
-}
-
-#######################################################################
 # pidexists checks if a process with a given pid exists and is alive.
 # This will return the positive pid if the process exists and is alive.
 # This will return the negative pid if the process exists differently.
@@ -155,7 +136,7 @@ sub pidexists {
     if($pid > 0) {
         # verify if currently existing Windows process
         $pid = winpid_to_pid($pid);  # if cygwin || msys
-        if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
+        if ($pid > 65536 && os_is_win()) {  # if win32 server.exe
             $pid -= 65536;
             if($^O ne 'MSWin32') {  # if cygwin || msys
                 my $filter = "PID eq $pid";
@@ -194,7 +175,7 @@ sub pidterm {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);  # if cygwin || msys
-        if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
+        if ($pid > 65536 && os_is_win()) {  # if win32 server.exe
             $pid -= 65536;
             if($^O ne 'MSWin32') {  # if cygwin || msys
                 # https://ss64.com/nt/taskkill.html
@@ -220,7 +201,7 @@ sub pidkill {
     if($pid > 0) {
         # request the process to quit
         $pid = winpid_to_pid($pid);  # if cygwin || msys
-        if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
+        if ($pid > 65536 && os_is_win()) {  # if win32 server.exe
             $pid -= 65536;
             if($^O ne 'MSWin32') {  # if cygwin || msys
                 # https://ss64.com/nt/taskkill.html
@@ -246,7 +227,7 @@ sub pidwait {
 
     $pid = winpid_to_pid($pid);  # if cygwin || msys
     # check if the process exists
-    if ($pid > 65536 && os_is_win()) {  # if cygwin || msys || win32
+    if ($pid > 65536 && os_is_win()) {  # if win32 server.exe
         if($flags == &WNOHANG) {
             print "pidwait: $^O: $runnerid: ->pidexists($pid)\n";
             return pidexists($pid)?0:$pid;
