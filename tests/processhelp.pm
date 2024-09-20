@@ -181,7 +181,8 @@ sub pidterm {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -t -pid $pid >nul 2>&1";
                 print "pidterm: $^O: Executing: '$cmd'\n";
-                system($cmd);
+                my $result = system($cmd);
+                print "pidterm: $^O: taskkill $pid result: $result\n";
                 return;
             }
         }
@@ -207,7 +208,8 @@ sub pidkill {
                 # https://ss64.com/nt/taskkill.html
                 my $cmd = "taskkill -f -t -pid $pid >nul 2>&1";
                 print "pidkill: $^O: Executing: '$cmd'\n";
-                system($cmd);
+                my $result = system($cmd);
+                print "pidterm: $^O: taskkill -f $pid result: $result\n";
                 return;
             }
         }

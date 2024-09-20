@@ -288,7 +288,9 @@ sub clearlocks {
             my $cmd = "$handle $dir -accepteula -nobanner";
             print "clearlocks: $^O: Executing: '$cmd'\n";
             my @handles = `$cmd`;
+            print "clearlocks: $^O: handle $dir result: " . @handles . " lines\n";
             for my $tryhandle (@handles) {
+                print "clearlocks: $^O: handle $dir line: |$tryhandle|\n";
                 # Skip the "No matching handles found." warning when returned
                 if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
                     print "clearlocks: $^O: Found $3 lock of '$5' ($4) by $1 ($2)\n";
@@ -298,7 +300,8 @@ sub clearlocks {
                         # https://ss64.com/nt/taskkill.html
                         my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
                         print "clearlocks: $^O: Executing: '$cmd'\n";
-                        system($cmd);
+                        my $result = system($cmd);
+                        print "clearlocks: $^O: taskkill.exe result: $result\n";
                         $done = 1;
                     }
                 }
