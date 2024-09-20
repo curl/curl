@@ -35,9 +35,6 @@ concurrency:
 
 permissions: {}
 
-env:
-  CURL_CI: github
-
 jobs:
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -106,7 +103,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 5
         run: |
-          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
             --enable-websockets \
             --with-openssl \
@@ -409,7 +406,7 @@ jobs:
       - name: 'autotools configure'
         if: ${{ matrix.build == 'autotools' }}
         run: |
-          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-warnings --enable-werror \
             --host=${TRIPLET} \
             --with-schannel --with-winidn \
             --without-libpsl \

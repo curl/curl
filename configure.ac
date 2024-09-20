@@ -623,12 +623,7 @@ AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
     AC_MSG_RESULT([no])
     ;;
   esac ],
-    if test -n "$CURL_CI"; then
-      want_unity='yes'
-      AC_MSG_RESULT([yes])
-    else
-      AC_MSG_RESULT([no])
-    fi
+    AC_MSG_RESULT([no])
 )
 
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])

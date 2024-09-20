@@ -36,7 +36,6 @@ concurrency:
 permissions: {}
 
 env:
-  CURL_CI: github
   MAKEFLAGS: -j 5
   # unhandled
   bearssl-version: 0.6
@@ -497,7 +496,10 @@ jobs:
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: ${{ matrix.build.configure-prefix }} ./configure --disable-dependency-tracking --enable-warnings --enable-werror ${{ matrix.build.configure }}
+      - run: |
+          ${{ matrix.build.configure-prefix }} \
+          ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+            ${{ matrix.build.configure }}
         if: ${{ matrix.build.configure }}
         name: 'configure (autotools)'
 
@@ -565,3 +567,4 @@ jobs:
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
+          CURL_CI: github

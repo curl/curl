@@ -46,7 +46,6 @@ name: Old Linux
 permissions: {}
 
 env:
-  CURL_CI: github
   MAKEFLAGS: -j 5
   DEBIAN_FRONTEND: noninteractive
 
@@ -114,7 +113,9 @@ jobs:
         run: |
           mkdir bld-am
           cd bld-am
-          ../configure --disable-dependency-tracking --enable-warnings --enable-werror --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --prefix="$PWD"/../install-am
+          ../configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+            --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi \
+            --prefix="$PWD"/../install-am
 
       - name: 'autoconf build'
         run: |
