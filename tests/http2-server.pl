@@ -29,15 +29,21 @@ use Cwd;
 use Cwd 'abs_path';
 use File::Basename;
 
+use serverhelp qw(
+    logmsg
+    $logfile
+    );
+
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
-my $logfile = "$logdir/http2.log";
 my $nghttpx = "nghttpx";
 my $listenport = 9015;
 my $listenport2 = 9016;
 my $connect = "127.0.0.1,8990";
 my $conf = "nghttpx.conf";
 my $cert = "Server-localhost-sv";
+
+$logfile = "$logdir/http2.log";
 
 #***************************************************************************
 # Process command line options
