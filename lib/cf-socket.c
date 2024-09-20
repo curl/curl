@@ -2109,7 +2109,7 @@ CURLcode Curl_cf_quic_sock_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_quic, ctx);
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     Curl_safefree(cf);
     Curl_safefree(ctx);

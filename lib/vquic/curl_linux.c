@@ -142,7 +142,7 @@ struct h3_stream_ctx {
 };
 
 #define H3_STREAM_CTX(ctx,data)   ((struct h3_stream_ctx *)(\
-            data? Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
+            data ? Curl_hash_offt_get(&(ctx)->streams, (data)->id) : NULL))
 #define H3_STREAM_CTX_ID(ctx,id)  ((struct h3_stream_ctx *)(\
             Curl_hash_offt_get(&(ctx)->streams, (id))))
 
@@ -1567,8 +1567,8 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   struct Curl_easy *data;
 
   cf = (struct Curl_cfilter *)SSL_get_app_data(ssl);
-  ctx = cf? cf->ctx : NULL;
-  data = cf? CF_DATA_CURRENT(cf) : NULL;
+  ctx = cf ? cf->ctx : NULL;
+  data = cf ? CF_DATA_CURRENT(cf) : NULL;
   if(cf && data && ctx) {
     Curl_ossl_add_session(cf, data, &ctx->peer, ssl_sessionid);
     return 1;
@@ -1967,7 +1967,7 @@ out:
     nread = total;
   }
   CURL_TRC_CF(data, cf, "recvd %zd packet%s with %zd bytes -> %d", npkts,
-              npkts > 1? "s" : "", nread, *err);
+              npkts > 1 ? "s" : "", nread, *err);
   return nread;
 }
 
@@ -2023,7 +2023,7 @@ static ssize_t cf_linuxq_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(blen=%zu) -> %zd, %d",
-              stream? stream->id : -1, blen, nread, *err);
+              stream ? stream->id : -1, blen, nread, *err);
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
@@ -2388,7 +2388,7 @@ static ssize_t cf_linuxq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
 out:
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu, eos=%d) "
-              "-> %zd, %d", stream? stream->id : -1, len, eos, sent, *err);
+              "-> %zd, %d", stream ? stream->id : -1, len, eos, sent, *err);
   CF_DATA_RESTORE(cf, save);
   return sent;
 }
@@ -2429,7 +2429,7 @@ static CURLcode cf_linuxq_query(struct Curl_cfilter *cf,
       if(ctx->max_bidi_streams > ctx->used_bidi_streams)
         avail_bidi_streams = ctx->max_bidi_streams - ctx->used_bidi_streams;
       max_streams += avail_bidi_streams;
-      *pres1 = (max_streams > INT_MAX)? INT_MAX : (int)max_streams;
+      *pres1 = (max_streams > INT_MAX) ? INT_MAX : (int)max_streams;
     }
     else  /* transport params not arrived yet? take our default. */
       *pres1 = (int)Curl_multi_max_concurrent_streams(data->multi);
@@ -2442,7 +2442,7 @@ static CURLcode cf_linuxq_query(struct Curl_cfilter *cf,
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->q.got_first_byte) {
       timediff_t ms = Curl_timediff(ctx->q.first_byte_at, ctx->started_at);
-      *pres1 = (ms < INT_MAX)? (int)ms : INT_MAX;
+      *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
       *pres1 = -1;
@@ -2541,7 +2541,7 @@ CURLcode Curl_cf_linuxq_create(struct Curl_cfilter **pcf,
   cf->next = quic_cf;
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     if(quic_cf)
       Curl_conn_cf_discard_sub(cf, quic_cf, data, TRUE);
@@ -2555,7 +2555,7 @@ bool Curl_conn_is_linuxq(const struct Curl_easy *data,
                          const struct connectdata *conn,
                          int sockindex)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for(; cf; cf = cf->next) {
