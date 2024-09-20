@@ -2540,7 +2540,9 @@ if(!$randseed) {
     print "CWD-3: " . Cwd::getcwd() . "\n";
     print "CWD-4: " . Cwd::abs_path() . "\n";
     print "Using curl: $CURL\n";
-    open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>$dev_null") ||
+    my $cmd = shell_quote($CURL) . " --version 2>$dev_null";
+    print "curl cmd: |$cmd|\n";
+    open(my $curlvh, "-|", $cmd) ||
         die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) || die "could not get curl version!";
