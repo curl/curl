@@ -50,6 +50,7 @@ permissions: {}
 # that function.
 
 env:
+  CURL_CI: github
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
   MAKEFLAGS: -j 4
 

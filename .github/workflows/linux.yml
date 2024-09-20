@@ -36,6 +36,7 @@ concurrency:
 permissions: {}
 
 env:
+  CURL_CI: github
   MAKEFLAGS: -j 5
   # unhandled
   bearssl-version: 0.6
@@ -560,9 +561,7 @@ jobs:
       - if: contains(matrix.build.install_steps, 'pytest')
         # run for `tests/http` directory, so pytest does not pick up any other
         # packages we might have built here
-        run:
-          pytest -v tests/http
+        run: pytest -v tests/http
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
-          CURL_CI: github

@@ -40,6 +40,7 @@ concurrency:
 permissions: {}
 
 env:
+  CURL_CI: github
   MAKEFLAGS: -j 5
 
 jobs:

@@ -46,6 +46,7 @@ name: Old Linux
 permissions: {}
 
 env:
+  CURL_CI: github
   MAKEFLAGS: -j 5
   DEBIAN_FRONTEND: noninteractive
 

@@ -37,6 +37,7 @@ concurrency:
 permissions: {}
 
 env:
+  CURL_CI: github
   MAKEFLAGS: -j 5
 
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
