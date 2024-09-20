@@ -697,7 +697,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
         break;
 
       if(rc != SSH_OK) {
-        failf(data, "Failure establishing ssh session");
+        failf(data, "Failure establishing ssh session, errorcode %d", rc);
         MOVE_TO_ERROR_STATE(CURLE_FAILED_INIT);
         break;
       }

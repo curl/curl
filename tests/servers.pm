@@ -1859,7 +1859,7 @@ sub runsshserver {
     $sftplog = server_logfilename($LOGDIR, 'sftp', $ipvnum, $idnum);
 
     if(verifysftp('sftp', $ipvnum, $idnum, $ip, $port) < 1) {
-        logmsg "RUN: SFTP server failed verification\n";
+        logmsg "RUN: $srvrname server failed verification\n";
         # failed to talk to it properly. Kill the server and return failure
         display_sftplog();
         display_sftpconfig();
@@ -2785,6 +2785,12 @@ sub startservers {
             }
         }
         elsif($what eq "sftp" || $what eq "scp") {
+            if($run{'ssh'} &&
+               !responsive_ssh_server($verbose)) {
+                if(stopserver('ssh')) {
+                    return ("failed stopping unresponsive ssh server", 3);
+                }
+            }
             if(!$run{'ssh'}) {
                 ($serr, $pid, $pid2, $PORT{'ssh'}) = runsshserver("", $verbose);
                 if($pid <= 0) {
