@@ -35,9 +35,6 @@ sftp://localhost:%SSHPORT%SSH_PWD/%LOGDIR/upload%TESTNUMBER.txt %USER: %LOGDIR/s
 
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 0
 </errorcode>

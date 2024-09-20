@@ -35,8 +35,5 @@ perl -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 978264000)'
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

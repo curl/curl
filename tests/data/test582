@@ -34,9 +34,6 @@ Moooooooooooo
 
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <strip>
 </strip>
 <protocol>

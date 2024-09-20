@@ -40,8 +40,5 @@ for ssh upload test
 Test data
 for ssh upload test
 </upload>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

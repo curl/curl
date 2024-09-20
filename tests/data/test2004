@@ -72,8 +72,5 @@ for several protocols
 Test data file
 for tftp test
 </stdout>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

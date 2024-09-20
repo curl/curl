@@ -37,9 +37,6 @@ Dummy test file for remove test
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <protocol>
 </protocol>
 </verify>
