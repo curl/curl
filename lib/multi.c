@@ -1126,6 +1126,7 @@ static void multi_getsock(struct Curl_easy *data,
 
   if(expect_sockets && !ps->num &&
      !(data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) &&
+     !Curl_cwriter_is_paused(data) && !Curl_creader_is_paused(data) &&
      Curl_conn_is_ip_connected(data, FIRSTSOCKET)) {
     infof(data, "WARNING: no socket in pollset, transfer may stall!");
     DEBUGASSERT(0);
