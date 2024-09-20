@@ -134,6 +134,7 @@ static void sftp_quote(struct Curl_easy *data);
 static void sftp_quote_stat(struct Curl_easy *data);
 static int myssh_getsock(struct Curl_easy *data,
                          struct connectdata *conn, curl_socket_t *sock);
+static void myssh_block2waitfor(struct connectdata *conn, bool block);
 
 static CURLcode myssh_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn);
@@ -693,8 +694,12 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
     case SSH_S_STARTUP:
       rc = ssh_connect(sshc->ssh_session);
-      if(rc == SSH_AGAIN)
+
+      myssh_block2waitfor(conn, (rc == SSH_AGAIN) ? TRUE : FALSE);
+      if(rc == SSH_AGAIN) {
+        DEBUGF(infof(data, "ssh_connect -> EAGAIN"));
         break;
+      }
 
       if(rc != SSH_OK) {
         failf(data, "Failure establishing ssh session");
@@ -2047,6 +2052,7 @@ static int myssh_getsock(struct Curl_easy *data,
   if(!conn->waitfor)
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
+  DEBUGF(infof(data, "ssh_getsock -> %x", bitmap));
   return bitmap;
 }
 
@@ -2060,13 +2066,12 @@ static void myssh_block2waitfor(struct connectdata *conn, bool block)
 
   if(block) {
     int dir = ssh_get_poll_flags(sshc->ssh_session);
-    if(dir & SSH_READ_PENDING) {
-      /* translate the libssh define bits into our own bit defines */
-      conn->waitfor = KEEP_RECV;
-    }
-    else if(dir & SSH_WRITE_PENDING) {
-      conn->waitfor = KEEP_SEND;
-    }
+    conn->waitfor = 0;
+    /* translate the libssh define bits into our own bit defines */
+    if(dir & SSH_READ_PENDING)
+      conn->waitfor |= KEEP_RECV;
+    if(dir & SSH_WRITE_PENDING)
+      conn->waitfor |= KEEP_SEND;
   }
 }
 
