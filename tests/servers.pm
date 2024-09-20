@@ -2785,12 +2785,6 @@ sub startservers {
             }
         }
         elsif($what eq "sftp" || $what eq "scp") {
-            if($run{'ssh'} &&
-               !responsive_ssh_server($verbose)) {
-                if(stopserver('ssh')) {
-                    return ("failed stopping unresponsive ssh server", 3);
-                }
-            }
             if(!$run{'ssh'}) {
                 ($serr, $pid, $pid2, $PORT{'ssh'}) = runsshserver("", $verbose);
                 if($pid <= 0) {
