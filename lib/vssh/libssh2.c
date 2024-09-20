@@ -279,23 +279,27 @@ static CURLcode libssh2_session_error_to_CURLE(int err)
   return CURLE_SSH;
 }
 
+/* These functions are made to use the libcurl memory functions - NOT the
+   debugmem functions, as that leads us to trigger on libssh2 memory leaks
+   that are not ours to care for */
+
 static LIBSSH2_ALLOC_FUNC(my_libssh2_malloc)
 {
   (void)abstract; /* arg not used */
-  return malloc(count);
+  return Curl_cmalloc(count);
 }
 
 static LIBSSH2_REALLOC_FUNC(my_libssh2_realloc)
 {
   (void)abstract; /* arg not used */
-  return realloc(ptr, count);
+  return Curl_crealloc(ptr, count);
 }
 
 static LIBSSH2_FREE_FUNC(my_libssh2_free)
 {
   (void)abstract; /* arg not used */
   if(ptr) /* ssh2 agent sometimes call free with null ptr */
-    free(ptr);
+    Curl_cfree(ptr);
 }
 
 /*
