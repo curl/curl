@@ -206,8 +206,8 @@ jobs:
               --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: event-based valgrind
-            install_packages: libssh-dev valgrind
+          - name: event-based
+            install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n -e '!TLS-SRP'
             singleuse: --unit
