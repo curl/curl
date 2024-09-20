@@ -198,7 +198,6 @@ jobs:
 
           - name: memory-sanitizer
             install_packages: clang
-            install_steps:
             configure: >
               CC=clang
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
@@ -207,19 +206,20 @@ jobs:
               --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: event-based valgrind
-            install_packages: libssh-dev valgrind
+          - name: event-based
+            install_packages: libssh-dev
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n -e '!TLS-SRP'
             singleuse: --unit
 
-          - name: hyper valgrind
-            install_steps: rust hyper valgrind
+          - name: hyper
+            install_steps: rust hyper
             configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
             singleuse: --unit
 
           - name: rustls valgrind
-            install_steps: rust rustls pytest valgrind libpsl-dev
+            install_packages: libpsl-dev valgrind
+            install_steps: rust rustls pytest
             configure: --with-rustls=$HOME/rustls --enable-debug
             singleuse: --unit
 
