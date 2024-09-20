@@ -173,7 +173,7 @@ CURL_EXTERN int curl_dbg_fclose(FILE *file, int line, const char *source);
 #define freeaddrinfo(data) \
   curl_dbg_freeaddrinfo(data, __LINE__, __FILE__)
 #endif /* HAVE_FREEADDRINFO */
-#endif /* CURL_NO_GETADDRINFO_OVERRIDE */
+#endif /* !CURL_NO_GETADDRINFO_OVERRIDE */
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose

@@ -96,7 +96,7 @@
 #ifdef HAVE_FREEADDRINFO
 #undef freeaddrinfo
 #endif /* HAVE_FREEADDRINFO */
-#endif /* CURL_NO_GETADDRINFO_OVERRIDE */
+#endif /* !CURL_NO_GETADDRINFO_OVERRIDE */
 
 /* sclose is probably already defined, redefine it! */
 #undef sclose
