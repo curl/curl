@@ -33,7 +33,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-warnings --enable-werror --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --with-openssl \
               || { tail -1000 config.log; false; }
 
   configure-openssl-no-verbose:
@@ -41,7 +41,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --disable-verbose --enable-werror --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --disable-verbose --enable-werror --with-openssl \
               || { tail -1000 config.log; false; }
 
   configure-no-proxy:
@@ -49,7 +49,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --disable-proxy --enable-werror --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --disable-proxy --enable-werror --with-openssl \
               || { tail -1000 config.log; false; }
 
   install-cares:
@@ -110,7 +110,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-warnings --enable-werror --with-openssl --enable-ares \
+            ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
   configure-wolfssh:
@@ -118,7 +118,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --disable-dependency-tracking --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
+            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
               || { tail -1000 config.log; false; }
 
   configure-cares-debug:
@@ -126,7 +126,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-debug --enable-werror --with-openssl --enable-ares \
+            ./configure --disable-dependency-tracking --enable-unity --enable-debug --enable-werror --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
   build:
