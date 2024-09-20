@@ -2009,8 +2009,7 @@ static CURLcode cf_quic_connect(struct Curl_cfilter *cf,
     }
 
     /* Connect QUIC socket */
-    rc = connect(ctx->sock, &ctx->addr.sa_addr,
-                 (curl_socklen_t)ctx->addr.addrlen);
+    rc = do_connect(cf, data, 0);
     set_local_ip(cf, data);
     CURL_TRC_CF(data, cf, "local address %s port %d...",
                 ctx->ip.local_ip, ctx->ip.local_port);
