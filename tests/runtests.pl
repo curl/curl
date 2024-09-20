@@ -481,6 +481,7 @@ sub parseprotocols {
 # Information to do with servers is displayed in displayserverfeatures, after
 # the server initialization is performed.
 sub checksystemfeatures {
+    my $proto;
     my $feat;
     my $curl;
     my $libcurl;
@@ -624,8 +625,9 @@ sub checksystemfeatures {
             }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
+            $proto = $1;
             # these are the protocols compiled in to this libcurl
-            parseprotocols($1);
+            parseprotocols($proto);
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
@@ -848,6 +850,7 @@ sub checksystemfeatures {
     logmsg ("********* System characteristics ******** \n",
             "* $curl\n",
             "* $libcurl\n",
+            "* Protocols: $proto\n",
             "* Features: $feat\n",
             "* Disabled: $dis\n",
             "* Host: $hostname\n",
