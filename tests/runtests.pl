@@ -122,6 +122,7 @@ my $libtool;
 my $repeat = 0;
 
 my $start;          # time at which testing started
+my $args;           # command-line arguments
 
 my $uname_release = `uname -r`;
 my $is_wsl = $uname_release =~ /Microsoft$/;
@@ -480,6 +481,7 @@ sub parseprotocols {
 # Information to do with servers is displayed in displayserverfeatures, after
 # the server initialization is performed.
 sub checksystemfeatures {
+    my $proto;
     my $feat;
     my $curl;
     my $libcurl;
@@ -623,8 +625,9 @@ sub checksystemfeatures {
             }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
+            $proto = $1;
             # these are the protocols compiled in to this libcurl
-            parseprotocols($1);
+            parseprotocols($proto);
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
@@ -847,12 +850,14 @@ sub checksystemfeatures {
     logmsg ("********* System characteristics ******** \n",
             "* $curl\n",
             "* $libcurl\n",
+            "* Protocols: $proto\n",
             "* Features: $feat\n",
             "* Disabled: $dis\n",
             "* Host: $hostname\n",
             "* System: $hosttype\n",
             "* OS: $hostos\n",
-            "* Perl: $^V ($^X)\n");
+            "* Perl: $^V ($^X)\n",
+            "* Args: $args\n");
 
     if($jobs) {
         # Only show if not the default for now
@@ -2203,6 +2208,8 @@ if(@ARGV && $ARGV[-1] eq '$TFLAGS') {
     pop @ARGV;
     push(@ARGV, split(' ', $ENV{'TFLAGS'})) if defined($ENV{'TFLAGS'});
 }
+
+$args = join(' ', @ARGV);
 
 $valgrind = checktestcmd("valgrind");
 my $number=0;
