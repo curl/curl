@@ -2462,8 +2462,7 @@ static CURLcode cf_linuxq_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
-    cf->next->cft->query(cf->next, data, query, pres1, pres2) :
+  return cf->next ? cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
 
