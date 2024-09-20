@@ -653,7 +653,7 @@ static CURLcode InitiateTransfer(struct Curl_easy *data)
     /* set the SO_SNDBUF for the secondary socket for those who need it */
     Curl_sndbuf_init(conn->sock[SECONDARYSOCKET]);
 
-    /* FTP uload, shutdown DATA, ignore shutdown errors, as we rely
+    /* FTP upload, shutdown DATA, ignore shutdown errors, as we rely
      * on the server response on the CONTROL connection. */
     Curl_xfer_setup2(data, CURL_XFER_SEND, -1, TRUE, TRUE);
   }
