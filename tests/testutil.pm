@@ -211,10 +211,15 @@ sub runclientoutput {
 #
 sub shell_quote {
     my ($s)=@_;
-    if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
-        # string contains a "dangerous" character--quote it
-        $s =~ s/'/'"'"'/g;
-        $s = "'" . $s . "'";
+    if($^O eq 'MSWin32') {
+        $s = '"' . $s . '"';
+    }
+    else {
+        if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
+            # string contains a "dangerous" character--quote it
+            $s =~ s/'/'"'"'/g;
+            $s = "'" . $s . "'";
+        }
     }
     return $s;
 }
