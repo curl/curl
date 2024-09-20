@@ -122,6 +122,7 @@ my $libtool;
 my $repeat = 0;
 
 my $start;          # time at which testing started
+my $args;           # command-line arguments
 
 my $uname_release = `uname -r`;
 my $is_wsl = $uname_release =~ /Microsoft$/;
@@ -852,7 +853,8 @@ sub checksystemfeatures {
             "* Host: $hostname\n",
             "* System: $hosttype\n",
             "* OS: $hostos\n",
-            "* Perl: $^V ($^X)\n");
+            "* Perl: $^V ($^X)\n",
+            "* Args: $args\n");
 
     if($jobs) {
         # Only show if not the default for now
@@ -2203,6 +2205,8 @@ if(@ARGV && $ARGV[-1] eq '$TFLAGS') {
     pop @ARGV;
     push(@ARGV, split(' ', $ENV{'TFLAGS'})) if defined($ENV{'TFLAGS'});
 }
+
+$args = join(' ', @ARGV);
 
 $valgrind = checktestcmd("valgrind");
 my $number=0;
