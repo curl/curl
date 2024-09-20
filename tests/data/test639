@@ -42,8 +42,5 @@ Dummy test file for rename test
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

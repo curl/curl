@@ -42,8 +42,5 @@ Test file for rename test
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Test file for rename test
 </file>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

@@ -23,9 +23,6 @@ SFTP retrieval with nonexistent private key file
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 67
 </errorcode>

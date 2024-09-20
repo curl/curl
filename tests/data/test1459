@@ -40,8 +40,5 @@ CURL_HOME=%PWD/%LOGDIR/test%TESTNUMBER.dir
 <errorcode>
 60
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

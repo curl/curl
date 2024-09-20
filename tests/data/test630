@@ -27,8 +27,5 @@ SFTP incorrect host key
 <errorcode>
 60
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

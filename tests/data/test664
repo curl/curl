@@ -37,8 +37,5 @@ test
 <errorcode>
 0
 </errorcode>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>
