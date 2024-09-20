@@ -2065,12 +2065,13 @@ static void myssh_block2waitfor(struct connectdata *conn, bool block)
 
   if(block) {
     int dir = ssh_get_poll_flags(sshc->ssh_session);
+    conn->waitfor = 0;
     if(dir & SSH_READ_PENDING) {
       /* translate the libssh define bits into our own bit defines */
-      conn->waitfor = KEEP_RECV;
+      conn->waitfor |= KEEP_RECV;
     }
-    else if(dir & SSH_WRITE_PENDING) {
-      conn->waitfor = KEEP_SEND;
+    if(dir & SSH_WRITE_PENDING) {
+      conn->waitfor |= KEEP_SEND;
     }
   }
 }
