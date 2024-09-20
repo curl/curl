@@ -615,16 +615,20 @@ AC_ARG_ENABLE(unity,
 AS_HELP_STRING([--enable-unity],[Enable unity mode])
 AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
 [ case "$enableval" in
-  no)
-    AC_MSG_RESULT([no])
+  yes)
+    want_unity='yes'
+    AC_MSG_RESULT([yes])
     ;;
   *)
-    want_unity='yes'
-    AC_MSG_RESULT([yes])
+    AC_MSG_RESULT([no])
     ;;
   esac ],
-    want_unity='yes'
-    AC_MSG_RESULT([yes])
+    if test -n "$CURL_CI"; then
+      want_unity='yes'
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+    fi
 )
 
 AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
