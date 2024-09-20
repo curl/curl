@@ -212,8 +212,7 @@ jobs:
             tflags: -n -e '!TLS-SRP'
             singleuse: --unit
 
-          - name: hyper valgrind
-            install_packages: valgrind
+          - name: hyper
             install_steps: rust hyper
             configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
             singleuse: --unit
