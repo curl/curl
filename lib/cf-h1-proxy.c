@@ -547,8 +547,8 @@ static CURLcode CONNECT_host(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  authority = aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname, ipv6_ip?"]":"",
-                      port);
+  authority = aprintf("%s%s%s:%d", ipv6_ip ? "[":"", hostname,
+                      ipv6_ip ? "]" : "", port);
   if(!authority)
     return CURLE_OUT_OF_MEMORY;
 

@@ -228,15 +228,15 @@ static CURLcode tftp_set_timeouts(struct tftp_state_data *state)
   state->retry_max = (int)timeout/5;
 
   /* But bound the total number */
-  if(state->retry_max<3)
+  if(state->retry_max < 3)
     state->retry_max = 3;
 
-  if(state->retry_max>50)
+  if(state->retry_max > 50)
     state->retry_max = 50;
 
   /* Compute the re-ACK interval to suit the timeout */
   state->retry_time = (int)(timeout/state->retry_max);
-  if(state->retry_time<1)
+  if(state->retry_time < 1)
     state->retry_time = 1;
 
   infof(state->data,
@@ -443,7 +443,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
   case TFTP_EVENT_TIMEOUT: /* Resend the first packet out */
     /* Increment the retry counter, quit if over the limit */
     state->retries++;
-    if(state->retries>state->retry_max) {
+    if(state->retries > state->retry_max) {
       state->error = TFTP_ERR_NORESPONSE;
       state->state = TFTP_STATE_FIN;
       return result;
@@ -526,7 +526,7 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
        not have a size_t argument, like older unixes that want an 'int' */
     senddata = sendto(state->sockfd, (void *)state->spacket.data,
                       (SEND_TYPE_ARG3)sbytes, 0,
-                      &data->conn->remote_addr->sa_addr,
+                      &data->conn->remote_addr->curl_sa_addr,
                       (curl_socklen_t)data->conn->remote_addr->addrlen);
     if(senddata != (ssize_t)sbytes) {
       char buffer[STRERROR_LEN];
@@ -664,7 +664,7 @@ static CURLcode tftp_rx(struct tftp_state_data *state,
                       4, SEND_4TH_ARG,
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
-      if(sbytes<0) {
+      if(sbytes < 0) {
         failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
         return CURLE_SEND_ERROR;
       }
@@ -729,7 +729,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
               rblock, state->block);
         state->retries++;
         /* Bail out if over the maximum */
-        if(state->retries>state->retry_max) {
+        if(state->retries > state->retry_max) {
           failf(data, "tftp_tx: giving up waiting for block %d ack",
                 state->block);
           result = CURLE_SEND_ERROR;
@@ -741,7 +741,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
                           (struct sockaddr *)&state->remote_addr,
                           state->remote_addrlen);
           /* Check all sbytes were sent */
-          if(sbytes<0) {
+          if(sbytes < 0) {
             failf(data, "%s", Curl_strerror(SOCKERRNO,
                                             buffer, sizeof(buffer)));
             result = CURLE_SEND_ERROR;
@@ -786,7 +786,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
                     (struct sockaddr *)&state->remote_addr,
                     state->remote_addrlen);
     /* Check all sbytes were sent */
-    if(sbytes<0) {
+    if(sbytes < 0) {
       failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
       return CURLE_SEND_ERROR;
     }
@@ -812,7 +812,7 @@ static CURLcode tftp_tx(struct tftp_state_data *state, tftp_event_t event)
                       (struct sockaddr *)&state->remote_addr,
                       state->remote_addrlen);
       /* Check all sbytes were sent */
-      if(sbytes<0) {
+      if(sbytes < 0) {
         failf(data, "%s", Curl_strerror(SOCKERRNO, buffer, sizeof(buffer)));
         return CURLE_SEND_ERROR;
       }

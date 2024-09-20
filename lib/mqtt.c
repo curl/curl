@@ -156,7 +156,7 @@ static int mqtt_encode_len(char *buf, size_t len)
 {
   int i;
 
-  for(i = 0; (len > 0) && (i<4); i++) {
+  for(i = 0; (len > 0) && (i < 4); i++) {
     unsigned char encoded;
     encoded = len % 0x80;
     len /= 0x80;
@@ -375,7 +375,7 @@ static CURLcode mqtt_recv_atleast(struct Curl_easy *data, size_t nbytes)
       return CURLE_OUT_OF_MEMORY;
     rlen = Curl_dyn_len(&mq->recvbuf);
   }
-  return (rlen >= nbytes)? CURLE_OK : CURLE_AGAIN;
+  return (rlen >= nbytes) ? CURLE_OK : CURLE_AGAIN;
 }
 
 static void mqtt_recv_consume(struct Curl_easy *data, size_t nbytes)
@@ -610,7 +610,7 @@ static void mqstate(struct Curl_easy *data,
   infof(data, "%s (from %s) (next is %s)",
         statenames[state],
         statenames[mqtt->state],
-        (state == MQTT_FIRST)? statenames[nextstate] : "");
+        (state == MQTT_FIRST) ? statenames[nextstate] : "");
 #endif
   mqtt->state = state;
   if(state == MQTT_FIRST)

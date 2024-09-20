@@ -300,7 +300,7 @@ static CURLcode cw_download_write(struct Curl_easy *data,
 
   /* Error on too large filesize is handled below, after writing
    * the permitted bytes */
-  if(data->set.max_filesize) {
+  if(data->set.max_filesize && !data->req.ignorebody) {
     size_t wmax = get_max_body_write_len(data, data->set.max_filesize);
     if(nwrite > wmax) {
       nwrite = wmax;
@@ -398,7 +398,7 @@ CURLcode Curl_cwriter_create(struct Curl_cwriter **pwriter,
   result = cwt->do_init(data, writer);
 
 out:
-  *pwriter = result? NULL : writer;
+  *pwriter = result ? NULL : writer;
   if(result)
     free(writer);
   return result;
@@ -575,7 +575,7 @@ bool Curl_creader_def_needs_rewind(struct Curl_easy *data,
 curl_off_t Curl_creader_def_total_length(struct Curl_easy *data,
                                          struct Curl_creader *reader)
 {
-  return reader->next?
+  return reader->next ?
          reader->next->crt->total_length(data, reader->next) : -1;
 }
 
@@ -930,7 +930,7 @@ CURLcode Curl_creader_create(struct Curl_creader **preader,
   result = crt->do_init(data, reader);
 
 out:
-  *preader = result? NULL : reader;
+  *preader = result ? NULL : reader;
   if(result)
     free(reader);
   return result;
@@ -1376,7 +1376,7 @@ out:
 curl_off_t Curl_creader_total_length(struct Curl_easy *data)
 {
   struct Curl_creader *r = data->req.reader_stack;
-  return r? r->crt->total_length(data, r) : -1;
+  return r ? r->crt->total_length(data, r) : -1;
 }
 
 curl_off_t Curl_creader_client_length(struct Curl_easy *data)
@@ -1384,7 +1384,7 @@ curl_off_t Curl_creader_client_length(struct Curl_easy *data)
   struct Curl_creader *r = data->req.reader_stack;
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
-  return r? r->crt->total_length(data, r) : -1;
+  return r ? r->crt->total_length(data, r) : -1;
 }
 
 CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
@@ -1392,7 +1392,7 @@ CURLcode Curl_creader_resume_from(struct Curl_easy *data, curl_off_t offset)
   struct Curl_creader *r = data->req.reader_stack;
   while(r && r->phase != CURL_CR_CLIENT)
     r = r->next;
-  return r? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
+  return r ? r->crt->resume_from(data, r, offset) : CURLE_READ_ERROR;
 }
 
 CURLcode Curl_creader_unpause(struct Curl_easy *data)

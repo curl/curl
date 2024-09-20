@@ -150,10 +150,10 @@ Displays a help text about this program's command line options.
 Spawn the given number of processes to run tests in. This defaults to 0 to run
 tests serially within a single process. Using a number greater than one allows
 multiple tests to run in parallel, speeding up a test run. The optimum number
-is dependent on the system and set of tests to run, but 7 times number of CPU
-cores is a good figure to start with, or 1.3 times number of CPU cores if
-Valgrind is in use. Enabling parallel tests is not recommended in conjunction
-with the -g option.
+is dependent on the system and set of tests to run, but 7 times the number of
+CPU cores is a good figure to start with, or 1.3 times if Valgrind is in use,
+or 5 times for torture tests. Enabling parallel tests is not recommended in
+conjunction with the -g option.
 
 ## `-k`
 

@@ -97,8 +97,8 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
   if(result)
     goto out;
 
-  authority = aprintf("%s%s%s:%d", ipv6_ip?"[":"", hostname,
-                      ipv6_ip?"]":"", port);
+  authority = aprintf("%s%s%s:%d", ipv6_ip ? "[" : "", hostname,
+                      ipv6_ip ?"]" : "", port);
   if(!authority) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;
@@ -185,7 +185,7 @@ connect_sub:
   *done = FALSE;
   if(!ctx->cf_protocol) {
     struct Curl_cfilter *cf_protocol = NULL;
-    int alpn = Curl_conn_cf_is_ssl(cf->next)?
+    int alpn = Curl_conn_cf_is_ssl(cf->next) ?
       cf->conn->proxy_alpn : CURL_HTTP_VERSION_1_1;
 
     /* First time call after the subchain connected */
@@ -195,7 +195,7 @@ connect_sub:
     case CURL_HTTP_VERSION_1_1:
       CURL_TRC_CF(data, cf, "installing subfilter for HTTP/1.1");
       infof(data, "CONNECT tunnel: HTTP/1.%d negotiated",
-            (alpn == CURL_HTTP_VERSION_1_0)? 0 : 1);
+            (alpn == CURL_HTTP_VERSION_1_0) ? 0 : 1);
       result = Curl_cf_h1_proxy_insert_after(cf, data);
       if(result)
         goto out;

@@ -52,8 +52,8 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
 {
   struct connectdata *conn = data->conn;
   timediff_t timeout_ms; /* in milliseconds */
-  timediff_t response_time = (data->set.server_response_timeout)?
-    data->set.server_response_timeout: pp->response_time;
+  timediff_t response_time = (data->set.server_response_timeout) ?
+    data->set.server_response_timeout : pp->response_time;
 
   /* if CURLOPT_SERVER_RESPONSE_TIMEOUT is set, use that to determine
      remaining time, or use pp->response because SERVER_RESPONSE_TIMEOUT is
@@ -113,9 +113,9 @@ CURLcode Curl_pp_statemach(struct Curl_easy *data,
     /* We are receiving and there is data ready in the SSL library */
     rc = 1;
   else
-    rc = Curl_socket_check(pp->sendleft?CURL_SOCKET_BAD:sock, /* reading */
+    rc = Curl_socket_check(pp->sendleft ? CURL_SOCKET_BAD : sock, /* reading */
                            CURL_SOCKET_BAD,
-                           pp->sendleft?sock:CURL_SOCKET_BAD, /* writing */
+                           pp->sendleft ? sock : CURL_SOCKET_BAD, /* writing */
                            interval_ms);
 
   if(block) {

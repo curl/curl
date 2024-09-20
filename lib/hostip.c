@@ -630,7 +630,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
       ipv6_works = 1;
       sclose(s);
     }
-    return (ipv6_works>0)?TRUE:FALSE;
+    return (ipv6_works > 0) ? TRUE : FALSE;
   }
 }
 #endif /* USE_IPV6 */
@@ -1068,7 +1068,7 @@ void Curl_resolv_unlink(struct Curl_easy *data, struct Curl_dns_entry **pdns)
 static void hostcache_unlink_entry(void *entry)
 {
   struct Curl_dns_entry *dns = (struct Curl_dns_entry *) entry;
-  DEBUGASSERT(dns && (dns->refcount>0));
+  DEBUGASSERT(dns && (dns->refcount > 0));
 
   dns->refcount--;
   if(dns->refcount == 0) {

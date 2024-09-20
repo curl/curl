@@ -640,8 +640,8 @@ Curl_ldap_search_s_a(void *ld, char *base, int scope, char *filter,
   }
 
   if(status == LDAP_SUCCESS)
-    status = ldap_search_s(ld, ebase? ebase: "", scope,
-                           efilter? efilter: "(objectclass=*)",
+    status = ldap_search_s(ld, ebase ? ebase: "", scope,
+                           efilter ? efilter: "(objectclass=*)",
                            eattrs, attrsonly, res);
 
   if(eattrs) {

@@ -82,14 +82,16 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile.inc             \
  plan9/src/mkfile
 
-EXTRA_DIST = CHANGES.md COPYING Makefile.dist curl-config.in    \
- RELEASE-NOTES libcurl.pc.in $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
- $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat Dockerfile
+EXTRA_DIST = CHANGES.md COPYING Makefile.dist             \
+ RELEASE-NOTES $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
+ $(PLAN9_DIST) buildconf.bat Dockerfile
 
 CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
  $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)       \
  $(VC14_20_LIBVCXPROJ) $(VC14_20_SRCVCXPROJ)       \
  $(VC14_30_LIBVCXPROJ) $(VC14_30_SRCVCXPROJ)
+
+DISTCLEANFILES = buildinfo.txt
 
 bin_SCRIPTS = curl-config
 

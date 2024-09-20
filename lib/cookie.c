@@ -245,7 +245,7 @@ static const char *get_top_domain(const char * const domain, size_t *outlen)
   if(outlen)
     *outlen = len;
 
-  return first? first: domain;
+  return first ? first : domain;
 }
 
 /* Avoid C1001, an "internal error" with MSVC14 */
@@ -730,8 +730,8 @@ Curl_cookie_add(struct Curl_easy *data,
            */
           CURLofft offt;
           const char *maxage = valuep;
-          offt = curlx_strtoofft((*maxage == '\"')?
-                                 &maxage[1]:&maxage[0], NULL, 10,
+          offt = curlx_strtoofft((*maxage == '\"') ?
+                                 &maxage[1] : &maxage[0], NULL, 10,
                                  &co->expires);
           switch(offt) {
           case CURL_OFFT_FLOW:
@@ -904,7 +904,7 @@ Curl_cookie_add(struct Curl_easy *data,
          * domain can access the variable. Set TRUE when the cookie says
          * .domain.com and to false when the domain is complete www.domain.com
          */
-        co->tailmatch = strcasecompare(ptr, "TRUE")?TRUE:FALSE;
+        co->tailmatch = strcasecompare(ptr, "TRUE") ? TRUE : FALSE;
         break;
       case 2:
         /* The file format allows the path field to remain not filled in */
@@ -1171,7 +1171,7 @@ Curl_cookie_add(struct Curl_easy *data,
     /* Only show this when NOT reading the cookies from a file */
     infof(data, "%s cookie %s=\"%s\" for domain %s, path %s, "
           "expire %" FMT_OFF_T,
-          replace_old?"Replaced":"Added", co->name, co->value,
+          replace_old ? "Replaced":"Added", co->name, co->value,
           co->domain, co->path, co->expires);
 
   if(!replace_old) {
@@ -1400,7 +1400,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
 
   while(co) {
     /* if the cookie requires we are secure we must only continue if we are! */
-    if(co->secure?secure:TRUE) {
+    if(co->secure ? secure : TRUE) {
 
       /* now check if the domain is correct */
       if(!co->domain ||
@@ -1471,7 +1471,7 @@ struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
     /* remake the linked list order according to the new order */
 
     mainco = array[0]; /* start here */
-    for(i = 0; i<matches-1; i++)
+    for(i = 0; i < matches-1; i++)
       array[i]->next = array[i + 1];
     array[matches-1]->next = NULL; /* terminate the list */
 
@@ -1592,19 +1592,19 @@ static char *get_netscape_format(const struct Cookie *co)
     "%" FMT_OFF_T "\t"   /* expires */
     "%s\t"   /* name */
     "%s",    /* value */
-    co->httponly?"#HttpOnly_":"",
+    co->httponly ? "#HttpOnly_" : "",
     /*
      * Make sure all domains are prefixed with a dot if they allow
      * tailmatching. This is Mozilla-style.
      */
-    (co->tailmatch && co->domain && co->domain[0] != '.')? ".":"",
-    co->domain?co->domain:"unknown",
-    co->tailmatch?"TRUE":"FALSE",
-    co->path?co->path:"/",
-    co->secure?"TRUE":"FALSE",
+    (co->tailmatch && co->domain && co->domain[0] != '.') ? "." : "",
+    co->domain ? co->domain : "unknown",
+    co->tailmatch ? "TRUE" : "FALSE",
+    co->path ? co->path : "/",
+    co->secure ? "TRUE" : "FALSE",
     co->expires,
     co->name,
-    co->value?co->value:"");
+    co->value ? co->value : "");
 }
 
 /*

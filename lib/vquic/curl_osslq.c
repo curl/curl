@@ -175,7 +175,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
   switch(addr->family) {
   case AF_INET: {
     struct sockaddr_in * const sin =
-      (struct sockaddr_in * const)(void *)&addr->sa_addr;
+      (struct sockaddr_in * const)(void *)&addr->curl_sa_addr;
     if(!BIO_ADDR_rawmake(ba, AF_INET, &sin->sin_addr,
                          sizeof(sin->sin_addr), sin->sin_port)) {
       goto out;
@@ -186,7 +186,7 @@ static CURLcode make_bio_addr(BIO_ADDR **pbio_addr,
 #ifdef USE_IPV6
   case AF_INET6: {
     struct sockaddr_in6 * const sin =
-      (struct sockaddr_in6 * const)(void *)&addr->sa_addr;
+      (struct sockaddr_in6 * const)(void *)&addr->curl_sa_addr;
     if(!BIO_ADDR_rawmake(ba, AF_INET6, &sin->sin6_addr,
                          sizeof(sin->sin6_addr), sin->sin6_port)) {
     }
@@ -1037,7 +1037,7 @@ cb_h3_read_req_body(nghttp3_conn *conn, int64_t stream_id,
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] read req body -> "
               "%d vecs%s with %zu (buffered=%zu, left=%" FMT_OFF_T ")",
               stream->s.id, (int)nvecs,
-              *pflags == NGHTTP3_DATA_FLAG_EOF?" EOF":"",
+              *pflags == NGHTTP3_DATA_FLAG_EOF ? " EOF" : "",
               nwritten, Curl_bufq_len(&stream->sendbuf),
               stream->upload_left);
   return (nghttp3_ssize)nvecs;
@@ -1531,7 +1531,7 @@ static CURLcode h3_send_streams(struct Curl_cfilter *cf,
     for(i = 0; (i < n) && !blocked; ++i) {
       /* Without stream->s.ssl, we closed that already, so
        * pretend the write did succeed. */
-      uint64_t flags = (eos && ((i + 1) == n))? SSL_WRITE_FLAG_CONCLUDE : 0;
+      uint64_t flags = (eos && ((i + 1) == n)) ? SSL_WRITE_FLAG_CONCLUDE : 0;
       written = vec[i].len;
       ok = !s->ssl || SSL_write_ex2(s->ssl, vec[i].base, vec[i].len, flags,
                                    &written);
@@ -1985,7 +1985,7 @@ static ssize_t cf_osslq_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 out:
   result = check_and_set_expiry(cf, data);
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_send(len=%zu) -> %zd, %d",
-              stream? stream->s.id : -1, len, nwritten, *err);
+              stream ? stream->s.id : -1, len, nwritten, *err);
   CF_DATA_RESTORE(cf, save);
   return nwritten;
 }
@@ -2002,7 +2002,7 @@ static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
     failf(data,
           "HTTP/3 stream %" FMT_PRId64 " reset by server",
           stream->s.id);
-    *err = data->req.bytecount? CURLE_PARTIAL_FILE : CURLE_HTTP3;
+    *err = data->req.bytecount ? CURLE_PARTIAL_FILE : CURLE_HTTP3;
     goto out;
   }
   else if(!stream->resp_hds_complete) {
@@ -2096,7 +2096,7 @@ out:
     }
   }
   CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] cf_recv(len=%zu) -> %zd, %d",
-              stream? stream->s.id : -1, len, nread, *err);
+              stream ? stream->s.id : -1, len, nread, *err);
   CF_DATA_RESTORE(cf, save);
   return nread;
 }
@@ -2207,7 +2207,7 @@ static bool cf_osslq_conn_is_alive(struct Curl_cfilter *cf,
     *input_pending = FALSE;
     result = cf_progress_ingress(cf, data);
     CURL_TRC_CF(data, cf, "is_alive, progress ingress -> %d", result);
-    alive = result? FALSE : TRUE;
+    alive = result ? FALSE : TRUE;
   }
 
 out:
@@ -2266,7 +2266,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
     }
     /* we report avail + in_use */
     v += CONN_INUSE(cf->conn);
-    *pres1 = (v > INT_MAX)? INT_MAX : (int)v;
+    *pres1 = (v > INT_MAX) ? INT_MAX : (int)v;
 #else
     *pres1 = 100;
 #endif
@@ -2276,7 +2276,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
   case CF_QUERY_CONNECT_REPLY_MS:
     if(ctx->got_first_byte) {
       timediff_t ms = Curl_timediff(ctx->first_byte_at, ctx->started_at);
-      *pres1 = (ms < INT_MAX)? (int)ms : INT_MAX;
+      *pres1 = (ms < INT_MAX) ? (int)ms : INT_MAX;
     }
     else
       *pres1 = -1;
@@ -2296,7 +2296,7 @@ static CURLcode cf_osslq_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -2351,7 +2351,7 @@ CURLcode Curl_cf_osslq_create(struct Curl_cfilter **pcf,
   cf->next = udp_cf;
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     if(udp_cf)
       Curl_conn_cf_discard_sub(cf, udp_cf, data, TRUE);
@@ -2365,7 +2365,7 @@ bool Curl_conn_is_osslq(const struct Curl_easy *data,
                         const struct connectdata *conn,
                         int sockindex)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for(; cf; cf = cf->next) {

@@ -209,7 +209,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
   struct gss_channel_bindings_struct chan;
   size_t base64_sz = 0;
   struct sockaddr_in *remote_addr =
-    (struct sockaddr_in *)(void *)&conn->remote_addr->sa_addr;
+    (struct sockaddr_in *)(void *)&conn->remote_addr->curl_sa_addr;
   char *stringp;
 
   if(getsockname(conn->sock[FIRSTSOCKET],
@@ -623,7 +623,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
   size_t cmd_size = 0;
   CURLcode error;
   enum protection_level prot_level = conn->data_prot;
-  bool iscmd = (prot_level == PROT_CMD)?TRUE:FALSE;
+  bool iscmd = (prot_level == PROT_CMD) ? TRUE : FALSE;
 
   DEBUGASSERT(prot_level > PROT_NONE && prot_level < PROT_LAST);
 
@@ -655,7 +655,7 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
 
       socket_write(data, fd, cmd_buffer, cmd_size);
       socket_write(data, fd, "\r\n", 2);
-      infof(data, "Send: %s%s", prot_level == PROT_PRIVATE?enc:mic,
+      infof(data, "Send: %s%s", prot_level == PROT_PRIVATE ? enc : mic,
             cmd_buffer);
       free(cmd_buffer);
     }

@@ -177,8 +177,8 @@ static void cw_get_writefunc(struct Curl_easy *data, cw_out_type otype,
     *pmin_write = 0;
     break;
   case CW_OUT_HDS:
-    *pwcb = data->set.fwrite_header? data->set.fwrite_header :
-             (data->set.writeheader? data->set.fwrite_func : NULL);
+    *pwcb = data->set.fwrite_header ? data->set.fwrite_header :
+             (data->set.writeheader ? data->set.fwrite_func : NULL);
     *pwcb_data = data->set.writeheader;
     *pmax_write = 0; /* do not chunk-write headers, write them as they are */
     *pmin_write = 0;
@@ -218,12 +218,12 @@ static CURLcode cw_out_ptr_flush(struct cw_out_ctx *ctx,
   while(blen && !ctx->paused) {
     if(!flush_all && blen < min_write)
       break;
-    wlen = max_write? CURLMIN(blen, max_write) : blen;
+    wlen = max_write ? CURLMIN(blen, max_write) : blen;
     Curl_set_in_callback(data, TRUE);
     nwritten = wcb((char *)buf, 1, wlen, wcb_data);
     Curl_set_in_callback(data, FALSE);
     CURL_TRC_WRITE(data, "cw_out, wrote %zu %s bytes -> %zu",
-                   wlen, (otype == CW_OUT_BODY)? "body" : "header",
+                   wlen, (otype == CW_OUT_BODY) ? "body" : "header",
                    nwritten);
     if(CURL_WRITEFUNC_PAUSE == nwritten) {
       if(data->conn && data->conn->handler->flags & PROTOPT_NONETWORK) {
@@ -404,7 +404,7 @@ static CURLcode cw_out_write(struct Curl_easy *data,
   CURLcode result;
   bool flush_all;
 
-  flush_all = (type & CLIENTWRITE_EOS)? TRUE:FALSE;
+  flush_all = (type & CLIENTWRITE_EOS) ? TRUE : FALSE;
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     result = cw_out_do_write(ctx, data, CW_OUT_BODY, flush_all, buf, blen);
@@ -431,7 +431,7 @@ bool Curl_cw_out_is_paused(struct Curl_easy *data)
     return FALSE;
 
   ctx = (struct cw_out_ctx *)cw_out;
-  CURL_TRC_WRITE(data, "cw-out is%spaused", ctx->paused? "" : " not");
+  CURL_TRC_WRITE(data, "cw-out is%spaused", ctx->paused ? "" : " not");
   return ctx->paused;
 }
 

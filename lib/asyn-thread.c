@@ -286,7 +286,7 @@ static CURLcode getaddrinfo_complete(struct Curl_easy *data)
  * and wait on it.
  */
 static
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
 DWORD
 #else
 unsigned int
@@ -311,7 +311,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
   rc = Curl_getaddrinfo_ex(tsd->hostname, service, &tsd->hints, &tsd->res);
 
   if(rc) {
-    tsd->sock_error = SOCKERRNO?SOCKERRNO:rc;
+    tsd->sock_error = SOCKERRNO ? SOCKERRNO : rc;
     if(tsd->sock_error == 0)
       tsd->sock_error = RESOLVER_ENOMEM;
   }
@@ -354,7 +354,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
  * gethostbyname_thread() resolves a name and then exits.
  */
 static
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
 DWORD
 #else
 unsigned int
@@ -728,7 +728,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
 
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = pf;
-  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
+  hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
     SOCK_STREAM : SOCK_DGRAM;
 
   reslv->start = Curl_now();

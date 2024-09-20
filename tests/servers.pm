@@ -2587,15 +2587,24 @@ sub startservers {
                 if(stopserver('https')) {
                     return ("failed stopping HTTPS server with different cert", 3);
                 }
+                # also stop http server, we do not know which state it is in
+                if($run{'http'} && stopserver('http')) {
+                    return ("failed stopping HTTP server", 3);
+                }
             }
             if($run{'https'} &&
                !responsive_http_server("https", $verbose, 0,
                                        protoport('https'))) {
-               if(stopserver('https')) {
-                   return ("failed stopping unresponsive HTTPS server", 3);
-               }
+                if(stopserver('https')) {
+                    return ("failed stopping unresponsive HTTPS server", 3);
+                }
+                # also stop http server, we do not know which state it is in
+                if($run{'http'} && stopserver('http')) {
+                    return ("failed stopping unresponsive HTTP server", 3);
+                }
             }
-            if($run{'http'} &&
+            # check a running http server if we not already checked https
+            if($run{'http'} && !$run{'https'} &&
                !responsive_http_server("http", $verbose, 0,
                                        protoport('http'))) {
                 if(stopserver('http')) {

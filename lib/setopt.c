@@ -193,7 +193,7 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
     size_t tlen;
 
     str = strchr(str, ',');
-    tlen = str? (size_t) (str - token): strlen(token);
+    tlen = str ? (size_t) (str - token) : strlen(token);
     if(tlen) {
       const struct Curl_handler *h = Curl_getn_scheme_handler(token, tlen);
 
@@ -2319,7 +2319,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
-        data->psl = data->multi? &data->multi->psl: NULL;
+        data->psl = data->multi ? &data->multi->psl : NULL;
 #endif
 
       data->share->dirty--;
@@ -2337,7 +2337,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 
       data->share->dirty++;
 
-      if(data->share->specifier & (1<< CURL_LOCK_DATA_DNS)) {
+      if(data->share->specifier & (1 << CURL_LOCK_DATA_DNS)) {
         /* use shared host cache */
         data->dns.hostcache = &data->share->hostcache;
         data->dns.hostcachetype = HCACHE_SHARED;
@@ -3236,7 +3236,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   }
 #endif
   case CURLOPT_QUICK_EXIT:
-    data->set.quick_exit = (0 != va_arg(param, long)) ? 1L:0L;
+    data->set.quick_exit = (0 != va_arg(param, long)) ? 1L : 0L;
     break;
   default:
     /* unknown tag and its companion, just ignore: */

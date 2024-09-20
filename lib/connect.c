@@ -139,7 +139,7 @@ timediff_t Curl_timeleft(struct Curl_easy *data,
       return ctimeleft_ms; /* no general timeout, this is it */
   }
   /* return minimal time left or max amount already expired */
-  return (ctimeleft_ms < timeleft_ms)? ctimeleft_ms : timeleft_ms;
+  return (ctimeleft_ms < timeleft_ms) ? ctimeleft_ms : timeleft_ms;
 }
 
 void Curl_shutdown_start(struct Curl_easy *data, int sockindex,
@@ -172,7 +172,7 @@ timediff_t Curl_shutdown_timeleft(struct connectdata *conn, int sockindex,
   }
   left_ms = conn->shutdown.timeout_ms -
             Curl_timediff(*nowp, conn->shutdown.start[sockindex]);
-  return left_ms? left_ms : -1;
+  return left_ms ? left_ms : -1;
 }
 
 timediff_t Curl_conn_shutdown_timeleft(struct connectdata *conn,
@@ -414,9 +414,9 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   if(!baller)
     return CURLE_OUT_OF_MEMORY;
 
-  baller->name = ((ai_family == AF_INET)? "ipv4" : (
+  baller->name = ((ai_family == AF_INET) ? "ipv4" : (
 #ifdef USE_IPV6
-                  (ai_family == AF_INET6)? "ipv6" :
+                  (ai_family == AF_INET6) ? "ipv6" :
 #endif
                   "ip"));
   baller->cf_create = cf_create;
@@ -424,7 +424,7 @@ static CURLcode eyeballer_new(struct eyeballer **pballer,
   baller->ai_family = ai_family;
   baller->primary = primary;
   baller->delay_ms = delay_ms;
-  baller->timeoutms = addr_next_match(baller->addr, baller->ai_family)?
+  baller->timeoutms = addr_next_match(baller->addr, baller->ai_family) ?
     USETIME(timeout_ms) : timeout_ms;
   baller->timeout_id = timeout_id;
   baller->result = CURLE_COULDNT_CONNECT;
@@ -1089,7 +1089,7 @@ static CURLcode cf_he_query(struct Curl_cfilter *cf,
     }
   }
 
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -1417,7 +1417,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   ctx = NULL;
 
 out:
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   free(ctx);
   return result;
 }

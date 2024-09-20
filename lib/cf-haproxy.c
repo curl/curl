@@ -93,7 +93,7 @@ static CURLcode cf_haproxy_date_out_set(struct Curl_cfilter*cf,
     client_ip = ipquad.local_ip;
 
   result = Curl_dyn_addf(&ctx->data_out, "PROXY %s %s %s %i %i\r\n",
-                         is_ipv6? "TCP6" : "TCP4",
+                         is_ipv6 ? "TCP6" : "TCP4",
                          client_ip, ipquad.remote_ip,
                          ipquad.local_port, ipquad.remote_port);
 
@@ -231,7 +231,7 @@ static CURLcode cf_haproxy_create(struct Curl_cfilter **pcf,
 
 out:
   cf_haproxy_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 

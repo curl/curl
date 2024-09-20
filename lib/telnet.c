@@ -671,7 +671,7 @@ static void printsub(struct Curl_easy *data,
   if(data->set.verbose) {
     unsigned int i = 0;
     if(direction) {
-      infof(data, "%s IAC SB ", (direction == '<')? "RCVD":"SENT");
+      infof(data, "%s IAC SB ", (direction == '<') ? "RCVD" : "SENT");
       if(length >= 3) {
         int j;
 
@@ -721,8 +721,8 @@ static void printsub(struct Curl_easy *data,
     switch(pointer[0]) {
     case CURL_TELOPT_NAWS:
       if(length > 4)
-        infof(data, "Width: %d ; Height: %d", (pointer[1]<<8) | pointer[2],
-              (pointer[3]<<8) | pointer[4]);
+        infof(data, "Width: %d ; Height: %d", (pointer[1] << 8) | pointer[2],
+              (pointer[3] << 8) | pointer[4]);
       break;
     default:
       switch(pointer[1]) {

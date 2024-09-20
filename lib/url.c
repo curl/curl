@@ -3529,7 +3529,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
     infof(data, "Re-using existing connection with %s %s",
-          conn->bits.proxy?"proxy":"host",
+          conn->bits.proxy ? "proxy" : "host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);

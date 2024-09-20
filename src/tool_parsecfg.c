@@ -156,7 +156,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       option = line;
 
       /* the option starts with a dash? */
-      dashed_option = option[0]=='-'?TRUE:FALSE;
+      dashed_option = (option[0] == '-') ? TRUE : FALSE;
 
       while(*line && !ISSPACE(*line) && !ISSEP(*line, dashed_option))
         line++;

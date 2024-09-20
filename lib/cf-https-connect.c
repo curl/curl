@@ -275,7 +275,7 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     }
     else if(ctx->h21_baller.enabled)
       cf_hc_baller_init(&ctx->h21_baller, cf, data, "h21",
-                       cf->conn->transport);
+                        cf->conn->transport);
     ctx->state = CF_HC_CONNECT;
     FALLTHROUGH();
 
@@ -306,8 +306,8 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
        (!ctx->h21_baller.enabled || ctx->h21_baller.result)) {
       /* both failed or disabled. we give up */
       CURL_TRC_CF(data, cf, "connect, all failed");
-      result = ctx->result = ctx->h3_baller.enabled?
-                              ctx->h3_baller.result : ctx->h21_baller.result;
+      result = ctx->result = ctx->h3_baller.enabled ?
+        ctx->h3_baller.result : ctx->h21_baller.result;
       ctx->state = CF_HC_FAILURE;
       goto out;
     }
@@ -420,13 +420,13 @@ static struct curltime cf_get_max_baller_time(struct Curl_cfilter *cf,
 
   memset(&tmax, 0, sizeof(tmax));
   memset(&t, 0, sizeof(t));
-  cfb = ctx->h21_baller.enabled? ctx->h21_baller.cf : NULL;
+  cfb = ctx->h21_baller.enabled ? ctx->h21_baller.cf : NULL;
   if(cfb && !cfb->cft->query(cfb, data, query, NULL, &t)) {
     if((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
       tmax = t;
   }
   memset(&t, 0, sizeof(t));
-  cfb = ctx->h3_baller.enabled? ctx->h3_baller.cf : NULL;
+  cfb = ctx->h3_baller.enabled ? ctx->h3_baller.cf : NULL;
   if(cfb && !cfb->cft->query(cfb, data, query, NULL, &t)) {
     if((t.tv_sec || t.tv_usec) && Curl_timediff_us(t, tmax) > 0)
       tmax = t;
@@ -464,7 +464,7 @@ static CURLcode cf_hc_query(struct Curl_cfilter *cf,
       break;
     }
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -553,7 +553,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
   cf_hc_reset(cf, data);
 
 out:
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   free(ctx);
   return result;
 }

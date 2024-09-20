@@ -491,7 +491,7 @@ bool Curl_cpool_conn_now_idle(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   unsigned int maxconnects = !data->multi->maxconnects ?
-    data->multi->num_easy * 4: data->multi->maxconnects;
+    data->multi->num_easy * 4 : data->multi->maxconnects;
   struct connectdata *oldest_idle = NULL;
   struct cpool *cpool = cpool_get_instance(data);
   bool kept = TRUE;
@@ -820,7 +820,7 @@ void Curl_cpool_disconnect(struct Curl_easy *data,
   if(data->multi) {
     /* Add it to the multi's cpool for shutdown handling */
     infof(data, "%s connection #%" FMT_OFF_T,
-          aborted? "closing" : "shutting down", conn->connection_id);
+          aborted ? "closing" : "shutting down", conn->connection_id);
     cpool_discard_conn(&data->multi->cpool, data, conn, aborted);
   }
   else {
@@ -1180,7 +1180,7 @@ static void cpool_shutdown_all(struct cpool *cpool,
     timespent = Curl_timediff(Curl_now(), started);
     if(timespent >= (timediff_t)timeout_ms) {
       DEBUGF(infof(data, "cpool shutdown %s",
-                   (timeout_ms > 0)? "timeout" : "best effort done"));
+                   (timeout_ms > 0) ? "timeout" : "best effort done"));
       break;
     }
 

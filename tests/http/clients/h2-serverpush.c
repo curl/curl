@@ -52,7 +52,7 @@ void dump(const char *text, unsigned char *ptr, size_t size,
   fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
@@ -73,7 +73,7 @@ void dump(const char *text, unsigned char *ptr, size_t size,
         break;
       }
       fprintf(stderr, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
@@ -183,7 +183,7 @@ static int server_push_callback(CURL *parent,
   fprintf(stderr, "**** push callback approves stream %u, got %lu headers!\n",
           count, (unsigned long)num_headers);
 
-  for(i = 0; i<num_headers; i++) {
+  for(i = 0; i < num_headers; i++) {
     headp = curl_pushheader_bynum(headers, i);
     fprintf(stderr, "**** header %lu: %s\n", (unsigned long)i, headp);
   }

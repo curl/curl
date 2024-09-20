@@ -366,10 +366,10 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
     /* move through the descriptors and ask for processing on them */
     for(i = 0; i < num; i++)
       ares_process_fd((ares_channel)data->state.async.resolver,
-                      (pfd[i].revents & (POLLRDNORM|POLLIN))?
-                      pfd[i].fd:ARES_SOCKET_BAD,
-                      (pfd[i].revents & (POLLWRNORM|POLLOUT))?
-                      pfd[i].fd:ARES_SOCKET_BAD);
+                      (pfd[i].revents & (POLLRDNORM|POLLIN)) ?
+                      pfd[i].fd : ARES_SOCKET_BAD,
+                      (pfd[i].revents & (POLLWRNORM|POLLOUT)) ?
+                      pfd[i].fd : ARES_SOCKET_BAD);
   }
   return nfds;
 }
@@ -801,7 +801,7 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
       }
 #endif /* CURLRES_IPV6 */
       hints.ai_family = pf;
-      hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP)?
+      hints.ai_socktype = (data->conn->transport == TRNSPRT_TCP) ?
         SOCK_STREAM : SOCK_DGRAM;
       /* Since the service is a numerical one, set the hint flags
        * accordingly to save a call to getservbyname in inside C-Ares

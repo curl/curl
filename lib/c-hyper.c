@@ -274,7 +274,7 @@ static CURLcode status_line(struct Curl_easy *data,
   /* We need to set 'httpcodeq' for functions that check the response code in
      a single place. */
   data->req.httpcode = http_status;
-  data->req.httpversion = http_version == HYPER_HTTP_VERSION_1_1? 11 :
+  data->req.httpversion = http_version == HYPER_HTTP_VERSION_1_1 ? 11 :
                           (http_version == HYPER_HTTP_VERSION_2 ? 20 : 10);
   if(data->state.hconnect)
     /* CONNECT */
@@ -481,7 +481,7 @@ CURLcode Curl_hyper_stream(struct Curl_easy *data,
         goto out;
 
       k->deductheadercount =
-        (100 <= http_status && 199 >= http_status)?k->headerbytecount:0;
+        (100 <= http_status && 199 >= http_status) ? k->headerbytecount : 0;
 #ifdef USE_WEBSOCKETS
       if(k->upgr101 == UPGR101_WS) {
         if(http_status == 101) {
@@ -1035,7 +1035,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   p_accept = Curl_checkheaders(data,
-                               STRCONST("Accept"))?NULL:"Accept: */*\r\n";
+                               STRCONST("Accept")) ? NULL : "Accept: */*\r\n";
   if(p_accept) {
     result = Curl_hyper_header(data, headers, p_accept);
     if(result)

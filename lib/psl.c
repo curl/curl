@@ -81,7 +81,7 @@ const psl_ctx_t *Curl_psl_use(struct Curl_easy *easy)
       psl = psl_latest(NULL);
       dynamic = psl != NULL;
       /* Take care of possible time computation overflow. */
-      expires = now < TIME_T_MAX - PSL_TTL? now + PSL_TTL: TIME_T_MAX;
+      expires = now < TIME_T_MAX - PSL_TTL ? now + PSL_TTL : TIME_T_MAX;
 
       /* Only get the built-in PSL if we do not already have the "latest". */
       if(!psl && !pslcache->dynamic)

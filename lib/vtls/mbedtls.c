@@ -36,13 +36,6 @@
 /* Define this to enable lots of debugging for mbedTLS */
 /* #define MBEDTLS_DEBUG */
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-/* mbedTLS (as of v3.5.1) has a duplicate function declaration
-   in its public headers. Disable the warning that detects it. */
-#pragma GCC diagnostic ignored "-Wredundant-decls"
-#endif
-
 #include <mbedtls/version.h>
 #if MBEDTLS_VERSION_NUMBER >= 0x02040000
 #include <mbedtls/net_sockets.h>
@@ -61,10 +54,6 @@
 #  ifdef MBEDTLS_DEBUG
 #    include <mbedtls/debug.h>
 #  endif
-#endif
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
 #endif
 
 #include "cipher_suite.h"
@@ -638,7 +627,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     ret = mbedtls_x509_crt_parse(&backend->cacert, newblob,
                                  ca_info_blob->len + 1);
     free(newblob);
-    if(ret<0) {
+    if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error importing ca cert blob - mbedTLS: (-0x%04X) %s",
             -ret, errorbuf);
@@ -650,7 +639,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef MBEDTLS_FS_IO
     ret = mbedtls_x509_crt_parse_file(&backend->cacert, ssl_cafile);
 
-    if(ret<0) {
+    if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading ca cert file %s - mbedTLS: (-0x%04X) %s",
             ssl_cafile, -ret, errorbuf);
@@ -666,7 +655,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 #ifdef MBEDTLS_FS_IO
     ret = mbedtls_x509_crt_parse_path(&backend->cacert, ssl_capath);
 
-    if(ret<0) {
+    if(ret < 0) {
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "Error reading ca cert path %s - mbedTLS: (-0x%04X) %s",
             ssl_capath, -ret, errorbuf);
@@ -911,7 +900,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                               &backend->clicert, &backend->pk);
   }
 
-  if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni?
+  if(mbedtls_ssl_set_hostname(&backend->ssl, connssl->peer.sni ?
                               connssl->peer.sni : connssl->peer.hostname)) {
     /* mbedtls_ssl_set_hostname() sets the name to use in CN/SAN checks and
        the name to set in the SNI extension. So even if curl connects to a
@@ -975,8 +964,8 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
 #ifndef CURL_DISABLE_PROXY
-  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf)?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
+  const char * const pinnedpubkey = Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char * const pinnedpubkey = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -1103,7 +1092,7 @@ pinnedpubkey_error:
     const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
     Curl_alpn_set_negotiated(cf, data, (const unsigned char *)proto,
-                             proto? strlen(proto) : 0);
+                             proto ? strlen(proto) : 0);
   }
 #endif
 
@@ -1186,7 +1175,7 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #ifdef TLS13_SUPPORT
       || (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
 #endif
-      )? CURLE_AGAIN : CURLE_SEND_ERROR;
+      ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
     ret = -1;
   }
 
@@ -1357,8 +1346,8 @@ static size_t mbedtls_version(char *buffer, size_t size)
 #ifdef MBEDTLS_VERSION_C
   /* if mbedtls_version_get_number() is available it is better */
   unsigned int version = mbedtls_version_get_number();
-  return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version>>24,
-                   (version>>16)&0xff, (version>>8)&0xff);
+  return msnprintf(buffer, size, "mbedTLS/%u.%u.%u", version >> 24,
+                   (version >> 16) & 0xff, (version >> 8) & 0xff);
 #else
   return msnprintf(buffer, size, "mbedTLS/%s", MBEDTLS_VERSION_STRING);
 #endif
@@ -1452,11 +1441,10 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
 
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
-
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);

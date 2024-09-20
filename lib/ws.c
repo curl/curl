@@ -117,20 +117,20 @@ static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
   case 1:
     CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s]", msg,
                    ws_frame_name_of_op(dec->head[0]),
-                   (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL");
+                   (dec->head[0] & WSBIT_FIN) ? "" : " NON-FINAL");
     break;
   default:
     if(dec->head_len < dec->head_total) {
       CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s](%d/%d)", msg,
                      ws_frame_name_of_op(dec->head[0]),
-                     (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+                     (dec->head[0] & WSBIT_FIN) ? "" : " NON-FINAL",
                      dec->head_len, dec->head_total);
     }
     else {
       CURL_TRC_WRITE(data, "websocket, decoded %s [%s%s payload=%"
                      FMT_OFF_T "/%" FMT_OFF_T "]",
                      msg, ws_frame_name_of_op(dec->head[0]),
-                     (dec->head[0] & WSBIT_FIN)? "" : " NON-FINAL",
+                     (dec->head[0] & WSBIT_FIN) ? "" : " NON-FINAL",
                      dec->payload_offset, dec->payload_len);
     }
     break;
@@ -285,7 +285,7 @@ static CURLcode ws_dec_pass_payload(struct ws_decoder *dec,
                    FMT_OFF_T " remain", nwritten, remain);
   }
 
-  return remain? CURLE_AGAIN : CURLE_OK;
+  return remain ? CURLE_AGAIN : CURLE_OK;
 }
 
 static CURLcode ws_dec_pass(struct ws_decoder *dec,
@@ -496,7 +496,7 @@ static void ws_enc_info(struct ws_encoder *enc, struct Curl_easy *data,
         msg, ws_frame_name_of_op(enc->firstbyte),
         (enc->firstbyte & WSBIT_OPCODE_MASK) == WSBIT_OPCODE_CONT ?
         " CONT" : "",
-        (enc->firstbyte & WSBIT_FIN)? "" : " NON-FIN",
+        (enc->firstbyte & WSBIT_FIN) ? "" : " NON-FIN",
         enc->payload_len - enc->payload_remain, enc->payload_len);
 }
 
@@ -1021,7 +1021,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
     while(Curl_bufq_peek(&ws->sendbuf, &out, &outlen)) {
       if(blocking) {
         result = ws_send_raw_blocking(data, ws, (char *)out, outlen);
-        n = result? 0 : outlen;
+        n = result ? 0 : outlen;
       }
       else if(data->set.connect_only || Curl_is_in_callback(data))
         result = Curl_senddata(data, out, outlen, &n);
@@ -1080,7 +1080,7 @@ static CURLcode ws_send_raw_blocking(CURL *data, struct websocket *ws,
       if(sock == CURL_SOCKET_BAD)
         return CURLE_SEND_ERROR;
       ev = Curl_socket_check(CURL_SOCKET_BAD, CURL_SOCKET_BAD, sock,
-                             left_ms? left_ms : 500);
+                             left_ms ? left_ms : 500);
       if(ev < 0) {
         failf(data, "Error while waiting for socket becoming writable");
         return CURLE_SEND_ERROR;

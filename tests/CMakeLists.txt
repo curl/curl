@@ -21,8 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(CMAKE_UNITY_BUILD OFF)
-
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
   set(TEST_NGHTTPX "nghttpx")
@@ -94,30 +92,11 @@ use vars qw(
 1;
 ")
 
-# Save build info for test runner to pick up and log
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.
-configure.tool: cmake
-configure.command: ${CMAKE_COMMAND}
-configure.version: ${CMAKE_VERSION}
-configure.os: ${CMAKE_SYSTEM}
-configure.args:${_cmake_args}
-configure.generator: ${CMAKE_GENERATOR}
-configure.make: ${CMAKE_MAKE_PROGRAM}
-host.os: ${CMAKE_HOST_SYSTEM_NAME}
-host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
-target: ${CMAKE_C_COMPILER_TARGET}
-target.os: ${CMAKE_SYSTEM_NAME}
-target.cpu: ${CMAKE_SYSTEM_PROCESSOR}
-target.flags:${_target_flags}
-compiler: ${CMAKE_C_COMPILER_ID}
-compiler.version: ${CMAKE_C_COMPILER_VERSION}
-")
-
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")
 # ~flaky means that it ignores results of tests using the flaky keyword
 add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
 add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
-add_runtests(test-torture   "-a -t")
+add_runtests(test-torture   "-a -t -j2")
 add_runtests(test-event     "-a -e")

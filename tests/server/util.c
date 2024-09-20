@@ -277,7 +277,7 @@ curl_off_t our_getpid(void)
   curl_off_t pid;
 
   pid = (curl_off_t)getpid();
-#if defined(_WIN32) || defined(_WIN32)
+#if defined(_WIN32)
   /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
    * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
    *   h=b5e1003722cb14235c4f166be72c09acdffc62ea
@@ -497,7 +497,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 #ifdef _WIN32_WCE
 static DWORD thread_main_id = 0;
 #else
@@ -562,15 +562,22 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
   logmsg("ctrl_event_handler: %lu", dwCtrlType);
   switch(dwCtrlType) {
 #ifdef SIGINT
-    case CTRL_C_EVENT: signum = SIGINT; break;
+  case CTRL_C_EVENT:
+    signum = SIGINT;
+    break;
 #endif
 #ifdef SIGTERM
-    case CTRL_CLOSE_EVENT: signum = SIGTERM; break;
+  case CTRL_CLOSE_EVENT:
+    signum = SIGTERM;
+    break;
 #endif
 #ifdef SIGBREAK
-    case CTRL_BREAK_EVENT: signum = SIGBREAK; break;
+  case CTRL_BREAK_EVENT:
+    signum = SIGBREAK;
+    break;
 #endif
-    default: return FALSE;
+  default:
+    return FALSE;
   }
   if(signum) {
     logmsg("ctrl_event_handler: %lu -> %d", dwCtrlType, signum);
@@ -580,7 +587,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_APP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -595,9 +602,13 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
   if(hwnd == hidden_main_window) {
     switch(uMsg) {
 #ifdef SIGTERM
-      case WM_CLOSE: signum = SIGTERM; break;
+      case WM_CLOSE:
+        signum = SIGTERM;
+        break;
 #endif
-      case WM_DESTROY: PostQuitMessage(0); break;
+    case WM_DESTROY:
+      PostQuitMessage(0);
+      break;
     }
     if(signum) {
       logmsg("main_window_proc: %d -> %d", uMsg, signum);
@@ -671,7 +682,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   sa.sa_handler = handler;
   sigemptyset(&sa.sa_mask);
   sigaddset(&sa.sa_mask, signum);
-  sa.sa_flags = restartable? SA_RESTART: 0;
+  sa.sa_flags = restartable ? SA_RESTART : 0;
 
   if(sigaction(signum, &sa, &oldsa))
     return SIG_ERR;
@@ -743,7 +754,7 @@ void install_signal_handlers(bool keep_sigalrm)
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 
-#ifndef CURL_WINDOWS_APP
+#ifndef CURL_WINDOWS_UWP
   {
 #ifdef _WIN32_WCE
     typedef HANDLE curl_win_thread_handle_t;
@@ -798,7 +809,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#ifndef CURL_WINDOWS_APP
+#ifndef CURL_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {

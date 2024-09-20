@@ -866,8 +866,8 @@ cr_connect_common(struct Curl_cfilter *cf,
     wants_write = rustls_connection_wants_write(rconn) ||
                   backend->plain_out_buffered;
     DEBUGASSERT(wants_read || wants_write);
-    writefd = wants_write?sockfd:CURL_SOCKET_BAD;
-    readfd = wants_read?sockfd:CURL_SOCKET_BAD;
+    writefd = wants_write ? sockfd : CURL_SOCKET_BAD;
+    readfd = wants_read ? sockfd : CURL_SOCKET_BAD;
 
     /* check allowed time left */
     timeout_ms = Curl_timeleft(data, NULL, TRUE);
@@ -878,7 +878,7 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    socket_check_timeout = blocking?timeout_ms:0;
+    socket_check_timeout = blocking ? timeout_ms : 0;
 
     what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                              socket_check_timeout);

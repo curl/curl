@@ -29,7 +29,7 @@
 #define NUM_THREADS 100
 
 #ifdef _WIN32
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
 static DWORD WINAPI run_thread(LPVOID ptr)
 #else
 #include <process.h>
@@ -47,7 +47,7 @@ static unsigned int WINAPI run_thread(void *ptr)
 
 CURLcode test(char *URL)
 {
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
   typedef HANDLE curl_win_thread_handle_t;
 #else
   typedef uintptr_t curl_win_thread_handle_t;
@@ -78,7 +78,7 @@ CURLcode test(char *URL)
   for(i = 0; i < tid_count; i++) {
     curl_win_thread_handle_t th;
     results[i] = CURL_LAST; /* initialize with invalid value */
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_APP)
+#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
     th = CreateThread(NULL, 0, run_thread, &results[i], 0, NULL);
 #else
     th = _beginthreadex(NULL, 0, run_thread, &results[i], 0, NULL);

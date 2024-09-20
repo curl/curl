@@ -63,7 +63,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
   if(!string || (inlength < 0))
     return NULL;
 
-  length = (inlength?(size_t)inlength:strlen(string));
+  length = (inlength ? (size_t)inlength : strlen(string));
   if(!length)
     return strdup("");
 
@@ -82,7 +82,7 @@ char *curl_easy_escape(struct Curl_easy *data, const char *string,
       /* encode it */
       const char hex[] = "0123456789ABCDEF";
       char out[3]={'%'};
-      out[1] = hex[in>>4];
+      out[1] = hex[in >> 4];
       out[2] = hex[in & 0xf];
       if(Curl_dyn_addn(&d, out, 3))
         return NULL;
@@ -128,7 +128,7 @@ CURLcode Curl_urldecode(const char *string, size_t length,
   DEBUGASSERT(string);
   DEBUGASSERT(ctrl >= REJECT_NADA); /* crash on TRUE/FALSE */
 
-  alloc = (length?length:strlen(string));
+  alloc = (length ? length : strlen(string));
   ns = malloc(alloc + 1);
 
   if(!ns)
@@ -223,7 +223,7 @@ void Curl_hexencode(const unsigned char *src, size_t len, /* input length */
     while(len-- && (olen >= 3)) {
       /* clang-tidy warns on this line without this comment: */
       /* NOLINTNEXTLINE(clang-analyzer-core.UndefinedBinaryOperatorResult) */
-      *out++ = (unsigned char)hex[(*src & 0xF0)>>4];
+      *out++ = (unsigned char)hex[(*src & 0xF0) >> 4];
       *out++ = (unsigned char)hex[*src & 0x0F];
       ++src;
       olen -= 2;

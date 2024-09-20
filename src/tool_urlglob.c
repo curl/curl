@@ -645,7 +645,7 @@ CURLcode glob_match_url(char **result, char *filename, struct URLGlob *glob)
         unsigned long i;
         num--; /* make it zero based */
         /* find the correct glob entry */
-        for(i = 0; i<glob->size; i++) {
+        for(i = 0; i < glob->size; i++) {
           if(glob->pattern[i].globindex == (int)num) {
             pat = &glob->pattern[i];
             break;

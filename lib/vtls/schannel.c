@@ -1153,7 +1153,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* A hostname associated with the credential is needed by
        InitializeSecurityContext for SNI and other reasons. */
-    snihost = connssl->peer.sni? connssl->peer.sni : connssl->peer.hostname;
+    snihost = connssl->peer.sni ? connssl->peer.sni : connssl->peer.hostname;
     backend->cred->sni_hostname = curlx_convert_UTF8_to_tchar(snihost);
     if(!backend->cred->sni_hostname)
       return CURLE_OUT_OF_MEMORY;
@@ -1332,7 +1332,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(backend);
 
-  doread = (connssl->io_need & CURL_SSL_IO_NEED_SEND)? FALSE : TRUE;
+  doread = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ? FALSE : TRUE;
   connssl->io_need = CURL_SSL_IO_NEED_NONE;
 
   DEBUGF(infof(data,
@@ -1571,8 +1571,8 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifndef CURL_DISABLE_PROXY
-  pubkey_ptr = Curl_ssl_cf_is_proxy(cf)?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
+  pubkey_ptr = Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   pubkey_ptr = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -1863,10 +1863,10 @@ schannel_connect_common(struct Curl_cfilter *cf,
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd : CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd : CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
@@ -2732,7 +2732,7 @@ static void schannel_checksum(const unsigned char *input,
                               DWORD provType,
                               const unsigned int algId)
 {
-#ifdef CURL_WINDOWS_APP
+#ifdef CURL_WINDOWS_UWP
   (void)input;
   (void)inputlen;
   (void)provType;
@@ -2952,7 +2952,7 @@ const struct Curl_ssl Curl_ssl_schannel = {
 #ifdef HAS_MANUAL_VERIFY_API
   SSLSUPP_CAINFO_BLOB |
 #endif
-#ifndef CURL_WINDOWS_APP
+#ifndef CURL_WINDOWS_UWP
   SSLSUPP_PINNEDPUBKEY |
 #endif
   SSLSUPP_TLS13_CIPHERSUITES |

@@ -42,7 +42,7 @@ static const char *tail_err(struct bufq *q)
   struct buf_chunk *chunk;
 
   if(!q->tail) {
-    return q->head? "tail is NULL, but head is not" : NULL;
+    return q->head ? "tail is NULL, but head is not" : NULL;
   }
 
   chunk = q->head;
@@ -75,7 +75,7 @@ static void dump_bufq(struct bufq *q, const char *msg)
   }
   fprintf(stderr, "  ]\n");
   terr = tail_err(q);
-  fprintf(stderr, "- tail: %s\n", terr? terr : "ok");
+  fprintf(stderr, "- tail: %s\n", terr ? terr : "ok");
   n = 0;
   chunk = q->spare;
   while(chunk) {

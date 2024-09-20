@@ -371,8 +371,8 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy)
   if(data->conn) {
     struct ssl_primary_config *src, *dest;
 #ifndef CURL_DISABLE_PROXY
-    src = for_proxy? &data->set.proxy_ssl.primary : &data->set.ssl.primary;
-    dest = for_proxy? &data->conn->proxy_ssl_config : &data->conn->ssl_config;
+    src = for_proxy ? &data->set.proxy_ssl.primary : &data->set.ssl.primary;
+    dest = for_proxy ? &data->conn->proxy_ssl_config : &data->conn->ssl_config;
 #else
     (void)for_proxy;
     src = &data->set.ssl.primary;
@@ -581,7 +581,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   }
 
   CURL_TRC_CF(data, cf, "%s cached session ID for %s://%s:%d",
-              no_match? "No": "Found",
+              no_match ? "No" : "Found",
               cf->conn->handler->scheme, peer->hostname, peer->port);
   return no_match;
 }
@@ -857,7 +857,7 @@ void Curl_ssl_free_certinfo(struct Curl_easy *data)
   if(ci->num_of_certs) {
     /* free all individual lists used */
     int i;
-    for(i = 0; i<ci->num_of_certs; i++) {
+    for(i = 0; i < ci->num_of_certs; i++) {
       curl_slist_free_all(ci->certinfo[i]);
       ci->certinfo[i] = NULL;
     }
@@ -1851,7 +1851,7 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -1881,7 +1881,7 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
     return FALSE;
   }
   /* ssl backend does not know */
-  return cf->next?
+  return cf->next ?
     cf->next->cft->is_alive(cf->next, data, input_pending) :
     FALSE; /* pessimistic in absence of data */
 }
@@ -1950,7 +1950,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 out:
   if(result)
     cf_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 
@@ -2008,7 +2008,7 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
 out:
   if(result)
     cf_ctx_free(ctx);
-  *pcf = result? NULL : cf;
+  *pcf = result ? NULL : cf;
   return result;
 }
 
@@ -2029,7 +2029,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
 {
   (void)data;
-  return (Curl_ssl->supports & ssl_option)? TRUE : FALSE;
+  return (Curl_ssl->supports & ssl_option) ? TRUE : FALSE;
 }
 
 static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)
@@ -2124,7 +2124,7 @@ CURLcode Curl_ssl_cfilter_remove(struct Curl_easy *data,
   struct Curl_cfilter *cf, *head;
   CURLcode result = CURLE_OK;
 
-  head = data->conn? data->conn->cfilter[sockindex] : NULL;
+  head = data->conn ? data->conn->cfilter[sockindex] : NULL;
   for(cf = head; cf; cf = cf->next) {
     if(cf->cft == &Curl_cft_ssl) {
       bool done;
@@ -2154,7 +2154,7 @@ Curl_ssl_cf_get_config(struct Curl_cfilter *cf, struct Curl_easy *data)
   (void)cf;
   return &data->set.ssl;
 #else
-  return Curl_ssl_cf_is_proxy(cf)? &data->set.proxy_ssl : &data->set.ssl;
+  return Curl_ssl_cf_is_proxy(cf) ? &data->set.proxy_ssl : &data->set.ssl;
 #endif
 }
 
@@ -2164,7 +2164,7 @@ Curl_ssl_cf_get_primary_config(struct Curl_cfilter *cf)
 #ifdef CURL_DISABLE_PROXY
   return &cf->conn->ssl_config;
 #else
-  return Curl_ssl_cf_is_proxy(cf)?
+  return Curl_ssl_cf_is_proxy(cf) ?
     &cf->conn->proxy_ssl_config : &cf->conn->ssl_config;
 #endif
 }
@@ -2222,7 +2222,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 {
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
-    (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf))?
+    (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf)) ?
     &cf->conn->proxy_alpn : &cf->conn->alpn
 #else
     &cf->conn->alpn

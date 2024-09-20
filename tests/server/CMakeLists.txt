@@ -26,6 +26,8 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
+set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+
 foreach(_target IN LISTS noinst_PROGRAMS)
   set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
@@ -45,6 +47,10 @@ foreach(_target IN LISTS noinst_PROGRAMS)
   if(WIN32)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
   endif()
+  # getaddrinfo/freeaddrinfo overrides break UNITY build by overriding them
+  # before including system headers. Server code doesn't need these overrides,
+  # so it's safe to disable them globally.
+  set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_GETADDRINFO_OVERRIDE")
   set_target_properties(${_target_name} PROPERTIES
     OUTPUT_NAME "${_target}"
     PROJECT_LABEL "Test server ${_target}")

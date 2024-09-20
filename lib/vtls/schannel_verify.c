@@ -116,7 +116,7 @@ static CURLcode add_certs_data_to_store(HCERTSTORE trust_store,
   const char *current_ca_file_ptr = ca_buffer;
   const char *ca_buffer_limit = ca_buffer + ca_buffer_size;
 
-  while(more_certs && (current_ca_file_ptr<ca_buffer_limit)) {
+  while(more_certs && (current_ca_file_ptr < ca_buffer_limit)) {
     const char *begin_cert_ptr = c_memmem(current_ca_file_ptr,
                                           ca_buffer_limit-current_ca_file_ptr,
                                           BEGIN_CERT,
@@ -346,7 +346,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                   DWORD length)
 {
   DWORD actual_length = 0;
-#if defined(CURL_WINDOWS_APP)
+#if defined(CURL_WINDOWS_UWP)
   (void)data;
   (void)cert_context;
   (void)host_names;
