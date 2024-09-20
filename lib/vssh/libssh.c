@@ -134,6 +134,7 @@ static void sftp_quote(struct Curl_easy *data);
 static void sftp_quote_stat(struct Curl_easy *data);
 static int myssh_getsock(struct Curl_easy *data,
                          struct connectdata *conn, curl_socket_t *sock);
+static void myssh_block2waitfor(struct connectdata *conn, bool block);
 
 static CURLcode myssh_setup_connection(struct Curl_easy *data,
                                        struct connectdata *conn);
@@ -693,8 +694,11 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
     case SSH_S_STARTUP:
       rc = ssh_connect(sshc->ssh_session);
-      if(rc == SSH_AGAIN)
+      if(rc == SSH_AGAIN) {
+        DEBUGF(infof(data, "ssh_connect -> EAGAIN"));
+        myssh_block2waitfor(conn, TRUE);
         break;
+      }
 
       if(rc != SSH_OK) {
         failf(data, "Failure establishing ssh session, errorcode %d", rc);
@@ -2047,6 +2051,7 @@ static int myssh_getsock(struct Curl_easy *data,
   if(!conn->waitfor)
     bitmap |= GETSOCK_WRITESOCK(FIRSTSOCKET);
 
+  DEBUGF(infof(data, "ssh_getsock -> %x", bitmap));
   return bitmap;
 }
 
