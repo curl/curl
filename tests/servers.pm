@@ -3105,7 +3105,7 @@ sub subvariables {
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
     my $file_pwd = $pwd;
-    if($file_pwd !~ /^\//) {
+    if($^O ne 'MSWin32' && $file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";
     }
     my $ssh_pwd = $posix_pwd;
