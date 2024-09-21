@@ -550,6 +550,9 @@ jobs:
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
+          if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
+            TFLAGS+=' -j4'
+          fi
           if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
             TFLAGS+=' ~2077 ~2078'  # valgrind errors
           fi
