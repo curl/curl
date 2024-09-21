@@ -152,3 +152,6 @@ jobs:
 
       - run: cmake --install build --prefix $HOME/curl --strip
         name: 'cmake install'
+
+      - run: cmake --build build --parallel --target testdeps
+        name: 'cmake build tests'
