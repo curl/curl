@@ -64,8 +64,8 @@ jobs:
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            cmake --build bld --config Debug --parallel 3 --target testdeps
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j0'  # flakies: ~389 ~392 ~TFTP and more
               cmake --build bld --config Debug --target test-ci
             fi
@@ -101,8 +101,8 @@ jobs:
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            cmake --build bld --config Debug --parallel 3 --target testdeps
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
@@ -144,8 +144,8 @@ jobs:
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3 install
             src/curl --disable --version
-            make -j3 -C tests
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              make -j3 -C tests
               make test-ci V=1 TFLAGS='-j8 ~FTP'
             fi
             echo '::group::build examples'
@@ -174,8 +174,8 @@ jobs:
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
             cmake --build bld --config Debug --parallel 3
             bld/src/curl --disable --version
-            cmake --build bld --config Debug --parallel 3 --target testdeps
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
+              cmake --build bld --config Debug --parallel 3 --target testdeps
               export TFLAGS='-j8 ~FTP'
               cmake --build bld --config Debug --target test-ci
             fi
