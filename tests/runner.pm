@@ -380,7 +380,13 @@ sub prepro {
 # Load test keywords into %keywords hash
 #
 sub readtestkeywords {
+    if($^O ne 'MSWin32') {
+        print "TRACE-1";
+    }
     my @info_keywords = getpart("info", "keywords");
+    if($^O ne 'MSWin32') {
+        print "TRACE-2";
+    }
 
     # Clear the list of keywords from the last test
     %keywords = ();
