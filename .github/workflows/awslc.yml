@@ -50,8 +50,6 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install --yes libtool autoconf automake pkgconf stunnel4 libpsl-dev
           # ensure we don't pick up openssl in this build
           sudo apt remove --yes libssl-dev
@@ -94,15 +92,15 @@ jobs:
       - run: make -C build V=1
         name: 'make'
 
-      - run: make -C build V=1 examples
-        name: 'make examples'
-
       - run: make -C build V=1 -C tests
         name: 'make tests'
 
       - run: make -C build V=1 test-ci
         name: 'run tests'
         timeout-minutes: 15
+
+      - run: make -C build V=1 examples
+        name: 'make examples'
 
   cmake:
     name: awslc (cmake)
@@ -111,9 +109,7 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
-          sudo apt-get install cmake stunnel4 libpsl-dev
+          sudo apt-get install cmake ninja-build stunnel4 libpsl-dev
           # ensure we don't pick up openssl in this build
           sudo apt remove --yes libssl-dev
           sudo python3 -m pip install impacket
@@ -136,14 +132,14 @@ jobs:
           tar xzf v${{ env.awslc-version }}.tar.gz
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
-          cmake -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
+          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
           cmake --build . --parallel
           cmake --install .
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
 
       - run: |
-          cmake -B build -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+          cmake -B build -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DOPENSSL_ROOT_DIR=$HOME/awslc -DBUILD_SHARED_LIBS=ON
         name: 'cmake generate out-of-tree'
 
@@ -155,3 +151,6 @@ jobs:
 
       - run: cmake --build build --parallel --target testdeps
         name: 'cmake build tests'
+
+      - run: cmake --build build --parallel --target curl-examples
+        name: 'cmake build examples'

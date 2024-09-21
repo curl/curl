@@ -160,8 +160,6 @@ jobs:
       - name: install build prerequisites
         if: steps.settings.outputs.needs-build == 'true'
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
@@ -296,8 +294,6 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
@@ -457,9 +453,6 @@ jobs:
       - run: make V=1
         name: 'make'
 
-      - run: make V=1 examples
-        name: 'make examples'
-
       - run: make V=1 -C tests
         name: 'make tests'
 
@@ -473,3 +466,6 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
+
+      - run: make V=1 examples
+        name: 'make examples'

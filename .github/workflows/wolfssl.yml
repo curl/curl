@@ -63,8 +63,6 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install libtool autoconf automake pkgconf stunnel4 libpsl-dev ${{ matrix.build.install }}
           sudo python3 -m pip install impacket
         name: 'install prereqs and impacket'
@@ -90,9 +88,6 @@ jobs:
       - run: make V=1
         name: 'make'
 
-      - run: make V=1 examples
-        name: 'make examples'
-
       - run: make V=1 -C tests
         name: 'make tests'
 
@@ -101,3 +96,6 @@ jobs:
         timeout-minutes: ${{ contains(matrix.build.install, 'valgrind') && 30 || 15 }}
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
+
+      - run: make V=1 examples
+        name: 'make examples'
