@@ -49,8 +49,6 @@ jobs:
 
       - name: install
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install codespell python3-pip
           python3 -m pip install cmakelint==1.4.3
 
