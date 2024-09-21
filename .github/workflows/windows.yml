@@ -429,10 +429,6 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5
 
-      - name: 'autotools build tests'
-        if: ${{ matrix.build == 'autotools' }}
-        run: make -C bld -j5 -C tests
-
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5 examples
