@@ -92,15 +92,15 @@ jobs:
       - run: make -C build V=1
         name: 'make'
 
-      - run: make -C build V=1 examples
-        name: 'make examples'
-
       - run: make -C build V=1 -C tests
         name: 'make tests'
 
       - run: make -C build V=1 test-ci
         name: 'run tests'
         timeout-minutes: 15
+
+      - run: make -C build V=1 examples
+        name: 'make examples'
 
   cmake:
     name: awslc (cmake)
