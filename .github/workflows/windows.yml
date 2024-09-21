@@ -429,6 +429,10 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5
 
+      - name: 'autotools build tests'
+        if: ${{ matrix.build == 'autotools' }}
+        run: make -C bld -j5 -C tests
+
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5 examples
@@ -452,6 +456,10 @@ jobs:
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         run: cmake --build bld --parallel 5
+
+      - name: 'cmake build tests'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cmake --build bld --parallel 5 --target testdeps
 
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
