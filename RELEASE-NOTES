@@ -4,16 +4,56 @@ curl and libcurl 8.10.2
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3246
+ Contributors:                 3249
 
 This release includes the following changes:
 
+ o ipfs: add options to disable [8]
 
 This release includes the following bugfixes:
 
+ o alt-svc: honor data->state.httpwant [19]
+ o autotools: add support for 'unity' builds, enable in CI [15]
+ o build: limit arc4random detection to no-SSL configs [43]
+ o build: tidy up and improve versioned-symbols options [5]
+ o build: tidy up deprecation suppression, enable warnings for clang [12]
+ o checksrc: check for spaces around '?', '>' and '<' [46]
+ o cmake, Makefile.mk: use -isystem for headers, silence BearSSL issues [37]
+ o cmake/FindNGTCP2: use library path as hint for finding crypto module [40]
+ o cmake: allow building tests in unity mode [31]
+ o cmake: delete unused NEED_LBER_H, HAVE_LDAP_H [38]
+ o cmake: disable default OpenSSL if BearSSL, GnuTLS or Rustls is enabled [44]
+ o cmake: drop redundant assigments [49]
+ o cmake: drop redundant zlib var, rename function (internals) [50]
+ o cmake: expand CURL_USE_PKGCONFIG to non-cross MINGW [13]
+ o cmake: fix broken dependency chain for cmdline-opts, tidy-ups [11]
+ o cmake: separate target for examples, optimize CI, fix fallouts [16]
+ o cmake: sync torture test parallelism with autotools [35]
+ o configure: catch Apple in more target triplets [6]
  o curl_url_set.md: document HOST handling when URL is parsed [2]
+ o CURLMOPT_PIPELINING.md: clarify that CURLPIPE_NOTHING is not default [54]
+ o lib, src, tests: added space around ternary expressions [56]
+ o lib/src: white space edits to comply better with code style [47]
+ o lib: fix unity builds with BearSSL, MSH3, Quiche, OmniOS [32]
+ o libssh.c: handle EGAINS during proto-connect correctly [23]
+ o libssh2: use the Curl_* memory functions to avoid memdebug [22]
+ o multi.c: make stronger check for paused transfer before asserting [24]
  o negotiate: conditional check around GSS & SSL specific code [1]
+ o processhelp.pm: improve taskkill calls (Windows) [52]
+ o request: on shutdown send, proceed normally on timeout [18]
+ o runtests.md: suggest a value for -j for torture tests
  o sendf: add condition to max-filesize check [3]
+ o tests/valgrind.pm: fix warnings with no valgrind report to show [25]
+ o tests: delete duplicate macro check [53]
+ o tests: fix keyword for test1411
+ o tests: Only log warnings or worse by default in smbserver [33]
+ o tests: remove all valgrind disble instructions [21]
+ o tests: testrunner fairness [39]
+ o tests: testrunner reliability improvements [55]
+ o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
+ o unit1660: fix unreachable code warning in no-SSL builds [30]
+ o url: connection reuse on h3 connections [20]
+ o urlapi: drop unused header [51]
 
 This release includes the following known bugs:
 
@@ -33,11 +73,52 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Jon Rumsey, lomberd2 on github, Venkat Krishna R
-  (4 contributors)
+  Dan Fandrich, Daniel Stenberg, Gabriel Marin, Jon Rumsey, Kai Pastor,
+  lomberd2 on github, MacKenzie, Nicolas George, Pavel Kropachev,
+  Rasmus Melchior Jacobsen, Ray Satiro, Stefan Eissing, Tal Regev,
+  Venkat Krishna R, Viktor Szakats
+  (15 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=14938
  [2] = https://curl.se/bug/?i=14942
  [3] = https://curl.se/bug/?i=14958
+ [5] = https://curl.se/bug/?i=14818
+ [6] = https://curl.se/bug/?i=14728
+ [8] = https://curl.se/bug/?i=14824
+ [11] = https://curl.se/bug/?i=14883
+ [12] = https://curl.se/bug/?i=14789
+ [13] = https://curl.se/bug/?i=14658
+ [15] = https://curl.se/bug/?i=14815
+ [16] = https://curl.se/bug/?i=14906
+ [18] = https://curl.se/bug/?i=14843
+ [19] = https://curl.se/bug/?i=14966
+ [20] = https://curl.se/bug/?i=14890
+ [21] = https://curl.se/bug/?i=14983
+ [22] = https://curl.se/bug/?i=14984
+ [23] = https://curl.se/bug/?i=14982
+ [24] = https://curl.se/bug/?i=14981
+ [25] = https://curl.se/bug/?i=14977
+ [30] = https://curl.se/bug/?i=14971
+ [31] = https://curl.se/bug/?i=14765
+ [32] = https://curl.se/bug/?i=14932
+ [33] = https://curl.se/bug/?i=14950
+ [35] = https://curl.se/bug/?i=14969
+ [36] = https://curl.se/bug/?i=14881
+ [37] = https://curl.se/bug/?i=14763
+ [38] = https://curl.se/bug/?i=14690
+ [39] = https://curl.se/bug/?i=14967
+ [40] = https://github.com/curl/curl-for-win/blob/8b8909e1206de1dcca356a8dd33eb1e4ffeea7fd/curl.sh#L289
+ [43] = https://curl.se/bug/?i=14909
+ [44] = https://curl.se/bug/?i=14828
+ [46] = https://curl.se/bug/?i=14921
+ [47] = https://curl.se/bug/?i=14921
+ [49] = https://curl.se/bug/?i=14924
+ [50] = https://curl.se/bug/?i=14918
+ [51] = https://curl.se/bug/?i=14867
+ [52] = https://curl.se/bug/?i=14959
+ [53] = https://curl.se/bug/?i=14963
+ [54] = https://curl.se/bug/?i=14961
+ [55] = https://curl.se/bug/?i=14960
+ [56] = https://curl.se/bug/?i=14912
