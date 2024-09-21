@@ -80,9 +80,6 @@ jobs:
       - run: ./src/curl -V
         name: 'check curl -V output'
 
-      - run: make V=1 examples
-        name: 'make examples'
-
       - run: make V=1 -C tests
         name: 'make tests'
 
@@ -90,3 +87,6 @@ jobs:
         name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
+
+      - run: make V=1 examples
+        name: 'make examples'
