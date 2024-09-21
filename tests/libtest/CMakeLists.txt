@@ -36,7 +36,7 @@ add_custom_command(
     "${CURL_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
-if(CURL_USE_TEST_BUNDLES)
+if(CURL_TEST_BUNDLES)
   add_custom_command(
     OUTPUT "libtest_bundle.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
@@ -76,7 +76,7 @@ foreach(_target IN LISTS LIBTESTPROGS)
     "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
     "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
-  if(NOT CURL_USE_TEST_BUNDLES)
+  if(NOT CURL_TEST_BUNDLES)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
   endif()
   set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_NO_GETADDRINFO_OVERRIDE")

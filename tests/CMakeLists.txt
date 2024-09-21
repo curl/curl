@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-option(CURL_USE_TEST_BUNDLES "Bundle libtests/unittests into single binaries" ON)
+option(CURL_TEST_BUNDLES "Bundle libtests/unittests into single binaries" ON)
 
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
@@ -40,7 +40,7 @@ add_subdirectory(unit)
 add_subdirectory(certs EXCLUDE_FROM_ALL)
 
 function(add_runtests _targetname _test_flags)
-  if(CURL_USE_TEST_BUNDLES)
+  if(CURL_TEST_BUNDLES)
     set(_test_flags "${_test_flags} -bundle")
   endif()
   # Use a special '$TFLAGS' placeholder as last argument which will be

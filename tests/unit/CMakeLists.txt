@@ -26,7 +26,7 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-if(CURL_USE_TEST_BUNDLES)
+if(CURL_TEST_BUNDLES)
   add_custom_command(
     OUTPUT "unit_bundle.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "unit_bundle.c"
@@ -50,7 +50,7 @@ foreach(_target IN LISTS UNITPROGS)
     "${CURL_SOURCE_DIR}/src"
     "${CURL_SOURCE_DIR}/tests/libtest"
   )
-  if(CURL_USE_TEST_BUNDLES)
+  if(CURL_TEST_BUNDLES)
     target_include_directories(${_target_name} PRIVATE "${CURL_SOURCE_DIR}/tests/unit")
   endif()
   set_target_properties(${_target_name} PROPERTIES
