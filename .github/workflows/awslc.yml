@@ -50,8 +50,6 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install --yes libtool autoconf automake pkgconf stunnel4 libpsl-dev
           # ensure we don't pick up openssl in this build
           sudo apt remove --yes libssl-dev
@@ -111,8 +109,6 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
           sudo apt-get install cmake ninja-build stunnel4 libpsl-dev
           # ensure we don't pick up openssl in this build
           sudo apt remove --yes libssl-dev
