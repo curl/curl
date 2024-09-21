@@ -70,7 +70,7 @@ jobs:
         name: 'autoreconf'
 
       - run: |
-          ./configure --disable-dependency-tracking --enable-unity --enable-warnings --enable-werror \
+          ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             ${{ matrix.build.configure }}
         name: 'configure'
 
