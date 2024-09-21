@@ -858,6 +858,7 @@ sub checksystemfeatures {
             "* Host: $hostname\n",
             "* System: $hosttype\n",
             "* OS: $hostos\n",
+            "* Path: " . $ENV{'PATH'} . "\n",
             "* Perl: $^V ($^X)\n",
             "* Args: $args\n");
 
