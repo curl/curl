@@ -600,7 +600,12 @@ char **__crt0_glob_function(char *arg)
 
 #ifdef _WIN32
 
-/*
+/* Search and set the CA cert file for Windows.
+ *
+ * Do not call this function if Schannel is the selected SSL backend. We allow
+ * setting CA location for Schannel only when explicitly specified by the user
+ * via CURLOPT_CAINFO / --cacert.
+ *
  * Function to find CACert bundle on a Win32 platform using SearchPath.
  * (SearchPath is already declared via inclusions done in setup header file)
  * (Use the ASCII version instead of the Unicode one!)
@@ -614,7 +619,6 @@ char **__crt0_glob_function(char *arg)
  * For WinXP and later search order actually depends on registry value:
  * HKLM\SYSTEM\CurrentControlSet\Control\Session Manager\SafeProcessSearchMode
  */
-
 CURLcode FindWin32CACert(struct OperationConfig *config,
                          const TCHAR *bundle_file)
 {
