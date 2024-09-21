@@ -55,7 +55,7 @@ jobs:
             # https://pkgsrc.se/
             sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
             cmake -B bld -G Ninja \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DENABLE_WEBSOCKETS=ON \
@@ -92,7 +92,7 @@ jobs:
             # https://openbsd.app/
             sudo pkg_add cmake ninja perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
             cmake -B bld -G Ninja \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DENABLE_WEBSOCKETS=ON \
@@ -165,7 +165,7 @@ jobs:
               pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             cmake -B bld -G Ninja \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
               -DENABLE_WEBSOCKETS=ON \
