@@ -3083,7 +3083,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
       }
 
 #ifdef _WIN32
-      if(!env && feature_ssl) {
+      if(!env) {
 #if defined(CURL_CA_SEARCH_SAFE)
         char *cacert = NULL;
         FILE *cafile = Curl_execpath(global, "curl-ca-bundle.crt", &cacert);
