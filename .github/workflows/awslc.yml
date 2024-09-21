@@ -151,3 +151,6 @@ jobs:
 
       - run: cmake --build build --parallel --target testdeps
         name: 'cmake build tests'
+
+      - run: cmake --build build --parallel --target curl-examples
+        name: 'cmake build examples'
