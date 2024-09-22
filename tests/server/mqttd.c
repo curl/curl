@@ -110,7 +110,7 @@ static char loglockfile[256];
 static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
-static unsigned short my_port = DEFAULT_PORT;
+static unsigned short server_port = DEFAULT_PORT;
 
 static void resetdefaults(void)
 {
@@ -996,7 +996,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        my_port = util_ultous(ulnum);
+        server_port = util_ultous(ulnum);
         arg++;
       }
     }
@@ -1046,7 +1046,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = sockdaemon(sock, &my_port);
+    sock = sockdaemon(sock, &server_port);
     if(CURL_SOCKET_BAD == sock) {
       goto mqttd_cleanup;
     }
@@ -1054,14 +1054,14 @@ int main(int argc, char *argv[])
   }
 
   logmsg("Running %s version", ipv_inuse);
-  logmsg("Listening on port %hu", my_port);
+  logmsg("Listening on port %hu", server_port);
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
     goto mqttd_cleanup;
   }
 
-  wroteportfile = write_portfile(portname, my_port);
+  wroteportfile = write_portfile(portname, server_port);
   if(!wroteportfile) {
     goto mqttd_cleanup;
   }
