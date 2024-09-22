@@ -48,7 +48,7 @@ my @reused_symbols = (
     "configurable",
     "configfile",
     "resetdefaults",
-    "my_port",
+    "server_port",
     "config",
     "prevtestno",
     "prevpartno",
