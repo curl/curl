@@ -2399,12 +2399,23 @@ if(NOT CURL_DISABLE_INSTALL)
   #   CURL_SUPPORTED_PROTOCOLS_LIST
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
-  #   USE_OPENSSL
-  #   HAVE_LIBZ
-  #   USE_ARES
-  #   USE_LIBSSH2
-  #   USE_MBEDTLS
+  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
+  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
+  #   HAVE_BROTLI
+  #   HAVE_GSSAPI
   #   HAVE_ZSTD
+  #   USE_ARES
+  #   USE_BEARSSL
+  #   USE_GNUTLS
+  #   USE_GSASL
+  #   USE_LIBPSL
+  #   USE_LIBSSH
+  #   USE_LIBUV
+  #   USE_MBEDTLS
+  #   USE_QUICHE
+  #   USE_RUSTLS
+  #   USE_WOLFSSH
+  #   USE_WOLFSSL
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
