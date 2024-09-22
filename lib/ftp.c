@@ -1471,7 +1471,7 @@ static CURLcode ftp_state_prepare_transfer(struct Curl_easy *data)
       struct ftp_conn *ftpc = &conn->proto.ftpc;
       if(!conn->proto.ftpc.file)
         result = Curl_pp_sendf(data, &ftpc->pp, "PRET %s",
-                               data->set.str[STRING_CUSTOMREQUEST]?
+                               data->set.str[STRING_CUSTOMREQUEST] ?
                                data->set.str[STRING_CUSTOMREQUEST] :
                                (data->state.list_only ? "NLST" : "LIST"));
       else if(data->state.upload)
@@ -1578,7 +1578,7 @@ static CURLcode ftp_state_list(struct Curl_easy *data)
   }
 
   cmd = aprintf("%s%s%s",
-                data->set.str[STRING_CUSTOMREQUEST]?
+                data->set.str[STRING_CUSTOMREQUEST] ?
                 data->set.str[STRING_CUSTOMREQUEST] :
                 (data->state.list_only ? "NLST" : "LIST"),
                 lstArg ? " " : "",
