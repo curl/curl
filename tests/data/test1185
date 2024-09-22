@@ -165,6 +165,12 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:53:10: warning: use of snprintf is banned (SNPRINTF)
   int a = snprintf(buffer, sizeof(buffer), "%d", 99);
           ^
+./%LOGDIR/code1185.c:54:21: warning: missing space before colon (NOSPACEC)
+  int moo = hej?wrong:a>b;
+                     ^
+./%LOGDIR/code1185.c:54:22: warning: missing space after colon (NOSPACEC)
+  int moo = hej?wrong:a>b;
+                      ^
 ./%LOGDIR/code1185.c:54:15: warning: missing space before question mark (NOSPACEQ)
   int moo = hej?wrong:a>b;
                ^
@@ -195,7 +201,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
  
  ^
-checksrc: 0 errors and 36 warnings
+checksrc: 0 errors and 38 warnings
 </stdout>
 <errorcode>
 5
