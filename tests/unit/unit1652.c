@@ -29,8 +29,10 @@
 #ifdef __GNUC__
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
-#pragma GCC diagnostic ignored "-Wformat-overflow"
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
+#if !defined(__clang__) && __GNUC__ >= 7
+#pragma GCC diagnostic ignored "-Wformat-overflow"
+#endif
 #endif
 
 /*
