@@ -3351,6 +3351,16 @@ if test "x$want_openssl_quic" = "xyes"; then
   AC_SUBST(USE_OPENSSL_QUIC, [1])
 fi
 
+if test "$OPENSSL_ENABLED" = "1"; then
+  if test "$have_openssl_quic" = '1' -a "x$want_openssl_quic" = "xyes"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.3.0"
+  elif test "$have_openssl_3" = '1'; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl|>=|3.0.0"
+  else
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE openssl"
+  fi
+fi
+
 dnl **********************************************************************
 dnl Check for nghttp3 (HTTP/3 with ngtcp2)
 dnl **********************************************************************
