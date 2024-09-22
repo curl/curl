@@ -191,27 +191,15 @@ int tool_ftruncate64(int fd, curl_off_t where)
 #endif /* USE_TOOL_FTRUNCATE */
 
 #ifdef _WIN32
-FILE *Curl_execpath(struct GlobalConfig *config,
-                    const char *filename, char **pathp)
+FILE *Curl_execpath(const char *filename, char **pathp)
 {
   static char filebuffer[512];
   unsigned long len;
-#ifdef _WIN32
-  (void)config;
   /* Get the filename of our executable. GetModuleFileName is already declared
    * via inclusions done in setup header file. We assume that we are using
    * the ASCII version here.
    */
   len = GetModuleFileNameA(0, filebuffer, sizeof(filebuffer));
-#else
-  if(config->argv0) {
-    strncpy(filebuffer, config->argv0, sizeof(filebuffer) - 1);
-    filebuffer[sizeof(filebuffer) - 1] = '\0';
-    len = (unsigned long)strlen(filebuffer);
-  }
-  else
-    len = 0;
-#endif
   if(len > 0 && len < sizeof(filebuffer)) {
     /* We got a valid filename - get the directory part */
     char *lastdirchar = strrchr(filebuffer, DIR_CHAR[0]);

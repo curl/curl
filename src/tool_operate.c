@@ -3086,7 +3086,7 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
       if(!env) {
 #if defined(CURL_CA_SEARCH_SAFE)
         char *cacert = NULL;
-        FILE *cafile = Curl_execpath(global, "curl-ca-bundle.crt", &cacert);
+        FILE *cafile = Curl_execpath("curl-ca-bundle.crt", &cacert);
         if(cafile) {
           fclose(cafile);
           config->cacert = strdup(cacert);

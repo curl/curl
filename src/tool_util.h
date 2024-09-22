@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 #include "tool_setup.h"
-#include "tool_cfgable.h"
 
 struct timeval tvnow(void);
 
@@ -41,8 +40,7 @@ int struplocompare(const char *p1, const char *p2);
 int struplocompare4sort(const void *p1, const void *p2);
 
 #ifdef _WIN32
-FILE *Curl_execpath(struct GlobalConfig *config,
-                    const char *filename, char **pathp);
+FILE *Curl_execpath(const char *filename, char **pathp);
 #endif
 
 #endif /* HEADER_CURL_TOOL_UTIL_H */

@@ -314,7 +314,6 @@ struct OperationConfig {
 };
 
 struct GlobalConfig {
-  char *argv0;                    /* argv[0] received via main() */
   bool showerror;                 /* show errors when silent */
   bool silent;                    /* do not show messages, --silent given */
   bool noprogress;                /* do not show progress bar */
