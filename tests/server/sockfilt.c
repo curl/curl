@@ -126,7 +126,7 @@ static bool bind_only = FALSE;
 static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
-static unsigned short port = DEFAULT_PORT;
+static unsigned short server_port = DEFAULT_PORT;
 static unsigned short connectport = 0; /* if non-zero, we activate this mode */
 
 enum sockmode {
@@ -1126,7 +1126,8 @@ static bool juggle(curl_socket_t *sockfdp,
     else if(!memcmp("PORT", buffer, 4)) {
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
-      msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n", ipv_inuse, port);
+      msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
+                ipv_inuse, server_port);
       buffer_len = (ssize_t)strlen((char *)buffer);
       msnprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
       if(!write_stdout(data, 10))
@@ -1445,7 +1446,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = util_ultous(ulnum);
+        server_port = util_ultous(ulnum);
         arg++;
       }
     }
@@ -1558,7 +1559,7 @@ int main(int argc, char *argv[])
   }
   else {
     /* passive daemon style */
-    sock = sockdaemon(sock, &port);
+    sock = sockdaemon(sock, &server_port);
     if(CURL_SOCKET_BAD == sock) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
@@ -1571,9 +1572,9 @@ int main(int argc, char *argv[])
   if(connectport)
     logmsg("Connected to port %hu", connectport);
   else if(bind_only)
-    logmsg("Bound without listening on port %hu", port);
+    logmsg("Bound without listening on port %hu", server_port);
   else
-    logmsg("Listening on port %hu", port);
+    logmsg("Listening on port %hu", server_port);
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
@@ -1581,7 +1582,7 @@ int main(int argc, char *argv[])
     goto sockfilt_cleanup;
   }
   if(portname) {
-    wroteportfile = write_portfile(portname, port);
+    wroteportfile = write_portfile(portname, server_port);
     if(!wroteportfile) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
