@@ -2212,3 +2212,17 @@ file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated fi
 if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   message(STATUS "\n${_buildinfo}")
 endif()
+
+# Post-build events are always executed in MSBuild, even if the build is up to date.
+# Apply the workaround from https://gitlab.kitware.com/cmake/cmake/-/issues/18530
+if(CMAKE_GENERATOR MATCHES "Visual Studio")
+    file(CONFIGURE OUTPUT Directory.Build.props CONTENT [[
+      <Project>
+        <Target Name="DisablePostBuildEvent" AfterTargets="Link" BeforeTargets="PostBuildEvent">
+            <PropertyGroup>
+              <PostBuildEventUseInBuild Condition="'$(LinkSkippedExecution)' == 'True'">false</PostBuildEventUseInBuild>
+            </PropertyGroup>
+          </Target>
+      </Project>
+    ]] @ONLY)
+endif()
