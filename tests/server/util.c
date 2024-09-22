@@ -36,11 +36,6 @@
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #endif
-#ifdef HAVE_POLL_H
-#include <poll.h>
-#elif defined(HAVE_SYS_POLL_H)
-#include <sys/poll.h>
-#endif
 
 #ifdef MSDOS
 #include <dos.h>  /* delay() */
@@ -53,10 +48,23 @@
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
-#include "timeval.h"
 #include "timediff.h"
 
-const char *serverlogfile = NULL;  /* needs init from main() */
+/* need init from main() */
+const char *pidname = NULL;
+const char *portname = NULL; /* none by default */
+const char *serverlogfile = NULL;
+int serverlogslocked;
+const char *configfile = NULL;
+const char *logdir = "log";
+char loglockfile[256];
+#ifdef USE_IPV6
+bool use_ipv6 = FALSE;
+#endif
+const char *ipv_inuse = "IPv4";
+unsigned short server_port = 0;
+const char *socket_type = "IPv4";
+int socket_domain = AF_INET;
 
 static struct timeval tvnow(void);
 
@@ -135,6 +143,31 @@ void logmsg(const char *msg, ...)
     fprintf(stderr, "Error opening file '%s'\n", serverlogfile);
     fprintf(stderr, "Msg not logged: %s %s\n", timebuf, buffer);
   }
+}
+
+void loghex(unsigned char *buffer, ssize_t len)
+{
+  char data[12000];
+  ssize_t i;
+  unsigned char *ptr = buffer;
+  char *optr = data;
+  ssize_t width = 0;
+  int left = sizeof(data);
+
+  for(i = 0; i < len && (left >= 0); i++) {
+    msnprintf(optr, left, "%02x", ptr[i]);
+    width += 2;
+    optr += 2;
+    left -= 2;
+  }
+  if(width)
+    logmsg("'%s'", data);
+}
+
+unsigned char byteval(char *value)
+{
+  unsigned long num = strtoul(value, NULL, 10);
+  return num & 0xff;
 }
 
 #ifdef _WIN32
@@ -239,13 +272,6 @@ static long timediff(struct timeval newer, struct timeval older)
  */
 int wait_ms(int timeout_ms)
 {
-#if !defined(MSDOS) && !defined(USE_WINSOCK)
-#ifndef HAVE_POLL
-  struct timeval pending_tv;
-#endif
-  struct timeval initial_tv;
-  int pending_ms;
-#endif
   int r = 0;
 
   if(!timeout_ms)
@@ -259,26 +285,27 @@ int wait_ms(int timeout_ms)
 #elif defined(USE_WINSOCK)
   Sleep((DWORD)timeout_ms);
 #else
-  pending_ms = timeout_ms;
-  initial_tv = tvnow();
-  do {
-    int error;
-#ifdef HAVE_POLL
-    r = poll(NULL, 0, pending_ms);
-#else
-    pending_tv.tv_sec = pending_ms / 1000;
-    pending_tv.tv_usec = (pending_ms % 1000) * 1000;
-    r = select(0, NULL, NULL, NULL, &pending_tv);
-#endif /* HAVE_POLL */
-    if(r != -1)
-      break;
-    error = errno;
-    if(error && (error != EINTR))
-      break;
-    pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
-    if(pending_ms <= 0)
-      break;
-  } while(r == -1);
+  /* avoid using poll() for this since it behaves incorrectly with no sockets
+     on Apple operating systems */
+  {
+    struct timeval pending_tv;
+    struct timeval initial_tv = tvnow();
+    int pending_ms = timeout_ms;
+    do {
+      int error;
+      pending_tv.tv_sec = pending_ms / 1000;
+      pending_tv.tv_usec = (pending_ms % 1000) * 1000;
+      r = select(0, NULL, NULL, NULL, &pending_tv);
+      if(r != -1)
+        break;
+      error = errno;
+      if(error && (error != EINTR))
+        break;
+      pending_ms = timeout_ms - (int)timediff(tvnow(), initial_tv);
+      if(pending_ms <= 0)
+        break;
+    } while(r == -1);
+  }
 #endif /* USE_WINSOCK */
   if(r)
     r = -1;

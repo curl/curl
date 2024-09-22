@@ -85,20 +85,10 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-#define DEFAULT_PORT 8905
-
-#ifndef DEFAULT_REQFILE
-#define DEFAULT_REQFILE "log/socksd-request.log"
-#endif
-
-#ifndef DEFAULT_CONFIG
-#define DEFAULT_CONFIG "socksd.config"
-#endif
-
 static const char *backendaddr = "127.0.0.1";
 static unsigned short backendport = 0; /* default is use client's */
 
-struct configurable {
+struct socksd_configurable {
   unsigned char version; /* initial version byte in the request must match
                             this */
   unsigned char nmethods_min; /* minimum number of nmethods to expect */
@@ -123,34 +113,24 @@ struct configurable {
 #define CONFIG_ADDR backendaddr
 #define CONFIG_CONNECTREP 0
 
-static struct configurable config;
+static struct socksd_configurable s_config;
 
-static const char *reqlogfile = DEFAULT_REQFILE;
-static const char *configfile = DEFAULT_CONFIG;
+static const char *reqlogfile = "log/socksd-request.log";
 
-static const char *socket_type = "IPv4";
-static unsigned short port = DEFAULT_PORT;
-
-static void resetdefaults(void)
+static void socksd_resetdefaults(void)
 {
   logmsg("Reset to defaults");
-  config.version = CONFIG_VERSION;
-  config.nmethods_min = CONFIG_NMETHODS_MIN;
-  config.nmethods_max = CONFIG_NMETHODS_MAX;
-  config.responseversion = CONFIG_RESPONSEVERSION;
-  config.responsemethod = CONFIG_RESPONSEMETHOD;
-  config.reqcmd = CONFIG_REQCMD;
-  config.connectrep = CONFIG_CONNECTREP;
-  config.port = CONFIG_PORT;
-  strcpy(config.addr, CONFIG_ADDR);
-  strcpy(config.user, "user");
-  strcpy(config.password, "password");
-}
-
-static unsigned char byteval(char *value)
-{
-  unsigned long num = strtoul(value, NULL, 10);
-  return num & 0xff;
+  s_config.version = CONFIG_VERSION;
+  s_config.nmethods_min = CONFIG_NMETHODS_MIN;
+  s_config.nmethods_max = CONFIG_NMETHODS_MAX;
+  s_config.responseversion = CONFIG_RESPONSEVERSION;
+  s_config.responsemethod = CONFIG_RESPONSEMETHOD;
+  s_config.reqcmd = CONFIG_REQCMD;
+  s_config.connectrep = CONFIG_CONNECTREP;
+  s_config.port = CONFIG_PORT;
+  strcpy(s_config.addr, CONFIG_ADDR);
+  strcpy(s_config.user, "user");
+  strcpy(s_config.password, "password");
 }
 
 static unsigned short shortval(char *value)
@@ -159,12 +139,10 @@ static unsigned short shortval(char *value)
   return num & 0xffff;
 }
 
-static int socket_domain = AF_INET;
-
-static void getconfig(void)
+static void socksd_getconfig(void)
 {
   FILE *fp = fopen(configfile, FOPEN_READTEXT);
-  resetdefaults();
+  socksd_resetdefaults();
   if(fp) {
     char buffer[512];
     logmsg("parse config file");
@@ -173,32 +151,32 @@ static void getconfig(void)
       char value[260];
       if(2 == sscanf(buffer, "%31s %259s", key, value)) {
         if(!strcmp(key, "version")) {
-          config.version = byteval(value);
-          logmsg("version [%d] set", config.version);
+          s_config.version = byteval(value);
+          logmsg("version [%d] set", s_config.version);
         }
         else if(!strcmp(key, "nmethods_min")) {
-          config.nmethods_min = byteval(value);
-          logmsg("nmethods_min [%d] set", config.nmethods_min);
+          s_config.nmethods_min = byteval(value);
+          logmsg("nmethods_min [%d] set", s_config.nmethods_min);
         }
         else if(!strcmp(key, "nmethods_max")) {
-          config.nmethods_max = byteval(value);
-          logmsg("nmethods_max [%d] set", config.nmethods_max);
+          s_config.nmethods_max = byteval(value);
+          logmsg("nmethods_max [%d] set", s_config.nmethods_max);
         }
         else if(!strcmp(key, "backend")) {
-          strcpy(config.addr, value);
-          logmsg("backend [%s] set", config.addr);
+          strcpy(s_config.addr, value);
+          logmsg("backend [%s] set", s_config.addr);
         }
         else if(!strcmp(key, "backendport")) {
-          config.port = shortval(value);
-          logmsg("backendport [%d] set", config.port);
+          s_config.port = shortval(value);
+          logmsg("backendport [%d] set", s_config.port);
         }
         else if(!strcmp(key, "user")) {
-          strcpy(config.user, value);
-          logmsg("user [%s] set", config.user);
+          strcpy(s_config.user, value);
+          logmsg("user [%s] set", s_config.user);
         }
         else if(!strcmp(key, "password")) {
-          strcpy(config.password, value);
-          logmsg("password [%s] set", config.password);
+          strcpy(s_config.password, value);
+          logmsg("password [%s] set", s_config.password);
         }
         /* Methods:
            o  X'00' NO AUTHENTICATION REQUIRED
@@ -206,36 +184,17 @@ static void getconfig(void)
            o  X'02' USERNAME/PASSWORD
         */
         else if(!strcmp(key, "method")) {
-          config.responsemethod = byteval(value);
-          logmsg("method [%d] set", config.responsemethod);
+          s_config.responsemethod = byteval(value);
+          logmsg("method [%d] set", s_config.responsemethod);
         }
         else if(!strcmp(key, "response")) {
-          config.connectrep = byteval(value);
-          logmsg("response [%d] set", config.connectrep);
+          s_config.connectrep = byteval(value);
+          logmsg("response [%d] set", s_config.connectrep);
         }
       }
     }
     fclose(fp);
   }
-}
-
-static void loghex(unsigned char *buffer, ssize_t len)
-{
-  char data[1200];
-  ssize_t i;
-  unsigned char *ptr = buffer;
-  char *optr = data;
-  ssize_t width = 0;
-  int left = sizeof(data);
-
-  for(i = 0; i < len && (left >= 0); i++) {
-    msnprintf(optr, left, "%02x", ptr[i]);
-    width += 2;
-    optr += 2;
-    left -= 2;
-  }
-  if(width)
-    logmsg("'%s'", data);
 }
 
 /* RFC 1928, SOCKS5 byte index */
@@ -303,13 +262,13 @@ static curl_socket_t socks4(curl_socket_t fd,
     logmsg("SOCKS4 connect message too short: %zd", rc);
     return CURL_SOCKET_BAD;
   }
-  if(!config.port)
+  if(!s_config.port)
     s4port = (unsigned short)((buffer[SOCKS4_DSTPORT] << 8) |
                               (buffer[SOCKS4_DSTPORT + 1]));
   else
-    s4port = config.port;
+    s4port = s_config.port;
 
-  connfd = socksconnect(s4port, config.addr);
+  connfd = socksconnect(s4port, s_config.addr);
   if(connfd == CURL_SOCKET_BAD) {
     /* failed */
     cd = 91;
@@ -353,7 +312,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   curl_socket_t connfd = CURL_SOCKET_BAD;
   unsigned short s5port;
 
-  getconfig();
+  socksd_getconfig();
 
   rc = recv(fd, (char *)buffer, sizeof(buffer), 0);
   if(rc <= 0) {
@@ -372,14 +331,14 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
 
-  if(buffer[SOCKS5_VERSION] != config.version) {
-    logmsg("VERSION byte not %d", config.version);
+  if(buffer[SOCKS5_VERSION] != s_config.version) {
+    logmsg("VERSION byte not %d", s_config.version);
     return CURL_SOCKET_BAD;
   }
-  if((buffer[SOCKS5_NMETHODS] < config.nmethods_min) ||
-     (buffer[SOCKS5_NMETHODS] > config.nmethods_max)) {
+  if((buffer[SOCKS5_NMETHODS] < s_config.nmethods_min) ||
+     (buffer[SOCKS5_NMETHODS] > s_config.nmethods_max)) {
     logmsg("NMETHODS byte not within %d - %d ",
-           config.nmethods_min, config.nmethods_max);
+           s_config.nmethods_min, s_config.nmethods_max);
     return CURL_SOCKET_BAD;
   }
   /* after NMETHODS follows that many bytes listing the methods the client
@@ -391,8 +350,8 @@ static curl_socket_t sockit(curl_socket_t fd)
   logmsg("Incoming request deemed fine!");
 
   /* respond with two bytes: VERSION + METHOD */
-  response[0] = config.responseversion;
-  response[1] = config.responsemethod;
+  response[0] = s_config.responseversion;
+  response[1] = s_config.responsemethod;
   rc = (send)(fd, (char *)response, 2, 0);
   if(rc != 2) {
     logmsg("Sending response failed!");
@@ -411,7 +370,7 @@ static curl_socket_t sockit(curl_socket_t fd)
   logmsg("READ %zd bytes", rc);
   loghex(buffer, rc);
 
-  if(config.responsemethod == 2) {
+  if(s_config.responsemethod == 2) {
     /* RFC 1929 authentication
        +----+------+----------+------+----------+
        |VER | ULEN |  UNAME   | PLEN |  PASSWD  |
@@ -440,10 +399,10 @@ static curl_socket_t sockit(curl_socket_t fd)
       logmsg("Too short packet for ulen %d plen %d: %zd", ulen, plen, rc);
       return CURL_SOCKET_BAD;
     }
-    if((ulen != strlen(config.user)) ||
-       (plen != strlen(config.password)) ||
-       memcmp(&buffer[SOCKS5_UNAME], config.user, ulen) ||
-       memcmp(&buffer[SOCKS5_UNAME + ulen + 1], config.password, plen)) {
+    if((ulen != strlen(s_config.user)) ||
+       (plen != strlen(s_config.password)) ||
+       memcmp(&buffer[SOCKS5_UNAME], s_config.user, ulen) ||
+       memcmp(&buffer[SOCKS5_UNAME + ulen + 1], s_config.password, plen)) {
       /* no match! */
       logmsg("mismatched credentials!");
       login = FALSE;
@@ -475,18 +434,18 @@ static curl_socket_t sockit(curl_socket_t fd)
     return CURL_SOCKET_BAD;
   }
 
-  if(buffer[SOCKS5_VERSION] != config.version) {
-    logmsg("Request VERSION byte not %d", config.version);
+  if(buffer[SOCKS5_VERSION] != s_config.version) {
+    logmsg("Request VERSION byte not %d", s_config.version);
     return CURL_SOCKET_BAD;
   }
   /* 1 == CONNECT */
-  if(buffer[SOCKS5_REQCMD] != config.reqcmd) {
-    logmsg("Request COMMAND byte not %d", config.reqcmd);
+  if(buffer[SOCKS5_REQCMD] != s_config.reqcmd) {
+    logmsg("Request COMMAND byte not %d", s_config.reqcmd);
     return CURL_SOCKET_BAD;
   }
   /* reserved, should be zero */
   if(buffer[SOCKS5_RESERVED]) {
-    logmsg("Request COMMAND byte not %d", config.reqcmd);
+    logmsg("Request COMMAND byte not %d", s_config.reqcmd);
     return CURL_SOCKET_BAD;
   }
   /* ATYP:
@@ -550,26 +509,26 @@ static curl_socket_t sockit(curl_socket_t fd)
     }
   }
 
-  if(!config.port) {
+  if(!s_config.port) {
     unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
     s5port = (unsigned short)((portp[0] << 8) | (portp[1]));
   }
   else
-    s5port = config.port;
+    s5port = s_config.port;
 
-  if(!config.connectrep)
-    connfd = socksconnect(s5port, config.addr);
+  if(!s_config.connectrep)
+    connfd = socksconnect(s5port, s_config.addr);
 
   if(connfd == CURL_SOCKET_BAD) {
     /* failed */
     rep = 1;
   }
   else {
-    rep = config.connectrep;
+    rep = s_config.connectrep;
   }
 
   /* */
-  response[SOCKS5_VERSION] = config.responseversion;
+  response[SOCKS5_VERSION] = s_config.responseversion;
 
   /*
     o  REP    Reply field:
@@ -663,7 +622,7 @@ static int tunnel(struct perclient *cp, fd_set *fds)
   if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
   accept()
 */
-static bool incoming(curl_socket_t listenfd)
+static bool socksd_incoming(curl_socket_t listenfd)
 {
   fd_set fds_read;
   fd_set fds_write;
@@ -799,12 +758,10 @@ static bool incoming(curl_socket_t listenfd)
   return TRUE;
 }
 
-static curl_socket_t sockdaemon(curl_socket_t sock,
-                                unsigned short *listenport
-#ifdef USE_UNIX_SOCKETS
-        , const char *unix_socket
-#endif
-        )
+static curl_socket_t socksd_sockdaemon(curl_socket_t sock,
+                                       unsigned short *listenport,
+                                       const char *unix_socket,
+                                       bool bind_only)
 {
   /* passive daemon style */
   srvr_sockaddr_union_t listener;
@@ -815,6 +772,10 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
   int delay = 20;
   int attempt = 0;
   int error = 0;
+
+#ifndef USE_UNIX_SOCKETS
+  (void)unix_socket;
+#endif
 
   do {
     attempt++;
@@ -938,6 +899,12 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     }
   }
 
+  /* bindonly option forces no listening */
+  if(bind_only) {
+    logmsg("instructed to bind port without listening");
+    return sock;
+  }
+
   /* start accepting connections */
   rc = listen(sock, 5);
   if(0 != rc) {
@@ -958,18 +925,19 @@ int main(int argc, char *argv[])
   curl_socket_t msgsock = CURL_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
-  const char *pidname = ".socksd.pid";
-  const char *portname = NULL; /* none by default */
   bool juggle_again;
   int error;
   int arg = 1;
 
-#ifdef USE_UNIX_SOCKETS
   const char *unix_socket = NULL;
+#ifdef USE_UNIX_SOCKETS
   bool unlink_socket = false;
 #endif
 
+  pidname = ".socksd.pid";
   serverlogfile = "log/socksd.log";
+  configfile = "socksd.config";
+  server_port = 8905;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
@@ -1054,7 +1022,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = util_ultous(ulnum);
+        server_port = util_ultous(ulnum);
         arg++;
       }
     }
@@ -1099,11 +1067,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = sockdaemon(sock, &port
-#ifdef USE_UNIX_SOCKETS
-            , unix_socket
-#endif
-            );
+    sock = socksd_sockdaemon(sock, &server_port, unix_socket, FALSE);
     if(CURL_SOCKET_BAD == sock) {
       goto socks5_cleanup;
     }
@@ -1120,7 +1084,7 @@ int main(int argc, char *argv[])
     logmsg("Listening on Unix socket %s", unix_socket);
   else
 #endif
-  logmsg("Listening on port %hu", port);
+  logmsg("Listening on port %hu", server_port);
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
@@ -1128,14 +1092,14 @@ int main(int argc, char *argv[])
   }
 
   if(portname) {
-    wroteportfile = write_portfile(portname, port);
+    wroteportfile = write_portfile(portname, server_port);
     if(!wroteportfile) {
       goto socks5_cleanup;
     }
   }
 
   do {
-    juggle_again = incoming(sock);
+    juggle_again = socksd_incoming(sock);
   } while(juggle_again);
 
 socks5_cleanup:

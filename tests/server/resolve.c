@@ -50,9 +50,6 @@
 /* include memdebug.h last */
 #include "memdebug.h"
 
-static bool use_ipv6 = FALSE;
-static const char *ipv_inuse = "IPv4";
-
 int main(int argc, char *argv[])
 {
   int arg = 1;
@@ -71,14 +68,21 @@ int main(int argc, char *argv[])
       return 0;
     }
     else if(!strcmp("--ipv6", argv[arg])) {
+#if defined(CURLRES_IPV6)
       ipv_inuse = "IPv6";
       use_ipv6 = TRUE;
       arg++;
+#else
+      puts("IPv6 support has been disabled in this program");
+      return 1;
+#endif
     }
     else if(!strcmp("--ipv4", argv[arg])) {
       /* for completeness, we support this option as well */
       ipv_inuse = "IPv4";
+#if defined(CURLRES_IPV6)
       use_ipv6 = FALSE;
+#endif
       arg++;
     }
     else {
@@ -127,13 +131,8 @@ int main(int argc, char *argv[])
       freeaddrinfo(ai);
   }
 #else
-  if(use_ipv6) {
-    puts("IPv6 support has been disabled in this program");
-    return 1;
-  }
-  else {
-    /* gethostbyname() resolve */
-    struct hostent *he;
+  {
+    struct hostent *he;  /* gethostbyname() resolve */
 
 #ifdef __AMIGA__
     he = gethostbyname((unsigned char *)host);
