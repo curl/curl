@@ -3573,7 +3573,7 @@ AC_INCLUDES_DEFAULT
 fi
 
 dnl **********************************************************************
-dnl Check for msh3 (QUIC)
+dnl Check for msh3/msquic (QUIC)
 dnl **********************************************************************
 
 OPT_MSH3="no"
@@ -3612,7 +3612,7 @@ if test X"$want_msh3" != Xno; then
       AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-msh3 a no-no])
     fi
     if test "$OPENSSL_ENABLED" != "1"; then
-      AC_MSG_ERROR([msh3 requires OpenSSL])
+      AC_MSG_ERROR([msh3/msquic requires OpenSSL])
     fi
   fi
 
