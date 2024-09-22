@@ -28,30 +28,6 @@
 version: 2.1
 
 commands:
-  configure:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl \
-              || { tail -1000 config.log; false; }
-
-  configure-openssl-no-verbose:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-verbose --enable-werror --with-openssl \
-              || { tail -1000 config.log; false; }
-
-  configure-no-proxy:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-proxy --enable-werror --with-openssl \
-              || { tail -1000 config.log; false; }
-
   install-cares:
     steps:
       - run:
@@ -70,14 +46,6 @@ commands:
           command: |
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
             sudo python3 -m pip install impacket
-
-  configure-libssh:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl --with-libssh \
-              || { tail -1000 config.log; false; }
 
   install-wolfssl:
     steps:
@@ -104,6 +72,38 @@ commands:
             ./autogen.sh
             ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
             make install
+
+  configure:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl \
+              || { tail -1000 config.log; false; }
+
+  configure-openssl-no-verbose:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-verbose --enable-werror --with-openssl \
+              || { tail -1000 config.log; false; }
+
+  configure-no-proxy:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-proxy --enable-werror --with-openssl \
+              || { tail -1000 config.log; false; }
+
+  configure-libssh:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl --with-libssh \
+              || { tail -1000 config.log; false; }
 
   configure-cares:
     steps:
