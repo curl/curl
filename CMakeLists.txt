@@ -899,7 +899,7 @@ if(USE_QUICHE)
   endif()
 endif()
 
-option(USE_MSH3 "Use msquic library for HTTP/3 support" OFF)
+option(USE_MSH3 "Use msh3/msquic library for HTTP/3 support" OFF)
 if(USE_MSH3)
   if(USE_NGTCP2 OR USE_QUICHE)
     message(FATAL_ERROR "Only one HTTP/3 backend can be selected")
