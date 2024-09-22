@@ -206,7 +206,6 @@ if(PICKY_COMPILER)
         list(APPEND WPICKY_ENABLE
           -Walloc-zero                     #             gcc  7.0
           -Wduplicated-branches            #             gcc  7.0
-          -Wno-format-overflow             #             gcc  7.0
           -Wformat-truncation=2            #             gcc  7.0
           -Wimplicit-fallthrough           # clang  4.0  gcc  7.0
           -Wrestrict                       #             gcc  7.0
