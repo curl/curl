@@ -1,13 +1,15 @@
-curl and libcurl 8.10.2
+curl and libcurl 8.11.0
 
  Public curl releases:         262
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3249
+ Contributors:                 3250
 
 This release includes the following changes:
 
+ o curl: --create-dirs works for --dump-header as well [4]
+ o gtls: Add P12 format support [9]
  o ipfs: add options to disable [8]
 
 This release includes the following bugfixes:
@@ -27,9 +29,11 @@ This release includes the following bugfixes:
  o cmake: drop redundant zlib var, rename function (internals) [50]
  o cmake: expand CURL_USE_PKGCONFIG to non-cross MINGW [13]
  o cmake: fix broken dependency chain for cmdline-opts, tidy-ups [11]
+ o cmake: require quictls (or fork) when using msh3 on non-Windows [14]
  o cmake: separate target for examples, optimize CI, fix fallouts [16]
  o cmake: sync torture test parallelism with autotools [35]
  o configure: catch Apple in more target triplets [6]
+ o curl: add build options for safe/no CA bundle search (Windows) [26]
  o curl_url_set.md: document HOST handling when URL is parsed [2]
  o CURLMOPT_PIPELINING.md: clarify that CURLPIPE_NOTHING is not default [54]
  o lib, src, tests: added space around ternary expressions [56]
@@ -46,8 +50,10 @@ This release includes the following bugfixes:
  o tests/valgrind.pm: fix warnings with no valgrind report to show [25]
  o tests: delete duplicate macro check [53]
  o tests: fix keyword for test1411
+ o tests: libtests and unit tests need explicit #include memdebug [7]
  o tests: Only log warnings or worse by default in smbserver [33]
  o tests: remove all valgrind disble instructions [21]
+ o tests: speed up builds with single-binary test bundles [29]
  o tests: testrunner fairness [39]
  o tests: testrunner reliability improvements [55]
  o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
@@ -74,22 +80,27 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Dan Fandrich, Daniel Stenberg, Gabriel Marin, Jon Rumsey, Kai Pastor,
-  lomberd2 on github, MacKenzie, Nicolas George, Pavel Kropachev,
-  Rasmus Melchior Jacobsen, Ray Satiro, Stefan Eissing, Tal Regev,
-  Venkat Krishna R, Viktor Szakats
-  (15 contributors)
+  lomberd2 on github, MacKenzie, Montg0mery on github, Nicolas George,
+  Pavel Kropachev, Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot],
+  Stefan Eissing, Tal Regev, Tatsuhiro Tsujikawa, Venkat Krishna R,
+  Viktor Szakats
+  (18 contributors)
 
 References to bug reports and discussions on issues:
 
  [1] = https://curl.se/bug/?i=14938
  [2] = https://curl.se/bug/?i=14942
  [3] = https://curl.se/bug/?i=14958
+ [4] = https://curl.se/bug/?i=14941
  [5] = https://curl.se/bug/?i=14818
  [6] = https://curl.se/bug/?i=14728
+ [7] = https://curl.se/bug/?i=15007
  [8] = https://curl.se/bug/?i=14824
+ [9] = https://curl.se/bug/?i=14991
  [11] = https://curl.se/bug/?i=14883
  [12] = https://curl.se/bug/?i=14789
  [13] = https://curl.se/bug/?i=14658
+ [14] = https://curl.se/bug/?i=15003
  [15] = https://curl.se/bug/?i=14815
  [16] = https://curl.se/bug/?i=14906
  [18] = https://curl.se/bug/?i=14843
@@ -100,6 +111,8 @@ References to bug reports and discussions on issues:
  [23] = https://curl.se/bug/?i=14982
  [24] = https://curl.se/bug/?i=14981
  [25] = https://curl.se/bug/?i=14977
+ [26] = https://curl.se/bug/?i=14582
+ [29] = https://curl.se/bug/?i=14772
  [30] = https://curl.se/bug/?i=14971
  [31] = https://curl.se/bug/?i=14765
  [32] = https://curl.se/bug/?i=14932
