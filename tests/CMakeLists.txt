@@ -43,6 +43,13 @@ function(add_runtests _targetname _test_flags)
   if(CURL_TEST_BUNDLES)
     set(_test_flags "${_test_flags} -bundle")
   endif()
+  unset(_depends)
+  # Skip walking through dependent targets before running tests in CI.
+  # This avoids: GNU Make doing a slow re-evaluation of all targets and
+  # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
+  if(NOT _targetname STREQUAL "test-ci")
+    set(_depends "testdeps")
+  endif()
   # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
@@ -53,7 +60,7 @@ function(add_runtests _targetname _test_flags)
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${_test_flags_list}
       "\$TFLAGS"
-    DEPENDS testdeps
+    DEPENDS "${_depends}"
     VERBATIM USES_TERMINAL
   )
 endfunction()
