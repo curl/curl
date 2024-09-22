@@ -78,7 +78,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --with-openssl \
               || { tail -1000 config.log; false; }
 
   configure-openssl-no-verbose:
@@ -86,7 +87,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-verbose --enable-werror --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-verbose --enable-werror \
+              --with-openssl \
               || { tail -1000 config.log; false; }
 
   configure-no-proxy:
@@ -94,7 +96,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-proxy --enable-werror --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --disable-proxy --enable-werror \
+              --with-openssl \
               || { tail -1000 config.log; false; }
 
   configure-libssh:
@@ -102,7 +105,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl --with-libssh \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --with-openssl --with-libssh \
               || { tail -1000 config.log; false; }
 
   configure-cares:
@@ -110,7 +114,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl --enable-ares \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
   configure-wolfssh:
@@ -118,7 +123,9 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
+            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
               || { tail -1000 config.log; false; }
 
   configure-cares-debug:
@@ -126,7 +133,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-debug --enable-werror --with-openssl --enable-ares \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-debug --enable-werror \
+              --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
   build:
