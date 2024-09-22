@@ -622,7 +622,7 @@ jobs:
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target test-ci
 
       - name: 'cmake build examples'
         timeout-minutes: 5
