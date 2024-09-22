@@ -2216,13 +2216,9 @@ endif()
 # Post-build events are always executed in MSBuild, even if the build is up to date.
 # Apply the workaround from https://gitlab.kitware.com/cmake/cmake/-/issues/18530
 if(CMAKE_GENERATOR MATCHES "Visual Studio")
-    file(CONFIGURE OUTPUT Directory.Build.props CONTENT [[
-      <Project>
-        <Target Name="DisablePostBuildEvent" AfterTargets="Link" BeforeTargets="PostBuildEvent">
-            <PropertyGroup>
-              <PostBuildEventUseInBuild Condition="'$(LinkSkippedExecution)' == 'True'">false</PostBuildEventUseInBuild>
-            </PropertyGroup>
-          </Target>
-      </Project>
-    ]] @ONLY)
+  configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/Directory.Build.props.in
+    ${CMAKE_CURRENT_BINARY_DIR}/Directory.Build.props
+    @ONLY
+  )
 endif()

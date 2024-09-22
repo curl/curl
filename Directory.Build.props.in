@@ -1,0 +1,7 @@
+<Project>
+<Target Name="DisablePostBuildEvent" AfterTargets="Link" BeforeTargets="PostBuildEvent">
+    <PropertyGroup>
+        <PostBuildEventUseInBuild Condition="'$(LinkSkippedExecution)' == 'True'">false</PostBuildEventUseInBuild>
+    </PropertyGroup>
+    </Target>
+</Project>
