@@ -76,7 +76,7 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror --with-openssl --with-libssh \
               || { tail -1000 config.log; false; }
 
   install-wolfssl:
