@@ -56,7 +56,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
     return CURL_READFUNC_PAUSE;
   case 2:
     delta = time(NULL) - pooh->origin;
-    *ptr = delta >= PAUSE_TIME ? '\x42': '\x41'; /* ASCII A or B. */
+    *ptr = delta >= PAUSE_TIME ? '\x42' : '\x41'; /* ASCII A or B. */
     return 1;
   case 3:
     return 0;
