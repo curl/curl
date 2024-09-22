@@ -984,7 +984,7 @@ number:
         *fptr++ = 'l';
 
       if(flags & FLAGS_FLOATE)
-        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E':'e');
+        *fptr++ = (char)((flags & FLAGS_UPPER) ? 'E' : 'e');
       else if(flags & FLAGS_FLOATG)
         *fptr++ = (char)((flags & FLAGS_UPPER) ? 'G' : 'g');
       else

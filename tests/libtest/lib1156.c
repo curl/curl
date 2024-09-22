@@ -90,16 +90,16 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   unsigned int replyselector;
   char urlbuf[256];
 
-  replyselector = (p->flags & F_CONTENTRANGE) ? 1: 0;
+  replyselector = (p->flags & F_CONTENTRANGE) ? 1 : 0;
   if(p->flags & F_HTTP416)
     replyselector += 2;
   msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
   test_setopt(curl, CURLOPT_URL, urlbuf);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3: 0);
+  test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3 : 0);
   test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME) ?
                                    "3-1000000": (char *) NULL);
-  test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1: 0);
+  test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1 : 0);
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
