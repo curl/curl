@@ -264,7 +264,7 @@ else()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-if(UNIX OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))  # Keep in sync with CMake/curl-config.cmake.in
+if(UNIX OR VCPKG_TOOLCHAIN OR MINGW)  # Keep in sync with CMake/curl-config.cmake.in
   set(_curl_use_pkgconfig_default ON)
 else()
   set(_curl_use_pkgconfig_default OFF)

@@ -276,7 +276,7 @@ Details via CMake
 - `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
 - `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if no other TLS backend was enabled.
-- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix, vcpkg, MinGW if not cross-compiling.
+- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix, vcpkg, MinGW.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
 - `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
