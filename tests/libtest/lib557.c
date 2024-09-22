@@ -41,6 +41,7 @@
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
+#pragma GCC diagnostic ignored "-Wformat-overflow"
 #endif
 
 #if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
