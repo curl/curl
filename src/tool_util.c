@@ -190,6 +190,7 @@ int tool_ftruncate64(int fd, curl_off_t where)
 
 #endif /* USE_TOOL_FTRUNCATE */
 
+#ifdef _WIN32
 FILE *Curl_execpath(struct GlobalConfig *config,
                     const char *filename, char **pathp)
 {
@@ -229,3 +230,4 @@ FILE *Curl_execpath(struct GlobalConfig *config,
 
   return NULL;
 }
+#endif
