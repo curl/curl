@@ -24,6 +24,7 @@
 
 #include "test.h"
 #include "testtrace.h"
+#include "memdebug.h"
 
 #ifdef USE_WEBSOCKETS
 

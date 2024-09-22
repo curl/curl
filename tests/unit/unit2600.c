@@ -49,7 +49,7 @@
 #include "multiif.h"
 #include "select.h"
 #include "curl_trc.h"
-
+#include "memdebug.h"
 
 static CURL *easy;
 

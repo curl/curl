@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 #include "curl_get_line.h"
+#include "memdebug.h"
 
 #if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
