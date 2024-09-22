@@ -362,7 +362,7 @@ jobs:
         timeout-minutes: 10
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps --verbose
 
       - name: 'install test tools'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -382,7 +382,7 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci --verbose
 
       - name: 'cmake build examples'
         timeout-minutes: 5
@@ -601,7 +601,7 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps --verbose
 
       - name: 'install test tools'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -626,7 +626,7 @@ jobs:
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci --verbose
 
       - name: 'cmake build examples'
         timeout-minutes: 5
