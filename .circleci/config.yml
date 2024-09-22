@@ -87,8 +87,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --disable-verbose \
-              --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror \
+              --with-openssl --disable-verbose \
               || { tail -1000 config.log; false; }
 
   configure-no-proxy:
@@ -96,8 +96,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --disable-proxy \
-              --with-openssl \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror \
+              --with-openssl --disable-proxy \
               || { tail -1000 config.log; false; }
 
   configure-libssh:
