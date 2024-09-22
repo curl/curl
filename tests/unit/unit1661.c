@@ -22,8 +22,8 @@
  *
  ***************************************************************************/
 #include "curlcheck.h"
-
 #include "bufref.h"
+#include "memdebug.h"
 
 static struct bufref bufref;
 
