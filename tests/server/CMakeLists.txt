@@ -28,7 +28,7 @@ include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
-if(CURL_USE_TEST_BUNDLES)
+if(CURL_TEST_BUNDLES)
   add_custom_command(
     OUTPUT "server_bundle.c"
     COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${SERVERPROGS} > "server_bundle.c"
