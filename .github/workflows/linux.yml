@@ -276,7 +276,8 @@ jobs:
     steps:
       - if: matrix.build.container == null
         run: |
-          sudo apt-get install libtool autoconf automake pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
+          sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
+            ${{ matrix.build.install_packages }}
           sudo python3 -m pip install impacket
         name: 'install prereqs and impacket'
 
@@ -501,7 +502,7 @@ jobs:
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
-          cmake --build . --parallel
+          cmake --build . --parallel 5
           cmake --install .
 
       - if: contains(matrix.build.install_steps, 'rust')
@@ -584,23 +585,20 @@ jobs:
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: |
+      - name: 'configure'
+        run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
-          ${{ matrix.build.configure-prefix }} \
-          ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            ${{ matrix.build.configure }}
-        if: ${{ matrix.build.configure }}
-        name: 'configure (autotools)'
-
-      - run: |
-          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
-          cmake . \
-            -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-            -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
-            ${{ matrix.build.generate }}
-        if: ${{ matrix.build.generate }}
-        name: 'configure (cmake)'
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake -G Ninja \
+              -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+              ${{ matrix.build.generate }}
+          else
+            ${{ matrix.build.configure-prefix }} \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              ${{ matrix.build.configure }}
+          fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
@@ -611,10 +609,16 @@ jobs:
           cat tests/config || true
           cat tests/http/config.ini || true
 
-      - run: ${{ matrix.build.make-prefix }} make V=1 VERBOSE=1
-        name: 'make'
+      - name: 'build'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            ${{ matrix.build.make-prefix }} cmake --build . --parallel 5 --verbose
+          else
+            ${{ matrix.build.make-prefix }} make V=1
+          fi
 
-      - run: |
+      - name: single-use function check
+        run: |
           git config --global --add safe.directory "*"
           if [ -n '${{ matrix.build.generate }}' ]; then
             libcurla=lib/libcurl.a
@@ -622,7 +626,6 @@ jobs:
             libcurla=lib/.libs/libcurl.a
           fi
           ./scripts/singleuse.pl ${{ matrix.build.singleuse }} ${libcurla}
-        name: single-use function check
 
       - run: ./src/curl -V
         name: 'check curl -V output'
@@ -631,13 +634,14 @@ jobs:
         if: ${{ matrix.build.generate }}
         name: 'cmake install'
 
-      - run: make V=1 -C tests
-        if: ${{ matrix.build.configure && matrix.build.install_steps != 'skipall' }}
-        name: 'make tests (autotools)'
-
-      - run: make VERBOSE=1 testdeps
-        if: ${{ matrix.build.generate && matrix.build.install_steps != 'skipall' }}
-        name: 'make tests (cmake)'
+      - name: 'build tests'
+        if: ${{ matrix.build.install_steps != 'skipall' }}
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --parallel 5 --verbose --target testdeps
+          else
+            make V=1 -C tests
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
@@ -650,7 +654,11 @@ jobs:
           if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
             TFLAGS+=' ~2077 ~2078'  # valgrind errors
           fi
-          make V=1 VERBOSE=1 test-ci
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target test-ci
+          else
+            make V=1 test-ci
+          fi
 
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
@@ -664,10 +672,10 @@ jobs:
             make V=1 pytest-ci
           fi
 
-      - run: ${{ matrix.build.make-prefix }} make V=1 examples
-        if: ${{ matrix.build.configure }}
-        name: 'make examples (autotools)'
-
-      - run: ${{ matrix.build.make-prefix }} make VERBOSE=1 curl-examples
-        if: ${{ matrix.build.generate }}
-        name: 'make examples (cmake)'
+      - name: 'build examples'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            ${{ matrix.build.make-prefix }} cmake --build . --parallel 5 --verbose --target curl-examples
+          else
+            ${{ matrix.build.make-prefix }} make V=1 examples
+          fi
