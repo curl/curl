@@ -39,7 +39,7 @@ jobs:
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     defaults:
       run:
         shell: msys2 {0}
@@ -53,11 +53,11 @@ jobs:
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --enable-windows-unicode --enable-ares', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
-          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', test: 'uwp', name: 'schannel R' }
-          - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', name: 'schannel R' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
+          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
+          - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', test: 'uwp', name: 'schannel R' }
+          - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', name: 'schannel R' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -266,7 +266,7 @@ jobs:
   old-mingw-w64:
     name: 'old-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
-    timeout-minutes: 45
+    timeout-minutes: 30
     defaults:
       run:
         shell: C:\msys64\usr\bin\bash.exe {0}
@@ -479,42 +479,66 @@ jobs:
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=ON  -DCURL_USE_SCHANNEL=ON  -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
+              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON
+
           - name: 'openssl'
             install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON
+
           - name: 'openssl'
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
             arch: 'x64'
             plat: 'uwp'
             type: 'Debug'
             tflags: 'skiprun'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON -DCURL_USE_LIBPSL=OFF'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_LIBPSL=OFF
+
           - name: 'libressl'
             install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DCURL_CA_SEARCH_SAFE=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_CA_SEARCH_SAFE=ON
+
           - name: 'boringssl-ECH'
             install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_OPENSSL=ON -DUSE_HTTPSRR=ON -DUSE_ECH=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DUSE_HTTPSRR=ON -DUSE_ECH=ON
+
           - name: 'wolfssl'
             install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DCURL_USE_GSASL=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_GSASL=ON
+
           - name: 'gnutls'
             install: 'brotli zlib zstd libpsl nghttp2 shiftmedia-libgnutls libssh pkgconf gsasl ngtcp2[gnutls] nghttp3'
             arch: 'x64'
@@ -525,14 +549,22 @@ jobs:
             #          read its configuration from, making it vulnerable to attacks on
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DCURL_USE_GNUTLS=ON -DCURL_USE_GSASL=ON -DUSE_NGTCP2=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_GSASL=ON
+
           - name: 'msh3'
             install: 'brotli zlib zstd libpsl nghttp2 msh3 libssh2 pkgconf gsasl'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: 'skipall'
-            config: '-DENABLE_DEBUG=ON -DENABLE_UNICODE=OFF -DCURL_USE_SCHANNEL=OFF -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_LIBSSH2=ON -DUSE_MSH3=ON -DCURL_USE_GSASL=ON'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DUSE_MSH3=ON
+              -DCURL_USE_GSASL=ON
+
       fail-fast: false
     steps:
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -570,6 +602,8 @@ jobs:
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DENABLE_DEBUG=ON \
             -DENABLE_WEBSOCKETS=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
