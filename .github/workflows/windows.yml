@@ -620,7 +620,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 16
         run: |
-          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~FTP ~SCP ~612 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
