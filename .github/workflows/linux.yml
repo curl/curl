@@ -476,9 +476,9 @@ jobs:
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet -b v${{ env.msh3-version }} --depth=1 --recursive https://github.com/nibanks/msh3
-          cd msh3 && mkdir build && cd build
-          cmake -G 'Unix Makefiles' -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3 ..
+          git clone --quiet --depth=1 -b v${{ env.msh3-version }} --recursive https://github.com/nibanks/msh3
+          cd msh3
+          cmake -B . -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_INSTALL_PREFIX=$HOME/msh3
           cmake --build .
           cmake --install .
 
