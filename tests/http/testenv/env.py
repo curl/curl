@@ -585,6 +585,6 @@ class Env:
         p = subprocess.run(['make'], capture_output=True, text=True,
                            cwd=client_dir)
         if p.returncode != 0:
-            pytest.exit(f"`make`in {client_dir} failed:\n{p.stderr}")
+            pytest.exit(f"`make` in {client_dir} failed:\n{p.stderr}")
             return False
         return True
