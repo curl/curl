@@ -117,6 +117,11 @@ jobs:
             configure: --with-openssl --disable-proxy --disable-warnings
             singleuse: --unit
 
+          - name: openssl WARN-REPRO-TEST-!BUNDLE
+            install_steps: pytest
+            configure: --with-openssl --disable-proxy --disable-warnings --disable-test-bundles
+            singleuse: --unit
+
           - name: openssl default
             install_steps: pytest
             configure: --with-openssl --enable-debug
