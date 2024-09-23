@@ -2765,10 +2765,11 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
       if test "$curl_cv_windows_vista" = 'yes'; then
         want_winidn="yes"
         want_winidn_path="default"
+        AC_MSG_RESULT([yes])
       else
         want_winidn="no"
+        AC_MSG_RESULT([no])
       fi
-      AC_MSG_RESULT([no])
       ;;
     no)
       dnl --without-winidn option used or configure option not specified
