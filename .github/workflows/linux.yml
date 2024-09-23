@@ -66,8 +66,8 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: bearssl valgrind
-            install_packages: zlib1g-dev valgrind
+          - name: bearssl
+            install_packages: zlib1g-dev
             install_steps: bearssl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
@@ -78,8 +78,8 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/bearssl/lib" --with-bearssl=$HOME/bearssl --enable-debug
             singleuse: --unit
 
-          - name: libressl heimdal valgrind
-            install_packages: zlib1g-dev heimdal-dev valgrind
+          - name: libressl heimdal
+            install_packages: zlib1g-dev heimdal-dev
             install_steps: libressl pytest
             configure: LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --with-gssapi --enable-debug
             singleuse: --unit
@@ -120,8 +120,8 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
             singleuse: --unit
 
-          - name: msh3 valgrind
-            install_packages: zlib1g-dev valgrind
+          - name: msh3
+            install_packages: zlib1g-dev
             install_steps: quictls msh3
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
             singleuse: --unit
@@ -149,13 +149,13 @@ jobs:
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
             singleuse: --unit
 
-          - name: openssl3 valgrind
-            install_packages: zlib1g-dev valgrind
+          - name: openssl3
+            install_packages: zlib1g-dev
             install_steps: gcc-11 openssl3 pytest
             configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
 
-          - name: openssl3-O3 valgrind
+          - name: openssl3 -O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
@@ -249,8 +249,8 @@ jobs:
             configure: --with-rustls=$HOME/rustls --enable-debug
             singleuse: --unit
 
-          - name: IntelC !SSL valgrind
-            install_packages: zlib1g-dev valgrind
+          - name: IntelC !SSL
+            install_packages: zlib1g-dev
             install_steps: intel
             configure: CC=icc --enable-debug --without-ssl
             singleuse: --unit
