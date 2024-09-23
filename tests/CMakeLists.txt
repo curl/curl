@@ -43,10 +43,10 @@ function(add_runtests _targetname _test_flags)
   if(CURL_TEST_BUNDLES)
     set(_test_flags "${_test_flags} -bundle")
   endif()
-  unset(_depends)
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
+  unset(_depends)
   if(NOT _targetname STREQUAL "test-ci")
     set(_depends "testdeps")
   endif()
@@ -60,6 +60,20 @@ function(add_runtests _targetname _test_flags)
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${_test_flags_list}
       "\$TFLAGS"
+    DEPENDS "${_depends}"
+    VERBATIM USES_TERMINAL
+  )
+endfunction()
+
+function(add_pytest _targetname _test_flags)
+  unset(_depends)
+  if(NOT _targetname STREQUAL "pytest-ci")
+    set(_depends "test-http-clients")
+  endif()
+  string(REPLACE " " ";" _test_flags_list "${_test_flags}")
+  add_custom_target(${_targetname}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"
     DEPENDS "${_depends}"
     VERBATIM USES_TERMINAL
   )
@@ -94,3 +108,6 @@ add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
 add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
 add_runtests(test-torture   "-a -t -j2")
 add_runtests(test-event     "-a -e")
+
+add_pytest(curl-pytest      "")
+add_pytest(curl-pytest-ci   "-v")

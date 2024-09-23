@@ -652,14 +652,17 @@ jobs:
           fi
           make V=1 VERBOSE=1 test-ci
 
-      - if: contains(matrix.build.install_steps, 'pytest')
-        # run for `tests/http` directory, so pytest does not pick up any other
-        # packages we might have built here
-        run: pytest -v tests/http
-        name: 'run pytest'
+      - name: 'run pytest'
+        if: contains(matrix.build.install_steps, 'pytest')
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target curl-pytest-ci
+          else
+            make V=1 pytest-ci
+          fi
 
       - run: ${{ matrix.build.make-prefix }} make V=1 examples
         if: ${{ matrix.build.configure }}
