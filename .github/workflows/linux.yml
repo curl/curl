@@ -276,7 +276,8 @@ jobs:
     steps:
       - if: matrix.build.container == null
         run: |
-          sudo apt-get install libtool autoconf automake pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev ${{ matrix.build.install_packages }}
+          sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
+            ${{ matrix.build.install_packages }}
           sudo python3 -m pip install impacket
         name: 'install prereqs and impacket'
 
@@ -594,7 +595,7 @@ jobs:
 
       - run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
-          cmake . \
+          cmake -G Ninja \
             -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
@@ -611,8 +612,13 @@ jobs:
           cat tests/config || true
           cat tests/http/config.ini || true
 
-      - run: ${{ matrix.build.make-prefix }} make V=1 VERBOSE=1
-        name: 'make'
+      - run: ${{ matrix.build.make-prefix }} make V=1
+        if: ${{ matrix.build.configure }}
+        name: 'make (autotools)'
+
+      - run: ${{ matrix.build.make-prefix }} cmake --build . --verbose
+        if: ${{ matrix.build.generate }}
+        name: 'make (cmake)'
 
       - run: |
           git config --global --add safe.directory "*"
@@ -635,7 +641,7 @@ jobs:
         if: ${{ matrix.build.configure && matrix.build.install_steps != 'skipall' }}
         name: 'make tests (autotools)'
 
-      - run: make VERBOSE=1 testdeps
+      - run: cmake --build . --verbose --target testdeps
         if: ${{ matrix.build.generate && matrix.build.install_steps != 'skipall' }}
         name: 'make tests (cmake)'
 
@@ -650,7 +656,11 @@ jobs:
           if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
             TFLAGS+=' ~2077 ~2078'  # valgrind errors
           fi
-          make V=1 VERBOSE=1 test-ci
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target test-ci
+          else
+            make V=1 test-ci
+          fi
 
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
@@ -668,6 +678,6 @@ jobs:
         if: ${{ matrix.build.configure }}
         name: 'make examples (autotools)'
 
-      - run: ${{ matrix.build.make-prefix }} make VERBOSE=1 curl-examples
+      - run: ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
         if: ${{ matrix.build.generate }}
         name: 'make examples (cmake)'
