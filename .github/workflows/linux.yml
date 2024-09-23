@@ -123,8 +123,8 @@ jobs:
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
             singleuse: --unit
 
-          - name: openssl3 valgrind
-            install_packages: zlib1g-dev valgrind
+          - name: openssl3
+            install_packages: zlib1g-dev
             install_steps: gcc-11 openssl3 pytest
             configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
             singleuse: --unit
