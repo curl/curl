@@ -112,6 +112,11 @@ jobs:
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
             singleuse: --unit
 
+          - name: openssl WARN-REPRO-TEST
+            install_steps: pytest
+            configure: --with-openssl --disable-proxy --disable-warnings
+            singleuse: --unit
+
           - name: openssl default
             install_steps: pytest
             configure: --with-openssl --enable-debug
