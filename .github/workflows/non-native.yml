@@ -103,7 +103,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j20 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
+              export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
@@ -146,7 +146,7 @@ jobs:
             src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              make test-ci V=1 TFLAGS='-j20 ~FTP'
+              make test-ci V=1 TFLAGS='-j8 ~FTP'
             fi
             echo '::group::build examples'
             make -j3 examples
@@ -176,7 +176,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j20 ~FTP'
+              export TFLAGS='-j8 ~FTP'
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
@@ -206,7 +206,7 @@ jobs:
             gmake -j3 install
             src/curl --disable --version
             gmake -j3 -C tests
-            gmake test-ci V=1 TFLAGS='-j20 ~MQTT ~FTP'
+            gmake test-ci V=1 TFLAGS='-j12 ~MQTT ~FTP'
             echo '::group::build examples'
             gmake -j3 examples
             echo '::endgroup::'
