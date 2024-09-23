@@ -157,6 +157,7 @@ jobs:
             TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
+            TFLAGS+=' ~SFTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
@@ -619,7 +620,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 16
         run: |
-          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP ~SCP ~612 ${{ matrix.tflags }}'
+          export TFLAGS='-j14 ~TFTP ~MQTT ~WebSockets ~FTP ~SCP ~612 ${{ matrix.tflags }}'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
