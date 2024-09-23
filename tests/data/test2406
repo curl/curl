@@ -32,7 +32,6 @@ h2c
 SSL
 </features>
 <server>
-http
 http/2
 </server>
 <name>
