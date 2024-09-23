@@ -549,7 +549,7 @@ jobs:
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
-            TFLAGS+=' -j8'
+            TFLAGS+=' -j6'
           fi
           if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
             TFLAGS+=' ~2077 ~2078'  # valgrind errors
