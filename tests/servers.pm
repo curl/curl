@@ -2435,6 +2435,17 @@ sub startservers {
             }
         }
         elsif($what eq "http/2") {
+            if($run{'http/2'} &&
+               !responsive_http_server("https", $verbose, 0, protoport('http2tls'))) {
+                logmsg "* restarting unresponsive HTTP/2 server\n";
+                if(stopserver('http/2')) {
+                    return ("failed stopping unresponsive HTTP/2 server", 3);
+                }
+                # also stop http server, we do not know which state it is in
+                if($run{'http'} && stopserver('http')) {
+                    return ("failed stopping HTTP server", 3);
+                }
+            }
             if(!$run{'http/2'}) {
                 ($serr, $pid, $pid2, $PORT{"http2"}, $PORT{"http2tls"}) =
                     runhttp2server($verbose);
