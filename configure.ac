@@ -5208,6 +5208,9 @@ if test "x$want_curldebug" = "xyes"; then
 fi
 if test "x$CURL_CA_EMBED" != "x"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
+  CURL_CA_EMBED_msg="$CURL_CA_EMBED"
+else
+  CURL_CA_EMBED_msg='no'
 fi
 
 dnl replace spaces with newlines
@@ -5410,7 +5413,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSPI:             ${curl_sspi_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
-  ca cert embed:    ${CURL_CA_EMBED}
+  ca cert embed:    ${CURL_CA_EMBED_msg}
   ca fallback:      ${with_ca_fallback}
   LDAP:             ${curl_ldap_msg}
   LDAPS:            ${curl_ldaps_msg}
