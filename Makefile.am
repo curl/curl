@@ -118,7 +118,11 @@ check: test examples check-docs
 
 if CROSSCOMPILING
 test-full: test
+test-nonflaky: test
 test-torture: test
+test-event: test
+test-am: test
+test-ci: test
 
 test:
 	@echo "NOTICE: we can't run the tests when cross-compiling!"
