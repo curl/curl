@@ -231,7 +231,7 @@ jobs:
       - name: 'run tests'
         timeout-minutes: 20
         run: |
-          export TFLAGS='-j10 ${{ matrix.tflags }}'
+          export TFLAGS='-j20 ${{ matrix.tflags }}'
           TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
@@ -381,7 +381,7 @@ jobs:
       - name: 'cmake run tests'
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
         run: |
-          export TFLAGS='-j10 ${{ matrix.build.tflags }}'
+          export TFLAGS='-j20 ${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
             TFLAGS+=' ~2037 ~2041'  # flaky
             if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
