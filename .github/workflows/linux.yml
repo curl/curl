@@ -94,6 +94,18 @@ jobs:
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/libressl/lib" --with-openssl=$HOME/libressl --enable-debug
             singleuse: --unit
 
+          - name: wolfssl-all
+            install_packages: zlib1g-dev
+            install_steps: wolfssl-all
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-debug
+            singleuse: --unit
+
+          - name: wolfssl-opensslextra valgrind
+            install_packages: zlib1g-dev valgrind
+            install_steps: wolfssl-opensslextra
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-opensslextra/lib" --with-wolfssl=$HOME/wolfssl-opensslextra --enable-debug
+            singleuse: --unit
+
           - name: mbedtls valgrind
             install_packages: libnghttp2-dev valgrind
             install_steps: mbedtls pytest
@@ -317,6 +329,48 @@ jobs:
           cd libressl-git
           ./autogen.sh
           ./configure --disable-dependency-tracking --prefix=$HOME/libressl
+          make install
+
+      - name: cache wolfssl (all)
+        if: contains(matrix.build.install_steps, 'wolfssl-all')
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-wolfssl-all
+        env:
+          cache-name: cache-wolfssl-all
+        with:
+          path: /home/runner/wolfssl-all
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+
+      - name: 'build wolfssl (all)'
+        if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
+        run: |
+          source .github/scripts/VERSIONS
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
+          tar -xzf v$WOLFSSL_VER-stable.tar.gz
+          cd wolfssl-$WOLFSSL_VER-stable
+          ./autogen.sh
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-all --enable-all
+          make install
+
+      - name: cache wolfssl (opensslextra)
+        if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
+        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        id: cache-wolfssl-opensslextra
+        env:
+          cache-name: cache-wolfssl-opensslextra
+        with:
+          path: /home/runner/wolfssl-opensslextra
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+
+      - name: 'build wolfssl (opensslextra)'
+        if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
+        run: |
+          source .github/scripts/VERSIONS
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
+          tar -xzf v$WOLFSSL_VER-stable.tar.gz
+          cd wolfssl-$WOLFSSL_VER-stable
+          ./autogen.sh
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-opensslextra --enable-opensslextra
           make install
 
       - name: cache mbedtls
