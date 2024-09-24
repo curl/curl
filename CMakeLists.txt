@@ -1274,7 +1274,7 @@ if(_curl_ca_bundle_supported)
   set(CURL_CA_PATH "auto" CACHE
     STRING "Location of default CA path. Set 'none' to disable or 'auto' for auto-detection. Defaults to 'auto'.")
   set(CURL_CA_EMBED "" CACHE
-    STRING "Path to the CA bundle to embed into the curl tool.")
+    STRING "Path to the CA bundle to embed in the curl tool.")
 
   if(CURL_CA_BUNDLE STREQUAL "")
     message(FATAL_ERROR "Invalid value of CURL_CA_BUNDLE. Use 'none', 'auto' or file path.")
