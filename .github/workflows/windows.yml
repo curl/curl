@@ -558,7 +558,7 @@ jobs:
           echo '----------------------'
           PATH="/c/Program Files/7-Zip:$PATH"
           export VCPKG_FORCE_SYSTEM_BINARIES=1
-          vcpkg x-set-installed ${{ matrix.install }} --debug '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+          vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - name: 'cmake configure'
         timeout-minutes: 5
