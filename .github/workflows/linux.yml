@@ -652,19 +652,17 @@ jobs:
           fi
           make V=1 VERBOSE=1 test-ci
 
-      - run: make V=1 pytest-ci
-        if: ${{ matrix.build.configure && contains(matrix.build.install_steps, 'pytest') }}
-        name: 'run pytest (autotools)'
+      - name: 'run pytest'
+        if: contains(matrix.build.install_steps, 'pytest')
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
-
-      - run: cmake --build . --verbose --target curl-pytest-ci
-        if: ${{ matrix.build.generate && contains(matrix.build.install_steps, 'pytest') }}
-        name: 'run pytest (cmake)'
-        env:
-          TFLAGS: "${{ matrix.build.tflags }}"
-          CURL_CI: github
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target curl-pytest-ci
+          else
+            make V=1 pytest-ci
+          fi
 
       - run: ${{ matrix.build.make-prefix }} make V=1 examples
         if: ${{ matrix.build.configure }}
