@@ -127,6 +127,7 @@ sub serverfactors {
 #
 sub servername_str {
     my ($proto, $ipver, $idnum) = @_;
+    my $idstr = '';
 
     $proto = uc($proto) if($proto);
     die "unsupported protocol: '$proto'" unless($proto &&
@@ -140,9 +141,14 @@ sub servername_str {
     $idnum = 1 if(not $idnum);
     die "unsupported ID number: '$idnum'" unless($idnum &&
         ($idnum =~ /^(\d+)$/));
-    $idnum = '' if($idnum <= 1);
+    if($proto =~ /^(HTTPS?)$/i && $idnum == 2) {
+        $idstr = '_proxy';
+    }
+    elsif($idnum > 1) {
+        $idstr = '${idnum}';
+    }
 
-    return "${proto}${idnum}${ipver}";
+    return "${proto}${idstr}${ipver}";
 }
 
 
