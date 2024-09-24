@@ -1197,7 +1197,7 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
 
   AC_ARG_WITH(ca-bundle,
 AS_HELP_STRING([--with-ca-bundle=FILE],
-  [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
+  [Absolute path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
 AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
@@ -1208,7 +1208,7 @@ AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
 AS_HELP_STRING([--with-ca-path=DIRECTORY],
-  [Path to a directory containing CA certificates stored individually, with \
+  [Absolute path to a directory containing CA certificates stored individually, with \
 their filenames in a hash format. This option can be used with the OpenSSL, \
 GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
@@ -1348,7 +1348,7 @@ AC_DEFUN([CURL_CHECK_CA_EMBED], [
 
   AC_ARG_WITH(ca-embed,
 AS_HELP_STRING([--with-ca-embed=FILE],
-  [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
+  [Absolute path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
 AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle]),
   [
     want_ca_embed="$withval"
