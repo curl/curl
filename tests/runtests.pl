@@ -3061,7 +3061,6 @@ my $sofar = time() - $start;
 # Finish CI Test Run
 citest_finishtestrun();
 
-logmsg "TESTDEBUG: tell runners to stop servers\n";
 # Tests done, stop the servers
 foreach my $runnerid (values %runnerids) {
     runnerac_stopservers($runnerid);
@@ -3069,11 +3068,8 @@ foreach my $runnerid (values %runnerids) {
 
 # Wait for servers to stop
 my $unexpected;
-logmsg "TESTDEBUG: read response from runners\n";
 foreach my $runnerid (values %runnerids) {
-    logmsg "TESTDEBUG: read response from runner ${runnerid}\n";
     my ($rid, $unexpect, $logs) = runnerar($runnerid);
-    logmsg "TESTDEBUG: got response from runner ${runnerid}\n";
     $unexpected ||= $unexpect;
     logmsg $logs;
 }
@@ -3082,7 +3078,6 @@ foreach my $runnerid (values %runnerids) {
 # There is a race condition here since we don't know exactly when the runners
 # have each finished shutting themselves down, but we're about to exit so it
 # doesn't make much difference.
-logmsg "TESTDEBUG: tell runners to shutdown\n";
 foreach my $runnerid (values %runnerids) {
     runnerac_shutdown($runnerid);
     sleep 0;  # give runner a context switch so it can shut itself down
