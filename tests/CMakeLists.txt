@@ -65,6 +65,20 @@ function(add_runtests _targetname _test_flags)
   )
 endfunction()
 
+function(add_pytest _targetname _test_flags)
+  unset(_depends)
+  if(NOT _targetname STREQUAL "pytest-ci")
+    set(_depends "test-http-clients")
+  endif()
+  string(REPLACE " " ";" _test_flags_list "${_test_flags}")
+  add_custom_target(${_targetname}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"
+    DEPENDS "${_depends}"
+    VERBATIM USES_TERMINAL
+  )
+endfunction()
+
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
 if(MSVC OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
   set(CURL_CPP "\"${CMAKE_C_COMPILER}\" -E")
@@ -94,3 +108,6 @@ add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
 add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
 add_runtests(test-torture   "-a -t -j2")
 add_runtests(test-event     "-a -e")
+
+add_pytest(curl-pytest      "")
+add_pytest(curl-pytest-ci   "-v")

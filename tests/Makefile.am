@@ -122,6 +122,7 @@ TEST_COMMON =
 
 if CROSSCOMPILING
 TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
+PYTEST = $(TEST)
 else # if not cross-compiling:
 if USE_TEST_BUNDLES
 TEST_COMMON += -bundle
@@ -140,6 +141,8 @@ TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
 TEST_CI = $(TEST_NF) -r -rm -j2
+
+PYTEST = pytest
 endif
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
@@ -176,6 +179,11 @@ torture-test: perlcheck all
 
 event-test: perlcheck all
 	$(TEST) $(TEST_E) $(TFLAGS)
+
+default-pytest: ci-pytest
+
+ci-pytest: all
+	srcdir=$(srcdir) $(PYTEST) -v $(srcdir)/http
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)

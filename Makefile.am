@@ -123,6 +123,8 @@ test-torture: test
 test-event: test
 test-am: test
 test-ci: test
+pytest: test
+pytest-ci: test
 
 test:
 	@echo "NOTICE: we can't run the tests when cross-compiling!"
@@ -149,6 +151,12 @@ test-am:
 
 test-ci:
 	@(cd tests; $(MAKE) all ci-test)
+
+pytest:
+	@(cd tests; $(MAKE) all default-pytest)
+
+pytest-ci:
+	@(cd tests; $(MAKE) all ci-pytest)
 
 endif
 
