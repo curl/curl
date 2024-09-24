@@ -64,12 +64,15 @@ timediff_t Curl_pp_state_timeout(struct Curl_easy *data,
      full response to arrive before we bail out */
   timeout_ms = response_time -
     Curl_timediff(Curl_now(), pp->response); /* spent time */
+  DEBUGF(infof(data, "Curl_pp_state_timeout, timeout1=%ld", (long)timeout_ms));
 
   if(data->set.timeout && !disconnecting) {
     /* if timeout is requested, find out how much remaining time we have */
     timediff_t timeout2_ms = data->set.timeout - /* timeout time */
       Curl_timediff(Curl_now(), conn->now); /* spent time */
 
+    DEBUGF(infof(data, "Curl_pp_state_timeout, timeout2=%ld",
+          (long)timeout2_ms));
     /* pick the lowest number */
     timeout_ms = CURLMIN(timeout_ms, timeout2_ms);
   }
