@@ -1344,12 +1344,12 @@ dnl Check if a ca-bundle should be embedded
 
 AC_DEFUN([CURL_CHECK_CA_EMBED], [
 
-  AC_MSG_CHECKING([CA cert bundle path to embed])
+  AC_MSG_CHECKING([CA cert bundle path to embed in the curl tool])
 
   AC_ARG_WITH(ca-embed,
 AS_HELP_STRING([--with-ca-embed=FILE],
-  [Absolute path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle]),
+  [Absolute path to a file containing CA certificates to embed in the curl tool (example: /etc/ca-bundle.crt)])
+AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle in the curl tool]),
   [
     want_ca_embed="$withval"
     if test "x$want_ca_embed" = "xyes"; then
