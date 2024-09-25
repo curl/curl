@@ -66,7 +66,6 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j20'  # flakies: ~389 ~392 ~TFTP and more
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
@@ -146,7 +145,7 @@ jobs:
             src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              make test-ci V=1 TFLAGS='-j8 ~FTP'
+              # make test-ci V=1 TFLAGS='-j8 ~FTP'
             fi
             echo '::group::build examples'
             make -j3 examples
@@ -176,7 +175,7 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j8 ~FTP'
+              # export TFLAGS='-j8 ~FTP'
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
