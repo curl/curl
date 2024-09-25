@@ -42,7 +42,6 @@ use File::Basename;
 use serverhelp qw(
     server_pidfilename
     server_logfilename
-    $logfile
     );
 
 use pathhelp;
@@ -65,6 +64,7 @@ my $socketopt;
 my $cmd;
 
 my $pidfile;          # stunnel pid file
+my $logfile;          # stunnel log file
 my $loglevel = 5;     # stunnel log level
 my $ipvnum = 4;       # default IP version of stunneled server
 my $idnum = 1;        # default stunneled server instance number
