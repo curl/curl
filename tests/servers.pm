@@ -59,6 +59,7 @@ BEGIN {
             stopserver
             stopservers
             subvariables
+            localhttp
         ),
 
         # for debugging only
@@ -3040,5 +3041,8 @@ sub subvariables {
     $$thing =~ s/${prefix}H2CVER/$h2cver/g;
 }
 
+sub localhttp {
+    return $HOSTIP eq "127.0.0.1";
+}
 
 1;

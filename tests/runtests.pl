@@ -824,6 +824,7 @@ sub checksystemfeatures {
     $feature{"xattr"} = 1;
     $feature{"large-time"} = 1;
     $feature{"sha512-256"} = 1;
+    $feature{"local-http"} = servers::localhttp();
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
