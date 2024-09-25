@@ -115,7 +115,9 @@ void logmsg(const char *msg, ...)
   mvsnprintf(buffer, sizeof(buffer), msg, ap);
   va_end(ap);
 
-  logfp = fopen(serverlogfile, "ab");
+  do {
+    logfp = fopen(serverlogfile, "ab");
+  } while(!logfp && (errno == EINTR));
   if(logfp) {
     fprintf(logfp, "%s %s\n", timebuf, buffer);
     fclose(logfp);

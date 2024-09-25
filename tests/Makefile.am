@@ -140,7 +140,7 @@ TEST_E = -a -e
 TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm -j2
+TEST_CI = $(TEST_NF) -r -rm -j20
 
 PYTEST = pytest
 endif
