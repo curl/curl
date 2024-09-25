@@ -3497,7 +3497,8 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
         AC_LANG_PROGRAM([[
           $curl_includes_stdlib
         ]],[[
-          #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+          #if defined(__BIONIC__) || \
+            (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L)
             return 0;
           #else
             #error force compilation error
