@@ -402,9 +402,8 @@ static CURLcode cw_out_write(struct Curl_easy *data,
 {
   struct cw_out_ctx *ctx = writer->ctx;
   CURLcode result;
-  bool flush_all;
+  bool flush_all = !!(type & CLIENTWRITE_EOS);
 
-  flush_all = (type & CLIENTWRITE_EOS) ? TRUE : FALSE;
   if((type & CLIENTWRITE_BODY) ||
      ((type & CLIENTWRITE_HEADER) && data->set.include_header)) {
     result = cw_out_do_write(ctx, data, CW_OUT_BODY, flush_all, buf, blen);
