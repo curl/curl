@@ -2,7 +2,6 @@
 <info>
 <keywords>
 FILE
-FAILURE
 </keywords>
 </info>
 
@@ -14,10 +13,10 @@ FAILURE
 file
 </server>
 <name>
-"upload" nonexisting with file://
+"upload" with file:// overwriting existing
 </name>
 <command option="no-include">
-file://localhost/%PWD/%LOGDIR/nonexisting/result%TESTNUMBER.txt -T %LOGDIR/upload%TESTNUMBER.txt
+file://localhost%FILE_PWD/%LOGDIR/result%TESTNUMBER.txt -T %LOGDIR/upload%TESTNUMBER.txt
 </command>
 <file name="%LOGDIR/upload%TESTNUMBER.txt">
 data
@@ -26,13 +25,19 @@ file
 to
 write
 </file>
+<file2 name="%LOGDIR/result%TESTNUMBER.txt">
+already existing
+</file2>
 </client>
 
 # Verify data after the test has been "shot"
 <verify>
-# 23 => CURLE_WRITE_ERROR
-<errorcode>
-23
-</errorcode>
+<file name="%LOGDIR/result%TESTNUMBER.txt">
+data
+in
+file
+to
+write
+</file>
 </verify>
 </testcase>
