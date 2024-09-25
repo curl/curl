@@ -146,3 +146,9 @@ s/janedenone on hackerone/janedenone on github/
 s/Benjamin Riefenstahl Mecom/Benjamin Riefenstahl/
 s/Micah Snyder)/Micah Snyder/
 s/\#14922//
+s/vvb2060\z/vvb2060 on github/
+s/kartatz\z/Kartatz on github/i
+s/Karthikdasari0423\z/Karthikdasari0423 on github/
+s/niallor on github/Niall O'Reilly/
+s/RuurdBeerstra on github/Ruurd Beerstra/
+s/Smackd0wn\z/Smackd0wn on github/
