@@ -38,7 +38,7 @@ HTTPS GET to localhost, first subject alt name matches, CN does not match (Schan
 CURL_SSL_BACKEND=schannel
 </setenv>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost because we're checking the host name
 <precheck>
