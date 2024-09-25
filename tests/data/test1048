@@ -41,12 +41,8 @@ ftp-ipv6
 FTP-IPv6 dir list PASV with localhost --interface
 </name>
 <command>
--g "ftp://%HOST6IP:%FTP6PORT/" --interface ::1
+-g "ftp://%HOST6IP:%FTP6PORT/" --interface %CLIENT6IP-NB
 </command>
-# --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
-<precheck>
-perl -e "print 'Test requires default test client host address' if ( '%CLIENT6IP' ne '[::1]' );"
-</precheck>
 </client>
 
 #
