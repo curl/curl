@@ -41,9 +41,6 @@ CURL_TESTDIR=%LOGDIR
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl %LOGDIR/name%TESTNUMBER
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -77,6 +74,8 @@ MOOOO
 
 <file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
-
+<notexists>
+%LOGDIR/name%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

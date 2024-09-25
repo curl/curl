@@ -32,9 +32,6 @@ HTTP GET -o fname without Content-Disposition (empty file)
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/outfile%TESTNUMBER file://%PWD/%LOGDIR/outfile%TESTNUMBER
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl %LOGDIR/%TESTNUMBER
-</postcheck>
 </client>
 
 #
@@ -51,5 +48,8 @@ Accept: */*
 <file1 name="%LOGDIR/outfile%TESTNUMBER">
 </file1>
 
+<notexists>
+%LOGDIR/%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

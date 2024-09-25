@@ -31,13 +31,13 @@ SFTP directory retrieval
 <command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
-</postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
+<postcheck>
+perl %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
+</postcheck>
 </verify>
 </testcase>

@@ -34,9 +34,6 @@ FTP DL, file with C-D inside, using -o fname -J -D stdout
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER -J -D -
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl %LOGDIR/file%TESTNUMBER %LOGDIR/name%TESTNUMBER
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -88,5 +85,9 @@ MOOOO
 s/^(229 Entering Passive Mode \().*(\).*)/${1}stripped${2}/
 </stripfile2>
 
+<notexists>
+%LOGDIR/file%TESTNUMBER
+%LOGDIR/name%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

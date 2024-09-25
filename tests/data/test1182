@@ -21,16 +21,15 @@ Verify that runtests.pl accepts an exclude file with the -E option
 <precheck>
 mkdir %LOGDIR/data ; mkdir %LOGDIR/log; cp %SRCDIR/data/test1 %LOGDIR/data; echo 'test:1:Test should not run for unit test %TESTNUMBER' > %LOGDIR/test%TESTNUMBER-exclude-file
 </precheck>
-<postcheck>
-grep -q "Test should not run for unit test %TESTNUMBER" %LOGDIR/stdout%TESTNUMBER
-</postcheck>
-
 </client>
 
 <verify>
 <errorcode>
 1
 </errorcode>
+<postcheck>
+grep -q "Test should not run for unit test %TESTNUMBER" %LOGDIR/stdout%TESTNUMBER
+</postcheck>
 </verify>
 
 </testcase>

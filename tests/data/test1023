@@ -22,14 +22,14 @@ Compare curl --version with curl-config --vernum
 <command>
 --version
 </command>
-<postcheck>
-%SRCDIR/libtest/test1022.pl ../curl-config %LOGDIR/stdout%TESTNUMBER vernum
-</postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
+<postcheck>
+%SRCDIR/libtest/test1022.pl ../curl-config %LOGDIR/stdout%TESTNUMBER vernum
+</postcheck>
 <errorcode>
 0
 </errorcode>

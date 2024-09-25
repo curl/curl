@@ -510,10 +510,6 @@ output is displayed by the command or if the return code is non-zero, the test
 is skipped and the (single-line) output is displayed as reason for not running
 the test.
 
-### `<postcheck>`
-A command line that if set gets run by the test script after the test. If the
-command exists with a non-zero status code, the test is considered failed.
-
 ### `<tool>`
 Name of tool to invoke instead of "curl". This tool must be built and exist
 either in the `libtest/` directory (if the tool name starts with `lib`) or in
@@ -621,6 +617,14 @@ changing protocol data such as port numbers or user-agent strings.
 ### `<strippart>`
 One perl op per line that operates on the protocol dump. This is pretty
 advanced. Example: `s/^EPRT .*/EPRT stripped/`.
+
+### `<postcheck>`
+A command line that if set gets run by the test script after the test. If the
+command exists with a non-zero status code, the test is considered failed.
+
+### `<notexists>`
+A list of directory entries that are checked for after the test has completed
+and that must not exist. A listed entry existing causes the test to fail.
 
 ### `<protocol [nonewline="yes"][crlf="yes"]>`
 

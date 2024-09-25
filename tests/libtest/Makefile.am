@@ -38,7 +38,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_srcdir)/tests/libtest
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
-  notexists.pl CMakeLists.txt mk-lib1521.pl .checksrc
+  CMakeLists.txt mk-lib1521.pl .checksrc
 
 CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
 

@@ -22,9 +22,6 @@ SFTP put remote failure
 <command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -T %LOGDIR/file%TESTNUMBER.txt sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/rofile.txt --insecure
 </command>
-<postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir
-</postcheck>
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Test data
 for ssh upload test
@@ -37,5 +34,8 @@ for ssh upload test
 <errorcode>
 9
 </errorcode>
+<postcheck>
+perl %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir
+</postcheck>
 </verify>
 </testcase>
