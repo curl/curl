@@ -153,7 +153,7 @@ jobs:
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~TFTP ~MQTT ~WebSockets ~SMTP ~FTP'
+            TFLAGS+=' ~TFTP ~WebSockets ~SMTP ~FTP'
             TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
@@ -248,7 +248,7 @@ jobs:
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~MQTT ~WebSockets'
+            TFLAGS+=' ~WebSockets'
             TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
@@ -378,7 +378,7 @@ jobs:
         timeout-minutes: 14
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
-          export TFLAGS='-j8 ~MQTT ~WebSockets ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ~WebSockets ${{ matrix.tflags }}'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -620,7 +620,7 @@ jobs:
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
-          export TFLAGS='-j8 ~MQTT ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
+          export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
