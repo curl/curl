@@ -121,7 +121,8 @@ replaced by their content at that time.
 
 Available substitute variables include:
 
-- `%CLIENT6IP` - IPv6 address of the client running curl
+- `%CLIENT6IP` - IPv6 address of the client running curl (including brackets)
+- `%CLIENT6IP-NB` - IPv6 address of the client running curl (no brackets)
 - `%CLIENTIP` - IPv4 address of the client running curl
 - `%CURL` - Path to the curl executable
 - `%DATE` - current YYYY-MM-DD date
