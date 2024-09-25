@@ -432,6 +432,7 @@ Features testable here are:
 - `brotli`
 - `c-ares`
 - `CharConv`
+- `codeset-utf8`. If the running codeset is UTF-8 capable.
 - `cookies`
 - `crypto`
 - `Debug`

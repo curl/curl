@@ -83,6 +83,7 @@ BEGIN {
 
 use Digest::MD5 qw(md5);
 use List::Util 'sum';
+use I18N::Langinfo qw(langinfo CODESET);
 
 use pathhelp qw(
     exe_ext
@@ -825,6 +826,7 @@ sub checksystemfeatures {
     $feature{"large-time"} = 1;
     $feature{"sha512-256"} = 1;
     $feature{"local-http"} = servers::localhttp();
+    $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
 
     # make each protocol an enabled "feature"
     for my $p (@protocols) {
