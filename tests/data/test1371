@@ -63,7 +63,8 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 </file2>
 
 <notexists>
-%LOGDIR/%TESTNUMBER %LOGDIR/name%TESTNUMBER
+%LOGDIR/%TESTNUMBER
+%LOGDIR/name%TESTNUMBER
 </notexists>
 </verify>
 </testcase>
