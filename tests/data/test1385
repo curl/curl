@@ -25,9 +25,6 @@ FTP DL, file without C-D inside, using -o fname -i, without -D
 <command option="no-output,no-include">
 ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -o %LOGDIR/download%TESTNUMBER -i
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl %LOGDIR/file%TESTNUMBER
-</postcheck>
 </client>
 
 # Verify data after the test has been "shot"
@@ -55,5 +52,8 @@ mooo
 <file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
 
+<notexists>
+%LOGDIR/file%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

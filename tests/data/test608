@@ -28,9 +28,6 @@ SFTP post-quote rename
 </command>
 # Verify that the file was renamed properly, then rename the file back to what
 # it was so the verify section works and the file can be cleaned up.
-<postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/file%TESTNUMBER.txt move %PWD/%LOGDIR/file%TESTNUMBER-renamed.txt %PWD/%LOGDIR/file%TESTNUMBER.txt
-</postcheck>
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Test file for rename test
 </file>
@@ -42,5 +39,8 @@ Test file for rename test
 <file name="%LOGDIR/file%TESTNUMBER.txt">
 Test file for rename test
 </file>
+<postcheck>
+perl %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/file%TESTNUMBER.txt move %PWD/%LOGDIR/file%TESTNUMBER-renamed.txt %PWD/%LOGDIR/file%TESTNUMBER.txt
+</postcheck>
 </verify>
 </testcase>

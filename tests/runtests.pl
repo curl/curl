@@ -1714,6 +1714,25 @@ sub singletest_check {
         $ok .= "-"; # memory not checked
     }
 
+    my @notexists = getpart("verify", "notexists");
+    if(@notexists) {
+        # a list of directory entries that must not exist
+        my $err;
+        while (@notexists) {
+            my $fname = shift @notexists;
+            chomp $fname;
+            if (-e $fname) {
+                logmsg "Found '$fname' when not supposed to exist.\n";
+                $err++;
+            }
+            elsif($verbose) {
+                logmsg "Found '$fname' confirmed to not exist.\n";
+            }
+        }
+        if($err) {
+            return -1;
+        }
+    }
     if($valgrind) {
         if($usedvalgrind) {
             if(!opendir(DIR, "$logdir")) {

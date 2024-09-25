@@ -22,14 +22,14 @@ Compare curl --version with curl-config --version
 <command>
 --version
 </command>
-<postcheck>
-%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
-</postcheck>
 </client>
 
 #
 # Verify data after the test has been "shot"
 <verify>
+<postcheck>
+%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
+</postcheck>
 <errorcode>
 0
 </errorcode>

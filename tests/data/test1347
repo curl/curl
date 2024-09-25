@@ -41,9 +41,6 @@ CURL_TESTDIR=%LOGDIR
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -i -O
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl %LOGDIR/name%TESTNUMBER
-</postcheck>
 </client>
 
 #
@@ -71,6 +68,9 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
 <file2 name="%LOGDIR/stdout%TESTNUMBER">
 </file2>
+<notexists>
+%LOGDIR/name%TESTNUMBER
+</notexists>
 
 </verify>
 </testcase>

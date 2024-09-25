@@ -1131,6 +1131,11 @@ sub singletest_postcheck {
     # run the postcheck command
     my @postcheck= getpart("client", "postcheck");
     if(@postcheck) {
+        die "test$testnum uses client/postcheck";
+    }
+
+    @postcheck= getpart("verify", "postcheck");
+    if(@postcheck) {
         my $cmd = join("", @postcheck);
         chomp $cmd;
         if($cmd) {
