@@ -146,7 +146,7 @@ jobs:
             src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              make test-ci V=1
+              make test-ci V=1 TFLAGS='-j4'
             fi
             echo '::group::build examples'
             make -j3 examples
