@@ -83,7 +83,9 @@ CURLcode test(char *URL)
       }
 
       abort_on_test_timeout();
+
       multi_perform(m, &running);
+
       abort_on_test_timeout();
     }
 
