@@ -585,23 +585,20 @@ jobs:
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: |
+      - name: 'configure'
+        run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
-          ${{ matrix.build.configure-prefix }} \
-          ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            ${{ matrix.build.configure }}
-        if: ${{ matrix.build.configure }}
-        name: 'configure (autotools)'
-
-      - run: |
-          [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
-          cmake -G Ninja \
-            -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-            -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
-            ${{ matrix.build.generate }}
-        if: ${{ matrix.build.generate }}
-        name: 'configure (cmake)'
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake -G Ninja \
+              -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+              ${{ matrix.build.generate }}
+          else
+            ${{ matrix.build.configure-prefix }} \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              ${{ matrix.build.configure }}
+          fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
@@ -612,15 +609,16 @@ jobs:
           cat tests/config || true
           cat tests/http/config.ini || true
 
-      - run: ${{ matrix.build.make-prefix }} make V=1
-        if: ${{ matrix.build.configure }}
-        name: 'make (autotools)'
+      - name: 'build'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            ${{ matrix.build.make-prefix }} cmake --build . --verbose
+          else
+            ${{ matrix.build.make-prefix }} make V=1
+          fi
 
-      - run: ${{ matrix.build.make-prefix }} cmake --build . --verbose
-        if: ${{ matrix.build.generate }}
-        name: 'make (cmake)'
-
-      - run: |
+      - name: single-use function check
+        run: |
           git config --global --add safe.directory "*"
           if [ -n '${{ matrix.build.generate }}' ]; then
             libcurla=lib/libcurl.a
@@ -628,7 +626,6 @@ jobs:
             libcurla=lib/.libs/libcurl.a
           fi
           ./scripts/singleuse.pl ${{ matrix.build.singleuse }} ${libcurla}
-        name: single-use function check
 
       - run: ./src/curl -V
         name: 'check curl -V output'
@@ -637,13 +634,14 @@ jobs:
         if: ${{ matrix.build.generate }}
         name: 'cmake install'
 
-      - run: make V=1 -C tests
-        if: ${{ matrix.build.configure && matrix.build.install_steps != 'skipall' }}
-        name: 'make tests (autotools)'
-
-      - run: cmake --build . --verbose --target testdeps
-        if: ${{ matrix.build.generate && matrix.build.install_steps != 'skipall' }}
-        name: 'make tests (cmake)'
+      - name: 'build tests'
+        if: ${{ matrix.build.install_steps != 'skipall' }}
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target testdeps
+          else
+            make V=1 -C tests
+          fi
 
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
@@ -674,10 +672,10 @@ jobs:
             make V=1 pytest-ci
           fi
 
-      - run: ${{ matrix.build.make-prefix }} make V=1 examples
-        if: ${{ matrix.build.configure }}
-        name: 'make examples (autotools)'
-
-      - run: ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
-        if: ${{ matrix.build.generate }}
-        name: 'make examples (cmake)'
+      - name: 'build examples'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
+          else
+            ${{ matrix.build.make-prefix }} make V=1 examples
+          fi
