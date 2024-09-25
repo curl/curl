@@ -456,6 +456,7 @@ Features testable here are:
 - `libssh`
 - `oldlibssh` (versions before 0.9.4)
 - `libz`
+- `local-http`. The HTTP server runs on 127.0.0.1
 - `manual`
 - `mbedtls`
 - `Mime`

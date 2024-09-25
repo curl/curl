@@ -26,6 +26,7 @@ MooMoo
 <features>
 SSL
 Schannel
+local-http
 </features>
 <server>
 https Server-localhost-lastSAN-sv.pem
@@ -40,10 +41,6 @@ CURL_SSL_BACKEND=schannel
 <command>
 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #
