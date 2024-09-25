@@ -2608,6 +2608,10 @@ sub startservers {
                 logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
                     if($verbose);
                 $run{'https'}="$pid $pid2";
+                if(!responsive_http_server("https", $verbose, 0,
+                                           protoport('https'))) {
+                    return ("verify failed for started https server", 3);
+                }
             }
         }
         elsif($what eq "http/2") {
