@@ -86,6 +86,9 @@ sub logmsg {
             localtime($seconds);
         $now = sprintf("%02d:%02d:%02d ", $hour, $min, $sec);
     }
+    # we see warnings on Windows run that $logfile is used uninitialized
+    # TODO: not found yet where this comes from
+    $logfile = "serverhelp_uninitialized.log" if(!$logfile);
     if(open(my $logfilefh, ">>", "$logfile")) {
         print $logfilefh $now;
         print $logfilefh @_;

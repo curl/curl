@@ -122,7 +122,7 @@ jobs:
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~615'
+          export TFLAGS='-j20 ${{ matrix.tflags }} ~615'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
