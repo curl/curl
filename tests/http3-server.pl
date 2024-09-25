@@ -30,21 +30,14 @@ use Cwd;
 use Cwd 'abs_path';
 use File::Basename;
 
-use serverhelp qw(
-    server_pidfilename
-    server_logfilename
-    $logfile
-    );
-
 my $logdir = "log";
 my $pidfile = "$logdir/nghttpx.pid";
+my $logfile = "$logdir/http3.log";
 my $nghttpx = "nghttpx";
 my $listenport = 9017;
 my $connect = "127.0.0.1,8990";
 my $cert = "Server-localhost-sv";
 my $conf = "nghttpx.conf";
-
-$logfile = "$logdir/http3.log";
 
 #***************************************************************************
 # Process command line options

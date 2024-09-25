@@ -36,7 +36,6 @@ use File::Basename;
 use serverhelp qw(
     server_pidfilename
     server_logfilename
-    $logfile
     );
 
 use pathhelp qw(
@@ -51,6 +50,7 @@ my $idnum = 1;       # default http server instance number
 my $proto = 'http';  # protocol the http server speaks
 my $pidfile;         # pid file
 my $portfile;        # port number file
+my $logfile;         # log file
 my $cmdfile;         # command file
 my $connect;         # IP to connect to on CONNECT
 my $keepalive_secs;  # number of seconds to keep idle connections
