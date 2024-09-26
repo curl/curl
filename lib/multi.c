@@ -240,12 +240,13 @@ static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
 }
 
 #define TRHASH_SIZE 13
+
+/* the given key here is a struct Curl_easy pointer */
 static size_t trhash(void *key, size_t key_length, size_t slots_num)
 {
-  size_t keyval = (size_t)*(struct Curl_easy **)key;
-  (void) key_length;
-
-  return (keyval % slots_num);
+  unsigned char bytes = ((unsigned char *)key)[key_length - 1] ^
+    ((unsigned char *)key)[0];
+  return (bytes % slots_num);
 }
 
 static size_t trhash_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
