@@ -217,10 +217,13 @@ class Httpd:
         domain1 = self.env.domain1
         domain1brotli = self.env.domain1brotli
         creds1 = self.env.get_credentials(domain1)
+        assert creds1  # convince pytype this isn't None
         domain2 = self.env.domain2
         creds2 = self.env.get_credentials(domain2)
+        assert creds2  # convince pytype this isn't None
         proxy_domain = self.env.proxy_domain
         proxy_creds = self.env.get_credentials(proxy_domain)
+        assert proxy_creds  # convince pytype this isn't None
         self._mkpath(self._conf_dir)
         self._mkpath(self._logs_dir)
         self._mkpath(self._tmp_dir)

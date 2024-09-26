@@ -30,6 +30,7 @@ import logging
 import os
 import time
 import pytest
+from typing import List
 
 from testenv import Env, CurlClient, LocalClient
 
@@ -669,7 +670,7 @@ class TestUpload:
         up_speed = r.stats[0]['speed_upload']
         assert (speed_limit * 0.5) <= up_speed <= (speed_limit * 1.5), f'{r.stats[0]}'
 
-    def check_downloads(self, client, source: str, count: int,
+    def check_downloads(self, client, source: List[str], count: int,
                         complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)

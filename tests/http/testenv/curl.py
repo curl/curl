@@ -541,7 +541,7 @@ class CurlClient:
                       with_profile: bool = False,
                       with_tcpdump: bool = False,
                       no_save: bool = False,
-                      extra_args: List[str] = None):
+                      extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         if no_save:
@@ -656,7 +656,7 @@ class CurlClient:
                       with_profile: bool = False,
                       with_tcpdump: bool = False,
                       no_save: bool = False,
-                      extra_args: List[str] = None):
+                      extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         if no_save:
@@ -685,7 +685,7 @@ class CurlClient:
                       with_profile: bool = False,
                       with_tcpdump: bool = False,
                       no_save: bool = False,
-                      extra_args: List[str] = None):
+                      extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         extra_args.extend([
@@ -702,7 +702,7 @@ class CurlClient:
                    with_stats: bool = True,
                    with_profile: bool = False,
                    with_tcpdump: bool = False,
-                   extra_args: List[str] = None):
+                   extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         if fupload is not None:
@@ -732,7 +732,7 @@ class CurlClient:
                        with_stats: bool = True,
                        with_profile: bool = False,
                        with_tcpdump: bool = False,
-                       extra_args: List[str] = None):
+                       extra_args: Optional[List[str]] = None):
         if extra_args is None:
             extra_args = []
         extra_args.extend([
@@ -837,8 +837,6 @@ class CurlClient:
                       with_profile=with_profile, with_tcpdump=with_tcpdump)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
-            if r.json:
-                r.response["json"] = r.json
         return r
 
     def _complete_args(self, urls, timeout=None, options=None,
@@ -892,7 +890,7 @@ class CurlClient:
             args.append(url)
         return args
 
-    def _parse_headerfile(self, headerfile: str, r: ExecResult = None) -> ExecResult:
+    def _parse_headerfile(self, headerfile: str, r: Optional[ExecResult] = None) -> ExecResult:
         lines = open(headerfile).readlines()
         if r is None:
             r = ExecResult(args=[], exit_code=0, stdout=[], stderr=[])

@@ -52,7 +52,6 @@ class Nghttpx:
         self._error_log = os.path.join(self._run_dir, 'nghttpx.log')
         self._stderr = os.path.join(self._run_dir, 'nghttpx.stderr')
         self._tmp_dir = os.path.join(self._run_dir, 'tmp')
-        self._process = None
         self._process: Optional[subprocess.Popen] = None
         self._rmf(self._pid_file)
         self._rmf(self._error_log)
@@ -180,6 +179,8 @@ class NghttpxQuic(Nghttpx):
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
+        creds = self.env.get_credentials(self.env.domain1)
+        assert creds  # convince pytype this isn't None
         args = [
             self._cmd,
             f'--frontend=*,{self.env.h3_port};quic',
@@ -190,8 +191,8 @@ class NghttpxQuic(Nghttpx):
             f'--errorlog-file={self._error_log}',
             f'--conf={self._conf_file}',
             f'--cacert={self.env.ca.cert_file}',
-            self.env.get_credentials(self.env.domain1).pkey_file,
-            self.env.get_credentials(self.env.domain1).cert_file,
+            creds.pkey_file,
+            creds.cert_file,
             f'--frontend-http3-window-size=1M',
             f'--frontend-http3-max-window-size=10M',
             f'--frontend-http3-connection-window-size=10M',
@@ -214,6 +215,8 @@ class NghttpxFwd(Nghttpx):
         self._mkpath(self._tmp_dir)
         if self._process:
             self.stop()
+        creds = self.env.get_credentials(self.env.proxy_domain)
+        assert creds  # convince pytype this isn't None
         args = [
             self._cmd,
             f'--http2-proxy',
@@ -224,8 +227,8 @@ class NghttpxFwd(Nghttpx):
             f'--errorlog-file={self._error_log}',
             f'--conf={self._conf_file}',
             f'--cacert={self.env.ca.cert_file}',
-            self.env.get_credentials(self.env.proxy_domain).pkey_file,
-            self.env.get_credentials(self.env.proxy_domain).cert_file,
+            creds.pkey_file,
+            creds.cert_file,
         ]
         ngerr = open(self._stderr, 'a')
         self._process = subprocess.Popen(args=args, stderr=ngerr)

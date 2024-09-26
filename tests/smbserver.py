@@ -231,7 +231,7 @@ class TestSmbServer(imp_smbserver.SMBSERVER):
             if path == SERVER_MAGIC:
                 fid, full_path = self.get_server_path(requested_file)
             else:
-                assert (path == TESTS_MAGIC)
+                assert path == TESTS_MAGIC
                 fid, full_path = self.get_test_path(requested_file)
 
             self.tmpfiles.append(full_path)

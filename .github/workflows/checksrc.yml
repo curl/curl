@@ -49,7 +49,7 @@ jobs:
 
       - name: install
         run: |
-          sudo apt-get install codespell python3-pip
+          sudo apt-get install codespell python3-pip python3-pytest
           python3 -m pip install cmakelint==1.4.3
 
       - name: spellcheck

@@ -37,7 +37,7 @@ import sys
 from util import ClosingFileHandler
 
 try:  # Python 2
-    import SocketServer as socketserver
+    import SocketServer as socketserver  # type: ignore
 except ImportError:  # Python 3
     import socketserver
 

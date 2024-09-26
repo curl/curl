@@ -28,12 +28,12 @@ import inspect
 import logging
 import os
 import subprocess
-from datetime import timedelta, datetime
-from json import JSONEncoder
 import time
 from typing import List, Union, Optional
 
-from .curl import CurlClient, ExecResult
+from datetime import datetime, timedelta
+
+from .curl import CurlClient
 from .env import Env
 
 
@@ -73,7 +73,7 @@ class VsFTPD:
         return self._docs_dir
 
     @property
-    def port(self) -> str:
+    def port(self) -> int:
         return self._port
 
     def clear_logs(self):
@@ -157,19 +157,6 @@ class VsFTPD:
         log.error(f"Server still not responding after {timeout}")
         return False
 
-    def _run(self, args, intext=''):
-        env = {}
-        for key, val in os.environ.items():
-            env[key] = val
-        with open(self._error_log, 'w') as cerr:
-            self._process = subprocess.run(args, stderr=cerr, stdout=cerr,
-                                           cwd=self._vsftpd_dir,
-                                           input=intext.encode() if intext else None,
-                                           env=env)
-            start = datetime.now()
-            return ExecResult(args=args, exit_code=self._process.returncode,
-                              duration=datetime.now() - start)
-
     def _rmf(self, path):
         if os.path.exists(path):
             return os.remove(path)
@@ -200,6 +187,7 @@ class VsFTPD:
         ]
         if self._with_ssl:
             creds = self.env.get_credentials(self.domain)
+            assert creds  # convince pytype this isn't None
             conf.extend([
                 f'ssl_enable=YES',
                 f'debug_ssl=YES',
