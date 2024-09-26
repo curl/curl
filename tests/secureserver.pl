@@ -201,6 +201,8 @@ $certfile = abs_path($certfile);
 
 my $ssltext = uc($proto) ." SSL/TLS:";
 
+my $host_ip = ($ipvnum == 6)? '::1' : '127.0.0.1';
+
 #***************************************************************************
 # Find out version info for the given stunnel binary
 #
@@ -255,6 +257,8 @@ if($stunnel_version < 400) {
     if($stunnel_version >= 319) {
         $socketopt = "-O a:SO_REUSEADDR=1";
     }
+    # TODO: we do not use $host_ip in this old version. I simply find
+    # no documentation how to. But maybe ipv6 is not available anyway?
     $cmd  = "\"$stunnel\" -p $certfile -P $pidfile ";
     $cmd .= "-d $accept_port -r $target_port -f -D $loglevel ";
     $cmd .= ($socketopt) ? "$socketopt " : "";
@@ -304,8 +308,8 @@ if($stunnel_version >= 400) {
         }
         print $stunconf "\n";
         print $stunconf "[curltest]\n";
-        print $stunconf "accept = $accept_port\n";
-        print $stunconf "connect = $target_port\n";
+        print $stunconf "accept = $host_ip:$accept_port\n";
+        print $stunconf "connect = $host_ip:$target_port\n";
         if(!close($stunconf)) {
             print "$ssltext Error closing file $conffile\n";
             exit 1;
@@ -332,8 +336,8 @@ if($stunnel_version >= 400) {
         }
         print "\n";
         print "[curltest]\n";
-        print "accept = $accept_port\n";
-        print "connect = $target_port\n";
+        print "accept = $host_ip:$accept_port\n";
+        print "connect = $host_ip:$target_port\n";
     }
 }
 
