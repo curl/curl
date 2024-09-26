@@ -24,16 +24,12 @@
 #
 ###########################################################################
 #
-import pytest
-import json
 import logging
 import os
-import re
 import shutil
 import subprocess
-from datetime import timedelta, datetime
-from typing import List, Optional, Dict, Union
-from urllib.parse import urlparse
+from datetime import datetime
+from typing import Optional, Dict
 
 from . import ExecResult
 from .env import Env

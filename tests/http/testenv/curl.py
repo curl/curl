@@ -121,25 +121,24 @@ class RunTcpDump:
         if self._proc:
             raise Exception('tcpdump still running')
         lines = []
-        for l in open(self._stdoutfile).readlines():
-            if re.match(r'.* IP 127\.0\.0\.1\.\d+ [<>] 127\.0\.0\.1\.\d+:.*', l):
-                lines.append(l)
+        for line in open(self._stdoutfile).readlines():
+            if re.match(r'.* IP 127\.0\.0\.1\.\d+ [<>] 127\.0\.0\.1\.\d+:.*', line):
+                lines.append(line)
         return lines
 
     def stats_excluding(self, src_port) -> Optional[List[str]]:
         if self._proc:
             raise Exception('tcpdump still running')
         lines = []
-        for l in self.stats:
-            if not re.match(r'.* IP 127\.0\.0\.1\.' + str(src_port) + ' >.*', l):
-                lines.append(l)
+        for line in self.stats:
+            if not re.match(r'.* IP 127\.0\.0\.1\.' + str(src_port) + ' >.*', line):
+                lines.append(line)
         return lines
 
     @property
     def stderr(self) -> List[str]:
         if self._proc:
             raise Exception('tcpdump still running')
-        lines = []
         return open(self._stderrfile).readlines()
 
     def sample(self):
@@ -217,7 +216,7 @@ class ExecResult:
             try:
                 out = ''.join(self._stdout)
                 self._json_out = json.loads(out)
-            except:
+            except:  # noqa: E722
                 pass
 
     def __repr__(self):
@@ -226,11 +225,12 @@ class ExecResult:
 
     def _parse_stats(self):
         self._stats = []
-        for l in self._stdout:
+        for line in self._stdout:
             try:
-                self._stats.append(json.loads(l))
-            except:
-                log.error(f'not a JSON stat: {l}')
+                self._stats.append(json.loads(line))
+            # TODO: specify specific exceptions here
+            except:  # noqa: E722
+                log.error(f'not a JSON stat: {line}')
                 break
 
     @property
