@@ -92,10 +92,10 @@ Via: 3 nghttpx
 ^Host:.*
 </strip>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-* Connection #0 to host localhost left intact
-* Connection #0 to host localhost left intact
-* Connection #0 to host localhost left intact
-* Connection #0 to host localhost left intact
+== Info: Connection #0 to host localhost left intact
+== Info: Connection #0 to host localhost left intact
+== Info: Connection #0 to host localhost left intact
+== Info: Connection #0 to host localhost left intact
 </file>
 <stripfile>
 $_ = '' if (($_ !~ /left intact/) && ($_ !~ /Closing connection/))
