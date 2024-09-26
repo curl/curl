@@ -502,7 +502,7 @@ jobs:
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
-          cmake --build . --parallel
+          cmake --build . --parallel 5
           cmake --install .
 
       - if: contains(matrix.build.install_steps, 'rust')
@@ -612,7 +612,7 @@ jobs:
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --verbose
+            ${{ matrix.build.make-prefix }} cmake --build . --parallel 5 --verbose
           else
             ${{ matrix.build.make-prefix }} make V=1
           fi
@@ -638,7 +638,7 @@ jobs:
         if: ${{ matrix.build.install_steps != 'skipall' }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target testdeps
+            cmake --build . --parallel 5 --verbose --target testdeps
           else
             make V=1 -C tests
           fi
@@ -675,7 +675,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
+            ${{ matrix.build.make-prefix }} cmake --build . --parallel 5 --verbose --target curl-examples
           else
             ${{ matrix.build.make-prefix }} make V=1 examples
           fi
