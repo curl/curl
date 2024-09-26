@@ -71,9 +71,9 @@ class EnvConfig:
         if 'CURL' in os.environ:
             self.curl = os.environ['CURL']
         self.curl_props = {
-            'version': None,
-            'os': None,
-            'fullname': None,
+            'version': '',
+            'os': '',
+            'fullname': '',
             'features': [],
             'protocols': [],
             'libs': [],
@@ -331,7 +331,7 @@ class Env:
         return 'unknown'
 
     @staticmethod
-    def curl_lib_version_at_least(libname: str, min_version) -> str:
+    def curl_lib_version_at_least(libname: str, min_version) -> bool:
         lversion = Env.curl_lib_version(libname)
         if lversion != 'unknown':
             return Env.CONFIG.versiontuple(min_version) <= \

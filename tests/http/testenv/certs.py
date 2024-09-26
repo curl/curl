@@ -126,6 +126,7 @@ class Credentials:
         self._cert_file = None
         self._pkey_file = None
         self._store = None
+        self._combined_file = None
 
     @property
     def name(self) -> str:
@@ -372,7 +373,7 @@ class TestCA:
         return creds
 
     @staticmethod
-    def _make_x509_name(org_name: str = None, common_name: str = None, parent: x509.Name = None) -> x509.Name:
+    def _make_x509_name(org_name: Optional[str] = None, common_name: Optional[str] = None, parent: x509.Name = None) -> x509.Name:
         name_pieces = []
         if org_name:
             oid = NameOID.ORGANIZATIONAL_UNIT_NAME if parent else NameOID.ORGANIZATION_NAME
@@ -388,8 +389,8 @@ class TestCA:
             subject: x509.Name,
             pkey: Any,
             issuer_subject: Optional[Credentials],
-            valid_from_delta: timedelta = None,
-            valid_until_delta: timedelta = None
+            valid_from_delta: Optional[timedelta] = None,
+            valid_until_delta: Optional[timedelta] = None
     ):
         pubkey = pkey.public_key()
         issuer_subject = issuer_subject if issuer_subject is not None else subject
@@ -468,7 +469,7 @@ class TestCA:
         )
 
     @staticmethod
-    def _add_client_usages(csr: Any, issuer: Credentials, rfc82name: str = None) -> Any:
+    def _add_client_usages(csr: Any, issuer: Credentials, rfc82name: Optional[str] = None) -> Any:
         cert = csr.add_extension(
             x509.BasicConstraints(ca=False, path_length=None),
             critical=True,
@@ -493,7 +494,7 @@ class TestCA:
 
     @staticmethod
     def _make_ca_credentials(name, key_type: Any,
-                             issuer: Credentials = None,
+                             issuer: Optional[Credentials] = None,
                              valid_from: timedelta = timedelta(days=-1),
                              valid_to: timedelta = timedelta(days=89),
                              ) -> Credentials:
