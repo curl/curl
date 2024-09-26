@@ -132,7 +132,6 @@ Available substitute variables include:
 - `%FTPSPORT` - Port number of the FTPS server
 - `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
   response from the test FTP server
-- `%FTPTIME3` - Even longer than `%FTPTIME2`
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
 - `%GOPHERSPORT` - Port number of the Gophers server
