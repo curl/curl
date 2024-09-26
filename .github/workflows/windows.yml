@@ -153,10 +153,9 @@ jobs:
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~TFTP ~WebSockets ~SMTP ~FTP'
+            TFLAGS+=' ~2302'  # WebSockets'
             TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
-            TFLAGS+=' ~SFTP'
             TFLAGS+=' ~SFTP'
           fi
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
