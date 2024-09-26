@@ -4953,32 +4953,39 @@ if test "x$OPENSSL_ENABLED" = "x1"; then
   AC_CHECK_FUNCS([SSL_set0_wbio])
 fi
 
-dnl *************************************************************
-dnl WebSockets
-dnl
-AC_MSG_CHECKING([whether to support WebSockets])
-AC_ARG_ENABLE(websockets,
-AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
-AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
-[ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    AC_DEFINE_UNQUOTED(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-    ;;
-  *)
-    if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
-      AC_MSG_RESULT(yes)
-    else
-      dnl WebSockets requires >32 bit curl_off_t
+if test "x$CURL_DISABLE_HTTP" != "x1"; then
+  dnl *************************************************************
+  dnl WebSockets
+  dnl
+  AC_MSG_CHECKING([whether to support WebSockets])
+  AC_ARG_ENABLE(websockets,
+  AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
+  AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
+  [ case "$enableval" in
+    no)
       AC_MSG_RESULT(no)
-      AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
-      AC_DEFINE_UNQUOTED(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-    fi
-    ;;
-  esac ],
-    AC_MSG_RESULT(yes)
-)
-
+      AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+      AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+      ;;
+    *)
+      if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
+        AC_MSG_RESULT(yes)
+      else
+        dnl WebSockets requires >32 bit curl_off_t
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
+        AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+        AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+      fi
+      ;;
+    esac ],
+      AC_MSG_RESULT(yes)
+  )
+else
+  AC_MSG_WARN([WebSockets disabled because HTTP is disabled])
+  AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+  AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+fi
 
 dnl ************************************************************
 dnl hiding of library internal symbols
