@@ -61,9 +61,7 @@ jobs:
     steps:
       - run: |
           sudo apt-get install cmake ninja-build pkgconf stunnel4 ${{ matrix.build.install }}
-          python3 -m venv $HOME/venv
-          source $HOME/venv/bin/activate
-          python3 -m pip install impacket
+          python3 -m pip install --break-system-packages impacket
         name: 'install prereqs'
 
       - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
@@ -83,9 +81,7 @@ jobs:
       - run: cmake --build . --verbose --target testdeps
         name: 'build tests'
 
-      - run: |
-          source $HOME/venv/bin/activate
-          cmake --build . --verbose --target test-torture
+      - run: cmake --build . --verbose --target test-torture
         name: 'run tests'
         env:
           TFLAGS: '-j10 ${{ matrix.build.tflags }}'
