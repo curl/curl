@@ -4590,6 +4590,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     if(result) {
       X509_free(octx->server_cert);
       octx->server_cert = NULL;
+      Curl_dyn_free(&dname);
       return result;
     }
   }
@@ -4603,6 +4604,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   }
   else {
     infof(data, " issuer: %s", Curl_dyn_ptr(&dname));
+    Curl_dyn_free(&dname);
 
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
@@ -4695,7 +4697,6 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     else
       infof(data, " SSL certificate verify ok.");
   }
-  Curl_dyn_free(&dname);
   infof_certstack(data, octx->ssl);
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
