@@ -3031,15 +3031,13 @@ sub subvariables {
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
 
-    # The purpose of FTPTIME2 and FTPTIME3 is to provide times that can be
+    # The purpose of FTPTIME2 is to provide times that can be
     # used for time-out tests and that would work on most hosts as these
     # adjust for the startup/check time for this particular host. We needed to
     # do this to make the test suite run better on very slow hosts.
     my $ftp2 = $ftpchecktime * 8;
-    my $ftp3 = $ftpchecktime * 12;
 
     $$thing =~ s/${prefix}FTPTIME2/$ftp2/g;
-    $$thing =~ s/${prefix}FTPTIME3/$ftp3/g;
 
     # HTTP2
     $$thing =~ s/${prefix}H2CVER/$h2cver/g;
