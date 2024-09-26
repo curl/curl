@@ -180,13 +180,17 @@ while (<N>) {
     if($l =~ /^([0-9a-z_-]+)\.o:/) {
         $file = $1;
     }
-    if($l =~ /^([0-9a-f]+) T (.*)/) {
+    # libcurl.a(unity_0_c.c.o):
+    elsif($l =~ /\(([0-9a-z_.-]+)\.o\):/) {  # Apple nm
+        $file = $1;
+    }
+    if($l =~ /^([0-9a-f]+) T _?(.*)/) {
         my ($name)=($2);
         #print "Define $name in $file\n";
         $file =~ s/^libcurl_la-//;
         $exist{$name} = $file;
     }
-    elsif($l =~ /^                 U (.*)/) {
+    elsif($l =~ /^                 U _?(.*)/) {
         my ($name)=($1);
         #print "Uses $name in $file\n";
         $uses{$name} .= "$file, ";
