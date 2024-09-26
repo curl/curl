@@ -3035,20 +3035,19 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
       BYTE key_usage[2];
       DWORD req_size;
       const unsigned char *encoded_cert;
-#if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-      char cert_name[256];
-#endif
-
       pContext = CertEnumCertificatesInStore(hStore, pContext);
       if(!pContext)
         break;
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-      if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
-                             NULL, cert_name, sizeof(cert_name))) {
-        strcpy(cert_name, "Unknown");
+      else {
+        char cert_name[256];
+        if(!CertGetNameStringA(pContext, CERT_NAME_SIMPLE_DISPLAY_TYPE, 0,
+                               NULL, cert_name, sizeof(cert_name)))
+          infof(data, "SSL: unknown cert name");
+        else
+          infof(data, "SSL: Checking cert \"%s\"", cert_name);
       }
-      infof(data, "SSL: Checking cert \"%s\"", cert_name);
 #endif
       encoded_cert = (const unsigned char *)pContext->pbCertEncoded;
       if(!encoded_cert)
@@ -3130,7 +3129,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
          not OpenSSL. */
       if(X509_STORE_add_cert(store, x509) == 1) {
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
-        infof(data, "SSL: Imported cert \"%s\"", cert_name);
+        infof(data, "SSL: Imported cert");
 #endif
         *imported = true;
       }
@@ -4232,10 +4231,10 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
                     "SSL certificate problem: %s",
                     X509_verify_cert_error_string(lerr));
         }
-        else
-          /* strcpy() is fine here as long as the string fits within
-             error_buffer */
-          strcpy(error_buffer, "SSL certificate verification failed");
+        else {
+          failf(data, "%s", "SSL certificate verification failed");
+          return result;
+        }
       }
 #if defined(SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
