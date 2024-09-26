@@ -1256,7 +1256,7 @@ elsif($cmd eq "-c") {
 
 my @files = @ARGV; # the rest are the files
 
-# can be overriden for releases
+# can be overridden for releases
 if($ENV{'CURL_MAKETGZ_VERSION'}) {
     $version = $ENV{'CURL_MAKETGZ_VERSION'};
 }
