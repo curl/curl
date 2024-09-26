@@ -27,7 +27,7 @@ ftp
 FTP download with strict timeout and slow CWD
 </name>
 <command>
-ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER -m %FTPTIME2
+ftp://%HOSTIP:%FTPPORT/path/to/file/%TESTNUMBER -m 10
 </command>
 </client>
 
