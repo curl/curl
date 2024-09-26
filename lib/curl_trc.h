@@ -226,7 +226,7 @@ static void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 #endif
-#if defined(CURL_DISABLE_WEBSOCKETS) || defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
 static void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;
