@@ -38,7 +38,7 @@ local-http
 *.localhost is a local host
 </name>
 <command>
-http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
+-4 http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost
 </client>

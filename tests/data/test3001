@@ -35,7 +35,7 @@ https Server-localhost-lastSAN-sv.pem
 HTTPS GET to localhost, last subject alt name matches, CN does not match
 </name>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

@@ -40,7 +40,7 @@ simple HTTPS GET with PEM public key pinning (Schannel variant)
 CURL_SSL_BACKEND=schannel
  </setenv>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey %SRCDIR/certs/Server-localhost-sv.pub.pem --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
