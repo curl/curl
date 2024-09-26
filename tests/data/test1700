@@ -42,7 +42,6 @@ Content-Type: text/html
 h2c
 </features>
 <server>
-http
 http/2
 </server>
 <name>
