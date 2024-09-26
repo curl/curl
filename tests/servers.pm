@@ -550,18 +550,19 @@ sub getexternalproxyflags {
 # assign requested address")
 #
 sub verifyhttp {
-    my ($proto, $ipvnum, $idnum, $ip, $port_or_path) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port_or_path, $do_http3) = @_;
     my $server = servername_id($proto, $ipvnum, $idnum);
     my $bonus="";
     # $port_or_path contains a path for Unix sockets, sws ignores the port
     my $port = ($ipvnum eq "unix") ? 80 : $port_or_path;
+    my $infix = ($do_http3) ? "_h3" : "";
 
     my $verifyout = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.out';
+        servername_canon($proto, $ipvnum, $idnum) .$infix .'_verify.out';
     unlink($verifyout) if(-f $verifyout);
 
     my $verifylog = "$LOGDIR/".
-        servername_canon($proto, $ipvnum, $idnum) .'_verify.log';
+        servername_canon($proto, $ipvnum, $idnum) .$infix .'_verify.log';
     unlink($verifylog) if(-f $verifylog);
 
     if($proto eq "gopher") {
@@ -579,6 +580,7 @@ sub verifyhttp {
     if($proxy_address) {
         $flags .= getexternalproxyflags();
     }
+    $flags .= "--http3-only " if($do_http3);
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
     my $cmd = "$VCURL $flags 2>$verifylog";
@@ -1101,12 +1103,12 @@ sub verifyserver {
 # to verify that a server present in %run hash is still functional
 #
 sub responsiveserver {
-    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my ($proto, $ipvnum, $idnum, $ip, $port, $do_http3) = @_;
     my $prev_verbose = $verbose;
 
     $verbose = 0;
     my $fun = $protofunc{$proto};
-    my $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port);
+    my $pid = &$fun($proto, $ipvnum, $idnum, $ip, $port, $do_http3);
     $verbose = $prev_verbose;
 
     if($pid > 0) {
@@ -2217,7 +2219,7 @@ sub runnegtelnetserver {
 # be used to verify that a server present in %run hash is still functional
 #
 sub responsive_http_server {
-    my ($proto, $verb, $alt, $port_or_path) = @_;
+    my ($proto, $verb, $alt, $port_or_path, $do_http3) = @_;
     my $ip = $HOSTIP;
     my $ipvnum = 4;
     my $idnum = 1;
@@ -2235,7 +2237,7 @@ sub responsive_http_server {
         $ipvnum = "unix";
     }
 
-    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port_or_path, $do_http3);
 }
 
 #######################################################################
@@ -2424,29 +2426,6 @@ sub startservers {
                 $run{'gopher-ipv6'}="$pid $pid2";
             }
         }
-        elsif($what eq "http/3") {
-            if(!$run{'http/3'}) {
-                ($serr, $pid, $pid2, $PORT{"http3"}) = runhttp3server($verbose);
-                if($pid <= 0) {
-                    return ("failed starting HTTP/3 server", $serr);
-                }
-                logmsg sprintf ("* pid http/3 => %d %d\n", $pid, $pid2)
-                    if($verbose);
-                $run{'http/3'}="$pid $pid2";
-            }
-        }
-        elsif($what eq "http/2") {
-            if(!$run{'http/2'}) {
-                ($serr, $pid, $pid2, $PORT{"http2"}, $PORT{"http2tls"}) =
-                    runhttp2server($verbose);
-                if($pid <= 0) {
-                    return ("failed starting HTTP/2 server", $serr);
-                }
-                logmsg sprintf ("* pid http/2 => %d %d\n", $pid, $pid2)
-                    if($verbose);
-                $run{'http/2'}="$pid $pid2";
-            }
-        }
         elsif($what eq "http") {
             if($run{'http'} &&
                !responsive_http_server("http", $verbose, 0, protoport('http'))) {
@@ -2630,6 +2609,87 @@ sub startservers {
                 logmsg sprintf("* pid https => %d %d\n", $pid, $pid2)
                     if($verbose);
                 $run{'https'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "http/2") {
+            # http/2 server proxies to a http server
+            if($run{'http/2'} &&
+               !responsive_http_server("https", $verbose, 0, protoport('http2tls'))) {
+                logmsg "* restarting unresponsive HTTP/2 server\n";
+                if(stopserver('http/2')) {
+                    return ("failed stopping unresponsive HTTP/2 server", 3);
+                }
+                # also stop http server, we do not know which state it is in
+                if($run{'http'} && stopserver('http')) {
+                    return ("failed stopping HTTP server", 3);
+                }
+            }
+            # check a running http server if we not already checked http/2
+            if($run{'http'} && !$run{'http/2'} &&
+               !responsive_http_server("http", $verbose, 0,
+                                       protoport('http'))) {
+                if(stopserver('http')) {
+                    return ("failed stopping unresponsive HTTP server", 3);
+                }
+            }
+            if(!$run{'http'}) {
+                ($serr, $pid, $pid2, $PORT{'http'}) =
+                    runhttpserver("http", $verbose, 0);
+                if($pid <= 0) {
+                    return ("failed starting HTTP server", $serr);
+                }
+                logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'http'}="$pid $pid2";
+            }
+            if(!$run{'http/2'}) {
+                ($serr, $pid, $pid2, $PORT{"http2"}, $PORT{"http2tls"}) =
+                    runhttp2server($verbose);
+                if($pid <= 0) {
+                    return ("failed starting HTTP/2 server", $serr);
+                }
+                logmsg sprintf ("* pid http/2 => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http/2'}="$pid $pid2";
+            }
+        }
+        elsif($what eq "http/3") {
+            # http/3 server proxies to a http server
+            if($run{'http/3'} &&
+               !responsive_http_server("https", $verbose, 0, protoport('http3'), 1)) {
+                logmsg "* restarting unresponsive HTTP/3 server\n";
+                if(stopserver('http/3')) {
+                    return ("failed stopping unresponsive HTTP/3 server", 3);
+                }
+                # also stop http server, we do not know which state it is in
+                if($run{'http'} && stopserver('http')) {
+                    return ("failed stopping HTTP server", 3);
+                }
+            }
+            # check a running http server if we not already checked http/3
+            if($run{'http'} && !$run{'http/3'} &&
+               !responsive_http_server("http", $verbose, 0,
+                                       protoport('http'))) {
+                if(stopserver('http')) {
+                    return ("failed stopping unresponsive HTTP server", 3);
+                }
+            }
+            if(!$run{'http'}) {
+                ($serr, $pid, $pid2, $PORT{'http'}) =
+                    runhttpserver("http", $verbose, 0);
+                if($pid <= 0) {
+                    return ("failed starting HTTP server", $serr);
+                }
+                logmsg sprintf("* pid http => %d %d\n", $pid, $pid2) if($verbose);
+                $run{'http'}="$pid $pid2";
+            }
+            if(!$run{'http/3'}) {
+                ($serr, $pid, $pid2, $PORT{"http3"}) = runhttp3server($verbose);
+                if($pid <= 0) {
+                    return ("failed starting HTTP/3 server", $serr);
+                }
+                logmsg sprintf ("* pid http/3 => %d %d\n", $pid, $pid2)
+                    if($verbose);
+                $run{'http/3'}="$pid $pid2";
             }
         }
         elsif($what eq "gophers") {

@@ -33,7 +33,6 @@ nghttpx-h3
 headers-api
 </features>
 <server>
-http
 http/3
 </server>
 <name>

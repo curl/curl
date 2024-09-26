@@ -34,7 +34,6 @@ SSL
 headers-api
 </features>
 <server>
-http
 http/2
 </server>
 <name>
