@@ -353,7 +353,9 @@ class TestCA:
                            valid_from: timedelta = timedelta(days=-1),
                            valid_to: timedelta = timedelta(days=89),
                            ) -> Credentials:
-        """Create a certificate signed by this CA for the given domains.
+        """
+        Create a certificate signed by this CA for the given domains.
+
         :returns: the certificate and private key PEM file paths
         """
         if spec.domains and len(spec.domains):
@@ -381,7 +383,7 @@ class TestCA:
         elif common_name:
             name_pieces.append(x509.NameAttribute(NameOID.COMMON_NAME, common_name))
         if parent:
-            name_pieces.extend([rdn for rdn in parent])
+            name_pieces.extend(list(parent))
         return x509.Name(name_pieces)
 
     @staticmethod
@@ -522,7 +524,6 @@ class TestCA:
                                  valid_from: timedelta = timedelta(days=-1),
                                  valid_to: timedelta = timedelta(days=89),
                                  ) -> Credentials:
-        name = name
         pkey = _private_key(key_type=key_type)
         subject = TestCA._make_x509_name(common_name=name, parent=issuer.subject)
         csr = TestCA._make_csr(subject=subject,

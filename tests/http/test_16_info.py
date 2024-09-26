@@ -139,12 +139,12 @@ class TestInfo:
         # check timings reported on a transfer for consistency
         url = s['url_effective']
         # all stat keys which reporting timings
-        all_keys = set([
+        all_keys = {
             'time_appconnect', 'time_connect', 'time_redirect',
             'time_pretransfer', 'time_starttransfer', 'time_total'
-        ])
+        }
         # stat keys where we expect a positive value
-        pos_keys = set(['time_pretransfer', 'time_starttransfer', 'time_total'])
+        pos_keys = {'time_pretransfer', 'time_starttransfer', 'time_total'}
         if s['num_connects'] > 0:
             pos_keys.add('time_connect')
             if url.startswith('https:'):

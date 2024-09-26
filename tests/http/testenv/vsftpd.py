@@ -152,9 +152,7 @@ class VsFTPD:
         return False
 
     def _run(self, args, intext=''):
-        env = {}
-        for key, val in os.environ.items():
-            env[key] = val
+        env = os.environ.copy()
         with open(self._error_log, 'w') as cerr:
             self._process = subprocess.run(args, stderr=cerr, stdout=cerr,
                                            cwd=self._vsftpd_dir,

@@ -95,13 +95,12 @@ class LocalClient:
                 if key in os.environ and key not in run_env:
                     run_env[key] = os.environ[key]
         try:
-            with open(self._stdoutfile, 'w') as cout:
-                with open(self._stderrfile, 'w') as cerr:
-                    p = subprocess.run(myargs, stderr=cerr, stdout=cout,
-                                       cwd=self._run_dir, shell=False,
-                                       input=None, env=run_env,
-                                       timeout=self._timeout)
-                    exitcode = p.returncode
+            with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
+                p = subprocess.run(myargs, stderr=cerr, stdout=cout,
+                                   cwd=self._run_dir, shell=False,
+                                   input=None, env=run_env,
+                                   timeout=self._timeout)
+                exitcode = p.returncode
         except subprocess.TimeoutExpired:
             log.warning(f'Timeout after {self._timeout}s: {args}')
             exitcode = -1
