@@ -152,7 +152,7 @@ my %api = (
 
 sub doublecheck {
     my ($f, $used) = @_;
-    open(F, "git grep -le '$f\\W' -- lib ${unittests}packages|");
+    open(F, "git grep -Fwle '$f' -- lib ${unittests}packages|");
     my @also;
     while(<F>) {
         my $e = $_;
