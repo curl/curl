@@ -541,7 +541,7 @@ static int mbed_verify_cb(void *ptr, mbedtls_x509_crt *crt,
     mbedtls_x509_crt_verify_info(buf, sizeof(buf), "", *flags);
     failf(data, "mbedTLS: %s", buf);
 #else
-    failf(data, "mbedTLS: cerificate verification error 0x%08x", *flags);
+    failf(data, "mbedTLS: certificate verification error 0x%08x", *flags);
 #endif
   }
 

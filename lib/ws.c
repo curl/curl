@@ -1247,7 +1247,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
         goto out;
       }
       /* We added the complete data to our sendbuf. Report one byte less as
-       * sent. This parital success should make the caller invoke us again
+       * sent. This partial success should make the caller invoke us again
        * with the last byte. */
       *sent = payload_added - 1;
       result = Curl_bufq_unwrite(&ws->sendbuf, 1);

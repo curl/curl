@@ -53,7 +53,12 @@ jobs:
           python3 -m pip install cmakelint==1.4.3
 
       - name: spellcheck
-        run: codespell --skip src/tool_hugehelp.c -I .github/scripts/codespell-ignore.txt include src lib
+        run: |
+          codespell \
+            --skip scripts/mk-ca-bundle.pl \
+            --skip src/tool_hugehelp.c \
+            -I .github/scripts/codespell-ignore.txt \
+            CMake include m4 scripts src lib
 
       - name: cmakelint
         run: scripts/cmakelint.sh

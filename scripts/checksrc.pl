@@ -630,7 +630,7 @@ sub scanfile {
         if($nostr =~ /^(.*[^']\?[^'].*)(\w|\)|\]|')\:/i) {
             my $m = $1;
             my $e = $nostr;
-            $e =~ s/'(.)':'(.)'/$1:$2/g; # eliminate chars quotes that suround colon
+            $e =~ s/'(.)':'(.)'/$1:$2/g; # eliminate chars quotes that surround colon
             $e =~ s/':'//g;              # ignore these
             if($e =~ /^(.*[^']\?[^'].*)(\w|\)|\]|')\:/i) {
                 checkwarn("NOSPACEC",
@@ -642,7 +642,7 @@ sub scanfile {
         if($nostr =~ /^(.*[^'"]\?[^'"].*)\:(\w|\)|\]|')/i) {
             my $m = $1;
             my $e = $nostr;
-            $e =~ s/'(.)':'(.)'/$1:$2/g; # eliminate chars quotes that suround colon
+            $e =~ s/'(.)':'(.)'/$1:$2/g; # eliminate chars quotes that surround colon
             $e =~ s/':'//g;              # ignore these
             if($e =~ /^(.*[^'"]\?[^'"].*)\:(\w|\)|\]|')/i) {
                 checkwarn("NOSPACEC",

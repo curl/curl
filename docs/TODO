@@ -1059,7 +1059,7 @@
 
 18.7 specify which response codes that make -f/--fail return error
 
- Allows a user to better specify exacly which error code(s) that are fine
+ Allows a user to better specify exactly which error code(s) that are fine
  and which are errors for their specific uses cases
 
 18.9 Choose the name of file in braces for complex URLs
