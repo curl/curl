@@ -35,7 +35,7 @@ https Server-localhost-sv.pem
 simple HTTPS GET
 </name>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

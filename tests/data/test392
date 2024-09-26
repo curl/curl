@@ -35,7 +35,7 @@ HTTP secure cookies over localhost
 TZ=GMT
 </setenv>
 <command>
-http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
+-4 http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
 </command>
 <features>
 cookies

@@ -22,7 +22,7 @@ https Server-localhost-sv.pem
 CRL test
 </name>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --crlfile %SRCDIR/certs/Server-localhost-sv.crl https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --crlfile %SRCDIR/certs/Server-localhost-sv.crl https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 

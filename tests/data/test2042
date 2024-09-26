@@ -27,7 +27,7 @@ https Server-localhost-sv.pem
 HTTPS wrong base64-sha256 pinnedpubkey but right CN
 </name>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//bSIggTf+ikMG0CtmDlpMVBd7yi7H1md4URogRPqerso= https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//bSIggTf+ikMG0CtmDlpMVBd7yi7H1md4URogRPqerso= https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
 </client>
 
