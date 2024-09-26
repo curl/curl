@@ -266,12 +266,10 @@ class TestSSLUse:
 
     @staticmethod
     def gen_test_17_09_list():
-        ret = []
-        for tls_proto in ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']:
-            for max_ver in range(0, 5):
-                for min_ver in range(-2, 4):
-                    ret.append([tls_proto, max_ver, min_ver])
-        return ret
+        return [[tls_proto, max_ver, min_ver]
+                for tls_proto in ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+                for max_ver in range(5)
+                for min_ver in range(-2, 4)]
 
     @pytest.mark.parametrize("tls_proto, max_ver, min_ver", gen_test_17_09_list())
     def test_17_09_ssl_min_max(self, env: Env, httpd, tls_proto, max_ver, min_ver):

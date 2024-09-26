@@ -117,9 +117,7 @@ class Httpd:
         self._proxy_auth_basic = active
 
     def _run(self, args, intext=''):
-        env = {}
-        for key, val in os.environ.items():
-            env[key] = val
+        env = os.environ.copy()
         env['APACHE_RUN_DIR'] = self._run_dir
         env['APACHE_RUN_USER'] = os.environ['USER']
         env['APACHE_LOCK_DIR'] = self._lock_dir
@@ -252,7 +250,7 @@ class Httpd:
                 if os.path.exists(os.path.join(self._mods_dir, f'mod_{m}.so')):
                     fd.write(f'LoadModule {m}_module   "{self._mods_dir}/mod_{m}.so"\n')
             if Httpd.MOD_CURLTEST is not None:
-                fd.write(f'LoadModule curltest_module   \"{Httpd.MOD_CURLTEST}\"\n')
+                fd.write(f'LoadModule curltest_module   "{Httpd.MOD_CURLTEST}"\n')
             conf = [   # base server config
                 f'ServerRoot "{self._apache_dir}"',
                 'DefaultRuntimeDir logs',

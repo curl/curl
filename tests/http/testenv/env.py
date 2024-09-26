@@ -213,8 +213,8 @@ class EnvConfig:
                     log.error(f'{self.apxs} failed to query HTTPD_VERSION: {p}')
                 else:
                     self._httpd_version = p.stdout.strip()
-            except Exception as e:
-                log.error(f'{self.apxs} failed to run: {e}')
+            except Exception:
+                log.exception(f'{self.apxs} failed to run')
         return self._httpd_version
 
     def versiontuple(self, v):
@@ -563,7 +563,7 @@ class Env:
     def make_data_file(self, indir: str, fname: str, fsize: int,
                        line_length: int = 1024) -> str:
         if line_length < 11:
-            raise 'line_length less than 11 not supported'
+            raise RuntimeError('line_length less than 11 not supported')
         fpath = os.path.join(indir, fname)
         s10 = "0123456789"
         s = round((line_length / 10) + 1) * s10

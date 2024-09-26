@@ -120,20 +120,16 @@ class RunTcpDump:
     def stats(self) -> Optional[List[str]]:
         if self._proc:
             raise Exception('tcpdump still running')
-        lines = []
-        for line in open(self._stdoutfile).readlines():
-            if re.match(r'.* IP 127\.0\.0\.1\.\d+ [<>] 127\.0\.0\.1\.\d+:.*', line):
-                lines.append(line)
-        return lines
+        return [line
+                for line in open(self._stdoutfile)
+                if re.match(r'.* IP 127\.0\.0\.1\.\d+ [<>] 127\.0\.0\.1\.\d+:.*', line)]
 
     def stats_excluding(self, src_port) -> Optional[List[str]]:
         if self._proc:
             raise Exception('tcpdump still running')
-        lines = []
-        for line in self.stats:
-            if not re.match(r'.* IP 127\.0\.0\.1\.' + str(src_port) + ' >.*', line):
-                lines.append(line)
-        return lines
+        return [line
+                for line in self.stats
+                if not re.match(r'.* IP 127\.0\.0\.1\.' + str(src_port) + ' >.*', line)]
 
     @property
     def stderr(self) -> List[str]:
@@ -157,20 +153,19 @@ class RunTcpDump:
             args.extend([
                 tcpdump, '-i', local_if, '-n', 'tcp[tcpflags] & (tcp-rst)!=0'
             ])
-            with open(self._stdoutfile, 'w') as cout:
-                with open(self._stderrfile, 'w') as cerr:
-                    self._proc = subprocess.Popen(args, stdout=cout, stderr=cerr,
-                                                  text=True, cwd=self._run_dir,
-                                                  shell=False)
-                    assert self._proc
-                    assert self._proc.returncode is None
-                    while self._proc:
-                        try:
-                            self._proc.wait(timeout=1)
-                        except subprocess.TimeoutExpired:
-                            pass
-        except Exception as e:
-            log.error(f'Tcpdump: {e}')
+            with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
+                self._proc = subprocess.Popen(args, stdout=cout, stderr=cerr,
+                                              text=True, cwd=self._run_dir,
+                                              shell=False)
+                assert self._proc
+                assert self._proc.returncode is None
+                while self._proc:
+                    try:
+                        self._proc.wait(timeout=1)
+                    except subprocess.TimeoutExpired:
+                        pass
+        except Exception:
+            log.exception('Tcpdump')
 
     def start(self):
         def do_sample():
@@ -230,7 +225,7 @@ class ExecResult:
                 self._stats.append(json.loads(line))
             # TODO: specify specific exceptions here
             except:  # noqa: E722
-                log.error(f'not a JSON stat: {line}')
+                log.exception(f'not a JSON stat: {line}')
                 break
 
     @property
@@ -771,39 +766,38 @@ class CurlClient:
             tcpdump = RunTcpDump(self.env, self._run_dir)
             tcpdump.start()
         try:
-            with open(self._stdoutfile, 'w') as cout:
-                with open(self._stderrfile, 'w') as cerr:
-                    if with_profile:
-                        end_at = started_at + timedelta(seconds=self._timeout) \
-                            if self._timeout else None
-                        log.info(f'starting: {args}')
-                        p = subprocess.Popen(args, stderr=cerr, stdout=cout,
-                                             cwd=self._run_dir, shell=False,
-                                             env=self._run_env)
-                        profile = RunProfile(p.pid, started_at, self._run_dir)
-                        if intext is not None and False:
-                            p.communicate(input=intext.encode(), timeout=1)
-                        ptimeout = 0.0
-                        while True:
-                            try:
-                                p.wait(timeout=ptimeout)
-                                break
-                            except subprocess.TimeoutExpired:
-                                if end_at and datetime.now() >= end_at:
-                                    p.kill()
-                                    raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout)
-                                profile.sample()
-                                ptimeout = 0.01
-                        exitcode = p.returncode
-                        profile.finish()
-                        log.info(f'done: exit={exitcode}, profile={profile}')
-                    else:
-                        p = subprocess.run(args, stderr=cerr, stdout=cout,
-                                           cwd=self._run_dir, shell=False,
-                                           input=intext.encode() if intext else None,
-                                           timeout=self._timeout,
-                                           env=self._run_env)
-                        exitcode = p.returncode
+            with open(self._stdoutfile, 'w') as cout, open(self._stderrfile, 'w') as cerr:
+                if with_profile:
+                    end_at = started_at + timedelta(seconds=self._timeout) \
+                        if self._timeout else None
+                    log.info(f'starting: {args}')
+                    p = subprocess.Popen(args, stderr=cerr, stdout=cout,
+                                         cwd=self._run_dir, shell=False,
+                                         env=self._run_env)
+                    profile = RunProfile(p.pid, started_at, self._run_dir)
+                    if intext is not None and False:
+                        p.communicate(input=intext.encode(), timeout=1)
+                    ptimeout = 0.0
+                    while True:
+                        try:
+                            p.wait(timeout=ptimeout)
+                            break
+                        except subprocess.TimeoutExpired:
+                            if end_at and datetime.now() >= end_at:
+                                p.kill()
+                                raise subprocess.TimeoutExpired(cmd=args, timeout=self._timeout)
+                            profile.sample()
+                            ptimeout = 0.01
+                    exitcode = p.returncode
+                    profile.finish()
+                    log.info(f'done: exit={exitcode}, profile={profile}')
+                else:
+                    p = subprocess.run(args, stderr=cerr, stdout=cout,
+                                       cwd=self._run_dir, shell=False,
+                                       input=intext.encode() if intext else None,
+                                       timeout=self._timeout,
+                                       env=self._run_env)
+                    exitcode = p.returncode
         except subprocess.TimeoutExpired:
             now = datetime.now()
             duration = now - started_at
@@ -857,7 +851,6 @@ class CurlClient:
             args.extend(['-v', '--trace-ids', '--trace-time'])
             if self.env.verbose > 1:
                 args.extend(['--trace-config', 'http/2,http/3,h2-proxy,h1-proxy'])
-                pass
 
         active_options = options
         if options is not None and '--next' in options:

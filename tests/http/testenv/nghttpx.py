@@ -164,7 +164,7 @@ class Nghttpx:
 
     def _write_config(self):
         with open(self._conf_file, 'w') as fd:
-            fd.write('# nghttpx test config'),
+            fd.write('# nghttpx test config')
             fd.write("\n".join([
                 '# do we need something here?'
             ]))

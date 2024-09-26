@@ -183,7 +183,7 @@ class TestCaddy:
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
-        for i in range(0,count):
+        for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
 
