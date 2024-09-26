@@ -101,7 +101,7 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi);
 static void Curl_expire_ex(struct Curl_easy *data, const struct curltime *nowp,
                            timediff_t milli, expire_id id);
 
-#ifdef DEBUGBUILD
+#if defined( DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static const char * const multi_statename[]={
   "INIT",
   "PENDING",

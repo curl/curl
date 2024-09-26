@@ -152,8 +152,6 @@ void Curl_infof(struct Curl_easy *data,
  */
 void Curl_trc_cf_infof(struct Curl_easy *data, struct Curl_cfilter *cf,
                        const char *fmt, ...) CURL_PRINTF(3, 4);
-void Curl_trc_ft_infof(struct Curl_easy *data, struct curl_trc_feat *ft,
-                       const char *fmt, ...) CURL_PRINTF(3, 4);
 void Curl_trc_write(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_read(struct Curl_easy *data,
@@ -196,13 +194,6 @@ static void Curl_trc_cf_infof(struct Curl_easy *data,
 }
 
 struct curl_trc_feat;
-
-static void Curl_trc_ft_infof(struct Curl_easy *data,
-                              struct curl_trc_feat *ft,
-                              const char *fmt, ...)
-{
-  (void)data; (void)ft; (void)fmt;
-}
 
 static void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
 {
