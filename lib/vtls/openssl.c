@@ -1681,29 +1681,23 @@ fail:
 }
 
 /* returns non-zero on failure */
-static int x509_name_oneline(X509_NAME *a, char *buf, size_t size)
+static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
 {
   BIO *bio_out = BIO_new(BIO_s_mem());
   BUF_MEM *biomem;
   int rc;
+  CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  if(!bio_out)
-    return 1; /* alloc failed! */
-
-  rc = X509_NAME_print_ex(bio_out, a, 0, XN_FLAG_SEP_SPLUS_SPC);
-  BIO_get_mem_ptr(bio_out, &biomem);
-
-  if((size_t)biomem->length < size)
-    size = biomem->length;
-  else
-    size--; /* do not overwrite the buffer end */
-
-  memcpy(buf, biomem->data, size);
-  buf[size] = 0;
-
-  BIO_free(bio_out);
-
-  return !rc;
+  if(bio_out) {
+    Curl_dyn_reset(d);
+    rc = X509_NAME_print_ex(bio_out, a, 0, XN_FLAG_SEP_SPLUS_SPC);
+    if(rc != -1) {
+      BIO_get_mem_ptr(bio_out, &biomem);
+      result = Curl_dyn_addn(d, biomem->data, biomem->length);
+      BIO_free(bio_out);
+    }
+  }
+  return result;
 }
 
 /**
@@ -2235,8 +2229,9 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     /* we have to look to the last occurrence of a commonName in the
        distinguished one to get the most significant one. */
     int i = -1;
-    unsigned char *peer_CN = NULL;
-    int peerlen = 0;
+    unsigned char *cn = NULL;
+    int cnlen = 0;
+    bool free_cn = FALSE;
 
     /* The following is done because of a bug in 0.9.6b */
     X509_NAME *name = X509_get_subject_name(server_cert);
@@ -2260,21 +2255,17 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
          conditional in the future when OpenSSL has been fixed. */
       if(tmp) {
         if(ASN1_STRING_type(tmp) == V_ASN1_UTF8STRING) {
-          peerlen = ASN1_STRING_length(tmp);
-          if(peerlen >= 0) {
-            peer_CN = OPENSSL_malloc(peerlen + 1);
-            if(peer_CN) {
-              memcpy(peer_CN, ASN1_STRING_get0_data(tmp), peerlen);
-              peer_CN[peerlen] = '\0';
-            }
-            else
-              result = CURLE_OUT_OF_MEMORY;
-          }
+          cnlen = ASN1_STRING_length(tmp);
+          cn = (unsigned char *) ASN1_STRING_get0_data(tmp);
         }
-        else /* not a UTF8 name */
-          peerlen = ASN1_STRING_to_UTF8(&peer_CN, tmp);
+        else { /* not a UTF8 name */
+          cnlen = ASN1_STRING_to_UTF8(&cn, tmp);
+          free_cn = TRUE;
+        }
 
-        if(peer_CN && (curlx_uztosi(strlen((char *)peer_CN)) != peerlen)) {
+        if((cnlen <= 0) || !cn)
+          result = CURLE_OUT_OF_MEMORY;
+        else if((size_t)cnlen != strlen((char *)cn)) {
           /* there was a terminating zero before the end of string, this
              cannot match and we return failure! */
           failf(data, "SSL: illegal cert name field");
@@ -2286,22 +2277,22 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
     if(result)
       /* error already detected, pass through */
       ;
-    else if(!peer_CN) {
+    else if(!cn) {
       failf(data,
             "SSL: unable to obtain common name from peer certificate");
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
-    else if(!Curl_cert_hostcheck((const char *)peer_CN,
-                                 peerlen, peer->hostname, hostlen)) {
+    else if(!Curl_cert_hostcheck((const char *)cn, cnlen,
+                                 peer->hostname, hostlen)) {
       failf(data, "SSL: certificate subject name '%s' does not match "
-            "target hostname '%s'", peer_CN, peer->dispname);
+            "target hostname '%s'", cn, peer->dispname);
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
     else {
-      infof(data, " common name: %s (matched)", peer_CN);
+      infof(data, " common name: %s (matched)", cn);
     }
-    if(peer_CN)
-      OPENSSL_free(peer_CN);
+    if(free_cn)
+      OPENSSL_free(cn);
   }
 
   return result;
@@ -4521,6 +4512,8 @@ static void infof_certstack(struct Curl_easy *data, const SSL *ssl)
 #define infof_certstack(data, ssl)
 #endif
 
+#define MAX_CERT_NAME_LENGTH 2048
+
 CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct ossl_ctx *octx,
@@ -4530,17 +4523,18 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   CURLcode result = CURLE_OK;
-  int rc;
   long lerr;
   X509 *issuer;
   BIO *fp = NULL;
   char error_buffer[256]="";
-  char buffer[2048];
   const char *ptr;
   BIO *mem = BIO_new(BIO_s_mem());
   bool strict = (conn_config->verifypeer || conn_config->verifyhost);
+  struct dynbuf dname;
 
   DEBUGASSERT(octx);
+
+  Curl_dyn_init(&dname, MAX_CERT_NAME_LENGTH);
 
   if(!mem) {
     failf(data,
@@ -4568,9 +4562,9 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   infof(data, "%s certificate:",
         Curl_ssl_cf_is_proxy(cf) ? "Proxy" : "Server");
 
-  rc = x509_name_oneline(X509_get_subject_name(octx->server_cert),
-                         buffer, sizeof(buffer));
-  infof(data, " subject: %s", rc ? "[NONE]" : buffer);
+  result = x509_name_oneline(X509_get_subject_name(octx->server_cert),
+                             &dname);
+  infof(data, " subject: %s", result ? "[NONE]" : Curl_dyn_ptr(&dname));
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   {
@@ -4594,19 +4588,21 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     if(result) {
       X509_free(octx->server_cert);
       octx->server_cert = NULL;
+      Curl_dyn_free(&dname);
       return result;
     }
   }
 
-  rc = x509_name_oneline(X509_get_issuer_name(octx->server_cert),
-                         buffer, sizeof(buffer));
-  if(rc) {
+  result = x509_name_oneline(X509_get_issuer_name(octx->server_cert),
+                             &dname);
+  if(result) {
     if(strict)
       failf(data, "SSL: could not get X509-issuer name");
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
   else {
-    infof(data, " issuer: %s", buffer);
+    infof(data, " issuer: %s", Curl_dyn_ptr(&dname));
+    Curl_dyn_free(&dname);
 
     /* We could do all sorts of certificate verification stuff here before
        deallocating the certificate. */
@@ -4699,7 +4695,6 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     else
       infof(data, " SSL certificate verify ok.");
   }
-
   infof_certstack(data, octx->ssl);
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
