@@ -45,7 +45,7 @@ env:
 jobs:
   linux-i686:
     name: ${{ matrix.build.name }}
-    runs-on: 'ubuntu-22.04'
+    runs-on: 'ubuntu-24.04'
     timeout-minutes: 90
     strategy:
       fail-fast: false
