@@ -2,7 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
-name: http3-linux
+name: Linux HTTP/3
 
 'on':
   push:
