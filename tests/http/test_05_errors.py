@@ -24,12 +24,10 @@
 #
 ###########################################################################
 #
-import json
 import logging
-from typing import Optional, Tuple, List, Dict
 import pytest
 
-from testenv import Env, CurlClient, ExecResult
+from testenv import Env, CurlClient
 
 
 log = logging.getLogger(__name__)

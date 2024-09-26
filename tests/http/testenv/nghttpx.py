@@ -164,7 +164,7 @@ class Nghttpx:
 
     def _write_config(self):
         with open(self._conf_file, 'w') as fd:
-            fd.write(f'# nghttpx test config'),
+            fd.write('# nghttpx test config'),
             fd.write("\n".join([
                 '# do we need something here?'
             ]))
@@ -186,17 +186,17 @@ class NghttpxQuic(Nghttpx):
             f'--frontend=*,{self.env.h3_port};quic',
             f'--backend=127.0.0.1,{self.env.https_port};{self.env.domain1};sni={self.env.domain1};proto=h2;tls',
             f'--backend=127.0.0.1,{self.env.http_port}',
-            f'--log-level=INFO',
+            '--log-level=INFO',
             f'--pid-file={self._pid_file}',
             f'--errorlog-file={self._error_log}',
             f'--conf={self._conf_file}',
             f'--cacert={self.env.ca.cert_file}',
             creds.pkey_file,
             creds.cert_file,
-            f'--frontend-http3-window-size=1M',
-            f'--frontend-http3-max-window-size=10M',
-            f'--frontend-http3-connection-window-size=10M',
-            f'--frontend-http3-max-connection-window-size=100M',
+            '--frontend-http3-window-size=1M',
+            '--frontend-http3-max-window-size=10M',
+            '--frontend-http3-connection-window-size=10M',
+            '--frontend-http3-max-connection-window-size=100M',
             # f'--frontend-quic-debug-log',
         ]
         ngerr = open(self._stderr, 'a')
@@ -219,10 +219,10 @@ class NghttpxFwd(Nghttpx):
         assert creds  # convince pytype this isn't None
         args = [
             self._cmd,
-            f'--http2-proxy',
+            '--http2-proxy',
             f'--frontend=*,{self.env.h2proxys_port}',
             f'--backend=127.0.0.1,{self.env.proxy_port}',
-            f'--log-level=INFO',
+            '--log-level=INFO',
             f'--pid-file={self._pid_file}',
             f'--errorlog-file={self._error_log}',
             f'--conf={self._conf_file}',

@@ -154,23 +154,23 @@ class Caddy:
             fd.write(JSONEncoder().encode(data))
         with open(self._conf_file, 'w') as fd:
             conf = [   # base server config
-                f'{{',
+                '{',
                 f'  http_port {self.env.caddy_http_port}',
                 f'  https_port {self.env.caddy_https_port}',
                 f'  servers :{self.env.caddy_https_port} {{',
-                f'    protocols h3 h2 h1',
-                f'  }}',
-                f'}}',
+                '    protocols h3 h2 h1',
+                '  }',
+                '}',
                 f'{domain1}:{self.env.caddy_https_port} {{',
-                f'  file_server * {{',
+                '  file_server * {',
                 f'    root {self._docs_dir}',
-                f'  }}',
+                '  }',
                 f'  tls {creds1.cert_file} {creds1.pkey_file}',
-                f'}}',
+                '}',
                 f'{domain2} {{',
                 f'  reverse_proxy /* http://localhost:{self.env.http_port} {{',
-                f'  }}',
+                '  }',
                 f'  tls {creds2.cert_file} {creds2.pkey_file}',
-                f'}}',
+                '}',
             ]
             fd.write("\n".join(conf))

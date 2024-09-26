@@ -44,7 +44,7 @@ else:
 
 # impacket needs to be installed in the Python environment
 try:
-    import impacket
+    import impacket  # noqa: F401
 except ImportError:
     sys.stderr.write(
         'Warning: Python package impacket is required for smb testing; '

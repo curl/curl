@@ -72,7 +72,7 @@ class UDSFaker:
             try:
                 c, client_address = self._socket.accept()
                 try:
-                    data = c.recv(16)
+                    c.recv(16)
                     c.sendall("""HTTP/1.1 200 Ok
 Server: UdsFaker
 Content-Type: application/json
@@ -109,7 +109,7 @@ class TestUnix:
         r.check_response(count=1, http_status=200)
 
     # download https: via Unix socket
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_11_02_unix_connect_http(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'

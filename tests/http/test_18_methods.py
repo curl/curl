@@ -24,14 +24,10 @@
 #
 ###########################################################################
 #
-import difflib
-import filecmp
 import logging
-import os
-from datetime import timedelta
 import pytest
 
-from testenv import Env, CurlClient, LocalClient
+from testenv import Env, CurlClient
 
 
 log = logging.getLogger(__name__)

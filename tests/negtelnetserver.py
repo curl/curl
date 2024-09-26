@@ -31,7 +31,6 @@ import logging
 import os
 import socket
 import sys
-import time
 
 from util import ClosingFileHandler
 

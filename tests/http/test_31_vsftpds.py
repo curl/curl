@@ -37,7 +37,7 @@ from testenv import Env, CurlClient, VsFTPD
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=not Env.has_vsftpd(), reason=f"missing vsftpd")
+@pytest.mark.skipif(condition=not Env.has_vsftpd(), reason="missing vsftpd")
 class TestVsFTPD:
 
     SUPPORTS_SSL = True
@@ -154,7 +154,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         # vsftp closes control connection without niceties,
         # disregard RST packets it sent from its port to curl
-        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, f'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, 'Unexpected TCP RSTs packets'
 
     # check with `tcpdump` if curl causes any TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
@@ -170,7 +170,7 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         # vsftp closes control connection without niceties,
         # disregard RST packets it sent from its port to curl
-        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, f'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.stats_excluding(src_port=env.ftps_port)) == 0, 'Unexpected TCP RSTs packets'
 
     def test_31_08_upload_ascii(self, env: Env, vsftpds: VsFTPD):
         docname = 'upload-ascii'

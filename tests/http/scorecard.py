@@ -67,7 +67,7 @@ class ScoreCard:
     def handshakes(self, proto: str) -> Dict[str, Any]:
         props = {}
         sample_size = 5
-        self.info(f'TLS Handshake\n')
+        self.info('TLS Handshake\n')
         for authority in [
             'curl.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
         ]:
@@ -125,7 +125,7 @@ class ScoreCard:
         samples = []
         errors = []
         profiles = []
-        self.info(f'single...')
+        self.info('single...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
@@ -152,7 +152,7 @@ class ScoreCard:
         errors = []
         profiles = []
         url = f'{url}?[0-{count - 1}]'
-        self.info(f'serial...')
+        self.info('serial...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
@@ -180,7 +180,7 @@ class ScoreCard:
         profiles = []
         max_parallel = self._download_parallel if self._download_parallel > 0 else count
         url = f'{url}?[0-{count - 1}]'
-        self.info(f'parallel...')
+        self.info('parallel...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
@@ -214,7 +214,7 @@ class ScoreCard:
                                                    count=count)
             props['parallel'] = self.transfer_parallel(url=url, proto=proto,
                                                        count=count)
-        self.info(f'ok.\n')
+        self.info('ok.\n')
         return props
 
     def downloads(self, proto: str, count: int,
@@ -280,7 +280,7 @@ class ScoreCard:
         samples = []
         errors = []
         profiles = []
-        self.info(f'single...')
+        self.info('single...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=proto,
@@ -307,7 +307,7 @@ class ScoreCard:
         errors = []
         profiles = []
         url = f'{url}?id=[0-{count - 1}]'
-        self.info(f'serial...')
+        self.info('serial...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=proto,
@@ -335,7 +335,7 @@ class ScoreCard:
         profiles = []
         max_parallel = count
         url = f'{url}?id=[0-{count - 1}]'
-        self.info(f'parallel...')
+        self.info('parallel...')
         for i in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=proto,
@@ -371,7 +371,7 @@ class ScoreCard:
                                                  fpath=fpath, count=count)
             props['parallel'] = self.upload_parallel(url=url, proto=proto,
                                                      fpath=fpath, count=count)
-        self.info(f'ok.\n')
+        self.info('ok.\n')
         return props
 
     def uploads(self, proto: str, count: int,
@@ -443,8 +443,8 @@ class ScoreCard:
             else:
                 samples.append(count / r.duration.total_seconds())
                 non_200s = 0
-                for l in r.stdout.splitlines():
-                    if not l.startswith('200,'):
+                for line in r.stdout.splitlines():
+                    if not line.startswith('200,'):
                         non_200s += 1
                 if non_200s > 0:
                     errors.append(f'responses != 200: {non_200s}')
@@ -464,7 +464,7 @@ class ScoreCard:
         for m in [1, 6, 25, 50, 100, 300]:
             props[str(m)] = self.do_requests(url=url, proto=proto, count=count,
                                              max_parallel=m)
-        self.info(f'ok.\n')
+        self.info('ok.\n')
         return props
 
     def requests(self, proto: str, req_count) -> Dict[str, Any]:
@@ -612,7 +612,8 @@ class ScoreCard:
 
             print('Downloads')
             print(f'  {"Server":<8} {"Size":>8}', end='')
-            for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
+            for m in measures:
+                print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
             print(f' {"Errors":^20}')
 
             for server in score['downloads']:
@@ -656,7 +657,8 @@ class ScoreCard:
 
             print('Uploads')
             print(f'  {"Server":<8} {"Size":>8}', end='')
-            for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
+            for m in measures:
+                print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
             print(f' {"Errors":^20}')
 
             for server in score['uploads']:
@@ -703,7 +705,8 @@ class ScoreCard:
 
             print('Requests, max in parallel')
             print(f'  {"Server":<8} {"Size":>6} {"Reqs":>6}', end='')
-            for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
+            for m in measures:
+                print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
             print(f' {"Errors":^10}')
 
             for server in score['requests']:
