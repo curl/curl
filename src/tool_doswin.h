@@ -27,10 +27,8 @@
 
 #if defined(_WIN32) || defined(MSDOS)
 
-#define SANITIZE_ALLOW_COLONS    (1<<0)  /* Allow colons */
 #define SANITIZE_ALLOW_PATH      (1<<1)  /* Allow path separators and colons */
 #define SANITIZE_ALLOW_RESERVED  (1<<2)  /* Allow reserved device names */
-#define SANITIZE_ALLOW_TRUNCATE  (1<<3)  /* Allow truncating a long filename */
 
 typedef enum {
   SANITIZE_ERR_OK = 0,           /* 0 - OK */
