@@ -907,6 +907,20 @@ sub verifyhttptls {
 }
 
 #######################################################################
+# STUB for verifying mqtt
+#
+sub verifymqtt {
+    my ($proto, $ipvnum, $idnum, $ip, $port) = @_;
+    my $pidfile = server_pidfilename("$LOGDIR/$PIDDIR", $proto, $ipvnum,
+                                     $idnum);
+    my $pid = processexists($pidfile);
+    if($pid < 0) {
+        logmsg "RUN: MQTT server has died after starting up\n";
+    }
+    return $pid;
+}
+
+#######################################################################
 # STUB for verifying socks
 #
 sub verifysocks {
@@ -1062,6 +1076,7 @@ my %protofunc = ('http' => \&verifyhttp,
                  'ftps' => \&verifyftp,
                  'pop3s' => \&verifyftp,
                  'imaps' => \&verifyftp,
+                 'mqtt' => \&verifymqtt,
                  'smtps' => \&verifyftp,
                  'tftp' => \&verifyftp,
                  'ssh' => \&verifyssh,
@@ -1950,13 +1965,12 @@ sub runmqttserver {
     }
 
     my $mqttport = pidfromfile($portfile);
-    $PORT{"mqtt"} = $mqttport;
 
     if($verb) {
         logmsg "RUN: $srvrname server is now running PID $pid2 on PORT $mqttport\n";
     }
 
-    return (0, $pid2, $sockspid);
+    return (0, $pid2, $sockspid, $mqttport);
 }
 
 #######################################################################
@@ -2236,6 +2250,19 @@ sub responsive_http_server {
     }
 
     return &responsiveserver($proto, $ipvnum, $idnum, $ip, $port_or_path);
+}
+
+#######################################################################
+# Single shot mqtt server responsiveness test. This should only
+# be used to verify that a server present in %run hash is still functional
+#
+sub responsive_mqtt_server {
+    my ($proto, $id, $verb, $ipv6) = @_;
+    my $ip = ($ipv6 && ($ipv6 =~ /6$/)) ? "$HOST6IP" : "$HOSTIP";
+    my $ipvnum = ($ipv6 && ($ipv6 =~ /6$/)) ? 6 : 4;
+    my $idnum = ($id && ($id =~ /^(\d+)$/) && ($id > 1)) ? $id : 1;
+
+    return &responsiveserver($proto, $ipvnum, $idnum, $ip);
 }
 
 #######################################################################
@@ -2816,8 +2843,14 @@ sub startservers {
             }
         }
         elsif($what eq "mqtt" ) {
+            if($run{'mqtt'} &&
+               !responsive_mqtt_server("mqtt", "", $verbose)) {
+                if(stopserver('mqtt')) {
+                    return ("failed stopping unresponsive MQTT server", 3);
+                }
+            }
             if(!$run{'mqtt'}) {
-                ($serr, $pid, $pid2) = runmqttserver("", $verbose);
+                ($serr, $pid, $pid2, $PORT{"mqtt"}) = runmqttserver("", $verbose);
                 if($pid <= 0) {
                     return ("failed starting mqtt server", $serr);
                 }
