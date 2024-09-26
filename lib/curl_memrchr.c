@@ -33,9 +33,6 @@
 #include "memdebug.h"
 
 #ifndef HAVE_MEMRCHR
-#if (!defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_COOKIES)) || \
-  defined(USE_OPENSSL) || \
-  defined(USE_SCHANNEL)
 
 /*
  * Curl_memrchr()
@@ -64,5 +61,4 @@ Curl_memrchr(const void *s, int c, size_t n)
   return NULL;
 }
 
-#endif
 #endif /* HAVE_MEMRCHR */
