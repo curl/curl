@@ -28,6 +28,8 @@ import logging
 import os
 import socket
 from threading import Thread
+from typing import Generator
+
 import pytest
 
 from testenv import Env, CurlClient
@@ -40,6 +42,7 @@ class UDSFaker:
     def __init__(self, path):
         self._uds_path = path
         self._done = False
+        self._socket = None
 
     @property
     def path(self):
@@ -88,7 +91,7 @@ Content-Length: 19
 class TestUnix:
 
     @pytest.fixture(scope="class")
-    def uds_faker(self, env: Env) -> UDSFaker:
+    def uds_faker(self, env: Env) -> Generator[UDSFaker, None, None]:
         uds_path = os.path.join(env.gen_dir, 'uds_11.sock')
         faker = UDSFaker(path=uds_path)
         faker.start()

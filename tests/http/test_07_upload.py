@@ -29,6 +29,7 @@ import filecmp
 import logging
 import os
 import pytest
+from typing import List
 
 from testenv import Env, CurlClient, LocalClient
 
@@ -648,7 +649,7 @@ class TestUpload:
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
 
-    def check_downloads(self, client, source: str, count: int,
+    def check_downloads(self, client, source: List[str], count: int,
                         complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)
