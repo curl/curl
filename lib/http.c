@@ -2697,7 +2697,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   }
 
   result = Curl_http_cookies(data, conn, &req);
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
     result = Curl_ws_request(data, &req);
 #endif
@@ -3449,7 +3449,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
           goto out;
         *pconsumed += blen;
       }
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
       else if(k->upgr101 == UPGR101_WS) {
         /* verify the response. Any passed `buf` bytes are already in
          * WebSockets format and taken in by the protocol handler. */
@@ -3534,7 +3534,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   }
 #endif
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   /* All >=200 HTTP status codes are errors when wanting WebSockets */
   if(data->req.upgr101 == UPGR101_WS) {
     failf(data, "Refused WebSockets upgrade: %d", k->httpcode);

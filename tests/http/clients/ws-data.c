@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -210,7 +210,7 @@ out:
 
 int main(int argc, char *argv[])
 {
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url;
@@ -262,10 +262,10 @@ int main(int argc, char *argv[])
   curl_global_cleanup();
   return (int)res;
 
-#else /* USE_WEBSOCKETS */
+#else /* !CURL_DISABLE_WEBSOCKETS */
   (void)argc;
   (void)argv;
   fprintf(stderr, "WebSockets not enabled in libcurl\n");
   return 1;
-#endif /* !USE_WEBSOCKETS */
+#endif /* CURL_DISABLE_WEBSOCKETS */
 }

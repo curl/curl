@@ -94,11 +94,11 @@ void Curl_failf(struct Curl_easy *data,
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_smtp)) \
          Curl_trc_smtp(data, __VA_ARGS__); } while(0)
 #endif /* !CURL_DISABLE_SMTP */
-#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
-#define CURL_TRC_WS(data, ...) \
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#define CURL_TRC_WS(data, ...)                             \
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ws)) \
          Curl_trc_ws(data, __VA_ARGS__); } while(0)
-#endif /* USE_WEBSOCKETS && !CURL_DISABLE_HTTP */
+#endif /* !CURL_DISABLE_WEBSOCKETS && !CURL_DISABLE_HTTP */
 
 #else /* CURL_HAVE_C99 */
 
@@ -113,7 +113,7 @@ void Curl_failf(struct Curl_easy *data,
 #ifndef CURL_DISABLE_SMTP
 #define CURL_TRC_SMTP  Curl_trc_smtp
 #endif
-#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS    Curl_trc_ws
 #endif
 
@@ -169,7 +169,7 @@ extern struct curl_trc_feat Curl_trc_feat_smtp;
 void Curl_trc_smtp(struct Curl_easy *data,
                    const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
-#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 extern struct curl_trc_feat Curl_trc_feat_ws;
 void Curl_trc_ws(struct Curl_easy *data,
                  const char *fmt, ...) CURL_PRINTF(2, 3);
@@ -226,7 +226,7 @@ static void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
   (void)data; (void)fmt;
 }
 #endif
-#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
 static void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
 {
   (void)data; (void)fmt;

@@ -274,7 +274,7 @@ static const struct testcase get_parts_list[] ={
   {"https://user@example.net",
    "https | user | [12] | [13] | example.net | [15] | / | [16] | [17]",
    0, 0, CURLUE_OK},
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   {"ws://example.com/color/?green",
    "ws | [11] | [12] | [13] | example.com | [15] | /color/ | green |"
    " [17]",

@@ -185,3 +185,7 @@ Disable the TFTP protocol
 ## `CURL_DISABLE_VERBOSE_STRINGS`
 
 Disable verbose strings and error messages.
+
+## `CURL_DISABLE_WEBSOCKETS`
+
+Disable the WebSocket protocols.

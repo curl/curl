@@ -148,6 +148,9 @@
 /* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
 
+/* disabled WebSockets */
+#cmakedefine CURL_DISABLE_WEBSOCKETS 1
+
 /* disables use of socketpair for curl_multi_poll */
 #cmakedefine CURL_DISABLE_SOCKETPAIR 1
 
@@ -811,9 +814,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to enable Apple IDN */
 #cmakedefine USE_APPLE_IDN 1
-
-/* Define to 1 to enable websocket support. */
-#cmakedefine USE_WEBSOCKETS 1
 
 /* Define to 1 if OpenSSL has the SSL_CTX_set_srp_username function. */
 #cmakedefine HAVE_OPENSSL_SRP 1

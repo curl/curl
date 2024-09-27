@@ -57,15 +57,6 @@ Graduation requirements:
 
 - a reasonable expectation of a stable API going forward.
 
-### WebSocket
-
-Graduation requirements:
-
-- feedback from users saying that the API works for their specific use cases
-
-- unless the above happens, we consider WebSocket silently working by
-  September 2024 when it has been stewing as EXPERIMENTAL for two years.
-
 ## ECH
 
 Use of the HTTPS resource record and Encrypted Client Hello (ECH) when using
