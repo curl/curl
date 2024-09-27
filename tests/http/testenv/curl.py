@@ -831,10 +831,6 @@ class CurlClient:
                       with_profile=with_profile, with_tcpdump=with_tcpdump)
         if r.exit_code == 0 and with_headers:
             self._parse_headerfile(self._headerfile, r=r)
-            if r.json:
-                # TODO: this isn't valid; should this instead be:
-                # r._response["json"] = r.json
-                r.response["json"] = r.json
         return r
 
     def _complete_args(self, urls, timeout=None, options=None,
