@@ -83,7 +83,6 @@ jobs:
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
-            --enable-websockets \
             --with-openssl \
             --with-libssh2 \
             --disable-dependency-tracking \
@@ -136,7 +135,6 @@ jobs:
           cmake -B bld -G Ninja ${options} \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
-            -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON \
             ${{ matrix.config }}
 

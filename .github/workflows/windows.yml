@@ -105,7 +105,6 @@ jobs:
         run: |
           mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
-            --enable-websockets \
             --with-openssl \
             --with-libssh2 \
             --disable-dependency-tracking \
@@ -198,7 +197,6 @@ jobs:
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
-            -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON \
             ${{ matrix.config }}
 
@@ -330,7 +328,6 @@ jobs:
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
-            -DENABLE_WEBSOCKETS=ON \
             -DCURL_USE_LIBPSL=OFF \
             ${{ matrix.config }}
 
@@ -604,7 +601,6 @@ jobs:
             -DCURL_WERROR=ON \
             -DBUILD_SHARED_LIBS=OFF \
             -DENABLE_DEBUG=ON \
-            -DENABLE_WEBSOCKETS=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
             ${{ matrix.config }}

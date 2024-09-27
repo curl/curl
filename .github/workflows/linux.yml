@@ -138,22 +138,22 @@ jobs:
           - name: openssl3
             install_packages: zlib1g-dev
             install_steps: gcc-11 openssl3 pytest
-            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
 
           - name: openssl3 -O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3
-            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
 
           - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug --enable-websockets
+            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug
 
           - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
-            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DENABLE_WEBSOCKETS=ON
+            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
 
           - name: openssl3 !ipv6
             install_steps: gcc-11 openssl3
@@ -187,7 +187,7 @@ jobs:
               CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
               LIBS="-ldl -lubsan"
-              --with-openssl --enable-debug --enable-websockets
+              --with-openssl --enable-debug
 
           - name: thread-sanitizer
             install_packages: zlib1g-dev clang libtsan2
@@ -196,7 +196,7 @@ jobs:
               CC=clang
               CFLAGS="-fsanitize=thread -g"
               LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl3/lib"
-              --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+              --with-openssl=$HOME/openssl3 --enable-debug
 
           - name: memory-sanitizer
             install_packages: clang
@@ -205,7 +205,7 @@ jobs:
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=memory"
               LIBS="-ldl"
-              --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
+              --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
 
           - name: event-based
             install_packages: libssh-dev
@@ -214,7 +214,7 @@ jobs:
 
           - name: hyper
             install_steps: rust hyper
-            configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
+            configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug
 
           - name: rustls valgrind
             install_packages: libpsl-dev valgrind
@@ -239,7 +239,7 @@ jobs:
             container: 'andy5995/slackware-build-essential:15.0'
 
           - name: Alpine MUSL
-            configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
             container: 'alpine:3.18'
 
     steps:
