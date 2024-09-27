@@ -1608,8 +1608,6 @@ endif()
 
 unset(CMAKE_REQUIRED_FLAGS)
 
-option(ENABLE_WEBSOCKETS "Enable WebSockets (experimental)" OFF)
-
 curl_internal_test(HAVE_GLIBC_STRERROR_R)
 curl_internal_test(HAVE_POSIX_STRERROR_R)
 
