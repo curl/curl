@@ -223,7 +223,7 @@ static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
       blen = (size_t)totalleft;
   }
   else if(xfer_recv_shutdown_started(data)) {
-    /* we already reveived everything. Do not try more. */
+    /* we already received everything. Do not try more. */
     blen = 0;
   }
 
