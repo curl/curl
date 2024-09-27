@@ -1608,14 +1608,8 @@ endif()
 
 unset(CMAKE_REQUIRED_FLAGS)
 
-option(ENABLE_WEBSOCKETS "Enable WebSockets (experimental)" OFF)
-
-foreach(_curl_test IN ITEMS
-    HAVE_GLIBC_STRERROR_R
-    HAVE_POSIX_STRERROR_R
-    )
-  curl_internal_test(${_curl_test})
-endforeach()
+curl_internal_test(HAVE_GLIBC_STRERROR_R)
+curl_internal_test(HAVE_POSIX_STRERROR_R)
 
 # Check for reentrant
 foreach(_curl_test IN ITEMS
