@@ -58,7 +58,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
@@ -95,7 +94,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
@@ -138,7 +136,6 @@ jobs:
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
-              --enable-websockets \
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
@@ -168,7 +165,6 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
@@ -199,7 +195,6 @@ jobs:
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
-              --enable-websockets \
               --with-openssl \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             gmake -j3 install

@@ -54,7 +54,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
     "-DHTTP_ONLY=${HTTP_ONLY}" \
     "-DBUILD_SHARED_LIBS=${SHARED}" \
-    "-DENABLE_WEBSOCKETS=${WEBSOCKETS:-}" \
     "-DCMAKE_UNITY_BUILD=${UNITY}" \
     '-DCURL_TEST_BUNDLES=ON' \
     '-DCURL_WERROR=ON' \
@@ -104,7 +103,7 @@ elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2017' ]; then
     cd winbuild
     cat << EOF > _make.bat
       call "C:/Program Files (x86)/Microsoft Visual Studio/2017/Community/VC/Auxiliary/Build/vcvars64.bat"
-      nmake -f Makefile.vc mode=dll VC=14.10 "SSL_PATH=${openssl_root_win}" WITH_SSL=dll MACHINE=x64 DEBUG=${DEBUG} ENABLE_UNICODE=${ENABLE_UNICODE} ENABLE_WEBSOCKETS=yes
+      nmake -f Makefile.vc mode=dll VC=14.10 "SSL_PATH=${openssl_root_win}" WITH_SSL=dll MACHINE=x64 DEBUG=${DEBUG} ENABLE_UNICODE=${ENABLE_UNICODE}
 EOF
     ./_make.bat
     rm _make.bat
