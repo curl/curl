@@ -498,9 +498,10 @@ static int on_header(nghttp2_session *session, const nghttp2_frame *frame,
                      const uint8_t *value, size_t valuelen,
                      uint8_t flags,
                      void *userp);
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static int error_callback(nghttp2_session *session, const char *msg,
                           size_t len, void *userp);
-
+#endif
 static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
@@ -530,7 +531,9 @@ static CURLcode cf_h2_ctx_open(struct Curl_cfilter *cf,
   nghttp2_session_callbacks_set_on_begin_headers_callback(
     cbs, on_begin_headers);
   nghttp2_session_callbacks_set_on_header_callback(cbs, on_header);
+#if !defined(CURL_DISABLE_VERBOSE_STRINGS)
   nghttp2_session_callbacks_set_error_callback(cbs, error_callback);
+#endif
 
   /* The nghttp2 session is not yet setup, do it */
   rc = h2_client_new(cf, cbs);
