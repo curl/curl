@@ -250,7 +250,6 @@ jobs:
         name: 'build nghttp2'
 
   autotools:
-    name: ${{ matrix.build.name }}
     needs:
       - setup
       - build-cache
