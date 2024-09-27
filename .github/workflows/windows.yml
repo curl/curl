@@ -153,7 +153,7 @@ jobs:
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~2302'  # WebSockets'
+            TFLAGS+=' ~2301 ~2302'  # WebSockets'
             TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
