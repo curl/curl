@@ -39,6 +39,10 @@ PKCS#11 URI. If a PKCS#11 URI is provided, then the --engine option is set as
 `pkcs11` if none was provided and the --cert-type option is set as `ENG` if
 none was provided.
 
+If curl is built against GnuTLS library, a PKCS#11 URI can be used to specify
+a certificate located in a PKCS#11 device. A string beginning with `pkcs11:`
+is interpreted as a PKCS#11 URI.
+
 (iOS and macOS only) If curl is built against Secure Transport, then the
 certificate string can either be the name of a certificate/private key in the
 system or user keychain, or the path to a PKCS#12-encoded certificate and
