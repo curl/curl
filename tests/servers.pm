@@ -156,6 +156,7 @@ our $stunnel;        # path to stunnel command
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
     my @paths;
+    print "checkcmd: $^O: |$cmd|" . @extrapaths . "|\n";
     if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
         @paths=(split(';', $ENV{'PATH'}), @extrapaths);
