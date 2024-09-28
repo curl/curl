@@ -147,7 +147,14 @@ sub sys_native_current_path {
         print "sys_native_current_path: $^O: Executing: '$cmd'\n";
         # Do not use 'cygpath' - it falsely succeeds on paths like '/cygdrive'.
         $cur_dir = `$cmd`;
-        print "sys_native_current_path: $^O: Result: '$cur_dir'\n";
+        if($^O eq 'MSWin32') {
+          my $cur_dirnative = Cwd::getcwd();
+          print "sys_native_current_path: $^O: Result: '$cur_dir' TEST: '$cur_dirnative'\n";
+        }
+        else {
+          my $cur_dirnative = Cygwin::posix_to_win_path("", 1);
+          print "sys_native_current_path: $^O: Result: '$cur_dir' TEST: '$cur_dirnative'\n";
+        }
         if($? != 0 || substr($cur_dir, 0, 1) eq '%') {
             warn "Can't determine Windows current directory.\n";
             return undef;
@@ -158,6 +165,7 @@ sub sys_native_current_path {
         # Replace back slashes with forward slashes.
         $cur_dir =~ s{\\}{/}g;
     }
+    print "sys_native_current_path: $^O: Return: '$cur_dir'\n";
     return $cur_dir;
 }
 
