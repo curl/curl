@@ -660,12 +660,34 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'libressl'
+          - name: 'libressl WINPERL'
             install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_CA_SEARCH_SAFE=ON
+
+          - name: 'libressl -j0 WINPERL'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 -j0'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_CA_SEARCH_SAFE=ON
+
+          - name: 'libressl -j0'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 -j0'
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
@@ -743,7 +765,7 @@ jobs:
       - name: 'cmake configure'
         timeout-minutes: 5
         run: |
-          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then  # for testing
+          if [[ '${{ matrix.name }}' = *'WINPERL'* ]]; then  # for testing
             options+=" -DPERL_EXECUTABLE=/c/Strawberry/perl/bin/perl"
           fi
           cmake -B bld ${options} \
