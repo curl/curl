@@ -192,7 +192,7 @@ sub runner_init {
             $SIG{INT} = 'IGNORE';
             $SIG{TERM} = 'IGNORE';
             eval {
-                # some msys2 perl versions don't define SIGUSR1
+                # some msys2 perl versions don't define SIGUSR1, also missing from Win32 Perl
                 $SIG{USR1} = 'IGNORE';
             };
 
