@@ -70,6 +70,7 @@ use getpart;
 # This function is currently required to be here by servers.pm
 # This is copied from runtests.pl
 #
+print "devtest: $^O: Executing: 'uname -r'\n";  # FIXME: limit to MSWin32
 my $uname_release = `uname -r`;
 my $is_wsl = $uname_release =~ /Microsoft$/;
 sub logmsg {
