@@ -245,6 +245,8 @@ jobs:
     steps:
       - if: matrix.build.container == null
         run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update -y
           sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
           sudo python3 -m pip install impacket
@@ -267,6 +269,7 @@ jobs:
 
       - if: contains(matrix.build.install_steps, 'gcc-11')
         run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
           sudo apt-get update
           sudo apt-get install gcc-11
