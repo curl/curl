@@ -179,94 +179,16 @@ sub sys_native_path {
     # Do not process empty path.
     return $path if ($path eq '');
 
-    if($path =~ s{^([a-zA-Z]):$}{\u$1:}) {
-        # Path is single drive with colon. (C:)
-        # This type of paths is not processed correctly by 'cygpath'.
-        # WARNING!
-        # Be careful, this relative path can be accidentally transformed
-        # into wrong absolute path by adding to it some '/dirname' with
-        # slash at font.
-        return $path;
-    }
-    elsif($path =~ m{^\\} || $path =~ m{^[a-zA-Z]:[^/\\]}) {
-        # Path is a directory or filename on Windows current drive or relative
-        # path on current directory on specific Windows drive.
-        # ('\path' or 'D:path')
-        # First type of paths is not processed by MSYS transformation and
-        # resolved to absolute path by 'cygpath'.
-        # Second type is not processed by MSYS transformation and may be
-        # incorrectly processed by 'cygpath' (for paths like 'D:..\../.\')
-
-        my $first_char = ucfirst(substr($path, 0, 1));
-
-        # Replace any back and duplicated slashes with single forward slashes.
-        $path =~ s{[\\/]+}{/}g;
-
-        # Convert leading slash back to forward slash to indicate
-        # directory on Windows current drive or capitalize drive letter.
-        substr($path, 0, 1, $first_char);
-        return $path;
-    }
-    elsif(should_use_cygpath()) {
-        # 'cygpath' is available - use it.
-
-        # Remove leading duplicated forward and back slashes, as they may
-        # prevent transforming and may be not processed.
-        $path =~ s{^([\\/])[\\/]+}{$1}g;
-
-        my $has_final_slash = ($path =~ m{[/\\]$});
-
-        # Use 'cygpath', '-m' means Windows path with forward slashes.
-        my $cmd = "cygpath -m '$path'";
-        print "sys_native_path: $^O: Executing: '$cmd'\n";
-        chomp($path = `$cmd`);
-        print "sys_native_path: $^O: Result: $? '$path'\n";
-        if ($? != 0) {
-            warn "Can't convert path by \"cygpath\".\n";
-            return undef;
-        }
-
-        # 'cygpath' may remove last slash for existing directories.
-        $path .= '/' if($has_final_slash);
-
-        # Remove any duplicated forward slashes (added by 'cygpath' for root
-        # directories)
-        $path =~ s{//+}{/}g;
-
-        return $path;
-    }
-    elsif($^O eq 'msys') {
+    if($^O eq 'msys' || $^O eq 'cygwin') {
         # MSYS transforms automatically path to Windows native form in staring
         # program parameters if program is not MSYS-based.
-
-        $path = do_msys_transform($path);
-        return undef if !defined $path;
-
-        # Capitalize drive letter for Windows paths.
-        $path =~ s{^([a-z]:)}{\u$1};
-
-        # Replace any back and duplicated slashes with single forward slashes.
-        $path =~ s{[\\/]+}{/}g;
-        return $path;
+        return do_msys_transform($path);
     }
-    elsif($path =~ s{^([a-zA-Z]):[/\\]}{\u$1:/}) {
-        # Path is already in Windows form. ('C:\path')
-
-        # Replace any back and duplicated slashes with single forward slashes.
-        $path =~ s{[\\/]+}{/}g;
-        return $path;
-    }
-    elsif($path !~ m{^/}) {
-        # Path is in relative form. ('path/name', './path' or '../path')
-
-        # Replace any back and duplicated slashes with single forward slashes.
-        $path =~ s{[\\/]+}{/}g;
-        return $path;
+    elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
+        return uc($2) . ":/" . $3;
     }
 
-    # OS is Windows, but not MSYS, path is absolute, path is not in Windows
-    # form and 'cygpath' is not available.
-    return do_dumb_guessed_transform($path);
+    return $path;
 }
 
 #######################################################################
