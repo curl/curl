@@ -160,7 +160,7 @@ sub build_sys_abs_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    return Cwd::abs_path($path) if (!os_is_win());
+    return Cwd::abs_path($path) if !os_is_win();
 
     if($^O eq 'msys' || $^O eq 'cygwin') {
         new = Cygwin::win_to_posix_path($path, 1);
