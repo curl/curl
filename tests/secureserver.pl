@@ -362,7 +362,14 @@ if($tstunnel_windows) {
 
     # Put an "exec" in front of the command so that the child process
     # keeps this child's process ID by being tied to the spawned shell.
-    exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    if($^O eq 'MSWin32') {
+        print "secureserver: $^O: Executing: '$cmd'\n";
+        exec("$cmd") || die "Can't exec() $cmd: $!";
+    }
+    else {
+        print "secureserver: $^O: Executing: exec '$cmd'\n";
+        exec("exec $cmd") || die "Can't exec() $cmd: $!";
+    }
     # exec() will create a new process, but ties the existence of the
     # new process to the parent waiting perl.exe and sh.exe processes.
 
