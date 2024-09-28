@@ -24,7 +24,7 @@
 
 # This Perl package helps with path transforming when running curl tests on
 # Windows platform with MSYS or Cygwin.
-# Three main functions 'sys_native_abs_path', 'sys_native_path' and
+# Three main functions 'sys_native_abs_path' and
 # 'build_sys_abs_path' autodetect format of given pathnames. Following formats
 # are supported:
 #  (1) /some/path   - absolute path in Unix-style
@@ -37,8 +37,7 @@
 # slash in forms (1) and (5).
 # Forward slashes are simpler processed in Perl, do not require extra escaping
 # for shell (unlike back slashes) and accepted by Windows native programs, so
-# all functions return paths with only forward slashes except
-# 'sys_native_path' which returns paths with first forward slash for form (5).
+# all functions return paths with only forward slashes.
 # All returned paths don't contain any duplicated slashes, only single slashes
 # are used as directory separators on output.
 # On non-Windows platforms functions acts as transparent wrappers for similar
@@ -121,35 +120,6 @@ sub sys_native_current_path {
     }
     print "sys_native_current_path: $^O: Return: '$cur_dir'\n";
     return $cur_dir;
-}
-
-#######################################################################
-# Converts given path to system native format, i.e. to Windows format on
-# Windows platform. Relative paths converted to relative, absolute
-# paths converted to absolute.
-#
-sub sys_native_path {
-    my ($path) = @_;
-
-    # Return untouched on non-Windows platforms.
-    return $path if (!os_is_win());
-
-    # Do not process empty path.
-    return $path if ($path eq '');
-
-    my $new;
-    if($^O eq 'msys' || $^O eq 'cygwin') {
-        $new = Cygwin::posix_to_win_path($path);
-    }
-    elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
-        $new = uc($2) . ":/" . $3;
-    }
-    else {
-        $new = $path;
-    }
-
-    print "sys_native_path: $^O: Return: '$path' -> '$new'\n";
-    return $new;
 }
 
 #######################################################################
