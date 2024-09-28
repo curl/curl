@@ -137,14 +137,19 @@ sub sys_native_path {
     # Do not process empty path.
     return $path if ($path eq '');
 
+    my $new;
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        return Cygwin::posix_to_win_path($path);
+        $new = Cygwin::posix_to_win_path($path);
     }
     elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
-        return uc($2) . ":/" . $3;
+        $new = uc($2) . ":/" . $3;
+    }
+    else {
+        $new = $path;
     }
 
-    return $path;
+    print "sys_native_path: $^O: Return: '$path' -> '$new'\n";
+    return $new;
 }
 
 #######################################################################
@@ -161,14 +166,19 @@ sub sys_native_abs_path {
     # Do not process empty path.
     return $path if ($path eq '');
 
+    my $new;
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        return Cygwin::posix_to_win_path(Cwd::abs_path($path));
+        $new = Cygwin::posix_to_win_path(Cwd::abs_path($path));
     }
     elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
-        return uc($2) . ":/" . $3;
+        $new = uc($2) . ":/" . $3;
+    }
+    else {
+        $new = Cwd::abs_path($path);
     }
 
-    return Cwd::abs_path($path);
+    print "sys_native_abs_path: $^O: Return: '$path' -> '$new'\n";
+    return $new;
 }
 
 #######################################################################
@@ -188,12 +198,17 @@ sub build_sys_abs_path {
 
     $path = normalize_path(Cwd::abs_path($path));
 
+    my $new;
     if($path =~ m{^([A-Za-z]):(.*)}) {
-        $path = "/" . lc($1) . $2;
-        $path = '/cygdrive' . $path if(drives_mounted_on_cygdrive());
+        $new = "/" . lc($1) . $2;
+        $new = '/cygdrive' . $new if(drives_mounted_on_cygdrive());
+    }
+    else {
+        $new = $path;
     }
 
-    return $path;
+    print "build_sys_abs_path: $^O: Return: '$path' -> '$new'\n";
+    return $new;
 }
 
 #######################################################################
