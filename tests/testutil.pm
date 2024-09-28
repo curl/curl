@@ -181,6 +181,7 @@ sub subnewlines {
 #
 sub runclient {
     my ($cmd)=@_;
+    print "runclient: $^O: Executing: '$cmd'\n";
     my $ret = system($cmd);
     print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;

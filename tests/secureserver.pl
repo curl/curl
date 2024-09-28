@@ -374,6 +374,7 @@ if($tstunnel_windows) {
 #***************************************************************************
 # Run stunnel.
 #
+print "secureserver: $^O: Executing: '$cmd'\n";
 my $rc = system($cmd);
 
 $rc >>= 8;
