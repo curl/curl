@@ -143,8 +143,11 @@ sub sys_native_current_path {
         $cur_dir .= '/' if length($cur_dir) > 3;
     }
     else {
-        # Do not use 'cygpath' - it falsely succeed on paths like '/cygdrive'.
-        $cur_dir = `cmd "/c;" echo %__CD__%`;
+        my $cmd = 'cmd "/c;" echo %__CD__%';
+        print "sys_native_current_path: $^O: Executing: '$cmd'\n";
+        # Do not use 'cygpath' - it falsely succeeds on paths like '/cygdrive'.
+        $cur_dir = `$cmd`;
+        print "sys_native_current_path: $^O: Result: '$cur_dir'\n";
         if($? != 0 || substr($cur_dir, 0, 1) eq '%') {
             warn "Can't determine Windows current directory.\n";
             return undef;
@@ -164,7 +167,10 @@ sub sys_native_current_path {
 sub get_win32_current_drive {
     # Notice parameter "/c;" - it's required to turn off MSYS's
     # transformation of '/c' and compatible with Cygwin.
-    my $drive_letter = `cmd "/c;" echo %__CD__:~0,2%`;
+    my $cmd = 'cmd "/c;" echo %__CD__:~0,2%';
+    print "get_win32_current_drive: $^O: Executing: '$cmd'\n";
+    my $drive_letter = `$cmd`;
+    print "get_win32_current_drive: $^O: Result: '$drive_letter'\n";
     if($? != 0 || substr($drive_letter, 1, 1) ne ':') {
         warn "Can't determine current Windows drive letter.\n";
         return undef;
@@ -241,7 +247,10 @@ sub sys_native_path {
         my $has_final_slash = ($path =~ m{[/\\]$});
 
         # Use 'cygpath', '-m' means Windows path with forward slashes.
-        chomp($path = `cygpath -m '$path'`);
+        my $cmd = "cygpath -m '$path'";
+        print "sys_native_path: $^O: Executing: '$cmd'\n";
+        chomp($path = `$cmd`);
+        print "sys_native_path: $^O: Result: $? '$path'\n";
         if ($? != 0) {
             warn "Can't convert path by \"cygpath\".\n";
             return undef;
@@ -332,7 +341,10 @@ sub sys_native_abs_path {
         # print "Inter result: \"$path\"\n";
         # Use 'cygpath', '-m' means Windows path with forward slashes,
         # '-a' means absolute path
-        chomp($path = `cygpath -m -a '$path'`);
+        my $cmd = "cygpath -m -a '$path'";
+        print "sys_native_abs_path: $^O: Executing: '$cmd'\n";
+        chomp($path = `$cmd`);
+        print "sys_native_abs_path: $^O: Result: $? '$path'\n";
         if($? != 0) {
             warn "Can't resolve path by usung \"cygpath\".\n";
             return undef;
@@ -377,7 +389,10 @@ sub sys_native_abs_path {
             $cur_dir = `bash -c 'pwd -L'`;
         }
         else {
-            $cur_dir = `pwd -L`;
+            my $cmd = 'pwd -L';
+            print "sys_native_abs_path: $^O: Executing: '$cmd'\n";
+            $cur_dir = `$cmd`;
+            print "sys_native_abs_path: $^O: Result: $? '$cur_dir'\n";
         }
         if($? != 0) {
             warn "Can't determine current working directory.\n";
@@ -451,7 +466,10 @@ sub build_sys_abs_path {
             chomp($path = `bash -c 'pwd -L'`);
         }
         else {
-            chomp($path = `pwd -L`);
+            my $cmd = 'pwd -L';
+            print "build_sys_abs_path: $^O: Executing: '$cmd'\n";
+            chomp($path = `$cmd`);
+            print "build_sys_abs_path: $^O: Result: $? '$path'\n";
         }
         if($? != 0) {
             warn "Can't determine Unix-style current working directory.\n";
@@ -475,7 +493,10 @@ sub build_sys_abs_path {
 
         # Use 'cygpath', '-u' means Unix-stile path,
         # '-a' means absolute path
-        chomp($path = `cygpath -u -a '$path'`);
+        my $cmd = "cygpath -u -a '$path'";
+        print "build_sys_abs_path: $^O: Executing: '$cmd'\n";
+        chomp($path = `$cmd`);
+        print "build_sys_abs_path: $^O: Result: $? '$path'\n";
         if($? != 0) {
             warn "Can't resolve path by usung \"cygpath\".\n";
             return undef;
@@ -529,7 +550,10 @@ sub build_sys_abs_path {
             $cur_dir = `bash -c 'pwd -L'`;
         }
         else {
-            $cur_dir = `pwd -L`;
+            my $cmd = 'pwd -L';
+            print "build_sys_abs_path: $^O: Executing: '$cmd'\n";
+            $cur_dir = `$cmd`;
+            print "build_sys_abs_path: $^O: Result: $? '$cur_dir'\n";
         }
         if($? != 0) {
             warn "Can't determine current working directory.\n";
@@ -629,7 +653,10 @@ sub do_msys_transform {
     # MSYS transforms automatically path to Windows native form in staring
     # program parameters if program is not MSYS-based.
     # Note: already checked that $path is non-empty.
-    $path = `cmd //c echo '$path'`;
+    my $cmd = "cmd //c echo '$path'";
+    print "do_msys_transform: $^O: Executing: '$cmd'\n";
+    $path = `$cmd`;
+    print "do_msys_transform: $^O: Result: $? '$path'\n";
     if($? != 0) {
         warn "Can't transform path into Windows form by using MSYS" .
              "internal transformation.\n";
@@ -652,7 +679,10 @@ sub get_abs_path_on_win32_drive {
 
     # Get current directory on specified drive.
     # "/c;" is compatible with both MSYS and Cygwin.
-    my $cur_dir_on_drv = `cmd "/c;" echo %=$drv:%`;
+    my $cmd = 'cmd "/c;" echo %=$drv:%';
+    print "get_abs_path_on_win32_drive: $^O: Executing: '$cmd'\n";
+    my $cur_dir_on_drv = `$cmd`;
+    print "get_abs_path_on_win32_drive: $^O: Result: $? '$cur_dir_on_drv'\n";
     if($? != 0) {
         warn "Can't determine Windows current directory on drive $drv:.\n";
         return undef;
@@ -715,8 +745,10 @@ sub do_dumb_guessed_transform {
     my $path_tail = '';
     while(1) {
         if(-d $check_path) {
-            my $res =
-                `(cd "$check_path" && cmd /c "echo %__CD__%") 2>$dev_null`;
+            my $cmd = "(cd \"$check_path\" && cmd /c \"echo %__CD__%\") 2>$dev_null";
+            print "do_dumb_guessed_transform: $^O: Executing: '$cmd'\n";
+            my $res = `$cmd`;
+            print "do_dumb_guessed_transform: $^O: Result: $? '$res'\n";
             if($? == 0 && substr($path, 0, 1) ne '%') {
                 # Remove both '\r' and '\n'.
                 $res =~ s{\n|\r}{}g;
@@ -754,7 +786,10 @@ sub simple_transform_win32_to_unix {
     if(should_use_cygpath()) {
         # 'cygpath' gives precise result.
         my $res;
-        chomp($res = `cygpath -a -u '$path'`);
+        my $cmd = "cygpath -a -u '$path'";
+        print "simple_transform_win32_to_unix: $^O: Executing: '$cmd'\n";
+        chomp($res = `$cmd`);
+        print "simple_transform_win32_to_unix: $^O: Result: $? '$res'\n";
         if($? != 0) {
             warn "Can't determine Unix-style directory for Windows " .
                  "directory \"$path\".\n";
