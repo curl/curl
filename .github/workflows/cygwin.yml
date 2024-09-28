@@ -166,7 +166,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 1
         run: |
-          find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
+          find . -name '*.exe' -o -name '*.dll'
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
