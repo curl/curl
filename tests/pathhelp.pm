@@ -132,38 +132,11 @@ sub sys_native_current_path {
     return Cwd::getcwd() if !os_is_win();
 
     my $cur_dir;
-    if($^O eq 'msys') {
-        # MSYS shell has built-in command.
-        chomp($cur_dir = `bash -c 'pwd -W'`);
-        if($? != 0) {
-            warn "Can't determine Windows current directory.\n";
-            return undef;
-        }
-        # Add final slash if required.
-        $cur_dir .= '/' if length($cur_dir) > 3;
+    if($^O eq 'MSWin32') {
+        $cur_dir = Cwd::getcwd();
     }
     else {
-        my $cmd = 'cmd "/c;" echo %__CD__%';
-        print "sys_native_current_path: $^O: Executing: '$cmd'\n";
-        # Do not use 'cygpath' - it falsely succeeds on paths like '/cygdrive'.
-        $cur_dir = `$cmd`;
-        if($^O eq 'MSWin32') {
-          my $cur_dirnative = Cwd::getcwd();
-          print "sys_native_current_path: $^O: Result: '$cur_dir' TEST: '$cur_dirnative'\n";
-        }
-        else {
-          my $cur_dirnative = Cygwin::posix_to_win_path("", 1);
-          print "sys_native_current_path: $^O: Result: '$cur_dir' TEST: '$cur_dirnative'\n";
-        }
-        if($? != 0 || substr($cur_dir, 0, 1) eq '%') {
-            warn "Can't determine Windows current directory.\n";
-            return undef;
-        }
-        # Remove both '\r' and '\n'.
-        $cur_dir =~ s{\n|\r}{}g;
-
-        # Replace back slashes with forward slashes.
-        $cur_dir =~ s{\\}{/}g;
+        $cur_dir = Cygwin::posix_to_win_path(Cwd::getcwd());
     }
     print "sys_native_current_path: $^O: Return: '$cur_dir'\n";
     return $cur_dir;
