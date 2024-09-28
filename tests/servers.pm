@@ -168,9 +168,11 @@ sub checkcmd {
     for(@paths) {
         if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
+            print "checkcmd: $^O: Found: |$cmd|$_/$cmd|\n";
             return "$_/$cmd";
         }
     }
+    print "checkcmd: $^O: NotFound: |$cmd|\n";
     return "";
 }
 
