@@ -142,21 +142,9 @@ sub sys_native_current_path {
     return $cur_dir;
 }
 
-#######################################################################
-# Returns Windows current drive letter with colon.
-#
-sub get_win32_current_drive {
-    return substr(Cwd::getcwd(), 0, 2);
-}
-
 # Internal function. Converts path by using MSYS's built-in transformation.
 # Returned path may contain duplicated and back slashes.
 sub do_msys_transform;
-
-# Internal function. Gets two parameters: first parameter must be single
-# drive letter ('c'), second optional parameter is path relative to drive's
-# current working directory. Returns Windows absolute normalized path.
-sub get_abs_path_on_win32_drive;
 
 #######################################################################
 # Converts given path to system native format, i.e. to Windows format on
@@ -209,9 +197,6 @@ sub sys_native_abs_path {
 
     return Cwd::abs_path($path);
 }
-
-# Internal function. Converts given Unix-style absolute path to Windows format.
-sub simple_transform_win32_to_unix;
 
 #######################################################################
 # Converts given path to build system format absolute path, i.e. to
@@ -317,79 +302,6 @@ sub do_msys_transform {
     return undef if $^O ne 'msys' || $^O ne 'cygwin';
     return $path if $path eq '';
     return Cygwin::posix_to_win_path($path);
-}
-
-# Internal function. Gets two parameters: first parameter must be single
-# drive letter ('c'), second optional parameter is path relative to drive's
-# current working directory. Returns Windows absolute normalized path.
-sub get_abs_path_on_win32_drive {
-    my ($drv, $rel_path) = @_;
-    my $res;
-
-    # Get current directory on specified drive.
-    # "/c;" is compatible with both MSYS and Cygwin.
-    my $cmd = 'cmd "/c;" echo %=$drv:%';
-    print "get_abs_path_on_win32_drive: $^O: Executing: '$cmd'\n";
-    my $cur_dir_on_drv = `$cmd`;
-    print "get_abs_path_on_win32_drive: $^O: Result: $? '$cur_dir_on_drv'\n";
-    if($? != 0) {
-        warn "Can't determine Windows current directory on drive $drv:.\n";
-        return undef;
-    }
-
-    if($cur_dir_on_drv =~ m{^[%]}) {
-        # Current directory on drive is not set, default is
-        # root directory.
-
-        $res = ucfirst($drv) . ':/';
-    }
-    else {
-        # Current directory on drive was set.
-        # Remove both '\r' and '\n'.
-        $cur_dir_on_drv =~ s{\n|\r}{}g;
-
-        # Append relative path part.
-        $res = $cur_dir_on_drv . '/';
-    }
-    $res .= $rel_path if defined $rel_path;
-
-    # Replace any possible back slashes with forward slashes,
-    # remove any duplicated slashes, resolve relative dirs.
-    return normalize_path($res);
-}
-
-# Internal function. Converts given Unix-style absolute path to Windows format.
-sub simple_transform_win32_to_unix {
-    my ($path) = @_;
-
-    if(should_use_cygpath()) {
-        # 'cygpath' gives precise result.
-        my $res;
-        my $cmd = "cygpath -a -u '$path'";
-        print "simple_transform_win32_to_unix: $^O: Executing: '$cmd'\n";
-        chomp($res = `$cmd`);
-        print "simple_transform_win32_to_unix: $^O: Result: $? '$res'\n";
-        if($? != 0) {
-            warn "Can't determine Unix-style directory for Windows " .
-                 "directory \"$path\".\n";
-            return undef;
-        }
-
-        # 'cygpath' removes last slash if path is root dir on Windows drive.
-        $res .= '/' if(substr($res, length($res) - 1, 1) ne '/' &&
-                       $path =~ m{[/\\]$});
-        return $res;
-    }
-
-    # 'cygpath' is not available, use guessed transformation.
-    if($path !~ s{^([a-zA-Z]):(?:/|\\)}{/\l$1/}) {
-        warn "Can't determine Unix-style directory for Windows " .
-             "directory \"$path\".\n";
-        return undef;
-    }
-
-    $path = '/cygdrive' . $path if(drives_mounted_on_cygdrive());
-    return $path;
 }
 #
 #***************************************************************************
