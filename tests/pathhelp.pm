@@ -193,18 +193,15 @@ sub build_sys_abs_path {
     return Cwd::abs_path($path) if (!os_is_win());
 
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        return Cygwin::win_to_posix_path($path, 1);
-    }
-
-    $path = normalize_path(Cwd::abs_path($path));
-
-    my $new;
-    if($path =~ m{^([A-Za-z]):(.*)}) {
-        $new = "/" . lc($1) . $2;
-        $new = '/cygdrive' . $new if(drives_mounted_on_cygdrive());
+        new = Cygwin::win_to_posix_path($path, 1);
     }
     else {
-        $new = $path;
+        my $new = normalize_path(Cwd::abs_path($path));
+
+        if($new =~ m{^([A-Za-z]):(.*)}) {
+            $new = "/" . lc($1) . $2;
+            $new = '/cygdrive' . $new if(drives_mounted_on_cygdrive());
+        }
     }
 
     print "build_sys_abs_path: $^O: Return: '$path' -> '$new'\n";
