@@ -469,7 +469,7 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
 
-      - run: pytest -v tests/http
+      - run: make pytest-ci
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
