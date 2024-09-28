@@ -158,13 +158,6 @@ sub do_msys_transform;
 # current working directory. Returns Windows absolute normalized path.
 sub get_abs_path_on_win32_drive;
 
-# Internal function. Tries to find or guess Windows version of given
-# absolute Unix-style path. Other types of paths are not supported.
-# Returned paths contain only single forward slashes (no back and
-# duplicated slashes).
-# Last resort. Used only when other transformations are not available.
-sub do_dumb_guessed_transform;
-
 #######################################################################
 # Converts given path to system native format, i.e. to Windows format on
 # Windows platform. Relative paths converted to relative, absolute
@@ -502,76 +495,6 @@ sub get_abs_path_on_win32_drive {
     # remove any duplicated slashes, resolve relative dirs.
     return normalize_path($res);
 }
-
-# Internal function. Tries to find or guess Windows version of given
-# absolute Unix-style path. Other types of paths are not supported.
-# Returned paths contain only single forward slashes (no back and
-# duplicated slashes).
-# Last resort. Used only when other transformations are not available.
-sub do_dumb_guessed_transform {
-    my ($path) = @_;
-
-    # Replace any possible back slashes and duplicated forward slashes
-    # with single forward slashes.
-    $path =~ s{[/\\]+}{/}g;
-
-    # Empty path is not valid.
-    return undef if (length($path) == 0);
-
-    # RE to find Windows drive letter
-    my $drv_ltr_re = drives_mounted_on_cygdrive() ?
-                        qr{^/cygdrive/([a-zA-Z])($|/.*$)} :
-                        qr{^/([a-zA-Z])($|/.*$)};
-
-    # Check path whether path is Windows directly mapped drive and try to
-    # transform it assuming that drive letter is matched to Windows drive letter.
-    if($path =~ m{$drv_ltr_re}) {
-        return ucfirst($1) . ':/' if(length($2) == 0);
-        return ucfirst($1) . ':' . $2;
-    }
-
-    # This may be some custom mapped path. ('/mymount/path')
-
-    # Must check longest possible path component as subdir can be mapped to
-    # different directory. For example '/usr/bin/' can be mapped to '/bin/' or
-    # '/bin/' can be mapped to '/usr/bin/'.
-    my $check_path = $path;
-    my $path_tail = '';
-    while(1) {
-        if(-d $check_path) {
-            my $cmd = "(cd \"$check_path\" && cmd /c \"echo %__CD__%\") 2>$dev_null";
-            print "do_dumb_guessed_transform: $^O: Executing: '$cmd'\n";
-            my $res = `$cmd`;
-            print "do_dumb_guessed_transform: $^O: Result: $? '$res'\n";
-            if($? == 0 && substr($path, 0, 1) ne '%') {
-                # Remove both '\r' and '\n'.
-                $res =~ s{\n|\r}{}g;
-
-                # Replace all back slashes with forward slashes.
-                $res =~ s{\\}{/}g;
-
-                if(length($path_tail) > 0) {
-                    return $res . $path_tail;
-                }
-                else {
-                    $res =~ s{/$}{} if $check_path !~ m{/$};
-                    return $res;
-                }
-            }
-        }
-        if($check_path =~ m{(^.*/)([^/]+/*)}) {
-            $check_path = $1;
-            $path_tail = $2 . $path_tail;
-        }
-        else {
-            # Shouldn't happens as root '/' directory should always
-            # be resolvable.
-            warn "Can't determine Windows directory for path \"$path\".\n";
-            return undef;
-        }
-    }
-}
-
 
 # Internal function. Converts given Unix-style absolute path to Windows format.
 sub simple_transform_win32_to_unix {
