@@ -131,7 +131,7 @@ sub sys_native_abs_path {
     my ($path) = @_;
 
     # Return untouched on non-Windows platforms.
-    return Cwd::abs_path($path) if (!os_is_win());
+    return Cwd::abs_path($path) if !os_is_win();
 
     # Do not process empty path.
     return $path if ($path eq '');
