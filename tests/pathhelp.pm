@@ -146,18 +146,7 @@ sub sys_native_current_path {
 # Returns Windows current drive letter with colon.
 #
 sub get_win32_current_drive {
-    # Notice parameter "/c;" - it's required to turn off MSYS's
-    # transformation of '/c' and compatible with Cygwin.
-    my $cmd = 'cmd "/c;" echo %__CD__:~0,2%';
-    print "get_win32_current_drive: $^O: Executing: '$cmd'\n";
-    my $drive_letter = `$cmd`;
-    print "get_win32_current_drive: $^O: Result: '$drive_letter'\n";
-    if($? != 0 || substr($drive_letter, 1, 1) ne ':') {
-        warn "Can't determine current Windows drive letter.\n";
-        return undef;
-    }
-
-    return substr($drive_letter, 0, 2);
+    return substr(Cwd::getcwd(), 0, 2);
 }
 
 # Internal function. Converts path by using MSYS's built-in transformation.
