@@ -430,31 +430,9 @@ sub normalize_path {
 # transformation.
 sub do_msys_transform {
     my ($path) = @_;
-    return undef if $^O ne 'msys';
+    return undef if $^O ne 'msys' || $^O ne 'cygwin';
     return $path if $path eq '';
-
-    # Remove leading double forward slashes, as they turn off MSYS
-    # transforming.
-    $path =~ s{^/[/\\]+}{/};
-
-    # MSYS transforms automatically path to Windows native form in staring
-    # program parameters if program is not MSYS-based.
-    # Note: already checked that $path is non-empty.
-    my $cmd = "cmd //c echo '$path'";
-    print "do_msys_transform: $^O: Executing: '$cmd'\n";
-    $path = `$cmd`;
-    print "do_msys_transform: $^O: Result: $? '$path'\n";
-    if($? != 0) {
-        warn "Can't transform path into Windows form by using MSYS" .
-             "internal transformation.\n";
-        return undef;
-    }
-
-    # Remove double quotes, they are added for paths with spaces,
-    # remove both '\r' and '\n'.
-    $path =~ s{^\"|\"$|\"\r|\n|\r}{}g;
-
-    return $path;
+    return Cygwin::posix_to_win_path($path);
 }
 
 # Internal function. Gets two parameters: first parameter must be single
