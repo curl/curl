@@ -95,4 +95,4 @@ jobs:
       - name: badwords
         run: |
           grep -Ev '(\\bwill| url | dir )' .github/scripts/badwords.txt | \
-          .github/scripts/badwords.pl `git ls-files -- src lib include`
+          .github/scripts/badwords.pl $(git ls-files -- src lib include)
