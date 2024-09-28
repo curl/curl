@@ -66,7 +66,6 @@ BEGIN {
         sys_native_current_path
         build_sys_abs_path
         normalize_path
-        should_use_cygpath
         drives_mounted_on_cygdrive
     );
 }
@@ -95,24 +94,6 @@ BEGIN {
         $cygdrive_present = ((-e '/cygdrive/') && (-d '/cygdrive/')) ? 1 : 0;
         return $cygdrive_present;
     }
-}
-
-my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
-
-my $use_cygpath;     # Only for Windows:
-                     #  undef - autodetect
-                     #      0 - do not use cygpath
-                     #      1 - use cygpath
-
-# Returns boolean true if 'cygpath' utility should be used for path conversion.
-sub should_use_cygpath {
-    return $use_cygpath if defined $use_cygpath;
-    if(os_is_win()) {
-        $use_cygpath = (qx{cygpath -u '.\\' 2>$dev_null} eq "./\n" && $? == 0);
-    } else {
-        $use_cygpath = 0;
-    }
-    return $use_cygpath;
 }
 
 #######################################################################
