@@ -221,137 +221,21 @@ sub simple_transform_win32_to_unix;
 sub build_sys_abs_path {
     my ($path) = @_;
 
-    if(!os_is_win()) {
-        # Convert path to absolute form.
-        $path = Cwd::abs_path($path);
+    # Return untouched on non-Windows platforms.
+    return Cwd::abs_path($path) if (!os_is_win());
 
-        # Do not process further on non-Windows platforms.
-        return $path;
+    if($^O eq 'msys' || $^O eq 'cygwin') {
+        return Cygwin::win_to_posix_path($path, 1);
     }
 
-    if($path =~ m{^([a-zA-Z]):($|[^/\\].*$)}) {
-        # Path is single drive with colon or relative path on Windows drive.
-        # ('C:' or 'C:path')
-        # This kind of relative path is not processed correctly by 'cygpath'.
-        # Get specified drive letter
+    $path = normalize_path(Cwd::abs_path($path));
 
-        # Resolve relative dirs in Windows-style path or paths like 'D:/../c/'
-        # will be resolved incorrectly.
-        # Replace any possible back slashes with forward slashes,
-        # remove any duplicated slashes.
-        $path = get_abs_path_on_win32_drive($1, $2);
-        return undef if !defined $path;
-
-        return simple_transform_win32_to_unix($path);
-    }
-    elsif($path eq '') {
-        # Path is empty string. Return current directory.
-        # Empty string processed correctly by 'cygpath'.
-
-        # MSYS shell has built-in command.
-        if($^O eq 'msys') {
-            chomp($path = `bash -c 'pwd -L'`);
-        }
-        else {
-            my $cmd = 'pwd -L';
-            print "build_sys_abs_path: $^O: Executing: '$cmd'\n";
-            chomp($path = `$cmd`);
-            print "build_sys_abs_path: $^O: Result: $? '$path'\n";
-        }
-        if($? != 0) {
-            warn "Can't determine Unix-style current working directory.\n";
-            return undef;
-        }
-
-        # Add final slash if not at root dir.
-        $path .= '/' if length($path) > 2;
-        return $path;
-    }
-    elsif(should_use_cygpath()) {
-        # 'cygpath' is available - use it.
-
-        my $has_final_slash = ($path =~ m{[\\/]$});
-
-        # Resolve relative directories, as they may be not resolved for
-        # Unix-style paths.
-        # Remove duplicated slashes, as they may be not processed.
-        $path = normalize_path($path);
-        return undef if !defined $path;
-
-        # Use 'cygpath', '-u' means Unix-stile path,
-        # '-a' means absolute path
-        my $cmd = "cygpath -u -a '$path'";
-        print "build_sys_abs_path: $^O: Executing: '$cmd'\n";
-        chomp($path = `$cmd`);
-        print "build_sys_abs_path: $^O: Result: $? '$path'\n";
-        if($? != 0) {
-            warn "Can't resolve path by usung \"cygpath\".\n";
-            return undef;
-        }
-
-        # 'cygpath' removes last slash if path is root dir on Windows drive.
-        # Restore it.
-        $path .= '/' if($has_final_slash &&
-                        substr($path, length($path) - 1, 1) ne '/');
-
-        return $path
-    }
-    elsif($path =~ m{^[a-zA-Z]:[/\\]}) {
-        # Path is already in Windows form. ('C:\path')
-
-        # Resolve relative dirs in Windows-style path otherwise paths
-        # like 'D:/../c/' will be resolved incorrectly.
-        # Replace any possible back slashes with forward slashes,
-        # remove any duplicated slashes.
-        $path = normalize_path($path);
-        return undef if !defined $path;
-
-        return simple_transform_win32_to_unix($path);
-    }
-    elsif(substr($path, 0, 1) eq '\\') {
-        # Path is directory or filename on Windows current drive. ('\Windows')
-
-        my $w32drive = get_win32_current_drive();
-        return undef if !defined $w32drive;
-
-        # Combine drive and path.
-        # Resolve relative dirs in Windows-style path or paths like 'D:/../c/'
-        # will be resolved incorrectly.
-        # Replace any possible back slashes with forward slashes,
-        # remove any duplicated slashes.
-        $path = normalize_path($w32drive . $path);
-        return undef if !defined $path;
-
-        return simple_transform_win32_to_unix($path);
+    if($path =~ m{^([A-Za-z]):(.*)}) {
+        $path = "/" . lc($1) . $2;
+        $path = '/cygdrive' . $path if(drives_mounted_on_cygdrive());
     }
 
-    # Path is not in any Windows form.
-    if(substr($path, 0, 1) ne '/') {
-        # Path in relative form. Resolve relative directories in Unix form
-        # *BEFORE* converting to Windows form otherwise paths like
-        # '../../../cygdrive/c/windows' will not be resolved.
-
-        my $cur_dir;
-        # MSYS shell has built-in command.
-        if($^O eq 'msys') {
-            $cur_dir = `bash -c 'pwd -L'`;
-        }
-        else {
-            my $cmd = 'pwd -L';
-            print "build_sys_abs_path: $^O: Executing: '$cmd'\n";
-            $cur_dir = `$cmd`;
-            print "build_sys_abs_path: $^O: Result: $? '$cur_dir'\n";
-        }
-        if($? != 0) {
-            warn "Can't determine current working directory.\n";
-            return undef;
-        }
-        chomp($cur_dir);
-
-        $path = $cur_dir . '/' . $path;
-    }
-
-    return normalize_path($path);
+    return $path;
 }
 
 #######################################################################
