@@ -142,10 +142,6 @@ sub sys_native_current_path {
     return $cur_dir;
 }
 
-# Internal function. Converts path by using MSYS's built-in transformation.
-# Returned path may contain duplicated and back slashes.
-sub do_msys_transform;
-
 #######################################################################
 # Converts given path to system native format, i.e. to Windows format on
 # Windows platform. Relative paths converted to relative, absolute
@@ -161,9 +157,7 @@ sub sys_native_path {
     return $path if ($path eq '');
 
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        # MSYS transforms automatically path to Windows native form in staring
-        # program parameters if program is not MSYS-based.
-        return do_msys_transform($path);
+        return Cygwin::posix_to_win_path($path);
     }
     elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
         return uc($2) . ":/" . $3;
@@ -187,9 +181,7 @@ sub sys_native_abs_path {
     return $path if ($path eq '');
 
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        # MSYS transforms automatically path to Windows native form in staring
-        # program parameters if program is not MSYS-based.
-        return do_msys_transform(Cwd::abs_path($path));
+        return Cygwin::posix_to_win_path(Cwd::abs_path($path));
     }
     elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
         return uc($2) . ":/" . $3;
@@ -293,15 +285,6 @@ sub normalize_path {
     $ret .= '/' if($path =~ m{\\$|/$} && scalar @res > 0);
 
     return $ret;
-}
-
-# Internal function. Converts path by using MSYS's built-in
-# transformation.
-sub do_msys_transform {
-    my ($path) = @_;
-    return undef if $^O ne 'msys' || $^O ne 'cygwin';
-    return $path if $path eq '';
-    return Cygwin::posix_to_win_path($path);
 }
 #
 #***************************************************************************
