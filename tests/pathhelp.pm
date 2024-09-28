@@ -199,120 +199,22 @@ sub sys_native_path {
 sub sys_native_abs_path {
     my ($path) = @_;
 
-    if(!os_is_win()) {
-        # Convert path to absolute form.
-        $path = Cwd::abs_path($path);
+    # Return untouched on non-Windows platforms.
+    return Cwd::abs_path($path) if (!os_is_win());
 
-        # Do not process further on non-Windows platforms.
-        return $path;
-    }
+    # Do not process empty path.
+    return $path if ($path eq '');
 
-    if($path =~ m{^([a-zA-Z]):($|[^/\\].*$)}) {
-        # Path is single drive with colon or relative path on Windows drive.
-        # ('C:' or 'C:path')
-        # This kind of relative path is not processed correctly by 'cygpath'.
-        # Get specified drive letter
-        return get_abs_path_on_win32_drive($1, $2);
-    }
-    elsif($path eq '') {
-        # Path is empty string. Return current directory.
-        # Empty string processed correctly by 'cygpath'.
-
-        return sys_native_current_path();
-    }
-    elsif(should_use_cygpath()) {
-        # 'cygpath' is available - use it.
-
-        my $has_final_slash = ($path =~ m{[\\/]$});
-
-        # Remove leading duplicated forward and back slashes, as they may
-        # prevent transforming and may be not processed.
-        $path =~ s{^([\\/])[\\/]+}{$1}g;
-
-        # some debugging? enable on need
-        # print "Inter result: \"$path\"\n";
-        # Use 'cygpath', '-m' means Windows path with forward slashes,
-        # '-a' means absolute path
-        my $cmd = "cygpath -m -a '$path'";
-        print "sys_native_abs_path: $^O: Executing: '$cmd'\n";
-        chomp($path = `$cmd`);
-        print "sys_native_abs_path: $^O: Result: $? '$path'\n";
-        if($? != 0) {
-            warn "Can't resolve path by usung \"cygpath\".\n";
-            return undef;
-        }
-
-        # 'cygpath' may remove last slash for existing directories.
-        $path .= '/' if($has_final_slash);
-
-        # Remove any duplicated forward slashes (added by 'cygpath' for root
-        # directories)
-        $path =~ s{//+}{/}g;
-
-        return $path
-    }
-    elsif($path =~ s{^([a-zA-Z]):[/\\]}{\u$1:/}) {
-        # Path is already in Windows form. ('C:\path')
-
-        # Replace any possible back slashes with forward slashes,
-        # remove any duplicated slashes, resolve relative dirs.
-        return normalize_path($path);
-    }
-    elsif(substr($path, 0, 1) eq '\\' ) {
-        # Path is directory or filename on Windows current drive. ('\Windows')
-
-        my $w32drive = get_win32_current_drive();
-        return undef if !defined $w32drive;
-
-        # Combine drive and path.
-        # Replace any possible back slashes with forward slashes,
-        # remove any duplicated slashes, resolve relative dirs.
-        return normalize_path($w32drive . $path);
-    }
-
-    if(substr($path, 0, 1) ne '/') {
-        # Path is in relative form. Resolve relative directories in Unix form
-        # *BEFORE* converting to Windows form otherwise paths like
-        # '../../../cygdrive/c/windows' will not be resolved.
-
-        my $cur_dir;
-        # MSYS shell has built-in command.
-        if($^O eq 'msys') {
-            $cur_dir = `bash -c 'pwd -L'`;
-        }
-        else {
-            my $cmd = 'pwd -L';
-            print "sys_native_abs_path: $^O: Executing: '$cmd'\n";
-            $cur_dir = `$cmd`;
-            print "sys_native_abs_path: $^O: Result: $? '$cur_dir'\n";
-        }
-        if($? != 0) {
-            warn "Can't determine current working directory.\n";
-            return undef;
-        }
-        chomp($cur_dir);
-
-        $path = $cur_dir . '/' . $path;
-    }
-
-    # Resolve relative dirs.
-    $path = normalize_path($path);
-    return undef unless defined $path;
-
-    if($^O eq 'msys') {
+    if($^O eq 'msys' || $^O eq 'cygwin') {
         # MSYS transforms automatically path to Windows native form in staring
         # program parameters if program is not MSYS-based.
-        $path = do_msys_transform($path);
-        return undef if !defined $path;
-
-        # Replace any back and duplicated slashes with single forward slashes.
-        $path =~ s{[\\/]+}{/}g;
-        return $path;
+        return do_msys_transform(Cwd::abs_path($path));
     }
-    # OS is Windows, but not MSYS, path is absolute, path is not in Windows
-    # form and 'cygpath' is not available.
+    elsif($path =~ m{^/(cygdrive/)?([a-z])/(.*)}) {
+        return uc($2) . ":/" . $3;
+    }
 
-    return do_dumb_guessed_transform($path);
+    return Cwd::abs_path($path);
 }
 
 # Internal function. Converts given Unix-style absolute path to Windows format.
