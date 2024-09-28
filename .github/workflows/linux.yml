@@ -161,7 +161,7 @@ jobs:
 
           - name: openssl3 https-only
             install_steps: gcc-11 openssl3
-            configure: >
+            configure: >-
               LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
@@ -182,7 +182,7 @@ jobs:
           - name: address-sanitizer
             install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
             install_steps: pytest
-            configure: >
+            configure: >-
               CC=clang
               CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
@@ -192,7 +192,7 @@ jobs:
           - name: thread-sanitizer
             install_packages: zlib1g-dev clang libtsan2
             install_steps: pytest openssltsan3
-            configure: >
+            configure: >-
               CC=clang
               CFLAGS="-fsanitize=thread -g"
               LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl3/lib"
@@ -200,7 +200,7 @@ jobs:
 
           - name: memory-sanitizer
             install_packages: clang
-            configure: >
+            configure: >-
               CC=clang
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=memory"
