@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: ''       , config: '--enable-debug --disable-threaded-resolver', name: 'openssl' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: 'skiprun', config: '-DCURL_USE_OPENSSL=ON', name: 'openssl R' }
+          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '', name: 'openssl R' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -127,11 +127,6 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           make -C bld -j5 V=1 test-ci
-
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 5
-        run: make -C bld -j5 V=1 examples
 
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}

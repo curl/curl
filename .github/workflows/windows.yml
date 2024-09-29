@@ -47,8 +47,8 @@ jobs:
       matrix:
         include:
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19                !1233', config: '--enable-debug --disable-threaded-resolver --disable-proxy', name: '!proxy' }
-          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '--enable-debug --disable-threaded-resolver', name: 'default' }
-          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
+          - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver', name: 'default' }
+          - { build: 'cmake'    , sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '-DENABLE_DEBUG=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'default' }
           - { build: 'autotools', sys: 'msys'   , env: 'x86_64'      , tflags: '!19 !504 !704 !705 !1233', config: '', name: 'default R' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --enable-windows-unicode --enable-ares', name: 'c-ares U' }
@@ -165,7 +165,7 @@ jobs:
           make -C bld -j5 V=1 test-ci
 
       - name: 'autotools build examples'
-        if: ${{ matrix.build == 'autotools' }}
+        if: ${{ matrix.build == 'autotools' && (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}
         timeout-minutes: 5
         run: make -C bld -j5 V=1 examples
 
