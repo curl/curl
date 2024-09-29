@@ -191,4 +191,12 @@ if($verbose) {
 }
 
 $| = 1;
-exec("exec server/sws".exe_ext('SRV')." $flags");
+
+my $cmdline = "server/sws".exe_ext('SRV')." $flags";
+if($^O eq 'MSWin32') {
+    print "http-server: $^O: Executing: '$cmdline'\n";
+    exec("start \"\" $cmdline");
+}
+else {
+    exec("exec $cmdline");
+}

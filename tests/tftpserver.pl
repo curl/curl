@@ -130,4 +130,12 @@ $flags .= "--pidfile \"$pidfile\" ".
 $flags .= "--ipv$ipvnum --port $port --srcdir \"$srcdir\"";
 
 $| = 1;
-exec("exec server/tftpd".exe_ext('SRV')." $flags");
+
+my $cmdline = "server/tftpd".exe_ext('SRV')." $flags";
+if($^O eq 'MSWin32') {
+    print "tftpserver: $^O: Executing: '$cmdline'\n";
+    exec("start \"\" $cmdline");
+}
+else {
+    exec("exec $cmdline");
+}

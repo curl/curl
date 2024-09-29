@@ -398,9 +398,15 @@ sub startnew {
         # Flush output.
         $| = 1;
 
-        # Put an "exec" in front of the command so that the child process
-        # keeps this child's process ID.
-        exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        if($^O eq 'MSWin32') {
+            print "servers: $^O: Executing: '$cmd'\n";
+            exec("start \"\" $cmd");
+        }
+        else {
+            # Put an "exec" in front of the command so that the child process
+            # keeps this child's process ID.
+            exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        }
 
         # exec() should never return back here to this process. We protect
         # ourselves by calling die() just in case something goes really bad.
