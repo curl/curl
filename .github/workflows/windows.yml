@@ -353,7 +353,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          find . -name '*.exe' -o -name '*.dll'
+          PATH=/usr/bin find . -name '*.exe' -o -name '*.dll'
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
