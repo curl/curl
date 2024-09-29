@@ -38,7 +38,7 @@ Dummy test file for remove test
 Dummy test file for remove test
 </upload>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/test%TESTNUMBER.txt
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/test%TESTNUMBER.txt
 </postcheck>
 </verify>
 </testcase>

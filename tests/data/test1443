@@ -60,7 +60,7 @@ Accept: */*
 12345
 </file>
 <postcheck>
-perl -e 'exit((stat("%LOGDIR/%TESTNUMBER"))[9] != 960898200)'
+%PERL -e 'exit((stat("%LOGDIR/%TESTNUMBER"))[9] != 960898200)'
 </postcheck>
 </verify>
 </testcase>
