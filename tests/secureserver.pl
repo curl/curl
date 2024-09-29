@@ -383,6 +383,7 @@ if($tstunnel_windows) {
 #
 print "secureserver: $^O: Executing: '$cmd'\n";
 my $rc = system($cmd);
+print "secureserver: $^O: Result: $rc\n";
 
 $rc >>= 8;
 

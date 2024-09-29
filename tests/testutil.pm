@@ -197,6 +197,7 @@ sub runclient {
 #
 sub runclientoutput {
     my ($cmd)=@_;
+    print "runclientoutput: $^O: Executing: '$cmd'\n";
     return `$cmd 2>$dev_null`;
 
 # This is one way to test curl on a remote machine
