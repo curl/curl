@@ -362,7 +362,7 @@ if($tstunnel_windows) {
 
     if($^O eq 'MSWin32') {
         print "secureserver: $^O: Executing: '$cmd'\n";
-        exec("start \"\" $cmd") || die "Can't exec() $cmd: $!";
+        exec("$cmd") || die "Can't exec() $cmd: $!";
     }
     else {
         # Put an "exec" in front of the command so that the child process

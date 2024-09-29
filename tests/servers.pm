@@ -400,7 +400,7 @@ sub startnew {
 
         if($^O eq 'MSWin32') {
             print "servers: $^O: Executing: '$cmd'\n";
-            exec("start \"\" $cmd");
+            exec("$cmd");
         }
         else {
             # Put an "exec" in front of the command so that the child process

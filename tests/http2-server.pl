@@ -121,7 +121,7 @@ print "RUN: $cmdline\n" if($verbose);
 
 if($^O eq 'MSWin32') {
     print "http2-server: $^O: Executing: '$cmdline'\n";
-    exec("start \"\" $cmdline");
+    exec("$cmdline");
 }
 else {
     exec("exec $cmdline 2>$dev_null");

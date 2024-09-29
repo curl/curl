@@ -134,7 +134,7 @@ $| = 1;
 my $cmdline = "server/tftpd".exe_ext('SRV')." $flags";
 if($^O eq 'MSWin32') {
     print "tftpserver: $^O: Executing: '$cmdline'\n";
-    exec("start \"\" $cmdline");
+    exec("$cmdline");
 }
 else {
     exec("exec $cmdline");
