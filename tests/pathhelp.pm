@@ -162,11 +162,12 @@ sub build_sys_abs_path {
     # Return untouched on non-Windows platforms.
     return Cwd::abs_path($path) if !os_is_win();
 
+    my $new;
     if($^O eq 'msys' || $^O eq 'cygwin') {
-        new = Cygwin::win_to_posix_path($path, 1);
+        $new = Cygwin::win_to_posix_path($path, 1);
     }
     else {
-        my $new = normalize_path(Cwd::abs_path($path));
+        $new = normalize_path(Cwd::abs_path($path));
 
         if($new =~ m{^([A-Za-z]):(.*)}) {
             $new = "/" . lc($1) . $2;
