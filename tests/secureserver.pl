@@ -364,7 +364,7 @@ if($tstunnel_windows) {
     # keeps this child's process ID by being tied to the spawned shell.
     if($^O eq 'MSWin32') {
         print "secureserver: $^O: Executing: '$cmd'\n";
-        exec("$cmd") || die "Can't exec() $cmd: $!";
+        exec("start \"\" $cmd") || die "Can't exec() $cmd: $!";
     }
     else {
         print "secureserver: $^O: Executing: exec '$cmd'\n";
