@@ -29,6 +29,8 @@ if ( $#ARGV <= 0 )
     exit 1;
 }
 
+print "test610.pl OS: $^O\n";
+
 use File::Copy;
 while(@ARGV) {
     my $cmd = shift @ARGV;
