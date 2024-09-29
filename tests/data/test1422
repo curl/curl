@@ -40,7 +40,7 @@ HTTP GET with -O -J and Content-Disposition (empty file)
 CURL_TESTDIR=%LOGDIR
 </setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O file://%PWD/%LOGDIR/name%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O file://%FILE_PWD/%LOGDIR/name%TESTNUMBER
 </command>
 </client>
 

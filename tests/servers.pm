@@ -3104,6 +3104,8 @@ sub subvariables {
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
+    # POSIX/MSYS/Cygwin curl needs: file://localhost/d/path/to
+    # Windows native    curl needs: file://localhost/D:/path/to
     my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";
