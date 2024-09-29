@@ -118,4 +118,11 @@ my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
     "--conf=$conf ".
     "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
-exec("exec $cmdline 2>$dev_null");
+
+if($^O eq 'MSWin32') {
+    print "http3-server: $^O: Executing: '$cmdline'\n";
+    exec("start \"\" $cmdline");
+}
+else {
+    exec("exec $cmdline 2>$dev_null");
+}
