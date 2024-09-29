@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: ''       , config: '--enable-debug --disable-threaded-resolver', name: 'openssl' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: 'skiprun', config: '-DCURL_USE_OPENSSL=ON', name: 'openssl R' }
+          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '', name: 'openssl R' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
