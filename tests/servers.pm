@@ -3104,18 +3104,6 @@ sub subvariables {
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
-    my $file_pwd = $pwd;
-    if(os_is_win()) {
-        # D:\path\to -> D:/path/to
-        $file_pwd =~ s{[/\\]+}{/}g;
-        # D:/path/to -> D/path/to
-        if($file_pwd =~ m{^([A-Za-z]):(.*)}) {
-            $file_pwd = $1 . "/" . $2;
-        }
-    }
-    if($file_pwd !~ /^\//) {
-        $file_pwd = "/$file_pwd";
-    }
     my $ssh_pwd = $posix_pwd;
     # this only works after the SSH server has been started
     # TODO: call sshversioninfo early and store $sshdid so this substitution
