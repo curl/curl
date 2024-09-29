@@ -540,8 +540,6 @@ sub checksystemfeatures {
                 # Windows-style path.
                 $pwd = sys_native_current_path();
                 $feature{"win32"} = 1;
-                # set if built with MinGW (as opposed to MinGW-w64)
-                $feature{"MinGW"} = 1 if ($curl =~ /-pc-mingw32/);
             }
             if ($libcurl =~ /\s(winssl|schannel)\b/i) {
                 $feature{"Schannel"} = 1;
