@@ -165,7 +165,7 @@ jobs:
           make -C bld -j5 V=1 test-ci
 
       - name: 'autotools build examples'
-        if: ${{ matrix.build == 'autotools' }}
+        if: ${{ matrix.build == 'autotools' && (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}
         timeout-minutes: 5
         run: make -C bld -j5 V=1 examples
 
