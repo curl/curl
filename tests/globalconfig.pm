@@ -52,6 +52,7 @@ BEGIN {
         $proxy_address
         $PROXYIN
         $pwd
+        $file_pwd
         $randseed
         $run_event_based
         $SERVERCMD
@@ -90,6 +91,7 @@ our $randseed = 0;    # random number seed
 
 # paths
 our $pwd = getcwd();  # current working directory
+our $file_pwd = $pwd;  # in file://localhost/<file_pwd> style
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
 our $perl="perl -I. -I$srcdir"; # invoke perl like this
 our $LOGDIR="log";  # root of the log directory; this will be different for
