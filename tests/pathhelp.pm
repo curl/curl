@@ -118,6 +118,7 @@ sub sys_native_current_path {
     else {
         $cur_dir = Cygwin::posix_to_win_path(Cwd::getcwd());
     }
+    $cur_dir =~ s{[/\\]+}{/}g;
     print "sys_native_current_path: $^O: Return: '$cur_dir'\n";
     return $cur_dir;
 }
@@ -147,6 +148,7 @@ sub sys_native_abs_path {
         $new = Cwd::abs_path($path);
     }
 
+    $new =~ s{[/\\]+}{/}g;
     print "sys_native_abs_path: $^O: Return: '$path' -> '$new'\n";
     return $new;
 }
