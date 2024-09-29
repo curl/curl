@@ -543,58 +543,58 @@ sub checksystemfeatures {
                 # set if built with MinGW (as opposed to MinGW-w64)
                 $feature{"MinGW"} = 1 if ($curl =~ /-pc-mingw32/);
             }
-           if ($libcurl =~ /\s(winssl|schannel)\b/i) {
-               $feature{"Schannel"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\sopenssl\b/i) {
-               $feature{"OpenSSL"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\sgnutls\b/i) {
-               $feature{"GnuTLS"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\srustls-ffi\b/i) {
-               $feature{"rustls"} = 1;
-           }
-           elsif ($libcurl =~ /\swolfssl\b/i) {
-               $feature{"wolfssl"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\sbearssl\b/i) {
-               $feature{"bearssl"} = 1;
-           }
-           elsif ($libcurl =~ /\ssecuretransport\b/i) {
-               $feature{"sectransp"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\sBoringSSL\b/i) {
-               # OpenSSL compatible API
-               $feature{"OpenSSL"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\slibressl\b/i) {
-               # OpenSSL compatible API
-               $feature{"OpenSSL"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\squictls\b/i) {
-               # OpenSSL compatible API
-               $feature{"OpenSSL"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           elsif ($libcurl =~ /\smbedTLS\b/i) {
-               $feature{"mbedtls"} = 1;
-               $feature{"SSLpinning"} = 1;
-           }
-           if ($libcurl =~ /ares/i) {
-               $feature{"c-ares"} = 1;
-               $resolver="c-ares";
-           }
-           if ($libcurl =~ /Hyper/i) {
-               $feature{"hyper"} = 1;
-           }
+            if ($libcurl =~ /\s(winssl|schannel)\b/i) {
+                $feature{"Schannel"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\sopenssl\b/i) {
+                $feature{"OpenSSL"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\sgnutls\b/i) {
+                $feature{"GnuTLS"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\srustls-ffi\b/i) {
+                $feature{"rustls"} = 1;
+            }
+            elsif ($libcurl =~ /\swolfssl\b/i) {
+                $feature{"wolfssl"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\sbearssl\b/i) {
+                $feature{"bearssl"} = 1;
+            }
+            elsif ($libcurl =~ /\ssecuretransport\b/i) {
+                $feature{"sectransp"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\sBoringSSL\b/i) {
+                # OpenSSL compatible API
+                $feature{"OpenSSL"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\slibressl\b/i) {
+                # OpenSSL compatible API
+                $feature{"OpenSSL"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\squictls\b/i) {
+                # OpenSSL compatible API
+                $feature{"OpenSSL"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            elsif ($libcurl =~ /\smbedTLS\b/i) {
+                $feature{"mbedtls"} = 1;
+                $feature{"SSLpinning"} = 1;
+            }
+            if ($libcurl =~ /ares/i) {
+                $feature{"c-ares"} = 1;
+                $resolver="c-ares";
+            }
+            if ($libcurl =~ /Hyper/i) {
+                $feature{"hyper"} = 1;
+            }
             if ($libcurl =~ /nghttp2/i) {
                 # nghttp2 supports h2c, hyper does not
                 $feature{"h2c"} = 1;
