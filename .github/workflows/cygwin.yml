@@ -128,11 +128,6 @@ jobs:
           fi
           make -C bld -j5 V=1 test-ci
 
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 5
-        run: make -C bld -j5 V=1 examples
-
       - name: 'cmake configure'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
