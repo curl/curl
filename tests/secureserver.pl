@@ -369,9 +369,9 @@ if($tstunnel_windows) {
         # keeps this child's process ID by being tied to the spawned shell.
         print "secureserver: $^O: Executing: exec '$cmd'\n";
         exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        # exec() will create a new process, but ties the existence of the
+        # new process to the parent waiting perl.exe and sh.exe processes.
     }
-    # exec() will create a new process, but ties the existence of the
-    # new process to the parent waiting perl.exe and sh.exe processes.
 
     # exec() should never return back here to this process. We protect
     # ourselves by calling die() just in case something goes really bad.
