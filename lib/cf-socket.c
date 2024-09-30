@@ -1349,7 +1349,7 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "not connected yet");
     return CURLE_OK;
   }
-  else if(rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
+  else if((rc & CURL_CSELECT_ERR) || rc == CURL_CSELECT_OUT || cf->conn->bits.tcp_fastopen) {
     if(verifyconnect(ctx->sock, &ctx->error)) {
       /* we are connected with TCP, awesome! */
       ctx->connected_at = Curl_now();
@@ -1359,10 +1359,9 @@ static CURLcode cf_tcp_connect(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "connected");
       return CURLE_OK;
     }
-  }
-  else if(rc & CURL_CSELECT_ERR) {
-    (void)verifyconnect(ctx->sock, &ctx->error);
-    result = CURLE_COULDNT_CONNECT;
+    if (rc & CURL_CSELECT_ERR) {
+      result = CURLE_COULDNT_CONNECT;
+    }
   }
 
 out:
