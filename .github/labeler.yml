@@ -526,7 +526,6 @@ Windows:
       - changed-files:
           - any-glob-to-all-files: "{\
               appveyor.*,\
-              .github/workflows/cygwin.yml,\
               .github/workflows/windows.yml,\
               CMake/Platforms/WindowsCache.cmake,\
               lib/*win32*,\
