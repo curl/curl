@@ -770,7 +770,8 @@ skip:
   free(per->uploadfile);
   if(global->parallel)
     free(per->errorbuffer);
-
+  curl_slist_free_all(per->hdrcbdata.headlist);
+  per->hdrcbdata.headlist = NULL;
   return result;
 }
 

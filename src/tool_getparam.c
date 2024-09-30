@@ -2763,9 +2763,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   }
 
   if(!result && config->content_disposition) {
-    if(config->show_headers)
-      result = PARAM_CONTDISP_SHOW_HEADER;
-    else if(config->resume_from_current)
+    if(config->resume_from_current)
       result = PARAM_CONTDISP_RESUME_FROM;
   }
 
