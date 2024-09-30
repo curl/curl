@@ -66,6 +66,7 @@ BEGIN {
         %keywords
         @protocols
         $bundle
+        $devnull
     );
 }
 use pathhelp qw(exe_ext);
@@ -104,6 +105,7 @@ our $VCURL=$CURL;  # what curl binary to use to verify the servers with
 our $memanalyze="$perl $srcdir/memanalyze.pl";
 our $valgrind;     # path to valgrind, or empty if disabled
 our $bundle = 0;   # use bundled server, libtest, unit binaries
+our $devnull = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
 
 # paths in $LOGDIR
 our $LOCKDIR = "lock";          # root of the server directory with lock files
