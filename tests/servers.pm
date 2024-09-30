@@ -3095,6 +3095,7 @@ sub subvariables {
     $$thing =~ s/${prefix}HOSTIP/$HOSTIP/g;
 
     # misc
+    $$thing =~ s/${prefix}PERL/$perlcmd/g;
     $$thing =~ s/${prefix}CURL/$CURL/g;
     $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
