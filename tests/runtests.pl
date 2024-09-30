@@ -542,7 +542,6 @@ sub checksystemfeatures {
                 # MSYS/Cygwin  curl needs: file://localhost/d/path/to (handled by the default codepath)
                 # Win32 native curl needs: file://localhost/D:/path/to
                 $file_pwd = "/" . $pwd;
-                $file_pwd =~ s{[/\\]+}{/}g;  # /D:\path\to -> /D:/path/to
                 $feature{"win32"} = 1;
             }
             if ($libcurl =~ /\s(winssl|schannel)\b/i) {
