@@ -4108,6 +4108,7 @@ AC_CHECK_FUNCS([\
   if_nametoindex \
   mach_absolute_time \
   pipe \
+  poll \
   sched_yield \
   sendmsg \
   sendmmsg \

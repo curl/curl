@@ -430,8 +430,8 @@
 /* Define to 1 if you have the `eventfd' function. */
 #cmakedefine HAVE_EVENTFD 1
 
-/* If you have a fine poll */
-#cmakedefine HAVE_POLL_FINE 1
+/* If you have poll */
+#cmakedefine HAVE_POLL 1
 
 /* Define to 1 if you have the <poll.h> header file. */
 #cmakedefine HAVE_POLL_H 1
