@@ -3407,21 +3407,6 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
   tst_links_poll="unknown"
   tst_proto_poll="unknown"
   tst_compi_poll="unknown"
-  tst_works_poll="unknown"
-  tst_allow_poll="unknown"
-  #
-  case $host in
-    *-apple-*|*-*-interix*)
-      dnl poll() does not work on these platforms
-      dnl Interix: "does provide poll(), but the implementing developer must
-      dnl have been in a bad mood, because poll() only works on the /proc
-      dnl filesystem here"
-      dnl macOS: poll() first didn't exist, then was broken until fixed in 10.9
-      dnl only to break again in 10.12.
-      curl_disallow_poll="yes"
-      tst_compi_poll="no"
-      ;;
-  esac
   #
   AC_MSG_CHECKING([if poll can be linked])
   AC_LINK_IFELSE([
@@ -3464,82 +3449,13 @@ AC_DEFUN([CURL_CHECK_FUNC_POLL], [
     ],[
       AC_MSG_RESULT([yes])
       tst_compi_poll="yes"
+      AC_DEFINE_UNQUOTED(HAVE_POLL, 1, [If you have poll])
     ],[
       AC_MSG_RESULT([no])
       tst_compi_poll="no"
     ])
   fi
   #
-  dnl only do runtime verification when not cross-compiling
-  if test "$tst_compi_poll" = "yes"; then
-    if test "x$cross_compiling" != "xyes"; then
-      AC_MSG_CHECKING([if poll seems to work])
-      CURL_RUN_IFELSE([
-        AC_LANG_PROGRAM([[
-          $curl_includes_stdlib
-          $curl_includes_poll
-        ]],[[
-          /* detect the original poll() breakage */
-          if(0 != poll(0, 0, 10)) {
-            return 1; /* fail */
-          }
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-        tst_works_poll="yes"
-      ],[
-        AC_MSG_RESULT([no])
-        tst_works_poll="no"
-      ])
-    else
-      AC_MSG_CHECKING([if native poll seems to be supported])
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-          $curl_includes_stdlib
-        ]],[[
-          #if defined(__BIONIC__) || \
-            (defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L)
-            return 0;
-          #else
-            #error force compilation error
-          #endif
-        ]])
-      ],[
-        AC_MSG_RESULT([yes])
-        tst_works_poll="yes"
-      ],[
-        AC_MSG_RESULT([no])
-        tst_works_poll="no"
-      ])
-    fi
-  fi
-  #
-  if test "$tst_compi_poll" = "yes" &&
-    test "$tst_works_poll" != "no"; then
-    AC_MSG_CHECKING([if poll usage allowed])
-    if test "x$curl_disallow_poll" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_poll="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_poll="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if poll might be used])
-  if test "$tst_links_poll" = "yes" &&
-     test "$tst_proto_poll" = "yes" &&
-     test "$tst_compi_poll" = "yes" &&
-     test "$tst_allow_poll" = "yes" &&
-     test "$tst_works_poll" != "no"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_POLL_FINE, 1,
-      [If you have a fine poll])
-    curl_cv_func_poll="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_poll="no"
-  fi
 ])
 
 
