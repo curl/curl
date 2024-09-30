@@ -180,6 +180,7 @@ sub subnewlines {
 #
 sub runclient {
     my ($cmd)=@_;
+    print "runclient: $^O: Executing: '$cmd'\n";
     my $ret = system($cmd);
     print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;
@@ -195,6 +196,7 @@ sub runclient {
 #
 sub runclientoutput {
     my ($cmd)=@_;
+    print "runclientoutput: $^O: Executing: '$cmd'\n";
     return `$cmd 2>/dev/null`;
 
 # This is one way to test curl on a remote machine
