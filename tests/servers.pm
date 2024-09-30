@@ -3110,7 +3110,6 @@ sub subvariables {
     if($file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";
     }
-
     my $ssh_pwd = $posix_pwd;
     # this only works after the SSH server has been started
     # TODO: call sshversioninfo early and store $sshdid so this substitution
