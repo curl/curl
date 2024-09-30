@@ -3106,7 +3106,7 @@ sub subvariables {
 
     # POSIX/MSYS/Cygwin curl needs: file://localhost/d/path/to
     # Windows native    curl needs: file://localhost/D:/path/to
-    $file_pwd = $pwd;
+    my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";
     }
