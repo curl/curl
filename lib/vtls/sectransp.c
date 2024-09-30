@@ -24,7 +24,7 @@
  ***************************************************************************/
 
 /*
- * Source file for all iOS and macOS SecureTransport-specific code for the
+ * Source file for all iOS and macOS Secure Transport-specific code for the
  * TLS/SSL layer. No code but vtls.c should ever call or use these functions.
  */
 
@@ -197,7 +197,7 @@ static const uint16_t default_ciphers[] = {
   TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305_SHA256,      /* 0xCCA8 */
   TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,    /* 0xCCA9 */
 
-  /* TLSv1.3 is not supported by sectransp, but there is also other
+  /* TLSv1.3 is not supported by Secure Transport, but there is also other
    * code referencing TLSv1.3, like: kTLSProtocol13 ? */
   TLS_AES_128_GCM_SHA256,                           /* 0x1301 */
   TLS_AES_256_GCM_SHA384,                           /* 0x1302 */
@@ -532,7 +532,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
       keys_list_count = CFArrayGetCount(keys_list);
       *out_cert_and_key = NULL;
       status = 1;
-      for(i = 0; i<keys_list_count; i++) {
+      for(i = 0; i < keys_list_count; i++) {
         OSStatus err = noErr;
         SecCertificateRef cert = NULL;
         SecIdentityRef identity =
@@ -1227,8 +1227,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
      Mountain Lion.
      So we need to call SSLSetEnableCertVerify() on those older cats in order
      to disable certificate validation if the user turned that off.
-     (SecureTransport will always validate the certificate chain by
-     default.)
+     (Secure Transport always validates the certificate chain by default.)
   Note:
   Darwin 11.x.x is Lion (10.7)
   Darwin 12.x.x is Mountain Lion (10.8)
@@ -1285,8 +1284,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
    * Both hostname check and SNI require SSLSetPeerDomainName().
    * Also: the verifyhost setting influences SNI usage */
   if(conn_config->verifyhost) {
-    char *server = connssl->peer.sni?
-                   connssl->peer.sni : connssl->peer.hostname;
+    char *server = connssl->peer.sni ?
+      connssl->peer.sni : connssl->peer.hostname;
     err = SSLSetPeerDomainName(backend->ssl_ctx, server, strlen(server));
 
     if(err != noErr) {
@@ -2328,10 +2327,10 @@ sectransp_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
 
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                                nonblocking ? 0 : timeout_ms);
@@ -2463,7 +2462,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
     }
     else {
       /* We would like to read the close notify from the server using
-       * secure transport, however SSLRead() no longer works after we
+       * Secure Transport, however SSLRead() no longer works after we
        * sent the notify from our side. So, we just read from the
        * underlying filter and hope it will end. */
       nread = Curl_conn_cf_recv(cf->next, data, buf, sizeof(buf), &result);

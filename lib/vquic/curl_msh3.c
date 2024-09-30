@@ -71,7 +71,7 @@
   pthread_mutexattr_settype(&attr, PTHREAD_MUTEX_RECURSIVE); \
   pthread_mutex_init(lock, &attr); \
   pthread_mutexattr_destroy(&attr); \
-}while(0)
+} while(0)
 #define msh3_lock_uninitialize(lock) pthread_mutex_destroy(lock)
 #define msh3_lock_acquire(lock) pthread_mutex_lock(lock)
 #define msh3_lock_release(lock) pthread_mutex_unlock(lock)
@@ -248,8 +248,8 @@ static void drain_stream_from_other_thread(struct Curl_easy *data,
   }
 }
 
-static void drain_stream(struct Curl_cfilter *cf,
-                         struct Curl_easy *data)
+static void h3_drain_stream(struct Curl_cfilter *cf,
+                            struct Curl_easy *data)
 {
   struct cf_msh3_ctx *ctx = cf->ctx;
   struct stream_ctx *stream = H3_STREAM_CTX(ctx, data);
@@ -596,7 +596,7 @@ static ssize_t cf_msh3_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
     if(nread < 0)
       goto out;
     if(stream->closed)
-      drain_stream(cf, data);
+      h3_drain_stream(cf, data);
   }
   else if(stream->closed) {
     nread = recv_closed_stream(cf, data, err);
@@ -722,11 +722,11 @@ static void cf_msh3_adjust_pollset(struct Curl_cfilter *cf,
   if(stream && ctx->sock[SP_LOCAL] != CURL_SOCKET_BAD) {
     if(stream->recv_error) {
       Curl_pollset_add_in(data, ps, ctx->sock[SP_LOCAL]);
-      drain_stream(cf, data);
+      h3_drain_stream(cf, data);
     }
     else if(stream->req) {
       Curl_pollset_add_out(data, ps, ctx->sock[SP_LOCAL]);
-      drain_stream(cf, data);
+      h3_drain_stream(cf, data);
     }
   }
 }
@@ -749,7 +749,7 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
     if(pending)
-      drain_stream(cf, (struct Curl_easy *)data);
+      h3_drain_stream(cf, (struct Curl_easy *)data);
   }
 
   CF_DATA_RESTORE(cf, save);
@@ -761,7 +761,7 @@ static CURLcode h3_data_pause(struct Curl_cfilter *cf,
                               bool pause)
 {
   if(!pause) {
-    drain_stream(cf, data);
+    h3_drain_stream(cf, data);
     Curl_expire(data, 0, EXPIRE_RUN_NOW);
   }
   return CURLE_OK;
@@ -826,7 +826,7 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
     return CURLE_FAILED_INIT;
   verify = !!conn_config->verifypeer;
 
-  memcpy(&addr, &ctx->addr.sa_addr, ctx->addr.addrlen);
+  memcpy(&addr, &ctx->addr.curl_sa_addr, ctx->addr.addrlen);
   MSH3_SET_PORT(&addr, (uint16_t)cf->conn->remote_port);
 
   if(verify && (conn_config->CAfile || conn_config->CApath)) {
@@ -1020,7 +1020,7 @@ static CURLcode cf_msh3_query(struct Curl_cfilter *cf,
   default:
     break;
   }
-  return cf->next?
+  return cf->next ?
     cf->next->cft->query(cf->next, data, query, pres1, pres2) :
     CURLE_UNKNOWN_OPTION;
 }
@@ -1092,7 +1092,7 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
 
 out:
-  *pcf = (!result)? cf : NULL;
+  *pcf = (!result) ? cf : NULL;
   if(result) {
     Curl_safefree(cf);
     cf_msh3_ctx_free(ctx);
@@ -1105,7 +1105,7 @@ bool Curl_conn_is_msh3(const struct Curl_easy *data,
                        const struct connectdata *conn,
                        int sockindex)
 {
-  struct Curl_cfilter *cf = conn? conn->cfilter[sockindex] : NULL;
+  struct Curl_cfilter *cf = conn ? conn->cfilter[sockindex] : NULL;
 
   (void)data;
   for(; cf; cf = cf->next) {

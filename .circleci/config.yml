@@ -28,30 +28,6 @@
 version: 2.1
 
 commands:
-  configure:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl \
-              || { tail -1000 config.log; false; }
-
-  configure-openssl-no-verbose:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-verbose --enable-werror --with-openssl \
-              || { tail -1000 config.log; false; }
-
-  configure-no-proxy:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --disable-proxy --enable-werror --with-openssl \
-              || { tail -1000 config.log; false; }
-
   install-cares:
     steps:
       - run:
@@ -71,14 +47,6 @@ commands:
             sudo apt-get update && sudo apt-get install -y libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev python3-pip libpsl-dev
             sudo python3 -m pip install impacket
 
-  configure-libssh:
-    steps:
-      - run:
-          command: |
-            autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --with-libssh \
-              || { tail -1000 config.log; false; }
-
   install-wolfssl:
     steps:
       - run:
@@ -89,7 +57,7 @@ commands:
             tar -xzf v$WOLFSSL_VER-stable.tar.gz
             cd wolfssl-$WOLFSSL_VER-stable
             ./autogen.sh
-            ./configure --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
+            ./configure --disable-dependency-tracking --enable-tls13 --enable-all --enable-harden --prefix=$HOME/wssl
             make install
 
   install-wolfssh:
@@ -102,15 +70,52 @@ commands:
             tar -xzf v$WOLFSSH_VER-stable.tar.gz
             cd wolfssh-$WOLFSSH_VER-stable
             ./autogen.sh
-            ./configure --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
+            ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
             make install
+
+  configure:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+              --with-openssl \
+              || { tail -1000 config.log; false; }
+
+  configure-openssl-no-verbose:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror \
+              --with-openssl --disable-verbose \
+              || { tail -1000 config.log; false; }
+
+  configure-no-proxy:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror \
+              --with-openssl --disable-proxy \
+              || { tail -1000 config.log; false; }
+
+  configure-libssh:
+    steps:
+      - run:
+          command: |
+            autoreconf -fi
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+              --with-openssl --with-libssh \
+              || { tail -1000 config.log; false; }
 
   configure-cares:
     steps:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-warnings --enable-werror --with-openssl --enable-ares \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+              --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
   configure-wolfssh:
@@ -118,7 +123,9 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" ./configure --enable-warnings --enable-werror --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
+            LDFLAGS="-Wl,-rpath,$HOME/wssh/lib" \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-warnings \
+              --with-wolfssl=$HOME/wssl --with-wolfssh=$HOME/wssh \
               || { tail -1000 config.log; false; }
 
   configure-cares-debug:
@@ -126,7 +133,8 @@ commands:
       - run:
           command: |
             autoreconf -fi
-            ./configure --enable-debug --enable-werror --with-openssl --enable-ares \
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-werror --enable-debug \
+              --with-openssl --enable-ares \
               || { tail -1000 config.log; false; }
 
   build:

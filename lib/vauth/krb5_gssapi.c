@@ -158,7 +158,7 @@ CURLcode Curl_auth_create_gssapi_user_message(struct Curl_easy *data,
     gss_release_buffer(&unused_status, &output_token);
   }
   else
-    Curl_bufref_set(out, mutual_auth? "": NULL, 0, NULL);
+    Curl_bufref_set(out, mutual_auth ? "": NULL, 0, NULL);
 
   return result;
 }

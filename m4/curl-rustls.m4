@@ -34,8 +34,8 @@ if test "x$OPT_RUSTLS" != xno; then
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
 
-  case $host_os in
-    darwin*)
+  case $host in
+    *-apple-*)
       LDFLAGS="$LDFLAGS -framework Security"
       ;;
     *)

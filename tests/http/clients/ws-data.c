@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -60,7 +60,7 @@ void dump(const char *text, unsigned char *ptr, size_t size,
   fprintf(stderr, "%s, %lu bytes (0x%lx)\n",
           text, (unsigned long)size, (unsigned long)size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stderr, "%4.4lx: ", (unsigned long)i);
 
@@ -81,7 +81,7 @@ void dump(const char *text, unsigned char *ptr, size_t size,
         break;
       }
       fprintf(stderr, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)?ptr[i + c]:'.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
@@ -210,7 +210,7 @@ out:
 
 int main(int argc, char *argv[])
 {
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url;
@@ -262,10 +262,10 @@ int main(int argc, char *argv[])
   curl_global_cleanup();
   return (int)res;
 
-#else /* USE_WEBSOCKETS */
+#else /* !CURL_DISABLE_WEBSOCKETS */
   (void)argc;
   (void)argv;
   fprintf(stderr, "WebSockets not enabled in libcurl\n");
   return 1;
-#endif /* !USE_WEBSOCKETS */
+#endif /* CURL_DISABLE_WEBSOCKETS */
 }

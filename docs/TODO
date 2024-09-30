@@ -93,6 +93,7 @@
 
  9. IMAP
  9.1 Enhanced capability support
+ 9.2 upload unread
 
  10. LDAP
  10.1 SASL based authentication mechanisms
@@ -726,6 +727,12 @@
  Add the ability, for an application that uses libcurl, to obtain the list of
  capabilities returned from the CAPABILITY command.
 
+9.2 upload unread
+
+ Uploads over IMAP currently always set the email as "read" (or "seen"). It
+ would be good to offer a way for users to select for uploads to remain
+ unread.
+
 10. LDAP
 
 10.1 SASL based authentication mechanisms
@@ -938,7 +945,7 @@
 
 15.4 Add option to allow abrupt server closure
 
- libcurl w/schannel errors without a known termination point from the server
+ libcurl with Schannel errors without a known termination point from the server
  (such as length of transfer, or SSL "close notify" alert) to prevent against
  a truncation attack. Really old servers may neglect to send any termination
  point. An option could be added to ignore such abrupt closures.
@@ -1052,7 +1059,7 @@
 
 18.7 specify which response codes that make -f/--fail return error
 
- Allows a user to better specify exacly which error code(s) that are fine
+ Allows a user to better specify exactly which error code(s) that are fine
  and which are errors for their specific uses cases
 
 18.9 Choose the name of file in braces for complex URLs

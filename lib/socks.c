@@ -512,7 +512,7 @@ CONNECT_REQ_INIT:
   /* Result */
   switch(socksreq[1]) {
   case 90:
-    infof(data, "SOCKS4%s request granted.", protocol4a?"a":"");
+    infof(data, "SOCKS4%s request granted.", protocol4a ? "a" : "");
     break;
   case 91:
     failf(data,

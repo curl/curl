@@ -38,12 +38,8 @@ ftp-ipv6
 FTP-IPv6 dir list, EPRT with specified IP
 </name>
 <command>
--g "ftp://%HOST6IP:%FTP6PORT/" -P ::1
+-g "ftp://%HOST6IP:%FTP6PORT/" -P %CLIENT6IP-NB
 </command>
-# --interface doesn't accept an address surrounded by [] so %CLIENT6IP is out
-<precheck>
-perl -e "print 'Test requires default test client host address' if ( '%CLIENT6IP' ne '[::1]' );"
-</precheck>
 </client>
 
 # Verify data after the test has been "shot"

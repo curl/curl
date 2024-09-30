@@ -27,10 +27,8 @@
 
 #if defined(_WIN32) || defined(MSDOS)
 
-#define SANITIZE_ALLOW_COLONS    (1<<0)  /* Allow colons */
 #define SANITIZE_ALLOW_PATH      (1<<1)  /* Allow path separators and colons */
 #define SANITIZE_ALLOW_RESERVED  (1<<2)  /* Allow reserved device names */
-#define SANITIZE_ALLOW_TRUNCATE  (1<<3)  /* Allow truncating a long filename */
 
 typedef enum {
   SANITIZE_ERR_OK = 0,           /* 0 - OK */
@@ -59,9 +57,11 @@ char **__crt0_glob_function(char *arg);
 
 #ifdef _WIN32
 
+#if !defined(CURL_WINDOWS_UWP) && \
+  !defined(CURL_DISABLE_CA_SEARCH) && !defined(CURL_CA_SEARCH_SAFE)
 CURLcode FindWin32CACert(struct OperationConfig *config,
-                         curl_sslbackend backend,
                          const TCHAR *bundle_file);
+#endif
 struct curl_slist *GetLoadedModulePaths(void);
 CURLcode win32_init(void);
 

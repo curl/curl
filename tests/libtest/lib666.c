@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char buffer[17000]; /* more than 16K */
+static char testbuf[17000]; /* more than 16K */
 
 CURLcode test(char *URL)
 {
@@ -37,12 +37,12 @@ CURLcode test(char *URL)
 
   /* Checks huge binary-encoded mime post. */
 
-  /* Create a buffer with pseudo-binary data. */
-  for(i = 0; i < sizeof(buffer); i++)
+  /* Create a testbuf with pseudo-binary data. */
+  for(i = 0; i < sizeof(testbuf); i++)
     if(i % 77 == 76)
-      buffer[i] = '\n';
+      testbuf[i] = '\n';
     else
-      buffer[i] = (char) (0x41 + i % 26); /* A...Z */
+      testbuf[i] = (char) (0x41 + i % 26); /* A...Z */
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -79,7 +79,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "curl_mime_filename() failed\n");
     goto test_cleanup;
   }
-  res = curl_mime_data(part, buffer, sizeof(buffer));
+  res = curl_mime_data(part, testbuf, sizeof(testbuf));
   if(res) {
     fprintf(stderr, "curl_mime_data() failed\n");
     goto test_cleanup;

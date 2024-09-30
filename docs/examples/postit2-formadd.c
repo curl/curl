@@ -47,11 +47,6 @@
 
 #include <curl/curl.h>
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
-
 int main(int argc, char *argv[])
 {
   CURL *curl;
@@ -64,27 +59,29 @@ int main(int argc, char *argv[])
 
   curl_global_init(CURL_GLOBAL_ALL);
 
-  /* Fill in the file upload field */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "sendfile",
-               CURLFORM_FILE, "postit2-formadd.c",
-               CURLFORM_END);
+  CURL_IGNORE_DEPRECATION(
+    /* Fill in the file upload field */
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "sendfile",
+                 CURLFORM_FILE, "postit2-formadd.c",
+                 CURLFORM_END);
 
-  /* Fill in the filename field */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "filename",
-               CURLFORM_COPYCONTENTS, "postit2-formadd.c",
-               CURLFORM_END);
+    /* Fill in the filename field */
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "filename",
+                 CURLFORM_COPYCONTENTS, "postit2-formadd.c",
+                 CURLFORM_END);
 
 
-  /* Fill in the submit field too, even if this is rarely needed */
-  curl_formadd(&formpost,
-               &lastptr,
-               CURLFORM_COPYNAME, "submit",
-               CURLFORM_COPYCONTENTS, "send",
-               CURLFORM_END);
+    /* Fill in the submit field too, even if this is rarely needed */
+    curl_formadd(&formpost,
+                 &lastptr,
+                 CURLFORM_COPYNAME, "submit",
+                 CURLFORM_COPYCONTENTS, "send",
+                 CURLFORM_END);
+  )
 
   curl = curl_easy_init();
   /* initialize custom header list (stating that Expect: 100-continue is not
@@ -96,7 +93,9 @@ int main(int argc, char *argv[])
     if((argc == 2) && (!strcmp(argv[1], "noexpectheader")))
       /* only disable 100-continue header if explicitly requested */
       curl_easy_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-    curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    CURL_IGNORE_DEPRECATION(
+      curl_easy_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    )
 
     /* Perform the request, res gets the return code */
     res = curl_easy_perform(curl);
@@ -108,14 +107,13 @@ int main(int argc, char *argv[])
     /* always cleanup */
     curl_easy_cleanup(curl);
 
-    /* then cleanup the formpost chain */
-    curl_formfree(formpost);
+    CURL_IGNORE_DEPRECATION(
+      /* then cleanup the formpost chain */
+      curl_formfree(formpost);
+    )
+
     /* free slist */
     curl_slist_free_all(headerlist);
   }
   return 0;
 }
-
-#ifdef __GNUC__
-#pragma GCC diagnostic pop
-#endif

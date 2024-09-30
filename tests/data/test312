@@ -17,6 +17,7 @@ PEM certificate
 <client>
 <features>
 SSL
+local-http
 </features>
 <server>
 https Server-localhost.nn-sv.pem
@@ -25,12 +26,8 @@ https Server-localhost.nn-sv.pem
 HTTPS GET to localhost and null-prefixed CN cert
 </name>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #

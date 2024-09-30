@@ -26,7 +26,7 @@
 #include "speedcheck.h"
 #include "urldata.h"
 
-static CURL *easy;
+static struct Curl_easy *easy;
 
 static CURLcode unit_setup(void)
 {

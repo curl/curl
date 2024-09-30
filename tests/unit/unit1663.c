@@ -49,7 +49,7 @@ static void unit_stop(void)
 }
 
 static void test_parse(
-  const char *input,
+  const char *input_data,
   const char *exp_dev,
   const char *exp_iface,
   const char *exp_host,
@@ -58,7 +58,7 @@ static void test_parse(
   char *dev = NULL;
   char *iface = NULL;
   char *host = NULL;
-  CURLcode rc = Curl_parse_interface(input, &dev, &iface, &host);
+  CURLcode rc = Curl_parse_interface(input_data, &dev, &iface, &host);
   fail_unless(rc == exp_rc, "Curl_parse_interface() failed");
 
   fail_unless(!!exp_dev == !!dev, "dev expectation failed.");

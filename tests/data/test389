@@ -31,16 +31,16 @@ Funny-head: yesyes
 <server>
 http
 </server>
+<features>
+local-http
+</features>
 <name>
 *.localhost is a local host
 </name>
 <command>
-http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
+-4 http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #

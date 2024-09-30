@@ -41,9 +41,6 @@ to stay the same
 <precheck>
 perl -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, ">", $filename) or die $!; print FH "to stay the same" ; close(FH) }'
 </precheck>
-<postcheck>
-perl -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, "<", $filename) or die $!; (<FH> eq "to stay the same" and <FH> eq "") or die "incorrect $filename" ; close(FH) }'
-</postcheck>
 </client>
 
 #
@@ -55,5 +52,8 @@ perl -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; op
 <file name="%LOGDIR/exist%TESTNUMBER">
 to stay the same
 </file>
+<postcheck>
+perl -e 'for my $i ((1..100)) { my $filename = "%LOGDIR/exist%TESTNUMBER.$i"; open(FH, "<", $filename) or die $!; (<FH> eq "to stay the same" and <FH> eq "") or die "incorrect $filename" ; close(FH) }'
+</postcheck>
 </verify>
 </testcase>

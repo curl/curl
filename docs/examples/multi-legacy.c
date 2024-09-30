@@ -59,7 +59,7 @@ int main(void)
   int msgs_left; /* how many messages are left */
 
   /* Allocate one CURL handle per transfer */
-  for(i = 0; i<HANDLECOUNT; i++)
+  for(i = 0; i < HANDLECOUNT; i++)
     handles[i] = curl_easy_init();
 
   /* set the options (I left out a few, you get the point anyway) */
@@ -72,7 +72,7 @@ int main(void)
   multi_handle = curl_multi_init();
 
   /* add the individual transfers */
-  for(i = 0; i<HANDLECOUNT; i++)
+  for(i = 0; i < HANDLECOUNT; i++)
     curl_multi_add_handle(multi_handle, handles[i]);
 
   /* we start some action by calling perform right away */
@@ -155,7 +155,7 @@ int main(void)
       int idx;
 
       /* Find out which handle this message is about */
-      for(idx = 0; idx<HANDLECOUNT; idx++) {
+      for(idx = 0; idx < HANDLECOUNT; idx++) {
         int found = (msg->easy_handle == handles[idx]);
         if(found)
           break;
@@ -175,7 +175,7 @@ int main(void)
   curl_multi_cleanup(multi_handle);
 
   /* Free the CURL handles */
-  for(i = 0; i<HANDLECOUNT; i++)
+  for(i = 0; i < HANDLECOUNT; i++)
     curl_easy_cleanup(handles[i]);
 
   return 0;

@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "test.h"
 
-static char data[]="mooaaa";
+static char testdata[]="mooaaa";
 
 struct WriteThis {
   size_t sizeleft;
@@ -32,13 +32,13 @@ struct WriteThis {
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct WriteThis *pooh = (struct WriteThis *)userp;
-  size_t len = strlen(data);
+  size_t len = strlen(testdata);
 
   if(size*nmemb < len)
     return 0;
 
   if(pooh->sizeleft) {
-    memcpy(ptr, data, strlen(data));
+    memcpy(ptr, testdata, strlen(testdata));
     pooh->sizeleft = 0;
     return len;
   }

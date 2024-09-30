@@ -24,9 +24,11 @@
 
 # these files are used in every single unit test program
 
-UNITFILES = curlcheck.h \
- ../libtest/test.h \
- ../libtest/first.c
+FIRSTFILES = \
+ ../libtest/first.c \
+ ../libtest/first.h
+
+UNITFILES = curlcheck.h $(FIRSTFILES)
 
 # These are all unit test programs
 UNITPROGS = unit1300          unit1302 unit1303 unit1304 unit1305 unit1307 \

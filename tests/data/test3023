@@ -26,6 +26,7 @@ MooMoo
 <features>
 SSL
 Schannel
+local-http
 </features>
 <server>
 https Server-localhost-firstSAN-sv.pem
@@ -34,16 +35,12 @@ https Server-localhost-firstSAN-sv.pem
 HTTPS GET to localhost, first subject alt name matches, CN does not match (Schannel variant)
 </name>
 <setenv>
-# This test is pointless if we're not using the schannel backend
+# This test is pointless if we are not using the Schannel backend
 CURL_SSL_BACKEND=schannel
 </setenv>
 <command>
---cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
+-4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
 </command>
-# Ensure that we're running on localhost because we're checking the host name
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 </client>
 
 #

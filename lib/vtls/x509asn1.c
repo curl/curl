@@ -270,7 +270,7 @@ static CURLcode bool2str(struct dynbuf *store,
 {
   if(end - beg != 1)
     return CURLE_BAD_FUNCTION_ARGUMENT;
-  return Curl_dyn_add(store, *beg? "TRUE": "FALSE");
+  return Curl_dyn_add(store, *beg ? "TRUE": "FALSE");
 }
 
 /*
@@ -323,7 +323,7 @@ static CURLcode int2str(struct dynbuf *store,
   do
     val = (val << 8) | *(const unsigned char *) beg++;
   while(beg < end);
-  return Curl_dyn_addf(store, "%s%x", val >= 10? "0x": "", val);
+  return Curl_dyn_addf(store, "%s%x", val >= 10 ? "0x" : "", val);
 }
 
 /*
@@ -551,7 +551,7 @@ static CURLcode GTime2str(struct dynbuf *store,
                        "%.4s-%.2s-%.2s %.2s:%.2s:%c%c%s%.*s%s%.*s",
                        beg, beg + 4, beg + 6,
                        beg + 8, beg + 10, sec1, sec2,
-                       fracl? ".": "", (int)fracl, fracp,
+                       fracl ? ".": "", (int)fracl, fracp,
                        sep, (int)tzl, tzp);
 }
 

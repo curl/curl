@@ -55,11 +55,9 @@ jobs:
             # https://pkgsrc.se/
             sudo pkgin -y install cmake ninja-build pkg-config perl brotli heimdal openldap-client libssh2 libidn2 libpsl nghttp2 py311-impacket
             cmake -B bld -G Ninja \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
-              -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
@@ -67,9 +65,12 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j0'  # flakies: ~389 ~392 ~TFTP and more
+              export TFLAGS='-j4'
               cmake --build bld --config Debug --target test-ci
             fi
+            echo '::group::build examples'
+            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            echo '::endgroup::'
 
   openbsd:
     name: 'OpenBSD (cmake, libressl, clang)'
@@ -90,11 +91,9 @@ jobs:
             # https://openbsd.app/
             sudo pkg_add cmake ninja perl brotli openldap-client libssh2 libidn2 libpsl nghttp2 python3 py3-impacket
             cmake -B bld -G Ninja \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
-              -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
@@ -105,6 +104,9 @@ jobs:
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
+            echo '::group::build examples'
+            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            echo '::endgroup::'
 
   freebsd:
     name: 'FreeBSD (${{ matrix.build }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})'
@@ -132,19 +134,20 @@ jobs:
               pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
-            mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
-              --enable-websockets \
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             make -j3 install
             src/curl --disable --version
-            make -j3 examples
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               make -j3 -C tests
-              make test-ci V=1 TFLAGS='-j8 ~FTP'
+              make test-ci V=1 TFLAGS='-j4'
             fi
+            echo '::group::build examples'
+            make -j3 examples
+            echo '::endgroup::'
 
       - name: 'cmake'
         if: ${{ matrix.build == 'cmake' }}
@@ -159,11 +162,9 @@ jobs:
               pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
             cmake -B bld -G Ninja \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
-              -DCMAKE_UNITY_BUILD=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DENABLE_DEBUG=ON -DCMAKE_BUILD_TYPE=Debug -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-              -DBUILD_EXAMPLES=ON \
-              -DENABLE_WEBSOCKETS=ON \
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
@@ -171,9 +172,11 @@ jobs:
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               cmake --build bld --config Debug --parallel 3 --target testdeps
-              export TFLAGS='-j8 ~FTP'
               cmake --build bld --config Debug --target test-ci
             fi
+            echo '::group::build examples'
+            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            echo '::endgroup::'
 
   omnios:
     name: 'OmniOS (autotools, openssl, gcc, amd64)'
@@ -190,13 +193,14 @@ jobs:
           run: |
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --enable-debug --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
-              --enable-websockets \
               --with-openssl \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
             gmake -j3 install
             src/curl --disable --version
-            gmake -j3 examples
             gmake -j3 -C tests
-            gmake test-ci V=1 TFLAGS='-j12 ~MQTT ~FTP'
+            gmake test-ci V=1
+            echo '::group::build examples'
+            gmake -j3 examples
+            echo '::endgroup::'

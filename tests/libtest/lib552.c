@@ -30,7 +30,7 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-struct data {
+struct testdata {
   char trace_ascii; /* 1 or 0 */
 };
 
@@ -50,7 +50,7 @@ void dump(const char *text,
 
   fprintf(stream, "%s, %zu bytes (0x%zx)\n", text, size, size);
 
-  for(i = 0; i<size; i += width) {
+  for(i = 0; i < size; i += width) {
 
     fprintf(stream, "%04zx: ", i);
 
@@ -71,7 +71,7 @@ void dump(const char *text,
         break;
       }
       fprintf(stream, "%c",
-              (ptr[i + c] >= 0x20) && (ptr[i + c]<0x80)? ptr[i + c] : '.');
+              (ptr[i + c] >= 0x20) && (ptr[i + c] < 0x80) ? ptr[i + c] : '.');
       /* check again for 0D0A, to avoid an extra \n if it's at width */
       if(nohex && (i + c + 2 < size) && ptr[i + c + 1] == 0x0D &&
          ptr[i + c + 2] == 0x0A) {
@@ -89,7 +89,7 @@ int my_trace(CURL *handle, curl_infotype type,
              char *data, size_t size,
              void *userp)
 {
-  struct data *config = (struct data *)userp;
+  struct testdata *config = (struct testdata *)userp;
   const char *text;
   (void)handle; /* prevent compiler warning */
 
@@ -170,7 +170,7 @@ CURLcode test(char *URL)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
-  struct data config;
+  struct testdata config;
   size_t i;
   static const char fill[] = "test data";
 

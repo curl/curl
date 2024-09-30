@@ -35,13 +35,11 @@ HTTP secure cookies over localhost
 TZ=GMT
 </setenv>
 <command>
-http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
+-4 http://localhost:%HTTPPORT/%TESTNUMBER -b none http://localhost:%HTTPPORT/%TESTNUMBER
 </command>
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 <features>
 cookies
+local-http
 </features>
 </client>
 

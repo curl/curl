@@ -1,0 +1,37 @@
+<testcase>
+<info>
+<keywords>
+FILE
+</keywords>
+</info>
+
+<reply>
+</reply>
+
+# Client-side
+<client>
+<server>
+file
+</server>
+<name>
+file:// don't overwrite self with --skip-existing
+</name>
+<command option="no-output">
+file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt -o %LOGDIR/test%TESTNUMBER.txt --skip-existing
+</command>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+foo
+   bar
+bar
+   foo
+moo
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stderr mode="text">
+Note: skips transfer, "%LOGDIR/test%TESTNUMBER.txt" exists locally
+</stderr>
+</verify>
+</testcase>

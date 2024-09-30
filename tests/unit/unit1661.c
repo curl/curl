@@ -22,8 +22,8 @@
  *
  ***************************************************************************/
 #include "curlcheck.h"
-
 #include "bufref.h"
+#include "memdebug.h"
 
 static struct bufref bufref;
 
@@ -44,6 +44,7 @@ static CURLcode unit_setup(void)
 
 static void unit_stop(void)
 {
+  Curl_bufref_free(&bufref);
 }
 
 UNITTEST_START

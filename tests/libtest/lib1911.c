@@ -31,7 +31,7 @@
    define not publicly exposed so we set our own */
 #define MAX_INPUT_LENGTH 8000000
 
-static char buffer[MAX_INPUT_LENGTH + 2];
+static char testbuf[MAX_INPUT_LENGTH + 2];
 
 CURLcode test(char *URL)
 {
@@ -48,10 +48,10 @@ CURLcode test(char *URL)
   }
 
   /* make it a null-terminated C string with just As */
-  memset(buffer, 'A', MAX_INPUT_LENGTH + 1);
-  buffer[MAX_INPUT_LENGTH + 1] = 0;
+  memset(testbuf, 'A', MAX_INPUT_LENGTH + 1);
+  testbuf[MAX_INPUT_LENGTH + 1] = 0;
 
-  printf("string length: %d\n", (int)strlen(buffer));
+  printf("string length: %d\n", (int)strlen(testbuf));
 
   for(o = curl_easy_option_next(NULL);
       o;
@@ -76,7 +76,7 @@ CURLcode test(char *URL)
 
       /* This is a string. Make sure that passing in a string longer
          CURL_MAX_INPUT_LENGTH returns an error */
-      result = curl_easy_setopt(easy, o->id, buffer);
+      result = curl_easy_setopt(easy, o->id, testbuf);
       switch(result) {
       case CURLE_BAD_FUNCTION_ARGUMENT: /* the most normal */
       case CURLE_UNKNOWN_OPTION: /* left out from the build */

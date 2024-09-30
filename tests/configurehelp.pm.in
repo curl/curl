@@ -1,4 +1,3 @@
-#!/usr/bin/env perl
 #***************************************************************************
 #                                  _   _ ____  _
 #  Project                     ___| | | |  _ \| |
@@ -22,17 +21,25 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Check that given arguments do not exist on filesystem.
-my $code = 0;
-if ($#ARGV < 0) {
-    print "Usage: $0 file1 [fileN]\n";
-    exit 2;
-}
-while (@ARGV) {
-    my $fname = shift @ARGV;
-    if (-e $fname) {
-        print "Found '$fname' when not supposed to exist.\n";
-        $code = 1;
-    }
-}
-exit $code;
+
+package configurehelp;
+
+use strict;
+use warnings;
+use Exporter;
+
+use vars qw(
+    @ISA
+    @EXPORT_OK
+    $Cpreprocessor
+    );
+
+@ISA = qw(Exporter);
+
+@EXPORT_OK = qw(
+    $Cpreprocessor
+    );
+
+$Cpreprocessor = '@CURL_CPP@';
+
+1;

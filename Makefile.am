@@ -82,14 +82,16 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile.inc             \
  plan9/src/mkfile
 
-EXTRA_DIST = CHANGES.md COPYING Makefile.dist curl-config.in    \
- RELEASE-NOTES libcurl.pc.in $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
- $(PLAN9_DIST) lib/libcurl.vers.in buildconf.bat Dockerfile
+EXTRA_DIST = CHANGES.md COPYING Makefile.dist             \
+ RELEASE-NOTES $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
+ $(PLAN9_DIST) buildconf.bat Dockerfile
 
 CLEANFILES = $(VC14_LIBVCXPROJ) $(VC14_SRCVCXPROJ) \
  $(VC14_10_LIBVCXPROJ) $(VC14_10_SRCVCXPROJ)       \
  $(VC14_20_LIBVCXPROJ) $(VC14_20_SRCVCXPROJ)       \
  $(VC14_30_LIBVCXPROJ) $(VC14_30_SRCVCXPROJ)
+
+DISTCLEANFILES = buildinfo.txt
 
 bin_SCRIPTS = curl-config
 
@@ -116,7 +118,13 @@ check: test examples check-docs
 
 if CROSSCOMPILING
 test-full: test
+test-nonflaky: test
 test-torture: test
+test-event: test
+test-am: test
+test-ci: test
+pytest: test
+pytest-ci: test
 
 test:
 	@echo "NOTICE: we can't run the tests when cross-compiling!"
@@ -143,6 +151,12 @@ test-am:
 
 test-ci:
 	@(cd tests; $(MAKE) all ci-test)
+
+pytest:
+	@(cd tests; $(MAKE) all default-pytest)
+
+pytest-ci:
+	@(cd tests; $(MAKE) all ci-pytest)
 
 endif
 

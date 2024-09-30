@@ -878,7 +878,7 @@ cr_connect_common(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    socket_check_timeout = blocking?timeout_ms:0;
+    socket_check_timeout = blocking ? timeout_ms : 0;
 
     what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
                              socket_check_timeout);

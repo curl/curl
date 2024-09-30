@@ -426,9 +426,9 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
 
   /* Set the default CA cert bundle/path detected/specified at build time.
    *
-   * If Schannel or SecureTransport is the selected SSL backend then these
-   * locations are ignored. We allow setting CA location for schannel and
-   * securetransport when explicitly specified by the user via
+   * If Schannel or Secure Transport is the selected SSL backend then these
+   * locations are ignored. We allow setting CA location for Schannel and
+   * Secure Transport when explicitly specified by the user via
    *  CURLOPT_CAINFO / --cacert.
    */
   if(Curl_ssl_backend() != CURLSSLBACKEND_SCHANNEL &&
@@ -1031,13 +1031,25 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 
   /* If looking for HTTP and the HTTP version we want is less
-   * than the HTTP version of conn, continue looking */
+   * than the HTTP version of conn, continue looking.
+   * CURL_HTTP_VERSION_2TLS is default which indicates no preference,
+   * so we take any existing connection. */
   if((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
-     (((conn->httpversion >= 20) &&
-       (data->state.httpwant < CURL_HTTP_VERSION_2_0))
-      || ((conn->httpversion >= 30) &&
-          (data->state.httpwant < CURL_HTTP_VERSION_3))))
-    return FALSE;
+     (data->state.httpwant != CURL_HTTP_VERSION_2TLS)) {
+    if((conn->httpversion >= 20) &&
+       (data->state.httpwant < CURL_HTTP_VERSION_2_0)) {
+      DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
+             " with httpversion=%d, we want a version less than h2",
+             conn->connection_id, conn->httpversion));
+    }
+    if((conn->httpversion >= 30) &&
+       (data->state.httpwant < CURL_HTTP_VERSION_3)) {
+      DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
+             " with httpversion=%d, we want a version less than h3",
+             conn->connection_id, conn->httpversion));
+      return FALSE;
+    }
+  }
 #ifdef USE_SSH
   else if(get_protocol_family(needle->handler) & PROTO_FAMILY_SSH) {
     if(!ssh_config_matches(needle, conn))
@@ -1497,7 +1509,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
 #else
     NULL,
 #endif
-#if defined(USE_WEBSOCKETS) && \
+#if !defined(CURL_DISABLE_WEBSOCKETS) &&                \
   defined(USE_SSL) && !defined(CURL_DISABLE_HTTP)
     &Curl_handler_wss,
 #else
@@ -1566,7 +1578,7 @@ const struct Curl_handler *Curl_getn_scheme_handler(const char *scheme,
     NULL,
 #endif
     NULL,
-#if defined(USE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
     &Curl_handler_ws,
 #else
     NULL,
@@ -2090,7 +2102,7 @@ static char *detect_proxy(struct Curl_easy *data,
   }
 
   if(!proxy) {
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
     /* websocket proxy fallbacks */
     if(strcasecompare("ws_proxy", proxy_env)) {
       proxy = curl_getenv("http_proxy");
@@ -2108,7 +2120,7 @@ static char *detect_proxy(struct Curl_easy *data,
         envp = (char *)"ALL_PROXY";
         proxy = curl_getenv(envp);
       }
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
     }
 #endif
   }
@@ -3015,9 +3027,10 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
 #endif
        )) {
     /* no connect_to match, try alt-svc! */
-    enum alpnid srcalpnid;
-    bool hit;
-    struct altsvc *as;
+    enum alpnid srcalpnid = ALPN_none;
+    bool use_alt_svc = FALSE;
+    bool hit = FALSE;
+    struct altsvc *as = NULL;
     const int allowed_versions = ( ALPN_h1
 #ifdef USE_HTTP2
                                    | ALPN_h2
@@ -3026,24 +3039,65 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
                                    | ALPN_h3
 #endif
       ) & data->asi->flags;
+    static enum alpnid alpn_ids[] = {
+#ifdef USE_HTTP3
+      ALPN_h3,
+#endif
+#ifdef USE_HTTP2
+      ALPN_h2,
+#endif
+      ALPN_h1,
+    };
+    size_t i;
+
+    switch(data->state.httpwant) {
+    case CURL_HTTP_VERSION_1_0:
+      break;
+    case CURL_HTTP_VERSION_1_1:
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_h1; /* only regard alt-svc advice for http/1.1 */
+      break;
+    case CURL_HTTP_VERSION_2_0:
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_h2; /* only regard alt-svc advice for h2 */
+      break;
+    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+      break;
+    case CURL_HTTP_VERSION_3:
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_h3; /* only regard alt-svc advice for h3 */
+      break;
+    case CURL_HTTP_VERSION_3ONLY:
+      break;
+    default: /* no specific HTTP version wanted, look at all of alt-svc */
+      use_alt_svc = TRUE;
+      srcalpnid = ALPN_none;
+      break;
+    }
+    if(!use_alt_svc)
+      return CURLE_OK;
 
     host = conn->host.rawalloc;
-#ifdef USE_HTTP2
-    /* with h2 support, check that first */
-    srcalpnid = ALPN_h2;
-    hit = Curl_altsvc_lookup(data->asi,
-                             srcalpnid, host, conn->remote_port, /* from */
-                             &as /* to */,
-                             allowed_versions);
-    if(!hit)
-#endif
-    {
-      srcalpnid = ALPN_h1;
+    DEBUGF(infof(data, "check Alt-Svc for host %s", host));
+    if(srcalpnid == ALPN_none) {
+      /* scan all alt-svc protocol ids in order or relevance */
+      for(i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i) {
+        srcalpnid = alpn_ids[i];
+        hit = Curl_altsvc_lookup(data->asi,
+                                 srcalpnid, host, conn->remote_port, /* from */
+                                 &as /* to */,
+                                 allowed_versions);
+      }
+    }
+    else {
+      /* look for a specific alt-svc protocol id */
       hit = Curl_altsvc_lookup(data->asi,
                                srcalpnid, host, conn->remote_port, /* from */
                                &as /* to */,
                                allowed_versions);
     }
+
+
     if(hit) {
       char *hostd = strdup((char *)as->dst.host);
       if(!hostd)
@@ -3529,7 +3583,7 @@ static CURLcode create_conn(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PROXY
     infof(data, "Re-using existing connection with %s %s",
-          conn->bits.proxy?"proxy":"host",
+          conn->bits.proxy ? "proxy" : "host",
           conn->socks_proxy.host.name ? conn->socks_proxy.host.dispname :
           conn->http_proxy.host.name ? conn->http_proxy.host.dispname :
           conn->host.dispname);

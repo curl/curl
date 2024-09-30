@@ -44,9 +44,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O --remote-time
 </command>
 # Verify the mtime of the file. The mtime is specifically chosen to be an even
 # number so that it can be represented exactly on a FAT filesystem.
-<postcheck>
-perl -e 'exit((stat("%LOGDIR/%TESTNUMBER"))[9] != 960898200)'
-</postcheck>
 </client>
 
 #
@@ -62,5 +59,8 @@ Accept: */*
 <file name="%LOGDIR/%TESTNUMBER">
 12345
 </file>
+<postcheck>
+perl -e 'exit((stat("%LOGDIR/%TESTNUMBER"))[9] != 960898200)'
+</postcheck>
 </verify>
 </testcase>

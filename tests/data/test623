@@ -33,9 +33,6 @@ for ssh upload test
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 25
 </errorcode>

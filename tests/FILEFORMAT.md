@@ -121,7 +121,8 @@ replaced by their content at that time.
 
 Available substitute variables include:
 
-- `%CLIENT6IP` - IPv6 address of the client running curl
+- `%CLIENT6IP` - IPv6 address of the client running curl (including brackets)
+- `%CLIENT6IP-NB` - IPv6 address of the client running curl (no brackets)
 - `%CLIENTIP` - IPv4 address of the client running curl
 - `%CURL` - Path to the curl executable
 - `%DATE` - current YYYY-MM-DD date
@@ -131,7 +132,6 @@ Available substitute variables include:
 - `%FTPSPORT` - Port number of the FTPS server
 - `%FTPTIME2` - Timeout in seconds that should be just sufficient to receive a
   response from the test FTP server
-- `%FTPTIME3` - Even longer than `%FTPTIME2`
 - `%GOPHER6PORT` - IPv6 port number of the Gopher server
 - `%GOPHERPORT` - Port number of the Gopher server
 - `%GOPHERSPORT` - Port number of the Gophers server
@@ -431,6 +431,7 @@ Features testable here are:
 - `brotli`
 - `c-ares`
 - `CharConv`
+- `codeset-utf8`. If the running codeset is UTF-8 capable.
 - `cookies`
 - `crypto`
 - `Debug`
@@ -456,6 +457,7 @@ Features testable here are:
 - `libssh`
 - `oldlibssh` (versions before 0.9.4)
 - `libz`
+- `local-http`. The HTTP server runs on 127.0.0.1
 - `manual`
 - `mbedtls`
 - `Mime`
@@ -509,10 +511,6 @@ A command line that if set gets run by the test script before the test. If an
 output is displayed by the command or if the return code is non-zero, the test
 is skipped and the (single-line) output is displayed as reason for not running
 the test.
-
-### `<postcheck>`
-A command line that if set gets run by the test script after the test. If the
-command exists with a non-zero status code, the test is considered failed.
 
 ### `<tool>`
 Name of tool to invoke instead of "curl". This tool must be built and exist
@@ -621,6 +619,14 @@ changing protocol data such as port numbers or user-agent strings.
 ### `<strippart>`
 One perl op per line that operates on the protocol dump. This is pretty
 advanced. Example: `s/^EPRT .*/EPRT stripped/`.
+
+### `<postcheck>`
+A command line that if set gets run by the test script after the test. If the
+command exists with a non-zero status code, the test is considered failed.
+
+### `<notexists>`
+A list of directory entries that are checked for after the test has completed
+and that must not exist. A listed entry existing causes the test to fail.
 
 ### `<protocol [nonewline="yes"][crlf="yes"]>`
 

@@ -47,7 +47,7 @@ struct testparams {
   CURLcode result; /* Code that should be returned by curl_easy_perform(). */
 };
 
-static const struct testparams params[] = {
+static const struct testparams testparams[] = {
   { 0,                                                             CURLE_OK },
   {                                 F_CONTENTRANGE,                CURLE_OK },
   {                        F_FAIL,                                 CURLE_OK },
@@ -90,35 +90,35 @@ static int onetest(CURL *curl, const char *url, const struct testparams *p,
   unsigned int replyselector;
   char urlbuf[256];
 
-  replyselector = (p->flags & F_CONTENTRANGE)? 1: 0;
+  replyselector = (p->flags & F_CONTENTRANGE) ? 1 : 0;
   if(p->flags & F_HTTP416)
     replyselector += 2;
   msnprintf(urlbuf, sizeof(urlbuf), "%s%04u", url, replyselector);
   test_setopt(curl, CURLOPT_URL, urlbuf);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME)? 3: 0);
-  test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME)?
+  test_setopt(curl, CURLOPT_RESUME_FROM, (p->flags & F_RESUME) ? 3 : 0);
+  test_setopt(curl, CURLOPT_RANGE, !(p->flags & F_RESUME) ?
                                    "3-1000000": (char *) NULL);
-  test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL)? 1: 0);
+  test_setopt(curl, CURLOPT_FAILONERROR, (p->flags & F_FAIL) ? 1 : 0);
   hasbody = 0;
   res = curl_easy_perform(curl);
   if(res != p->result) {
     printf("%zd: bad error code (%d): resume=%s, fail=%s, http416=%s, "
            "content-range=%s, expected=%d\n", num, res,
-           (p->flags & F_RESUME)? "yes": "no",
-           (p->flags & F_FAIL)? "yes": "no",
-           (p->flags & F_HTTP416)? "yes": "no",
-           (p->flags & F_CONTENTRANGE)? "yes": "no",
+           (p->flags & F_RESUME) ? "yes": "no",
+           (p->flags & F_FAIL) ? "yes": "no",
+           (p->flags & F_HTTP416) ? "yes": "no",
+           (p->flags & F_CONTENTRANGE) ? "yes": "no",
            p->result);
     return 1;
   }
   if(hasbody && (p->flags & F_IGNOREBODY)) {
     printf("body should be ignored and is not: resume=%s, fail=%s, "
            "http416=%s, content-range=%s\n",
-           (p->flags & F_RESUME)? "yes": "no",
-           (p->flags & F_FAIL)? "yes": "no",
-           (p->flags & F_HTTP416)? "yes": "no",
-           (p->flags & F_CONTENTRANGE)? "yes": "no");
+           (p->flags & F_RESUME) ? "yes": "no",
+           (p->flags & F_FAIL) ? "yes": "no",
+           (p->flags & F_HTTP416) ? "yes": "no",
+           (p->flags & F_CONTENTRANGE) ? "yes": "no");
     return 1;
   }
   return 0;
@@ -143,7 +143,7 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < sizeof(params) / sizeof(params[0]); i++) {
+  for(i = 0; i < sizeof(testparams) / sizeof(testparams[0]); i++) {
     curl = curl_easy_init();
     if(!curl) {
       fprintf(stderr, "curl_easy_init() failed\n");
@@ -156,7 +156,7 @@ CURLcode test(char *URL)
 #ifdef SINGLETEST
     if(SINGLETEST == i)
 #endif
-      status |= onetest(curl, URL, params + i, i);
+      status |= onetest(curl, URL, testparams + i, i);
     curl_easy_cleanup(curl);
   }
 

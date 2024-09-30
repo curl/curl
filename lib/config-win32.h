@@ -475,7 +475,7 @@ Vista
 #endif
 
 /* Define to use the Windows crypto library. */
-#if !defined(CURL_WINDOWS_APP)
+#if !defined(CURL_WINDOWS_UWP)
 #define USE_WIN32_CRYPTO
 #endif
 

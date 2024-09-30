@@ -35,12 +35,13 @@ MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
-SUPPORTFILES = $(TIMEDIFF) first.c test.h
+FIRSTFILES = first.c first.h
+SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h
 
 THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
 # These are all libcurl test programs
-noinst_PROGRAMS = libauthretry libntlmconnect libprereq                  \
+LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509   \
  lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519   \
  lib520 lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532   \
@@ -464,7 +465,7 @@ lib1539_SOURCES = lib1514.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1539_LDADD = $(TESTUTIL_LIBS)
 lib1539_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1539
 
-lib1540_SOURCES = lib1540.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib1540_SOURCES = lib1540.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(WARNLESS)
 lib1540_LDADD = $(TESTUTIL_LIBS)
 
 lib1541_SOURCES = lib1541.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
@@ -477,7 +478,6 @@ lib1543_SOURCES = lib1518.c $(SUPPORTFILES)
 lib1543_CPPFLAGS = $(AM_CPPFLAGS) -DLIB1543
 
 lib1545_SOURCES = lib1545.c $(SUPPORTFILES)
-lib1545_CPPFLAGS = $(AM_CPPFLAGS) -DCURL_DISABLE_DEPRECATION
 
 lib1550_SOURCES = lib1550.c $(SUPPORTFILES)
 
@@ -692,7 +692,7 @@ lib2404_LDADD = $(TESTUTIL_LIBS)
 lib2405_SOURCES = lib2405.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2405_LDADD = $(TESTUTIL_LIBS)
 
-lib2502_SOURCES = lib2502.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
+lib2502_SOURCES = lib2502.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(WARNLESS)
 lib2502_LDADD = $(TESTUTIL_LIBS)
 
 lib3010_SOURCES = lib3010.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)

@@ -108,7 +108,7 @@ static ssize_t gtls_push(void *s, const void *buf, size_t blen)
   backend->gtls.io_result = result;
   if(nwritten < 0) {
     gnutls_transport_set_errno(backend->gtls.session,
-                               (CURLE_AGAIN == result)? EAGAIN : EINVAL);
+                               (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nwritten = -1;
   }
   return nwritten;
@@ -140,7 +140,7 @@ static ssize_t gtls_pull(void *s, void *buf, size_t blen)
   backend->gtls.io_result = result;
   if(nread < 0) {
     gnutls_transport_set_errno(backend->gtls.session,
-                               (CURLE_AGAIN == result)? EAGAIN : EINVAL);
+                               (CURLE_AGAIN == result) ? EAGAIN : EINVAL);
     nread = -1;
   }
   else if(nread == 0)
@@ -159,7 +159,7 @@ static int gtls_init(void)
 {
   int ret = 1;
   if(!gtls_inited) {
-    ret = gnutls_global_init()?0:1;
+    ret = gnutls_global_init() ? 0 : 1;
 #ifdef GTLSDEBUG
     gnutls_global_set_log_function(tls_log_func);
     gnutls_global_set_log_level(2);
@@ -193,7 +193,7 @@ static void showtime(struct Curl_easy *data,
             sizeof(str),
             "  %s: %s, %02d %s %4d %02d:%02d:%02d GMT",
             text,
-            Curl_wkday[tm->tm_wday?tm->tm_wday-1:6],
+            Curl_wkday[tm->tm_wday ? tm->tm_wday-1 : 6],
             tm->tm_mday,
             Curl_month[tm->tm_mon],
             tm->tm_year + 1900,
@@ -269,14 +269,14 @@ static CURLcode handshake(struct Curl_cfilter *cf,
     /* if ssl is expecting something, check if it is available. */
     if(connssl->io_need) {
       int what;
-      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND)?
-                              sockfd:CURL_SOCKET_BAD;
-      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV)?
-                             sockfd:CURL_SOCKET_BAD;
+      curl_socket_t writefd = (connssl->io_need & CURL_SSL_IO_NEED_SEND) ?
+        sockfd : CURL_SOCKET_BAD;
+      curl_socket_t readfd = (connssl->io_need & CURL_SSL_IO_NEED_RECV) ?
+        sockfd : CURL_SOCKET_BAD;
 
       what = Curl_socket_check(readfd, CURL_SOCKET_BAD, writefd,
-                               nonblocking?0:
-                               timeout_ms?timeout_ms:1000);
+                               nonblocking ? 0 :
+                               timeout_ms ? timeout_ms : 1000);
       if(what < 0) {
         /* fatal error */
         failf(data, "select/poll on SSL socket, errno: %d", SOCKERRNO);
@@ -308,8 +308,8 @@ static CURLcode handshake(struct Curl_cfilter *cf,
 
     if((rc == GNUTLS_E_AGAIN) || (rc == GNUTLS_E_INTERRUPTED)) {
       connssl->io_need =
-        gnutls_record_get_direction(session)?
-        CURL_SSL_IO_NEED_SEND:CURL_SSL_IO_NEED_RECV;
+        gnutls_record_get_direction(session) ?
+        CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
       continue;
     }
     else if((rc < 0) && !gnutls_error_is_fatal(rc)) {
@@ -770,7 +770,7 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     if(data) {
       CURL_TRC_CF(data, cf, "handshake: %s message type %d",
-                  incoming? "incoming" : "outgoing", htype);
+                  incoming ? "incoming" : "outgoing", htype);
       switch(htype) {
       case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
         gtls_update_session_id(cf, data, session);
@@ -936,7 +936,19 @@ static CURLcode gtls_client_init(struct Curl_cfilter *cf,
       if(result)
         return result;
     }
-    if(ssl_config->key_passwd) {
+    if(ssl_config->cert_type && strcasecompare(ssl_config->cert_type, "P12")) {
+      rc = gnutls_certificate_set_x509_simple_pkcs12_file(
+        gtls->shared_creds->creds, config->clientcert, GNUTLS_X509_FMT_DER,
+        ssl_config->key_passwd ? ssl_config->key_passwd : "");
+      if(rc != GNUTLS_E_SUCCESS) {
+        failf(data,
+              "error reading X.509 potentially-encrypted key or certificate "
+              "file: %s",
+              gnutls_strerror(rc));
+        return CURLE_SSL_CONNECT_ERROR;
+      }
+    }
+    else if(ssl_config->key_passwd) {
       const unsigned int supported_key_encryption_algorithms =
         GNUTLS_PKCS_USE_PKCS12_3DES | GNUTLS_PKCS_USE_PKCS12_ARCFOUR |
         GNUTLS_PKCS_USE_PKCS12_RC2_40 | GNUTLS_PKCS_USE_PBES2_3DES |
@@ -1313,7 +1325,7 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
           cause = "attached OCSP status response is invalid";
         failf(data, "server verification failed: %s. (CAfile: %s "
               "CRLfile: %s)", cause,
-              config->CAfile ? config->CAfile: "none",
+              config->CAfile ? config->CAfile : "none",
               ssl_config->primary.CRLfile ?
               ssl_config->primary.CRLfile : "none");
         return CURLE_PEER_FAILED_VERIFICATION;
@@ -1440,12 +1452,12 @@ Curl_gtls_verifyserver(struct Curl_easy *data,
     unload_file(issuerp);
     if(rc <= 0) {
       failf(data, "server certificate issuer check failed (IssuerCert: %s)",
-            config->issuercert?config->issuercert:"none");
+            config->issuercert ? config->issuercert : "none");
       gnutls_x509_crt_deinit(x509_cert);
       return CURLE_SSL_ISSUER_ERROR;
     }
     infof(data, "  server certificate issuer check OK (Issuer Cert: %s)",
-          config->issuercert?config->issuercert:"none");
+          config->issuercert ? config->issuercert : "none");
   }
 
   size = sizeof(certname);
@@ -1650,8 +1662,8 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
 #ifndef CURL_DISABLE_PROXY
-  const char *pinned_key = Curl_ssl_cf_is_proxy(cf)?
-    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY]:
+  const char *pinned_key = Curl_ssl_cf_is_proxy(cf) ?
+    data->set.str[STRING_SSL_PINNEDPUBLICKEY_PROXY] :
     data->set.str[STRING_SSL_PINNEDPUBLICKEY];
 #else
   const char *pinned_key = data->set.str[STRING_SSL_PINNEDPUBLICKEY];
@@ -1800,9 +1812,9 @@ static ssize_t gtls_send(struct Curl_cfilter *cf,
         rc = (ssize_t)total_written;
         goto out;
       }
-      *curlcode = (rc == GNUTLS_E_AGAIN)?
+      *curlcode = (rc == GNUTLS_E_AGAIN) ?
         CURLE_AGAIN :
-        (backend->gtls.io_result? backend->gtls.io_result : CURLE_SEND_ERROR);
+        (backend->gtls.io_result ? backend->gtls.io_result : CURLE_SEND_ERROR);
 
       rc = -1;
       goto out;
@@ -1851,7 +1863,7 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
       int ret = gnutls_bye(backend->gtls.session, GNUTLS_SHUT_RDWR);
       if((ret == GNUTLS_E_AGAIN) || (ret == GNUTLS_E_INTERRUPTED)) {
         CURL_TRC_CF(data, cf, "SSL shutdown, gnutls_bye EAGAIN");
-        connssl->io_need = gnutls_record_get_direction(backend->gtls.session)?
+        connssl->io_need = gnutls_record_get_direction(backend->gtls.session) ?
           CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
         backend->gtls.sent_shutdown = FALSE;
         result = CURLE_OK;
@@ -1881,7 +1893,7 @@ static CURLcode gtls_shutdown(struct Curl_cfilter *cf,
     *done = TRUE;
   }
   else if((nread == GNUTLS_E_AGAIN) || (nread == GNUTLS_E_INTERRUPTED)) {
-    connssl->io_need = gnutls_record_get_direction(backend->gtls.session)?
+    connssl->io_need = gnutls_record_get_direction(backend->gtls.session) ?
       CURL_SSL_IO_NEED_SEND : CURL_SSL_IO_NEED_RECV;
   }
   else {
@@ -1957,10 +1969,9 @@ static ssize_t gtls_recv(struct Curl_cfilter *cf,
 
   if(ret < 0) {
     failf(data, "GnuTLS recv error (%d): %s",
-
           (int)ret, gnutls_strerror((int)ret));
-    *curlcode = backend->gtls.io_result?
-                backend->gtls.io_result : CURLE_RECV_ERROR;
+    *curlcode = backend->gtls.io_result ?
+      backend->gtls.io_result : CURLE_RECV_ERROR;
     ret = -1;
     goto out;
   }
@@ -1981,7 +1992,7 @@ static CURLcode gtls_random(struct Curl_easy *data,
   int rc;
   (void)data;
   rc = gnutls_rnd(GNUTLS_RND_RANDOM, entropy, length);
-  return rc?CURLE_FAILED_INIT:CURLE_OK;
+  return rc ? CURLE_FAILED_INIT : CURLE_OK;
 }
 
 static CURLcode gtls_sha256sum(const unsigned char *tmp, /* input */

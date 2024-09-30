@@ -71,6 +71,8 @@ EXTRA_DIST =        \
  http2-server.pl    \
  http3-server.pl    \
  memanalyze.pl      \
+ mk-bundle-hints.sh \
+ mk-bundle.pl       \
  negtelnetserver.py \
  nghttpx.conf       \
  pathhelp.pm        \
@@ -95,8 +97,6 @@ EXTRA_DIST =        \
  $(TESTSCRIPTS)     \
  $(CURLPAGES)
 
-DISTCLEANFILES = configurehelp.pm
-
 # we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
 # do things twice in that subdir at times (and thus fails).
@@ -118,14 +118,21 @@ CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid $(MANDISTPAGES)
 curl:
 	@cd $(top_builddir) && $(MAKE)
 
+TEST_COMMON =
+
 if CROSSCOMPILING
 TEST = @echo "NOTICE: we can't run the tests when cross-compiling!"
+PYTEST = $(TEST)
 else # if not cross-compiling:
-TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl
+if USE_TEST_BUNDLES
+TEST_COMMON += -bundle
+endif
+
+TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
 TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
-TEST_T = -a -t
+TEST_T = -a -t -j2
 TEST_E = -a -e
 
 # ~<keyword> means that it will run all tests matching the keyword, but will
@@ -133,7 +140,9 @@ TEST_E = -a -e
 TEST_NF = -a -p ~flaky ~timing-dependent
 
 # special CI target derived from nonflaky with CI-specific flags
-TEST_CI = $(TEST_NF) -r -rm -j2
+TEST_CI = $(TEST_NF) -r -rm -j20
+
+PYTEST = pytest
 endif
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
@@ -170,6 +179,11 @@ torture-test: perlcheck all
 
 event-test: perlcheck all
 	$(TEST) $(TEST_E) $(TFLAGS)
+
+default-pytest: ci-pytest
+
+ci-pytest: all
+	srcdir=$(srcdir) $(PYTEST) -v $(srcdir)/http
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)

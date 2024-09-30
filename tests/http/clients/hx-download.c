@@ -367,7 +367,7 @@ int main(int argc, char *argv[])
     t->pause_at = (curl_off_t)pause_offset;
   }
 
-  n = (max_parallel < transfer_count)? max_parallel : transfer_count;
+  n = (max_parallel < transfer_count) ? max_parallel : transfer_count;
   for(i = 0; i < n; ++i) {
     t = &transfers[i];
     t->easy = curl_easy_init();

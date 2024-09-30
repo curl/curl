@@ -27,8 +27,8 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-static const char cmd[] = "A1 IDLE\r\n";
-static char buf[1024];
+static const char testcmd[] = "A1 IDLE\r\n";
+static char testbuf[1024];
 
 CURLcode test(char *URL)
 {
@@ -82,7 +82,8 @@ CURLcode test(char *URL)
 
       if(!state) {
         CURLcode ec;
-        ec = curl_easy_send(curl, cmd + pos, sizeof(cmd) - 1 - pos, &len);
+        ec = curl_easy_send(curl, testcmd + pos,
+                            sizeof(testcmd) - 1 - pos, &len);
         if(ec == CURLE_AGAIN) {
           continue;
         }
@@ -96,14 +97,14 @@ CURLcode test(char *URL)
           pos += len;
         else
           pos = 0;
-        if(pos == sizeof(cmd) - 1) {
+        if(pos == sizeof(testcmd) - 1) {
           state++;
           pos = 0;
         }
       }
-      else if(pos < (ssize_t)sizeof(buf)) {
+      else if(pos < (ssize_t)sizeof(testbuf)) {
         CURLcode ec;
-        ec = curl_easy_recv(curl, buf + pos, sizeof(buf) - pos, &len);
+        ec = curl_easy_recv(curl, testbuf + pos, sizeof(testbuf) - pos, &len);
         if(ec == CURLE_AGAIN) {
           continue;
         }
@@ -122,7 +123,7 @@ CURLcode test(char *URL)
   }
 
   if(state) {
-    fwrite(buf, pos, 1, stdout);
+    fwrite(testbuf, pos, 1, stdout);
     putchar('\n');
   }
 

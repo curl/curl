@@ -53,8 +53,5 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<valgrind>
-disable
-</valgrind>
 </verify>
 </testcase>

@@ -256,8 +256,8 @@ static ssize_t wsftp_send(struct Curl_easy *data, int sockindex,
   (void)sockindex;
   (void)eos;
 
-  offset[0] = (word32)sshc->offset&0xFFFFFFFF;
-  offset[1] = (word32)(sshc->offset>>32)&0xFFFFFFFF;
+  offset[0] = (word32)sshc->offset & 0xFFFFFFFF;
+  offset[1] = (word32)(sshc->offset >> 32) & 0xFFFFFFFF;
 
   rc = wolfSSH_SFTP_SendWritePacket(sshc->ssh_session, sshc->handle,
                                     sshc->handleSz,
@@ -300,8 +300,8 @@ static ssize_t wsftp_recv(struct Curl_easy *data, int sockindex,
   word32 offset[2];
   (void)sockindex;
 
-  offset[0] = (word32)sshc->offset&0xFFFFFFFF;
-  offset[1] = (word32)(sshc->offset>>32)&0xFFFFFFFF;
+  offset[0] = (word32)sshc->offset & 0xFFFFFFFF;
+  offset[1] = (word32)(sshc->offset >> 32) & 0xFFFFFFFF;
 
   rc = wolfSSH_SFTP_SendReadPacket(sshc->ssh_session, sshc->handle,
                                    sshc->handleSz,
@@ -763,7 +763,7 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
         return CURLE_SSH;
       }
 
-      size = ((curl_off_t)attrs.sz[1] <<32) | attrs.sz[0];
+      size = ((curl_off_t)attrs.sz[1] << 32) | attrs.sz[0];
 
       data->req.size = size;
       data->req.maxdownload = size;
@@ -1028,7 +1028,7 @@ static CURLcode wssh_block_statemach(struct Curl_easy *data,
 
       /* wait for the socket to become ready */
       (void)Curl_socket_check(fd_read, CURL_SOCKET_BAD, fd_write,
-                              left>1000?1000:left); /* ignore result */
+                              left > 1000 ? 1000 : left); /* ignore result */
     }
   }
 

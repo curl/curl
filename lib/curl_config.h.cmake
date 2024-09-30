@@ -21,7 +21,6 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-/* lib/curl_config.h.in. Generated somehow by cmake.  */
 
 /* Location of default ca bundle */
 #cmakedefine CURL_CA_BUNDLE "${CURL_CA_BUNDLE}"
@@ -131,6 +130,9 @@
 /* disables proxies */
 #cmakedefine CURL_DISABLE_PROXY 1
 
+/* disables IPFS from the curl tool */
+#cmakedefine CURL_DISABLE_IPFS 1
+
 /* disables RTSP */
 #cmakedefine CURL_DISABLE_RTSP 1
 
@@ -146,6 +148,9 @@
 /* disables SMTP */
 #cmakedefine CURL_DISABLE_SMTP 1
 
+/* disabled WebSockets */
+#cmakedefine CURL_DISABLE_WEBSOCKETS 1
+
 /* disables use of socketpair for curl_multi_poll */
 #cmakedefine CURL_DISABLE_SOCKETPAIR 1
 
@@ -157,6 +162,12 @@
 
 /* disables verbose strings */
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
+
+/* disables unsafe CA bundle search on Windows from the curl tool */
+#cmakedefine CURL_DISABLE_CA_SEARCH 1
+
+/* safe CA bundle search (within the curl tool directory) on Windows */
+#cmakedefine CURL_CA_SEARCH_SAFE 1
 
 /* to make a symbol visible */
 #cmakedefine CURL_EXTERN_SYMBOL ${CURL_EXTERN_SYMBOL}
@@ -352,9 +363,6 @@
 
 /* Define to 1 if you have the lber.h header file. */
 #cmakedefine HAVE_LBER_H 1
-
-/* Define to 1 if you have the ldap.h header file. */
-#cmakedefine HAVE_LDAP_H 1
 
 /* Use LDAPS implementation */
 #cmakedefine HAVE_LDAP_SSL 1
@@ -608,9 +616,6 @@
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
 
-/* Define to 1 if you need the lber.h header file even with ldap.h */
-#cmakedefine NEED_LBER_H 1
-
 /* Define to 1 if you need the malloc.h header file even with stdlib.h */
 #cmakedefine NEED_MALLOC_H 1
 
@@ -809,9 +814,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to enable Apple IDN */
 #cmakedefine USE_APPLE_IDN 1
-
-/* Define to 1 to enable websocket support. */
-#cmakedefine USE_WEBSOCKETS 1
 
 /* Define to 1 if OpenSSL has the SSL_CTX_set_srp_username function. */
 #cmakedefine HAVE_OPENSSL_SRP 1

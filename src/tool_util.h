@@ -39,4 +39,8 @@ long tvdiff(struct timeval t1, struct timeval t2);
 int struplocompare(const char *p1, const char *p2);
 int struplocompare4sort(const void *p1, const void *p2);
 
+#ifdef _WIN32
+FILE *Curl_execpath(const char *filename, char **pathp);
+#endif
+
 #endif /* HEADER_CURL_TOOL_UTIL_H */

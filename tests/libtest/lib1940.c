@@ -26,7 +26,7 @@
 
 #include "memdebug.h"
 
-static const char *show[]={
+static const char *testdata[]={
   "daTE",
   "Server",
   "content-type",
@@ -50,9 +50,9 @@ static void showem(CURL *easy, unsigned int type)
 {
   int i;
   struct curl_header *header;
-  for(i = 0; show[i]; i++) {
-    if(CURLHE_OK == curl_easy_header(easy, show[i], 0, type, HEADER_REQUEST,
-                                     &header)) {
+  for(i = 0; testdata[i]; i++) {
+    if(CURLHE_OK == curl_easy_header(easy, testdata[i], 0, type,
+                                     HEADER_REQUEST, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
         size_t index = 0;
@@ -63,7 +63,7 @@ static void showem(CURL *easy, unsigned int type)
 
           if(++index == amount)
             break;
-          if(CURLHE_OK != curl_easy_header(easy, show[i], index, type,
+          if(CURLHE_OK != curl_easy_header(easy, testdata[i], index, type,
                                            HEADER_REQUEST, &header))
             break;
         } while(1);

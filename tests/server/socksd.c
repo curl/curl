@@ -248,7 +248,7 @@ static void loghex(unsigned char *buffer, ssize_t len)
   ssize_t width = 0;
   int left = sizeof(data);
 
-  for(i = 0; i<len && (left >= 0); i++) {
+  for(i = 0; i < len && (left >= 0); i++) {
     msnprintf(optr, left, "%02x", ptr[i]);
     width += 2;
     optr += 2;
@@ -324,7 +324,7 @@ static curl_socket_t socks4(curl_socket_t fd,
     return CURL_SOCKET_BAD;
   }
   if(!config.port)
-    s4port = (unsigned short)((buffer[SOCKS4_DSTPORT]<<8) |
+    s4port = (unsigned short)((buffer[SOCKS4_DSTPORT] << 8) |
                               (buffer[SOCKS4_DSTPORT + 1]));
   else
     s4port = config.port;
@@ -572,7 +572,7 @@ static curl_socket_t sockit(curl_socket_t fd)
 
   if(!config.port) {
     unsigned char *portp = &buffer[SOCKS5_DSTADDR + len];
-    s5port = (unsigned short)((portp[0]<<8) | (portp[1]));
+    s5port = (unsigned short)((portp[0] << 8) | (portp[1]));
   }
   else
     s5port = config.port;
@@ -968,7 +968,7 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
 
-  while(argc>arg) {
+  while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("socksd IPv4%s\n",
 #ifdef USE_IPV6
@@ -981,37 +981,37 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--pidfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         pidname = argv[arg++];
     }
     else if(!strcmp("--portfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         portname = argv[arg++];
     }
     else if(!strcmp("--config", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         configfile = argv[arg++];
     }
     else if(!strcmp("--backend", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         backendaddr = argv[arg++];
     }
     else if(!strcmp("--backendport", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         backendport = (unsigned short)atoi(argv[arg++]);
     }
     else if(!strcmp("--logfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         serverlogfile = argv[arg++];
     }
     else if(!strcmp("--reqfile", argv[arg])) {
       arg++;
-      if(argc>arg)
+      if(argc > arg)
         reqlogfile = argv[arg++];
     }
     else if(!strcmp("--ipv6", argv[arg])) {
@@ -1030,7 +1030,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--unix-socket", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
 #ifdef USE_UNIX_SOCKETS
         struct sockaddr_un sau;
         unix_socket = argv[arg];
@@ -1048,7 +1048,7 @@ int main(int argc, char *argv[])
     }
     else if(!strcmp("--port", argv[arg])) {
       arg++;
-      if(argc>arg) {
+      if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
         port = curlx_ultous(ulnum);

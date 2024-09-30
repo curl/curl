@@ -168,13 +168,13 @@ curl_verbose_msg="enabled (--disable-verbose)"
    curl_sspi_msg="no      (--enable-sspi)"
    curl_ldap_msg="no      (--enable-ldap / --with-ldap-lib / --with-lber-lib)"
   curl_ldaps_msg="no      (--enable-ldaps)"
+   curl_ipfs_msg="no      (--enable-ipfs)"
    curl_rtsp_msg="no      (--enable-rtsp)"
    curl_rtmp_msg="no      (--with-librtmp)"
     curl_psl_msg="no      (--with-libpsl)"
  curl_altsvc_msg="enabled (--disable-alt-svc)"
 curl_headers_msg="enabled (--disable-headers-api)"
    curl_hsts_msg="enabled (--disable-hsts)"
-     curl_ws_msg="no      (--enable-websockets)"
     ssl_backends=
      curl_h1_msg="enabled (internal)"
      curl_h2_msg="no      (--with-nghttp2)"
@@ -533,7 +533,7 @@ if test X"$want_werror" = Xyes; then
     if test "$compiler_num" -ge "500"; then
       CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
     fi
-  elif test "$compiler_id" = "CLANG"; then
+  elif test "$compiler_id" = "CLANG" -o "$compiler_id" = "APPLECLANG"; then
     CURL_CFLAG_EXTRAS="$CURL_CFLAG_EXTRAS -pedantic-errors"
   fi
 fi
@@ -591,8 +591,8 @@ CURL_CHECK_WIN32_CRYPTO
 
 CURL_DARWIN_CFLAGS
 
-case $host_os in
-  darwin*)
+case $host in
+  *-apple-*)
     CURL_SUPPORTS_BUILTIN_AVAILABLE
     ;;
 esac
@@ -604,6 +604,52 @@ if test "$curl_cv_native_windows" = "yes"; then
   AM_COND_IF([HAVE_WINDRES],,
     [AC_MSG_ERROR([windres not found in PATH. Windows builds require windres. Cannot continue.])])
 fi
+
+dnl ----------------------------------------
+dnl whether use "unity" mode for lib and src
+dnl ----------------------------------------
+
+want_unity='no'
+AC_MSG_CHECKING([whether to build libcurl and curl in "unity" mode])
+AC_ARG_ENABLE(unity,
+AS_HELP_STRING([--enable-unity],[Enable unity mode])
+AS_HELP_STRING([--disable-unity],[Disable unity (default)]),
+[ case "$enableval" in
+  yes)
+    want_unity='yes'
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+  esac ],
+    AC_MSG_RESULT([no])
+)
+
+AM_CONDITIONAL([USE_UNITY], [test "$want_unity" = 'yes'])
+
+dnl -----------------------
+dnl whether to bundle tests
+dnl -----------------------
+
+want_test_bundles='no'
+AC_MSG_CHECKING([whether to build tests into single-binary bundles])
+AC_ARG_ENABLE(test-bundles,
+AS_HELP_STRING([--enable-test-bundles],[Enable test bundles])
+AS_HELP_STRING([--disable-test-bundles],[Disable test bundles (default)]),
+[ case "$enableval" in
+  yes)
+    want_test_bundles='yes'
+    AC_MSG_RESULT([yes])
+    ;;
+  *)
+    AC_MSG_RESULT([no])
+    ;;
+  esac ],
+    AC_MSG_RESULT([no])
+)
+
+AM_CONDITIONAL([USE_TEST_BUNDLES], [test "$want_test_bundles" = 'yes'])
 
 dnl ************************************************************
 dnl switch off particular protocols
@@ -617,8 +663,10 @@ AS_HELP_STRING([--disable-http],[Disable HTTP support]),
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
     disable_http="yes"
-    AC_MSG_WARN([disable HTTP disables FTP over proxy and RTSP])
+    AC_MSG_WARN([disable HTTP disables FTP over proxy, IPFS and RTSP])
     AC_SUBST(CURL_DISABLE_HTTP, [1])
+    AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
+    AC_SUBST(CURL_DISABLE_IPFS, [1])
     AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
     AC_SUBST(CURL_DISABLE_RTSP, [1])
     dnl toggle off alt-svc too when HTTP is disabled
@@ -667,6 +715,32 @@ AS_HELP_STRING([--disable-file],[Disable FILE support]),
     ;;
   esac ],
     AC_MSG_RESULT(yes)
+)
+AC_MSG_CHECKING([whether to support IPFS])
+AC_ARG_ENABLE(ipfs,
+AS_HELP_STRING([--enable-ipfs],[Enable IPFS support])
+AS_HELP_STRING([--disable-ipfs],[Disable IPFS support]),
+[ case "$enableval" in
+  no)
+    AC_MSG_RESULT(no)
+    AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
+    AC_SUBST(CURL_DISABLE_IPFS, [1])
+    ;;
+  *)
+    if test x$CURL_DISABLE_HTTP = x1; then
+      AC_MSG_ERROR(HTTP support needs to be enabled in order to enable IPFS support!)
+    else
+      AC_MSG_RESULT(yes)
+      curl_ipfs_msg="enabled"
+    fi
+    ;;
+  esac ],
+    if test "x$CURL_DISABLE_HTTP" != "x1"; then
+      AC_MSG_RESULT(yes)
+      curl_ipfs_msg="enabled"
+    else
+      AC_MSG_RESULT(no)
+    fi
 )
 AC_MSG_CHECKING([whether to support ldap])
 AC_ARG_ENABLE(ldap,
@@ -1175,12 +1249,12 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
       AC_MSG_CHECKING([for gethostbyname in $winsock_LIB])
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#endif
+          #ifdef _WIN32
+          #ifndef WIN32_LEAN_AND_MEAN
+          #define WIN32_LEAN_AND_MEAN
+          #endif
+          #include <winsock2.h>
+          #endif
         ]],[[
           gethostbyname("localhost");
         ]])
@@ -1201,8 +1275,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_CHECKING([for gethostbyname for Minix 3])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-/* Older Minix versions may need <net/gen/netdb.h> here instead */
-#include <netdb.h>
+      /* Older Minix versions may need <net/gen/netdb.h> here instead */
+      #include <netdb.h>
     ]],[[
       gethostbyname("localhost");
     ]])
@@ -1219,8 +1293,8 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   AC_MSG_CHECKING([for gethostbyname for eCos])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#include <stdio.h>
-#include <netdb.h>
+      #include <stdio.h>
+      #include <netdb.h>
     ]],[[
       gethostbyname("localhost");
     ]])
@@ -1705,27 +1779,27 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
   esac ],
 
   AC_RUN_IFELSE([AC_LANG_SOURCE([[
-/* are AF_INET6 and sockaddr_in6 available? */
-#include <sys/types.h>
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <sys/socket.h>
-#include <netinet/in.h>
-#if defined (__TANDEM)
-# include <netinet/in6.h>
-#endif
-#endif
+    /* are AF_INET6 and sockaddr_in6 available? */
+    #include <sys/types.h>
+    #ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #else
+    #include <sys/socket.h>
+    #include <netinet/in.h>
+    #if defined (__TANDEM)
+    # include <netinet/in6.h>
+    #endif
+    #endif
 
-int main(void)
-{
- struct sockaddr_in6 s;
- (void)s;
- return socket(AF_INET6, SOCK_STREAM, 0) < 0;
-}
-]])
-],
+    int main(void)
+    {
+      struct sockaddr_in6 s;
+      (void)s;
+      return socket(AF_INET6, SOCK_STREAM, 0) < 0;
+    }
+  ]])
+  ],
   AC_MSG_RESULT(yes)
   ipv6=yes,
   AC_MSG_RESULT(no)
@@ -1742,20 +1816,20 @@ if test "$ipv6" = yes; then
 
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
   AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
-#include <sys/types.h>
-#ifdef _WIN32
-#include <winsock2.h>
-#include <ws2tcpip.h>
-#else
-#include <netinet/in.h>
-#if defined (__TANDEM)
-# include <netinet/in6.h>
-#endif
-#endif
-]], [[
-  struct sockaddr_in6 s;
-  s.sin6_scope_id = 0;
-]])], [
+    #include <sys/types.h>
+    #ifdef _WIN32
+    #include <winsock2.h>
+    #include <ws2tcpip.h>
+    #else
+    #include <netinet/in.h>
+    #if defined (__TANDEM)
+    # include <netinet/in6.h>
+    #endif
+    #endif
+  ]], [[
+    struct sockaddr_in6 s;
+    s.sin6_scope_id = 0;
+  ]])], [
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
   ], [
@@ -1878,10 +1952,10 @@ if test x"$want_gss" = xyes; then
         [],
         [not_mit=1],
         [
-AC_INCLUDES_DEFAULT
-#ifdef HAVE_GSSAPI_GSSAPI_H
-#include <gssapi/gssapi.h>
-#endif
+          AC_INCLUDES_DEFAULT
+          #ifdef HAVE_GSSAPI_GSSAPI_H
+          #include <gssapi/gssapi.h>
+          #endif
         ])
       if test "x$not_mit" = "x1"; then
         dnl MIT not found, check for Heimdal
@@ -1899,9 +1973,9 @@ AC_INCLUDES_DEFAULT
         AC_MSG_CHECKING([if GSS-API headers declare GSS_C_NT_HOSTBASED_SERVICE])
         AC_COMPILE_IFELSE([
           AC_LANG_PROGRAM([[
-#include <gssapi/gssapi.h>
-#include <gssapi/gssapi_generic.h>
-#include <gssapi/gssapi_krb5.h>
+            #include <gssapi/gssapi.h>
+            #include <gssapi/gssapi_generic.h>
+            #include <gssapi/gssapi_krb5.h>
           ]],[[
             gss_import_name(
                             (OM_uint32 *)0,
@@ -1933,7 +2007,7 @@ if test x"$want_gss" = xyes; then
     LIBS="-lgss $LIBS"
   elif test -z "$GSSAPI_LIB_DIR"; then
     case $host in
-      *-*-darwin*)
+      *-apple-*)
         LIBS="-lgssapi_krb5 -lresolv $LIBS"
         ;;
       *)
@@ -2108,6 +2182,50 @@ if test -n "$check_for_ca_bundle"; then
 fi
 
 AM_CONDITIONAL(CURL_CA_EMBED_SET, test "x$CURL_CA_EMBED" != "x")
+
+dnl ----------------------
+dnl check unsafe CA search
+dnl ----------------------
+
+if test "$curl_cv_native_windows" = "yes"; then
+  AC_MSG_CHECKING([whether to enable unsafe CA bundle search in PATH on Windows])
+  AC_ARG_ENABLE(ca-search,
+AS_HELP_STRING([--enable-ca-search],[Enable unsafe CA bundle search in PATH on Windows (default)])
+AS_HELP_STRING([--disable-ca-search],[Disable unsafe CA bundle search in PATH on Windows]),
+  [ case "$enableval" in
+    no)
+      AC_MSG_RESULT([no])
+      AC_DEFINE(CURL_DISABLE_CA_SEARCH, 1, [If unsafe CA bundle search in PATH on Windows is disabled])
+      ;;
+    *)
+      AC_MSG_RESULT([yes])
+      ;;
+    esac ],
+      AC_MSG_RESULT([yes])
+  )
+fi
+
+dnl --------------------
+dnl check safe CA search
+dnl --------------------
+
+if test "$curl_cv_native_windows" = "yes"; then
+  AC_MSG_CHECKING([whether to enable safe CA bundle search (within the curl tool directory) on Windows])
+  AC_ARG_ENABLE(ca-search-safe,
+AS_HELP_STRING([--enable-ca-search-safe],[Enable safe CA bundle search])
+AS_HELP_STRING([--disable-ca-search-safe],[Disable safe CA bundle search (default)]),
+  [ case "$enableval" in
+    yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE(CURL_CA_SEARCH_SAFE, 1, [If safe CA bundle search is enabled])
+      ;;
+    *)
+      AC_MSG_RESULT([no])
+      ;;
+    esac ],
+      AC_MSG_RESULT([no])
+  )
+fi
 
 dnl **********************************************************************
 dnl Check for libpsl
@@ -2494,7 +2612,11 @@ AC_ARG_ENABLE(versioned-symbols,
 AS_HELP_STRING([--enable-versioned-symbols], [Enable versioned symbols in shared library])
 AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shared library]),
 [ case "$enableval" in
-  yes) AC_MSG_RESULT(yes)
+  no)
+    AC_MSG_RESULT(no)
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
     AC_MSG_CHECKING([if libraries can be versioned])
     GLD=`$LD --help < /dev/null 2>/dev/null | grep version-script`
     if test -z "$GLD"; then
@@ -2502,7 +2624,9 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
       AC_MSG_WARN([You need an ld version supporting the --version-script option])
     else
       AC_MSG_RESULT(yes)
-      if test "x$CURL_WITH_MULTI_SSL" = "x1"; then
+      if test "x$enableval" != "xyes"; then
+        versioned_symbols_flavour="$enableval"
+      elif test "x$CURL_WITH_MULTI_SSL" = "x1"; then
         versioned_symbols_flavour="MULTISSL_"
       elif test "x$OPENSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="OPENSSL_"
@@ -2510,14 +2634,12 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
         versioned_symbols_flavour="MBEDTLS_"
       elif test "x$BEARSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="BEARSSL_"
-      elif test "x$GNUTLS_ENABLED" = "x1"; then
-        versioned_symbols_flavour="GNUTLS_"
       elif test "x$WOLFSSL_ENABLED" = "x1"; then
         versioned_symbols_flavour="WOLFSSL_"
-      elif test "x$SCHANNEL_ENABLED" = "x1"; then
-        versioned_symbols_flavour="SCHANNEL_"
-      elif test "x$SECURETRANSPORT_ENABLED" = "x1"; then
-        versioned_symbols_flavour="SECURE_TRANSPORT_"
+      elif test "x$GNUTLS_ENABLED" = "x1"; then
+        versioned_symbols_flavour="GNUTLS_"
+      elif test "x$RUSTLS_ENABLED" = "x1"; then
+        versioned_symbols_flavour="RUSTLS_"
       else
         versioned_symbols_flavour=""
       fi
@@ -2525,17 +2647,14 @@ AS_HELP_STRING([--disable-versioned-symbols], [Disable versioned symbols in shar
     fi
     ;;
 
-  *)
-    AC_MSG_RESULT(no)
-    ;;
   esac
 ], [
-AC_MSG_RESULT(no)
+  AC_MSG_RESULT(no)
 ]
 )
 
-AC_SUBST([CURL_LT_SHLIB_VERSIONED_FLAVOUR],
-  ["$versioned_symbols_flavour"])
+AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX], ["$versioned_symbols_flavour"])
+AC_SUBST([CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME], ["4"])  dnl Keep in sync with VERSIONCHANGE - VERSIONDEL in lib/Makefile.soname
 AM_CONDITIONAL([CURL_LT_SHLIB_USE_VERSIONED_SYMBOLS],
   [test "x$versioned_symbols" = 'xyes'])
 
@@ -2657,8 +2776,8 @@ dnl Check for the presence of AppleIDN
 dnl **********************************************************************
 
 tst_links_appleidn='no'
-case $host_os in
-  darwin*)
+case $host in
+  *-apple-*)
     AC_MSG_CHECKING([whether to build with Apple IDN])
     OPT_IDN="default"
     AC_ARG_WITH(apple-idn,
@@ -3478,8 +3597,8 @@ if test X"$want_quiche" != Xno; then
           LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE quiche",
           [],
           [
-AC_INCLUDES_DEFAULT
-#include <sys/socket.h>
+            AC_INCLUDES_DEFAULT
+            #include <sys/socket.h>
           ]
         )
       ],
@@ -3497,7 +3616,7 @@ AC_INCLUDES_DEFAULT
 fi
 
 dnl **********************************************************************
-dnl Check for msh3 (QUIC)
+dnl Check for msh3/msquic (QUIC)
 dnl **********************************************************************
 
 OPT_MSH3="no"
@@ -3536,7 +3655,7 @@ if test X"$want_msh3" != Xno; then
       AC_MSG_ERROR([the detected TLS library does not support QUIC, making --with-msh3 a no-no])
     fi
     if test "$OPENSSL_ENABLED" != "1"; then
-      AC_MSG_ERROR([msh3 requires OpenSSL])
+      AC_MSG_ERROR([msh3/msquic requires OpenSSL])
     fi
   fi
 
@@ -3969,7 +4088,6 @@ AC_CHECK_DECLS([getpwuid_r], [], [AC_DEFINE(HAVE_DECL_GETPWUID_R_MISSING, 1, "Se
 
 AC_CHECK_FUNCS([\
   _fseeki64 \
-  arc4random \
   eventfd \
   fnmatch \
   geteuid \
@@ -3992,6 +4110,10 @@ AC_CHECK_FUNCS([\
   utimes \
 ])
 
+if test -z "$ssl_backends"; then
+  AC_CHECK_FUNCS([arc4random])
+fi
+
 if test "$curl_cv_native_windows" != 'yes'; then
   AC_CHECK_FUNCS([fseeko])
 
@@ -4008,8 +4130,8 @@ fi
 CURL_CHECK_NONBLOCKING_SOCKET
 
 if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$CURL_CA_EMBED" != "x"; then
-  AC_PATH_PROG( PERL, perl, ,
-    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin )
+  AC_PATH_PROG(PERL, perl,,
+    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
   AC_SUBST(PERL)
 
   if test -z "$PERL"; then
@@ -4076,7 +4198,7 @@ AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
       AC_MSG_RESULT(auto)
       want_pthreads=auto
     fi
-    ]
+  ]
 )
 
 dnl turn off pthreads if rt is disabled
@@ -4831,37 +4953,39 @@ if test "x$OPENSSL_ENABLED" = "x1"; then
   AC_CHECK_FUNCS([SSL_set0_wbio])
 fi
 
-dnl *************************************************************
-dnl WebSockets
-dnl
-AC_MSG_CHECKING([whether to support WebSockets])
-AC_ARG_ENABLE(websockets,
-AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
-AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
-[ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    ;;
-  *)
-    if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
-      AC_MSG_RESULT(yes)
-      curl_ws_msg="enabled"
-      AC_DEFINE_UNQUOTED(USE_WEBSOCKETS, [1], [enable WebSockets support])
-      SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WS"
-      if test "x$SSL_ENABLED" = "x1"; then
-        SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WSS"
-      fi
-      experimental="$experimental WebSockets"
-    else
-      dnl WebSockets requires >32 bit curl_off_t
+if test "x$CURL_DISABLE_HTTP" != "x1"; then
+  dnl *************************************************************
+  dnl WebSockets
+  dnl
+  AC_MSG_CHECKING([whether to support WebSockets])
+  AC_ARG_ENABLE(websockets,
+  AS_HELP_STRING([--enable-websockets],[Enable WebSockets support])
+  AS_HELP_STRING([--disable-websockets],[Disable WebSockets support]),
+  [ case "$enableval" in
+    no)
       AC_MSG_RESULT(no)
-      AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
-    fi
-    ;;
-  esac ],
-    AC_MSG_RESULT(no)
-)
-
+      AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+      AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+      ;;
+    *)
+      if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
+        AC_MSG_RESULT(yes)
+      else
+        dnl WebSockets requires >32 bit curl_off_t
+        AC_MSG_RESULT(no)
+        AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
+        AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+        AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+      fi
+      ;;
+    esac ],
+      AC_MSG_RESULT(yes)
+  )
+else
+  AC_MSG_WARN([WebSockets disabled because HTTP is disabled])
+  AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
+  AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+fi
 
 dnl ************************************************************
 dnl hiding of library internal symbols
@@ -5085,6 +5209,9 @@ if test "x$want_curldebug" = "xyes"; then
 fi
 if test "x$CURL_CA_EMBED" != "x"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES CAcert"
+  CURL_CA_EMBED_msg="$CURL_CA_EMBED"
+else
+  CURL_CA_EMBED_msg='no'
 fi
 
 dnl replace spaces with newlines
@@ -5099,7 +5226,7 @@ AC_SUBST(SUPPORT_FEATURES)
 
 dnl For supported protocols in pkg-config file
 if test "x$CURL_DISABLE_HTTP" != "x1"; then
-  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTP IPFS IPNS"
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTP"
   if test "x$SSL_ENABLED" = "x1"; then
     SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS HTTPS"
   fi
@@ -5176,11 +5303,20 @@ fi
 if test "x$USE_WOLFSSH" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS SFTP"
 fi
+if test "x$CURL_DISABLE_IPFS" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS IPFS IPNS"
+fi
 if test "x$CURL_DISABLE_RTSP" != "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTSP"
 fi
 if test "x$USE_LIBRTMP" = "x1"; then
   SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS RTMP"
+fi
+if test "x$CURL_DISABLE_WEBSOCKETS" != "x1"; then
+  SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WS"
+  if test "x$SSL_ENABLED" = "x1"; then
+    SUPPORT_PROTOCOLS="$SUPPORT_PROTOCOLS WSS"
+  fi
 fi
 
 dnl replace spaces with newlines
@@ -5215,6 +5351,8 @@ if test "x$want_curldebug_assumed" = "xyes" &&
   ac_configure_args="$ac_configure_args --enable-curldebug"
 fi
 
+CURL_PREPARE_CONFIGUREHELP_PM
+
 AC_CONFIG_FILES([\
   Makefile \
   docs/Makefile \
@@ -5230,6 +5368,7 @@ AC_CONFIG_FILES([\
   lib/libcurl.vers \
   tests/Makefile \
   tests/config \
+  tests/configurehelp.pm \
   tests/certs/Makefile \
   tests/certs/scripts/Makefile \
   tests/data/Makefile \
@@ -5245,9 +5384,6 @@ AC_CONFIG_FILES([\
   libcurl.pc
 ])
 AC_OUTPUT
-
-CURL_GENERATE_CONFIGUREHELP_PM
-CURL_GENERATE_BUILDINFO_TXT
 
 SUPPORT_PROTOCOLS_LOWER=`echo "$SUPPORT_PROTOCOLS" | tr A-Z a-z`
 
@@ -5284,9 +5420,11 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   SSPI:             ${curl_sspi_msg}
   ca cert bundle:   ${ca}${ca_warning}
   ca cert path:     ${capath}${capath_warning}
+  ca cert embed:    ${CURL_CA_EMBED_msg}
   ca fallback:      ${with_ca_fallback}
   LDAP:             ${curl_ldap_msg}
   LDAPS:            ${curl_ldaps_msg}
+  IPFS/IPNS:        ${curl_ipfs_msg}
   RTSP:             ${curl_rtsp_msg}
   RTMP:             ${curl_rtmp_msg}
   PSL:              ${curl_psl_msg}
@@ -5297,7 +5435,6 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
-  WebSockets:       ${curl_ws_msg}
   Protocols:        ${SUPPORT_PROTOCOLS_LOWER}
   Features:         ${SUPPORT_FEATURES}
 ])
@@ -5314,4 +5451,10 @@ if test -n "$experimental"; then
   for a in $experimental; do
     AC_MSG_WARN([$a is enabled but marked EXPERIMENTAL. Use with caution!])
   done
+fi
+
+CURL_PREPARE_BUILDINFO
+echo "[@%:@] This is a generated file.  Do not edit.${curl_buildinfo}" > ./buildinfo.txt
+if test -n "$CURL_BUILDINFO$CURL_CI$CI"; then
+  AC_MSG_NOTICE([${curl_buildinfo}])
 fi

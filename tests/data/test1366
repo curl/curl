@@ -33,9 +33,6 @@ HTTP GET -o fname and Content-Disposition, -D file
 <command option="no-output,no-include">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/outfile%TESTNUMBER -D %LOGDIR/heads%TESTNUMBER
 </command>
-<postcheck>
-perl %SRCDIR/libtest/notexists.pl %LOGDIR/%TESTNUMBER %LOGDIR/name%TESTNUMBER
-</postcheck>
 </client>
 
 #
@@ -67,5 +64,9 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 <file3 name="%LOGDIR/stdout%TESTNUMBER">
 </file3>
 
+<notexists>
+%LOGDIR/%TESTNUMBER
+%LOGDIR/name%TESTNUMBER
+</notexists>
 </verify>
 </testcase>

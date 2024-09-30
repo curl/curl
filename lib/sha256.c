@@ -417,27 +417,27 @@ static int my_sha256_update(struct sha256_state *md,
 {
   unsigned long n;
 
-#define block_size 64
+#define CURL_SHA256_BLOCK_SIZE 64
   if(md->curlen > sizeof(md->buf))
     return -1;
   while(inlen > 0) {
-    if(md->curlen == 0 && inlen >= block_size) {
+    if(md->curlen == 0 && inlen >= CURL_SHA256_BLOCK_SIZE) {
       if(sha256_compress(md, (unsigned char *)in) < 0)
         return -1;
-      md->length += block_size * 8;
-      in += block_size;
-      inlen -= block_size;
+      md->length += CURL_SHA256_BLOCK_SIZE * 8;
+      in += CURL_SHA256_BLOCK_SIZE;
+      inlen -= CURL_SHA256_BLOCK_SIZE;
     }
     else {
-      n = CURLMIN(inlen, (block_size - md->curlen));
+      n = CURLMIN(inlen, (CURL_SHA256_BLOCK_SIZE - md->curlen));
       memcpy(md->buf + md->curlen, in, n);
       md->curlen += n;
       in += n;
       inlen -= n;
-      if(md->curlen == block_size) {
+      if(md->curlen == CURL_SHA256_BLOCK_SIZE) {
         if(sha256_compress(md, md->buf) < 0)
           return -1;
-        md->length += 8 * block_size;
+        md->length += 8 * CURL_SHA256_BLOCK_SIZE;
         md->curlen = 0;
       }
     }

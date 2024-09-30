@@ -23,9 +23,6 @@ SFTP retrieval of nonexistent file
 #
 # Verify data after the test has been "shot"
 <verify>
-<valgrind>
-disable
-</valgrind>
 <errorcode>
 78
 </errorcode>

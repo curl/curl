@@ -24,8 +24,8 @@
 
 AC_DEFUN([CURL_DARWIN_SYSTEMCONFIGURATION], [
 AC_MSG_CHECKING([whether to link macOS CoreFoundation, CoreServices, and SystemConfiguration frameworks])
-case $host_os in
-  darwin*)
+case $host in
+  *-apple-*)
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         #include <sys/types.h>

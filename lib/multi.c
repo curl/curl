@@ -101,7 +101,7 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi);
 static void Curl_expire_ex(struct Curl_easy *data, const struct curltime *nowp,
                            timediff_t milli, expire_id id);
 
-#ifdef DEBUGBUILD
+#if defined( DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static const char * const multi_statename[]={
   "INIT",
   "PENDING",
@@ -240,12 +240,13 @@ static struct Curl_sh_entry *sh_getentry(struct Curl_hash *sh,
 }
 
 #define TRHASH_SIZE 13
+
+/* the given key here is a struct Curl_easy pointer */
 static size_t trhash(void *key, size_t key_length, size_t slots_num)
 {
-  size_t keyval = (size_t)*(struct Curl_easy **)key;
-  (void) key_length;
-
-  return (keyval % slots_num);
+  unsigned char bytes = ((unsigned char *)key)[key_length - 1] ^
+    ((unsigned char *)key)[0];
+  return (bytes % slots_num);
 }
 
 static size_t trhash_compare(void *k1, size_t k1_len, void *k2, size_t k2_len)
@@ -1125,9 +1126,14 @@ static void multi_getsock(struct Curl_easy *data,
   }
 
   if(expect_sockets && !ps->num &&
-     !(data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) &&
+     !Curl_llist_count(&data->state.timeoutlist) &&
+     !Curl_cwriter_is_paused(data) && !Curl_creader_is_paused(data) &&
      Curl_conn_is_ip_connected(data, FIRSTSOCKET)) {
-    infof(data, "WARNING: no socket in pollset, transfer may stall!");
+    /* We expected sockets for POLL monitoring, but none are set.
+     * We are not waiting on any timer.
+     * None of the READ/WRITE directions are paused.
+     * We are connected to the server on IP level, at least. */
+    infof(data, "WARNING: no socket in pollset or timer, transfer may stall!");
     DEBUGASSERT(0);
   }
 }
@@ -2230,7 +2236,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
       if(!result) {
         if(dophase_done) {
           /* after DO, go DO_DONE or DO_MORE */
-          multistate(data, data->conn->bits.do_more?
+          multistate(data, data->conn->bits.do_more ?
                      MSTATE_DOING_MORE : MSTATE_DID);
           rc = CURLM_CALL_MULTI_PERFORM;
         } /* dophase_done */
@@ -2254,7 +2260,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         if(control) {
           /* if positive, advance to DO_DONE
              if negative, go back to DOING */
-          multistate(data, control == 1?
+          multistate(data, control == 1 ?
                      MSTATE_DID : MSTATE_DOING);
           rc = CURLM_CALL_MULTI_PERFORM;
         }
@@ -2584,8 +2590,8 @@ statemachine_end:
         streamclose(data->conn, "Aborted by callback");
 
         /* if not yet in DONE state, go there, otherwise COMPLETED */
-        multistate(data, (data->mstate < MSTATE_DONE)?
-                   MSTATE_DONE: MSTATE_COMPLETED);
+        multistate(data, (data->mstate < MSTATE_DONE) ?
+                   MSTATE_DONE : MSTATE_COMPLETED);
         rc = CURLM_CALL_MULTI_PERFORM;
       }
     }
@@ -2866,7 +2872,7 @@ CURLMcode Curl_multi_pollset_ev(struct Curl_multi *multi,
     if(entry) {
       /* check if new for this transfer */
       unsigned int j;
-      for(j = 0; j< last_ps->num; j++) {
+      for(j = 0; j < last_ps->num; j++) {
         if(s == last_ps->sockets[j]) {
           last_action = last_ps->actions[j];
           break;
@@ -3379,7 +3385,7 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
     multi->timetree = Curl_splay(tv_zero, multi->timetree);
     /* this will not return NULL from a non-emtpy tree, but some compilers
      * are not convinced of that. Analyzers are hard. */
-    *expire_time = multi->timetree? multi->timetree->key : tv_zero;
+    *expire_time = multi->timetree ? multi->timetree->key : tv_zero;
 
     /* 'multi->timetree' will be non-NULL here but the compilers sometimes
        yell at us if we assume so */

@@ -579,12 +579,3 @@ class Env:
                 i = int(fsize / line_length) + 1
                 fd.write(f"{i:09d}-{s}"[0:remain-1] + "\n")
         return fpath
-
-    def make_clients(self):
-        client_dir = os.path.join(self.project_dir, 'tests/http/clients')
-        p = subprocess.run(['make'], capture_output=True, text=True,
-                           cwd=client_dir)
-        if p.returncode != 0:
-            pytest.exit(f"`make`in {client_dir} failed:\n{p.stderr}")
-            return False
-        return True

@@ -230,7 +230,7 @@ purpose. This code also implements the opportunistic (``--ech true``) or hard-fa
 (``--ech hard``) logic.
 
 Other than that, the main additions are in ``lib/doh.c``
-where we re-use ``dohprobe()`` to retrieve an HTTPS RR value for the target
+where we reuse ``dohprobe()`` to retrieve an HTTPS RR value for the target
 domain. If such a value is found, that is stored using a new ``doh_store_https()``
 function in a new field in the ``dohentry`` structure.
 
@@ -472,7 +472,7 @@ As of now we have not added support for using ``retry_config`` handling in the
 application - for a command line tool, one can just use ``dig`` (or ``kdig``)
 to get the HTTPS RR and pass the ECHConfigList from that on the command line,
 if needed, or one can access the value from command line output in verbose more
-and then re-use that in another invocation.
+and then reuse that in another invocation.
 
 Both our OpenSSL fork and BoringSSL have APIs for both controlling GREASE and
 accessing and logging ``retry_configs``, it seems wolfSSL has neither.

@@ -48,8 +48,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'automake', platform: 'x86_64', tflags: ''       , config: '--enable-debug --disable-threaded-resolver', name: 'openssl' }
-          - { build: 'cmake'   , platform: 'x86_64', tflags: 'skiprun', config: '-DCURL_USE_OPENSSL=ON', name: 'openssl R' }
+          - { build: 'automake', platform: 'x86_64', tflags: 'skiprun', config: '', name: 'openssl R' }
+          - { build: 'cmake'   , platform: 'x86_64', tflags: ''       , config: '-DENABLE_DEBUG=ON -DCURL_USE_OPENSSL=ON -DENABLE_THREADED_RESOLVER=OFF', name: 'openssl' }
       fail-fast: false
     steps:
       - run: git config --global core.autocrlf input
@@ -81,9 +81,8 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --prefix="${HOME}"/install \
-            --enable-websockets \
             --with-openssl \
             --with-libssh2 \
             --disable-dependency-tracking \
@@ -113,11 +112,6 @@ jobs:
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 5
-        run: make -C bld -j5 V=1 examples
-
       - name: 'autotools build tests'
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
@@ -127,7 +121,7 @@ jobs:
         if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~615'
+          export TFLAGS='-j20 ${{ matrix.tflags }} ~615'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
@@ -139,10 +133,8 @@ jobs:
         run: |
           PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
           cmake -B bld -G Ninja ${options} \
-            -DCMAKE_UNITY_BUILD=ON \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
-            -DBUILD_EXAMPLES=ON \
-            -DENABLE_WEBSOCKETS=ON \
             -DCURL_BROTLI=ON \
             ${{ matrix.config }}
 
@@ -167,7 +159,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 1
         run: |
-          find . -name '*.exe' -o -name '*.dll' | grep -v '/examples/'
+          find . -name '*.exe' -o -name '*.dll'
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -186,3 +178,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
+      - name: 'cmake build examples'
+        if: ${{ matrix.build == 'cmake' }}
+        timeout-minutes: 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples

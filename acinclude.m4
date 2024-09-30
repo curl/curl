@@ -49,9 +49,9 @@ AC_DEFUN([CURL_CHECK_DEF], [
   AC_PREPROC_IFELSE([
     AC_LANG_SOURCE(
 ifelse($2,,,[$2])[[
-#ifdef $1
-CURL_DEF_TOKEN $1
-#endif
+      #ifdef $1
+      CURL_DEF_TOKEN $1
+      #endif
     ]])
   ],[
     tmp_exp=`eval "$ac_cpp conftest.$ac_ext" 2>/dev/null | \
@@ -89,14 +89,14 @@ AC_DEFUN([CURL_CHECK_DEF_CC], [
   AC_COMPILE_IFELSE([
     AC_LANG_SOURCE(
 ifelse($2,,,[$2])[[
-int main (void)
-{
-#ifdef $1
-  return 0;
-#else
-  #error force compilation error
-#endif
-}
+      int main(void)
+      {
+      #ifdef $1
+        return 0;
+      #else
+        #error force compilation error
+      #endif
+      }
     ]])
   ],[
     tst_symbol_defined="yes"
@@ -123,16 +123,16 @@ AC_DEFUN([CURL_CHECK_LIB_XNET], [
   tst_lib_xnet_required="no"
   AC_COMPILE_IFELSE([
     AC_LANG_SOURCE([[
-int main (void)
-{
-#if defined(__hpux) && defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)
-  return 0;
-#elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
-  return 0;
-#else
-  #error force compilation error
-#endif
-}
+      int main(void)
+      {
+      #if defined(__hpux) && defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 600)
+        return 0;
+      #elif defined(__hpux) && defined(_XOPEN_SOURCE_EXTENDED)
+        return 0;
+      #else
+        #error force compilation error
+      #endif
+      }
     ]])
   ],[
     tst_lib_xnet_required="yes"
@@ -179,11 +179,11 @@ AC_DEFUN([CURL_CHECK_NATIVE_WINDOWS], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
       ]],[[
-#ifdef _WIN32
-        int dummy=1;
-#else
-        Not a native Windows build target.
-#endif
+        #ifdef _WIN32
+          int dummy=1;
+        #else
+          #error Not a native Windows build target.
+        #endif
       ]])
     ],[
       curl_cv_native_windows="yes"
@@ -205,21 +205,21 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
   AC_CACHE_CHECK([for lber.h], [curl_cv_header_lber_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#endif
-#ifndef NULL
-#define NULL (void *)0
-#endif
-#include <lber.h>
+        #undef inline
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <windows.h>
+        #else
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #endif
+        #ifndef NULL
+        #define NULL (void *)0
+        #endif
+        #include <lber.h>
       ]],[[
         BerValue *bvp = NULL;
         BerElement *bep = ber_init(bvp);
@@ -237,24 +237,24 @@ AC_DEFUN([CURL_CHECK_HEADER_LBER], [
     #
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#endif
-#ifndef NULL
-#define NULL (void *)0
-#endif
-#ifndef LDAP_DEPRECATED
-#define LDAP_DEPRECATED 1
-#endif
-#include <ldap.h>
+        #undef inline
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <windows.h>
+        #else
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #endif
+        #ifndef NULL
+        #define NULL (void *)0
+        #endif
+        #ifndef LDAP_DEPRECATED
+        #define LDAP_DEPRECATED 1
+        #endif
+        #include <ldap.h>
       ]],[[
         BerValue *bvp = NULL;
         BerElement *bep = ber_init(bvp);
@@ -285,24 +285,24 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP], [
   AC_CACHE_CHECK([for ldap.h], [curl_cv_header_ldap_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#endif
-#ifndef LDAP_DEPRECATED
-#define LDAP_DEPRECATED 1
-#endif
-#ifdef NEED_LBER_H
-#include <lber.h>
-#endif
-#include <ldap.h>
+        #undef inline
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <windows.h>
+        #else
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #endif
+        #ifndef LDAP_DEPRECATED
+        #define LDAP_DEPRECATED 1
+        #endif
+        #ifdef NEED_LBER_H
+        #include <lber.h>
+        #endif
+        #include <ldap.h>
       ]],[[
         LDAP *ldp = ldap_init("0.0.0.0", LDAP_PORT);
         int res = ldap_unbind(ldp);
@@ -331,27 +331,27 @@ AC_DEFUN([CURL_CHECK_HEADER_LDAP_SSL], [
   AC_CACHE_CHECK([for ldap_ssl.h], [curl_cv_header_ldap_ssl_h], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#endif
-#ifndef LDAP_DEPRECATED
-#define LDAP_DEPRECATED 1
-#endif
-#ifdef NEED_LBER_H
-#include <lber.h>
-#endif
-#ifdef HAVE_LDAP_H
-#include <ldap.h>
-#endif
-#include <ldap_ssl.h>
+        #undef inline
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <windows.h>
+        #else
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #endif
+        #ifndef LDAP_DEPRECATED
+        #define LDAP_DEPRECATED 1
+        #endif
+        #ifdef NEED_LBER_H
+        #include <lber.h>
+        #endif
+        #ifdef HAVE_LDAP_H
+        #include <ldap.h>
+        #endif
+        #include <ldap_ssl.h>
       ]],[[
         LDAP *ldp = ldapssl_init("0.0.0.0", LDAPS_PORT, 1);
       ]])
@@ -416,17 +416,17 @@ AC_DEFUN([CURL_CHECK_LIBS_WINLDAP], [
       fi
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <winldap.h>
-#ifdef HAVE_WINBER_H
-#include <winber.h>
-#endif
-#endif
+          #undef inline
+          #ifdef _WIN32
+          #ifndef WIN32_LEAN_AND_MEAN
+          #define WIN32_LEAN_AND_MEAN
+          #endif
+          #include <windows.h>
+          #include <winldap.h>
+          #ifdef HAVE_WINBER_H
+          #include <winber.h>
+          #endif
+          #endif
         ]],[[
           BERVAL *bvp = NULL;
           BerElement *bep = ber_init(bvp);
@@ -514,29 +514,29 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       fi
       AC_LINK_IFELSE([
         AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#endif
-#ifndef NULL
-#define NULL (void *)0
-#endif
-#ifndef LDAP_DEPRECATED
-#define LDAP_DEPRECATED 1
-#endif
-#ifdef NEED_LBER_H
-#include <lber.h>
-#endif
-#ifdef HAVE_LDAP_H
-#include <ldap.h>
-#endif
+          #undef inline
+          #ifdef _WIN32
+          #ifndef WIN32_LEAN_AND_MEAN
+          #define WIN32_LEAN_AND_MEAN
+          #endif
+          #include <windows.h>
+          #else
+          #ifdef HAVE_SYS_TYPES_H
+          #include <sys/types.h>
+          #endif
+          #endif
+          #ifndef NULL
+          #define NULL (void *)0
+          #endif
+          #ifndef LDAP_DEPRECATED
+          #define LDAP_DEPRECATED 1
+          #endif
+          #ifdef NEED_LBER_H
+          #include <lber.h>
+          #endif
+          #ifdef HAVE_LDAP_H
+          #include <ldap.h>
+          #endif
         ]],[[
           BerValue *bvp = NULL;
           BerElement *bep = ber_init(bvp);
@@ -583,26 +583,26 @@ AC_DEFUN([TYPE_SOCKADDR_STORAGE],
      AC_DEFINE(HAVE_STRUCT_SOCKADDR_STORAGE, 1,
        [if struct sockaddr_storage is defined]), ,
    [
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#endif
+     #undef inline
+     #ifdef _WIN32
+     #ifndef WIN32_LEAN_AND_MEAN
+     #define WIN32_LEAN_AND_MEAN
+     #endif
+     #include <winsock2.h>
+     #else
+     #ifdef HAVE_SYS_TYPES_H
+     #include <sys/types.h>
+     #endif
+     #ifdef HAVE_SYS_SOCKET_H
+     #include <sys/socket.h>
+     #endif
+     #ifdef HAVE_NETINET_IN_H
+     #include <netinet/in.h>
+     #endif
+     #ifdef HAVE_ARPA_INET_H
+     #include <arpa/inet.h>
+     #endif
+     #endif
    ])
 ])
 
@@ -618,21 +618,21 @@ AC_DEFUN([CURL_CHECK_FUNC_RECV], [
   AC_MSG_CHECKING([for recv])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-$curl_includes_bsdsocket
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#endif
+      #undef inline
+      #ifdef _WIN32
+      #ifndef WIN32_LEAN_AND_MEAN
+      #define WIN32_LEAN_AND_MEAN
+      #endif
+      #include <winsock2.h>
+      #else
+      $curl_includes_bsdsocket
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifdef HAVE_SYS_SOCKET_H
+      #include <sys/socket.h>
+      #endif
+      #endif
     ]],[[
       recv(0, 0, 0, 0);
     ]])
@@ -666,21 +666,21 @@ AC_DEFUN([CURL_CHECK_FUNC_SEND], [
   AC_MSG_CHECKING([for send])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-$curl_includes_bsdsocket
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#endif
+      #undef inline
+      #ifdef _WIN32
+      #ifndef WIN32_LEAN_AND_MEAN
+      #define WIN32_LEAN_AND_MEAN
+      #endif
+      #include <winsock2.h>
+      #else
+      $curl_includes_bsdsocket
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifdef HAVE_SYS_SOCKET_H
+      #include <sys/socket.h>
+      #endif
+      #endif
     ]],[[
       send(0, 0, 0, 0);
     ]])
@@ -710,20 +710,20 @@ AC_DEFUN([CURL_CHECK_MSG_NOSIGNAL], [
   AC_CACHE_CHECK([for MSG_NOSIGNAL], [curl_cv_msg_nosignal], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#endif
+        #undef inline
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <winsock2.h>
+        #else
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #ifdef HAVE_SYS_SOCKET_H
+        #include <sys/socket.h>
+        #endif
+        #endif
       ]],[[
         int flag=MSG_NOSIGNAL;
       ]])
@@ -752,23 +752,23 @@ AC_DEFUN([CURL_CHECK_STRUCT_TIMEVAL], [
   AC_CACHE_CHECK([for struct timeval], [curl_cv_struct_timeval], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
+        #undef inline
+        #ifdef _WIN32
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <winsock2.h>
+        #endif
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #ifdef HAVE_SYS_TIME_H
+        #include <sys/time.h>
+        #endif
+        #include <time.h>
+        #ifdef HAVE_SYS_SOCKET_H
+        #include <sys/socket.h>
+        #endif
       ]],[[
         struct timeval ts;
         ts.tv_sec  = 0;
@@ -804,26 +804,26 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
         if test "$curl_cv_in_addr_t_equiv" = "unknown"; then
           AC_LINK_IFELSE([
             AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#endif
+              #undef inline
+              #ifdef _WIN32
+              #ifndef WIN32_LEAN_AND_MEAN
+              #define WIN32_LEAN_AND_MEAN
+              #endif
+              #include <winsock2.h>
+              #else
+              #ifdef HAVE_SYS_TYPES_H
+              #include <sys/types.h>
+              #endif
+              #ifdef HAVE_SYS_SOCKET_H
+              #include <sys/socket.h>
+              #endif
+              #ifdef HAVE_NETINET_IN_H
+              #include <netinet/in.h>
+              #endif
+              #ifdef HAVE_ARPA_INET_H
+              #include <arpa/inet.h>
+              #endif
+              #endif
             ]],[[
               $t data = inet_addr ("1.2.3.4");
             ]])
@@ -843,26 +843,26 @@ AC_DEFUN([TYPE_IN_ADDR_T], [
         ;;
     esac
   ],[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#else
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-#ifdef HAVE_NETINET_IN_H
-#include <netinet/in.h>
-#endif
-#ifdef HAVE_ARPA_INET_H
-#include <arpa/inet.h>
-#endif
-#endif
+    #undef inline
+    #ifdef _WIN32
+    #ifndef WIN32_LEAN_AND_MEAN
+    #define WIN32_LEAN_AND_MEAN
+    #endif
+    #include <winsock2.h>
+    #else
+    #ifdef HAVE_SYS_TYPES_H
+    #include <sys/types.h>
+    #endif
+    #ifdef HAVE_SYS_SOCKET_H
+    #include <sys/socket.h>
+    #endif
+    #ifdef HAVE_NETINET_IN_H
+    #include <netinet/in.h>
+    #endif
+    #ifdef HAVE_ARPA_INET_H
+    #include <arpa/inet.h>
+    #endif
+    #endif
   ])
 ])
 
@@ -878,13 +878,13 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC], [
   if test "x$dontwant_rt" = "xno" ; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #ifdef HAVE_SYS_TIME_H
+        #include <sys/time.h>
+        #endif
+        #include <time.h>
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -912,13 +912,13 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOCK_GETTIME_MONOTONIC_RAW], [
   if test "x$dontwant_rt" = "xno" ; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
+        #ifdef HAVE_SYS_TYPES_H
+        #include <sys/types.h>
+        #endif
+        #ifdef HAVE_SYS_TIME_H
+        #include <sys/time.h>
+        #endif
+        #include <time.h>
       ]],[[
         struct timespec ts;
         (void)clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
@@ -958,13 +958,13 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
         fi
         AC_LINK_IFELSE([
           AC_LANG_PROGRAM([[
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
+            #ifdef HAVE_SYS_TYPES_H
+            #include <sys/types.h>
+            #endif
+            #ifdef HAVE_SYS_TIME_H
+            #include <sys/time.h>
+            #endif
+            #include <time.h>
           ]],[[
             struct timespec ts;
             (void)clock_gettime(CLOCK_MONOTONIC, &ts);
@@ -1004,14 +1004,14 @@ AC_DEFUN([CURL_CHECK_LIBS_CLOCK_GETTIME_MONOTONIC], [
       AC_MSG_CHECKING([if monotonic clock_gettime works])
       CURL_RUN_IFELSE([
         AC_LANG_PROGRAM([[
-#include <stdlib.h>
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
+          #include <stdlib.h>
+          #ifdef HAVE_SYS_TYPES_H
+          #include <sys/types.h>
+          #endif
+          #ifdef HAVE_SYS_TIME_H
+          #include <sys/time.h>
+          #endif
+          #include <time.h>
         ]],[[
           struct timespec ts;
           if (0 == clock_gettime(CLOCK_MONOTONIC, &ts))
@@ -1101,31 +1101,31 @@ AC_DEFUN([CURL_CHECK_FUNC_SELECT], [
   AC_MSG_CHECKING([for select])
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
-#undef inline
-#ifdef _WIN32
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <winsock2.h>
-#endif
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
-#ifndef _WIN32
-#ifdef HAVE_SYS_SELECT_H
-#include <sys/select.h>
-#elif defined(HAVE_UNISTD_H)
-#include <unistd.h>
-#endif
-#ifdef HAVE_SYS_SOCKET_H
-#include <sys/socket.h>
-#endif
-$curl_includes_bsdsocket
-#endif
+      #undef inline
+      #ifdef _WIN32
+      #ifndef WIN32_LEAN_AND_MEAN
+      #define WIN32_LEAN_AND_MEAN
+      #endif
+      #include <winsock2.h>
+      #endif
+      #ifdef HAVE_SYS_TYPES_H
+      #include <sys/types.h>
+      #endif
+      #ifdef HAVE_SYS_TIME_H
+      #include <sys/time.h>
+      #endif
+      #include <time.h>
+      #ifndef _WIN32
+      #ifdef HAVE_SYS_SELECT_H
+      #include <sys/select.h>
+      #elif defined(HAVE_UNISTD_H)
+      #include <unistd.h>
+      #endif
+      #ifdef HAVE_SYS_SOCKET_H
+      #include <sys/socket.h>
+      #endif
+      $curl_includes_bsdsocket
+      #endif
     ]],[[
       select(0, 0, 0, 0, 0);
     ]])
@@ -1164,11 +1164,11 @@ AC_DEFUN([CURL_VERIFY_RUNTIMELIBS], [
     dnl point also is available run-time!
     AC_MSG_CHECKING([run-time libs availability])
     CURL_RUN_IFELSE([
-int main()
-{
-  return 0;
-}
-],
+      int main()
+      {
+        return 0;
+      }
+    ],
     AC_MSG_RESULT([fine]),
     AC_MSG_RESULT([failed])
     AC_MSG_ERROR([one or more libs available at link-time are not available run-time. Libs used at link-time: $LIBS])
@@ -1197,7 +1197,7 @@ AC_DEFUN([CURL_CHECK_CA_BUNDLE], [
 
   AC_ARG_WITH(ca-bundle,
 AS_HELP_STRING([--with-ca-bundle=FILE],
-  [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
+  [Absolute path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
 AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [
     want_ca="$withval"
@@ -1208,7 +1208,7 @@ AS_HELP_STRING([--without-ca-bundle], [Don't use a default CA bundle]),
   [ want_ca="unset" ])
   AC_ARG_WITH(ca-path,
 AS_HELP_STRING([--with-ca-path=DIRECTORY],
-  [Path to a directory containing CA certificates stored individually, with \
+  [Absolute path to a directory containing CA certificates stored individually, with \
 their filenames in a hash format. This option can be used with the OpenSSL, \
 GnuTLS, mbedTLS and wolfSSL backends. Refer to OpenSSL c_rehash for details. \
 (example: /etc/certificates)])
@@ -1304,7 +1304,7 @@ AS_HELP_STRING([--without-ca-path], [Don't use a default CA path]),
   fi
 
   if test "x$ca" != "xno"; then
-    CURL_CA_BUNDLE='"'$ca'"'
+    CURL_CA_BUNDLE="$ca"
     AC_DEFINE_UNQUOTED(CURL_CA_BUNDLE, "$ca", [Location of default ca bundle])
     AC_SUBST(CURL_CA_BUNDLE)
     AC_MSG_RESULT([$ca])
@@ -1333,7 +1333,7 @@ AS_HELP_STRING([--without-ca-fallback], [Don't use the built-in CA store of the 
     if test "x$OPENSSL_ENABLED" != "x1" -a "x$GNUTLS_ENABLED" != "x1"; then
       AC_MSG_ERROR([--with-ca-fallback only works with OpenSSL or GnuTLS])
     fi
-    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built-in CA store of SSL library ])
+    AC_DEFINE_UNQUOTED(CURL_CA_FALLBACK, 1, [define "1" to use built-in CA store of SSL library])
   fi
 ])
 
@@ -1344,12 +1344,12 @@ dnl Check if a ca-bundle should be embedded
 
 AC_DEFUN([CURL_CHECK_CA_EMBED], [
 
-  AC_MSG_CHECKING([CA cert bundle path to embed])
+  AC_MSG_CHECKING([CA cert bundle path to embed in the curl tool])
 
   AC_ARG_WITH(ca-embed,
 AS_HELP_STRING([--with-ca-embed=FILE],
-  [Path to a file containing CA certificates (example: /etc/ca-bundle.crt)])
-AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle]),
+  [Absolute path to a file containing CA certificates to embed in the curl tool (example: /etc/ca-bundle.crt)])
+AS_HELP_STRING([--without-ca-embed], [Don't embed a default CA bundle in the curl tool]),
   [
     want_ca_embed="$withval"
     if test "x$want_ca_embed" = "xyes"; then
@@ -1381,11 +1381,11 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
-#if !defined(_WIN32_WCE) && (defined(__MINGW32__) || defined(_MSC_VER))
-          int dummy=1;
-#else
-          Win32 large file API not supported.
-#endif
+          #if !defined(_WIN32_WCE) && (defined(__MINGW32__) || defined(_MSC_VER))
+            int dummy=1;
+          #else
+            #error Win32 large file API not supported.
+          #endif
         ]])
       ],[
         curl_win32_file_api="win32_large_files"
@@ -1395,11 +1395,11 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       AC_COMPILE_IFELSE([
         AC_LANG_PROGRAM([[
         ]],[[
-#if defined(_WIN32_WCE) || defined(__MINGW32__) || defined(_MSC_VER)
-          int dummy=1;
-#else
-          Win32 small file API not supported.
-#endif
+          #if defined(_WIN32_WCE) || defined(__MINGW32__) || defined(_MSC_VER)
+            int dummy=1;
+          #else
+            #error Win32 small file API not supported.
+          #endif
         ]])
       ],[
         curl_win32_file_api="win32_small_files"
@@ -1436,12 +1436,12 @@ AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
   if test "$curl_cv_native_windows" = "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
-#undef inline
-#ifndef WIN32_LEAN_AND_MEAN
-#define WIN32_LEAN_AND_MEAN
-#endif
-#include <windows.h>
-#include <wincrypt.h>
+        #undef inline
+        #ifndef WIN32_LEAN_AND_MEAN
+        #define WIN32_LEAN_AND_MEAN
+        #endif
+        #include <windows.h>
+        #include <wincrypt.h>
       ]],[[
         HCRYPTPROV hCryptProv;
         if(CryptAcquireContext(&hCryptProv, NULL, NULL, PROV_RSA_FULL,
@@ -1518,52 +1518,28 @@ AC_DEFUN([CURL_CHECK_PKGCONFIG], [
 ])
 
 
-dnl CURL_GENERATE_CONFIGUREHELP_PM
+dnl CURL_PREPARE_CONFIGUREHELP_PM
 dnl -------------------------------------------------
-dnl Generate test harness configurehelp.pm module, defining and
+dnl Prepare test harness configurehelp.pm module, defining and
 dnl initializing some perl variables with values which are known
 dnl when the configure script runs. For portability reasons, test
 dnl harness needs information on how to run the C preprocessor.
 
-AC_DEFUN([CURL_GENERATE_CONFIGUREHELP_PM], [
+AC_DEFUN([CURL_PREPARE_CONFIGUREHELP_PM], [
   AC_REQUIRE([AC_PROG_CPP])dnl
   tmp_cpp=`eval echo "$ac_cpp" 2>/dev/null`
   if test -z "$tmp_cpp"; then
     tmp_cpp='cpp'
   fi
-  cat >./tests/configurehelp.pm <<_EOF
-[@%:@] This is a generated file.  Do not edit.
-
-package configurehelp;
-
-use strict;
-use warnings;
-use Exporter;
-
-use vars qw(
-    @ISA
-    @EXPORT_OK
-    \$Cpreprocessor
-    );
-
-@ISA = qw(Exporter);
-
-@EXPORT_OK = qw(
-    \$Cpreprocessor
-    );
-
-\$Cpreprocessor = '$tmp_cpp';
-
-1;
-_EOF
+  AC_SUBST(CURL_CPP, $tmp_cpp)
 ])
 
 
-dnl CURL_GENERATE_BUILDINFO_TXT
+dnl CURL_PREPARE_BUILDINFO
 dnl -------------------------------------------------
 dnl Save build info for test runner to pick up and log
 
-AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
+AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   curl_pflags=""
   case $host in
     *-apple-*) curl_pflags="${curl_pflags} APPLE";;
@@ -1592,22 +1568,19 @@ AC_DEFUN([CURL_GENERATE_BUILDINFO_TXT], [
     curl_pflags="${curl_pflags} CROSS"
   fi
   squeeze curl_pflags
-  cat >./tests/buildinfo.txt <<_EOF
-[@%:@] This is a generated file.  Do not edit.
-configure.tool: configure
-configure.args: $ac_configure_args
-host: $build
-host.os: $build_os
-host.cpu: $build_cpu
-host.vendor: $build_vendor
-target: $host
-target.os: $host_os
-target.cpu: $host_cpu
-target.vendor: $host_vendor
-target.flags: $curl_pflags
-compiler: $compiler_id
-compiler.version: $compiler_num
-_EOF
+  curl_buildinfo="
+buildinfo.configure.tool: configure
+buildinfo.configure.args: $ac_configure_args
+buildinfo.host: $build
+buildinfo.host.cpu: $build_cpu
+buildinfo.host.os: $build_os
+buildinfo.target: $host
+buildinfo.target.cpu: $host_cpu
+buildinfo.target.os: $host_os
+buildinfo.target.flags: $curl_pflags
+buildinfo.compiler: $compiler_id
+buildinfo.compiler.version: $compiler_ver
+buildinfo.sysroot: $lt_sysroot"
 ])
 
 
@@ -1669,8 +1642,8 @@ dnl
 AC_DEFUN([CURL_DARWIN_CFLAGS], [
 
   tst_cflags="no"
-  case $host_os in
-    darwin*)
+  case $host in
+    *-apple-*)
       tst_cflags="yes"
       ;;
   esac

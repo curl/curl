@@ -23,6 +23,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 #include "curl_path.h"
+#include "memdebug.h"
 
 static CURLcode unit_setup(void)
 {

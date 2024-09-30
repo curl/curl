@@ -64,7 +64,7 @@ macro(curl_internal_test _curl_test)
   endif()
 endmacro()
 
-macro(optional_dependency _dependency)
+macro(curl_dependency_option _dependency)
   set(CURL_${_dependency} "AUTO" CACHE STRING "Build curl with ${_dependency} support (AUTO, ON or OFF)")
   set_property(CACHE CURL_${_dependency} PROPERTY STRINGS "AUTO" "ON" "OFF")
 

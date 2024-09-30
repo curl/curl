@@ -35,12 +35,13 @@ environment:
   OPENSSL: 'OFF'
   DEBUG: 'ON'
   SHARED: 'OFF'
-  TFLAGS: 'skipall'
+  TFLAGS: 'skiprun'
+  EXAMPLES: 'OFF'
   matrix:
 
     # generated CMake-based Visual Studio builds
 
-    - job_name: 'CMake, VS2008, Release, x86, Schannel, Build-only'
+    - job_name: 'CMake, VS2008, Release, x86, Schannel, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 9 2008'
@@ -50,7 +51,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
-    - job_name: 'CMake, VS2008, Debug, x86, Schannel, Build-tests'
+    - job_name: 'CMake, VS2008, Debug, x86, Schannel, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 9 2008'
@@ -59,8 +60,8 @@ environment:
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
-      TFLAGS: 'skiprun'
-    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.2, WebSockets, Build-only'
+      EXAMPLES: 'ON'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.2, WebSockets, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -83,8 +84,7 @@ environment:
       HTTP_ONLY: 'OFF'
       DEBUG: 'OFF'
       CURLDEBUG: 'ON'
-      TFLAGS: 'skiprun'
-    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Static, Build-tests'
+    - job_name: 'CMake, VS2010, Debug, x64, Schannel, Static, Build-tests & examples'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 10 2010 Win64'
@@ -92,8 +92,8 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-      TFLAGS: 'skiprun'
-    - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode, Build-only'
+      EXAMPLES: 'ON'
+    - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -102,7 +102,7 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'ON'
       HTTP_ONLY: 'OFF'
-    - job_name: 'CMake, VS2022, Release, x64, Schannel, Shared, Unicode, DEBUGBULID, no-CURLDEBUG, Build-only'
+    - job_name: 'CMake, VS2022, Release, x64, Schannel, Shared, Unicode, DEBUGBULID, no-CURLDEBUG, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -113,7 +113,7 @@ environment:
       HTTP_ONLY: 'OFF'
       SHARED: 'ON'
       CURLDEBUG: 'OFF'
-    - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, Build-only'
+    - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
@@ -122,7 +122,7 @@ environment:
       SCHANNEL: 'OFF'
       ENABLE_UNICODE: 'OFF'
       HTTP_ONLY: 'OFF'
-    - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only, Build-only'
+    - job_name: 'CMake, VS2022, Debug, x64, no SSL, Static, HTTP only, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'

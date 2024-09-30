@@ -70,8 +70,27 @@ AM_CFLAGS =
 # Makefile.inc provides the CSOURCES and HHEADERS defines
 include Makefile.inc
 
+if USE_UNITY
+# Keep these separate to avoid duplicate definitions when linking libtests
+# in static mode.
+curl_EXCLUDE = curl_threads.c timediff.c warnless.c
+if DEBUGBUILD
+# We must compile these sources separately to avoid memdebug.h redefinitions
+# applying to them.
+curl_EXCLUDE += memdebug.c curl_multibyte.c
+endif
+libcurl_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CSOURCES)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CSOURCES) --exclude $(curl_EXCLUDE) > libcurl_unity.c
+
+nodist_libcurl_la_SOURCES = libcurl_unity.c
+libcurl_la_SOURCES = $(curl_EXCLUDE)
+nodist_libcurlu_la_SOURCES = libcurl_unity.c
+libcurlu_la_SOURCES = $(curl_EXCLUDE)
+CLEANFILES = libcurl_unity.c
+else
 libcurl_la_SOURCES = $(CSOURCES) $(HHEADERS)
 libcurlu_la_SOURCES = $(CSOURCES) $(HHEADERS)
+endif
 
 libcurl_la_CPPFLAGS_EXTRA =
 libcurl_la_LDFLAGS_EXTRA =

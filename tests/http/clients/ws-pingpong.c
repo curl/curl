@@ -42,7 +42,7 @@
 #include <sys/time.h>
 #endif
 
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
 
 static CURLcode ping(CURL *curl, const char *send_payload)
 {
@@ -124,7 +124,7 @@ static CURLcode pingpong(CURL *curl, const char *payload)
 
 int main(int argc, char *argv[])
 {
-#ifdef USE_WEBSOCKETS
+#ifndef CURL_DISABLE_WEBSOCKETS
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url, *payload;
@@ -157,10 +157,10 @@ int main(int argc, char *argv[])
   curl_global_cleanup();
   return (int)res;
 
-#else /* USE_WEBSOCKETS */
+#else /* !CURL_DISABLE_WEBSOCKETS */
   (void)argc;
   (void)argv;
   fprintf(stderr, "WebSockets not enabled in libcurl\n");
   return 1;
-#endif /* !USE_WEBSOCKETS */
+#endif /* CURL_DISABLE_WEBSOCKETS */
 }

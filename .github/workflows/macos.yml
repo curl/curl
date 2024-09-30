@@ -39,11 +39,11 @@ permissions: {}
 # deprecation warnings with llvm/clang:
 #
 # - 10.7  Lion (2011)          - GSS
-# - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl SecureTransport code)
+# - 10.8  Mountain Lion (2012) - CFURLCreateDataAndPropertiesFromResource (used by curl Secure Transport code)
 # - 10.9  Maverick (2013)      - LDAP
-# - 10.14 Mojave (2018)        - SecureTransport
+# - 10.14 Mojave (2018)        - Secure Transport
 #
-# For SecureTransport, curl implements features that require a target
+# For Secure Transport, curl implements features that require a target
 # newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
 # In this case `-Wno-deprecated-declarations` still comes handy to pacify
 # deprecation warnings, though the real solution would be to avoid calling
@@ -69,33 +69,33 @@ jobs:
           - name: '!ssl !debug brotli zstd'
             compiler: clang
             install: brotli zstd
-            configure: --without-ssl --enable-websockets --with-brotli --with-zstd
+            configure: --without-ssl --with-brotli --with-zstd
             macos-version-min: '10.9'
           - name: '!ssl !debug'
             compiler: gcc-12
-            configure: --without-ssl --enable-websockets
+            configure: --without-ssl
             macos-version-min: '10.9'
           - name: '!ssl'
             compiler: clang
-            configure: --enable-debug --without-ssl --enable-websockets
+            configure: --enable-debug --without-ssl
             macos-version-min: '10.9'
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
-            configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --with-apple-idn --enable-websockets
+            configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --with-apple-idn
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
             install: libssh
-            configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-ares --enable-websockets
+            configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-ares
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh'
             compiler: llvm@15
             install: libssh
-            configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-websockets
+            configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.9'
           - name: '!ssl c-ares'
             compiler: clang
-            configure: --enable-debug --enable-ares --without-ssl --enable-websockets
+            configure: --enable-debug --enable-ares --without-ssl
             macos-version-min: '10.9'
           - name: '!ssl HTTP-only'
             compiler: clang
@@ -110,44 +110,34 @@ jobs:
             macos-version-min: '10.15'  # Catalina (2019)
           - name: 'SecureTransport libssh2'
             compiler: clang
-            configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
+            configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
           - name: 'SecureTransport libssh2 10.12'
             compiler: clang
-            configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
+            configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.12'  # for monotonic timers
             cflags: '-Wno-deprecated-declarations'
           - name: 'SecureTransport libssh2'
             compiler: gcc-12
-            configure: --enable-debug --with-secure-transport --enable-websockets --with-libssh2=$(brew --prefix libssh2)
+            configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.8'
-          - name: 'LibreSSL'
+          - name: 'LibreSSL +examples'
             compiler: clang
             install: libressl
-            configure: --enable-debug --with-openssl=$(brew --prefix libressl) --enable-websockets
+            configure: --enable-debug --with-openssl=$(brew --prefix libressl)
             macos-version-min: '10.9'
           - name: 'OpenSSL'
             compiler: clang
-            configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
+            configure: --enable-debug --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.9'
           - name: 'OpenSSL event-based'
             compiler: clang
-            configure: --enable-debug --with-openssl=$(brew --prefix openssl) --enable-websockets
+            configure: --enable-debug --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.9'
             tflags: -e
-          - name: 'OpenSSL torture !FTP'
-            compiler: clang
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
-            tflags: -n -t --shallow=25 !FTP
-            macos-version-min: '10.9'
-          - name: 'OpenSSL torture FTP'
-            compiler: clang
-            configure: --enable-debug --disable-shared --disable-threaded-resolver --with-openssl=$(brew --prefix openssl) --enable-websockets
-            tflags: -n -t --shallow=20 FTP
-            macos-version-min: '10.9'
           - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
-            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl) --enable-websockets
+            configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.15'
     steps:
       - name: 'brew install'
@@ -203,7 +193,7 @@ jobs:
             options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
             CFLAGS+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
-          mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --disable-dependency-tracking \
             --with-libpsl=$(brew --prefix libpsl) \
             ${{ matrix.configure }} ${options}
@@ -229,9 +219,6 @@ jobs:
       - name: 'curl version'
         run: bld/src/curl --disable --version
 
-      - name: 'make examples'
-        run: make -C bld V=1 examples
-
       - name: 'make tests'
         run: make -C bld V=1 -C tests
 
@@ -244,30 +231,34 @@ jobs:
       - name: 'run tests'
         timeout-minutes: 20
         run: |
-          export TFLAGS='${{ matrix.tflags }} -j10'
+          export TFLAGS='-j20 ${{ matrix.tflags }}'
           TFLAGS+=' ~2037 ~2041'  # flaky
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
             TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
             if [[ '${{ matrix.configure }}' = *'--with-secure-transport'* ]]; then
               TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
+              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
             else
-              TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+              TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
             fi
           fi
           if [[ '${{ matrix.configure }}' = *'--with-secure-transport'* ]]; then
-            TFLAGS+=' ~313'  # SecureTransport does not support crl file
-            TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
+            TFLAGS+=' ~313'  # Secure Transport does not support crl file
+            TFLAGS+=' ~1631 ~1632'  # Secure Transport is not able to shutdown ftp over https gracefully yet
           fi
-          PATH="$HOME/venv/bin:$PATH"
+          source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           make -C bld V=1 test-ci
+
+      - name: 'make examples'
+        if: ${{ contains(matrix.build.name, '+examples') }}
+        run: make -C bld V=1 examples
 
   cmake:
     name: 'CM ${{ matrix.compiler }} ${{ matrix.build.name }}'
     runs-on: 'macos-latest'
-    timeout-minutes: 10
+    timeout-minutes: 30
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
@@ -278,18 +269,18 @@ jobs:
         build:
           - name: 'OpenSSL ws gsasl AppleIDN'
             install: gsasl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON -DENABLE_WEBSOCKETS=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
             macos-version-min: '10.9'
           - name: 'OpenSSL +static libssh'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
             macos-version-min: '10.9'
-          - name: 'SecureTransport ws debug+'
-            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_WEBSOCKETS=ON -DENABLE_DEBUG=ON -DENABLE_CURLDEBUG=ON
+          - name: 'SecureTransport ws debug'
+            generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
-          - name: 'LibreSSL !ldap heimdal c-ares'
+          - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON -DBUILD_EXAMPLES=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
@@ -299,9 +290,20 @@ jobs:
             install: gnutls nettle krb5
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
+          - name: 'OpenSSL torture !FTP'
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_BROTLI=ON -DCURL_ZSTD=ON
+            tflags: -t --shallow=25 !FTP
+            macos-version-min: '10.9'
+            torture: true
+          - name: 'OpenSSL torture FTP'
+            generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_BROTLI=ON -DCURL_ZSTD=ON
+            tflags: -t --shallow=20 FTP
+            macos-version-min: '10.9'
+            torture: true
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
           - { compiler: llvm@15, build: { macos-version-min: '10.9' } }
+          - { compiler: gcc-12, build: { torture: true } }
     steps:
       - name: 'brew install'
         run: |
@@ -341,7 +343,7 @@ jobs:
               fi
             done
           fi
-          cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+          cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             ${{ matrix.build.generate }}
@@ -377,33 +379,39 @@ jobs:
           python3 -m pip install impacket
 
       - name: 'cmake run tests'
-        timeout-minutes: 10
+        timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
         run: |
-          export TFLAGS='${{ matrix.build.tflags }} -j10'
-          TFLAGS+=' ~2037 ~2041'  # flaky
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-            TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
-            TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+          export TFLAGS='-j20 ${{ matrix.build.tflags }}'
+          if [ -z '${{ matrix.build.torture }}' ]; then
+            TFLAGS+=' ~2037 ~2041'  # flaky
+            if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+              TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
+              TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
+              if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
+                TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
+                TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
+              else
+                TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
+              fi
+            fi
             if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-              TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
-              TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, SecureTransport + nghttp2
-            else
-              TFLAGS+=' ~2402 ~2404'  # non-SecureTransport + nghttp2
+              TFLAGS+=' ~313'  # Secure Transport does not support crl file
+              TFLAGS+=' ~1631 ~1632'  # Secure Transport is not able to shutdown ftp over https gracefully yet
             fi
           fi
-          if [[ '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
-            TFLAGS+=' ~313'  # SecureTransport does not support crl file
-            TFLAGS+=' ~1631 ~1632'  # SecureTransport is not able to shutdown ftp over https gracefully yet
-          fi
-          PATH="$HOME/venv/bin:$PATH"
+          source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           ninja -C bld test-ci
 
-  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, SecureTransport/not, built tool, combinations
+      - name: 'cmake build examples'
+        if: ${{ contains(matrix.name, '+examples') }}
+        run: make -C bld VERBOSE=1
+
+  combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, Secure Transport/not, built tool, combinations
     if: true  # Set to `true` to enable this test matrix. It runs quickly.
     name: "${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.image }} ${{ matrix.xcode }} ${{ matrix.config }}"
     runs-on: ${{ matrix.image }}
-    timeout-minutes: 30
+    timeout-minutes: 10
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.xcode && format('_{0}', matrix.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.compiler }}
@@ -600,7 +608,7 @@ jobs:
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
-            mkdir bld && cd bld && ../configure --enable-warnings --enable-werror \
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
@@ -610,7 +618,7 @@ jobs:
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             # would pick up nghttp2, libidn2, and libssh2
-            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_WERROR=ON \
+            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \

@@ -23,7 +23,7 @@
 ###########################################################################
 
 EXTRA_DIST = coverage.sh completion.pl firefox-db2pem.sh checksrc.pl    \
- mk-ca-bundle.pl schemetable.c cd2nroff nroff2cd cdall cd2cd managen \
+ mk-ca-bundle.pl mk-unity.pl schemetable.c cd2nroff nroff2cd cdall cd2cd managen \
  dmaketgz maketgz release-tools.sh verify-release cmakelint.sh
 
 ZSH_FUNCTIONS_DIR = @ZSH_FUNCTIONS_DIR@
@@ -69,13 +69,13 @@ if USE_ZSH_COMPLETION
 	if test -n "$(PERL)"; then \
 	  $(MKDIR_P) $(DESTDIR)$(ZSH_FUNCTIONS_DIR); \
 	  $(INSTALL_DATA) $(ZSH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(ZSH_FUNCTIONS_DIR)/$(ZSH_COMPLETION_FUNCTION_FILENAME) ; \
-  fi
+	fi
 endif
 if USE_FISH_COMPLETION
 	if test -n "$(PERL)"; then \
 	  $(MKDIR_P) $(DESTDIR)$(FISH_FUNCTIONS_DIR); \
 	  $(INSTALL_DATA) $(FISH_COMPLETION_FUNCTION_FILENAME) $(DESTDIR)$(FISH_FUNCTIONS_DIR)/$(FISH_COMPLETION_FUNCTION_FILENAME) ; \
-  fi
+	fi
 endif
 endif
 

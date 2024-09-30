@@ -24,19 +24,17 @@ none
 IDN
 http
 proxy
+codeset-utf8
 </features>
 <setenv>
 LC_ALL=
 LC_CTYPE=en_US.UTF-8
 </setenv>
-<precheck>
-perl -MI18N::Langinfo=langinfo,CODESET -e 'die "Needs a UTF-8 locale" if (lc(langinfo(CODESET())) ne "utf-8");'
-</precheck>
 <name>
 HTTP over proxy with too long IDN host name
 </name>
 <command>
-http://too-long-IDN-name-cürl-rüles-la-la-la-dee-da-flooby-nooby.local/page/%TESTNUMBER -x %HOSTIP:%NOLISTENPORT
+http://too-long-IDN-name-cürl-rüleß-la-la-la-dee-da-flooby-nooby.local/page/%TESTNUMBER -x %HOSTIP:%NOLISTENPORT
 </command>
 </client>
 

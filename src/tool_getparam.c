@@ -171,7 +171,9 @@ static const struct LongShort aliases[]= {
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
   {"interface",                  ARG_STRG, ' ', C_INTERFACE},
   {"ip-tos",                     ARG_STRG, ' ', C_IP_TOS},
+#ifndef CURL_DISABLE_IPFS
   {"ipfs-gateway",               ARG_STRG, ' ', C_IPFS_GATEWAY},
+#endif /* !CURL_DISABLE_IPFS */
   {"ipv4",                       ARG_NONE, '4', C_IPV4},
   {"ipv6",                       ARG_NONE, '6', C_IPV6},
   {"json",                       ARG_STRG, ' ', C_JSON},
@@ -1340,9 +1342,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(!err && (config->maxredirs < -1))
         err = PARAM_BAD_NUMERIC;
       break;
+#ifndef CURL_DISABLE_IPFS
     case C_IPFS_GATEWAY: /* --ipfs-gateway */
       err = getstr(&config->ipfs_gateway, nextarg, DENY_BLANK);
       break;
+#endif /* !CURL_DISABLE_IPFS */
     case C_PROXY_NTLM: /* --proxy-ntlm */
       if(!feature_ntlm)
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -2261,9 +2265,8 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_HEAD: /* --head */
       config->no_body = toggle;
       config->show_headers = toggle;
-      if(SetHTTPrequest(config,
-                        (config->no_body)?TOOL_HTTPREQ_HEAD:TOOL_HTTPREQ_GET,
-                        &config->httpreq))
+      if(SetHTTPrequest(config, (config->no_body) ? TOOL_HTTPREQ_HEAD :
+                        TOOL_HTTPREQ_GET, &config->httpreq))
         err = PARAM_BAD_USE;
       break;
     case C_REMOTE_HEADER_NAME: /* --remote-header-name */
@@ -2322,7 +2325,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->nobuffer = longopt ? !toggle : TRUE;
       break;
     case C_REMOTE_NAME_ALL: /* --remote-name-all */
-      config->default_node_flags = toggle?GETOUT_USEREMOTE:0;
+      config->default_node_flags = toggle ? GETOUT_USEREMOTE : 0;
       break;
     case C_OUTPUT_DIR: /* --output-dir */
       err = getstr(&config->output_dir, nextarg, DENY_BLANK);

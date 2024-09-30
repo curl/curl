@@ -74,7 +74,7 @@ int main(void)
       }
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
                               &filesize);
-      if((CURLE_OK == res) && (filesize>0))
+      if((CURLE_OK == res) && (filesize > 0))
         printf("filesize %s: %" CURL_FORMAT_CURL_OFF_T " bytes\n",
                filename, filesize);
     }

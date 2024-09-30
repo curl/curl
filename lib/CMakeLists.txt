@@ -21,8 +21,8 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(LIB_NAME libcurl)
-set(LIBCURL_OUTPUT_NAME libcurl CACHE STRING "Basename of the curl library")
+set(LIB_NAME "libcurl")
+set(LIBCURL_OUTPUT_NAME "libcurl" CACHE STRING "Basename of the curl library")
 add_definitions("-DBUILDING_LIBCURL")
 
 configure_file("curl_config.h.cmake" "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
@@ -43,7 +43,7 @@ include_directories(
   "${CMAKE_CURRENT_SOURCE_DIR}"
 )
 if(USE_ARES)
-  include_directories(${CARES_INCLUDE_DIRS})
+  include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
 endif()
 
 if(BUILD_TESTING)
@@ -156,8 +156,7 @@ if(BUILD_SHARED_LIBS)
     if(CYGWIN)
       # For Cygwin always compile dllmain.c as a separate unit since it
       # includes windows.h, which should not be included in other units.
-      set_source_files_properties("dllmain.c" PROPERTIES
-        SKIP_UNITY_BUILD_INCLUSION ON)
+      set_source_files_properties("dllmain.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
     endif()
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "dllmain.c")
   endif()
@@ -238,15 +237,18 @@ if(BUILD_SHARED_LIBS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "WOLFSSL_")
       elseif(CURL_USE_GNUTLS)
         set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "GNUTLS_")
+      elseif(CURL_USE_RUSTLS)
+        set(CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX "RUSTLS_")
       endif()
     endif()
-    file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" "
-      HIDDEN {};
-      CURL_${CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX}${_cmakesoname}
-      {
-        global: curl_*;
-        local: *;
-      };")
+    # Generate version script for the linker, for versioned symbols.
+    # Consumed variables:
+    #   CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX
+    #   CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME
+    set(CURL_LIBCURL_VERSIONED_SYMBOLS_SONAME ${_cmakesoname})
+    configure_file(
+      "${CMAKE_CURRENT_SOURCE_DIR}/libcurl.vers.in"
+      "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" @ONLY)
     include(CheckCSourceCompiles)
     set(CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers")
     check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)

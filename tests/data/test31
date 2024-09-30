@@ -144,11 +144,9 @@ TZ=GMT
 <command>
 http://test31.curl:%HTTPPORT/we/want/%TESTNUMBER -b none -c %LOGDIR/jar%TESTNUMBER.txt --resolve test31.curl:%HTTPPORT:127.0.0.1
 </command>
-<precheck>
-perl -e "print 'Test requires default test server host' if ( '%HOSTIP' ne '127.0.0.1' );"
-</precheck>
 <features>
 cookies
+local-http
 </features>
 </client>
 

@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-set(CMAKE_UNITY_BUILD OFF)
+option(CURL_TEST_BUNDLES "Bundle libtests/unittests into single binaries" OFF)
 
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
@@ -40,6 +40,16 @@ add_subdirectory(unit)
 add_subdirectory(certs EXCLUDE_FROM_ALL)
 
 function(add_runtests _targetname _test_flags)
+  if(CURL_TEST_BUNDLES)
+    set(_test_flags "${_test_flags} -bundle")
+  endif()
+  # Skip walking through dependent targets before running tests in CI.
+  # This avoids: GNU Make doing a slow re-evaluation of all targets and
+  # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
+  unset(_depends)
+  if(NOT _targetname STREQUAL "test-ci")
+    set(_depends "testdeps")
+  endif()
   # Use a special '$TFLAGS' placeholder as last argument which will be
   # replaced by the contents of the environment variable in runtests.pl.
   # This is a workaround for CMake's limitation where commands executed by
@@ -50,74 +60,54 @@ function(add_runtests _targetname _test_flags)
       "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/runtests.pl"
       ${_test_flags_list}
       "\$TFLAGS"
-    DEPENDS testdeps
+    DEPENDS "${_depends}"
+    VERBATIM USES_TERMINAL
+  )
+endfunction()
+
+function(add_pytest _targetname _test_flags)
+  unset(_depends)
+  if(NOT _targetname STREQUAL "pytest-ci")
+    set(_depends "test-http-clients")
+  endif()
+  string(REPLACE " " ";" _test_flags_list "${_test_flags}")
+  add_custom_target(${_targetname}
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    COMMAND pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"
+    DEPENDS "${_depends}"
     VERBATIM USES_TERMINAL
   )
 endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
 if(MSVC OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  set(_cpp_cmd "\"${CMAKE_C_COMPILER}\" -E")
+  set(CURL_CPP "\"${CMAKE_C_COMPILER}\" -E")
   if(APPLE AND CMAKE_OSX_SYSROOT)
-    set(_cpp_cmd "${_cpp_cmd} -isysroot ${CMAKE_OSX_SYSROOT}")
+    set(CURL_CPP "${CURL_CPP} -isysroot ${CMAKE_OSX_SYSROOT}")
   endif()
   # Add header directories, like autotools builds do.
   get_property(_include_dirs TARGET ${LIB_SELECTED} PROPERTY INCLUDE_DIRECTORIES)
   foreach(_include_dir IN LISTS _include_dirs)
-    set(_cpp_cmd "${_cpp_cmd} -I${_include_dir}")
+    set(CURL_CPP "${CURL_CPP} -I${_include_dir}")
   endforeach()
 else()
-  set(_cpp_cmd "cpp")
+  set(CURL_CPP "cpp")
 endif()
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" "# This is a generated file.  Do not edit.
-
-package configurehelp;
-
-use strict;
-use warnings;
-use Exporter;
-
-use vars qw(
-    @ISA
-    @EXPORT_OK
-    \$Cpreprocessor
-    );
-
-@ISA = qw(Exporter);
-
-@EXPORT_OK = qw(
-    \$Cpreprocessor
-    );
-
-\$Cpreprocessor = '${_cpp_cmd}';
-
-1;
-")
-
-# Save build info for test runner to pick up and log
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.
-configure.tool: cmake
-configure.command: ${CMAKE_COMMAND}
-configure.version: ${CMAKE_VERSION}
-configure.os: ${CMAKE_SYSTEM}
-configure.args:${_cmake_args}
-configure.generator: ${CMAKE_GENERATOR}
-configure.make: ${CMAKE_MAKE_PROGRAM}
-host.os: ${CMAKE_HOST_SYSTEM_NAME}
-host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
-target: ${CMAKE_C_COMPILER_TARGET}
-target.os: ${CMAKE_SYSTEM_NAME}
-target.cpu: ${CMAKE_SYSTEM_PROCESSOR}
-target.flags:${_target_flags}
-compiler: ${CMAKE_C_COMPILER_ID}
-compiler.version: ${CMAKE_C_COMPILER_VERSION}
-")
+# Generate version script for the linker, for versioned symbols.
+# Consumed variable:
+#   CURL_CPP
+configure_file(
+  "${CMAKE_CURRENT_SOURCE_DIR}/configurehelp.pm.in"
+  "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" @ONLY)
 
 add_runtests(test-quiet     "-a -s")
 add_runtests(test-am        "-a -am")
 add_runtests(test-full      "-a -p -r")
 # ~flaky means that it ignores results of tests using the flaky keyword
 add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
-add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j2")
-add_runtests(test-torture   "-a -t")
+add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j20")
+add_runtests(test-torture   "-a -t -j2")
 add_runtests(test-event     "-a -e")
+
+add_pytest(curl-pytest      "")
+add_pytest(curl-pytest-ci   "-v")

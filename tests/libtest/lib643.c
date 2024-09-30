@@ -25,7 +25,7 @@
 
 #include "memdebug.h"
 
-static char data[]=
+static char testdata[]=
   "dummy\n";
 
 struct WriteThis {
@@ -56,7 +56,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode once(char *URL, bool oldstyle)
+static CURLcode test_once(char *URL, bool oldstyle)
 {
   CURL *curl;
   CURLcode res = CURLE_OK;
@@ -67,9 +67,9 @@ static CURLcode once(char *URL, bool oldstyle)
   struct WriteThis pooh2;
   curl_off_t datasize = -1;
 
-  pooh.readptr = data;
+  pooh.readptr = testdata;
 #ifndef LIB645
-  datasize = (curl_off_t)strlen(data);
+  datasize = (curl_off_t)strlen(testdata);
 #endif
   pooh.sizeleft = datasize;
 
@@ -122,9 +122,9 @@ static CURLcode once(char *URL, bool oldstyle)
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
-  pooh2.readptr = data;
+  pooh2.readptr = testdata;
 #ifndef LIB645
-  datasize = (curl_off_t)strlen(data);
+  datasize = (curl_off_t)strlen(testdata);
 #endif
   pooh2.sizeleft = datasize;
 
@@ -256,9 +256,9 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res = once(URL, TRUE); /* old */
+  res = test_once(URL, TRUE); /* old */
   if(!res)
-    res = once(URL, FALSE); /* new */
+    res = test_once(URL, FALSE); /* new */
 
   if(!res)
     res = cyclic_add();

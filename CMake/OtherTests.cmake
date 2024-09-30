@@ -95,7 +95,8 @@ if(NOT APPLE)
       #include <stdlib.h>
       int main(void)
       {
-        #if defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
+        #if defined(__BIONIC__) || \
+          defined(_POSIX_C_SOURCE) && _POSIX_C_SOURCE >= 200112L
           (void)poll(0, 0, 0);
         #else
           #error force compilation error
