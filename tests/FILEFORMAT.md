@@ -126,7 +126,7 @@ Available substitute variables include:
 - `%CLIENTIP` - IPv4 address of the client running curl
 - `%CURL` - Path to the curl executable
 - `%DATE` - current YYYY-MM-DD date
-- `%DEVNULL` - Null device (/dev/null or NUL)
+- `%DEV_NULL` - Null device (/dev/null or NUL)
 - `%FILE_PWD` - Current directory, on Windows prefixed with a slash
 - `%FTP6PORT` - IPv6 port number of the FTP server
 - `%FTPPORT` - Port number of the FTP server
