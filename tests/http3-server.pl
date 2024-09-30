@@ -38,7 +38,7 @@ my $listenport = 9017;
 my $connect = "127.0.0.1,8990";
 my $cert = "Server-localhost-sv";
 my $conf = "nghttpx.conf";
-my $devnull = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
 
 #***************************************************************************
 # Process command line options
@@ -118,4 +118,4 @@ my $cmdline="$nghttpx --http2-proxy --backend=$connect ".
     "--conf=$conf ".
     "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
-exec("exec $cmdline 2>$devnull");
+exec("exec $cmdline 2>$dev_null");

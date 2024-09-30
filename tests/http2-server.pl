@@ -38,7 +38,7 @@ my $listenport2 = 9016;
 my $connect = "127.0.0.1,8990";
 my $conf = "nghttpx.conf";
 my $cert = "Server-localhost-sv";
-my $devnull = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
 
 #***************************************************************************
 # Process command line options
@@ -118,4 +118,4 @@ my $cmdline="$nghttpx --backend=$connect ".
     "--errorlog-file=$logfile ".
     "$keyfile $certfile";
 print "RUN: $cmdline\n" if($verbose);
-exec("exec $cmdline 2>$devnull");
+exec("exec $cmdline 2>$dev_null");

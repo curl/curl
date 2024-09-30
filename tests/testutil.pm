@@ -56,7 +56,7 @@ use MIME::Base64;
 use globalconfig qw(
     $torture
     $verbose
-    $devnull
+    $dev_null
 );
 
 my $logfunc;      # optional reference to function for logging
@@ -196,7 +196,7 @@ sub runclient {
 #
 sub runclientoutput {
     my ($cmd)=@_;
-    return `$cmd 2>$devnull`;
+    return `$cmd 2>$dev_null`;
 
 # This is one way to test curl on a remote machine
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
