@@ -539,9 +539,6 @@ sub checksystemfeatures {
                 # This is a Windows MinGW build or native build, we need to use
                 # Windows-style path.
                 $pwd = sys_native_current_path();
-                # MSYS/Cygwin  curl needs: file://localhost/d/path/to (handled by the default codepath)
-                # Win32 native curl needs: file://localhost/D:/path/to
-                $file_pwd = "/" . $pwd;
                 $feature{"win32"} = 1;
             }
             if ($libcurl =~ /\s(winssl|schannel)\b/i) {
