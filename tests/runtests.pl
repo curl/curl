@@ -318,7 +318,8 @@ if (!$ENV{"NGHTTPX"}) {
     $ENV{"NGHTTPX"} = checktestcmd("nghttpx");
 }
 if ($ENV{"NGHTTPX"}) {
-    my $nghttpx_version=join(' ', `"$ENV{'NGHTTPX'}" -v 2>/dev/null`);
+    my $cmd = "\"$ENV{'NGHTTPX'}\" -v 2>$dev_null";
+    my $nghttpx_version=join(' ', `$cmd`);
     $nghttpx_h3 = $nghttpx_version =~ /nghttp3\//;
     chomp $nghttpx_h3;
 }
@@ -410,10 +411,10 @@ sub showdiff {
         print $temp "\n";
     }
     close($temp) || die "Failure writing diff file";
-    my @out = `diff -u $file2 $file1 2>/dev/null`;
+    my @out = `diff -u $file2 $file1 2>$dev_null`;
 
     if(!$out[0]) {
-        @out = `diff -c $file2 $file1 2>/dev/null`;
+        @out = `diff -c $file2 $file1 2>$dev_null`;
     }
 
     return @out;
@@ -2529,7 +2530,7 @@ if(!$randseed) {
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
     print "Using curl: $CURL\n";
-    open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>/dev/null") ||
+    open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>$dev_null") ||
         die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) || die "could not get curl version!";
@@ -2547,7 +2548,7 @@ if($valgrind) {
     # we have found valgrind on the host, use it
 
     # verify that we can invoke it fine
-    my $code = runclient("valgrind >/dev/null 2>&1");
+    my $code = runclient("valgrind >$dev_null 2>&1");
 
     if(($code>>8) != 1) {
         #logmsg "Valgrind failure, disable it\n";
@@ -2558,7 +2559,7 @@ if($valgrind) {
         # use it, if it is supported by the version installed on the system
         # (this happened in 2003, so we could probably don't need to care about
         # that old version any longer and just delete this check)
-        runclient("valgrind --help 2>&1 | grep -- --tool > /dev/null 2>&1");
+        runclient("valgrind --help 2>&1 | grep -- --tool >$dev_null 2>&1");
         if (($? >> 8)) {
             $valgrind_tool="";
         }

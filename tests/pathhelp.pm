@@ -97,6 +97,8 @@ BEGIN {
     }
 }
 
+my $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
+
 my $use_cygpath;     # Only for Windows:
                      #  undef - autodetect
                      #      0 - do not use cygpath
@@ -106,7 +108,7 @@ my $use_cygpath;     # Only for Windows:
 sub should_use_cygpath {
     return $use_cygpath if defined $use_cygpath;
     if(os_is_win()) {
-        $use_cygpath = (qx{cygpath -u '.\\' 2>/dev/null} eq "./\n" && $? == 0);
+        $use_cygpath = (qx{cygpath -u '.\\' 2>$dev_null} eq "./\n" && $? == 0);
     } else {
         $use_cygpath = 0;
     }
@@ -714,7 +716,7 @@ sub do_dumb_guessed_transform {
     while(1) {
         if(-d $check_path) {
             my $res =
-                `(cd "$check_path" && cmd /c "echo %__CD__%") 2>/dev/null`;
+                `(cd "$check_path" && cmd /c "echo %__CD__%") 2>$dev_null`;
             if($? == 0 && substr($path, 0, 1) ne '%') {
                 # Remove both '\r' and '\n'.
                 $res =~ s{\n|\r}{}g;

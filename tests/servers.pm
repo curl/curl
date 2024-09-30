@@ -3123,6 +3123,7 @@ sub subvariables {
     $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
     $$thing =~ s/${prefix}USER/$USER/g;
+    $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;
