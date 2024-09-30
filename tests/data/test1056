@@ -62,7 +62,7 @@ HTTP follow redirect from IPv4 to IPv6 with scope
 http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 </command>
 <precheck>
-perl -e "print 'Test is not supported on the Windows kernel' if ($^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin');"
+%PERL -e "print 'Test is not supported on the Windows kernel' if ($^O eq 'MSWin32' || $^O eq 'msys' || $^O eq 'cygwin');"
 </precheck>
 </client>
 

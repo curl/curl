@@ -47,6 +47,7 @@ BEGIN {
         $LOGDIR
         $memanalyze
         $MEMDUMP
+        $perlcmd
         $perl
         $PIDDIR
         $proxy_address
@@ -91,7 +92,8 @@ our $randseed = 0;    # random number seed
 # paths
 our $pwd = getcwd();  # current working directory
 our $srcdir = $ENV{'srcdir'} || '.';  # root of the test source code
-our $perl="perl -I. -I$srcdir"; # invoke perl like this
+our $perlcmd="$^X";
+our $perl="$perlcmd -I. -I$srcdir"; # invoke perl like this
 our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR="./libtest";

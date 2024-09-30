@@ -40,7 +40,7 @@ Test file for rename test
 Test file for rename test
 </file>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/file%TESTNUMBER.txt move %PWD/%LOGDIR/file%TESTNUMBER-renamed.txt %PWD/%LOGDIR/file%TESTNUMBER.txt
+%PERL %SRCDIR/libtest/test610.pl gone %PWD/%LOGDIR/file%TESTNUMBER.txt move %PWD/%LOGDIR/file%TESTNUMBER-renamed.txt %PWD/%LOGDIR/file%TESTNUMBER.txt
 </postcheck>
 </verify>
 </testcase>
