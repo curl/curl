@@ -1743,13 +1743,17 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
                            bool eos, CURLcode *err)
 {
   struct cf_call_data save;
-  ssize_t nwritten;
+  ssize_t nwritten = 0;
 
-  (void)eos; /* unused */
-  CF_DATA_SAVE(save, cf, data);
+  (void)eos;
+  /* OpenSSL and maybe other TLS libs do not like 0-length writes. Skip. */
   *err = CURLE_OK;
-  nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);
-  CF_DATA_RESTORE(cf, save);
+  if(len > 0) {
+    CF_DATA_SAVE(save, cf, data);
+    *err = CURLE_OK;
+    nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);
+    CF_DATA_RESTORE(cf, save);
+  }
   return nwritten;
 }
 
