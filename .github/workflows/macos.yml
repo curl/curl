@@ -437,42 +437,25 @@ jobs:
         # https://en.wikipedia.org/wiki/MacOS_version_history
         image: [macos-13, macos-14, macos-15]
         # Can skip these to reduce jobs:
-        #   13.1, 13.2.1 are fairly old.
-        #   13.3.1, 14.0.1 have the same default macOS SDK as 13.4.1 and identical test results.
         #   15.1 has the same default macOS SDK as 15.2 and identical test result.
         #   14.1, 15.4 not revealing new fallouts.
-        #xcode: ['13.1', '13.2.1', '13.3.1', '13.4.1', '14.0.1', '14.1', '14.2', '14.3.1', '15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0']  # all Xcode
-        #xcode: ['13.1', '13.2.1', '13.4.1', '14.1', '14.2', '14.3.1', '15.0.1', '15.2', '15.3', '15.4', '16.0']  # all SDK
-        #xcode: ['13.4.1', '14.2', '14.3.1', '15.0.1', '15.2', '15.3', '16.0']  # coverage
+        #xcode: ['14.1', '14.2', '14.3.1', '15.0.1', '15.1', '15.2', '15.3', '15.4', '16.0', '16.1']  # all Xcode
+        #xcode: ['14.1', '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
+        #xcode: [        '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
         xcode: ['']  # default Xcodes
         macos-version-min: ['10.8']
         build: [autotools, cmake]
         exclude:
           # Combinations uncovered by runner images:
-          - { image: macos-13, xcode: '13.1'   }
-          - { image: macos-13, xcode: '13.2.1' }
-          - { image: macos-13, xcode: '13.3.1' }
-          - { image: macos-13, xcode: '13.4.1' }
-          - { image: macos-13, xcode: '14.0.1' }
           - { image: macos-13, xcode: '15.3'   }
           - { image: macos-13, xcode: '15.4'   }
           - { image: macos-13, xcode: '16.0'   }
           - { image: macos-13, xcode: '16.1'   }
-          - { image: macos-14, xcode: '13.1'   }
-          - { image: macos-14, xcode: '13.2.1' }
-          - { image: macos-14, xcode: '13.3.1' }
-          - { image: macos-14, xcode: '13.4.1' }
-          - { image: macos-14, xcode: '14.0.1' }
           - { image: macos-14, xcode: '14.1'   }
           - { image: macos-14, xcode: '14.2'   }
           - { image: macos-14, xcode: '14.3.1' }
           - { image: macos-14, xcode: '16.0'   }
           - { image: macos-14, xcode: '16.1'   }
-          - { image: macos-15, xcode: '13.1'   }
-          - { image: macos-15, xcode: '13.2.1' }
-          - { image: macos-15, xcode: '13.3.1' }
-          - { image: macos-15, xcode: '13.4.1' }
-          - { image: macos-15, xcode: '14.0.1' }
           - { image: macos-15, xcode: '14.1'   }
           - { image: macos-15, xcode: '14.2'   }
           - { image: macos-15, xcode: '14.3.1' }
