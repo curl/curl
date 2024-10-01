@@ -82,6 +82,7 @@ my %warnings = (
     'MULTISPACE'            => 'multiple spaces used when not suitable',
     'NOSPACEC'              => 'missing space around ternary colon operator',
     'NOSPACEEQUALS'         => 'equals sign without preceding space',
+    'NOSPACEO'              => 'missing space around bitwise OR operator',
     'NOSPACEQ'              => 'missing space around ternary question mark operator',
     'NOSPACETHAN'           => 'missing space around less or greater than',
     'NOTEQUALSZERO',        => 'if/while comparison with != 0',
@@ -649,6 +650,20 @@ sub scanfile {
                           $line, length($m)+1, $file, $l,
                           "missing space after colon");
             }
+        }
+
+        # check spaces before bitwise OR operator
+        if($nostr =~ /^(.*)\w\|[^|]/i) {
+            checkwarn("NOSPACEO",
+                      $line, length($1)+1, $file, $l,
+                      "missing space before bitwise OR operator");
+        }
+
+        # check spaces after bitwise OR operator
+        if($nostr =~ /^(.*[^|])\|\w/i) {
+            checkwarn("NOSPACEO",
+                      $line, length($1)+1, $file, $l,
+                      "missing space after bitwise OR operator");
         }
 
         # check spaces before question mark
