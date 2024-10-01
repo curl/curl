@@ -204,14 +204,14 @@ typedef CURLcode (*Curl_datastream)(struct Curl_easy *data,
 
 #ifdef HAVE_GSSAPI
 # ifdef HAVE_GSSGNU
-#  include <gss.h>
+#  include "gss.h"
 # elif defined HAVE_GSSAPI_GSSAPI_H
-#  include <gssapi/gssapi.h>
+#  include "gssapi/gssapi.h"
 # else
-#  include <gssapi.h>
+#  include "gssapi.h"
 # endif
 # ifdef HAVE_GSSAPI_GSSAPI_GENERIC_H
-#  include <gssapi/gssapi_generic.h>
+#  include "gssapi/gssapi_generic.h"
 # endif
 #endif
 
