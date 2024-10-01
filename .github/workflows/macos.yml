@@ -428,15 +428,14 @@ jobs:
         compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@18, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
-        # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1,*14.2
-        # macos-13:                                       14.1, 14.2, 14.3.1,*15.0.1, 15.1, 15.2
-        # macos-14:                                                   14.3.1, 15.0.1, 15.1, 15.2, 15.3,*15.4, 16.0
-        # macos-15:                                                                                          *16.0, 16.1
-        # macOSSDK: 12.0, 12.1,   12.3,   12.3,   12.3,   13.0, 13.1, 13.3,   14.0,   14.2, 14.2, 14.4, 14.5, 15.0, 15.1
-        #           Monterey (2021)                       Ventura (2022)      Sonoma (2023)                   Sequoia (2024)
+        # macos-13: 14.1, 14.2, 14.3.1,*15.0.1, 15.1, 15.2
+        # macos-14:                     15.0.1, 15.1, 15.2, 15.3,*15.4
+        # macos-15:                                                    *16.0, 16.1
+        # macOSSDK: 13.0, 13.1, 13.3,   14.0,   14.2, 14.2, 14.4, 14.5, 15.0, 15.1
+        #           Ventura (2022)      Sonoma (2023)                   Sequoia (2024)
         # https://github.com/actions/runner-images/tree/main/images/macos
         # https://en.wikipedia.org/wiki/MacOS_version_history
-        image: [macos-12, macos-13, macos-14, macos-15]
+        image: [macos-13, macos-14, macos-15]
         # Can skip these to reduce jobs:
         #   13.1, 13.2.1 are fairly old.
         #   13.3.1, 14.0.1 have the same default macOS SDK as 13.4.1 and identical test results.
@@ -450,13 +449,6 @@ jobs:
         build: [autotools, cmake]
         exclude:
           # Combinations uncovered by runner images:
-          - { image: macos-12, xcode: '14.3.1' }
-          - { image: macos-12, xcode: '15.0.1' }
-          - { image: macos-12, xcode: '15.1'   }
-          - { image: macos-12, xcode: '15.2'   }
-          - { image: macos-12, xcode: '15.3'   }
-          - { image: macos-12, xcode: '15.4'   }
-          - { image: macos-12, xcode: '16.0'   }
           - { image: macos-13, xcode: '13.1'   }
           - { image: macos-13, xcode: '13.2.1' }
           - { image: macos-13, xcode: '13.3.1' }
@@ -465,6 +457,7 @@ jobs:
           - { image: macos-13, xcode: '15.3'   }
           - { image: macos-13, xcode: '15.4'   }
           - { image: macos-13, xcode: '16.0'   }
+          - { image: macos-13, xcode: '16.1'   }
           - { image: macos-14, xcode: '13.1'   }
           - { image: macos-14, xcode: '13.2.1' }
           - { image: macos-14, xcode: '13.3.1' }
@@ -472,6 +465,9 @@ jobs:
           - { image: macos-14, xcode: '14.0.1' }
           - { image: macos-14, xcode: '14.1'   }
           - { image: macos-14, xcode: '14.2'   }
+          - { image: macos-14, xcode: '14.3.1' }
+          - { image: macos-14, xcode: '16.0'   }
+          - { image: macos-14, xcode: '16.1'   }
           - { image: macos-15, xcode: '13.1'   }
           - { image: macos-15, xcode: '13.2.1' }
           - { image: macos-15, xcode: '13.3.1' }
@@ -485,7 +481,6 @@ jobs:
           - { image: macos-15, xcode: '15.2'   }
           - { image: macos-15, xcode: '15.3'   }
           - { image: macos-15, xcode: '15.4'   }
-          - { image: macos-12, compiler: 'llvm@18' }
           - { image: macos-13, compiler: 'llvm@18' }
           - { image: macos-14, compiler: 'llvm@18' }
           - { image: macos-15, compiler: 'llvm@15' }
@@ -499,13 +494,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
-          while [[ $? == 0 ]]; do
-            for i in 1 2 3; do
-              [ '${{ matrix.image }}' != 'macos-12' ] && brew update  # To avoid triggering updates needing build from source
-              brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; }
-            done
-            false Too many retries
-          done
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
