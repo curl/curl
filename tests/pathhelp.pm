@@ -64,8 +64,6 @@ BEGIN {
         sys_native_abs_path
         sys_native_current_path
         build_sys_abs_path
-        normalize_path
-        drives_mounted_on_cygdrive
     );
 }
 
