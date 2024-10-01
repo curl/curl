@@ -1199,7 +1199,7 @@ if(CURL_USE_GSSAPI)
       endif()
     endif()
 
-    include_directories(SYSTEM ${GSS_INCLUDE_DIRS})
+    include_directories(${GSS_INCLUDE_DIRS})
     link_directories(${GSS_LIBRARY_DIRS})
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${GSS_CFLAGS}")
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${GSS_LDFLAGS}")
