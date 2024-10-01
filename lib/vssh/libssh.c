@@ -1257,13 +1257,13 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
 
       if(data->set.remote_append)
         /* Try to open for append, but create if nonexisting */
-        flags = O_WRONLY|O_CREAT|O_APPEND;
+        flags = O_WRONLY | O_CREAT | O_APPEND;
       else if(data->state.resume_from > 0)
         /* If we have restart position then open for append */
-        flags = O_WRONLY|O_APPEND;
+        flags = O_WRONLY | O_APPEND;
       else
         /* Clear file before writing (normal behavior) */
-        flags = O_WRONLY|O_CREAT|O_TRUNC;
+        flags = O_WRONLY | O_CREAT | O_TRUNC;
 
       if(sshc->sftp_file)
         sftp_close(sshc->sftp_file);

@@ -99,7 +99,7 @@ static CURLcode mac_idn_to_ascii(const char *in, char **out)
     if(!iconv_result) {
       UErrorCode err = U_ZERO_ERROR;
       UIDNA* idna = uidna_openUTS46(
-        UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
+        UIDNA_CHECK_BIDI | UIDNA_NONTRANSITIONAL_TO_ASCII, &err);
       if(!U_FAILURE(err)) {
         UIDNAInfo info = UIDNA_INFO_INITIALIZER;
         char buffer[MAX_HOST_LENGTH] = {0};
@@ -127,7 +127,7 @@ static CURLcode mac_ascii_to_idn(const char *in, char **out)
   if(inlen < MAX_HOST_LENGTH) {
     UErrorCode err = U_ZERO_ERROR;
     UIDNA* idna = uidna_openUTS46(
-      UIDNA_CHECK_BIDI|UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
+      UIDNA_CHECK_BIDI | UIDNA_NONTRANSITIONAL_TO_UNICODE, &err);
     if(!U_FAILURE(err)) {
       UIDNAInfo info = UIDNA_INFO_INITIALIZER;
       char buffer[MAX_HOST_LENGTH] = {0};

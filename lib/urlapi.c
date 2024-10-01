@@ -1165,7 +1165,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     else {
       /* no scheme! */
 
-      if(!(flags & (CURLU_DEFAULT_SCHEME|CURLU_GUESS_SCHEME))) {
+      if(!(flags & (CURLU_DEFAULT_SCHEME | CURLU_GUESS_SCHEME))) {
         result = CURLUE_BAD_SCHEME;
         goto fail;
       }

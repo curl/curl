@@ -1123,16 +1123,17 @@ CURLcode curl_easy_pause(struct Curl_easy *data, int action)
   if(Curl_is_in_callback(data))
     recursive = TRUE;
   k = &data->req;
-  oldstate = k->keepon & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE);
+  oldstate = k->keepon & (KEEP_RECV_PAUSE | KEEP_SEND_PAUSE);
 
   /* first switch off both pause bits then set the new pause bits */
-  newstate = (k->keepon &~ (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) |
+  newstate = (k->keepon &~ (KEEP_RECV_PAUSE | KEEP_SEND_PAUSE)) |
     ((action & CURLPAUSE_RECV) ? KEEP_RECV_PAUSE : 0) |
     ((action & CURLPAUSE_SEND) ? KEEP_SEND_PAUSE : 0);
 
-  keep_changed = ((newstate & (KEEP_RECV_PAUSE| KEEP_SEND_PAUSE)) != oldstate);
-  not_all_paused = (newstate & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE)) !=
-                   (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE);
+  keep_changed = ((newstate & (KEEP_RECV_PAUSE | KEEP_SEND_PAUSE)) !=
+                   oldstate);
+  not_all_paused = (newstate & (KEEP_RECV_PAUSE | KEEP_SEND_PAUSE)) !=
+                   (KEEP_RECV_PAUSE | KEEP_SEND_PAUSE);
   unpause_read = ((k->keepon & ~newstate & KEEP_SEND_PAUSE) &&
                   (data->mstate == MSTATE_PERFORMING ||
                    data->mstate == MSTATE_RATELIMITING));

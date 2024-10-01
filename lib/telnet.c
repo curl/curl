@@ -1354,7 +1354,8 @@ static CURLcode telnet_do(struct Curl_easy *data, bool *done)
   }
 
   /* Tell Winsock what events we want to listen to */
-  if(WSAEventSelect(sockfd, event_handle, FD_READ|FD_CLOSE) == SOCKET_ERROR) {
+  if(WSAEventSelect(sockfd, event_handle,
+                    FD_READ | FD_CLOSE) == SOCKET_ERROR) {
     WSACloseEvent(event_handle);
     return CURLE_OK;
   }

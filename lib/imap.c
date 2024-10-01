@@ -137,7 +137,7 @@ const struct Curl_handler Curl_handler_imap = {
   PORT_IMAP,                        /* defport */
   CURLPROTO_IMAP,                   /* protocol */
   CURLPROTO_IMAP,                   /* family */
-  PROTOPT_CLOSEACTION|              /* flags */
+  PROTOPT_CLOSEACTION |             /* flags */
   PROTOPT_URLOPTIONS
 };
 

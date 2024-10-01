@@ -337,11 +337,11 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
     pfd[i].revents = 0;
     if(ARES_GETSOCK_READABLE(bitmask, i)) {
       pfd[i].fd = socks[i];
-      pfd[i].events |= POLLRDNORM|POLLIN;
+      pfd[i].events |= POLLRDNORM | POLLIN;
     }
     if(ARES_GETSOCK_WRITABLE(bitmask, i)) {
       pfd[i].fd = socks[i];
-      pfd[i].events |= POLLWRNORM|POLLOUT;
+      pfd[i].events |= POLLWRNORM | POLLOUT;
     }
     if(pfd[i].events)
       num++;
@@ -366,9 +366,9 @@ static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
     /* move through the descriptors and ask for processing on them */
     for(i = 0; i < num; i++)
       ares_process_fd((ares_channel)data->state.async.resolver,
-                      (pfd[i].revents & (POLLRDNORM|POLLIN)) ?
+                      (pfd[i].revents & (POLLRDNORM | POLLIN)) ?
                       pfd[i].fd : ARES_SOCKET_BAD,
-                      (pfd[i].revents & (POLLWRNORM|POLLOUT)) ?
+                      (pfd[i].revents & (POLLWRNORM | POLLOUT)) ?
                       pfd[i].fd : ARES_SOCKET_BAD);
   }
   return nfds;

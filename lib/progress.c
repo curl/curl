@@ -257,7 +257,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
   data->progress.dl.cur_size = 0;
   data->progress.ul.cur_size = 0;
   /* clear all bits except HIDE and HEADERS_OUT */
-  data->progress.flags &= PGRS_HIDE|PGRS_HEADERS_OUT;
+  data->progress.flags &= PGRS_HIDE | PGRS_HEADERS_OUT;
   Curl_ratelimit(data, data->progress.start);
 }
 

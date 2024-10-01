@@ -1310,11 +1310,11 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
   for(i = 0; i < cpfds.n; i++) {
     long mask = 0;
     if(cpfds.pfds[i].events & POLLIN)
-      mask |= FD_READ|FD_ACCEPT|FD_CLOSE;
+      mask |= FD_READ | FD_ACCEPT | FD_CLOSE;
     if(cpfds.pfds[i].events & POLLPRI)
       mask |= FD_OOB;
     if(cpfds.pfds[i].events & POLLOUT) {
-      mask |= FD_WRITE|FD_CONNECT|FD_CLOSE;
+      mask |= FD_WRITE | FD_CONNECT | FD_CLOSE;
       reset_socket_fdwrite(cpfds.pfds[i].fd);
     }
     if(mask) {
@@ -1386,9 +1386,9 @@ static CURLMcode multi_wait(struct Curl_multi *multi,
         curl_socket_t s = extra_fds[i].fd;
         wsa_events.lNetworkEvents = 0;
         if(WSAEnumNetworkEvents(s, NULL, &wsa_events) == 0) {
-          if(wsa_events.lNetworkEvents & (FD_READ|FD_ACCEPT|FD_CLOSE))
+          if(wsa_events.lNetworkEvents & (FD_READ | FD_ACCEPT | FD_CLOSE))
             mask |= CURL_WAIT_POLLIN;
-          if(wsa_events.lNetworkEvents & (FD_WRITE|FD_CONNECT|FD_CLOSE))
+          if(wsa_events.lNetworkEvents & (FD_WRITE | FD_CONNECT | FD_CLOSE))
             mask |= CURL_WAIT_POLLOUT;
           if(wsa_events.lNetworkEvents & FD_OOB)
             mask |= CURL_WAIT_POLLPRI;

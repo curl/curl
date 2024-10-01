@@ -2080,13 +2080,13 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
 
       if(data->set.remote_append)
         /* Try to open for append, but create if nonexisting */
-        flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_APPEND;
+        flags = LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_APPEND;
       else if(data->state.resume_from > 0)
         /* If we have restart position then open for append */
-        flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_APPEND;
+        flags = LIBSSH2_FXF_WRITE | LIBSSH2_FXF_APPEND;
       else
         /* Clear file before writing (normal behavior) */
-        flags = LIBSSH2_FXF_WRITE|LIBSSH2_FXF_CREAT|LIBSSH2_FXF_TRUNC;
+        flags = LIBSSH2_FXF_WRITE | LIBSSH2_FXF_CREAT | LIBSSH2_FXF_TRUNC;
 
       sshc->sftp_handle =
         libssh2_sftp_open_ex(sshc->sftp_session, sshp->path,

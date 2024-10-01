@@ -1614,7 +1614,7 @@ static CURLcode cf_h2_proxy_cntrl(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_h2_proxy = {
   "H2-PROXY",
-  CF_TYPE_IP_CONNECT|CF_TYPE_PROXY,
+  CF_TYPE_IP_CONNECT | CF_TYPE_PROXY,
   CURL_LOG_LVL_NONE,
   cf_h2_proxy_destroy,
   cf_h2_proxy_connect,

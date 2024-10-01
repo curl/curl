@@ -255,7 +255,7 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
       }
     }
     if(!rc && curl_url_set(uh, CURLUPART_URL, url,
-                           CURLU_GUESS_SCHEME|CURLU_NON_SUPPORT_SCHEME))
+                           CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME))
       rc = 2;
 
     if(!rc && curl_url_get(uh, cpart, &part, CURLU_DEFAULT_PORT))

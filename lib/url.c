@@ -2165,7 +2165,7 @@ static CURLcode parse_proxy(struct Curl_easy *data,
   /* When parsing the proxy, allowing non-supported schemes since we have
      these made up ones for proxies. Guess scheme for URLs without it. */
   uc = curl_url_set(uhp, CURLUPART_URL, proxy,
-                    CURLU_NON_SUPPORT_SCHEME|CURLU_GUESS_SCHEME);
+                    CURLU_NON_SUPPORT_SCHEME | CURLU_GUESS_SCHEME);
   if(!uc) {
     /* parsed okay as a URL */
     uc = curl_url_get(uhp, CURLUPART_SCHEME, &scheme, 0);

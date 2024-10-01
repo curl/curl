@@ -3268,7 +3268,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     /* Everything is fine. */
     infof(data, "successfully loaded CRL file:");
     X509_STORE_set_flags(store,
-                         X509_V_FLAG_CRL_CHECK|X509_V_FLAG_CRL_CHECK_ALL);
+                         X509_V_FLAG_CRL_CHECK | X509_V_FLAG_CRL_CHECK_ALL);
 
     infof(data, "  CRLfile: %s", ssl_crlfile);
   }

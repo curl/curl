@@ -1634,7 +1634,7 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
 {
   Curl_HttpReq httpreq = (Curl_HttpReq)data->state.httpreq;
   const char *request;
-  if((conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_FTP)) &&
+  if((conn->handler->protocol&(PROTO_FAMILY_HTTP | CURLPROTO_FTP)) &&
      data->state.upload)
     httpreq = HTTPREQ_PUT;
 
@@ -1749,9 +1749,9 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
        [brackets] if the hostname is a plain IPv6-address. RFC2732-style. */
     const char *host = conn->host.name;
 
-    if(((conn->given->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS)) &&
+    if(((conn->given->protocol&(CURLPROTO_HTTPS | CURLPROTO_WSS)) &&
         (conn->remote_port == PORT_HTTPS)) ||
-       ((conn->given->protocol&(CURLPROTO_HTTP|CURLPROTO_WS)) &&
+       ((conn->given->protocol&(CURLPROTO_HTTP | CURLPROTO_WS)) &&
         (conn->remote_port == PORT_HTTP)) )
       /* if(HTTPS on port 443) OR (HTTP on port 80) then do not include
          the port number in the host string */
@@ -2258,7 +2258,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : conn->host.name;
       const bool secure_context =
-        conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
+        conn->handler->protocol&(CURLPROTO_HTTPS | CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
         !strcmp(host, "::1") ? TRUE : FALSE;
@@ -2698,7 +2698,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   result = Curl_http_cookies(data, conn, &req);
 #ifndef CURL_DISABLE_WEBSOCKETS
-  if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+  if(!result && conn->handler->protocol&(CURLPROTO_WS | CURLPROTO_WSS))
     result = Curl_ws_request(data, &req);
 #endif
   if(!result)
@@ -3081,7 +3081,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
       const char *host = data->state.aptr.cookiehost ?
         data->state.aptr.cookiehost : conn->host.name;
       const bool secure_context =
-        conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
+        conn->handler->protocol&(CURLPROTO_HTTPS | CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
         !strcmp(host, "::1") ? TRUE : FALSE;
@@ -3965,7 +3965,7 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 
   result = http_rw_hd(data, hd, hdlen, &tmp, 0, &consumed);
   if(!result && is_eos) {
-    result = Curl_client_write(data, (CLIENTWRITE_BODY|CLIENTWRITE_EOS),
+    result = Curl_client_write(data, (CLIENTWRITE_BODY | CLIENTWRITE_EOS),
                                &tmp, 0);
   }
   return result;

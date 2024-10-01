@@ -330,7 +330,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
 
       /* Get contents from a given filename */
     case CURLFORM_FILECONTENT:
-      if(current_form->flags & (HTTPPOST_PTRCONTENTS|HTTPPOST_READFILE))
+      if(current_form->flags & (HTTPPOST_PTRCONTENTS | HTTPPOST_READFILE))
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
         const char *filename = array_state ?
@@ -397,7 +397,7 @@ CURLFORMcode FormAdd(struct curl_httppost **httppost,
       }
 
     case CURLFORM_BUFFERPTR:
-      current_form->flags |= HTTPPOST_PTRBUFFER|HTTPPOST_BUFFER;
+      current_form->flags |= HTTPPOST_PTRBUFFER | HTTPPOST_BUFFER;
       if(current_form->buffer)
         return_value = CURL_FORMADD_OPTION_TWICE;
       else {
@@ -761,7 +761,7 @@ void curl_formfree(struct curl_httppost *form)
     if(!(form->flags & HTTPPOST_PTRNAME))
       free(form->name); /* free the name */
     if(!(form->flags &
-         (HTTPPOST_PTRCONTENTS|HTTPPOST_BUFFER|HTTPPOST_CALLBACK))
+         (HTTPPOST_PTRCONTENTS | HTTPPOST_BUFFER | HTTPPOST_CALLBACK))
       )
       free(form->contents); /* free the contents */
     free(form->contenttype); /* free the content type */

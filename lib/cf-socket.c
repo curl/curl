@@ -1690,7 +1690,7 @@ static bool cf_socket_conn_is_alive(struct Curl_cfilter *cf,
 
   /* Check with 0 timeout if there are any events pending on the socket */
   pfd[0].fd = ctx->sock;
-  pfd[0].events = POLLRDNORM|POLLIN|POLLRDBAND|POLLPRI;
+  pfd[0].events = POLLRDNORM | POLLIN | POLLRDBAND | POLLPRI;
   pfd[0].revents = 0;
 
   r = Curl_poll(pfd, 1, 0);
@@ -1702,7 +1702,7 @@ static bool cf_socket_conn_is_alive(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "is_alive: poll timeout, assume alive");
     return TRUE;
   }
-  else if(pfd[0].revents & (POLLERR|POLLHUP|POLLPRI|POLLNVAL)) {
+  else if(pfd[0].revents & (POLLERR | POLLHUP | POLLPRI | POLLNVAL)) {
     CURL_TRC_CF(data, cf, "is_alive: err/hup/etc events, assume dead");
     return FALSE;
   }

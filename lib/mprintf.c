@@ -460,11 +460,11 @@ static int parsefmt(const char *format,
         break;
       case 'x':
         type = FORMAT_INTU;
-        flags |= FLAGS_HEX|FLAGS_UNSIGNED;
+        flags |= FLAGS_HEX | FLAGS_UNSIGNED;
         break;
       case 'X':
         type = FORMAT_INTU;
-        flags |= FLAGS_HEX|FLAGS_UPPER|FLAGS_UNSIGNED;
+        flags |= FLAGS_HEX | FLAGS_UPPER | FLAGS_UNSIGNED;
         break;
       case 'c':
         type = FORMAT_INT;
@@ -479,7 +479,7 @@ static int parsefmt(const char *format,
         break;
       case 'E':
         type = FORMAT_DOUBLE;
-        flags |= FLAGS_FLOATE|FLAGS_UPPER;
+        flags |= FLAGS_FLOATE | FLAGS_UPPER;
         break;
       case 'g':
         type = FORMAT_DOUBLE;
@@ -487,7 +487,7 @@ static int parsefmt(const char *format,
         break;
       case 'G':
         type = FORMAT_DOUBLE;
-        flags |= FLAGS_FLOATG|FLAGS_UPPER;
+        flags |= FLAGS_FLOATG | FLAGS_UPPER;
         break;
       default:
         /* invalid instruction, disregard and continue */

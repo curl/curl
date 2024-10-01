@@ -301,7 +301,7 @@ static CURLcode status_line(struct Curl_easy *data,
   Curl_debug(data, CURLINFO_HEADER_IN, Curl_dyn_ptr(&data->state.headerb),
              len);
 
-  writetype = CLIENTWRITE_HEADER|CLIENTWRITE_STATUS;
+  writetype = CLIENTWRITE_HEADER | CLIENTWRITE_STATUS;
   if(data->state.hconnect)
     writetype |= CLIENTWRITE_CONNECT;
   result = Curl_client_write(data, writetype,
@@ -1113,7 +1113,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     goto out;
 
-  if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
+  if(!result && conn->handler->protocol&(CURLPROTO_WS | CURLPROTO_WSS))
     result = Curl_ws_request(data, headers);
 
   result = Curl_add_timecondition(data, headers);

@@ -1952,7 +1952,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
      */
     uarg = va_arg(param, unsigned long);
     data->set.gssapi_delegation = (unsigned char)uarg&
-      (CURLGSSAPI_DELEGATION_POLICY_FLAG|CURLGSSAPI_DELEGATION_FLAG);
+      (CURLGSSAPI_DELEGATION_POLICY_FLAG | CURLGSSAPI_DELEGATION_FLAG);
     break;
   case CURLOPT_SSL_VERIFYPEER:
     /*

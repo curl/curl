@@ -918,8 +918,8 @@ void Curl_pollset_change(struct Curl_easy *data,
   if(!VALID_SOCK(sock))
     return;
 
-  DEBUGASSERT(add_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
-  DEBUGASSERT(remove_flags <= (CURL_POLL_IN|CURL_POLL_OUT));
+  DEBUGASSERT(add_flags <= (CURL_POLL_IN | CURL_POLL_OUT));
+  DEBUGASSERT(remove_flags <= (CURL_POLL_IN | CURL_POLL_OUT));
   DEBUGASSERT((add_flags&remove_flags) == 0); /* no overlap */
   for(i = 0; i < ps->num; ++i) {
     if(ps->sockets[i] == sock) {

@@ -588,13 +588,13 @@ static CURLcode wssh_statemach_act(struct Curl_easy *data, bool *block)
 
       if(data->set.remote_append)
         /* Try to open for append, but create if nonexisting */
-        flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_CREAT|WOLFSSH_FXF_APPEND;
+        flags = WOLFSSH_FXF_WRITE | WOLFSSH_FXF_CREAT | WOLFSSH_FXF_APPEND;
       else if(data->state.resume_from > 0)
         /* If we have restart position then open for append */
-        flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_APPEND;
+        flags = WOLFSSH_FXF_WRITE | WOLFSSH_FXF_APPEND;
       else
         /* Clear file before writing (normal behavior) */
-        flags = WOLFSSH_FXF_WRITE|WOLFSSH_FXF_CREAT|WOLFSSH_FXF_TRUNC;
+        flags = WOLFSSH_FXF_WRITE | WOLFSSH_FXF_CREAT | WOLFSSH_FXF_TRUNC;
 
       memset(&createattrs, 0, sizeof(createattrs));
       createattrs.per = (word32)data->set.new_file_perms;

@@ -73,13 +73,14 @@ CURLcode Curl_client_write(struct Curl_easy *data,
   CURLcode result;
 
   /* it is one of those, at least */
-  DEBUGASSERT(type & (CLIENTWRITE_BODY|CLIENTWRITE_HEADER|CLIENTWRITE_INFO));
+  DEBUGASSERT(type & (CLIENTWRITE_BODY |
+                      CLIENTWRITE_HEADER | CLIENTWRITE_INFO));
   /* BODY is only BODY (with optional EOS) */
   DEBUGASSERT(!(type & CLIENTWRITE_BODY) ||
-              ((type & ~(CLIENTWRITE_BODY|CLIENTWRITE_EOS)) == 0));
+              ((type & ~(CLIENTWRITE_BODY | CLIENTWRITE_EOS)) == 0));
   /* INFO is only INFO (with optional EOS) */
   DEBUGASSERT(!(type & CLIENTWRITE_INFO) ||
-              ((type & ~(CLIENTWRITE_INFO|CLIENTWRITE_EOS)) == 0));
+              ((type & ~(CLIENTWRITE_INFO | CLIENTWRITE_EOS)) == 0));
 
   if(!data->req.writer_stack) {
     result = do_init_writer_stack(data);

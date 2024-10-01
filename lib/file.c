@@ -209,7 +209,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
+  fd = open_readonly(actual_path, O_RDONLY | O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
@@ -325,9 +325,9 @@ static CURLcode file_upload(struct Curl_easy *data)
 #endif
 
   if(data->state.resume_from)
-    mode = MODE_DEFAULT|O_APPEND;
+    mode = MODE_DEFAULT | O_APPEND;
   else
-    mode = MODE_DEFAULT|O_TRUNC;
+    mode = MODE_DEFAULT | O_TRUNC;
 
   fd = open(file->path, mode, data->set.new_file_perms);
   if(fd < 0) {

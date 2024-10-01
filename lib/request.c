@@ -265,7 +265,7 @@ CURLcode Curl_req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
-  data->req.keepon &= ~(KEEP_SEND|KEEP_SEND_TIMED); /* we are done sending */
+  data->req.keepon &= ~(KEEP_SEND | KEEP_SEND_TIMED); /* we are done sending */
 
   Curl_pgrsTime(data, TIMER_POSTRANSFER);
   Curl_creader_done(data, data->req.upload_aborted);
@@ -474,6 +474,6 @@ CURLcode Curl_req_stop_send_recv(struct Curl_easy *data)
   /* stop receiving and ALL sending as well, including PAUSE and HOLD.
    * We might still be paused on receive client writes though, so
    * keep those bits around. */
-  data->req.keepon &= ~(KEEP_RECV|KEEP_SENDBITS);
+  data->req.keepon &= ~(KEEP_RECV | KEEP_SENDBITS);
   return Curl_req_abort_sending(data);
 }

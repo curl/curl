@@ -124,7 +124,7 @@ static int data_pending(struct Curl_easy *data)
 
   /* in the case of libssh2, we can never be really sure that we have emptied
      its internal buffers so we MUST always try until we get EAGAIN back */
-  return conn->handler->protocol&(CURLPROTO_SCP|CURLPROTO_SFTP) ||
+  return conn->handler->protocol&(CURLPROTO_SCP | CURLPROTO_SFTP) ||
     Curl_conn_data_pending(data, FIRSTSOCKET);
 }
 
@@ -364,7 +364,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
       data->state.select_bits |= CURL_CSELECT_OUT;
   }
 
-  if(((k->keepon & (KEEP_RECV|KEEP_SEND)) == KEEP_SEND) &&
+  if(((k->keepon & (KEEP_RECV | KEEP_SEND)) == KEEP_SEND) &&
      (conn->bits.close || is_multiplex)) {
     /* When we have read the entire thing and the close bit is set, the server
        may now close the connection. If there is now any kind of sending going
@@ -412,7 +412,7 @@ static int select_bits_paused(struct Curl_easy *data, int select_bits)
       !(data->req.keepon & KEEP_SEND_PAUSE)))
     return FALSE;
 
-  return (data->req.keepon & (KEEP_RECV_PAUSE|KEEP_SEND_PAUSE));
+  return (data->req.keepon & (KEEP_RECV_PAUSE | KEEP_SEND_PAUSE));
 }
 
 /*
@@ -439,7 +439,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
 #ifdef USE_HYPER
   if(data->conn->datastream) {
     result = data->conn->datastream(data, data->conn, &didwhat,
-                                    CURL_CSELECT_OUT|CURL_CSELECT_IN);
+                                    CURL_CSELECT_OUT | CURL_CSELECT_IN);
     if(result || data->req.done)
       goto out;
   }
@@ -515,7 +515,7 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
   }
 
   /* If there is nothing more to send/recv, the request is done */
-  if(0 == (k->keepon&(KEEP_RECVBITS|KEEP_SENDBITS)))
+  if(0 == (k->keepon&(KEEP_RECVBITS | KEEP_SENDBITS)))
     data->req.done = TRUE;
 
 out:
@@ -1005,7 +1005,7 @@ CURLcode Curl_retry_request(struct Curl_easy *data, char **url)
      protocol is HTTP as when uploading over HTTP we will still get a
      response */
   if(data->state.upload &&
-     !(conn->handler->protocol&(PROTO_FAMILY_HTTP|CURLPROTO_RTSP)))
+     !(conn->handler->protocol&(PROTO_FAMILY_HTTP | CURLPROTO_RTSP)))
     return CURLE_OK;
 
   if((data->req.bytecount + data->req.headerbytecount == 0) &&

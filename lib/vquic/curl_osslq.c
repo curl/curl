@@ -1113,21 +1113,21 @@ static CURLcode cf_osslq_h3conn_init(struct cf_osslq_ctx *ctx, SSL *conn,
   }
 
   result = cf_osslq_stream_open(&h3->s_ctrl, conn,
-                                SSL_STREAM_FLAG_ADVANCE|SSL_STREAM_FLAG_UNI,
+                                SSL_STREAM_FLAG_ADVANCE | SSL_STREAM_FLAG_UNI,
                                 &ctx->stream_bufcp, NULL);
   if(result) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto out;
   }
   result = cf_osslq_stream_open(&h3->s_qpack_enc, conn,
-                                SSL_STREAM_FLAG_ADVANCE|SSL_STREAM_FLAG_UNI,
+                                SSL_STREAM_FLAG_ADVANCE | SSL_STREAM_FLAG_UNI,
                                 &ctx->stream_bufcp, NULL);
   if(result) {
     result = CURLE_QUIC_CONNECT_ERROR;
     goto out;
   }
   result = cf_osslq_stream_open(&h3->s_qpack_dec, conn,
-                                SSL_STREAM_FLAG_ADVANCE|SSL_STREAM_FLAG_UNI,
+                                SSL_STREAM_FLAG_ADVANCE | SSL_STREAM_FLAG_UNI,
                                 &ctx->stream_bufcp, NULL);
   if(result) {
     result = CURLE_QUIC_CONNECT_ERROR;
