@@ -287,6 +287,11 @@ sub clearlocks {
             $handle = "handle64";
         }
         if(checkcmd($handle)) {
+            my @handlesall = `$handle -accepteula -nobanner`;
+            print "clearlocks: $^O: handle-ALL result: " . @handlesall . " lines\n";
+            for my $tryhandle (@handlesall) {
+                print "clearlocks: $^O: handle-ALL $dir line: |$tryhandle|\n";
+            }
             # https://learn.microsoft.com/sysinternals/downloads/handle#usage
             my $cmd = "$handle $dir -accepteula -nobanner";
             print "clearlocks: $^O: Executing: '$cmd'\n";
