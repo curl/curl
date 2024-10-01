@@ -155,13 +155,15 @@ our $stunnel;        # path to stunnel command
 #
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
-    my $sep = '[:]';
+    my @paths;
     if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
-        $sep = '[;]';
+        @paths=(split(';', $ENV{'PATH'}), @extrapaths);
     }
-    my @paths=(split(m/$sep/, $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-               "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
+    else {
+        @paths=(split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+                "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
+    }
     for(@paths) {
         if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
