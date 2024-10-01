@@ -524,7 +524,6 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            LDFLAGS+=' -v'
           fi
 
           # gcc ships with an `include-fixed` header set, which overrides SDK
@@ -626,7 +625,7 @@ jobs:
             export CFLAGS
             if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
-              CC+=" --target=$(uname -m)-apple-darwin"
+              CC+=" --target=$(uname -m)-apple-darwin --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
             fi
             if [ '${{ matrix.compiler }}' != 'clang' ]; then
               options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
