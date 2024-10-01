@@ -696,27 +696,39 @@ class CurlClient:
                             with_tcpdump=with_tcpdump,
                             extra_args=extra_args)
 
-    def ftp_upload(self, urls: List[str], fupload,
+    def ftp_upload(self, urls: List[str],
+                   fupload: Optional[Any] = None,
+                   updata: Optional[str] = None,
                    with_stats: bool = True,
                    with_profile: bool = False,
                    with_tcpdump: bool = False,
                    extra_args: List[str] = None):
         if extra_args is None:
             extra_args = []
-        extra_args.extend([
-            '--upload-file', fupload
-        ])
+        if fupload is not None:
+            extra_args.extend([
+                '--upload-file', fupload
+            ])
+        elif updata is not None:
+            extra_args.extend([
+                '--upload-file', '-'
+            ])
+        else:
+            raise Exception('need either file or data to upload')
         if with_stats:
             extra_args.extend([
                 '-w', '%{json}\\n'
             ])
         return self._raw(urls, options=extra_args,
+                         intext=updata,
                          with_stats=with_stats,
                          with_headers=False,
                          with_profile=with_profile,
                          with_tcpdump=with_tcpdump)
 
-    def ftp_ssl_upload(self, urls: List[str], fupload,
+    def ftp_ssl_upload(self, urls: List[str],
+                       fupload: Optional[Any] = None,
+                       updata: Optional[str] = None,
                        with_stats: bool = True,
                        with_profile: bool = False,
                        with_tcpdump: bool = False,
@@ -726,7 +738,7 @@ class CurlClient:
         extra_args.extend([
             '--ssl-reqd',
         ])
-        return self.ftp_upload(urls=urls, fupload=fupload,
+        return self.ftp_upload(urls=urls, fupload=fupload, updata=updata,
                                with_stats=with_stats, with_profile=with_profile,
                                with_tcpdump=with_tcpdump,
                                extra_args=extra_args)

@@ -220,6 +220,23 @@ class TestVsFTPD:
         r.check_stats(count=count, http_status=226)
         self.check_upload(env, vsftpds, docname=docname)
 
+    @pytest.mark.parametrize("indata", [
+        '1234567890', ''
+    ])
+    def test_31_10_upload_stdin(self, env: Env, vsftpds: VsFTPD, indata):
+        curl = CurlClient(env=env)
+        docname = "upload_31_10"
+        dstfile = os.path.join(vsftpds.docs_dir, docname)
+        self._rmf(dstfile)
+        count = 1
+        url = f'ftp://{env.ftp_domain}:{vsftpds.port}/{docname}'
+        r = curl.ftp_ssl_upload(urls=[url], updata=indata, with_stats=True)
+        r.check_stats(count=count, http_status=226)
+        assert os.path.exists(dstfile)
+        destdata = open(dstfile).readlines()
+        expdata = [indata] if len(indata) else []
+        assert expdata == destdata, f'exected: {expdata}, got: {destdata}'
+
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):
         for i in range(count):
