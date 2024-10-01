@@ -42,7 +42,7 @@ handle is no longer connected to the multi handle
 removed
 
 When this function is called, remaining entries in the connection pool held by
-the multi handle will be shut down, which might trigger calls to the
+the multi handle are shut down, which might trigger calls to the
 CURLMOPT_SOCKETFUNCTION(3) callback.
 
 Passing in a NULL pointer in *multi_handle* makes this function return
