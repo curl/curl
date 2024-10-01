@@ -58,8 +58,8 @@ CURLcode test(char *URL)
 
   /* count the number of requests by reading the first header of each
      request. */
-  origins = (CURLH_HEADER|CURLH_TRAILER|CURLH_CONNECT|
-             CURLH_1XX|CURLH_PSEUDO);
+  origins = (CURLH_HEADER | CURLH_TRAILER | CURLH_CONNECT|
+             CURLH_1XX | CURLH_PSEUDO);
   do {
     h = curl_easy_nextheader(curl, origins, count, NULL);
     if(h)

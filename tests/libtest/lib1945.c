@@ -72,7 +72,7 @@ CURLcode test(char *URL)
   if(res) {
     printf("badness: %d\n", res);
   }
-  showem(easy, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
+  showem(easy, CURLH_CONNECT | CURLH_HEADER | CURLH_TRAILER | CURLH_1XX);
 
 test_cleanup:
   curl_easy_cleanup(easy);
