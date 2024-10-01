@@ -25,22 +25,14 @@ Connection: close
 #
 # Client-side
 <client>
-# This relies on the debug feature to allow us to set a directory
-# in which to store the -O output
-<features>
-Debug
-</features>
 <server>
 http
 </server>
 <name>
 HTTP GET with -O and --remote-time
 </name>
-<setenv>
-CURL_TESTDIR=%LOGDIR
-</setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O --remote-time
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -O --remote-time --output-dir %LOGDIR
 </command>
 # Verify the mtime of the file. The mtime is specifically chosen to be an even
 # number so that it can be represented exactly on a FAT filesystem.

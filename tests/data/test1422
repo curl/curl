@@ -24,10 +24,7 @@ Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=str//nge
 #
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O and -J output in, using the CURL_TESTDIR variable
 <features>
-Debug
 file
 </features>
 <server>
@@ -36,11 +33,8 @@ http
 <name>
 HTTP GET with -O -J and Content-Disposition (empty file)
 </name>
-<setenv>
-CURL_TESTDIR=%LOGDIR
-</setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O file://%FILE_PWD/%LOGDIR/name%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O file://%FILE_PWD/%LOGDIR/name%TESTNUMBER --output-dir %LOGDIR
 </command>
 </client>
 
