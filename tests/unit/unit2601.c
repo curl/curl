@@ -177,7 +177,7 @@ static void check_bufq(size_t pool_spares,
 
   /* Test SOFT_LIMIT option */
   Curl_bufq_free(&q);
-  Curl_bufq_init2(&q, chunk_size, max_chunks, (opts|BUFQ_OPT_SOFT_LIMIT));
+  Curl_bufq_init2(&q, chunk_size, max_chunks, (opts | BUFQ_OPT_SOFT_LIMIT));
   nwritten = 0;
   while(!Curl_bufq_is_full(&q)) {
     n = Curl_bufq_write(&q, test_data, wsize, &result);

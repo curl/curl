@@ -418,7 +418,7 @@ static int init_fifo(GlobalInfo *g)
   g->input = fdopen(sockfd, "r");
 
   fprintf(MSG_OUT, "Now, pipe some URL's into > %s\n", fifo);
-  event_assign(&g->fifo_event, g->evbase, sockfd, EV_READ|EV_PERSIST,
+  event_assign(&g->fifo_event, g->evbase, sockfd, EV_READ | EV_PERSIST,
                fifo_cb, g);
   event_add(&g->fifo_event, NULL);
   return (0);

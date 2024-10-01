@@ -71,11 +71,11 @@ static const struct testcase tests[] = {
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[["
    "[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[[",
-   NOMATCH|MAC_FAIL},
+   NOMATCH | MAC_FAIL},
 
   { "\\[",                      "[",                      MATCH },
-  { "[",                        "[",             NOMATCH|LINUX_MATCH|MAC_FAIL},
-  { "[]",                       "[]",            NOMATCH|LINUX_MATCH|MAC_FAIL},
+  { "[",                        "[",         NOMATCH | LINUX_MATCH | MAC_FAIL},
+  { "[]",                       "[]",        NOMATCH | LINUX_MATCH | MAC_FAIL},
   { "[][]",                     "[",                      MATCH },
   { "[][]",                     "]",                      MATCH },
   { "[[]",                      "[",                      MATCH },
@@ -117,7 +117,7 @@ static const struct testcase tests[] = {
   { "[][?*-]",                  "*",                      MATCH },
   { "[][?*-]",                  "-",                      MATCH },
   { "[]?*-]",                   "-",                      MATCH },
-  { "[\xFF]",                   "\xFF", MATCH|LINUX_FAIL|MAC_FAIL},
+  { "[\xFF]",                   "\xFF", MATCH | LINUX_FAIL | MAC_FAIL},
   { "?/b/c",                    "a/b/c",                  MATCH },
   { "^_{}~",                    "^_{}~",                  MATCH },
   { "!#%+,-./01234567889",      "!#%+,-./01234567889",    MATCH },
@@ -139,9 +139,9 @@ static const struct testcase tests[] = {
   { "*[^a].t?t",                "ba.txt",                 NOMATCH },
   { "*[^a].t?t",                "ab.txt",                 MATCH },
   { "*[^a]",                    "",                       NOMATCH },
-  { "[!\xFF]",                  "",             NOMATCH|LINUX_FAIL},
-  { "[!\xFF]",                  "\xFF",  NOMATCH|LINUX_FAIL|MAC_FAIL},
-  { "[!\xFF]",                  "a",      MATCH|LINUX_FAIL|MAC_FAIL},
+  { "[!\xFF]",                  "",             NOMATCH | LINUX_FAIL},
+  { "[!\xFF]",                  "\xFF",  NOMATCH | LINUX_FAIL | MAC_FAIL},
+  { "[!\xFF]",                  "a",      MATCH | LINUX_FAIL | MAC_FAIL},
   { "[!?*[]",                   "?",                      NOMATCH },
   { "[!!]",                     "!",                      NOMATCH },
   { "[!!]",                     "x",                      MATCH },
@@ -173,8 +173,8 @@ static const struct testcase tests[] = {
   { "[^[:blank:]]",             "\t",                     NOMATCH },
   { "[^[:print:]]",             "\10",                    MATCH },
   { "[[:lower:]][[:lower:]]",   "ll",                     MATCH },
-  { "[[:foo:]]",                "bar",                    NOMATCH|MAC_FAIL},
-  { "[[:foo:]]",                "f]",         MATCH|LINUX_NOMATCH|MAC_FAIL},
+  { "[[:foo:]]",                "bar",                    NOMATCH | MAC_FAIL},
+  { "[[:foo:]]",                "f]",        MATCH | LINUX_NOMATCH | MAC_FAIL},
 
   { "Curl[[:blank:]];-)",       "Curl ;-)",               MATCH },
   { "*[[:blank:]]*",            " ",                      MATCH },
@@ -212,7 +212,7 @@ static const struct testcase tests[] = {
   { "x",                        "",                       NOMATCH },
 
   /* backslash */
-  { "\\",                       "\\",                     MATCH|LINUX_NOMATCH},
+  { "\\",                       "\\",                   MATCH | LINUX_NOMATCH},
   { "\\\\",                     "\\",                     MATCH },
   { "\\\\",                     "\\\\",                   NOMATCH },
   { "\\?",                      "?",                      MATCH },
@@ -249,7 +249,7 @@ static const struct testcase tests[] = {
   {"**]*[*[\x13]**[*\x13)]*]*[**[*\x13~r-]*]**[.*]*[\xe3\xe3\xe3\xe3\xe3\xe3"
    "\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3\xe3"
    "\xe3\xe3\xe3\xe3\xe3*[\x13]**[*\x13)]*]*[*[\x13]*[~r]*]*\xba\x13\xa6~b-]*",
-                                "a",                      NOMATCH|LINUX_FAIL}
+                                "a",                      NOMATCH | LINUX_FAIL}
 };
 
 static const char *ret2name(int i)
@@ -295,7 +295,7 @@ UNITTEST_START
   for(i = 0; i < testnum; i++) {
     int result = tests[i].result;
     int rc = Curl_fnmatch(NULL, tests[i].pattern, tests[i].string);
-    if(result & (LINUX_DIFFER|MAC_DIFFER)) {
+    if(result & (LINUX_DIFFER | MAC_DIFFER)) {
       if((result & LINUX_DIFFER) && (machine == SYSTEM_LINUX))
         result >>= LINUX_SHIFT;
       else if((result & MAC_DIFFER) && (machine == SYSTEM_MACOS))
