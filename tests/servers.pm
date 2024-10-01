@@ -102,6 +102,7 @@ use sshhelp qw(
 use pathhelp qw(
     exe_ext
     os_is_win
+    build_sys_abs_path
     sys_native_abs_path
     );
 
