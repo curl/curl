@@ -110,6 +110,7 @@ CURLcode test(char *URL)
 
   easy_init(hnd);
   easy_setopt(hnd, CURLOPT_URL, URL);
+  easy_setopt(hnd, CURLOPT_CONNECTTIMEOUT, 1L);
   easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsread);
   easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
   easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
@@ -126,6 +127,7 @@ CURLcode test(char *URL)
 
   easy_init(hnd);
   easy_setopt(hnd, CURLOPT_URL, URL);
+  easy_setopt(hnd, CURLOPT_CONNECTTIMEOUT, 1L);
   easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsreadfail);
   easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
   easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);

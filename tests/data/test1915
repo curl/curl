@@ -30,7 +30,7 @@ lib%TESTNUMBER
 </tool>
 
 <command>
-http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER --connect-timeout 1
+http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 </command>
 </client>
 
