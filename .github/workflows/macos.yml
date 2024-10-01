@@ -530,7 +530,11 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+            CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+            CC+=" --target=$(uname -m)-apple-darwin"
+            CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+          fi
 
           # gcc ships with an `include-fixed` header set, which overrides SDK
           # headers with the intent of making them compatible with gcc. The
@@ -625,11 +629,6 @@ jobs:
                 mv "${libgccdir}/include-fixed/${f}" "${libgccdir}/include-fixed/${f}-BAK"
               fi
             done
-          fi
-
-          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
-            CC+=" --target=$(uname -m)-apple-darwin"
-            CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
 
           if [ '${{ matrix.build }}' = 'autotools' ]; then
