@@ -94,16 +94,6 @@ BEGIN {
 }
 
 #######################################################################
-# Performs path "normalization": all slashes converted to forward
-# slashes (except leading slash), all duplicated slashes are replaced
-# with single slashes, all relative directories ('./' and '../') are
-# resolved if possible.
-# Path processed as string, directories are not checked for presence so
-# path for not yet existing directory can be "normalized".
-#
-sub normalize_path;
-
-#######################################################################
 # Returns current working directory in Windows format on Windows.
 #
 sub sys_native_current_path {
@@ -165,7 +155,7 @@ sub build_sys_abs_path {
         $new = Cygwin::win_to_posix_path($path, 1);
     }
     else {
-        $new = normalize_path(Cwd::abs_path($path));
+        $new = Cwd::abs_path($path);
 
         if($new =~ m{^([A-Za-z]):(.*)}) {
             $new = "/" . lc($1) . $2;
@@ -174,78 +164,6 @@ sub build_sys_abs_path {
     }
 
     return $new;
-}
-
-#######################################################################
-# Performs path "normalization": all slashes converted to forward
-# slashes (except leading slash), all duplicated slashes are replaced
-# with single slashes, all relative directories ('./' and '../') are
-# resolved if possible.
-# Path processed as string, directories are not checked for presence so
-# path for not yet existing directory can be "normalized".
-#
-sub normalize_path {
-    my ($path) = @_;
-
-    # Don't process empty paths.
-    return $path if $path eq '';
-
-    if($path !~ m{(?:^|\\|/)\.{1,2}(?:\\|/|$)}) {
-        # Speed up processing of simple paths.
-        my $first_char = substr($path, 0, 1);
-        $path =~ s{[\\/]+}{/}g;
-        # Restore starting backslash if any.
-        substr($path, 0, 1, $first_char);
-        return $path;
-    }
-
-    my @arr;
-    my $prefix;
-    my $have_root = 0;
-
-    # Check whether path starts from Windows drive. ('C:path' or 'C:\path')
-    if($path =~ m{^([a-zA-Z]:(/|\\)?)(.*$)}) {
-        $prefix = $1;
-        $have_root = 1 if defined $2;
-        # Process path separately from drive letter.
-        @arr = split(m{\/|\\}, $3);
-        # Replace backslash with forward slash if required.
-        substr($prefix, 2, 1, '/') if $have_root;
-    }
-    else {
-        if($path =~ m{^(\/|\\)}) {
-            $have_root = 1;
-            $prefix = $1;
-        }
-        else {
-            $prefix = '';
-        }
-        @arr = split(m{\/|\\}, $path);
-    }
-
-    my $p = 0;
-    my @res;
-
-    for my $el (@arr) {
-        if(length($el) == 0 || $el eq '.') {
-            next;
-        }
-        elsif($el eq '..' && @res > 0 && $res[-1] ne '..') {
-            pop @res;
-            next;
-        }
-        push @res, $el;
-    }
-    if($have_root && @res > 0 && $res[0] eq '..') {
-        warn "Error processing path \"$path\": " .
-             "Parent directory of root directory does not exist!\n";
-        return undef;
-    }
-
-    my $ret = $prefix . join('/', @res);
-    $ret .= '/' if($path =~ m{\\$|/$} && scalar @res > 0);
-
-    return $ret;
 }
 #
 #***************************************************************************
