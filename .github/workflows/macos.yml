@@ -645,6 +645,7 @@ jobs:
             if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
               options+=' -DCMAKE_EXE_LINKER_FLAGS=-fuse-ld=lld'
               options+=' -DCMAKE_SHARED_LINKER_FLAGS=-fuse-ld=lld'
+              options+=" -DCMAKE_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
             fi
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
