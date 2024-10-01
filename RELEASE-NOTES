@@ -11,6 +11,7 @@ This release includes the following changes:
  o curl: --create-dirs works for --dump-header as well [4]
  o gtls: Add P12 format support [9]
  o ipfs: add options to disable [8]
+ o WebSockets: make support official (non-experimental) [106]
 
 This release includes the following bugfixes:
 
@@ -36,6 +37,7 @@ This release includes the following bugfixes:
  o cmake: expand CURL_USE_PKGCONFIG to non-cross MINGW [13]
  o cmake: fix broken dependency chain for cmdline-opts, tidy-ups [11]
  o cmake: make `test-ci` target skip building dependencies [88]
+ o cmake: readd `generate-curl.1` dependency for `src` just in case [86]
  o cmake: require quictls (or fork) when using msh3 on non-Windows [14]
  o cmake: separate target for examples, optimize CI, fix fallouts [16]
  o cmake: sync torture test parallelism with autotools [35]
@@ -45,9 +47,12 @@ This release includes the following bugfixes:
  o curl_trc: fix build with verbose messages disabled [79]
  o curl_url_set.md: document HOST handling when URL is parsed [2]
  o CURLMOPT_PIPELINING.md: clarify that CURLPIPE_NOTHING is not default [54]
+ o docs/cmdline-opts: GnuTLS supports PKCS#11 URI in --cert option [101]
+ o ftp: fix 0-length last write on upload from stdin [76]
  o lib, src, tests: added space around ternary expressions [56]
  o lib/cw-out: initialize 'flush_all' directly [62]
  o lib/src: white space edits to comply better with code style [47]
+ o lib: fix disabled-verbose-strings + enable-debug build warnings
  o lib: fix unity builds with BearSSL, MSH3, Quiche, OmniOS [32]
  o libssh.c: handle EGAINS during proto-connect correctly [23]
  o libssh2: use the Curl_* memory functions to avoid memdebug [22]
@@ -58,9 +63,13 @@ This release includes the following bugfixes:
  o openssl: convert a memcpy to dynbuf use [57]
  o openssl: remove two strcpy() calls [64]
  o processhelp.pm: improve taskkill calls (Windows) [52]
+ o quic: use send/recvmmsg when available [93]
  o request: on shutdown send, proceed normally on timeout [18]
  o runtests.md: suggest a value for -j for torture tests
+ o runtests: drop unused code for old/classic-mingw support [87]
+ o select: use poll() if existing, avoid poll() with no sockets [75]
  o sendf: add condition to max-filesize check [3]
+ o singleuse: make `git grep` faster, add Apple `nm` support [109]
  o socks_gssapi: switch to dynbuf from buffer with strcpy [42]
  o test1035: convert host name back to utf8 as should be [63]
  o test1540: add debug logging [58]
@@ -69,6 +78,7 @@ This release includes the following bugfixes:
  o test504: fix handling on pending connect [59]
  o testrun: explicitly set proper IP address for stunnel listen/connect [61]
  o tests/valgrind.pm: fix warnings with no valgrind report to show [25]
+ o tests: add and use `%PERL` variable to refer to the Perl binary [82]
  o tests: add codeset-utf8 as a feature [66]
  o tests: add file: tests with existing files [45]
  o tests: check http/2 and http/3 server responsiveness [28]
@@ -82,6 +92,8 @@ This release includes the following bugfixes:
  o tests: postcheck is now in verify [69]
  o tests: remove all valgrind disable instructions [21]
  o tests: remove the %FTPTIME3 variable [41]
+ o tests: replace `%PWD` with `%FILE_PWD` for `file://` [84]
+ o tests: replace hard-coded `/dev/null` with variable [81]
  o tests: speed up builds with single-binary test bundles [29]
  o tests: testrunner fairness [39]
  o tests: testrunner reliability improvements [55]
@@ -110,13 +122,14 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aki Sakurai, Baruch Siach, Dan Fandrich, Daniel Stenberg, Gabriel Marin,
-  Ian Spence, Jon Rumsey, Kai Pastor, lomberd2 on github, MacKenzie,
-  Montg0mery on github, Nicolas George, Pavel Kropachev, ralfjunker on github,
+  Aki Sakurai, Baruch Siach, Dan Fandrich, Daniel Stenberg,
+  Denis Goleshchikhin, dependabot[bot], Gabriel Marin, Ian Spence, Jon Rumsey,
+  Kai Pastor, lomberd2 on github, MacKenzie, Montg0mery on github,
+  Nicolas George, Pavel Kropachev, ralfjunker on github,
   Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Stefan Eissing,
   Tal Regev, Tatsuhiro Tsujikawa, Testclutch, Venkat Krishna R, Viktor Szakats,
   vvb2060 on github
-  (24 contributors)
+  (26 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -191,11 +204,22 @@ References to bug reports and discussions on issues:
  [70] = https://curl.se/bug/?i=15013
  [71] = https://curl.se/bug/?i=15034
  [72] = https://curl.se/bug/?i=15035
+ [75] = https://curl.se/bug/?i=15096
+ [76] = https://curl.se/bug/?i=15101
  [77] = https://curl.se/bug/?i=14990
  [78] = https://curl.se/bug/?i=15033
  [79] = https://curl.se/bug/?i=15026
  [80] = https://curl.se/bug/?i=15028
+ [81] = https://curl.se/bug/?i=15098
+ [82] = https://curl.se/bug/?i=15097
  [83] = https://curl.se/bug/?i=15027
+ [84] = https://curl.se/bug/?i=15090
  [85] = https://curl.se/bug/?i=15012
+ [86] = https://curl.se/bug/?i=15088
+ [87] = https://curl.se/bug/?i=15087
  [88] = https://curl.se/bug/?i=15001
  [89] = https://curl.se/bug/?i=15010
+ [93] = https://curl.se/bug/?i=14880
+ [101] = https://curl.se/bug/?i=15075
+ [106] = https://curl.se/bug/?i=14936
+ [109] = https://curl.se/bug/?i=15070
