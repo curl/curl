@@ -495,7 +495,7 @@ jobs:
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do
             for i in 1 2 3; do
-              [ '${{ matrix.image }}' != 'macos-12' ] && brew update  # Triggers builds from source
+              [ '${{ matrix.image }}' != 'macos-12' ] && brew update  # To avoid triggering updates needing build from source
               brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; }
             done
             false Too many retries
