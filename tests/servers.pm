@@ -275,6 +275,7 @@ sub clearlocks {
 
     if(os_is_win()) {
         $dir = sys_native_abs_path($dir);
+        $dir =~ s/\//\\\\/g;
         my $handle = "handle";
         if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
             $handle = "handle64";
