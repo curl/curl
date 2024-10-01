@@ -102,6 +102,7 @@ use sshhelp qw(
 use pathhelp qw(
     exe_ext
     os_is_win
+    build_sys_abs_path
     sys_native_abs_path
     );
 
@@ -127,7 +128,7 @@ my %run;          # running server
 my %runcert;      # cert file currently in use by an ssl running server
 my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
-my $posix_pwd=$pwd;        # current working directory
+my $posix_pwd = build_sys_abs_path($pwd);  # current working directory in POSIX format
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
 my $portrange = 999;       # space from which to choose a random port
                            # don't increase without making sure generated port
