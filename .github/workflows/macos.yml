@@ -419,7 +419,7 @@ jobs:
       fail-fast: false
       matrix:
         config: [SecureTransport]  # also: OpenSSL
-        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, clang]
+        compiler: [gcc-12, gcc-13, gcc-14, llvm@15, llvm@16, clang]
         # Xcode support matrix as of 2024-07, with default macOS SDK versions and OS names, years:
         # * = default Xcode on the runner.
         # macos-12: 13.1, 13.2.1, 13.3.1, 13.4.1, 14.0.1, 14.1,*14.2
@@ -479,6 +479,10 @@ jobs:
           - { image: macos-15, xcode: '15.2'   }
           - { image: macos-15, xcode: '15.3'   }
           - { image: macos-15, xcode: '15.4'   }
+          - { image: macos-12, compiler: 'llvm@16' }
+          - { image: macos-13, compiler: 'llvm@16' }
+          - { image: macos-14, compiler: 'llvm@16' }
+          - { image: macos-15, compiler: 'llvm@15' }
           # Reduce build combinations, by dropping less interesting ones
           - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, build: cmake }
