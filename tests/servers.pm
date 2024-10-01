@@ -275,12 +275,22 @@ sub clearlocks {
 
     if(os_is_win()) {
         $dir = sys_native_abs_path($dir);
-        $dir =~ s/\//\\\\/g;
+        if ($^O eq 'MSWin32') {
+            $dir =~ s/\//\\/g;
+        }
+        else {
+            $dir =~ s/\//\\\\/g;
+        }
         my $handle = "handle";
         if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
             $handle = "handle64";
         }
         if(checkcmd($handle)) {
+            my @handlesall = `$handle -accepteula -nobanner`;
+            print "clearlocks: $^O: handle-ALL result: " . @handlesall . " lines\n";
+            for my $tryhandle (@handlesall) {
+                print "clearlocks: $^O: handle-ALL $dir line: |$tryhandle|\n";
+            }
             # https://learn.microsoft.com/sysinternals/downloads/handle#usage
             my $cmd = "$handle $dir -accepteula -nobanner";
             print "clearlocks: $^O: Executing: '$cmd'\n";
