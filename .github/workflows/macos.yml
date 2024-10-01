@@ -521,7 +521,10 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+            CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+            export LDFLAGS=
+          fi
 
           # gcc ships with an `include-fixed` header set, which overrides SDK
           # headers with the intent of making them compatible with gcc. The
