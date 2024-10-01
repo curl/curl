@@ -345,7 +345,7 @@ jobs:
           fi
           cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
-            "-DCMAKE_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)" \
+            "-DCMAKE_OSX_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)" \
             "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             ${{ matrix.build.generate }}
 
@@ -646,7 +646,7 @@ jobs:
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
-              "-DCMAKE_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)" \
+              "-DCMAKE_OSX_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
