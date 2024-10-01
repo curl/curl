@@ -523,7 +523,7 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            export LDFLAGS=
+            LDFLAGS+=' -v'
           fi
 
           # gcc ships with an `include-fixed` header set, which overrides SDK
