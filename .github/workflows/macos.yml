@@ -175,8 +175,9 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            CC+=" --target=$(uname -m)-apple-darwin"
             CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+            CC+=" --target=$(uname -m)-apple-darwin"
+            options+=" --target=$(uname -m)-apple-darwin"
           fi
           CFLAGS+=' ${{ matrix.cflags }}'
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
@@ -188,10 +189,6 @@ jobs:
                 mv "${libgccdir}/include-fixed/${f}" "${libgccdir}/include-fixed/${f}-BAK"
               fi
             done
-          fi
-          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
-            options+=" --target=$(uname -m)-apple-darwin"
-            CC+=" --target=$(uname -m)-apple-darwin"
           fi
           if [ '${{ matrix.compiler }}' != 'clang' ]; then
             options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
@@ -338,8 +335,8 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            CC+=" --target=$(uname -m)-apple-darwin"
             CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+            CC+=" --target=$(uname -m)-apple-darwin"
           fi
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
@@ -532,8 +529,8 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            CC+=" --target=$(uname -m)-apple-darwin"
             CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+            CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
           # gcc ships with an `include-fixed` header set, which overrides SDK
