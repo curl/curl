@@ -122,6 +122,8 @@ CURLcode test(char *URL)
   res = curl_easy_perform(hnd);
   curl_easy_cleanup(hnd);
   hnd = NULL;
+  if(res == CURLE_OPERATION_TIMEDOUT) /* we expect that on Windows */
+    res = CURLE_COULDNT_CONNECT;
   printf("First request returned %d\n", res);
   res = CURLE_OK;
 
