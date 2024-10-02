@@ -60,9 +60,7 @@ if [ -n "$NOTOK" ]; then
   exit
 fi
 
-SERIAL="$(date +'%s')${RANDOM:(-4)}"
-
-echo "SERIAL=$SERIAL PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
+echo "PREFIX=$PREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
@@ -72,8 +70,8 @@ EOF
 "$OPENSSL" req -config "$PREFIX-ca.prm" -new -key "$PREFIX-ca.key" -out "$PREFIX-ca.csr" -passin fd:0 <<EOF
 pass:secret
 EOF
-"$OPENSSL" x509 -set_serial "$SERIAL" -extfile "$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-$SERIAL-ca.cacert" "$DIGESTALGO"
-"$OPENSSL" x509 -text -in "$PREFIX-$SERIAL-ca.cacert" -nameopt multiline > "$PREFIX-ca.cacert"
+"$OPENSSL" x509 -extfile "$PREFIX-ca.prm" -days "$DURATION" -req -signkey "$PREFIX-ca.key" -in "$PREFIX-ca.csr" -out "$PREFIX-raw-ca.cacert" "$DIGESTALGO"
+"$OPENSSL" x509 -text -in "$PREFIX-raw-ca.cacert" -nameopt multiline > "$PREFIX-ca.cacert"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -outform der -out "$PREFIX-ca.der"
 "$OPENSSL" x509 -in "$PREFIX-ca.cacert" -text -nameopt multiline > "$PREFIX-ca.crt"
 "$OPENSSL" x509 -noout -text -in "$PREFIX-ca.cacert" -nameopt multiline
