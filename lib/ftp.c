@@ -3916,8 +3916,7 @@ static CURLcode init_wc_data(struct Curl_easy *data)
     last_slash++;
     if(last_slash[0] == '\0') {
       wildcard->state = CURLWC_CLEAN;
-      result = ftp_parse_url_path(data);
-      return result;
+      return ftp_parse_url_path(data);
     }
     wildcard->pattern = strdup(last_slash);
     if(!wildcard->pattern)
@@ -3933,8 +3932,7 @@ static CURLcode init_wc_data(struct Curl_easy *data)
     }
     else { /* only list */
       wildcard->state = CURLWC_CLEAN;
-      result = ftp_parse_url_path(data);
-      return result;
+      return ftp_parse_url_path(data);
     }
   }
 
