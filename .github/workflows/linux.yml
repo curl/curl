@@ -41,6 +41,8 @@ env:
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
   libressl-version: 3.9.2
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  wolfssl-version: 5.7.2
   # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
   mbedtls-version: 3.6.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
@@ -326,15 +328,14 @@ jobs:
           cache-name: cache-wolfssl-all
         with:
           path: /home/runner/wolfssl-all
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
       - name: 'build wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
-          source .github/scripts/VERSIONS
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
-          tar -xzf v$WOLFSSL_VER-stable.tar.gz
-          cd wolfssl-$WOLFSSL_VER-stable
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
+          tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
+          cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-all --enable-all
           make install
@@ -347,15 +348,14 @@ jobs:
           cache-name: cache-wolfssl-opensslextra
         with:
           path: /home/runner/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
       - name: 'build wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
-          source .github/scripts/VERSIONS
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
-          tar -xzf v$WOLFSSL_VER-stable.tar.gz
-          cd wolfssl-$WOLFSSL_VER-stable
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
+          tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
+          cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-opensslextra --enable-opensslextra
           make install
