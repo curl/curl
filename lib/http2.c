@@ -1278,6 +1278,32 @@ static int on_frame_send(nghttp2_session *session, const nghttp2_frame *frame,
 }
 #endif /* !CURL_DISABLE_VERBOSE_STRINGS */
 
+static void notify_goaway(nghttp2_session *session,
+                          struct Curl_hash *streams,
+                          const nghttp2_goaway *goaway)
+{
+  struct Curl_hash_iterator iter;
+  const struct Curl_hash_element *elem;
+  struct curl_connevt_msg msg;
+
+  msg.type = CURL_CONNEVT_GOAWAY;
+  msg.data.goaway.error_code = goaway->error_code;
+  msg.data.goaway.opaque.buffer = goaway->opaque_data;
+  msg.data.goaway.opaque.size = goaway->opaque_data_len;
+
+  Curl_hash_start_iterate(streams, &iter);
+  while((elem = Curl_hash_next_element(&iter))) {
+    const struct h2_stream_ctx *stream = elem->ptr;
+    struct Curl_easy *data =
+      nghttp2_session_get_stream_user_data(session, stream->id);
+    if(data && data->set.connevt_func) {
+      Curl_set_in_callback(data, true);
+      data->set.connevt_func(data, &msg, data->set.connevt_data);
+      Curl_set_in_callback(data, false);
+    }
+  }
+}
+
 static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                          void *userp)
 {
@@ -1340,6 +1366,7 @@ static int on_frame_recv(nghttp2_session *session, const nghttp2_frame *frame,
                     ctx->goaway_error, ctx->remote_max_sid);
         Curl_multi_connchanged(data->multi);
       }
+      notify_goaway(session, &ctx->streams, &frame->goaway);
       break;
     default:
       break;
