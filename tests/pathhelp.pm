@@ -105,6 +105,7 @@ sub sys_native_current_path {
         $cur_dir = Cygwin::posix_to_win_path(Cwd::getcwd());
     }
     $cur_dir =~ s{[/\\]+}{/}g;
+    print "sys_native_current_path: $^O: Return: '$cur_dir'\n";
     return $cur_dir;
 }
 
@@ -134,6 +135,7 @@ sub sys_native_abs_path {
     }
 
     $res =~ s{[/\\]+}{/}g;
+    print "sys_native_abs_path: $^O: Return: '$res'\n";
     return $res;
 }
 
@@ -160,7 +162,7 @@ sub build_sys_abs_path {
             $res = '/cygdrive' . $res if(drives_mounted_on_cygdrive());
         }
     }
-
+    print "build_sys_abs_path: $^O: Return: '$res'\n";
     return $res;
 }
 
