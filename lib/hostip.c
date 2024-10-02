@@ -313,7 +313,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
   /* See if the returned entry matches the required resolve mode */
   if(dns && data->conn->ip_version != CURL_IPRESOLVE_WHATEVER) {
     int pf = PF_INET;
-    bool found = false;
+    bool found = FALSE;
     struct Curl_addrinfo *addr = dns->addr;
 
 #ifdef PF_INET6
@@ -323,7 +323,7 @@ static struct Curl_dns_entry *fetch_addr(struct Curl_easy *data,
 
     while(addr) {
       if(addr->ai_family == pf) {
-        found = true;
+        found = TRUE;
         break;
       }
       addr = addr->ai_next;
@@ -739,7 +739,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
     /* notify the resolver start callback */
     if(data->set.resolver_start) {
       int st;
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       st = data->set.resolver_start(
 #ifdef USE_CURL_ASYNC
         data->state.async.resolver,
@@ -748,7 +748,7 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
 #endif
         NULL,
         data->set.resolver_start_client);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
       if(st)
         return CURLRESOLV_ERROR;
     }
@@ -1129,7 +1129,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
   char *host_end;
 
   /* Default is no wildcard found */
-  data->state.wildcard_resolve = false;
+  data->state.wildcard_resolve = FALSE;
 
   for(hostp = data->state.resolve; hostp; hostp = hostp->next) {
     char entry_id[MAX_HOSTCACHE_LEN];
@@ -1179,7 +1179,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       char *end_ptr;
       bool permanent = TRUE;
       unsigned long tmp_port;
-      bool error = true;
+      bool error = TRUE;
       char *host_begin = hostp->data;
       size_t hlen = 0;
 
@@ -1256,7 +1256,7 @@ CURLcode Curl_loadhostpairs(struct Curl_easy *data)
       if(!head)
         goto err;
 
-      error = false;
+      error = FALSE;
 err:
       if(error) {
         failf(data, "Couldn't parse CURLOPT_RESOLVE entry '%s'",
@@ -1316,7 +1316,7 @@ err:
       /* Wildcard hostname */
       if((hlen == 1) && (host_begin[0] == '*')) {
         infof(data, "RESOLVE *:%d using wildcard", port);
-        data->state.wildcard_resolve = true;
+        data->state.wildcard_resolve = TRUE;
       }
     }
   }

@@ -653,10 +653,10 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     ret = (*data->set.ssl.fsslctx)(data, &backend->ctx,
                                    data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     if(ret) {
       failf(data, "BearSSL: error signaled by ssl ctx callback");
       return ret;
@@ -791,7 +791,7 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
     }
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, &session);
     Curl_cipher_suite_get_str(session.cipher_suite, cipher_str,
-                              sizeof(cipher_str), true);
+                              sizeof(cipher_str), TRUE);
     infof(data, "BearSSL: %s connection using %s", ver_str, cipher_str);
   }
   return ret;

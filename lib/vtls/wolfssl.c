@@ -382,7 +382,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     (ca_info_blob ? NULL : conn_config->CAfile);
   const char * const ssl_capath = conn_config->CApath;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  bool imported_native_ca = false;
+  bool imported_native_ca = FALSE;
 
 #if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SYS_CA_CERTS)
   /* load native CA certificates */
@@ -391,7 +391,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       infof(data, "error importing native CA store, continuing anyway");
     }
     else {
-      imported_native_ca = true;
+      imported_native_ca = TRUE;
       infof(data, "successfully imported native CA store");
       wssl->x509_store_setup = TRUE;
     }
@@ -493,7 +493,7 @@ cached_x509_store_expired(const struct Curl_easy *data,
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
-    return false;
+    return FALSE;
 
   return elapsed_ms >= timeout_ms;
 }
