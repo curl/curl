@@ -3205,22 +3205,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     plen = strlen(argptr);
     if(plen > CURL_MAX_INPUT_LENGTH) {
       data->set.tls_ech = CURLECH_DISABLE;
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      return result;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
     /* set tls_ech flag value, preserving CLA_CFG bit */
     if(plen == 5 && !strcmp(argptr, "false"))
-      data->set.tls_ech = CURLECH_DISABLE
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+      data->set.tls_ech = CURLECH_DISABLE |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
     else if(plen == 6 && !strcmp(argptr, "grease"))
-      data->set.tls_ech = CURLECH_GREASE
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+      data->set.tls_ech = CURLECH_GREASE |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
     else if(plen == 4 && !strcmp(argptr, "true"))
-      data->set.tls_ech = CURLECH_ENABLE
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+      data->set.tls_ech = CURLECH_ENABLE |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
     else if(plen == 4 && !strcmp(argptr, "hard"))
-      data->set.tls_ech = CURLECH_HARD
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+      data->set.tls_ech = CURLECH_HARD |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
     else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
       result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
       if(result)

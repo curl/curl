@@ -317,10 +317,8 @@ struct altsvcinfo *Curl_altsvc_init(void)
  */
 CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 {
-  CURLcode result;
   DEBUGASSERT(asi);
-  result = altsvc_load(asi, file);
-  return result;
+  return altsvc_load(asi, file);
 }
 
 /*
