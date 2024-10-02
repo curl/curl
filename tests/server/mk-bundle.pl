@@ -40,6 +40,7 @@ print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
 
 #define MEMDEBUG_NODEFINES
+#define HEADER_CURL_MEMORY_H
 #include "first.h"
 HEADER
     ;
