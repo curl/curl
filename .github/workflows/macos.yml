@@ -470,7 +470,6 @@ jobs:
           # Reduce build combinations, by dropping less interesting ones
           - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, build: cmake }
-          - { compiler: gcc-13, image: macos-13 }
           - { compiler: gcc-14, config: SecureTransport }
     steps:
       - name: 'install autotools'
