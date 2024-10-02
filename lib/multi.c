@@ -1663,9 +1663,9 @@ static CURLcode multi_do_more(struct Curl_easy *data, int *complete)
 static bool multi_handle_timeout(struct Curl_easy *data,
                                  struct curltime *now,
                                  bool *stream_error,
-                                 CURLcode *result,
-                                 bool connect_timeout)
+                                 CURLcode *result)
 {
+  bool connect_timeout = data->mstate < MSTATE_DO;
   timediff_t timeout_ms = Curl_timeleft(data, now, connect_timeout);
   if(timeout_ms < 0) {
     /* Handle timed out */
@@ -1868,7 +1868,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     /* Wait for the connect state as only then is the start time stored, but
        we must not check already completed handles */
     if((data->mstate >= MSTATE_CONNECT) && (data->mstate < MSTATE_COMPLETED) &&
-       multi_handle_timeout(data, nowp, &stream_error, &result, FALSE))
+       multi_handle_timeout(data, nowp, &stream_error, &result))
       /* Skip the statemachine and go directly to error handling section. */
       goto statemachine_end;
 
@@ -2542,7 +2542,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
        * (i.e. CURLM_CALL_MULTI_PERFORM == TRUE) then we should do that before
        * declaring the connection timed out as we may almost have a completed
        * connection. */
-      multi_handle_timeout(data, nowp, &stream_error, &result, FALSE);
+      multi_handle_timeout(data, nowp, &stream_error, &result);
     }
 
 statemachine_end:
@@ -2685,8 +2685,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
       if(data->mstate == MSTATE_PENDING) {
         bool stream_unused;
         CURLcode result_unused;
-        if(multi_handle_timeout(data, &now, &stream_unused, &result_unused,
-                                FALSE)) {
+        if(multi_handle_timeout(data, &now, &stream_unused, &result_unused)) {
           infof(data, "PENDING handle timeout");
           move_pending_to_connect(multi, data);
         }
