@@ -163,7 +163,7 @@ sub build_sys_abs_path {
 
     return $res;
 }
-#
+
 #***************************************************************************
 # Return file extension for executable files on this operating system
 #
