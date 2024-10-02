@@ -1750,7 +1750,6 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
   *err = CURLE_OK;
   if(len > 0) {
     CF_DATA_SAVE(save, cf, data);
-    *err = CURLE_OK;
     nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);
     CF_DATA_RESTORE(cf, save);
   }
