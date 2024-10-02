@@ -1000,8 +1000,6 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
                               const char *pinnedpubkey,
                               const unsigned char *pubkey, size_t pubkeylen)
 {
-  FILE *fp;
-  unsigned char *buf = NULL, *pem_ptr = NULL;
   CURLcode result = CURLE_SSL_PINNEDPUBKEYNOTMATCH;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
@@ -1014,7 +1012,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     return result;
 
   /* only do this if pinnedpubkey starts with "sha256//", length 8 */
-  if(strncmp(pinnedpubkey, "sha256//", 8) == 0) {
+  if(!strncmp(pinnedpubkey, "sha256//", 8)) {
     CURLcode encode;
     size_t encodedlen = 0;
     char *encoded = NULL, *pinkeycopy, *begin_pos, *end_pos;
@@ -1078,26 +1076,28 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
     } while(end_pos && begin_pos);
     Curl_safefree(encoded);
     Curl_safefree(pinkeycopy);
-    return result;
   }
-
-  fp = fopen(pinnedpubkey, "rb");
-  if(!fp)
-    return result;
-
-  do {
+  else {
     long filesize;
     size_t size, pem_len;
     CURLcode pem_read;
+    struct dynbuf buf;
+    char unsigned *pem_ptr = NULL;
+    size_t left;
+    FILE *fp = fopen(pinnedpubkey, "rb");
+    if(!fp)
+      return result;
+
+    Curl_dyn_init(&buf, MAX_PINNED_PUBKEY_SIZE);
 
     /* Determine the file's size */
     if(fseek(fp, 0, SEEK_END))
-      break;
+      goto end;
     filesize = ftell(fp);
     if(fseek(fp, 0, SEEK_SET))
-      break;
+      goto end;
     if(filesize < 0 || filesize > MAX_PINNED_PUBKEY_SIZE)
-      break;
+      goto end;
 
     /*
      * if the size of our certificate is bigger than the file
@@ -1105,36 +1105,37 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      */
     size = curlx_sotouz((curl_off_t) filesize);
     if(pubkeylen > size)
-      break;
+      goto end;
 
     /*
-     * Allocate buffer for the pinned key
-     * With 1 additional byte for null terminator in case of PEM key
+     * Read the file into the dynbuf
      */
-    buf = malloc(size + 1);
-    if(!buf)
-      break;
-
-    /* Returns number of elements read, which should be 1 */
-    if((int) fread(buf, size, 1, fp) != 1)
-      break;
+    left = size;
+    do {
+      char buffer[1024];
+      size_t want = left > sizeof(buffer) ? sizeof(buffer) : left;
+      if(want != fread(buffer, 1, want, fp))
+        goto end;
+      if(Curl_dyn_addn(&buf, buffer, want))
+        goto end;
+      left -= want;
+    } while(left);
 
     /* If the sizes are the same, it cannot be base64 encoded, must be der */
     if(pubkeylen == size) {
-      if(!memcmp(pubkey, buf, pubkeylen))
+      if(!memcmp(pubkey, Curl_dyn_ptr(&buf), pubkeylen))
         result = CURLE_OK;
-      break;
+      goto end;
     }
 
     /*
      * Otherwise we will assume it is PEM and try to decode it
      * after placing null terminator
      */
-    buf[size] = '\0';
-    pem_read = pubkey_pem_to_der((const char *)buf, &pem_ptr, &pem_len);
+    pem_read = pubkey_pem_to_der(Curl_dyn_ptr(&buf), &pem_ptr, &pem_len);
     /* if it was not read successfully, exit */
     if(pem_read)
-      break;
+      goto end;
 
     /*
      * if the size of our certificate does not match the size of
@@ -1142,11 +1143,11 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
      */
     if(pubkeylen == pem_len && !memcmp(pubkey, pem_ptr, pubkeylen))
       result = CURLE_OK;
-  } while(0);
-
-  Curl_safefree(buf);
-  Curl_safefree(pem_ptr);
-  fclose(fp);
+end:
+    Curl_dyn_free(&buf);
+    Curl_safefree(pem_ptr);
+    fclose(fp);
+  }
 
   return result;
 }
