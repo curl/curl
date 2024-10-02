@@ -400,7 +400,7 @@ jobs:
           cache-name: cache-quiche
         with:
           path: /home/runner/quiche
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-quiche-${{ env.quiche-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quiche-version }}
 
       - if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
         run: |
