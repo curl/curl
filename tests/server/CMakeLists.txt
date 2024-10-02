@@ -22,7 +22,7 @@
 #
 ###########################################################################
 
-# Get 'SERVERPROGS', 'OTHERPROGS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'UTIL', 'UTIL_BUNDLE'
+# Get 'SERVERPROGS', 'OTHERPROGS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'UTIL_BUNDLE'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
@@ -39,7 +39,7 @@ if(CURL_TEST_BUNDLES)
 
   set(SERVERPROGS "servers")
   set(servers_SOURCES "server_bundle.c")
-  list(APPEND servers_SOURCES ${CURLX_SRCS} ${USEFUL} ${UTIL} ${UTIL_BUNDLE})
+  list(APPEND servers_SOURCES ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} ${UTIL_BUNDLE})
 endif()
 
 foreach(_target IN LISTS SERVERPROGS OTHERPROGS)
