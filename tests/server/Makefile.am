@@ -59,6 +59,8 @@ server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl $(CURLX_SRCS) $(USEFUL)
 noinst_PROGRAMS = servers $(OTHERPROGS)
 nodist_servers_SOURCES = server_bundle.c
 servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(UTIL_BUNDLE)
+servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+servers_CFLAGS = $(AM_CFLAGS)
 CLEANFILES = server_bundle.c
 else
 noinst_PROGRAMS = $(SERVERPROGS) $(OTHERPROGS)
