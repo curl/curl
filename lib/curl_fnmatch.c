@@ -161,7 +161,7 @@ static void setcharorrange(unsigned char **pp, unsigned char *charset)
   }
 }
 
-/* returns 1 (true) if pattern is OK, 0 if is bad ("p" is pattern pointer) */
+/* returns 1 (TRUE) if pattern is OK, 0 if is bad ("p" is pattern pointer) */
 static int setcharset(unsigned char **p, unsigned char *charset)
 {
   setcharset_state state = CURLFNM_SCHS_DEFAULT;
@@ -303,7 +303,7 @@ static int loop(const unsigned char *pattern, const unsigned char *string,
     case '[':
       pp = p + 1; /* Copy in case of syntax error in set. */
       if(setcharset(&pp, charset)) {
-        int found = FALSE;
+        bool found = FALSE;
         if(!*s)
           return CURL_FNMATCH_NOMATCH;
         if(charset[(unsigned int)*s])

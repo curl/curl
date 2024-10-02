@@ -1309,7 +1309,7 @@ static CURLcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
   CURLcode result = CURLE_OK;
   ssize_t nread;
   struct h3_quic_recv_ctx x;
-  int rv, eagain = FALSE;
+  bool eagain = FALSE;
   size_t total_recv_len = 0;
 
   DEBUGASSERT(s);
@@ -1359,6 +1359,7 @@ static CURLcode cf_osslq_stream_recv(struct cf_osslq_stream *s,
 
     /* When we forwarded everything, handle RESET/EOS */
     if(Curl_bufq_is_empty(&s->recvbuf) && !s->closed) {
+      int rv;
       result = CURLE_OK;
       if(s->reset) {
         uint64_t app_error;
@@ -1632,11 +1633,11 @@ static CURLcode check_and_set_expiry(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   struct timeval tv;
   timediff_t timeoutms;
-  int is_infinite = TRUE;
+  int is_infinite = 1;
 
   if(ctx->tls.ossl.ssl &&
-    SSL_get_event_timeout(ctx->tls.ossl.ssl, &tv, &is_infinite) &&
-    !is_infinite) {
+     SSL_get_event_timeout(ctx->tls.ossl.ssl, &tv, &is_infinite) &&
+     !is_infinite) {
     timeoutms = curlx_tvtoms(&tv);
     /* QUIC want to be called again latest at the returned timeout */
     if(timeoutms <= 0) {

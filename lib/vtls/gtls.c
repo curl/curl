@@ -509,7 +509,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
   int rc;
 
   if(config->verifypeer) {
-    bool imported_native_ca = false;
+    bool imported_native_ca = FALSE;
 
     if(ssl_config->native_ca_store) {
       rc = gnutls_certificate_set_x509_system_trust(creds);
@@ -519,7 +519,7 @@ static CURLcode gtls_populate_creds(struct Curl_cfilter *cf,
       else {
         infof(data, "found %d certificates in native ca store", rc);
         if(rc > 0)
-          imported_native_ca = true;
+          imported_native_ca = TRUE;
       }
     }
 
@@ -590,7 +590,7 @@ static bool gtls_shared_creds_expired(const struct Curl_easy *data,
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
-    return false;
+    return FALSE;
 
   return elapsed_ms >= timeout_ms;
 }

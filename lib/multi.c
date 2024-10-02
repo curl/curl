@@ -464,7 +464,7 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
     infof(data, "!!! WARNING !!!");
     infof(data, "This is a debug build of libcurl, "
           "do not use in production.");
-    multi->warned = true;
+    multi->warned = TRUE;
   }
 }
 #else
@@ -2102,13 +2102,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         int prereq_rc;
 
         /* call the prerequest callback function */
-        Curl_set_in_callback(data, true);
+        Curl_set_in_callback(data, TRUE);
         prereq_rc = data->set.fprereq(data->set.prereq_userp,
                                       data->info.primary.remote_ip,
                                       data->info.primary.local_ip,
                                       data->info.primary.remote_port,
                                       data->info.primary.local_port);
-        Curl_set_in_callback(data, false);
+        Curl_set_in_callback(data, FALSE);
         if(prereq_rc != CURL_PREREQFUNC_OK) {
           failf(data, "operation aborted by pre-request callback");
           /* failure in pre-request callback - do not do any other
@@ -2535,7 +2535,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     if(data->mstate >= MSTATE_CONNECT &&
        data->mstate < MSTATE_DO &&
        rc != CURLM_CALL_MULTI_PERFORM &&
-       !multi_ischanged(multi, false)) {
+       !multi_ischanged(multi, FALSE)) {
       /* We now handle stream timeouts if and only if this will be the last
        * loop iteration. We only check this on the last iteration to ensure
        * that if we know we have additional work to do immediately

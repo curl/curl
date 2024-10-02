@@ -471,9 +471,8 @@ static CURLcode oldap_ssl_connect(struct Curl_easy *data, ldapstate newstate)
 {
   struct connectdata *conn = data->conn;
   struct ldapconninfo *li = conn->proto.ldapc;
-  bool ssldone = 0;
-  CURLcode result =
-    Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
+  bool ssldone = FALSE;
+  CURLcode result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
   if(!result) {
     oldap_state(data, newstate);
 
@@ -973,7 +972,7 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
   BerElement *ber = NULL;
   struct timeval tv = {0, 0};
   struct berval bv, *bvals;
-  int binary = 0;
+  bool binary = FALSE;
   CURLcode result = CURLE_AGAIN;
   int code;
   char *info = NULL;
@@ -1056,10 +1055,10 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
       }
 
       binary = bv.bv_len > 7 &&
-               !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7);
+        !strncmp(bv.bv_val + bv.bv_len - 7, ";binary", 7);
 
       for(i = 0; bvals[i].bv_val != NULL; i++) {
-        int binval = 0;
+        bool binval = FALSE;
 
         result = client_write(data, STRCONST("\t"), bv.bv_val, bv.bv_len,
                               STRCONST(":"));
@@ -1070,13 +1069,13 @@ static ssize_t oldap_recv(struct Curl_easy *data, int sockindex, char *buf,
           /* check for leading or trailing whitespace */
           if(ISBLANK(bvals[i].bv_val[0]) ||
              ISBLANK(bvals[i].bv_val[bvals[i].bv_len - 1]))
-            binval = 1;
+            binval = TRUE;
           else {
             /* check for unprintable characters */
             unsigned int j;
             for(j = 0; j < bvals[i].bv_len; j++)
               if(!ISPRINT(bvals[i].bv_val[j])) {
-                binval = 1;
+                binval = TRUE;
                 break;
               }
           }
