@@ -60,7 +60,7 @@ Connection: close
 Content-Type: text/html
 Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
-curl saved to filename %PWD/%LOGDIR/name%TESTNUMBER
+curl saved to filename %LOGDIR/name%TESTNUMBER
 </file2>
 
 </verify>
