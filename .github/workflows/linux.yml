@@ -286,7 +286,7 @@ jobs:
           cache-name: cache-bearssl
         with:
           path: /home/runner/bearssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-bearssl-${{ env.bearssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.bearssl-version }}
 
       - name: 'build bearssl'
         if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
@@ -307,7 +307,7 @@ jobs:
           cache-name: cache-libressl
         with:
           path: /home/runner/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-libressl-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
 
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
@@ -368,7 +368,7 @@ jobs:
           cache-name: cache-mbedtls
         with:
           path: /home/runner/mbedtls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-mbedtls-${{ env.mbedtls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mbedtls-version }}
 
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
@@ -426,7 +426,7 @@ jobs:
           cache-name: cache-quictls
         with:
           path: /home/runner/quictls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-quictls-${{ env.quictls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}
 
       - name: 'build quictls'
         if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
@@ -444,7 +444,7 @@ jobs:
           cache-name: cache-msh3
         with:
           path: /home/runner/msh3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-msh3-${{ env.msh3-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.msh3-version }}
 
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
@@ -493,7 +493,7 @@ jobs:
           cache-name: cache-rustls
         with:
           path: /home/runner/rustls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-rustls-${{ env.rustls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.rustls-version }}
 
       - name: 'build rustls'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
