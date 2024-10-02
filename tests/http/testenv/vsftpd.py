@@ -27,12 +27,11 @@
 import logging
 import os
 import subprocess
-import tempfile
 import time
 
 from datetime import datetime, timedelta
 
-from .curl import CurlClient, ExecResult
+from .curl import CurlClient
 from .env import Env
 
 
@@ -152,24 +151,6 @@ class VsFTPD:
             time.sleep(.1)
         log.error(f"Server still not responding after {timeout}")
         return False
-
-    def _run(self, args, intext=''):
-        env = os.environ.copy()
-        with open(self._error_log, 'w') as cerr:
-            # Popen requires a real fd, so a StringIO won't do
-            with tempfile.TemporaryFile() as intextfile:
-                intextfile.write(intext.encode())
-                intextfile.flush()
-                intextfile.seek(0)
-                self._process = subprocess.Popen(args=args, stderr=cerr, stdout=cerr,
-                                                 cwd=self._vsftpd_dir,
-                                                 stdin=intextfile if intext else None,
-                                                 env=env, text=True)
-            start = datetime.now()
-        return ExecResult(args=args, exit_code=self._process.returncode,
-                          stdout=open(self._error_log, 'r').readlines(),
-                          stderr=[],
-                          duration=datetime.now() - start)
 
     def _rmf(self, path):
         if os.path.exists(path):
