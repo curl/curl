@@ -23,11 +23,9 @@
 ###########################################################################
 
 # This Perl package helps with path transforming when running curl tests on
-# Windows platform with MSYS or Cygwin.
-# Three main functions 'sys_native_abs_path' and
-# 'build_sys_abs_path' autodetect format of given pathnames. Following formats
-# are supported:
-#  (1) /some/path   - absolute path in Unix-style
+# native Windows and MSYS/Cygwin.
+# Following input formats are supported (via built-in Perl functions):
+#  (1) /some/path   - absolute path in POSIX-style
 #  (2) D:/some/path - absolute path in Windows-style
 #  (3) some/path    - relative path
 #  (4) D:some/path  - path relative to current directory on Windows drive
@@ -141,7 +139,7 @@ sub sys_native_abs_path {
 
 #######################################################################
 # Converts given path to build system format absolute path, i.e. to
-# MSYS/Cygwin Unix-style absolute format on Windows platform. Both
+# MSYS/Cygwin POSIX-style absolute format on Windows platform. Both
 # relative and absolute formats are supported for input.
 #
 sub build_sys_abs_path {
