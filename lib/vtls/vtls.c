@@ -941,13 +941,16 @@ CURLcode Curl_ssl_random(struct Curl_easy *data,
 static CURLcode pubkey_pem_to_der(const char *pem,
                                   unsigned char **der, size_t *der_len)
 {
-  char *stripped_pem, *begin_pos, *end_pos;
-  size_t pem_count, stripped_pem_count = 0, pem_len;
+  char *begin_pos, *end_pos;
+  size_t pem_count, pem_len;
   CURLcode result;
+  struct dynbuf pbuf;
 
   /* if no pem, exit. */
   if(!pem)
     return CURLE_BAD_CONTENT_ENCODING;
+
+  Curl_dyn_init(&pbuf, MAX_PINNED_PUBKEY_SIZE);
 
   begin_pos = strstr(pem, "-----BEGIN PUBLIC KEY-----");
   if(!begin_pos)
@@ -968,26 +971,23 @@ static CURLcode pubkey_pem_to_der(const char *pem,
 
   pem_len = end_pos - pem;
 
-  stripped_pem = malloc(pem_len - pem_count + 1);
-  if(!stripped_pem)
-    return CURLE_OUT_OF_MEMORY;
-
   /*
    * Here we loop through the pem array one character at a time between the
    * correct indices, and place each character that is not '\n' or '\r'
    * into the stripped_pem array, which should represent the raw base64 string
    */
   while(pem_count < pem_len) {
-    if('\n' != pem[pem_count] && '\r' != pem[pem_count])
-      stripped_pem[stripped_pem_count++] = pem[pem_count];
+    if('\n' != pem[pem_count] && '\r' != pem[pem_count]) {
+      result = Curl_dyn_addn(&pbuf, &pem[pem_count], 1);
+      if(result)
+        return result;
+    }
     ++pem_count;
   }
-  /* Place the null terminator in the correct place */
-  stripped_pem[stripped_pem_count] = '\0';
 
-  result = Curl_base64_decode(stripped_pem, der, der_len);
+  result = Curl_base64_decode(Curl_dyn_ptr(&pbuf), der, der_len);
 
-  Curl_safefree(stripped_pem);
+  Curl_dyn_free(&pbuf);
 
   return result;
 }
