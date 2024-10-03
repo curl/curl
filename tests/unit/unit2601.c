@@ -219,7 +219,7 @@ static void check_bufq(size_t pool_spares,
     Curl_bufq_reset(&q);
     while(Curl_bufq_len(&q) < chunk_size) {
       n = Curl_bufq_write(&q, buf, sizeof(buf), &result);
-      fail_unless(n > 0 && (size_t)n == sizeof(buf), "write should be complete");
+      fail_unless(n > 0 && (size_t)n == sizeof(buf), "write incomplete");
     }
     result = Curl_bufq_unwrite(&q, 1);
     roffset = 0;
