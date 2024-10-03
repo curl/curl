@@ -4,7 +4,7 @@ curl and libcurl 8.11.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3245
+ Contributors:                 3246
 
 This release includes the following changes:
 
@@ -52,13 +52,16 @@ This release includes the following bugfixes:
  o lib, src, tests: added space around ternary expressions [56]
  o lib/cw-out: initialize 'flush_all' directly [62]
  o lib/src: white space edits to comply better with code style [47]
+ o lib: avoid assigning 'result' temporarily [97]
  o lib: fix disabled-verbose-strings + enable-debug build warnings
  o lib: fix unity builds with BearSSL, MSH3, Quiche, OmniOS [32]
+ o lib: use bool/TRUE/FALSE properly [48]
  o libssh.c: handle EGAINS during proto-connect correctly [23]
  o libssh2: use the Curl_* memory functions to avoid memdebug [22]
  o multi.c: make stronger check for paused transfer before asserting [24]
  o multi.c: warn/assert on stall only without timer [80]
  o multi: avoid reading whole struct pointer from pointer [10]
+ o multi: make multi_handle_timeout use the connect timeout [98]
  o negotiate: conditional check around GSS & SSL specific code [1]
  o openssl: convert a memcpy to dynbuf use [57]
  o openssl: remove two strcpy() calls [64]
@@ -83,26 +86,37 @@ This release includes the following bugfixes:
  o tests: add file: tests with existing files [45]
  o tests: check http/2 and http/3 server responsiveness [28]
  o tests: delete duplicate macro check [53]
+ o tests: fix `%POSIX_PWD` on native Windows Perl [111]
  o tests: fix keyword for test1411
+ o tests: fix shell quoting on native Windows Perl [110]
+ o tests: fixup `checkcmd` `PATH` on non-unixy platforms [108]
  o tests: improve mqtt server handling [27]
  o tests: introduce %CLIENT6IP-NB [67]
+ o tests: let openssl generate random cert serials [91]
  o tests: libtests and unit tests need explicit #include memdebug [7]
  o tests: make precheck for HTTP on 127.0.0.1 into a feature [68]
  o tests: Only log warnings or worse by default in smbserver [33]
  o tests: postcheck is now in verify [69]
  o tests: remove all valgrind disable instructions [21]
+ o tests: remove debug requirement on 38 tests [100]
  o tests: remove the %FTPTIME3 variable [41]
  o tests: replace `%PWD` with `%FILE_PWD` for `file://` [84]
+ o tests: replace `%PWD` with `%SSH_PWD` in SCP/SFTP tests [112]
  o tests: replace hard-coded `/dev/null` with variable [81]
+ o tests: simplify `pathhelp.pm`, avoid using external tools [95]
  o tests: speed up builds with single-binary test bundles [29]
  o tests: testrunner fairness [39]
  o tests: testrunner reliability improvements [55]
  o tests: use '-4' where needed [17]
  o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
+ o tool: support --show-headers AND --remote-header-name [103]
  o tool_doswin: simplify; remove unused options and strncpy calls [65]
  o unit1660: fix unreachable code warning in no-SSL builds [30]
  o url: connection reuse on h3 connections [20]
  o urlapi: drop unused header [51]
+ o vtls: convert Curl_pin_peer_pubkey to use dynbuf [74]
+ o vtls: convert pubkey_pem_to_der to use dynbuf [90]
+ o wolfssl: convert malloc + memcpys to dynbuf for cipher string [96]
 
 This release includes the following known bugs:
 
@@ -123,13 +137,13 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Aki Sakurai, Baruch Siach, Dan Fandrich, Daniel Stenberg,
-  Denis Goleshchikhin, dependabot[bot], Gabriel Marin, Ian Spence, Jon Rumsey,
-  Kai Pastor, lomberd2 on github, MacKenzie, Montg0mery on github,
-  Nicolas George, Pavel Kropachev, ralfjunker on github,
+  Denis Goleshchikhin, Deniz Sökmen, dependabot[bot], Gabriel Marin,
+  Ian Spence, Jon Rumsey, Kai Pastor, lomberd2 on github, MacKenzie,
+  Montg0mery on github, Nicolas George, Pavel Kropachev, ralfjunker on github,
   Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Stefan Eissing,
   Tal Regev, Tatsuhiro Tsujikawa, Testclutch, Venkat Krishna R, Viktor Szakats,
   vvb2060 on github
-  (26 contributors)
+  (27 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -180,6 +194,7 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=15045
  [46] = https://curl.se/bug/?i=14921
  [47] = https://curl.se/bug/?i=14921
+ [48] = https://curl.se/bug/?i=15123
  [49] = https://curl.se/bug/?i=14924
  [50] = https://curl.se/bug/?i=14918
  [51] = https://curl.se/bug/?i=14867
@@ -204,6 +219,7 @@ References to bug reports and discussions on issues:
  [70] = https://curl.se/bug/?i=15013
  [71] = https://curl.se/bug/?i=15034
  [72] = https://curl.se/bug/?i=15035
+ [74] = https://curl.se/bug/?i=15126
  [75] = https://curl.se/bug/?i=15096
  [76] = https://curl.se/bug/?i=15101
  [77] = https://curl.se/bug/?i=14990
@@ -219,7 +235,19 @@ References to bug reports and discussions on issues:
  [87] = https://curl.se/bug/?i=15087
  [88] = https://curl.se/bug/?i=15001
  [89] = https://curl.se/bug/?i=15010
+ [90] = https://curl.se/bug/?i=15126
+ [91] = https://curl.se/bug/?i=15129
  [93] = https://curl.se/bug/?i=14880
+ [95] = https://curl.se/bug/?i=15111
+ [96] = https://curl.se/bug/?i=15124
+ [97] = https://curl.se/bug/?i=15122
+ [98] = https://curl.se/bug/?i=15100
+ [100] = https://curl.se/bug/?i=15114
  [101] = https://curl.se/bug/?i=15075
+ [103] = https://curl.se/bug/?i=15110
  [106] = https://curl.se/bug/?i=14936
+ [108] = https://curl.se/bug/?i=15106
  [109] = https://curl.se/bug/?i=15070
+ [110] = https://curl.se/bug/?i=15105
+ [111] = https://curl.se/bug/?i=15104
+ [112] = https://curl.se/bug/?i=15103
