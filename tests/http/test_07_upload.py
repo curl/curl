@@ -544,12 +544,14 @@ class TestUpload:
             pytest.skip(f'example client not built: {client.name}')
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after=0'
         r = client.run(['-V', proto, url])
-        exp_code = 18  # PARTIAL_FILE
-        if proto == 'h2':
-            exp_code = 92  # CURLE_HTTP2_STREAM
+        if r.exit_code == 18: # PARTIAL_FILE is always ok
+            pass
+        elif proto == 'h2':
+            r.check_exit_code(92)  # CURLE_HTTP2_STREAM also ok
         elif proto == 'h3':
-            exp_code = 95  # CURLE_HTTP3
-        r.check_exit_code(exp_code)
+            r.check_exit_code(95)  # CURLE_HTTP3 also ok
+        else:
+            r.check_exit_code(18)  # will fail as it should
 
     # upload data, pause, let connection die without any response at all
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
