@@ -254,7 +254,7 @@ sub server_exe {
             $cmd = "";
         }
         else {
-            $cmd .= " $name;"
+            $cmd .= " $name";
         }
     }
     print "server_exe: returning: '$cmd'\n";
