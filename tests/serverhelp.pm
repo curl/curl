@@ -246,12 +246,11 @@ sub server_exe {
     if(!defined $ext) {
         $ext = 'SRV';
     }
-    if($bundle) {
-        return "server/servers" . exe_ext($ext) . " " . $name
+    my $cmd = "server/" . $name . exe_ext($ext);
+    if(! -x "$cmd") {
+        return "server/servers" . exe_ext($ext) . " " . $name;
     }
-    else {
-        return "server/" . $name . exe_ext($ext)
-    }
+    return "$cmd";
 }
 
 
