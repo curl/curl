@@ -220,6 +220,8 @@ static void check_bufq(size_t pool_spares,
     while(Curl_bufq_len(&q) < chunk_size) {
       n = Curl_bufq_write(&q, buf, sizeof(buf), &result);
       fail_unless(n > 0 && (size_t)n == sizeof(buf), "write incomplete");
+      if(result)
+        break;
     }
     result = Curl_bufq_unwrite(&q, 1);
     roffset = 0;
@@ -227,6 +229,8 @@ static void check_bufq(size_t pool_spares,
       unsigned char rbuf[sizeof(buf)];
       n = Curl_bufq_read(&q, rbuf, sizeof(rbuf), &result);
       fail_unless(n > 0, "read should work");
+      if(result)
+        break;
       if(n != sizeof(rbuf)) {
         fail_unless(Curl_bufq_is_empty(&q), "should be last read");
       }
