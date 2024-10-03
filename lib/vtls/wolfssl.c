@@ -814,7 +814,10 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       result = wssl_add_default_ciphers(TRUE, &c);
 
     if(!result) {
-      if(ciphers12)
+      result = Curl_dyn_addn(&c, ":", 1);
+      if(result)
+        ;
+      else if(ciphers12)
         result = Curl_dyn_add(&c, ciphers12);
       else
         result = wssl_add_default_ciphers(FALSE, &c);
