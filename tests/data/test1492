@@ -4,6 +4,7 @@
 HTTP
 HTTP GET
 -J
+--show-headers
 </keywords>
 </info>
 
@@ -15,6 +16,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake
 Content-Length: 6
 Connection: close
+Content-Jisposition: inline; filename="name%TESTNUMBER"
 Content-Type: text/html
 
 12345
@@ -28,10 +30,10 @@ Content-Type: text/html
 http
 </server>
 <name>
-HTTP GET with -J without Content-Disposition
+HTTP GET with -J + --show-headers but no Content-Disposition:
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER?junk -J -O --output-dir %LOGDIR
+http://%HOSTIP:%HTTPPORT/junk%TESTNUMBER -J -O --show-headers --output-dir %LOGDIR
 </command>
 </client>
 
@@ -39,13 +41,21 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER?junk -J -O --output-dir %LOGDIR
 # Verify data after the test has been "shot"
 <verify>
 <protocol>
-GET /%TESTNUMBER?junk HTTP/1.1
+GET /junk%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-<file name="%LOGDIR/%TESTNUMBER">
+<file name="%LOGDIR/junk%TESTNUMBER">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 6
+Connection: close
+Content-Jisposition: inline; filename="name%TESTNUMBER"
+Content-Type: text/html
+
 12345
 </file>
 

@@ -342,7 +342,6 @@ typedef enum {
   PARAM_NO_PREFIX,
   PARAM_NUMBER_TOO_LARGE,
   PARAM_NO_NOT_BOOLEAN,
-  PARAM_CONTDISP_SHOW_HEADER, /* --include and --remote-header-name */
   PARAM_CONTDISP_RESUME_FROM, /* --continue-at and --remote-header-name */
   PARAM_READ_ERROR,
   PARAM_EXPAND_ERROR, /* --expand problem */

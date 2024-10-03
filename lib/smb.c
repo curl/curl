@@ -908,7 +908,7 @@ static CURLcode smb_connection_state(struct Curl_easy *data, bool *done)
     }
     smbc->uid = smb_swap16(h->uid);
     conn_state(data, SMB_CONNECTED);
-    *done = true;
+    *done = TRUE;
     break;
 
   default:
@@ -1108,7 +1108,7 @@ static CURLcode smb_request_state(struct Curl_easy *data, bool *done)
 
   case SMB_DONE:
     result = req->result;
-    *done = true;
+    *done = TRUE;
     break;
 
   default:

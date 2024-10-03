@@ -400,7 +400,7 @@ jobs:
           cache-name: cache-quiche
         with:
           path: /home/runner/quiche
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-quiche-${{ env.quiche-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quiche-version }}
 
       - if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
         run: |
@@ -446,7 +446,7 @@ jobs:
           sudo make install
         name: 'install mod_h2'
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - run: |
           sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt

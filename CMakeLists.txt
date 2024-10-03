@@ -192,6 +192,10 @@ cmake_dependent_option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup"
 
 include(PickyWarnings)
 
+if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
+endif()
+
 option(ENABLE_DEBUG "Enable curl debug features" OFF)
 option(ENABLE_CURLDEBUG "Enable TrackMemory feature" ${ENABLE_DEBUG})
 
@@ -1462,12 +1466,14 @@ endif()
 check_symbol_exists("fnmatch"         "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)
 check_symbol_exists("opendir"         "${CURL_INCLUDES};dirent.h" HAVE_OPENDIR)
+check_symbol_exists("poll"            "${CURL_INCLUDES}" HAVE_POLL)
 check_symbol_exists("socket"          "${CURL_INCLUDES}" HAVE_SOCKET)
 check_symbol_exists("sched_yield"     "${CURL_INCLUDES};sched.h" HAVE_SCHED_YIELD)
 check_symbol_exists("socketpair"      "${CURL_INCLUDES}" HAVE_SOCKETPAIR)
 check_symbol_exists("recv"            "${CURL_INCLUDES}" HAVE_RECV)
 check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)
 check_symbol_exists("sendmsg"         "${CURL_INCLUDES}" HAVE_SENDMSG)
+check_symbol_exists("sendmmsg"        "sys/socket.h" HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)
 check_symbol_exists("strdup"          "${CURL_INCLUDES};string.h" HAVE_STRDUP)
 check_symbol_exists("strtok_r"        "${CURL_INCLUDES};string.h" HAVE_STRTOK_R)

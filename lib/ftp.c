@@ -465,11 +465,11 @@ static CURLcode AcceptServerConnect(struct Curl_easy *data)
     int error = 0;
 
     /* activate callback for setting socket options */
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     error = data->set.fsockopt(data->set.sockopt_client,
                                s,
                                CURLSOCKTYPE_ACCEPT);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
 
     if(error) {
       close_secondarysocket(data);
@@ -1704,10 +1704,10 @@ static CURLcode ftp_state_ul_setup(struct Curl_easy *data,
 
     /* Let's read off the proper amount of bytes from the input. */
     if(data->set.seek_func) {
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       seekerr = data->set.seek_func(data->set.seek_client,
                                     data->state.resume_from, SEEK_SET);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
     }
 
     if(seekerr != CURL_SEEKFUNC_OK) {
@@ -3406,9 +3406,9 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
   if(data->state.wildcardmatch) {
     if(data->set.chunk_end && ftpc->file) {
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       data->set.chunk_end(data->set.wildcardptr);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
     }
     ftpc->known_filesize = -1;
   }
@@ -3916,8 +3916,7 @@ static CURLcode init_wc_data(struct Curl_easy *data)
     last_slash++;
     if(last_slash[0] == '\0') {
       wildcard->state = CURLWC_CLEAN;
-      result = ftp_parse_url_path(data);
-      return result;
+      return ftp_parse_url_path(data);
     }
     wildcard->pattern = strdup(last_slash);
     if(!wildcard->pattern)
@@ -3933,8 +3932,7 @@ static CURLcode init_wc_data(struct Curl_easy *data)
     }
     else { /* only list */
       wildcard->state = CURLWC_CLEAN;
-      result = ftp_parse_url_path(data);
-      return result;
+      return ftp_parse_url_path(data);
     }
   }
 
@@ -4054,11 +4052,11 @@ static CURLcode wc_statemach(struct Curl_easy *data)
       infof(data, "Wildcard - START of \"%s\"", finfo->filename);
       if(data->set.chunk_bgn) {
         long userresponse;
-        Curl_set_in_callback(data, true);
+        Curl_set_in_callback(data, TRUE);
         userresponse = data->set.chunk_bgn(
           finfo, data->set.wildcardptr,
           (int)Curl_llist_count(&wildcard->filelist));
-        Curl_set_in_callback(data, false);
+        Curl_set_in_callback(data, FALSE);
         switch(userresponse) {
         case CURL_CHUNK_BGN_FUNC_SKIP:
           infof(data, "Wildcard - \"%s\" skipped by user",
@@ -4097,9 +4095,9 @@ static CURLcode wc_statemach(struct Curl_easy *data)
 
     case CURLWC_SKIP: {
       if(data->set.chunk_end) {
-        Curl_set_in_callback(data, true);
+        Curl_set_in_callback(data, TRUE);
         data->set.chunk_end(data->set.wildcardptr);
-        Curl_set_in_callback(data, false);
+        Curl_set_in_callback(data, FALSE);
       }
       Curl_node_remove(Curl_llist_head(&wildcard->filelist));
       wildcard->state = (Curl_llist_count(&wildcard->filelist) == 0) ?
