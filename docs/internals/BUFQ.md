@@ -76,6 +76,17 @@ void Curl_bufq_skip(struct bufq *q, size_t amount);
 
 This removes `amount` number of bytes from the `bufq`.
 
+## unwrite
+
+It is possible to undo writes by calling:
+
+```
+CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len);
+```
+
+This will remove `len` bytes from the end of the bufq again. When removing
+more bytes than are present, CURLE_AGAIN is returned and the bufq will be
+empty.
 
 ## lifetime
 
