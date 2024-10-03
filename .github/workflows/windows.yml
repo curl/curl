@@ -605,207 +605,209 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         run: cmake --build bld --parallel 5 --target curl-examples
 
-#  msvc:
-#    name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-#    runs-on: windows-latest
-#    timeout-minutes: 55
-#    defaults:
-#      run:
-#        shell: bash
-#    env:
-#      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
-#      VCPKG_DISABLE_METRICS: '1'
-#    strategy:
-#      matrix:
-#        include:
-#          - name: 'schannel MultiSSL U'
-#            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls shiftmedia-libgnutls'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
-#              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON
-#
-#          - name: 'openssl'
-#            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-#              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON
-#
-#          - name: 'openssl'
-#            install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
-#            arch: 'x64'
-#            plat: 'uwp'
-#            type: 'Debug'
-#            tflags: 'skiprun'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-#              -DCURL_USE_LIBPSL=OFF
-#
-#          - name: 'libressl'
-#            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
-#              -DCURL_CA_SEARCH_SAFE=ON
-#
-#          - name: 'boringssl-ECH'
-#            install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
-#              -DUSE_HTTPSRR=ON -DUSE_ECH=ON
-#
-#          - name: 'wolfssl'
-#            install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: '~1516'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
-#              -DCURL_USE_GSASL=ON
-#
-#          - name: 'gnutls'
-#            install: 'brotli zlib zstd libpsl nghttp2 shiftmedia-libgnutls libssh pkgconf gsasl ngtcp2[gnutls] nghttp3'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: '~1516'
-#            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
-#            #          read its configuration from, making it vulnerable to attacks on
-#            #          Windows. Do not use this component till there is a fix for these.
-#            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-#              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
-#              -DCURL_USE_GSASL=ON
-#
-#          - name: 'msh3'
-#            install: 'brotli zlib zstd libpsl nghttp2 msh3 libssh2 pkgconf gsasl'
-#            arch: 'x64'
-#            plat: 'windows'
-#            type: 'Debug'
-#            tflags: 'skipall'
-#            config: >-
-#              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-#              -DCURL_USE_SCHANNEL=OFF -DUSE_MSH3=ON
-#              -DCURL_USE_GSASL=ON
-#
-#      fail-fast: false
-#    steps:
-#      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
-#
-#      - name: 'vcpkg cache setup'
-#        uses: actions/github-script@v7
-#        with:
-#          script: |
-#            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
-#            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
-#
-#      - name: 'vcpkg versions'
-#        timeout-minutes: 1
-#        run: |
-#          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
-#          vcpkg version
-#
-#      - name: 'vcpkg build'
-#        timeout-minutes: 35
-#        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
-#
-#      - name: 'cmake configure'
-#        timeout-minutes: 5
-#        run: |
-#          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
-#            # without this, CMake gets confused by the non-vcpkg OpenSSL
-#            # installed on the runner and fails when linking.
-#            options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
-#          fi
-#          cmake -B bld ${options} \
-#            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-#            "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
-#            '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
-#            -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
-#            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
-#            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-#            -DCURL_WERROR=ON \
-#            -DBUILD_SHARED_LIBS=OFF \
-#            -DENABLE_DEBUG=ON \
-#            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
-#            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
-#            ${{ matrix.config }}
-#
-#      - name: 'cmake configure log'
-#        if: ${{ !cancelled() }}
-#        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-#
-#      - name: 'curl_config.h'
-#        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
-#
-#      - name: 'curl_config.h (full)'
-#        run: cat bld/lib/curl_config.h || true
-#
-#      - name: 'cmake build'
-#        timeout-minutes: 5
-#        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
-#
-#      - name: 'curl version'
-#        timeout-minutes: 1
-#        run: |
-#          find . -name '*.exe' -o -name '*.dll'
-#          if [ '${{ matrix.plat }}' != 'uwp' ]; then
-#            PATH="$PWD/bld/lib:$PATH"
-#            bld/src/curl.exe --disable --version
-#          fi
-#
-#      - name: 'cmake build tests'
-#        if: ${{ matrix.tflags != 'skipall' }}
-#        timeout-minutes: 10
-#        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
-#
-#      - name: 'install test tools'
-#        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-#        timeout-minutes: 5
-#        run: |
-#          # GnuTLS is not fully functional on Windows, so skip the tests
-#          # https://github.com/ShiftMediaProject/gnutls/issues/23
-#          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
-#            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
-#          fi
-#          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-#          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
-#
-#      - name: 'cmake run tests'
-#        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-#        timeout-minutes: 10
-#        run: |
-#          export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
-#          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
-#            TFLAGS+=' ~SFTP'
-#          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
-#            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
-#          fi
-#          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
-#          cmake --build bld --config '${{ matrix.type }}' --target test-ci
-#
-#      - name: 'cmake build examples'
-#        timeout-minutes: 5
-#        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+  msvc:
+    name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
+    runs-on: windows-latest
+    timeout-minutes: 55
+    defaults:
+      run:
+        shell: bash
+    env:
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_DISABLE_METRICS: '1'
+    strategy:
+      matrix:
+        include:
+          - name: 'schannel MultiSSL U'
+            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls shiftmedia-libgnutls'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
+              -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON
+
+          - name: 'openssl'
+            install: 'brotli zlib zstd libpsl nghttp2 nghttp3 openssl libssh2 pkgconf gsasl c-ares libuv'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON
+
+          - name: 'openssl'
+            install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
+            arch: 'x64'
+            plat: 'uwp'
+            type: 'Debug'
+            tflags: 'skiprun'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+              -DCURL_USE_LIBPSL=OFF
+
+          - name: 'libressl'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_CA_SEARCH_SAFE=ON
+
+          - name: 'boringssl-ECH'
+            install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DUSE_HTTPSRR=ON -DUSE_ECH=ON
+
+          - name: 'wolfssl'
+            install: 'brotli zlib zstd libpsl nghttp2 wolfssl libssh2 pkgconf gsasl ngtcp2[wolfssl] nghttp3'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_GSASL=ON
+
+          - name: 'gnutls'
+            install: 'brotli zlib zstd libpsl nghttp2 shiftmedia-libgnutls libssh pkgconf gsasl ngtcp2[gnutls] nghttp3'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516'
+            # WARNING: libssh uses hard-coded world-writable paths (/etc/..., ~/.ssh/) to
+            #          read its configuration from, making it vulnerable to attacks on
+            #          Windows. Do not use this component till there is a fix for these.
+            # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
+              -DCURL_USE_GSASL=ON
+
+          - name: 'msh3'
+            install: 'brotli zlib zstd libpsl nghttp2 msh3 libssh2 pkgconf gsasl'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: 'skipall'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DUSE_MSH3=ON
+              -DCURL_USE_GSASL=ON
+
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+
+      - name: 'vcpkg cache setup'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: 'vcpkg versions'
+        timeout-minutes: 1
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          vcpkg version
+
+      - name: 'vcpkg build'
+        timeout-minutes: 35
+        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+
+      - name: 'cmake configure'
+        timeout-minutes: 5
+        run: |
+          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
+            # without this, CMake gets confused by the non-vcpkg OpenSSL
+            # installed on the runner and fails when linking.
+            options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
+          fi
+          cmake -B bld ${options} \
+            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
+            '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
+            -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
+            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+            -DCURL_WERROR=ON \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DENABLE_DEBUG=ON \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
+            -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
+            ${{ matrix.config }}
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        run: cat bld/lib/curl_config.h || true
+
+      - name: 'cmake build'
+        timeout-minutes: 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        timeout-minutes: 1
+        run: |
+          find . -name '*.exe' -o -name '*.dll'
+          if [ '${{ matrix.plat }}' != 'uwp' ]; then
+            PATH="$PWD/bld/lib:$PATH"
+            bld/src/curl.exe --disable --version
+          fi
+
+      - name: 'cmake build tests'
+        if: ${{ matrix.tflags != 'skipall' }}
+        timeout-minutes: 10
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+
+      - name: 'install test tools'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 5
+        run: |
+          # GnuTLS is not fully functional on Windows, so skip the tests
+          # https://github.com/ShiftMediaProject/gnutls/issues/23
+          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
+            /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
+          fi
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
+
+      - name: 'cmake run tests'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        timeout-minutes: 10
+        run: |
+          export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
+          if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
+            TFLAGS+=' ~SFTP'
+          elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
+            TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
+          fi
+          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+
+      - name: 'cmake build examples'
+        timeout-minutes: 5
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+
+# test1
