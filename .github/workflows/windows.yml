@@ -729,7 +729,11 @@ jobs:
 
       - name: 'vcpkg build'
         timeout-minutes: 35
-        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+        run: |
+          export SystemDrive="$SYSTEMDRIVE"
+          export SystemRoot="$SYSTEMROOT"
+          export windir="$WINDIR"
+          vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
       - name: 'cmake configure'
         timeout-minutes: 5
