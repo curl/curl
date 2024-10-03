@@ -807,7 +807,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 #else
-#define MAX_CIPHER_LEN 1024
+#define MAX_CIPHER_LEN 4096
   if(conn_config->cipher_list || conn_config->cipher_list13) {
     const char *ciphers12 = conn_config->cipher_list;
     const char *ciphers13 = conn_config->cipher_list13;
