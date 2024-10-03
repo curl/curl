@@ -642,8 +642,15 @@ wssl_add_default_ciphers(bool tls13, struct dynbuf *buf)
     if((strncmp(str, "TLS13", 5) == 0) != tls13)
       continue;
 
+    /* if there already is data in the string, add colon separator */
+    if(Curl_dyn_len(buf)) {
+      CURLcode result = Curl_dyn_addn(buf, ":", 1);
+      if(result)
+        return result;
+    }
+
     n = strlen(str);
-    if(Curl_dyn_addn(buf, str, n) || Curl_dyn_addn(buf, ":", 1))
+    if(Curl_dyn_addn(buf, str, n))
       return CURLE_OUT_OF_MEMORY;
   }
 
@@ -800,7 +807,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
 #else
-#define MAX_CIPHER_LEN 1024
+#define MAX_CIPHER_LEN 4096
   if(conn_config->cipher_list || conn_config->cipher_list13) {
     const char *ciphers12 = conn_config->cipher_list;
     const char *ciphers13 = conn_config->cipher_list13;
@@ -814,8 +821,12 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       result = wssl_add_default_ciphers(TRUE, &c);
 
     if(!result) {
-      if(ciphers12)
-        result = Curl_dyn_add(&c, ciphers12);
+      if(ciphers12) {
+        if(Curl_dyn_len(&c))
+          result = Curl_dyn_addn(&c, ":", 1);
+        if(!result)
+          result = Curl_dyn_add(&c, ciphers12);
+      }
       else
         result = wssl_add_default_ciphers(FALSE, &c);
     }
