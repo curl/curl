@@ -247,24 +247,17 @@ sub server_exe {
         $ext = 'SRV';
     }
     my $cmd = "server/" . $name . exe_ext($ext);
-    print "server_exe: $^O: '$cmd'\n";
-    if(-x "$cmd") {
-        print "server_exe: $^O: -x '$cmd'\n";
-    }
-    if(-f "$cmd") {
-        print "server_exe: $^O: -f '$cmd'\n";
-    }
-    if(! -f "$cmd") {
+    if(! -x "$cmd") {
         $cmd = "server/servers" . exe_ext($ext);
-        print "server_exe: $^O: bundle '$cmd'\n";
-        if(-x "$cmd") {
-            print "server_exe: $^O: bundle -x '$cmd'\n";
+        if(! -x "$cmd") {
+            print "server_exe: Could not find the requested server: '$name'\n";
+            $cmd = "";
         }
-        if(-f "$cmd") {
-            print "server_exe: $^O: bundle -f '$cmd'\n";
+        else {
+            $cmd .= " " + $name;
         }
-        return $cmd . " " . $name;
     }
+    print "server_exe: returning: '$cmd'\n";
     return "$cmd";
 }
 
