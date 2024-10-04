@@ -249,7 +249,9 @@ if(BUILD_SHARED_LIBS)
     configure_file(
       "${CMAKE_CURRENT_SOURCE_DIR}/libcurl.vers.in"
       "${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers" @ONLY)
+    include(CMakePushCheckState)
     include(CheckCSourceCompiles)
+    cmake_push_check_state()
     set(CMAKE_REQUIRED_LINK_OPTIONS "-Wl,--version-script=${CMAKE_CURRENT_BINARY_DIR}/libcurl.vers")
     check_c_source_compiles("int main(void) { return 0; }" HAVE_VERSIONED_SYMBOLS)
     if(HAVE_VERSIONED_SYMBOLS)
@@ -258,7 +260,7 @@ if(BUILD_SHARED_LIBS)
     else()
       message(WARNING "Versioned symbols requested, but not supported by the toolchain.")
     endif()
-    unset(CMAKE_REQUIRED_LINK_OPTIONS)
+    cmake_pop_check_state()
   endif()
 endif()
 

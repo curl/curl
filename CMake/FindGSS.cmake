@@ -176,6 +176,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     )
 
     if(_GSS_INCLUDE_DIRS)  # jay, we have found something
+      cmake_push_check_state()
       set(CMAKE_REQUIRED_INCLUDES "${_GSS_INCLUDE_DIRS}")
       check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _gss_have_mit_headers)
 
@@ -190,8 +191,8 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         if(_gss_have_roken_h OR _gss_have_heimdal_roken_h)
           set(GSS_FLAVOUR "Heimdal")
         endif()
-        list(REMOVE_ITEM CMAKE_REQUIRED_DEFINITIONS "-D__ROKEN_H__")
       endif()
+      cmake_pop_check_state()
     else()
       # I am not convinced if this is the right way but this is what autotools do at the moment
       find_path(_GSS_INCLUDE_DIRS NAMES "gssapi.h"
