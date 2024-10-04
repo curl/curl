@@ -504,7 +504,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
     '-llber -lldap' \
     '-lldapssl -lldapx -lldapsdk' \
     '-lldapsdk -lldapx -lldapssl' \
-    '-lldap -llber -lssl -lcrypto' ; do
+    '-lldap -llber -lssl -lcrypto'; do
 
     if test "$curl_cv_ldap_LIBS" = "unknown"; then
       if test -z "$x_nlibs"; then
@@ -565,6 +565,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       else
         LIBS="$curl_cv_ldap_LIBS $curl_cv_save_LIBS"
       fi
+      LIBCURL_PC_REQUIRES_PRIVATE="ldap $LIBCURL_PC_REQUIRES_PRIVATE"
       AC_MSG_RESULT([$curl_cv_ldap_LIBS])
       ;;
   esac
