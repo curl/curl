@@ -1701,6 +1701,14 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     }
   }
 
+  /* Since OpenSSL does its own send/recv internally, we may miss the
+   * moment to populate the x509 store right before the server response.
+   * Do it instead before we start the handshake, at the loss of the
+   * time to set this up. */
+  result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
+  if(result)
+    goto out;
+
   ERR_clear_error();
   err = SSL_do_handshake(ctx->tls.ossl.ssl);
 
@@ -1725,7 +1733,6 @@ static CURLcode cf_osslq_connect(struct Curl_cfilter *cf,
     case SSL_ERROR_WANT_READ:
       ctx->q.last_io = now;
       CURL_TRC_CF(data, cf, "QUIC SSL_connect() -> WANT_RECV");
-      result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
       goto out;
     case SSL_ERROR_WANT_WRITE:
       ctx->q.last_io = now;

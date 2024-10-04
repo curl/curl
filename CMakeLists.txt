@@ -2066,7 +2066,7 @@ if(NOT CURL_DISABLE_INSTALL)
     set(ENABLE_STATIC       "no")
   endif()
 
-  # Finally generate a "curl-config" matching this config.
+  # Generate a "curl-config" matching this config.
   # Consumed variables:
   #   CC
   #   CONFIGURE_OPTIONS
@@ -2096,11 +2096,12 @@ if(NOT CURL_DISABLE_INSTALL)
       GROUP_READ GROUP_EXECUTE
       WORLD_READ WORLD_EXECUTE)
 
-  # Finally generate a pkg-config file matching this config
+  # Generate a pkg-config file matching this config.
   # Consumed variables:
   #   CURLVERSION
   #   exec_prefix
   #   includedir
+  #   LDFLAGS
   #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_CFLAGS_PRIVATE
   #   LIBCURL_PC_LIBS
