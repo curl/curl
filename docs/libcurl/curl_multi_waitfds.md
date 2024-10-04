@@ -45,12 +45,13 @@ If a number of descriptors used by the multi_handle is greater than the
 *size* parameter then libcurl returns CURLM_OUT_OF_MEMORY error.
 
 If the *fd_count* argument is not a null pointer, it points to a variable
-that on returns specifies the number of descriptors used by the multi_handle to
+that on return specifies the number of descriptors used by the multi_handle to
 be checked for being ready to read or write.
 
 The client code can pass *size* equal to zero just to get the number of the
 descriptors and allocate appropriate storage for them to be used in a
-subsequent function call.
+subsequent function call. In this case, *fd_count* receives a number greater
+than or equal to the number of descriptors.
 
 # %PROTOCOLS%
 
@@ -89,7 +90,7 @@ int main(void)
     ufds = (struct curl_waitfd*)malloc(fd_count * sizeof(struct curl_waitfd));
 
     /* get wait descriptors from the transfers and put them into array. */
-    mc = curl_multi_waitfds(multi, ufds, fd_count, NULL);
+    mc = curl_multi_waitfds(multi, ufds, fd_count, &fd_count);
 
     if(mc != CURLM_OK) {
       fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);

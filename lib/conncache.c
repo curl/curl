@@ -926,10 +926,10 @@ CURLcode Curl_cpool_add_pollfds(struct cpool *cpool,
   return result;
 }
 
-CURLcode Curl_cpool_add_waitfds(struct cpool *cpool,
-                                struct curl_waitfds *cwfds)
+unsigned int Curl_cpool_add_waitfds(struct cpool *cpool,
+                                    struct curl_waitfds *cwfds)
 {
-  CURLcode result = CURLE_OK;
+  unsigned int need = 0;
 
   CPOOL_LOCK(cpool);
   if(Curl_llist_head(&cpool->shutdowns)) {
@@ -945,14 +945,11 @@ CURLcode Curl_cpool_add_waitfds(struct cpool *cpool,
       Curl_conn_adjust_pollset(cpool->idata, &ps);
       Curl_detach_connection(cpool->idata);
 
-      result = Curl_waitfds_add_ps(cwfds, &ps);
-      if(result)
-        goto out;
+      need += Curl_waitfds_add_ps(cwfds, &ps);
     }
   }
-out:
   CPOOL_UNLOCK(cpool);
-  return result;
+  return need;
 }
 
 static void cpool_perform(struct cpool *cpool)
