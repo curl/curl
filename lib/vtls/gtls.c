@@ -737,6 +737,9 @@ static CURLcode gtls_update_session_id(struct Curl_cfilter *cf,
 
     /* get the session ID data size */
     gnutls_session_get_data(session, NULL, &connect_idsize);
+    if(!connect_idsize) /* gnutls does this for some version combinations */
+      return CURLE_OK;
+
     connect_sessionid = malloc(connect_idsize); /* get a buffer for it */
     if(!connect_sessionid) {
       return CURLE_OUT_OF_MEMORY;
