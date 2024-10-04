@@ -85,7 +85,7 @@ typedef enum {
   ssl_earlydata_sending,
   ssl_earlydata_sent,
   ssl_earlydata_accepted,
-  ssl_earlydata_rejected,
+  ssl_earlydata_rejected
 } ssl_earlydata_state;
 
 #define CURL_SSL_IO_NEED_NONE   (0)
