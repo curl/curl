@@ -504,7 +504,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
     '-llber -lldap' \
     '-lldapssl -lldapx -lldapsdk' \
     '-lldapsdk -lldapx -lldapssl' \
-    '-lldap -llber -lssl -lcrypto' ; do
+    '-lldap -llber -lssl -lcrypto'; do
 
     if test "$curl_cv_ldap_LIBS" = "unknown"; then
       if test -z "$x_nlibs"; then
