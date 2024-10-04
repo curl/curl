@@ -454,6 +454,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
     return NULL;
 
   ctx->alpn = alpn;
+  Curl_bufq_init2(&ctx->earlydata, CURL_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
   ctx->backend = calloc(1, Curl_ssl->sizeof_ssl_backend_data);
   if(!ctx->backend) {
     free(ctx);
@@ -465,6 +466,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if(ctx) {
+    Curl_bufq_free(&ctx->earlydata);
     free(ctx->backend);
     free(ctx);
   }
@@ -1716,7 +1718,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     connssl->handshake_done = Curl_now();
-    DEBUGASSERT(connssl->state == ssl_connection_complete);
+    /* Connection can be deferred when sending early data */
+    DEBUGASSERT(connssl->state == ssl_connection_complete ||
+                connssl->state == ssl_connection_deferred);
   }
 out:
   CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);

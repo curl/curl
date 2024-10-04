@@ -74,13 +74,26 @@ typedef enum {
 
 typedef enum {
   ssl_connection_none,
+  ssl_connection_deferred,
   ssl_connection_negotiating,
   ssl_connection_complete
 } ssl_connection_state;
 
+typedef enum {
+  ssl_earlydata_none,
+  ssl_earlydata_use,
+  ssl_earlydata_sending,
+  ssl_earlydata_sent,
+  ssl_earlydata_accepted,
+  ssl_earlydata_rejected,
+} ssl_earlydata_state;
+
 #define CURL_SSL_IO_NEED_NONE   (0)
 #define CURL_SSL_IO_NEED_RECV   (1<<0)
 #define CURL_SSL_IO_NEED_SEND   (1<<1)
+
+/* Max earlydata payload we want to send */
+#define CURL_SSL_EARLY_MAX       (64*1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
@@ -89,8 +102,13 @@ struct ssl_connect_data {
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
+  struct bufq earlydata;            /* earlydata to be send to peer */
+  size_t earlydata_max;             /* max earlydata allowed by peer */
+  size_t earlydata_skip;            /* sending bytes to skip when earlydata
+                                     * is accepted by peer */
   ssl_connection_state state;
   ssl_connect_state connecting_state;
+  ssl_earlydata_state earlydata_state;
   int io_need;                      /* TLS signals special SEND/RECV needs */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */

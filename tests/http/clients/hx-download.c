@@ -228,7 +228,7 @@ static int my_progress_cb(void *userdata,
 }
 
 static int setup(CURL *hnd, const char *url, struct transfer *t,
-                 int http_version)
+                 int http_version, struct curl_slist *host)
 {
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
@@ -242,6 +242,8 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
   if(forbid_reuse)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
+  if(host)
+    curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
 
   /* please be verbose */
   if(verbose) {
@@ -292,8 +294,10 @@ int main(int argc, char *argv[])
   struct transfer *t;
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
+  struct curl_slist *host = NULL;
+  const char *resolve = NULL;
 
-  while((ch = getopt(argc, argv, "afhm:n:A:F:P:V:")) != -1) {
+  while((ch = getopt(argc, argv, "afhm:n:A:F:P:R:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage(NULL);
@@ -318,6 +322,9 @@ int main(int argc, char *argv[])
       break;
     case 'P':
       pause_offset = (size_t)strtol(optarg, NULL, 10);
+      break;
+    case 'R':
+      resolve = optarg;
       break;
     case 'V': {
       if(!strcmp("http/1.1", optarg))
@@ -349,6 +356,9 @@ int main(int argc, char *argv[])
   }
   url = argv[0];
 
+  if(resolve)
+    host = curl_slist_append(NULL, resolve);
+
   transfers = calloc(transfer_count, sizeof(*transfers));
   if(!transfers) {
     fprintf(stderr, "error allocating transfer structs\n");
@@ -371,7 +381,7 @@ int main(int argc, char *argv[])
   for(i = 0; i < n; ++i) {
     t = &transfers[i];
     t->easy = curl_easy_init();
-    if(!t->easy || setup(t->easy, url, t, http_version)) {
+    if(!t->easy || setup(t->easy, url, t, http_version, host)) {
       fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
       return 1;
     }
@@ -444,7 +454,7 @@ int main(int argc, char *argv[])
           t = &transfers[i];
           if(!t->started) {
             t->easy = curl_easy_init();
-            if(!t->easy || setup(t->easy, url, t, http_version)) {
+            if(!t->easy || setup(t->easy, url, t, http_version, host)) {
               fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
               return 1;
             }
