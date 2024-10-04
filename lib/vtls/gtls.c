@@ -1858,7 +1858,7 @@ out:
     return CURLE_OK;
   }
   *done = ((connssl->connecting_state == ssl_connect_1) ||
-           (connssl->connecting_state == ssl_connection_deferred));
+           (connssl->state == ssl_connection_deferred));
   return result;
 }
 
