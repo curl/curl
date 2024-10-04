@@ -986,7 +986,7 @@ if(NOT CURL_DISABLE_LDAP)
   # Now that we know, we are not using Windows LDAP...
   if(NOT USE_WIN32_LDAP)
     # Check for LDAP
-    unset(CMAKE_REQUIRED_LIBRARIES)
+    cmake_push_check_state()
     if(USE_OPENSSL)
       set(CMAKE_REQUIRED_LIBRARIES ${OPENSSL_LIBRARIES})
     endif()
@@ -997,7 +997,6 @@ if(NOT CURL_DISABLE_LDAP)
       check_library_exists("${CMAKE_LBER_LIB}" "ber_init" "" HAVE_LIBLBER)
     endif()
 
-    set(CMAKE_REQUIRED_INCLUDES_BAK ${CMAKE_REQUIRED_INCLUDES})
     set(CMAKE_LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
     if(CMAKE_LDAP_INCLUDE_DIR)
       list(APPEND CMAKE_REQUIRED_INCLUDES ${CMAKE_LDAP_INCLUDE_DIR})
@@ -1008,13 +1007,9 @@ if(NOT CURL_DISABLE_LDAP)
     if(NOT HAVE_LDAP_H)
       message(STATUS "LDAP_H not found CURL_DISABLE_LDAP set ON")
       set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
-      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK})  # LDAP includes will not be used
-      unset(CMAKE_REQUIRED_LIBRARIES)
     elseif(NOT HAVE_LIBLDAP)
       message(STATUS "LDAP library '${CMAKE_LDAP_LIB}' not found CURL_DISABLE_LDAP set ON")
       set(CURL_DISABLE_LDAP ON CACHE BOOL "" FORCE)
-      set(CMAKE_REQUIRED_INCLUDES ${CMAKE_REQUIRED_INCLUDES_BAK})  # LDAP includes will not be used
-      unset(CMAKE_REQUIRED_LIBRARIES)
     else()
       if(CMAKE_LDAP_INCLUDE_DIR)
         include_directories(SYSTEM ${CMAKE_LDAP_INCLUDE_DIR})
@@ -1031,8 +1026,6 @@ if(NOT CURL_DISABLE_LDAP)
       check_function_exists("ldap_url_parse" HAVE_LDAP_URL_PARSE)
       check_function_exists("ldap_init_fd" HAVE_LDAP_INIT_FD)
 
-      unset(CMAKE_REQUIRED_LIBRARIES)
-
       check_include_file("ldap_ssl.h" HAVE_LDAP_SSL_H)
 
       if(HAVE_LDAP_INIT_FD)
@@ -1043,6 +1036,7 @@ if(NOT CURL_DISABLE_LDAP)
         set(HAVE_LDAP_SSL ON)
       endif()
     endif()
+    cmake_pop_check_state()
   endif()
 endif()
 
