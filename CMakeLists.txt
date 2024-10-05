@@ -168,8 +168,8 @@ if(WIN32)
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
+    list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to curl_internal_test()
   endif()
 
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
@@ -1490,9 +1490,9 @@ endif()
 
 # Check for some functions that are used
 if(WIN32)
-  set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")  # Apply to all feature checks
 elseif(HAVE_LIBSOCKET)
-  set(CMAKE_REQUIRED_LIBRARIES "socket")
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")  # Apply to all feature checks
 endif()
 
 check_symbol_exists("fnmatch"         "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
