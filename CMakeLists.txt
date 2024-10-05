@@ -1638,12 +1638,13 @@ if(HAVE_FSEEKO)
 endif()
 
 # Include this header to get the type
+cmake_push_check_state()
 set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
 check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
-set(CMAKE_EXTRA_INCLUDE_FILES "")
+cmake_pop_check_state()
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # On non-Windows and not cross-compiling, check for writable argv[]
