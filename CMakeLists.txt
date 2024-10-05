@@ -1652,7 +1652,7 @@ endforeach()
 cmake_push_check_state()
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
-  set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
+  set(CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
 endif()
 check_type_size("off_t" SIZEOF_OFF_T)
 
