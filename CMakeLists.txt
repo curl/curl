@@ -1500,9 +1500,9 @@ endif()
 
 # Check for some functions that are used
 if(WIN32)
-  set(CMAKE_REQUIRED_LIBRARIES "ws2_32")
+  set(CMAKE_REQUIRED_LIBRARIES "ws2_32")  # Apply to all feature checks
 elseif(HAVE_LIBSOCKET)
-  set(CMAKE_REQUIRED_LIBRARIES "socket")
+  set(CMAKE_REQUIRED_LIBRARIES "socket")  # Apply to all feature checks
 endif()
 
 check_symbol_exists("fnmatch"         "${CURL_INCLUDES};fnmatch.h" HAVE_FNMATCH)
