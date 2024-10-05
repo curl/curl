@@ -169,7 +169,6 @@ if(WIN32)
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to all feature checks
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")  # Apply to curl_internal_test()
   endif()
 
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
