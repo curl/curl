@@ -982,9 +982,15 @@ if(NOT CURL_DISABLE_LDAP)
 
   # Now that we know, we are not using Windows LDAP...
   if(NOT USE_WIN32_LDAP)
-    set(LDAP_LIBRARY "ldap" CACHE STRING "Name or full path to ldap library")
-    set(LBER_LIBRARY "lber" CACHE STRING "Name or full path to lber library")
-    set(LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
+    if(NOT DEFINED LDAP_LIBRARY)
+      set(LDAP_LIBRARY "ldap" CACHE STRING "Name or full path to ldap library")
+    endif()
+    if(NOT DEFINED LBER_LIBRARY)
+      set(LBER_LIBRARY "lber" CACHE STRING "Name or full path to lber library")
+    endif()
+    if(NOT DEFINED LDAP_INCLUDE_DIR)
+      set(LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
+    endif()
 
     # Check for LDAP
     cmake_push_check_state()
