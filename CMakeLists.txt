@@ -980,11 +980,12 @@ if(NOT CURL_DISABLE_LDAP)
     endif()
   endif()
 
-  set(LDAP_LIBRARY "ldap" CACHE STRING "Name or full path to ldap library")
-  set(LBER_LIBRARY "lber" CACHE STRING "Name or full path to lber library")
-
   # Now that we know, we are not using Windows LDAP...
   if(NOT USE_WIN32_LDAP)
+    set(LDAP_LIBRARY "ldap" CACHE STRING "Name or full path to ldap library")
+    set(LBER_LIBRARY "lber" CACHE STRING "Name or full path to lber library")
+    set(LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
+
     # Check for LDAP
     cmake_push_check_state()
     if(USE_OPENSSL)
@@ -997,7 +998,6 @@ if(NOT CURL_DISABLE_LDAP)
       check_library_exists("${LBER_LIBRARY}" "ber_init" "" HAVE_LIBLBER)
     endif()
 
-    set(LDAP_INCLUDE_DIR "" CACHE STRING "Path to LDAP include directory")
     if(LDAP_INCLUDE_DIR)
       list(APPEND CMAKE_REQUIRED_INCLUDES ${LDAP_INCLUDE_DIR})
     endif()
