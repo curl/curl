@@ -1622,6 +1622,7 @@ foreach(_curl_test IN ITEMS
   curl_internal_test(${_curl_test})
 endforeach()
 
+cmake_push_check_state()
 if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
   set(CMAKE_REQUIRED_FLAGS "-D_FILE_OFFSET_BITS=64")
@@ -1644,7 +1645,8 @@ set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
 check_type_size("curl_socket_t" SIZEOF_CURL_SOCKET_T)
-cmake_pop_check_state()
+cmake_pop_check_state()  # pop curl system headers
+cmake_pop_check_state()  # pop -D_FILE_OFFSET_BITS=64
 
 if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
   # On non-Windows and not cross-compiling, check for writable argv[]
@@ -1657,8 +1659,6 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       return (argv[0][0] == ' ')?0:1;
     }" HAVE_WRITABLE_ARGV)
 endif()
-
-unset(CMAKE_REQUIRED_FLAGS)
 
 curl_internal_test(HAVE_GLIBC_STRERROR_R)
 curl_internal_test(HAVE_POSIX_STRERROR_R)
