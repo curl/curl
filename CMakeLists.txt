@@ -1437,6 +1437,10 @@ check_include_file_concat("termios.h"        HAVE_TERMIOS_H)
 check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file_concat("utime.h"          HAVE_UTIME_H)
 
+if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
+  check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
+endif()
+
 check_type_size("size_t"      SIZEOF_SIZE_T)
 check_type_size("ssize_t"     SIZEOF_SSIZE_T)
 check_type_size("long long"   SIZEOF_LONG_LONG)
@@ -1526,6 +1530,10 @@ check_symbol_exists("setrlimit"       "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
 if(WIN32 OR CYGWIN)
   check_function_exists("_setmode" HAVE__SETMODE)
+endif()
+
+if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
+  check_symbol_exists("CloseSocket" "${CURL_INCLUDES}" HAVE_CLOSESOCKET_CAMEL)
 endif()
 
 if(NOT _ssl_enabled)
