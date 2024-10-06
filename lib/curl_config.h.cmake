@@ -481,6 +481,9 @@
 /* Define to 1 if you have the `setmode' function. */
 #cmakedefine HAVE_SETMODE 1
 
+/* Define to 1 if you have the `_setmode' function. */
+#cmakedefine HAVE__SETMODE 1
+
 /* Define to 1 if you have the `setrlimit' function. */
 #cmakedefine HAVE_SETRLIMIT 1
 

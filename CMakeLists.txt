@@ -1524,6 +1524,10 @@ check_symbol_exists("setlocale"       "${CURL_INCLUDES}" HAVE_SETLOCALE)
 check_symbol_exists("setmode"         "${CURL_INCLUDES}" HAVE_SETMODE)
 check_symbol_exists("setrlimit"       "${CURL_INCLUDES}" HAVE_SETRLIMIT)
 
+if(WIN32 OR CYGWIN)
+  check_function_exists("_setmode" HAVE__SETMODE)
+endif()
+
 if(NOT _ssl_enabled)
   check_symbol_exists("arc4random" "${CURL_INCLUDES};stdlib.h" HAVE_ARC4RANDOM)
 endif()

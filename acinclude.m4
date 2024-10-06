@@ -1553,9 +1553,9 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
         curl_pflags="${curl_pflags} UNIX";;
     esac
   fi
-  case $host_os in
-    cygwin*|msys*) curl_pflags="${curl_pflags} CYGWIN";;
-  esac
+  if test "$curl_cv_cygwin" = 'yes'; then
+    curl_pflags="${curl_pflags} CYGWIN"
+  fi
   case $host_os in
     msys*) curl_pflags="${curl_pflags} MSYS";;
   esac
