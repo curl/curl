@@ -150,30 +150,6 @@ curl_includes_netdb="\
 ])
 
 
-dnl CURL_INCLUDES_POLL
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when poll.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_POLL], [
-curl_includes_poll="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_POLL_H
-#  include <poll.h>
-#endif
-#ifdef HAVE_SYS_POLL_H
-#  include <sys/poll.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h poll.h sys/poll.h,
-    [], [], [$curl_includes_poll])
-])
-
-
 dnl CURL_INCLUDES_SETJMP
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
