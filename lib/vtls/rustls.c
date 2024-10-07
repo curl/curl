@@ -768,6 +768,7 @@ static void
 cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   const struct rustls_connection *rconn)
 {
+  struct ssl_connect_data *const connssl = cf->ctx;
   const uint8_t *protocol = NULL;
   size_t len = 0;
 
