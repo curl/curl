@@ -1180,7 +1180,7 @@ if(CURL_USE_GSSAPI)
 
     check_include_file_concat("gssapi/gssapi.h" HAVE_GSSAPI_GSSAPI_H)
     check_include_file_concat("gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
-    check_include_file_concat("gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
+    check_include_file_concat("gssapi/gssapi_krb5.h" _have_gssapi_gssapi_krb5_h)
 
     if(GSS_FLAVOUR STREQUAL "MIT")
       set(_include_list "")
@@ -1190,7 +1190,7 @@ if(CURL_USE_GSSAPI)
       if(HAVE_GSSAPI_GSSAPI_GENERIC_H)
         list(APPEND _include_list "gssapi/gssapi_generic.h")
       endif()
-      if(HAVE_GSSAPI_GSSAPI_KRB5_H)
+      if(_have_gssapi_gssapi_krb5_h)
         list(APPEND _include_list "gssapi/gssapi_krb5.h")
       endif()
 
