@@ -290,23 +290,14 @@ static void destroy_async_data(struct Curl_async *async)
 int Curl_resolver_getsock(struct Curl_easy *data,
                           curl_socket_t *socks)
 {
-  struct timeval maxtime;
+  struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
   struct timeval timebuf;
-  struct timeval *timeout;
-  long milli;
   int max = ares_getsock((ares_channel)data->state.async.resolver,
                          (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
-
-  maxtime.tv_sec = CURL_TIMEOUT_RESOLVE;
-  maxtime.tv_usec = 0;
-
-  timeout = ares_timeout((ares_channel)data->state.async.resolver, &maxtime,
-                         &timebuf);
-  milli = (long)curlx_tvtoms(timeout);
-  if(milli == 0)
-    milli += 10;
+  struct timeval *timeout =
+    ares_timeout((ares_channel)data->state.async.resolver, &maxtime, &timebuf);
+  timediff_t milli = curlx_tvtoms(timeout);
   Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-
   return max;
 }
 

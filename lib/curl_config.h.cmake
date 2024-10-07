@@ -219,6 +219,9 @@
 /* Define to 1 if you have the `closesocket' function. */
 #cmakedefine HAVE_CLOSESOCKET 1
 
+/* Define to 1 if you have the `CloseSocket' function. */
+#cmakedefine HAVE_CLOSESOCKET_CAMEL 1
+
 /* Define to 1 if you have the <dirent.h> header file. */
 #cmakedefine HAVE_DIRENT_H 1
 
@@ -318,9 +321,6 @@
 /* Define to 1 if you have the <gssapi/gssapi.h> header file. */
 #cmakedefine HAVE_GSSAPI_GSSAPI_H 1
 
-/* Define to 1 if you have the <gssapi/gssapi_krb5.h> header file. */
-#cmakedefine HAVE_GSSAPI_GSSAPI_KRB5_H 1
-
 /* if you have the GNU gssapi libraries */
 #cmakedefine HAVE_GSSGNU 1
 
@@ -409,6 +409,9 @@
 /* Define to 1 if you have the <netinet/in.h> header file. */
 #cmakedefine HAVE_NETINET_IN_H 1
 
+/* Define to 1 if you have the <netinet/in6.h> header file. */
+#cmakedefine HAVE_NETINET_IN6_H 1
+
 /* Define to 1 if you have the <netinet/tcp.h> header file. */
 #cmakedefine HAVE_NETINET_TCP_H 1
 
@@ -481,6 +484,9 @@
 /* Define to 1 if you have the `setmode' function. */
 #cmakedefine HAVE_SETMODE 1
 
+/* Define to 1 if you have the `_setmode' function. */
+#cmakedefine HAVE__SETMODE 1
+
 /* Define to 1 if you have the `setrlimit' function. */
 #cmakedefine HAVE_SETRLIMIT 1
 
@@ -507,6 +513,9 @@
 
 /* Define to 1 if you have the `socket' function. */
 #cmakedefine HAVE_SOCKET 1
+
+/* Define to 1 if you have the <proto/bsdsocket.h> header file. */
+#cmakedefine HAVE_PROTO_BSDSOCKET_H 1
 
 /* Define to 1 if you have the socketpair function. */
 #cmakedefine HAVE_SOCKETPAIR 1

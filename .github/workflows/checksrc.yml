@@ -41,16 +41,22 @@ jobs:
       - name: check
         run: git ls-files -z "*.[ch]" | xargs -0 -n1 ./scripts/checksrc.pl
 
-  codespell-cmakelint:
-    runs-on: ubuntu-latest
+  codespell-cmakelint-pytype-ruff:
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
         name: checkout
 
       - name: install
-        run: |
-          sudo apt-get install codespell python3-pip
-          python3 -m pip install cmakelint==1.4.3
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: >-
+          sudo apt-get install -y --no-install-suggests --no-install-recommends
+          codespell python3-pip python3-networkx python3-pydot python3-yaml
+          python3-toml python3-markupsafe python3-jinja2 python3-tabulate
+          python3-typing-extensions python3-libcst python3-impacket
+          python3-websockets python3-pytest &&
+          python3 -m pip install --break-system-packages cmakelint==1.4.3 pytype==2024.9.13 ruff==0.6.8
 
       - name: spellcheck
         run: |
@@ -63,6 +69,12 @@ jobs:
       - name: cmakelint
         run: scripts/cmakelint.sh
 
+      - name: pytype
+        run: find . -name '*.py' -exec pytype -j auto -k {} +
+
+      - name: ruff
+        run: ruff check --extend-select=B007,B016,C405,C416,COM818,D200,D213,D204,D401,D415,FURB129,N818,PERF401,PERF403,PIE790,PIE808,PLW0127,Q004,RUF010,SIM101,SIM117,SIM118,TRY400,TRY401
+
   reuse:
     runs-on: ubuntu-latest
     steps:
@@ -73,7 +85,7 @@ jobs:
         uses: fsfe/reuse-action@3ae3c6bdf1257ab19397fab11fd3312144692083 # v4
 
   miscchecks:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4

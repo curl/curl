@@ -547,9 +547,10 @@ jobs:
           # to the extra patch for the hack applied by Homebrew, there may
           # be extra changes as well.
           #
-          # For GHA runners, it means that the default Xcode + OS combo is
-          # broken in 8 out of 12 combinations (66%) have an SDK mismatch,
-          # and 9 fail to build (75%). These are the 3 lucky default
+          # For GHA runners, it means that the default Xcode + OS combo have
+          # and SDK mismatch in 8 out of 12 combinations (66%). All fail to
+          # build, plus one more with matching SDK. This is 9 in total (75%)
+          # that fail to build out of the box. These are the 3 lucky default
           # combinations that worked to build curl:
           #   macos-14 + Xcode 15.0.1 + gcc-12, gcc-14
           #
@@ -557,7 +558,7 @@ jobs:
           # combinations, 40% are broken.
           #
           # Compared to mainline llvm: llvm ships the same binaries regardless
-          # of build-OS or environent, it contains no SDK-version-specific
+          # of build-OS or environment, it contains no SDK-version-specific
           # hacks, and has no 3rd party patches. This still leaves some
           # occasional issues, but works much closer to expectations.
           #

@@ -150,30 +150,6 @@ curl_includes_netdb="\
 ])
 
 
-dnl CURL_INCLUDES_POLL
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when poll.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_POLL], [
-curl_includes_poll="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_POLL_H
-#  include <poll.h>
-#endif
-#ifdef HAVE_SYS_POLL_H
-#  include <sys/poll.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h poll.h sys/poll.h,
-    [], [], [$curl_includes_poll])
-])
-
-
 dnl CURL_INCLUDES_SETJMP
 dnl -------------------------------------------------
 dnl Set up variable with list of headers that must be
@@ -209,27 +185,6 @@ curl_includes_signal="\
   AC_CHECK_HEADERS(
     sys/types.h,
     [], [], [$curl_includes_signal])
-])
-
-
-dnl CURL_INCLUDES_SOCKET
-dnl -------------------------------------------------
-dnl Set up variable with list of headers that must be
-dnl included when socket.h is to be included.
-
-AC_DEFUN([CURL_INCLUDES_SOCKET], [
-curl_includes_socket="\
-/* includes start */
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_SOCKET_H
-#  include <socket.h>
-#endif
-/* includes end */"
-  AC_CHECK_HEADERS(
-    sys/types.h socket.h,
-    [], [], [$curl_includes_socket])
 ])
 
 
@@ -694,7 +649,6 @@ dnl HAVE_CLOSESOCKET will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
   #
   tst_links_closesocket="unknown"
   tst_proto_closesocket="unknown"
@@ -705,7 +659,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
   AC_LINK_IFELSE([
     AC_LANG_PROGRAM([[
       $curl_includes_winsock2
-      $curl_includes_socket
     ]],[[
       if(0 != closesocket(0))
         return 1;
@@ -722,7 +675,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_MSG_CHECKING([if closesocket is prototyped])
     AC_EGREP_CPP([closesocket],[
       $curl_includes_winsock2
-      $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_closesocket="yes"
@@ -737,7 +689,6 @@ AC_DEFUN([CURL_CHECK_FUNC_CLOSESOCKET], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_winsock2
-        $curl_includes_socket
       ]],[[
         if(0 != closesocket(0))
           return 1;
@@ -2158,101 +2109,6 @@ AC_DEFUN([CURL_CHECK_FUNC_GETSOCKNAME], [
   fi
 ])
 
-dnl CURL_CHECK_FUNC_IF_NAMETOINDEX
-dnl -------------------------------------------------
-dnl Verify if if_nametoindex is available, prototyped, and
-dnl can be compiled. If all of these are true, and
-dnl usage has not been previously disallowed with
-dnl shell variable curl_disallow_if_nametoindex, then
-dnl HAVE_IF_NAMETOINDEX will be defined.
-
-AC_DEFUN([CURL_CHECK_FUNC_IF_NAMETOINDEX], [
-  AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
-  AC_REQUIRE([CURL_INCLUDES_NETIF])dnl
-  AC_REQUIRE([CURL_PREPROCESS_CALLCONV])dnl
-  #
-  tst_links_if_nametoindex="unknown"
-  tst_proto_if_nametoindex="unknown"
-  tst_compi_if_nametoindex="unknown"
-  tst_allow_if_nametoindex="unknown"
-  #
-  AC_MSG_CHECKING([if if_nametoindex can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_winsock2
-      $curl_includes_bsdsocket
-      #include <net/if.h>
-    ]],[[
-      if(0 != if_nametoindex(""))
-        return 1;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_if_nametoindex="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_if_nametoindex="no"
-  ])
-  #
-  if test "$tst_links_if_nametoindex" = "yes"; then
-    AC_MSG_CHECKING([if if_nametoindex is prototyped])
-    AC_EGREP_CPP([if_nametoindex],[
-      $curl_includes_winsock2
-      $curl_includes_netif
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_if_nametoindex="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_if_nametoindex="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_if_nametoindex" = "yes"; then
-    AC_MSG_CHECKING([if if_nametoindex is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_winsock2
-        $curl_includes_netif
-      ]],[[
-        if(0 != if_nametoindex(""))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_if_nametoindex="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_if_nametoindex="no"
-    ])
-  fi
-  #
-  if test "$tst_compi_if_nametoindex" = "yes"; then
-    AC_MSG_CHECKING([if if_nametoindex usage allowed])
-    if test "x$curl_disallow_if_nametoindex" != "xyes"; then
-      AC_MSG_RESULT([yes])
-      tst_allow_if_nametoindex="yes"
-    else
-      AC_MSG_RESULT([no])
-      tst_allow_if_nametoindex="no"
-    fi
-  fi
-  #
-  AC_MSG_CHECKING([if if_nametoindex might be used])
-  if test "$tst_links_if_nametoindex" = "yes" &&
-     test "$tst_proto_if_nametoindex" = "yes" &&
-     test "$tst_compi_if_nametoindex" = "yes" &&
-     test "$tst_allow_if_nametoindex" = "yes"; then
-    AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_IF_NAMETOINDEX, 1,
-      [Define to 1 if you have the if_nametoindex function.])
-    curl_cv_func_if_nametoindex="yes"
-  else
-    AC_MSG_RESULT([no])
-    curl_cv_func_if_nametoindex="no"
-  fi
-])
-
 
 dnl CURL_CHECK_FUNC_GETIFADDRS
 dnl -------------------------------------------------
@@ -3395,74 +3251,6 @@ AC_DEFUN([CURL_CHECK_FUNC_MEMRCHR], [
 ])
 
 
-dnl CURL_CHECK_FUNC_POLL
-dnl -------------------------------------------------
-dnl Verify if poll is available, prototyped, can
-dnl be compiled and seems to work.
-
-AC_DEFUN([CURL_CHECK_FUNC_POLL], [
-  AC_REQUIRE([CURL_INCLUDES_STDLIB])dnl
-  AC_REQUIRE([CURL_INCLUDES_POLL])dnl
-  #
-  tst_links_poll="unknown"
-  tst_proto_poll="unknown"
-  tst_compi_poll="unknown"
-  #
-  AC_MSG_CHECKING([if poll can be linked])
-  AC_LINK_IFELSE([
-    AC_LANG_PROGRAM([[
-      $curl_includes_poll
-    ]],[[
-      if(0 != poll(0, 0, 0))
-        return 1;
-    ]])
-  ],[
-    AC_MSG_RESULT([yes])
-    tst_links_poll="yes"
-  ],[
-    AC_MSG_RESULT([no])
-    tst_links_poll="no"
-  ])
-  #
-  if test "$tst_links_poll" = "yes"; then
-    AC_MSG_CHECKING([if poll is prototyped])
-    AC_EGREP_CPP([poll],[
-      $curl_includes_poll
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_poll="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_poll="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_poll" = "yes"; then
-    AC_MSG_CHECKING([if poll is compilable])
-    AC_COMPILE_IFELSE([
-      AC_LANG_PROGRAM([[
-        $curl_includes_poll
-      ]],[[
-        if(0 != poll(0, 0, 0))
-          return 1;
-      ]])
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_compi_poll="yes"
-      AC_DEFINE_UNQUOTED(HAVE_POLL, 1, [If you have poll])
-    ],[
-      AC_MSG_RESULT([no])
-      tst_compi_poll="no"
-    ])
-  fi
-  #
-])
-
-
-  fi
-])
-
-
 dnl CURL_CHECK_FUNC_SIGACTION
 dnl -------------------------------------------------
 dnl Verify if sigaction is available, prototyped, and
@@ -3836,7 +3624,6 @@ dnl HAVE_SOCKET will be defined.
 AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
   AC_REQUIRE([CURL_INCLUDES_WINSOCK2])dnl
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
   #
   tst_links_socket="unknown"
   tst_proto_socket="unknown"
@@ -3849,7 +3636,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
       $curl_includes_winsock2
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
-      $curl_includes_socket
     ]],[[
       if(0 != socket(0, 0, 0))
         return 1;
@@ -3868,7 +3654,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
       $curl_includes_winsock2
       $curl_includes_bsdsocket
       $curl_includes_sys_socket
-      $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_socket="yes"
@@ -3885,7 +3670,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKET], [
         $curl_includes_winsock2
         $curl_includes_bsdsocket
         $curl_includes_sys_socket
-        $curl_includes_socket
       ]],[[
         if(0 != socket(0, 0, 0))
           return 1;
@@ -3936,7 +3720,6 @@ dnl HAVE_SOCKETPAIR will be defined.
 
 AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
   AC_REQUIRE([CURL_INCLUDES_SYS_SOCKET])dnl
-  AC_REQUIRE([CURL_INCLUDES_SOCKET])dnl
   #
   tst_links_socketpair="unknown"
   tst_proto_socketpair="unknown"
@@ -3958,7 +3741,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
     AC_MSG_CHECKING([if socketpair is prototyped])
     AC_EGREP_CPP([socketpair],[
       $curl_includes_sys_socket
-      $curl_includes_socket
     ],[
       AC_MSG_RESULT([yes])
       tst_proto_socketpair="yes"
@@ -3973,7 +3755,6 @@ AC_DEFUN([CURL_CHECK_FUNC_SOCKETPAIR], [
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         $curl_includes_sys_socket
-        $curl_includes_socket
       ]],[[
         int sv[2];
         if(0 != socketpair(0, 0, 0, sv))

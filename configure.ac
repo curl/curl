@@ -605,6 +605,11 @@ case $host in
     ;;
 esac
 
+curl_cv_cygwin='no'
+case $host_os in
+  cygwin*|msys*) curl_cv_cygwin='yes';;
+esac
+
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
 
@@ -3884,7 +3889,6 @@ AC_CHECK_HEADERS(
   sys/utime.h \
   sys/poll.h \
   poll.h \
-  socket.h \
   sys/resource.h \
   libgen.h \
   locale.h \
@@ -4058,7 +4062,6 @@ CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
 CURL_CHECK_FUNC_GETPEERNAME
 CURL_CHECK_FUNC_GETSOCKNAME
-CURL_CHECK_FUNC_IF_NAMETOINDEX
 CURL_CHECK_FUNC_GETIFADDRS
 CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_INET_NTOP
@@ -4067,7 +4070,6 @@ CURL_CHECK_FUNC_IOCTL
 CURL_CHECK_FUNC_IOCTLSOCKET
 CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
 CURL_CHECK_FUNC_MEMRCHR
-CURL_CHECK_FUNC_POLL
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_SIGINTERRUPT
 CURL_CHECK_FUNC_SIGNAL
@@ -4119,6 +4121,10 @@ AC_CHECK_FUNCS([\
   utime \
   utimes \
 ])
+
+if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
+  AC_CHECK_FUNCS([_setmode])
+fi
 
 if test -z "$ssl_backends"; then
   AC_CHECK_FUNCS([arc4random])

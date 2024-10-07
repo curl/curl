@@ -191,6 +191,7 @@ jobs:
           # https://pkg.omnios.org/r151050/core/en/index.shtml
           prepare: pkg install build-essential libtool
           run: |
+            set -e
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
             autoreconf -fi
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
