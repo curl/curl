@@ -1869,7 +1869,7 @@ gtls_connect_common(struct Curl_cfilter *cf,
       if(gnutls_session_get_flags(backend->gtls.session) &
          GNUTLS_SFLAGS_EARLY_DATA) {
         connssl->earlydata_state = ssl_earlydata_accepted;
-        infof(data, "Server accpeted %zu bytes of early data",
+        infof(data, "Server accepted %zu bytes of early data",
               connssl->earlydata_skip);
       }
       else {
