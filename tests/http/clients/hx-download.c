@@ -273,7 +273,8 @@ static void usage(const char *msg)
     "  -m number  max parallel downloads\n"
     "  -e         use TLS early data when possible\n"
     "  -f         forbid connection reuse\n"
-    "  -n number  total downloads\n"
+    "  -n number  total downloads\n");
+  fprintf(stderr,
     "  -A number  abort transfer after `number` response bytes\n"
     "  -F number  fail writing response after `number` response bytes\n"
     "  -P number  pause transfer after `number` response bytes\n"
