@@ -88,6 +88,11 @@ if test "x$OPT_RUSTLS" != xno; then
             CPPFLAGS="$CPPFLAGS $addcflags"
         fi
 
+        if test $(uname) = "Darwin"; then
+            RUSTLS_LDFLAGS="-framework Security -framework Foundation"
+        else
+            RUSTLS_LDFLAGS="-lpthread -ldl -lm"
+        fi
         AC_CHECK_LIB(rustls, rustls_connection_read,
           [
           AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
@@ -98,11 +103,11 @@ if test "x$OPT_RUSTLS" != xno; then
           test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
           ],
           AC_MSG_ERROR([--with-rustls was specified but could not find Rustls.]),
-          -lpthread -ldl -lm)
+          $RUSTLS_LDFLAGS)
 
         LIB_RUSTLS="$PREFIX_RUSTLS/lib$libsuff"
         if test "$PREFIX_RUSTLS" != "/usr" ; then
-          SSL_LDFLAGS="-L$LIB_RUSTLS"
+          SSL_LDFLAGS="-L$LIB_RUSTLS $RUSTLS_LDFLAGS"
           SSL_CPPFLAGS="-I$PREFIX_RUSTLS/include"
         fi
       fi
