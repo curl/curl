@@ -110,6 +110,7 @@ class EnvConfig:
             'ftps': socket.SOCK_STREAM,
             'http': socket.SOCK_STREAM,
             'https': socket.SOCK_STREAM,
+            'nghttpx_https': socket.SOCK_STREAM,
             'proxy': socket.SOCK_STREAM,
             'proxys': socket.SOCK_STREAM,
             'h2proxys': socket.SOCK_STREAM,
@@ -471,6 +472,10 @@ class Env:
     @property
     def https_port(self) -> int:
         return self.CONFIG.ports['https']
+
+    @property
+    def nghttpx_https_port(self) -> int:
+        return self.CONFIG.ports['nghttpx_https']
 
     @property
     def h3_port(self) -> int:

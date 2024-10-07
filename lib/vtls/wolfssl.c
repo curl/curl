@@ -1059,7 +1059,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              &ssl_sessionid, NULL)) {
+                              &ssl_sessionid, NULL, NULL)) {
       /* we got a session id, use it! */
       if(!SSL_set_session(backend->handle, ssl_sessionid)) {
         Curl_ssl_delsessionid(data, ssl_sessionid);
@@ -1406,11 +1406,11 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
     rc = wolfSSL_ALPN_GetProtocol(backend->handle, &protocol, &protocol_len);
 
     if(rc == SSL_SUCCESS) {
-      Curl_alpn_set_negotiated(cf, data, (const unsigned char *)protocol,
-                               protocol_len);
+      Curl_alpn_set_negotiated(cf, data, connssl,
+                               (const unsigned char *)protocol, protocol_len);
     }
     else if(rc == SSL_ALPN_NOT_FOUND)
-      Curl_alpn_set_negotiated(cf, data, NULL, 0);
+      Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
     else {
       failf(data, "ALPN, failure getting protocol, error %d", rc);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1457,7 +1457,7 @@ wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(our_ssl_sessionid) {
       Curl_ssl_sessionid_lock(data);
       /* call takes ownership of `our_ssl_sessionid` */
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
+      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
                                       our_ssl_sessionid, 0,
                                       wolfssl_session_free);
       Curl_ssl_sessionid_unlock(data);

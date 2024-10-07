@@ -753,6 +753,7 @@ static CURLcode gtls_update_session_id(struct Curl_cfilter *cf,
       Curl_ssl_sessionid_lock(data);
       /* store this session id, takes ownership */
       result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
+                                      connssl->alpn_negotiated,
                                       connect_sessionid, connect_idsize,
                                       gtls_sessionid_free);
       Curl_ssl_sessionid_unlock(data);
@@ -1048,7 +1049,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_connect_data *connssl = cf->ctx;
-
+  gnutls_datum_t gtls_alpns[5];
+  size_t gtls_alpns_count = 0;
   CURLcode result;
 
   DEBUGASSERT(gctx);
@@ -1071,40 +1073,15 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     gnutls_session_set_keylog_function(gctx->session, keylog_callback);
   }
 
-  /* convert the ALPN string from our arguments to a list of strings
-   * that gnutls wants and will convert internally back to this very
-   * string for sending to the server. nice. */
-  if(alpn && alpn_len) {
-    gnutls_datum_t alpns[5];
-    size_t i, alen = alpn_len;
-    unsigned char *s = (unsigned char *)alpn;
-    unsigned char slen;
-    for(i = 0; (i < ARRAYSIZE(alpns)) && alen; ++i) {
-      slen = s[0];
-      if(slen >= alen)
-        return CURLE_FAILED_INIT;
-      alpns[i].data = s + 1;
-      alpns[i].size = slen;
-      s += slen + 1;
-      alen -= (size_t)slen + 1;
-    }
-    if(alen) /* not all alpn chars used, wrong format or too many */
-        return CURLE_FAILED_INIT;
-    if(i && gnutls_alpn_set_protocols(gctx->session,
-                                      alpns, (unsigned int)i,
-                                      GNUTLS_ALPN_MANDATORY)) {
-      failf(data, "failed setting ALPN");
-      return CURLE_SSL_CONNECT_ERROR;
-    }
-  }
-
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
   if(conn_config->cache_session) {
     void *ssl_sessionid;
     size_t ssl_idsize;
+    char *session_alpn;
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, peer, &ssl_sessionid, &ssl_idsize)) {
+    if(!Curl_ssl_getsessionid(cf, data, peer,
+                              &ssl_sessionid, &ssl_idsize, &session_alpn)) {
       /* we got a session id, use it! */
       int rc;
 
@@ -1115,21 +1092,69 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
         infof(data, "SSL reusing session ID (size=%zu)", ssl_idsize);
         if((gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3) &&
 #ifdef DEBUGBUILD
-           (ssl_config->earlydata || !!getenv("CURL_USE_EARLYDATA"))) {
+           (ssl_config->earlydata || !!getenv("CURL_USE_EARLYDATA")) &&
 #else
-           ssl_config->earlydata) {
+           ssl_config->earlydata &&
 #endif
+           Curl_alpn_contains_proto(connssl->alpn, session_alpn)) {
           connssl->earlydata_max =
             gnutls_record_get_max_early_data_size(gctx->session);
-          CURL_TRC_CF(data, cf, "TLS session allows %zu earlydata bytes",
-                      connssl->earlydata_max);
-          if(connssl->earlydata_max)
+          if((!connssl->earlydata_max ||
+              connssl->earlydata_max == 0xFFFFFFFFUL)) {
+            /* Seems to be GnuTLS way to signal no EarlyData in session */
+            CURL_TRC_CF(data, cf, "TLS session does not allow earlydata");
+          }
+          else {
+            CURL_TRC_CF(data, cf, "TLS session allows %zu earlydata bytes, "
+                        "reusing ALPN '%s'",
+                        connssl->earlydata_max, session_alpn);
             connssl->earlydata_state = ssl_earlydata_use;
+            result = Curl_alpn_set_negotiated(cf, data, connssl,
+                            (const unsigned char *)session_alpn,
+                            session_alpn ? strlen(session_alpn) : 0);
+            if(result)
+              return result;
+            /* We only try the ALPN protocol the session used before,
+             * otherwise we might send early data for the wrong protocol */
+            gtls_alpns[0].data = (unsigned char *)session_alpn;
+            gtls_alpns[0].size = (unsigned)strlen(session_alpn);
+            gtls_alpns_count = 1;
+          }
         }
       }
     }
     Curl_ssl_sessionid_unlock(data);
   }
+
+  /* convert the ALPN string from our arguments to a list of strings
+   * that gnutls wants and will convert internally back to this very
+   * string for sending to the server. nice. */
+  if(!gtls_alpns_count && alpn && alpn_len) {
+    size_t i, alen = alpn_len;
+    unsigned char *s = (unsigned char *)alpn;
+    unsigned char slen;
+    for(i = 0; (i < ARRAYSIZE(gtls_alpns)) && alen; ++i) {
+      slen = s[0];
+      if(slen >= alen)
+        return CURLE_FAILED_INIT;
+      gtls_alpns[i].data = s + 1;
+      gtls_alpns[i].size = slen;
+      s += slen + 1;
+      alen -= (size_t)slen + 1;
+    }
+    if(alen) /* not all alpn chars used, wrong format or too many */
+        return CURLE_FAILED_INIT;
+    gtls_alpns_count = i;
+  }
+
+  if(gtls_alpns_count &&
+     gnutls_alpn_set_protocols(gctx->session,
+                               gtls_alpns, (unsigned int)gtls_alpns_count,
+                               GNUTLS_ALPN_MANDATORY)) {
+    failf(data, "failed setting ALPN");
+    return CURLE_SSL_CONNECT_ERROR;
+  }
+
   return CURLE_OK;
 }
 
@@ -1704,9 +1729,12 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
 
     rc = gnutls_alpn_get_selected_protocol(session, &proto);
     if(rc == 0)
-      Curl_alpn_set_negotiated(cf, data, proto.data, proto.size);
+      result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                        proto.data, proto.size);
     else
-      Curl_alpn_set_negotiated(cf, data, NULL, 0);
+      result = Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
+    if(result)
+      goto out;
   }
 
   /* Only on TLSv1.2 or lower do we have the session id now. For
@@ -1866,6 +1894,12 @@ static CURLcode gtls_connect_nonblocking(struct Curl_cfilter *cf,
                                          struct Curl_easy *data,
                                          bool *done)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
+  if(connssl->state == ssl_connection_deferred) {
+    /* We refuse to be pushed, we are waiting for someone to send/recv. */
+    *done = TRUE;
+    return CURLE_OK;
+  }
   return gtls_connect_common(cf, data, TRUE, done);
 }
 

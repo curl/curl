@@ -466,6 +466,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if(ctx) {
+    Curl_safefree(ctx->alpn_negotiated);
     Curl_bufq_free(&ctx->earlydata);
     free(ctx->backend);
     free(ctx);
@@ -529,7 +530,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            const struct ssl_peer *peer,
                            void **ssl_sessionid,
-                           size_t *idsize) /* set 0 if unknown */
+                           size_t *idsize, /* set 0 if unknown */
+                           char **palpn)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -539,6 +541,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   bool no_match = TRUE;
 
   *ssl_sessionid = NULL;
+  if(palpn)
+    *palpn = NULL;
   if(!ssl_config)
     return TRUE;
 
@@ -577,6 +581,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
       *ssl_sessionid = check->sessionid;
       if(idsize)
         *idsize = check->idsize;
+      if(palpn)
+        *palpn = check->alpn;
       no_match = FALSE;
       break;
     }
@@ -607,6 +613,7 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *session)
 
     Curl_safefree(session->name);
     Curl_safefree(session->conn_to_host);
+    Curl_safefree(session->alpn);
   }
 }
 
@@ -630,6 +637,7 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
 CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const struct ssl_peer *peer,
+                                const char *alpn,
                                 void *ssl_sessionid,
                                 size_t idsize,
                                 Curl_ssl_sessionid_dtor *sessionid_free_cb)
@@ -641,6 +649,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
   long oldest_age;
   char *clone_host = NULL;
   char *clone_conn_to_host = NULL;
+  char *clone_alpn = NULL;
   int conn_to_port;
   long *general_age;
   void *old_sessionid;
@@ -655,7 +664,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size)) {
+  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size, NULL)) {
     if((old_size == idsize) &&
        ((old_sessionid == ssl_sessionid) ||
         (idsize && !memcmp(old_sessionid, ssl_sessionid, idsize)))) {
@@ -680,6 +689,10 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
     if(!clone_conn_to_host)
       goto out;
   }
+
+  clone_alpn = alpn ? strdup(alpn) : NULL;
+  if(alpn && !clone_alpn)
+    goto out;
 
   if(cf->conn->bits.conn_to_port)
     conn_to_port = cf->conn->conn_to_port;
@@ -729,6 +742,8 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
   store->conn_to_host = clone_conn_to_host; /* clone connect to hostname */
   clone_conn_to_host = NULL;
   store->conn_to_port = conn_to_port; /* connect to port number */
+  store->alpn = clone_alpn;
+  clone_alpn = NULL;
   /* port number */
   store->remote_port = peer->port;
   store->scheme = cf->conn->handler->scheme;
@@ -739,6 +754,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
 out:
   free(clone_host);
   free(clone_conn_to_host);
+  free(clone_alpn);
   if(result) {
     failf(data, "Failed to add Session ID to cache for %s://%s:%d [%s]",
           store->scheme, store->name, store->remote_port,
@@ -2223,8 +2239,21 @@ CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
   return CURLE_OK;
 }
 
+bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
+                              const char *proto)
+{
+  size_t i, plen = proto ? strlen(proto) : 0;
+  for(i = 0; spec && plen && i < spec->count; ++i) {
+    size_t slen = strlen(spec->entries[i]);
+    if((slen == plen) && !memcmp(proto, spec->entries[i], plen))
+      return TRUE;
+  }
+  return FALSE;
+}
+
 CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct ssl_connect_data *connssl,
                                   const unsigned char *proto,
                                   size_t proto_len)
 {
@@ -2236,6 +2265,15 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     &cf->conn->alpn
 #endif
     ;
+
+  Curl_safefree(connssl->alpn_negotiated);
+  if(proto && proto_len && !memchr(proto, '\0', proto_len)) {
+    connssl->alpn_negotiated = malloc(proto_len + 1);
+    if(!connssl->alpn_negotiated)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(connssl->alpn_negotiated, proto, proto_len);
+    connssl->alpn_negotiated[proto_len] = 0;
+  }
 
   if(proto && proto_len) {
     if(proto_len == ALPN_HTTP_1_1_LENGTH &&

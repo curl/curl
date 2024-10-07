@@ -228,8 +228,10 @@ static int my_progress_cb(void *userdata,
 }
 
 static int setup(CURL *hnd, const char *url, struct transfer *t,
-                 int http_version, struct curl_slist *host)
+                 int http_version, struct curl_slist *host,
+                 CURLSH *share, int use_earlydata)
 {
+  curl_easy_setopt(hnd, CURLOPT_SHARE, share);
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -240,6 +242,8 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_cb);
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
+  if(use_earlydata)
+    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
   if(forbid_reuse)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
   if(host)
@@ -267,10 +271,13 @@ static void usage(const char *msg)
     "  download a url with following options:\n"
     "  -a         abort paused transfer\n"
     "  -m number  max parallel downloads\n"
+    "  -e         use TLS early data when possible\n"
+    "  -f         forbid connection reuse\n"
     "  -n number  total downloads\n"
     "  -A number  abort transfer after `number` response bytes\n"
     "  -F number  fail writing response after `number` response bytes\n"
     "  -P number  pause transfer after `number` response bytes\n"
+    "  -r <host>:<port>:<addr>  resolve information\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }
@@ -284,26 +291,30 @@ int main(int argc, char *argv[])
 #ifndef _MSC_VER
   CURLM *multi_handle;
   struct CURLMsg *m;
+  CURLSH *share;
   const char *url;
   size_t i, n, max_parallel = 1;
   size_t active_transfers;
   size_t pause_offset = 0;
   size_t abort_offset = 0;
   size_t fail_offset = 0;
-  int abort_paused = 0;
+  int abort_paused = 0, use_earlydata = 0;
   struct transfer *t;
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
   const char *resolve = NULL;
 
-  while((ch = getopt(argc, argv, "afhm:n:A:F:P:R:V:")) != -1) {
+  while((ch = getopt(argc, argv, "aefhm:n:A:F:P:r:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage(NULL);
       return 2;
     case 'a':
       abort_paused = 1;
+      break;
+    case 'e':
+      use_earlydata = 1;
       break;
     case 'f':
       forbid_reuse = 1;
@@ -323,7 +334,7 @@ int main(int argc, char *argv[])
     case 'P':
       pause_offset = (size_t)strtol(optarg, NULL, 10);
       break;
-    case 'R':
+    case 'r':
       resolve = optarg;
       break;
     case 'V': {
@@ -359,6 +370,18 @@ int main(int argc, char *argv[])
   if(resolve)
     host = curl_slist_append(NULL, resolve);
 
+  share = curl_share_init();
+  if(!share) {
+    fprintf(stderr, "error allocating share\n");
+    return 1;
+  }
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
+
   transfers = calloc(transfer_count, sizeof(*transfers));
   if(!transfers) {
     fprintf(stderr, "error allocating transfer structs\n");
@@ -381,7 +404,8 @@ int main(int argc, char *argv[])
   for(i = 0; i < n; ++i) {
     t = &transfers[i];
     t->easy = curl_easy_init();
-    if(!t->easy || setup(t->easy, url, t, http_version, host)) {
+    if(!t->easy ||
+       setup(t->easy, url, t, http_version, host, share, use_earlydata)) {
       fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
       return 1;
     }
@@ -454,7 +478,9 @@ int main(int argc, char *argv[])
           t = &transfers[i];
           if(!t->started) {
             t->easy = curl_easy_init();
-            if(!t->easy || setup(t->easy, url, t, http_version, host)) {
+            if(!t->easy ||
+               setup(t->easy, url, t, http_version, host, share,
+                     use_earlydata)) {
               fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
               return 1;
             }

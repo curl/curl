@@ -772,7 +772,7 @@ cr_set_negotiated_alpn(struct Curl_cfilter *cf, struct Curl_easy *data,
   size_t len = 0;
 
   rustls_connection_get_alpn_protocol(rconn, &protocol, &len);
-  Curl_alpn_set_negotiated(cf, data, protocol, len);
+  Curl_alpn_set_negotiated(cf, data, connssl, protocol, len);
 }
 
 /* Given an established network connection, do a TLS handshake.

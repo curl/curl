@@ -591,3 +591,33 @@ class TestDownload:
         # we see 3 connections, because Apache only every serves a single
         # request via Upgrade: and then closed the connection.
         assert r.total_connects == 3, r.dump_logs()
+
+    # nghttpx is the only server we have that supports TLS early data
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_02_32_earlydata(self, env: Env, httpd, nghttpx, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 2
+        docname = 'data-10k'
+        # we want this test to always connect to nghttpx, since it is
+        # the only server we have that supports TLS earlydata
+        port = env.port_for(proto)
+        if proto != 'h3':
+            port = env.nghttpx_https_port
+        # url = f'https://{env.domain1}:{env.port_for(proto)}/{docname}'
+        url = f'https://{env.domain1}:{port}/{docname}'
+        client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',
+             '-e',  # use TLS earlydata
+             '-f',  # forbid reuse of connections
+             '-r', f'{env.domain1}:{port}:127.0.0.1',
+             '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
+

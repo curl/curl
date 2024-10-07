@@ -347,6 +347,7 @@ struct Curl_ssl_session {
   char *name;       /* hostname for which this ID was used */
   char *conn_to_host; /* hostname for the connection (may be NULL) */
   const char *scheme; /* protocol scheme used */
+  char *alpn;         /* APLN TLS negotiated protocol string */
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
   Curl_ssl_sessionid_dtor *sessionid_free; /* free `sessionid` callback */
