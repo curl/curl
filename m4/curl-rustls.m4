@@ -34,13 +34,6 @@ if test "x$OPT_RUSTLS" != xno; then
   CLEANLDFLAGS="$LDFLAGS"
   CLEANCPPFLAGS="$CPPFLAGS"
 
-  case $host in
-    *-apple-*)
-      LDFLAGS="$LDFLAGS -framework Security"
-      ;;
-    *)
-      ;;
-  esac
   ## NEW CODE
 
   dnl use pkg-config unless we have been given a path
@@ -88,11 +81,14 @@ if test "x$OPT_RUSTLS" != xno; then
             CPPFLAGS="$CPPFLAGS $addcflags"
         fi
 
-        if test $(uname) = "Darwin"; then
+        case $host in
+          *-apple-*)
             RUSTLS_LDFLAGS="-framework Security -framework Foundation"
-        else
+            ;;
+          *)
             RUSTLS_LDFLAGS="-lpthread -ldl -lm"
-        fi
+            ;;
+        esac
         AC_CHECK_LIB(rustls, rustls_connection_read,
           [
           AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
