@@ -788,6 +788,7 @@ macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
   elseif(USE_WOLFSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${WOLFSSL_INCLUDE_DIRS}")
     set(CMAKE_REQUIRED_LIBRARIES  "${WOLFSSL_LIBRARIES}")
+    curl_required_libpaths("${WOLFSSL_LIBRARY_DIRS}")
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_INCLUDES  "${ZLIB_INCLUDE_DIRS}")  # Public wolfSSL headers require zlib headers
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
