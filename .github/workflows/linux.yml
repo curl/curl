@@ -118,11 +118,11 @@ jobs:
             install_steps: mbedtls
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
-          - name: mbedtls-packaged
+          - name: mbedtls-pkg
             install_packages: libnghttp2-dev libmbedtls-dev
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
-          - name: mbedtls-packaged !pkg-config
+          - name: mbedtls-pkg !pc
             install_packages: libnghttp2-dev libmbedtls-dev
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
             install_steps: skipall
