@@ -30,7 +30,7 @@
 # Result variables:
 #
 # GSS_FOUND         System has the Heimdal library
-# GSS_FLAVOUR       "MIT" or "Heimdal" if anything found
+# GSS_FLAVOUR       "GNU", "MIT" or "Heimdal" if anything found
 # GSS_INCLUDE_DIRS  The GSS include directories
 # GSS_LIBRARIES     The GSS library names
 # GSS_LIBRARY_DIRS  The GSS library directories
