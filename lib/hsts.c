@@ -250,7 +250,6 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
                            bool subdomain)
 {
   if(h) {
-    char buffer[MAX_HSTS_HOSTLEN + 1];
     time_t now = time(NULL);
     size_t hlen = strlen(hostname);
     struct Curl_llist_node *e;
@@ -258,15 +257,13 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
 
     if((hlen > MAX_HSTS_HOSTLEN) || !hlen)
       return NULL;
-    memcpy(buffer, hostname, hlen);
     if(hostname[hlen-1] == '.')
       /* remove the trailing dot */
       --hlen;
-    buffer[hlen] = 0;
-    hostname = buffer;
 
     for(e = Curl_llist_head(&h->list); e; e = n) {
       struct stsentry *sts = Curl_node_elem(e);
+      size_t ntail;
       n = Curl_node_next(e);
       if(sts->expires <= now) {
         /* remove expired entries */
@@ -274,16 +271,15 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
         hsts_free(sts);
         continue;
       }
-      if(subdomain && sts->includeSubDomains) {
-        size_t ntail = strlen(sts->host);
-        if(ntail < hlen) {
-          size_t offs = hlen - ntail;
-          if((hostname[offs-1] == '.') &&
-             strncasecompare(&hostname[offs], sts->host, ntail))
-            return sts;
-        }
+      ntail = strlen(sts->host);
+      if((subdomain && sts->includeSubDomains) && (ntail < hlen)) {
+        size_t offs = hlen - ntail;
+        if((hostname[offs-1] == '.') &&
+           strncasecompare(&hostname[offs], sts->host, ntail))
+          return sts;
       }
-      if(strcasecompare(hostname, sts->host))
+      /* avoid strcasecompare because the host name is not null terminated */
+      if((hlen == ntail) && strncasecompare(hostname, sts->host, hlen))
         return sts;
     }
   }
