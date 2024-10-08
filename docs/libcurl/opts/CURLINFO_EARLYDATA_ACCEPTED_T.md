@@ -31,10 +31,10 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_EARLYDATA_ACCEPTED_T,
 
 Pass a pointer to a *curl_off_t* to receive the total amount of bytes of
 TLSv1.3 earlydata that were accepted by the server. When no TLS early
-data is used, this will report 0. When earlydata is sent, this will
-return -1 until the TLS handshake with the server is complete.
+data is used, this reports 0. When earlydata is sent, this
+returns -1 until the TLS handshake with the server is complete.
 
-Note that TLS earlydata will only be attempted when CURLSSLOPT_EARLYDATA
+Note that TLS earlydata is only attempted when CURLSSLOPT_EARLYDATA
 is set for the transfer.
 
 # %PROTOCOLS%
