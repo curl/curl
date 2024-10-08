@@ -569,6 +569,8 @@ jobs:
             if [[ '${{ matrix.build.install_steps }}' = *'mbedtls'* ]]; then
               export PKG_CONFIG_PATH="$HOME/mbedtls/lib/pkgconfig"
               echo '-------------'
+              find "$HOME/mbedtls"
+              echo '-------------'
               ls -l $HOME/mbedtls/lib/pkgconfig
               echo '-------------'
             fi
