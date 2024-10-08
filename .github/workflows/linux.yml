@@ -116,7 +116,7 @@ jobs:
           - name: mbedtls
             install_packages: libnghttp2-dev
             install_steps: mbedtls
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCMAKE_C_FLAGS=-fPIC
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
           - name: mbedtls-packaged
             install_packages: libnghttp2-dev libmbedtls-dev
@@ -390,7 +390,7 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
           git submodule update --init
-          cmake -B . -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls
+          cmake -B . -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls
           cmake --build .
           cmake --install .
 
