@@ -329,6 +329,9 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    "limit of %zu", oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
+
+      /* in case the bundle was destroyed in disconnect, look it up again */
+      bundle = cpool_find_bundle(cpool, conn);
     }
     if(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
       result = CPOOL_LIMIT_DEST;
