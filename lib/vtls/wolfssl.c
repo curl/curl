@@ -658,7 +658,8 @@ wssl_add_default_ciphers(bool tls13, struct dynbuf *buf)
 }
 #endif
 
-#if LIBWOLFSSL_VERSION_HEX < 0x04002000 /* 4.2.0 (2019) */
+/* 4.2.0 (2019) */
+#if LIBWOLFSSL_VERSION_HEX < 0x04002000 || !defined(OPENSSL_EXTRA)
 static int
 wssl_legacy_CTX_set_min_proto_version(WOLFSSL_CTX* ctx, int version)
 {
