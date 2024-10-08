@@ -50,6 +50,7 @@ int main(void)
   int flags = 0;
   if(0 != fcntl(0, F_SETFL, flags | O_NONBLOCK))
     return 1;
+  ;
   return 0;
 }
 #endif
@@ -159,7 +160,7 @@ int main(void) { return 0; }
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
                        && LARGE_OFF_T % 2147483647 == 1)
                       ? 1 : -1];
-int main(void) { ; return 0; }
+int main(void) { return 0; }
 #endif
 
 #ifdef HAVE_IOCTLSOCKET
