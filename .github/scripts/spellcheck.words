@@ -364,7 +364,7 @@ ifdefs
 ifhost
 IIS
 ILE
-Illumos
+illumos
 IMAP
 imap
 IMAPS
@@ -688,7 +688,6 @@ RETR
 retransmit
 retrigger
 RHEL
-RICS
 Rikard
 rmdir
 ROADMAP
