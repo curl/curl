@@ -116,11 +116,16 @@ jobs:
           - name: mbedtls
             install_packages: libnghttp2-dev
             install_steps: mbedtls
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCMAKE_C_FLAGS=-fPIC
 
           - name: mbedtls-packaged
             install_packages: libnghttp2-dev libmbedtls-dev
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+
+          - name: mbedtls-packaged !pkg-config
+            install_packages: libnghttp2-dev libmbedtls-dev
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
+            install_steps: skipall
 
           - name: msh3
             install_packages: zlib1g-dev
