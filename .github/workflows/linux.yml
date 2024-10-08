@@ -43,7 +43,7 @@ env:
   libressl-version: 3.9.2
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssl-version: 5.7.2
-  # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   mbedtls-version: 3.6.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
   mod_h2-version: 2.0.29
@@ -378,7 +378,7 @@ jobs:
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
+          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
           git submodule update --init
           make DESTDIR=$HOME/mbedtls install
