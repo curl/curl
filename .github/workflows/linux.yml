@@ -43,7 +43,7 @@ env:
   libressl-version: 3.9.2
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssl-version: 5.7.2
-  # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   mbedtls-version: 3.6.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
   mod_h2-version: 2.0.29
@@ -112,6 +112,10 @@ jobs:
             install_packages: libnghttp2-dev clang
             install_steps: mbedtls
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
+
+          - name: mbedtls-pkg
+            install_packages: libnghttp2-dev libmbedtls-dev
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
 
           - name: msh3
             install_packages: zlib1g-dev
@@ -373,10 +377,12 @@ jobs:
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
+          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
           git submodule update --init
-          make DESTDIR=$HOME/mbedtls install
+          cmake -B . -G Ninja -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls
+          cmake --build .
+          cmake --install .
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
@@ -561,7 +567,7 @@ jobs:
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake -G Ninja \
+            cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
