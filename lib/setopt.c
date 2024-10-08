@@ -3165,16 +3165,16 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       return CURLE_BAD_FUNCTION_ARGUMENT;
     }
     /* set tls_ech flag value, preserving CLA_CFG bit */
-    if(plen == 5 && !strcmp(argptr, "false"))
+    if(!strcmp(argptr, "false"))
       data->set.tls_ech = CURLECH_DISABLE |
         (data->set.tls_ech & CURLECH_CLA_CFG);
-    else if(plen == 6 && !strcmp(argptr, "grease"))
+    else if(!strcmp(argptr, "grease"))
       data->set.tls_ech = CURLECH_GREASE |
         (data->set.tls_ech & CURLECH_CLA_CFG);
-    else if(plen == 4 && !strcmp(argptr, "true"))
+    else if(!strcmp(argptr, "true"))
       data->set.tls_ech = CURLECH_ENABLE |
         (data->set.tls_ech & CURLECH_CLA_CFG);
-    else if(plen == 4 && !strcmp(argptr, "hard"))
+    else if(!strcmp(argptr, "hard"))
       data->set.tls_ech = CURLECH_HARD |
         (data->set.tls_ech & CURLECH_CLA_CFG);
     else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
