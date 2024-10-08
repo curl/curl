@@ -1090,12 +1090,13 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
         infof(data, "SSL failed to set session ID");
       else {
         infof(data, "SSL reusing session ID (size=%zu)", ssl_idsize);
-        if((gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3) &&
 #ifdef DEBUGBUILD
-           (ssl_config->earlydata || !!getenv("CURL_USE_EARLYDATA")) &&
+        if((ssl_config->earlydata || !!getenv("CURL_USE_EARLYDATA")) &&
 #else
-           ssl_config->earlydata &&
+        if(ssl_config->earlydata &&
 #endif
+           !cf->conn->connect_only &&
+           (gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3) &&
            Curl_alpn_contains_proto(connssl->alpn, session_alpn)) {
           connssl->earlydata_max =
             gnutls_record_get_max_early_data_size(gctx->session);
