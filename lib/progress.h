@@ -69,6 +69,9 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
 void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
                       struct curltime timestamp);
 
+void Curl_pgrsEarlyData(struct Curl_easy *data,
+                        curl_off_t sent, curl_off_t accepted);
+
 #define PGRS_HIDE    (1<<4)
 #define PGRS_UL_SIZE_KNOWN (1<<5)
 #define PGRS_DL_SIZE_KNOWN (1<<6)

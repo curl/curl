@@ -29,6 +29,7 @@ import filecmp
 import logging
 import math
 import os
+import re
 from datetime import timedelta
 import pytest
 
@@ -620,3 +621,17 @@ class TestDownload:
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
+        # check that TLS earlydata worked as expected
+        earlydata = {}
+        for l in r.trace_lines:
+            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)/(\d+)', l)
+            if m:
+                earlydata[int(m.group(1))] = (int(m.group(2))), int(m.group(3))
+        assert earlydata[0] == (0, 0), f'{earlydata}'
+        if proto == 'http/1.1':
+            assert earlydata[1] == (69, 69), f'{earlydata}'
+        elif proto == 'h2':
+            assert earlydata[1] == (107, 107), f'{earlydata}'
+        elif proto == 'h3':
+            # not implemented
+            assert earlydata[1] == (0, 0), f'{earlydata}'

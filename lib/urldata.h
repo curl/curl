@@ -1071,6 +1071,8 @@ struct Progress {
   struct pgrs_dir dl;
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
+  curl_off_t earlydata_sent;
+  curl_off_t earlydata_accepted;
 
   int width; /* screen width at download start */
   int flags; /* see progress.h */

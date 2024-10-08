@@ -439,6 +439,13 @@ int main(int argc, char *argv[])
         if(t) {
           t->done = 1;
           fprintf(stderr, "[t-%d] FINISHED\n", t->idx);
+          if(use_earlydata) {
+            curl_off_t sent, accepted;
+            curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
+            curl_easy_getinfo(e, CURLINFO_EARLYDATA_ACCEPTED_T, &accepted);
+            fprintf(stderr, "[t-%d] EarlyData: %ld/%ld\n", t->idx,
+                    (long)sent, (long)accepted);
+          }
         }
         else {
           curl_easy_cleanup(e);

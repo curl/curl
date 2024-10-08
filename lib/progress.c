@@ -381,6 +381,13 @@ void Curl_pgrsSetUploadSize(struct Curl_easy *data, curl_off_t size)
   }
 }
 
+void Curl_pgrsEarlyData(struct Curl_easy *data,
+                        curl_off_t sent, curl_off_t accepted)
+{
+    data->progress.earlydata_sent = sent;
+    data->progress.earlydata_accepted = accepted;
+}
+
 /* returns the average speed in bytes / second */
 static curl_off_t trspeed(curl_off_t size, /* number of bytes */
                           curl_off_t us)   /* microseconds */
