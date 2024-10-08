@@ -568,6 +568,9 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             if [[ '${{ matrix.build.install_steps }}' = *'mbedtls'* ]]; then
               export PKG_CONFIG_PATH="$HOME/mbedtls/lib/pkgconfig"
+              echo '-------------'
+              ls -l $HOME/mbedtls/lib/pkgconfig
+              echo '-------------'
             fi
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
