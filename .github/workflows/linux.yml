@@ -113,6 +113,12 @@ jobs:
             install_steps: mbedtls
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
+          - name: mbedtls
+            install_packages: libnghttp2-dev
+            install_steps: mbedtls
+            PKG_CONFIG_PATH: '$HOME/mbedtls/lib/pkgconfig'  # Requires v3.6.0 or upper
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+
           - name: mbedtls-pkg
             install_packages: libnghttp2-dev libmbedtls-dev
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
@@ -121,6 +127,12 @@ jobs:
             install_packages: zlib1g-dev
             install_steps: quictls msh3
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
+
+          - name: msh3
+            install_packages: zlib1g-dev
+            install_steps: quictls msh3 skipall
+            PKG_CONFIG_PATH: '$HOME/msh3/lib/pkgconfig'  # Broken as of v0.6.0
+            generate: -DOPENSSL_ROOT_DIR=$HOME/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=$HOME/msh3/include -DMSH3_LIBRARY=$HOME/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
           - name: awslc
             install_packages: zlib1g-dev
@@ -226,6 +238,12 @@ jobs:
             install_packages: libpsl-dev valgrind
             install_steps: rust rustls pytest
             configure: --with-rustls=$HOME/rustls --enable-debug
+
+          - name: rustls
+            install_packages: libpsl-dev
+            install_steps: rust rustls skipall
+            PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
+            generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
 
           - name: IntelC !SSL
             install_packages: zlib1g-dev
@@ -570,6 +588,9 @@ jobs:
       - name: 'configure'
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
+          if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
+            export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
+          fi
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
