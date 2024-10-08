@@ -113,6 +113,11 @@ jobs:
             install_steps: mbedtls
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
+          - name: mbedtls
+            install_packages: libnghttp2-dev
+            install_steps: mbedtls
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3
