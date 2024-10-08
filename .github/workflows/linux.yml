@@ -385,8 +385,9 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
           git submodule update --init
-          cmake -B . -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
-          make DESTDIR=$HOME/mbedtls install
+          cmake -B . -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls
+          cmake --build .
+          cmake --install .
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
