@@ -340,6 +340,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
    cipher suite present in other SSL implementations. Provide
    provisional support for specifying the cipher suite here. */
 #ifdef MBEDTLS_TLS_ECJPAKE_WITH_AES_128_CCM_8
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
 static int
 mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
                           bool prefer_rfc)
@@ -350,6 +351,7 @@ mbed_cipher_suite_get_str(uint16_t id, char *buf, size_t buf_size,
     return Curl_cipher_suite_get_str(id, buf, buf_size, prefer_rfc);
   return 0;
 }
+#endif
 
 static uint16_t
 mbed_cipher_suite_walk_str(const char **str, const char **end)
