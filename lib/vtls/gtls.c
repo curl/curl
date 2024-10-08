@@ -1111,6 +1111,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                         "reusing ALPN '%s'",
                         connssl->earlydata_max, session_alpn);
             connssl->earlydata_state = ssl_earlydata_use;
+            connssl->state = ssl_connection_deferred;
             result = Curl_alpn_set_negotiated(cf, data, connssl,
                             (const unsigned char *)session_alpn,
                             session_alpn ? strlen(session_alpn) : 0);
@@ -1190,6 +1191,11 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                               proto.data, proto.len, NULL, NULL, cf);
   if(result)
     return result;
+
+  if(connssl->alpn && (connssl->state != ssl_connection_deferred)) {
+    Curl_alpn_to_proto_str(&proto, connssl->alpn);
+    infof(data, VTLS_INFOF_ALPN_OFFER_1STR, proto.data);
+  }
 
   gnutls_handshake_set_hook_function(backend->gtls.session,
                                      GNUTLS_HANDSHAKE_ANY, GNUTLS_HOOK_POST,
@@ -1725,20 +1731,6 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   if(result)
     goto out;
 
-  if(connssl->alpn) {
-    gnutls_datum_t proto;
-    int rc;
-
-    rc = gnutls_alpn_get_selected_protocol(session, &proto);
-    if(rc == 0)
-      result = Curl_alpn_set_negotiated(cf, data, connssl,
-                                        proto.data, proto.size);
-    else
-      result = Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
-    if(result)
-      goto out;
-  }
-
   /* Only on TLSv1.2 or lower do we have the session id now. For
    * TLSv1.3 we get it via a SESSION_TICKET message that arrives later. */
   if(gnutls_protocol_get_version(session) < GNUTLS_TLS1_3)
@@ -1806,6 +1798,8 @@ static CURLcode gtls_send_earlydata(struct Curl_cfilter *cf,
     Curl_bufq_skip(&connssl->earlydata, (size_t)n);
   }
   /* sent everything there was */
+  infof(data, "SSL sending %" FMT_OFF_T " bytes of early data",
+        connssl->earlydata_skip);
 out:
   return result;
 }
@@ -1841,8 +1835,6 @@ gtls_connect_common(struct Curl_cfilter *cf,
 
   if(connssl->connecting_state == ssl_connect_2) {
     if(connssl->earlydata_state == ssl_earlydata_use) {
-      infof(data, "TLS EarlyData enabled, delaying handshake");
-      connssl->state = ssl_connection_deferred;
       goto out;
     }
     else if(connssl->earlydata_state == ssl_earlydata_sending) {
@@ -1867,9 +1859,13 @@ gtls_connect_common(struct Curl_cfilter *cf,
     result = gtls_verifyserver(cf, data, backend->gtls.session);
     if(result)
       goto out;
+
     connssl->state = ssl_connection_complete;
     connssl->connecting_state = ssl_connect_1;
+
     if(connssl->earlydata_state == ssl_earlydata_sent) {
+      /* We already set the ALPN from the reused session */
+      DEBUGASSERT(connssl->alpn_negotiated);
       if(gnutls_session_get_flags(backend->gtls.session) &
          GNUTLS_SFLAGS_EARLY_DATA) {
         connssl->earlydata_state = ssl_earlydata_accepted;
@@ -1880,10 +1876,23 @@ gtls_connect_common(struct Curl_cfilter *cf,
         connssl->earlydata_state = ssl_earlydata_rejected;
         if(!Curl_ssl_cf_is_proxy(cf))
           Curl_pgrsEarlyData(data, -(curl_off_t)connssl->earlydata_skip);
-        infof(data, "Server rejected %zu bytes of early data",
-              connssl->earlydata_skip);
+        infof(data, "Server rejected early data, resending...");
         connssl->earlydata_skip = 0;
       }
+    }
+    else if(connssl->alpn) {
+      /* We send the server ALPNs, see what it selected */
+      gnutls_datum_t proto;
+      int rc;
+
+      rc = gnutls_alpn_get_selected_protocol(backend->gtls.session, &proto);
+      if(rc == 0)
+        result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                          proto.data, proto.size);
+      else
+        result = Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
+      if(result)
+        goto out;
     }
   }
 

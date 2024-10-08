@@ -2300,11 +2300,18 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       /* return CURLE_NOT_BUILT_IN; */
       goto out;
     }
-    infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, (int)proto_len, proto);
+
+    if(connssl->state == ssl_connection_deferred)
+      infof(data, VTLS_INFOF_ALPN_DEFERRED, (int)proto_len, proto);
+    else
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED, (int)proto_len, proto);
   }
   else {
     *palpn = CURL_HTTP_VERSION_NONE;
-    infof(data, VTLS_INFOF_NO_ALPN);
+    if(connssl->state == ssl_connection_deferred)
+      infof(data, VTLS_INFOF_NO_ALPN_DEFERRED);
+    else
+      infof(data, VTLS_INFOF_NO_ALPN);
   }
 
 out:
