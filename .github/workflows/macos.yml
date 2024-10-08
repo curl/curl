@@ -287,6 +287,10 @@ jobs:
             install: brotli wolfssl zstd
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
+          - name: 'mbedTLS !ldap brotli zstd'
+            install: brotli mbedtls zstd
+            generate: -DCURL_USE_MBEDTLS=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON
+            macos-version-min: '10.15'
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON
