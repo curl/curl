@@ -572,9 +572,6 @@ jobs:
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
           if [ -n '${{ matrix.build.generate }}' ]; then
-            if [[ '${{ matrix.build.install_steps }}' = *'mbedtls'* ]]; then
-              export PKG_CONFIG_PATH="$HOME/mbedtls/lib/pkgconfig"
-            fi
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
