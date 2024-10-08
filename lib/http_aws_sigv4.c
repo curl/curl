@@ -198,8 +198,10 @@ static CURLcode make_headers(struct Curl_easy *data,
 
     if(fullhost)
       head = Curl_slist_append_nodup(NULL, fullhost);
-    if(!head)
+    if(!head) {
+      free(fullhost);
       goto fail;
+    }
   }
 
 
