@@ -118,6 +118,10 @@ jobs:
             install_steps: mbedtls
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
+          - name: mbedtls-packaged
+            install_packages: libnghttp2-dev libmbedtls-dev
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3
