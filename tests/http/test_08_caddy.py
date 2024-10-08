@@ -28,6 +28,7 @@ import difflib
 import filecmp
 import logging
 import os
+import re
 import pytest
 
 from testenv import Env, CurlClient, Caddy, LocalClient
@@ -227,6 +228,14 @@ class TestCaddy:
         r.check_exit_code(0)
         srcfile = os.path.join(caddy.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
+        earlydata = {}
+        for line in r.trace_lines:
+            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
+            if m:
+                earlydata[int(m.group(1))] = int(m.group(2))
+        # Caddy does not support early data
+        assert earlydata[0] == 0, f'{earlydata}'
+        assert earlydata[1] == 0, f'{earlydata}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):

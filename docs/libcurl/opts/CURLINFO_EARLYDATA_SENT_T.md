@@ -5,7 +5,6 @@ Title: CURLINFO_EARLYDATA_SENT_T
 Section: 3
 Source: libcurl
 See-also:
-  - CURLINFO_EARLYDATA_ACCEPTED_T (3)
   - curl_easy_getinfo (3)
   - curl_easy_setopt (3)
 Protocol:
@@ -32,8 +31,14 @@ Pass a pointer to a *curl_off_t* to receive the total amount of bytes that
 were sent to the server as TLSv1.3 earlydata. When no TLS early
 data is used, this reports 0.
 
-Note that TLS earlydata is only attempted when CURLSSLOPT_EARLYDATA
-is set for the transfer.
+TLS earlydata is only attempted when CURLSSLOPT_EARLYDATA is set for the
+transfer. And it can only be used by libcurl if a TLS session exists
+that announces support for this TLS feature.
+
+Note that the amount is **negative** when the sent data was rejected
+by the server. TLS allows a server that announces support for earlydata to
+reject any attempt to use it at its disgression. When for example 127
+bytes had been sent, but were rejected, it reports -127 as the amount "sent".
 
 # %PROTOCOLS%
 

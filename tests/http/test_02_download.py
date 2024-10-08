@@ -626,14 +626,14 @@ class TestDownload:
         # check that TLS earlydata worked as expected
         earlydata = {}
         for line in r.trace_lines:
-            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)/(\d+)', line)
+            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
             if m:
-                earlydata[int(m.group(1))] = (int(m.group(2))), int(m.group(3))
-        assert earlydata[0] == (0, 0), f'{earlydata}'
+                earlydata[int(m.group(1))] = int(m.group(2))
+        assert earlydata[0] == 0, f'{earlydata}'
         if proto == 'http/1.1':
-            assert earlydata[1] == (69, 69), f'{earlydata}'
+            assert earlydata[1] == 69, f'{earlydata}'
         elif proto == 'h2':
-            assert earlydata[1] == (107, 107), f'{earlydata}'
+            assert earlydata[1] == 107, f'{earlydata}'
         elif proto == 'h3':
             # not implemented
-            assert earlydata[1] == (0, 0), f'{earlydata}'
+            assert earlydata[1] == 0, f'{earlydata}'

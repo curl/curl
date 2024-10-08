@@ -1851,7 +1851,7 @@ gtls_connect_common(struct Curl_cfilter *cf,
         goto out;
       connssl->earlydata_state = ssl_earlydata_sent;
       if(!Curl_ssl_cf_is_proxy(cf))
-        Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip, -1);
+        Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip);
     }
     DEBUGASSERT((connssl->earlydata_state == ssl_earlydata_none) ||
                 (connssl->earlydata_state == ssl_earlydata_sent));
@@ -1873,18 +1873,16 @@ gtls_connect_common(struct Curl_cfilter *cf,
       if(gnutls_session_get_flags(backend->gtls.session) &
          GNUTLS_SFLAGS_EARLY_DATA) {
         connssl->earlydata_state = ssl_earlydata_accepted;
-        if(!Curl_ssl_cf_is_proxy(cf))
-          Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip,
-                             (curl_off_t)connssl->earlydata_skip);
         infof(data, "Server accepted %zu bytes of early data",
               connssl->earlydata_skip);
       }
       else {
         connssl->earlydata_state = ssl_earlydata_rejected;
         if(!Curl_ssl_cf_is_proxy(cf))
-          Curl_pgrsEarlyData(data, (curl_off_t)connssl->earlydata_skip, 0);
+          Curl_pgrsEarlyData(data, -(curl_off_t)connssl->earlydata_skip);
+        infof(data, "Server rejected %zu bytes of early data",
+              connssl->earlydata_skip);
         connssl->earlydata_skip = 0;
-        infof(data, "Server rejected early data");
       }
     }
   }

@@ -167,7 +167,6 @@ man_MANS =                                      \
   CURLOPT_DOH_SSL_VERIFYPEER.3                  \
   CURLOPT_DOH_SSL_VERIFYSTATUS.3                \
   CURLOPT_DOH_URL.3                             \
-  CURLINFO_EARLYDATA_ACCEPTED_T.3               \
   CURLINFO_EARLYDATA_SENT_T.3                   \
   CURLOPT_ECH.3                                 \
   CURLOPT_EGDSOCKET.3                           \

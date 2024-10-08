@@ -452,9 +452,6 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_EARLYDATA_SENT_T:
     *param_offt = data->progress.earlydata_sent;
     break;
-  case CURLINFO_EARLYDATA_ACCEPTED_T:
-    *param_offt = data->progress.earlydata_accepted;
-    break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }
