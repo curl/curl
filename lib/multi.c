@@ -2727,8 +2727,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
 
-    multi->magic = 0; /* not good anymore */
-
     /* move the pending and msgsent entries back to process
        so that there is just one list to iterate over */
     unlink_all_msgsent_handles(multi);
@@ -2761,6 +2759,8 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     Curl_cpool_destroy(&multi->cpool);
+
+    multi->magic = 0; /* not good anymore */
 
     sockhash_destroy(&multi->sockhash);
     Curl_hash_destroy(&multi->proto_hash);
