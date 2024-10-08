@@ -37,7 +37,7 @@ that announces support.
 
 Note that the amount is **negative** when the sent data was rejected
 by the server. TLS allows a server that announces support for earlydata to
-reject any attempt to use it at its disgression. When for example 127
+reject any attempt to use it at its own discretion. When for example 127
 bytes had been sent, but were rejected, it reports -127 as the amount "sent".
 
 # %PROTOCOLS%
