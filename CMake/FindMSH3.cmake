@@ -33,41 +33,35 @@
 # MSH3_FOUND         System has msh3
 # MSH3_INCLUDE_DIRS  The msh3 include directories
 # MSH3_LIBRARIES     The msh3 library names
+# MSH3_LIBRARY_DIRS  The msh3 library directories
+# MSH3_CFLAGS        Required compiler flags
 # MSH3_VERSION       Version of msh3
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED MSH3_INCLUDE_DIR AND
+   NOT DEFINED MSH3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_MSH3 "libmsh3")
+  pkg_check_modules(MSH3 "libmsh3")
 endif()
-
-find_path(MSH3_INCLUDE_DIR NAMES "msh3.h"
-  HINTS
-    ${PC_MSH3_INCLUDEDIR}
-    ${PC_MSH3_INCLUDE_DIRS}
-)
-
-find_library(MSH3_LIBRARY NAMES "msh3"
-  HINTS
-    ${PC_MSH3_LIBDIR}
-    ${PC_MSH3_LIBRARY_DIRS}
-)
-
-if(PC_MSH3_VERSION)
-  set(MSH3_VERSION ${PC_MSH3_VERSION})
-endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(MSH3
-  REQUIRED_VARS
-    MSH3_INCLUDE_DIR
-    MSH3_LIBRARY
-  VERSION_VAR
-    MSH3_VERSION
-)
 
 if(MSH3_FOUND)
-  set(MSH3_INCLUDE_DIRS ${MSH3_INCLUDE_DIR})
-  set(MSH3_LIBRARIES    ${MSH3_LIBRARY})
-endif()
+  string(REPLACE ";" " " MSH3_CFLAGS "${MSH3_CFLAGS}")
+  message(STATUS "Found MSH3 (via pkg-config): ${MSH3_INCLUDE_DIRS} (found version \"${MSH3_VERSION}\")")
+else()
+  find_path(MSH3_INCLUDE_DIR NAMES "msh3.h")
+  find_library(MSH3_LIBRARY NAMES "msh3")
 
-mark_as_advanced(MSH3_INCLUDE_DIR MSH3_LIBRARY)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(MSH3
+    REQUIRED_VARS
+      MSH3_INCLUDE_DIR
+      MSH3_LIBRARY
+  )
+
+  if(MSH3_FOUND)
+    set(MSH3_INCLUDE_DIRS ${MSH3_INCLUDE_DIR})
+    set(MSH3_LIBRARIES    ${MSH3_LIBRARY})
+  endif()
+
+  mark_as_advanced(MSH3_INCLUDE_DIR MSH3_LIBRARY)
+endif()
