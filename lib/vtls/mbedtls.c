@@ -1048,7 +1048,7 @@ mbed_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* Make a copy of our const peercert because mbedtls_pk_write_pubkey_der
        needs a non-const key, for now.
-       https://github.com/ARMmbed/mbedtls/issues/396 */
+       https://github.com/Mbed-TLS/mbedtls/issues/396 */
 #if MBEDTLS_VERSION_NUMBER == 0x03000000
     if(mbedtls_x509_crt_parse_der(p,
                         peercert->MBEDTLS_PRIVATE(raw).MBEDTLS_PRIVATE(p),
