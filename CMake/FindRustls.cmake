@@ -33,41 +33,35 @@
 # RUSTLS_FOUND         System has rustls
 # RUSTLS_INCLUDE_DIRS  The rustls include directories
 # RUSTLS_LIBRARIES     The rustls library names
+# RUSTLS_LIBRARY_DIRS  The rustls library directories
+# RUSTLS_CFLAGS        Required compiler flags
 # RUSTLS_VERSION       Version of rustls
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED RUSTLS_INCLUDE_DIR AND
+   NOT DEFINED RUSTLS_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_RUSTLS "rustls")
+  pkg_check_modules(RUSTLS "rustls")
 endif()
-
-find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h"
-  HINTS
-    ${PC_RUSTLS_INCLUDEDIR}
-    ${PC_RUSTLS_INCLUDE_DIRS}
-)
-
-find_library(RUSTLS_LIBRARY NAMES "rustls"
-  HINTS
-    ${PC_RUSTLS_LIBDIR}
-    ${PC_RUSTLS_LIBRARY_DIRS}
-)
-
-if(PC_RUSTLS_VERSION)
-  set(RUSTLS_VERSION ${PC_RUSTLS_VERSION})
-endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Rustls
-  REQUIRED_VARS
-    RUSTLS_INCLUDE_DIR
-    RUSTLS_LIBRARY
-  VERSION_VAR
-    RUSTLS_VERSION
-)
 
 if(RUSTLS_FOUND)
-  set(RUSTLS_INCLUDE_DIRS ${RUSTLS_INCLUDE_DIR})
-  set(RUSTLS_LIBRARIES    ${RUSTLS_LIBRARY})
-endif()
+  string(REPLACE ";" " " RUSTLS_CFLAGS "${RUSTLS_CFLAGS}")
+  message(STATUS "Found Rustls (via pkg-config): ${RUSTLS_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
+else()
+  find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h")
+  find_library(RUSTLS_LIBRARY NAMES "rustls")
 
-mark_as_advanced(RUSTLS_INCLUDE_DIR RUSTLS_LIBRARY)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Rustls
+    REQUIRED_VARS
+      RUSTLS_INCLUDE_DIR
+      RUSTLS_LIBRARY
+  )
+
+  if(RUSTLS_FOUND)
+    set(RUSTLS_INCLUDE_DIRS ${RUSTLS_INCLUDE_DIR})
+    set(RUSTLS_LIBRARIES    ${RUSTLS_LIBRARY})
+  endif()
+
+  mark_as_advanced(RUSTLS_INCLUDE_DIR RUSTLS_LIBRARY)
+endif()
