@@ -32,8 +32,8 @@ were sent to the server as TLSv1.3 earlydata. When no TLS early
 data is used, this reports 0.
 
 TLS earlydata is only attempted when CURLSSLOPT_EARLYDATA is set for the
-transfer. And it can only be used by libcurl if a TLS session exists
-that announces support for this TLS feature.
+transfer. In addition, it is only used by libcurl when a TLS session exists
+that announces support.
 
 Note that the amount is **negative** when the sent data was rejected
 by the server. TLS allows a server that announces support for earlydata to
