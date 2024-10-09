@@ -45,14 +45,14 @@ class TestPush:
         env.make_data_file(indir=push_dir, fname="data2", fsize=1*1024)
         env.make_data_file(indir=push_dir, fname="data3", fsize=1*1024)
         httpd.set_extra_config(env.domain1, [
-            f'H2EarlyHints on',
-            f'<Location /push/data1>',
-            f'  H2PushResource /push/data2',
-            f'</Location>',
-            f'<Location /push/data2>',
-            f'  H2PushResource /push/data1',
-            f'  H2PushResource /push/data3',
-            f'</Location>',
+            'H2EarlyHints on',
+            '<Location /push/data1>',
+            '  H2PushResource /push/data2',
+            '</Location>',
+            '<Location /push/data2>',
+            '  H2PushResource /push/data1',
+            '  H2PushResource /push/data3',
+            '</Location>',
         ])
         # activate the new config
         httpd.reload()

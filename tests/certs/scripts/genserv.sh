@@ -79,11 +79,7 @@ if [ -n "$NOTOK" ]; then
   exit
 fi
 
-if [ -z "${SERIAL:-}" ]; then
-  SERIAL="$(date +'%s')${RANDOM:(-4)}"
-fi
-
-echo "SERIAL=$SERIAL PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
+echo "PREFIX=$PREFIX CAPREFIX=$CAPREFIX DURATION=$DURATION KEYSIZE=$KEYSIZE"
 
 set -x
 
@@ -104,7 +100,7 @@ echo 'pseudo secrets generated'
 
 "$OPENSSL" rsa -in "$PREFIX-sv.key" -pubout -outform DER -out "$PREFIX-sv.pub.der"
 "$OPENSSL" rsa -in "$PREFIX-sv.key" -pubout -outform PEM -out "$PREFIX-sv.pub.pem"
-"$OPENSSL" x509 -set_serial "$SERIAL" -extfile "$PREFIX-sv.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -in "$PREFIX-sv.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX-sv.crt"
+"$OPENSSL" x509 -extfile "$PREFIX-sv.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -in "$PREFIX-sv.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX-sv.crt"
 
 if [ "$P12" = YES ]; then
   "$OPENSSL" pkcs12 -export -des3 -out "$PREFIX-sv.p12" -caname "$CAPREFIX" -name "$PREFIX" -inkey "$PREFIX-sv.key" -in "$PREFIX-sv.crt" -certfile "$CAPREFIX-ca.crt"

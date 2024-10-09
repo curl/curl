@@ -4,20 +4,27 @@ curl and libcurl 8.11.0
  Command line options:         265
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3245
+ Contributors:                 3251
 
 This release includes the following changes:
 
  o curl: --create-dirs works for --dump-header as well [4]
  o gtls: Add P12 format support [9]
  o ipfs: add options to disable [8]
+ o WebSockets: make support official (non-experimental) [106]
 
 This release includes the following bugfixes:
 
  o alt-svc: honor data->state.httpwant [19]
+ o altsvc: avoid using local buffer and memcpy [124]
+ o asyn-ares: remove typecast, fix expire [113]
  o autotools: add support for 'unity' builds, enable in CI [15]
+ o bearssl: avoid strpcy() when generating TLS version log message [120]
+ o bufq: unwrite fix [121]
+ o build: add `ldap` to `libcurl.pc` `Requires:` [139]
  o build: add pytest targets [71]
  o build: clarify CA embed is for curl tool, mark default, improve summary [72]
+ o build: detect and use `_setmode()` with Cygwin/MSYS, also use on Windows [136]
  o build: fix cross-compile check for poll with bionic [70]
  o build: fix possible `-Wformat-overflow` in lib557 [85]
  o build: limit arc4random detection to no-SSL configs [43]
@@ -28,69 +35,126 @@ This release includes the following bugfixes:
  o checksrc: check for spaces around '?', '>' and '<' [46]
  o cmake, Makefile.mk: use -isystem for headers, silence BearSSL issues [37]
  o cmake/FindNGTCP2: use library path as hint for finding crypto module [40]
+ o cmake: add missed variable to comment
  o cmake: allow building tests in unity mode [31]
  o cmake: delete unused NEED_LBER_H, HAVE_LDAP_H [38]
+ o cmake: detect `HAVE_NETINET_IN6_H`, `HAVE_CLOSESOCKET_CAMEL`, `HAVE_PROTO_BSDSOCKET_H` [132]
+ o cmake: detect GNU GSS [127]
  o cmake: disable default OpenSSL if BearSSL, GnuTLS or Rustls is enabled [44]
+ o cmake: do not propagate unused `HAVE_GSSAPI_GSSAPI_KRB5_H` to C [131]
  o cmake: drop redundant assignments [49]
  o cmake: drop redundant zlib var, rename function (internals) [50]
  o cmake: expand CURL_USE_PKGCONFIG to non-cross MINGW [13]
  o cmake: fix broken dependency chain for cmdline-opts, tidy-ups [11]
  o cmake: make `test-ci` target skip building dependencies [88]
+ o cmake: readd `generate-curl.1` dependency for `src` just in case [86]
  o cmake: require quictls (or fork) when using msh3 on non-Windows [14]
  o cmake: separate target for examples, optimize CI, fix fallouts [16]
  o cmake: sync torture test parallelism with autotools [35]
+ o cmake: use OpenSSL for LDAP detection only if available [102]
+ o configure: add GSS to `libcurl.pc` `Depends:` [126]
  o configure: catch Apple in more target triplets [6]
+ o configure: drop duplicate feature checks for `poll()`, `if_nametoindex()` [135]
+ o configure: drop unused bare `socket.h` detection [133]
  o configure: improve help string for some options [78]
+ o conncache: find bundle again in case it is removed [129]
  o curl: add build options for safe/no CA bundle search (Windows) [26]
  o curl_trc: fix build with verbose messages disabled [79]
  o curl_url_set.md: document HOST handling when URL is parsed [2]
  o CURLMOPT_PIPELINING.md: clarify that CURLPIPE_NOTHING is not default [54]
+ o CURLOPT_APPEND.md: goes for SFTP as well [128]
+ o CURLOPT_HEADERFUNCTION.md: do not modify the passed in buffer [107]
+ o docs/cmdline-opts: GnuTLS supports PKCS#11 URI in --cert option [101]
+ o ech: spelling, whitespace, say `--ech` default config [137]
+ o ftp: fix 0-length last write on upload from stdin [76]
+ o hsts: avoid the local buffer and memcpy on lookup [125]
+ o http_aws_sigv4: avoid local buffer and strcpy [92]
+ o INSTALL-CMAKE.md: mention focus on shared libraries [73]
+ o json.md: cli-option `--json` is an alias of `--data-binary` [89]
  o lib, src, tests: added space around ternary expressions [56]
  o lib/cw-out: initialize 'flush_all' directly [62]
  o lib/src: white space edits to comply better with code style [47]
+ o lib: avoid assigning 'result' temporarily [97]
+ o lib: fix disabled-verbose-strings + enable-debug build warnings
  o lib: fix unity builds with BearSSL, MSH3, Quiche, OmniOS [32]
+ o lib: use bool/TRUE/FALSE properly [48]
  o libssh.c: handle EGAINS during proto-connect correctly [23]
  o libssh2: use the Curl_* memory functions to avoid memdebug [22]
  o multi.c: make stronger check for paused transfer before asserting [24]
  o multi.c: warn/assert on stall only without timer [80]
  o multi: avoid reading whole struct pointer from pointer [10]
+ o multi: make multi_handle_timeout use the connect timeout [98]
  o negotiate: conditional check around GSS & SSL specific code [1]
+ o openssl quic: populate x509 store before handshake [117]
  o openssl: convert a memcpy to dynbuf use [57]
  o openssl: remove two strcpy() calls [64]
  o processhelp.pm: improve taskkill calls (Windows) [52]
+ o pytest: improve pytest_07_42a reliability [118]
+ o quic: use send/recvmmsg when available [93]
  o request: on shutdown send, proceed normally on timeout [18]
  o runtests.md: suggest a value for -j for torture tests
+ o runtests: drop unused code for old/classic-mingw support [87]
+ o select: use poll() if existing, avoid poll() with no sockets [75]
  o sendf: add condition to max-filesize check [3]
+ o setopt: avoid superfluous length checks before strcmp() [105]
+ o singleuse: make `git grep` faster, add Apple `nm` support [109]
+ o smb: replace use of strcpy() with snprintf() [122]
  o socks_gssapi: switch to dynbuf from buffer with strcpy [42]
+ o sws: fix unused static function with `TCP_NODELAY` undefined [134]
+ o telnet: avoid two strcpy() by pointing to the strings instead [99]
  o test1035: convert host name back to utf8 as should be [63]
+ o test1515: add tracing and more debug info [119]
  o test1540: add debug logging [58]
  o test190: replace %FTPTIME2 with a fixed value [34]
+ o test1915: add tracing and connect timeout [114]
+ o test1915: remove wrong comment
  o test2502: add libtest debug tracing [60]
  o test504: fix handling on pending connect [59]
  o testrun: explicitly set proper IP address for stunnel listen/connect [61]
  o tests/valgrind.pm: fix warnings with no valgrind report to show [25]
+ o tests/valgrind.supp: remove a travis suppression, add a Debian [116]
+ o tests: add and use `%PERL` variable to refer to the Perl binary [82]
  o tests: add codeset-utf8 as a feature [66]
  o tests: add file: tests with existing files [45]
+ o tests: change Python code style to pass ruff checks
  o tests: check http/2 and http/3 server responsiveness [28]
  o tests: delete duplicate macro check [53]
+ o tests: enable additional ruff Python lint options
+ o tests: fix `%POSIX_PWD` on native Windows Perl [111]
  o tests: fix keyword for test1411
+ o tests: fix shell quoting on native Windows Perl [110]
+ o tests: fix some Python typing issues
+ o tests: fixup `checkcmd` `PATH` on non-unixy platforms [108]
  o tests: improve mqtt server handling [27]
  o tests: introduce %CLIENT6IP-NB [67]
+ o tests: let openssl generate random cert serials [91]
  o tests: libtests and unit tests need explicit #include memdebug [7]
  o tests: make precheck for HTTP on 127.0.0.1 into a feature [68]
  o tests: Only log warnings or worse by default in smbserver [33]
  o tests: postcheck is now in verify [69]
  o tests: remove all valgrind disable instructions [21]
+ o tests: remove debug requirement on 38 tests [100]
  o tests: remove the %FTPTIME3 variable [41]
+ o tests: replace `%PWD` with `%FILE_PWD` for `file://` [84]
+ o tests: replace `%PWD` with `%SSH_PWD` in SCP/SFTP tests [112]
+ o tests: replace hard-coded `/dev/null` with variable [81]
+ o tests: simplify `pathhelp.pm`, avoid using external tools [95]
  o tests: speed up builds with single-binary test bundles [29]
  o tests: testrunner fairness [39]
  o tests: testrunner reliability improvements [55]
  o tests: use '-4' where needed [17]
+ o tftp: avoid two memcpy/strcpy [94]
  o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
+ o tool: support --show-headers AND --remote-header-name [103]
  o tool_doswin: simplify; remove unused options and strncpy calls [65]
  o unit1660: fix unreachable code warning in no-SSL builds [30]
  o url: connection reuse on h3 connections [20]
  o urlapi: drop unused header [51]
+ o urlapi: normalize the IPv6 address [115]
+ o vtls: convert Curl_pin_peer_pubkey to use dynbuf [74]
+ o vtls: convert pubkey_pem_to_der to use dynbuf [90]
+ o warnless: remove curlx_sktosi and curlx_sitosk [104]
+ o wolfssl: convert malloc + memcpys to dynbuf for cipher string [96]
 
 This release includes the following known bugs:
 
@@ -102,7 +166,7 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
- o Hyper support after February 2025 [89]
+ o Hyper support
  o TLS libraries not supporting TLS 1.3
 
  See https://curl.se/dev/deprecate.html for details
@@ -110,13 +174,15 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aki Sakurai, Baruch Siach, Dan Fandrich, Daniel Stenberg, Gabriel Marin,
+  Aki Sakurai, Baruch Siach, Chris Stubbs, Dan Fandrich, Daniel Stenberg,
+  Denis Goleshchikhin, Deniz Sökmen, dependabot[bot], Gabriel Marin,
   Ian Spence, Jon Rumsey, Kai Pastor, lomberd2 on github, MacKenzie,
-  Montg0mery on github, Nicolas George, Pavel Kropachev, ralfjunker on github,
-  Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot], Stefan Eissing,
-  Tal Regev, Tatsuhiro Tsujikawa, Testclutch, Venkat Krishna R, Viktor Szakats,
-  vvb2060 on github
-  (24 contributors)
+  Montg0mery on github, Moritz Knüsel, Nemos2024 on github, Nicolas George,
+  Pavel Kropachev, ralfjunker on github, Rasmus Melchior Jacobsen, Ray Satiro,
+  renovate[bot], Sebastian Walz, Stefan Eissing, Tal Regev,
+  Tatsuhiro Tsujikawa, Testclutch, Venkat Krishna R, Viktor Szakats,
+  Vollstrecker on github, vvb2060 on github
+  (32 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -167,6 +233,7 @@ References to bug reports and discussions on issues:
  [45] = https://curl.se/bug/?i=15045
  [46] = https://curl.se/bug/?i=14921
  [47] = https://curl.se/bug/?i=14921
+ [48] = https://curl.se/bug/?i=15123
  [49] = https://curl.se/bug/?i=14924
  [50] = https://curl.se/bug/?i=14918
  [51] = https://curl.se/bug/?i=14867
@@ -191,11 +258,68 @@ References to bug reports and discussions on issues:
  [70] = https://curl.se/bug/?i=15013
  [71] = https://curl.se/bug/?i=15034
  [72] = https://curl.se/bug/?i=15035
+ [73] = https://curl.se/bug/?i=14845
+ [74] = https://curl.se/bug/?i=15126
+ [75] = https://curl.se/bug/?i=15096
+ [76] = https://curl.se/bug/?i=15101
  [77] = https://curl.se/bug/?i=14990
  [78] = https://curl.se/bug/?i=15033
  [79] = https://curl.se/bug/?i=15026
  [80] = https://curl.se/bug/?i=15028
+ [81] = https://curl.se/bug/?i=15098
+ [82] = https://curl.se/bug/?i=15097
  [83] = https://curl.se/bug/?i=15027
+ [84] = https://curl.se/bug/?i=15090
  [85] = https://curl.se/bug/?i=15012
+ [86] = https://curl.se/bug/?i=15088
+ [87] = https://curl.se/bug/?i=15087
  [88] = https://curl.se/bug/?i=15001
- [89] = https://curl.se/bug/?i=15010
+ [89] = https://curl.se/bug/?i=15197
+ [90] = https://curl.se/bug/?i=15126
+ [91] = https://curl.se/bug/?i=15129
+ [92] = https://curl.se/bug/?i=15200
+ [93] = https://curl.se/bug/?i=14880
+ [94] = https://curl.se/bug/?i=15199
+ [95] = https://curl.se/bug/?i=15111
+ [96] = https://curl.se/bug/?i=15124
+ [97] = https://curl.se/bug/?i=15122
+ [98] = https://curl.se/bug/?i=15100
+ [99] = https://curl.se/bug/?i=15198
+ [100] = https://curl.se/bug/?i=15114
+ [101] = https://curl.se/bug/?i=15075
+ [102] = https://curl.se/bug/?i=15077
+ [103] = https://curl.se/bug/?i=15110
+ [104] = https://curl.se/bug/?i=15153
+ [105] = https://curl.se/bug/?i=15192
+ [106] = https://curl.se/bug/?i=14936
+ [107] = https://curl.se/bug/?i=15148
+ [108] = https://curl.se/bug/?i=15106
+ [109] = https://curl.se/bug/?i=15070
+ [110] = https://curl.se/bug/?i=15105
+ [111] = https://curl.se/bug/?i=15104
+ [112] = https://curl.se/bug/?i=15103
+ [113] = https://curl.se/bug/?i=15145
+ [114] = https://curl.se/bug/?i=15107
+ [115] = https://curl.se/bug/?i=15143
+ [116] = https://curl.se/bug/?i=15142
+ [117] = https://curl.se/bug/?i=15137
+ [118] = https://curl.se/bug/?i=15138
+ [119] = https://curl.se/bug/?i=15140
+ [120] = https://curl.se/bug/?i=15194
+ [121] = https://curl.se/bug/?i=15136
+ [122] = https://curl.se/bug/?i=15196
+ [123] = https://curl.se/bug/?i=15135
+ [124] = https://curl.se/bug/?i=15191
+ [125] = https://curl.se/bug/?i=15190
+ [126] = https://curl.se/bug/?i=15177
+ [127] = https://curl.se/bug/?i=15176
+ [128] = https://curl.se/bug/?i=15181
+ [129] = https://curl.se/bug/?i=15185
+ [131] = https://curl.se/bug/?i=15174
+ [132] = https://curl.se/bug/?i=15172
+ [133] = https://curl.se/bug/?i=15173
+ [134] = https://curl.se/bug/?i=15171
+ [135] = https://curl.se/bug/?i=15170
+ [136] = https://curl.se/bug/?i=15169
+ [137] = https://curl.se/bug/?i=15167
+ [139] = https://curl.se/bug/?i=15163

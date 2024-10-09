@@ -573,6 +573,14 @@ case $host_os in
     ;;
 esac
 
+# In order to detect support of sendmmsg(), we need to escape the POSIX
+# jail by defining _GNU_SOURCE or <sys/socket.h> will not expose it.
+case $host_os in
+  linux*)
+    CPPFLAGS="$CPPFLAGS -D_GNU_SOURCE"
+    ;;
+esac
+
 dnl Build unit tests when option --enable-debug is given.
 if test "x$want_debug" = "xyes" &&
    test "x$supports_unittests" = "xyes"; then
@@ -595,6 +603,11 @@ case $host in
   *-apple-*)
     CURL_SUPPORTS_BUILTIN_AVAILABLE
     ;;
+esac
+
+curl_cv_cygwin='no'
+case $host_os in
+  cygwin*|msys*) curl_cv_cygwin='yes';;
 esac
 
 AM_CONDITIONAL([HAVE_WINDRES],
@@ -2058,6 +2071,13 @@ if test x"$want_gss" = xyes; then
         LIBS="-lgssapi $LIBS"
         ;;
     esac
+  fi
+  if test -n "$gnu_gss"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
+  elif test "x$not_mit" = "x1"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE heimdal-gssapi"
+  else
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
   fi
 else
   CPPFLAGS="$save_CPPFLAGS"
@@ -3876,7 +3896,6 @@ AC_CHECK_HEADERS(
   sys/utime.h \
   sys/poll.h \
   poll.h \
-  socket.h \
   sys/resource.h \
   libgen.h \
   locale.h \
@@ -4050,7 +4069,6 @@ CURL_CHECK_FUNC_GETHOSTBYNAME_R
 CURL_CHECK_FUNC_GETHOSTNAME
 CURL_CHECK_FUNC_GETPEERNAME
 CURL_CHECK_FUNC_GETSOCKNAME
-CURL_CHECK_FUNC_IF_NAMETOINDEX
 CURL_CHECK_FUNC_GETIFADDRS
 CURL_CHECK_FUNC_GMTIME_R
 CURL_CHECK_FUNC_INET_NTOP
@@ -4059,7 +4077,6 @@ CURL_CHECK_FUNC_IOCTL
 CURL_CHECK_FUNC_IOCTLSOCKET
 CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL
 CURL_CHECK_FUNC_MEMRCHR
-CURL_CHECK_FUNC_POLL
 CURL_CHECK_FUNC_SIGACTION
 CURL_CHECK_FUNC_SIGINTERRUPT
 CURL_CHECK_FUNC_SIGNAL
@@ -4100,8 +4117,10 @@ AC_CHECK_FUNCS([\
   if_nametoindex \
   mach_absolute_time \
   pipe \
+  poll \
   sched_yield \
   sendmsg \
+  sendmmsg \
   setlocale \
   setmode \
   setrlimit \
@@ -4109,6 +4128,10 @@ AC_CHECK_FUNCS([\
   utime \
   utimes \
 ])
+
+if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
+  AC_CHECK_FUNCS([_setmode])
+fi
 
 if test -z "$ssl_backends"; then
   AC_CHECK_FUNCS([arc4random])

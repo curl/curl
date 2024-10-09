@@ -691,7 +691,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   nth = 0; /* number of internal waiting threads */
   nws = 0; /* number of handled Winsock sockets */
   for(fd = 0; fd < nfds; fd++) {
-    wsasock = curlx_sitosk(fd);
+    wsasock = (curl_socket_t)fd;
     wsaevents.lNetworkEvents = 0;
     handles[nfd] = 0;
 
@@ -818,7 +818,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   for(i = 0; i < nfd; i++) {
     fd = data[i].fd;
     handle = handles[i];
-    wsasock = curlx_sitosk(fd);
+    wsasock = (curl_socket_t)fd;
 
     /* check if the current internal handle was triggered */
     if(wait != WAIT_FAILED && (wait - WAIT_OBJECT_0) <= i &&

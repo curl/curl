@@ -18,7 +18,7 @@ SFTP
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP with --remote-time
@@ -32,8 +32,8 @@ SFTP with --remote-time
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
-perl -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 978264000)'
+%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
+%PERL -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 978264000)'
 </postcheck>
 </verify>
 </testcase>

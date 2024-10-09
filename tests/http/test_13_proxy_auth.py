@@ -24,11 +24,8 @@
 #
 ###########################################################################
 #
-import filecmp
 import logging
-import os
 import re
-import time
 import pytest
 
 from testenv import Env, CurlClient, ExecResult

@@ -24,15 +24,12 @@
 #
 ###########################################################################
 #
-import difflib
-import filecmp
 import json
 import logging
 import os
-from datetime import timedelta
 import pytest
 
-from testenv import Env, CurlClient, LocalClient, ExecResult
+from testenv import Env, CurlClient
 
 
 log = logging.getLogger(__name__)
@@ -153,7 +150,7 @@ class TestSSLUse:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
-        domain = f'127.0.0.1'
+        domain = '127.0.0.1'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 0, f'{r}'
@@ -168,7 +165,7 @@ class TestSSLUse:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
-        domain = f'localhost'
+        domain = 'localhost'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
         r = curl.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 0, f'{r}'
@@ -259,7 +256,7 @@ class TestSSLUse:
             not env.curl_uses_lib('quictls'):
             pytest.skip("TLS library does not support --cert-status")
         curl = CurlClient(env=env)
-        domain = f'localhost'
+        domain = 'localhost'
         url = f'https://{env.authority_for(domain, proto)}/'
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=[
             '--cert-status'
@@ -269,12 +266,10 @@ class TestSSLUse:
 
     @staticmethod
     def gen_test_17_09_list():
-        ret = []
-        for tls_proto in ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']:
-            for max_ver in range(0, 5):
-                for min_ver in range(-2, 4):
-                    ret.append([tls_proto, max_ver, min_ver])
-        return ret
+        return [[tls_proto, max_ver, min_ver]
+                for tls_proto in ['TLSv1', 'TLSv1.1', 'TLSv1.2', 'TLSv1.3']
+                for max_ver in range(5)
+                for min_ver in range(-2, 4)]
 
     @pytest.mark.parametrize("tls_proto, max_ver, min_ver", gen_test_17_09_list())
     def test_17_09_ssl_min_max(self, env: Env, httpd, tls_proto, max_ver, min_ver):

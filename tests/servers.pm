@@ -102,6 +102,7 @@ use sshhelp qw(
 use pathhelp qw(
     exe_ext
     os_is_win
+    build_sys_abs_path
     sys_native_abs_path
     );
 
@@ -127,7 +128,7 @@ my %run;          # running server
 my %runcert;      # cert file currently in use by an ssl running server
 my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
 my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
-my $posix_pwd=$pwd;        # current working directory
+my $posix_pwd = build_sys_abs_path($pwd);  # current working directory in POSIX format
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
 my $portrange = 999;       # space from which to choose a random port
                            # don't increase without making sure generated port
@@ -154,13 +155,15 @@ our $stunnel;        # path to stunnel command
 #
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
-    my $sep = '[:]';
+    my @paths;
     if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
-        $sep = '[;]';
+        @paths=(split(';', $ENV{'PATH'}), @extrapaths);
     }
-    my @paths=(split(m/$sep/, $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
-               "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
+    else {
+        @paths=(split(':', $ENV{'PATH'}), "/usr/sbin", "/usr/local/sbin",
+                "/sbin", "/usr/bin", "/usr/local/bin", @extrapaths);
+    }
     for(@paths) {
         if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
@@ -3095,6 +3098,7 @@ sub subvariables {
     $$thing =~ s/${prefix}HOSTIP/$HOSTIP/g;
 
     # misc
+    $$thing =~ s/${prefix}PERL/$perlcmd/g;
     $$thing =~ s/${prefix}CURL/$CURL/g;
     $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
@@ -3104,6 +3108,8 @@ sub subvariables {
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
+    # POSIX/MSYS/Cygwin curl needs: file://localhost/d/path/to
+    # Windows native    curl needs: file://localhost/D:/path/to
     my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";
@@ -3120,6 +3126,7 @@ sub subvariables {
     $$thing =~ s/${prefix}SSH_PWD/$ssh_pwd/g;
     $$thing =~ s/${prefix}SRCDIR/$srcdir/g;
     $$thing =~ s/${prefix}USER/$USER/g;
+    $$thing =~ s/${prefix}DEV_NULL/$dev_null/g;
 
     $$thing =~ s/${prefix}SSHSRVMD5/$SSHSRVMD5/g;
     $$thing =~ s/${prefix}SSHSRVSHA256/$SSHSRVSHA256/g;

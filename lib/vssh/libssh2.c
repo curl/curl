@@ -580,11 +580,11 @@ static CURLcode ssh_knownhost(struct Curl_easy *data)
         keymatch = (enum curl_khmatch)keycheck;
 
         /* Ask the callback how to behave */
-        Curl_set_in_callback(data, true);
+        Curl_set_in_callback(data, TRUE);
         rc = func(data, knownkeyp, /* from the knownhosts file */
                   &foundkey, /* from the remote host */
                   keymatch, data->set.ssh_keyfunc_userp);
-        Curl_set_in_callback(data, false);
+        Curl_set_in_callback(data, FALSE);
       }
     }
     else
@@ -782,10 +782,10 @@ static CURLcode ssh_check_fingerprint(struct Curl_easy *data)
                                                       &keylen, &sshkeytype);
       if(remotekey) {
         enum curl_khtype keytype = convert_ssh2_keytype(sshkeytype);
-        Curl_set_in_callback(data, true);
+        Curl_set_in_callback(data, TRUE);
         rc = data->set.ssh_hostkeyfunc(data->set.ssh_hostkeyfunc_userp,
                                        (int)keytype, remotekey, keylen);
-        Curl_set_in_callback(data, false);
+        Curl_set_in_callback(data, FALSE);
         if(rc!= CURLKHMATCH_OK) {
           state(data, SSH_SESSION_FREE);
           sshc->actualcode = CURLE_PEER_FAILED_VERIFICATION;
@@ -849,7 +849,7 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
   const char *kh_name_end = NULL;
   size_t kh_name_size = 0;
   int port = 0;
-  bool found = false;
+  bool found = FALSE;
 
   if(sshc->kh && !data->set.str[STRING_SSH_HOST_PUBLIC_KEY_MD5]) {
     /* lets try to find our host in the known hosts file */
@@ -870,18 +870,18 @@ static CURLcode ssh_force_knownhost_key_type(struct Curl_easy *data)
               kh_name_size = strlen(store->name) - 1 - strlen(kh_name_end);
               if(strncmp(store->name + 1,
                  conn->host.name, kh_name_size) == 0) {
-                found = true;
+                found = TRUE;
                 break;
               }
             }
           }
           else if(strcmp(store->name, conn->host.name) == 0) {
-            found = true;
+            found = TRUE;
             break;
           }
         }
         else {
-          found = true;
+          found = TRUE;
           break;
         }
       }
@@ -2148,10 +2148,10 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
       if(data->state.resume_from > 0) {
         /* Let's read off the proper amount of bytes from the input. */
         if(data->set.seek_func) {
-          Curl_set_in_callback(data, true);
+          Curl_set_in_callback(data, TRUE);
           seekerr = data->set.seek_func(data->set.seek_client,
                                         data->state.resume_from, SEEK_SET);
-          Curl_set_in_callback(data, false);
+          Curl_set_in_callback(data, FALSE);
         }
 
         if(seekerr != CURL_SEEKFUNC_OK) {
@@ -2170,11 +2170,11 @@ static CURLcode ssh_statemach_act(struct Curl_easy *data, bool *block)
               sizeof(scratch) : curlx_sotouz(data->state.resume_from - passed);
 
             size_t actuallyread;
-            Curl_set_in_callback(data, true);
+            Curl_set_in_callback(data, TRUE);
             actuallyread = data->state.fread_func(scratch, 1,
                                                   readthisamountnow,
                                                   data->state.in);
-            Curl_set_in_callback(data, false);
+            Curl_set_in_callback(data, FALSE);
 
             passed += actuallyread;
             if((actuallyread == 0) || (actuallyread > readthisamountnow)) {
@@ -3453,7 +3453,7 @@ static CURLcode scp_doing(struct Curl_easy *data,
 static CURLcode ssh_do(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
-  bool connected = 0;
+  bool connected = FALSE;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
 
