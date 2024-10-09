@@ -249,11 +249,13 @@ CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
 struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
                            bool subdomain)
 {
+  struct stsentry *bestsub = NULL;
   if(h) {
     time_t now = time(NULL);
     size_t hlen = strlen(hostname);
     struct Curl_llist_node *e;
     struct Curl_llist_node *n;
+    size_t blen = 0;
 
     if((hlen > MAX_HSTS_HOSTLEN) || !hlen)
       return NULL;
@@ -275,15 +277,19 @@ struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
       if((subdomain && sts->includeSubDomains) && (ntail < hlen)) {
         size_t offs = hlen - ntail;
         if((hostname[offs-1] == '.') &&
-           strncasecompare(&hostname[offs], sts->host, ntail))
-          return sts;
+           strncasecompare(&hostname[offs], sts->host, ntail) &&
+           (ntail > blen)) {
+          /* save the tail match with the longest tail */
+          bestsub = sts;
+          blen = ntail;
+        }
       }
       /* avoid strcasecompare because the host name is not null terminated */
       if((hlen == ntail) && strncasecompare(hostname, sts->host, hlen))
         return sts;
     }
   }
-  return NULL; /* no match */
+  return bestsub;
 }
 
 /*
@@ -435,7 +441,7 @@ static CURLcode hsts_add(struct hsts *h, char *line)
     e = Curl_hsts(h, p, subdomain);
     if(!e)
       result = hsts_create(h, p, subdomain, expires);
-    else {
+    else if(strcasecompare(p, e->host)) {
       /* the same hostname, use the largest expire time */
       if(expires > e->expires)
         e->expires = expires;

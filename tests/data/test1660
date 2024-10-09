@@ -52,7 +52,7 @@ this.example [this.example]: 1548400797
 Input 12: error 43
 Input 13: error 43
 Input 14: error 43
-3.example.com [example.com]: 1569905261 includeSubDomains
+3.example.com [3.example.com]: 1569905261 includeSubDomains
 3.example.com [example.com]: 1569905261 includeSubDomains
 foo.example.com [example.com]: 1569905261 includeSubDomains
 'foo.xample.com' is not HSTS
