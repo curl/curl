@@ -464,7 +464,7 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
     infof(data, "!!! WARNING !!!");
     infof(data, "This is a debug build of libcurl, "
           "do not use in production.");
-    multi->warned = true;
+    multi->warned = TRUE;
   }
 }
 #else
@@ -1663,9 +1663,9 @@ static CURLcode multi_do_more(struct Curl_easy *data, int *complete)
 static bool multi_handle_timeout(struct Curl_easy *data,
                                  struct curltime *now,
                                  bool *stream_error,
-                                 CURLcode *result,
-                                 bool connect_timeout)
+                                 CURLcode *result)
 {
+  bool connect_timeout = data->mstate < MSTATE_DO;
   timediff_t timeout_ms = Curl_timeleft(data, now, connect_timeout);
   if(timeout_ms < 0) {
     /* Handle timed out */
@@ -1868,7 +1868,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     /* Wait for the connect state as only then is the start time stored, but
        we must not check already completed handles */
     if((data->mstate >= MSTATE_CONNECT) && (data->mstate < MSTATE_COMPLETED) &&
-       multi_handle_timeout(data, nowp, &stream_error, &result, FALSE))
+       multi_handle_timeout(data, nowp, &stream_error, &result))
       /* Skip the statemachine and go directly to error handling section. */
       goto statemachine_end;
 
@@ -2102,13 +2102,13 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
         int prereq_rc;
 
         /* call the prerequest callback function */
-        Curl_set_in_callback(data, true);
+        Curl_set_in_callback(data, TRUE);
         prereq_rc = data->set.fprereq(data->set.prereq_userp,
                                       data->info.primary.remote_ip,
                                       data->info.primary.local_ip,
                                       data->info.primary.remote_port,
                                       data->info.primary.local_port);
-        Curl_set_in_callback(data, false);
+        Curl_set_in_callback(data, FALSE);
         if(prereq_rc != CURL_PREREQFUNC_OK) {
           failf(data, "operation aborted by pre-request callback");
           /* failure in pre-request callback - do not do any other
@@ -2535,14 +2535,14 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
     if(data->mstate >= MSTATE_CONNECT &&
        data->mstate < MSTATE_DO &&
        rc != CURLM_CALL_MULTI_PERFORM &&
-       !multi_ischanged(multi, false)) {
+       !multi_ischanged(multi, FALSE)) {
       /* We now handle stream timeouts if and only if this will be the last
        * loop iteration. We only check this on the last iteration to ensure
        * that if we know we have additional work to do immediately
        * (i.e. CURLM_CALL_MULTI_PERFORM == TRUE) then we should do that before
        * declaring the connection timed out as we may almost have a completed
        * connection. */
-      multi_handle_timeout(data, nowp, &stream_error, &result, FALSE);
+      multi_handle_timeout(data, nowp, &stream_error, &result);
     }
 
 statemachine_end:
@@ -2685,8 +2685,7 @@ CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
       if(data->mstate == MSTATE_PENDING) {
         bool stream_unused;
         CURLcode result_unused;
-        if(multi_handle_timeout(data, &now, &stream_unused, &result_unused,
-                                FALSE)) {
+        if(multi_handle_timeout(data, &now, &stream_unused, &result_unused)) {
           infof(data, "PENDING handle timeout");
           move_pending_to_connect(multi, data);
         }
@@ -2728,8 +2727,6 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
 
-    multi->magic = 0; /* not good anymore */
-
     /* move the pending and msgsent entries back to process
        so that there is just one list to iterate over */
     unlink_all_msgsent_handles(multi);
@@ -2762,6 +2759,8 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     Curl_cpool_destroy(&multi->cpool);
+
+    multi->magic = 0; /* not good anymore */
 
     sockhash_destroy(&multi->sockhash);
     Curl_hash_destroy(&multi->proto_hash);

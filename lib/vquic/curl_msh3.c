@@ -280,9 +280,9 @@ static void MSH3_CALL msh3_conn_connected(MSH3_CONNECTION *Connection,
   (void)Connection;
 
   CURL_TRC_CF(data, cf, "[MSH3] connected");
-  ctx->handshake_succeeded = true;
-  ctx->connected = true;
-  ctx->handshake_complete = true;
+  ctx->handshake_succeeded = TRUE;
+  ctx->connected = TRUE;
+  ctx->handshake_complete = TRUE;
 }
 
 static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
@@ -294,8 +294,8 @@ static void MSH3_CALL msh3_conn_shutdown_complete(MSH3_CONNECTION *Connection,
 
   (void)Connection;
   CURL_TRC_CF(data, cf, "[MSH3] shutdown complete");
-  ctx->connected = false;
-  ctx->handshake_complete = true;
+  ctx->connected = FALSE;
+  ctx->handshake_complete = TRUE;
 }
 
 static void MSH3_CALL msh3_conn_new_request(MSH3_CONNECTION *Connection,
@@ -450,7 +450,7 @@ static bool MSH3_CALL msh3_data_received(MSH3_REQUEST *Request,
       stream->recv_error = result;
       goto out;
     }
-    stream->recv_header_complete = true;
+    stream->recv_header_complete = TRUE;
   }
 
   result = write_resp_raw(data, buf, *buflen);
@@ -476,7 +476,7 @@ static void MSH3_CALL msh3_complete(MSH3_REQUEST *Request, void *IfContext,
     return;
   msh3_lock_acquire(&stream->recv_lock);
   stream->closed = TRUE;
-  stream->recv_header_complete = true;
+  stream->recv_header_complete = TRUE;
   if(error)
     stream->error3 = error;
   if(aborted)

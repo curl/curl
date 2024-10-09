@@ -31,7 +31,7 @@ XXXXXXXx
 </file>
 # generate the config file
 <precheck>
-perl -e 'for(1 .. 1000) { printf("upload-file=%LOGDIR/upload-this\nurl=htttttp://non-existing-host.haxx.se/upload/%TESTNUMBER\n", $_);}' > %LOGDIR/cmd%TESTNUMBER;
+%PERL -e 'for(1 .. 1000) { printf("upload-file=%LOGDIR/upload-this\nurl=htttttp://non-existing-host.haxx.se/upload/%TESTNUMBER\n", $_);}' > %LOGDIR/cmd%TESTNUMBER;
 </precheck>
 </client>
 

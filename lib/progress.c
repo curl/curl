@@ -174,7 +174,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_STARTSINGLE:
     /* This is set at the start of each single transfer */
     data->progress.t_startsingle = timestamp;
-    data->progress.is_t_startransfer_set = false;
+    data->progress.is_t_startransfer_set = FALSE;
     break;
   case TIMER_POSTQUEUE:
     /* Set when the transfer starts (after potentially having been brought
@@ -211,7 +211,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
       return;
     }
     else {
-      data->progress.is_t_startransfer_set = true;
+      data->progress.is_t_startransfer_set = TRUE;
       break;
     }
   case TIMER_POSTRANSFER:
@@ -249,7 +249,7 @@ void Curl_pgrsStartNow(struct Curl_easy *data)
 {
   data->progress.speeder_c = 0; /* reset the progress meter display */
   data->progress.start = Curl_now();
-  data->progress.is_t_startransfer_set = false;
+  data->progress.is_t_startransfer_set = FALSE;
   data->progress.ul.limit.start = data->progress.start;
   data->progress.dl.limit.start = data->progress.start;
   data->progress.ul.limit.start_size = 0;
@@ -583,13 +583,13 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
     if(data->set.fxferinfo) {
       int result;
       /* There is a callback set, call that */
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       result = data->set.fxferinfo(data->set.progress_client,
                                    data->progress.dl.total_size,
                                    data->progress.dl.cur_size,
                                    data->progress.ul.total_size,
                                    data->progress.ul.cur_size);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
         if(result)
           failf(data, "Callback aborted");
@@ -599,13 +599,13 @@ static int pgrsupdate(struct Curl_easy *data, bool showprogress)
     else if(data->set.fprogress) {
       int result;
       /* The older deprecated callback is set, call that */
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       result = data->set.fprogress(data->set.progress_client,
                                    (double)data->progress.dl.total_size,
                                    (double)data->progress.dl.cur_size,
                                    (double)data->progress.ul.total_size,
                                    (double)data->progress.ul.cur_size);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
       if(result != CURL_PROGRESSFUNC_CONTINUE) {
         if(result)
           failf(data, "Callback aborted");
