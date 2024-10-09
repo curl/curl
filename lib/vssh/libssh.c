@@ -496,11 +496,11 @@ static int myssh_is_known(struct Curl_easy *data)
         goto cleanup;
       }
 
-      Curl_set_in_callback(data, true);
+      Curl_set_in_callback(data, TRUE);
       rc = func(data, knownkeyp, /* from the knownhosts file */
                 &foundkey, /* from the remote host */
                 keymatch, data->set.ssh_keyfunc_userp);
-      Curl_set_in_callback(data, false);
+      Curl_set_in_callback(data, FALSE);
 
       switch(rc) {
       case CURLKHSTAT_FINE_ADD_TO_FILE:
@@ -1294,10 +1294,10 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       if(data->state.resume_from > 0) {
         /* Let's read off the proper amount of bytes from the input. */
         if(data->set.seek_func) {
-          Curl_set_in_callback(data, true);
+          Curl_set_in_callback(data, TRUE);
           seekerr = data->set.seek_func(data->set.seek_client,
                                         data->state.resume_from, SEEK_SET);
-          Curl_set_in_callback(data, false);
+          Curl_set_in_callback(data, FALSE);
         }
 
         if(seekerr != CURL_SEEKFUNC_OK) {
@@ -2317,7 +2317,7 @@ CURLcode scp_perform(struct Curl_easy *data,
 static CURLcode myssh_do_it(struct Curl_easy *data, bool *done)
 {
   CURLcode result;
-  bool connected = 0;
+  bool connected = FALSE;
   struct connectdata *conn = data->conn;
   struct ssh_conn *sshc = &conn->proto.sshc;
 

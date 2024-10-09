@@ -34,8 +34,8 @@ from testenv import Env, CurlClient, Caddy
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=not Env.has_caddy(), reason=f"missing caddy")
-@pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+@pytest.mark.skipif(condition=not Env.has_caddy(), reason="missing caddy")
+@pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
 class TestCaddy:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -183,7 +183,7 @@ class TestCaddy:
         r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
-        for i in range(0,count):
+        for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == [data]
 

@@ -221,6 +221,7 @@ static const char *doc404 = "HTTP/1.1 404 Not Found\r\n"
 /* work around for handling trailing headers */
 static int already_recv_zeroed_chunk = FALSE;
 
+#ifdef TCP_NODELAY
 /* returns true if the current socket is an IP one */
 static bool socket_domain_is_ip(void)
 {
@@ -235,6 +236,7 @@ static bool socket_domain_is_ip(void)
     return false;
   }
 }
+#endif
 
 /* parse the file on disk that might have a test number for us */
 static int parse_cmdfile(struct httprequest *req)

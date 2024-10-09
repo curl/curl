@@ -24,13 +24,13 @@ d?????????    N U         U               N ???  N NN:NN asubdir
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP pre-quote chmod
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "chmod 444 %PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
+--key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: -Q "chmod 444 %SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt" sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
 </client>
 
@@ -38,7 +38,7 @@ SFTP pre-quote chmod
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
+%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
 </postcheck>
 </verify>
 </testcase>

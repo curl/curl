@@ -34,6 +34,10 @@ all the other multi-functions, sometimes referred to as a multi handle in some
 places in the documentation. This init call MUST have a corresponding call to
 curl_multi_cleanup(3) when the operation is complete.
 
+By default, several caches are stored in and held by the multi handle: DNS
+cache, connection pool, TLS session ID cache and the TLS CA cert cache. All
+transfers using the same multi handle share these caches.
+
 # %PROTOCOLS%
 
 # EXAMPLE

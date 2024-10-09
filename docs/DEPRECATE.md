@@ -51,7 +51,7 @@ The only way to keep hyper support in curl is to give it a good polish by
 someone with time, skill and energy to spend on this task.
 
 Unless a significant overhaul has proven to be in progress, hyper support is
-removed from curl after February 2025.
+removed from curl in January 2025.
 
 ## Past removals
 
