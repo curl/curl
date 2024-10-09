@@ -82,3 +82,5 @@ CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *curl);
 #endif
 
 #endif /* CURLINC_WEBSOCKETS_H */
+
+// Root Layout and Protected Routes1
