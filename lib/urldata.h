@@ -324,6 +324,7 @@ struct ssl_config_data {
   char *key_passwd; /* plain text private key password */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(falsestart);
+  BIT(earlydata);    /* use tls1.3 early data */
   BIT(enable_beast); /* allow this flaw for interoperability's sake */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
   BIT(no_partialchain); /* do not accept partial certificate chains */
@@ -346,6 +347,7 @@ struct Curl_ssl_session {
   char *name;       /* hostname for which this ID was used */
   char *conn_to_host; /* hostname for the connection (may be NULL) */
   const char *scheme; /* protocol scheme used */
+  char *alpn;         /* APLN TLS negotiated protocol string */
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
   Curl_ssl_sessionid_dtor *sessionid_free; /* free `sessionid` callback */
@@ -1069,6 +1071,7 @@ struct Progress {
   struct pgrs_dir dl;
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
+  curl_off_t earlydata_sent;
 
   int width; /* screen width at download start */
   int flags; /* see progress.h */

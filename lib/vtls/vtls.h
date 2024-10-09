@@ -43,14 +43,17 @@ struct Curl_ssl_session;
 
 #define ALPN_ACCEPTED "ALPN: server accepted "
 
-#define VTLS_INFOF_NO_ALPN                                      \
+#define VTLS_INFOF_NO_ALPN            \
   "ALPN: server did not agree on a protocol. Uses default."
-#define VTLS_INFOF_ALPN_OFFER_1STR              \
+#define VTLS_INFOF_ALPN_OFFER_1STR    \
   "ALPN: curl offers %s"
-#define VTLS_INFOF_ALPN_ACCEPTED_1STR           \
-  ALPN_ACCEPTED "%s"
-#define VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR       \
+#define VTLS_INFOF_ALPN_ACCEPTED      \
   ALPN_ACCEPTED "%.*s"
+
+#define VTLS_INFOF_NO_ALPN_DEFERRED   \
+  "ALPN: deferred handshake for early data without specific protocol."
+#define VTLS_INFOF_ALPN_DEFERRED      \
+  "ALPN: deferred handshake for early data using '%.*s'."
 
 /* Curl_multi SSL backend-specific data; declared differently by each SSL
    backend */

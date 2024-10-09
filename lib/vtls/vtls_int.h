@@ -29,6 +29,8 @@
 
 #ifdef USE_SSL
 
+struct ssl_connect_data;
+
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
 #define ALPN_HTTP_1_1_LENGTH 8
 #define ALPN_HTTP_1_1 "http/1.1"
@@ -61,8 +63,12 @@ CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
 
 CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct ssl_connect_data *connssl,
                                   const unsigned char *proto,
                                   size_t proto_len);
+
+bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
+                              const char *proto);
 
 /* enum for the nonblocking SSL connection state machine */
 typedef enum {
@@ -74,13 +80,26 @@ typedef enum {
 
 typedef enum {
   ssl_connection_none,
+  ssl_connection_deferred,
   ssl_connection_negotiating,
   ssl_connection_complete
 } ssl_connection_state;
 
+typedef enum {
+  ssl_earlydata_none,
+  ssl_earlydata_use,
+  ssl_earlydata_sending,
+  ssl_earlydata_sent,
+  ssl_earlydata_accepted,
+  ssl_earlydata_rejected
+} ssl_earlydata_state;
+
 #define CURL_SSL_IO_NEED_NONE   (0)
 #define CURL_SSL_IO_NEED_RECV   (1<<0)
 #define CURL_SSL_IO_NEED_SEND   (1<<1)
+
+/* Max earlydata payload we want to send */
+#define CURL_SSL_EARLY_MAX       (64*1024)
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
@@ -89,8 +108,14 @@ struct ssl_connect_data {
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
+  char *alpn_negotiated;            /* negotiated ALPN value or NULL */
+  struct bufq earlydata;            /* earlydata to be send to peer */
+  size_t earlydata_max;             /* max earlydata allowed by peer */
+  size_t earlydata_skip;            /* sending bytes to skip when earlydata
+                                     * is accepted by peer */
   ssl_connection_state state;
   ssl_connect_state connecting_state;
+  ssl_earlydata_state earlydata_state;
   int io_need;                      /* TLS signals special SEND/RECV needs */
   BIT(use_alpn);                    /* if ALPN shall be used in handshake */
   BIT(peer_closed);                 /* peer has closed connection */
@@ -193,12 +218,20 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
  * Caller must make sure that the ownership of returned sessionid object
  * is properly taken (e.g. its refcount is incremented
  * under sessionid mutex).
+ * @param cf      the connection filter wanting to use it
+ * @param data    the transfer involved
+ * @param peer    the peer the filter wants to talk to
+ * @param sessionid on return the TLS session
+ * @param idsize  on return the size of the TLS session data
+ * @param palpn   on return the ALPN string used by the session,
+ *                set to NULL when not interested
  */
 bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            const struct ssl_peer *peer,
                            void **ssl_sessionid,
-                           size_t *idsize); /* set 0 if unknown */
+                           size_t *idsize, /* set 0 if unknown */
+                           char **palpn);
 
 /* Set a TLS session ID for `peer`. Replaces an existing session ID if
  * not already the very same.
@@ -212,6 +245,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
 CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const struct ssl_peer *peer,
+                                const char *alpn,
                                 void *sessionid,
                                 size_t sessionid_size,
                                 Curl_ssl_sessionid_dtor *sessionid_free_cb);

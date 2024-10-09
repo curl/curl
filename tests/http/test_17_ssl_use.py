@@ -64,9 +64,6 @@ class TestSSLUse:
         count = 3
         exp_resumed = 'Resumed'
         xargs = ['--sessionid', '--tls-max', tls_max, f'--tlsv{tls_max}']
-        if env.curl_uses_lib('gnutls'):
-            if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in GnuTLS, but 1.3 does not, TODO
         if env.curl_uses_lib('libressl'):
             if tls_max == '1.3':
                 exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
@@ -279,7 +276,9 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         proto = 'http/1.1'
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        run_env['CURL_USE_EARLYDATA'] = '1'
+        curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
         if env.curl_uses_lib('bearssl'):

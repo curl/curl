@@ -24,11 +24,14 @@
 #
 ###########################################################################
 #
+import difflib
+import filecmp
 import logging
 import os
+import re
 import pytest
 
-from testenv import Env, CurlClient, Caddy
+from testenv import Env, CurlClient, Caddy, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -57,6 +60,7 @@ class TestCaddy:
 
     @pytest.fixture(autouse=True, scope='class')
     def _class_scope(self, env, caddy):
+        self._make_docs_file(docs_dir=caddy.docs_dir, fname='data10k.data', fsize=10*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data1.data', fsize=1024*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data5.data', fsize=5*1024*1024)
         self._make_docs_file(docs_dir=caddy.docs_dir, fname='data10.data', fsize=10*1024*1024)
@@ -205,3 +209,43 @@ class TestCaddy:
         for i in range(count):
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_08_08_earlydata(self, env: Env, httpd, caddy, proto):
+        count = 2
+        docname = 'data10k.data'
+        url = f'https://{env.domain1}:{caddy.port}/{docname}'
+        client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',
+             '-e',  # use TLS earlydata
+             '-f',  # forbid reuse of connections
+             '-r', f'{env.domain1}:{caddy.port}:127.0.0.1',
+             '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(caddy.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
+        earlydata = {}
+        for line in r.trace_lines:
+            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
+            if m:
+                earlydata[int(m.group(1))] = int(m.group(2))
+        # Caddy does not support early data
+        assert earlydata[0] == 0, f'{earlydata}'
+        assert earlydata[1] == 0, f'{earlydata}'
+
+    def check_downloads(self, client, srcfile: str, count: int,
+                        complete: bool = True):
+        for i in range(count):
+            dfile = client.download_file(i)
+            assert os.path.exists(dfile)
+            if complete and not filecmp.cmp(srcfile, dfile, shallow=False):
+                diff = "".join(difflib.unified_diff(a=open(srcfile).readlines(),
+                                                    b=open(dfile).readlines(),
+                                                    fromfile=srcfile,
+                                                    tofile=dfile,
+                                                    n=1))
+                assert False, f'download {dfile} differs:\n{diff}'

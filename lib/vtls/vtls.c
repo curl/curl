@@ -454,6 +454,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
     return NULL;
 
   ctx->alpn = alpn;
+  Curl_bufq_init2(&ctx->earlydata, CURL_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
   ctx->backend = calloc(1, Curl_ssl->sizeof_ssl_backend_data);
   if(!ctx->backend) {
     free(ctx);
@@ -465,6 +466,8 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if(ctx) {
+    Curl_safefree(ctx->alpn_negotiated);
+    Curl_bufq_free(&ctx->earlydata);
     free(ctx->backend);
     free(ctx);
   }
@@ -527,7 +530,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            const struct ssl_peer *peer,
                            void **ssl_sessionid,
-                           size_t *idsize) /* set 0 if unknown */
+                           size_t *idsize, /* set 0 if unknown */
+                           char **palpn)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -537,6 +541,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   bool no_match = TRUE;
 
   *ssl_sessionid = NULL;
+  if(palpn)
+    *palpn = NULL;
   if(!ssl_config)
     return TRUE;
 
@@ -575,6 +581,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
       *ssl_sessionid = check->sessionid;
       if(idsize)
         *idsize = check->idsize;
+      if(palpn)
+        *palpn = check->alpn;
       no_match = FALSE;
       break;
     }
@@ -605,6 +613,7 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *session)
 
     Curl_safefree(session->name);
     Curl_safefree(session->conn_to_host);
+    Curl_safefree(session->alpn);
   }
 }
 
@@ -628,6 +637,7 @@ void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
 CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const struct ssl_peer *peer,
+                                const char *alpn,
                                 void *ssl_sessionid,
                                 size_t idsize,
                                 Curl_ssl_sessionid_dtor *sessionid_free_cb)
@@ -639,6 +649,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
   long oldest_age;
   char *clone_host = NULL;
   char *clone_conn_to_host = NULL;
+  char *clone_alpn = NULL;
   int conn_to_port;
   long *general_age;
   void *old_sessionid;
@@ -653,7 +664,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size)) {
+  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size, NULL)) {
     if((old_size == idsize) &&
        ((old_sessionid == ssl_sessionid) ||
         (idsize && !memcmp(old_sessionid, ssl_sessionid, idsize)))) {
@@ -678,6 +689,10 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
     if(!clone_conn_to_host)
       goto out;
   }
+
+  clone_alpn = alpn ? strdup(alpn) : NULL;
+  if(alpn && !clone_alpn)
+    goto out;
 
   if(cf->conn->bits.conn_to_port)
     conn_to_port = cf->conn->conn_to_port;
@@ -727,6 +742,8 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
   store->conn_to_host = clone_conn_to_host; /* clone connect to hostname */
   clone_conn_to_host = NULL;
   store->conn_to_port = conn_to_port; /* connect to port number */
+  store->alpn = clone_alpn;
+  clone_alpn = NULL;
   /* port number */
   store->remote_port = peer->port;
   store->scheme = cf->conn->handler->scheme;
@@ -737,6 +754,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
 out:
   free(clone_host);
   free(clone_conn_to_host);
+  free(clone_alpn);
   if(result) {
     failf(data, "Failed to add Session ID to cache for %s://%s:%d [%s]",
           store->scheme, store->name, store->remote_port,
@@ -1716,7 +1734,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   if(!result && *done) {
     cf->connected = TRUE;
     connssl->handshake_done = Curl_now();
-    DEBUGASSERT(connssl->state == ssl_connection_complete);
+    /* Connection can be deferred when sending early data */
+    DEBUGASSERT(connssl->state == ssl_connection_complete ||
+                connssl->state == ssl_connection_deferred);
   }
 out:
   CURL_TRC_CF(data, cf, "cf_connect() -> %d, done=%d", result, *done);
@@ -2219,11 +2239,25 @@ CURLcode Curl_alpn_to_proto_str(struct alpn_proto_buf *buf,
   return CURLE_OK;
 }
 
+bool Curl_alpn_contains_proto(const struct alpn_spec *spec,
+                              const char *proto)
+{
+  size_t i, plen = proto ? strlen(proto) : 0;
+  for(i = 0; spec && plen && i < spec->count; ++i) {
+    size_t slen = strlen(spec->entries[i]);
+    if((slen == plen) && !memcmp(proto, spec->entries[i], plen))
+      return TRUE;
+  }
+  return FALSE;
+}
+
 CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
+                                  struct ssl_connect_data *connssl,
                                   const unsigned char *proto,
                                   size_t proto_len)
 {
+  CURLcode result = CURLE_OK;
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
     (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf)) ?
@@ -2232,6 +2266,45 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
     &cf->conn->alpn
 #endif
     ;
+
+  if(connssl->alpn_negotiated) {
+    /* When we ask for a specific ALPN protocol, we need the confirmation
+     * of it by the server, as we have installed protocol handler and
+     * connection filter chain for exactly this protocol. */
+    if(!proto_len) {
+      failf(data, "ALPN: asked for '%s' from previous session, "
+            "but server did not confirm it. Refusing to continue.",
+            connssl->alpn_negotiated);
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    else if((strlen(connssl->alpn_negotiated) != proto_len) ||
+            memcmp(connssl->alpn_negotiated, proto, proto_len)) {
+      failf(data, "ALPN: asked for '%s' from previous session, but server "
+            "selected '%.*s'. Refusing to continue.",
+            connssl->alpn_negotiated, (int)proto_len, proto);
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    /* ALPN is exactly what we asked for, done. */
+    infof(data, "ALPN: server confirmed to use '%s'",
+          connssl->alpn_negotiated);
+    goto out;
+  }
+
+  if(proto && proto_len) {
+    if(memchr(proto, '\0', proto_len)) {
+      failf(data, "ALPN: server selected protocol contains NUL. "
+            "Refusing to continue.");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    connssl->alpn_negotiated = malloc(proto_len + 1);
+    if(!connssl->alpn_negotiated)
+      return CURLE_OUT_OF_MEMORY;
+    memcpy(connssl->alpn_negotiated, proto, proto_len);
+    connssl->alpn_negotiated[proto_len] = 0;
+  }
 
   if(proto && proto_len) {
     if(proto_len == ALPN_HTTP_1_1_LENGTH &&
@@ -2258,15 +2331,22 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       /* return CURLE_NOT_BUILT_IN; */
       goto out;
     }
-    infof(data, VTLS_INFOF_ALPN_ACCEPTED_LEN_1STR, (int)proto_len, proto);
+
+    if(connssl->state == ssl_connection_deferred)
+      infof(data, VTLS_INFOF_ALPN_DEFERRED, (int)proto_len, proto);
+    else
+      infof(data, VTLS_INFOF_ALPN_ACCEPTED, (int)proto_len, proto);
   }
   else {
     *palpn = CURL_HTTP_VERSION_NONE;
-    infof(data, VTLS_INFOF_NO_ALPN);
+    if(connssl->state == ssl_connection_deferred)
+      infof(data, VTLS_INFOF_NO_ALPN_DEFERRED);
+    else
+      infof(data, VTLS_INFOF_NO_ALPN);
   }
 
 out:
-  return CURLE_OK;
+  return result;
 }
 
 #endif /* USE_SSL */
