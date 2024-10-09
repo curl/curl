@@ -2913,8 +2913,8 @@ static CURLcode parse_connect_to_string(struct Curl_easy *data,
 {
   CURLcode result = CURLE_OK;
   const char *ptr = conn_to_host;
-  int host_match = FALSE;
-  int port_match = FALSE;
+  bool host_match = FALSE;
+  bool port_match = FALSE;
 
   *host_result = NULL;
   *port_result = -1;

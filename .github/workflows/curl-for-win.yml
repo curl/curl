@@ -40,14 +40,13 @@ env:
   CW_MAP: '0'
   CW_JOBS: '5'
   CW_NOPKG: '1'
-  DOCKER_CONTENT_TRUST: '1'
 
 jobs:
   linux-glibc-llvm:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
         with:
           path: 'curl'
           fetch-depth: 8
@@ -58,6 +57,7 @@ jobs:
           export CW_CONFIG='-main-werror-linux-a64-x64'
           export CW_REVISION='${{ github.sha }}'
           DOCKER_IMAGE='debian:bookworm-slim'
+          DOCKER_CONTENT_TRUST=1
           export CW_CCSUFFIX='-15'
           export CW_GCCSUFFIX='-12'
           docker trust inspect --pretty "${DOCKER_IMAGE}"
@@ -73,7 +73,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
         with:
           path: 'curl'
           fetch-depth: 8
@@ -99,7 +99,7 @@ jobs:
     env:
       CW_JOBS: '4'
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
         with:
           path: 'curl'
           fetch-depth: 8
@@ -114,7 +114,7 @@ jobs:
   win-llvm:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
         with:
           path: 'curl'
           fetch-depth: 8

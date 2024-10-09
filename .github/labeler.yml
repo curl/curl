@@ -115,7 +115,7 @@ connecting & proxies:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              docs/CONNECTION-FILTERS.md,\
+              docs/internals/CONNECTION-FILTERS.md,\
               docs/examples/ipv6.c,\
               docs/libcurl/opts/CURLINFO_CONNECT*,\
               docs/libcurl/opts/CURLINFO_PROXY*,\
@@ -236,7 +236,6 @@ HTTP:
               docs/examples/httpput*,\
               docs/examples/https*,\
               docs/examples/*post*,\
-              docs/HSTS.md,\
               docs/HTTP-COOKIES.md,\
               docs/libcurl/opts/CURLINFO_COOKIE*,\
               docs/libcurl/opts/CURLOPT_COOKIE*,\
@@ -271,7 +270,6 @@ HTTP/2:
           - any-glob-to-all-files: "{\
               CMake/FindNGHTTP2.cmake,\
               CMake/FindQuiche.cmake,\
-              docs/HTTP2.md,\
               docs/libcurl/opts/CURLOPT_STREAM*,\
               docs/examples/http2*,\
               lib/http2*,\
@@ -353,7 +351,6 @@ MQTT:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              docs/MQTT.md,\
               lib/mqtt*,\
               tests/server/mqttd.c\
               }"
@@ -509,7 +506,7 @@ WebSocket:
   - all:
       - changed-files:
           - any-glob-to-all-files: "{\
-              docs/WEBSOCKET.md*,\
+              docs/internals/WEBSOCKET.md*,\
               docs/examples/websocket*,\
               docs/libcurl/curl_ws_*,\
               docs/libcurl/libcurl-ws*,\
@@ -526,7 +523,6 @@ Windows:
       - changed-files:
           - any-glob-to-all-files: "{\
               appveyor.*,\
-              .github/workflows/cygwin.yml,\
               .github/workflows/windows.yml,\
               CMake/Platforms/WindowsCache.cmake,\
               lib/*win32*,\

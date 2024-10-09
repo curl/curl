@@ -852,7 +852,7 @@ cr_connect_common(struct Curl_cfilter *cf,
           ver = "TLSv1.3";
         if(proto == RUSTLS_TLS_VERSION_TLSV1_2)
           ver = "TLSv1.2";
-        Curl_cipher_suite_get_str(cipher, buf, sizeof(buf), true);
+        Curl_cipher_suite_get_str(cipher, buf, sizeof(buf), TRUE);
         infof(data, "rustls: handshake complete, %s, cipher: %s",
               ver, buf);
       }
@@ -935,7 +935,7 @@ cr_connect_common(struct Curl_cfilter *cf,
 
   /* We should never fall through the loop. We should return either because
      the handshake is done or because we cannot read/write without blocking. */
-  DEBUGASSERT(false);
+  DEBUGASSERT(FALSE);
 }
 
 static CURLcode

@@ -25,22 +25,14 @@ MOOOO
 
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O output in, using the CURL_TESTDIR variable
-<features>
-Debug
-</features>
 <server>
 ftp
 </server>
 <name>
 FTP download, file with C-D inside, using -O -J -D file
 </name>
-<setenv>
-CURL_TESTDIR=%LOGDIR
-</setenv>
 <command option="no-output,no-include">
-ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -J -D %LOGDIR/heads%TESTNUMBER
+ftp://%HOSTIP:%FTPPORT/path/file%TESTNUMBER -O -J -D %LOGDIR/heads%TESTNUMBER --output-dir %LOGDIR
 </command>
 </client>
 
