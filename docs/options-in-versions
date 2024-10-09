@@ -246,6 +246,7 @@
 --tftp-blksize                       7.20.0
 --tftp-no-options                    7.48.0
 --time-cond (-z)                     5.8
+--tls-earlydata                      8.11.0
 --tls-max                            7.54.0
 --tls13-ciphers                      7.61.0
 --tlsauthtype                        7.21.4

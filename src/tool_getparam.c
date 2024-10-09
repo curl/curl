@@ -316,6 +316,7 @@ static const struct LongShort aliases[]= {
   {"tftp-blksize",               ARG_STRG, ' ', C_TFTP_BLKSIZE},
   {"tftp-no-options",            ARG_BOOL, ' ', C_TFTP_NO_OPTIONS},
   {"time-cond",                  ARG_STRG, 'z', C_TIME_COND},
+  {"tls-earlydata",              ARG_BOOL, ' ', C_TLS_EARLYDATA},
   {"tls-max",                    ARG_STRG, ' ', C_TLS_MAX},
   {"tls13-ciphers",              ARG_STRG, ' ', C_TLS13_CIPHERS},
   {"tlsauthtype",                ARG_STRG, ' ', C_TLSAUTHTYPE},
@@ -1690,6 +1691,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_ABSTRACT_UNIX_SOCKET: /* --abstract-unix-socket */
       config->abstract_unix_socket = TRUE;
       err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+      break;
+    case C_TLS_EARLYDATA: /* --tls-earlydata */
+      if(feature_ssl)
+        config->ssl_allow_earlydata = toggle;
       break;
     case C_TLS_MAX: /* --tls-max */
       err = str2tls_max(&config->ssl_version_max, nextarg);
