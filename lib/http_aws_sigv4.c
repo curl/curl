@@ -122,10 +122,6 @@ static void trim_headers(struct curl_slist *head)
 
 #define DATE_HDR_KEY_LEN (MAX_SIGV4_LEN + sizeof("X--Date"))
 
-#define MAX_HOST_LEN 255
-/* FQDN + host: */
-#define FULL_HOST_LEN (MAX_HOST_LEN + sizeof("host:"))
-
 /* string been x-PROVIDER-date:TIMESTAMP, I need +1 for ':' */
 #define DATE_FULL_HDR_LEN (DATE_HDR_KEY_LEN + TIMESTAMP_SIZE + 1)
 
@@ -176,7 +172,7 @@ static CURLcode make_headers(struct Curl_easy *data,
   struct curl_slist *tmp_head = NULL;
   CURLcode ret = CURLE_OUT_OF_MEMORY;
   struct curl_slist *l;
-  int again = 1;
+  bool again = TRUE;
 
   /* provider1 mid */
   Curl_strntolower(provider1, provider1, strlen(provider1));
@@ -190,31 +186,22 @@ static CURLcode make_headers(struct Curl_easy *data,
             "x-%s-date:%s", provider1, timestamp);
 
   if(!Curl_checkheaders(data, STRCONST("Host"))) {
-    char full_host[FULL_HOST_LEN + 1];
+    char *fullhost;
 
     if(data->state.aptr.host) {
-      size_t pos;
-
-      if(strlen(data->state.aptr.host) > FULL_HOST_LEN) {
-        ret = CURLE_URL_MALFORMAT;
-        goto fail;
-      }
-      strcpy(full_host, data->state.aptr.host);
       /* remove /r/n as the separator for canonical request must be '\n' */
-      pos = strcspn(full_host, "\n\r");
-      full_host[pos] = 0;
+      size_t pos = strcspn(data->state.aptr.host, "\n\r");
+      fullhost = Curl_memdup0(data->state.aptr.host, pos);
     }
-    else {
-      if(strlen(hostname) > MAX_HOST_LEN) {
-        ret = CURLE_URL_MALFORMAT;
-        goto fail;
-      }
-      msnprintf(full_host, FULL_HOST_LEN, "host:%s", hostname);
-    }
+    else
+      fullhost = aprintf("host:%s", hostname);
 
-    head = curl_slist_append(NULL, full_host);
-    if(!head)
+    if(fullhost)
+      head = Curl_slist_append_nodup(NULL, fullhost);
+    if(!head) {
+      free(fullhost);
       goto fail;
+    }
   }
 
 
@@ -300,7 +287,7 @@ static CURLcode make_headers(struct Curl_easy *data,
 
   /* alpha-sort by header name in a case sensitive manner */
   do {
-    again = 0;
+    again = FALSE;
     for(l = head; l; l = l->next) {
       struct curl_slist *next = l->next;
 
@@ -309,7 +296,7 @@ static CURLcode make_headers(struct Curl_easy *data,
 
         l->data = next->data;
         next->data = tmp;
-        again = 1;
+        again = TRUE;
       }
     }
   } while(again);
@@ -507,7 +494,7 @@ static CURLcode canon_string(const char *q, size_t len,
           /* allowed as-is */
           if(*q == '=') {
             result = Curl_dyn_addn(dq, q, 1);
-            *found_equals = true;
+            *found_equals = TRUE;
             break;
           }
         }
@@ -562,7 +549,7 @@ static CURLcode canon_query(struct Curl_easy *data,
   ap = &array[0];
   for(i = 0; !result && (i < entry); i++, ap++) {
     const char *q = ap->p;
-    bool found_equals = false;
+    bool found_equals = FALSE;
     if(!ap->len)
       continue;
     result = canon_string(q, ap->len, dq, &found_equals);
@@ -589,7 +576,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
   char provider1[MAX_SIGV4_LEN + 1]="";
   char region[MAX_SIGV4_LEN + 1]="";
   char service[MAX_SIGV4_LEN + 1]="";
-  bool sign_as_s3 = false;
+  bool sign_as_s3 = FALSE;
   const char *hostname = conn->host.name;
   time_t clock;
   struct tm tm;

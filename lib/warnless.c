@@ -345,28 +345,6 @@ size_t curlx_sitouz(int sinum)
 #endif
 }
 
-#ifdef USE_WINSOCK
-
-/*
-** curl_socket_t to signed int
-*/
-
-int curlx_sktosi(curl_socket_t s)
-{
-  return (int)((ssize_t) s);
-}
-
-/*
-** signed int to curl_socket_t
-*/
-
-curl_socket_t curlx_sitosk(int i)
-{
-  return (curl_socket_t)((ssize_t) i);
-}
-
-#endif /* USE_WINSOCK */
-
 #if defined(_WIN32)
 
 ssize_t curlx_read(int fd, void *buf, size_t count)

@@ -482,11 +482,9 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
     if(!data->set.tftp_no_options) {
       char buf[64];
       /* add tsize option */
-      if(data->state.upload && (data->state.infilesize != -1))
-        msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
-                  data->state.infilesize);
-      else
-        strcpy(buf, "0"); /* the destination is large enough */
+      msnprintf(buf, sizeof(buf), "%" FMT_OFF_T,
+                data->state.upload && (data->state.infilesize != -1) ?
+                data->state.infilesize : 0);
 
       result = tftp_option_add(state, &sbytes,
                                (char *)state->spacket.data + sbytes,
@@ -1099,24 +1097,20 @@ static int tftp_getsock(struct Curl_easy *data,
  **********************************************************/
 static CURLcode tftp_receive_packet(struct Curl_easy *data)
 {
-  struct Curl_sockaddr_storage fromaddr;
   curl_socklen_t        fromlen;
   CURLcode              result = CURLE_OK;
   struct connectdata *conn = data->conn;
   struct tftp_state_data *state = conn->proto.tftpc;
 
   /* Receive the packet */
-  fromlen = sizeof(fromaddr);
+  fromlen = sizeof(state->remote_addr);
   state->rbytes = (int)recvfrom(state->sockfd,
                                 (void *)state->rpacket.data,
                                 (RECV_TYPE_ARG3)state->blksize + 4,
                                 0,
-                                (struct sockaddr *)&fromaddr,
+                                (struct sockaddr *)&state->remote_addr,
                                 &fromlen);
-  if(state->remote_addrlen == 0) {
-    memcpy(&state->remote_addr, &fromaddr, fromlen);
-    state->remote_addrlen = fromlen;
-  }
+  state->remote_addrlen = fromlen;
 
   /* Sanity check packet length */
   if(state->rbytes < 4) {

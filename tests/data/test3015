@@ -50,7 +50,7 @@ http
 HTTP GET -w num_headers with redirected fetch (2 connects)
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_headers}\n" -L -o/dev/null
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w "%{num_headers}\n" -L -o%DEV_NULL
 </command>
 </client>
 

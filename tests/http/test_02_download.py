@@ -301,14 +301,14 @@ class TestDownload:
         # setting smaller frame sizes. This is not released yet, we
         # test if it works and back out if not.
         httpd.set_extra_config(env.domain1, lines=[
-            f'H2MaxDataFrameLen 1024',
+            'H2MaxDataFrameLen 1024',
         ])
         assert httpd.stop()
         if not httpd.start():
             # no, not supported, bail out
             httpd.set_extra_config(env.domain1, lines=None)
             assert httpd.start()
-            pytest.skip(f'H2MaxDataFrameLen not supported')
+            pytest.skip('H2MaxDataFrameLen not supported')
         # ok, make 100 downloads with 2 parallel running and they
         # are expected to stumble into the issue when using `lib/http2.c`
         # from curl 7.88.0
