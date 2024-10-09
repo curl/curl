@@ -382,7 +382,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
     (ca_info_blob ? NULL : conn_config->CAfile);
   const char * const ssl_capath = conn_config->CApath;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  bool imported_native_ca = false;
+  bool imported_native_ca = FALSE;
 
 #if !defined(NO_FILESYSTEM) && defined(WOLFSSL_SYS_CA_CERTS)
   /* load native CA certificates */
@@ -391,7 +391,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       infof(data, "error importing native CA store, continuing anyway");
     }
     else {
-      imported_native_ca = true;
+      imported_native_ca = TRUE;
       infof(data, "successfully imported native CA store");
       wssl->x509_store_setup = TRUE;
     }
@@ -493,7 +493,7 @@ cached_x509_store_expired(const struct Curl_easy *data,
   timediff_t timeout_ms = cfg->ca_cache_timeout * (timediff_t)1000;
 
   if(timeout_ms < 0)
-    return false;
+    return FALSE;
 
   return elapsed_ms >= timeout_ms;
 }
@@ -631,36 +631,35 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
 }
 
 #ifdef WOLFSSL_TLS13
-static size_t
-wssl_get_default_ciphers(bool tls13, char *buf, size_t size)
+static CURLcode
+wssl_add_default_ciphers(bool tls13, struct dynbuf *buf)
 {
-  size_t len = 0;
-  char *term = buf;
   int i;
   char *str;
-  size_t n;
 
   for(i = 0; (str = wolfSSL_get_cipher_list(i)); i++) {
+    size_t n;
     if((strncmp(str, "TLS13", 5) == 0) != tls13)
       continue;
 
-    n = strlen(str);
-    if(buf && len + n + 1 <= size) {
-      memcpy(buf + len, str, n);
-      term = buf + len + n;
-      *term = ':';
+    /* if there already is data in the string, add colon separator */
+    if(Curl_dyn_len(buf)) {
+      CURLcode result = Curl_dyn_addn(buf, ":", 1);
+      if(result)
+        return result;
     }
-    len += n + 1;
+
+    n = strlen(str);
+    if(Curl_dyn_addn(buf, str, n))
+      return CURLE_OUT_OF_MEMORY;
   }
 
-  if(buf)
-    *term = '\0';
-
-  return len > 0 ? len - 1 : 0;
+  return CURLE_OK;
 }
 #endif
 
-#if LIBWOLFSSL_VERSION_HEX < 0x04002000 /* 4.2.0 (2019) */
+/* 4.2.0 (2019) */
+#if LIBWOLFSSL_VERSION_HEX < 0x04002000 || !defined(OPENSSL_EXTRA)
 static int
 wssl_legacy_CTX_set_min_proto_version(WOLFSSL_CTX* ctx, int version)
 {
@@ -707,7 +706,7 @@ static CURLcode
 wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   int res;
-  char *ciphers, *curves;
+  char *curves;
   struct ssl_connect_data *connssl = cf->ctx;
   struct wolfssl_ctx *backend =
     (struct wolfssl_ctx *)connssl->backend;
@@ -798,50 +797,50 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
 #ifndef WOLFSSL_TLS13
-  ciphers = conn_config->cipher_list;
-  if(ciphers) {
-    if(!SSL_CTX_set_cipher_list(backend->ctx, ciphers)) {
-      failf(data, "failed setting cipher list: %s", ciphers);
-      return CURLE_SSL_CIPHER;
+  {
+    char *ciphers = conn_config->cipher_list;
+    if(ciphers) {
+      if(!SSL_CTX_set_cipher_list(backend->ctx, ciphers)) {
+        failf(data, "failed setting cipher list: %s", ciphers);
+        return CURLE_SSL_CIPHER;
+      }
+      infof(data, "Cipher selection: %s", ciphers);
     }
-    infof(data, "Cipher selection: %s", ciphers);
   }
 #else
+#define MAX_CIPHER_LEN 4096
   if(conn_config->cipher_list || conn_config->cipher_list13) {
     const char *ciphers12 = conn_config->cipher_list;
     const char *ciphers13 = conn_config->cipher_list13;
-
-    /* Set ciphers to a combination of ciphers_list and ciphers_list13.
-     * If cipher_list is not set use the default TLSv1.2 (1.1, 1.0) ciphers.
-     * If cipher_list13 is not set use the default TLSv1.3 ciphers. */
-    size_t len13 = ciphers13 ? strlen(ciphers13)
-        : wssl_get_default_ciphers(true, NULL, 0);
-    size_t len12 = ciphers12 ? strlen(ciphers12)
-        : wssl_get_default_ciphers(false, NULL, 0);
-
-    ciphers = malloc(len13 + 1 + len12 + 1);
-    if(!ciphers)
-      return CURLE_OUT_OF_MEMORY;
+    struct dynbuf c;
+    CURLcode result;
+    Curl_dyn_init(&c, MAX_CIPHER_LEN);
 
     if(ciphers13)
-      memcpy(ciphers, ciphers13, len13);
+      result = Curl_dyn_add(&c, ciphers13);
     else
-      wssl_get_default_ciphers(true, ciphers, len13 + 1);
-    ciphers[len13] = ':';
+      result = wssl_add_default_ciphers(TRUE, &c);
 
-    if(ciphers12)
-      memcpy(ciphers + len13 + 1, ciphers12, len12);
-    else
-      wssl_get_default_ciphers(false, ciphers + len13 + 1, len12 + 1);
-    ciphers[len13 + 1 + len12] = '\0';
+    if(!result) {
+      if(ciphers12) {
+        if(Curl_dyn_len(&c))
+          result = Curl_dyn_addn(&c, ":", 1);
+        if(!result)
+          result = Curl_dyn_add(&c, ciphers12);
+      }
+      else
+        result = wssl_add_default_ciphers(FALSE, &c);
+    }
+    if(result)
+      return result;
 
-    if(!SSL_CTX_set_cipher_list(backend->ctx, ciphers)) {
-      failf(data, "failed setting cipher list: %s", ciphers);
-      free(ciphers);
+    if(!SSL_CTX_set_cipher_list(backend->ctx, Curl_dyn_ptr(&c))) {
+      failf(data, "failed setting cipher list: %s", Curl_dyn_ptr(&c));
+      Curl_dyn_free(&c);
       return CURLE_SSL_CIPHER;
     }
-    infof(data, "Cipher selection: %s", ciphers);
-    free(ciphers);
+    infof(data, "Cipher selection: %s", Curl_dyn_ptr(&c));
+    Curl_dyn_free(&c);
   }
 #endif
 

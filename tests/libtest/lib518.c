@@ -368,7 +368,7 @@ static int test_rlimit(int keep_open)
   rlim2str(strbuff, sizeof(strbuff), num_open.rlim_max);
   fprintf(stderr, "%s file descriptors open\n", strbuff);
 
-#if !defined(HAVE_POLL_FINE) && !defined(USE_WINSOCK)
+#if !defined(HAVE_POLL) && !defined(USE_WINSOCK)
 
   /*
    * when using select() instead of poll() we cannot test

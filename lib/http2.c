@@ -993,11 +993,11 @@ static int push_promise(struct Curl_cfilter *cf,
     }
     DEBUGASSERT(stream);
 
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     rv = data->multi->push_cb(data, newhandle,
                               stream->push_headers_used, &heads,
                               data->multi->push_userp);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
 
     /* free the headers again */
     free_push_headers(stream);

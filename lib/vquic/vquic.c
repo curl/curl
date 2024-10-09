@@ -22,18 +22,6 @@
  *
  ***************************************************************************/
 
-/* WIP, experimental: use recvmmsg() on Linux
- * we have no configure check, yet
- * and also it is only available for _GNU_SOURCE, which
- * we do not use otherwise.
-#define HAVE_SENDMMSG
- */
-#if defined(HAVE_SENDMMSG)
-#define _GNU_SOURCE
-#include <sys/socket.h>
-#undef _GNU_SOURCE
-#endif
-
 #include "curl_setup.h"
 
 #ifdef HAVE_NETINET_UDP_H

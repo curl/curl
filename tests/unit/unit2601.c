@@ -209,6 +209,41 @@ static void check_bufq(size_t pool_spares,
   }
   fail_unless(nread == nwritten, "did not get the same out as put in");
 
+  /* CHECK bufq_unwrite: write a string repeatedly into the second chunk.
+   * bufq_unwrite() 1 byte. Read strings again and check for content.
+   * We had a bug that unwrite used the head chunk instead of tail, which
+   * did corrupt the read values. */
+  if(TRUE) {
+    const unsigned char buf[] = "0123456789--";
+    size_t roffset;
+    Curl_bufq_reset(&q);
+    while(Curl_bufq_len(&q) < chunk_size) {
+      n = Curl_bufq_write(&q, buf, sizeof(buf), &result);
+      fail_unless(n > 0 && (size_t)n == sizeof(buf), "write incomplete");
+      if(result)
+        break;
+    }
+    result = Curl_bufq_unwrite(&q, 1);
+    roffset = 0;
+    while(!Curl_bufq_is_empty(&q)) {
+      unsigned char rbuf[sizeof(buf)];
+      n = Curl_bufq_read(&q, rbuf, sizeof(rbuf), &result);
+      fail_unless(n > 0, "read should work");
+      if(result)
+        break;
+      if(n != sizeof(rbuf)) {
+        fail_unless(Curl_bufq_is_empty(&q), "should be last read");
+      }
+      if(memcmp(buf, rbuf, n)) {
+        fprintf(stderr, "at offset %zu expected '%.*s', got '%.*s'\n",
+                roffset, (int)n, buf, (int)n, rbuf);
+        fail("read buf content wrong");
+      }
+      roffset += n;
+    }
+    Curl_bufq_reset(&q);
+  }
+
   dump_bufq(&q, "at end of test");
   Curl_bufq_free(&q);
   if(pool_spares > 0)

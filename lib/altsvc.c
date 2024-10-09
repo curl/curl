@@ -94,6 +94,7 @@ static void altsvc_free(struct altsvc *as)
 
 static struct altsvc *altsvc_createid(const char *srchost,
                                       const char *dsthost,
+                                      size_t dlen, /* dsthost length */
                                       enum alpnid srcalpnid,
                                       enum alpnid dstalpnid,
                                       unsigned int srcport,
@@ -101,11 +102,9 @@ static struct altsvc *altsvc_createid(const char *srchost,
 {
   struct altsvc *as = calloc(1, sizeof(struct altsvc));
   size_t hlen;
-  size_t dlen;
   if(!as)
     return NULL;
   hlen = strlen(srchost);
-  dlen = strlen(dsthost);
   DEBUGASSERT(hlen);
   DEBUGASSERT(dlen);
   if(!hlen || !dlen) {
@@ -157,7 +156,8 @@ static struct altsvc *altsvc_create(char *srchost,
   enum alpnid srcalpnid = alpn2alpnid(srcalpn);
   if(!srcalpnid || !dstalpnid)
     return NULL;
-  return altsvc_createid(srchost, dsthost, srcalpnid, dstalpnid,
+  return altsvc_createid(srchost, dsthost, strlen(dsthost),
+                         srcalpnid, dstalpnid,
                          srcport, dstport);
 }
 
@@ -317,10 +317,8 @@ struct altsvcinfo *Curl_altsvc_init(void)
  */
 CURLcode Curl_altsvc_load(struct altsvcinfo *asi, const char *file)
 {
-  CURLcode result;
   DEBUGASSERT(asi);
-  result = altsvc_load(asi, file);
-  return result;
+  return altsvc_load(asi, file);
 }
 
 /*
@@ -492,8 +490,6 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                            unsigned short srcport)
 {
   const char *p = value;
-  size_t len;
-  char namebuf[MAX_ALTSVC_HOSTLEN] = "";
   char alpnbuf[MAX_ALTSVC_ALPNLEN] = "";
   struct altsvc *as;
   unsigned short dstport = srcport; /* the same by default */
@@ -523,6 +519,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
       p++;
       if(*p == '\"') {
         const char *dsthost = "";
+        size_t dstlen = 0; /* destination hostname length */
         const char *value_ptr;
         char option[32];
         unsigned long num;
@@ -537,32 +534,31 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
           const char *hostp = p;
           if(*p == '[') {
             /* pass all valid IPv6 letters - does not handle zone id */
-            len = strspn(++p, "0123456789abcdefABCDEF:.");
-            if(p[len] != ']')
+            dstlen = strspn(++p, "0123456789abcdefABCDEF:.");
+            if(p[dstlen] != ']')
               /* invalid host syntax, bail out */
               break;
             /* we store the IPv6 numerical address *with* brackets */
-            len += 2;
-            p = &p[len-1];
+            dstlen += 2;
+            p = &p[dstlen-1];
           }
           else {
             while(*p && (ISALNUM(*p) || (*p == '.') || (*p == '-')))
               p++;
-            len = p - hostp;
+            dstlen = p - hostp;
           }
-          if(!len || (len >= MAX_ALTSVC_HOSTLEN)) {
+          if(!dstlen || (dstlen >= MAX_ALTSVC_HOSTLEN)) {
             infof(data, "Excessive alt-svc hostname, ignoring.");
             valid = FALSE;
           }
           else {
-            memcpy(namebuf, hostp, len);
-            namebuf[len] = 0;
-            dsthost = namebuf;
+            dsthost = hostp;
           }
         }
         else {
           /* no destination name, use source host */
           dsthost = srchost;
+          dstlen = strlen(srchost);
         }
         if(*p == ':') {
           unsigned long port = 0;
@@ -637,7 +633,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                this is the first entry of the line. */
             altsvc_flush(asi, srcalpnid, srchost, srcport);
 
-          as = altsvc_createid(srchost, dsthost,
+          as = altsvc_createid(srchost, dsthost, dstlen,
                                srcalpnid, dstalpnid,
                                srcport, dstport);
           if(as) {
