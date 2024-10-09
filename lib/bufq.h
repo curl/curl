@@ -276,3 +276,5 @@ ssize_t Curl_bufq_write_pass(struct bufq *q,
                              CURLcode *err);
 
 #endif /* HEADER_CURL_BUFQ_H */
+
+// Root Layout and Protected Routes1
