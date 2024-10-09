@@ -30,7 +30,7 @@ encrypted, it is not protected against replays. An attacker can send
 your early data to the server again and the server would accept it.
 
 If your request contacts a public server and only retrieves a file, there
-may be no harm in that. If the first request orders a refridgerator
+may be no harm in that. If the first request orders a refrigerator
 for you, it is probably not a good idea to use early data for it. curl
 cannot deduce what the security implications of your requests actually
 are and make this decision for you.
