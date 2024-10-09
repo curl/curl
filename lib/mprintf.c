@@ -668,7 +668,7 @@ static int formatf(
   char work[BUFFSIZE];
 
   /* 'workend' points to the final buffer byte position, but with an extra
-     byte as margin to avoid the (false?) warning Coverity gives us
+     byte as margin to avoid the (FALSE?) warning Coverity gives us
      otherwise */
   char *workend = &work[sizeof(work) - 2];
 
