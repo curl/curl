@@ -1856,6 +1856,8 @@ gtls_connect_common(struct Curl_cfilter *cf,
 
   /* Finish connecting once the handshake is done */
   if(connssl->connecting_state == ssl_connect_3) {
+    gnutls_datum_t proto;
+    int rc;
     result = gtls_verifyserver(cf, data, backend->gtls.session);
     if(result)
       goto out;
@@ -1863,36 +1865,31 @@ gtls_connect_common(struct Curl_cfilter *cf,
     connssl->state = ssl_connection_complete;
     connssl->connecting_state = ssl_connect_1;
 
+    rc = gnutls_alpn_get_selected_protocol(backend->gtls.session, &proto);
+    if(rc) {  /* No ALPN from server */
+      proto.data = NULL;
+      proto.size = 0;
+    }
+
+    result = Curl_alpn_set_negotiated(cf, data, connssl,
+                                      proto.data, proto.size);
+    if(result)
+      goto out;
+
     if(connssl->earlydata_state == ssl_earlydata_sent) {
-      /* We already set the ALPN from the reused session */
-      DEBUGASSERT(connssl->alpn_negotiated);
       if(gnutls_session_get_flags(backend->gtls.session) &
          GNUTLS_SFLAGS_EARLY_DATA) {
         connssl->earlydata_state = ssl_earlydata_accepted;
-        infof(data, "Server accepted %zu bytes of early data",
+        infof(data, "Server accepted %zu bytes of TLS early data.",
               connssl->earlydata_skip);
       }
       else {
         connssl->earlydata_state = ssl_earlydata_rejected;
         if(!Curl_ssl_cf_is_proxy(cf))
           Curl_pgrsEarlyData(data, -(curl_off_t)connssl->earlydata_skip);
-        infof(data, "Server rejected early data, resending...");
+        infof(data, "Server rejected TLS early data.");
         connssl->earlydata_skip = 0;
       }
-    }
-    else if(connssl->alpn) {
-      /* We send the server ALPNs, see what it selected */
-      gnutls_datum_t proto;
-      int rc;
-
-      rc = gnutls_alpn_get_selected_protocol(backend->gtls.session, &proto);
-      if(rc == 0)
-        result = Curl_alpn_set_negotiated(cf, data, connssl,
-                                          proto.data, proto.size);
-      else
-        result = Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
-      if(result)
-        goto out;
     }
   }
 

@@ -2257,6 +2257,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
                                   const unsigned char *proto,
                                   size_t proto_len)
 {
+  CURLcode result = CURLE_OK;
   unsigned char *palpn =
 #ifndef CURL_DISABLE_PROXY
     (cf->conn->bits.tunnel_proxy && Curl_ssl_cf_is_proxy(cf)) ?
@@ -2266,8 +2267,38 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 #endif
     ;
 
-  Curl_safefree(connssl->alpn_negotiated);
-  if(proto && proto_len && !memchr(proto, '\0', proto_len)) {
+  if(connssl->alpn_negotiated) {
+    /* When we ask for a specific ALPN protocol, we need the confirmation
+     * of it by the server, as we have installed protocol handler and
+     * connection filter chain for exactly this protocol. */
+    if(!proto_len) {
+      failf(data, "ALPN: asked for '%s' from previous session, "
+            "but server did not confirm it. Refusing to continue.",
+            connssl->alpn_negotiated);
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    else if((strlen(connssl->alpn_negotiated) != proto_len) ||
+            memcmp(connssl->alpn_negotiated, proto, proto_len)) {
+      failf(data, "ALPN: asked for '%s' from previous session, but server "
+            "selected '%.*s'. Refusing to continue.",
+            connssl->alpn_negotiated, (int)proto_len, proto);
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
+    /* ALPN is exactly what we asked for, done. */
+    infof(data, "ALPN: server confirmed to use '%s'",
+          connssl->alpn_negotiated);
+    goto out;
+  }
+
+  if(proto && proto_len) {
+    if(memchr(proto, '\0', proto_len)) {
+      failf(data, "ALPN: server selected protocol contains NUL. "
+            "Refusing to continue.");
+      result = CURLE_SSL_CONNECT_ERROR;
+      goto out;
+    }
     connssl->alpn_negotiated = malloc(proto_len + 1);
     if(!connssl->alpn_negotiated)
       return CURLE_OUT_OF_MEMORY;
@@ -2315,7 +2346,7 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
   }
 
 out:
-  return CURLE_OK;
+  return result;
 }
 
 #endif /* USE_SSL */
