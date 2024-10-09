@@ -30,12 +30,8 @@ import re
 import shutil
 import socket
 import subprocess
-import sys
 from configparser import ConfigParser, ExtendedInterpolation
-from datetime import timedelta
 from typing import Optional
-
-import pytest
 
 from .certs import CertificateSpec, TestCA, Credentials
 from .ports import alloc_ports
@@ -71,9 +67,9 @@ class EnvConfig:
         if 'CURL' in os.environ:
             self.curl = os.environ['CURL']
         self.curl_props = {
-            'version': None,
-            'os': None,
-            'fullname': None,
+            'version': '',
+            'os': '',
+            'fullname': '',
             'features': [],
             'protocols': [],
             'libs': [],
@@ -87,9 +83,9 @@ class EnvConfig:
             assert False, f'{self.curl} -V failed with exit code: {p.returncode}'
         if p.stderr.startswith('WARNING:'):
             self.curl_is_debug = True
-        for l in p.stdout.splitlines(keepends=False):
-            if l.startswith('curl '):
-                m = re.match(r'^curl (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', l)
+        for line in p.stdout.splitlines(keepends=False):
+            if line.startswith('curl '):
+                m = re.match(r'^curl (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', line)
                 if m:
                     self.curl_props['fullname'] = m.group(0)
                     self.curl_props['version'] = m.group('version')
@@ -100,13 +96,13 @@ class EnvConfig:
                     self.curl_props['libs'] = [
                         re.sub(r'/.*', '', lib) for lib in self.curl_props['lib_versions']
                     ]
-            if l.startswith('Features: '):
+            if line.startswith('Features: '):
                 self.curl_props['features'] = [
-                    feat.lower() for feat in l[10:].split(' ')
+                    feat.lower() for feat in line[10:].split(' ')
                 ]
-            if l.startswith('Protocols: '):
+            if line.startswith('Protocols: '):
                 self.curl_props['protocols'] = [
-                    prot.lower() for prot in l[11:].split(' ')
+                    prot.lower() for prot in line[11:].split(' ')
                 ]
 
         self.ports = alloc_ports(port_specs={
@@ -181,7 +177,8 @@ class EnvConfig:
                     self._caddy_version = m.group(1)
                 else:
                     raise f'Unable to determine cadd version from: {p.stdout}'
-            except:
+            # TODO: specify specific exceptions here
+            except:  # noqa: E722
                 self.caddy = None
 
         self.vsftpd = self.config['vsftpd']['vsftpd']
@@ -201,7 +198,7 @@ class EnvConfig:
                     self._vsftpd_version = 'unknown'
                 else:
                     raise Exception(f'Unable to determine VsFTPD version from: {p.stderr}')
-            except Exception as e:
+            except Exception:
                 self.vsftpd = None
 
         self._tcpdump = shutil.which('tcpdump')
@@ -216,8 +213,8 @@ class EnvConfig:
                     log.error(f'{self.apxs} failed to query HTTPD_VERSION: {p}')
                 else:
                     self._httpd_version = p.stdout.strip()
-            except Exception as e:
-                log.error(f'{self.apxs} failed to run: {e}')
+            except Exception:
+                log.exception(f'{self.apxs} failed to run')
         return self._httpd_version
 
     def versiontuple(self, v):
@@ -244,13 +241,13 @@ class EnvConfig:
 
     def get_incomplete_reason(self) -> Optional[str]:
         if self.httpd is None or len(self.httpd.strip()) == 0:
-            return f'httpd not configured, see `--with-test-httpd=<path>`'
+            return 'httpd not configured, see `--with-test-httpd=<path>`'
         if not os.path.isfile(self.httpd):
             return f'httpd ({self.httpd}) not found'
         if not os.path.isfile(self.apachectl):
             return f'apachectl ({self.apachectl}) not found'
         if self.apxs is None:
-            return f"command apxs not found (commonly provided in apache2-dev)"
+            return "command apxs not found (commonly provided in apache2-dev)"
         if not os.path.isfile(self.apxs):
             return f"apxs ({self.apxs}) not found"
         return None
@@ -331,7 +328,7 @@ class Env:
         return 'unknown'
 
     @staticmethod
-    def curl_lib_version_at_least(libname: str, min_version) -> str:
+    def curl_lib_version_at_least(libname: str, min_version) -> bool:
         lversion = Env.curl_lib_version(libname)
         if lversion != 'unknown':
             return Env.CONFIG.versiontuple(min_version) <= \
@@ -566,7 +563,7 @@ class Env:
     def make_data_file(self, indir: str, fname: str, fsize: int,
                        line_length: int = 1024) -> str:
         if line_length < 11:
-            raise 'line_length less than 11 not supported'
+            raise RuntimeError('line_length less than 11 not supported')
         fpath = os.path.join(indir, fname)
         s10 = "0123456789"
         s = round((line_length / 10) + 1) * s10

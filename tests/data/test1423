@@ -30,7 +30,7 @@ file
 HTTP GET -o fname without Content-Disposition (empty file)
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/outfile%TESTNUMBER file://%PWD/%LOGDIR/outfile%TESTNUMBER
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/outfile%TESTNUMBER file://%FILE_PWD/%LOGDIR/outfile%TESTNUMBER
 </command>
 </client>
 

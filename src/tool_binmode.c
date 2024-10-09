@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_SETMODE
+#if defined(HAVE_SETMODE) || defined(HAVE__SETMODE)
 
 #ifdef HAVE_IO_H
 #  include <io.h>
@@ -42,6 +42,8 @@ void set_binmode(FILE *stream)
 #ifdef O_BINARY
 #  ifdef __HIGHC__
   _setmode(stream, O_BINARY);
+#  elif defined(HAVE__SETMODE)
+  (void)_setmode(fileno(stream), O_BINARY);
 #  else
   (void)setmode(fileno(stream), O_BINARY);
 #  endif
@@ -50,4 +52,4 @@ void set_binmode(FILE *stream)
 #endif
 }
 
-#endif /* HAVE_SETMODE */
+#endif /* HAVE_SETMODE || HAVE__SETMODE */

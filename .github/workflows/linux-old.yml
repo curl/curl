@@ -73,14 +73,14 @@ jobs:
           httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u4_amd64.deb
           dpkg -i libc6_*_amd64.deb
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - name: 'cmake build-only (out-of-tree, libssh2)'
         run: |
           mkdir bld-1
           cd bld-1
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON -DENABLE_WEBSOCKETS=ON
+            -DENABLE_ARES=OFF -DCURL_ZSTD=OFF -DCURL_USE_GSSAPI=OFF -DCURL_USE_LIBSSH2=ON -DCURL_USE_LIBSSH=OFF -DUSE_LIBRTMP=ON
           make install
           src/curl --disable --version
 
@@ -89,7 +89,7 @@ jobs:
           mkdir bld-cares
           cd bld-cares
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
-            -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_LIBRTMP=ON -DENABLE_WEBSOCKETS=ON \
+            -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
 
       - name: 'cmake build'
@@ -114,7 +114,7 @@ jobs:
           mkdir bld-am
           cd bld-am
           ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --with-librtmp --enable-websockets \
+            --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../install-am
 
       - name: 'autoconf build'

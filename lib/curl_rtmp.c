@@ -255,7 +255,7 @@ static CURLcode rtmp_connect(struct Curl_easy *data, bool *done)
     return CURLE_FAILED_INIT;
 
   /* Clients must send a periodic BytesReceived report to the server */
-  r->m_bSendCounter = true;
+  r->m_bSendCounter = TRUE;
 
   *done = TRUE;
   conn->recv[FIRSTSOCKET] = rtmp_recv;

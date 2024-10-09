@@ -38,7 +38,7 @@ from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult, NghttpxQ
 log = logging.getLogger(__name__)
 
 
-class ScoreCardException(Exception):
+class ScoreCardError(Exception):
     pass
 
 
@@ -67,7 +67,7 @@ class ScoreCard:
     def handshakes(self, proto: str) -> Dict[str, Any]:
         props = {}
         sample_size = 5
-        self.info(f'TLS Handshake\n')
+        self.info('TLS Handshake\n')
         for authority in [
             'curl.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
         ]:
@@ -78,7 +78,7 @@ class ScoreCard:
                 c_samples = []
                 hs_samples = []
                 errors = []
-                for i in range(sample_size):
+                for _ in range(sample_size):
                     curl = CurlClient(env=self.env, silent=self._silent_curl)
                     args = [
                         '--http3-only' if proto == 'h3' else '--http2',
@@ -125,8 +125,8 @@ class ScoreCard:
         samples = []
         errors = []
         profiles = []
-        self.info(f'single...')
-        for i in range(sample_size):
+        self.info('single...')
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False, with_profile=True)
@@ -152,8 +152,8 @@ class ScoreCard:
         errors = []
         profiles = []
         url = f'{url}?[0-{count - 1}]'
-        self.info(f'serial...')
-        for i in range(sample_size):
+        self.info('serial...')
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False, with_profile=True)
@@ -180,8 +180,8 @@ class ScoreCard:
         profiles = []
         max_parallel = self._download_parallel if self._download_parallel > 0 else count
         url = f'{url}?[0-{count - 1}]'
-        self.info(f'parallel...')
-        for i in range(sample_size):
+        self.info('parallel...')
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False,
@@ -214,7 +214,7 @@ class ScoreCard:
                                                    count=count)
             props['parallel'] = self.transfer_parallel(url=url, proto=proto,
                                                        count=count)
-        self.info(f'ok.\n')
+        self.info('ok.\n')
         return props
 
     def downloads(self, proto: str, count: int,
@@ -280,8 +280,8 @@ class ScoreCard:
         samples = []
         errors = []
         profiles = []
-        self.info(f'single...')
-        for i in range(sample_size):
+        self.info('single...')
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=proto,
                               with_headers=False, with_profile=True)
@@ -307,8 +307,8 @@ class ScoreCard:
         errors = []
         profiles = []
         url = f'{url}?id=[0-{count - 1}]'
-        self.info(f'serial...')
-        for i in range(sample_size):
+        self.info('serial...')
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=proto,
                               with_headers=False, with_profile=True)
@@ -335,8 +335,8 @@ class ScoreCard:
         profiles = []
         max_parallel = count
         url = f'{url}?id=[0-{count - 1}]'
-        self.info(f'parallel...')
-        for i in range(sample_size):
+        self.info('parallel...')
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=proto,
                               with_headers=False, with_profile=True,
@@ -371,7 +371,7 @@ class ScoreCard:
                                                  fpath=fpath, count=count)
             props['parallel'] = self.upload_parallel(url=url, proto=proto,
                                                      fpath=fpath, count=count)
-        self.info(f'ok.\n')
+        self.info('ok.\n')
         return props
 
     def uploads(self, proto: str, count: int,
@@ -433,7 +433,7 @@ class ScoreCard:
                '--parallel', '--parallel-max', str(max_parallel)
             ])
         self.info(f'{max_parallel}...')
-        for i in range(sample_size):
+        for _ in range(sample_size):
             curl = CurlClient(env=self.env, silent=self._silent_curl)
             r = curl.http_download(urls=[url], alpn_proto=proto, no_save=True,
                                    with_headers=False, with_profile=True,
@@ -443,8 +443,8 @@ class ScoreCard:
             else:
                 samples.append(count / r.duration.total_seconds())
                 non_200s = 0
-                for l in r.stdout.splitlines():
-                    if not l.startswith('200,'):
+                for line in r.stdout.splitlines():
+                    if not line.startswith('200,'):
                         non_200s += 1
                 if non_200s > 0:
                     errors.append(f'responses != 200: {non_200s}')
@@ -464,7 +464,7 @@ class ScoreCard:
         for m in [1, 6, 25, 50, 100, 300]:
             props[str(m)] = self.do_requests(url=url, proto=proto, count=count,
                                              max_parallel=m)
-        self.info(f'ok.\n')
+        self.info('ok.\n')
         return props
 
     def requests(self, proto: str, req_count) -> Dict[str, Any]:
@@ -515,7 +515,7 @@ class ScoreCard:
         if proto == 'h3':
             p['name'] = 'h3'
             if not self.env.have_h3_curl():
-                raise ScoreCardException('curl does not support HTTP/3')
+                raise ScoreCardError('curl does not support HTTP/3')
             for lib in ['ngtcp2', 'quiche', 'msh3', 'nghttp3']:
                 if self.env.curl_uses_lib(lib):
                     p['implementation'] = lib
@@ -523,7 +523,7 @@ class ScoreCard:
         elif proto == 'h2':
             p['name'] = 'h2'
             if not self.env.have_h2_curl():
-                raise ScoreCardException('curl does not support HTTP/2')
+                raise ScoreCardError('curl does not support HTTP/2')
             for lib in ['nghttp2', 'hyper']:
                 if self.env.curl_uses_lib(lib):
                     p['implementation'] = lib
@@ -534,10 +534,10 @@ class ScoreCard:
             p['implementation'] = 'hyper' if self.env.curl_uses_lib('hyper')\
                 else 'native'
         else:
-            raise ScoreCardException(f"unknown protocol: {proto}")
+            raise ScoreCardError(f"unknown protocol: {proto}")
 
         if 'implementation' not in p:
-            raise ScoreCardException(f'did not recognized {p} lib')
+            raise ScoreCardError(f'did not recognized {p} lib')
         p['version'] = Env.curl_lib_version(p['implementation'])
 
         score = {
@@ -599,7 +599,7 @@ class ScoreCard:
             m_names = {}
             mcol_width = 12
             mcol_sw = 17
-            for server, server_score in score['downloads'].items():
+            for server_score in score['downloads'].values():
                 for sskey, ssval in server_score.items():
                     if isinstance(ssval, str):
                         continue
@@ -612,7 +612,8 @@ class ScoreCard:
 
             print('Downloads')
             print(f'  {"Server":<8} {"Size":>8}', end='')
-            for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
+            for m in measures:
+                print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
             print(f' {"Errors":^20}')
 
             for server in score['downloads']:
@@ -620,7 +621,7 @@ class ScoreCard:
                     size_score = score['downloads'][server][size]
                     print(f'  {server:<8} {size:>8}', end='')
                     errors = []
-                    for key, val in size_score.items():
+                    for val in size_score.values():
                         if 'errors' in val:
                             errors.extend(val['errors'])
                     for m in measures:
@@ -643,7 +644,7 @@ class ScoreCard:
             m_names = {}
             mcol_width = 12
             mcol_sw = 17
-            for server, server_score in score['uploads'].items():
+            for server_score in score['uploads'].values():
                 for sskey, ssval in server_score.items():
                     if isinstance(ssval, str):
                         continue
@@ -656,7 +657,8 @@ class ScoreCard:
 
             print('Uploads')
             print(f'  {"Server":<8} {"Size":>8}', end='')
-            for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
+            for m in measures:
+                print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
             print(f' {"Errors":^20}')
 
             for server in score['uploads']:
@@ -664,7 +666,7 @@ class ScoreCard:
                     size_score = score['uploads'][server][size]
                     print(f'  {server:<8} {size:>8}', end='')
                     errors = []
-                    for key, val in size_score.items():
+                    for val in size_score.values():
                         if 'errors' in val:
                             errors.extend(val['errors'])
                     for m in measures:
@@ -692,18 +694,19 @@ class ScoreCard:
             for server in score['requests']:
                 server_score = score['requests'][server]
                 for sskey, ssval in server_score.items():
-                    if isinstance(ssval, str) or isinstance(ssval, int):
+                    if isinstance(ssval, (str, int)):
                         continue
                     if sskey not in sizes:
                         sizes.append(sskey)
-                    for mkey, mval in server_score[sskey].items():
+                    for mkey in server_score[sskey]:
                         if mkey not in measures:
                             measures.append(mkey)
                             m_names[mkey] = f'{mkey}'
 
             print('Requests, max in parallel')
             print(f'  {"Server":<8} {"Size":>6} {"Reqs":>6}', end='')
-            for m in measures: print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
+            for m in measures:
+                print(f' {m_names[m]:>{mcol_width}} {"[cpu/rss]":<{mcol_sw}}', end='')
             print(f' {"Errors":^10}')
 
             for server in score['requests']:
@@ -712,7 +715,7 @@ class ScoreCard:
                     count = score['requests'][server]['count']
                     print(f'  {server:<8} {size:>6} {count:>6}', end='')
                     errors = []
-                    for key, val in size_score.items():
+                    for val in size_score.values():
                         if 'errors' in val:
                             errors.extend(val['errors'])
                     for m in measures:
@@ -861,8 +864,8 @@ def main():
         else:
             card.print_score(score)
 
-    except ScoreCardException as ex:
-        sys.stderr.write(f"ERROR: {str(ex)}\n")
+    except ScoreCardError as ex:
+        sys.stderr.write(f"ERROR: {ex}\n")
         rv = 1
     except KeyboardInterrupt:
         log.warning("aborted")

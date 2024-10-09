@@ -23,7 +23,7 @@ d?????????    N U         U               N ???  N NN:NN asubdir
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test%TESTNUMBER.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test%TESTNUMBER.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP directory retrieval
@@ -37,7 +37,7 @@ SFTP directory retrieval
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-perl %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
+%PERL %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
 </postcheck>
 </verify>
 </testcase>

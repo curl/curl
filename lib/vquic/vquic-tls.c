@@ -173,10 +173,10 @@ static CURLcode Curl_wssl_init_ctx(struct curl_tls_ctx *ctx,
 
   /* give application a chance to interfere with SSL set up. */
   if(data->set.ssl.fsslctx) {
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     result = (*data->set.ssl.fsslctx)(data, ctx->wssl.ctx,
                                       data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       goto out;
