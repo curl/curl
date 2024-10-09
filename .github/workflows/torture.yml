@@ -51,7 +51,7 @@ jobs:
         build:
           - name: 'OpenSSL torture !FTP'
             install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
-            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON -DENABLE_WEBSOCKETS=ON
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=25 !FTP
           - name: 'OpenSSL torture FTP'
             install: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
@@ -64,7 +64,7 @@ jobs:
           python3 -m pip install --break-system-packages impacket
         name: 'install prereqs'
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - run: |
           cmake -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
