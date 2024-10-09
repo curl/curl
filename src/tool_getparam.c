@@ -390,7 +390,7 @@ void parse_cert_parameter(const char *cert_parameter,
   param_place = cert_parameter;
   while(*param_place) {
     span = strcspn(param_place, ":\\");
-    strncpy(certname_place, param_place, span);
+    memcpy(certname_place, param_place, span);
     param_place += span;
     certname_place += span;
     /* we just ate all the non-special chars. now we are on either a special
@@ -944,7 +944,7 @@ static ParameterError set_rate(struct GlobalConfig *global,
   if(numlen > sizeof(number) -1)
     return PARAM_NUMBER_TOO_LARGE;
 
-  strncpy(number, nextarg, numlen);
+  memcpy(number, nextarg, numlen);
   number[numlen] = 0;
   err = str2unum(&denominator, number);
   if(err)
