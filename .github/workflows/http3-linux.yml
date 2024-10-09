@@ -50,9 +50,9 @@ env:
   gnutls-version: 3.8.7
   wolfssl-version: master
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
-  nghttp3-version: 1.5.0
+  nghttp3-version: 1.6.0
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
-  ngtcp2-version: 1.7.0
+  ngtcp2-version: 1.8.0
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
   nghttp2-version: 1.62.1
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
@@ -266,18 +266,21 @@ jobs:
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-openssl=$HOME/quictls/build
+
           - name: gnutls
             configure: >-
               PKG_CONFIG_PATH="$HOME/gnutls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/gnutls/build/lib"
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-gnutls=$HOME/gnutls/build
+
           - name: wolfssl
             configure: >-
               PKG_CONFIG_PATH="$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/wolfssl/build/lib"
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-wolfssl=$HOME/wolfssl/build
+
           - name: openssl-quic
             configure: >-
               PKG_CONFIG_PATH="$HOME/openssl3/build/lib64/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/build/lib64"
@@ -285,6 +288,7 @@ jobs:
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-openssl=$HOME/openssl3/build --with-openssl-quic
               --with-nghttp3=$HOME/nghttp3/build
+
           - name: quiche
             configure: >-
               LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
@@ -396,7 +400,7 @@ jobs:
           cache-name: cache-quiche
         with:
           path: /home/runner/quiche
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-quiche-${{ env.quiche-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quiche-version }}
 
       - if: matrix.build.name == 'quiche' && steps.cache-quiche.outputs.cache-hit != 'true'
         run: |
@@ -442,7 +446,7 @@ jobs:
           sudo make install
         name: 'install mod_h2'
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - run: |
           sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
@@ -465,7 +469,7 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
 
-      - run: pytest -v tests/http
+      - run: make pytest-ci
         name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
