@@ -29,6 +29,7 @@
  */
 
 #include "test.h"
+#include "testtrace.h"
 #include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
@@ -36,18 +37,6 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 #define DNS_TIMEOUT 1
-
-static int debug_callback(CURL *curl, curl_infotype info, char *msg,
-                          size_t len, void *ptr)
-{
-  (void)curl;
-  (void)ptr;
-
-  if(info == CURLINFO_TEXT)
-    fprintf(stderr, "debug: %.*s", (int) len, msg);
-
-  return 0;
-}
 
 static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
 {
@@ -64,9 +53,13 @@ static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
 
   easy_setopt(curls, CURLOPT_URL, URL);
   easy_setopt(curls, CURLOPT_RESOLVE, resolve_list);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, debug_callback);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1);
   easy_setopt(curls, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
+
+  libtest_debug_config.nohex = 1;
+  libtest_debug_config.tracetime = 1;
+  easy_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
 
   multi_add_handle(m, curls);
   multi_perform(m, &still_running);
@@ -127,6 +120,7 @@ CURLcode test(char *URL)
   start_test_timing();
 
   global_init(CURL_GLOBAL_ALL);
+  curl_global_trace("all");
   multi_init(multi);
 
   for(i = 1; i <= count; i++) {
@@ -137,6 +131,7 @@ CURLcode test(char *URL)
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
     if(res != CURLE_OK) {
+      fprintf(stderr, "request %s failed with %d\n", target_url, res);
       goto test_cleanup;
     }
 
