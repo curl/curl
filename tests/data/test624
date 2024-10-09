@@ -38,7 +38,7 @@ Test data
 for ssh upload test
 </upload>
 <postcheck>
-perl %SRCDIR/libtest/test610.pl move %PWD/%LOGDIR/test%TESTNUMBER.dir/upload.%TESTNUMBER %PWD/%LOGDIR/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test610.pl move %PWD/%LOGDIR/test%TESTNUMBER.dir/upload.%TESTNUMBER %PWD/%LOGDIR/upload.%TESTNUMBER rmdir %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
 </verify>
 </testcase>

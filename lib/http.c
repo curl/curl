@@ -1974,11 +1974,8 @@ static CURLcode set_reader(struct Curl_easy *data, Curl_HttpReq httpreq)
 
   switch(httpreq) {
   case HTTPREQ_PUT: /* Let's PUT the data to the server! */
-    if(!postsize)
-      result = Curl_creader_set_null(data);
-    else
-      result = Curl_creader_set_fread(data, postsize);
-    return result;
+    return postsize ? Curl_creader_set_fread(data, postsize) :
+      Curl_creader_set_null(data);
 
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   case HTTPREQ_POST_FORM:

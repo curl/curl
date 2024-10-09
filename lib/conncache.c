@@ -163,7 +163,7 @@ int Curl_cpool_init(struct cpool *cpool,
   cpool->idata = curl_easy_init();
   if(!cpool->idata)
     return 1; /* bad */
-  cpool->idata->state.internal = true;
+  cpool->idata->state.internal = TRUE;
   /* TODO: this is quirky. We need an internal handle for certain
    * operations, but we do not add it to the multi (if there is one).
    * But we give it the multi so that socket event operations can work.
@@ -172,7 +172,7 @@ int Curl_cpool_init(struct cpool *cpool,
   cpool->idata->multi = multi;
  #ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
-    cpool->idata->set.verbose = true;
+    cpool->idata->set.verbose = TRUE;
 #endif
 
   cpool->disconnect_cb = disconnect_cb;
@@ -329,6 +329,9 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    "limit of %zu", oldest_idle->connection_id,
                    Curl_llist_count(&bundle->conns), dest_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
+
+      /* in case the bundle was destroyed in disconnect, look it up again */
+      bundle = cpool_find_bundle(cpool, conn);
     }
     if(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
       result = CPOOL_LIMIT_DEST;

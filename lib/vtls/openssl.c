@@ -916,7 +916,7 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
   if(master_key_length <= 0)
     return;
 
-  *keylog_done = true;
+  *keylog_done = TRUE;
   Curl_tls_keylog_write("CLIENT_RANDOM", client_random,
                         master_key, master_key_length);
 }
@@ -3004,7 +3004,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
   CURLcode result = CURLE_OK;
   HCERTSTORE hStore;
 
-  *imported = false;
+  *imported = FALSE;
 
   hStore = CertOpenSystemStoreA(0, name);
   if(hStore) {
@@ -3091,12 +3091,12 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
           }
           else {
             DWORD i;
-            bool found = false;
+            bool found = FALSE;
 
             for(i = 0; i < enhkey_usage->cUsageIdentifier; ++i) {
               if(!strcmp("1.3.6.1.5.5.7.3.1" /* OID server auth */,
                          enhkey_usage->rgpszUsageIdentifier[i])) {
-                found = true;
+                found = TRUE;
                 break;
               }
             }
@@ -3122,7 +3122,7 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
         infof(data, "SSL: Imported cert");
 #endif
-        *imported = true;
+        *imported = TRUE;
       }
       X509_free(x509);
     }
@@ -3154,8 +3154,8 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   const char * const ssl_capath = conn_config->CApath;
   const char * const ssl_crlfile = ssl_config->primary.CRLfile;
   const bool verifypeer = conn_config->verifypeer;
-  bool imported_native_ca = false;
-  bool imported_ca_info_blob = false;
+  bool imported_native_ca = FALSE;
+  bool imported_ca_info_blob = FALSE;
 
   CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
               ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
@@ -3176,14 +3176,14 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
       };
       size_t i;
       for(i = 0; i < ARRAYSIZE(storeNames); ++i) {
-        bool imported = false;
+        bool imported = FALSE;
         result = import_windows_cert_store(data, storeNames[i], store,
                                            &imported);
         if(result)
           return result;
         if(imported) {
           infof(data, "successfully imported Windows %s store", storeNames[i]);
-          imported_native_ca = true;
+          imported_native_ca = TRUE;
         }
         else
           infof(data, "error importing Windows %s store, continuing anyway",
@@ -3198,7 +3198,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
         return result;
       }
       else {
-        imported_ca_info_blob = true;
+        imported_ca_info_blob = TRUE;
         infof(data, "successfully imported CA certificate blob");
       }
     }
@@ -3795,10 +3795,10 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return result;
       octx->x509_store_setup = TRUE;
     }
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     result = (*data->set.ssl.fsslctx)(data, octx->ssl_ctx,
                                       data->set.ssl.fsslctxp);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     if(result) {
       failf(data, "error signaled by ssl ctx callback");
       return result;

@@ -210,6 +210,52 @@ static CURLcode protocol2num(const char *str, curl_prot_t *val)
   return CURLE_OK;
 }
 
+static CURLcode httpauth(struct Curl_easy *data, bool proxy, va_list param)
+{
+  unsigned long auth = va_arg(param, unsigned long);
+
+  if(auth != CURLAUTH_NONE) {
+    int bitcheck = 0;
+    bool authbits = FALSE;
+    /* the DIGEST_IE bit is only used to set a special marker, for all the
+       rest we need to handle it as normal DIGEST */
+    bool iestyle = !!(auth & CURLAUTH_DIGEST_IE);
+    if(proxy)
+      data->state.authproxy.iestyle = iestyle;
+    else
+      data->state.authhost.iestyle = iestyle;
+
+    if(auth & CURLAUTH_DIGEST_IE) {
+      auth |= CURLAUTH_DIGEST; /* set standard digest bit */
+      auth &= ~CURLAUTH_DIGEST_IE; /* unset ie digest bit */
+    }
+
+    /* switch off bits we cannot support */
+#ifndef USE_NTLM
+    auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
+#endif
+#ifndef USE_SPNEGO
+    auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without GSS-API
+                                    or SSPI */
+#endif
+
+    /* check if any auth bit lower than CURLAUTH_ONLY is still set */
+    while(bitcheck < 31) {
+      if(auth & (1UL << bitcheck++)) {
+        authbits = TRUE;
+        break;
+      }
+    }
+    if(!authbits)
+      return CURLE_NOT_BUILT_IN; /* no supported types left! */
+  }
+  if(proxy)
+    data->set.proxyauth = auth;
+  else
+    data->set.httpauth = auth;
+  return CURLE_OK;
+}
+
 /*
  * Do not make Curl_vsetopt() static: it is called from
  * packages/OS400/ccsidcurl.c.
@@ -1029,52 +1075,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 #endif
 
   case CURLOPT_HTTPAUTH:
-    /*
-     * Set HTTP Authentication type BITMASK.
-     */
-  {
-    int bitcheck;
-    bool authbits;
-    unsigned long auth = va_arg(param, unsigned long);
-
-    if(auth == CURLAUTH_NONE) {
-      data->set.httpauth = auth;
-      break;
-    }
-
-    /* the DIGEST_IE bit is only used to set a special marker, for all the
-       rest we need to handle it as normal DIGEST */
-    data->state.authhost.iestyle = !!(auth & CURLAUTH_DIGEST_IE);
-
-    if(auth & CURLAUTH_DIGEST_IE) {
-      auth |= CURLAUTH_DIGEST; /* set standard digest bit */
-      auth &= ~CURLAUTH_DIGEST_IE; /* unset ie digest bit */
-    }
-
-    /* switch off bits we cannot support */
-#ifndef USE_NTLM
-    auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-#endif
-#ifndef USE_SPNEGO
-    auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
-                                    GSS-API or SSPI */
-#endif
-
-    /* check if any auth bit lower than CURLAUTH_ONLY is still set */
-    bitcheck = 0;
-    authbits = FALSE;
-    while(bitcheck < 31) {
-      if(auth & (1UL << bitcheck++)) {
-        authbits = TRUE;
-        break;
-      }
-    }
-    if(!authbits)
-      return CURLE_NOT_BUILT_IN; /* no supported types left! */
-
-    data->set.httpauth = auth;
-  }
-  break;
+    return httpauth(data, FALSE, param);
 
   case CURLOPT_CUSTOMREQUEST:
     /*
@@ -1108,51 +1109,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     break;
 
   case CURLOPT_PROXYAUTH:
-    /*
-     * Set HTTP Authentication type BITMASK.
-     */
-  {
-    int bitcheck;
-    bool authbits;
-    unsigned long auth = va_arg(param, unsigned long);
-
-    if(auth == CURLAUTH_NONE) {
-      data->set.proxyauth = auth;
-      break;
-    }
-
-    /* the DIGEST_IE bit is only used to set a special marker, for all the
-       rest we need to handle it as normal DIGEST */
-    data->state.authproxy.iestyle = !!(auth & CURLAUTH_DIGEST_IE);
-
-    if(auth & CURLAUTH_DIGEST_IE) {
-      auth |= CURLAUTH_DIGEST; /* set standard digest bit */
-      auth &= ~CURLAUTH_DIGEST_IE; /* unset ie digest bit */
-    }
-    /* switch off bits we cannot support */
-#ifndef USE_NTLM
-    auth &= ~CURLAUTH_NTLM;    /* no NTLM support */
-#endif
-#ifndef USE_SPNEGO
-    auth &= ~CURLAUTH_NEGOTIATE; /* no Negotiate (SPNEGO) auth without
-                                    GSS-API or SSPI */
-#endif
-
-    /* check if any auth bit lower than CURLAUTH_ONLY is still set */
-    bitcheck = 0;
-    authbits = FALSE;
-    while(bitcheck < 31) {
-      if(auth & (1UL << bitcheck++)) {
-        authbits = TRUE;
-        break;
-      }
-    }
-    if(!authbits)
-      return CURLE_NOT_BUILT_IN; /* no supported types left! */
-
-    data->set.proxyauth = auth;
-  }
-  break;
+    return httpauth(data, TRUE, param);
 
   case CURLOPT_PROXY:
     /*
@@ -3205,22 +3162,21 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     plen = strlen(argptr);
     if(plen > CURL_MAX_INPUT_LENGTH) {
       data->set.tls_ech = CURLECH_DISABLE;
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      return result;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
     /* set tls_ech flag value, preserving CLA_CFG bit */
-    if(plen == 5 && !strcmp(argptr, "false"))
-      data->set.tls_ech = CURLECH_DISABLE
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
-    else if(plen == 6 && !strcmp(argptr, "grease"))
-      data->set.tls_ech = CURLECH_GREASE
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
-    else if(plen == 4 && !strcmp(argptr, "true"))
-      data->set.tls_ech = CURLECH_ENABLE
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
-    else if(plen == 4 && !strcmp(argptr, "hard"))
-      data->set.tls_ech = CURLECH_HARD
-                          | (data->set.tls_ech & CURLECH_CLA_CFG);
+    if(!strcmp(argptr, "false"))
+      data->set.tls_ech = CURLECH_DISABLE |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(!strcmp(argptr, "grease"))
+      data->set.tls_ech = CURLECH_GREASE |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(!strcmp(argptr, "true"))
+      data->set.tls_ech = CURLECH_ENABLE |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
+    else if(!strcmp(argptr, "hard"))
+      data->set.tls_ech = CURLECH_HARD |
+        (data->set.tls_ech & CURLECH_CLA_CFG);
     else if(plen > 5 && !strncmp(argptr, "ecl:", 4)) {
       result = Curl_setstropt(&data->set.str[STRING_ECH_CONFIG], argptr + 4);
       if(result)
