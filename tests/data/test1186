@@ -32,7 +32,7 @@ Multipart formposting with backslash-escaping filename containing '"'
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape -F "file=@\"%LOGDIR/test%TESTNUMBER\\\".txt\";type=mo/foo;filename=\"test%TESTNUMBER\\\".txt\"" -F 'file2=@"%LOGDIR/test%TESTNUMBER\".txt"' -F 'file3=@"%LOGDIR/test%TESTNUMBER\".txt";type=m/f,"%LOGDIR/test%TESTNUMBER\".txt"'
 </command>
 <precheck>
-perl -e "print 'Test requires a system supporting double quotes in file names' if ($^O eq 'msys');"
+%PERL -e "print 'Test requires a system supporting double quotes in file names' if ($^O eq 'msys');"
 </precheck>
 # We create this file before the command is invoked!
 <file name=%LOGDIR/test%TESTNUMBER".txt>

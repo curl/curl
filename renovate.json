@@ -49,7 +49,7 @@
     {
       "customType": "regex",
       "fileMatch": [
-        "^.github/scripts/VERSIONS$"
+        ".circleci/config.yml"
       ],
       "matchStrings": [
         "# renovate: datasource=(?<datasource>.*?) depName=(?<depName>.*?)( versioning=(?<versioning>.*?))?( extractVersion=(?<extractVersion>.+?))?( registryUrl=(?<registryUrl>.*?))?\\s.*?_VER=(?<currentValue>.*)\\s"

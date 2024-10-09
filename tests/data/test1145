@@ -18,6 +18,8 @@ file:// bad host
 </name>
 # This command should not succeed since we only accept
 # file:/// file://localhost/ file://127.0.0.1/
+# Pass %PWD instead of %FILE_PWD to trigger the expected
+# error code with native Windows curl.
 <command>
 file://bad-host%PWD/%LOGDIR/test%TESTNUMBER.txt
 </command>

@@ -610,19 +610,14 @@ static CURLUcode ipv6_parse(struct Curl_URL *u, char *hostname,
     /* hostname is fine */
   }
 
-  /* Check the IPv6 address. */
+  /* Normalize the IPv6 address */
   {
     char dest[16]; /* fits a binary IPv6 address */
-    char norm[MAX_IPADR_LEN];
     hostname[hlen] = 0; /* end the address there */
     if(1 != Curl_inet_pton(AF_INET6, hostname, dest))
       return CURLUE_BAD_IPV6;
-
-    /* check if it can be done shorter */
-    if(Curl_inet_ntop(AF_INET6, dest, norm, sizeof(norm)) &&
-       (strlen(norm) < hlen)) {
-      strcpy(hostname, norm);
-      hlen = strlen(norm);
+    if(Curl_inet_ntop(AF_INET6, dest, hostname, hlen)) {
+      hlen = strlen(hostname); /* might be shorter now */
       hostname[hlen + 1] = 0;
     }
     hostname[hlen] = ']'; /* restore ending bracket */

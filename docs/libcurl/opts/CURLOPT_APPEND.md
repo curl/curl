@@ -10,6 +10,7 @@ See-also:
   - CURLOPT_UPLOAD (3)
 Protocol:
   - FTP
+  - SFTP
 Added-in: 7.17.0
 ---
 

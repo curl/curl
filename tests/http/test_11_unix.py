@@ -28,6 +28,8 @@ import logging
 import os
 import socket
 from threading import Thread
+from typing import Generator
+
 import pytest
 
 from testenv import Env, CurlClient
@@ -40,6 +42,7 @@ class UDSFaker:
     def __init__(self, path):
         self._uds_path = path
         self._done = False
+        self._socket = None
 
     @property
     def path(self):
@@ -69,7 +72,7 @@ class UDSFaker:
             try:
                 c, client_address = self._socket.accept()
                 try:
-                    data = c.recv(16)
+                    c.recv(16)
                     c.sendall("""HTTP/1.1 200 Ok
 Server: UdsFaker
 Content-Type: application/json
@@ -88,7 +91,7 @@ Content-Length: 19
 class TestUnix:
 
     @pytest.fixture(scope="class")
-    def uds_faker(self, env: Env) -> UDSFaker:
+    def uds_faker(self, env: Env) -> Generator[UDSFaker, None, None]:
         uds_path = os.path.join(env.gen_dir, 'uds_11.sock')
         faker = UDSFaker(path=uds_path)
         faker.start()
@@ -106,7 +109,7 @@ class TestUnix:
         r.check_response(count=1, http_status=200)
 
     # download https: via Unix socket
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_11_02_unix_connect_http(self, env: Env, httpd, uds_faker, repeat):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'

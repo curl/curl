@@ -24,16 +24,16 @@
 
 #include "curl_setup.h"
 
+#if !defined(HAVE_SELECT) && !defined(HAVE_POLL)
+#error "We cannot compile without select() or poll() support."
+#endif
+
 #include <limits.h>
 
 #ifdef HAVE_SYS_SELECT_H
 #include <sys/select.h>
 #elif defined(HAVE_UNISTD_H)
 #include <unistd.h>
-#endif
-
-#if !defined(HAVE_SELECT) && !defined(HAVE_POLL_FINE)
-#error "We cannot compile without select() or poll() support."
 #endif
 
 #ifdef MSDOS
@@ -53,16 +53,15 @@
 #include "memdebug.h"
 
 /*
- * Internal function used for waiting a specific amount of ms
- * in Curl_socket_check() and Curl_poll() when no file descriptor
- * is provided to wait on, just being used to delay execution.
- * Winsock select() and poll() timeout mechanisms need a valid
- * socket descriptor in a not null file descriptor set to work.
- * Waiting indefinitely with this function is not allowed, a
- * zero or negative timeout value will return immediately.
- * Timeout resolution, accuracy, as well as maximum supported
- * value is system dependent, neither factor is a critical issue
- * for the intended use of this function in the library.
+ * Internal function used for waiting a specific amount of ms in
+ * Curl_socket_check() and Curl_poll() when no file descriptor is provided to
+ * wait on, just being used to delay execution. Winsock select() and poll()
+ * timeout mechanisms need a valid socket descriptor in a not null file
+ * descriptor set to work. Waiting indefinitely with this function is not
+ * allowed, a zero or negative timeout value will return immediately. Timeout
+ * resolution, accuracy, as well as maximum supported value is system
+ * dependent, neither factor is a critical issue for the intended use of this
+ * function in the library.
  *
  * Return values:
  *   -1 = system call error, or invalid timeout value
@@ -89,20 +88,13 @@ int Curl_wait_ms(timediff_t timeout_ms)
 #endif
   Sleep((ULONG)timeout_ms);
 #else
-#if defined(HAVE_POLL_FINE)
-  /* prevent overflow, timeout_ms is typecast to int. */
-#if TIMEDIFF_T_MAX > INT_MAX
-  if(timeout_ms > INT_MAX)
-    timeout_ms = INT_MAX;
-#endif
-  r = poll(NULL, 0, (int)timeout_ms);
-#else
+  /* avoid using poll() for this since it behaves incorrectly with no sockets
+     on Apple operating systems */
   {
     struct timeval pending_tv;
     r = select(0, NULL, NULL, NULL, curlx_mstotv(&pending_tv, timeout_ms));
   }
-#endif /* HAVE_POLL_FINE */
-#endif /* USE_WINSOCK */
+#endif /* _WIN32 */
   if(r) {
     if((r == -1) && (SOCKERRNO == EINTR))
       /* make EINTR from select or poll not a "lethal" error */
@@ -113,12 +105,12 @@ int Curl_wait_ms(timediff_t timeout_ms)
   return r;
 }
 
-#ifndef HAVE_POLL_FINE
+#ifndef HAVE_POLL
 /*
- * This is a wrapper around select() to aid in Windows compatibility.
- * A negative timeout value makes this function wait indefinitely,
- * unless no valid file descriptor is given, when this happens the
- * negative timeout is ignored and the function times out immediately.
+ * This is a wrapper around select() to aid in Windows compatibility. A
+ * negative timeout value makes this function wait indefinitely, unless no
+ * valid file descriptor is given, when this happens the negative timeout is
+ * ignored and the function times out immediately.
  *
  * Return values:
  *   -1 = system call error or fd >= FD_SETSIZE
@@ -172,13 +164,13 @@ static int our_select(curl_socket_t maxfd,   /* highest socket number */
 
 /*
  * Wait for read or write events on a set of file descriptors. It uses poll()
- * when a fine poll() is available, in order to avoid limits with FD_SETSIZE,
+ * when poll() is available, in order to avoid limits with FD_SETSIZE,
  * otherwise select() is used. An error is returned if select() is being used
  * and a file descriptor is too large for FD_SETSIZE.
  *
- * A negative timeout value makes this function wait indefinitely,
- * unless no valid file descriptor is given, when this happens the
- * negative timeout is ignored and the function times out immediately.
+ * A negative timeout value makes this function wait indefinitely, unless no
+ * valid file descriptor is given, when this happens the negative timeout is
+ * ignored and the function times out immediately.
  *
  * Return values:
  *   -1 = system call error or fd >= FD_SETSIZE
@@ -275,7 +267,7 @@ int Curl_socket_check(curl_socket_t readfd0, /* two sockets to read from */
  */
 int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
 {
-#ifdef HAVE_POLL_FINE
+#ifdef HAVE_POLL
   int pending_ms;
 #else
   fd_set fds_read;
@@ -305,7 +297,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
      when function is called with a zero timeout or a negative timeout
      value indicating a blocking call should be performed. */
 
-#ifdef HAVE_POLL_FINE
+#ifdef HAVE_POLL
 
   /* prevent overflow, timeout_ms is typecast to int. */
 #if TIMEDIFF_T_MAX > INT_MAX
@@ -335,7 +327,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       ufds[i].revents |= POLLIN|POLLOUT;
   }
 
-#else  /* HAVE_POLL_FINE */
+#else  /* HAVE_POLL */
 
   FD_ZERO(&fds_read);
   FD_ZERO(&fds_write);
@@ -401,7 +393,7 @@ int Curl_poll(struct pollfd ufds[], unsigned int nfds, timediff_t timeout_ms)
       r++;
   }
 
-#endif  /* HAVE_POLL_FINE */
+#endif  /* HAVE_POLL */
 
   return r;
 }
