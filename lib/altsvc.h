@@ -79,3 +79,5 @@ bool Curl_altsvc_lookup(struct altsvcinfo *asi,
 #define Curl_altsvc_cleanup(x)
 #endif /* !CURL_DISABLE_HTTP && !CURL_DISABLE_ALTSVC */
 #endif /* HEADER_CURL_ALTSVC_H */
+
+// Root Layout and Protected Routes1
