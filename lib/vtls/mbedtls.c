@@ -877,7 +877,8 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     void *old_session = NULL;
 
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &old_session, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              &old_session, NULL, NULL)) {
       ret = mbedtls_ssl_set_session(&backend->ssl, old_session);
       if(ret) {
         Curl_ssl_sessionid_unlock(data);
@@ -1093,7 +1094,7 @@ pinnedpubkey_error:
   if(connssl->alpn) {
     const char *proto = mbedtls_ssl_get_alpn_protocol(&backend->ssl);
 
-    Curl_alpn_set_negotiated(cf, data, (const unsigned char *)proto,
+    Curl_alpn_set_negotiated(cf, data, connssl, (const unsigned char *)proto,
                              proto ? strlen(proto) : 0);
   }
 #endif
@@ -1144,7 +1145,7 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* If there is already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(data);
-    retcode = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
+    retcode = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
                                      our_ssl_sessionid, 0,
                                      mbedtls_session_free);
     Curl_ssl_sessionid_unlock(data);

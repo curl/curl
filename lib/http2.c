@@ -789,8 +789,11 @@ static ssize_t send_callback(nghttp2_session *h2,
   (void)flags;
   DEBUGASSERT(data);
 
-  nwritten = Curl_bufq_write_pass(&ctx->outbufq, buf, blen,
-                                  nw_out_writer, cf, &result);
+  if(!cf->connected)
+    nwritten = Curl_bufq_write(&ctx->outbufq, buf, blen, &result);
+  else
+    nwritten = Curl_bufq_write_pass(&ctx->outbufq, buf, blen,
+                                    nw_out_writer, cf, &result);
   if(nwritten < 0) {
     if(result == CURLE_AGAIN) {
       ctx->nw_out_blocked = 1;
@@ -1898,6 +1901,11 @@ out:
                 nghttp2_strerror(rv), rv);
     return CURLE_SEND_ERROR;
   }
+  /* Defer flushing during the connect phase so that the SETTINGS and
+   * other initial frames are sent together with the first request.
+   * Unless we are 'connect_only' where the request will never come. */
+  if(!cf->connected && !cf->conn->connect_only)
+    return CURLE_OK;
   return nw_out_flush(cf, data);
 }
 
@@ -2439,6 +2447,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   struct cf_h2_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
   struct cf_call_data save;
+  bool first_time = FALSE;
 
   if(cf->connected) {
     *done = TRUE;
@@ -2460,11 +2469,14 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
     result = cf_h2_ctx_open(cf, data);
     if(result)
       goto out;
+    first_time = TRUE;
   }
 
-  result = h2_progress_ingress(cf, data, H2_CHUNK_SIZE);
-  if(result)
-    goto out;
+  if(!first_time) {
+    result = h2_progress_ingress(cf, data, H2_CHUNK_SIZE);
+    if(result)
+      goto out;
+  }
 
   /* Send out our SETTINGS and ACKs and such. If that blocks, we
    * have it buffered and  can count this filter as being connected */

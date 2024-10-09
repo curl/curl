@@ -112,6 +112,11 @@ curl_easy_header(3) instead. See CURLINFO_CONTENT_TYPE(3)
 
 List of all known cookies. See CURLINFO_COOKIELIST(3)
 
+## CURLINFO_EARLYDATA_SENT_T
+
+Amount of TLS early data sent (in number of bytes) when
+CURLSSLOPT_EARLYDATA is enabled.
+
 ## CURLINFO_EFFECTIVE_METHOD
 
 Last used HTTP method. See CURLINFO_EFFECTIVE_METHOD(3)

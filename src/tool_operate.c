@@ -1932,6 +1932,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             long mask =
               (config->ssl_allow_beast ?
                CURLSSLOPT_ALLOW_BEAST : 0) |
+              (config->ssl_allow_earlydata ?
+               CURLSSLOPT_EARLYDATA : 0) |
               (config->ssl_no_revoke ?
                CURLSSLOPT_NO_REVOKE : 0) |
               (config->ssl_revoke_best_effort ?

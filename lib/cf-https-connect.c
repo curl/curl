@@ -174,6 +174,7 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   CURLcode result = CURLE_OK;
+  int reply_ms;
 
   DEBUGASSERT(winner->cf);
   if(winner != &ctx->h3_baller)
@@ -181,9 +182,15 @@ static CURLcode baller_connected(struct Curl_cfilter *cf,
   if(winner != &ctx->h21_baller)
     cf_hc_baller_reset(&ctx->h21_baller, data);
 
-  CURL_TRC_CF(data, cf, "connect+handshake %s: %dms, 1st data: %dms",
-              winner->name, (int)Curl_timediff(Curl_now(), winner->started),
-              cf_hc_baller_reply_ms(winner, data));
+  reply_ms = cf_hc_baller_reply_ms(winner, data);
+  if(reply_ms >= 0)
+    CURL_TRC_CF(data, cf, "connect+handshake %s: %dms, 1st data: %dms",
+                winner->name, (int)Curl_timediff(Curl_now(), winner->started),
+                reply_ms);
+  else
+    CURL_TRC_CF(data, cf, "deferred handshake %s: %dms",
+                winner->name, (int)Curl_timediff(Curl_now(), winner->started));
+
   cf->next = winner->cf;
   winner->cf = NULL;
 

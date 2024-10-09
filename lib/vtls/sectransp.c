@@ -1334,7 +1334,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              (void **)&ssl_sessionid, &ssl_sessionid_len)) {
+                              (void **)&ssl_sessionid, &ssl_sessionid_len,
+                              NULL)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       Curl_ssl_sessionid_unlock(data);
@@ -1362,8 +1363,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, ssl_sessionid,
-                                      ssl_sessionid_len,
+      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
+                                      ssl_sessionid, ssl_sessionid_len,
                                       sectransp_session_free);
       Curl_ssl_sessionid_unlock(data);
       if(result)
