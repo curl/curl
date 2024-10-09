@@ -14,7 +14,7 @@ FAILURE
 sftp
 </server>
 <precheck>
-perl %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test613.pl prepare %PWD/%LOGDIR/test%TESTNUMBER.dir
 </precheck>
 <name>
 SFTP put remote failure
@@ -35,7 +35,7 @@ for ssh upload test
 9
 </errorcode>
 <postcheck>
-perl %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir
+%PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir
 </postcheck>
 </verify>
 </testcase>

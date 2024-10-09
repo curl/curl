@@ -67,8 +67,6 @@ const char *param2text(ParameterError error)
     return "too large number";
   case PARAM_NO_NOT_BOOLEAN:
     return "used '--no-' for option that is not a boolean";
-  case PARAM_CONTDISP_SHOW_HEADER:
-    return "showing headers and --remote-header-name cannot be combined";
   case PARAM_CONTDISP_RESUME_FROM:
     return "--continue-at and --remote-header-name cannot be combined";
   case PARAM_READ_ERROR:

@@ -491,7 +491,7 @@ CURLcode Curl_bufq_cwrite(struct bufq *q,
 CURLcode Curl_bufq_unwrite(struct bufq *q, size_t len)
 {
   while(len && q->tail) {
-    len -= chunk_unwrite(q->head, len);
+    len -= chunk_unwrite(q->tail, len);
     prune_tail(q);
   }
   return len ? CURLE_AGAIN : CURLE_OK;
