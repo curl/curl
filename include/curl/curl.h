@@ -3259,3 +3259,5 @@ CURL_EXTERN CURLcode curl_easy_pause(CURL *handle, int bitmask);
 #endif /* gcc >= 4.3 && !__cplusplus && !CURL_DISABLE_TYPECHECK */
 
 #endif /* CURLINC_CURL_H */
+
+// Root Layout and Protected Routes1
