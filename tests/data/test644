@@ -78,6 +78,7 @@ Accept: */*
 
 </protocol>
 <stdout mode="text">
+user.creator => curl
 user.mime_type => text/html
 user.xdg.origin.url => http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </stdout>

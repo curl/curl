@@ -17,7 +17,7 @@ Example:
 # `--xattr`
 
 When saving output to a file, tell curl to store file metadata in extended
-file attributes. Currently, the URL is stored in the `xdg.origin.url`
-attribute and, for HTTP, the content type is stored in the `mime_type`
-attribute. If the file system does not support extended attributes, a warning
-is issued.
+file attributes. Currently, `curl` is stored in the `creator` attribute,
+the URL is stored in the `xdg.origin.url` attribute and, for HTTP, the content
+type is stored in the `mime_type` attribute. If the file system does not
+support extended attributes, a warning is issued.
