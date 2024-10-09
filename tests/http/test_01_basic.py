@@ -50,7 +50,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # simple https: GET, any http version
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_01_02_https_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
@@ -59,7 +59,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # simple https: GET, h2 wanted and got
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_01_03_h2_get(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain1}:{env.https_port}/data.json'
@@ -68,7 +68,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # simple https: GET, h2 unsupported, fallback to h1
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_01_04_h2_unsupported(self, env: Env, httpd):
         curl = CurlClient(env=env)
         url = f'https://{env.domain2}:{env.https_port}/data.json'
@@ -86,7 +86,7 @@ class TestBasic:
         assert r.json['server'] == env.domain1
 
     # simple download, check connect/handshake timings
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_01_06_timings(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
@@ -102,7 +102,7 @@ class TestBasic:
 
     # simple https: HEAD
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason=f"curl without SSL")
+    @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     def test_01_07_head(self, env: Env, httpd, nghttpx, repeat, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")

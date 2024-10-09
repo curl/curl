@@ -844,10 +844,10 @@ static bool cs_is_separator(char c)
     case ':':
     case ',':
     case ';':
-      return true;
+      return TRUE;
     default:;
   }
-  return false;
+  return FALSE;
 }
 
 uint16_t Curl_cipher_suite_walk_str(const char **str, const char **end)

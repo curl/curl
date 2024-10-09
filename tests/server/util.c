@@ -229,7 +229,7 @@ FILE *test2fopen(long testno, const char *logdir)
 int wait_ms(int timeout_ms)
 {
 #if !defined(MSDOS) && !defined(USE_WINSOCK)
-#ifndef HAVE_POLL_FINE
+#ifndef HAVE_POLL
   struct timeval pending_tv;
 #endif
   struct timeval initial_tv;
@@ -252,13 +252,13 @@ int wait_ms(int timeout_ms)
   initial_tv = tvnow();
   do {
     int error;
-#if defined(HAVE_POLL_FINE)
+#ifdef HAVE_POLL
     r = poll(NULL, 0, pending_ms);
 #else
     pending_tv.tv_sec = pending_ms / 1000;
     pending_tv.tv_usec = (pending_ms % 1000) * 1000;
     r = select(0, NULL, NULL, NULL, &pending_tv);
-#endif /* HAVE_POLL_FINE */
+#endif /* HAVE_POLL */
     if(r != -1)
       break;
     error = errno;

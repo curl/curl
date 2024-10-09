@@ -62,6 +62,25 @@ static void write_linked_location(CURL *curl, const char *location,
     size_t loclen, FILE *stream);
 #endif
 
+int tool_write_headers(struct HdrCbData *hdrcbdata, FILE *stream)
+{
+  struct curl_slist *h = hdrcbdata->headlist;
+  int rc = 1;
+  while(h) {
+    /* not "handled", just show it */
+    size_t len = strlen(h->data);
+    if(len != fwrite(h->data, 1, len, stream))
+      goto fail;
+    h = h->next;
+  }
+  rc = 0; /* success */
+fail:
+  curl_slist_free_all(hdrcbdata->headlist);
+  hdrcbdata->headlist = NULL;
+  return rc;
+}
+
+
 /*
 ** callback for CURLOPT_HEADERFUNCTION
 */
@@ -164,63 +183,90 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
      * Content-Disposition header specifying a filename property.
      */
 
-    else if(hdrcbdata->honor_cd_filename &&
-            (cb > 20) && checkprefix("Content-disposition:", str)) {
-      const char *p = str + 20;
+    else if(hdrcbdata->honor_cd_filename) {
+      if((cb > 20) && checkprefix("Content-disposition:", str)) {
+        const char *p = str + 20;
 
-      /* look for the 'filename=' parameter
-         (encoded filenames (*=) are not supported) */
-      for(;;) {
-        char *filename;
-        size_t len;
+        /* look for the 'filename=' parameter
+           (encoded filenames (*=) are not supported) */
+        for(;;) {
+          char *filename;
+          size_t len;
 
-        while((p < end) && *p && !ISALPHA(*p))
-          p++;
-        if(p > end - 9)
-          break;
-
-        if(memcmp(p, "filename=", 9)) {
-          /* no match, find next parameter */
-          while((p < end) && *p && (*p != ';'))
+          while((p < end) && *p && !ISALPHA(*p))
             p++;
-          if((p < end) && *p)
-            continue;
-          else
+          if(p > end - 9)
             break;
-        }
-        p += 9;
 
-        len = cb - (size_t)(p - str);
-        filename = parse_filename(p, len);
-        if(filename) {
-          if(outs->stream) {
-            /* indication of problem, get out! */
-            free(filename);
-            return CURL_WRITEFUNC_ERROR;
+          if(memcmp(p, "filename=", 9)) {
+            /* no match, find next parameter */
+            while((p < end) && *p && (*p != ';'))
+              p++;
+            if((p < end) && *p)
+              continue;
+            else
+              break;
           }
+          p += 9;
 
-          if(per->config->output_dir) {
-            outs->filename = aprintf("%s/%s", per->config->output_dir,
-                                     filename);
-            free(filename);
-            if(!outs->filename)
+          len = cb - (size_t)(p - str);
+          filename = parse_filename(p, len);
+          if(filename) {
+            if(outs->stream) {
+              /* indication of problem, get out! */
+              free(filename);
+              return CURL_WRITEFUNC_ERROR;
+            }
+
+            if(per->config->output_dir) {
+              outs->filename = aprintf("%s/%s", per->config->output_dir,
+                                       filename);
+              free(filename);
+              if(!outs->filename)
+                return CURL_WRITEFUNC_ERROR;
+            }
+            else
+              outs->filename = filename;
+
+            outs->is_cd_filename = TRUE;
+            outs->s_isreg = TRUE;
+            outs->fopened = FALSE;
+            outs->alloc_filename = TRUE;
+            hdrcbdata->honor_cd_filename = FALSE; /* done now! */
+            if(!tool_create_output_file(outs, per->config))
+              return CURL_WRITEFUNC_ERROR;
+            if(tool_write_headers(&per->hdrcbdata, outs->stream))
               return CURL_WRITEFUNC_ERROR;
           }
-          else
-            outs->filename = filename;
-
-          outs->is_cd_filename = TRUE;
-          outs->s_isreg = TRUE;
-          outs->fopened = FALSE;
-          outs->alloc_filename = TRUE;
-          hdrcbdata->honor_cd_filename = FALSE; /* done now! */
-          if(!tool_create_output_file(outs, per->config))
-            return CURL_WRITEFUNC_ERROR;
+          break;
         }
-        break;
+        if(!outs->stream && !tool_create_output_file(outs, per->config))
+          return CURL_WRITEFUNC_ERROR;
+        if(tool_write_headers(&per->hdrcbdata, outs->stream))
+          return CURL_WRITEFUNC_ERROR;
+      } /* content-disposition handling */
+
+      if(hdrcbdata->honor_cd_filename &&
+         hdrcbdata->config->show_headers) {
+        /* still awaiting the Content-Disposition header, store the header in
+           memory. Since it is not zero terminated, we need an extra dance. */
+        char *clone = aprintf("%.*s", (int)cb, (char *)str);
+        if(clone) {
+          struct curl_slist *old = hdrcbdata->headlist;
+          hdrcbdata->headlist = curl_slist_append(old, clone);
+          free(clone);
+          if(!hdrcbdata->headlist) {
+            curl_slist_free_all(old);
+            return CURL_WRITEFUNC_ERROR;
+          }
+        }
+        else {
+          curl_slist_free_all(hdrcbdata->headlist);
+          hdrcbdata->headlist = NULL;
+          return CURL_WRITEFUNC_ERROR;
+        }
+        return cb; /* done for now */
       }
-      if(!outs->stream && !tool_create_output_file(outs, per->config))
-        return CURL_WRITEFUNC_ERROR;
     }
   }
   if(hdrcbdata->config->writeout) {

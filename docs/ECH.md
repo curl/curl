@@ -94,7 +94,7 @@ We currently support the following new curl command line arguments/options:
     - ``grease`` if attempting ECH is not possible, then send a GREASE ECH extension
     - ``hard`` hard-fail the connection if ECH cannot be attempted
     - ``ecl:<b64value>`` a base64 encoded ECHConfigList, rather than one accessed from the DNS
-    - ``pn:<name>`` over-ride the ``public_name`` from an ECHConfigList
+    - ``pn:<name>`` override the ``public_name`` from an ECHConfigList
 
 Note that in the above "attempt ECH" means the client emitting a TLS
 ClientHello with a "real" ECH extension, but that does not mean that the

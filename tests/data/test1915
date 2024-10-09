@@ -21,7 +21,6 @@ http
 none
 </server>
 
-# require debug so that alt-svc can work over plain old HTTP
 <name>
 HSTS read/write callbacks
 </name>
