@@ -41,6 +41,10 @@ handle is no longer connected to the multi handle
 3 - curl_multi_cleanup(3) should be called when all easy handles are
 removed
 
+When this function is called, remaining entries in the connection pool held by
+the multi handle are shut down, which might trigger calls to the
+CURLMOPT_SOCKETFUNCTION(3) callback.
+
 Passing in a NULL pointer in *multi_handle* makes this function return
 CURLM_BAD_HANDLE immediately with no other action.
 

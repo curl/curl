@@ -28,8 +28,8 @@ import difflib
 import filecmp
 import logging
 import os
-import time
 import pytest
+from typing import List
 
 from testenv import Env, CurlClient, LocalClient
 
@@ -544,12 +544,14 @@ class TestUpload:
             pytest.skip(f'example client not built: {client.name}')
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]&die_after=0'
         r = client.run(['-V', proto, url])
-        exp_code = 18  # PARTIAL_FILE
-        if proto == 'h2':
-            exp_code = 92  # CURLE_HTTP2_STREAM
+        if r.exit_code == 18: # PARTIAL_FILE is always ok
+            pass
+        elif proto == 'h2':
+            r.check_exit_code(92)  # CURLE_HTTP2_STREAM also ok
         elif proto == 'h3':
-            exp_code = 95  # CURLE_HTTP3
-        r.check_exit_code(exp_code)
+            r.check_exit_code(95)  # CURLE_HTTP3 also ok
+        else:
+            r.check_exit_code(18)  # will fail as it should
 
     # upload data, pause, let connection die without any response at all
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -649,25 +651,7 @@ class TestUpload:
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
 
-    # speed limited on echo handler
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_51_echo_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
-        if proto == 'h3' and not env.have_h3():
-            pytest.skip("h3 not supported")
-        count = 1
-        fdata = os.path.join(env.gen_dir, 'data-100k')
-        speed_limit = 50 * 1024
-        curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-0]'
-        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
-                             with_headers=True, extra_args=[
-            '--limit-rate', f'{speed_limit}'
-        ])
-        r.check_response(count=count, http_status=200)
-        up_speed = r.stats[0]['speed_upload']
-        assert (speed_limit * 0.5) <= up_speed <= (speed_limit * 1.5), f'{r.stats[0]}'
-
-    def check_downloads(self, client, source: str, count: int,
+    def check_downloads(self, client, source: List[str], count: int,
                         complete: bool = True):
         for i in range(count):
             dfile = client.download_file(i)

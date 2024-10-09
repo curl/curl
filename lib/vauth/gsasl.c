@@ -59,7 +59,7 @@ bool Curl_auth_gsasl_is_supported(struct Curl_easy *data,
     return FALSE;
   }
 
-  return true;
+  return TRUE;
 }
 
 CURLcode Curl_auth_gsasl_start(struct Curl_easy *data,

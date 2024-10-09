@@ -24,12 +24,8 @@
 #
 ###########################################################################
 #
-import difflib
-import filecmp
 import logging
-import os
 import re
-from datetime import timedelta
 import pytest
 
 from testenv import Env, CurlClient, LocalClient
@@ -85,7 +81,7 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=2)
         assert r.tcpdump
-        assert len(r.tcpdump.stats) == 0, f'Unexpected TCP RSTs packets'
+        assert len(r.tcpdump.stats) == 0, 'Unexpected TCP RSTs packets'
 
     # run downloads where the server closes the connection after each request
     @pytest.mark.parametrize("proto", ['http/1.1'])
@@ -101,7 +97,8 @@ class TestShutdown:
             f'id=[0-{count-1}]&with_cl&close'
         r = curl.http_download(urls=[url], alpn_proto=proto)
         r.check_response(http_status=200, count=count)
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        shutdowns = [line for line in r.trace_lines
+                     if re.match(r'.*CCACHE\] shutdown #\d+, done=1', line)]
         assert len(shutdowns) == count, f'{shutdowns}'
 
     # run downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
@@ -123,7 +120,8 @@ class TestShutdown:
              '-n', f'{count}', '-f', '-V', proto, url
         ])
         r.check_exit_code(0)
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        shutdowns = [line for line in r.trace_lines
+                     if re.match(r'.*CCACHE\] shutdown #\d+, done=1', line)]
         assert len(shutdowns) == count, f'{shutdowns}'
 
     # run event-based downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
@@ -147,10 +145,12 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=count)
         # check that we closed all connections
-        closings = [l for l in r.trace_lines if re.match(r'.*CCACHE\] closing #\d+', l)]
+        closings = [line for line in r.trace_lines
+                    if re.match(r'.*CCACHE\] closing #\d+', line)]
         assert len(closings) == count, f'{closings}'
         # check that all connection sockets were removed from event
-        removes = [l for l in r.trace_lines if re.match(r'.*socket cb: socket \d+ REMOVED', l)]
+        removes = [line for line in r.trace_lines
+                   if re.match(r'.*socket cb: socket \d+ REMOVED', line)]
         assert len(removes) == count, f'{removes}'
 
     # check graceful shutdown on multiplexed http
@@ -170,5 +170,6 @@ class TestShutdown:
         ])
         r.check_response(http_status=200, count=2)
         # check connection cache closings
-        shutdowns = [l for l in r.trace_lines if re.match(r'.*CCACHE\] shutdown #\d+, done=1', l)]
+        shutdowns = [line for line in r.trace_lines
+                     if re.match(r'.*CCACHE\] shutdown #\d+, done=1', line)]
         assert len(shutdowns) == 1, f'{shutdowns}'

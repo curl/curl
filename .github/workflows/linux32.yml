@@ -53,7 +53,7 @@ jobs:
         build:
           - name: Linux i686
             install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-0-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386 libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386
-            configure: --enable-debug --enable-websockets --with-openssl --with-librtmp --with-libssh2 --with-libidn2 --enable-ares --host=i686-linux-gnu CC=i686-linux-gnu-gcc-14 PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig CPPFLAGS=-I/usr/include/i386-linux-gnu LDFLAGS=-L/usr/lib/i386-linux-gnu
+            configure: --enable-debug --with-openssl --with-librtmp --with-libssh2 --with-libidn2 --enable-ares --host=i686-linux-gnu CC=i686-linux-gnu-gcc-14 PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig CPPFLAGS=-I/usr/include/i386-linux-gnu LDFLAGS=-L/usr/lib/i386-linux-gnu
 
     steps:
       - run: |
@@ -64,7 +64,7 @@ jobs:
           sudo python3 -m pip install --break-system-packages impacket
         name: 'install prereqs'
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - run: autoreconf -fi
         name: 'autoreconf'

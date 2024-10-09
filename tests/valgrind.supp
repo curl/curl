@@ -130,22 +130,10 @@
 }
 
 {
-   openssl-1.0.1-error-as-seen-on-travis
-   Memcheck:Cond
-   fun:ASN1_STRING_set
-   fun:ASN1_mbstring_ncopy
-   fun:ASN1_mbstring_copy
-   fun:ASN1_STRING_to_UTF8
-   obj:/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-   obj:/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-   fun:ASN1_item_ex_d2i
-   obj:/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-   obj:/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-   fun:ASN1_item_ex_d2i
-   obj:/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-   obj:/lib/x86_64-linux-gnu/libcrypto.so.1.0.0
-   fun:ASN1_item_ex_d2i
-   fun:ASN1_item_d2i
-   fun:PEM_X509_INFO_read_bio
-   fun:X509_load_cert_crl_file
+   inet_pton6-Debian-GLIBC-2.40-3
+   Memcheck:Overlap
+   fun:__memcpy_chk
+   fun:memmove
+   fun:inet_pton6
+   fun:ipv6_parse
 }
