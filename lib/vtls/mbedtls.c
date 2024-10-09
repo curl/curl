@@ -573,6 +573,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   DEBUGASSERT(backend);
   DEBUGASSERT(!backend->initialized);
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), enter");
 
   if((conn_config->version == CURL_SSLVERSION_SSLv2) ||
      (conn_config->version == CURL_SSLVERSION_SSLv3)) {
@@ -588,6 +589,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           -ret, errorbuf);
     return CURLE_SSL_CONNECT_ERROR;
   }
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), psa_crypto_init() done");
 #endif /* TLS13_SUPPORT */
 
 #ifdef THREADING_SUPPORT
@@ -614,9 +616,11 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_FAILED_INIT;
   }
 #endif /* THREADING_SUPPORT */
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), seed init done");
 
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), default x509 init done");
 
   if(ca_info_blob && verifypeer) {
     /* Unfortunately, mbedtls_x509_crt_parse() requires the data to be null
@@ -635,6 +639,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
             -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
+    CURL_TRC_CF(data, cf, "mbed_connect_step1(), ca_info_blob done");
   }
 
   if(ssl_cafile && verifypeer) {
@@ -647,6 +652,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
             ssl_cafile, -ret, errorbuf);
       return CURLE_SSL_CACERT_BADFILE;
     }
+    CURL_TRC_CF(data, cf, "mbed_connect_step1(), ssl_cafile done");
 #else
     failf(data, "mbedtls: functions that use the filesystem not built in");
     return CURLE_NOT_BUILT_IN;
@@ -665,6 +671,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       if(verifypeer)
         return CURLE_SSL_CACERT_BADFILE;
     }
+    CURL_TRC_CF(data, cf, "mbed_connect_step1(), ssl_capath done");
 #else
     failf(data, "mbedtls: functions that use the filesystem not built in");
     return CURLE_NOT_BUILT_IN;
@@ -673,6 +680,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Load the client certificate */
   mbedtls_x509_crt_init(&backend->clicert);
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), clicert done");
 
   if(ssl_cert) {
 #ifdef MBEDTLS_FS_IO
@@ -685,6 +693,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
       return CURLE_SSL_CERTPROBLEM;
     }
+    CURL_TRC_CF(data, cf, "mbed_connect_step1(), ssl_cert done");
 #else
     failf(data, "mbedtls: functions that use the filesystem not built in");
     return CURLE_NOT_BUILT_IN;
@@ -709,10 +718,12 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
             ssl_config->key, -ret, errorbuf);
       return CURLE_SSL_CERTPROBLEM;
     }
+    CURL_TRC_CF(data, cf, "mbed_connect_step1(), ssl_cert_blob done");
   }
 
   /* Load the client private key */
   mbedtls_pk_init(&backend->pk);
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), pk done");
 
   if(ssl_config->key || ssl_config->key_blob) {
     if(ssl_config->key) {
@@ -733,6 +744,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
               ssl_config->key, -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
+      CURL_TRC_CF(data, cf, "mbed_connect_step1(), key done");
 #else
       failf(data, "mbedtls: functions that use the filesystem not built in");
       return CURLE_NOT_BUILT_IN;
@@ -761,6 +773,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
               -ret, errorbuf);
         return CURLE_SSL_CERTPROBLEM;
       }
+      CURL_TRC_CF(data, cf, "mbed_connect_step1(), key_blob done");
     }
 
     if(ret == 0 && !(mbedtls_pk_can_do(&backend->pk, MBEDTLS_PK_RSA) ||
@@ -771,6 +784,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Load the CRL */
 #ifdef MBEDTLS_X509_CRL_PARSE_C
   mbedtls_x509_crl_init(&backend->crl);
+  CURL_TRC_CF(data, cf, "mbed_connect_step1(), mbedtls_x509_crl_init done");
 
   if(ssl_crlfile) {
 #ifdef MBEDTLS_FS_IO
@@ -783,6 +797,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
       return CURLE_SSL_CRL_BADFILE;
     }
+    CURL_TRC_CF(data, cf, "mbed_connect_step1(), ssl_crlfile done");
 #else
     failf(data, "mbedtls: functions that use the filesystem not built in");
     return CURLE_NOT_BUILT_IN;
