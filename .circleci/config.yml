@@ -51,7 +51,8 @@ commands:
     steps:
       - run:
           command: |
-            source .github/scripts/VERSIONS
+            # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+            WOLFSSL_VER=5.6.0
             echo "Installing wolfSSL $WOLFSSL_VER"
             curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
             tar -xzf v$WOLFSSL_VER-stable.tar.gz
@@ -64,7 +65,8 @@ commands:
     steps:
       - run:
           command: |
-            source .github/scripts/VERSIONS
+            # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+            WOLFSSH_VER=1.4.12
             echo "Installing wolfSSH $WOLFSSH_VER"
             curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssh/archive/v$WOLFSSH_VER-stable.tar.gz
             tar -xzf v$WOLFSSH_VER-stable.tar.gz

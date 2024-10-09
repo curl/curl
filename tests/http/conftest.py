@@ -25,7 +25,7 @@
 import logging
 import os
 import sys
-from typing import Optional
+from typing import Generator
 
 import pytest
 
@@ -81,7 +81,7 @@ def log_global_env_facts(record_testsuite_property, env):
 
 
 @pytest.fixture(scope='package')
-def httpd(env) -> Httpd:
+def httpd(env) -> Generator[Httpd, None, None]:
     httpd = Httpd(env=env)
     if not httpd.exists():
         pytest.skip(f'httpd not found: {env.httpd}')
@@ -93,7 +93,7 @@ def httpd(env) -> Httpd:
 
 
 @pytest.fixture(scope='package')
-def nghttpx(env, httpd) -> Optional[Nghttpx]:
+def nghttpx(env, httpd) -> Generator[Nghttpx, None, None]:
     nghttpx = NghttpxQuic(env=env)
     if env.have_h3():
         nghttpx.clear_logs()
@@ -102,7 +102,7 @@ def nghttpx(env, httpd) -> Optional[Nghttpx]:
     nghttpx.stop()
 
 @pytest.fixture(scope='package')
-def nghttpx_fwd(env, httpd) -> Optional[Nghttpx]:
+def nghttpx_fwd(env, httpd) -> Generator[Nghttpx, None, None]:
     nghttpx = NghttpxFwd(env=env)
     if env.have_h3():
         nghttpx.clear_logs()

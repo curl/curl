@@ -198,10 +198,10 @@ static void doh_print_buf(struct Curl_easy *data,
 {
   unsigned char hexstr[LOCAL_PB_HEXMAX];
   size_t hlen = LOCAL_PB_HEXMAX;
-  bool truncated = false;
+  bool truncated = FALSE;
 
   if(len > (LOCAL_PB_HEXMAX / 2))
-    truncated = true;
+    truncated = TRUE;
   Curl_hexencode(buf, len, hexstr, hlen);
   if(!truncated)
     infof(data, "%s: len=%d, val=%s", prefix, (int)len, hexstr);
@@ -278,7 +278,7 @@ static CURLcode doh_run_probe(struct Curl_easy *data,
 
   /* pass in the struct pointer via a local variable to please coverity and
      the gcc typecheck helpers */
-  doh->state.internal = true;
+  doh->state.internal = TRUE;
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   doh->state.feat = &Curl_doh_trc;
 #endif

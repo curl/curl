@@ -41,14 +41,16 @@ env:
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
   libressl-version: 3.9.2
-  # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  wolfssl-version: 5.7.2
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   mbedtls-version: 3.6.0
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
   mod_h2-version: 2.0.29
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.34.2
+  awslc-version: 1.36.0
   # handled in renovate.json
   openssl3-version: openssl-3.1.3
   # unhandled
@@ -111,6 +113,10 @@ jobs:
             install_steps: mbedtls
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
+          - name: mbedtls-pkg
+            install_packages: libnghttp2-dev libmbedtls-dev
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
+
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3
@@ -138,22 +144,22 @@ jobs:
           - name: openssl3
             install_packages: zlib1g-dev
             install_steps: gcc-11 openssl3 pytest
-            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
 
           - name: openssl3 -O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11 openssl3
-            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
 
           - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug --enable-websockets
+            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug
 
           - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             install_steps: openssl3
-            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON -DENABLE_WEBSOCKETS=ON
+            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
 
           - name: openssl3 !ipv6
             install_steps: gcc-11 openssl3
@@ -161,7 +167,7 @@ jobs:
 
           - name: openssl3 https-only
             install_steps: gcc-11 openssl3
-            configure: >
+            configure: >-
               LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
@@ -182,30 +188,30 @@ jobs:
           - name: address-sanitizer
             install_packages: zlib1g-dev libssh2-1-dev clang libssl-dev libubsan1 libasan8 libtsan2
             install_steps: pytest
-            configure: >
+            configure: >-
               CC=clang
               CFLAGS="-fsanitize=address,undefined,signed-integer-overflow -fno-sanitize-recover=undefined,integer -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=address,undefined -fno-sanitize-recover=undefined,integer"
               LIBS="-ldl -lubsan"
-              --with-openssl --enable-debug --enable-websockets
+              --with-openssl --enable-debug
 
           - name: thread-sanitizer
             install_packages: zlib1g-dev clang libtsan2
             install_steps: pytest openssltsan3
-            configure: >
+            configure: >-
               CC=clang
               CFLAGS="-fsanitize=thread -g"
               LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl3/lib"
-              --with-openssl=$HOME/openssl3 --enable-debug --enable-websockets
+              --with-openssl=$HOME/openssl3 --enable-debug
 
           - name: memory-sanitizer
             install_packages: clang
-            configure: >
+            configure: >-
               CC=clang
               CFLAGS="-fsanitize=memory -Wformat -Werror=format-security -Werror=array-bounds -g"
               LDFLAGS="-fsanitize=memory"
               LIBS="-ldl"
-              --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug --enable-websockets
+              --without-ssl --without-zlib --without-brotli --without-zstd --without-libpsl --without-nghttp2 --enable-debug
 
           - name: event-based
             install_packages: libssh-dev
@@ -214,7 +220,7 @@ jobs:
 
           - name: hyper
             install_steps: rust hyper
-            configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug --enable-websockets
+            configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug
 
           - name: rustls valgrind
             install_packages: libpsl-dev valgrind
@@ -239,7 +245,7 @@ jobs:
             container: 'andy5995/slackware-build-essential:15.0'
 
           - name: Alpine MUSL
-            configure: --enable-debug --enable-websockets --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
+            configure: --enable-debug --with-ssl --with-libssh2 --with-libidn2 --with-gssapi --enable-ldap --with-libpsl
             container: 'alpine:3.18'
 
     steps:
@@ -257,7 +263,7 @@ jobs:
           apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4
+      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - name: Fix kernel mmap rnd bits
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -286,7 +292,7 @@ jobs:
           cache-name: cache-bearssl
         with:
           path: /home/runner/bearssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-bearssl-${{ env.bearssl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.bearssl-version }}
 
       - name: 'build bearssl'
         if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
@@ -307,7 +313,7 @@ jobs:
           cache-name: cache-libressl
         with:
           path: /home/runner/libressl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-libressl-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
 
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
@@ -326,15 +332,14 @@ jobs:
           cache-name: cache-wolfssl-all
         with:
           path: /home/runner/wolfssl-all
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
       - name: 'build wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
-          source .github/scripts/VERSIONS
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
-          tar -xzf v$WOLFSSL_VER-stable.tar.gz
-          cd wolfssl-$WOLFSSL_VER-stable
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
+          tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
+          cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-all --enable-all
           make install
@@ -347,15 +352,14 @@ jobs:
           cache-name: cache-wolfssl-opensslextra
         with:
           path: /home/runner/wolfssl-opensslextra
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
       - name: 'build wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
-          source .github/scripts/VERSIONS
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v$WOLFSSL_VER-stable.tar.gz
-          tar -xzf v$WOLFSSL_VER-stable.tar.gz
-          cd wolfssl-$WOLFSSL_VER-stable
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
+          tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
+          cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-opensslextra --enable-opensslextra
           make install
@@ -368,15 +372,17 @@ jobs:
           cache-name: cache-mbedtls
         with:
           path: /home/runner/mbedtls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-mbedtls-${{ env.mbedtls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mbedtls-version }}
 
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
+          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
           git submodule update --init
-          make DESTDIR=$HOME/mbedtls install
+          cmake -B . -G Ninja -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls
+          cmake --build .
+          cmake --install .
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
@@ -426,7 +432,7 @@ jobs:
           cache-name: cache-quictls
         with:
           path: /home/runner/quictls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-quictls-${{ env.quictls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}
 
       - name: 'build quictls'
         if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
@@ -444,7 +450,7 @@ jobs:
           cache-name: cache-msh3
         with:
           path: /home/runner/msh3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-msh3-${{ env.msh3-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.msh3-version }}
 
       - name: 'build msh3'
         if: contains(matrix.build.install_steps, 'msh3') && steps.cache-msh3.outputs.cache-hit != 'true'
@@ -493,7 +499,7 @@ jobs:
           cache-name: cache-rustls
         with:
           path: /home/runner/rustls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-rustls-${{ env.rustls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.rustls-version }}
 
       - name: 'build rustls'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
@@ -561,7 +567,7 @@ jobs:
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake -G Ninja \
+            cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON \

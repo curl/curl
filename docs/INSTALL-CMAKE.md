@@ -107,6 +107,25 @@ Build (you have to specify the build directory).
 
     $ cmake --build ../curl-build
 
+## Static builds
+
+The CMake build setup is primarily done to work with shared/dynamic third
+party dependencies. When linking with shared libraries, the dependency "chain"
+is handled automatically by the library loader - on all modern systems.
+
+If you instead link with a static library, you need to provide all the
+dependency libraries already at the link command line.
+
+Figuring out all the dependency libraries for a given library is hard, as it
+might involve figuring out the dependencies of the dependencies and they vary
+between platforms and can change between versions.
+
+When using static dependencies, the build scripts mostly assume that you, the
+user, provide all the necessary additional dependency libraries as additional
+arguments in the build.
+
+Building statically is not for the faint of heart.
+
 ### Fallback for CMake before version 3.13
 
 CMake before version 3.13 does not support the `--build` option. In that

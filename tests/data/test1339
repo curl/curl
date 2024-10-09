@@ -24,22 +24,14 @@ Content-Type: text/html
 #
 # Client-side
 <client>
-# this relies on the debug feature to allow us to set directory to store the
-# -O and -J output in, using the CURL_TESTDIR variable
-<features>
-Debug
-</features>
 <server>
 http
 </server>
 <name>
 HTTP GET with -O -J without Content-Disposition, -D stdout
 </name>
-<setenv>
-CURL_TESTDIR=%LOGDIR
-</setenv>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D -
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D - --output-dir %LOGDIR
 </command>
 </client>
 

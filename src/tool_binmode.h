@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifdef HAVE_SETMODE
+#if defined(HAVE_SETMODE) || defined(HAVE__SETMODE)
 
 void set_binmode(FILE *stream);
 
@@ -33,6 +33,6 @@ void set_binmode(FILE *stream);
 
 #define set_binmode(x) Curl_nop_stmt
 
-#endif /* HAVE_SETMODE */
+#endif /* HAVE_SETMODE || HAVE__SETMODE */
 
 #endif /* HEADER_CURL_TOOL_BINMODE_H */

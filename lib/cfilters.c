@@ -523,10 +523,10 @@ bool Curl_conn_cf_needs_flush(struct Curl_cfilter *cf,
                               struct Curl_easy *data)
 {
   CURLcode result;
-  int pending = FALSE;
+  int pending = 0;
   result = cf ? cf->cft->query(cf, data, CF_QUERY_NEED_FLUSH,
                                &pending, NULL) : CURLE_UNKNOWN_OPTION;
-  return (result || pending == FALSE) ? FALSE : TRUE;
+  return (result || !pending) ? FALSE : TRUE;
 }
 
 bool Curl_conn_needs_flush(struct Curl_easy *data, int sockindex)

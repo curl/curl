@@ -355,11 +355,11 @@ static CURLcode socket_open(struct Curl_easy *data,
     * might have been changed and this 'new' address will actually be used
     * here to connect.
     */
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     *sockfd = data->set.fopensocket(data->set.opensocket_client,
                                     CURLSOCKTYPE_IPCXN,
                                     (struct curl_sockaddr *)addr);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
   }
   else {
     /* opensocket callback not set, so simply create the socket now */
@@ -413,9 +413,9 @@ static int socket_close(struct Curl_easy *data, struct connectdata *conn,
   if(use_callback && conn && conn->fclosesocket) {
     int rc;
     Curl_multi_closed(data, sock);
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     rc = conn->fclosesocket(conn->closesocket_client, sock);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
     return rc;
   }
 
@@ -1164,11 +1164,11 @@ static CURLcode cf_socket_open(struct Curl_cfilter *cf,
 
   if(data->set.fsockopt) {
     /* activate callback for setting socket options */
-    Curl_set_in_callback(data, true);
+    Curl_set_in_callback(data, TRUE);
     error = data->set.fsockopt(data->set.sockopt_client,
                                ctx->sock,
                                CURLSOCKTYPE_IPCXN);
-    Curl_set_in_callback(data, false);
+    Curl_set_in_callback(data, FALSE);
 
     if(error == CURL_SOCKOPT_ALREADY_CONNECTED)
       isconnected = TRUE;
