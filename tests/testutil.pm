@@ -56,6 +56,7 @@ use MIME::Base64;
 use globalconfig qw(
     $torture
     $verbose
+    $dev_null
 );
 
 my $logfunc;      # optional reference to function for logging
@@ -195,7 +196,7 @@ sub runclient {
 #
 sub runclientoutput {
     my ($cmd)=@_;
-    return `$cmd 2>/dev/null`;
+    return `$cmd 2>$dev_null`;
 
 # This is one way to test curl on a remote machine
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
@@ -210,10 +211,15 @@ sub runclientoutput {
 #
 sub shell_quote {
     my ($s)=@_;
-    if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
-        # string contains a "dangerous" character--quote it
-        $s =~ s/'/'"'"'/g;
-        $s = "'" . $s . "'";
+    if($^O eq 'MSWin32') {
+        $s = '"' . $s . '"';
+    }
+    else {
+        if($s !~ m/^[-+=.,_\/:a-zA-Z0-9]+$/) {
+            # string contains a "dangerous" character--quote it
+            $s =~ s/'/'"'"'/g;
+            $s = "'" . $s . "'";
+        }
     }
     return $s;
 }

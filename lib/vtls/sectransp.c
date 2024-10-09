@@ -278,7 +278,7 @@ static OSStatus sectransp_bio_cf_in_read(SSLConnectionRef connection,
       case CURLE_OK:
       case CURLE_AGAIN:
         rtn = errSSLWouldBlock;
-        backend->ssl_direction = false;
+        backend->ssl_direction = FALSE;
         break;
       default:
         rtn = ioErr;
@@ -317,7 +317,7 @@ static OSStatus sectransp_bio_cf_out_write(SSLConnectionRef connection,
   if(nwritten <= 0) {
     if(result == CURLE_AGAIN) {
       rtn = errSSLWouldBlock;
-      backend->ssl_direction = true;
+      backend->ssl_direction = TRUE;
     }
     else {
       rtn = ioErr;
@@ -512,7 +512,7 @@ static OSStatus CopyIdentityWithLabel(char *label,
                                     * label matching below worked correctly */
     keys[2] = kSecMatchLimit;
     /* identity searches need a SecPolicyRef in order to work */
-    values[3] = SecPolicyCreateSSL(false, NULL);
+    values[3] = SecPolicyCreateSSL(FALSE, NULL);
     keys[3] = kSecMatchPolicy;
     /* match the name of the certificate (does not work in macOS 10.12.1) */
     values[4] = label_cf;
@@ -609,7 +609,7 @@ static OSStatus CopyIdentityFromPKCS12File(const char *cPath,
     pkcs_url =
       CFURLCreateFromFileSystemRepresentation(NULL,
                                               (const UInt8 *)cPath,
-                                              (CFIndex)strlen(cPath), false);
+                                              (CFIndex)strlen(cPath), FALSE);
     resource_imported =
       CFURLCreateDataAndPropertiesFromResource(NULL,
                                                pkcs_url, &pkcs_data,
@@ -711,11 +711,11 @@ CF_INLINE bool is_file(const char *filename)
   struct_stat st;
 
   if(!filename)
-    return false;
+    return FALSE;
 
   if(stat(filename, &st) == 0)
     return S_ISREG(st.st_mode);
-  return false;
+  return FALSE;
 }
 
 static CURLcode
@@ -796,8 +796,8 @@ legacy:
   }
 
   /* only TLS 1.0 is supported, disable SSL 3.0 and SSL 2.0 */
-  SSLSetProtocolVersionEnabled(backend->ssl_ctx, kSSLProtocolAll, false);
-  SSLSetProtocolVersionEnabled(backend->ssl_ctx, kTLSProtocol1, true);
+  SSLSetProtocolVersionEnabled(backend->ssl_ctx, kSSLProtocolAll, FALSE);
+  SSLSetProtocolVersionEnabled(backend->ssl_ctx, kTLSProtocol1, TRUE);
 
   return CURLE_OK;
 #endif
@@ -1069,7 +1069,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #if CURL_SUPPORT_MAC_10_8
     if(backend->ssl_ctx)
       (void)SSLDisposeContext(backend->ssl_ctx);
-    err = SSLNewContext(false, &(backend->ssl_ctx));
+    err = SSLNewContext(FALSE, &(backend->ssl_ctx));
     if(err != noErr) {
       failf(data, "SSL: could not create a context: OSStatus %d", err);
       return CURLE_OUT_OF_MEMORY;
@@ -1079,7 +1079,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 #else
   if(backend->ssl_ctx)
     (void)SSLDisposeContext(backend->ssl_ctx);
-  err = SSLNewContext(false, &(backend->ssl_ctx));
+  err = SSLNewContext(FALSE, &(backend->ssl_ctx));
   if(err != noErr) {
     failf(data, "SSL: could not create a context: OSStatus %d", err);
     return CURLE_OUT_OF_MEMORY;
@@ -1253,7 +1253,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   else {
 #if CURL_SUPPORT_MAC_10_8
     err = SSLSetEnableCertVerify(backend->ssl_ctx,
-                                 conn_config->verifypeer ? true : false);
+                                 conn_config->verifypeer ? true : FALSE);
     if(err != noErr) {
       failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
       return CURLE_SSL_CONNECT_ERROR;
@@ -1262,7 +1262,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
   }
 #else
   err = SSLSetEnableCertVerify(backend->ssl_ctx,
-                               conn_config->verifypeer ? true : false);
+                               conn_config->verifypeer ? true : FALSE);
   if(err != noErr) {
     failf(data, "SSL: SSLSetEnableCertVerify() failed: OSStatus %d", err);
     return CURLE_SSL_CONNECT_ERROR;
@@ -1604,7 +1604,7 @@ static CURLcode verify_cert_buf(struct Curl_cfilter *cf,
     failf(data, "SecTrustSetAnchorCertificates() returned error %d", ret);
     goto out;
   }
-  ret = SecTrustSetAnchorCertificatesOnly(trust, true);
+  ret = SecTrustSetAnchorCertificatesOnly(trust, TRUE);
   if(ret != noErr) {
     failf(data, "SecTrustSetAnchorCertificatesOnly() returned error %d", ret);
     goto out;
@@ -2053,7 +2053,7 @@ check_handshake:
     (void)SSLGetNegotiatedProtocolVersion(backend->ssl_ctx, &protocol);
 
     sectransp_cipher_suite_get_str((uint16_t) cipher, cipher_str,
-                                   sizeof(cipher_str), true);
+                                   sizeof(cipher_str), TRUE);
     switch(protocol) {
       case kSSLProtocol2:
         infof(data, "SSL 2.0 connection using %s", cipher_str);
@@ -2168,7 +2168,7 @@ static CURLcode collect_server_cert(struct Curl_cfilter *cf,
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   const bool show_verbose_server_cert = data->set.verbose;
 #else
-  const bool show_verbose_server_cert = false;
+  const bool show_verbose_server_cert = FALSE;
 #endif
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   CURLcode result = ssl_config->certinfo ?
@@ -2543,10 +2543,10 @@ static bool sectransp_data_pending(struct Curl_cfilter *cf,
     err = SSLGetBufferedReadSize(backend->ssl_ctx, &buffer);
     if(err == noErr)
       return buffer > 0UL;
-    return false;
+    return FALSE;
   }
   else
-    return false;
+    return FALSE;
 }
 
 static CURLcode sectransp_random(struct Curl_easy *data UNUSED_PARAM,

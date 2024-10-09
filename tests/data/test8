@@ -79,7 +79,7 @@ Set-Cookie: cookie31=%hex[%7f-junk]hex%
 
 </file>
 <precheck>
-perl -e 'if ("%HOSTIP" !~ /\.0\.0\.1$/) {print "Test only works for HOSTIPs ending with .0.0.1"; exit(1)}'
+%PERL -e 'if ("%HOSTIP" !~ /\.0\.0\.1$/) {print "Test only works for HOSTIPs ending with .0.0.1"; exit(1)}'
 </precheck>
 <features>
 cookies
