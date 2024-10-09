@@ -505,6 +505,8 @@ int main(int argc, char *argv[])
 
   } while(active_transfers); /* as long as we have transfers going */
 
+  curl_multi_cleanup(multi_handle);
+
   for(i = 0; i < transfer_count; ++i) {
     t = &transfers[i];
     if(t->out) {
@@ -518,7 +520,7 @@ int main(int argc, char *argv[])
   }
   free(transfers);
 
-  curl_multi_cleanup(multi_handle);
+  curl_share_cleanup(share);
 
   return 0;
 #else

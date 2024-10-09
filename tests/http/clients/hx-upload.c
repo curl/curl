@@ -252,8 +252,10 @@ static int my_progress_cb(void *userdata,
 }
 
 static int setup(CURL *hnd, const char *url, struct transfer *t,
-                 int http_version)
+                 int http_version, struct curl_slist *host,
+                 CURLSH *share, int use_earlydata, int announce_length)
 {
+  curl_easy_setopt(hnd, CURLOPT_SHARE, share);
   curl_easy_setopt(hnd, CURLOPT_URL, url);
   curl_easy_setopt(hnd, CURLOPT_HTTP_VERSION, http_version);
   curl_easy_setopt(hnd, CURLOPT_SSL_VERIFYPEER, 0L);
@@ -261,6 +263,8 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   curl_easy_setopt(hnd, CURLOPT_BUFFERSIZE, (long)(128 * 1024));
   curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, my_write_cb);
   curl_easy_setopt(hnd, CURLOPT_WRITEDATA, t);
+  if(use_earlydata)
+    curl_easy_setopt(hnd, CURLOPT_SSL_OPTIONS, (long)CURLSSLOPT_EARLYDATA);
 
   if(!t->method || !strcmp("PUT", t->method))
     curl_easy_setopt(hnd, CURLOPT_UPLOAD, 1L);
@@ -272,11 +276,16 @@ static int setup(CURL *hnd, const char *url, struct transfer *t,
   }
   curl_easy_setopt(hnd, CURLOPT_READFUNCTION, my_read_cb);
   curl_easy_setopt(hnd, CURLOPT_READDATA, t);
+  if(announce_length)
+    curl_easy_setopt(hnd, CURLOPT_INFILESIZE_LARGE, t->send_total);
+
   curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
   curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, my_progress_cb);
   curl_easy_setopt(hnd, CURLOPT_XFERINFODATA, t);
   if(forbid_reuse)
     curl_easy_setopt(hnd, CURLOPT_FORBID_REUSE, 1L);
+  if(host)
+    curl_easy_setopt(hnd, CURLOPT_RESOLVE, host);
 
   /* please be verbose */
   if(verbose) {
@@ -299,11 +308,13 @@ static void usage(const char *msg)
     "usage: [options] url\n"
     "  upload to a url with following options:\n"
     "  -a         abort paused transfer\n"
+    "  -e         use TLS earlydata\n"
     "  -m number  max parallel uploads\n"
     "  -n number  total uploads\n"
     "  -A number  abort transfer after `number` request body bytes\n"
     "  -F number  fail reading request body after `number` of bytes\n"
     "  -P number  pause transfer after `number` request body bytes\n"
+    "  -r <host>:<port>:<addr>  resolve information\n"
     "  -S number  size to upload\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
@@ -318,6 +329,7 @@ int main(int argc, char *argv[])
 #ifndef _MSC_VER
   CURLM *multi_handle;
   struct CURLMsg *m;
+  CURLSH *share;
   const char *url;
   const char *method = "PUT";
   size_t i, n, max_parallel = 1;
@@ -328,11 +340,15 @@ int main(int argc, char *argv[])
   size_t send_total = (128 * 1024);
   int abort_paused = 0;
   int reuse_easy = 0;
+  int use_earlydata = 0;
+  int announce_length = 0;
   struct transfer *t;
   int http_version = CURL_HTTP_VERSION_2_0;
+  struct curl_slist *host = NULL;
+  const char *resolve = NULL;
   int ch;
 
-  while((ch = getopt(argc, argv, "afhm:n:A:F:M:P:RS:V:")) != -1) {
+  while((ch = getopt(argc, argv, "aefhlm:n:A:F:M:P:r:RS:V:")) != -1) {
     switch(ch) {
     case 'h':
       usage(NULL);
@@ -340,8 +356,14 @@ int main(int argc, char *argv[])
     case 'a':
       abort_paused = 1;
       break;
+    case 'e':
+      use_earlydata = 1;
+      break;
     case 'f':
       forbid_reuse = 1;
+      break;
+    case 'l':
+      announce_length = 1;
       break;
     case 'm':
       max_parallel = (size_t)strtol(optarg, NULL, 10);
@@ -360,6 +382,9 @@ int main(int argc, char *argv[])
       break;
     case 'P':
       pause_offset = (size_t)strtol(optarg, NULL, 10);
+      break;
+    case 'r':
+      resolve = optarg;
       break;
     case 'R':
       reuse_easy = 1;
@@ -402,6 +427,21 @@ int main(int argc, char *argv[])
   }
   url = argv[0];
 
+  if(resolve)
+    host = curl_slist_append(NULL, resolve);
+
+  share = curl_share_init();
+  if(!share) {
+    fprintf(stderr, "error allocating share\n");
+    return 1;
+  }
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_DNS);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_SSL_SESSION);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_CONNECT);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
+
   transfers = calloc(transfer_count, sizeof(*transfers));
   if(!transfers) {
     fprintf(stderr, "error allocating transfer structs\n");
@@ -429,7 +469,8 @@ int main(int argc, char *argv[])
     for(i = 0; i < transfer_count; ++i) {
       t = &transfers[i];
       t->easy = easy;
-      if(setup(t->easy, url, t, http_version)) {
+      if(setup(t->easy, url, t, http_version, host, share, use_earlydata,
+               announce_length)) {
         fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
         return 1;
       }
@@ -450,7 +491,8 @@ int main(int argc, char *argv[])
     for(i = 0; i < n; ++i) {
       t = &transfers[i];
       t->easy = curl_easy_init();
-      if(!t->easy || setup(t->easy, url, t, http_version)) {
+      if(!t->easy || setup(t->easy, url, t, http_version, host, share,
+                           use_earlydata, announce_length)) {
         fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
         return 1;
       }
@@ -483,6 +525,11 @@ int main(int argc, char *argv[])
           if(t) {
             t->done = 1;
             fprintf(stderr, "[t-%d] FINISHED\n", t->idx);
+            if(use_earlydata) {
+              curl_off_t sent;
+              curl_easy_getinfo(e, CURLINFO_EARLYDATA_SENT_T, &sent);
+              fprintf(stderr, "[t-%d] EarlyData: %ld\n", t->idx, (long)sent);
+            }
           }
           else {
             curl_easy_cleanup(e);
@@ -523,7 +570,8 @@ int main(int argc, char *argv[])
             t = &transfers[i];
             if(!t->started) {
               t->easy = curl_easy_init();
-              if(!t->easy || setup(t->easy, url, t, http_version)) {
+              if(!t->easy || setup(t->easy, url, t, http_version, host,
+                                   share, use_earlydata, announce_length)) {
                 fprintf(stderr, "[t-%d] FAILED setup\n", (int)i);
                 return 1;
               }
@@ -557,6 +605,7 @@ int main(int argc, char *argv[])
     }
   }
   free(transfers);
+  curl_share_cleanup(share);
 
   return 0;
 #else
