@@ -50,7 +50,7 @@ AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
 # Makefile.inc provides neat definitions
 include Makefile.inc
 
-EXTRA_DIST = base64.pl CMakeLists.txt
+EXTRA_DIST = base64.pl CMakeLists.txt .checksrc
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
