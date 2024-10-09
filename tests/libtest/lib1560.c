@@ -565,6 +565,10 @@ static const struct urltestcase get_url_list[] = {
   {"https://[fe80:0:0:0:409b::]:80/moo",
    "https://[fe80::409b:0:0:0]:80/moo",
    0, 0, CURLUE_OK},
+  /* normalize to lower case */
+  {"https://[FE80:0:A:0:409B:0:0:0]:80/moo",
+   "https://[fe80:0:a:0:409b::]:80/moo",
+   0, 0, CURLUE_OK},
   {"https://[::%25fakeit];80/moo",
    "",
    0, 0, CURLUE_BAD_PORT_NUMBER},

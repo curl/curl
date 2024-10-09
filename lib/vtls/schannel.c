@@ -1090,14 +1090,14 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     curlx_verify_windows_version(6, 3, 0, PLATFORM_WINNT,
                                  VERSION_GREATER_THAN_EQUAL);
 #else
-  backend->use_alpn = false;
+  backend->use_alpn = FALSE;
 #endif
 
 #ifdef _WIN32_WCE
 #ifdef HAS_MANUAL_VERIFY_API
   /* certificate validation on CE does not seem to work right; we will
    * do it following a more manual process. */
-  backend->use_manual_cred_validation = true;
+  backend->use_manual_cred_validation = TRUE;
 #else
 #error "compiler too old to support Windows CE requisite manual cert verify"
 #endif
@@ -1106,7 +1106,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     if(curlx_verify_windows_version(6, 1, 0, PLATFORM_WINNT,
                                     VERSION_GREATER_THAN_EQUAL)) {
-      backend->use_manual_cred_validation = true;
+      backend->use_manual_cred_validation = TRUE;
     }
     else {
       failf(data, "schannel: this version of Windows is too old to support "
@@ -1115,7 +1115,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
   }
   else
-    backend->use_manual_cred_validation = false;
+    backend->use_manual_cred_validation = FALSE;
 #else
   if(conn_config->CAfile || conn_config->ca_info_blob) {
     failf(data, "schannel: CA cert support not built in");
@@ -1300,10 +1300,10 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                "sent %zd bytes", written));
 
   backend->recv_unrecoverable_err = CURLE_OK;
-  backend->recv_sspi_close_notify = false;
-  backend->recv_connection_closed = false;
-  backend->recv_renegotiating = false;
-  backend->encdata_is_incomplete = false;
+  backend->recv_sspi_close_notify = FALSE;
+  backend->recv_connection_closed = FALSE;
+  backend->recv_renegotiating = FALSE;
+  backend->encdata_is_incomplete = FALSE;
 
   /* continue to second handshake step */
   connssl->connecting_state = ssl_connect_2;
@@ -1355,7 +1355,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* buffer to store previously received and encrypted data */
   if(!backend->encdata_buffer) {
-    backend->encdata_is_incomplete = false;
+    backend->encdata_is_incomplete = FALSE;
     backend->encdata_offset = 0;
     backend->encdata_length = CURL_SCHANNEL_BUFFER_INIT_SIZE;
     backend->encdata_buffer = malloc(backend->encdata_length);
@@ -1407,7 +1407,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
       /* increase encrypted data buffer offset */
       backend->encdata_offset += nread;
-      backend->encdata_is_incomplete = false;
+      backend->encdata_is_incomplete = FALSE;
       DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
     }
 
@@ -1447,7 +1447,7 @@ schannel_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* check if the handshake was incomplete */
     if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
-      backend->encdata_is_incomplete = true;
+      backend->encdata_is_incomplete = TRUE;
       connssl->io_need = CURL_SSL_IO_NEED_RECV;
       DEBUGF(infof(data,
                    "schannel: received incomplete message, need more data"));
@@ -1617,9 +1617,9 @@ traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func,
                     void *arg)
 {
   const CERT_CONTEXT *current_context = NULL;
-  bool should_continue = true;
-  bool first = true;
-  bool reverse_order = false;
+  bool should_continue = TRUE;
+  bool first = TRUE;
+  bool reverse_order = FALSE;
   while(should_continue &&
         (current_context = CertEnumCertificatesInStore(
           context->hCertStore,
@@ -1630,9 +1630,9 @@ traverse_cert_store(const CERT_CONTEXT *context, Read_crt_func func,
        by comparing SECPKG_ATTR_REMOTE_CERT_CONTEXT's pbCertContext with the
        first certificate's pbCertContext. */
     if(first && context->pbCertEncoded != current_context->pbCertEncoded)
-      reverse_order = true;
+      reverse_order = TRUE;
     should_continue = func(current_context, reverse_order, arg);
-    first = false;
+    first = FALSE;
   }
 
   if(current_context)
@@ -1646,7 +1646,7 @@ cert_counter_callback(const CERT_CONTEXT *ccert_context, bool reverse_order,
   (void)reverse_order; /* unused */
   if(valid_cert_encoding(ccert_context))
     (*(int *)certs_count)++;
-  return true;
+  return TRUE;
 }
 
 struct Adder_args
@@ -2181,12 +2181,12 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         infof(data, "schannel: recv returned error %d", *err);
     }
     else if(nread == 0) {
-      backend->recv_connection_closed = true;
+      backend->recv_connection_closed = TRUE;
       DEBUGF(infof(data, "schannel: server closed the connection"));
     }
     else if(nread > 0) {
       backend->encdata_offset += (size_t)nread;
-      backend->encdata_is_incomplete = false;
+      backend->encdata_is_incomplete = FALSE;
       DEBUGF(infof(data, "schannel: encrypted data got %zd", nread));
     }
   }
@@ -2299,9 +2299,9 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         connssl->state = ssl_connection_negotiating;
         connssl->connecting_state = ssl_connect_2;
         connssl->io_need = CURL_SSL_IO_NEED_SEND;
-        backend->recv_renegotiating = true;
+        backend->recv_renegotiating = TRUE;
         *err = schannel_connect_common(cf, data, FALSE, &done);
-        backend->recv_renegotiating = false;
+        backend->recv_renegotiating = FALSE;
         if(*err) {
           infof(data, "schannel: renegotiation failed");
           goto cleanup;
@@ -2315,16 +2315,16 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
       else if(sspi_status == SEC_I_CONTEXT_EXPIRED) {
         /* In Windows 2000 SEC_I_CONTEXT_EXPIRED (close_notify) is not
            returned so we have to work around that in cleanup. */
-        backend->recv_sspi_close_notify = true;
+        backend->recv_sspi_close_notify = TRUE;
         if(!backend->recv_connection_closed)
-          backend->recv_connection_closed = true;
+          backend->recv_connection_closed = TRUE;
         infof(data,
               "schannel: server close notification received (close_notify)");
         goto cleanup;
       }
     }
     else if(sspi_status == SEC_E_INCOMPLETE_MESSAGE) {
-      backend->encdata_is_incomplete = true;
+      backend->encdata_is_incomplete = TRUE;
       if(!*err)
         *err = CURLE_AGAIN;
       infof(data, "schannel: failed to decrypt data, need more data");
@@ -2370,7 +2370,7 @@ cleanup:
                                                 VERSION_EQUAL);
 
     if(isWin2k && sspi_status == SEC_E_OK)
-      backend->recv_sspi_close_notify = true;
+      backend->recv_sspi_close_notify = TRUE;
     else {
       *err = CURLE_RECV_ERROR;
       infof(data, "schannel: server closed abruptly (missing close_notify)");
@@ -2622,7 +2622,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_safefree(backend->encdata_buffer);
     backend->encdata_length = 0;
     backend->encdata_offset = 0;
-    backend->encdata_is_incomplete = false;
+    backend->encdata_is_incomplete = FALSE;
   }
 
   /* free internal buffer for received decrypted data */
@@ -2896,7 +2896,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   DEBUGASSERT(multi);
 
   if(!multi) {
-    return false;
+    return FALSE;
   }
 
   share = Curl_hash_pick(&multi->proto_hash,
@@ -2905,14 +2905,14 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   if(!share) {
     share = calloc(1, sizeof(*share));
     if(!share) {
-      return false;
+      return FALSE;
     }
     if(!Curl_hash_add2(&multi->proto_hash,
                        (void *)MPROTO_SCHANNEL_CERT_SHARE_KEY,
                        sizeof(MPROTO_SCHANNEL_CERT_SHARE_KEY)-1,
                        share, schannel_cert_share_free)) {
       free(share);
-      return false;
+      return FALSE;
     }
   }
 
@@ -2927,7 +2927,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
     if(conn_config->CAfile) {
       CAfile = strdup(conn_config->CAfile);
       if(!CAfile) {
-        return false;
+        return FALSE;
       }
     }
   }
@@ -2942,7 +2942,7 @@ bool Curl_schannel_set_cached_cert_store(struct Curl_cfilter *cf,
   share->cert_store = cert_store;
   share->CAinfo_blob_size = CAinfo_blob_size;
   share->CAfile = CAfile;
-  return true;
+  return TRUE;
 }
 
 const struct Curl_ssl Curl_ssl_schannel = {

@@ -898,9 +898,9 @@ CURLcode rtp_client_write(struct Curl_easy *data, const char *ptr, size_t len)
     user_ptr = data->set.out;
   }
 
-  Curl_set_in_callback(data, true);
+  Curl_set_in_callback(data, TRUE);
   wrote = writeit((char *)ptr, 1, len, user_ptr);
-  Curl_set_in_callback(data, false);
+  Curl_set_in_callback(data, FALSE);
 
   if(CURL_WRITEFUNC_PAUSE == wrote) {
     failf(data, "Cannot pause RTP");
