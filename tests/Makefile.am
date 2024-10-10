@@ -143,6 +143,7 @@ TEST_NF = -a -p ~flaky ~timing-dependent
 TEST_CI = $(TEST_NF) -r -rm -j20
 
 PYTEST = pytest
+PYTESTFLAGS = -v
 endif
 
 CD2NROFF = $(top_srcdir)/scripts/cd2nroff $< >$@
@@ -183,7 +184,7 @@ event-test: perlcheck all
 default-pytest: ci-pytest
 
 ci-pytest: all
-	srcdir=$(srcdir) $(PYTEST) -v $(srcdir)/http
+	srcdir=$(srcdir) $(PYTEST) $(PYTESTFLAGS) $(srcdir)/http
 
 checksrc:
 	(cd libtest && $(MAKE) checksrc)

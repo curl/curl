@@ -471,7 +471,7 @@ jobs:
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
       - run: |
-          sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
+          sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt pytest-astropy-header
         name: 'install python test prereqs'
 
       - run: autoreconf -fi
@@ -545,7 +545,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci
           else
-            make V=1 pytest-ci
+            make V=1 pytest-ci PYTESTFLAGS="-v --astropy-header"
           fi
 
       - name: 'build examples'

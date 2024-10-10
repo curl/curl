@@ -552,8 +552,8 @@ jobs:
       - if: contains(matrix.build.install_steps, 'pytest')
         run: |
           sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
-          sudo python3 -m pip install -r tests/http/requirements.txt
-        name: 'install pytest and apach2-dev'
+          sudo python3 -m pip install -r tests/http/requirements.txt pytest-astropy-header
+        name: 'install pytest and apache2-dev'
 
       - name: cache mod_h2
         if: contains(matrix.build.install_steps, 'pytest')
@@ -678,7 +678,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci
           else
-            make V=1 pytest-ci
+            make V=1 pytest-ci PYTESTFLAGS="-v --astropy-header"
           fi
 
       - name: 'build examples'
