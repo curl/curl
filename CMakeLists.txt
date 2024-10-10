@@ -1478,6 +1478,21 @@ if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
   check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
+# Pass these detection results to curl_internal_test() for use in CurlTests.c
+foreach(_variable IN ITEMS
+    HAVE_STDATOMIC_H
+    HAVE_STDBOOL_H
+    HAVE_STROPTS_H
+    HAVE_SYS_IOCTL_H
+    HAVE_SYS_SOCKET_H
+    HAVE_SYS_TYPES_H
+    HAVE_UNISTD_H
+    )
+  if(${_variable})
+    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${_variable}")
+  endif()
+endforeach()
+
 check_type_size("size_t"      SIZEOF_SIZE_T)
 check_type_size("ssize_t"     SIZEOF_SSIZE_T)
 check_type_size("long long"   SIZEOF_LONG_LONG)
