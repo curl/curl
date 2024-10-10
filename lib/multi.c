@@ -757,6 +757,8 @@ static CURLcode multi_done(struct Curl_easy *data,
   mdctx.premature = premature;
   Curl_cpool_do_locked(data, data->conn, multi_done_locked, &mdctx);
 
+  /* flush the netrc cache */
+  Curl_netrc_cleanup(&data->state.netrc);
   return result;
 }
 
