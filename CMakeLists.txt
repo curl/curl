@@ -165,6 +165,8 @@ if(WIN32)
     endif()
   endif()
 
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWIN32_LEAN_AND_MEAN")  # Apply to all feature checks
+
   set(CURL_TARGET_WINDOWS_VERSION "" CACHE STRING "Minimum target Windows version as hex string")
   if(CURL_TARGET_WINDOWS_VERSION)
     add_definitions("-D_WIN32_WINNT=${CURL_TARGET_WINDOWS_VERSION}")
