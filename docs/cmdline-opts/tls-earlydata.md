@@ -21,7 +21,7 @@ This has security implications for the requests sent that way.
 
 This option is used when curl is built to use GnuTLS.
 
-If a server supports this TLSv1.3 feature, and to what extend, is announced
+If a server supports this TLSv1.3 feature, and to what extent, is announced
 as part of the TLS "session" sent back to curl. Until curl has seen such
 a session in a previous request, early data cannot be used.
 
