@@ -72,7 +72,6 @@ function(add_pytest _targetname _test_flags)
   endif()
   string(REPLACE " " ";" _test_flags_list "${_test_flags}")
   add_custom_target(${_targetname}
-    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"
     DEPENDS "${_depends}"
     VERBATIM USES_TERMINAL
