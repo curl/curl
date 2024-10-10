@@ -590,7 +590,6 @@ jobs:
               # Requires v3.6.0 or upper
               export PKG_CONFIG_PATH="$HOME/mbedtls/lib/pkgconfig"
             elif [[ '${{ matrix.build.install_steps }}' = *'msh3'* ]]; then
-              find $HOME/msh3
               # Broken as of v0.6.0
               export PKG_CONFIG_PATH="$HOME/msh3/lib/pkgconfig"
             elif [[ '${{ matrix.build.install_steps }}' = *'rustls'* ]]; then
