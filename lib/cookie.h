@@ -39,12 +39,12 @@ struct Cookie {
   char *domain;       /* domain = <this> */
   curl_off_t expires; /* expires = <this> */
   int creationtime;   /* time when the cookie was written */
-  BIT(tailmatch);     /* whether we do tail-matching of the domain name */
-  BIT(secure);        /* whether the 'secure' keyword was used */
+  BIT(tailmatch);     /* tail-match the domain name */
+  BIT(secure);        /* the 'secure' keyword was used */
   BIT(livecookie);    /* updated from a server, not a stored file */
-  BIT(httponly);      /* true if the httponly directive is present */
-  BIT(prefix_secure); /* secure prefix are set */
-  BIT(prefix_host);   /* host prefix are set */
+  BIT(httponly);      /* the httponly directive is present */
+  BIT(prefix_secure); /* secure prefix is set */
+  BIT(prefix_host);   /* host prefix is set */
 };
 
 /*
