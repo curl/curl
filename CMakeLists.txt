@@ -1407,8 +1407,8 @@ endif()
 
 # Check for header files
 if(WIN32)
-  set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")  # CURL_INCLUDES
-  set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")  # CURL_INCLUDES
+  set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
+  set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
 
   if(HAVE_WIN32_WINNT)
     if(HAVE_WIN32_WINNT LESS 0x0501)
@@ -1438,25 +1438,25 @@ check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
-check_include_file_concat("sys/select.h"     HAVE_SYS_SELECT_H)  # CURL_INCLUDES
-check_include_file_concat("sys/socket.h"     HAVE_SYS_SOCKET_H)  # CURL_INCLUDES
+check_include_file_concat("sys/select.h"     HAVE_SYS_SELECT_H)
+check_include_file_concat("sys/socket.h"     HAVE_SYS_SOCKET_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
 check_include_file("sys/stat.h"       HAVE_SYS_STAT_H)
-check_include_file_concat("sys/time.h"       HAVE_SYS_TIME_H)  # CURL_INCLUDES
-check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)  # CURL_INCLUDES
+check_include_file_concat("sys/time.h"       HAVE_SYS_TIME_H)
+check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file("sys/xattr.h"      HAVE_SYS_XATTR_H)
-check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)  # CURL_INCLUDES
+check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file("dirent.h"         HAVE_DIRENT_H)
 check_include_file("fcntl.h"          HAVE_FCNTL_H)
-check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)  # CURL_INCLUDES
+check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file("io.h"             HAVE_IO_H)
-check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)  # CURL_INCLUDES
+check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
 check_include_file("net/if.h"         HAVE_NET_IF_H)
-check_include_file_concat("netdb.h"          HAVE_NETDB_H)  # CURL_INCLUDES
+check_include_file_concat("netdb.h"          HAVE_NETDB_H)
 check_include_file("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
 check_include_file("netinet/tcp.h"    HAVE_NETINET_TCP_H)
@@ -1469,11 +1469,11 @@ check_include_file("strings.h"        HAVE_STRINGS_H)
 check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
 check_include_file("termios.h"        HAVE_TERMIOS_H)
-check_include_file_concat("unistd.h"         HAVE_UNISTD_H)  # CURL_INCLUDES
+check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file("utime.h"          HAVE_UTIME_H)
 
 if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
-  check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)  # CURL_INCLUDES
+  check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
 # Pass these detection results to curl_internal_test() for use in CurlTests.c
