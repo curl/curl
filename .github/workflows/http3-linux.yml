@@ -291,10 +291,10 @@ jobs:
 
           - name: quiche
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
-              --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
+              LDFLAGS="-Wl,-rpath,$HOME/quiche/target/release"
+              --with-openssl=$HOME/quiche/quiche/deps/boringssl/src
               --enable-warnings --enable-werror --enable-debug
-              --with-quiche=/home/runner/quiche/target/release
+              --with-quiche=$HOME/quiche/target/release
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
 
@@ -417,9 +417,9 @@ jobs:
           ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
           # include dir
-          # /home/runner/quiche/quiche/deps/boringssl/src/include
+          # $HOME/quiche/quiche/deps/boringssl/src/include
           # lib dir
-          # /home/runner/quiche/quiche/deps/boringssl/src/lib
+          # $HOME/quiche/quiche/deps/boringssl/src/lib
         name: 'build quiche and boringssl'
 
       - name: cache mod_h2
