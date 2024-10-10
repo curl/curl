@@ -511,7 +511,7 @@ jobs:
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --parallel 5 --verbose
+            cmake --build . --verbose
           else
             make V=1
           fi
@@ -522,7 +522,7 @@ jobs:
       - name: 'build tests'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --parallel 5 --verbose --target testdeps
+            cmake --build . --verbose --target testdeps
           else
             make V=1 -C tests
           fi
@@ -551,7 +551,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --parallel 5 --verbose --target curl-examples
+            cmake --build . --verbose --target curl-examples
           else
             make V=1 examples
           fi

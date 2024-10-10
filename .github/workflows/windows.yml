@@ -153,7 +153,7 @@ jobs:
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}'
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
@@ -166,7 +166,7 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 15
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --target testdeps
 
       - name: 'cmake run tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -182,7 +182,7 @@ jobs:
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: cmake --build bld --config '${{ matrix.type }}' --target curl-examples
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -363,7 +363,7 @@ jobs:
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: cmake --build bld --config '${{ matrix.type }}'
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
@@ -378,7 +378,7 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: cmake --build bld --config '${{ matrix.type }}' --target testdeps
 
       - name: 'install test tools'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -407,7 +407,7 @@ jobs:
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: cmake --build bld --config '${{ matrix.type }}' --target curl-examples
 
   old-mingw-w64:
     name: 'old-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
@@ -595,15 +595,15 @@ jobs:
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --parallel 5
+        run: cmake --build bld
 
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --parallel 5 --target testdeps
+        run: cmake --build bld --target testdeps
 
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --parallel 5 --target curl-examples
+        run: cmake --build bld --target curl-examples
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'

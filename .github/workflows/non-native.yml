@@ -61,15 +61,15 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target testdeps
               export TFLAGS='-j4'
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
-            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            cmake --build bld --config Debug --target curl-examples
             echo '::endgroup::'
 
   openbsd:
@@ -97,15 +97,15 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
-            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            cmake --build bld --config Debug --target curl-examples
             echo '::endgroup::'
 
   freebsd:
@@ -168,14 +168,14 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            cmake --build bld --config Debug --parallel 3
+            cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target testdeps
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
-            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            cmake --build bld --config Debug --target curl-examples
             echo '::endgroup::'
 
   omnios:
