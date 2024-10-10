@@ -63,7 +63,7 @@ jobs:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     runs-on: 'ubuntu-latest'
     container: ${{ matrix.build.container }}
-    timeout-minutes: 90
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -260,7 +260,10 @@ jobs:
 
       - if: startsWith(matrix.build.container, 'alpine')
         run: |
-          apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
+          apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev \
+            zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev \
+            py3-impacket py3-asn1 py3-six py3-pycryptodomex \
+            perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
@@ -379,7 +382,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
-          git submodule update --init
+          git submodule update --init --depth=1
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
@@ -582,6 +585,11 @@ jobs:
       - name: 'configure log'
         if: ${{ !cancelled() }}
         run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          cat lib/curl_config.h | grep -F '#define' | sort || true
 
       - name: 'test configs'
         run: |

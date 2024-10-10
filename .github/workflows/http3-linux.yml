@@ -217,7 +217,7 @@ jobs:
           cd $HOME
           git clone --quiet --depth=1 -b v${{ env.nghttp3-version }} https://github.com/ngtcp2/nghttp3
           cd nghttp3
-          git submodule update --init
+          git submodule update --init --depth=1
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig" --enable-lib-only
           make
@@ -249,13 +249,13 @@ jobs:
           make install
         name: 'build nghttp2'
 
-  autotools:
-    name: ${{ matrix.build.name }}
+  linux:
+    name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs:
       - setup
       - build-cache
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 60
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -291,10 +291,10 @@ jobs:
 
           - name: quiche
             configure: >-
-              LDFLAGS="-Wl,-rpath,/home/runner/quiche/target/release"
-              --with-openssl=/home/runner/quiche/quiche/deps/boringssl/src
+              LDFLAGS="-Wl,-rpath,$HOME/quiche/target/release"
+              --with-openssl=$HOME/quiche/quiche/deps/boringssl/src
               --enable-warnings --enable-werror --enable-debug
-              --with-quiche=/home/runner/quiche/target/release
+              --with-quiche=$HOME/quiche/target/release
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
 
@@ -302,7 +302,7 @@ jobs:
       - run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
-          sudo apt-get install libtool autoconf automake pkgconf stunnel4 \
+          sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libev-dev libc-ares-dev \
             nettle-dev libp11-kit-dev libtspi-dev libunistring-dev guile-2.2-dev libtasn1-bin \
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
@@ -323,6 +323,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache gnutls
+        if: matrix.build.name == 'gnutls'
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-gnutls
         env:
@@ -333,6 +334,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache wolfssl
+        if: matrix.build.name == 'wolfssl'
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-wolfssl
         env:
@@ -417,9 +419,9 @@ jobs:
           ln -vnf $(find target/release -name libcrypto.a -o -name libssl.a) quiche/deps/boringssl/src/lib/
 
           # include dir
-          # /home/runner/quiche/quiche/deps/boringssl/src/include
+          # $HOME/quiche/quiche/deps/boringssl/src/include
           # lib dir
-          # /home/runner/quiche/quiche/deps/boringssl/src/lib
+          # $HOME/quiche/quiche/deps/boringssl/src/lib
         name: 'build quiche and boringssl'
 
       - name: cache mod_h2
@@ -431,7 +433,8 @@ jobs:
           path: /home/runner/mod_h2
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
 
-      - if: steps.cache-mod_h2.outputs.cache-hit != 'true'
+      - name: 'build mod_h2'
+        if: steps.cache-mod_h2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
           git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
@@ -439,12 +442,11 @@ jobs:
           autoreconf -fi
           ./configure
           make
-        name: 'build mod_h2'
 
-      - run: |
+      - name: 'install mod_h2'
+        run: |
           cd $HOME/mod_h2
           sudo make install
-        name: 'install mod_h2'
 
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
@@ -453,27 +455,80 @@ jobs:
         name: 'install python test prereqs'
 
       - run: autoreconf -fi
+        if: ${{ matrix.build.configure }}
         name: 'autoreconf'
 
-      - run: ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles ${{ matrix.build.configure }}
-        name: 'configure'
+      - name: 'configure'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake -B . -G Ninja \
+              -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+              ${{ matrix.build.generate }}
+          else
+            ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              ${{ matrix.build.configure }}
+          fi
 
-      - run: make V=1
-        name: 'make'
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - run: make V=1 -C tests
-        name: 'make tests'
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          cat lib/curl_config.h | grep -F '#define' | sort || true
 
-      - run: make V=1 test-ci
-        name: 'run tests'
+      - name: 'test configs'
+        run: |
+          cat tests/config || true
+          cat tests/http/config.ini || true
+
+      - name: 'build'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --parallel 5 --verbose
+          else
+            make V=1
+          fi
+
+      - run: ./src/curl -V
+        name: 'check curl -V output'
+
+      - name: 'build tests'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --parallel 5 --verbose --target testdeps
+          else
+            make V=1 -C tests
+          fi
+
+      - name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target test-ci
+          else
+            make V=1 test-ci
+          fi
 
-      - run: make pytest-ci
-        name: 'run pytest'
+      - name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --verbose --target curl-pytest-ci
+          else
+            make V=1 pytest-ci
+          fi
 
-      - run: make V=1 examples
-        name: 'make examples'
+      - name: 'build examples'
+        run: |
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            cmake --build . --parallel 5 --verbose --target curl-examples
+          else
+            make V=1 examples
+          fi
