@@ -370,6 +370,38 @@ static void wolfssl_bio_cf_free_methods(void)
 
 #endif /* !USE_BIO_CHAIN */
 
+static void wolfssl_session_free(void *sessionid, size_t idsize)
+{
+  (void)idsize;
+  wolfSSL_SESSION_free(sessionid);
+}
+
+static int wolfssl_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
+{
+  struct Curl_cfilter *cf;
+
+  cf = (struct Curl_cfilter*)wolfSSL_get_app_data(ssl);
+  DEBUGASSERT(cf != NULL);
+  if(cf && session) {
+    struct ssl_connect_data *connssl = cf->ctx;
+    struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    DEBUGASSERT(connssl);
+    DEBUGASSERT(data);
+    if(connssl && data) {
+      CURLcode result;
+      Curl_ssl_sessionid_lock(data);
+      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
+                                      session, 0, wolfssl_session_free);
+      Curl_ssl_sessionid_unlock(data);
+      if(result)
+        failf(data, "failed to add new ssl session to cache (%d)", result);
+      else
+        CURL_TRC_CF(data, cf, "added new session to cache");
+    }
+  }
+  return 1;
+}
+
 static CURLcode populate_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     X509_STORE *store,
@@ -1057,6 +1089,10 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->primary.cache_session) {
     void *ssl_sessionid = NULL;
 
+    /* Register to get notified when a new session is received */
+    wolfSSL_set_app_data(backend->handle, cf);
+    wolfSSL_CTX_sess_set_new_cb(backend->ctx, wolfssl_new_session_cb);
+
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
                               &ssl_sessionid, NULL, NULL)) {
@@ -1430,50 +1466,6 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
   return CURLE_OK;
 }
 
-
-static void wolfssl_session_free(void *sessionid, size_t idsize)
-{
-  (void)idsize;
-  wolfSSL_SESSION_free(sessionid);
-}
-
-
-static CURLcode
-wolfssl_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  CURLcode result = CURLE_OK;
-  struct ssl_connect_data *connssl = cf->ctx;
-  struct wolfssl_ctx *backend =
-    (struct wolfssl_ctx *)connssl->backend;
-  const struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-
-  DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
-  DEBUGASSERT(backend);
-
-  if(ssl_config->primary.cache_session) {
-    /* wolfSSL_get1_session allocates memory that has to be freed. */
-    WOLFSSL_SESSION *our_ssl_sessionid = wolfSSL_get1_session(backend->handle);
-
-    if(our_ssl_sessionid) {
-      Curl_ssl_sessionid_lock(data);
-      /* call takes ownership of `our_ssl_sessionid` */
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                      our_ssl_sessionid, 0,
-                                      wolfssl_session_free);
-      Curl_ssl_sessionid_unlock(data);
-      if(result) {
-        failf(data, "failed to store ssl session");
-        return result;
-      }
-    }
-  }
-
-  connssl->connecting_state = ssl_connect_done;
-
-  return result;
-}
-
-
 static ssize_t wolfssl_send(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             const void *mem,
@@ -1834,9 +1826,9 @@ wolfssl_connect_common(struct Curl_cfilter *cf,
   } /* repeat step2 until all transactions are done. */
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    result = wolfssl_connect_step3(cf, data);
-    if(result)
-      return result;
+    /* In other backends, this is where we verify the certificate, but
+     * wolfSSL already does that as part of the handshake. */
+    connssl->connecting_state = ssl_connect_done;
   }
 
   if(ssl_connect_done == connssl->connecting_state) {
