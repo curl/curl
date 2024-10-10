@@ -1208,7 +1208,7 @@ sftp_upload_init(struct Curl_easy *data,
           sftperr != LIBSSH2_FX_OK ?
           sftp_libssh2_strerror(sftperr) : "ssh error",
           sftperr, rc);
-    return CURLE_UPLOAD_FAILED;
+    return sshc->actualcode;
   }
 
   /* If we have a restart point then we need to seek to the correct
