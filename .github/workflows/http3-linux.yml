@@ -281,6 +281,12 @@ jobs:
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-wolfssl=$HOME/wolfssl/build
 
+          - name: wolfssl
+            generate: >-
+              -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON
+              -DTEST_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
+              -DHTTPD_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
+
           - name: openssl-quic
             configure: >-
               PKG_CONFIG_PATH="$HOME/openssl3/build/lib64/pkgconfig" LDFLAGS="-Wl,-rpath,$HOME/openssl3/build/lib64"
@@ -469,7 +475,9 @@ jobs:
       - name: 'configure'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            if [[ '${{ matrix.build.name }}' = 'quiche' ]]; then
+            if [[ '${{ matrix.build.name }}' = 'wolfssl' ]]; then
+              export PKG_CONFIG_PATH="$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig"
+            elif [[ '${{ matrix.build.name }}' = 'quiche' ]]; then
               export PKG_CONFIG_PATH="$HOME/quiche/target/release"
             fi
             cmake -B . -G Ninja \
