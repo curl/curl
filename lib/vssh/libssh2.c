@@ -1190,7 +1190,6 @@ sftp_upload_init(struct Curl_easy *data,
        (data->set.ftp_create_missing_dirs &&
         (strlen(sshp->path) > 1))) {
       /* try to create the path remotely */
-      rc = 0; /* clear rc and continue */
       sshc->secondCreateDirs = 1;
       state(data, SSH_SFTP_CREATE_DIRS_INIT);
       return CURLE_OK;
