@@ -118,6 +118,10 @@ struct mbed_ssl_backend_data {
 #define TLS13_SUPPORT
 #endif
 
+#if defined(TLS13_SUPPORT) && defined(MBEDTLS_SSL_SESSION_TICKETS)
+#define HAS_SESSION_TICKETS
+#endif
+
 #if defined(THREADING_SUPPORT)
 static mbedtls_entropy_context ts_entropy;
 
@@ -291,7 +295,8 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
     break;
 #endif
   default:
-    failf(data, "mbedTLS: unsupported minimum TLS version value");
+    failf(data, "mbedTLS: unsupported minimum TLS version value: %x",
+          conn_config->version);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -1113,17 +1118,15 @@ static void mbedtls_session_free(void *sessionid, size_t idsize)
 }
 
 static CURLcode
-mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
+mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
-  CURLcode retcode = CURLE_OK;
   struct ssl_connect_data *connssl = cf->ctx;
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+  CURLcode result = CURLE_OK;
 
-  DEBUGASSERT(ssl_connect_3 == connssl->connecting_state);
   DEBUGASSERT(backend);
-
   if(ssl_config->primary.cache_session) {
     int ret;
     mbedtls_ssl_session *our_ssl_sessionid;
@@ -1149,13 +1152,8 @@ mbed_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
                                      our_ssl_sessionid, 0,
                                      mbedtls_session_free);
     Curl_ssl_sessionid_unlock(data);
-    if(retcode)
-      return retcode;
   }
-
-  connssl->connecting_state = ssl_connect_done;
-
-  return CURLE_OK;
+  return result;
 }
 
 static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -1314,7 +1312,6 @@ static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   struct mbed_ssl_backend_data *backend =
     (struct mbed_ssl_backend_data *)connssl->backend;
   int ret = -1;
-  ssize_t len = -1;
 
   (void)data;
   DEBUGASSERT(backend);
@@ -1324,24 +1321,31 @@ static ssize_t mbed_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(ret <= 0) {
     CURL_TRC_CF(data, cf, "mbedtls_ssl_read(len=%zu) -> -0x%04X",
                 buffersize, -ret);
-    if(ret == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY)
-      return 0;
-    *curlcode = ((ret == MBEDTLS_ERR_SSL_WANT_READ)
-#ifdef TLS13_SUPPORT
-              || (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
+    switch(ret) {
+#ifdef HAS_SESSION_TICKETS
+    case MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET:
+      mbed_new_session(cf, data);
+      FALLTHROUGH();
 #endif
-    ) ? CURLE_AGAIN : CURLE_RECV_ERROR;
-    if(*curlcode != CURLE_AGAIN) {
+    case MBEDTLS_ERR_SSL_WANT_READ:
+      *curlcode = CURLE_AGAIN;
+      ret = -1;
+      break;
+    case MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY:
+      *curlcode = CURLE_OK;
+      ret = 0;
+      break;
+    default: {
       char errorbuf[128];
       mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
       failf(data, "ssl_read returned: (-0x%04X) %s", -ret, errorbuf);
+      *curlcode = CURLE_RECV_ERROR;
+      ret = -1;
+      break;
     }
-    return -1;
+    }
   }
-
-  len = ret;
-
-  return len;
+  return (ssize_t)ret;
 }
 
 static size_t mbedtls_version(char *buffer, size_t size)
@@ -1486,9 +1490,22 @@ mbed_connect_common(struct Curl_cfilter *cf, struct Curl_easy *data,
   } /* repeat step2 until all transactions are done. */
 
   if(ssl_connect_3 == connssl->connecting_state) {
-    retcode = mbed_connect_step3(cf, data);
-    if(retcode)
-      return retcode;
+    /* For tls1.3 we get notified about new sessions */
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
+    struct ssl_connect_data *ctx = cf->ctx;
+    struct mbed_ssl_backend_data *backend =
+      (struct mbed_ssl_backend_data *)ctx->backend;
+
+    if(mbedtls_ssl_get_version_number(&backend->ssl) <=
+       MBEDTLS_SSL_VERSION_TLS1_2) {
+#else
+    {  /* no TLSv1.3 supported here */
+#endif
+      retcode = mbed_new_session(cf, data);
+      if(retcode)
+        return retcode;
+    }
+    connssl->connecting_state = ssl_connect_done;
   }
 
   if(ssl_connect_done == connssl->connecting_state) {

@@ -74,7 +74,8 @@ class TestSSLUse:
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('bearssl') and tls_max == '1.3':
             pytest.skip('BearSSL does not support TLSv1.3')
-        if env.curl_uses_lib('mbedtls') and tls_max == '1.3':
+        if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
+           not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working in 3.6.0')
 
         curl = CurlClient(env=env)
@@ -223,6 +224,9 @@ class TestSSLUse:
             if tls_proto == 'TLSv1.3':
                 pytest.skip('BearSSL does not support TLSv1.3')
             tls_proto = 'TLSv1.2'
+        elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
+            if tls_proto == 'TLSv1.3':
+                pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
         elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
             if tls_proto == 'TLSv1.3':
                 pytest.skip('Secure Transport does not support TLSv1.3')
