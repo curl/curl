@@ -70,7 +70,11 @@ function(add_pytest _targetname _test_flags)
   if(NOT _targetname STREQUAL "pytest-ci")
     set(_depends "test-http-clients")
   endif()
-  string(REPLACE " " ";" _test_flags_list "${_test_flags}")
+  if(DEFINED PYTEST_FLAGS)
+    string(REPLACE " " ";" _test_flags_list "${PYTEST_FLAGS}")
+  else()
+    string(REPLACE " " ";" _test_flags_list "${_test_flags}")
+  endif()
   add_custom_target(${_targetname}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMAND pytest ${_test_flags_list} "${CMAKE_CURRENT_SOURCE_DIR}/http"

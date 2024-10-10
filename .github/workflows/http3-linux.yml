@@ -543,7 +543,7 @@ jobs:
           CURL_CI: github
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-pytest-ci
+            cmake --build . --verbose --target curl-pytest-ci -DPYTEST_FLAGS="-v --astropy-header"
           else
             make V=1 pytest-ci PYTESTFLAGS="-v --astropy-header"
           fi
