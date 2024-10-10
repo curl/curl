@@ -431,7 +431,8 @@ jobs:
           path: /home/runner/mod_h2
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
 
-      - if: steps.cache-mod_h2.outputs.cache-hit != 'true'
+      - name: 'build mod_h2'
+        if: steps.cache-mod_h2.outputs.cache-hit != 'true'
         run: |
           cd $HOME
           git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
@@ -439,12 +440,11 @@ jobs:
           autoreconf -fi
           ./configure
           make
-        name: 'build mod_h2'
 
-      - run: |
+      - name: 'install mod_h2'
+        run: |
           cd $HOME/mod_h2
           sudo make install
-        name: 'install mod_h2'
 
       - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
 
@@ -455,25 +455,25 @@ jobs:
       - run: autoreconf -fi
         name: 'autoreconf'
 
-      - run: ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles ${{ matrix.build.configure }}
-        name: 'configure'
+      - name: 'configure'
+        run: ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles ${{ matrix.build.configure }}
 
-      - run: make V=1
-        name: 'make'
+      - name: 'make'
+        run: make V=1
 
-      - run: make V=1 -C tests
-        name: 'make tests'
+      - name: 'make tests'
+        run: make V=1 -C tests
 
-      - run: make V=1 test-ci
-        name: 'run tests'
+      - name: 'run tests'
+        run: make V=1 test-ci
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
 
-      - run: make pytest-ci
-        name: 'run pytest'
+      - name: 'run pytest'
+        run: make pytest-ci
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
 
-      - run: make V=1 examples
-        name: 'make examples'
+      - name: 'make examples'
+        run: make V=1 examples
