@@ -116,6 +116,7 @@ jobs:
           - name: mbedtls
             install_packages: libnghttp2-dev
             install_steps: mbedtls
+            PKG_CONFIG_PATH: '$HOME/mbedtls/lib/pkgconfig'  # Requires v3.6.0 or upper
             generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
 
           - name: mbedtls-pkg
@@ -130,6 +131,7 @@ jobs:
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3 skipall
+            PKG_CONFIG_PATH: '$HOME/msh3/lib/pkgconfig'  # Broken as of v0.6.0
             generate: -DOPENSSL_ROOT_DIR=$HOME/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=$HOME/msh3/include -DMSH3_LIBRARY=$HOME/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
           - name: awslc
@@ -240,6 +242,7 @@ jobs:
           - name: rustls
             install_packages: libpsl-dev
             install_steps: rust rustls skipall
+            PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
             generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
 
           - name: IntelC !SSL
@@ -585,17 +588,10 @@ jobs:
       - name: 'configure'
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
+          if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
+            export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
+          fi
           if [ -n '${{ matrix.build.generate }}' ]; then
-            if [[ '${{ matrix.build.install_steps }}' = *'mbedtls'* ]]; then
-              # Requires v3.6.0 or upper
-              export PKG_CONFIG_PATH="$HOME/mbedtls/lib/pkgconfig"
-            elif [[ '${{ matrix.build.install_steps }}' = *'msh3'* ]]; then
-              # Broken as of v0.6.0
-              export PKG_CONFIG_PATH="$HOME/msh3/lib/pkgconfig"
-            elif [[ '${{ matrix.build.install_steps }}' = *'rustls'* ]]; then
-              # Not built as of v0.14.0
-              export PKG_CONFIG_PATH="$HOME/rustls/lib/pkgconfig"
-            fi
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
