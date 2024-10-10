@@ -856,12 +856,10 @@ Curl_cookie_add(struct Curl_easy *data,
     int fields;
 
     /*
-     * IE introduced HTTP-only cookies to prevent XSS attacks. Cookies marked
-     * with httpOnly after the domain name are not accessible from javascripts,
-     * but since curl does not operate at javascript level, we include them
-     * anyway. In Firefox's cookie files, these lines are preceded with
-     * #HttpOnly_ and then everything is as usual, so we skip 10 characters of
-     * the line..
+     * In 2008, Internet Explorer introduced HTTP-only cookies to prevent XSS
+     * attacks. Cookies marked httpOnly are not accessible to JavaScript. In
+     * Firefox's cookie files, they are prefixed #HttpOnly_ and the rest
+     * remains as usual, so we skip 10 characters of the line.
      */
     if(strncmp(lineptr, "#HttpOnly_", 10) == 0) {
       lineptr += 10;
