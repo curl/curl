@@ -159,8 +159,7 @@ jobs:
       - name: 'toolchain versions'
         run: |
           [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && \
-            grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
+          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
@@ -326,8 +325,7 @@ jobs:
       - name: 'toolchain versions'
         run: |
           [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && \
-            grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
+          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
@@ -488,8 +486,7 @@ jobs:
       - name: 'toolchain versions'
         run: |
           [[ '${{ matrix.compiler }}' = 'llvm'* ]] && CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && \
-            grep -h -r -E -o '.+[0-9.]+\.sdk/' "$(dirname "$("${CC}" -print-libgcc-file-name)")/include-fixed" | sed -E 's/^\t+//g' | tr -d '"' | sort -u || true
+          [[ '${{ matrix.compiler }}' = 'gcc'* ]] && "${CC}" --print-sysroot
           which "${CC}"; "${CC}" --version || true
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
