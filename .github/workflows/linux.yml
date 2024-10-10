@@ -367,15 +367,15 @@ jobs:
       - name: cache mbedtls
         if: contains(matrix.build.install_steps, 'mbedtls')
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
-        id: cache-mbedtls
+        id: cache-mbedtlsRwD
         env:
-          cache-name: cache-mbedtls
+          cache-name: cache-mbedtlsRwD
         with:
           path: /home/runner/mbedtls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mbedtls-version }}
 
       - name: 'build mbedtls'
-        if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
+        if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtlsRwD.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
