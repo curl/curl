@@ -67,9 +67,6 @@ class TestSSLUse:
         if env.curl_uses_lib('libressl'):
             if tls_max == '1.3':
                 exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
-        if env.curl_uses_lib('wolfssl'):
-            if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in wolfSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('bearssl') and tls_max == '1.3':
