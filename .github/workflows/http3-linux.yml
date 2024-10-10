@@ -487,7 +487,7 @@ jobs:
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DPYTEST_FLAGS="-v --astropy-header" \
               ${{ matrix.build.generate }}
           else
             ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
@@ -543,7 +543,7 @@ jobs:
           CURL_CI: github
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target curl-pytest-ci -DPYTEST_FLAGS="-v --astropy-header"
+            cmake --build . --verbose --target curl-pytest-ci
           else
             make V=1 pytest-ci PYTESTFLAGS="-v --astropy-header"
           fi
