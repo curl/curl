@@ -323,6 +323,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache gnutls
+        if: matrix.build.name == 'gnutls'
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-gnutls
         env:
@@ -333,6 +334,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache wolfssl
+        if: matrix.build.name == 'wolfssl'
         uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
         id: cache-wolfssl
         env:
