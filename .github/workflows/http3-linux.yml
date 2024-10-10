@@ -285,7 +285,7 @@ jobs:
               --with-wolfssl=$HOME/wolfssl/build
 
           - name: wolfssl
-            PKG_CONFIG_PATH: '$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig'
+            PKG_CONFIG_PATH: '$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig'
             generate: >-
               -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON -DENABLE_DEBUG=ON
               -DTEST_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
