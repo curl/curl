@@ -3928,10 +3928,10 @@ dnl default includes
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
+#include <netinet/in6.h>  /* is this really required to detect other headers? */
 #endif
 #ifdef HAVE_SYS_UN_H
-#include <sys/un.h>
+#include <sys/un.h>  /* is this really required to detect other headers? */
 #endif
 ]
 )

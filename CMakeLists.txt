@@ -1431,6 +1431,11 @@ if(WIN32)
   endif()
 endif()
 
+# Detect headers
+
+# Use check_include_file_concat() for headers required by subsequent
+# check_include_file_concat() or check_symbol_exists() detections.
+# Order for these is significant.
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
 check_include_file("sys/wait.h"       HAVE_SYS_WAIT_H)
@@ -1447,6 +1452,7 @@ check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file("sys/xattr.h"      HAVE_SYS_XATTR_H)
+
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file("dirent.h"         HAVE_DIRENT_H)
 check_include_file("fcntl.h"          HAVE_FCNTL_H)
@@ -1457,10 +1463,10 @@ check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
 check_include_file("net/if.h"         HAVE_NET_IF_H)
 check_include_file_concat("netdb.h"          HAVE_NETDB_H)
-check_include_file("netinet/in.h"     HAVE_NETINET_IN_H)
+check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
-check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (Cygwin)
-check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (Cygwin)
+check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
+check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
 check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
@@ -1477,6 +1483,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
 endif()
 
 # Pass these detection results to curl_internal_test() for use in CurlTests.c
+# Add here all feature flags referenced from CurlTests.c
 foreach(_variable IN ITEMS
     HAVE_STDATOMIC_H
     HAVE_STDBOOL_H
