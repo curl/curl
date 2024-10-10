@@ -298,6 +298,14 @@ jobs:
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-ca-fallback
 
+          - name: quiche
+            generate: >-
+              -DOPENSSL_ROOT_DIR=$HOME/quiche/quiche/deps/boringssl/src -DENABLE_DEBUG=ON
+              -DUSE_QUICHE=ON
+              -DTEST_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
+              -DHTTPD_NGHTTPX="$HOME/nghttp2/build/bin/nghttpx"
+              -DCURL_CA_FALLBACK=ON
+
     steps:
       - run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -461,6 +469,9 @@ jobs:
       - name: 'configure'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
+            if [[ '${{ matrix.build.name }}' = 'quiche' ]]; then
+              export PKG_CONFIG_PATH="$HOME/quiche/target/release"
+            fi
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
