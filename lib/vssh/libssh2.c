@@ -1112,7 +1112,6 @@ sftp_upload_init(struct Curl_easy *data,
                  bool *blockp)
 {
   unsigned long flags;
-  int rc;
 
   /*
    * NOTE!!!  libssh2 requires that the destination path is a full path
@@ -1124,9 +1123,9 @@ sftp_upload_init(struct Curl_easy *data,
   if(data->state.resume_from) {
     LIBSSH2_SFTP_ATTRIBUTES attrs;
     if(data->state.resume_from < 0) {
-      rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshp->path,
-                                curlx_uztoui(strlen(sshp->path)),
-                                LIBSSH2_SFTP_STAT, &attrs);
+      int rc = libssh2_sftp_stat_ex(sshc->sftp_session, sshp->path,
+                                    curlx_uztoui(strlen(sshp->path)),
+                                    LIBSSH2_SFTP_STAT, &attrs);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         *blockp = TRUE;
         return CURLE_OK;
@@ -1163,7 +1162,7 @@ sftp_upload_init(struct Curl_easy *data,
 
   if(!sshc->sftp_handle) {
     unsigned long sftperr;
-    rc = libssh2_session_last_errno(sshc->ssh_session);
+    int rc = libssh2_session_last_errno(sshc->ssh_session);
 
     if(LIBSSH2_ERROR_EAGAIN == rc) {
       *blockp = TRUE;
