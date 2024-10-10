@@ -723,18 +723,14 @@ parse_cookie_header(struct Curl_easy *data,
         }
       }
       else if((nlen == 7) && strncasecompare("expires", namep, 7)) {
-        char date[128];
-        if(!co->expires && (vlen < sizeof(date))) {
-          /* copy the date so that it can be null terminated */
-          memcpy(date, valuep, vlen);
-          date[vlen] = 0;
+        if(!co->expires) {
           /*
            * Let max-age have priority.
            *
            * If the date cannot get parsed for whatever reason, the cookie
            * will be treated as a session cookie
            */
-          co->expires = Curl_getdate_capped(date);
+          co->expires = Curl_getdate_capped(valuep);
 
           /*
            * Session cookies have expires set to 0 so if we get that back
