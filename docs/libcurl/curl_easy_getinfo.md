@@ -114,7 +114,7 @@ List of all known cookies. See CURLINFO_COOKIELIST(3)
 
 ## CURLINFO_EARLYDATA_SENT_T
 
-Amount of TLS earlydata sent (in number of bytes) when
+Amount of TLS early data sent (in number of bytes) when
 CURLSSLOPT_EARLYDATA is enabled.
 
 ## CURLINFO_EFFECTIVE_METHOD
