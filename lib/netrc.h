@@ -26,9 +26,19 @@
 
 #include "curl_setup.h"
 #ifndef CURL_DISABLE_NETRC
+#include "dynbuf.h"
+
+struct store_netrc {
+  struct dynbuf filebuf;
+  char *filename;
+  BIT(loaded);
+};
+
+void Curl_netrc_init(struct store_netrc *s);
+void Curl_netrc_cleanup(struct store_netrc *s);
 
 /* returns -1 on failure, 0 if the host is found, 1 is the host is not found */
-int Curl_parsenetrc(const char *host, char **loginp,
+int Curl_parsenetrc(struct store_netrc *s, const char *host, char **loginp,
                     char **passwordp, char *filename);
   /* Assume: (*passwordp)[0]=0, host[0] != 0.
    * If (*loginp)[0] = 0, search for login and password within a machine
@@ -38,6 +48,8 @@ int Curl_parsenetrc(const char *host, char **loginp,
 #else
 /* disabled */
 #define Curl_parsenetrc(a,b,c,d,e,f) 1
+#define Curl_netrc_init(x)
+#define Curl_netrc_cleanup(x)
 #endif
 
 #endif /* HEADER_CURL_NETRC_H */

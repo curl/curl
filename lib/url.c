@@ -338,6 +338,7 @@ CURLcode Curl_close(struct Curl_easy **datap)
   Curl_wildcard_dtor(&data->wildcard);
   Curl_freeset(data);
   Curl_headers_cleanup(data);
+  Curl_netrc_cleanup(&data->state.netrc);
   free(data);
   return CURLE_OK;
 }
@@ -545,6 +546,7 @@ CURLcode Curl_open(struct Curl_easy **curl)
 #ifndef CURL_DISABLE_HTTP
     Curl_llist_init(&data->state.httphdrs, NULL);
 #endif
+    Curl_netrc_init(&data->state.netrc);
   }
 
   if(result) {
@@ -2689,7 +2691,7 @@ static CURLcode override_login(struct Curl_easy *data,
       url_provided = TRUE;
     }
 
-    ret = Curl_parsenetrc(conn->host.name,
+    ret = Curl_parsenetrc(&data->state.netrc, conn->host.name,
                           userp, passwdp,
                           data->set.str[STRING_NETRC_FILE]);
     if(ret > 0) {

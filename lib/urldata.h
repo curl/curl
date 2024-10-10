@@ -163,6 +163,7 @@ typedef unsigned int curl_prot_t;
 #include "dynbuf.h"
 #include "dynhds.h"
 #include "request.h"
+#include "netrc.h"
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
@@ -1311,6 +1312,10 @@ struct UrlState {
 
 #ifndef CURL_DISABLE_VERBOSE_STRINGS
   struct curl_trc_feat *feat; /* opt. trace feature transfer is part of */
+#endif
+
+#ifndef CURL_DISABLE_NETRC
+  struct store_netrc netrc;
 #endif
 
   /* Dynamically allocated strings, MUST be freed before this struct is
