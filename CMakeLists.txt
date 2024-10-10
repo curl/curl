@@ -1455,7 +1455,7 @@ check_include_file("io.h"             HAVE_IO_H)
 check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)  # CURL_INCLUDES
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
-check_include_file_concat("net/if.h"         HAVE_NET_IF_H)  # CURL_INCLUDES
+check_include_file("net/if.h"         HAVE_NET_IF_H)
 check_include_file_concat("netdb.h"          HAVE_NETDB_H)  # CURL_INCLUDES
 check_include_file("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
