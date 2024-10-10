@@ -71,10 +71,13 @@ class TestSSLUse:
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('bearssl') and tls_max == '1.3':
             pytest.skip('BearSSL does not support TLSv1.3')
-        if env.curl_uses_lib('mbedtls') and tls_max == '1.3':
+        if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
+           not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working in 3.6.0')
 
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'ssl'
+        curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo?'\
                f'id=[0-{count-1}]&close'
@@ -91,9 +94,9 @@ class TestSSLUse:
                 djson = json.load(f)
             assert djson['HTTPS'] == 'on', f'{i}: {djson}'
             if i == 0:
-                assert djson['SSL_SESSION_RESUMED'] == 'Initial', f'{i}: {djson}'
+                assert djson['SSL_SESSION_RESUMED'] == 'Initial', f'{i}: {djson}\n{r.dump_logs()}'
             else:
-                assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}'
+                assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}\n{r.dump_logs()}'
 
     # use host name with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -220,6 +223,9 @@ class TestSSLUse:
             if tls_proto == 'TLSv1.3':
                 pytest.skip('BearSSL does not support TLSv1.3')
             tls_proto = 'TLSv1.2'
+        elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
+            if tls_proto == 'TLSv1.3':
+                pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
         elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
             if tls_proto == 'TLSv1.3':
                 pytest.skip('Secure Transport does not support TLSv1.3')
