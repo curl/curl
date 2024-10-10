@@ -469,6 +469,15 @@ jobs:
               ${{ matrix.build.configure }}
           fi
 
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'test configs'
+        run: |
+          cat tests/config || true
+          cat tests/http/config.ini || true
+
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
@@ -476,6 +485,9 @@ jobs:
           else
             make V=1
           fi
+
+      - run: ./src/curl -V
+        name: 'check curl -V output'
 
       - name: 'build tests'
         run: |
