@@ -1523,17 +1523,17 @@ elseif(HAVE_LIBSOCKET)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")  # Apply to all feature checks
 endif()
 
-check_function_exists("fnmatch"       HAVE_FNMATCH)  # FUNCTION!
+check_function_exists("fnmatch"       HAVE_FNMATCH)
 check_symbol_exists("basename"        "${CURL_INCLUDES};string.h" HAVE_BASENAME)  # libgen.h unistd.h
 check_symbol_exists("opendir"         "dirent.h" HAVE_OPENDIR)
-check_function_exists("poll"          HAVE_POLL)  # poll.h  # FUNCTION!
+check_function_exists("poll"          HAVE_POLL)  # poll.h
 check_symbol_exists("socket"          "${CURL_INCLUDES}" HAVE_SOCKET)  # winsock2.h sys/socket.h
-check_function_exists("sched_yield"   HAVE_SCHED_YIELD)  # FUNCTION!
+check_function_exists("sched_yield"   HAVE_SCHED_YIELD)
 check_symbol_exists("socketpair"      "${CURL_INCLUDES}" HAVE_SOCKETPAIR)  # sys/socket.h
 check_symbol_exists("recv"            "${CURL_INCLUDES}" HAVE_RECV)  # proto/bsdsocket.h sys/types.h sys/socket.h
 check_symbol_exists("send"            "${CURL_INCLUDES}" HAVE_SEND)  # proto/bsdsocket.h sys/types.h sys/socket.h
-check_function_exists("sendmsg"       HAVE_SENDMSG)  # FUNCTION!
-check_function_exists("sendmmsg"      HAVE_SENDMMSG)  # FUNCTION!
+check_function_exists("sendmsg"       HAVE_SENDMSG)
+check_function_exists("sendmmsg"      HAVE_SENDMMSG)
 check_symbol_exists("select"          "${CURL_INCLUDES}" HAVE_SELECT)  # proto/bsdsocket.h sys/select.h sys/socket.h
 check_symbol_exists("strdup"          "string.h" HAVE_STRDUP)
 check_symbol_exists("strtok_r"        "string.h" HAVE_STRTOK_R)
@@ -1543,17 +1543,17 @@ check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 check_symbol_exists("memrchr"         "string.h" HAVE_MEMRCHR)
 check_symbol_exists("alarm"           "unistd.h" HAVE_ALARM)
 check_symbol_exists("fcntl"           "fcntl.h" HAVE_FCNTL)
-check_function_exists("getppid"       HAVE_GETPPID)  # FUNCTION!
-check_function_exists("utimes"        HAVE_UTIMES)  # FUNCTION!
+check_function_exists("getppid"       HAVE_GETPPID)
+check_function_exists("utimes"        HAVE_UTIMES)
 
-check_function_exists("gettimeofday"  HAVE_GETTIMEOFDAY)  # sys/time.h  # FUNCTION!
+check_function_exists("gettimeofday"  HAVE_GETTIMEOFDAY)  # sys/time.h
 check_symbol_exists("closesocket"     "${CURL_INCLUDES}" HAVE_CLOSESOCKET)  # winsock2.h
 check_symbol_exists("sigsetjmp"       "setjmp.h" HAVE_SIGSETJMP)
-check_function_exists("getpass_r"     HAVE_GETPASS_R)  # FUNCTION!
-check_function_exists("getpwuid"      HAVE_GETPWUID)  # FUNCTION!
-check_function_exists("getpwuid_r"    HAVE_GETPWUID_R)  # FUNCTION!
-check_function_exists("geteuid"       HAVE_GETEUID)  # FUNCTION!
-check_function_exists("utime"         HAVE_UTIME)  # FUNCTION!
+check_function_exists("getpass_r"     HAVE_GETPASS_R)
+check_function_exists("getpwuid"      HAVE_GETPWUID)
+check_function_exists("getpwuid_r"    HAVE_GETPWUID_R)
+check_function_exists("geteuid"       HAVE_GETEUID)
+check_function_exists("utime"         HAVE_UTIME)
 check_symbol_exists("gmtime_r"        "stdlib.h;time.h" HAVE_GMTIME_R)
 
 check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
@@ -1566,17 +1566,17 @@ check_symbol_exists("siginterrupt"    "signal.h" HAVE_SIGINTERRUPT)
 check_symbol_exists("getaddrinfo"     "${CURL_INCLUDES};stdlib.h;string.h" HAVE_GETADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
 check_symbol_exists("getifaddrs"      "${CURL_INCLUDES};stdlib.h" HAVE_GETIFADDRS)  # ifaddrs.h
 check_symbol_exists("freeaddrinfo"    "${CURL_INCLUDES}" HAVE_FREEADDRINFO)  # ws2tcpip.h sys/socket.h netdb.h
-check_function_exists("pipe"          HAVE_PIPE)  # FUNCTION!
-check_function_exists("eventfd"       HAVE_EVENTFD)  # FUNCTION!
+check_function_exists("pipe"          HAVE_PIPE)
+check_function_exists("eventfd"       HAVE_EVENTFD)
 check_symbol_exists("ftruncate"       "unistd.h" HAVE_FTRUNCATE)
-check_function_exists("_fseeki64"     HAVE__FSEEKI64)  # FUNCTION!
+check_function_exists("_fseeki64"     HAVE__FSEEKI64)
 check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
-check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # winsock2.h net/if.h  # FUNCTION!
-check_function_exists("getrlimit"       HAVE_GETRLIMIT)  # FUNCTION!
-check_function_exists("setlocale"       HAVE_SETLOCALE)  # FUNCTION!
-check_function_exists("setmode"         HAVE_SETMODE)  # FUNCTION!
-check_function_exists("setrlimit"       HAVE_SETRLIMIT)  # FUNCTION!
+check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # winsock2.h net/if.h
+check_function_exists("getrlimit"       HAVE_GETRLIMIT)
+check_function_exists("setlocale"       HAVE_SETLOCALE)
+check_function_exists("setmode"         HAVE_SETMODE)
+check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
 if(WIN32 OR CYGWIN)
   check_function_exists("_setmode" HAVE__SETMODE)
@@ -1592,7 +1592,7 @@ endif()
 
 if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1900))
   # Earlier MSVC compilers had faulty snprintf implementations
-  check_function_exists("snprintf" HAVE_SNPRINTF)  # FUNCTION!
+  check_function_exists("snprintf" HAVE_SNPRINTF)
 endif()
 check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h
