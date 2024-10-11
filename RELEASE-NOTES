@@ -1,16 +1,17 @@
 curl and libcurl 8.11.0
 
  Public curl releases:         262
- Command line options:         265
+ Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3251
+ Contributors:                 3255
 
 This release includes the following changes:
 
  o curl: --create-dirs works for --dump-header as well [4]
  o gtls: Add P12 format support [9]
  o ipfs: add options to disable [8]
+ o TLS: TLSv1.3 earlydata support for curl [140]
  o WebSockets: make support official (non-experimental) [106]
 
 This release includes the following bugfixes:
@@ -36,7 +37,9 @@ This release includes the following bugfixes:
  o cmake, Makefile.mk: use -isystem for headers, silence BearSSL issues [37]
  o cmake/FindNGTCP2: use library path as hint for finding crypto module [40]
  o cmake: add missed variable to comment
+ o cmake: add native `pkg-config` detection for mbedTLS, MSH3, Quiche, Rustls, wolfSSL [149]
  o cmake: allow building tests in unity mode [31]
+ o cmake: allow manual configuration for LDAP [144]
  o cmake: delete unused NEED_LBER_H, HAVE_LDAP_H [38]
  o cmake: detect `HAVE_NETINET_IN6_H`, `HAVE_CLOSESOCKET_CAMEL`, `HAVE_PROTO_BSDSOCKET_H` [132]
  o cmake: detect GNU GSS [127]
@@ -48,8 +51,10 @@ This release includes the following bugfixes:
  o cmake: fix broken dependency chain for cmdline-opts, tidy-ups [11]
  o cmake: make `test-ci` target skip building dependencies [88]
  o cmake: readd `generate-curl.1` dependency for `src` just in case [86]
+ o cmake: replace `check_include_file_concat()` for LDAP and GSS detection [143]
  o cmake: require quictls (or fork) when using msh3 on non-Windows [14]
  o cmake: separate target for examples, optimize CI, fix fallouts [16]
+ o cmake: stop adding dependency headers to global `CMAKE_REQUIRED_INCLUDES` [146]
  o cmake: sync torture test parallelism with autotools [35]
  o cmake: use OpenSSL for LDAP detection only if available [102]
  o configure: add GSS to `libcurl.pc` `Depends:` [126]
@@ -58,6 +63,7 @@ This release includes the following bugfixes:
  o configure: drop unused bare `socket.h` detection [133]
  o configure: improve help string for some options [78]
  o conncache: find bundle again in case it is removed [129]
+ o cookie: overhaul and cleanup [142]
  o curl: add build options for safe/no CA bundle search (Windows) [26]
  o curl_trc: fix build with verbose messages disabled [79]
  o curl_url_set.md: document HOST handling when URL is parsed [2]
@@ -68,8 +74,10 @@ This release includes the following bugfixes:
  o ech: spelling, whitespace, say `--ech` default config [137]
  o ftp: fix 0-length last write on upload from stdin [76]
  o hsts: avoid the local buffer and memcpy on lookup [125]
+ o hsts: improve subdomain handling [158]
  o http_aws_sigv4: avoid local buffer and strcpy [92]
  o INSTALL-CMAKE.md: mention focus on shared libraries [73]
+ o INSTALL.md: fix a typo that slipped in to RISC OS
  o json.md: cli-option `--json` is an alias of `--data-binary` [89]
  o lib, src, tests: added space around ternary expressions [56]
  o lib/cw-out: initialize 'flush_all' directly [62]
@@ -83,11 +91,15 @@ This release includes the following bugfixes:
  o multi.c: make stronger check for paused transfer before asserting [24]
  o multi.c: warn/assert on stall only without timer [80]
  o multi: avoid reading whole struct pointer from pointer [10]
+ o multi: convert Curl_follow to static multi_follow [141]
+ o multi: make curl_multi_cleanup invalidate magic latter [159]
  o multi: make multi_handle_timeout use the connect timeout [98]
  o negotiate: conditional check around GSS & SSL specific code [1]
+ o netrc: cache the netrc file in memory [138]
  o openssl quic: populate x509 store before handshake [117]
  o openssl: convert a memcpy to dynbuf use [57]
  o openssl: remove two strcpy() calls [64]
+ o packages/OS400/curlmain: remove the strncpy calls [155]
  o processhelp.pm: improve taskkill calls (Windows) [52]
  o pytest: improve pytest_07_42a reliability [118]
  o quic: use send/recvmmsg when available [93]
@@ -111,6 +123,7 @@ This release includes the following bugfixes:
  o test2502: add libtest debug tracing [60]
  o test504: fix handling on pending connect [59]
  o testrun: explicitly set proper IP address for stunnel listen/connect [61]
+ o tests/server/util.c: remove use of strncpy [156]
  o tests/valgrind.pm: fix warnings with no valgrind report to show [25]
  o tests/valgrind.supp: remove a travis suppression, add a Debian [116]
  o tests: add and use `%PERL` variable to refer to the Perl binary [82]
@@ -147,6 +160,7 @@ This release includes the following bugfixes:
  o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
  o tool: support --show-headers AND --remote-header-name [103]
  o tool_doswin: simplify; remove unused options and strncpy calls [65]
+ o tool_getparam: replace two uses of strncpy(), ban strncpy [157]
  o unit1660: fix unreachable code warning in no-SSL builds [30]
  o url: connection reuse on h3 connections [20]
  o urlapi: drop unused header [51]
@@ -155,6 +169,7 @@ This release includes the following bugfixes:
  o vtls: convert pubkey_pem_to_der to use dynbuf [90]
  o warnless: remove curlx_sktosi and curlx_sitosk [104]
  o wolfssl: convert malloc + memcpys to dynbuf for cipher string [96]
+ o wolfssl: use old version API without openssl extra [160]
 
 This release includes the following known bugs:
 
@@ -174,15 +189,16 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aki Sakurai, Baruch Siach, Chris Stubbs, Dan Fandrich, Daniel Stenberg,
-  Denis Goleshchikhin, Deniz Sökmen, dependabot[bot], Gabriel Marin,
-  Ian Spence, Jon Rumsey, Kai Pastor, lomberd2 on github, MacKenzie,
-  Montg0mery on github, Moritz Knüsel, Nemos2024 on github, Nicolas George,
-  Pavel Kropachev, ralfjunker on github, Rasmus Melchior Jacobsen, Ray Satiro,
-  renovate[bot], Sebastian Walz, Stefan Eissing, Tal Regev,
+  ad-chaos on github, Aki Sakurai, Baruch Siach, Chris Stubbs, Colton Willey,
+  Dan Fandrich, Daniel Stenberg, Denis Goleshchikhin, Deniz Sökmen,
+  dependabot[bot], Emanuel Komínek, Gabriel Marin, Ian Spence, Jon Rumsey,
+  Kai Pastor, lomberd2 on github, MacKenzie, Montg0mery on github,
+  Moritz Knüsel, Nemos2024 on github, Nicolas George, Pavel Kropachev,
+  Pierre-Etienne Meunier, ralfjunker on github, Rasmus Melchior Jacobsen,
+  Ray Satiro, renovate[bot], Sebastian Walz, Stefan Eissing, Tal Regev,
   Tatsuhiro Tsujikawa, Testclutch, Venkat Krishna R, Viktor Szakats,
   Vollstrecker on github, vvb2060 on github
-  (32 contributors)
+  (36 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -308,7 +324,6 @@ References to bug reports and discussions on issues:
  [120] = https://curl.se/bug/?i=15194
  [121] = https://curl.se/bug/?i=15136
  [122] = https://curl.se/bug/?i=15196
- [123] = https://curl.se/bug/?i=15135
  [124] = https://curl.se/bug/?i=15191
  [125] = https://curl.se/bug/?i=15190
  [126] = https://curl.se/bug/?i=15177
@@ -322,4 +337,18 @@ References to bug reports and discussions on issues:
  [135] = https://curl.se/bug/?i=15170
  [136] = https://curl.se/bug/?i=15169
  [137] = https://curl.se/bug/?i=15167
+ [138] = https://curl.se/bug/?i=15248
  [139] = https://curl.se/bug/?i=15163
+ [140] = https://curl.se/bug/?i=15211
+ [141] = https://curl.se/bug/?i=15260
+ [142] = https://curl.se/bug/?i=15247
+ [143] = https://curl.se/bug/?i=15157
+ [144] = https://curl.se/bug/?i=15255
+ [146] = https://curl.se/bug/?i=15252
+ [149] = https://curl.se/bug/?i=15193
+ [155] = https://curl.se/bug/?i=15214
+ [156] = https://curl.se/bug/?i=15213
+ [157] = https://curl.se/bug/?i=15212
+ [158] = https://curl.se/bug/?i=15210
+ [159] = https://curl.se/bug/?i=15201
+ [160] = https://curl.se/bug/?i=15205
