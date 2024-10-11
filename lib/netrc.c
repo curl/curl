@@ -132,8 +132,8 @@ static int parsenetrc(struct store_netrc *store,
           state = NOTHING; /* end of macro definition */
       }
 
-      if(!*tok || (*tok == '\n') || (*tok == '#'))
-        /* end of line or the rest is a comment */
+      if(!*tok || (*tok == '\n'))
+        /* end of line  */
         break;
 
       /* leading double-quote means quoted string */
