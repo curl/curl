@@ -73,10 +73,9 @@ macro(curl_dependency_option _dependency)
   endif()
 endmacro()
 
-# Convert the passed paths (or list of paths) to libpath linker options
-# and add them to CMAKE_REQUIRED_LINK_OPTIONS.
-macro(curl_required_libpaths)
-  set(_libpaths "${ARGN}")
+# Convert the passed paths to libpath linker options and add them to CMAKE_REQUIRED_LINK_OPTIONS.
+macro(curl_required_libpaths _libpaths_arg)
+  set(_libpaths "${_libpaths_arg}")
   foreach(_libpath IN LISTS _libpaths)
     list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "${CMAKE_LIBRARY_PATH_FLAG}${_libpath}")
   endforeach()
