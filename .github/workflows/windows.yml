@@ -569,6 +569,14 @@ jobs:
         if: ${{ matrix.build == 'autotools' && !cancelled() }}
         run: cat bld/config.log 2>/dev/null || true
 
+      - name: 'curl_config.h'
+        if: ${{ matrix.build == 'autotools' }}
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cat bld/lib/curl_config.h || true
+
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
         run: make -C bld -j5
@@ -592,6 +600,14 @@ jobs:
       - name: 'cmake configure log'
         if: ${{ matrix.build == 'cmake' && !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+
+      - name: 'curl_config.h (full)'
+        if: ${{ matrix.build == 'cmake' }}
+        run: cat bld/lib/curl_config.h || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
