@@ -239,10 +239,8 @@ static int parsenetrc(struct store_netrc *store,
             state_our_login = !Curl_timestrcmp(login, tok);
           }
           else if(!login || Curl_timestrcmp(login, tok)) {
-            if(login_alloc) {
+            if(login_alloc)
               free(login);
-              login_alloc = FALSE;
-            }
             login = strdup(tok);
             if(!login) {
               retcode = NETRC_FAILED; /* allocation failed */
@@ -253,12 +251,10 @@ static int parsenetrc(struct store_netrc *store,
           state_login = FALSE;
         }
         else if(state_password) {
-          if((state_our_login || !specific_login)
-             && (!password || Curl_timestrcmp(password, tok))) {
-            if(password_alloc) {
+          if((state_our_login || !specific_login) &&
+             (!password || Curl_timestrcmp(password, tok))) {
+            if(password_alloc)
               free(password);
-              password_alloc = FALSE;
-            }
             password = strdup(tok);
             if(!password) {
               retcode = NETRC_FAILED; /* allocation failed */
@@ -297,13 +293,11 @@ out:
   if(!retcode) {
     /* success */
     if(login_alloc) {
-      if(*loginp)
-        free(*loginp);
+      free(*loginp);
       *loginp = login;
     }
     if(password_alloc) {
-      if(*passwordp)
-        free(*passwordp);
+      free(*passwordp);
       *passwordp = password;
     }
   }
