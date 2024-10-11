@@ -87,7 +87,7 @@ jobs:
       - name: 'cmake build-only curl_config.h'
         run: |
           echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld-1/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld-1/lib/curl_config.h | sort || true
 
       - name: 'cmake generate (out-of-tree, c-ares, libssh, zstd, gssapi)'
         run: |
@@ -100,7 +100,7 @@ jobs:
       - name: 'cmake curl_config.h'
         run: |
           echo '::group::raw'; cat bld-cares/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld-cares/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld-cares/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         run: |
@@ -130,7 +130,7 @@ jobs:
       - name: 'autoconf curl_config.h'
         run: |
           echo '::group::raw'; cat bld-am/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld-am/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld-am/lib/curl_config.h | sort || true
 
       - name: 'autoconf build'
         run: |

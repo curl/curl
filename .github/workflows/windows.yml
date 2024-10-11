@@ -96,7 +96,7 @@ jobs:
         if: ${{ matrix.build == 'automake' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'automake' }}
@@ -144,7 +144,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -262,7 +262,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
@@ -350,7 +350,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -478,7 +478,7 @@ jobs:
       - name: 'curl_config.h'
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         timeout-minutes: 5
@@ -564,7 +564,7 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'autotools build'
         if: ${{ matrix.build == 'autotools' }}
@@ -594,7 +594,7 @@ jobs:
         if: ${{ matrix.build == 'cmake' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
@@ -768,7 +768,7 @@ jobs:
       - name: 'curl_config.h'
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         timeout-minutes: 5

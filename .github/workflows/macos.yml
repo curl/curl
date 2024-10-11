@@ -205,7 +205,7 @@ jobs:
       - name: 'curl_config.h'
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'build-cert'
         if: contains(matrix.configure, '--with-secure-transport')
@@ -363,7 +363,7 @@ jobs:
       - name: 'curl_config.h'
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON')
@@ -643,7 +643,7 @@ jobs:
       - name: 'curl_config.h'
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          cat bld/lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' bld/lib/curl_config.h | sort || true
 
       - name: 'build / ${{ matrix.build }}'
         run: make -C bld V=1 VERBOSE=1
