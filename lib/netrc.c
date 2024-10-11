@@ -48,6 +48,12 @@ enum host_lookup_state {
   MACDEF
 };
 
+enum found_state {
+  NONE,
+  LOGIN,
+  PASSWORD
+};
+
 #define NETRC_FILE_MISSING 1
 #define NETRC_FAILED -1
 #define NETRC_SUCCESS 0
@@ -99,11 +105,9 @@ static int parsenetrc(struct store_netrc *store,
   bool login_alloc = FALSE;
   bool password_alloc = FALSE;
   enum host_lookup_state state = NOTHING;
-
-  bool state_login = FALSE;     /* Found a login keyword */
-  bool state_password = FALSE;  /* Found a password keyword */
-  bool state_our_login = TRUE;  /* With specific_login, found *our* login
-                                   name (or login-less line) */
+  enum found_state found = NONE;
+  bool our_login = TRUE;  /* With specific_login, found *our* login name (or
+                             login-less line) */
   bool done = FALSE;
   char *netrcbuffer;
   struct dynbuf token;
@@ -234,9 +238,9 @@ static int parsenetrc(struct store_netrc *store,
         break;
       case HOSTVALID:
         /* we are now parsing sub-keywords concerning "our" host */
-        if(state_login) {
+        if(found == LOGIN) {
           if(specific_login) {
-            state_our_login = !Curl_timestrcmp(login, tok);
+            our_login = !Curl_timestrcmp(login, tok);
           }
           else if(!login || Curl_timestrcmp(login, tok)) {
             if(login_alloc)
@@ -248,10 +252,10 @@ static int parsenetrc(struct store_netrc *store,
             }
             login_alloc = TRUE;
           }
-          state_login = FALSE;
+          found = NONE;
         }
-        else if(state_password) {
-          if((state_our_login || !specific_login) &&
+        else if(found == PASSWORD) {
+          if((our_login || !specific_login) &&
              (!password || Curl_timestrcmp(password, tok))) {
             if(password_alloc)
               free(password);
@@ -262,16 +266,16 @@ static int parsenetrc(struct store_netrc *store,
             }
             password_alloc = TRUE;
           }
-          state_password = FALSE;
+          found = NONE;
         }
         else if(strcasecompare("login", tok))
-          state_login = TRUE;
+          found = LOGIN;
         else if(strcasecompare("password", tok))
-          state_password = TRUE;
+          found = PASSWORD;
         else if(strcasecompare("machine", tok)) {
           /* ok, there is machine here go => */
           state = HOSTFOUND;
-          state_our_login = FALSE;
+          found = NONE;
         }
         break;
       } /* switch (state) */
