@@ -2153,6 +2153,37 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 }
 #endif /* USE_OPENSSL */
 
+#ifdef USE_GNUTLS
+static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
+                                  unsigned when, unsigned int incoming,
+                                  const gnutls_datum_t *msg)
+{
+  ngtcp2_crypto_conn_ref *conn_ref = gnutls_session_get_ptr(session);
+  struct Curl_cfilter *cf = conn_ref ? conn_ref->user_data : NULL;
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+
+  (void)msg;
+  (void)incoming;
+  if(when) { /* after message has been processed */
+    struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    DEBUGASSERT(data);
+    if(data) {
+      CURL_TRC_CF(data, cf, "handshake: %s message type %d",
+                  incoming ? "incoming" : "outgoing", htype);
+    }
+    switch(htype) {
+    case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
+      (void)Curl_gtls_update_session_id(cf, data, session, &ctx->peer, "h3");
+      break;
+    }
+    default:
+      break;
+    }
+  }
+  return 0;
+}
+#endif /* USE_GNUTLS */
+
 static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               void *user_data)
@@ -2186,6 +2217,10 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
     failf(data, "ngtcp2_crypto_gnutls_configure_client_session failed");
     return CURLE_FAILED_INIT;
   }
+  gnutls_handshake_set_hook_function(ctx->gtls.session,
+                                     GNUTLS_HANDSHAKE_ANY, GNUTLS_HOOK_POST,
+                                     quic_gtls_handshake_cb);
+
 #elif defined(USE_WOLFSSL)
   if(ngtcp2_crypto_wolfssl_configure_client_context(ctx->wssl.ctx) != 0) {
     failf(data, "ngtcp2_crypto_wolfssl_configure_client_context failed");
