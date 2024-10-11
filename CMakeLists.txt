@@ -1616,18 +1616,16 @@ if(HAVE_FSETXATTR)
 endif()
 
 cmake_push_check_state()
-set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
-check_type_size("sa_family_t" SIZEOF_SA_FAMILY_T)
-set(HAVE_SA_FAMILY_T ${HAVE_SIZEOF_SA_FAMILY_T})
-cmake_pop_check_state()
-
 if(WIN32)
-  cmake_push_check_state()
   set(CMAKE_EXTRA_INCLUDE_FILES "winsock2.h")
   check_type_size("ADDRESS_FAMILY" SIZEOF_ADDRESS_FAMILY)
   set(HAVE_ADDRESS_FAMILY ${HAVE_SIZEOF_ADDRESS_FAMILY})
-  cmake_pop_check_state()
+elseif(HAVE_SYS_SOCKET_H)
+  set(CMAKE_EXTRA_INCLUDE_FILES "sys/socket.h")
+  check_type_size("sa_family_t" SIZEOF_SA_FAMILY_T)
+  set(HAVE_SA_FAMILY_T ${HAVE_SIZEOF_SA_FAMILY_T})
 endif()
+cmake_pop_check_state()
 
 # Do curl specific tests
 foreach(_curl_test IN ITEMS
