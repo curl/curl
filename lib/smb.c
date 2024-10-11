@@ -28,7 +28,9 @@
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
 #ifdef _WIN32
-#define getpid GetCurrentProcessId
+#define Curl_getpid() ((unsigned int)GetCurrentProcessId())
+#else
+#define Curl_getpid() ((unsigned int)getpid())
 #endif
 
 #include "smb.h"
@@ -546,7 +548,7 @@ static void smb_format_message(struct Curl_easy *data, struct smb_header *h,
   h->flags2 = smb_swap16(SMB_FLAGS2_IS_LONG_NAME | SMB_FLAGS2_KNOWS_LONG_NAME);
   h->uid = smb_swap16(smbc->uid);
   h->tid = smb_swap16(req->tid);
-  pid = (unsigned int)getpid();
+  pid = Curl_getpid();
   h->pid_high = smb_swap16((unsigned short)(pid >> 16));
   h->pid = smb_swap16((unsigned short) pid);
 }
