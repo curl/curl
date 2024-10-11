@@ -478,9 +478,11 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
-if(HAVE_LIBSOCKET)
-  set(CURL_LIBS "socket;${CURL_LIBS}")
+if(NOT WIN32)
+  check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
+  if(HAVE_LIBSOCKET)
+    set(CURL_LIBS "socket;${CURL_LIBS}")
+  endif()
 endif()
 
 check_function_exists("gethostname" HAVE_GETHOSTNAME)
