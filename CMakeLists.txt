@@ -1060,7 +1060,6 @@ if(NOT CURL_DISABLE_LDAP)
           set(LDAP_LIBRARIES "lber")
         endif()
         list(APPEND LDAP_LIBRARIES "ldap")
-        set(LIBCURL_PC_REQUIRES_PRIVATE "ldap;${LIBCURL_PC_REQUIRES_PRIVATE}")
       endif()
     endif()
 
