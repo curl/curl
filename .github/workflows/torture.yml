@@ -72,6 +72,11 @@ jobs:
             ${{ matrix.build.generate }}
         name: 'cmake configure'
 
+      - name: 'cmake curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' lib/curl_config.h | sort || true
+
       - run: cmake --build . --verbose
         name: 'cmake build'
 

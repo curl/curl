@@ -61,6 +61,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -97,6 +99,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -139,6 +143,8 @@ jobs:
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
+            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             make -j3 install
             src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -168,6 +174,8 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -198,6 +206,8 @@ jobs:
               --prefix="${HOME}"/install \
               --with-openssl \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
+            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             gmake -j3 install
             src/curl --disable --version
             gmake -j3 -C tests

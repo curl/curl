@@ -74,6 +74,11 @@ jobs:
             ${{ matrix.build.configure }}
         name: 'configure'
 
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' lib/curl_config.h | sort || true
+
       - run: make V=1
         name: 'make'
 

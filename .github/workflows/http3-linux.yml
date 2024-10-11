@@ -501,7 +501,7 @@ jobs:
       - name: 'curl_config.h'
         run: |
           echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
-          cat lib/curl_config.h | grep -F '#define' | sort || true
+          grep -F '#define' lib/curl_config.h | sort || true
 
       - name: 'test configs'
         run: |
