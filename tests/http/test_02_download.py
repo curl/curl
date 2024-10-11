@@ -625,10 +625,16 @@ class TestDownload:
         self.check_downloads(client, srcfile, count)
         # check that TLS earlydata worked as expected
         earlydata = {}
+        reused_session = False
         for line in r.trace_lines:
             m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
+                continue
+            m = re.match(r'\[1-1] \* SSL reusing session.*', line)
+            if m:
+                reused_session = True
+        assert reused_session, 'session was not reused for 2nd transfer'
         assert earlydata[0] == 0, f'{earlydata}'
         if proto == 'http/1.1':
             assert earlydata[1] == 69, f'{earlydata}'

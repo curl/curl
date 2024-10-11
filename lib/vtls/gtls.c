@@ -720,47 +720,55 @@ static void gtls_sessionid_free(void *sessionid, size_t idsize)
   free(sessionid);
 }
 
-static CURLcode gtls_update_session_id(struct Curl_cfilter *cf,
-                                       struct Curl_easy *data,
-                                       gnutls_session_t session)
+CURLcode Curl_gtls_update_session_id(struct Curl_cfilter *cf,
+                                     struct Curl_easy *data,
+                                     gnutls_session_t session,
+                                     struct ssl_peer *peer,
+                                     const char *alpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct ssl_connect_data *connssl = cf->ctx;
+  void *connect_sessionid;
+  size_t connect_idsize = 0;
   CURLcode result = CURLE_OK;
 
-  if(ssl_config->primary.cache_session) {
-    /* we always unconditionally get the session id here, as even if we
-       already got it from the cache and asked to use it in the connection, it
-       might've been rejected and then a new one is in use now and we need to
-       detect that. */
-    void *connect_sessionid;
-    size_t connect_idsize = 0;
+  if(!ssl_config->primary.cache_session)
+    return CURLE_OK;
 
-    /* get the session ID data size */
-    gnutls_session_get_data(session, NULL, &connect_idsize);
-    if(!connect_idsize) /* gnutls does this for some version combinations */
-      return CURLE_OK;
+  /* we always unconditionally get the session id here, as even if we
+     already got it from the cache and asked to use it in the connection, it
+     might've been rejected and then a new one is in use now and we need to
+     detect that. */
 
-    connect_sessionid = malloc(connect_idsize); /* get a buffer for it */
-    if(!connect_sessionid) {
-      return CURLE_OUT_OF_MEMORY;
-    }
-    else {
-      /* extract session ID to the allocated buffer */
-      gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
+  /* get the session ID data size */
+  gnutls_session_get_data(session, NULL, &connect_idsize);
+  if(!connect_idsize) /* gnutls does this for some version combinations */
+    return CURLE_OK;
 
-      CURL_TRC_CF(data, cf, "get session id (len=%zu) and store in cache",
-                  connect_idsize);
-      Curl_ssl_sessionid_lock(data);
-      /* store this session id, takes ownership */
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer,
-                                      connssl->alpn_negotiated,
-                                      connect_sessionid, connect_idsize,
-                                      gtls_sessionid_free);
-      Curl_ssl_sessionid_unlock(data);
-    }
-  }
+  connect_sessionid = malloc(connect_idsize); /* get a buffer for it */
+  if(!connect_sessionid)
+    return CURLE_OUT_OF_MEMORY;
+
+  /* extract session ID to the allocated buffer */
+  gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
+
+  CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s) and store in cache",
+              connect_idsize, alpn ? alpn : "-");
+  Curl_ssl_sessionid_lock(data);
+  /* store this session id, takes ownership */
+  result = Curl_ssl_set_sessionid(cf, data, peer, alpn,
+                                  connect_sessionid, connect_idsize,
+                                  gtls_sessionid_free);
+  Curl_ssl_sessionid_unlock(data);
   return result;
+}
+
+static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          gnutls_session_t session)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  return Curl_gtls_update_session_id(cf, data, session, &connssl->peer,
+                                     connssl->alpn_negotiated);
 }
 
 static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
@@ -778,7 +786,7 @@ static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
                   incoming ? "incoming" : "outgoing", htype);
       switch(htype) {
       case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
-        gtls_update_session_id(cf, data, session);
+        cf_gtls_update_session_id(cf, data, session);
         break;
       }
       default:
@@ -1043,13 +1051,13 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const unsigned char *alpn, size_t alpn_len,
+                            struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
                             void *ssl_user_data)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct ssl_connect_data *connssl = cf->ctx;
   gnutls_datum_t gtls_alpns[5];
   size_t gtls_alpns_count = 0;
   CURLcode result;
@@ -1090,13 +1098,14 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       if(rc < 0)
         infof(data, "SSL failed to set session ID");
       else {
-        infof(data, "SSL reusing session ID (size=%zu)", ssl_idsize);
+        infof(data, "SSL reusing session ID (size=%zu, alpn=%s)",
+              ssl_idsize, session_alpn ? session_alpn : "-");
 #ifdef DEBUGBUILD
         if((ssl_config->earlydata || !!getenv("CURL_USE_EARLYDATA")) &&
 #else
         if(ssl_config->earlydata &&
 #endif
-           !cf->conn->connect_only &&
+           !cf->conn->connect_only && connssl &&
            (gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3) &&
            Curl_alpn_contains_proto(connssl->alpn, session_alpn)) {
           connssl->earlydata_max =
@@ -1188,7 +1197,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
-                              proto.data, proto.len, NULL, NULL, cf);
+                              proto.data, proto.len, connssl, NULL, NULL, cf);
   if(result)
     return result;
 
@@ -1734,7 +1743,7 @@ static CURLcode gtls_verifyserver(struct Curl_cfilter *cf,
   /* Only on TLSv1.2 or lower do we have the session id now. For
    * TLSv1.3 we get it via a SESSION_TICKET message that arrives later. */
   if(gnutls_protocol_get_version(session) < GNUTLS_TLS1_3)
-    result = gtls_update_session_id(cf, data, session);
+    result = cf_gtls_update_session_id(cf, data, session);
 
 out:
   return result;

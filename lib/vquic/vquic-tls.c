@@ -240,7 +240,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #elif defined(USE_GNUTLS)
   (void)result;
   return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
-                            (const unsigned char *)alpn, alpn_len,
+                            (const unsigned char *)alpn, alpn_len, NULL,
                             cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_WOLFSSL)
   result = Curl_wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
