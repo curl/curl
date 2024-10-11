@@ -634,7 +634,7 @@ class TestDownload:
             m = re.match(r'\[1-1] \* SSL reusing session.*', line)
             if m:
                 reused_session = True
-        assert reused_session, f'session was not reused for 2nd transfer'
+        assert reused_session, 'session was not reused for 2nd transfer'
         assert earlydata[0] == 0, f'{earlydata}'
         if proto == 'http/1.1':
             assert earlydata[1] == 69, f'{earlydata}'
