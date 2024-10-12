@@ -30,6 +30,7 @@ import re
 import shutil
 import socket
 import subprocess
+import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from typing import Optional
 
@@ -186,12 +187,22 @@ class EnvConfig:
         self._vsftpd_version = None
         if self.vsftpd is not None:
             try:
-                p = subprocess.run(args=[self.vsftpd, '-v'],
-                                   capture_output=True, text=True)
-                if p.returncode != 0:
-                    # not a working vsftpd
-                    self.vsftpd = None
-                m = re.match(r'vsftpd: version (\d+\.\d+\.\d+)', p.stderr)
+                with tempfile.TemporaryFile('w+') as tmp:
+                    p = subprocess.run(args=[self.vsftpd, '-v'],
+                                       capture_output=True, text=True, stdin=tmp)
+                    if p.returncode != 0:
+                        # not a working vsftpd
+                        self.vsftpd = None
+                    if p.stderr:
+                        ver_text = p.stderr
+                    else:
+                        # Oddly, some versions of vsftpd write to stdin (!)
+                        # instead of stderr, which is odd but works. If there
+                        # is nothing on stderr, read the file on stdin and use
+                        # any data there instead.
+                        tmp.seek(0)
+                        ver_text = tmp.read()
+                m = re.match(r'vsftpd: version (\d+\.\d+\.\d+)', ver_text)
                 if m:
                     self._vsftpd_version = m.group(1)
                 elif len(p.stderr) == 0:
