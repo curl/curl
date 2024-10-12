@@ -157,7 +157,7 @@ jobs:
         run: |
           echo 'needs-build=true' >> $GITHUB_OUTPUT
 
-      - name: install build prerequisites
+      - name: install build prereqs
         if: steps.settings.outputs.needs-build == 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -330,7 +330,7 @@ jobs:
             apache2 apache2-dev libnghttp2-dev vsftpd
           echo 'CC=gcc-12' >> $GITHUB_ENV
           echo 'CXX=g++-12' >> $GITHUB_ENV
-        name: 'install prereqs and impacket, pytest, crypto, apache2'
+        name: 'install prereqs'
 
       - name: cache quictls
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
@@ -444,35 +444,7 @@ jobs:
           # $HOME/quiche/quiche/deps/boringssl/src/lib
         name: 'build quiche and boringssl'
 
-      - name: cache mod_h2
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
-        id: cache-mod_h2
-        env:
-          cache-name: cache-mod_h2
-        with:
-          path: /home/runner/mod_h2
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
-
-      - name: 'build mod_h2'
-        if: steps.cache-mod_h2.outputs.cache-hit != 'true'
-        run: |
-          cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
-          cd mod_h2
-          autoreconf -fi
-          ./configure
-          make
-
-      - name: 'install mod_h2'
-        run: |
-          cd $HOME/mod_h2
-          sudo make install
-
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
-
-      - run: |
-          sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
-        name: 'install python test prereqs'
 
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}
@@ -527,6 +499,10 @@ jobs:
             make V=1 -C tests
           fi
 
+      - name: 'install test prereqs'
+        run: |
+          sudo python3 -m pip install -r tests/requirements.txt
+
       - name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
@@ -536,6 +512,34 @@ jobs:
           else
             make V=1 test-ci
           fi
+
+      - name: 'install pytest prereqs'
+        run: |
+          sudo python3 -m pip install -r tests/http/requirements.txt
+
+      - name: cache mod_h2
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        id: cache-mod_h2
+        env:
+          cache-name: cache-mod_h2
+        with:
+          path: /home/runner/mod_h2
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+      - name: 'build mod_h2'
+        if: steps.cache-mod_h2.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          cd mod_h2
+          autoreconf -fi
+          ./configure
+          make
+
+      - name: 'install mod_h2'
+        run: |
+          cd $HOME/mod_h2
+          sudo make install
 
       - name: 'run pytest'
         env:

@@ -273,8 +273,12 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
-          sudo python3 -m pip install impacket
-        name: 'install prereqs and impacket'
+        name: 'install prereqs'
+
+      - if: contains(matrix.build.install_steps, 'pytest')
+        run: |
+          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
+        name: 'install prereqs for pytest'
 
       - if: startsWith(matrix.build.container, 'alpine')
         run: |
@@ -549,38 +553,6 @@ jobs:
           printenv >> $GITHUB_ENV
         name: 'install Intel compilers'
 
-      - if: contains(matrix.build.install_steps, 'pytest')
-        run: |
-          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
-          sudo python3 -m pip install -r tests/http/requirements.txt
-        name: 'install pytest and apach2-dev'
-
-      - name: cache mod_h2
-        if: contains(matrix.build.install_steps, 'pytest')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
-        id: cache-mod_h2
-        env:
-          cache-name: cache-mod_h2
-        with:
-          path: /home/runner/mod_h2
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
-
-      - name: 'build mod_h2'
-        if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
-        run: |
-          cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
-          cd mod_h2
-          autoreconf -fi
-          ./configure
-          make
-
-      - name: 'install mod_h2'
-        if: contains(matrix.build.install_steps, 'pytest')
-        run: |
-          cd $HOME/mod_h2
-          sudo make install
-
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
@@ -652,6 +624,11 @@ jobs:
             make V=1 -C tests
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.build.install_steps != 'skipall' && !startsWith(matrix.build.container, 'alpine') && matrix.build.container == null }}
+        run: |
+          sudo python3 -m pip install -r tests/requirements.txt
+
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
@@ -668,6 +645,37 @@ jobs:
           else
             make V=1 test-ci
           fi
+
+      - name: 'install pytest prereqs'
+        if: contains(matrix.build.install_steps, 'pytest')
+        run: |
+          sudo python3 -m pip install -r tests/http/requirements.txt
+
+      - name: cache mod_h2
+        if: contains(matrix.build.install_steps, 'pytest')
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        id: cache-mod_h2
+        env:
+          cache-name: cache-mod_h2
+        with:
+          path: /home/runner/mod_h2
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+      - name: 'build mod_h2'
+        if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          cd mod_h2
+          autoreconf -fi
+          ./configure
+          make
+
+      - name: 'install mod_h2'
+        if: contains(matrix.build.install_steps, 'pytest')
+        run: |
+          cd $HOME/mod_h2
+          sudo make install
 
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')

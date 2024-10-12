@@ -281,7 +281,7 @@ jobs:
         timeout-minutes: 10
         run: make -C bld -j5 V=1 -C tests
 
-      - name: 'install test tools'
+      - name: 'install test prereqs'
         if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
@@ -372,7 +372,7 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config '${{ matrix.type }}' --target testdeps
 
-      - name: 'install test tools'
+      - name: 'install test prereqs'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
@@ -500,7 +500,7 @@ jobs:
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
-      - name: 'install test tools'
+      - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
@@ -783,7 +783,7 @@ jobs:
         timeout-minutes: 10
         run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
-      - name: 'install test tools'
+      - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |

@@ -61,7 +61,6 @@ jobs:
     steps:
       - run: |
           sudo apt-get install cmake ninja-build pkgconf stunnel4 ${{ matrix.build.install }}
-          python3 -m pip install --break-system-packages impacket
         name: 'install prereqs'
 
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
@@ -85,6 +84,10 @@ jobs:
 
       - run: cmake --build . --verbose --target testdeps
         name: 'build tests'
+
+      - name: 'install test prereqs'
+        run: |
+          python3 -m pip install --break-system-packages -r tests/requirements.txt
 
       - run: cmake --build . --verbose --target test-torture
         name: 'run tests'

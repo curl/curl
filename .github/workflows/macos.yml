@@ -222,11 +222,11 @@ jobs:
       - name: 'make tests'
         run: make -C bld V=1 -C tests
 
-      - name: 'pip3 install'
+      - name: 'make install test prereqs'
         run: |
           python3 -m venv $HOME/venv
           source $HOME/venv/bin/activate
-          python3 -m pip install impacket
+          python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
         timeout-minutes: 20
@@ -380,11 +380,11 @@ jobs:
       - name: 'cmake build tests'
         run: ninja -C bld testdeps
 
-      - name: 'pip3 install'
+      - name: 'cmake install test prereqs'
         run: |
           python3 -m venv $HOME/venv
           source $HOME/venv/bin/activate
-          python3 -m pip install impacket
+          python3 -m pip install -r tests/requirements.txt
 
       - name: 'cmake run tests'
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
