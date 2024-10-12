@@ -274,8 +274,7 @@ jobs:
           sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }} \
             apache2 apache2-dev libnghttp2-dev vsftpd
-          sudo python3 -m pip install -r tests/requirements.txt
-        name: 'install prereqs and impacket'
+        name: 'install prereqs'
 
       - if: startsWith(matrix.build.container, 'alpine')
         run: |
@@ -621,6 +620,11 @@ jobs:
             make V=1 -C tests
           fi
 
+      - name: 'install test prereqs'
+        if: ${{ matrix.build.install_steps != 'skipall' }}
+        run: |
+          sudo python3 -m pip install -r tests/requirements.txt
+
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
@@ -638,7 +642,7 @@ jobs:
             make V=1 test-ci
           fi
 
-      - name: 'install pytest and apach2-dev'
+      - name: 'install pytest prereqs'
         if: contains(matrix.build.install_steps, 'pytest')
         run: |
           sudo python3 -m pip install -r tests/http/requirements.txt

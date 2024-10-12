@@ -328,7 +328,6 @@ jobs:
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
             texinfo texlive texlive-extra-utils autopoint libev-dev \
             apache2 apache2-dev libnghttp2-dev vsftpd
-          sudo python3 -m pip install -r tests/requirements.txt
           echo 'CC=gcc-12' >> $GITHUB_ENV
           echo 'CXX=g++-12' >> $GITHUB_ENV
         name: 'install prereqs and impacket, pytest, crypto, apache2'
@@ -500,6 +499,10 @@ jobs:
             make V=1 -C tests
           fi
 
+      - name: 'install test prereqs'
+        run: |
+          sudo python3 -m pip install -r tests/requirements.txt
+
       - name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
@@ -510,7 +513,7 @@ jobs:
             make V=1 test-ci
           fi
 
-      - name: 'install python test prereqs'
+      - name: 'install pytest prereqs'
         run: |
           sudo python3 -m pip install -r tests/http/requirements.txt
 
