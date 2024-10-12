@@ -1206,6 +1206,11 @@ struct urlpieces {
   char *query;
 };
 
+#define CREDS_NONE   0
+#define CREDS_URL    1 /* from URL */
+#define CREDS_OPTION 2 /* set with a CURLOPT_ */
+#define CREDS_NETRC  3 /* found in netrc */
+
 struct UrlState {
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
@@ -1344,7 +1349,6 @@ struct UrlState {
     char *proxypasswd;
 #endif
   } aptr;
-
   unsigned char httpwant; /* when non-zero, a specific HTTP version requested
                              to be used in the library's request(s) */
   unsigned char httpversion; /* the lowest HTTP version*10 reported by any
@@ -1354,6 +1358,9 @@ struct UrlState {
   unsigned char select_bits; /* != 0 -> bitmask of socket events for this
                                  transfer overriding anything the socket may
                                  report */
+  unsigned int creds_from:2; /* where is the server credentials originating
+                                from, see the CREDS_* defines above */
+
   /* when curl_easy_perform() is called, the multi handle is "owned" by
      the easy handle so curl_easy_cleanup() on such an easy handle will
      also close the multi handle! */

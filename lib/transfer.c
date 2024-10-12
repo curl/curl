@@ -679,6 +679,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       return CURLE_OUT_OF_MEMORY;
   }
 
+  if(data->set.str[STRING_USERNAME] ||
+     data->set.str[STRING_PASSWORD])
+    data->state.creds_from = CREDS_OPTION;
   if(!result)
     result = Curl_setstropt(&data->state.aptr.user,
                             data->set.str[STRING_USERNAME]);
