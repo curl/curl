@@ -95,9 +95,9 @@ class TestSSLUse:
                 djson = json.load(f)
             assert djson['HTTPS'] == 'on', f'{i}: {djson}'
             if i == 0:
-                assert djson['SSL_SESSION_RESUMED'] == 'Initial', f'{i}: {djson}'
+                assert djson['SSL_SESSION_RESUMED'] == 'Initial', f'{i}: {djson}\n{r.dump_logs()}'
             else:
-                assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}'
+                assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}\n{r.dump_logs()}'
 
     # use host name with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
