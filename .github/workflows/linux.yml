@@ -621,7 +621,7 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ matrix.build.install_steps != 'skipall' }}
+        if: ${{ matrix.build.install_steps != 'skipall' && !startsWith(matrix.build.container, 'alpine') && matrix.build.container == null }}
         run: |
           sudo python3 -m pip install -r tests/requirements.txt
 
