@@ -1,0 +1,92 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--location-trusted
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+<data>
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Location: http://somewhere.else.example/a/path/%TESTNUMBER0002
+
+</data>
+<data2>
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data2>
+
+<datacheck>
+HTTP/1.1 301 redirect
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Length: 0
+Connection: close
+Content-Type: text/html
+Location: http://somewhere.else.example/a/path/%TESTNUMBER0002
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Content-Length: 6
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</datacheck>
+
+</reply>
+
+#
+# Client-side
+<client>
+<features>
+proxy
+</features>
+<server>
+http
+</server>
+<name>
+HTTP with auth in URL redirected to another host
+</name>
+<command>
+-x %HOSTIP:%HTTPPORT http://alberto:einstein@somwhere.example/%TESTNUMBER --location-trusted
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<strip>
+QUIT
+</strip>
+<protocol>
+GET http://somwhere.example/998 HTTP/1.1
+Host: somwhere.example
+Authorization: Basic YWxiZXJ0bzplaW5zdGVpbg==
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://somewhere.else.example/a/path/9980002 HTTP/1.1
+Host: somewhere.else.example
+Authorization: Basic YWxiZXJ0bzplaW5zdGVpbg==
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>
