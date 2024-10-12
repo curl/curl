@@ -157,7 +157,7 @@ jobs:
         run: |
           echo 'needs-build=true' >> $GITHUB_OUTPUT
 
-      - name: install build prerequisites
+      - name: install build prereqs
         if: steps.settings.outputs.needs-build == 'true'
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
@@ -330,7 +330,7 @@ jobs:
             apache2 apache2-dev libnghttp2-dev vsftpd
           echo 'CC=gcc-12' >> $GITHUB_ENV
           echo 'CXX=g++-12' >> $GITHUB_ENV
-        name: 'install prereqs and impacket, pytest, crypto, apache2'
+        name: 'install prereqs'
 
       - name: cache quictls
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4

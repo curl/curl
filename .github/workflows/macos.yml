@@ -222,7 +222,7 @@ jobs:
       - name: 'make tests'
         run: make -C bld V=1 -C tests
 
-      - name: 'pip3 install'
+      - name: 'make install test prereqs'
         run: |
           python3 -m venv $HOME/venv
           source $HOME/venv/bin/activate
@@ -380,7 +380,7 @@ jobs:
       - name: 'cmake build tests'
         run: ninja -C bld testdeps
 
-      - name: 'pip3 install'
+      - name: 'cmake install test prereqs'
         run: |
           python3 -m venv $HOME/venv
           source $HOME/venv/bin/activate
