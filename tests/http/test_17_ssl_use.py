@@ -78,7 +78,9 @@ class TestSSLUse:
            not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working in 3.6.0')
 
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'ssl'
+        curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo?'\
                f'id=[0-{count-1}]&close'
