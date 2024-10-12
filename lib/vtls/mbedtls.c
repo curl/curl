@@ -1148,9 +1148,9 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     /* If there is already a matching session in the cache, delete it */
     Curl_ssl_sessionid_lock(data);
-    retcode = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                     our_ssl_sessionid, 0,
-                                     mbedtls_session_free);
+    result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
+                                    our_ssl_sessionid, 0,
+                                    mbedtls_session_free);
     Curl_ssl_sessionid_unlock(data);
   }
   return result;
