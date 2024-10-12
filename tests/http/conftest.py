@@ -53,6 +53,13 @@ def pytest_report_header(config):
         report.extend([
             f'  VsFTPD: {env.vsftpd_version()}, ftp:{env.ftp_port}, ftps:{env.ftps_port}'
         ])
+    buildinfo_fn = os.path.join(env.build_dir, 'buildinfo.txt')
+    if os.path.exists(buildinfo_fn):
+        with open(buildinfo_fn, 'r') as file_in:
+            for line in file_in:
+                line = line.strip()
+                if line and not line.startswith('#'):
+                    report.extend([line])
     return '\n'.join(report)
 
 # TODO: remove this and repeat argument everywhere, pytest-repeat can be used to repeat tests
