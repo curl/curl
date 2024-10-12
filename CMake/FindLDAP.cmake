@@ -36,6 +36,7 @@
 # LDAP_LIBRARIES     The ldap library names
 # LDAP_LIBRARY_DIRS  The ldap library directories
 # LDAP_CFLAGS        Required compiler flags
+# LDAP_VERSION       Version of ldap
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_INCLUDE_DIR AND
@@ -60,12 +61,33 @@ elseif(NOT APPLE)
   find_library(LDAP_LIBRARY NAMES "ldap")
   find_library(LDAP_LBER_LIBRARY NAMES "lber")
 
+  if(LDAP_INCLUDE_DIR AND EXISTS "${LDAP_INCLUDE_DIR}/ldap_features.h")
+    set(_version_regex1 "#[\t ]*define[\t ]+LDAP_VENDOR_VERSION_MAJOR[\t ]+([0-9]+).*")
+    set(_version_regex2 "#[\t ]*define[\t ]+LDAP_VENDOR_VERSION_MINOR[\t ]+([0-9]+).*")
+    set(_version_regex3 "#[\t ]*define[\t ]+LDAP_VENDOR_VERSION_PATCH[\t ]+([0-9]+).*")
+    file(STRINGS "${LDAP_INCLUDE_DIR}/ldap_features.h" _version_str1 REGEX "${_version_regex1}")
+    file(STRINGS "${LDAP_INCLUDE_DIR}/ldap_features.h" _version_str2 REGEX "${_version_regex2}")
+    file(STRINGS "${LDAP_INCLUDE_DIR}/ldap_features.h" _version_str3 REGEX "${_version_regex3}")
+    string(REGEX REPLACE "${_version_regex1}" "\\1" _version_str1 "${_version_str1}")
+    string(REGEX REPLACE "${_version_regex2}" "\\1" _version_str2 "${_version_str2}")
+    string(REGEX REPLACE "${_version_regex3}" "\\1" _version_str3 "${_version_str3}")
+    set(LDAP_VERSION "${_version_str1}.${_version_str2}.${_version_str3}")
+    unset(_version_regex1)
+    unset(_version_regex2)
+    unset(_version_regex3)
+    unset(_version_str1)
+    unset(_version_str2)
+    unset(_version_str3)
+  endif()
+
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(LDAP
     REQUIRED_VARS
       LDAP_INCLUDE_DIR
       LDAP_LIBRARY
       LDAP_LBER_LIBRARY
+    VERSION_VAR
+      LDAP_VERSION
   )
 
   if(LDAP_FOUND)
