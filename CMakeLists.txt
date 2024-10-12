@@ -1220,7 +1220,7 @@ if(CURL_USE_GSSAPI)
       check_include_files("${_include_list};gssapi/gssapi_generic.h" HAVE_GSSAPI_GSSAPI_GENERIC_H)
 
       if(GSS_FLAVOUR STREQUAL "MIT")
-        check_include_files("${_include_list};gssapi/gssapi_krb5.h" HAVE_GSSAPI_GSSAPI_KRB5_H)
+        check_include_files("${_include_list};gssapi/gssapi_krb5.h" _have_gssapi_gssapi_krb5_h)
         if(HAVE_GSSAPI_GSSAPI_GENERIC_H)
           list(APPEND _include_list "gssapi/gssapi_generic.h")
         endif()
