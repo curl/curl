@@ -1035,7 +1035,11 @@ if(NOT CURL_DISABLE_LDAP)
     if(LDAP_FOUND)
       set(CURL_LIBS "${LDAP_LIBRARIES};${CURL_LIBS}")
       set(LIBCURL_PC_REQUIRES_PRIVATE "ldap;${LIBCURL_PC_REQUIRES_PRIVATE}")
-      include_directories(SYSTEM ${LDAP_INCLUDE_DIRS})
+      if(APPLE)
+        include_directories(${LDAP_INCLUDE_DIRS})
+      else()
+        include_directories(SYSTEM ${LDAP_INCLUDE_DIRS})
+      endif()
 
       # LDAP feature checks
 
