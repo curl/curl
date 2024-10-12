@@ -471,7 +471,7 @@ jobs:
       - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - run: |
-          sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt
+          sudo python3 -m pip install -r tests/requirements.txt -r tests/http/requirements.txt pytest-astropy-header
         name: 'install python test prereqs'
 
       - run: autoreconf -fi
@@ -487,7 +487,7 @@ jobs:
             cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DPYTEST_FLAGS="-v --astropy-header" \
               ${{ matrix.build.generate }}
           else
             ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
@@ -545,7 +545,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci
           else
-            make V=1 pytest-ci
+            make V=1 pytest-ci PYTESTFLAGS="-v --astropy-header"
           fi
 
       - name: 'build examples'
