@@ -42,6 +42,9 @@ Funny-head: yesyes
 #
 # Client-side
 <client>
+<features>
+proxy
+</features>
 <server>
 http
 </server>
