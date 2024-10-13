@@ -39,6 +39,93 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
+/* This function compensates the shortcomings of fseek in windows for
+text-mode filestreams: we assume that a user considers a line break as
+one character '\n' and not "\r\n" */
+int textmode_fseek(FILE *stream, curl_off_t offset, int whence)
+{
+  #if defined(HAVE__FSEEKI64)
+  #define FSEEK(S, O, W) _fseeki64(S, (__int64)O, W)
+  #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
+  #define FSEEK(S, O, W) fseeko(S, (off_t)O, W)
+  #else
+  #define FSEEK(S, O, W) ((O > LONG_MAX) ? -1 : fseek(S, (long)O, W))
+  #endif
+  curl_off_t pos, newpos = 0;
+
+  if(whence == SEEK_END && FSEEK(stream, 0, SEEK_END))
+    return -1;
+
+  pos = (curl_off_t)ftell(stream);
+  if(pos == -1)
+    return -1;
+
+  if(FSEEK(stream, 0, SEEK_SET))
+    return -1;
+
+  if(whence == SEEK_SET)
+    newpos = offset;
+  else
+    newpos = offset + pos;
+  pos = 0;
+  while(pos < newpos && fgetc(stream) != EOF)
+    pos++;
+
+  return (pos == newpos) ? 0 : -1;
+  #undef FSEEK
+}
+
+/* filename_extract_limits() examines the entered filename. It starts
+at the end of the string and works its way to the pointer filename. If
+the string ends with "!x-y" or "!x-" or "!-y", then x and/or y is stored
+in the addresses of start and end.
+(1) in case "!x-y", x is stored in the memory of start and y in the
+    memory of end. The return value of filename_extract_limits() here is
+    FILELIMIT_START | FILELIMIT_END.
+(2) in case "-y", y is stored in the memory of end and the
+    filename_extract_limits() function returns FILELIMIT_END.
+(3) in case "x-", x is stored in the memory of start and the
+    filename_extract_limits() function returns FILELIMIT_START.
+(4) if x or y are not numbers, 0 is returned and the memory of start and end
+    remains unchanged. */
+int filename_extract_limits(char *filename, curl_off_t *start,
+                            curl_off_t *end)
+{
+  char *ptr_range;
+  int flags_ret = 0;
+  bool have_minus = FALSE;
+
+  ptr_range = filename + strlen(filename) - 1;
+  while(ptr_range > filename) {
+    if(!strchr("0123456789-!", *ptr_range))
+      return 0;
+
+    if(*ptr_range == '-') {
+      have_minus = TRUE;
+    }
+    if(*ptr_range == '!') {
+      if(*(ptr_range + 1) != '-') {
+        flags_ret |= FILELIMIT_START;
+        if(curlx_strtoofft(ptr_range + 1, NULL, 10, start) != CURL_OFFT_OK)
+          return 0;
+      }
+      if(have_minus && flags_ret)
+        *ptr_range = '\0';
+      break;
+    }
+    else if(*ptr_range == '-' && strchr(ptr_range + 1, '-'))
+      return 0;
+
+    else if(*ptr_range == '-' && *(ptr_range + 1) != '\0') {
+      flags_ret = FILELIMIT_END;
+      if(curlx_strtoofft(ptr_range + 1, NULL, 10, end) != CURL_OFFT_OK)
+        return 0;
+    }
+    ptr_range--;
+  }
+  return flags_ret;
+}
+
 struct getout *new_getout(struct OperationConfig *config)
 {
   struct getout *node = calloc(1, sizeof(struct getout));
@@ -90,20 +177,47 @@ static size_t memcrlf(char *orig,
 
 #define MAX_FILE2STRING MAX_FILE2MEMORY
 
-ParameterError file2string(char **bufp, FILE *file)
+ParameterError file2string(char **bufp, FILE *file, int filelimit,
+                           curl_off_t start, curl_off_t end)
 {
   struct curlx_dynbuf dyn;
+  curl_off_t rangelen = 0;
+  int rangelen_set = 0;
+
+  if(filelimit == FILELIMIT_START && textmode_fseek(file, start, SEEK_SET)) {
+    return PARAM_FSEEK_ERROR;
+  }
+  if(filelimit == FILELIMIT_END && textmode_fseek(file, -end, SEEK_END)) {
+    return PARAM_FSEEK_ERROR;
+  }
+  if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
+    if(textmode_fseek(file, start, SEEK_SET)) {
+      return PARAM_FSEEK_ERROR;
+    }
+    rangelen = end - start + 1;
+    rangelen_set = 1;
+  }
   curlx_dyn_init(&dyn, MAX_FILE2STRING);
   if(file) {
     do {
       char buffer[4096];
       char *ptr;
-      size_t nread = fread(buffer, 1, sizeof(buffer), file);
+      size_t elt_cnt;
+      size_t nread;
+
+      if(rangelen_set && (rangelen < (curl_off_t)sizeof(buffer))) {
+        elt_cnt = (size_t)rangelen;
+      }
+      else {
+        elt_cnt = sizeof(buffer);
+      }
+      nread = fread(buffer, 1, elt_cnt, file);
       if(ferror(file)) {
         curlx_dyn_free(&dyn);
         *bufp = NULL;
         return PARAM_READ_ERROR;
       }
+      rangelen = rangelen - nread;
       ptr = buffer;
       while(nread) {
         size_t nlen = memcrlf(ptr, FALSE, nread);
@@ -118,22 +232,57 @@ ParameterError file2string(char **bufp, FILE *file)
           nread -= nlen;
         }
       }
+      if(rangelen_set && rangelen <= 0)
+        break;
     } while(!feof(file));
   }
   *bufp = curlx_dyn_ptr(&dyn);
   return PARAM_OK;
 }
 
-ParameterError file2memory(char **bufp, size_t *size, FILE *file)
+ParameterError file2memory(char **bufp, size_t *size, FILE *file,
+                           int filelimit, curl_off_t start, curl_off_t end)
 {
+  #if defined(HAVE__FSEEKI64)
+  #define FSEEK(S, O, W) _fseeki64(S, (__int64)O, W)
+  #elif defined(HAVE_FSEEKO) && defined(HAVE_DECL_FSEEKO)
+  #define FSEEK(S, O, W) fseeko(S, (off_t)O, W)
+  #else
+  #define FSEEK(S, O, W) ((O > LONG_MAX) ? -1 : fseek(S, (long)O, W))
+  #endif
+
   if(file) {
     size_t nread;
     struct curlx_dynbuf dyn;
+    curl_off_t rangelen = 0;
+    int rangelen_set = 0;
+
+    if(filelimit == FILELIMIT_START && FSEEK(file, start, SEEK_SET)) {
+      return PARAM_FSEEK_ERROR;
+    }
+    if(filelimit == FILELIMIT_END && FSEEK(file, -end, SEEK_END)) {
+      return PARAM_FSEEK_ERROR;
+    }
+    if(filelimit == (FILELIMIT_START | FILELIMIT_END)) {
+      if(FSEEK(file, start, SEEK_SET)) {
+        return PARAM_FSEEK_ERROR;
+      }
+      rangelen = end - start + 1;
+      rangelen_set = 1;
+    }
     /* The size needs to fit in an int later */
     curlx_dyn_init(&dyn, MAX_FILE2MEMORY);
     do {
       char buffer[4096];
-      nread = fread(buffer, 1, sizeof(buffer), file);
+      curl_off_t elt_cnt;
+
+      if(rangelen_set && (rangelen < (curl_off_t)sizeof(buffer)))
+        elt_cnt = rangelen;
+      else
+        elt_cnt = sizeof(buffer);
+
+      nread = fread(buffer, 1, (size_t)elt_cnt, file);
+      rangelen = rangelen - nread;
       if(ferror(file)) {
         curlx_dyn_free(&dyn);
         *size = 0;
@@ -143,6 +292,10 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
       if(nread)
         if(curlx_dyn_addn(&dyn, buffer, nread))
           return PARAM_NO_MEM;
+
+      if(rangelen_set && rangelen <= 0)
+        break;
+
     } while(!feof(file));
     *size = curlx_dyn_len(&dyn);
     *bufp = curlx_dyn_ptr(&dyn);
@@ -152,6 +305,7 @@ ParameterError file2memory(char **bufp, size_t *size, FILE *file)
     *bufp = NULL;
   }
   return PARAM_OK;
+  #undef FSEEK
 }
 
 /*
