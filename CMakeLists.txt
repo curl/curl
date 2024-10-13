@@ -69,7 +69,19 @@ include(Macros)
 include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
-project(CURL C)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
+string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
+string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
+string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
+string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
+unset(_curl_version_h_contents)
+
+message(STATUS "curl version=[${_curl_version}]")
+
+string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _curl_version_sem "${_curl_version}")
+project(CURL
+  VERSION "${_curl_version_sem}"
+  LANGUAGES C)
 
 unset(_target_flags)
 if(APPLE)
@@ -118,15 +130,6 @@ function(curl_dumpvars)  # Dump all defined variables with their values
   endforeach()
   message("::endgroup::")
 endfunction()
-
-file(STRINGS "${CURL_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
-string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
-string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
-string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
-string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
-unset(_curl_version_h_contents)
-
-message(STATUS "curl version=[${_curl_version}]")
 
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
