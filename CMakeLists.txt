@@ -120,13 +120,13 @@ function(curl_dumpvars)  # Dump all defined variables with their values
 endfunction()
 
 file(STRINGS "${CURL_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
-string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" CURL_VERSION ${_curl_version_h_contents})
-string(REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
-string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" CURL_VERSION_NUM ${_curl_version_h_contents})
-string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
+string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
+string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
+string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
+string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
 unset(_curl_version_h_contents)
 
-message(STATUS "curl version=[${CURL_VERSION}]")
+message(STATUS "curl version=[${_curl_version}]")
 
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
@@ -2024,8 +2024,8 @@ if(NOT CURL_DISABLE_INSTALL)
   set(CC                      "${CMAKE_C_COMPILER}")
   # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
-  set(CURLVERSION             "${CURL_VERSION}")
-  set(VERSIONNUM              "${CURL_VERSION_NUM}")
+  set(CURLVERSION             "${_curl_version}")
+  set(VERSIONNUM              "${_curl_version_num}")
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
   if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
@@ -2210,7 +2210,7 @@ if(NOT CURL_DISABLE_INSTALL)
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
     "${_version_config}"
-    VERSION ${CURL_VERSION}
+    VERSION ${_curl_version}
     COMPATIBILITY SameMajorVersion)
   file(READ "${_version_config}" _generated_version_config)
   file(WRITE "${_version_config}" "
