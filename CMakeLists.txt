@@ -63,13 +63,34 @@ foreach(_cache_var ${_cache_vars})
   endif()
 endforeach()
 
+function(curl_dumpvars)  # Dump all defined variables with their values
+  message("::group::CMake Variable Dump")
+  get_cmake_property(_vars VARIABLES)
+  foreach(_var ${_vars})
+    message("${_var} = ${${_var}}")
+  endforeach()
+  message("::endgroup::")
+endfunction()
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
 include(CMakeDependentOption)
 include(CheckCCompilerFlag)
 
-project(CURL C)
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
+string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" _curl_version ${_curl_version_h_contents})
+string(REGEX REPLACE "[^\"]+\"" "" _curl_version ${_curl_version})
+string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" _curl_version_num ${_curl_version_h_contents})
+string(REGEX REPLACE "[^0]+0x" "" _curl_version_num ${_curl_version_num})
+unset(_curl_version_h_contents)
+
+message(STATUS "curl version=[${_curl_version}]")
+
+string(REGEX REPLACE "([0-9]+\.[0-9]+\.[0-9]+).+" "\\1" _curl_version_sem "${_curl_version}")
+project(CURL
+  VERSION "${_curl_version_sem}"
+  LANGUAGES C)
 
 unset(_target_flags)
 if(APPLE)
@@ -109,24 +130,6 @@ if(CMAKE_CROSSCOMPILING)
     "${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> "
     "${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
 endif()
-
-function(curl_dumpvars)  # Dump all defined variables with their values
-  message("::group::CMake Variable Dump")
-  get_cmake_property(_vars VARIABLES)
-  foreach(_var ${_vars})
-    message("${_var} = ${${_var}}")
-  endforeach()
-  message("::endgroup::")
-endfunction()
-
-file(STRINGS "${CURL_SOURCE_DIR}/include/curl/curlver.h" _curl_version_h_contents REGEX "#define LIBCURL_VERSION( |_NUM )")
-string(REGEX MATCH "#define LIBCURL_VERSION \"[^\"]*" CURL_VERSION ${_curl_version_h_contents})
-string(REGEX REPLACE "[^\"]+\"" "" CURL_VERSION ${CURL_VERSION})
-string(REGEX MATCH "#define LIBCURL_VERSION_NUM 0x[0-9a-fA-F]+" CURL_VERSION_NUM ${_curl_version_h_contents})
-string(REGEX REPLACE "[^0]+0x" "" CURL_VERSION_NUM ${CURL_VERSION_NUM})
-unset(_curl_version_h_contents)
-
-message(STATUS "curl version=[${CURL_VERSION}]")
 
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
@@ -2024,8 +2027,8 @@ if(NOT CURL_DISABLE_INSTALL)
   set(CC                      "${CMAKE_C_COMPILER}")
   # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
-  set(CURLVERSION             "${CURL_VERSION}")
-  set(VERSIONNUM              "${CURL_VERSION_NUM}")
+  set(CURLVERSION             "${_curl_version}")
+  set(VERSIONNUM              "${_curl_version_num}")
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
   if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
@@ -2210,7 +2213,7 @@ if(NOT CURL_DISABLE_INSTALL)
   include(CMakePackageConfigHelpers)
   write_basic_package_version_file(
     "${_version_config}"
-    VERSION ${CURL_VERSION}
+    VERSION ${_curl_version}
     COMPATIBILITY SameMajorVersion)
   file(READ "${_version_config}" _generated_version_config)
   file(WRITE "${_version_config}" "
@@ -2265,6 +2268,11 @@ if(NOT CURL_DISABLE_INSTALL)
       OWNER_READ OWNER_WRITE OWNER_EXECUTE
       GROUP_READ GROUP_EXECUTE
       WORLD_READ WORLD_EXECUTE)
+
+  # The `-DEV` part is important
+  string(REGEX REPLACE "([0-9]+\.[0-9]+)\.([0-9]+.*)" "\\2" CPACK_PACKAGE_VERSION_PATCH "${_curl_version}")
+  set(CPACK_GENERATOR "TGZ")
+  include(CPack)
 endif()
 
 # Save build info for test runner to pick up and log
