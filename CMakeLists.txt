@@ -63,6 +63,15 @@ foreach(_cache_var ${_cache_vars})
   endif()
 endforeach()
 
+function(curl_dumpvars)  # Dump all defined variables with their values
+  message("::group::CMake Variable Dump")
+  get_cmake_property(_vars VARIABLES)
+  foreach(_var ${_vars})
+    message("${_var} = ${${_var}}")
+  endforeach()
+  message("::endgroup::")
+endfunction()
+
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
@@ -121,15 +130,6 @@ if(CMAKE_CROSSCOMPILING)
     "${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> "
     "${CMAKE_SYSTEM_NAME}/${CMAKE_SYSTEM_PROCESSOR}")
 endif()
-
-function(curl_dumpvars)  # Dump all defined variables with their values
-  message("::group::CMake Variable Dump")
-  get_cmake_property(_vars VARIABLES)
-  foreach(_var ${_vars})
-    message("${_var} = ${${_var}}")
-  endforeach()
-  message("::endgroup::")
-endfunction()
 
 if(CMAKE_C_COMPILER_TARGET)
   set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
