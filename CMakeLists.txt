@@ -2268,6 +2268,9 @@ if(NOT CURL_DISABLE_INSTALL)
       OWNER_READ OWNER_WRITE OWNER_EXECUTE
       GROUP_READ GROUP_EXECUTE
       WORLD_READ WORLD_EXECUTE)
+
+  set(CPACK_GENERATOR "TGZ")
+  include(CPack)
 endif()
 
 # Save build info for test runner to pick up and log
