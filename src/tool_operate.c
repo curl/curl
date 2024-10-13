@@ -128,10 +128,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
                                 bool capath_from_env,
-                                bool *added);
+                                bool *added,
+                                bool *skipped);
 static CURLcode create_transfer(struct GlobalConfig *global,
                                 CURLSH *share,
-                                bool *added);
+                                bool *added,
+                                bool *skipped);
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -828,7 +830,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
                                 bool capath_from_env,
-                                bool *added)
+                                bool *added,
+                                bool *skipped)
 {
   CURLcode result = CURLE_OK;
   struct getout *urlnode;
@@ -837,7 +840,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   struct State *state = &config->state;
   char *httpgetfields = state->httpgetfields;
 
-  *added = FALSE; /* not yet */
+  *skipped = *added = FALSE; /* not yet */
 
   if(config->postfields) {
     if(config->use_httpget) {
@@ -1220,6 +1223,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               notef(global, "skips transfer, \"%s\" exists locally",
                     per->outfile);
               per->skip = TRUE;
+              *skipped = TRUE;
             }
           }
           if((urlnode->flags & GETOUT_USEREMOTE)
@@ -2468,15 +2472,17 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   *addedp = FALSE;
   *morep = FALSE;
   if(all_pers < (global->parallel_max*2)) {
-    result = create_transfer(global, share, addedp);
-    if(result)
-      return result;
+    bool skipped = FALSE;
+    do {
+      result = create_transfer(global, share, addedp, &skipped);
+      if(result)
+        return result;
+    } while(skipped);
   }
   for(per = transfers; per && (all_added < global->parallel_max);
       per = per->next) {
-    bool getadded = FALSE;
-    if(per->added)
-      /* already added */
+    if(per->added || per->skip)
+      /* already added or to be skipped */
       continue;
     if(per->startat && (time(NULL) < per->startat)) {
       /* this is still delaying */
@@ -2512,8 +2518,15 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
       result = CURLE_OUT_OF_MEMORY;
     }
 
-    if(!result)
-      result = create_transfer(global, share, &getadded);
+    if(!result) {
+      bool getadded = FALSE;
+      bool skipped = FALSE;
+      do {
+        result = create_transfer(global, share, &getadded, &skipped);
+        if(result)
+          break;
+      } while(skipped);
+    }
     if(result) {
       free(errorbuf);
       return result;
@@ -2874,31 +2887,34 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
 #endif
   else
 #endif
-  while(!s->mcode && (s->still_running || s->more_transfers)) {
-    /* If stopping prematurely (eg due to a --fail-early condition) then signal
-       that any transfers in the multi should abort (via progress callback). */
-    if(s->wrapitup) {
-      if(!s->still_running)
-        break;
-      if(!s->wrapitup_processed) {
-        struct per_transfer *per;
-        for(per = transfers; per; per = per->next) {
-          if(per->added)
-            per->abort = TRUE;
+
+  if(all_added) {
+    while(!s->mcode && (s->still_running || s->more_transfers)) {
+      /* If stopping prematurely (eg due to a --fail-early condition) then
+         signal that any transfers in the multi should abort (via progress
+         callback). */
+      if(s->wrapitup) {
+        if(!s->still_running)
+          break;
+        if(!s->wrapitup_processed) {
+          struct per_transfer *per;
+          for(per = transfers; per; per = per->next) {
+            if(per->added)
+              per->abort = TRUE;
+          }
+          s->wrapitup_processed = TRUE;
         }
-        s->wrapitup_processed = TRUE;
       }
+
+      s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
+      if(!s->mcode)
+        s->mcode = curl_multi_perform(s->multi, &s->still_running);
+      if(!s->mcode)
+        result = check_finished(s);
     }
 
-    s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
-    if(!s->mcode)
-      s->mcode = curl_multi_perform(s->multi, &s->still_running);
-
-    if(!s->mcode)
-      result = check_finished(s);
+    (void)progress_meter(global, &s->start, TRUE);
   }
-
-  (void)progress_meter(global, &s->start, TRUE);
 
   /* Make sure to return some kind of error if there was a multi problem */
   if(s->mcode) {
@@ -2920,8 +2936,9 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   CURLcode result = CURLE_OK;
   struct per_transfer *per;
   bool added = FALSE;
+  bool skipped = FALSE;
 
-  result = create_transfer(global, share, &added);
+  result = create_transfer(global, share, &added, &skipped);
   if(result)
     return result;
   if(!added) {
@@ -2967,12 +2984,14 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     if(is_fatal_error(returncode) || (returncode && global->fail_early))
       bailout = TRUE;
     else {
-      /* setup the next one just before we delete this */
-      result = create_transfer(global, share, &added);
-      if(result) {
-        returncode = result;
-        bailout = TRUE;
-      }
+      do {
+        /* setup the next one just before we delete this */
+        result = create_transfer(global, share, &added, &skipped);
+        if(result) {
+          returncode = result;
+          bailout = TRUE;
+        }
+      } while(skipped);
     }
 
     per = del_per_transfer(per);
@@ -3006,7 +3025,8 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
 static CURLcode transfer_per_config(struct GlobalConfig *global,
                                     struct OperationConfig *config,
                                     CURLSH *share,
-                                    bool *added)
+                                    bool *added,
+                                    bool *skipped)
 {
   CURLcode result = CURLE_OK;
   bool capath_from_env;
@@ -3111,7 +3131,8 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
   }
 
   if(!result)
-    result = single_transfer(global, config, share, capath_from_env, added);
+    result = single_transfer(global, config, share, capath_from_env, added,
+                             skipped);
 
   return result;
 }
@@ -3122,12 +3143,14 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
  */
 static CURLcode create_transfer(struct GlobalConfig *global,
                                 CURLSH *share,
-                                bool *added)
+                                bool *added,
+                                bool *skipped)
 {
   CURLcode result = CURLE_OK;
   *added = FALSE;
   while(global->current) {
-    result = transfer_per_config(global, global->current, share, added);
+    result = transfer_per_config(global, global->current, share, added,
+                                 skipped);
     if(!result && !*added) {
       /* when one set is drained, continue to next */
       global->current = global->current->next;
