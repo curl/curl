@@ -97,9 +97,11 @@ LIB_VQUIC_HFILES = \
 LIB_VSSH_CFILES =  \
   vssh/libssh.c    \
   vssh/libssh2.c   \
+  vssh/curl_path.c \
   vssh/wolfssh.c
 
-LIB_VSSH_HFILES =  \
+LIB_VSSH_HFILES =    \
+  vssh/curl_path.h   \
   vssh/ssh.h
 
 LIB_CFILES =         \
@@ -131,7 +133,6 @@ LIB_CFILES =         \
   curl_memrchr.c     \
   curl_multibyte.c   \
   curl_ntlm_core.c   \
-  curl_path.c        \
   curl_range.c       \
   curl_rtmp.c        \
   curl_sasl.c        \
@@ -273,7 +274,6 @@ LIB_HFILES =         \
   curl_memrchr.h     \
   curl_multibyte.h   \
   curl_ntlm_core.h   \
-  curl_path.h        \
   curl_printf.h      \
   curl_range.h       \
   curl_rtmp.h        \
