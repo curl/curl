@@ -501,7 +501,7 @@ jobs:
 
       - name: 'install test prereqs'
         run: |
-          sudo python3 -m pip install -r tests/requirements.txt
+          sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
 
       - name: 'run tests'
         env:
@@ -515,7 +515,7 @@ jobs:
 
       - name: 'install pytest prereqs'
         run: |
-          sudo python3 -m pip install -r tests/http/requirements.txt
+          sudo python3 -m pip install --break-system-packages -r tests/http/requirements.txt
 
       - name: cache mod_h2
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
