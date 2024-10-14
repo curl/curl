@@ -80,7 +80,12 @@ jobs:
           JSON
 
       - name: check special prose
-        run: proselint docs/CHECKSRC.md docs/libcurl/curl_mprintf.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
+        run: >-
+          proselint
+            docs/internals/CHECKSRC.md
+            docs/libcurl/curl_mprintf.md
+            docs/libcurl/opts/CURLOPT_INTERFACE.md
+            docs/cmdline-opts/interface.md
 
   # Docs: https://github.com/marketplace/actions/markdown-link-check
   linkcheck:
