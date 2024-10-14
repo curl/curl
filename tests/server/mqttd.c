@@ -439,6 +439,7 @@ static int publish(FILE *dump,
     loghex(packet, rc);
     logprotocol(FROM_SERVER, "PUBLISH", remaininglength, dump, packet, rc);
   }
+  free(packet);
   if((size_t)rc == packetlen)
     return 0;
   return 1;
@@ -647,13 +648,16 @@ static curl_socket_t mqttit(curl_socket_t fd)
         if(!config.publish_before_suback) {
           if(suback(dump, fd, packet_id)) {
             logmsg("failed sending SUBACK");
+            free(data);
             goto end;
           }
         }
         if(publish(dump, fd, packet_id, topic, data, datalen)) {
           logmsg("PUBLISH failed");
+          free(data);
           goto end;
         }
+        free(data);
         if(config.publish_before_suback) {
           if(suback(dump, fd, packet_id)) {
             logmsg("failed sending SUBACK");
