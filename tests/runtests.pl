@@ -858,6 +858,7 @@ sub checksystemfeatures {
             "* Host: $hostname\n",
             "* System: $hosttype\n",
             "* OS: $hostos\n",
+            "* Path: " . $ENV{'PATH'} . "\n",
             "* Perl: $^V ($^X)\n",
             "* Args: $args\n");
 
@@ -2530,7 +2531,9 @@ if(!$randseed) {
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
     print "Using curl: $CURL\n";
-    open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>$dev_null") ||
+    my $cmd = shell_quote($CURL) . " --version 2>$dev_null";
+    print "curl cmd: |$cmd|\n";
+    open(my $curlvh, "-|", $cmd) ||
         die "could not get curl version!";
     my @c = <$curlvh>;
     close($curlvh) || die "could not get curl version!";
@@ -3147,6 +3150,7 @@ if(%skipped && !$short) {
         $log_line .= ")\n";
         $restraints{$log_line} = $skip_count;
     }
+    #foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a} || $b <=> $a} keys %restraints) {
     foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a}} keys %restraints) {
         logmsg $log_line;
     }
