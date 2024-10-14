@@ -69,7 +69,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
     ret = curl_easy_perform(curl);
     if(ret == CURLE_OK) {
-      /* only connected! */
+      /* only connected */
     }
   }
 }

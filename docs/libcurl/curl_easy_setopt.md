@@ -37,7 +37,7 @@ appropriate options, the application can change libcurl's behavior. All
 options are set with an *option* followed by a *parameter*. That parameter can
 be a **long**, a **function pointer**, an **object pointer** or a
 **curl_off_t**, depending on what the specific option expects. Read this
-manual carefully as bad input values may cause libcurl to behave badly! You
+manual carefully as bad input values may cause libcurl to behave badly. You
 can only set one option in each function call. A typical application uses many
 curl_easy_setopt(3) calls in the setup phase.
 

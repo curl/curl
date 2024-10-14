@@ -44,7 +44,7 @@ SPDX-License-Identifier: curl
   when connecting to make the connection succeed.
 
   An additional complication can be that modern SSL libraries sometimes are
-  built with support for older SSL and TLS versions disabled!
+  built with support for older SSL and TLS versions disabled.
 
   All versions of SSL and the TLS versions before 1.2 are considered insecure
   and should be avoided. Use TLS 1.2 or later.

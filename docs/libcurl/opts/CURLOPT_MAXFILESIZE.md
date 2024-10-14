@@ -56,7 +56,7 @@ int main(void)
   if(curl) {
     CURLcode ret;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    /* refuse to download if larger than 1000 bytes! */
+    /* refuse to download if larger than 1000 bytes */
     curl_easy_setopt(curl, CURLOPT_MAXFILESIZE, 1000L);
     ret = curl_easy_perform(curl);
   }

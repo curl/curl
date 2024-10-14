@@ -571,7 +571,7 @@ SPDX-License-Identifier: curl
 
  Curl supports encrypted fetches when built to use a TLS library and it can be
  built to use one out of a fairly large set of libraries - `curl -V` shows
- which one your curl was built to use (if any!). To get a page from an HTTPS
+ which one your curl was built to use (if any). To get a page from an HTTPS
  server, simply run curl like:
 
     curl https://secure.example.com

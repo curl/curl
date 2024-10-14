@@ -21,12 +21,12 @@ first.
 
 Most examples should build fine using a command line like this:
 
-    `curl-config --cc --cflags --libs` -o example example.c
+    `curl-config --cc --cflags --libs` -o example-my example.c
 
 Some compilers do not like having the arguments in this order but instead
 want you do reorganize them like:
 
-    `curl-config --cc` -o example example.c `curl-config --cflags --libs`
+    `curl-config --cc` -o example-my example.c `curl-config --cflags --libs`
 
 **Please** do not use the `curl.se` site as a test target for your libcurl
 applications/experiments. Even if some of the examples use that site as a URL

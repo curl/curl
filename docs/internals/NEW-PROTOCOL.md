@@ -101,7 +101,7 @@ peculiarities of the protocol. It needs documentation.
 
 Maybe it even needs some internal documentation so that the developers who try
 to debug something five years from now can figure out functionality a little
-easier!
+easier.
 
 The protocol specification itself should be freely available without requiring
 a non-disclosure agreement or similar.

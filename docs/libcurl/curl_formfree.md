@@ -27,7 +27,7 @@ void curl_formfree(struct curl_httppost *form);
 
 # DESCRIPTION
 
-This function is deprecated. Do not use. See curl_mime_init(3) instead!
+This function is deprecated. Do not use. See curl_mime_init(3) instead.
 
 curl_formfree() is used to clean up data previously built/appended with
 curl_formadd(3). This must be called when the data has been used, which

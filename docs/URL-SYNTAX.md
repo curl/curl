@@ -32,7 +32,7 @@ unlikely that multiple parsers treat URLs the same way.
 
 Due to the inherent differences between URL parser implementations, it is
 considered a security risk to mix different implementations and assume the
-same behavior!
+same behavior.
 
 For example, if you use one parser to check if a URL uses a good hostname or
 the correct auth field, and then pass on that same URL to a *second* parser,

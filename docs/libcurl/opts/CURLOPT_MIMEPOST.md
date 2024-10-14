@@ -68,7 +68,7 @@ int main(void)
       /* Set the form info */
       curl_easy_setopt(curl, CURLOPT_MIMEPOST, multipart);
 
-      curl_easy_perform(curl); /* post away! */
+      curl_easy_perform(curl); /* post away */
       curl_mime_free(multipart); /* free the post data */
     }
   }

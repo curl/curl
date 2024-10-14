@@ -40,7 +40,7 @@ int main(void)
 {
   char *width = curl_getenv("COLUMNS");
   if(width) {
-    /* it was set! */
+    /* it was set */
     curl_free(width);
   }
 }

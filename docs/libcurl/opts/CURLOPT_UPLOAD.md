@@ -83,7 +83,7 @@ int main(void)
     /* Set the size of the file to upload */
     curl_easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)fsize);
 
-    /* Now run off and do what you have been told! */
+    /* Now run off and do what you have been told */
     curl_easy_perform(curl);
   }
 }

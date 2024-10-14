@@ -29,7 +29,7 @@ CURLcode curl_easy_getinfo(CURL *handle, CURLINFO_PROTOCOL, long *p);
 
 This option is deprecated. We strongly recommend using
 CURLINFO_SCHEME(3) instead, because this option cannot return all
-possible protocols!
+possible protocols.
 
 Pass a pointer to a long to receive the version used in the last http
 connection. The returned value is set to one of the CURLPROTO_* values:

@@ -61,7 +61,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
-    /* get us the resource without a body - use HEAD! */
+    /* get us the resource without a body - use HEAD */
     curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 
     /* Perform the request */

@@ -26,7 +26,7 @@ char *curl_escape(const char *string, int length);
 
 # DESCRIPTION
 
-Obsolete function. Use curl_easy_escape(3) instead!
+Obsolete function. Use curl_easy_escape(3) instead.
 
 This function converts the given input **string** to a URL encoded string
 and return that as a new allocated string. All input characters that are not

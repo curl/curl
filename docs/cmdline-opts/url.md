@@ -29,4 +29,4 @@ To control where this URL is written, use the --output or the --remote-name
 options.
 
 **WARNING**: On Windows, particular `file://` accesses can be converted to
-network accesses by the operating system. Beware!
+network accesses by the operating system. Beware.

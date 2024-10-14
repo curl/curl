@@ -9,7 +9,7 @@ SPDX-License-Identifier: curl
 Hyper is a separate HTTP library written in Rust. curl can be told to use this
 library as a backend to deal with HTTP.
 
-## Experimental!
+## EXPERIMENTAL
 
 Hyper support in curl is considered **EXPERIMENTAL** until further notice. It
 needs to be explicitly enabled at build-time.

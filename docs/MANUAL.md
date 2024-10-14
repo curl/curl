@@ -274,7 +274,7 @@ To get even more details and information on what curl does, try using the
 `--trace` or `--trace-ascii` options with a given filename to log to, like
 this:
 
-    curl --trace trace.txt www.haxx.se
+    curl --trace my-trace.txt www.haxx.se
 
 
 ## Detailed Information
