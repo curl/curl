@@ -180,7 +180,7 @@ UNITTEST DOHcode doh_req_encode(const char *host,
 }
 
 static size_t
-doh_write_cb(const void *contents, size_t size, size_t nmemb, void *userp)
+doh_write_cb(char *contents, size_t size, size_t nmemb, void *userp)
 {
   size_t realsize = size * nmemb;
   struct dynbuf *mem = (struct dynbuf *)userp;

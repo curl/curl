@@ -159,10 +159,10 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb,
 }
 
 static int progress_callback(void *clientp,
-                             double dltotal,
-                             double dlnow,
-                             double ultotal,
-                             double ulnow)
+                             curl_off_t dltotal,
+                             curl_off_t dlnow,
+                             curl_off_t ultotal,
+                             curl_off_t ulnow)
 {
   (void)dltotal;
   (void)dlnow;

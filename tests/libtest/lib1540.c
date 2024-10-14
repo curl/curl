@@ -57,7 +57,7 @@ static int please_continue(void *userp,
   return 0; /* go on */
 }
 
-static size_t header_callback(void *ptr, size_t size, size_t nmemb,
+static size_t header_callback(char *ptr, size_t size, size_t nmemb,
                               void *userp)
 {
   size_t len = size * nmemb;
@@ -66,7 +66,7 @@ static size_t header_callback(void *ptr, size_t size, size_t nmemb,
   return len;
 }
 
-static size_t write_callback(void *ptr, size_t size, size_t nmemb, void *userp)
+static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 {
   struct transfer_status *st = (struct transfer_status *)userp;
   size_t len = size * nmemb;
