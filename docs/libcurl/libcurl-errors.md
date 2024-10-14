@@ -60,7 +60,7 @@ The URL was not properly formatted.
 
 ## CURLE_NOT_BUILT_IN (4)
 
-A requested feature, protocol or option was not found built-in in this libcurl
+A requested feature, protocol or option was not found built into this libcurl
 due to a build-time decision. This means that a feature or option was not
 enabled or explicitly disabled when libcurl was built and in order to get it
 to function you have to get a rebuilt libcurl.
