@@ -1,6 +1,7 @@
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
 <!-- SPDX-License-Identifier: curl -->
 # OPTIONS
+
 Options start with one or two dashes. Many of the options require an
 additional value next to them. If provided text does not start with a dash, it
 is presumed to be and treated as a URL.
