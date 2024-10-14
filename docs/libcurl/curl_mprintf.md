@@ -183,9 +183,9 @@ pointer to a long argument
 
 ## ll
 
-(ell-ell). A following integer conversion corresponds to a `long long` or
-`unsigned long long` argument, or a following n conversion corresponds to
-a pointer to a `long long` argument.
+(ell-ell). A following integer conversion corresponds to a *long long* or
+*unsigned long long* argument, or a following n conversion corresponds to
+a pointer to a *long long* argument.
 
 ## q
 
