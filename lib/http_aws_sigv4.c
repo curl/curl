@@ -47,7 +47,7 @@
 
 #define HMAC_SHA256(k, kl, d, dl, o)           \
   do {                                         \
-    result = Curl_hmacit(Curl_HMAC_SHA256,     \
+    result = Curl_hmacit(&Curl_HMAC_SHA256,    \
                          (unsigned char *)k,   \
                          kl,                   \
                          (unsigned char *)d,   \

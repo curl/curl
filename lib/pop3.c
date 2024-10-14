@@ -504,7 +504,7 @@ static CURLcode pop3_perform_apop(struct Curl_easy *data,
   }
 
   /* Create the digest */
-  ctxt = Curl_MD5_init(Curl_DIGEST_MD5);
+  ctxt = Curl_MD5_init(&Curl_DIGEST_MD5);
   if(!ctxt)
     return CURLE_OUT_OF_MEMORY;
 
