@@ -44,7 +44,7 @@ curl was built with support for character set conversions (like EBCDIC)
 
 ## `Debug`
 This curl uses a libcurl built with Debug. This enables more error-tracking
-and memory debugging etc. For curl-developers only!
+and memory debugging etc. For curl-developers only.
 
 ## `ECH`
 ECH support is present.

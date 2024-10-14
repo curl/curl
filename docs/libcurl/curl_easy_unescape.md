@@ -59,7 +59,7 @@ int main(void)
     int decodelen;
     char *decoded = curl_easy_unescape(curl, "%63%75%72%6c", 12, &decodelen);
     if(decoded) {
-      /* do not assume printf() works on the decoded data! */
+      /* do not assume printf() works on the decoded data */
       printf("Decoded: ");
       /* ... */
       curl_free(decoded);

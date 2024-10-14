@@ -525,7 +525,7 @@ You are doomed.
 
 ## CURLM_INTERNAL_ERROR (4)
 
-This can only be returned if libcurl bugs. Please report it to us!
+This can only be returned if libcurl bugs. Please report it to us.
 
 ## CURLM_BAD_SOCKET (5)
 

@@ -36,7 +36,7 @@ The share interface was added to enable sharing of data between curl handles.
 
 You can have multiple easy handles share data between them. Have them update
 and use the **same** cookie database, DNS cache, TLS session cache and/or
-connection cache! This way, each single transfer takes advantage from data
+connection cache. This way, each single transfer takes advantage from data
 updates made by the other transfer(s).
 
 # SHARE OBJECT

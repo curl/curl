@@ -105,7 +105,7 @@ Too many redirects. When following redirects, curl hit the maximum amount.
 ## 48
 Unknown option specified to libcurl. This indicates that you passed a weird
 option to curl that was passed on to libcurl and rejected. Read up in the
-manual!
+manual.
 ## 49
 Malformed telnet option.
 ## 52

@@ -28,7 +28,7 @@ char *curl_version();
 Returns a human readable string with the version number of libcurl and some of
 its important components (like OpenSSL version).
 
-We recommend using curl_version_info(3) instead!
+We recommend using curl_version_info(3) instead.
 
 # %PROTOCOLS%
 

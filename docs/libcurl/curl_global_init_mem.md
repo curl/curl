@@ -69,7 +69,7 @@ to that man page for documentation.
 # CAUTION
 
 Manipulating these gives considerable powers to the application to severely
-screw things up for libcurl. Take care!
+screw things up for libcurl. Take care.
 
 # %PROTOCOLS%
 

@@ -42,7 +42,7 @@ specifies two separate 100-byte ranges(*) (HTTP)
 ##
 
 (*) = NOTE that these make the server reply with a multipart response, which
-is returned as-is by curl! Parsing or otherwise transforming this response is
+is returned as-is by curl. Parsing or otherwise transforming this response is
 the responsibility of the caller.
 
 Only digit characters (0-9) are valid in the 'start' and 'stop' fields of the
