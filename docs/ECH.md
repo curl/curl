@@ -330,7 +330,7 @@ Then:
     autoreconf -fi
     LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
     ...lots of output...
-    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution!
+    WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution.
     make
 ```
 

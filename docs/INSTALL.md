@@ -570,7 +570,7 @@ that are not automatically detected:
 
 This is a probably incomplete list of known CPU architectures and operating
 systems that curl has been compiled for. If you know a system curl compiles
-and runs on, that is not listed, please let us know!
+and runs on, that is not listed, please let us know.
 
 ## 101 Operating Systems
 

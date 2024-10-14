@@ -44,4 +44,4 @@ gambling, pornography, social media manipulation etc.
 ## Past Sponsors
 
 Sponsors that stop paying are considered *Past Sponsors* and are not displayed
-on the sponsor page anymore. We thank you for your contributions!
+on the sponsor page anymore. We thank you for your contributions.
