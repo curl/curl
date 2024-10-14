@@ -48,7 +48,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL,
                      "ftp://example.com/old-server/file.txt");
 
-    /* a drftpd server, do it! */
+    /* a drftpd server, do it */
     curl_easy_setopt(curl, CURLOPT_FTP_USE_PRET, 1L);
 
     res = curl_easy_perform(curl);

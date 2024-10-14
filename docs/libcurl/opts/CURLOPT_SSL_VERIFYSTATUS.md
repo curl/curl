@@ -53,7 +53,7 @@ int main(void)
   if(curl) {
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com/");
-    /* ask for OCSP stapling! */
+    /* ask for OCSP stapling */
     curl_easy_setopt(curl, CURLOPT_SSL_VERIFYSTATUS, 1L);
     res = curl_easy_perform(curl);
     curl_easy_cleanup(curl);

@@ -57,7 +57,7 @@ The *clientp* argument to the callback is set with the
 CURLOPT_IOCTLDATA(3) option.
 
 **This option is deprecated**. Do not use it. Use CURLOPT_SEEKFUNCTION(3)
-instead to provide seeking! If CURLOPT_SEEKFUNCTION(3) is set, this
+instead to provide seeking. If CURLOPT_SEEKFUNCTION(3) is set, this
 parameter is ignored when seeking.
 
 # DEFAULT

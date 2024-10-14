@@ -27,7 +27,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_DNS_USE_GLOBAL_CACHE,
 
 # DESCRIPTION
 
-Has no function since 7.62.0. Do not use!
+Has no function since 7.62.0. Do not use.
 
 Pass a long. If the *enable* value is 1, it tells curl to use a global DNS
 cache that survives between easy handle creations and deletions. This is not

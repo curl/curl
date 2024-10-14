@@ -64,7 +64,7 @@ int main(void)
 
     /* HTTPS over a proxy makes a separate CONNECT to the proxy, so tell
        libcurl to not send the custom headers to the proxy. Keep them
-       separate! */
+       separate. */
     curl_easy_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
     ret = curl_easy_perform(curl);
     curl_slist_free_all(list);

@@ -30,7 +30,7 @@ Pass the long argument *allowed* set to 1L to allow HTTP/0.9 responses.
 
 An HTTP/0.9 response is a server response entirely without headers and only a
 body. You can connect to lots of random TCP services and still get a response
-that curl might consider to be HTTP/0.9!
+that curl might consider to be HTTP/0.9.
 
 # DEFAULT
 
