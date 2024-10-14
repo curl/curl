@@ -389,7 +389,7 @@ static void state(struct Curl_easy *data, sshstate nowstate)
 
 
 #ifdef HAVE_LIBSSH2_KNOWNHOST_API
-static int sshkeycallback(struct Curl_easy *easy,
+static int sshkeycallback(CURL *easy,
                           const struct curl_khkey *knownkey, /* known */
                           const struct curl_khkey *foundkey, /* found */
                           enum curl_khmatch match,

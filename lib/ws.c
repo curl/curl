@@ -924,10 +924,11 @@ static ssize_t nw_in_recv(void *reader_ctx,
   return (ssize_t)nread;
 }
 
-CURL_EXTERN CURLcode curl_ws_recv(struct Curl_easy *data, void *buffer,
+CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
                                   size_t buflen, size_t *nread,
                                   const struct curl_ws_frame **metap)
 {
+  struct Curl_easy *data = d;
   struct connectdata *conn = data->conn;
   struct websocket *ws;
   struct ws_collect ctx;
@@ -1047,11 +1048,12 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
   return CURLE_OK;
 }
 
-static CURLcode ws_send_raw_blocking(CURL *data, struct websocket *ws,
+static CURLcode ws_send_raw_blocking(CURL *d, struct websocket *ws,
                                      const char *buffer, size_t buflen)
 {
   CURLcode result = CURLE_OK;
   size_t nwritten;
+  struct Curl_easy *data = d;
 
   (void)ws;
   while(buflen) {
@@ -1088,7 +1090,7 @@ static CURLcode ws_send_raw_blocking(CURL *data, struct websocket *ws,
   return result;
 }
 
-static CURLcode ws_send_raw(CURL *data, const void *buffer,
+static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
                             size_t buflen, size_t *pnwritten)
 {
   struct websocket *ws = data->conn->proto.ws;
@@ -1124,7 +1126,7 @@ static CURLcode ws_send_raw(CURL *data, const void *buffer,
   return result;
 }
 
-CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
+CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer,
                                   size_t buflen, size_t *sent,
                                   curl_off_t fragsize,
                                   unsigned int flags)
@@ -1133,6 +1135,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *data, const void *buffer,
   ssize_t n;
   size_t space, payload_added;
   CURLcode result;
+  struct Curl_easy *data = d;
 
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
               ", flags=%x), raw=%d",
@@ -1289,10 +1292,11 @@ static CURLcode ws_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *d)
 {
   /* we only return something for websocket, called from within the callback
      when not using raw mode */
+  struct Curl_easy *data = d;
   if(GOOD_EASY_HANDLE(data) && Curl_is_in_callback(data) && data->conn &&
      data->conn->proto.ws && !data->set.ws_raw_mode)
     return &data->conn->proto.ws->frame;
@@ -1380,7 +1384,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *curl, const void *buffer,
   return CURLE_NOT_BUILT_IN;
 }
 
-CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(struct Curl_easy *data)
+CURL_EXTERN const struct curl_ws_frame *curl_ws_meta(CURL *data)
 {
   (void)data;
   return NULL;

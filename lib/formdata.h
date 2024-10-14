@@ -49,7 +49,7 @@ struct FormInfo {
   bool showfilename_alloc;
 };
 
-CURLcode Curl_getformdata(struct Curl_easy *data,
+CURLcode Curl_getformdata(CURL *data,
                           curl_mimepart *,
                           struct curl_httppost *post,
                           curl_read_callback fread_func);

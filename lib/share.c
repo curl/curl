@@ -38,7 +38,7 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-struct Curl_share *
+CURLSH *
 curl_share_init(void)
 {
   struct Curl_share *share = calloc(1, sizeof(struct Curl_share));
@@ -53,7 +53,7 @@ curl_share_init(void)
 
 #undef curl_share_setopt
 CURLSHcode
-curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
+curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 {
   va_list param;
   int type;
@@ -61,6 +61,7 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
   curl_unlock_function unlockfunc;
   void *ptr;
   CURLSHcode res = CURLSHE_OK;
+  struct Curl_share *share = sh;
 
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
@@ -214,8 +215,9 @@ curl_share_setopt(struct Curl_share *share, CURLSHoption option, ...)
 }
 
 CURLSHcode
-curl_share_cleanup(struct Curl_share *share)
+curl_share_cleanup(CURLSH *sh)
 {
+  struct Curl_share *share = sh;
   if(!GOOD_SHARE_HANDLE(share))
     return CURLSHE_INVALID;
 

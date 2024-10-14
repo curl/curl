@@ -98,7 +98,8 @@
 #include "tool_ipfs.h"
 #include "dynbuf.h"
 #ifdef DEBUGBUILD
-#include "easyif.h"  /* for libcurl's debug-only curl_easy_perform_ev() */
+/* libcurl's debug-only curl_easy_perform_ev() */
+CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #include "memdebug.h" /* keep this as LAST include */
