@@ -72,7 +72,7 @@
   } while(0)
 
 
-/* A list of connections to the same destinationn. */
+/* A list of connections to the same destination. */
 struct cpool_bundle {
   struct Curl_llist conns; /* connections in the bundle */
   size_t dest_len; /* total length of destination, including NUL */
@@ -269,25 +269,10 @@ cpool_add_bundle(struct cpool *cpool, struct connectdata *conn)
 static void cpool_remove_bundle(struct cpool *cpool,
                                 struct cpool_bundle *bundle)
 {
-  struct Curl_hash_iterator iter;
-  struct Curl_hash_element *he;
-
   if(!cpool)
     return;
 
-  Curl_hash_start_iterate(&cpool->dest2bundle, &iter);
-
-  he = Curl_hash_next_element(&iter);
-  while(he) {
-    if(he->ptr == bundle) {
-      /* The bundle is destroyed by the hash destructor function,
-         free_bundle_hash_entry() */
-      Curl_hash_delete(&cpool->dest2bundle, he->key, he->key_len);
-      return;
-    }
-
-    he = Curl_hash_next_element(&iter);
-  }
+  Curl_hash_delete(&cpool->dest2bundle, bundle->dest, bundle->dest_len);
 }
 
 static struct connectdata *
@@ -412,7 +397,7 @@ static void cpool_remove_conn(struct cpool *cpool,
       cpool->num_conn--;
     }
     else {
-      /* Not in  a bundle, already in the shutdown list? */
+      /* Not in a bundle, already in the shutdown list? */
       DEBUGASSERT(list == &cpool->shutdowns);
     }
   }
