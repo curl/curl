@@ -2046,21 +2046,18 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
       break;
 
     case SSH_SFTP_REALPATH:
-    {
-      char tempHome[CURL_PATH_MAX];
-
       /*
        * Get the "home" directory
        */
       rc = sftp_libssh2_realpath(sshc->sftp_session, ".",
-                                 tempHome, CURL_PATH_MAX-1);
+                                 sshp->readdir_filename, CURL_PATH_MAX);
       if(rc == LIBSSH2_ERROR_EAGAIN) {
         break;
       }
       if(rc > 0) {
         /* It seems that this string is not always NULL terminated */
-        tempHome[rc] = '\0';
-        sshc->homedir = strdup(tempHome);
+        sshp->readdir_filename[rc] = '\0';
+        sshc->homedir = strdup(sshp->readdir_filename);
         if(!sshc->homedir) {
           state(data, SSH_SFTP_CLOSE);
           sshc->actualcode = CURLE_OUT_OF_MEMORY;
@@ -2083,7 +2080,7 @@ static CURLcode ssh_statemachine(struct Curl_easy *data, bool *block)
         state(data, SSH_STOP);
         break;
       }
-    }
+
     /* This is the last step in the SFTP connect phase. Do note that while
        we get the homedir here, we get the "workingpath" in the DO action
        since the homedir will remain the same between request but the
