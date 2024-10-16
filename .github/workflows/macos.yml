@@ -274,8 +274,8 @@ jobs:
             make -C bld/tests/certs clean-certs
             make -C bld/tests/certs build-certs -j1
           else
-            ninja -C bld clean-certs
-            ninja -C bld build-certs -j 1
+            cmake --build bld --target clean-certs
+            cmake --build bld --target build-certs --parallel 1
           fi
 
       - name: 'build'
@@ -283,7 +283,7 @@ jobs:
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld V=1
           else
-            ninja -C bld --verbose
+            cmake --build bld --verbose
           fi
 
       - name: 'curl version'
@@ -294,7 +294,7 @@ jobs:
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld V=1 -C tests
           else
-            ninja -C bld testdeps
+            cmake --build bld --target testdeps
           fi
 
       - name: 'install test prereqs'
@@ -333,7 +333,7 @@ jobs:
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld V=1 test-ci
           else
-            ninja -C bld test-ci
+            cmake --build bld --target test-ci
           fi
 
       - name: 'build examples'
@@ -342,7 +342,7 @@ jobs:
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld examples V=1
           else
-            ninja -C bld curl-examples --verbose
+            cmake --build bld --target curl-examples --verbose
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, Secure Transport/not, built tool, combinations
