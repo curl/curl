@@ -311,9 +311,12 @@ jobs:
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             TFLAGS+=' ~RTSP'  # 567 568 569 570 571 572 577 689 3100
             TFLAGS+=' ~1156 ~1539'  # HTTP Content-Range, Content-Length
-            if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
+            if [[ -n '${{ matrix.build.configure }}' || \
                   '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
               TFLAGS+=' ~2100'  # 2100:'HTTP GET using DoH' https://github.com/curl/curl/actions/runs/9942146678/job/27462937524#step:15:5059
+            fi
+            if [[ '${{ matrix.build.configure }}' = *'--with-secure-transport'* || \
+                  '${{ matrix.build.generate }}' = *'-DCURL_USE_SECTRANSP=ON'* ]]; then
               TFLAGS+=' ~HTTP/2'  # 2400 2401 2402 2403 2404 2406, Secure Transport + nghttp2
             else
               TFLAGS+=' ~2402 ~2404'  # non-Secure Transport + nghttp2
