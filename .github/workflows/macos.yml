@@ -181,7 +181,7 @@ jobs:
             torture: true
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
-          - { compiler: llvm@15, build: { macos-version-min: '10.9' } }
+          - { compiler: llvm@15, build: { torture: true } }
           - { compiler: gcc-12, build: { torture: true } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@15, build: { compiler: 'clang' } }
