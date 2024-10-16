@@ -165,6 +165,12 @@ static int gtls_init(void)
     gnutls_global_set_log_function(tls_log_func);
     gnutls_global_set_log_level(2);
 #endif
+#if (GNUTLS_VERSION_NUMBER >= 0x030703)
+    gnutls_protocol_set_enabled(GNUTLS_TLS1, TRUE);
+    gnutls_protocol_set_enabled(GNUTLS_TLS1_1, TRUE);
+    gnutls_protocol_set_enabled(GNUTLS_TLS1_2, TRUE);
+    gnutls_protocol_set_enabled(GNUTLS_TLS1_3, TRUE);
+#endif
     gtls_inited = TRUE;
   }
   return ret;

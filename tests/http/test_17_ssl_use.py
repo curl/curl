@@ -298,13 +298,8 @@ class TestSSLUse:
         extra_args.extend(['--trace-config', 'ssl'])
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
         if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
-            assert r.exit_code == 0 , r.dump_logs()
+            assert r.exit_code == 0 , f'extra_args={extra_args}\n{r.dump_logs()}'
             assert r.json['HTTPS'] == 'on', r.dump_logs()
             assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
         else:
-            # ubuntu-latest seems to have a system config that disable TLS1.0 and 1.1
-            # for gnutls now. Not sure why we cannot override this.
-            if env.curl_uses_lib('gnutls') and max_ver in [0, 1]:
-                log.info("ignored failure to make gnutls 1.0/1.1 handshake")
-            else:
-                assert r.exit_code != 0, r.dump_logs()
+            assert r.exit_code != 0, f'extra_args={extra_args}\n{r.dump_logs()}'
