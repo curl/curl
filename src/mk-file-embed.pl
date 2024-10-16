@@ -29,7 +29,7 @@ if($ARGV[0] eq "--var") {
     $varname = shift @ARGV;
 }
 
-my $varname_upper = uc($varnam);
+my $varname_upper = uc($varname);
 
 print <<HEAD
 /*
