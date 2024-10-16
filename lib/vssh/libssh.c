@@ -2146,7 +2146,7 @@ static CURLcode myssh_setup_connection(struct Curl_easy *data,
   data->req.p.ssh = ssh = calloc(1, sizeof(struct SSHPROTO));
   if(!ssh)
     return CURLE_OUT_OF_MEMORY;
-  Curl_dyn_init(&sshc->readdir_buf, PATH_MAX * 2);
+  Curl_dyn_init(&sshc->readdir_buf, CURL_PATH_MAX * 2);
 
   return CURLE_OK;
 }
