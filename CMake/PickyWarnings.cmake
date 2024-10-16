@@ -30,17 +30,17 @@ if(CURL_WERROR AND
      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
-  set(WPICKY "${WPICKY} -pedantic-errors")
+  list(APPEND WPICKY "-pedantic-errors")
 endif()
 
 if(APPLE AND
    (CMAKE_C_COMPILER_ID STREQUAL "Clang"      AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 3.6) OR
    (CMAKE_C_COMPILER_ID STREQUAL "AppleClang" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 6.3))
-  set(WPICKY "${WPICKY} -Werror=partial-availability")  # clang 3.6  appleclang 6.3
+  list(APPEND WPICKY "-Werror=partial-availability")  # clang 3.6  appleclang 6.3
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  set(WPICKY "${WPICKY} -Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
+  list(APPEND WPICKY "-Werror-implicit-function-declaration")  # clang 1.0  gcc 2.95
 endif()
 
 if(PICKY_COMPILER)
@@ -221,7 +221,7 @@ if(PICKY_COMPILER)
     #
 
     foreach(_ccopt IN LISTS WPICKY_ENABLE)
-      set(WPICKY "${WPICKY} ${_ccopt}")
+      list(APPEND WPICKY "${_ccopt}")
     endforeach()
 
     foreach(_ccopt IN LISTS WPICKY_DETECT)
@@ -233,13 +233,24 @@ if(PICKY_COMPILER)
       string(REPLACE "-Wno-" "-W" _ccopt_on "${_ccopt}")
       check_c_compiler_flag(${_ccopt_on} ${_optvarname})
       if(${_optvarname})
-        set(WPICKY "${WPICKY} ${_ccopt}")
+        list(APPEND WPICKY "${_ccopt}")
       endif()
     endforeach()
   endif()
 endif()
 
+# clang-cl
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
+  # list(TRANSFORM WPICKY PREPEND "/clang:") # since CMake 3.12
+  set(_wpicky "")
+  foreach(_ccopt IN LISTS WPICKY)
+    list(APPEND _wpicky "/clang:${_ccopt}")
+  endforeach()
+  set(WPICKY ${_wpicky})
+endif()
+
 if(WPICKY)
+  string(REPLACE ";" " " WPICKY "${WPICKY}")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WPICKY}")
   message(STATUS "Picky compiler options:${WPICKY}")
 endif()
