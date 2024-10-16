@@ -183,6 +183,13 @@ jobs:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
           - { compiler: llvm@15, build: { macos-version-min: '10.9' } }
           - { compiler: gcc-12, build: { torture: true } }
+          # opt out jobs from combinations that have the compiler set manually
+          - { compiler: llvm@15, build: { compiler: 'clang' } }
+          - { compiler: llvm@15, build: { compiler: 'gcc-12' } }
+          - { compiler: gcc-12, build: { compiler: 'clang' } }
+          - { compiler: gcc-12, build: { compiler: 'llvm@15' } }
+          - { compiler: clang, build: { compiler: 'gcc-12' } }
+          - { compiler: clang, build: { compiler: 'llvm@15' } }
 
     steps:
       - name: 'brew install'
