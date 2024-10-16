@@ -298,7 +298,12 @@ class TestSSLUse:
         extra_args.extend(['--trace-config', 'ssl'])
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
         if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
-            assert r.exit_code == 0 , f'extra_args={extra_args}\n{r.dump_logs()}'
+            sysconfig = ''
+            if r.exit_code != 0 and env.curl_uses_lib('gnutls'):
+                gnutls_config = '/etc/gnutls/config'
+                if os.path.exists(gnutls_config):
+                    sysconfig = open(gnutls_config).read()
+            assert r.exit_code == 0, f'extra_args={extra_args}\nsysconfig={sysconfig}\n{r.dump_logs()}'
             assert r.json['HTTPS'] == 'on', r.dump_logs()
             assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
         else:
