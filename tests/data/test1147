@@ -40,9 +40,7 @@ One: 1
 Two: 2
 no-colon
 
-%if !hyper
  And A Funny One : wohoo
-%endif
 User-Agent:
 </file>
 <command>
@@ -59,9 +57,7 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 One: 1
 Two: 2
-%if !hyper
  And A Funny One : wohoo
-%endif
 
 </protocol>
 </verify>

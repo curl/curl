@@ -676,7 +676,7 @@ struct wsfield {
   const char *val;
 };
 
-CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
+CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req)
 {
   unsigned int i;
   CURLcode result = CURLE_OK;
@@ -729,16 +729,8 @@ CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req)
   free(randstr);
   for(i = 0; !result && (i < sizeof(heads)/sizeof(heads[0])); i++) {
     if(!Curl_checkheaders(data, STRCONST(heads[i].name))) {
-#ifdef USE_HYPER
-      char field[128];
-      msnprintf(field, sizeof(field), "%s %s", heads[i].name,
-                heads[i].val);
-      result = Curl_hyper_header(data, req, field);
-#else
-      (void)data;
       result = Curl_dyn_addf(req, "%s %s\r\n", heads[i].name,
                              heads[i].val);
-#endif
     }
   }
   k->upgr101 = UPGR101_WS;

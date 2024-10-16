@@ -27,12 +27,6 @@
 
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 
-#ifdef USE_HYPER
-#define REQTYPE void
-#else
-#define REQTYPE struct dynbuf
-#endif
-
 /* a client-side WS frame decoder, parsing frame headers and
  * payload, keeping track of current position and stats */
 enum ws_dec_state {
@@ -73,7 +67,7 @@ struct websocket {
   struct curl_ws_frame frame;  /* the current WS FRAME received */
 };
 
-CURLcode Curl_ws_request(struct Curl_easy *data, REQTYPE *req);
+CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
 CURLcode Curl_ws_accept(struct Curl_easy *data, const char *mem, size_t len);
 
 extern const struct Curl_handler Curl_handler_ws;
