@@ -105,7 +105,10 @@ CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef CURL_CA_EMBED
+#ifndef CURL_DECLARED_CURL_CA_EMBED
+#define CURL_DECLARED_CURL_CA_EMBED
 extern const unsigned char curl_ca_embed[];
+#endif
 #endif
 
 #ifndef O_BINARY
