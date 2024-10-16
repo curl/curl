@@ -87,6 +87,7 @@ where `<options>` is one or many of:
  - `WITH_NGHTTP2=<dll/static>`   - Enable HTTP/2 support, DLL or static
  - `WITH_MSH3=<dll/static>`      - Enable (experimental) HTTP/3 support, DLL or static
  - `WITH_MBEDTLS=<dll/static>`   - Enable mbedTLS support, DLL or static
+ - `WITH_WOLFSSL=<dll/static>`   - Enable wolfSSL support, DLL or static
  - `WITH_CARES=<dll/static>`     - Enable c-ares support, DLL or static
  - `WITH_ZLIB=<dll/static>`      - Enable zlib support, DLL or static
  - `WITH_SSH=<dll/static>`       - Enable libssh support, DLL or static
@@ -108,6 +109,7 @@ where `<options>` is one or many of:
  - `MACHINE=<x86/x64/arm64>`     - Target architecture (default is x86)
  - `CARES_PATH=<path>`           - Custom path for c-ares
  - `MBEDTLS_PATH=<path>`         - Custom path for mbedTLS
+ - `WOLFSSL_PATH=<path>`         - Custom path for wolfSSL
  - `NGHTTP2_PATH=<path>`         - Custom path for nghttp2
  - `MSH3_PATH=<path>`            - Custom path for msh3
  - `SSH2_PATH=<path>`            - Custom path for libssh2
