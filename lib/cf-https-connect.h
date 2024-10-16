@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
+#if !defined(CURL_DISABLE_HTTP)
 
 struct Curl_cfilter;
 struct Curl_easy;
@@ -54,5 +54,5 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
                              const struct Curl_dns_entry *remotehost);
 
 
-#endif /* !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER) */
+#endif /* !defined(CURL_DISABLE_HTTP) */
 #endif /* HEADER_CURL_CF_HTTP_H */

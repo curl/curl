@@ -1021,13 +1021,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     arg = (long)va_arg(param, unsigned long);
     if(arg > 1L)
       return CURLE_BAD_FUNCTION_ARGUMENT;
-#ifdef USE_HYPER
-    /* Hyper does not support HTTP/0.9 */
-    if(arg)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-#else
     data->set.http09_allowed = !!arg;
-#endif
     break;
 
   case CURLOPT_HTTP200ALIASES:
@@ -2588,12 +2582,8 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     /*
      * disable libcurl transfer encoding is used
      */
-#ifndef USE_HYPER
     data->set.http_te_skip = (0 == va_arg(param, long));
     break;
-#else
-    return CURLE_NOT_BUILT_IN; /* hyper does not support */
-#endif
 
   case CURLOPT_HTTP_CONTENT_DECODING:
     /*

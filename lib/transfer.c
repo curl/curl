@@ -435,15 +435,6 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
     data->state.select_bits = 0;
   }
 
-#ifdef USE_HYPER
-  if(data->conn->datastream) {
-    result = data->conn->datastream(data, data->conn, &didwhat,
-                                    CURL_CSELECT_OUT|CURL_CSELECT_IN);
-    if(result || data->req.done)
-      goto out;
-  }
-  else {
-#endif
   /* We go ahead and do a read if we have a readable socket or if the stream
      was rewound (in which case we have data in a buffer) */
   if(k->keepon & KEEP_RECV) {
@@ -458,9 +449,6 @@ CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp)
     if(result)
       goto out;
   }
-#ifdef USE_HYPER
-  }
-#endif
 
   if(!didwhat) {
     /* Transfer wanted to send/recv, but nothing was possible. */

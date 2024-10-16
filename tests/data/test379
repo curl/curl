@@ -43,14 +43,10 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -o %LOGDIR/save --remove-on-error --no-clob
 </client>
 
 #
-# Verify data after the test has been "shot". hyper doesn't do error 18
+# Verify data after the test has been "shot".
 <verify>
 <errorcode>
-%if hyper
-56
-%else
 18
-%endif
 </errorcode>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
