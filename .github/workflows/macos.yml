@@ -146,7 +146,7 @@ jobs:
             install: gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
             macos-version-min: '10.9'
-          - name: 'OpenSSL +static libssh'
+          - name: 'OpenSSL +static libssh +examples'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
             macos-version-min: '10.9'
