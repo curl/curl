@@ -279,9 +279,7 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         proto = 'http/1.1'
-        run_env = os.environ.copy()
-        run_env['CURL_USE_EARLYDATA'] = '1'
-        curl = CurlClient(env=env, run_env=run_env)
+        curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
         if env.curl_uses_lib('bearssl'):
@@ -297,6 +295,7 @@ class TestSSLUse:
         # test
         extra_args = [[], ['--tlsv1'], ['--tlsv1.0'], ['--tlsv1.1'], ['--tlsv1.2'], ['--tlsv1.3']][min_ver+2] + \
             [['--tls-max', '1.0'], ['--tls-max', '1.1'], ['--tls-max', '1.2'], ['--tls-max', '1.3'], []][max_ver]
+        extra_args.extend(['--trace-config', 'ssl'])
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
         if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
             assert r.exit_code == 0 , r.dump_logs()
