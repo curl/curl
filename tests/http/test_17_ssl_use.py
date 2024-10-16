@@ -279,7 +279,17 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         proto = 'http/1.1'
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        if env.curl_uses_lib('gnutls'):
+            # we need to override any default system configuration since
+            # we want to test all protocol versions. Ubuntu (or the GH image)
+            # disable TSL1.0 and TLS1.1 system wide. We do not want.
+            our_config = os.path.join(env.gen_dir, 'gnutls_config')
+            if not os.path.exists(our_config):
+                with open(our_config, 'w') as fd:
+                    fd.write('# empty\n')
+            run_env['GNUTLS_SYSTEM_PRIORITY_FILE'] = our_config
+        curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
         if env.curl_uses_lib('bearssl'):
@@ -298,12 +308,7 @@ class TestSSLUse:
         extra_args.extend(['--trace-config', 'ssl'])
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
         if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
-            sysconfig = ''
-            if r.exit_code != 0 and env.curl_uses_lib('gnutls'):
-                gnutls_config = '/etc/gnutls/config'
-                if os.path.exists(gnutls_config):
-                    sysconfig = open(gnutls_config).read()
-            assert r.exit_code == 0, f'extra_args={extra_args}\nsysconfig={sysconfig}\n{r.dump_logs()}'
+            assert r.exit_code == 0, f'extra_args={extra_args}\n{r.dump_logs()}'
             assert r.json['HTTPS'] == 'on', r.dump_logs()
             assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
         else:
