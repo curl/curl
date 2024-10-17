@@ -77,9 +77,9 @@ jobs:
             compiler: gcc-12
             configure: --without-ssl
             macos-version-min: '10.9'
-          - name: '!ssl'
+          - name: '!ssl !AppleIDN'
             compiler: clang
-            configure: --enable-debug --without-ssl
+            configure: --enable-debug --without-ssl --without-apple-idn
             macos-version-min: '10.9'
           - name: '!ssl libssh2'
             compiler: clang
@@ -157,9 +157,9 @@ jobs:
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
             macos-version-min: '10.15'
-          - name: 'wolfSSL !ldap brotli zstd'
+          - name: 'wolfSSL !ldap brotli zstd !AppleIDN'
             install: brotli wolfssl zstd
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON -DUSE_APPLE_IDN=OFF
             macos-version-min: '10.15'
           - name: 'mbedTLS !ldap brotli zstd'
             install: brotli mbedtls zstd
