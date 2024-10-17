@@ -1119,9 +1119,6 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
         return CURLE_RECV_ERROR;
       }
     }
-    if(frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
-      drain_stream(cf, data, stream);
-    }
     break;
   case NGHTTP2_HEADERS:
     if(stream->bodystarted) {
@@ -1137,10 +1134,10 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
       return CURLE_RECV_ERROR;
 
     /* Only final status code signals the end of header */
-    if(stream->status_code / 100 != 1) {
+    if(stream->status_code / 100 != 1)
       stream->bodystarted = TRUE;
+    else
       stream->status_code = -1;
-    }
 
     h2_xfer_write_resp_hd(cf, data, stream, STRCONST("\r\n"), stream->closed);
 
@@ -1186,6 +1183,22 @@ static CURLcode on_stream_frame(struct Curl_cfilter *cf,
     break;
   default:
     break;
+  }
+
+  if(frame->hd.flags & NGHTTP2_FLAG_END_STREAM) {
+    if(!stream->closed && !stream->body_eos &&
+       ((stream->status_code >= 400) || (stream->status_code < 200))) {
+      /* The server did not give us a positive response and we are not
+       * done uploading the request body. We need to stop doing that and
+       * also inform the server that we aborted our side. */
+      CURL_TRC_CF(data, cf, "[%d] EOS frame with unfinished upload and "
+                  "HTTP status %d, abort upload by RST",
+                  stream_id, stream->status_code);
+      nghttp2_submit_rst_stream(ctx->h2, NGHTTP2_FLAG_NONE,
+                                stream->id, NGHTTP2_STREAM_CLOSED);
+      stream->closed = TRUE;
+    }
+    drain_stream(cf, data, stream);
   }
   return CURLE_OK;
 }

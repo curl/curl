@@ -534,6 +534,7 @@ static int curltest_put_handler(request_rec *r)
   char buffer[128*1024];
   const char *ct;
   apr_off_t rbody_len = 0;
+  apr_off_t rbody_max_len = -1;
   const char *s_rbody_len;
   const char *request_id = "none";
   apr_time_t read_delay = 0, chunk_delay = 0;
@@ -573,6 +574,10 @@ static int curltest_put_handler(request_rec *r)
             continue;
           }
         }
+        else if(!strcmp("max_upload", arg)) {
+          rbody_max_len = (int)apr_atoi64(val);
+          continue;
+        }
       }
       ap_log_rerror(APLOG_MARK, APLOG_ERR, 0, r, "query parameter not "
                     "understood: '%s' in %s",
@@ -611,6 +616,10 @@ static int curltest_put_handler(request_rec *r)
         apr_sleep(chunk_delay);
       }
       rbody_len += l;
+      if((rbody_max_len > 0) && (rbody_len > rbody_max_len)) {
+        r->status = 413;
+        break;
+      }
     }
   }
   /* we are done */
@@ -624,6 +633,10 @@ static int curltest_put_handler(request_rec *r)
   ap_log_rerror(APLOG_MARK, APLOG_TRACE1, 0, r, "put_handler: request read");
 
   rv = ap_pass_brigade(r->output_filters, bb);
+
+  if(r->status == 413) {
+    apr_sleep(apr_time_from_sec(1));
+  }
 
 cleanup:
   if(rv == APR_SUCCESS
