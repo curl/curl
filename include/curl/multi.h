@@ -244,13 +244,13 @@ CURL_EXTERN CURLMcode curl_multi_cleanup(CURLM *multi_handle);
  *          The data the returned pointer points to will not survive calling
  *          curl_multi_cleanup().
  *
- *          The 'CURLMsg' struct is meant to be very simple and only contain
- *          very basic information. If more involved information is wanted,
- *          we will provide the particular "transfer handle" in that struct
- *          and that should/could/would be used in subsequent
- *          curl_easy_getinfo() calls (or similar). The point being that we
- *          must never expose complex structs to applications, as then we will
- *          undoubtably get backwards compatibility problems in the future.
+ *          The 'CURLMsg' struct is meant to be simple and only contain basic
+ *          information. If more involved information is wanted, we will
+ *          provide the particular "transfer handle" in that struct and that
+ *          should/could/would be used in subsequent curl_easy_getinfo() calls
+ *          (or similar). The point being that we must never expose complex
+ *          structs to applications, as then we will undoubtably get backwards
+ *          compatibility problems in the future.
  *
  * Returns: A pointer to a filled-in struct, or NULL if it failed or ran out
  *          of structs. It also writes the number of messages left in the

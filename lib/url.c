@@ -506,10 +506,10 @@ CURLcode Curl_open(struct Curl_easy **curl)
   CURLcode result;
   struct Curl_easy *data;
 
-  /* Very simple start-up: alloc the struct, init it with zeroes and return */
+  /* simple start-up: alloc the struct, init it with zeroes and return */
   data = calloc(1, sizeof(struct Curl_easy));
   if(!data) {
-    /* this is a very serious error */
+    /* this is a serious error */
     DEBUGF(fprintf(stderr, "Error: calloc of Curl_easy failed\n"));
     return CURLE_OUT_OF_MEMORY;
   }
@@ -880,16 +880,16 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   }
 
   if(needle->localdev || needle->localport) {
-    /* If we are bound to a specific local end (IP+port), we must not
-       reuse a random other one, although if we did not ask for a
-       particular one we can reuse one that was bound.
+    /* If we are bound to a specific local end (IP+port), we must not reuse a
+       random other one, although if we did not ask for a particular one we
+       can reuse one that was bound.
 
        This comparison is a bit rough and too strict. Since the input
-       parameters can be specified in numerous ways and still end up the
-       same it would take a lot of processing to make it really accurate.
-       Instead, this matching will assume that reuses of bound connections
-       will most likely also reuse the exact same binding parameters and
-       missing out a few edge cases should not hurt anyone very much.
+       parameters can be specified in numerous ways and still end up the same
+       it would take a lot of processing to make it really accurate. Instead,
+       this matching will assume that reuses of bound connections will most
+       likely also reuse the exact same binding parameters and missing out a
+       few edge cases should not hurt anyone much.
     */
     if((conn->localport != needle->localport) ||
        (conn->localportrange != needle->localportrange) ||
@@ -2006,8 +2006,8 @@ static CURLcode setup_connection_internals(struct Curl_easy *data,
   }
 
   if(conn->primary.remote_port < 0)
-    /* we check for -1 here since if proxy was detected already, this
-       was very likely already set to the proxy port */
+    /* we check for -1 here since if proxy was detected already, this was
+       likely already set to the proxy port */
     conn->primary.remote_port = p->defport;
 
   /* Now create the destination name */

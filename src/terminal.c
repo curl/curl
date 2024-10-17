@@ -39,7 +39,7 @@
 
 /*
  * get_terminal_columns() returns the number of columns in the current
- * terminal. It will return 79 on failure. Also, the number can be very big.
+ * terminal. It will return 79 on failure. Also, the number can be big.
  */
 
 unsigned int get_terminal_columns(void)
@@ -87,5 +87,5 @@ unsigned int get_terminal_columns(void)
   }
   if(!width)
     width = 79;
-  return width; /* 79 for unknown, might also be very small or very big */
+  return width; /* 79 for unknown, might also be tiny or enormous */
 }

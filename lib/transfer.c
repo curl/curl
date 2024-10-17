@@ -777,8 +777,8 @@ static void xfer_setup(
   int sockindex,            /* socket index to read from or -1 */
   curl_off_t size,          /* -1 if unknown at this point */
   bool getheader,           /* TRUE if header parsing is wanted */
-  int writesockindex,       /* socket index to write to, it may very well be
-                               the same we read from. -1 disables */
+  int writesockindex,       /* socket index to write to, it may be the same we
+                               read from. -1 disables */
   bool shutdown,            /* shutdown connection at transfer end. Only
                              * supported when sending OR receiving. */
   bool shutdown_err_ignore  /* errors during shutdown do not fail the
@@ -801,7 +801,7 @@ static void xfer_setup(
       conn->sock[sockindex];
     conn->writesockfd = conn->sockfd;
     if(want_send)
-      /* special and very HTTP-specific */
+      /* special and HTTP-specific */
       writesockindex = FIRSTSOCKET;
   }
   else {

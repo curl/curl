@@ -234,7 +234,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            char **palpn);
 
 /* Set a TLS session ID for `peer`. Replaces an existing session ID if
- * not already the very same.
+ * not already the same.
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * Call takes ownership of `ssl_sessionid`, using `sessionid_free_cb`
  * to deallocate it. Is called in all outcomes, either right away or
