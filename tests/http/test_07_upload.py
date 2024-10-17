@@ -589,6 +589,22 @@ class TestUpload:
             exp_code = 0  # we get a 500 from the server
         r.check_exit_code(exp_code)  # GOT_NOTHING
 
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_43_upload_denied(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        count = 1
+        max_upload = 128 * 1024
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?'\
+            f'id=[0-{count-1}]&max_upload={max_upload}'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+                             extra_args=['--trace-config', 'all'])
+        r.check_stats(count=count, http_status=413, exitcode=0)
+
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_50_put_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
