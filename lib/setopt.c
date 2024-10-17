@@ -3195,6 +3195,12 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
   case CURLOPT_QUICK_EXIT:
     data->set.quick_exit = (0 != va_arg(param, long)) ? 1L : 0L;
     break;
+  case CURLOPT_CONNEVTFUNCTION:
+    data->set.connevt_func = va_arg(param, curl_connevt_callback);
+    break;
+  case CURLOPT_CONNEVTDATA:
+    data->set.connevt_data = va_arg(param, void *);
+    break;
   default:
     /* unknown tag and its companion, just ignore: */
     result = CURLE_UNKNOWN_OPTION;

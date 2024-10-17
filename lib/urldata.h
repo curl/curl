@@ -1640,6 +1640,8 @@ struct UserDefined {
 #if !defined(CURL_DISABLE_MIME) || !defined(CURL_DISABLE_FORM_API)
   curl_mimepart mimepost;  /* MIME/POST data. */
 #endif
+  curl_connevt_callback connevt_func; /* callback of connection events */
+  void *connevt_data; /* pointer to pass to connevt_func */
 #ifndef CURL_DISABLE_TELNET
   struct curl_slist *telnet_options; /* linked list of telnet options */
 #endif

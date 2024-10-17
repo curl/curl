@@ -501,6 +501,31 @@ typedef int (*curl_prereq_callback)(void *clientp,
    request */
 #define CURL_PREREQFUNC_ABORT 1
 
+typedef enum {
+   CURL_CONNEVT_GOAWAY = 1, /* GOAWAY frame in HTTP/2 */
+} curl_connevt_type;
+
+struct curl_connevt_goaway {
+   unsigned int error_code; /* An error code explaining why
+                               the GOAWAY is being sent */
+   struct {
+      const void *buffer;
+      size_t size;
+   } opaque; /* Diagnostic information */
+};
+
+struct curl_connevt_msg {
+   curl_connevt_type type; /* The connection event type */
+   union {
+      struct curl_connevt_goaway goaway; /* GOAWAY event data */
+   } data;
+};
+
+/* This is the CURLOPT_CONNEVTFUNCTION callback prototype. */
+typedef void (*curl_connevt_callback)(CURL *handle,
+                                      const struct curl_connevt_msg *msg,
+                                      void *userp);
+
 /* All possible error codes from all sorts of curl functions. Future versions
    may return other values, stay prepared.
 
@@ -2221,6 +2246,12 @@ typedef enum {
 
   /* maximum number of keepalive probes (Linux, *BSD, macOS, etc.) */
   CURLOPT(CURLOPT_TCP_KEEPCNT, CURLOPTTYPE_LONG, 326),
+
+  /* Function that will be called when receiving connection events */
+  CURLOPT(CURLOPT_CONNEVTFUNCTION, CURLOPTTYPE_FUNCTIONPOINT, 327),
+
+  /* Data passed to the CURLOPT_CONNEVTFUNCTION callback */
+  CURLOPT(CURLOPT_CONNEVTDATA, CURLOPTTYPE_CBPOINT, 328),
 
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
