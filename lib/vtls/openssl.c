@@ -1935,8 +1935,9 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
 
   /* SSL should now have started the shutdown from our side. Since it
    * was not complete, we are lacking the close notify from the server. */
-  if(send_shutdown) {
+  if(send_shutdown && !(SSL_get_shutdown(octx->ssl) & SSL_SENT_SHUTDOWN)) {
     ERR_clear_error();
+    CURL_TRC_CF(data, cf, "send SSL close notify");
     if(SSL_shutdown(octx->ssl) == 1) {
       CURL_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
@@ -1961,7 +1962,10 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   err = SSL_get_error(octx->ssl, nread);
   switch(err) {
   case SSL_ERROR_ZERO_RETURN: /* no more data */
-    CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
+    if(SSL_shutdown(octx->ssl) == 1)
+      CURL_TRC_CF(data, cf, "SSL shutdown finished");
+    else
+      CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
     *done = TRUE;
     break;
   case SSL_ERROR_NONE: /* just did not get anything */

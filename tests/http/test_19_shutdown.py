@@ -73,7 +73,7 @@ class TestShutdown:
             pytest.skip('only works for curl debug builds')
         curl = CurlClient(env=env, run_env={
             'CURL_GRACEFUL_SHUTDOWN': '2000',
-            'CURL_DEBUG': 'ssl'
+            'CURL_DEBUG': 'ssl,tcp'
         })
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-1]'
         r = curl.http_download(urls=[url], alpn_proto=proto, with_tcpdump=True, extra_args=[
