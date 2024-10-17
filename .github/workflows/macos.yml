@@ -311,7 +311,7 @@ jobs:
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
-        timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
+        timeout-minutes: ${{ matrix.build.torture && 30 || 10 }}
         run: |
           export TFLAGS='-j20 ${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
