@@ -612,4 +612,3 @@ FOOTER
 
 close($fh);
 rename($tempfile, $ARGV[0]);
-
