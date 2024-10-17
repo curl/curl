@@ -302,10 +302,10 @@ static void close_secondarysocket(struct Curl_easy *data)
  * requests on files respond with headers passed to the client/stdout that
  * looked like HTTP ones.
  *
- * This approach is not very elegant, it causes confusion and is error-prone.
- * It is subject for removal at the next (or at least a future) soname bump.
- * Until then you can test the effects of the removal by undefining the
- * following define named CURL_FTP_HTTPSTYLE_HEAD.
+ * This approach is not elegant, it causes confusion and is error-prone. It is
+ * subject for removal at the next (or at least a future) soname bump. Until
+ * then you can test the effects of the removal by undefining the following
+ * define named CURL_FTP_HTTPSTYLE_HEAD.
  */
 #define CURL_FTP_HTTPSTYLE_HEAD 1
 
@@ -2454,10 +2454,10 @@ static CURLcode ftp_state_get_resp(struct Curl_easy *data,
        !data->set.ignorecl &&
        (ftp->downloadsize < 1)) {
       /*
-       * It seems directory listings either do not show the size or very
-       * often uses size 0 anyway. ASCII transfers may very well turn out
-       * that the transferred amount of data is not the same as this line
-       * tells, why using this number in those cases only confuses us.
+       * It seems directory listings either do not show the size or often uses
+       * size 0 anyway. ASCII transfers may cause that the transferred amount
+       * of data is not the same as this line tells, why using this number in
+       * those cases only confuses us.
        *
        * Example D above makes this parsing a little tricky */
       char *bytes;

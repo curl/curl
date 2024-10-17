@@ -348,9 +348,9 @@ curl_easy_strerror(CURLcode error)
    * By using gcc -Wall -Werror, you cannot forget.
    *
    * A table would not have the same benefit. Most compilers will generate
-   * code very similar to a table in any case, so there is little performance
-   * gain from a table. Something is broken for the user's application,
-   * anyways, so does it matter how fast it _does not_ work?
+   * code similar to a table in any case, so there is little performance gain
+   * from a table. Something is broken for the user's application, anyways, so
+   * does it matter how fast it _does not_ work?
    *
    * The line number for the error will be near this comment, which is why it
    * is here, and not at the start of the switch.

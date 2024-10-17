@@ -49,9 +49,9 @@ struct memdebug {
 };
 
 /*
- * Note that these debug functions are very simple and they are meant to
- * remain so. For advanced analysis, record a log file and write perl scripts
- * to analyze them!
+ * Note that these debug functions are simple and they are meant to remain so.
+ * For advanced analysis, record a log file and write perl scripts to analyze
+ * them!
  *
  * Do not use these with multithreaded test programs!
  */
