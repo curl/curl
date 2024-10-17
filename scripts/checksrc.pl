@@ -80,6 +80,7 @@ my %warnings = (
     'LONGLINE'              => "Line longer than $max_column",
     'SPACEBEFORELABEL'      => 'labels not at the start of the line',
     'MULTISPACE'            => 'multiple spaces used when not suitable',
+    'NOSPACEAND'            => 'missing space around Logical AND operator',
     'NOSPACEC'              => 'missing space around ternary colon operator',
     'NOSPACEEQUALS'         => 'equals sign without preceding space',
     'NOSPACEQ'              => 'missing space around ternary question mark operator',
@@ -624,6 +625,20 @@ sub scanfile {
             checkwarn("SPACEAFTERPAREN",
                       $line, length($1)+1, $file, $l,
                       "space after open parenthesis");
+        }
+
+        # check spaces before Logical AND operator
+        if($nostr =~ /^(.*)\w&&/i) {
+            checkwarn("NOSPACEAND",
+                      $line, length($1)+1, $file, $l,
+                      "missing space before Logical AND");
+        }
+
+        # check spaces after Logical AND operator
+        if($nostr =~ /^(.*&&)\w/i) {
+            checkwarn("NOSPACEAND",
+                      $line, length($1), $file, $l,
+                      "missing space after Logical AND");
         }
 
         # check spaces before colon
