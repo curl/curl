@@ -1064,7 +1064,13 @@ if(CURL_DISABLE_LDAP)
 endif()
 
 if(WIN32)
-  option(USE_WIN32_IDN "Use WinIDN for IDN support" OFF)
+  # MSVC 2008 does not have the necessary symbols in the normaliz library.
+  if(HAVE_WIN32_WINNT LESS 0x0600 OR (MSVC AND MSVC_VERSION LESS_EQUAL 1500))
+    set(_use_win32_idn_default OFF)
+  else()
+    set(_use_win32_idn_default ON)  # Windows Vista / Server 2008 or newer
+  endif()
+  option(USE_WIN32_IDN "Use WinIDN for IDN support" ${_use_win32_idn_default})
   if(USE_WIN32_IDN)
     list(APPEND CURL_LIBS "normaliz")
   endif()
@@ -1073,7 +1079,7 @@ else()
 endif()
 
 if(APPLE)
-  option(USE_APPLE_IDN "Use Apple built-in IDN support" OFF)
+  option(USE_APPLE_IDN "Use Apple built-in IDN support" ON)
   if(USE_APPLE_IDN)
     cmake_push_check_state()
     set(CMAKE_REQUIRED_LIBRARIES "icucore")
