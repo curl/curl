@@ -30,7 +30,7 @@ set_source_files_properties("../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_B
 
 add_custom_command(
   OUTPUT "lib1521.c"
-  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${CURL_SOURCE_DIR}/include/curl/curl.h" > "lib1521.c"
+  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${CURL_SOURCE_DIR}/include/curl/curl.h" "lib1521.c"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
     "${CURL_SOURCE_DIR}/include/curl/curl.h"
