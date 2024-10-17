@@ -3039,7 +3039,7 @@ while () {
             }
         }
     }
-    if(!@ridsready && $runnerwait && !$torture && scalar(%runnersrunning)) {
+    if(!@ridsready && $runnerwait && scalar(%runnersrunning)) {
         $runner_wait_cnt++;
         if($runner_wait_cnt >= 5) {
             my $msg = "waiting for " . scalar(%runnersrunning) . " results:";
