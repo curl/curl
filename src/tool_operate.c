@@ -2994,6 +2994,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
         if(result) {
           returncode = result;
           bailout = TRUE;
+          break;
         }
       } while(skipped);
     }
