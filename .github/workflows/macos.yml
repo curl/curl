@@ -81,9 +81,9 @@ jobs:
             compiler: clang
             configure: --enable-debug --without-ssl
             macos-version-min: '10.9'
-          - name: '!ssl libssh2 AppleIDN'
+          - name: '!ssl libssh2'
             compiler: clang
-            configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --with-apple-idn
+            configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl
             macos-version-min: '10.9'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
@@ -142,9 +142,9 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.15'
           # cmake
-          - name: 'OpenSSL gsasl AppleIDN'
+          - name: 'OpenSSL gsasl'
             install: gsasl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON
             macos-version-min: '10.9'
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
@@ -459,24 +459,24 @@ jobs:
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
-            # would pick up nghttp2, libidn2, but libssh2 is disabled by default
+            # would pick up nghttp2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
-              --without-nghttp2 --without-libidn2 \
+              --without-nghttp2 \
               --without-libpsl \
               ${options}
           else
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
-            # would pick up nghttp2, libidn2, and libssh2
+            # would pick up nghttp2, libssh2
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_OSX_SYSROOT=${sysroot}" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
-              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
+              -DUSE_NGHTTP2=OFF \
               -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
               ${options}
           fi
