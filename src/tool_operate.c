@@ -3026,6 +3026,92 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   return result;
 }
 
+static CURLcode is_using_schannel(int *using)
+{
+  CURLcode result = CURLE_OK;
+  static int using_schannel = -1; /* -1 = not checked
+                                     0 = nope
+                                     1 = yes */
+  if(using_schannel == -1) {
+    CURL *curltls = curl_easy_init();
+    /* The TLS backend remains, so keep the info */
+    struct curl_tlssessioninfo *tls_backend_info = NULL;
+
+    if(!curltls)
+      result = CURLE_OUT_OF_MEMORY;
+    else {
+      result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
+                                 &tls_backend_info);
+      if(!result)
+        using_schannel =
+          (tls_backend_info->backend == CURLSSLBACKEND_SCHANNEL);
+    }
+    curl_easy_cleanup(curltls);
+    if(result)
+      return result;
+  }
+  *using = using_schannel;
+  return result;
+}
+
+/* Set the CA cert locations specified in the environment. For Windows if no
+ * environment-specified filename is found then check for CA bundle default
+ * filename curl-ca-bundle.crt in the user's PATH.
+ *
+ * If Schannel is the selected SSL backend then these locations are ignored.
+ * We allow setting CA location for Schannel only when explicitly specified by
+ * the user via CURLOPT_CAINFO / --cacert.
+ */
+
+static CURLcode cacertpaths(struct OperationConfig *config)
+{
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+  char *env = curl_getenv("CURL_CA_BUNDLE");
+  if(env) {
+    config->cacert = strdup(env);
+    curl_free(env);
+    if(!config->cacert)
+      goto fail;
+  }
+  else {
+    env = curl_getenv("SSL_CERT_DIR");
+    if(env) {
+      config->capath = strdup(env);
+      curl_free(env);
+      if(!config->capath)
+        goto fail;
+    }
+    env = curl_getenv("SSL_CERT_FILE");
+    if(env) {
+      config->cacert = strdup(env);
+      curl_free(env);
+      if(!config->cacert)
+        goto fail;
+    }
+  }
+
+#ifdef _WIN32
+  if(!env) {
+#if defined(CURL_CA_SEARCH_SAFE)
+    char *cacert = NULL;
+    FILE *cafile = Curl_execpath("curl-ca-bundle.crt", &cacert);
+    if(cafile) {
+      fclose(cafile);
+      config->cacert = strdup(cacert);
+    }
+#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
+    result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
+    if(result)
+      goto fail;
+#endif
+  }
+#endif
+  return CURLE_OK;
+fail:
+  free(config->capath);
+  return result;
+}
+
 /* setup a transfer for the given config */
 static CURLcode transfer_per_config(struct GlobalConfig *global,
                                     struct OperationConfig *config,
@@ -3057,82 +3143,16 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
      !config->cacert &&
      !config->capath &&
      (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
-    CURL *curltls = curl_easy_init();
-    struct curl_tlssessioninfo *tls_backend_info = NULL;
+    int using_schannel = -1;
 
-    /* With the addition of CAINFO support for Schannel, this search could find
-     * a certificate bundle that was previously ignored. To maintain backward
-     * compatibility, only perform this search if not using Schannel.
+    result = is_using_schannel(&using_schannel);
+
+    /* With the addition of CAINFO support for Schannel, this search could
+     * find a certificate bundle that was previously ignored. To maintain
+     * backward compatibility, only perform this search if not using Schannel.
      */
-    result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
-                               &tls_backend_info);
-    if(result) {
-      curl_easy_cleanup(curltls);
-      return result;
-    }
-
-    /* Set the CA cert locations specified in the environment. For Windows if
-     * no environment-specified filename is found then check for CA bundle
-     * default filename curl-ca-bundle.crt in the user's PATH.
-     *
-     * If Schannel is the selected SSL backend then these locations are
-     * ignored. We allow setting CA location for Schannel only when explicitly
-     * specified by the user via CURLOPT_CAINFO / --cacert.
-     */
-    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
-      char *env;
-      env = curl_getenv("CURL_CA_BUNDLE");
-      if(env) {
-        config->cacert = strdup(env);
-        curl_free(env);
-        if(!config->cacert) {
-          curl_easy_cleanup(curltls);
-          errorf(global, "out of memory");
-          return CURLE_OUT_OF_MEMORY;
-        }
-      }
-      else {
-        env = curl_getenv("SSL_CERT_DIR");
-        if(env) {
-          config->capath = strdup(env);
-          curl_free(env);
-          if(!config->capath) {
-            curl_easy_cleanup(curltls);
-            errorf(global, "out of memory");
-            return CURLE_OUT_OF_MEMORY;
-          }
-          capath_from_env = true;
-        }
-        env = curl_getenv("SSL_CERT_FILE");
-        if(env) {
-          config->cacert = strdup(env);
-          curl_free(env);
-          if(!config->cacert) {
-            if(capath_from_env)
-              free(config->capath);
-            curl_easy_cleanup(curltls);
-            errorf(global, "out of memory");
-            return CURLE_OUT_OF_MEMORY;
-          }
-        }
-      }
-
-#ifdef _WIN32
-      if(!env) {
-#if defined(CURL_CA_SEARCH_SAFE)
-        char *cacert = NULL;
-        FILE *cafile = Curl_execpath("curl-ca-bundle.crt", &cacert);
-        if(cafile) {
-          fclose(cafile);
-          config->cacert = strdup(cacert);
-        }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
-        result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
-#endif
-      }
-#endif
-    }
-    curl_easy_cleanup(curltls);
+    if(!result && !using_schannel)
+      result = cacertpaths(config);
   }
 
   if(!result)
