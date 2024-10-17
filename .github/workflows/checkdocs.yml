@@ -50,10 +50,15 @@ jobs:
           cat <<JSON > $HOME/.proselintrc.json
           {
             "checks": {
+              "typography.symbols.multiplication_symbol": false,
+              "typography.symbols.copyright": false,
+              "typography.symbols.ellipsis": false,
+              "typography.symbols.curly_quotes": false,
               "typography.diacritical_marks": false,
               "typography.symbols": false,
               "annotations.misc": false,
-              "security.password": false
+              "security.password": false,
+              "misc.annotations": false
             }
           }
           JSON
