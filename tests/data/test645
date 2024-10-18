@@ -76,11 +76,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-%if hyper
-7C
-%else
 7c
-%endif
 ------------------------------
 Content-Disposition: form-data; name="sendfile"; filename="postit2.c"
 
@@ -96,11 +92,7 @@ y
 1
 
 
-%if hyper
-6B
-%else
 6b
-%endif
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
@@ -119,11 +111,7 @@ y
 1
 
 
-%if hyper
-1B2
-%else
 1b2
-%endif
 
 ------------------------------
 Content-Disposition: form-data; name="filename"
@@ -149,11 +137,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-%if hyper
-8A
-%else
 8a
-%endif
 ------------------------------
 Content-Disposition: form-data; name="sendfile alternative"; filename="file name 2"
 
@@ -169,11 +153,7 @@ y
 1
 
 
-%if hyper
-6B
-%else
 6b
-%endif
 
 ------------------------------
 Content-Disposition: form-data; name="callbackdata"
@@ -192,11 +172,7 @@ y
 1
 
 
-%if hyper
-1B2
-%else
 1b2
-%endif
 
 ------------------------------
 Content-Disposition: form-data; name="filename"

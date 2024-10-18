@@ -23,9 +23,6 @@ MooMoo
 <server>
 http
 </server>
-<features>
-!hyper
-</features>
 <name>
 CURLOPT_HTTP200ALIASES
 </name>
