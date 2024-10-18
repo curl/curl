@@ -895,7 +895,7 @@ cr_connect_common(struct Curl_cfilter *cf,
     }
     if(0 == what) {
       CURL_TRC_CF(data, cf, "Curl_socket_check: %s would block",
-            wants_read&&wants_write ? "writing and reading" :
+            wants_read && wants_write ? "writing and reading" :
             wants_write ? "writing" : "reading");
       if(wants_write)
         connssl->io_need |= CURL_SSL_IO_NEED_SEND;
