@@ -73,7 +73,7 @@ int main(void)
 
     res = curl_easy_perform(curl);
 
-    /* close the handle, write the cookies! */
+    /* close the handle, write the cookies */
     curl_easy_cleanup(curl);
   }
 }

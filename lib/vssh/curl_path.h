@@ -28,19 +28,6 @@
 #include <curl/curl.h>
 #include "urldata.h"
 
-#ifdef _WIN32
-#  undef  PATH_MAX
-#  define PATH_MAX MAX_PATH
-#  ifndef R_OK
-#    define R_OK 4
-#  endif
-#endif
-
-#ifndef PATH_MAX
-#define PATH_MAX 1024 /* just an extra precaution since there are systems that
-                         have their definition hidden well */
-#endif
-
 CURLcode Curl_getworkingpath(struct Curl_easy *data,
                              char *homedir,
                              char **path);

@@ -28,6 +28,7 @@ import difflib
 import filecmp
 import logging
 import os
+import re
 import pytest
 from typing import List
 
@@ -43,6 +44,7 @@ class TestUpload:
     def _class_scope(self, env, httpd, nghttpx):
         if env.have_h3():
             nghttpx.start_if_needed()
+        env.make_data_file(indir=env.gen_dir, fname="data-10k", fsize=10*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-63k", fsize=63*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-64k", fsize=64*1024)
         env.make_data_file(indir=env.gen_dir, fname="data-100k", fsize=100*1024)
@@ -587,6 +589,22 @@ class TestUpload:
             exp_code = 0  # we get a 500 from the server
         r.check_exit_code(exp_code)  # GOT_NOTHING
 
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
+    def test_07_43_upload_denied(self, env: Env, httpd, nghttpx, repeat, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        if proto == 'h3' and env.curl_uses_lib('msh3'):
+            pytest.skip("msh3 fails here")
+        fdata = os.path.join(env.gen_dir, 'data-10m')
+        count = 1
+        max_upload = 128 * 1024
+        curl = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/put?'\
+            f'id=[0-{count-1}]&max_upload={max_upload}'
+        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto,
+                             extra_args=['--trace-config', 'all'])
+        r.check_stats(count=count, http_status=413, exitcode=0)
+
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_07_50_put_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
@@ -650,6 +668,51 @@ class TestUpload:
             '--expect100-timeout', f'{read_delay-1}'
         ])
         r.check_stats(count=1, http_status=200, exitcode=0)
+
+    # nghttpx is the only server we have that supports TLS early data and
+    # has a limit of 16k it announces
+    @pytest.mark.skipif(condition=not Env.have_nghttpx(), reason="no nghttpx")
+    @pytest.mark.parametrize("proto,upload_size,exp_early", [
+        ['http/1.1', 100, 203],        # headers+body
+        ['http/1.1', 10*1024, 10345],  # headers+body
+        ['http/1.1', 32*1024, 16384],  # headers+body, limited by server max
+        ['h2', 10*1024, 10378],        # headers+body
+        ['h2', 32*1024, 16384],        # headers+body, limited by server max
+        ['h3', 1024, 0],               # earlydata not supported
+    ])
+    def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size, exp_early):
+        if not env.curl_uses_lib('gnutls'):
+            pytest.skip('TLS earlydata only implemented in GnuTLS')
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 2
+        # we want this test to always connect to nghttpx, since it is
+        # the only server we have that supports TLS earlydata
+        port = env.port_for(proto)
+        if proto != 'h3':
+            port = env.nghttpx_https_port
+        url = f'https://{env.domain1}:{port}/curltest/put?id=[0-{count-1}]'
+        client = LocalClient(name='hx-upload', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',
+             '-e',  # use TLS earlydata
+             '-f',  # forbid reuse of connections
+             '-l',  # announce upload length, no 'Expect: 100'
+             '-S', f'{upload_size}',
+             '-r', f'{env.domain1}:{port}:127.0.0.1',
+             '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        self.check_downloads(client, [f"{upload_size}"], count)
+        earlydata = {}
+        for line in r.trace_lines:
+            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
+            if m:
+                earlydata[int(m.group(1))] = int(m.group(2))
+        assert earlydata[0] == 0, f'{earlydata}'
+        assert earlydata[1] == exp_early, f'{earlydata}'
 
     def check_downloads(self, client, source: List[str], count: int,
                         complete: bool = True):

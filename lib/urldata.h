@@ -163,6 +163,7 @@ typedef unsigned int curl_prot_t;
 #include "dynbuf.h"
 #include "dynhds.h"
 #include "request.h"
+#include "netrc.h"
 
 /* return the count of bytes sent, or -1 on error */
 typedef ssize_t (Curl_send)(struct Curl_easy *data,   /* transfer */
@@ -324,6 +325,7 @@ struct ssl_config_data {
   char *key_passwd; /* plain text private key password */
   BIT(certinfo);     /* gather lots of certificate info */
   BIT(falsestart);
+  BIT(earlydata);    /* use tls1.3 early data */
   BIT(enable_beast); /* allow this flaw for interoperability's sake */
   BIT(no_revoke);    /* disable SSL certificate revocation checks */
   BIT(no_partialchain); /* do not accept partial certificate chains */
@@ -346,6 +348,7 @@ struct Curl_ssl_session {
   char *name;       /* hostname for which this ID was used */
   char *conn_to_host; /* hostname for the connection (may be NULL) */
   const char *scheme; /* protocol scheme used */
+  char *alpn;         /* APLN TLS negotiated protocol string */
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
   Curl_ssl_sessionid_dtor *sessionid_free; /* free `sessionid` callback */
@@ -868,9 +871,8 @@ struct connectdata {
   /**** curl_get() phase fields */
 
   curl_socket_t sockfd;   /* socket to read from or CURL_SOCKET_BAD */
-  curl_socket_t writesockfd; /* socket to write to, it may very
-                                well be the same we read from.
-                                CURL_SOCKET_BAD disables */
+  curl_socket_t writesockfd; /* socket to write to, it may be the same we read
+                                from. CURL_SOCKET_BAD disables */
 
 #ifdef HAVE_GSSAPI
   BIT(sec_complete); /* if Kerberos is enabled for this connection */
@@ -1069,6 +1071,7 @@ struct Progress {
   struct pgrs_dir dl;
 
   curl_off_t current_speed; /* uses the currently fastest transfer */
+  curl_off_t earlydata_sent;
 
   int width; /* screen width at download start */
   int flags; /* see progress.h */
@@ -1202,6 +1205,11 @@ struct urlpieces {
   char *query;
 };
 
+#define CREDS_NONE   0
+#define CREDS_URL    1 /* from URL */
+#define CREDS_OPTION 2 /* set with a CURLOPT_ */
+#define CREDS_NETRC  3 /* found in netrc */
+
 struct UrlState {
   /* buffers to store authentication data in, as parsed from input options */
   struct curltime keeps_speed; /* for the progress meter really */
@@ -1310,6 +1318,10 @@ struct UrlState {
   struct curl_trc_feat *feat; /* opt. trace feature transfer is part of */
 #endif
 
+#ifndef CURL_DISABLE_NETRC
+  struct store_netrc netrc;
+#endif
+
   /* Dynamically allocated strings, MUST be freed before this struct is
      killed. */
   struct dynamically_allocated_data {
@@ -1336,7 +1348,6 @@ struct UrlState {
     char *proxypasswd;
 #endif
   } aptr;
-
   unsigned char httpwant; /* when non-zero, a specific HTTP version requested
                              to be used in the library's request(s) */
   unsigned char httpversion; /* the lowest HTTP version*10 reported by any
@@ -1346,6 +1357,9 @@ struct UrlState {
   unsigned char select_bits; /* != 0 -> bitmask of socket events for this
                                  transfer overriding anything the socket may
                                  report */
+  unsigned int creds_from:2; /* where is the server credentials originating
+                                from, see the CREDS_* defines above */
+
   /* when curl_easy_perform() is called, the multi handle is "owned" by
      the easy handle so curl_easy_cleanup() on such an easy handle will
      also close the multi handle! */
@@ -1881,14 +1895,12 @@ struct Curl_easy {
   /* First a simple identifier to easier detect if a user mix up this easy
      handle with a multi handle. Set this to CURLEASY_MAGIC_NUMBER */
   unsigned int magic;
-  /* once an easy handle is tied to a connection pool
-     a non-negative number to distinguish this transfer from
-     other using the same pool. For easier tracking
-     in log output.
-     This may wrap around after LONG_MAX to 0 again, so it
-     has no uniqueness guarantee for very large processings.
-     Note: it has no uniqueness either IFF more than one connection pool
-     is used by the libcurl application. */
+  /* once an easy handle is tied to a connection pool a non-negative number to
+     distinguish this transfer from other using the same pool. For easier
+     tracking in log output. This may wrap around after LONG_MAX to 0 again,
+     so it has no uniqueness guarantee for large processings. Note: it has no
+     uniqueness either IFF more than one connection pool is used by the
+     libcurl application. */
   curl_off_t id;
   /* once an easy handle is added to a multi, either explicitly by the
    * libcurl application or implicitly during `curl_easy_perform()`,

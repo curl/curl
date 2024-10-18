@@ -27,6 +27,8 @@
 #ifdef USE_LIBPSL
 #include <libpsl.h>
 
+struct Curl_easy;
+
 #define PSL_TTL (72 * 3600)     /* PSL time to live before a refresh. */
 
 struct PslCache {

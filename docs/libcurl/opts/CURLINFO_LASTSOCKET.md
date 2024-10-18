@@ -51,7 +51,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode res;
-    long sockfd; /* does not work on win64! */
+    long sockfd; /* does not work on win64 */
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
 
     /* Do not do the transfer - only connect to host */

@@ -76,7 +76,7 @@ int main(void)
 
 # DEPRECATED
 
-curl_multi_socket(3) is deprecated, use curl_multi_socket_action(3) instead!
+curl_multi_socket(3) is deprecated, use curl_multi_socket_action(3) instead.
 
 # %AVAILABILITY%
 

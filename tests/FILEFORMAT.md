@@ -545,7 +545,7 @@ If there is no test number found above, the HTTP test server uses the number
 following the last dot in the given hostname (made so that a CONNECT can still
 pass on test number) so that "foo.bar.123" gets treated as test case
 123. Alternatively, if an IPv6 address is provided to CONNECT, the last
-hexadecimal group in the address is used as the test number! For example the
+hexadecimal group in the address is used as the test number. For example the
 address "[1234::ff]" would be treated as test case 255.
 
 Set `type="perl"` to write the test case as a perl script. It implies that

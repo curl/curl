@@ -50,6 +50,7 @@ int main(void)
   int flags = 0;
   if(0 != fcntl(0, F_SETFL, flags | O_NONBLOCK))
     return 1;
+  ;
   return 0;
 }
 #endif
@@ -159,15 +160,12 @@ int main(void) { return 0; }
   int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
                        && LARGE_OFF_T % 2147483647 == 1)
                       ? 1 : -1];
-int main(void) { ; return 0; }
+int main(void) { return 0; }
 #endif
 
 #ifdef HAVE_IOCTLSOCKET
 /* includes start */
 #ifdef _WIN32
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  include <winsock2.h>
 #endif
 int main(void)
@@ -184,9 +182,6 @@ int main(void)
 #ifdef HAVE_IOCTLSOCKET_CAMEL
 /* includes start */
 #ifdef _WIN32
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  include <winsock2.h>
 #endif
 int main(void)
@@ -202,9 +197,6 @@ int main(void)
 #ifdef HAVE_IOCTLSOCKET_CAMEL_FIONBIO
 /* includes start */
 #ifdef _WIN32
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  include <winsock2.h>
 #endif
 int main(void)
@@ -221,9 +213,6 @@ int main(void)
 #ifdef HAVE_IOCTLSOCKET_FIONBIO
 /* includes start */
 #ifdef _WIN32
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  include <winsock2.h>
 #endif
 int main(void)
@@ -296,9 +285,6 @@ int main(void)
 #ifdef HAVE_SETSOCKOPT_SO_NONBLOCK
 /* includes start */
 #ifdef _WIN32
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  include <winsock2.h>
 #endif
 /* includes start */
@@ -409,9 +395,6 @@ int main(void)
 #ifdef HAVE_WIN32_WINNT
 /* includes start */
 #ifdef _WIN32
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
 #  ifndef NOGDI
 #    define NOGDI
 #  endif

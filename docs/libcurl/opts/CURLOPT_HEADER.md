@@ -48,7 +48,7 @@ It is often better to use CURLOPT_HEADERFUNCTION(3) to get the header
 data separately.
 
 While named confusingly similar, CURLOPT_HTTPHEADER(3) is used to set
-custom HTTP headers!
+custom HTTP headers.
 
 # DEFAULT
 

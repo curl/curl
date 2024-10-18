@@ -18,6 +18,6 @@ Example:
 
 # `--head`
 
-Fetch the headers only! HTTP-servers feature the command HEAD which this uses
-to get nothing but the header of a document. When used on an FTP or FILE file,
+Fetch the headers only. HTTP-servers feature the command HEAD which this uses
+to get nothing but the header of a document. When used on an FTP or FILE URL,
 curl displays the file size and last modification time only.

@@ -245,9 +245,9 @@ You can build curl with cmake:
      % cd ..
      % git clone https://github.com/curl/curl
      % cd curl
-     % cmake . -B build -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-     % cmake --build build
-     % cmake --install build
+     % cmake . -B bld -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
+     % cmake --build bld
+     % cmake --install bld
 
  If `make install` results in `Permission denied` error, you need to prepend
  it with `sudo`.
@@ -404,7 +404,7 @@ Get, build and install nghttp2:
      % git clone https://github.com/nghttp2/nghttp2.git
      % cd nghttp2
      % autoreconf -fi
-     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig  LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
+     % PKG_CONFIG_PATH=$PKG_CONFIG_PATH:/home/daniel/build-quictls/lib/pkgconfig:/home/daniel/build-nghttp3/lib/pkgconfig:/home/daniel/build-ngtcp2/lib/pkgconfig LDFLAGS=-L/home/daniel/build-quictls/lib CFLAGS=-I/home/daniel/build-quictls/include ./configure --enable-maintainer-mode --prefix=/home/daniel/build-nghttp2 --disable-shared --enable-app --enable-http3 --without-jemalloc --without-libxml2 --without-systemd
      % make && make install
 
 Run the local h3 server on port 9443, make it proxy all traffic through to

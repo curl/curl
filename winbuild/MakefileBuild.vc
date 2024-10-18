@@ -203,6 +203,22 @@ MBEDTLS_CFLAGS = /DUSE_MBEDTLS /I"$(MBEDTLS_INC_DIR)"
 MBEDTLS_LIBS   = mbedtls.lib mbedcrypto.lib mbedx509.lib
 !ENDIF
 
+!IFDEF WOLFSSL_PATH
+WOLFSSL_INC_DIR  = $(WOLFSSL_PATH)\include
+WOLFSSL_LIB_DIR  = $(WOLFSSL_PATH)\lib
+WOLFSSL_LFLAGS   = $(WOLFSSL_LFLAGS) "/LIBPATH:$(WOLFSSL_LIB_DIR)"
+!ELSE
+WOLFSSL_INC_DIR  = $(DEVEL_INCLUDE)
+WOLFSSL_LIB_DIR  = $(DEVEL_LIB)
+!ENDIF
+
+!IF "$(WITH_WOLFSSL)"=="dll" || "$(WITH_WOLFSSL)"=="static"
+USE_WOLFSSL    = true
+WOLFSSL        = $(WITH_WOLFSSL)
+WOLFSSL_CFLAGS = /DUSE_WOLFSSL /I"$(WOLFSSL_INC_DIR)"
+WOLFSSL_LIBS   = wolfssl.lib
+!ENDIF
+
 
 !IFDEF CARES_PATH
 CARES_INC_DIR  = $(CARES_PATH)\include
@@ -479,6 +495,11 @@ CFLAGS = $(CFLAGS) $(MBEDTLS_CFLAGS)
 LFLAGS = $(LFLAGS) $(MBEDTLS_LFLAGS) $(MBEDTLS_LIBS)
 !ENDIF
 
+!IF "$(USE_WOLFSSL)"=="true"
+CFLAGS = $(CFLAGS) $(WOLFSSL_CFLAGS)
+LFLAGS = $(LFLAGS) $(WOLFSSL_LFLAGS) $(WOLFSSL_LIBS)
+!ENDIF
+
 !IF "$(USE_CARES)"=="true"
 CFLAGS = $(CFLAGS) $(CARES_CFLAGS)
 LFLAGS = $(LFLAGS) $(CARES_LFLAGS) $(CARES_LIBS)
@@ -528,7 +549,10 @@ LFLAGS = $(LFLAGS) $(LFLAGS_PDB)
 
 !IF ( "$(USE_SSL)"=="true" && "$(USE_SCHANNEL)"=="true" ) \
  || ( "$(USE_SSL)"=="true" && "$(USE_MBEDTLS)"=="true" ) \
- || ( "$(USE_MBEDTLS)"=="true" && "$(USE_SCHANNEL)"=="true" )
+ || ( "$(USE_SSL)"=="true" && "$(USE_WOLFSSL)"=="true" ) \
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_WOLFSSL)"=="true" ) \
+ || ( "$(USE_MBEDTLS)"=="true" && "$(USE_SCHANNEL)"=="true" ) \
+ || ( "$(USE_WOLFSSL)"=="true" && "$(USE_SCHANNEL)"=="true" )
 CFLAGS = $(CFLAGS) /DCURL_WITH_MULTI_SSL
 !ENDIF
 

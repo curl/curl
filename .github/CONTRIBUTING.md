@@ -26,4 +26,4 @@ Send your suggestions using one of these methods:
 
  3. as an [issue](https://github.com/curl/curl/issues)
 
-/ The curl team!
+/ The curl team

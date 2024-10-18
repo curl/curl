@@ -26,6 +26,8 @@
 
 #include <curl/curl.h>
 
+struct Curl_easy;
+
 #include "formdata.h"
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_FORM_API)
 
@@ -812,7 +814,7 @@ static int fseeko_wrapper(void *stream, curl_off_t offset, int whence)
  * a NULL pointer in the 'data' argument.
  */
 
-CURLcode Curl_getformdata(struct Curl_easy *data,
+CURLcode Curl_getformdata(CURL *data,
                           curl_mimepart *finalform,
                           struct curl_httppost *post,
                           curl_read_callback fread_func)

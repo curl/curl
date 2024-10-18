@@ -232,7 +232,7 @@ We allow subscribers to subscribe to the "digest" version of the mailing
 lists. A digest is a collection of mails lumped together in one single mail.
 
 Should you decide to reply to a mail sent out as a digest, there are two
-things you MUST consider if you really really cannot subscribe normally
+things you MUST consider if you really, really cannot subscribe normally
 instead:
 
 Cut off all mails and chatter that is not related to the mail you want to

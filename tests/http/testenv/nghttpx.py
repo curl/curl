@@ -184,6 +184,7 @@ class NghttpxQuic(Nghttpx):
         args = [
             self._cmd,
             f'--frontend=*,{self.env.h3_port};quic',
+            f'--frontend=*,{self.env.nghttpx_https_port};tls',
             f'--backend=127.0.0.1,{self.env.https_port};{self.env.domain1};sni={self.env.domain1};proto=h2;tls',
             f'--backend=127.0.0.1,{self.env.http_port}',
             '--log-level=INFO',

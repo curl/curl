@@ -28,7 +28,9 @@
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
 #ifdef _WIN32
-#define getpid GetCurrentProcessId
+#define Curl_getpid() ((unsigned int)GetCurrentProcessId())
+#else
+#define Curl_getpid() ((unsigned int)getpid())
 #endif
 
 #include "smb.h"
@@ -44,7 +46,8 @@
 #include "escape.h"
 #include "curl_endian.h"
 
-/* The last #include files should be: */
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
@@ -316,20 +319,6 @@ const struct Curl_handler Curl_handler_smbs = {
 #define CLIENTNAME        "curl"
 #define SERVICENAME       "?????"
 
-/* Append a string to an SMB message */
-#define MSGCAT(str)                             \
-  do {                                          \
-    strcpy(p, (str));                           \
-    p += strlen(str);                           \
-  } while(0)
-
-/* Append a null-terminated string to an SMB message */
-#define MSGCATNULL(str)                         \
-  do {                                          \
-    strcpy(p, (str));                           \
-    p += strlen(str) + 1;                       \
-  } while(0)
-
 /* SMB is mostly little endian */
 #if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__) || \
   defined(__OS400__)
@@ -559,7 +548,7 @@ static void smb_format_message(struct Curl_easy *data, struct smb_header *h,
   h->flags2 = smb_swap16(SMB_FLAGS2_IS_LONG_NAME | SMB_FLAGS2_KNOWS_LONG_NAME);
   h->uid = smb_swap16(smbc->uid);
   h->tid = smb_swap16(req->tid);
-  pid = (unsigned int)getpid();
+  pid = Curl_getpid();
   h->pid_high = smb_swap16((unsigned short)(pid >> 16));
   h->pid = smb_swap16((unsigned short) pid);
 }
@@ -667,10 +656,13 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
   p += sizeof(lm);
   memcpy(p, nt, sizeof(nt));
   p += sizeof(nt);
-  MSGCATNULL(smbc->user);
-  MSGCATNULL(smbc->domain);
-  MSGCATNULL(OS);
-  MSGCATNULL(CLIENTNAME);
+  p += msnprintf(p, byte_count - sizeof(nt) - sizeof(lm),
+                 "%s%c"  /* user */
+                 "%s%c"  /* domain */
+                 "%s%c"  /* OS */
+                 "%s", /* client name */
+                 smbc->user, 0, smbc->domain, 0, OS, 0, CLIENTNAME);
+  p++; /* count the final null termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 
@@ -694,11 +686,13 @@ static CURLcode smb_send_tree_connect(struct Curl_easy *data)
   msg.word_count = SMB_WC_TREE_CONNECT_ANDX;
   msg.andx.command = SMB_COM_NO_ANDX_COMMAND;
   msg.pw_len = 0;
-  MSGCAT("\\\\");
-  MSGCAT(conn->host.name);
-  MSGCAT("\\");
-  MSGCATNULL(smbc->share);
-  MSGCATNULL(SERVICENAME); /* Match any type of service */
+
+  p += msnprintf(p, byte_count,
+                 "\\\\%s\\"  /* hostname */
+                 "%s%c"      /* share */
+                 "%s",       /* service */
+                 conn->host.name, smbc->share, 0, SERVICENAME);
+  p++; /* count the final null termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);
 

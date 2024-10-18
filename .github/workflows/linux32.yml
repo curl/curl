@@ -61,10 +61,9 @@ jobs:
           sudo dpkg --add-architecture i386
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends libtool autoconf automake pkgconf stunnel4 ${{ matrix.build.install_packages }}
-          sudo python3 -m pip install --break-system-packages impacket
         name: 'install prereqs'
 
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - run: autoreconf -fi
         name: 'autoreconf'
@@ -74,6 +73,11 @@ jobs:
             ${{ matrix.build.configure }}
         name: 'configure'
 
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' lib/curl_config.h | sort || true
+
       - run: make V=1
         name: 'make'
 
@@ -82,6 +86,10 @@ jobs:
 
       - run: make V=1 -C tests
         name: 'make tests'
+
+      - name: 'install test prereqs'
+        run: |
+          sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
 
       - run: make V=1 test-ci
         name: 'run tests'

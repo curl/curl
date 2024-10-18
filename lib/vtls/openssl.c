@@ -1935,8 +1935,9 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
 
   /* SSL should now have started the shutdown from our side. Since it
    * was not complete, we are lacking the close notify from the server. */
-  if(send_shutdown) {
+  if(send_shutdown && !(SSL_get_shutdown(octx->ssl) & SSL_SENT_SHUTDOWN)) {
     ERR_clear_error();
+    CURL_TRC_CF(data, cf, "send SSL close notify");
     if(SSL_shutdown(octx->ssl) == 1) {
       CURL_TRC_CF(data, cf, "SSL shutdown finished");
       *done = TRUE;
@@ -1961,7 +1962,10 @@ static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
   err = SSL_get_error(octx->ssl, nread);
   switch(err) {
   case SSL_ERROR_ZERO_RETURN: /* no more data */
-    CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
+    if(SSL_shutdown(octx->ssl) == 1)
+      CURL_TRC_CF(data, cf, "SSL shutdown finished");
+    else
+      CURL_TRC_CF(data, cf, "SSL shutdown not received, but closed");
     *done = TRUE;
     break;
   case SSL_ERROR_NONE: /* just did not get anything */
@@ -2914,7 +2918,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     }
 
     Curl_ssl_sessionid_lock(data);
-    result = Curl_ssl_set_sessionid(cf, data, peer, der_session_buf,
+    result = Curl_ssl_set_sessionid(cf, data, peer, NULL, der_session_buf,
                                     der_session_size, ossl_session_free);
     Curl_ssl_sessionid_unlock(data);
   }
@@ -3973,7 +3977,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(ssl_config->primary.cache_session && transport == TRNSPRT_TCP) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, peer, (void **)&der_sessionid,
-      &der_sessionid_size)) {
+      &der_sessionid_size, NULL)) {
       /* we got a session id, use it! */
       ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
         (long)der_sessionid_size);
@@ -4377,7 +4381,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       unsigned int len;
       SSL_get0_alpn_selected(octx->ssl, &neg_protocol, &len);
 
-      return Curl_alpn_set_negotiated(cf, data, neg_protocol, len);
+      return Curl_alpn_set_negotiated(cf, data, connssl, neg_protocol, len);
     }
 #endif
 
@@ -4710,7 +4714,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
         bool incache;
         Curl_ssl_sessionid_lock(data);
         incache = !(Curl_ssl_getsessionid(cf, data, peer,
-                                          &old_ssl_sessionid, NULL));
+                                          &old_ssl_sessionid, NULL, NULL));
         if(incache) {
           infof(data, "Remove session ID again from cache");
           Curl_ssl_delsessionid(data, old_ssl_sessionid);

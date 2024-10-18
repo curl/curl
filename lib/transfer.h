@@ -42,8 +42,6 @@ typedef enum {
   FOLLOW_REDIR /* a full true redirect */
 } followtype;
 
-CURLcode Curl_follow(struct Curl_easy *data, char *newurl,
-                     followtype type);
 CURLcode Curl_sendrecv(struct Curl_easy *data, struct curltime *nowp);
 int Curl_single_getsock(struct Curl_easy *data,
                         struct connectdata *conn, curl_socket_t *socks);

@@ -154,8 +154,8 @@ struct TELNET {
   int himq[256];
   int him_preferred[256];
   int subnegotiation[256];
-  char subopt_ttype[32];             /* Set with suboption TTYPE */
-  char subopt_xdisploc[128];         /* Set with suboption XDISPLOC */
+  char *subopt_ttype;                /* Set with suboption TTYPE */
+  char *subopt_xdisploc;             /* Set with suboption XDISPLOC */
   unsigned short subopt_wsx;         /* Set with suboption NAWS */
   unsigned short subopt_wsy;         /* Set with suboption NAWS */
   TelnetReceive telrcv_state;
@@ -831,12 +831,9 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       case 5:
         /* Terminal type */
         if(strncasecompare(option, "TTYPE", 5)) {
-          size_t l = strlen(arg);
-          if(l < sizeof(tn->subopt_ttype)) {
-            strcpy(tn->subopt_ttype, arg);
-            tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
-            break;
-          }
+          tn->subopt_ttype = arg;
+          tn->us_preferred[CURL_TELOPT_TTYPE] = CURL_YES;
+          break;
         }
         result = CURLE_UNKNOWN_OPTION;
         break;
@@ -844,12 +841,9 @@ static CURLcode check_telnet_options(struct Curl_easy *data)
       case 8:
         /* Display variable */
         if(strncasecompare(option, "XDISPLOC", 8)) {
-          size_t l = strlen(arg);
-          if(l < sizeof(tn->subopt_xdisploc)) {
-            strcpy(tn->subopt_xdisploc, arg);
-            tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
-            break;
-          }
+          tn->subopt_xdisploc = arg;
+          tn->us_preferred[CURL_TELOPT_XDISPLOC] = CURL_YES;
+          break;
         }
         result = CURLE_UNKNOWN_OPTION;
         break;

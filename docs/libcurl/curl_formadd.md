@@ -105,7 +105,7 @@ you must make sure strlen() on the data pointer returns zero.
 
 ## CURLFORM_CONTENTSLENGTH
 
-(This option is deprecated. Use *CURLFORM_CONTENTLEN* instead!)
+(This option is deprecated. Use *CURLFORM_CONTENTLEN* instead.)
 
 followed by a long giving the length of the contents. Note that for
 *CURLFORM_STREAM* contents, this option is mandatory.

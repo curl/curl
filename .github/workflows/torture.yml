@@ -61,16 +61,20 @@ jobs:
     steps:
       - run: |
           sudo apt-get install cmake ninja-build pkgconf stunnel4 ${{ matrix.build.install }}
-          python3 -m pip install --break-system-packages impacket
         name: 'install prereqs'
 
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - run: |
           cmake -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
             -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
             ${{ matrix.build.generate }}
         name: 'cmake configure'
+
+      - name: 'cmake curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' lib/curl_config.h | sort || true
 
       - run: cmake --build . --verbose
         name: 'cmake build'
@@ -80,6 +84,10 @@ jobs:
 
       - run: cmake --build . --verbose --target testdeps
         name: 'build tests'
+
+      - name: 'install test prereqs'
+        run: |
+          python3 -m pip install --break-system-packages -r tests/requirements.txt
 
       - run: cmake --build . --verbose --target test-torture
         name: 'run tests'

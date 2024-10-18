@@ -98,13 +98,17 @@
 #include "tool_ipfs.h"
 #include "dynbuf.h"
 #ifdef DEBUGBUILD
-#include "easyif.h"  /* for libcurl's debug-only curl_easy_perform_ev() */
+/* libcurl's debug-only curl_easy_perform_ev() */
+CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #include "memdebug.h" /* keep this as LAST include */
 
 #ifdef CURL_CA_EMBED
+#ifndef CURL_DECLARED_CURL_CA_EMBED
+#define CURL_DECLARED_CURL_CA_EMBED
 extern const unsigned char curl_ca_embed[];
+#endif
 #endif
 
 #ifndef O_BINARY
@@ -128,10 +132,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
                                 bool capath_from_env,
-                                bool *added);
+                                bool *added,
+                                bool *skipped);
 static CURLcode create_transfer(struct GlobalConfig *global,
                                 CURLSH *share,
-                                bool *added);
+                                bool *added,
+                                bool *skipped);
 
 static bool is_fatal_error(CURLcode code)
 {
@@ -828,7 +834,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
                                 struct OperationConfig *config,
                                 CURLSH *share,
                                 bool capath_from_env,
-                                bool *added)
+                                bool *added,
+                                bool *skipped)
 {
   CURLcode result = CURLE_OK;
   struct getout *urlnode;
@@ -837,7 +844,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
   struct State *state = &config->state;
   char *httpgetfields = state->httpgetfields;
 
-  *added = FALSE; /* not yet */
+  *skipped = *added = FALSE; /* not yet */
 
   if(config->postfields) {
     if(config->use_httpget) {
@@ -1220,6 +1227,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
               notef(global, "skips transfer, \"%s\" exists locally",
                     per->outfile);
               per->skip = TRUE;
+              *skipped = TRUE;
             }
           }
           if((urlnode->flags & GETOUT_USEREMOTE)
@@ -1932,6 +1940,8 @@ static CURLcode single_transfer(struct GlobalConfig *global,
             long mask =
               (config->ssl_allow_beast ?
                CURLSSLOPT_ALLOW_BEAST : 0) |
+              (config->ssl_allow_earlydata ?
+               CURLSSLOPT_EARLYDATA : 0) |
               (config->ssl_no_revoke ?
                CURLSSLOPT_NO_REVOKE : 0) |
               (config->ssl_revoke_best_effort ?
@@ -2466,15 +2476,17 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
   *addedp = FALSE;
   *morep = FALSE;
   if(all_pers < (global->parallel_max*2)) {
-    result = create_transfer(global, share, addedp);
-    if(result)
-      return result;
+    bool skipped = FALSE;
+    do {
+      result = create_transfer(global, share, addedp, &skipped);
+      if(result)
+        return result;
+    } while(skipped);
   }
   for(per = transfers; per && (all_added < global->parallel_max);
       per = per->next) {
-    bool getadded = FALSE;
-    if(per->added)
-      /* already added */
+    if(per->added || per->skip)
+      /* already added or to be skipped */
       continue;
     if(per->startat && (time(NULL) < per->startat)) {
       /* this is still delaying */
@@ -2510,8 +2522,15 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
       result = CURLE_OUT_OF_MEMORY;
     }
 
-    if(!result)
-      result = create_transfer(global, share, &getadded);
+    if(!result) {
+      bool getadded = FALSE;
+      bool skipped = FALSE;
+      do {
+        result = create_transfer(global, share, &getadded, &skipped);
+        if(result)
+          break;
+      } while(skipped);
+    }
     if(result) {
       free(errorbuf);
       return result;
@@ -2872,31 +2891,34 @@ static CURLcode parallel_transfers(struct GlobalConfig *global,
 #endif
   else
 #endif
-  while(!s->mcode && (s->still_running || s->more_transfers)) {
-    /* If stopping prematurely (eg due to a --fail-early condition) then signal
-       that any transfers in the multi should abort (via progress callback). */
-    if(s->wrapitup) {
-      if(!s->still_running)
-        break;
-      if(!s->wrapitup_processed) {
-        struct per_transfer *per;
-        for(per = transfers; per; per = per->next) {
-          if(per->added)
-            per->abort = TRUE;
+
+  if(all_added) {
+    while(!s->mcode && (s->still_running || s->more_transfers)) {
+      /* If stopping prematurely (eg due to a --fail-early condition) then
+         signal that any transfers in the multi should abort (via progress
+         callback). */
+      if(s->wrapitup) {
+        if(!s->still_running)
+          break;
+        if(!s->wrapitup_processed) {
+          struct per_transfer *per;
+          for(per = transfers; per; per = per->next) {
+            if(per->added)
+              per->abort = TRUE;
+          }
+          s->wrapitup_processed = TRUE;
         }
-        s->wrapitup_processed = TRUE;
       }
+
+      s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
+      if(!s->mcode)
+        s->mcode = curl_multi_perform(s->multi, &s->still_running);
+      if(!s->mcode)
+        result = check_finished(s);
     }
 
-    s->mcode = curl_multi_poll(s->multi, NULL, 0, 1000, NULL);
-    if(!s->mcode)
-      s->mcode = curl_multi_perform(s->multi, &s->still_running);
-
-    if(!s->mcode)
-      result = check_finished(s);
+    (void)progress_meter(global, &s->start, TRUE);
   }
-
-  (void)progress_meter(global, &s->start, TRUE);
 
   /* Make sure to return some kind of error if there was a multi problem */
   if(s->mcode) {
@@ -2918,8 +2940,9 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   CURLcode result = CURLE_OK;
   struct per_transfer *per;
   bool added = FALSE;
+  bool skipped = FALSE;
 
-  result = create_transfer(global, share, &added);
+  result = create_transfer(global, share, &added, &skipped);
   if(result)
     return result;
   if(!added) {
@@ -2965,12 +2988,15 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
     if(is_fatal_error(returncode) || (returncode && global->fail_early))
       bailout = TRUE;
     else {
-      /* setup the next one just before we delete this */
-      result = create_transfer(global, share, &added);
-      if(result) {
-        returncode = result;
-        bailout = TRUE;
-      }
+      do {
+        /* setup the next one just before we delete this */
+        result = create_transfer(global, share, &added, &skipped);
+        if(result) {
+          returncode = result;
+          bailout = TRUE;
+          break;
+        }
+      } while(skipped);
     }
 
     per = del_per_transfer(per);
@@ -3000,11 +3026,98 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
   return result;
 }
 
+static CURLcode is_using_schannel(int *using)
+{
+  CURLcode result = CURLE_OK;
+  static int using_schannel = -1; /* -1 = not checked
+                                     0 = nope
+                                     1 = yes */
+  if(using_schannel == -1) {
+    CURL *curltls = curl_easy_init();
+    /* The TLS backend remains, so keep the info */
+    struct curl_tlssessioninfo *tls_backend_info = NULL;
+
+    if(!curltls)
+      result = CURLE_OUT_OF_MEMORY;
+    else {
+      result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
+                                 &tls_backend_info);
+      if(!result)
+        using_schannel =
+          (tls_backend_info->backend == CURLSSLBACKEND_SCHANNEL);
+    }
+    curl_easy_cleanup(curltls);
+    if(result)
+      return result;
+  }
+  *using = using_schannel;
+  return result;
+}
+
+/* Set the CA cert locations specified in the environment. For Windows if no
+ * environment-specified filename is found then check for CA bundle default
+ * filename curl-ca-bundle.crt in the user's PATH.
+ *
+ * If Schannel is the selected SSL backend then these locations are ignored.
+ * We allow setting CA location for Schannel only when explicitly specified by
+ * the user via CURLOPT_CAINFO / --cacert.
+ */
+
+static CURLcode cacertpaths(struct OperationConfig *config)
+{
+  CURLcode result = CURLE_OUT_OF_MEMORY;
+  char *env = curl_getenv("CURL_CA_BUNDLE");
+  if(env) {
+    config->cacert = strdup(env);
+    curl_free(env);
+    if(!config->cacert)
+      goto fail;
+  }
+  else {
+    env = curl_getenv("SSL_CERT_DIR");
+    if(env) {
+      config->capath = strdup(env);
+      curl_free(env);
+      if(!config->capath)
+        goto fail;
+    }
+    env = curl_getenv("SSL_CERT_FILE");
+    if(env) {
+      config->cacert = strdup(env);
+      curl_free(env);
+      if(!config->cacert)
+        goto fail;
+    }
+  }
+
+#ifdef _WIN32
+  if(!env) {
+#if defined(CURL_CA_SEARCH_SAFE)
+    char *cacert = NULL;
+    FILE *cafile = Curl_execpath("curl-ca-bundle.crt", &cacert);
+    if(cafile) {
+      fclose(cafile);
+      config->cacert = strdup(cacert);
+    }
+#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
+    result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
+    if(result)
+      goto fail;
+#endif
+  }
+#endif
+  return CURLE_OK;
+fail:
+  free(config->capath);
+  return result;
+}
+
 /* setup a transfer for the given config */
 static CURLcode transfer_per_config(struct GlobalConfig *global,
                                     struct OperationConfig *config,
                                     CURLSH *share,
-                                    bool *added)
+                                    bool *added,
+                                    bool *skipped)
 {
   CURLcode result = CURLE_OK;
   bool capath_from_env;
@@ -3030,86 +3143,21 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
      !config->cacert &&
      !config->capath &&
      (!config->insecure_ok || (config->doh_url && !config->doh_insecure_ok))) {
-    CURL *curltls = curl_easy_init();
-    struct curl_tlssessioninfo *tls_backend_info = NULL;
+    int using_schannel = -1;
 
-    /* With the addition of CAINFO support for Schannel, this search could find
-     * a certificate bundle that was previously ignored. To maintain backward
-     * compatibility, only perform this search if not using Schannel.
+    result = is_using_schannel(&using_schannel);
+
+    /* With the addition of CAINFO support for Schannel, this search could
+     * find a certificate bundle that was previously ignored. To maintain
+     * backward compatibility, only perform this search if not using Schannel.
      */
-    result = curl_easy_getinfo(curltls, CURLINFO_TLS_SSL_PTR,
-                               &tls_backend_info);
-    if(result) {
-      curl_easy_cleanup(curltls);
-      return result;
-    }
-
-    /* Set the CA cert locations specified in the environment. For Windows if
-     * no environment-specified filename is found then check for CA bundle
-     * default filename curl-ca-bundle.crt in the user's PATH.
-     *
-     * If Schannel is the selected SSL backend then these locations are
-     * ignored. We allow setting CA location for Schannel only when explicitly
-     * specified by the user via CURLOPT_CAINFO / --cacert.
-     */
-    if(tls_backend_info->backend != CURLSSLBACKEND_SCHANNEL) {
-      char *env;
-      env = curl_getenv("CURL_CA_BUNDLE");
-      if(env) {
-        config->cacert = strdup(env);
-        curl_free(env);
-        if(!config->cacert) {
-          curl_easy_cleanup(curltls);
-          errorf(global, "out of memory");
-          return CURLE_OUT_OF_MEMORY;
-        }
-      }
-      else {
-        env = curl_getenv("SSL_CERT_DIR");
-        if(env) {
-          config->capath = strdup(env);
-          curl_free(env);
-          if(!config->capath) {
-            curl_easy_cleanup(curltls);
-            errorf(global, "out of memory");
-            return CURLE_OUT_OF_MEMORY;
-          }
-          capath_from_env = true;
-        }
-        env = curl_getenv("SSL_CERT_FILE");
-        if(env) {
-          config->cacert = strdup(env);
-          curl_free(env);
-          if(!config->cacert) {
-            if(capath_from_env)
-              free(config->capath);
-            curl_easy_cleanup(curltls);
-            errorf(global, "out of memory");
-            return CURLE_OUT_OF_MEMORY;
-          }
-        }
-      }
-
-#ifdef _WIN32
-      if(!env) {
-#if defined(CURL_CA_SEARCH_SAFE)
-        char *cacert = NULL;
-        FILE *cafile = Curl_execpath("curl-ca-bundle.crt", &cacert);
-        if(cafile) {
-          fclose(cafile);
-          config->cacert = strdup(cacert);
-        }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
-        result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
-#endif
-      }
-#endif
-    }
-    curl_easy_cleanup(curltls);
+    if(!result && !using_schannel)
+      result = cacertpaths(config);
   }
 
   if(!result)
-    result = single_transfer(global, config, share, capath_from_env, added);
+    result = single_transfer(global, config, share, capath_from_env, added,
+                             skipped);
 
   return result;
 }
@@ -3120,12 +3168,14 @@ static CURLcode transfer_per_config(struct GlobalConfig *global,
  */
 static CURLcode create_transfer(struct GlobalConfig *global,
                                 CURLSH *share,
-                                bool *added)
+                                bool *added,
+                                bool *skipped)
 {
   CURLcode result = CURLE_OK;
   *added = FALSE;
   while(global->current) {
-    result = transfer_per_config(global, global->current, share, added);
+    result = transfer_per_config(global, global->current, share, added,
+                                 skipped);
     if(!result && !*added) {
       /* when one set is drained, continue to next */
       global->current = global->current->next;

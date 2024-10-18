@@ -105,8 +105,9 @@ struct ossl_sha256_ctx {
 };
 typedef struct ossl_sha256_ctx my_sha256_ctx;
 
-static CURLcode my_sha256_init(my_sha256_ctx *ctx)
+static CURLcode my_sha256_init(void *in)
 {
+  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   ctx->openssl_ctx = EVP_MD_CTX_create();
   if(!ctx->openssl_ctx)
     return CURLE_OUT_OF_MEMORY;
@@ -118,15 +119,17 @@ static CURLcode my_sha256_init(my_sha256_ctx *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(my_sha256_ctx *ctx,
+static void my_sha256_update(void *in,
                              const unsigned char *data,
                              unsigned int length)
 {
+  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestUpdate(ctx->openssl_ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
+static void my_sha256_final(unsigned char *digest, void *in)
 {
+  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   EVP_DigestFinal_ex(ctx->openssl_ctx, digest, NULL);
   EVP_MD_CTX_destroy(ctx->openssl_ctx);
 }
@@ -135,20 +138,20 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 
 typedef struct sha256_ctx my_sha256_ctx;
 
-static CURLcode my_sha256_init(my_sha256_ctx *ctx)
+static CURLcode my_sha256_init(void *ctx)
 {
   sha256_init(ctx);
   return CURLE_OK;
 }
 
-static void my_sha256_update(my_sha256_ctx *ctx,
+static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
   sha256_update(ctx, length, data);
 }
 
-static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
+static void my_sha256_final(unsigned char *digest, void *ctx)
 {
   sha256_digest(ctx, SHA256_DIGEST_SIZE, digest);
 }
@@ -157,7 +160,7 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 
 typedef mbedtls_sha256_context my_sha256_ctx;
 
-static CURLcode my_sha256_init(my_sha256_ctx *ctx)
+static CURLcode my_sha256_init(void *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_sha256_starts(ctx, 0);
@@ -167,7 +170,7 @@ static CURLcode my_sha256_init(my_sha256_ctx *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(my_sha256_ctx *ctx,
+static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
@@ -178,7 +181,7 @@ static void my_sha256_update(my_sha256_ctx *ctx,
 #endif
 }
 
-static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
+static void my_sha256_final(unsigned char *digest, void *ctx)
 {
 #if !defined(HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS)
   (void) mbedtls_sha256_finish(ctx, digest);
@@ -190,20 +193,20 @@ static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
 #elif defined(AN_APPLE_OS)
 typedef CC_SHA256_CTX my_sha256_ctx;
 
-static CURLcode my_sha256_init(my_sha256_ctx *ctx)
+static CURLcode my_sha256_init(void *ctx)
 {
   (void) CC_SHA256_Init(ctx);
   return CURLE_OK;
 }
 
-static void my_sha256_update(my_sha256_ctx *ctx,
+static void my_sha256_update(void *ctx,
                              const unsigned char *data,
                              unsigned int length)
 {
   (void) CC_SHA256_Update(ctx, data, length);
 }
 
-static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
+static void my_sha256_final(unsigned char *digest, void *ctx)
 {
   (void) CC_SHA256_Final(digest, ctx);
 }
@@ -220,8 +223,9 @@ typedef struct sha256_ctx my_sha256_ctx;
 #define CALG_SHA_256 0x0000800c
 #endif
 
-static CURLcode my_sha256_init(my_sha256_ctx *ctx)
+static CURLcode my_sha256_init(void *in)
 {
+  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   if(!CryptAcquireContext(&ctx->hCryptProv, NULL, NULL, PROV_RSA_AES,
                          CRYPT_VERIFYCONTEXT | CRYPT_SILENT))
     return CURLE_OUT_OF_MEMORY;
@@ -235,15 +239,17 @@ static CURLcode my_sha256_init(my_sha256_ctx *ctx)
   return CURLE_OK;
 }
 
-static void my_sha256_update(my_sha256_ctx *ctx,
+static void my_sha256_update(void *in,
                              const unsigned char *data,
                              unsigned int length)
 {
+  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   CryptHashData(ctx->hHash, (unsigned char *) data, length, 0);
 }
 
-static void my_sha256_final(unsigned char *digest, my_sha256_ctx *ctx)
+static void my_sha256_final(unsigned char *digest, void *in)
 {
+  my_sha256_ctx *ctx = (my_sha256_ctx *)in;
   unsigned long length = 0;
 
   CryptGetHashParam(ctx->hHash, HP_HASHVAL, NULL, &length, 0);
@@ -388,8 +394,9 @@ static int sha256_compress(struct sha256_state *md,
 }
 
 /* Initialize the hash state */
-static CURLcode my_sha256_init(struct sha256_state *md)
+static CURLcode my_sha256_init(void *in)
 {
+  struct sha256_state *md = (struct sha256_state *)in;
   md->curlen = 0;
   md->length = 0;
   md->state[0] = 0x6A09E667UL;
@@ -409,21 +416,21 @@ static CURLcode my_sha256_init(struct sha256_state *md)
    @param md     The hash state
    @param in     The data to hash
    @param inlen  The length of the data (octets)
-   @return 0 if successful
 */
-static int my_sha256_update(struct sha256_state *md,
-                            const unsigned char *in,
-                            unsigned long inlen)
+static void my_sha256_update(void *ctx,
+                             const unsigned char *in,
+                             unsigned int len)
 {
+  unsigned long inlen = len;
   unsigned long n;
-
+  struct sha256_state *md = (struct sha256_state *)ctx;
 #define CURL_SHA256_BLOCK_SIZE 64
   if(md->curlen > sizeof(md->buf))
-    return -1;
+    return;
   while(inlen > 0) {
     if(md->curlen == 0 && inlen >= CURL_SHA256_BLOCK_SIZE) {
       if(sha256_compress(md, (unsigned char *)in) < 0)
-        return -1;
+        return;
       md->length += CURL_SHA256_BLOCK_SIZE * 8;
       in += CURL_SHA256_BLOCK_SIZE;
       inlen -= CURL_SHA256_BLOCK_SIZE;
@@ -436,14 +443,12 @@ static int my_sha256_update(struct sha256_state *md,
       inlen -= n;
       if(md->curlen == CURL_SHA256_BLOCK_SIZE) {
         if(sha256_compress(md, md->buf) < 0)
-          return -1;
+          return;
         md->length += 8 * CURL_SHA256_BLOCK_SIZE;
         md->curlen = 0;
       }
     }
   }
-
-  return 0;
 }
 
 /*
@@ -452,13 +457,13 @@ static int my_sha256_update(struct sha256_state *md,
    @param out [out] The destination of the hash (32 bytes)
    @return 0 if successful
 */
-static int my_sha256_final(unsigned char *out,
-                           struct sha256_state *md)
+static void my_sha256_final(unsigned char *out, void *ctx)
 {
+  struct sha256_state *md = ctx;
   int i;
 
   if(md->curlen >= sizeof(md->buf))
-    return -1;
+    return;
 
   /* Increase the length of the message */
   md->length += md->curlen * 8;
@@ -490,8 +495,6 @@ static int my_sha256_final(unsigned char *out,
   /* Copy output */
   for(i = 0; i < 8; i++)
     WPA_PUT_BE32(out + (4 * i), md->state[i]);
-
-  return 0;
 }
 
 #endif /* CRYPTO LIBS */
@@ -510,7 +513,7 @@ static int my_sha256_final(unsigned char *out,
  * Returns CURLE_OK on success.
  */
 CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
-                   const size_t length)
+                       const size_t length)
 {
   CURLcode result;
   my_sha256_ctx ctx;
@@ -524,21 +527,13 @@ CURLcode Curl_sha256it(unsigned char *output, const unsigned char *input,
 }
 
 
-const struct HMAC_params Curl_HMAC_SHA256[] = {
-  {
-    /* Hash initialization function. */
-    CURLX_FUNCTION_CAST(HMAC_hinit_func, my_sha256_init),
-    /* Hash update function. */
-    CURLX_FUNCTION_CAST(HMAC_hupdate_func, my_sha256_update),
-    /* Hash computation end function. */
-    CURLX_FUNCTION_CAST(HMAC_hfinal_func, my_sha256_final),
-    /* Size of hash context structure. */
-    sizeof(my_sha256_ctx),
-    /* Maximum key length. */
-    64,
-    /* Result size. */
-    32
-  }
+const struct HMAC_params Curl_HMAC_SHA256 = {
+  my_sha256_init,        /* Hash initialization function. */
+  my_sha256_update,      /* Hash update function. */
+  my_sha256_final,       /* Hash computation end function. */
+  sizeof(my_sha256_ctx), /* Size of hash context structure. */
+  64,                    /* Maximum key length. */
+  32                     /* Result size. */
 };
 
 

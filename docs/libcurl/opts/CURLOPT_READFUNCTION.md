@@ -86,7 +86,7 @@ size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userdata)
   curl_off_t nread;
 
   /* copy as much data as possible into the 'ptr' buffer, but no more than
-     'size' * 'nmemb' bytes! */
+     'size' * 'nmemb' bytes. */
   size_t retcode = fread(ptr, size, nmemb, readhere);
 
   nread = (curl_off_t)retcode;

@@ -40,17 +40,17 @@ env:
   # unhandled
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
-  libressl-version: 3.9.2
+  libressl-version: 4.0.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssl-version: 5.7.2
-  # renovate: datasource=github-tags depName=ARMmbed/mbedtls versioning=semver registryUrl=https://github.com
-  mbedtls-version: 3.6.0
+  # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
+  mbedtls-version: 3.6.2
   # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
   mod_h2-version: 2.0.29
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.36.0
+  awslc-version: 1.37.0
   # handled in renovate.json
   openssl3-version: openssl-3.1.3
   # unhandled
@@ -61,9 +61,9 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: 'ubuntu-latest'
+    runs-on: 'ubuntu-24.04'
     container: ${{ matrix.build.container }}
-    timeout-minutes: 90
+    timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
@@ -113,10 +113,31 @@ jobs:
             install_steps: mbedtls
             configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/mbedtls/lib" --with-mbedtls=$HOME/mbedtls --enable-debug
 
+          - name: mbedtls
+            install_packages: libnghttp2-dev
+            install_steps: mbedtls
+            PKG_CONFIG_PATH: '$HOME/mbedtls/lib/pkgconfig'  # Requires v3.6.0 or v2.28.8
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+
+          - name: mbedtls-pkg
+            install_packages: libnghttp2-dev libmbedtls-dev
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+
+          - name: mbedtls-pkg !pc
+            install_packages: libnghttp2-dev libmbedtls-dev
+            install_steps: skipall
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DCURL_USE_PKGCONFIG=OFF
+
           - name: msh3
             install_packages: zlib1g-dev
             install_steps: quictls msh3
             configure: LDFLAGS="-Wl,-rpath,$HOME/msh3/lib -Wl,-rpath,$HOME/quictls/lib" --with-msh3=$HOME/msh3 --with-openssl=$HOME/quictls --enable-debug
+
+          - name: msh3
+            install_packages: zlib1g-dev
+            install_steps: quictls msh3 skipall
+            PKG_CONFIG_PATH: '$HOME/msh3/lib/pkgconfig'  # Broken as of v0.6.0
+            generate: -DOPENSSL_ROOT_DIR=$HOME/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=$HOME/msh3/include -DMSH3_LIBRARY=$HOME/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
 
           - name: awslc
             install_packages: zlib1g-dev
@@ -214,14 +235,16 @@ jobs:
             configure: --enable-debug --disable-shared --disable-threaded-resolver --with-libssh --with-openssl
             tflags: -n -e '!TLS-SRP'
 
-          - name: hyper
-            install_steps: rust hyper
-            configure: LDFLAGS="-Wl,-rpath,$HOME/hyper/target/debug" --with-openssl --with-hyper=$HOME/hyper --enable-debug
-
           - name: rustls valgrind
             install_packages: libpsl-dev valgrind
             install_steps: rust rustls pytest
             configure: --with-rustls=$HOME/rustls --enable-debug
+
+          - name: rustls
+            install_packages: libpsl-dev
+            install_steps: rust rustls skipall
+            PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
+            generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
 
           - name: IntelC !SSL
             install_packages: zlib1g-dev
@@ -251,15 +274,22 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
-          sudo python3 -m pip install impacket
-        name: 'install prereqs and impacket'
+        name: 'install prereqs'
+
+      - if: contains(matrix.build.install_steps, 'pytest')
+        run: |
+          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
+        name: 'install prereqs for pytest'
 
       - if: startsWith(matrix.build.container, 'alpine')
         run: |
-          apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev py3-impacket py3-asn1 py3-six py3-pycryptodomex perl-time-hires openssh stunnel sudo git
+          apk add --no-cache build-base autoconf automake libtool perl openssl-dev libssh2-dev \
+            zlib-dev brotli-dev zstd-dev libidn2-dev openldap-dev heimdal-dev libpsl-dev \
+            py3-impacket py3-asn1 py3-six py3-pycryptodomex \
+            perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - name: Fix kernel mmap rnd bits
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -282,7 +312,7 @@ jobs:
 
       - name: cache bearssl
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -303,7 +333,7 @@ jobs:
 
       - name: cache libressl
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -322,7 +352,7 @@ jobs:
 
       - name: cache wolfssl (all)
         if: contains(matrix.build.install_steps, 'wolfssl-all')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-wolfssl-all
         env:
           cache-name: cache-wolfssl-all
@@ -342,7 +372,7 @@ jobs:
 
       - name: cache wolfssl (opensslextra)
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-wolfssl-opensslextra
         env:
           cache-name: cache-wolfssl-opensslextra
@@ -362,7 +392,7 @@ jobs:
 
       - name: cache mbedtls
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls
@@ -373,14 +403,17 @@ jobs:
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/ARMmbed/mbedtls
+          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
-          git submodule update --init
-          make DESTDIR=$HOME/mbedtls install
+          git submodule update --init --depth=1
+          cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
+            -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
+          cmake --build .
+          cmake --install .
 
       - name: cache openssl3
         if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-openssl3
         env:
           cache-name: cache-openssl3
@@ -398,7 +431,7 @@ jobs:
 
       - name: cache openssltsan3
         if: contains(matrix.build.install_steps, 'openssltsan3')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-openssltsan3
         env:
           cache-name: cache-openssltsan3
@@ -420,7 +453,7 @@ jobs:
 
       - name: cache quictls
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -438,7 +471,7 @@ jobs:
 
       - name: cache msh3
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -457,7 +490,7 @@ jobs:
 
       - name: cache awslc
         if: contains(matrix.build.install_steps, 'awslc')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -474,20 +507,12 @@ jobs:
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
           cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
-          cmake --build . --parallel 5
+          cmake --build .
           cmake --install .
-
-      - if: contains(matrix.build.install_steps, 'rust')
-        run: |
-          cd $HOME
-          curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
-          source $HOME/.cargo/env
-          rustup toolchain install nightly
-        name: 'install rust'
 
       - name: cache rustls
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
@@ -495,21 +520,20 @@ jobs:
           path: /home/runner/rustls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.rustls-version }}
 
+      - name: 'install rust'
+        if: contains(matrix.build.install_steps, 'rust') && steps.cache-rustls.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          curl -sSf --compressed https://sh.rustup.rs/ | sh -s -- -y
+          source $HOME/.cargo/env
+          rustup toolchain install nightly
+
       - name: 'build rustls'
         if: contains(matrix.build.install_steps, 'rustls') && steps.cache-rustls.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b v${{ env.rustls-version }} --recursive https://github.com/rustls/rustls-ffi.git
           cd rustls-ffi
           make DESTDIR=$HOME/rustls install
-
-      - if: contains(matrix.build.install_steps, 'hyper')
-        run: |
-          cd $HOME
-          git clone --quiet --depth=1 https://github.com/hyperium/hyper.git
-          cd $HOME/hyper
-          RUSTFLAGS="--cfg hyper_unstable_ffi" cargo +nightly rustc --features client,http1,http2,ffi -Z unstable-options --crate-type cdylib
-          echo "LD_LIBRARY_PATH=$HOME/hyper/target/debug:/usr/local/lib" >> $GITHUB_ENV
-        name: 'install hyper'
 
       - if: contains(matrix.build.install_steps, 'intel')
         run: |
@@ -521,38 +545,6 @@ jobs:
           printenv >> $GITHUB_ENV
         name: 'install Intel compilers'
 
-      - if: contains(matrix.build.install_steps, 'pytest')
-        run: |
-          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
-          sudo python3 -m pip install -r tests/http/requirements.txt
-        name: 'install pytest and apach2-dev'
-
-      - name: cache mod_h2
-        if: contains(matrix.build.install_steps, 'pytest')
-        uses: actions/cache@0c45773b623bea8c8e75f6c82b208c3cf94ea4f9 # v4
-        id: cache-mod_h2
-        env:
-          cache-name: cache-mod_h2
-        with:
-          path: /home/runner/mod_h2
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
-
-      - name: 'build mod_h2'
-        if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
-        run: |
-          cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
-          cd mod_h2
-          autoreconf -fi
-          ./configure
-          make
-
-      - name: 'install mod_h2'
-        if: contains(matrix.build.install_steps, 'pytest')
-        run: |
-          cd $HOME/mod_h2
-          sudo make install
-
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
@@ -560,8 +552,11 @@ jobs:
       - name: 'configure'
         run: |
           [[ '${{ matrix.build.install_steps }}' = *'awslc'* ]] && sudo apt remove --yes libssl-dev
+          if [ -n '${{ matrix.build.PKG_CONFIG_PATH }}' ]; then
+            export PKG_CONFIG_PATH="${{ matrix.build.PKG_CONFIG_PATH }}"
+          fi
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake -G Ninja \
+            cmake -B . -G Ninja \
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
@@ -576,6 +571,11 @@ jobs:
         if: ${{ !cancelled() }}
         run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' lib/curl_config.h | sort || true
+
       - name: 'test configs'
         run: |
           cat tests/config || true
@@ -584,7 +584,7 @@ jobs:
       - name: 'build'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --parallel 5 --verbose
+            ${{ matrix.build.make-prefix }} cmake --build . --verbose
           else
             ${{ matrix.build.make-prefix }} make V=1
           fi
@@ -611,10 +611,15 @@ jobs:
         if: ${{ matrix.build.install_steps != 'skipall' }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --parallel 5 --verbose --target testdeps
+            cmake --build . --verbose --target testdeps
           else
             make V=1 -C tests
           fi
+
+      - name: 'install test prereqs'
+        if: ${{ matrix.build.install_steps != 'skipall' && !startsWith(matrix.build.container, 'alpine') && matrix.build.container == null }}
+        run: |
+          sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
@@ -633,6 +638,37 @@ jobs:
             make V=1 test-ci
           fi
 
+      - name: 'install pytest prereqs'
+        if: contains(matrix.build.install_steps, 'pytest')
+        run: |
+          sudo python3 -m pip install --break-system-packages -r tests/http/requirements.txt
+
+      - name: cache mod_h2
+        if: contains(matrix.build.install_steps, 'pytest')
+        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        id: cache-mod_h2
+        env:
+          cache-name: cache-mod_h2
+        with:
+          path: /home/runner/mod_h2
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
+
+      - name: 'build mod_h2'
+        if: contains(matrix.build.install_steps, 'pytest') && steps.cache-mod_h2.outputs.cache-hit != 'true'
+        run: |
+          cd $HOME
+          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
+          cd mod_h2
+          autoreconf -fi
+          ./configure
+          make
+
+      - name: 'install mod_h2'
+        if: contains(matrix.build.install_steps, 'pytest')
+        run: |
+          cd $HOME/mod_h2
+          sudo make install
+
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         env:
@@ -648,7 +684,7 @@ jobs:
       - name: 'build examples'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            ${{ matrix.build.make-prefix }} cmake --build . --parallel 5 --verbose --target curl-examples
+            ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
           else
             ${{ matrix.build.make-prefix }} make V=1 examples
           fi

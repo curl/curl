@@ -24,7 +24,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
@@ -42,7 +42,7 @@ jobs:
         run: |
           SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
-      - uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
@@ -128,7 +128,7 @@ jobs:
     timeout-minutes: 5
     needs: maketgz-and-verify-in-tree
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
@@ -140,7 +140,7 @@ jobs:
   reproducible-releases:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'

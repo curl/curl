@@ -64,23 +64,20 @@ class TestSSLUse:
         count = 3
         exp_resumed = 'Resumed'
         xargs = ['--sessionid', '--tls-max', tls_max, f'--tlsv{tls_max}']
-        if env.curl_uses_lib('gnutls'):
-            if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in GnuTLS, but 1.3 does not, TODO
         if env.curl_uses_lib('libressl'):
             if tls_max == '1.3':
                 exp_resumed = 'Initial'  # 1.2 works in LibreSSL, but 1.3 does not, TODO
-        if env.curl_uses_lib('wolfssl'):
-            if tls_max == '1.3':
-                exp_resumed = 'Initial'  # 1.2 works in wolfSSL, but 1.3 does not, TODO
         if env.curl_uses_lib('rustls-ffi'):
             exp_resumed = 'Initial'  # Rustls does not support sessions, TODO
         if env.curl_uses_lib('bearssl') and tls_max == '1.3':
             pytest.skip('BearSSL does not support TLSv1.3')
-        if env.curl_uses_lib('mbedtls') and tls_max == '1.3':
+        if env.curl_uses_lib('mbedtls') and tls_max == '1.3' and \
+           not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
             pytest.skip('mbedtls TLSv1.3 session resume not working in 3.6.0')
 
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'ssl'
+        curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo?'\
                f'id=[0-{count-1}]&close'
@@ -97,9 +94,9 @@ class TestSSLUse:
                 djson = json.load(f)
             assert djson['HTTPS'] == 'on', f'{i}: {djson}'
             if i == 0:
-                assert djson['SSL_SESSION_RESUMED'] == 'Initial', f'{i}: {djson}'
+                assert djson['SSL_SESSION_RESUMED'] == 'Initial', f'{i}: {djson}\n{r.dump_logs()}'
             else:
-                assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}'
+                assert djson['SSL_SESSION_RESUMED'] == exp_resumed, f'{i}: {djson}\n{r.dump_logs()}'
 
     # use host name with trailing dot, verify handshake
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
@@ -226,6 +223,9 @@ class TestSSLUse:
             if tls_proto == 'TLSv1.3':
                 pytest.skip('BearSSL does not support TLSv1.3')
             tls_proto = 'TLSv1.2'
+        elif env.curl_uses_lib('mbedtls') and not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
+            if tls_proto == 'TLSv1.3':
+                pytest.skip('mbedTLS < 3.6.0 does not support TLSv1.3')
         elif env.curl_uses_lib('sectransp'):  # not in CI, so untested
             if tls_proto == 'TLSv1.3':
                 pytest.skip('Secure Transport does not support TLSv1.3')
@@ -279,7 +279,17 @@ class TestSSLUse:
         ])
         httpd.reload_if_config_changed()
         proto = 'http/1.1'
-        curl = CurlClient(env=env)
+        run_env = os.environ.copy()
+        if env.curl_uses_lib('gnutls'):
+            # we need to override any default system configuration since
+            # we want to test all protocol versions. Ubuntu (or the GH image)
+            # disable TSL1.0 and TLS1.1 system wide. We do not want.
+            our_config = os.path.join(env.gen_dir, 'gnutls_config')
+            if not os.path.exists(our_config):
+                with open(our_config, 'w') as fd:
+                    fd.write('# empty\n')
+            run_env['GNUTLS_SYSTEM_PRIORITY_FILE'] = our_config
+        curl = CurlClient(env=env, run_env=run_env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
         # SSL backend specifics
         if env.curl_uses_lib('bearssl'):
@@ -295,10 +305,11 @@ class TestSSLUse:
         # test
         extra_args = [[], ['--tlsv1'], ['--tlsv1.0'], ['--tlsv1.1'], ['--tlsv1.2'], ['--tlsv1.3']][min_ver+2] + \
             [['--tls-max', '1.0'], ['--tls-max', '1.1'], ['--tls-max', '1.2'], ['--tls-max', '1.3'], []][max_ver]
+        extra_args.extend(['--trace-config', 'ssl'])
         r = curl.http_get(url=url, alpn_proto=proto, extra_args=extra_args)
         if max_ver >= min_ver and tls_proto in supported[max(0, min_ver):min(max_ver, 3)+1]:
-            assert r.exit_code == 0 , r.dump_logs()
+            assert r.exit_code == 0, f'extra_args={extra_args}\n{r.dump_logs()}'
             assert r.json['HTTPS'] == 'on', r.dump_logs()
             assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
         else:
-            assert r.exit_code != 0, r.dump_logs()
+            assert r.exit_code != 0, f'extra_args={extra_args}\n{r.dump_logs()}'

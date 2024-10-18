@@ -59,7 +59,7 @@ TLS_AES_128_CCM_8_SHA256
 In addition to above list the following cipher suites can be used:
 `TLS_SM4_GCM_SM3` `TLS_SM4_CCM_SM3` `TLS_SHA256_SHA256` `TLS_SHA384_SHA384`.
 Usage of these cipher suites is not recommended. (The last two cipher suites
-are NULL ciphers!)
+are NULL ciphers, offering no encryption whatsoever.)
 
 ### Schannel notes
 

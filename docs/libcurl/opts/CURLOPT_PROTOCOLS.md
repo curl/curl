@@ -29,7 +29,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROTOCOLS, long bitmask);
 
 This option is deprecated. We strongly recommend using
 CURLOPT_PROTOCOLS_STR(3) instead because this option cannot control all
-available protocols!
+available protocols.
 
 Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
 limits what protocols libcurl may use in the transfer. This allows you to have

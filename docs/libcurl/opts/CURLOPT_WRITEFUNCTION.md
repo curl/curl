@@ -95,7 +95,7 @@ static size_t cb(char *data, size_t size, size_t nmemb, void *clientp)
 
   char *ptr = realloc(mem->response, mem->size + realsize + 1);
   if(!ptr)
-    return 0;  /* out of memory! */
+    return 0;  /* out of memory */
 
   mem->response = ptr;
   memcpy(&(mem->response[mem->size]), data, realsize);

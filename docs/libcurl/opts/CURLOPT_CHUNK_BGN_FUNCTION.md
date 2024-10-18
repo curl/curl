@@ -24,7 +24,7 @@ CURLOPT_CHUNK_BGN_FUNCTION - callback before a transfer with FTP wildcard match
 struct curl_fileinfo {
   char *filename;
   curlfiletype filetype;
-  time_t time;   /* always zero! */
+  time_t time;   /* always zero */
   unsigned int perm;
   int uid;
   int gid;

@@ -44,7 +44,7 @@ jobs:
       matrix:
         arch: ['x86_64']
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
       - name: 'cmake'
         uses: cross-platform-actions/action@cdc9ee69ef84a5f2e59c9058335d9c57bcb4ac86 # v0.25.0
         with:
@@ -61,15 +61,17 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            cmake --build bld --config Debug --parallel 3
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target testdeps
               export TFLAGS='-j4'
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
-            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            cmake --build bld --config Debug --target curl-examples
             echo '::endgroup::'
 
   openbsd:
@@ -80,7 +82,7 @@ jobs:
       matrix:
         arch: ['x86_64']
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
       - name: 'cmake'
         uses: cross-platform-actions/action@cdc9ee69ef84a5f2e59c9058335d9c57bcb4ac86 # v0.25.0
         with:
@@ -97,15 +99,17 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            cmake --build bld --config Debug --parallel 3
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
-            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            cmake --build bld --config Debug --target curl-examples
             echo '::endgroup::'
 
   freebsd:
@@ -120,7 +124,7 @@ jobs:
           - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
       - name: 'autotools'
         if: ${{ matrix.build == 'autotools' }}
         uses: cross-platform-actions/action@cdc9ee69ef84a5f2e59c9058335d9c57bcb4ac86 # v0.25.0
@@ -139,6 +143,8 @@ jobs:
               --with-openssl \
               --with-brotli --enable-ldap --enable-ldaps --with-libidn2 --with-libssh2 --with-nghttp2 --with-gssapi \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
+            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             make -j3 install
             src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
@@ -168,14 +174,16 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON -DCURL_USE_GSSAPI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
-            cmake --build bld --config Debug --parallel 3
+            echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
+            cmake --build bld --config Debug
             bld/src/curl --disable --version
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
-              cmake --build bld --config Debug --parallel 3 --target testdeps
+              cmake --build bld --config Debug --target testdeps
               cmake --build bld --config Debug --target test-ci
             fi
             echo '::group::build examples'
-            cmake --build bld --config Debug --parallel 3 --target curl-examples
+            cmake --build bld --config Debug --target curl-examples
             echo '::endgroup::'
 
   omnios:
@@ -183,9 +191,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
       - name: 'autotools'
-        uses: vmactions/omnios-vm@bc3c64398d10bd00ecd8b3ca72db91c5a03dea77 # v1
+        uses: vmactions/omnios-vm@52a1db31be4fd41325bb0ed32d9ff79f78c69d8d # v1
         with:
           usesh: true
           # https://pkg.omnios.org/r151050/core/en/index.shtml
@@ -198,6 +206,8 @@ jobs:
               --prefix="${HOME}"/install \
               --with-openssl \
               --disable-dependency-tracking || { tail -n 1000 config.log; false; }
+            echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
+            echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             gmake -j3 install
             src/curl --disable --version
             gmake -j3 -C tests

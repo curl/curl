@@ -316,6 +316,7 @@ static const struct LongShort aliases[]= {
   {"tftp-blksize",               ARG_STRG, ' ', C_TFTP_BLKSIZE},
   {"tftp-no-options",            ARG_BOOL, ' ', C_TFTP_NO_OPTIONS},
   {"time-cond",                  ARG_STRG, 'z', C_TIME_COND},
+  {"tls-earlydata",              ARG_BOOL, ' ', C_TLS_EARLYDATA},
   {"tls-max",                    ARG_STRG, ' ', C_TLS_MAX},
   {"tls13-ciphers",              ARG_STRG, ' ', C_TLS13_CIPHERS},
   {"tlsauthtype",                ARG_STRG, ' ', C_TLSAUTHTYPE},
@@ -390,7 +391,7 @@ void parse_cert_parameter(const char *cert_parameter,
   param_place = cert_parameter;
   while(*param_place) {
     span = strcspn(param_place, ":\\");
-    strncpy(certname_place, param_place, span);
+    memcpy(certname_place, param_place, span);
     param_place += span;
     certname_place += span;
     /* we just ate all the non-special chars. now we are on either a special
@@ -963,7 +964,7 @@ static ParameterError set_rate(struct GlobalConfig *global,
   if(numlen > sizeof(number) -1)
     return PARAM_NUMBER_TOO_LARGE;
 
-  strncpy(number, nextarg, numlen);
+  memcpy(number, nextarg, numlen);
   number[numlen] = 0;
   err = str2unum(&denominator, number);
   if(err)
@@ -1709,6 +1710,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_ABSTRACT_UNIX_SOCKET: /* --abstract-unix-socket */
       config->abstract_unix_socket = TRUE;
       err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
+      break;
+    case C_TLS_EARLYDATA: /* --tls-earlydata */
+      if(feature_ssl)
+        config->ssl_allow_earlydata = toggle;
       break;
     case C_TLS_MAX: /* --tls-max */
       err = str2tls_max(&config->ssl_version_max, nextarg);

@@ -27,20 +27,24 @@
 
 #include <curl/curl.h>
 
+#include "llist.h"
+
 struct Cookie {
-  struct Cookie *next; /* next in the chain */
-  char *name;        /* <this> = value */
-  char *value;       /* name = <this> */
+  struct Curl_llist_node node; /* for the main cookie list */
+  struct Curl_llist_node getnode; /* for getlist */
+  char *name;         /* <this> = value */
+  char *value;        /* name = <this> */
   char *path;         /* path = <this> which is in Set-Cookie: */
   char *spath;        /* sanitized cookie path */
-  char *domain;      /* domain = <this> */
-  curl_off_t expires;  /* expires = <this> */
-  bool tailmatch;    /* whether we do tail-matching of the domain name */
-  bool secure;       /* whether the 'secure' keyword was used */
-  bool livecookie;   /* updated from a server, not a stored file */
-  bool httponly;     /* true if the httponly directive is present */
-  int creationtime;  /* time when the cookie was written */
-  unsigned char prefix; /* bitmap fields indicating which prefix are set */
+  char *domain;       /* domain = <this> */
+  curl_off_t expires; /* expires = <this> */
+  int creationtime;   /* time when the cookie was written */
+  BIT(tailmatch);     /* tail-match the domain name */
+  BIT(secure);        /* the 'secure' keyword was used */
+  BIT(livecookie);    /* updated from a server, not a stored file */
+  BIT(httponly);      /* the httponly directive is present */
+  BIT(prefix_secure); /* secure prefix is set */
+  BIT(prefix_host);   /* host prefix is set */
 };
 
 /*
@@ -53,8 +57,8 @@ struct Cookie {
 #define COOKIE_HASH_SIZE 63
 
 struct CookieInfo {
-  /* linked list of cookies we know of */
-  struct Cookie *cookies[COOKIE_HASH_SIZE];
+  /* linked lists of cookies we know of */
+  struct Curl_llist cookielist[COOKIE_HASH_SIZE];
   curl_off_t next_expiration; /* the next time at which expiration happens */
   int numcookies;  /* number of cookies in the "jar" */
   int lastct;      /* last creation-time used in the jar */
@@ -112,10 +116,10 @@ struct Cookie *Curl_cookie_add(struct Curl_easy *data,
                                const char *domain, const char *path,
                                bool secure);
 
-struct Cookie *Curl_cookie_getlist(struct Curl_easy *data,
-                                   struct CookieInfo *c, const char *host,
-                                   const char *path, bool secure);
-void Curl_cookie_freelist(struct Cookie *cookies);
+int Curl_cookie_getlist(struct Curl_easy *data,
+                        struct CookieInfo *c, const char *host,
+                        const char *path, bool secure,
+                        struct Curl_llist *list);
 void Curl_cookie_clearall(struct CookieInfo *cookies);
 void Curl_cookie_clearsess(struct CookieInfo *cookies);
 

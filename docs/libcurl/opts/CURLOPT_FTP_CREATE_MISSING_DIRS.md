@@ -50,7 +50,7 @@ retry the CWD command again if the subsequent **MKD** command fails. This is
 especially useful if you are doing many simultaneous connections against the
 same server and they all have this option enabled, as then CWD may first fail
 but then another connection does **MKD** before this connection and thus
-**MKD** fails but trying CWD works!
+**MKD** fails but trying CWD works.
 
 # DEFAULT
 

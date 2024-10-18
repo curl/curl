@@ -30,7 +30,7 @@
  */
 
 #ifdef CURL_NO_OLDIES
-#define CURL_STRICTER
+#define CURL_STRICTER /* not used since 8.11.0 */
 #endif
 
 /* Compile-time deprecation macros. */
@@ -114,13 +114,8 @@
 extern "C" {
 #endif
 
-#if defined(BUILDING_LIBCURL) || defined(CURL_STRICTER)
-typedef struct Curl_easy CURL;
-typedef struct Curl_share CURLSH;
-#else
 typedef void CURL;
 typedef void CURLSH;
-#endif
 
 /*
  * libcurl external API function linkage decorations.
@@ -254,12 +249,12 @@ typedef int (*curl_xferinfo_callback)(void *clientp,
 #endif
 
 #ifndef CURL_MAX_WRITE_SIZE
-  /* Tests have proven that 20K is a very bad buffer size for uploads on
-     Windows, while 16K for some odd reason performed a lot better.
-     We do the ifndef check to allow this value to easier be changed at build
-     time for those who feel adventurous. The practical minimum is about
-     400 bytes since libcurl uses a buffer of this size as a scratch area
-     (unrelated to network send operations). */
+  /* Tests have proven that 20K is a bad buffer size for uploads on Windows,
+     while 16K for some odd reason performed a lot better. We do the ifndef
+     check to allow this value to easier be changed at build time for those
+     who feel adventurous. The practical minimum is about 400 bytes since
+     libcurl uses a buffer of this size as a scratch area (unrelated to
+     network send operations). */
 #define CURL_MAX_WRITE_SIZE 16384
 #endif
 
@@ -942,6 +937,9 @@ typedef enum {
 /* - CURLSSLOPT_AUTO_CLIENT_CERT tells libcurl to automatically locate and use
    a client certificate for authentication. (Schannel) */
 #define CURLSSLOPT_AUTO_CLIENT_CERT (1<<5)
+
+/* If possible, send data using TLS 1.3 early data */
+#define CURLSSLOPT_EARLYDATA (1<<6)
 
 /* The default connection attempt delay in milliseconds for happy eyeballs.
    CURLOPT_HAPPY_EYEBALLS_TIMEOUT_MS.3 and happy-eyeballs-timeout-ms.d document
@@ -2954,7 +2952,8 @@ typedef enum {
   CURLINFO_QUEUE_TIME_T     = CURLINFO_OFF_T + 65,
   CURLINFO_USED_PROXY       = CURLINFO_LONG + 66,
   CURLINFO_POSTTRANSFER_TIME_T = CURLINFO_OFF_T + 67,
-  CURLINFO_LASTONE          = 67
+  CURLINFO_EARLYDATA_SENT_T = CURLINFO_OFF_T + 68,
+  CURLINFO_LASTONE          = 68
 } CURLINFO;
 
 /* CURLINFO_RESPONSE_CODE is the new name for the option previously known as

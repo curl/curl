@@ -119,7 +119,7 @@ a lowercase c). You can find other functions in the library source code, but
 other prefixes indicate that the functions are private and may change without
 further notice in the next release.
 
-Only use documented functions and functionality!
+Only use documented functions and functionality.
 
 # PORTABILITY
 

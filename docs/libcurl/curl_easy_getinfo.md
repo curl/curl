@@ -112,6 +112,11 @@ curl_easy_header(3) instead. See CURLINFO_CONTENT_TYPE(3)
 
 List of all known cookies. See CURLINFO_COOKIELIST(3)
 
+## CURLINFO_EARLYDATA_SENT_T
+
+Amount of TLS early data sent (in number of bytes) when
+CURLSSLOPT_EARLYDATA is enabled.
+
 ## CURLINFO_EFFECTIVE_METHOD
 
 Last used HTTP method. See CURLINFO_EFFECTIVE_METHOD(3)
@@ -346,7 +351,7 @@ In microseconds. See CURLINFO_STARTTRANSFER_TIME_T(3)
 ## CURLINFO_TLS_SESSION
 
 (**Deprecated**) TLS session info that can be used for further processing. See
-CURLINFO_TLS_SESSION(3). Use CURLINFO_TLS_SSL_PTR(3) instead!
+CURLINFO_TLS_SESSION(3). Use CURLINFO_TLS_SSL_PTR(3) instead.
 
 ## CURLINFO_TLS_SSL_PTR
 

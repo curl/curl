@@ -104,7 +104,7 @@ Extracted parts are not URL decoded unless the user also asks for it with the
 *CURLU_URLDECODE* flag set in the fourth bitmask argument.
 
 Remember to free the returned string with curl_free(3) when you are done
-with it!
+with it.
 
 # SET PARTS
 

@@ -31,7 +31,6 @@ macro(check_include_file_concat _file _variable)
   check_include_files("${CURL_INCLUDES};${_file}" ${_variable})
   if(${_variable})
     set(CURL_INCLUDES ${CURL_INCLUDES} ${_file})
-    set(CURL_TEST_DEFINES "${CURL_TEST_DEFINES} -D${_variable}")
   endif()
 endmacro()
 
@@ -39,8 +38,7 @@ endmacro()
 # Return result in variable: CURL_TEST_OUTPUT
 macro(curl_internal_test _curl_test)
   if(NOT DEFINED "${_curl_test}")
-    set(_macro_check_function_definitions
-      "-D${_curl_test} ${CURL_TEST_DEFINES} ${CMAKE_REQUIRED_FLAGS}")
+    string(REPLACE ";" " " _cmake_required_definitions "${CMAKE_REQUIRED_DEFINITIONS}")
     if(CMAKE_REQUIRED_LIBRARIES)
       set(_curl_test_add_libraries
         "-DLINK_LIBRARIES:STRING=${CMAKE_REQUIRED_LIBRARIES}")
@@ -51,7 +49,7 @@ macro(curl_internal_test _curl_test)
       ${CMAKE_BINARY_DIR}
       "${CMAKE_CURRENT_SOURCE_DIR}/CMake/CurlTests.c"
       CMAKE_FLAGS
-        "-DCOMPILE_DEFINITIONS:STRING=${_macro_check_function_definitions}"
+        "-DCOMPILE_DEFINITIONS:STRING=-D${_curl_test} ${CURL_TEST_DEFINES} ${_cmake_required_definitions}"
         "${_curl_test_add_libraries}"
       OUTPUT_VARIABLE CURL_TEST_OUTPUT)
     if(${_curl_test})
@@ -73,4 +71,12 @@ macro(curl_dependency_option _dependency)
   elseif(CURL_${_dependency})
     find_package(${_dependency} REQUIRED)
   endif()
+endmacro()
+
+# Convert the passed paths to libpath linker options and add them to CMAKE_REQUIRED_LINK_OPTIONS.
+macro(curl_required_libpaths _libpaths_arg)
+  set(_libpaths "${_libpaths_arg}")
+  foreach(_libpath IN LISTS _libpaths)
+    list(APPEND CMAKE_REQUIRED_LINK_OPTIONS "${CMAKE_LIBRARY_PATH_FLAG}${_libpath}")
+  endforeach()
 endmacro()

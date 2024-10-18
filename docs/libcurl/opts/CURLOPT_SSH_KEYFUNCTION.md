@@ -34,7 +34,7 @@ enum curl_khstat {
 
 enum curl_khmatch {
   CURLKHMATCH_OK,       /* match */
-  CURLKHMATCH_MISMATCH, /* host found, key mismatch! */
+  CURLKHMATCH_MISMATCH, /* host found, key mismatch */
   CURLKHMATCH_MISSING,  /* no matching host/key found */
 };
 

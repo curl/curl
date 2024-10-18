@@ -460,7 +460,7 @@ created.
 libcurl itself uses *fork()* and *execl()* if told to use the
 **CURLAUTH_NTLM_WB** authentication method which then invokes the helper
 command in a child process with file descriptors duplicated. Make sure that
-only the trusted and reliable helper program is invoked!
+only the trusted and reliable helper program is invoked.
 
 This feature was removed from curl in 8.8.0.
 

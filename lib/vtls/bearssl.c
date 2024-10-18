@@ -613,7 +613,8 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &session, NULL)) {
+    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
+                              &session, NULL, NULL)) {
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
@@ -761,7 +762,6 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
     (struct bearssl_ssl_backend_data *)connssl->backend;
   br_ssl_session_parameters session;
   char cipher_str[64];
-  char ver_str[16];
   CURLcode ret;
 
   DEBUGASSERT(backend);
@@ -772,6 +772,7 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
     return CURLE_OK;
   if(ret == CURLE_OK) {
     unsigned int tver;
+    int subver = 0;
 
     if(br_ssl_engine_current_state(&backend->ctx.eng) == BR_SSL_CLOSED) {
       failf(data, "SSL: connection closed during handshake");
@@ -780,19 +781,22 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_3;
     /* Informational message */
     tver = br_ssl_engine_get_version(&backend->ctx.eng);
-    if(tver == BR_TLS12)
-      strcpy(ver_str, "TLSv1.2");
-    else if(tver == BR_TLS11)
-      strcpy(ver_str, "TLSv1.1");
-    else if(tver == BR_TLS10)
-      strcpy(ver_str, "TLSv1.0");
-    else {
-      msnprintf(ver_str, sizeof(ver_str), "TLS 0x%04x", tver);
+    switch(tver) {
+    case BR_TLS12:
+      subver = 2; /* 1.2 */
+      break;
+    case BR_TLS11:
+      subver = 1; /* 1.1 */
+      break;
+    case BR_TLS10: /* 1.0 */
+    default: /* unknown, leave it at zero */
+      break;
     }
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, &session);
     Curl_cipher_suite_get_str(session.cipher_suite, cipher_str,
                               sizeof(cipher_str), TRUE);
-    infof(data, "BearSSL: %s connection using %s", ver_str, cipher_str);
+    infof(data, "BearSSL: TLS v1.%d connection using %s", subver,
+          cipher_str);
   }
   return ret;
 }
@@ -820,7 +824,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     const char *proto;
 
     proto = br_ssl_engine_get_selected_protocol(&backend->ctx.eng);
-    Curl_alpn_set_negotiated(cf, data, (const unsigned char *)proto,
+    Curl_alpn_set_negotiated(cf, data, connssl, (const unsigned char *)proto,
                              proto ? strlen(proto) : 0);
   }
 
@@ -832,7 +836,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
     Curl_ssl_sessionid_lock(data);
-    ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, session, 0,
+    ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL, session, 0,
                                  bearssl_session_free);
     Curl_ssl_sessionid_unlock(data);
     if(ret)

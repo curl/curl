@@ -1130,7 +1130,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   if(ssl_config->primary.cache_session) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              (void **)&old_cred, NULL)) {
+                              (void **)&old_cred, NULL, NULL)) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
@@ -1752,7 +1752,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
        SecApplicationProtocolNegotiationStatus_Success) {
       unsigned char prev_alpn = cf->conn->alpn;
 
-      Curl_alpn_set_negotiated(cf, data, alpn_result.ProtocolId,
+      Curl_alpn_set_negotiated(cf, data, connssl, alpn_result.ProtocolId,
                                alpn_result.ProtocolIdSize);
       if(backend->recv_renegotiating) {
         if(prev_alpn != cf->conn->alpn &&
@@ -1766,7 +1766,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     else {
       if(!backend->recv_renegotiating)
-        Curl_alpn_set_negotiated(cf, data, NULL, 0);
+        Curl_alpn_set_negotiated(cf, data, connssl, NULL, 0);
     }
   }
 #endif
@@ -1776,7 +1776,8 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl_sessionid_lock(data);
     /* Up ref count since call takes ownership */
     backend->cred->refcount++;
-    result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, backend->cred,
+    result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
+                                    backend->cred,
                                     sizeof(struct Curl_schannel_cred),
                                     schannel_session_free);
     Curl_ssl_sessionid_unlock(data);

@@ -50,6 +50,7 @@
 #include "http2.h"
 #include "socketpair.h"
 #include "socks.h"
+#include "urlapi-int.h"
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
@@ -450,7 +451,7 @@ error:
   return NULL;
 }
 
-struct Curl_multi *curl_multi_init(void)
+CURLM *curl_multi_init(void)
 {
   return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
                            CURL_CONNECTION_HASH_SIZE,
@@ -471,10 +472,11 @@ static void multi_warn_debug(struct Curl_multi *multi, struct Curl_easy *data)
 #define multi_warn_debug(x,y) Curl_nop_stmt
 #endif
 
-CURLMcode curl_multi_add_handle(struct Curl_multi *multi,
-                                struct Curl_easy *data)
+CURLMcode curl_multi_add_handle(CURLM *m, CURL *d)
 {
   CURLMcode rc;
+  struct Curl_multi *multi = m;
+  struct Curl_easy *data = d;
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -756,6 +758,8 @@ static CURLcode multi_done(struct Curl_easy *data,
   mdctx.premature = premature;
   Curl_cpool_do_locked(data, data->conn, multi_done_locked, &mdctx);
 
+  /* flush the netrc cache */
+  Curl_netrc_cleanup(&data->state.netrc);
   return result;
 }
 
@@ -769,10 +773,10 @@ static void close_connect_only(struct connectdata *conn,
     connclose(conn, "Removing connect-only easy handle");
 }
 
-CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
-                                   struct Curl_easy *data)
+CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 {
-  struct Curl_easy *easy = data;
+  struct Curl_multi *multi = m;
+  struct Curl_easy *data = d;
   bool premature;
   struct Curl_llist_node *e;
   CURLMcode rc;
@@ -847,7 +851,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
 
   /* This ignores the return code even in case of problems because there is
      nothing more to do about that, here */
-  (void)singlesocket(multi, easy); /* to let the application know what sockets
+  (void)singlesocket(multi, data); /* to let the application know what sockets
                                       that vanish with this handle */
 
   /* Remove the association between the connection and the handle */
@@ -887,7 +891,7 @@ CURLMcode curl_multi_remove_handle(struct Curl_multi *multi,
   for(e = Curl_llist_head(&multi->msglist); e; e = Curl_node_next(e)) {
     struct Curl_message *msg = Curl_node_elem(e);
 
-    if(msg->extmsg.easy_handle == easy) {
+    if(msg->extmsg.easy_handle == data) {
       Curl_node_remove(e);
       /* there can only be one from this specific handle */
       break;
@@ -1138,7 +1142,7 @@ static void multi_getsock(struct Curl_easy *data,
   }
 }
 
-CURLMcode curl_multi_fdset(struct Curl_multi *multi,
+CURLMcode curl_multi_fdset(CURLM *m,
                            fd_set *read_fd_set, fd_set *write_fd_set,
                            fd_set *exc_fd_set, int *max_fd)
 {
@@ -1147,6 +1151,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
      and then we must make sure that is done. */
   int this_max_fd = -1;
   struct Curl_llist_node *e;
+  struct Curl_multi *multi = m;
   (void)exc_fd_set; /* not used */
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -1179,7 +1184,7 @@ CURLMcode curl_multi_fdset(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
+CURLMcode curl_multi_waitfds(CURLM *m,
                              struct curl_waitfd *ufds,
                              unsigned int size,
                              unsigned int *fd_count)
@@ -1187,6 +1192,7 @@ CURLMcode curl_multi_waitfds(struct Curl_multi *multi,
   struct curl_waitfds cwfds;
   CURLMcode result = CURLM_OK;
   struct Curl_llist_node *e;
+  struct Curl_multi *multi = m;
 
   if(!ufds)
     return CURLM_BAD_FUNCTION_ARGUMENT;
@@ -1484,7 +1490,7 @@ out:
   return result;
 }
 
-CURLMcode curl_multi_wait(struct Curl_multi *multi,
+CURLMcode curl_multi_wait(CURLM *multi,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
@@ -1494,7 +1500,7 @@ CURLMcode curl_multi_wait(struct Curl_multi *multi,
                     FALSE);
 }
 
-CURLMcode curl_multi_poll(struct Curl_multi *multi,
+CURLMcode curl_multi_poll(CURLM *multi,
                           struct curl_waitfd extra_fds[],
                           unsigned int extra_nfds,
                           int timeout_ms,
@@ -1504,11 +1510,12 @@ CURLMcode curl_multi_poll(struct Curl_multi *multi,
                     TRUE);
 }
 
-CURLMcode curl_multi_wakeup(struct Curl_multi *multi)
+CURLMcode curl_multi_wakeup(CURLM *m)
 {
   /* this function is usually called from another thread,
      it has to be careful only to access parts of the
      Curl_multi struct that are constant */
+  struct Curl_multi *multi = m;
 
 #if defined(ENABLE_WAKEUP) && !defined(USE_WINSOCK)
 #ifdef USE_EVENTFD
@@ -1815,6 +1822,298 @@ static void multi_posttransfer(struct Curl_easy *data)
 #else
   (void)data; /* unused parameter */
 #endif
+}
+
+/*
+ * multi_follow() handles the URL redirect magic. Pass in the 'newurl' string
+ * as given by the remote server and set up the new URL to request.
+ *
+ * This function DOES NOT FREE the given url.
+ */
+static CURLcode multi_follow(struct Curl_easy *data,
+                             char *newurl,    /* the Location: string */
+                             followtype type) /* see transfer.h */
+{
+#ifdef CURL_DISABLE_HTTP
+  (void)data;
+  (void)newurl;
+  (void)type;
+  /* Location: following will not happen when HTTP is disabled */
+  return CURLE_TOO_MANY_REDIRECTS;
+#else
+
+  /* Location: redirect */
+  bool disallowport = FALSE;
+  bool reachedmax = FALSE;
+  CURLUcode uc;
+
+  DEBUGASSERT(type != FOLLOW_NONE);
+
+  if(type != FOLLOW_FAKE)
+    data->state.requests++; /* count all real follows */
+  if(type == FOLLOW_REDIR) {
+    if((data->set.maxredirs != -1) &&
+       (data->state.followlocation >= data->set.maxredirs)) {
+      reachedmax = TRUE;
+      type = FOLLOW_FAKE; /* switch to fake to store the would-be-redirected
+                             to URL */
+    }
+    else {
+      data->state.followlocation++; /* count redirect-followings, including
+                                       auth reloads */
+
+      if(data->set.http_auto_referer) {
+        CURLU *u;
+        char *referer = NULL;
+
+        /* We are asked to automatically set the previous URL as the referer
+           when we get the next URL. We pick the ->url field, which may or may
+           not be 100% correct */
+
+        if(data->state.referer_alloc) {
+          Curl_safefree(data->state.referer);
+          data->state.referer_alloc = FALSE;
+        }
+
+        /* Make a copy of the URL without credentials and fragment */
+        u = curl_url();
+        if(!u)
+          return CURLE_OUT_OF_MEMORY;
+
+        uc = curl_url_set(u, CURLUPART_URL, data->state.url, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_FRAGMENT, NULL, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_USER, NULL, 0);
+        if(!uc)
+          uc = curl_url_set(u, CURLUPART_PASSWORD, NULL, 0);
+        if(!uc)
+          uc = curl_url_get(u, CURLUPART_URL, &referer, 0);
+
+        curl_url_cleanup(u);
+
+        if(uc || !referer)
+          return CURLE_OUT_OF_MEMORY;
+
+        data->state.referer = referer;
+        data->state.referer_alloc = TRUE; /* yes, free this later */
+      }
+    }
+  }
+
+  if((type != FOLLOW_RETRY) &&
+     (data->req.httpcode != 401) && (data->req.httpcode != 407) &&
+     Curl_is_absolute_url(newurl, NULL, 0, FALSE)) {
+    /* If this is not redirect due to a 401 or 407 response and an absolute
+       URL: do not allow a custom port number */
+    disallowport = TRUE;
+  }
+
+  DEBUGASSERT(data->state.uh);
+  uc = curl_url_set(data->state.uh, CURLUPART_URL, newurl, (unsigned int)
+                    ((type == FOLLOW_FAKE) ? CURLU_NON_SUPPORT_SCHEME :
+                     ((type == FOLLOW_REDIR) ? CURLU_URLENCODE : 0) |
+                     CURLU_ALLOW_SPACE |
+                     (data->set.path_as_is ? CURLU_PATH_AS_IS : 0)));
+  if(uc) {
+    if(type != FOLLOW_FAKE) {
+      failf(data, "The redirect target URL could not be parsed: %s",
+            curl_url_strerror(uc));
+      return Curl_uc_to_curlcode(uc);
+    }
+
+    /* the URL could not be parsed for some reason, but since this is FAKE
+       mode, just duplicate the field as-is */
+    newurl = strdup(newurl);
+    if(!newurl)
+      return CURLE_OUT_OF_MEMORY;
+  }
+  else {
+    uc = curl_url_get(data->state.uh, CURLUPART_URL, &newurl, 0);
+    if(uc)
+      return Curl_uc_to_curlcode(uc);
+
+    /* Clear auth if this redirects to a different port number or protocol,
+       unless permitted */
+    if(!data->set.allow_auth_to_other_hosts && (type != FOLLOW_FAKE)) {
+      char *portnum;
+      int port;
+      bool clear = FALSE;
+
+      if(data->set.use_port && data->state.allow_port)
+        /* a custom port is used */
+        port = (int)data->set.use_port;
+      else {
+        uc = curl_url_get(data->state.uh, CURLUPART_PORT, &portnum,
+                          CURLU_DEFAULT_PORT);
+        if(uc) {
+          free(newurl);
+          return Curl_uc_to_curlcode(uc);
+        }
+        port = atoi(portnum);
+        free(portnum);
+      }
+      if(port != data->info.conn_remote_port) {
+        infof(data, "Clear auth, redirects to port from %u to %u",
+              data->info.conn_remote_port, port);
+        clear = TRUE;
+      }
+      else {
+        char *scheme;
+        const struct Curl_handler *p;
+        uc = curl_url_get(data->state.uh, CURLUPART_SCHEME, &scheme, 0);
+        if(uc) {
+          free(newurl);
+          return Curl_uc_to_curlcode(uc);
+        }
+
+        p = Curl_get_scheme_handler(scheme);
+        if(p && (p->protocol != data->info.conn_protocol)) {
+          infof(data, "Clear auth, redirects scheme from %s to %s",
+                data->info.conn_scheme, scheme);
+          clear = TRUE;
+        }
+        free(scheme);
+      }
+      if(clear) {
+        Curl_safefree(data->state.aptr.user);
+        Curl_safefree(data->state.aptr.passwd);
+      }
+    }
+  }
+
+  if(type == FOLLOW_FAKE) {
+    /* we are only figuring out the new URL if we would have followed locations
+       but now we are done so we can get out! */
+    data->info.wouldredirect = newurl;
+
+    if(reachedmax) {
+      failf(data, "Maximum (%ld) redirects followed", data->set.maxredirs);
+      return CURLE_TOO_MANY_REDIRECTS;
+    }
+    return CURLE_OK;
+  }
+
+  if(disallowport)
+    data->state.allow_port = FALSE;
+
+  if(data->state.url_alloc)
+    Curl_safefree(data->state.url);
+
+  data->state.url = newurl;
+  data->state.url_alloc = TRUE;
+  Curl_req_soft_reset(&data->req, data);
+  infof(data, "Issue another request to this URL: '%s'", data->state.url);
+
+  /*
+   * We get here when the HTTP code is 300-399 (and 401). We need to perform
+   * differently based on exactly what return code there was.
+   *
+   * News from 7.10.6: we can also get here on a 401 or 407, in case we act on
+   * an HTTP (proxy-) authentication scheme other than Basic.
+   */
+  switch(data->info.httpcode) {
+    /* 401 - Act on a WWW-Authenticate, we keep on moving and do the
+       Authorization: XXXX header in the HTTP request code snippet */
+    /* 407 - Act on a Proxy-Authenticate, we keep on moving and do the
+       Proxy-Authorization: XXXX header in the HTTP request code snippet */
+    /* 300 - Multiple Choices */
+    /* 306 - Not used */
+    /* 307 - Temporary Redirect */
+  default:  /* for all above (and the unknown ones) */
+    /* Some codes are explicitly mentioned since I have checked RFC2616 and
+     * they seem to be OK to POST to.
+     */
+    break;
+  case 301: /* Moved Permanently */
+    /* (quote from RFC7231, section 6.4.2)
+     *
+     * Note: For historical reasons, a user agent MAY change the request
+     * method from POST to GET for the subsequent request. If this
+     * behavior is undesired, the 307 (Temporary Redirect) status code
+     * can be used instead.
+     *
+     * ----
+     *
+     * Many webservers expect this, so these servers often answers to a POST
+     * request with an error page. To be sure that libcurl gets the page that
+     * most user agents would get, libcurl has to force GET.
+     *
+     * This behavior is forbidden by RFC1945 and the obsolete RFC2616, and
+     * can be overridden with CURLOPT_POSTREDIR.
+     */
+    if((data->state.httpreq == HTTPREQ_POST
+        || data->state.httpreq == HTTPREQ_POST_FORM
+        || data->state.httpreq == HTTPREQ_POST_MIME)
+       && !(data->set.keep_post & CURL_REDIR_POST_301)) {
+      infof(data, "Switch from POST to GET");
+      data->state.httpreq = HTTPREQ_GET;
+      Curl_creader_set_rewind(data, FALSE);
+    }
+    break;
+  case 302: /* Found */
+    /* (quote from RFC7231, section 6.4.3)
+     *
+     * Note: For historical reasons, a user agent MAY change the request
+     * method from POST to GET for the subsequent request. If this
+     * behavior is undesired, the 307 (Temporary Redirect) status code
+     * can be used instead.
+     *
+     * ----
+     *
+     * Many webservers expect this, so these servers often answers to a POST
+     * request with an error page. To be sure that libcurl gets the page that
+     * most user agents would get, libcurl has to force GET.
+     *
+     * This behavior is forbidden by RFC1945 and the obsolete RFC2616, and
+     * can be overridden with CURLOPT_POSTREDIR.
+     */
+    if((data->state.httpreq == HTTPREQ_POST
+        || data->state.httpreq == HTTPREQ_POST_FORM
+        || data->state.httpreq == HTTPREQ_POST_MIME)
+       && !(data->set.keep_post & CURL_REDIR_POST_302)) {
+      infof(data, "Switch from POST to GET");
+      data->state.httpreq = HTTPREQ_GET;
+      Curl_creader_set_rewind(data, FALSE);
+    }
+    break;
+
+  case 303: /* See Other */
+    /* 'See Other' location is not the resource but a substitute for the
+     * resource. In this case we switch the method to GET/HEAD, unless the
+     * method is POST and the user specified to keep it as POST.
+     * https://github.com/curl/curl/issues/5237#issuecomment-614641049
+     */
+    if(data->state.httpreq != HTTPREQ_GET &&
+       ((data->state.httpreq != HTTPREQ_POST &&
+         data->state.httpreq != HTTPREQ_POST_FORM &&
+         data->state.httpreq != HTTPREQ_POST_MIME) ||
+        !(data->set.keep_post & CURL_REDIR_POST_303))) {
+      data->state.httpreq = HTTPREQ_GET;
+      infof(data, "Switch to %s",
+            data->req.no_body ? "HEAD" : "GET");
+    }
+    break;
+  case 304: /* Not Modified */
+    /* 304 means we did a conditional request and it was "Not modified".
+     * We should not get any Location: header in this response!
+     */
+    break;
+  case 305: /* Use Proxy */
+    /* (quote from RFC2616, section 10.3.6):
+     * "The requested resource MUST be accessed through the proxy given
+     * by the Location field. The Location field gives the URI of the
+     * proxy. The recipient is expected to repeat this single request
+     * via the proxy. 305 responses MUST only be generated by origin
+     * servers."
+     */
+    break;
+  }
+  Curl_pgrsTime(data, TIMER_REDIRECT);
+  Curl_pgrsResetTransferSizes(data);
+
+  return CURLE_OK;
+#endif /* CURL_DISABLE_HTTP */
 }
 
 static CURLMcode multi_runsingle(struct Curl_multi *multi,
@@ -2197,7 +2496,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
           if(newurl) {
             if(!drc || (drc == CURLE_SEND_ERROR)) {
               follow = FOLLOW_RETRY;
-              drc = Curl_follow(data, newurl, follow);
+              drc = multi_follow(data, newurl, follow);
               if(!drc) {
                 multistate(data, MSTATE_SETUP);
                 rc = CURLM_CALL_MULTI_PERFORM;
@@ -2451,7 +2750,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             follow = FOLLOW_RETRY;
           (void)multi_done(data, CURLE_OK, FALSE);
           /* multi_done() might return CURLE_GOT_NOTHING */
-          result = Curl_follow(data, newurl, follow);
+          result = multi_follow(data, newurl, follow);
           if(!result) {
             multistate(data, MSTATE_SETUP);
             rc = CURLM_CALL_MULTI_PERFORM;
@@ -2466,7 +2765,7 @@ static CURLMcode multi_runsingle(struct Curl_multi *multi,
             free(newurl);
             newurl = data->req.location;
             data->req.location = NULL;
-            result = Curl_follow(data, newurl, FOLLOW_FAKE);
+            result = multi_follow(data, newurl, FOLLOW_FAKE);
             if(result) {
               stream_error = TRUE;
               result = multi_done(data, result, TRUE);
@@ -2627,13 +2926,14 @@ statemachine_end:
 }
 
 
-CURLMcode curl_multi_perform(struct Curl_multi *multi, int *running_handles)
+CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 {
   CURLMcode returncode = CURLM_OK;
   struct Curl_tree *t = NULL;
   struct curltime now = Curl_now();
   struct Curl_llist_node *e;
   struct Curl_llist_node *n = NULL;
+  struct Curl_multi *multi = m;
   SIGPIPE_VARIABLE(pipe_st);
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -2719,15 +3019,14 @@ static void unlink_all_msgsent_handles(struct Curl_multi *multi)
   }
 }
 
-CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
+CURLMcode curl_multi_cleanup(CURLM *m)
 {
+  struct Curl_multi *multi = m;
   if(GOOD_MULTI_HANDLE(multi)) {
     struct Curl_llist_node *e;
     struct Curl_llist_node *n;
     if(multi->in_callback)
       return CURLM_RECURSIVE_API_CALL;
-
-    multi->magic = 0; /* not good anymore */
 
     /* move the pending and msgsent entries back to process
        so that there is just one list to iterate over */
@@ -2761,6 +3060,8 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
     }
 
     Curl_cpool_destroy(&multi->cpool);
+
+    multi->magic = 0; /* not good anymore */
 
     sockhash_destroy(&multi->sockhash);
     Curl_hash_destroy(&multi->proto_hash);
@@ -2796,9 +3097,10 @@ CURLMcode curl_multi_cleanup(struct Curl_multi *multi)
  * beyond. The current design is fully O(1).
  */
 
-CURLMsg *curl_multi_info_read(struct Curl_multi *multi, int *msgs_in_queue)
+CURLMsg *curl_multi_info_read(CURLM *m, int *msgs_in_queue)
 {
   struct Curl_message *msg;
+  struct Curl_multi *multi = m;
 
   *msgs_in_queue = 0; /* default to none */
 
@@ -3261,12 +3563,13 @@ out:
 }
 
 #undef curl_multi_setopt
-CURLMcode curl_multi_setopt(struct Curl_multi *multi,
+CURLMcode curl_multi_setopt(CURLM *m,
                             CURLMoption option, ...)
 {
   CURLMcode res = CURLM_OK;
   va_list param;
   unsigned long uarg;
+  struct Curl_multi *multi = m;
 
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
@@ -3342,24 +3645,26 @@ CURLMcode curl_multi_setopt(struct Curl_multi *multi,
 /* we define curl_multi_socket() in the public multi.h header */
 #undef curl_multi_socket
 
-CURLMcode curl_multi_socket(struct Curl_multi *multi, curl_socket_t s,
-                            int *running_handles)
+CURLMcode curl_multi_socket(CURLM *m, curl_socket_t s, int *running_handles)
 {
+  struct Curl_multi *multi = m;
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
   return multi_socket(multi, FALSE, s, 0, running_handles);
 }
 
-CURLMcode curl_multi_socket_action(struct Curl_multi *multi, curl_socket_t s,
+CURLMcode curl_multi_socket_action(CURLM *m, curl_socket_t s,
                                    int ev_bitmask, int *running_handles)
 {
+  struct Curl_multi *multi = m;
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
   return multi_socket(multi, FALSE, s, ev_bitmask, running_handles);
 }
 
-CURLMcode curl_multi_socket_all(struct Curl_multi *multi, int *running_handles)
+CURLMcode curl_multi_socket_all(CURLM *m, int *running_handles)
 {
+  struct Curl_multi *multi = m;
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
   return multi_socket(multi, TRUE, CURL_SOCKET_BAD, 0, running_handles);
@@ -3409,10 +3714,11 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
   return CURLM_OK;
 }
 
-CURLMcode curl_multi_timeout(struct Curl_multi *multi,
+CURLMcode curl_multi_timeout(CURLM *m,
                              long *timeout_ms)
 {
   struct curltime expire_time;
+  struct Curl_multi *multi = m;
 
   /* First, make some basic checks that the CURLM handle is a good handle */
   if(!GOOD_MULTI_HANDLE(multi))
@@ -3689,10 +3995,11 @@ bool Curl_expire_clear(struct Curl_easy *data)
   return FALSE;
 }
 
-CURLMcode curl_multi_assign(struct Curl_multi *multi, curl_socket_t s,
+CURLMcode curl_multi_assign(CURLM *m, curl_socket_t s,
                             void *hashp)
 {
   struct Curl_sh_entry *there = NULL;
+  struct Curl_multi *multi = m;
   if(!GOOD_MULTI_HANDLE(multi))
     return CURLM_BAD_HANDLE;
 
@@ -3763,10 +4070,10 @@ unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)
   return multi->max_concurrent_streams;
 }
 
-struct Curl_easy **curl_multi_get_handles(struct Curl_multi *multi)
+CURL **curl_multi_get_handles(CURLM *m)
 {
-  struct Curl_easy **a = malloc(sizeof(struct Curl_easy *) *
-                                (multi->num_easy + 1));
+  struct Curl_multi *multi = m;
+  CURL **a = malloc(sizeof(struct Curl_easy *) * (multi->num_easy + 1));
   if(a) {
     unsigned int i = 0;
     struct Curl_llist_node *e;

@@ -85,10 +85,8 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
 }
 
 int libtest_debug_cb(CURL *handle, curl_infotype type,
-                     unsigned char *data, size_t size,
-                     void *userp)
+                     char *data, size_t size, void *userp)
 {
-
   struct libtest_trace_cfg *trace_cfg = userp;
   const char *text;
   struct timeval tv;
@@ -140,6 +138,7 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
     return 0;
   }
 
-  libtest_debug_dump(timebuf, text, stderr, data, size, trace_cfg->nohex);
+  libtest_debug_dump(timebuf, text, stderr, (unsigned char *)data, size,
+                     trace_cfg->nohex);
   return 0;
 }

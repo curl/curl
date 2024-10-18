@@ -51,7 +51,7 @@ for consistency with the other *VERIFYHOST* options we suggest use 2 and
 not 1.
 
 When the *verify* value is set to 0L, the connection succeeds regardless of
-the names used in the certificate. Use that ability with caution!
+the names used in the certificate. Use that ability with caution.
 
 See also CURLOPT_DOH_SSL_VERIFYPEER(3) to verify the digital signature
 of the DoH server certificate.

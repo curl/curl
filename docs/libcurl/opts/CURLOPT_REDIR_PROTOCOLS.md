@@ -30,7 +30,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_REDIR_PROTOCOLS, long bitmask);
 
 This option is deprecated. We strongly recommend using
 CURLOPT_REDIR_PROTOCOLS_STR(3) instead because this option cannot
-control all available protocols!
+control all available protocols.
 
 Pass a long that holds a bitmask of CURLPROTO_* defines. If used, this bitmask
 limits what protocols libcurl may use in a transfer that it follows to in a

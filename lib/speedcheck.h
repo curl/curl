@@ -27,7 +27,7 @@
 #include "curl_setup.h"
 
 #include "timeval.h"
-
+struct Curl_easy;
 void Curl_speedinit(struct Curl_easy *data);
 CURLcode Curl_speedcheck(struct Curl_easy *data,
                          struct curltime now);

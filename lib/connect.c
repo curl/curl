@@ -619,7 +619,7 @@ static CURLcode is_connected(struct Curl_cfilter *cf,
    * If transport is QUIC, we need to shutdown the ongoing 'other'
    * cot ballers in a QUIC appropriate way. */
 evaluate:
-  *connected = FALSE; /* a very negative world view is best */
+  *connected = FALSE; /* a negative world view is best */
   now = Curl_now();
   ongoing = not_started = 0;
   for(i = 0; i < ARRAYSIZE(ctx->baller); i++) {

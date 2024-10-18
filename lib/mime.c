@@ -26,6 +26,8 @@
 
 #include <curl/curl.h>
 
+struct Curl_easy;
+
 #include "mime.h"
 #include "warnless.h"
 #include "urldata.h"
@@ -1279,7 +1281,7 @@ CURLcode Curl_mime_duppart(struct Curl_easy *data,
  */
 
 /* Create a mime handle. */
-curl_mime *curl_mime_init(struct Curl_easy *easy)
+curl_mime *curl_mime_init(void *easy)
 {
   curl_mime *mime;
 

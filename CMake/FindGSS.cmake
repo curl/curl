@@ -30,7 +30,7 @@
 # Result variables:
 #
 # GSS_FOUND         System has the Heimdal library
-# GSS_FLAVOUR       "MIT" or "Heimdal" if anything found
+# GSS_FLAVOUR       "GNU", "MIT" or "Heimdal" if anything found
 # GSS_INCLUDE_DIRS  The GSS include directories
 # GSS_LIBRARIES     The GSS library names
 # GSS_LIBRARY_DIRS  The GSS library directories
@@ -39,6 +39,7 @@
 # GSS_VERSION       This is set to version advertised by pkg-config or read from manifest.
 #                   In case the library is found but no version info available it is set to "unknown"
 
+set(_gnu_modname "gss")
 set(_mit_modname "mit-krb5-gssapi")
 set(_heimdal_modname "heimdal-gssapi")
 
@@ -55,7 +56,7 @@ set(_gss_root_hints
 if(NOT GSS_ROOT_DIR AND NOT "$ENV{GSS_ROOT_DIR}")
   if(CURL_USE_PKGCONFIG)
     find_package(PkgConfig QUIET)
-    pkg_search_module(_GSS ${_mit_modname} ${_heimdal_modname})
+    pkg_search_module(_GSS ${_gnu_modname} ${_mit_modname} ${_heimdal_modname})
     list(APPEND _gss_root_hints "${_GSS_PREFIX}")
   endif()
   if(WIN32)
@@ -175,6 +176,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     )
 
     if(_GSS_INCLUDE_DIRS)  # jay, we have found something
+      cmake_push_check_state()
       set(CMAKE_REQUIRED_INCLUDES "${_GSS_INCLUDE_DIRS}")
       check_include_files("gssapi/gssapi_generic.h;gssapi/gssapi_krb5.h" _gss_have_mit_headers)
 
@@ -189,8 +191,8 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         if(_gss_have_roken_h OR _gss_have_heimdal_roken_h)
           set(GSS_FLAVOUR "Heimdal")
         endif()
-        list(REMOVE_ITEM CMAKE_REQUIRED_DEFINITIONS "-D__ROKEN_H__")
       endif()
+      cmake_pop_check_state()
     else()
       # I am not convinced if this is the right way but this is what autotools do at the moment
       find_path(_GSS_INCLUDE_DIRS NAMES "gssapi.h"
@@ -203,6 +205,17 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
       if(_GSS_INCLUDE_DIRS)
         set(GSS_FLAVOUR "Heimdal")
+      else()
+        find_path(_GSS_INCLUDE_DIRS NAMES "gss.h"
+          HINTS
+            ${_gss_root_hints}
+          PATH_SUFFIXES
+            "include"
+        )
+
+        if(_GSS_INCLUDE_DIRS)
+          set(GSS_FLAVOUR "GNU")
+        endif()
       endif()
     endif()
 
@@ -216,14 +229,18 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       if(WIN32)
         if(CMAKE_SIZEOF_VOID_P EQUAL 8)
           list(APPEND _gss_libdir_suffixes "lib/AMD64")
-          if(GSS_FLAVOUR STREQUAL "MIT")
+          if(GSS_FLAVOUR STREQUAL "GNU")
+            set(_gss_libname "gss")
+          elseif(GSS_FLAVOUR STREQUAL "MIT")
             set(_gss_libname "gssapi64")
           else()
             set(_gss_libname "libgssapi")
           endif()
         else()
           list(APPEND _gss_libdir_suffixes "lib/i386")
-          if(GSS_FLAVOUR STREQUAL "MIT")
+          if(GSS_FLAVOUR STREQUAL "GNU")
+            set(_gss_libname "gss")
+          elseif(GSS_FLAVOUR STREQUAL "MIT")
             set(_gss_libname "gssapi32")
           else()
             set(_gss_libname "libgssapi")
@@ -231,7 +248,9 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         endif()
       else()
         list(APPEND _gss_libdir_suffixes "lib;lib64")  # those suffixes are not checked for HINTS
-        if(GSS_FLAVOUR STREQUAL "MIT")
+        if(GSS_FLAVOUR STREQUAL "GNU")
+          set(_gss_libname "gss")
+        elseif(GSS_FLAVOUR STREQUAL "MIT")
           set(_gss_libname "gssapi_krb5")
         else()
           set(_gss_libname "gssapi")
@@ -247,7 +266,13 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     endif()
   endif()
 else()
-  if(_GSS_MODULE_NAME STREQUAL _mit_modname OR _GSS_${_mit_modname}_VERSION)  # _GSS_MODULE_NAME set since CMake 3.16
+  # _GSS_MODULE_NAME set since CMake 3.16
+  if(_GSS_MODULE_NAME STREQUAL _gnu_modname OR _GSS_${_gnu_modname}_VERSION)
+    set(GSS_FLAVOUR "GNU")
+    if(NOT _GSS_VERSION)  # for old CMake versions?
+      set(_GSS_VERSION ${_GSS_${_gnu_modname}_VERSION})
+    endif()
+  elseif(_GSS_MODULE_NAME STREQUAL _mit_modname OR _GSS_${_mit_modname}_VERSION)
     set(GSS_FLAVOUR "MIT")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_mit_modname}_VERSION})
@@ -293,6 +318,15 @@ if(GSS_FLAVOUR)
       set(GSS_VERSION "${_mit_version}")
     else()
       set(GSS_VERSION "MIT Unknown")
+    endif()
+  elseif(NOT GSS_VERSION AND GSS_FLAVOUR STREQUAL "GNU")
+    if(GSS_INCLUDE_DIRS AND EXISTS "${GSS_INCLUDE_DIRS}/gss.h")
+      set(_version_regex "#[\t ]*define[\t ]+GSS_VERSION[\t ]+\"([^\"]*)\"")
+      file(STRINGS "${GSS_INCLUDE_DIRS}/gss.h" _version_str REGEX "${_version_regex}")
+      string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+      set(GSS_VERSION "${_version_str}")
+      unset(_version_regex)
+      unset(_version_str)
     endif()
   endif()
 endif()

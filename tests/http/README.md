@@ -85,7 +85,7 @@ There is a lot of [`pytest` documentation](https://docs.pytest.org/) with exampl
 
 In `conftest.py` 3 "fixtures" are defined that are used by all test cases:
 
-1. `env`: the test environment. It is an instance of class `testenv/env.py:Env`. It holds all information about paths, availability of features (HTTP/3!), port numbers to use, domains and SSL certificates for those.
+1. `env`: the test environment. It is an instance of class `testenv/env.py:Env`. It holds all information about paths, availability of features (HTTP/3), port numbers to use, domains and SSL certificates for those.
 2. `httpd`: the Apache httpd instance, configured and started, then stopped at the end of the test suite. It has sites configured for the domains from `env`. It also loads a local module `mod_curltest?` and makes it available in certain locations. (more on mod_curltest below).
 3. `nghttpx`: an instance of nghttpx that provides HTTP/3 support. `nghttpx` proxies those requests to the `httpd` server. In a direct mapping, so you may access all the resources under the same path as with HTTP/2. Only the port number used for HTTP/3 requests will be different.
 

@@ -60,7 +60,8 @@ Open a Visual Studio Command prompt:
  Using the **'VS [version] [platform] [type] Command Prompt'** menu entry:
  where [version] is the Visual Studio version, [platform] is e.g. x64 and
  [type] Native of Cross platform build. This type of command prompt may not
- exist in all Visual Studio versions.
+ exist in all Visual Studio versions. For example, to build a 64-bit curl open
+ the x64 Native Tools prompt.
 
  See also: [Set the Path and Environment Variables for Command-Line Builds](https://docs.microsoft.com/en-us/cpp/build/building-on-the-command-line)
 
@@ -86,6 +87,7 @@ where `<options>` is one or many of:
  - `WITH_NGHTTP2=<dll/static>`   - Enable HTTP/2 support, DLL or static
  - `WITH_MSH3=<dll/static>`      - Enable (experimental) HTTP/3 support, DLL or static
  - `WITH_MBEDTLS=<dll/static>`   - Enable mbedTLS support, DLL or static
+ - `WITH_WOLFSSL=<dll/static>`   - Enable wolfSSL support, DLL or static
  - `WITH_CARES=<dll/static>`     - Enable c-ares support, DLL or static
  - `WITH_ZLIB=<dll/static>`      - Enable zlib support, DLL or static
  - `WITH_SSH=<dll/static>`       - Enable libssh support, DLL or static
@@ -107,11 +109,23 @@ where `<options>` is one or many of:
  - `MACHINE=<x86/x64/arm64>`     - Target architecture (default is x86)
  - `CARES_PATH=<path>`           - Custom path for c-ares
  - `MBEDTLS_PATH=<path>`         - Custom path for mbedTLS
+ - `WOLFSSL_PATH=<path>`         - Custom path for wolfSSL
  - `NGHTTP2_PATH=<path>`         - Custom path for nghttp2
  - `MSH3_PATH=<path>`            - Custom path for msh3
  - `SSH2_PATH=<path>`            - Custom path for libssh2
  - `SSL_PATH=<path>`             - Custom path for OpenSSL
  - `ZLIB_PATH=<path>`            - Custom path for zlib
+
+## Cleaning a build
+
+ For most build configurations you can remove a bad build by using the same
+ options with the added keyword "clean". For example:
+
+    nmake /f Makefile.vc mode=static clean
+
+ Build errors due to switching Visual Studio platform tools or mistakenly
+ specifying the wrong machine platform for the tools can usually be solved by
+ first cleaning the bad build.
 
 ## Static linking of Microsoft's C runtime (CRT):
 
@@ -193,7 +207,7 @@ where `<options>` is one or many of:
 
  When you build curl using the build files in this directory the default SSL
  backend will be Schannel (Windows SSPI), the native SSL library that comes
- with the Windows OS. Schannel in Windows <= XP is not able to connect to
- servers that no longer support the legacy handshakes and algorithms used by
+ with the Windows OS. Schannel in Windows 8 and earlier is not able to connect
+ to servers that no longer support the legacy handshakes and algorithms used by
  those versions. If you will be using curl in one of those earlier versions of
  Windows you should choose another SSL backend like OpenSSL.

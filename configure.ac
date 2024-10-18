@@ -2072,6 +2072,13 @@ if test x"$want_gss" = xyes; then
         ;;
     esac
   fi
+  if test -n "$gnu_gss"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE gss"
+  elif test "x$not_mit" = "x1"; then
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE heimdal-gssapi"
+  else
+    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mit-krb5-gssapi"
+  fi
 else
   CPPFLAGS="$save_CPPFLAGS"
 fi
@@ -3921,10 +3928,10 @@ dnl default includes
 #include <netinet/in.h>
 #endif
 #ifdef HAVE_NETINET_IN6_H
-#include <netinet/in6.h>
+#include <netinet/in6.h>  /* is this really required to detect other headers? */
 #endif
 #ifdef HAVE_SYS_UN_H
-#include <sys/un.h>
+#include <sys/un.h>  /* is this really required to detect other headers? */
 #endif
 ]
 )

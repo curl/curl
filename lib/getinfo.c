@@ -449,6 +449,9 @@ static CURLcode getinfo_offt(struct Curl_easy *data, CURLINFO info,
     *param_offt = data->conn ?
       data->conn->connection_id : data->state.recent_conn_id;
     break;
+  case CURLINFO_EARLYDATA_SENT_T:
+    *param_offt = data->progress.earlydata_sent;
+    break;
   default:
     return CURLE_UNKNOWN_OPTION;
   }

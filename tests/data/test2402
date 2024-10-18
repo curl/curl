@@ -47,7 +47,7 @@ file contents should appear once for each file
 # Client-side
 <client>
 <features>
-h2c
+http/2
 SSL
 </features>
 <server>
@@ -57,7 +57,7 @@ http/2
 lib%TESTNUMBER
 </tool>
 <name>
-HTTP GET multiple over HTTP/2
+HTTP GET multiple files over HTTP/2 using HTTPS
 </name>
 <command>
 https://%HOSTIP:%HTTP2TLSPORT/path/%TESTNUMBER %HOSTIP %HTTP2TLSPORT

@@ -35,7 +35,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTPHEADER,
 
 Pass a pointer to a linked list of HTTP headers to pass to the server and/or
 proxy in your HTTP request. The same list can be used for both host and proxy
-requests!
+requests.
 
 When used within an IMAP or SMTP request to upload a MIME mail, the given
 header list establishes the document-level MIME headers to prepend to the

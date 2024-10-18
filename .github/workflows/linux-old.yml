@@ -73,7 +73,7 @@ jobs:
           httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u4_amd64.deb
           dpkg -i libc6_*_amd64.deb
 
-      - uses: actions/checkout@d632683dd7b4114ad314bca15554477dd762a938 # v4
+      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
 
       - name: 'cmake build-only (out-of-tree, libssh2)'
         run: |
@@ -84,6 +84,11 @@ jobs:
           make install
           src/curl --disable --version
 
+      - name: 'cmake build-only curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld-1/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld-1/lib/curl_config.h | sort || true
+
       - name: 'cmake generate (out-of-tree, c-ares, libssh, zstd, gssapi)'
         run: |
           mkdir bld-cares
@@ -91,6 +96,11 @@ jobs:
           cmake .. -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON -DBUILD_SHARED_LIBS=ON \
             -DENABLE_ARES=ON -DCURL_ZSTD=ON -DCURL_USE_GSSAPI=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON -DUSE_LIBRTMP=ON \
             -DCURL_LIBCURL_VERSIONED_SYMBOLS=ON
+
+      - name: 'cmake curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld-cares/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld-cares/lib/curl_config.h | sort || true
 
       - name: 'cmake build'
         run: |
@@ -116,6 +126,11 @@ jobs:
           ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
             --with-openssl --enable-ares --with-libssh --with-zstd --with-gssapi --with-librtmp \
             --prefix="$PWD"/../install-am
+
+      - name: 'autoconf curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld-am/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld-am/lib/curl_config.h | sort || true
 
       - name: 'autoconf build'
         run: |

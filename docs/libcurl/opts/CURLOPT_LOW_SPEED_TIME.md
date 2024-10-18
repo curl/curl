@@ -51,7 +51,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_LOW_SPEED_LIMIT, 30L);
     res = curl_easy_perform(curl);
     if(CURLE_OPERATION_TIMEDOUT == res) {
-      printf("Timeout!\n");
+      printf("Timeout.\n");
     }
     /* always cleanup */
     curl_easy_cleanup(curl);

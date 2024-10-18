@@ -2248,8 +2248,9 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
     addcookies = data->set.str[STRING_COOKIE];
 
   if(data->cookies || addcookies) {
-    struct Cookie *co = NULL; /* no cookies from start */
+    struct Curl_llist list;
     int count = 0;
+    int rc = 1;
 
     if(data->cookies && data->state.cookie_engine) {
       const char *host = data->state.aptr.cookiehost ?
@@ -2260,15 +2261,17 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
         !strcmp(host, "127.0.0.1") ||
         !strcmp(host, "::1") ? TRUE : FALSE;
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
-      co = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
-                               secure_context);
+      rc = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
+                               secure_context, &list);
       Curl_share_unlock(data, CURL_LOCK_DATA_COOKIE);
     }
-    if(co) {
-      struct Cookie *store = co;
+    if(!rc) {
+      struct Curl_llist_node *n;
       size_t clen = 8; /* hold the size of the generated Cookie: header */
-      /* now loop through all cookies that matched */
-      while(co) {
+
+      /* loop through all cookies that matched */
+      for(n = Curl_llist_head(&list); n; n = Curl_node_next(n)) {
+        struct Cookie *co = Curl_node_elem(n);
         if(co->value) {
           size_t add;
           if(!count) {
@@ -2290,9 +2293,8 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
           clen += add + (count ? 2 : 0);
           count++;
         }
-        co = co->next; /* next cookie please */
       }
-      Curl_cookie_freelist(store);
+      Curl_llist_destroy(&list, NULL);
     }
     if(addcookies && !result && !linecap) {
       if(!count)

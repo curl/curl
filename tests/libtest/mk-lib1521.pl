@@ -24,7 +24,7 @@
 ###########################################################################
 
 # Usage:
-#   perl mk-lib1521.pl < ../../include/curl/curl.h > lib1521.c
+#   perl mk-lib1521.pl < ../../include/curl/curl.h lib1521.c
 
 # minimum and maximum long signed values
 my $minlong = "LONG_MIN";
@@ -171,7 +171,15 @@ $allowednumerrors .= <<MOO
 MOO
     ;
 
-print <<HEADER
+if(!$ARGV[0]) {
+    die "missing target file name";
+}
+
+use File::Temp qw/ :mktemp  /;
+
+my ($fh, $tempfile) = mkstemp("lib1521-XXXXX");
+
+print $fh <<HEADER
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \\| |
@@ -451,88 +459,88 @@ MOO
 MOO
             ;
 
-        print "\n  /****** Verify $name ******/\n";
+        print $fh "\n  /****** Verify $name ******/\n";
         if($type eq "CURLOPTTYPE_STRINGPOINT") {
-            print "${fpref} \"string\");\n$fstringcheck";
-            print "$ifpresent";
-            print "${pref} NULL);\n$nullcheck";
+            print $fh "${fpref} \"string\");\n$fstringcheck";
+            print $fh "$ifpresent";
+            print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif(($type eq "CURLOPTTYPE_LONG") ||
               ($type eq "CURLOPTTYPE_VALUES")) {
-            print "${fpref} 0L);\n$flongcheckzero";
-            print "$ifpresent";
-            print "${pref} 22L);\n$longcheck";
-            print "${pref} LO);\n$longcheck";
-            print "${pref} HI);\n$longcheck";
+            print $fh "${fpref} 0L);\n$flongcheckzero";
+            print $fh "$ifpresent";
+            print $fh "${pref} 22L);\n$longcheck";
+            print $fh "${pref} LO);\n$longcheck";
+            print $fh "${pref} HI);\n$longcheck";
         }
         elsif($type eq "CURLOPTTYPE_OFF_T") {
-            print "${fpref} OFF_NO);\n$flongcheckzero";
-            print "$ifpresent";
+            print $fh "${fpref} OFF_NO);\n$flongcheckzero";
+            print $fh "$ifpresent";
             my $lvl = " " x 29;
-            print "${pref}\n${lvl}(curl_off_t)22);\n$longcheck";
-            print "${pref} OFF_HI);\n$longcheck";
-            print "${pref} OFF_LO);\n$longcheck";
+            print $fh "${pref}\n${lvl}(curl_off_t)22);\n$longcheck";
+            print $fh "${pref} OFF_HI);\n$longcheck";
+            print $fh "${pref} OFF_LO);\n$longcheck";
         }
         elsif(($type eq "CURLOPTTYPE_OBJECTPOINT") ||
               ($type eq "CURLOPTTYPE_CBPOINT")) {
             if($name =~ /DEPENDS/) {
-              print "${fpref} dep);\n$fcheck";
+              print $fh "${fpref} dep);\n$fcheck";
             }
             elsif($name =~ "SHARE") {
-              print "${fpref} share);\n$fcheck";
+              print $fh "${fpref} share);\n$fcheck";
             }
             elsif($name eq "CURLOPT_ERRORBUFFER") {
-              print "${fpref} errorbuffer);\n$fcheck";
+              print $fh "${fpref} errorbuffer);\n$fcheck";
             }
             elsif(($name eq "CURLOPT_POSTFIELDS") ||
                   ($name eq "CURLOPT_COPYPOSTFIELDS")) {
                 # set size to zero to avoid it being "illegal"
-                print "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
-                print "${fpref} stringpointerextra);\n$fcheck";
+                print $fh "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
+                print $fh "${fpref} stringpointerextra);\n$fcheck";
             }
             elsif($name eq "CURLOPT_HTTPPOST") {
-              print "${fpref} httppost);\n$fcheck";
+              print $fh "${fpref} httppost);\n$fcheck";
             }
             elsif($name eq "CURLOPT_MIMEPOST") {
-              print "${fpref} mimepost);\n$fcheck";
+              print $fh "${fpref} mimepost);\n$fcheck";
             }
             elsif($name eq "CURLOPT_STDERR") {
-              print "${fpref} stream);\n$fcheck";
+              print $fh "${fpref} stream);\n$fcheck";
             }
             else {
-              print "${fpref} &object);\n$fcheck";
+              print $fh "${fpref} &object);\n$fcheck";
             }
-            print "$ifpresent";
-            print "${pref} NULL);\n$nullcheck";
+            print $fh "$ifpresent";
+            print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif($type eq "CURLOPTTYPE_SLISTPOINT") {
-            print "${fpref} slist);\n$fcheck";
-            print "$ifpresent";
-            print "${pref} NULL);\n$nullcheck";
+            print $fh "${fpref} slist);\n$fcheck";
+            print $fh "$ifpresent";
+            print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif($type eq "CURLOPTTYPE_FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {
                 my $l=lc($1);
                 $l =~ s/^curlopt_//;
-                print "${fpref}\n$i${l}cb);\n$fcheck";
+                print $fh "${fpref}\n$i${l}cb);\n$fcheck";
             }
             else {
-                print "${fpref} &func);\n$fcheck";
+                print $fh "${fpref} &func);\n$fcheck";
             }
-            print "$ifpresent";
-            print "${pref} NULL);\n$nullcheck";
+            print $fh "$ifpresent";
+            print $fh "${pref} NULL);\n$nullcheck";
         }
         elsif($type eq "CURLOPTTYPE_BLOB") {
-            print "${fpref} &blob);\n$check";
-            print "$ifpresent";
-            print "${pref} NULL);\n$nullcheck";
+            print $fh "${fpref} &blob);\n$check";
+            print $fh "$ifpresent";
+            print $fh "${pref} NULL);\n$nullcheck";
         }
         else {
             print STDERR "\nUnknown type: $type\n";
             exit 22; # exit to make this noticed!
         }
 
-        print <<MOO
+        print $fh <<MOO
     } /* end of secondary checks */
   } /* end of single setopt */
 MOO
@@ -547,31 +555,31 @@ MOO
        my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
        my $check = "  if(res)\n    geterr(\"$info\", res, __LINE__);\n";
        if($type eq "STRING") {
-         print "$c &charp);\n$check";
+         print $fh "$c &charp);\n$check";
        }
        elsif($type eq "LONG") {
-         print "$c &val);\n$check";
+         print $fh "$c &val);\n$check";
        }
        elsif($type eq "OFF_T") {
-         print "$c &oval);\n$check";
+         print $fh "$c &oval);\n$check";
        }
        elsif($type eq "DOUBLE") {
-         print "$c &dval);\n$check";
+         print $fh "$c &dval);\n$check";
        }
        elsif($type eq "SLIST") {
-         print "$c &slist);\n$check";
-         print "  if(slist)\n    curl_slist_free_all(slist);\n";
+         print $fh "$c &slist);\n$check";
+         print $fh "  if(slist)\n    curl_slist_free_all(slist);\n";
        }
        elsif($type eq "SOCKET") {
-         print "$c &sockfd);\n$check";
+         print $fh "$c &sockfd);\n$check";
        }
        elsif($type eq "PTR") {
          if($info eq "CERTINFO") {
-            print "$c &certinfo);\n$check";
+            print $fh "$c &certinfo);\n$check";
          }
          elsif(($info eq "TLS_SESSION") ||
                ($info eq "TLS_SSL_PTR")) {
-            print "$c &tlssession);\n$check";
+            print $fh "$c &tlssession);\n$check";
          }
          else {
             print STDERR "$info/$type is unsupported\n";
@@ -584,7 +592,7 @@ MOO
 }
 
 
-print <<FOOTER
+print $fh <<FOOTER
   )
 
   curl_easy_setopt(curl, (CURLoption)1, 0);
@@ -601,3 +609,6 @@ test_cleanup:
 }
 FOOTER
     ;
+
+close($fh);
+rename($tempfile, $ARGV[0]);

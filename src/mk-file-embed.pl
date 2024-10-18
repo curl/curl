@@ -29,11 +29,16 @@ if($ARGV[0] eq "--var") {
     $varname = shift @ARGV;
 }
 
+my $varname_upper = uc($varname);
+
 print <<HEAD
 /*
  * NEVER EVER edit this manually, fix the mk-file-embed.pl script instead!
  */
+#ifndef CURL_DECLARED_${varname_upper}
+#define CURL_DECLARED_${varname_upper}
 extern const unsigned char ${varname}[];
+#endif
 const unsigned char ${varname}[] = {
 HEAD
     ;
