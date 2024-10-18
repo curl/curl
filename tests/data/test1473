@@ -46,11 +46,5 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-%if hyper
-# curl: (1) Hyper: [6] invalid HTTP header parsed
-<errorcode>
-1
-</errorcode>
-%endif
 </verify>
 </testcase>

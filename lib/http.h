@@ -74,43 +74,14 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
                              const char *thisheader,
                              const size_t thislen);
 
-CURLcode Curl_add_timecondition(struct Curl_easy *data,
-#ifndef USE_HYPER
-                                struct dynbuf *req
-#else
-                                void *headers
-#endif
-  );
-CURLcode Curl_add_custom_headers(struct Curl_easy *data,
-                                 bool is_connect,
-#ifndef USE_HYPER
-                                 struct dynbuf *req
-#else
-                                 void *headers
-#endif
-  );
-CURLcode Curl_dynhds_add_custom(struct Curl_easy *data,
-                                bool is_connect,
+CURLcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
+CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
+                                 struct dynbuf *req);
+CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
                                 struct dynhds *hds);
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
-CURLcode Curl_http_useragent(struct Curl_easy *data);
-CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn);
-CURLcode Curl_http_target(struct Curl_easy *data, struct connectdata *conn,
-                          struct dynbuf *req);
-CURLcode Curl_http_statusline(struct Curl_easy *data,
-                              struct connectdata *conn);
-CURLcode Curl_http_header(struct Curl_easy *data,
-                          const char *hd, size_t hdlen);
-CURLcode Curl_transferencode(struct Curl_easy *data);
-CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
-                                  Curl_HttpReq httpreq,
-                                  const char **tep);
-CURLcode Curl_http_req_complete(struct Curl_easy *data,
-                                struct dynbuf *r, Curl_HttpReq httpreq);
-bool Curl_use_http_1_1plus(const struct Curl_easy *data,
-                           const struct connectdata *conn);
 #ifndef CURL_DISABLE_COOKIES
 CURLcode Curl_http_cookies(struct Curl_easy *data,
                            struct connectdata *conn,
@@ -118,9 +89,6 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
 #else
 #define Curl_http_cookies(a,b,c) CURLE_OK
 #endif
-CURLcode Curl_http_range(struct Curl_easy *data,
-                         Curl_HttpReq httpreq);
-CURLcode Curl_http_firstwrite(struct Curl_easy *data);
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
@@ -178,16 +146,12 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data);
    version. This count includes CONNECT response headers. */
 #define MAX_HTTP_RESP_HEADER_SIZE (300*1024)
 
-bool Curl_http_exp100_is_selected(struct Curl_easy *data);
-void Curl_http_exp100_got100(struct Curl_easy *data);
 
 #endif /* CURL_DISABLE_HTTP */
 
 /****************************************************************************
  * HTTP unique setup
  ***************************************************************************/
-
-CURLcode Curl_http_size(struct Curl_easy *data);
 
 CURLcode Curl_http_write_resp_hds(struct Curl_easy *data,
                                   const char *buf, size_t blen,

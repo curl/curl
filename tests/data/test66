@@ -15,9 +15,6 @@ no headers swsclose
 
 # Client-side
 <client>
-<features>
-!hyper
-</features>
 <server>
 http
 </server>

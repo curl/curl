@@ -166,9 +166,6 @@ CURLcode Curl_cwriter_add(struct Curl_easy *data,
 struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
                                               const struct Curl_cwtype *cwt);
 
-void Curl_cwriter_remove_by_name(struct Curl_easy *data,
-                                 const char *name);
-
 struct Curl_cwriter *Curl_cwriter_get_by_name(struct Curl_easy *data,
                                               const char *name);
 
