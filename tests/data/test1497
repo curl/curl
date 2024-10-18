@@ -1,0 +1,51 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+--data @file!0-499
+Only a part of a file
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+
+blablabla
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+POST only a part of --data (first 26 byte, remove the cr/lf/crlf's and send it)
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --variable foo@%LOGDIR/test%TESTNUMBER.txt!5-25 --expand-data AB{{foo}}XY
+</command>
+<file name="%LOGDIR/test%TESTNUMBER.txt">
+%repeat[5 x 1]%%repeat[5 x 2]%%repeat[5 x 3]%%repeat[5 x 4]%%repeat[5 x 5]%0123456789repeat[500 x test]%
+</file>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol nonewline="yes" crlf="yes">
+POST /we/want/%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+Content-Length: 25
+Content-Type: application/x-www-form-urlencoded
+
+AB222223333344444555550XY
+</protocol>
+</verify>
+</testcase>
