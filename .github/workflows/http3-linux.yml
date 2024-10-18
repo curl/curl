@@ -45,7 +45,7 @@ env:
   # handled in renovate.json
   openssl3-version: openssl-3.3.0
   # unhandled
-  quictls-version: 3.1.4+quic
+  quictls-version: 3.3.0-quic1
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   gnutls-version: 3.8.7
   wolfssl-version: master
