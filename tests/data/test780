@@ -22,7 +22,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Strict-Transport-Security: max-age=1000
+Strict-Transport-Security: max-age  = 1000
 
 </data>
 </reply>
@@ -68,7 +68,7 @@ Date: Tue, 09 Nov 2010 14:49:00 GMT
 Server: test-server/fake swsclose
 Content-Type: text/html
 Funny-head: yesyes
-Strict-Transport-Security: max-age=1000
+Strict-Transport-Security: max-age  = 1000
 
 </stdout>
 
