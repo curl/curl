@@ -1831,8 +1831,8 @@ endif()
 # (= regenerate it).
 function(transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
-  string(REPLACE "$(top_srcdir)"   "\${CMAKE_CURRENT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
-  string(REPLACE "$(top_builddir)" "\${CMAKE_CURRENT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
   string(REGEX REPLACE "\\\\\n" "!π!α!" _makefile_inc_text ${_makefile_inc_text})
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "set(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
@@ -2206,7 +2206,7 @@ if(NOT CURL_DISABLE_INSTALL)
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
   # Install headers
-  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/curl"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
 
@@ -2297,7 +2297,7 @@ buildinfo.compiler: ${CMAKE_C_COMPILER_ID}
 buildinfo.compiler.version: ${CMAKE_C_COMPILER_VERSION}
 buildinfo.sysroot: ${_cmake_sysroot}
 ")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
+file(WRITE "${PROJECT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
 if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   message(STATUS "\n${_buildinfo}")
 endif()
