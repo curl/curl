@@ -336,6 +336,32 @@ void single_transfer_cleanup(void)
   glob_cleanup(&state->inglob);
 }
 
+/* Helper function for retrycheck.
+ *
+ * This function is a prerequisite check used to determine whether or not some
+ * already downloaded data (ie out->bytes written) can be safely resumed in a
+ * subsequent transfer. The conditions are somewhat pedantic to avoid any risk
+ * of data corruption.
+ *
+ * Specific HTTP limitations (scheme, method, response code, etc) are checked
+ * in retrycheck if this prerequisite check is met.
+ */
+static bool is_outfile_auto_resumable(struct OperationConfig *config,
+                                      struct per_transfer *per,
+                                      CURLcode result)
+{
+  struct OutStruct *outs = &per->outs;
+  return config->use_resume && config->resume_from_current &&
+         config->resume_from >= 0 && outs->init == config->resume_from &&
+         outs->bytes > 0 && outs->filename && outs->s_isreg && outs->fopened &&
+         outs->stream && !ferror(outs->stream) &&
+         !config->customrequest && !per->uploadfile &&
+         (config->httpreq == TOOL_HTTPREQ_UNSPEC ||
+          config->httpreq == TOOL_HTTPREQ_GET) &&
+         /* CURLE_WRITE_ERROR could mean outs->bytes is not accurate */
+         result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR;
+}
+
 static CURLcode retrycheck(struct OperationConfig *config,
                            struct per_transfer *per,
                            CURLcode result,
@@ -353,7 +379,6 @@ static CURLcode retrycheck(struct OperationConfig *config,
     RETRY_FTP,
     RETRY_LAST /* not used */
   } retry = RETRY_NO;
-  long response = 0;
   if((CURLE_OPERATION_TIMEDOUT == result) ||
      (CURLE_COULDNT_RESOLVE_HOST == result) ||
      (CURLE_COULDNT_RESOLVE_PROXY == result) ||
@@ -378,6 +403,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
     scheme = proto_token(scheme);
     if(scheme == proto_http || scheme == proto_https) {
       /* This was HTTP(S) */
+      long response = 0;
       curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
 
       switch(response) {
@@ -404,6 +430,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
   } /* if CURLE_OK */
   else if(result) {
     const char *scheme;
+    long response = 0;
 
     curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
     curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
@@ -432,6 +459,7 @@ static CURLcode retrycheck(struct OperationConfig *config,
       ": HTTP error",
       ": FTP error"
     };
+    bool truncate = TRUE; /* truncate output file */
 
     if(RETRY_HTTP == retry) {
       curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
@@ -482,7 +510,49 @@ static CURLcode retrycheck(struct OperationConfig *config,
 
     per->retry_remaining--;
 
-    if(outs->bytes && outs->filename && outs->stream) {
+    /* Skip truncation of outfile if auto-resume is enabled for download and
+       the partially received data is good. Only for HTTP GET requests in
+       limited circumstances. */
+    if(is_outfile_auto_resumable(config, per, result)) {
+      long response = 0;
+      struct curl_header *header = NULL;
+      const char *method = NULL, *scheme = NULL;
+
+      curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &method);
+      curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
+      curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
+      scheme = proto_token(scheme);
+
+      if((scheme == proto_http || scheme == proto_https) &&
+         method && !strcmp(method, "GET") &&
+         ((response == 206 && config->resume_from) ||
+          (response == 200 &&
+           !curl_easy_header(curl, "Accept-Ranges", 0,
+                             CURLH_HEADER, -1, &header) &&
+           !strcmp(header->value, "bytes")))) {
+
+        notef("Keeping %" CURL_FORMAT_CURL_OFF_T " bytes", outs->bytes);
+        if(fflush(outs->stream)) {
+          errorf("Failed to flush output file stream");
+          return CURLE_WRITE_ERROR;
+        }
+        if(outs->bytes >= CURL_OFF_T_MAX - outs->init) {
+          errorf("Exceeded maximum supported file size ("
+                 "%" CURL_FORMAT_CURL_OFF_T " + "
+                 "%" CURL_FORMAT_CURL_OFF_T ")",
+                 outs->init, outs->bytes);
+          return CURLE_WRITE_ERROR;
+        }
+        truncate = FALSE;
+        outs->init += outs->bytes;
+        outs->bytes = 0;
+        config->resume_from = outs->init;
+        curl_easy_setopt(curl, CURLOPT_RESUME_FROM_LARGE,
+                         config->resume_from);
+      }
+    }
+
+    if(truncate && outs->bytes && outs->filename && outs->stream) {
 #ifndef __MINGW32CE__
       struct_stat fileinfo;
 
