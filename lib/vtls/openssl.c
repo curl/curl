@@ -247,7 +247,7 @@
 #elif defined(OPENSSL_IS_AWSLC)
 #define OSSL_PACKAGE "AWS-LC"
 #else
-# if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
+# if (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || defined(USE_MSH3)
 #   define OSSL_PACKAGE "quictls"
 # else
 #   define OSSL_PACKAGE "OpenSSL"
