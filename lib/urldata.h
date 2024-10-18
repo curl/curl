@@ -1860,6 +1860,7 @@ struct UserDefined {
   BIT(http09_allowed); /* allow HTTP/0.9 responses */
 #ifndef CURL_DISABLE_WEBSOCKETS
   BIT(ws_raw_mode);
+  BIT(ws_no_auto_pong);
 #endif
 #ifdef USE_ECH
   int tls_ech;      /* TLS ECH configuration  */
