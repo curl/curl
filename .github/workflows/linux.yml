@@ -54,7 +54,7 @@ env:
   # handled in renovate.json
   openssl3-version: openssl-3.1.3
   # unhandled
-  quictls-version: 3.1.4+quic
+  quictls-version: 3.3.0-quic1
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   rustls-version: 0.14.0
 
