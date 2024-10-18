@@ -87,7 +87,7 @@ jobs:
         uses: cross-platform-actions/action@cdc9ee69ef84a5f2e59c9058335d9c57bcb4ac86 # v0.25.0
         with:
           operating_system: 'openbsd'
-          version: '7.5'
+          version: '7.6'
           architecture: ${{ matrix.arch }}
           run: |
             # https://openbsd.app/
