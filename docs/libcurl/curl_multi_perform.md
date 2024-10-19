@@ -69,7 +69,7 @@ removing all the handles and adding new ones.
 int main(void)
 {
   int still_running;
-  CURL *multi = curl_multi_init();
+  CURLM *multi = curl_multi_init();
   CURL *curl = curl_easy_init();
   if(curl) {
     curl_multi_add_handle(multi, curl);
