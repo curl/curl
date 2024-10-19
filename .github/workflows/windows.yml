@@ -655,14 +655,14 @@ jobs:
               -DCURL_USE_LIBPSL=OFF
 
           - name: 'libressl'
-            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
               -DCURL_CA_SEARCH_SAFE=ON
 
           - name: 'boringssl-ECH'
@@ -737,11 +737,6 @@ jobs:
       - name: 'cmake configure'
         timeout-minutes: 5
         run: |
-          if [[ '${{ matrix.install }}' = *'libressl'* ]]; then
-            # without this, CMake gets confused by the non-vcpkg OpenSSL
-            # installed on the runner and fails when linking.
-            options+=" -DOPENSSL_ROOT_DIR=$VCPKG_INSTALLATION_ROOT/installed/${{ matrix.arch }}-${{ matrix.plat }}"
-          fi
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
