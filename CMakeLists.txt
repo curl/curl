@@ -1860,8 +1860,8 @@ cmake_dependent_option(BUILD_TESTING "Build tests"
   OFF)
 
 if(HAVE_MANUAL_TOOLS)
-  set(CURL_MANPAGE "${CMAKE_CURRENT_BINARY_DIR}/docs/cmdline-opts/curl.1")
-  set(CURL_ASCIIPAGE "${CMAKE_CURRENT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
+  set(CURL_MANPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.1")
+  set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
 endif()
 
