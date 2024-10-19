@@ -239,6 +239,16 @@ if(PICKY_COMPILER)
   endif()
 endif()
 
+# clang-cl
+if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
+  # list(TRANSFORM WPICKY PREPEND "/clang:") # since CMake 3.12
+  set(_wpicky "")
+  foreach(_ccopt IN LISTS WPICKY)
+    list(APPEND _wpicky "/clang:${_ccopt}")
+  endforeach()
+  set(WPICKY ${_wpicky})
+endif()
+
 if(WPICKY)
   string(REPLACE ";" " " WPICKY "${WPICKY}")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${WPICKY}")
