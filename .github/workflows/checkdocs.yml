@@ -88,7 +88,7 @@ jobs:
   linkcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: checkout
 
       - name: trim the cmdline docs markdown files
@@ -101,7 +101,7 @@ jobs:
   spellcheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: checkout
 
       - name: trim all man page *.md files
@@ -120,14 +120,14 @@ jobs:
         run: grep -v '^#' .github/scripts/spellcheck.words >  wordlist.txt
 
       - name: Check Spelling
-        uses: rojopolis/spellcheck-github-actions@7ff888c45ba73d66b3a180963706715897f41684 # v0
+        uses: rojopolis/spellcheck-github-actions@ab8ac455183f925b40fe751278ef92cc0edf3151 # v0
         with:
           config_path: .github/scripts/spellcheck.yaml
 
   badwords-synopsis:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: checkout
 
       - name: badwords
@@ -139,7 +139,7 @@ jobs:
   man-examples:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: checkout
 
       - name: render nroff versions

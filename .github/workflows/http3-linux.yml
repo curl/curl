@@ -54,7 +54,7 @@ env:
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
   ngtcp2-version: 1.8.1
   # renovate: datasource=github-tags depName=nghttp2/nghttp2 versioning=semver registryUrl=https://github.com
-  nghttp2-version: 1.62.1
+  nghttp2-version: 1.64.0
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   quiche-version: 0.22.0
 
@@ -90,7 +90,7 @@ jobs:
 
     steps:
       - name: cache quictls
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-quictls-no-deprecated
         env:
           cache-name: cache-quictls-no-deprecated
@@ -99,7 +99,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
 
       - name: cache gnutls
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-gnutls
         env:
           cache-name: cache-gnutls
@@ -108,7 +108,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
 
       - name: cache wolfssl
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
@@ -118,7 +118,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
       - name: cache nghttp3
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -127,7 +127,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
 
       - name: cache ngtcp2
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-ngtcp2
         env:
           cache-name: cache-ngtcp2
@@ -136,7 +136,7 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
 
       - name: cache nghttp2
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-nghttp2
         env:
           cache-name: cache-nghttp2
@@ -333,7 +333,7 @@ jobs:
         name: 'install prereqs'
 
       - name: cache quictls
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-quictls-no-deprecated
         env:
           cache-name: cache-quictls-no-deprecated
@@ -344,7 +344,7 @@ jobs:
 
       - name: cache gnutls
         if: matrix.build.name == 'gnutls'
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-gnutls
         env:
           cache-name: cache-gnutls
@@ -355,7 +355,7 @@ jobs:
 
       - name: cache wolfssl
         if: matrix.build.name == 'wolfssl'
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
@@ -366,7 +366,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache nghttp3
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-nghttp3
         env:
           cache-name: cache-nghttp3
@@ -376,7 +376,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache ngtcp2
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-ngtcp2
         env:
           cache-name: cache-ngtcp2
@@ -386,7 +386,7 @@ jobs:
           fail-on-cache-miss: true
 
       - name: cache nghttp2
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-nghttp2
         env:
           cache-name: cache-nghttp2
@@ -397,7 +397,7 @@ jobs:
 
       - name: cache openssl
         if: matrix.build.name == 'openssl-quic'
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-openssl
         env:
           cache-name: cache-openssl
@@ -416,7 +416,7 @@ jobs:
 
       - name: cache quiche
         if: matrix.build.name == 'quiche'
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-quiche
         env:
           cache-name: cache-quiche
@@ -444,7 +444,7 @@ jobs:
           # $HOME/quiche/quiche/deps/boringssl/src/lib
         name: 'build quiche and boringssl'
 
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}

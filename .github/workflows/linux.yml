@@ -312,7 +312,7 @@ jobs:
             perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: 'Fix kernel mmap rnd bits'
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -324,7 +324,7 @@ jobs:
 
       - name: 'cache bearssl'
         if: contains(matrix.build.install_steps, 'bearssl')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-bearssl
         env:
           cache-name: cache-bearssl
@@ -345,7 +345,7 @@ jobs:
 
       - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-libressl
         env:
           cache-name: cache-libressl
@@ -364,7 +364,7 @@ jobs:
 
       - name: 'cache wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-wolfssl-all
         env:
           cache-name: cache-wolfssl-all
@@ -384,7 +384,7 @@ jobs:
 
       - name: 'cache wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-wolfssl-opensslextra
         env:
           cache-name: cache-wolfssl-opensslextra
@@ -404,7 +404,7 @@ jobs:
 
       - name: 'cache mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-mbedtls
         env:
           cache-name: cache-mbedtls
@@ -425,7 +425,7 @@ jobs:
 
       - name: 'cache openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-openssl-tsan
         env:
           cache-name: cache-openssl-tsan
@@ -443,7 +443,7 @@ jobs:
 
       - name: 'cache quictls'
         if: contains(matrix.build.install_steps, 'quictls')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-quictls
         env:
           cache-name: cache-quictls
@@ -461,7 +461,7 @@ jobs:
 
       - name: 'cache msh3'
         if: contains(matrix.build.install_steps, 'msh3')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-msh3
         env:
           cache-name: cache-msh3
@@ -480,7 +480,7 @@ jobs:
 
       - name: 'cache awslc'
         if: contains(matrix.build.install_steps, 'awslc')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-awslc
         env:
           cache-name: cache-awslc
@@ -502,7 +502,7 @@ jobs:
 
       - name: 'cache rustls'
         if: contains(matrix.build.install_steps, 'rustls')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-rustls
         env:
           cache-name: cache-rustls
