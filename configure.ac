@@ -610,6 +610,23 @@ case $host_os in
   cygwin*|msys*) curl_cv_cygwin='yes';;
 esac
 
+dnl Check if native Windows targeting Vista or newer
+curl_cv_windows_vista='no'
+if test "$curl_cv_native_windows" = 'yes'; then
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <windows.h>
+    ]],[[
+      #if _WIN32_WINNT < 0x0600
+      #error
+      #endif
+    ]])
+  ],[
+    curl_cv_windows_vista='yes'
+  ],[
+  ])
+fi
+
 AM_CONDITIONAL([HAVE_WINDRES],
   [test "$curl_cv_native_windows" = "yes" && test -n "${RC}"])
 
@@ -2717,7 +2734,18 @@ AS_HELP_STRING([--with-winidn=PATH],[enable Windows native IDN])
 AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     OPT_WINIDN=$withval)
   case "$OPT_WINIDN" in
-    no|default)
+    default)
+      dnl enable by default on native Windows with Vista and newer
+      if test "$curl_cv_windows_vista" = 'yes'; then
+        want_winidn="yes"
+        want_winidn_path="default"
+        AC_MSG_RESULT([yes])
+      else
+        want_winidn="no"
+        AC_MSG_RESULT([no])
+      fi
+      ;;
+    no)
       dnl --without-winidn option used or configure option not specified
       want_winidn="no"
       AC_MSG_RESULT([no])
@@ -2805,8 +2833,11 @@ AS_HELP_STRING([--with-apple-idn],[Enable AppleIDN])
 AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
       [OPT_IDN=$withval])
     case "$OPT_IDN" in
-      yes)
-        dnl --with-apple-idn option used
+      no)
+        dnl --without-apple-idn option used
+        AC_MSG_RESULT([no])
+        ;;
+      *)
         AC_MSG_RESULT([yes, check])
         AC_CHECK_LIB(icucore, uidna_openUTS46,
         [
@@ -2819,9 +2850,6 @@ AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
             tst_links_appleidn='yes'
           )
         ])
-        ;;
-      *)
-        AC_MSG_RESULT([no])
         ;;
     esac
     ;;
@@ -5206,19 +5234,8 @@ if test "$tst_atomic" = "yes"; then
 elif test "x$USE_THREADS_POSIX" = "x1" -a \
      "x$ac_cv_header_pthread_h" = "xyes"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-else
-  AC_COMPILE_IFELSE([
-    AC_LANG_PROGRAM([[
-      #include <windows.h>
-    ]],[[
-      #if (WINVER < 0x600) && (_WIN32_WINNT < 0x600)
-      #error
-      #endif
-    ]])
-  ],[
-    SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
-  ],[
-  ])
+elif test "$curl_cv_windows_vista" = 'yes'; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES threadsafe"
 fi
 
 if test "x$want_winuni" = "xyes"; then
