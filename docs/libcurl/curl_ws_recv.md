@@ -37,12 +37,14 @@ Retrieves as much as possible of a received WebSocket data fragment into the
 number of bytes actually stored.
 
 If there is more fragment data to deliver than what fits in the provided
-*buffer*, libcurl returns a full buffer and the application needs to call
-this function again to continue draining the buffer.
+*buffer*, libcurl returns a full buffer and the application needs to call this
+function again to continue draining the buffer.
 
-The *meta* pointer gets set to point to a *const struct curl_ws_frame*
-that contains information about the received data. See the
-curl_ws_meta(3) for details on that struct.
+If the function call is successful, the *meta* pointer gets set to point to a
+*const struct curl_ws_frame* that contains information about the received
+data. That struct must not be freed and its contents must not be relied upon
+anymore once another WebSocket function is called. See the curl_ws_meta(3) for
+details on that struct.a
 
 # %PROTOCOLS%
 
