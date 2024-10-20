@@ -31,13 +31,13 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # $(top_srcdir)/include is for libcurl's external include files
 # $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
 # $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
+# $(top_srcdir)/src for src/tool_xattr.h used from 'disabled'
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
-              -I$(top_srcdir)/lib
-
-disabled_CPPFLAGS = $(AM_CPPFLAGS) \
-              -I$(top_srcdir)/src
+              -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/src            \
+              -I$(top_srcdir)/tests/server
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
@@ -51,6 +51,20 @@ AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
 include Makefile.inc
 
 EXTRA_DIST = base64.pl CMakeLists.txt .checksrc
+
+if USE_TEST_BUNDLES
+server_bundle.c: $(top_srcdir)/tests/mk-bundle-server.pl $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(UTIL_BUNDLE)
+	@PERL@ $(top_srcdir)/tests/mk-bundle-server.pl $(SERVERPROGS) > server_bundle.c
+
+noinst_PROGRAMS = servers $(OTHERPROGS)
+nodist_servers_SOURCES = server_bundle.c
+servers_SOURCES = $(CURLX_SRCS) $(USEFUL) $(INET_PTON) $(UTIL) $(UTIL_BUNDLE)
+servers_LDADD = @CURL_NETWORK_AND_TIME_LIBS@
+servers_CFLAGS = $(AM_CFLAGS)
+CLEANFILES = server_bundle.c
+else
+noinst_PROGRAMS = $(SERVERPROGS) $(OTHERPROGS)
+endif
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;
