@@ -156,6 +156,7 @@ our $stunnel;        # path to stunnel command
 sub checkcmd {
     my ($cmd, @extrapaths)=@_;
     my @paths;
+    print "checkcmd: $^O: |$cmd|" . @extrapaths . "|\n";
     if ($^O eq 'MSWin32' || $^O eq 'dos' || $^O eq 'os2') {
         # PATH separator is different
         @paths=(split(';', $ENV{'PATH'}), @extrapaths);
@@ -167,9 +168,11 @@ sub checkcmd {
     for(@paths) {
         if( -x "$_/$cmd" . exe_ext('SYS') && ! -d "$_/$cmd" . exe_ext('SYS')) {
             # executable bit but not a directory!
+            print "checkcmd: $^O: Found: |$cmd|$_/$cmd|\n";
             return "$_/$cmd";
         }
     }
+    print "checkcmd: $^O: NotFound: |$cmd|\n";
     return "";
 }
 
@@ -272,27 +275,41 @@ sub clearlocks {
 
     if(os_is_win()) {
         $dir = sys_native_abs_path($dir);
-        $dir =~ s/\//\\\\/g;
+        # Must use backslashes for handle64 to find a match
+        if ($^O eq 'MSWin32') {
+            $dir =~ s/\//\\/g;
+        }
+        else {
+            $dir =~ s/\//\\\\/g;
+        }
         my $handle = "handle";
         if($ENV{"PROCESSOR_ARCHITECTURE"} =~ /64$/) {
             $handle = "handle64";
         }
         if(checkcmd($handle)) {
+            my @handlesall = `$handle -accepteula -nobanner`;
+            print "clearlocks: $^O: handle-ALL result: " . @handlesall . " lines\n";
+            for my $tryhandle (@handlesall) {
+                print "clearlocks: $^O: handle-ALL $dir line: |$tryhandle|\n";
+            }
             # https://learn.microsoft.com/sysinternals/downloads/handle#usage
             my $cmd = "$handle $dir -accepteula -nobanner";
-            logmsg "Executing: '$cmd'\n";
+            print "clearlocks: $^O: Executing: '$cmd'\n";
             my @handles = `$cmd`;
+            print "clearlocks: $^O: handle $dir result: " . @handles . " lines\n";
             for my $tryhandle (@handles) {
+                print "clearlocks: $^O: handle $dir line: |$tryhandle|\n";
                 # Skip the "No matching handles found." warning when returned
                 if($tryhandle =~ /^(\S+)\s+pid:\s+(\d+)\s+type:\s+(\w+)\s+([0-9A-F]+):\s+(.+)\r\r/) {
-                    logmsg "Found $3 lock of '$5' ($4) by $1 ($2)\n";
+                    print "clearlocks: $^O: Found $3 lock of '$5' ($4) by $1 ($2)\n";
                     # Ignore stunnel since we cannot do anything about its locks
                     if("$3" eq "File" && "$1" ne "tstunnel.exe") {
-                        logmsg "Killing IMAGENAME eq $1 and PID eq $2\n";
+                        print "clearlocks: $^O: Killing IMAGENAME eq $1 and PID eq $2\n";
                         # https://ss64.com/nt/taskkill.html
                         my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
-                        logmsg "Executing: '$cmd'\n";
-                        system($cmd);
+                        print "clearlocks: $^O: Executing: '$cmd'\n";
+                        my $result = system($cmd);
+                        print "clearlocks: $^O: taskkill.exe result: $result\n";
                         $done = 1;
                     }
                 }
@@ -386,9 +403,15 @@ sub startnew {
         # Flush output.
         $| = 1;
 
-        # Put an "exec" in front of the command so that the child process
-        # keeps this child's process ID.
-        exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        if($^O eq 'MSWin32') {
+            print "servers: $^O: Executing: '$cmd'\n";
+            exec("$cmd");
+        }
+        else {
+            # Put an "exec" in front of the command so that the child process
+            # keeps this child's process ID.
+            exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        }
 
         # exec() should never return back here to this process. We protect
         # ourselves by calling die() just in case something goes really bad.

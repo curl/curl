@@ -360,11 +360,18 @@ if($tstunnel_windows) {
     # Flush output.
     $| = 1;
 
-    # Put an "exec" in front of the command so that the child process
-    # keeps this child's process ID by being tied to the spawned shell.
-    exec("exec $cmd") || die "Can't exec() $cmd: $!";
-    # exec() will create a new process, but ties the existence of the
-    # new process to the parent waiting perl.exe and sh.exe processes.
+    if($^O eq 'MSWin32') {
+        print "secureserver: $^O: Executing: '$cmd'\n";
+        exec("$cmd") || die "Can't exec() $cmd: $!";
+    }
+    else {
+        # Put an "exec" in front of the command so that the child process
+        # keeps this child's process ID by being tied to the spawned shell.
+        print "secureserver: $^O: Executing: exec '$cmd'\n";
+        exec("exec $cmd") || die "Can't exec() $cmd: $!";
+        # exec() will create a new process, but ties the existence of the
+        # new process to the parent waiting perl.exe and sh.exe processes.
+    }
 
     # exec() should never return back here to this process. We protect
     # ourselves by calling die() just in case something goes really bad.
@@ -374,7 +381,9 @@ if($tstunnel_windows) {
 #***************************************************************************
 # Run stunnel.
 #
+print "secureserver: $^O: Executing: '$cmd'\n";
 my $rc = system($cmd);
+print "secureserver: $^O: Result: $rc\n";
 
 $rc >>= 8;
 
