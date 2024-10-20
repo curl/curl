@@ -933,6 +933,9 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
   struct websocket *ws;
   struct ws_collect ctx;
 
+  *nread = 0;
+  *metap = NULL;
+
   if(!conn) {
     /* Unhappy hack with lifetimes of transfers and connection */
     if(!data->set.connect_only) {
@@ -952,8 +955,6 @@ CURL_EXTERN CURLcode curl_ws_recv(CURL *d, void *buffer,
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
-  *nread = 0;
-  *metap = NULL;
 
   memset(&ctx, 0, sizeof(ctx));
   ctx.data = data;
