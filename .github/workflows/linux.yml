@@ -419,6 +419,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'openssltsan3') && steps.cache-openssltsan3.outputs.cache-hit != 'true'
         # There are global data race in openssl:
         # Cherry-Pick the fix for testing https://github.com/openssl/openssl/pull/24782
+        # Drop this when bumping to OpenSSL 3.4.0 or upper.
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
