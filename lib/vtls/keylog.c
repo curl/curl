@@ -27,7 +27,8 @@
   defined(USE_GNUTLS) || \
   defined(USE_WOLFSSL) || \
   (defined(USE_NGTCP2) && defined(USE_NGHTTP3)) || \
-  defined(USE_QUICHE)
+  defined(USE_QUICHE) || \
+  defined(USE_RUSTLS)
 
 #include "keylog.h"
 #include <curl/curl.h>
