@@ -160,32 +160,30 @@ jobs:
 
           - name: openssl3
             install_packages: zlib1g-dev
-            install_steps: gcc-11 openssl3 pytest
-            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
+            install_steps: gcc-11 pytest
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
           - name: openssl3 -O3 valgrind
             install_packages: zlib1g-dev valgrind
-            install_steps: gcc-11 openssl3
-            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
+            install_steps: gcc-11
+            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 --with-openssl --enable-debug
 
           - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
-            install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug
+            configure: CC=clang --with-openssl --with-gssapi --enable-debug
 
           - name: openssl3 clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
-            install_steps: openssl3
-            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
 
           - name: openssl3 !ipv6
-            install_steps: gcc-11 openssl3
-            configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-ipv6 --disable-unity
+            install_steps: gcc-11
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity
 
           - name: openssl3 https-only
-            install_steps: gcc-11 openssl3
+            install_steps: gcc-11
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-unity
+              --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
               --disable-rtmp --disable-rtsp
@@ -410,24 +408,6 @@ jobs:
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .
           cmake --install .
-
-      - name: cache openssl3
-        if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
-        id: cache-openssl3
-        env:
-          cache-name: cache-openssl3
-        with:
-          path: /home/runner/openssl3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
-
-      - name: 'install openssl3'
-        if: contains(matrix.build.install_steps, 'openssl3') && steps.cache-openssl3.outputs.cache-hit != 'true'
-        run: |
-          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
-          cd openssl
-          ./config --prefix=$HOME/openssl3 --libdir=lib
-          make -j1 install_sw
 
       - name: cache openssltsan3
         if: contains(matrix.build.install_steps, 'openssltsan3')
