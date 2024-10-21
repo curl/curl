@@ -52,7 +52,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   awslc-version: 1.37.0
   # handled in renovate.json
-  openssl3-version: openssl-3.1.3
+  openssl3-version: openssl-3.3.2
   # unhandled
   quictls-version: 3.3.0-quic1
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
@@ -158,41 +158,36 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
-          - name: openssl3
+          - name: openssl
             install_packages: zlib1g-dev
-            install_steps: gcc-11 openssl3 pytest
-            configure: CFLAGS=-std=gnu89 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
+            install_steps: pytest
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl3 -O3 valgrind
+          - name: openssl -O3 valgrind
             install_packages: zlib1g-dev valgrind
-            install_steps: gcc-11 openssl3
-            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug
+            configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 --with-openssl --enable-debug
 
-          - name: openssl3 clang krb5
+          - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
-            install_steps: openssl3
-            configure: CC=clang LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --with-gssapi --enable-debug
+            configure: CC=clang --with-openssl --with-gssapi --enable-debug
 
-          - name: openssl3 clang krb5
+          - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
-            install_steps: openssl3
-            generate: -DOPENSSL_ROOT_DIR=$HOME/openssl3 -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
+            install_steps: skipall
+            generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
 
-          - name: openssl3 !ipv6
-            install_steps: gcc-11 openssl3
-            configure: LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-ipv6 --disable-unity
+          - name: openssl !ipv6
+            configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity
 
-          - name: openssl3 https-only
-            install_steps: gcc-11 openssl3
+          - name: openssl https-only
             configure: >-
-              LDFLAGS="-Wl,-rpath,$HOME/openssl3/lib" --with-openssl=$HOME/openssl3 --enable-debug --disable-unity
+              --with-openssl --enable-debug --disable-unity
               --disable-dict --disable-gopher --disable-ldap --disable-telnet
               --disable-imap --disable-pop3 --disable-smtp
               --disable-rtmp --disable-rtsp
               --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
 
           - name: '!ssl !http !smtp !imap'
-            install_steps: gcc-11
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: scanbuild
@@ -246,13 +241,8 @@ jobs:
             PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
             generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
 
-          - name: IntelC !SSL
-            install_packages: zlib1g-dev
-            install_steps: intel
-            configure: CC=icc --enable-debug --without-ssl
-
-          - name: IntelC openssl valgrind
-            install_packages: zlib1g-dev libssl-dev valgrind
+          - name: IntelC openssl
+            install_packages: zlib1g-dev libssl-dev
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
 
@@ -298,17 +288,6 @@ jobs:
         # See https://github.com/actions/runner-images/issues/9491
         continue-on-error: true
         run: sudo sysctl vm.mmap_rnd_bits=28
-
-      - if: contains(matrix.build.install_steps, 'gcc-11')
-        run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
-          sudo apt-get update
-          sudo apt-get install gcc-11
-          sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-11 100
-          sudo update-alternatives --set gcc /usr/bin/gcc-11
-          gcc --version
-        name: 'install gcc-11'
 
       - name: cache bearssl
         if: contains(matrix.build.install_steps, 'bearssl')
@@ -411,24 +390,6 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: cache openssl3
-        if: contains(matrix.build.install_steps, 'openssl3')
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
-        id: cache-openssl3
-        env:
-          cache-name: cache-openssl3
-        with:
-          path: /home/runner/openssl3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}
-
-      - name: 'install openssl3'
-        if: contains(matrix.build.install_steps, 'openssl3') && steps.cache-openssl3.outputs.cache-hit != 'true'
-        run: |
-          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
-          cd openssl
-          ./config --prefix=$HOME/openssl3 --libdir=lib
-          make -j1 install_sw
-
       - name: cache openssltsan3
         if: contains(matrix.build.install_steps, 'openssltsan3')
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
@@ -443,6 +404,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'openssltsan3') && steps.cache-openssltsan3.outputs.cache-hit != 'true'
         # There are global data race in openssl:
         # Cherry-Pick the fix for testing https://github.com/openssl/openssl/pull/24782
+        # Drop this when bumping to OpenSSL 3.4.0 or upper.
         run: |
           git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
