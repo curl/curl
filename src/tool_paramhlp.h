@@ -26,9 +26,13 @@
 #include "tool_setup.h"
 #include "tool_libinfo.h"
 
+#define FILELIMIT_START 2
+#define FILELIMIT_END 1
+
 struct getout *new_getout(struct OperationConfig *config);
 
-ParameterError file2string(char **bufp, FILE *file);
+ParameterError file2string(char **bufp, FILE *file, int filelimit,
+                           curl_off_t start, curl_off_t end);
 
 #if SIZEOF_SIZE_T > 4
 #define MAX_FILE2MEMORY (16LL*1024*1024*1024)
@@ -36,7 +40,12 @@ ParameterError file2string(char **bufp, FILE *file);
 #define MAX_FILE2MEMORY (INT_MAX)
 #endif
 
-ParameterError file2memory(char **bufp, size_t *size, FILE *file);
+int textmode_fseek(FILE *stream, curl_off_t offset, int whence);
+int filename_extract_limits(char *filename, curl_off_t *start,
+                            curl_off_t *end);
+
+ParameterError file2memory(char **bufp, size_t *size, FILE *file,
+                           int filelimit, curl_off_t start, curl_off_t end);
 
 ParameterError str2num(long *val, const char *str);
 ParameterError str2unum(long *val, const char *str);
