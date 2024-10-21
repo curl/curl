@@ -158,29 +158,29 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
-          - name: openssl3
+          - name: openssl
             install_packages: zlib1g-dev
             install_steps: gcc-11 pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl3 -O3 valgrind
+          - name: openssl -O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 --with-openssl --enable-debug
 
-          - name: openssl3 clang krb5
+          - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             configure: CC=clang --with-openssl --with-gssapi --enable-debug
 
-          - name: openssl3 clang krb5
+          - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
 
-          - name: openssl3 !ipv6
+          - name: openssl !ipv6
             install_steps: gcc-11
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity
 
-          - name: openssl3 https-only
+          - name: openssl https-only
             install_steps: gcc-11
             configure: >-
               --with-openssl --enable-debug --disable-unity
