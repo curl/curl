@@ -466,7 +466,7 @@ include(CheckCSourceCompiles)
 
 # Preload settings on Windows
 if(WIN32)
-  include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
 endif()
 
 if(ENABLE_THREADED_RESOLVER)
