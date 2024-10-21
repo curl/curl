@@ -158,12 +158,12 @@ jobs:
             install_steps: pytest
             configure: --with-openssl --enable-debug --disable-threaded-resolver --with-libssh2
 
-          - name: openssl
+          - name: openssl gcc-11
             install_packages: zlib1g-dev
             install_steps: gcc-11 pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl -O3 valgrind
+          - name: openssl gcc-11 -O3 valgrind
             install_packages: zlib1g-dev valgrind
             install_steps: gcc-11
             configure: CPPFLAGS=-DCURL_WARN_SIGN_CONVERSION CFLAGS=-O3 --with-openssl --enable-debug
@@ -176,11 +176,11 @@ jobs:
             install_packages: zlib1g-dev libkrb5-dev clang
             generate: -DCURL_USE_OPENSSL=ON -DCURL_USE_GSSAPI=ON -DENABLE_DEBUG=ON
 
-          - name: openssl !ipv6
+          - name: openssl gcc-11 !ipv6
             install_steps: gcc-11
             configure: --with-openssl --disable-ipv6 --enable-debug --disable-unity
 
-          - name: openssl https-only
+          - name: openssl gcc-11 https-only
             install_steps: gcc-11
             configure: >-
               --with-openssl --enable-debug --disable-unity
@@ -189,7 +189,7 @@ jobs:
               --disable-rtmp --disable-rtsp
               --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
 
-          - name: '!ssl !http !smtp !imap'
+          - name: 'gcc-11 !ssl !http !smtp !imap'
             install_steps: gcc-11
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
