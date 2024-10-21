@@ -244,11 +244,6 @@ jobs:
             PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
             generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
 
-          - name: IntelC !SSL
-            install_packages: zlib1g-dev
-            install_steps: intel
-            configure: CC=icc --enable-debug --without-ssl
-
           - name: IntelC openssl
             install_packages: zlib1g-dev libssl-dev
             install_steps: intel
