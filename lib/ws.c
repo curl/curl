@@ -396,10 +396,13 @@ static ssize_t ws_cw_dec_next(const unsigned char *buf, size_t buflen,
   struct ws_cw_dec_ctx *ctx = user_data;
   struct Curl_easy *data = ctx->data;
   struct websocket *ws = ctx->ws;
+  bool auto_pong;
   curl_off_t remain = (payload_len - (payload_offset + buflen));
 
   (void)frame_age;
-  if((frame_flags & CURLWS_PING) && !remain) {
+
+  auto_pong = !data->set.ws_no_auto_pong;
+  if(auto_pong && (frame_flags & CURLWS_PING) && !remain) {
     /* auto-respond to PINGs, only works for single-frame payloads atm */
     size_t bytes;
     infof(data, "WS: auto-respond to PING with a PONG");
