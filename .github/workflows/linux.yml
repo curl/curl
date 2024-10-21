@@ -249,8 +249,8 @@ jobs:
             install_steps: intel
             configure: CC=icc --enable-debug --without-ssl
 
-          - name: IntelC openssl valgrind
-            install_packages: zlib1g-dev libssl-dev valgrind
+          - name: IntelC openssl
+            install_packages: zlib1g-dev libssl-dev
             install_steps: intel
             configure: CC=icc --enable-debug --with-openssl
 
