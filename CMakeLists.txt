@@ -1851,7 +1851,7 @@ include(GNUInstallDirs)
 
 set(CURL_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
-set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
+set(_generated_dir "${PROJECT_BINARY_DIR}/generated")
 set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
 set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
@@ -2169,9 +2169,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
   configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/curl-config.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/curl-config" @ONLY)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/curl-config"
+    "${PROJECT_SOURCE_DIR}/curl-config.in"
+    "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/curl-config"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     PERMISSIONS
       OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -2200,9 +2200,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html
   #   https://www.msys2.org/docs/pkgconfig/
   configure_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/libcurl.pc.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/libcurl.pc" @ONLY)
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/libcurl.pc"
+    "${PROJECT_SOURCE_DIR}/libcurl.pc.in"
+    "${PROJECT_BINARY_DIR}/libcurl.pc" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/libcurl.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
   # Install headers
