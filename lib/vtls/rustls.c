@@ -38,6 +38,7 @@
 #include "vtls.h"
 #include "vtls_int.h"
 #include "rustls.h"
+#include "keylog.h"
 #include "strerror.h"
 #include "cipher_suite.h"
 #include "x509asn1.h"
@@ -518,6 +519,19 @@ add_ciphers:
   *selected_size = count;
 }
 
+static void
+cr_keylog_log_cb(struct rustls_str label,
+                 const uint8_t *client_random, size_t client_random_len,
+                 const uint8_t *secret, size_t secret_len)
+{
+  char clabel[KEYLOG_LABEL_MAXLEN];
+  (void)client_random_len;
+  DEBUGASSERT(client_random_len == CLIENT_RANDOM_SIZE);
+  /* Turning a "rustls_str" into a null delimited "c" string */
+  msnprintf(clabel, label.len + 1, "%.*s", (int)label.len, label.data);
+  Curl_tls_keylog_write(clabel, client_random, secret, secret_len);
+}
+
 static CURLcode
 init_config_builder(struct Curl_easy *data,
                     const struct ssl_primary_config *conn_config,
@@ -775,6 +789,29 @@ cleanup:
 }
 
 static CURLcode
+init_config_builder_keylog(struct Curl_easy *data,
+                           struct rustls_client_config_builder *builder)
+{
+  rustls_result rr;
+
+  Curl_tls_keylog_open();
+  if(!Curl_tls_keylog_enabled()) {
+    return CURLE_OK;
+  }
+
+  rr = rustls_client_config_builder_set_key_log(builder,
+                                                cr_keylog_log_cb,
+                                                NULL);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls_client_config_builder_set_key_log");
+    Curl_tls_keylog_close();
+    return map_error(rr);
+  }
+
+  return CURLE_OK;
+}
+
+static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
@@ -817,6 +854,12 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
       rustls_client_config_builder_free(config_builder);
       return result;
     }
+  }
+
+  result = init_config_builder_keylog(data, config_builder);
+  if(result != CURLE_OK) {
+    rustls_client_config_builder_free(config_builder);
+    return result;
   }
 
   rr = rustls_client_config_builder_build(
@@ -1125,6 +1168,11 @@ cr_random(struct Curl_easy *data, unsigned char *entropy, size_t length)
   return map_error(rresult);
 }
 
+static void cr_cleanup(void)
+{
+  Curl_tls_keylog_close();
+}
+
 const struct Curl_ssl Curl_ssl_rustls = {
   { CURLSSLBACKEND_RUSTLS, "rustls" },
   SSLSUPP_CAINFO_BLOB |            /* supports */
@@ -1135,7 +1183,7 @@ const struct Curl_ssl Curl_ssl_rustls = {
   sizeof(struct rustls_ssl_backend_data),
 
   NULL,                            /* init */
-  NULL,                            /* cleanup */
+  cr_cleanup,                      /* cleanup */
   cr_version,                      /* version */
   cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
