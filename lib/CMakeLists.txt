@@ -39,8 +39,8 @@ list(APPEND HHEADERS "${CMAKE_CURRENT_BINARY_DIR}/curl_config.h")
 # The rest of the build
 
 include_directories(
-  "${CMAKE_CURRENT_BINARY_DIR}"
-  "${CMAKE_CURRENT_SOURCE_DIR}"
+  "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
+  "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
 )
 if(USE_ARES)
   include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
@@ -112,7 +112,7 @@ if(SHARE_LIB_OBJECT)
 
   target_include_directories(${LIB_OBJECT} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
   set(LIB_SOURCE $<TARGET_OBJECTS:${LIB_OBJECT}>)
 else()
@@ -145,7 +145,7 @@ if(BUILD_STATIC_LIBS)
 
   target_include_directories(${LIB_STATIC} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 endif()
 
 if(BUILD_SHARED_LIBS)
@@ -163,7 +163,7 @@ if(BUILD_SHARED_LIBS)
   if(WIN32)
     set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "libcurl.rc")
     if(CURL_HIDES_PRIVATE_SYMBOLS)
-      set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${CURL_SOURCE_DIR}/lib/libcurl.def")
+      set_property(TARGET ${LIB_SHARED} APPEND PROPERTY SOURCES "${PROJECT_SOURCE_DIR}/lib/libcurl.def")
     endif()
   endif()
   target_link_libraries(${LIB_SHARED} PRIVATE ${CURL_LIBS})
@@ -184,7 +184,7 @@ if(BUILD_SHARED_LIBS)
 
   target_include_directories(${LIB_SHARED} INTERFACE
     "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
-    "$<BUILD_INTERFACE:${CURL_SOURCE_DIR}/include>")
+    "$<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>")
 
   if(CMAKE_DLL_NAME_WITH_SOVERSION OR
     CYGWIN OR

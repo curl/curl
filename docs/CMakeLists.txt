@@ -31,7 +31,7 @@ endif()
 
 if(BUILD_MISC_DOCS)
   foreach(_man_misc IN ITEMS "curl-config" "mk-ca-bundle")
-    set(_man_target "${CURL_BINARY_DIR}/docs/${_man_misc}.1")
+    set(_man_target "${CMAKE_CURRENT_BINARY_DIR}/${_man_misc}.1")
     add_custom_command(OUTPUT "${_man_target}"
       WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
       COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/cd2nroff" "${_man_misc}.md" > "${_man_target}"

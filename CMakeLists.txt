@@ -137,7 +137,7 @@ else()
   set(OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
-include_directories("${CURL_SOURCE_DIR}/include")
+include_directories("${PROJECT_SOURCE_DIR}/include")
 
 if(NOT DEFINED CMAKE_UNITY_BUILD_BATCH_SIZE)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
@@ -466,7 +466,7 @@ include(CheckCSourceCompiles)
 
 # Preload settings on Windows
 if(WIN32)
-  include(${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
 endif()
 
 if(ENABLE_THREADED_RESOLVER)
@@ -1676,7 +1676,7 @@ endif()
 
 # Include this header to get the type
 cmake_push_check_state()
-set(CMAKE_REQUIRED_INCLUDES "${CURL_SOURCE_DIR}/include")
+set(CMAKE_REQUIRED_INCLUDES "${PROJECT_SOURCE_DIR}/include")
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/system.h")
 check_type_size("curl_off_t" SIZEOF_CURL_OFF_T)
 set(CMAKE_EXTRA_INCLUDE_FILES "curl/curl.h")
@@ -1831,8 +1831,8 @@ endif()
 # (= regenerate it).
 function(transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
-  string(REPLACE "$(top_srcdir)"   "\${CURL_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
-  string(REPLACE "$(top_builddir)" "\${CURL_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
+  string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
 
   string(REGEX REPLACE "\\\\\n" "!π!α!" _makefile_inc_text ${_makefile_inc_text})
   string(REGEX REPLACE "([a-zA-Z_][a-zA-Z0-9_]*)[\t ]*=[\t ]*([^\n]*)" "set(\\1 \\2)" _makefile_inc_text ${_makefile_inc_text})
@@ -1860,8 +1860,8 @@ cmake_dependent_option(BUILD_TESTING "Build tests"
   OFF)
 
 if(HAVE_MANUAL_TOOLS)
-  set(CURL_MANPAGE "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.1")
-  set(CURL_ASCIIPAGE "${CURL_BINARY_DIR}/docs/cmdline-opts/curl.txt")
+  set(CURL_MANPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.1")
+  set(CURL_ASCIIPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.txt")
   add_subdirectory(docs)
 endif()
 
@@ -2169,9 +2169,9 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
   configure_file(
-    "${CURL_SOURCE_DIR}/curl-config.in"
-    "${CURL_BINARY_DIR}/curl-config" @ONLY)
-  install(FILES "${CURL_BINARY_DIR}/curl-config"
+    "${PROJECT_SOURCE_DIR}/curl-config.in"
+    "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/curl-config"
     DESTINATION ${CMAKE_INSTALL_BINDIR}
     PERMISSIONS
       OWNER_READ OWNER_WRITE OWNER_EXECUTE
@@ -2200,13 +2200,13 @@ if(NOT CURL_DISABLE_INSTALL)
   #   https://manpages.debian.org/unstable/pkg-config/pkg-config.1.en.html
   #   https://www.msys2.org/docs/pkgconfig/
   configure_file(
-    "${CURL_SOURCE_DIR}/libcurl.pc.in"
-    "${CURL_BINARY_DIR}/libcurl.pc" @ONLY)
-  install(FILES "${CURL_BINARY_DIR}/libcurl.pc"
+    "${PROJECT_SOURCE_DIR}/libcurl.pc.in"
+    "${PROJECT_BINARY_DIR}/libcurl.pc" @ONLY)
+  install(FILES "${PROJECT_BINARY_DIR}/libcurl.pc"
     DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig")
 
   # Install headers
-  install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/include/curl"
+  install(DIRECTORY "${PROJECT_SOURCE_DIR}/include/curl"
     DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
     FILES_MATCHING PATTERN "*.h")
 
@@ -2297,7 +2297,7 @@ buildinfo.compiler: ${CMAKE_C_COMPILER_ID}
 buildinfo.compiler.version: ${CMAKE_C_COMPILER_VERSION}
 buildinfo.sysroot: ${_cmake_sysroot}
 ")
-file(WRITE "${CMAKE_CURRENT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
+file(WRITE "${PROJECT_BINARY_DIR}/buildinfo.txt" "# This is a generated file.  Do not edit.\n${_buildinfo}")
 if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   message(STATUS "\n${_buildinfo}")
 endif()
