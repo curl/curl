@@ -598,7 +598,7 @@ jobs:
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -n '${{ matrix.build.torture }}' ]; then
-            TFLAGS+=' -j10'
+            TFLAGS+=' -j20'
           else
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
