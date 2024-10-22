@@ -50,9 +50,9 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   awslc-version: 1.37.0
   # handled in renovate.json
-  openssl3-version: openssl-3.3.2
-  # unhandled
-  quictls-version: 3.3.0-quic1
+  openssl3-version: 3.3.2
+  # handled in renovate.json
+  quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
   rustls-version: 0.14.0
 
@@ -439,7 +439,7 @@ jobs:
         # Cherry-Pick the fix for testing https://github.com/openssl/openssl/pull/24782
         # Drop this when bumping to OpenSSL 3.4.0 or upper.
         run: |
-          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
           git fetch --quiet --depth=2 origin d8def79838cd0d5e7c21d217aa26edb5229f0ab4
           git cherry-pick -n d8def79838cd0d5e7c21d217aa26edb5229f0ab4
@@ -454,12 +454,12 @@ jobs:
           cache-name: cache-quictls
         with:
           path: /home/runner/quictls
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
 
       - name: 'build quictls'
         if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
           cd openssl
           ./config --prefix=$HOME/quictls --libdir=lib
           make -j1 install_sw

@@ -43,9 +43,9 @@ permissions: {}
 env:
   MAKEFLAGS: -j 5
   # handled in renovate.json
-  openssl3-version: openssl-3.3.0
-  # unhandled
-  quictls-version: 3.3.0-quic1
+  openssl3-version: 3.3.0
+  # handled in renovate.json
+  quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   gnutls-version: 3.8.7
   wolfssl-version: master
@@ -96,7 +96,7 @@ jobs:
           cache-name: cache-quictls-no-deprecated
         with:
           path: /home/runner/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
 
       - name: cache gnutls
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
@@ -173,7 +173,7 @@ jobs:
       - if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }} https://github.com/quictls/openssl quictls
+          git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl quictls
           cd quictls
           ./config no-deprecated --prefix=$PWD/build --libdir=lib
           make
@@ -408,7 +408,7 @@ jobs:
       - name: 'install openssl3'
         if: matrix.build.name == 'openssl-quic' && steps.cache-openssl3.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b ${{ env.openssl3-version }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.openssl3-version }} https://github.com/openssl/openssl
           cd openssl
           ./config --prefix=$HOME/openssl3/build
           make -j1 install_sw
