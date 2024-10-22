@@ -185,13 +185,13 @@ jobs:
               --disable-rtmp --disable-rtsp
               --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
 
-          - name: 'OpenSSL torture !FTP'
+          - name: openssl torture !FTP
             install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=25 !FTP
             torture: true
 
-          - name: 'OpenSSL torture FTP'
+          - name: openssl torture FTP
             install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=20 FTP
