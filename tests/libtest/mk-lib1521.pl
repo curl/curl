@@ -441,7 +441,7 @@ MOO
 MOO
             ;
         my $flongcheckzero = <<MOO
-    if(first && present(first) && !bad_long(res,
+    if(first && present(first) && !bad_long(first,
        $name))
       errlongzero("$name", first, __LINE__);
 MOO
@@ -594,7 +594,6 @@ MOO
 
 print $fh <<FOOTER
   )
-
   curl_easy_setopt(curl, (CURLoption)1, 0);
   res = CURLE_OK;
 test_cleanup:
