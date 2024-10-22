@@ -41,7 +41,7 @@ jobs:
   #
   #      - name: install prereqs
   #        run: |
-  #          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/azure-cli.sources
+  #          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
   #          sudo apt-get install -y --no-install-suggests --no-install-recommends \
   #            python3-proselint
   #
