@@ -336,7 +336,6 @@ class TestSSLUse:
         ])
         r.check_exit_code(0)
         # check that TLS session was reused as expected
-        earlydata = {}
         reused_session = False
         for line in r.trace_lines:
             m = re.match(r'\[1-1] \* SSL reusing session.*', line)
