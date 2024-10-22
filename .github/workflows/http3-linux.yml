@@ -57,8 +57,6 @@ env:
   nghttp2-version: 1.62.1
   # renovate: datasource=github-tags depName=cloudflare/quiche versioning=semver registryUrl=https://github.com
   quiche-version: 0.22.0
-  # renovate: datasource=github-tags depName=icing/mod_h2 versioning=semver registryUrl=https://github.com
-  mod_h2-version: 2.0.29
 
 jobs:
   setup:
@@ -516,30 +514,6 @@ jobs:
       - name: 'install pytest prereqs'
         run: |
           sudo python3 -m pip install --break-system-packages -r tests/http/requirements.txt
-
-      - name: cache mod_h2
-        uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
-        id: cache-mod_h2
-        env:
-          cache-name: cache-mod_h2
-        with:
-          path: /home/runner/mod_h2
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.mod_h2-version }}
-
-      - name: 'build mod_h2'
-        if: steps.cache-mod_h2.outputs.cache-hit != 'true'
-        run: |
-          cd $HOME
-          git clone --quiet --depth=1 -b v${{ env.mod_h2-version }} https://github.com/icing/mod_h2
-          cd mod_h2
-          autoreconf -fi
-          ./configure
-          make
-
-      - name: 'install mod_h2'
-        run: |
-          cd $HOME/mod_h2
-          sudo make install
 
       - name: 'run pytest'
         env:
