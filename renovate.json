@@ -80,8 +80,21 @@
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "openssl/openssl",
       "versioningTemplate": "semver",
-      "extractVersionTemplate": "^openssl-(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)$",
-      "registryUrlTemplate": "https://github.com"
+      "extractVersionTemplate": "^openssl-(?<version>.*)$"
+    },
+    {
+      "customType": "regex",
+      "fileMatch": [
+        "^.github/workflows/linux.yml$",
+        "^.github/workflows/http3-linux.yml$"
+      ],
+      "matchStrings": [
+        "quictls-version: (?<currentValue>.*)\\s"
+      ],
+      "datasourceTemplate": "github-tags",
+      "depNameTemplate": "quictls/openssl",
+      "versioningTemplate": "semver",
+      "extractVersionTemplate": "^openssl-(?<version>.*)-quic1$"
     }
   ]
 }
