@@ -42,7 +42,8 @@ jobs:
   #      - name: install prereqs
   #        run: |
   #          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-  #          sudo apt-get install python3-proselint
+  #          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+  #            python3-proselint
   #
   #      # config file help: https://github.com/amperser/proselint/
   #      - name: create proselint config
