@@ -294,7 +294,6 @@ class TestDownload:
                       remote_ip='127.0.0.1')
 
     @pytest.mark.skipif(condition=Env().slow_network, reason="not suitable for slow network tests")
-    @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     def test_02_20_h2_small_frames(self, env: Env, httpd, repeat):
         # Test case to reproduce content corruption as observed in
         # https://github.com/curl/curl/issues/10525
