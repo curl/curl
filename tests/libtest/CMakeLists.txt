@@ -30,18 +30,18 @@ set_source_files_properties("../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_B
 
 add_custom_command(
   OUTPUT "lib1521.c"
-  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${CURL_SOURCE_DIR}/include/curl/curl.h" "lib1521.c"
+  COMMAND ${PERL_EXECUTABLE} "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl" < "${PROJECT_SOURCE_DIR}/include/curl/curl.h" "lib1521.c"
   DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/mk-lib1521.pl"
-    "${CURL_SOURCE_DIR}/include/curl/curl.h"
+    "${PROJECT_SOURCE_DIR}/include/curl/curl.h"
   VERBATIM)
 
 if(CURL_TEST_BUNDLES)
   add_custom_command(
     OUTPUT "libtest_bundle.c"
-    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" "${CMAKE_CURRENT_SOURCE_DIR}" > "libtest_bundle.c"
     DEPENDS
-      "${CURL_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} "lib1521.c"
+      "${PROJECT_SOURCE_DIR}/tests/mk-bundle.pl" ${FIRSTFILES} "lib1521.c"
       "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
     VERBATIM)
 
@@ -72,9 +72,9 @@ foreach(_target IN LISTS LIBTESTPROGS)
   add_dependencies(testdeps ${_target_name})
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
   target_include_directories(${_target_name} PRIVATE
-    "${CURL_BINARY_DIR}/lib"            # for "curl_config.h"
-    "${CURL_SOURCE_DIR}/lib"            # for "curl_setup.h"
-    "${CURL_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
+    "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
+    "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
   if(NOT CURL_TEST_BUNDLES)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS ${_upper_target})
