@@ -132,7 +132,7 @@ TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON
 TEST_Q = -a -s
 TEST_AM = -a -am
 TEST_F = -a -p -r
-TEST_T = -a -t -j2
+TEST_T = -a -t -j20
 TEST_E = -a -e
 
 # ~<keyword> means that it will run all tests matching the keyword, but will
