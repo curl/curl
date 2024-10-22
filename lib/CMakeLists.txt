@@ -46,7 +46,7 @@ if(USE_ARES)
   include_directories(SYSTEM ${CARES_INCLUDE_DIRS})
 endif()
 
-if(BUILD_TESTING AND PERL_FOUND AND NOT CURL_DISABLE_TESTS)
+if(CURL_BUILD_TESTING)
   add_library(
     curlu  # special libcurlu library just for unittests
     STATIC
