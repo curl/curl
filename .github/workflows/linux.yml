@@ -186,13 +186,13 @@ jobs:
               --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
 
           - name: openssl torture !FTP
-            install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+            install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=25 !FTP
             torture: true
 
           - name: openssl torture FTP
-            install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+            install_packages: zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
             generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
             tflags: -t --shallow=20 FTP
             torture: true
@@ -241,12 +241,11 @@ jobs:
             tflags: -n -e '!TLS-SRP'
 
           - name: rustls valgrind
-            install_packages: libpsl-dev valgrind
+            install_packages: valgrind
             install_steps: rust rustls pytest
             configure: --with-rustls=$HOME/rustls --enable-debug
 
           - name: rustls
-            install_packages: libpsl-dev
             install_steps: rust rustls skipall
             PKG_CONFIG_PATH: '$HOME/rustls/lib/pkgconfig'  # Not built as of v0.14.0
             generate: -DCURL_USE_RUSTLS=ON -DRUSTLS_INCLUDE_DIR=$HOME/rustls/include -DRUSTLS_LIBRARY=$HOME/rustls/lib/librustls.a -DENABLE_DEBUG=ON
