@@ -342,4 +342,4 @@ class TestSSLUse:
             m = re.match(r'\[1-1] \* SSL reusing session.*', line)
             if m:
                 reused_session = True
-        assert reused_session
+        assert reused_session, f'{r}\n{r.dump_logs()}'
