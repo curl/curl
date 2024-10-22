@@ -48,5 +48,16 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct wolfssl_ctx *wssl);
 
+CURLcode wssl_setup_session(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct wolfssl_ctx *wss,
+                            struct ssl_peer *peer);
+
+CURLcode wssl_cache_session(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct ssl_peer *peer,
+                            WOLFSSL_SESSION *session);
+
+
 #endif /* USE_WOLFSSL */
 #endif /* HEADER_CURL_WOLFSSL_H */

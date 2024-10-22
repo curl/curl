@@ -370,13 +370,60 @@ static void wolfssl_bio_cf_free_methods(void)
 
 #endif /* !USE_BIO_CHAIN */
 
-static void wolfssl_session_free(void *sessionid, size_t idsize)
+static void wolfssl_session_free(void *sdata, size_t slen)
 {
-  (void)idsize;
-  wolfSSL_SESSION_free(sessionid);
+  (void)slen;
+  free(sdata);
 }
 
-static int wolfssl_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
+CURLcode wssl_cache_session(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct ssl_peer *peer,
+                            WOLFSSL_SESSION *session)
+{
+  CURLcode result = CURLE_OK;
+  unsigned char *sdata = NULL;
+  unsigned int slen;
+
+  if(!session)
+    goto out;
+
+  slen = wolfSSL_i2d_SSL_SESSION(session, NULL);
+  if(slen <= 0) {
+    CURL_TRC_CF(data, cf, "fail to assess session length: %u", slen);
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+  sdata = calloc(1, slen);
+  if(!sdata) {
+    failf(data, "unable to allocate session buffer of %u bytes", slen);
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+  slen = wolfSSL_i2d_SSL_SESSION(session, &sdata);
+  if(slen <= 0) {
+    CURL_TRC_CF(data, cf, "fail to serialize session: %u", slen);
+    result = CURLE_FAILED_INIT;
+    goto out;
+  }
+
+  Curl_ssl_sessionid_lock(data);
+  result = Curl_ssl_set_sessionid(cf, data, peer, NULL,
+                                  sdata, slen, wolfssl_session_free);
+  Curl_ssl_sessionid_unlock(data);
+  if(result)
+    failf(data, "failed to add new ssl session to cache (%d)", result);
+  else {
+    CURL_TRC_CF(data, cf, "added new session to cache");
+    sdata = NULL;
+  }
+
+out:
+  free(sdata);
+  return 0;
+}
+
+static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
 {
   struct Curl_cfilter *cf;
 
@@ -388,18 +435,44 @@ static int wolfssl_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     DEBUGASSERT(connssl);
     DEBUGASSERT(data);
     if(connssl && data) {
-      CURLcode result;
-      Curl_ssl_sessionid_lock(data);
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                      session, 0, wolfssl_session_free);
-      Curl_ssl_sessionid_unlock(data);
-      if(result)
-        failf(data, "failed to add new ssl session to cache (%d)", result);
-      else
-        CURL_TRC_CF(data, cf, "added new session to cache");
+      (void)wssl_cache_session(cf, data, &connssl->peer, session);
     }
   }
-  return 1;
+  return 0;
+}
+
+CURLcode wssl_setup_session(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            struct wolfssl_ctx *wss,
+                            struct ssl_peer *peer)
+{
+  void *psdata;
+  const unsigned char *sdata = NULL;
+  size_t slen = 0;
+  CURLcode result = CURLE_OK;
+
+  Curl_ssl_sessionid_lock(data);
+  if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen, NULL)) {
+    WOLFSSL_SESSION *session;
+    sdata = psdata;
+    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
+    if(session) {
+      int ret = wolfSSL_set_session(wss->handle, session);
+      if(ret != WOLFSSL_SUCCESS) {
+        Curl_ssl_delsessionid(data, psdata);
+        infof(data, "previous session not accepted (%d), "
+              "removing from cache", ret);
+      }
+      else
+        infof(data, "SSL reusing session ID");
+      wolfSSL_SESSION_free(session);
+    }
+    else {
+      failf(data, "could not decode previous session");
+    }
+  }
+  Curl_ssl_sessionid_unlock(data);
+  return result;
 }
 
 static CURLcode populate_x509_store(struct Curl_cfilter *cf,
@@ -1087,24 +1160,11 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
-    void *ssl_sessionid = NULL;
-
+    /* Set session from cache if there is one */
+    (void)wssl_setup_session(cf, data, backend, &connssl->peer);
     /* Register to get notified when a new session is received */
     wolfSSL_set_app_data(backend->handle, cf);
-    wolfSSL_CTX_sess_set_new_cb(backend->ctx, wolfssl_new_session_cb);
-
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              &ssl_sessionid, NULL, NULL)) {
-      /* we got a session id, use it! */
-      if(!SSL_set_session(backend->handle, ssl_sessionid)) {
-        Curl_ssl_delsessionid(data, ssl_sessionid);
-        infof(data, "cannot use session ID, going on without");
-      }
-      else
-        infof(data, "SSL reusing session ID");
-    }
-    Curl_ssl_sessionid_unlock(data);
+    wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);
   }
 
 #ifdef USE_ECH

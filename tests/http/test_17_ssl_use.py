@@ -27,9 +27,10 @@
 import json
 import logging
 import os
+import re
 import pytest
 
-from testenv import Env, CurlClient
+from testenv import Env, CurlClient, LocalClient
 
 
 log = logging.getLogger(__name__)
@@ -38,7 +39,8 @@ log = logging.getLogger(__name__)
 class TestSSLUse:
 
     @pytest.fixture(autouse=True, scope='class')
-    def _class_scope(self, env, nghttpx):
+    def _class_scope(self, env, httpd, nghttpx):
+        env.make_data_file(indir=httpd.docs_dir, fname="data-10k", fsize=10*1024)
         if env.have_h3():
             nghttpx.start_if_needed()
 
@@ -118,8 +120,6 @@ class TestSSLUse:
     def test_17_04_double_dot(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('wolfssl'):
-            pytest.skip("wolfSSL HTTP/3 peer verification does not properly check")
         curl = CurlClient(env=env)
         domain = f'{env.domain1}..'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
@@ -313,3 +313,31 @@ class TestSSLUse:
             assert r.json['SSL_PROTOCOL'] == tls_proto, r.dump_logs()
         else:
             assert r.exit_code != 0, f'extra_args={extra_args}\n{r.dump_logs()}'
+
+    def test_17_10_h3_session_reuse(self, env: Env, httpd, nghttpx):
+        if not env.have_h3():
+            pytest.skip("h3 not supported")
+        if not env.curl_uses_lib('quictls') and \
+            not env.curl_uses_lib('gnutls') and \
+            not env.curl_uses_lib('wolfssl'):
+            pytest.skip("QUIC session reuse not implemented")
+        count = 2
+        docname = 'data-10k'
+        url = f'https://localhost:{env.https_port}/{docname}'
+        client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',
+             '-f',  # forbid reuse of connections
+             '-r', f'{env.domain1}:{env.port_for("h3")}:127.0.0.1',
+             '-V', 'h3', url
+        ])
+        r.check_exit_code(0)
+        # check that TLS session was reused as expected
+        reused_session = False
+        for line in r.trace_lines:
+            m = re.match(r'\[1-1] \* SSL reusing session.*', line)
+            if m:
+                reused_session = True
+        assert reused_session, f'{r}\n{r.dump_logs()}'
