@@ -185,6 +185,18 @@ jobs:
               --disable-rtmp --disable-rtsp
               --disable-scp --disable-sftp --disable-tftp --disable-ftp --disable-file --disable-smb
 
+          - name: 'OpenSSL torture !FTP'
+            install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
+            tflags: -t --shallow=25 !FTP
+            torture: true
+
+          - name: 'OpenSSL torture FTP'
+            install_packages: libpsl-dev libbrotli-dev libzstd-dev zlib1g-dev libnghttp2-dev libssh2-1-dev libc-ares-dev
+            generate: -DCURL_USE_OPENSSL=ON -DENABLE_DEBUG=ON -DENABLE_ARES=ON
+            tflags: -t --shallow=20 FTP
+            torture: true
+
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
@@ -586,16 +598,20 @@ jobs:
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
-          if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
-            TFLAGS+=' -j6'
-          fi
-          if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
-            TFLAGS+=' ~2077 ~2078'  # valgrind errors
+          if [ -n '${{ matrix.build.torture }}' ]; then
+            TFLAGS+=' -j10'
+          else
+            if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
+              TFLAGS+=' -j6'
+            fi
+            if [[ '${{ matrix.build.install_packages }}' = *'heimdal-dev'* ]]; then
+              TFLAGS+=' ~2077 ~2078'  # valgrind errors
+            fi
           fi
           if [ -n '${{ matrix.build.generate }}' ]; then
-            cmake --build . --verbose --target test-ci
+            cmake --build . --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
-            make V=1 test-ci
+            make V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           fi
 
       - name: 'install pytest prereqs'
