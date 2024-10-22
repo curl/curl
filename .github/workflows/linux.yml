@@ -279,6 +279,7 @@ jobs:
     steps:
       - if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
         run: |
+          find . /etc/apt/
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
