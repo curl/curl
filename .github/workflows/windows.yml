@@ -641,7 +641,7 @@ jobs:
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_GSASL=ON -DENABLE_ARES=OFF -DCURL_USE_LIBUV=ON
+              -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON
 
           - name: 'openssl'
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
