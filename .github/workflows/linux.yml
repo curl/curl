@@ -284,6 +284,7 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
             libtool autoconf automake pkgconf stunnel4 \
+            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${{ matrix.build.install_packages }}
         name: 'install prereqs'
 
