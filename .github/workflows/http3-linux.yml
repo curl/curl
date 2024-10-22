@@ -43,7 +43,7 @@ permissions: {}
 env:
   MAKEFLAGS: -j 5
   # handled in renovate.json
-  openssl3-version: openssl-3.3.0
+  openssl3-version: openssl-3.3.2
   # unhandled
   quictls-version: 3.3.0-quic1
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
