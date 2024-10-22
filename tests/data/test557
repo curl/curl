@@ -41,6 +41,7 @@ All curl_mprintf() signed long tests OK!
 All curl_mprintf() curl_off_t tests OK!
 All curl_mprintf() strings tests OK!
 All float strings tests OK!
+All curl_mprintf() octal & hexadecimal tests OK!
 </stdout>
 </verify>
 

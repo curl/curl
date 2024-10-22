@@ -456,12 +456,12 @@ static int parsefmt(const char *format,
         break;
       case 'o':
         if(flags & FLAGS_LONGLONG)
-          type = FORMAT_LONGLONG;
+          type = FORMAT_LONGLONGU;
         else if(flags & FLAGS_LONG)
-          type = FORMAT_LONG;
+          type = FORMAT_LONGU;
         else
-          type = FORMAT_INT;
-        flags |= FLAGS_OCTAL;
+          type = FORMAT_INTU;
+        flags |= FLAGS_OCTAL|FLAGS_UNSIGNED;
         break;
       case 'x':
         if(flags & FLAGS_LONGLONG)
