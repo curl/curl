@@ -339,9 +339,9 @@ jobs:
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
           if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld V=1 test-ci
+            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
-            cmake --build bld --target test-ci
+            cmake --build bld --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           fi
 
       - name: 'build examples'
