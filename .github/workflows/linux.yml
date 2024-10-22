@@ -281,7 +281,7 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
-          sudo apt-get install -y \
+          sudo apt-get install -y --no-install-suggests --no-install-recommends \
             libtool autoconf automake pkgconf ninja-build stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
@@ -300,7 +300,8 @@ jobs:
 
       - if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          sudo apt-get install apache2 apache2-dev libnghttp2-dev vsftpd
+          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+            apache2 apache2-dev libnghttp2-dev vsftpd
         name: 'install prereqs for pytest'
 
       - if: startsWith(matrix.build.container, 'alpine')
