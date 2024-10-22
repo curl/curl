@@ -1552,6 +1552,10 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
       *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
         curl_pflags="${curl_pflags} UNIX";;
     esac
+    case $host in
+      *-*-*bsd*)
+        curl_pflags="${curl_pflags} BSD";;
+    esac
   fi
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
