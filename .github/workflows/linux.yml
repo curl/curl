@@ -597,9 +597,7 @@ jobs:
         timeout-minutes: ${{ contains(matrix.build.install_packages, 'valgrind') && 30 || 15 }}
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
-          if [ -n '${{ matrix.build.torture }}' ]; then
-            TFLAGS+=' -j20'
-          else
+          if [ -z '${{ matrix.build.torture }}' ]; then
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
             fi
