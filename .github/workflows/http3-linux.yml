@@ -158,7 +158,7 @@ jobs:
       - name: install build prereqs
         if: steps.settings.outputs.needs-build == 'true'
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/azure-cli.sources
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
             libtool autoconf automake pkgconf stunnel4 \
@@ -319,7 +319,7 @@ jobs:
 
     steps:
       - run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/azure-cli.sources
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
             libtool autoconf automake ninja-build pkgconf stunnel4 \

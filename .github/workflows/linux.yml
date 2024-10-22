@@ -279,8 +279,7 @@ jobs:
     steps:
       - if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
         run: |
-          find . /etc/apt/
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/azure-cli.sources
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
             libtool autoconf automake pkgconf ninja-build stunnel4 \
@@ -290,7 +289,7 @@ jobs:
 
       - if: contains(matrix.build.name, 'i686')
         run: |
-          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list /etc/apt/sources.list.d/azure-cli.sources
           sudo dpkg --add-architecture i386
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
