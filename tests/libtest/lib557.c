@@ -1439,6 +1439,48 @@ static int test_float_formatting(void)
 
   return errors;
 }
+
+static int test_oct_hex_formatting(void)
+{
+  int errors = 0;
+  char buf[256];
+
+  curl_msnprintf(buf, sizeof(buf), "%ho %hx %hX", 0xFA10U, 0xFA10U, 0xFA10U);
+  errors += string_check(buf, "175020 fa10 FA10");
+
+#if (SIZEOF_INT == 2)
+  curl_msnprintf(buf, sizeof(buf), "%o %x %X", 0xFA10U, 0xFA10U, 0xFA10U);
+  errors += string_check(buf, "175020 fa10 FA10");
+#elif (SIZEOF_INT == 4)
+  curl_msnprintf(buf, sizeof(buf), "%o %x %X",
+                 0xFABC1230U, 0xFABC1230U, 0xFABC1230U);
+  errors += string_check(buf, "37257011060 fabc1230 FABC1230");
+#elif (SIZEOF_INT == 8)
+  curl_msnprintf(buf, sizeof(buf), "%o %x %X",
+                 0xFABCDEF123456780U, 0xFABCDEF123456780U, 0xFABCDEF123456780U);
+  errors += string_check(buf, "1752746757044321263600 fabcdef123456780 FABCDEF123456780");
+#endif
+
+#if (SIZEOF_LONG == 2)
+  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX", 0xFA10UL, 0xFA10UL, 0xFA10UL);
+  errors += string_check(buf, "175020 fa10 FA10");
+#elif (SIZEOF_LONG == 4)
+  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
+                 0xFABC1230UL, 0xFABC1230UL, 0xFABC1230UL);
+  errors += string_check(buf, "37257011060 fabc1230 FABC1230");
+#elif (SIZEOF_LONG == 8)
+  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
+                 0xFABCDEF123456780UL, 0xFABCDEF123456780UL, 0xFABCDEF123456780UL);
+  errors += string_check(buf, "1752746757044321263600 fabcdef123456780 FABCDEF123456780");
+#endif
+
+  if(!errors)
+    printf("All curl_mprintf() octal & hexadecimal tests OK!\n");
+  else
+    printf("Some curl_mprintf() octal & hexadecimal tests Failed!\n");
+
+  return errors;
+}
 /* !checksrc! enable LONGLINE */
 
 static int test_return_codes(void)
@@ -1506,6 +1548,8 @@ CURLcode test(char *URL)
   errors += test_string_formatting();
 
   errors += test_float_formatting();
+
+  errors += test_oct_hex_formatting();
 
   errors += test_return_codes();
 
