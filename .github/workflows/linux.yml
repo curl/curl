@@ -197,6 +197,16 @@ jobs:
             tflags: -t --shallow=20 FTP
             torture: true
 
+          - name: openssl i686
+            install_packages: gcc-14-i686-linux-gnu libssl-dev:i386 librtmp-dev:i386 libssh2-1-dev:i386 libidn2-0-dev:i386 libc-ares-dev:i386 zlib1g-dev:i386
+            configure: >-
+              PKG_CONFIG_PATH=/usr/lib/i386-linux-gnu/pkgconfig
+              CC=i686-linux-gnu-gcc-14
+              CPPFLAGS=-I/usr/include/i386-linux-gnu
+              LDFLAGS=-L/usr/lib/i386-linux-gnu
+              --host=i686-linux-gnu
+              --with-openssl --with-librtmp --with-libssh2 --with-libidn2 --enable-ares --enable-debug
+
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
@@ -267,11 +277,24 @@ jobs:
             container: 'alpine:3.18'
 
     steps:
-      - if: matrix.build.container == null
+      - if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
-          sudo apt-get install libtool autoconf automake ninja-build pkgconf stunnel4 libpsl-dev libbrotli-dev libzstd-dev \
+          sudo apt-get install -y \
+            libtool autoconf automake pkgconf ninja-build stunnel4 \
+            libpsl-dev libbrotli-dev libzstd-dev \
+            ${{ matrix.build.install_packages }}
+        name: 'install prereqs'
+
+      - if: contains(matrix.build.name, 'i686')
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo dpkg --add-architecture i386
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+            libtool autoconf automake pkgconf stunnel4 \
+            libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${{ matrix.build.install_packages }}
         name: 'install prereqs'
 
@@ -588,7 +611,7 @@ jobs:
           fi
 
       - name: 'install test prereqs'
-        if: ${{ matrix.build.install_steps != 'skipall' && !startsWith(matrix.build.container, 'alpine') && matrix.build.container == null }}
+        if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
         run: |
           sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
 
