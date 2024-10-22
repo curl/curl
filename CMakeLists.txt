@@ -1855,9 +1855,7 @@ set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
 set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
-cmake_dependent_option(BUILD_TESTING "Build tests"
-  ON "PERL_FOUND;NOT CURL_DISABLE_TESTS"
-  OFF)
+option(BUILD_TESTING "Build tests" ON)
 
 if(HAVE_MANUAL_TOOLS)
   set(CURL_MANPAGE "${PROJECT_BINARY_DIR}/docs/cmdline-opts/curl.1")
@@ -1876,7 +1874,7 @@ if(BUILD_EXAMPLES)
   add_subdirectory(docs/examples)
 endif()
 
-if(BUILD_TESTING)
+if(BUILD_TESTING AND PERL_FOUND AND NOT CURL_DISABLE_TESTS)
   add_subdirectory(tests)
 endif()
 
