@@ -727,6 +727,9 @@ jobs:
       - name: 'vcpkg versions'
         timeout-minutes: 1
         run: |
+          uname -a
+          cygpath -w ~ || true
+          cygpath -w / || true
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
