@@ -380,7 +380,6 @@ static int wolfssl_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
 {
   /* 0 means we do not hold a reference to the session on return */
   int ret = 0;
-#ifdef HAVE_SESSION_TICKET
   struct Curl_cfilter *cf;
 
   cf = (struct Curl_cfilter*)wolfSSL_get_app_data(ssl);
@@ -404,7 +403,6 @@ static int wolfssl_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
       }
     }
   }
-#endif
   return ret;
 }
 
@@ -1091,7 +1089,6 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif /* HAVE_SECURE_RENEGOTIATION */
 
-#ifdef HAVE_SESSION_TICKET
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
     void *ssl_sessionid = NULL;
@@ -1113,7 +1110,6 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
     Curl_ssl_sessionid_unlock(data);
   }
-#endif
 
 #ifdef USE_ECH
   if(ECH_ENABLED(data)) {
