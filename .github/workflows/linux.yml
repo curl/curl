@@ -277,7 +277,7 @@ jobs:
             container: 'alpine:3.18'
 
     steps:
-      - if: matrix.build.container == null
+      - if: matrix.build.container == null && !contains(matrix.build.name, 'i686')
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
