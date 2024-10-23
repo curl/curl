@@ -1821,11 +1821,11 @@ if(CURL_LTO)
   cmake_policy(SET CMP0069 NEW)
 
   include(CheckIPOSupported)
-  check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT CURL_LTO_ERROR LANGUAGES C)
+  check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT _curl_lto_error LANGUAGES C)
   if(CURL_HAS_LTO)
     message(STATUS "LTO supported and enabled")
   else()
-    message(FATAL_ERROR "LTO has been requested, but the compiler does not support it\n${CURL_LTO_ERROR}")
+    message(FATAL_ERROR "LTO has been requested, but the compiler does not support it\n${_curl_lto_error}")
   endif()
 endif()
 
