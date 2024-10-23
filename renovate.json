@@ -75,7 +75,7 @@
         "^.github/workflows/http3-linux.yml$"
       ],
       "matchStrings": [
-        "openssl3-version: (?<currentValue>.*)\\s"
+        "openssl-version: (?<currentValue>.*)\\s"
       ],
       "datasourceTemplate": "github-tags",
       "depNameTemplate": "openssl/openssl",

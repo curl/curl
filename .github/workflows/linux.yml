@@ -50,7 +50,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   awslc-version: 1.37.0
   # handled in renovate.json
-  openssl3-version: 3.4.0
+  openssl-version: 3.4.0
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
@@ -233,8 +233,8 @@ jobs:
             configure: >-
               CC=clang
               CFLAGS="-fsanitize=thread -g"
-              LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl3/lib"
-              --with-openssl=$HOME/openssl3 --enable-debug
+              LDFLAGS="-fsanitize=thread -Wl,-rpath,$HOME/openssl/lib"
+              --with-openssl=$HOME/openssl --enable-debug
 
           - name: memory-sanitizer
             install_packages: clang
@@ -430,15 +430,15 @@ jobs:
         env:
           cache-name: cache-openssl-tsan
         with:
-          path: /home/runner/openssl3
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl3-version }}-d8def798
+          path: /home/runner/openssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl-version }}
 
       - name: 'build openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b openssl-${{ env.openssl3-version }} https://github.com/openssl/openssl
+          git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
-          CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl3 --libdir=lib
+          CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib
           make -j1 install_sw
 
       - name: 'cache quictls'
