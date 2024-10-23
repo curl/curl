@@ -50,7 +50,7 @@ env:
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
   awslc-version: 1.37.0
   # handled in renovate.json
-  openssl3-version: 3.3.2
+  openssl3-version: 3.4.0
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
