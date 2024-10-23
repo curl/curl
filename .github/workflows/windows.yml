@@ -611,7 +611,7 @@ jobs:
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest
-    timeout-minutes: 55
+    timeout-minutes: 65
     defaults:
       run:
         shell: C:\msys64\usr\bin\bash.exe {0}
@@ -622,14 +622,14 @@ jobs:
       matrix:
         include:
           - name: 'schannel MultiSSL U'
-            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls'
+            install: 'brotli zlib zstd libpsl nghttp2 libssh2[core,zlib] pkgconf gsasl openssl mbedtls shiftmedia-libgnutls'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
+              -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_GNUTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
               -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON
 
           - name: 'openssl'
@@ -687,8 +687,8 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
 
-          - name: 'mbedtls'
-            install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
+          - name: 'gnutls'
+            install: 'brotli zlib zstd libpsl nghttp2 shiftmedia-libgnutls libssh pkgconf gsasl ngtcp2[gnutls] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
@@ -699,7 +699,7 @@ jobs:
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_GNUTLS=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
 
           - name: 'msh3'
@@ -725,8 +725,10 @@ jobs:
             core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
       - name: 'vcpkg versions'
-        timeout-minutes: 1
+        timeout-minutes: 5
         run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" pull
+          "$VCPKG_INSTALLATION_ROOT/bootstrap-vcpkg.bat"
           git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
           vcpkg version
 
@@ -789,15 +791,15 @@ jobs:
         run: |
           # GnuTLS is not fully functional on Windows, so skip the tests
           # https://github.com/ShiftMediaProject/gnutls/issues/23
-          if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
+          # if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
             /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
-          fi
+          # fi
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 10
+        timeout-minutes: 40
         run: |
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
