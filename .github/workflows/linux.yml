@@ -423,7 +423,7 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: cache openssl-tsan
+      - name: cache openssl (thread sanitizer)
         if: contains(matrix.build.install_steps, 'openssl-tsan')
         uses: actions/cache@3624ceb22c1c5a301c8db4169662070a689d9ea8 # v4
         id: cache-openssl-tsan
