@@ -299,10 +299,6 @@ option(CURL_DISABLE_DOH "Disable DNS-over-HTTPS" OFF)
 mark_as_advanced(CURL_DISABLE_DOH)
 option(CURL_DISABLE_FILE "Disable FILE" OFF)
 mark_as_advanced(CURL_DISABLE_FILE)
-cmake_dependent_option(CURL_DISABLE_FORM_API "Disable form-api"
-  OFF "NOT CURL_DISABLE_MIME"
-  ON)
-mark_as_advanced(CURL_DISABLE_FORM_API)
 option(CURL_DISABLE_FTP "Disable FTP" OFF)
 mark_as_advanced(CURL_DISABLE_FTP)
 option(CURL_DISABLE_GETOPTIONS "Disable curl_easy_options API for existing options to curl_easy_setopt" OFF)
@@ -327,6 +323,10 @@ option(CURL_DISABLE_LIBCURL_OPTION "Disable --libcurl option from the curl tool"
 mark_as_advanced(CURL_DISABLE_LIBCURL_OPTION)
 option(CURL_DISABLE_MIME "Disable MIME support" OFF)
 mark_as_advanced(CURL_DISABLE_MIME)
+cmake_dependent_option(CURL_DISABLE_FORM_API "Disable form-api"
+  OFF "NOT CURL_DISABLE_MIME"
+  ON)
+mark_as_advanced(CURL_DISABLE_FORM_API)
 option(CURL_DISABLE_MQTT "Disable MQTT" OFF)
 mark_as_advanced(CURL_DISABLE_MQTT)
 option(CURL_DISABLE_BINDLOCAL "Disable local binding support" OFF)
