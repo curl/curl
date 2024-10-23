@@ -3147,7 +3147,7 @@ if(%skipped && !$short) {
         $log_line .= ")\n";
         $restraints{$log_line} = $skip_count;
     }
-    foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a} || $b cmp $a} keys %restraints) {
+    foreach my $log_line (sort {$restraints{$b} <=> $restraints{$a} || $a cmp $b} keys %restraints) {
         logmsg $log_line;
     }
 }
