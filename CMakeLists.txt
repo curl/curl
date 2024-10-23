@@ -1821,11 +1821,11 @@ if(CURL_LTO)
   cmake_policy(SET CMP0069 NEW)
 
   include(CheckIPOSupported)
-  check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT CURL_LTO_ERROR LANGUAGES C)
+  check_ipo_supported(RESULT CURL_HAS_LTO OUTPUT _lto_error LANGUAGES C)
   if(CURL_HAS_LTO)
     message(STATUS "LTO supported and enabled")
   else()
-    message(FATAL_ERROR "LTO has been requested, but the compiler does not support it\n${CURL_LTO_ERROR}")
+    message(FATAL_ERROR "LTO has been requested, but the compiler does not support it\n${_lto_error}")
   endif()
 endif()
 
@@ -1852,7 +1852,7 @@ endfunction()
 
 include(GNUInstallDirs)
 
-set(CURL_INSTALL_CMAKE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
+set(_install_cmake_dir "${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}")
 set(TARGETS_EXPORT_NAME "${PROJECT_NAME}Targets")
 set(_generated_dir "${CMAKE_CURRENT_BINARY_DIR}/generated")
 set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
@@ -2237,17 +2237,17 @@ if(NOT CURL_DISABLE_INSTALL)
   #   HAVE_LIBZ
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
-    INSTALL_DESTINATION ${CURL_INSTALL_CMAKE_DIR}
+    INSTALL_DESTINATION ${_install_cmake_dir}
     PATH_VARS CMAKE_INSTALL_INCLUDEDIR)
 
   if(CURL_ENABLE_EXPORT_TARGET)
     install(EXPORT "${TARGETS_EXPORT_NAME}"
       NAMESPACE "${PROJECT_NAME}::"
-      DESTINATION ${CURL_INSTALL_CMAKE_DIR})
+      DESTINATION ${_install_cmake_dir})
   endif()
 
   install(FILES ${_version_config} ${_project_config}
-    DESTINATION ${CURL_INSTALL_CMAKE_DIR})
+    DESTINATION ${_install_cmake_dir})
 
   # Workaround for MSVS10 to avoid the Dialog Hell
   # FIXME: This could be removed with future version of CMake.
