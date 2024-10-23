@@ -304,6 +304,8 @@ jobs:
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
           make -C bld -j5 V=1 test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'autotools build examples'
         if: ${{ matrix.build == 'autotools' && (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}
@@ -395,6 +397,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'cmake build examples'
         if: ${{ matrix.build == 'cmake' }}
@@ -519,6 +523,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'cmake build examples'
         timeout-minutes: 5
@@ -654,12 +660,34 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'libressl'
+          - name: 'libressl WINPERL'
             install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            config: >
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_CA_SEARCH_SAFE=ON
+
+          - name: 'libressl -j0 WINPERL'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 -j0'
+            config: >-
+              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_CA_SEARCH_SAFE=ON
+
+          - name: 'libressl -j0'
+            install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib]'
+            arch: 'x64'
+            plat: 'windows'
+            type: 'Debug'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 -j0'
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
@@ -737,6 +765,9 @@ jobs:
       - name: 'cmake configure'
         timeout-minutes: 5
         run: |
+          if [[ '${{ matrix.name }}' = *'WINPERL'* ]]; then  # for testing
+            options+=" -DPERL_EXECUTABLE=/c/Strawberry/perl/bin/perl"
+          fi
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
@@ -787,7 +818,8 @@ jobs:
           if [[ '${{ matrix.name }}' != *'gnutls'* ]]; then
             /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel openssh || true
           fi
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
+          # TESTING:
+          #curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
       - name: 'cmake run tests'
@@ -803,6 +835,8 @@ jobs:
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          ps -W || true
+          tasklist || true
 
       - name: 'cmake build examples'
         timeout-minutes: 5
