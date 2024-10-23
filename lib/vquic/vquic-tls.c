@@ -195,12 +195,14 @@ out:
 /** SSL callbacks ***/
 
 static CURLcode Curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
+                                   struct Curl_cfilter *cf,
                                    struct Curl_easy *data,
                                    struct ssl_peer *peer,
                                    const char *alpn, size_t alpn_len,
                                    void *user_data)
 {
-  (void)data;
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
+
   DEBUGASSERT(!ctx->wssl.handle);
   DEBUGASSERT(ctx->wssl.ctx);
   ctx->wssl.handle = wolfSSL_new(ctx->wssl.ctx);
@@ -216,6 +218,10 @@ static CURLcode Curl_wssl_init_ssl(struct curl_tls_ctx *ctx,
   if(peer->sni) {
     wolfSSL_UseSNI(ctx->wssl.handle, WOLFSSL_SNI_HOST_NAME,
                    peer->sni, (unsigned short)strlen(peer->sni));
+  }
+
+  if(ssl_config->primary.cache_session) {
+    (void)wssl_setup_session(cf, data, &ctx->wssl, peer);
   }
 
   return CURLE_OK;
@@ -247,7 +253,8 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   if(result)
     return result;
 
-  return Curl_wssl_init_ssl(ctx, data, peer, alpn, alpn_len, ssl_user_data);
+  return Curl_wssl_init_ssl(ctx, cf, data, peer, alpn, alpn_len,
+                            ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;

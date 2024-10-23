@@ -320,7 +320,8 @@ class TestSSLUse:
         if not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_uses_lib('quictls') and \
-            not env.curl_uses_lib('gnutls'):
+            not env.curl_uses_lib('gnutls') and \
+            not env.curl_uses_lib('wolfssl'):
             pytest.skip("QUIC session reuse not implemented")
         count = 2
         docname = 'data-10k'
