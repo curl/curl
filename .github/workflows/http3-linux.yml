@@ -444,7 +444,7 @@ jobs:
           # $HOME/quiche/quiche/deps/boringssl/src/lib
         name: 'build quiche and boringssl'
 
-      - uses: actions/checkout@eef61447b9ff4aafe5dcd4e0bbf5d482be7e7871 # v4
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}
