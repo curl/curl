@@ -614,7 +614,7 @@ jobs:
     timeout-minutes: 55
     defaults:
       run:
-        shell: bash
+        shell: C:\msys64\usr\bin\bash.exe {0}
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
@@ -737,6 +737,7 @@ jobs:
       - name: 'cmake configure'
         timeout-minutes: 5
         run: |
+          PATH="/c/msys64/usr/bin:$PATH"
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
@@ -762,7 +763,9 @@ jobs:
 
       - name: 'cmake build'
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+        run: |
+          PATH="/c/msys64/usr/bin:$PATH"
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
       - name: 'curl version'
         timeout-minutes: 1
@@ -776,7 +779,9 @@ jobs:
       - name: 'cmake build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
+        run: |
+          PATH="/c/msys64/usr/bin:$PATH"
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target testdeps
 
       - name: 'install test prereqs'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
@@ -792,18 +797,20 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 12
+        timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
-          TFLAGS+=' ~987'  # 'SMTPS with redundant explicit SSL request'
           if [[ '${{ matrix.install }}' = *'libssh2[core,zlib]'* ]]; then
             TFLAGS+=' ~SFTP'
           elif [[ '${{ matrix.install }}' = *'libssh '* ]]; then
             TFLAGS+=' ~614'  # 'SFTP pre-quote chmod' SFTP, pre-quote, directory
           fi
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin:/c/Program Files/OpenSSH-Win64"
+          PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
       - name: 'cmake build examples'
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
+        run: |
+          PATH="/c/msys64/usr/bin:$PATH"
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
