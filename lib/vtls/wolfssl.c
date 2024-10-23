@@ -455,7 +455,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
   if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen, NULL)) {
     WOLFSSL_SESSION *session;
     sdata = psdata;
-    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, slen);
+    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {

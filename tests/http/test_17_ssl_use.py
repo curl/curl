@@ -120,8 +120,6 @@ class TestSSLUse:
     def test_17_04_double_dot(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('wolfssl'):
-            pytest.skip("wolfSSL HTTP/3 peer verification does not properly check")
         curl = CurlClient(env=env)
         domain = f'{env.domain1}..'
         url = f'https://{env.authority_for(domain, proto)}/curltest/sslinfo'
