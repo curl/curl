@@ -460,7 +460,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
         Curl_ssl_delsessionid(data, psdata);
-        infof(data, "previous session not accpeted (%d), "
+        infof(data, "previous session not accepted (%d), "
               "removing from cache", ret);
       }
       else
