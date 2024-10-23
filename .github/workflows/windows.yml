@@ -797,7 +797,7 @@ jobs:
 
       - name: 'cmake run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 12
+        timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ~WebSockets ~SCP ~612 ${{ matrix.tflags }}'
           TFLAGS+=' ~987'  # 'SMTPS with redundant explicit SSL request'
