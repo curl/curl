@@ -30,7 +30,7 @@
 macro(check_include_file_concat _file _variable)
   check_include_files("${CURL_INCLUDES};${_file}" ${_variable})
   if(${_variable})
-    set(CURL_INCLUDES ${CURL_INCLUDES} ${_file})
+    list(APPEND CURL_INCLUDES ${_file})
   endif()
 endmacro()
 

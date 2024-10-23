@@ -1414,8 +1414,8 @@ endif()
 
 # Check for header files
 if(WIN32)
-  set(CURL_INCLUDES ${CURL_INCLUDES} "winsock2.h")
-  set(CURL_INCLUDES ${CURL_INCLUDES} "ws2tcpip.h")
+  list(APPEND CURL_INCLUDES "winsock2.h")
+  list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
   if(HAVE_WIN32_WINNT)
     if(HAVE_WIN32_WINNT LESS 0x0501)
