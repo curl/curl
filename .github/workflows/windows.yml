@@ -614,7 +614,7 @@ jobs:
     timeout-minutes: 55
     defaults:
       run:
-        shell: bash
+        shell: C:\msys64\usr\bin\bash.exe {0}
     env:
       VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
       VCPKG_DISABLE_METRICS: '1'
