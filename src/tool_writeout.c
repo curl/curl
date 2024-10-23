@@ -204,7 +204,7 @@ static int urlpart(struct per_transfer *per, writeoutid vid,
         rc = 5;
     }
     else
-      url = per->this_url;
+      url = per->url;
 
     if(!rc) {
       switch(vid) {
@@ -373,8 +373,8 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
       }
       break;
     case VAR_INPUT_URL:
-      if(per->this_url) {
-        strinfo = per->this_url;
+      if(per->url) {
+        strinfo = per->url;
         valid = true;
       }
       break;
@@ -398,7 +398,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     case VAR_INPUT_URLEQUERY:
     case VAR_INPUT_URLEFRAGMENT:
     case VAR_INPUT_URLEZONEID:
-      if(per->this_url) {
+      if(per->url) {
         if(!urlpart(per, wovar->id, &strinfo)) {
           freestr = strinfo;
           valid = true;

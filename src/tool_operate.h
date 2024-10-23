@@ -41,7 +41,7 @@ struct per_transfer {
   long num_retries; /* counts the performed retries */
   struct timeval start; /* start of this transfer */
   struct timeval retrystart;
-  char *this_url;
+  char *url;
   unsigned int urlnum; /* the index of the given URL */
   char *outfile;
   int infd;

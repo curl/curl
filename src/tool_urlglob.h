@@ -73,6 +73,6 @@ struct URLGlob {
 CURLcode glob_url(struct URLGlob**, char *, curl_off_t *, FILE *);
 CURLcode glob_next_url(char **, struct URLGlob *);
 CURLcode glob_match_url(char **, char *, struct URLGlob *);
-void glob_cleanup(struct URLGlob *glob);
+void glob_cleanup(struct URLGlob **glob);
 
 #endif /* HEADER_CURL_TOOL_URLGLOB_H */
