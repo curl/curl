@@ -431,7 +431,7 @@ jobs:
           cache-name: cache-openssl-tsan
         with:
           path: /home/runner/openssl
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl-version }}-d8def798
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl-version }}
 
       - name: 'build openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
