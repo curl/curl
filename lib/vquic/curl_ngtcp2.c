@@ -2253,7 +2253,6 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
   }
   if(ssl_config->primary.cache_session) {
     /* Register to get notified when a new session is received */
-    wolfSSL_CTX_UseSessionTicket(ctx->wssl.ctx);
     wolfSSL_CTX_sess_set_new_cb(ctx->wssl.ctx, wssl_quic_new_session_cb);
   }
 #endif

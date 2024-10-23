@@ -1164,7 +1164,6 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     (void)wssl_setup_session(cf, data, backend, &connssl->peer);
     /* Register to get notified when a new session is received */
     wolfSSL_set_app_data(backend->handle, cf);
-    wolfSSL_CTX_UseSessionTicket(backend->ctx);
     wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);
   }
 
