@@ -2320,7 +2320,7 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         if(!backend->recv_connection_closed)
           backend->recv_connection_closed = TRUE;
         /* We received the close notify just fine, any error we got
-         * from the lower filters afterwords (e.g. the socket), is not
+         * from the lower filters afterwards (e.g. the socket), is not
          * an error on the TLS data stream. That one ended here. */
         if(*err == CURLE_RECV_ERROR)
           *err = CURLE_OK;
