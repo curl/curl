@@ -286,7 +286,7 @@ Details via CMake
 - `CURL_ZSTD`:                              Use zstd. Default: `OFF`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
 - `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `ON`
-- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`, or `OFF` if Apple IDN or WinIDN is enabled
+- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`. Apple IDN or WinIDN takes priority if enabled.
 - `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
 - `USE_MSH3`:                               Use msh3/msquic library for HTTP/3 support. Default: `OFF`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
