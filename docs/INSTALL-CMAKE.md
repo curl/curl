@@ -156,7 +156,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (`/MT`). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
-- `CURL_TEST_BUNDLES`:                      Bundle `libtests`/`unittests` into single binaries. Default: `OFF`
+- `CURL_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`

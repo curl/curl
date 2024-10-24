@@ -21,7 +21,7 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-option(CURL_TEST_BUNDLES "Bundle libtests/unittests into single binaries" OFF)
+option(CURL_TEST_BUNDLES "Bundle libtest and unittest tests into single binaries" OFF)
 
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
