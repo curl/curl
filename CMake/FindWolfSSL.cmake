@@ -25,19 +25,19 @@
 #
 # Input variables:
 #
-# WOLFSSL_INCLUDE_DIR   The wolfssl include directory
-# WolfSSL_INCLUDE_DIR   The wolfssl include directory (deprecated)
-# WOLFSSL_LIBRARY       Path to wolfssl library
-# WolfSSL_LIBRARY       Path to wolfssl library (deprecated)
+# WOLFSSL_INCLUDE_DIR   The wolfssl include directory.
+# WolfSSL_INCLUDE_DIR   The wolfssl include directory. (deprecated)
+# WOLFSSL_LIBRARY       Path to wolfssl library.
+# WolfSSL_LIBRARY       Path to wolfssl library. (deprecated)
 #
 # Result variables:
 #
-# WOLFSSL_FOUND         System has wolfssl
-# WOLFSSL_INCLUDE_DIRS  The wolfssl include directories
-# WOLFSSL_LIBRARIES     The wolfssl library names
-# WOLFSSL_LIBRARY_DIRS  The wolfssl library directories
-# WOLFSSL_CFLAGS        Required compiler flags
-# WOLFSSL_VERSION       Version of wolfssl
+# WOLFSSL_FOUND         System has wolfssl.
+# WOLFSSL_INCLUDE_DIRS  The wolfssl include directories.
+# WOLFSSL_LIBRARIES     The wolfssl library names.
+# WOLFSSL_LIBRARY_DIRS  The wolfssl library directories.
+# WOLFSSL_CFLAGS        Required compiler flags.
+# WOLFSSL_VERSION       Version of wolfssl.
 
 if(DEFINED WolfSSL_INCLUDE_DIR AND NOT DEFINED WOLFSSL_INCLUDE_DIR)
   message(WARNING "WolfSSL_INCLUDE_DIR is deprecated, use WOLFSSL_INCLUDE_DIR instead.")

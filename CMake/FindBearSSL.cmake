@@ -25,15 +25,15 @@
 #
 # Input variables:
 #
-# BEARSSL_INCLUDE_DIR   The bearssl include directory
-# BEARSSL_INCLUDE_DIRS  The bearssl include directory (deprecated)
-# BEARSSL_LIBRARY       Path to bearssl library
+# BEARSSL_INCLUDE_DIR   The bearssl include directory.
+# BEARSSL_INCLUDE_DIRS  The bearssl include directory. (deprecated)
+# BEARSSL_LIBRARY       Path to bearssl library.
 #
 # Result variables:
 #
-# BEARSSL_FOUND         System has bearssl
-# BEARSSL_INCLUDE_DIRS  The bearssl include directories
-# BEARSSL_LIBRARIES     The bearssl library names
+# BEARSSL_FOUND         System has bearssl.
+# BEARSSL_INCLUDE_DIRS  The bearssl include directories.
+# BEARSSL_LIBRARIES     The bearssl library names.
 
 if(DEFINED BEARSSL_INCLUDE_DIRS AND NOT DEFINED BEARSSL_INCLUDE_DIR)
   message(WARNING "BEARSSL_INCLUDE_DIRS is deprecated, use BEARSSL_INCLUDE_DIR instead.")

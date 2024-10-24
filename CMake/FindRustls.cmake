@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# RUSTLS_INCLUDE_DIR   The rustls include directory
-# RUSTLS_LIBRARY       Path to rustls library
+# RUSTLS_INCLUDE_DIR   The rustls include directory.
+# RUSTLS_LIBRARY       Path to rustls library.
 #
 # Result variables:
 #
-# RUSTLS_FOUND         System has rustls
-# RUSTLS_INCLUDE_DIRS  The rustls include directories
-# RUSTLS_LIBRARIES     The rustls library names
-# RUSTLS_LIBRARY_DIRS  The rustls library directories
-# RUSTLS_CFLAGS        Required compiler flags
-# RUSTLS_VERSION       Version of rustls
+# RUSTLS_FOUND         System has rustls.
+# RUSTLS_INCLUDE_DIRS  The rustls include directories.
+# RUSTLS_LIBRARIES     The rustls library names.
+# RUSTLS_LIBRARY_DIRS  The rustls library directories.
+# RUSTLS_CFLAGS        Required compiler flags.
+# RUSTLS_VERSION       Version of rustls.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED RUSTLS_INCLUDE_DIR AND
