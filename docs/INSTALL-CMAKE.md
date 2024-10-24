@@ -138,3 +138,235 @@ assumes that CMake generates `Makefile`:
 
     $ cd ../curl-build
     $ make install
+
+# CMake build options
+
+- `BUILD_CURL_EXE`:                         Build curl executable. Default: `ON`
+- `BUILD_EXAMPLES`:                         Build libcurl examples. Default: `ON`
+- `BUILD_LIBCURL_DOCS`:                     Build libcurl man pages. Default: `ON`
+- `BUILD_MISC_DOCS`:                        Build misc man pages (e.g. `curl-config` and `mk-ca-bundle`). Default: `ON`
+- `BUILD_SHARED_LIBS`:                      Build shared libraries. Default: `ON`
+- `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF`
+- `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
+- `BUILD_TESTING`:                          Build tests. Default: `ON`
+- `CURL_BROTLI`:                            Use brotli. Default: `OFF`
+- `CURL_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `CURL_CA_BUNDLE_SET`:                     (kind of internal)
+- `CURL_CA_EMBED`:                          Path to the CA bundle to embed in the curl tool. Default: (disabled)
+- `CURL_CA_FALLBACK`:                       Set ON to use built-in CA store of TLS backend. Default: `OFF`
+- `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
+- `CURL_CA_PATH_SET`:                       (kind of internal)
+- `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+- `CURL_DISABLE_ALTSVC`:                    Disable alt-svc support. Default: `OFF`
+- `CURL_DISABLE_AWS`:                       Disable AWS-SIG4. Default: `OFF`
+- `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
+- `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
+- `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
+- `CURL_DISABLE_CA_SEARCH`:                 Disable unsafe CA bundle search in PATH on Windows. Default: `OFF`
+- `CURL_DISABLE_COOKIES`:                   Disable cookies support. Default: `OFF`
+- `CURL_DISABLE_DICT`:                      Disable DICT. Default: `OFF`
+- `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
+- `CURL_DISABLE_DOH`:                       Disable DNS-over-HTTPS. Default: `OFF`
+- `CURL_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
+- `CURL_DISABLE_FORM_API`:                  Disable form-api: Default: `=CURL_DISABLE_MIME`
+- `CURL_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
+- `CURL_DISABLE_GETOPTIONS`:                Disable curl_easy_options API for existing options to curl_easy_setopt. Default: `OFF`
+- `CURL_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
+- `CURL_DISABLE_HEADERS_API`:               Disable headers-api support. Default: `OFF`
+- `CURL_DISABLE_HSTS`:                      Disable HSTS support. Default: `OFF`
+- `CURL_DISABLE_HTTP`:                      Disable HTTP. Default: `OFF`
+- `CURL_DISABLE_HTTP_AUTH`:                 Disable all HTTP authentication methods. Default: `OFF`
+- `CURL_DISABLE_IMAP`:                      Disable IMAP. Default: `OFF`
+- `CURL_DISABLE_INSTALL`:                   Disable installation targets. Default: `OFF`
+- `CURL_DISABLE_IPFS`:                      Disable IPFS. Default: `OFF`
+- `CURL_DISABLE_KERBEROS_AUTH`:             Disable Kerberos authentication. Default: `OFF`
+- `CURL_DISABLE_LDAP`:                      Disable LDAP. Default: `OFF`
+- `CURL_DISABLE_LDAPS`:                     Disable LDAPS. Default: `=CURL_DISABLE_LDAP`
+- `CURL_DISABLE_LIBCURL_OPTION`:            Disable --libcurl option from the curl tool. Default: `OFF`
+- `CURL_DISABLE_MIME`:                      Disable MIME support. Default: `OFF`
+- `CURL_DISABLE_MQTT`:                      Disable MQTT. Default: `OFF`
+- `CURL_DISABLE_NEGOTIATE_AUTH`:            Disable negotiate authentication. Default: `OFF`
+- `CURL_DISABLE_NETRC`:                     Disable netrc parser. Default: `OFF`
+- `CURL_DISABLE_NTLM`:                      Disable NTLM support. Default: `OFF`
+- `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG`:  Disable automatic loading of OpenSSL configuration. Default: `OFF`
+- `CURL_DISABLE_PARSEDATE`:                 Disable date parsing. Default: `OFF`
+- `CURL_DISABLE_POP3`:                      Disable POP3. Default: `OFF`
+- `CURL_DISABLE_PROGRESS_METER`:            Disable built-in progress meter. Default: `OFF`
+- `CURL_DISABLE_PROXY`:                     Disable proxy support. Default: `OFF`
+- `CURL_DISABLE_RTSP`:                      Disable RTSP. Default: `OFF`
+- `CURL_DISABLE_SHA512_256`:                Disable SHA-512/256 hash algorithm. Default: `OFF`
+- `CURL_DISABLE_SHUFFLE_DNS`:               Disable shuffle DNS feature. Default: `OFF`
+- `CURL_DISABLE_SMB`:                       Disable SMB. Default: `OFF`
+- `CURL_DISABLE_SMTP`:                      Disable SMTP. Default: `OFF`
+- `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll. Default: `OFF`
+- `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
+- `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
+- `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
+- `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
+- `CURL_DISABLE_WEBSOCKETS`:                Disable WebSockets. Default: `OFF`
+- `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
+- `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
+- `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external)". Default: `ON`
+- `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
+- `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
+- `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
+- `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (/MT). Default: `OFF`
+- `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
+- `CURL_TEST_BUNDLES`:                      Bundle libtests/unittests into single binaries. Default: `OFF`
+- `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
+- `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
+- `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
+- `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
+- `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
+- `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
+- `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
+- `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
+- `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if not other TLS backend was enabled
+- `CURL_USE_PKGCONFIG`:                     Enable pkg-config to detect dependencies. Default: `ON` for UNIX, VCPKG, MINGW if not cross-compiling
+- `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
+- `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
+- `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
+- `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
+- `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
+- `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
+- `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: `=CURL_USE_SCHANNEL`
+- `CURL_ZLIB`:                              Use zlib ("ON", "OFF" or "AUTO"). Default: `AUTO`
+- `CURL_ZSTD`:                              Use zstd. Default: `OFF`
+- `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
+- `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: `=ENABLE_DEBUG`
+- `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
+- `ENABLE_DEBUG`:                           Enable curl debug features. Default: `OFF`
+- `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON`
+- `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled
+- `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
+- `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
+- `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
+- `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp`
+- `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
+- `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
+- `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
+- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
+- `USE_ECH`:                                Enable ECH support. Default: `OFF`
+- `USE_HTTPSRR`:                            Enable HTTPS RR support for ECH (experimental). Default: `OFF`
+- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
+- `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
+- `USE_MSH3`:                               Use msh3/msquic library for HTTP/3 support. Default: `OFF`
+- `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
+- `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
+- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
+- `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
+- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
+- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
+
+## Environment
+
+- ENV: `CURL_BUILDINFO`:                    Print `buildinfo.txt` if set.
+- ENV: `CURL_CI`:                           Assume running under CI if set.
+- ENV: `CI`:                                Assume running under CI if set.
+
+## CMake built-ins
+
+- `CMAKE_UNITY_BUILD`:                      Default: `OFF`
+- `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Default: `0`
+- `CMAKE_C_FLAGS`
+- `CMAKE_EXE_LINKER_FLAGS`
+- `CMAKE_SHARED_LINKER_FLAGS`
+- `CMAKE_DEBUG_POSTFIX`
+- `CMAKE_STATIC_LIBRARY_SUFFIX`
+- `CMAKE_IMPORT_LIBRARY_SUFFIX`
+- `CMAKE_INSTALL_INCLUDEDIR`
+- `CMAKE_INSTALL_LIBDIR`
+- `PKG_CONFIG_EXECUTABLE`
+
+## Dependencies
+
+- `PERL_EXECUTABLE`
+- `TEST_NGHTTPX`:                           Default: `nghttpx`
+- `CADDY`:                                  Default: `caddy`
+- `VSFTPD`:                                 Default: `vsftps`
+- `HTTPD`:                                  Default: `apache2`
+- `APACHECTL`:                              Default: `apache2ctl`
+- `APXS`:                                   Default: `apxs`
+- `HTTPD_NGHTTPX`:                          Default: `nghttpx`
+
+- `LDAP_LIBRARY`:                           Name or full path to ldap library. Default: `ldap`
+- `LDAP_LBER_LIBRARY`:                      Name or full path to lber library. Default: `lber`
+- `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory
+
+- `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL
+
+- `ZLIB_INCLUDE_DIR`:                       The zlib include directory
+- `ZLIB_LIBRARY`:                           Path to zlib library
+
+- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS
+- ENV: `GSS_ROOT_DIR`:                      Set this env to the root installation of GSS
+
+- `BEARSSL_INCLUDE_DIR`:                    The bearssl include directory
+- `BEARSSL_INCLUDE_DIRS`:                   The bearssl include directory (deprecated)
+- `BEARSSL_LIBRARY`:                        Path to bearssl library
+
+- `BROTLI_INCLUDE_DIR`:                     The brotli include directory
+- `BROTLICOMMON_LIBRARY`:                   Path to brotlicommon library
+- `BROTLIDEC_LIBRARY`:                      Path to brotlidec library
+
+- `CARES_INCLUDE_DIR`:                      The c-ares include directory
+- `CARES_LIBRARY`:                          Path to c-ares library
+
+- `LIBGSASL_INCLUDE_DIR`:                   The libgsasl include directory
+- `LIBGSASL_LIBRARY`:                       Path to libgsasl library
+
+- `LIBIDN2_INCLUDE_DIR`:                    The libidn2 include directory
+- `LIBIDN2_LIBRARY`:                        Path to libidn2 library
+
+- `LIBPSL_INCLUDE_DIR`:                     The libpsl include directory
+- `LIBPSL_LIBRARY`:                         Path to libpsl library
+
+- `LIBSSH_INCLUDE_DIR`:                     The libssh include directory
+- `LIBSSH_LIBRARY`:                         Path to libssh library
+
+- `LIBSSH2_INCLUDE_DIR`:                    The libssh2 include directory
+- `LIBSSH2_LIBRARY`:                        Path to libssh2 library
+
+- `LIBUV_INCLUDE_DIR`:                      The libuv include directory
+- `LIBUV_LIBRARY`:                          Path to libuv library
+
+- `MSH3_INCLUDE_DIR`:                       The msh3 include directory
+- `MSH3_LIBRARY`:                           Path to msh3 library
+
+- `MBEDTLS_INCLUDE_DIR`:                    The mbedtls include directory
+- `MBEDTLS_INCLUDE_DIRS`:                   The mbedtls include directory (deprecated)
+- `MBEDTLS_LIBRARY`:                        Path to mbedtls library
+- `MBEDX509_LIBRARY`:                       Path to mbedx509 library
+- `MBEDCRYPTO_LIBRARY`:                     Path to mbedcrypto library
+
+- `NGHTTP2_INCLUDE_DIR`:                    The nghttp2 include directory
+- `NGHTTP2_LIBRARY`:                        Path to nghttp2 library
+
+- `NGHTTP3_INCLUDE_DIR`:                    The nghttp3 include directory
+- `NGHTTP3_LIBRARY`:                        Path to nghttp3 library
+
+- `NGTCP2_INCLUDE_DIR`:                     The ngtcp2 include directory
+- `NGTCP2_LIBRARY`:                         Path to ngtcp2 library
+
+- `NETTLE_INCLUDE_DIR`:                     The nettle include directory
+- `NETTLE_LIBRARY`:                         Path to nettle library
+
+- `QUICHE_INCLUDE_DIR`:                     The quiche include directory
+- `QUICHE_LIBRARY`:                         Path to quiche library
+
+- `RUSTLS_INCLUDE_DIR`:                     The rustls include directory
+- `RUSTLS_LIBRARY`:                         Path to rustls library
+
+- `WOLFSSH_INCLUDE_DIR`:                    The wolfssh include directory
+- `WOLFSSH_LIBRARY`:                        Path to wolfssh library
+
+- `WOLFSSL_INCLUDE_DIR`:                    The wolfssl include directory
+- `WolfSSL_INCLUDE_DIR`:                    The wolfssl include directory (deprecated)
+- `WOLFSSL_LIBRARY`:                        Path to wolfssl library
+- `WolfSSL_LIBRARY`:                        Path to wolfssl library (deprecated)
+
+- `ZSTD_INCLUDE_DIR`:                       The zstd include directory
+- `Zstd_INCLUDE_DIR`:                       The zstd include directory (deprecated)
+- `ZSTD_LIBRARY`:                           Path to zstd library
+- `Zstd_LIBRARY`:                           Path to zstd library (deprecated)
