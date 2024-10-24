@@ -182,7 +182,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_KERBEROS_AUTH`:             Disable Kerberos authentication. Default: `OFF`
 - `CURL_DISABLE_LDAP`:                      Disable LDAP. Default: `OFF`
 - `CURL_DISABLE_LDAPS`:                     Disable LDAPS. Default: `=CURL_DISABLE_LDAP`
-- `CURL_DISABLE_LIBCURL_OPTION`:            Disable --libcurl option from the curl tool. Default: `OFF`
+- `CURL_DISABLE_LIBCURL_OPTION`:            Disable `--libcurl` option from the curl tool. Default: `OFF`
 - `CURL_DISABLE_MIME`:                      Disable MIME support. Default: `OFF`
 - `CURL_DISABLE_MQTT`:                      Disable MQTT. Default: `OFF`
 - `CURL_DISABLE_NEGOTIATE_AUTH`:            Disable negotiate authentication. Default: `OFF`
@@ -203,14 +203,14 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
-- `CURL_DISABLE_WEBSOCKETS`:                Disable WebSockets. Default: `OFF`
+- `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
 - `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external)". Default: `ON`
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
 - `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
-- `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (/MT). Default: `OFF`
+- `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (`/MT`). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
 - `CURL_TEST_BUNDLES`:                      Bundle libtests/unittests into single binaries. Default: `OFF`
 - `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
@@ -223,7 +223,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
 - `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if not other TLS backend was enabled
-- `CURL_USE_PKGCONFIG`:                     Enable pkg-config to detect dependencies. Default: `ON` for UNIX, VCPKG, MINGW if not cross-compiling
+- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for UNIX, VCPKG, MINGW if not cross-compiling
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
 - `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
