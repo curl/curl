@@ -295,7 +295,7 @@ assumes that CMake generates `Makefile`:
 - `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library
 
 - `CARES_INCLUDE_DIR`:                      The c-ares include directory
-- `CARES_LIBRARY`:                          Path to `c-ares` library
+- `CARES_LIBRARY`:                          Path to `cares` library
 
 - `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS (also supported as environment variable)
 
