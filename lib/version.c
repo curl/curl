@@ -142,6 +142,23 @@ static void psl_version(char *buf, size_t bufsz)
 }
 #endif
 
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
+#define USE_IDN
+#endif
+
+#ifdef USE_IDN
+static void idn_version(char *buf, size_t bufsz)
+{
+#ifdef USE_LIBIDN2
+  msnprintf(buf, bufsz, "libidn2/%s", idn2_check_version(NULL));
+#elif defined(USE_WIN32_IDN)
+  msnprintf(buf, bufsz, "WinIDN");
+#elif defined(USE_APPLE_IDN)
+  msnprintf(buf, bufsz, "AppleIDN");
+#endif
+}
+#endif
+
 /*
  * curl_version() returns a pointer to a static buffer.
  *
@@ -173,8 +190,8 @@ char *curl_version(void)
 #ifdef USE_ARES
   char cares_version[30];
 #endif
-#ifdef USE_LIBIDN2
-  char idn_version[30];
+#ifdef USE_IDN
+  char idn_ver[30];
 #endif
 #ifdef USE_LIBPSL
   char psl_ver[30];
@@ -234,14 +251,9 @@ char *curl_version(void)
             "c-ares/%s", ares_version(NULL));
   src[i++] = cares_version;
 #endif
-#ifdef USE_LIBIDN2
-  msnprintf(idn_version, sizeof(idn_version),
-            "libidn2/%s", idn2_check_version(NULL));
-  src[i++] = idn_version;
-#elif defined(USE_WIN32_IDN)
-  src[i++] = (char *)"WinIDN";
-#elif defined(USE_APPLE_IDN)
-  src[i++] = (char *)"AppleIDN";
+#ifdef USE_IDN
+  idn_version(idn_ver, sizeof(idn_ver));
+  src[i++] = idn_ver;
 #endif
 #ifdef USE_LIBPSL
   psl_version(psl_ver, sizeof(psl_ver));
