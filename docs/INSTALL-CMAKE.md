@@ -261,45 +261,32 @@ assumes that CMake generates `Makefile`:
 
 ## Environment
 
+- `CI`:                                     Assume running under CI if set.
 - `CURL_BUILDINFO`:                         Print `buildinfo.txt` if set.
 - `CURL_CI`:                                Assume running under CI if set.
-- `CI`:                                     Assume running under CI if set.
 
-## CMake built-ins
+## CMake options
 
-- `CMAKE_UNITY_BUILD`:                      Default: `OFF`
-- `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Default: `0`
-- `CMAKE_C_FLAGS`
-- `CMAKE_EXE_LINKER_FLAGS`
-- `CMAKE_SHARED_LINKER_FLAGS`
-- `CMAKE_DEBUG_POSTFIX`
-- `CMAKE_STATIC_LIBRARY_SUFFIX`
+- `CMAKE_DEBUG_POSTFIX`:                    Default: `-d`
 - `CMAKE_IMPORT_LIBRARY_SUFFIX`
+- `CMAKE_INSTALL_BINDIR`
 - `CMAKE_INSTALL_INCLUDEDIR`
 - `CMAKE_INSTALL_LIBDIR`
-- `PKG_CONFIG_EXECUTABLE`
+- `CMAKE_INSTALL_PREFIX`
+- `CMAKE_STATIC_LIBRARY_SUFFIX`
+- `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Default: `0`
+- `CMAKE_UNITY_BUILD`:                      Default: `OFF`
 
-## Dependencies
-
-- `PERL_EXECUTABLE`
-- `TEST_NGHTTPX`:                           Default: `nghttpx`
-- `CADDY`:                                  Default: `caddy`
-- `VSFTPD`:                                 Default: `vsftps`
-- `HTTPD`:                                  Default: `apache2`
-- `APACHECTL`:                              Default: `apache2ctl`
-- `APXS`:                                   Default: `apxs`
-- `HTTPD_NGHTTPX`:                          Default: `nghttpx`
-
-- `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
-- `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
-- `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory
+## Dependencies (via CMake)
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL
 
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory
 - `ZLIB_LIBRARY`:                           Path to `zlib` library
 
-- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS (also supported as environment variable)
+## Dependencies
+
+- `PERL_EXECUTABLE`
 
 - `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory
 - `BEARSSL_INCLUDE_DIRS`:                   The BearSSL include directory (deprecated)
@@ -311,6 +298,12 @@ assumes that CMake generates `Makefile`:
 
 - `CARES_INCLUDE_DIR`:                      The c-ares include directory
 - `CARES_LIBRARY`:                          Path to `c-ares` library
+
+- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS (also supported as environment variable)
+
+- `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
+- `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
+- `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory
 
 - `LIBGSASL_INCLUDE_DIR`:                   The libgsasl include directory
 - `LIBGSASL_LIBRARY`:                       Path to `libgsasl` library
@@ -369,3 +362,13 @@ assumes that CMake generates `Makefile`:
 - `Zstd_INCLUDE_DIR`:                       The zstd include directory (deprecated)
 - `ZSTD_LIBRARY`:                           Path to `zstd` library
 - `Zstd_LIBRARY`:                           Path to `zstd` library (deprecated)
+
+## Test tools
+
+- `APACHECTL`:                              Default: `apache2ctl`
+- `APXS`:                                   Default: `apxs`
+- `CADDY`:                                  Default: `caddy`
+- `HTTPD_NGHTTPX`:                          Default: `nghttpx`
+- `HTTPD`:                                  Default: `apache2`
+- `TEST_NGHTTPX`:                           Default: `nghttpx`
+- `VSFTPD`:                                 Default: `vsftps`
