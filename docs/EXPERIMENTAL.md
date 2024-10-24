@@ -34,14 +34,6 @@ Experimental support in curl means:
 
 ## Experimental features right now
 
-### The Hyper HTTP backend
-
-Graduation requirements:
-
-- HTTP/1 and HTTP/2 support, including multiplexing
-
-(Hyper is marked for deprecation. It cannot graduate.)
-
 ###  HTTP/3 support (non-ngtcp2 backends)
 
 Graduation requirements:

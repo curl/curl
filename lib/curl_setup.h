@@ -923,7 +923,6 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST static
 #endif
 
-/* Hyper supports HTTP2 also, but Curl's integration with Hyper does not */
 #if defined(USE_NGHTTP2)
 #define USE_HTTP2
 #endif
