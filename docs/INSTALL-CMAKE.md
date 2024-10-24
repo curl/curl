@@ -308,7 +308,7 @@ Details via CMake
 - `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library
 - `CARES_INCLUDE_DIR`:                      The c-ares include directory
 - `CARES_LIBRARY`:                          Path to `cares` library
-- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS (also supported as environment variable)
+- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS (also supported as environment)
 - `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
 - `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
 - `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory
