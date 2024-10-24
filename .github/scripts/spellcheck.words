@@ -701,6 +701,7 @@ RRtype
 RSA
 RTMP
 rtmp
+rtmpdump
 RTMPE
 RTMPS
 RTMPT
@@ -767,6 +768,7 @@ SOCKOPT
 SOCKSv
 Solaris
 SONAME
+SOVERSION
 Soref
 SPARC
 SPDX
