@@ -125,6 +125,8 @@ static void oldap_version(char *buf, size_t bufsz)
     ldap_memfree(api.ldapai_vendor_name);
     ber_memvfree((void **)api.ldapai_extensions);
   }
+  else
+    msnprintf(buf, bufsz, "OpenLDAP");
 }
 #endif
 
