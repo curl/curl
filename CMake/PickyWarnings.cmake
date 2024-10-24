@@ -225,14 +225,12 @@ if(PICKY_COMPILER)
     endforeach()
 
     foreach(_ccopt IN LISTS _picky_detect)
-      # Surprisingly, check_c_compiler_flag() needs a new variable to store each new
-      # test result in.
-      string(MAKE_C_IDENTIFIER "OPT${_ccopt}" _optvarname)
       # GCC only warns about unknown -Wno- options if there are also other diagnostic messages,
       # so test for the positive form instead
       string(REPLACE "-Wno-" "-W" _ccopt_on "${_ccopt}")
-      check_c_compiler_flag(${_ccopt_on} ${_optvarname})
-      if(${_optvarname})
+      unset(_have_ccopt CACHE)
+      check_c_compiler_flag(${_ccopt_on} _have_ccopt)
+      if(_have_ccopt)
         list(APPEND _picky "${_ccopt}")
       endif()
     endforeach()
