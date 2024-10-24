@@ -25,7 +25,7 @@ protocol is used, otherwise it assumes HTTP. Scheme guessing can be avoided by
 providing a full URL including the scheme, or disabled by setting a default
 protocol, see --proto-default for details.
 
-To control where the contents of a retreived URL is written instead of the
+To control where the contents of a retrieved URL is written instead of the
 default stdout, use the --output or the --remote-name options. When retrieving
 multiple URLs in a single invoke, each provided URL needs its own dedicated
 destination option unless --remote-name-all is used.
