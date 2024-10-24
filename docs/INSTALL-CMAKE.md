@@ -158,7 +158,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_CA_PATH_SET`:                       (kind of internal)
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
 - `CURL_DISABLE_ALTSVC`:                    Disable alt-svc support. Default: `OFF`
-- `CURL_DISABLE_AWS`:                       Disable AWS-SIG4. Default: `OFF`
+- `CURL_DISABLE_AWS`:                       Disable `AWS-SIG4`. Default: `OFF`
 - `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
 - `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
 - `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
@@ -168,11 +168,11 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
 - `CURL_DISABLE_DOH`:                       Disable DNS-over-HTTPS. Default: `OFF`
 - `CURL_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
-- `CURL_DISABLE_FORM_API`:                  Disable form-api: Default: `=CURL_DISABLE_MIME`
+- `CURL_DISABLE_FORM_API`:                  Disable `form-api`: Default: `=CURL_DISABLE_MIME`
 - `CURL_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
 - `CURL_DISABLE_GETOPTIONS`:                Disable curl_easy_options API for existing options to curl_easy_setopt. Default: `OFF`
 - `CURL_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
-- `CURL_DISABLE_HEADERS_API`:               Disable headers-api support. Default: `OFF`
+- `CURL_DISABLE_HEADERS_API`:               Disable `headers-api` support. Default: `OFF`
 - `CURL_DISABLE_HSTS`:                      Disable HSTS support. Default: `OFF`
 - `CURL_DISABLE_HTTP`:                      Disable HTTP. Default: `OFF`
 - `CURL_DISABLE_HTTP_AUTH`:                 Disable all HTTP authentication methods. Default: `OFF`
@@ -297,76 +297,76 @@ assumes that CMake generates `Makefile`:
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL
 
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory
-- `ZLIB_LIBRARY`:                           Path to zlib library
+- `ZLIB_LIBRARY`:                           Path to `zlib` library
 
 - `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS
 - ENV: `GSS_ROOT_DIR`:                      Set this env to the root installation of GSS
 
-- `BEARSSL_INCLUDE_DIR`:                    The bearssl include directory
-- `BEARSSL_INCLUDE_DIRS`:                   The bearssl include directory (deprecated)
-- `BEARSSL_LIBRARY`:                        Path to bearssl library
+- `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory
+- `BEARSSL_INCLUDE_DIRS`:                   The BearSSL include directory (deprecated)
+- `BEARSSL_LIBRARY`:                        Path to `bearssl` library
 
 - `BROTLI_INCLUDE_DIR`:                     The brotli include directory
-- `BROTLICOMMON_LIBRARY`:                   Path to brotlicommon library
-- `BROTLIDEC_LIBRARY`:                      Path to brotlidec library
+- `BROTLICOMMON_LIBRARY`:                   Path to `brotlicommon` library
+- `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library
 
 - `CARES_INCLUDE_DIR`:                      The c-ares include directory
-- `CARES_LIBRARY`:                          Path to c-ares library
+- `CARES_LIBRARY`:                          Path to `c-ares` library
 
 - `LIBGSASL_INCLUDE_DIR`:                   The libgsasl include directory
-- `LIBGSASL_LIBRARY`:                       Path to libgsasl library
+- `LIBGSASL_LIBRARY`:                       Path to `libgsasl` library
 
 - `LIBIDN2_INCLUDE_DIR`:                    The libidn2 include directory
-- `LIBIDN2_LIBRARY`:                        Path to libidn2 library
+- `LIBIDN2_LIBRARY`:                        Path to `libidn2` library
 
 - `LIBPSL_INCLUDE_DIR`:                     The libpsl include directory
-- `LIBPSL_LIBRARY`:                         Path to libpsl library
+- `LIBPSL_LIBRARY`:                         Path to `libpsl` library
 
 - `LIBSSH_INCLUDE_DIR`:                     The libssh include directory
-- `LIBSSH_LIBRARY`:                         Path to libssh library
+- `LIBSSH_LIBRARY`:                         Path to `libssh` library
 
 - `LIBSSH2_INCLUDE_DIR`:                    The libssh2 include directory
-- `LIBSSH2_LIBRARY`:                        Path to libssh2 library
+- `LIBSSH2_LIBRARY`:                        Path to `libssh2` library
 
 - `LIBUV_INCLUDE_DIR`:                      The libuv include directory
-- `LIBUV_LIBRARY`:                          Path to libuv library
+- `LIBUV_LIBRARY`:                          Path to `libuv` library
 
 - `MSH3_INCLUDE_DIR`:                       The msh3 include directory
-- `MSH3_LIBRARY`:                           Path to msh3 library
+- `MSH3_LIBRARY`:                           Path to `msh3` library
 
-- `MBEDTLS_INCLUDE_DIR`:                    The mbedtls include directory
-- `MBEDTLS_INCLUDE_DIRS`:                   The mbedtls include directory (deprecated)
-- `MBEDTLS_LIBRARY`:                        Path to mbedtls library
-- `MBEDX509_LIBRARY`:                       Path to mbedx509 library
-- `MBEDCRYPTO_LIBRARY`:                     Path to mbedcrypto library
+- `MBEDTLS_INCLUDE_DIR`:                    The mbedTLS include directory
+- `MBEDTLS_INCLUDE_DIRS`:                   The mbedTLS include directory (deprecated)
+- `MBEDTLS_LIBRARY`:                        Path to `mbedtls` library
+- `MBEDX509_LIBRARY`:                       Path to `mbedx509` library
+- `MBEDCRYPTO_LIBRARY`:                     Path to `mbedcrypto` library
 
 - `NGHTTP2_INCLUDE_DIR`:                    The nghttp2 include directory
-- `NGHTTP2_LIBRARY`:                        Path to nghttp2 library
+- `NGHTTP2_LIBRARY`:                        Path to `nghttp2` library
 
 - `NGHTTP3_INCLUDE_DIR`:                    The nghttp3 include directory
-- `NGHTTP3_LIBRARY`:                        Path to nghttp3 library
+- `NGHTTP3_LIBRARY`:                        Path to `nghttp3` library
 
 - `NGTCP2_INCLUDE_DIR`:                     The ngtcp2 include directory
-- `NGTCP2_LIBRARY`:                         Path to ngtcp2 library
+- `NGTCP2_LIBRARY`:                         Path to `ngtcp2` library
 
 - `NETTLE_INCLUDE_DIR`:                     The nettle include directory
-- `NETTLE_LIBRARY`:                         Path to nettle library
+- `NETTLE_LIBRARY`:                         Path to `nettle` library
 
 - `QUICHE_INCLUDE_DIR`:                     The quiche include directory
-- `QUICHE_LIBRARY`:                         Path to quiche library
+- `QUICHE_LIBRARY`:                         Path to `quiche` library
 
-- `RUSTLS_INCLUDE_DIR`:                     The rustls include directory
-- `RUSTLS_LIBRARY`:                         Path to rustls library
+- `RUSTLS_INCLUDE_DIR`:                     The Rustls include directory
+- `RUSTLS_LIBRARY`:                         Path to `rustls` library
 
-- `WOLFSSH_INCLUDE_DIR`:                    The wolfssh include directory
-- `WOLFSSH_LIBRARY`:                        Path to wolfssh library
+- `WOLFSSH_INCLUDE_DIR`:                    The wolfSSH include directory
+- `WOLFSSH_LIBRARY`:                        Path to `wolfssh` library
 
-- `WOLFSSL_INCLUDE_DIR`:                    The wolfssl include directory
-- `WolfSSL_INCLUDE_DIR`:                    The wolfssl include directory (deprecated)
-- `WOLFSSL_LIBRARY`:                        Path to wolfssl library
-- `WolfSSL_LIBRARY`:                        Path to wolfssl library (deprecated)
+- `WOLFSSL_INCLUDE_DIR`:                    The wolfSSL include directory
+- `WolfSSL_INCLUDE_DIR`:                    The wolfSSL include directory (deprecated)
+- `WOLFSSL_LIBRARY`:                        Path to `wolfssl` library
+- `WolfSSL_LIBRARY`:                        Path to `wolfssl` library (deprecated)
 
 - `ZSTD_INCLUDE_DIR`:                       The zstd include directory
 - `Zstd_INCLUDE_DIR`:                       The zstd include directory (deprecated)
-- `ZSTD_LIBRARY`:                           Path to zstd library
-- `Zstd_LIBRARY`:                           Path to zstd library (deprecated)
+- `ZSTD_LIBRARY`:                           Path to `zstd` library
+- `Zstd_LIBRARY`:                           Path to `zstd` library (deprecated)
