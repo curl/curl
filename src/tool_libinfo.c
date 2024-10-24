@@ -83,6 +83,7 @@ bool feature_spnego = FALSE;
 bool feature_ssl = FALSE;
 bool feature_tls_srp = FALSE;
 bool feature_zstd = FALSE;
+bool feature_ech = FALSE;
 
 static struct feature_name_presentp {
   const char   *feature_name;
@@ -95,6 +96,7 @@ static struct feature_name_presentp {
   {"brotli",         &feature_brotli,     CURL_VERSION_BROTLI},
   {"CharConv",       NULL,                CURL_VERSION_CONV},
   {"Debug",          NULL,                CURL_VERSION_DEBUG},
+  {"ECH",            &feature_ech,        0},
   {"gsasl",          NULL,                CURL_VERSION_GSASL},
   {"GSS-API",        NULL,                CURL_VERSION_GSSAPI},
   {"HSTS",           &feature_hsts,       CURL_VERSION_HSTS},

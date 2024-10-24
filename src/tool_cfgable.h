@@ -306,12 +306,9 @@ struct OperationConfig {
   bool rm_partial;                /* on error, remove partially written output
                                      files */
   bool skip_existing;
-#ifdef USE_ECH
   char *ech;                      /* Config set by --ech keywords */
   char *ech_config;               /* Config set by "--ech esl:" option */
   char *ech_public;               /* Config set by "--ech pn:" option */
-#endif
-
 };
 
 struct GlobalConfig {

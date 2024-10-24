@@ -173,21 +173,14 @@ static void free_config_fields(struct OperationConfig *config)
   Curl_safefree(config->preproxy);
   Curl_safefree(config->proxy_service_name);
   Curl_safefree(config->service_name);
-
   Curl_safefree(config->ftp_account);
   Curl_safefree(config->ftp_alternative_to_user);
-
   Curl_safefree(config->aws_sigv4);
   Curl_safefree(config->proto_str);
   Curl_safefree(config->proto_redir_str);
-#ifdef USE_ECH
   Curl_safefree(config->ech);
-  config->ech = NULL;
   Curl_safefree(config->ech_config);
-  config->ech_config = NULL;
   Curl_safefree(config->ech_public);
-  config->ech_public = NULL;
-#endif
 }
 
 void config_free(struct OperationConfig *config)

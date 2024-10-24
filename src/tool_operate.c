@@ -1734,15 +1734,15 @@ static CURLcode config2setopts(struct GlobalConfig *global,
   if(config->hsts)
     my_setopt_str(curl, CURLOPT_HSTS, config->hsts);
 
-#ifdef USE_ECH
-  /* only if enabled in configure */
-  if(config->ech) /* only if set (optional) */
-    my_setopt_str(curl, CURLOPT_ECH, config->ech);
-  if(config->ech_public) /* only if set (optional) */
-    my_setopt_str(curl, CURLOPT_ECH, config->ech_public);
-  if(config->ech_config) /* only if set (optional) */
-    my_setopt_str(curl, CURLOPT_ECH, config->ech_config);
-#endif
+  if(feature_ech) {
+    /* only if enabled in libcurl */
+    if(config->ech) /* only if set (optional) */
+      my_setopt_str(curl, CURLOPT_ECH, config->ech);
+    if(config->ech_public) /* only if set (optional) */
+      my_setopt_str(curl, CURLOPT_ECH, config->ech_public);
+    if(config->ech_config) /* only if set (optional) */
+      my_setopt_str(curl, CURLOPT_ECH, config->ech_config);
+  }
 
   /* new in 8.9.0 */
   if(config->ip_tos > 0 || config->vlan_priority > 0) {
