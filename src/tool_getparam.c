@@ -1917,13 +1917,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = PARAM_ENGINES_REQUESTED;
       }
       break;
-#ifndef USE_ECH
-    case C_ECH: /* --ech, not implemented by default */
-      err = PARAM_LIBCURL_DOESNT_SUPPORT;
-      break;
-#else
     case C_ECH: /* --ech */
-      if(strlen(nextarg) > 4 && strncasecompare("pn:", nextarg, 3)) {
+      if(!feature_ech)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else if(strlen(nextarg) > 4 && strncasecompare("pn:", nextarg, 3)) {
         /* a public_name */
         err = getstr(&config->ech_public, nextarg, DENY_BLANK);
       }
@@ -1967,7 +1964,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->ech, nextarg, DENY_BLANK);
     }
     break;
-#endif
     case C_CAPATH: /* --capath */
       err = getstr(&config->capath, nextarg, DENY_BLANK);
       break;

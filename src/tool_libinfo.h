@@ -61,6 +61,7 @@ extern bool feature_spnego;
 extern bool feature_ssl;
 extern bool feature_tls_srp;
 extern bool feature_zstd;
+extern bool feature_ech;
 
 CURLcode get_libcurl_info(void);
 const char *proto_token(const char *proto);
