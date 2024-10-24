@@ -301,7 +301,6 @@ Details via CMake
 
 - `PERL_EXECUTABLE`                         Perl binary used throughout the build and tests.
 - `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory.
-- `BEARSSL_INCLUDE_DIRS`:                   The BearSSL include directory. (Deprecated. Use: `BEARSSL_INCLUDE_DIR`)
 - `BEARSSL_LIBRARY`:                        Path to `bearssl` library.
 - `BROTLI_INCLUDE_DIR`:                     The brotli include directory.
 - `BROTLICOMMON_LIBRARY`:                   Path to `brotlicommon` library.
@@ -327,7 +326,6 @@ Details via CMake
 - `MSH3_INCLUDE_DIR`:                       The msh3 include directory.
 - `MSH3_LIBRARY`:                           Path to `msh3` library.
 - `MBEDTLS_INCLUDE_DIR`:                    The mbedTLS include directory.
-- `MBEDTLS_INCLUDE_DIRS`:                   The mbedTLS include directory. (Deprecated. Use: `MBEDTLS_INCLUDE_DIR`)
 - `MBEDTLS_LIBRARY`:                        Path to `mbedtls` library.
 - `MBEDX509_LIBRARY`:                       Path to `mbedx509` library.
 - `MBEDCRYPTO_LIBRARY`:                     Path to `mbedcrypto` library.
@@ -346,13 +344,9 @@ Details via CMake
 - `WOLFSSH_INCLUDE_DIR`:                    The wolfSSH include directory.
 - `WOLFSSH_LIBRARY`:                        Path to `wolfssh` library.
 - `WOLFSSL_INCLUDE_DIR`:                    The wolfSSL include directory.
-- `WolfSSL_INCLUDE_DIR`:                    The wolfSSL include directory. (Deprecated. Use: `WOLFSSL_INCLUDE_DIR`)
 - `WOLFSSL_LIBRARY`:                        Path to `wolfssl` library.
-- `WolfSSL_LIBRARY`:                        Path to `wolfssl` library. (Deprecated. Use: `WOLFSSL_LIBRARY`)
 - `ZSTD_INCLUDE_DIR`:                       The zstd include directory.
-- `Zstd_INCLUDE_DIR`:                       The zstd include directory. (Deprecated. Use: `ZSTD_INCLUDE_DIR`)
 - `ZSTD_LIBRARY`:                           Path to `zstd` library.
-- `Zstd_LIBRARY`:                           Path to `zstd` library. (Deprecated. Use: `ZSTD_LIBRARY`)
 
 ## Test tools
 

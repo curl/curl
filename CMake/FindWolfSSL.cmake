@@ -26,9 +26,7 @@
 # Input variables:
 #
 # WOLFSSL_INCLUDE_DIR   The wolfSSL include directory.
-# WolfSSL_INCLUDE_DIR   The wolfSSL include directory. (Deprecated. Use: `WOLFSSL_INCLUDE_DIR`)
 # WOLFSSL_LIBRARY       Path to `wolfssl` library.
-# WolfSSL_LIBRARY       Path to `wolfssl` library. (Deprecated. Use: `WOLFSSL_LIBRARY`)
 #
 # Result variables:
 #

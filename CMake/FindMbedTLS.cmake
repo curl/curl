@@ -26,7 +26,6 @@
 # Input variables:
 #
 # MBEDTLS_INCLUDE_DIR   The mbedTLS include directory.
-# MBEDTLS_INCLUDE_DIRS  The mbedTLS include directory. (Deprecated. Use: `MBEDTLS_INCLUDE_DIR`)
 # MBEDTLS_LIBRARY       Path to `mbedtls` library.
 # MBEDX509_LIBRARY      Path to `mbedx509` library.
 # MBEDCRYPTO_LIBRARY    Path to `mbedcrypto` library.
