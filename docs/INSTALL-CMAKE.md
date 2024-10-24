@@ -285,14 +285,14 @@ Details via CMake
 - `CURL_ZLIB`:                              Use zlib (`ON`, `OFF` or `AUTO`). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd. Default: `OFF`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
-- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
-- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
+- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `ON`
+- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`, or `OFF` if Apple IDN or WinIDN is enabled
 - `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
 - `USE_MSH3`:                               Use msh3/msquic library for HTTP/3 support. Default: `OFF`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
-- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
+- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `ON`
 - `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
 ## Dependency options (via CMake)
