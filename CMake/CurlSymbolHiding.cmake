@@ -21,8 +21,6 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-include(CheckCSourceCompiles)
-
 option(CURL_HIDDEN_SYMBOLS "Hide libcurl internal symbols (=hide all symbols that are not officially external)" ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
@@ -54,19 +52,10 @@ if(CURL_HIDDEN_SYMBOLS)
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
     set(CURL_EXTERN_SYMBOL "__global")
     set(CURL_CFLAG_SYMBOLS_HIDE "-xldscope=hidden")
-  elseif(CMAKE_C_COMPILER_ID MATCHES "Intel" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0)
-    # Note: This should probably just check for version 9.1.045 but I am not 100% sure
-    #       so let us do it the same way autotools do.
+  elseif(CMAKE_C_COMPILER_ID MATCHES "Intel" AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 9.0)  # Requires 9.1.045
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
     set(CURL_EXTERN_SYMBOL "__attribute__ ((__visibility__ (\"default\")))")
     set(CURL_CFLAG_SYMBOLS_HIDE "-fvisibility=hidden")
-    check_c_source_compiles("#include <stdio.h>
-      int main(void) { printf(\"icc fvisibility bug test\"); return 0; }" _no_bug)
-    if(NOT _no_bug)
-      set(CURL_HIDES_PRIVATE_SYMBOLS FALSE)
-      set(CURL_EXTERN_SYMBOL "")
-      set(CURL_CFLAG_SYMBOLS_HIDE "")
-    endif()
   elseif(MSVC)
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
   endif()
