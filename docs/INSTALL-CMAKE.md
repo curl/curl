@@ -155,6 +155,62 @@ assumes that CMake generates `Makefile`:
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of TLS backend. Default: `OFF`
 - `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+- `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
+- `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
+- `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external)". Default: `ON`
+- `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
+- `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
+- `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
+- `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (`/MT`). Default: `OFF`
+- `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
+- `CURL_TEST_BUNDLES`:                      Bundle `libtests`/`unittests` into single binaries. Default: `OFF`
+- `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
+- `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
+- `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
+- `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
+- `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
+- `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
+- `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
+- `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
+- `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
+- `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if not other TLS backend was enabled
+- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for UNIX, VCPKG, MINGW if not cross-compiling
+- `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
+- `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
+- `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
+- `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
+- `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
+- `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
+- `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
+- `CURL_ZLIB`:                              Use zlib ("ON", "OFF" or "AUTO"). Default: `AUTO`
+- `CURL_ZSTD`:                              Use zstd. Default: `OFF`
+- `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
+- `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: =`ENABLE_DEBUG`
+- `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
+- `ENABLE_DEBUG`:                           Enable curl debug features. Default: `OFF`
+- `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON`
+- `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled
+- `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
+- `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
+- `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp`
+- `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
+- `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
+- `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
+- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
+- `USE_ECH`:                                Enable ECH support. Default: `OFF`
+- `USE_HTTPSRR`:                            Enable HTTPS RR support for ECH (experimental). Default: `OFF`
+- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
+- `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
+- `USE_MSH3`:                               Use msh3/msquic library for HTTP/3 support. Default: `OFF`
+- `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
+- `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
+- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
+- `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
+- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
+- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
+
+## Disabling features
+
 - `CURL_DISABLE_ALTSVC`:                    Disable alt-svc support. Default: `OFF`
 - `CURL_DISABLE_AWS`:                       Disable **aws-sigv4**. Default: `OFF`
 - `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
@@ -202,60 +258,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
-- `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
-- `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
-- `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external)". Default: `ON`
-- `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
-- `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
-- `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
-- `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (`/MT`). Default: `OFF`
-- `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
-- `CURL_TEST_BUNDLES`:                      Bundle `libtests`/`unittests` into single binaries. Default: `OFF`
-- `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
-- `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
-- `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
-- `CURL_USE_GSSAPI`:                        Use GSSAPI implementation. Default: `OFF`
-- `CURL_USE_LIBPSL`:                        Use libpsl. Default: `ON`
-- `CURL_USE_LIBSSH`:                        Use libssh. Default: `OFF`
-- `CURL_USE_LIBSSH2`:                       Use libssh2. Default: `ON`
-- `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
-- `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
-- `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if not other TLS backend was enabled
-- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for UNIX, VCPKG, MINGW if not cross-compiling
-- `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
-- `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
-- `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
-- `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
-- `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
-- `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
-- `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
-- `CURL_ZLIB`:                              Use zlib ("ON", "OFF" or "AUTO"). Default: `AUTO`
-- `CURL_ZSTD`:                              Use zstd. Default: `OFF`
-- `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
-- `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: =`ENABLE_DEBUG`
-- `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
-- `ENABLE_DEBUG`:                           Enable curl debug features. Default: `OFF`
-- `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON`
-- `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled
-- `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
-- `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
-- `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp`
-- `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
-- `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
-- `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
-- `USE_APPLE_IDN`:                          Use Apple built-in IDN support. Default: `OFF`
-- `USE_ECH`:                                Enable ECH support. Default: `OFF`
-- `USE_HTTPSRR`:                            Enable HTTPS RR support for ECH (experimental). Default: `OFF`
-- `USE_LIBIDN2`:                            Use libidn2 for IDN support. Default: `ON`
-- `USE_LIBRTMP`:                            Enable librtmp from rtmpdump. Default: `OFF`
-- `USE_MSH3`:                               Use msh3/msquic library for HTTP/3 support. Default: `OFF`
-- `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
-- `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
-- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
-- `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
-- `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
-- `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
 ## Environment
 
