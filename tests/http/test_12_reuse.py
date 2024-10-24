@@ -35,7 +35,6 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=Env.curl_uses_lib('bearssl'), reason='BearSSL too slow')
 @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
 class TestReuse:
 
