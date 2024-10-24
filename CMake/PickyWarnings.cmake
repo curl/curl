@@ -226,7 +226,7 @@ if(PICKY_COMPILER)
 
     foreach(_ccopt IN LISTS _picky_detect)
       # Use a unique variable name 1. for meaningful log output 2. to have a fresh, undefined variable for each detection
-      string(MAKE_C_IDENTIFIER "OPT${_ccopt}" _optvarname)
+      string(MAKE_C_IDENTIFIER "HAVE${_ccopt}" _optvarname)
       # GCC only warns about unknown -Wno- options if there are also other diagnostic messages,
       # so test for the positive form instead
       string(REPLACE "-Wno-" "-W" _ccopt_on "${_ccopt}")
