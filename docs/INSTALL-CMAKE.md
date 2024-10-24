@@ -261,9 +261,9 @@ assumes that CMake generates `Makefile`:
 
 ## Environment
 
-- ENV: `CURL_BUILDINFO`:                    Print `buildinfo.txt` if set.
-- ENV: `CURL_CI`:                           Assume running under CI if set.
-- ENV: `CI`:                                Assume running under CI if set.
+- `CURL_BUILDINFO`:                         Print `buildinfo.txt` if set.
+- `CURL_CI`:                                Assume running under CI if set.
+- `CI`:                                     Assume running under CI if set.
 
 ## CMake built-ins
 
@@ -299,8 +299,7 @@ assumes that CMake generates `Makefile`:
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory
 - `ZLIB_LIBRARY`:                           Path to `zlib` library
 
-- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS
-- ENV: `GSS_ROOT_DIR`:                      Set this env to the root installation of GSS
+- `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS (also supported as environment variable)
 
 - `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory
 - `BEARSSL_INCLUDE_DIRS`:                   The BearSSL include directory (deprecated)
