@@ -32,14 +32,15 @@ man_MANS =                                      \
   CURLINFO_CERTINFO.3                           \
   CURLINFO_CONDITION_UNMET.3                    \
   CURLINFO_CONNECT_TIME.3                       \
-  CURLINFO_CONNECT_TIME_T.3                     \
   CURLINFO_CONN_ID.3                            \
+  CURLINFO_CONNECT_TIME_T.3                     \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD.3            \
   CURLINFO_CONTENT_LENGTH_DOWNLOAD_T.3          \
   CURLINFO_CONTENT_LENGTH_UPLOAD.3              \
   CURLINFO_CONTENT_LENGTH_UPLOAD_T.3            \
   CURLINFO_CONTENT_TYPE.3                       \
   CURLINFO_COOKIELIST.3                         \
+  CURLINFO_EARLYDATA_SENT_T.3                   \
   CURLINFO_EFFECTIVE_METHOD.3                   \
   CURLINFO_EFFECTIVE_URL.3                      \
   CURLINFO_FILETIME.3                           \
@@ -167,7 +168,6 @@ man_MANS =                                      \
   CURLOPT_DOH_SSL_VERIFYPEER.3                  \
   CURLOPT_DOH_SSL_VERIFYSTATUS.3                \
   CURLOPT_DOH_URL.3                             \
-  CURLINFO_EARLYDATA_SENT_T.3                   \
   CURLOPT_ECH.3                                 \
   CURLOPT_EGDSOCKET.3                           \
   CURLOPT_ERRORBUFFER.3                         \
