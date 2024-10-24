@@ -253,7 +253,7 @@ assumes that CMake generates `Makefile`:
 
 Details via CMake
 [variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html) and
-[GNUInstallDirs](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html).
+[install directories](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html).
 
 ## Dependencies
 
