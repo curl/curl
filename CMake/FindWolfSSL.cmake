@@ -93,4 +93,5 @@ if(NOT WIN32)
   if(_math_library)
     list(APPEND WOLFSSL_LIBRARIES "m")  # for log and pow
   endif()
+  mark_as_advanced(_math_library)
 endif()
