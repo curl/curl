@@ -36,7 +36,6 @@ if(WIN32 AND (ENABLE_DEBUG OR ENABLE_CURLDEBUG))
 endif()
 
 if(CURL_HIDDEN_SYMBOLS)
-
   if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
     set(CURL_EXTERN_SYMBOL "__attribute__ ((__visibility__ (\"default\")))")
@@ -59,7 +58,6 @@ if(CURL_HIDDEN_SYMBOLS)
   elseif(MSVC)
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
   endif()
-
 else()
   if(MSVC)
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
