@@ -166,13 +166,16 @@ assumes that CMake generates `Makefile`:
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
 - `STATIC_LIB_SUFFIX`:                      Static library suffix. Default: (empty)
 
-## Enabling features
+## CA bundle options
 
 - `CURL_CA_BUNDLE`:                         Path to the CA bundle. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_EMBED`:                          Path to the CA bundle to embed in the curl tool. Default: (disabled)
 - `CURL_CA_FALLBACK`:                       Use built-in CA store of TLS backend. Default: `OFF`
 - `CURL_CA_PATH`:                           Location of default CA path. Set `none` to disable or `auto` for auto-detection. Default: `auto`
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
+
+## Enabling features
+
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
 - `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
 - `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON`
