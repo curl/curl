@@ -184,6 +184,7 @@ assumes that CMake generates `Makefile`:
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support for ECH (experimental). Default: `OFF`
+- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 
 ## Disabling features
 
@@ -286,7 +287,6 @@ Details via CMake
 - `USE_MSH3`:                               Use msh3/msquic library for HTTP/3 support. Default: `OFF`
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
-- `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
 - `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
 - `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
