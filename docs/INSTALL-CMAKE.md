@@ -158,7 +158,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_CA_PATH_SET`:                       (kind of internal)
 - `CURL_CA_SEARCH_SAFE`:                    Enable safe CA bundle search (within the curl tool directory) on Windows. Default: `OFF`
 - `CURL_DISABLE_ALTSVC`:                    Disable alt-svc support. Default: `OFF`
-- `CURL_DISABLE_AWS`:                       Disable aws-sigv4. Default: `OFF`
+- `CURL_DISABLE_AWS`:                       Disable **aws-sigv4**. Default: `OFF`
 - `CURL_DISABLE_BASIC_AUTH`:                Disable Basic authentication. Default: `OFF`
 - `CURL_DISABLE_BEARER_AUTH`:               Disable Bearer authentication. Default: `OFF`
 - `CURL_DISABLE_BINDLOCAL`:                 Disable local binding support. Default: `OFF`
@@ -290,8 +290,8 @@ assumes that CMake generates `Makefile`:
 - `APXS`:                                   Default: `apxs`
 - `HTTPD_NGHTTPX`:                          Default: `nghttpx`
 
-- `LDAP_LIBRARY`:                           Name or full path to ldap library. Default: `ldap`
-- `LDAP_LBER_LIBRARY`:                      Name or full path to lber library. Default: `lber`
+- `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
+- `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
 - `LDAP_INCLUDE_DIR`:                       Path to LDAP include directory
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL
