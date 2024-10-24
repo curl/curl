@@ -201,7 +201,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
 - `CURL_DISABLE_FORM_API`:                  Disable **form-api**: Default: =`CURL_DISABLE_MIME`
 - `CURL_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
-- `CURL_DISABLE_GETOPTIONS`:                Disable curl_easy_options API for existing options to curl_easy_setopt. Default: `OFF`
+- `CURL_DISABLE_GETOPTIONS`:                Disable `curl_easy_options` API for existing options to `curl_easy_setopt`. Default: `OFF`
 - `CURL_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
 - `CURL_DISABLE_HEADERS_API`:               Disable **headers-api** support. Default: `OFF`
 - `CURL_DISABLE_HSTS`:                      Disable HSTS support. Default: `OFF`
