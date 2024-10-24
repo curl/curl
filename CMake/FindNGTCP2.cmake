@@ -34,7 +34,7 @@
 # Input variables:
 #
 # NGTCP2_INCLUDE_DIR   The ngtcp2 include directory.
-# NGTCP2_LIBRARY       Path to ngtcp2 library.
+# NGTCP2_LIBRARY       Path to `ngtcp2` library.
 #
 # Result variables:
 #

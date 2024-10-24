@@ -27,8 +27,8 @@
 #
 # WOLFSSL_INCLUDE_DIR   The wolfssl include directory.
 # WolfSSL_INCLUDE_DIR   The wolfssl include directory. (deprecated)
-# WOLFSSL_LIBRARY       Path to wolfssl library.
-# WolfSSL_LIBRARY       Path to wolfssl library. (deprecated)
+# WOLFSSL_LIBRARY       Path to `wolfssl` library.
+# WolfSSL_LIBRARY       Path to `wolfssl` library. (deprecated)
 #
 # Result variables:
 #

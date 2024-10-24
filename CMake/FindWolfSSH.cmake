@@ -26,7 +26,7 @@
 # Input variables:
 #
 # WOLFSSH_INCLUDE_DIR   The wolfssh include directory.
-# WOLFSSH_LIBRARY       Path to wolfssh library.
+# WOLFSSH_LIBRARY       Path to `wolfssh` library.
 #
 # Result variables:
 #

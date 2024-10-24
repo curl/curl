@@ -26,7 +26,7 @@
 # Input variables:
 #
 # MSH3_INCLUDE_DIR   The msh3 include directory.
-# MSH3_LIBRARY       Path to msh3 library.
+# MSH3_LIBRARY       Path to `msh3` library.
 #
 # Result variables:
 #

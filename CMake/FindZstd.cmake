@@ -27,8 +27,8 @@
 #
 # ZSTD_INCLUDE_DIR   The zstd include directory.
 # Zstd_INCLUDE_DIR   The zstd include directory. (deprecated)
-# ZSTD_LIBRARY       Path to zstd library.
-# Zstd_LIBRARY       Path to zstd library. (deprecated)
+# ZSTD_LIBRARY       Path to `zstd` library.
+# Zstd_LIBRARY       Path to `zstd` library. (deprecated)
 #
 # Result variables:
 #
