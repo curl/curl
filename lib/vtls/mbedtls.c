@@ -885,18 +885,27 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
-    void *old_session = NULL;
+    void *sdata = NULL;
+    size_t slen = 0;
 
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              &old_session, NULL, NULL)) {
-      ret = mbedtls_ssl_set_session(&backend->ssl, old_session);
+                              &sdata, &slen, NULL) && slen) {
+      mbedtls_ssl_session session;
+
+      mbedtls_ssl_session_init(&session);
+      ret = mbedtls_ssl_session_load(&session, sdata, slen);
       if(ret) {
-        Curl_ssl_sessionid_unlock(data);
-        failf(data, "mbedtls_ssl_set_session returned -0x%x", -ret);
-        return CURLE_SSL_CONNECT_ERROR;
+        failf(data, "error loading cached session: -0x%x", -ret);
       }
-      infof(data, "mbedTLS reusing session");
+      else {
+        ret = mbedtls_ssl_set_session(&backend->ssl, &session);
+        if(ret)
+          failf(data, "error setting session: -0x%x", -ret);
+        else
+          infof(data, "SSL reusing session ID");
+      }
+      mbedtls_ssl_session_free(&session);
     }
     Curl_ssl_sessionid_unlock(data);
   }
@@ -1116,11 +1125,10 @@ pinnedpubkey_error:
   return CURLE_OK;
 }
 
-static void mbedtls_session_free(void *sessionid, size_t idsize)
+static void mbedtls_session_free(void *session, size_t slen)
 {
-  (void)idsize;
-  mbedtls_ssl_session_free(sessionid);
-  free(sessionid);
+  (void)slen;
+  free(session);
 }
 
 static CURLcode
@@ -1135,29 +1143,42 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   DEBUGASSERT(backend);
   if(ssl_config->primary.cache_session) {
     int ret;
-    mbedtls_ssl_session *our_ssl_sessionid;
+    mbedtls_ssl_session session;
+    unsigned char *sdata = NULL;
+    size_t slen = 0;
 
-    our_ssl_sessionid = malloc(sizeof(mbedtls_ssl_session));
-    if(!our_ssl_sessionid)
-      return CURLE_OUT_OF_MEMORY;
-
-    mbedtls_ssl_session_init(our_ssl_sessionid);
-
-    ret = mbedtls_ssl_get_session(&backend->ssl, our_ssl_sessionid);
+    mbedtls_ssl_session_init(&session);
+    ret = mbedtls_ssl_get_session(&backend->ssl, &session);
     if(ret) {
       if(ret != MBEDTLS_ERR_SSL_ALLOC_FAILED)
-        mbedtls_ssl_session_free(our_ssl_sessionid);
-      free(our_ssl_sessionid);
+        mbedtls_ssl_session_free(&session);
       failf(data, "mbedtls_ssl_get_session returned -0x%x", -ret);
       return CURLE_SSL_CONNECT_ERROR;
     }
 
-    /* If there is already a matching session in the cache, delete it */
-    Curl_ssl_sessionid_lock(data);
-    result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                    our_ssl_sessionid, 0,
-                                    mbedtls_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    mbedtls_ssl_session_save(&session, NULL, 0, &slen);
+    if(!slen) {
+      failf(data, "failed to serialize session: length is 0");
+    }
+    else {
+      sdata = malloc(slen);
+      if(sdata) {
+        ret = mbedtls_ssl_session_save(&session, sdata, slen, &slen);
+        if(ret) {
+          failf(data, "failed to serialize session: -0x%x", -ret);
+        }
+        else {
+          Curl_ssl_sessionid_lock(data);
+          result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
+                                          sdata, slen, mbedtls_session_free);
+          Curl_ssl_sessionid_unlock(data);
+          if(!result)
+            sdata = NULL;
+        }
+      }
+    }
+    mbedtls_ssl_session_free(&session);
+    free(sdata);
   }
   return result;
 }

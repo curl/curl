@@ -143,7 +143,7 @@ class TestSSLUse:
         if env.curl_uses_lib('bearssl'):
             pytest.skip("BearSSL does not support cert verification with IP addresses")
         if env.curl_uses_lib('mbedtls'):
-            pytest.skip("mbedTLS does not support cert verification with IP addresses")
+            pytest.skip("mbedTLS does use IP addresses in SNI")
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
