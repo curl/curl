@@ -166,7 +166,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
 - `CURL_DISABLE_DOH`:                       Disable DNS-over-HTTPS. Default: `OFF`
 - `CURL_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
-- `CURL_DISABLE_FORM_API`:                  Disable `form-api`: Default: `=CURL_DISABLE_MIME`
+- `CURL_DISABLE_FORM_API`:                  Disable `form-api`: Default: =`CURL_DISABLE_MIME`
 - `CURL_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
 - `CURL_DISABLE_GETOPTIONS`:                Disable curl_easy_options API for existing options to curl_easy_setopt. Default: `OFF`
 - `CURL_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
@@ -179,7 +179,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_IPFS`:                      Disable IPFS. Default: `OFF`
 - `CURL_DISABLE_KERBEROS_AUTH`:             Disable Kerberos authentication. Default: `OFF`
 - `CURL_DISABLE_LDAP`:                      Disable LDAP. Default: `OFF`
-- `CURL_DISABLE_LDAPS`:                     Disable LDAPS. Default: `=CURL_DISABLE_LDAP`
+- `CURL_DISABLE_LDAPS`:                     Disable LDAPS. Default: =`CURL_DISABLE_LDAP`
 - `CURL_DISABLE_LIBCURL_OPTION`:            Disable `--libcurl` option from the curl tool. Default: `OFF`
 - `CURL_DISABLE_MIME`:                      Disable MIME support. Default: `OFF`
 - `CURL_DISABLE_MQTT`:                      Disable MQTT. Default: `OFF`
@@ -228,11 +228,11 @@ assumes that CMake generates `Makefile`:
 - `CURL_USE_WOLFSSH`:                       Use wolfSSH. Default: `OFF`
 - `CURL_USE_WOLFSSL`:                       Enable wolfSSL for SSL/TLS. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
-- `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: `=CURL_USE_SCHANNEL`
+- `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
 - `CURL_ZLIB`:                              Use zlib ("ON", "OFF" or "AUTO"). Default: `AUTO`
 - `CURL_ZSTD`:                              Use zstd. Default: `OFF`
 - `ENABLE_ARES`:                            Enable c-ares support. Default: `OFF`
-- `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: `=ENABLE_DEBUG`
+- `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
 - `ENABLE_DEBUG`:                           Enable curl debug features. Default: `OFF`
 - `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON`
