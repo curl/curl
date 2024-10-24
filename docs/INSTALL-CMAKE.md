@@ -149,13 +149,17 @@ assumes that CMake generates `Makefile`:
 - `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF`
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
+- `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
+                                            Accepted values in order of default priority:
+                                            `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
 - `CURL_ENABLE_EXPORT_TARGET`:              Enable CMake export target. Default: `ON`
 - `CURL_HIDDEN_SYMBOLS`:                    Hide libcurl internal symbols (=hide all symbols that are not officially external). Default: `ON`
 - `CURL_LIBCURL_SOVERSION`:                 Enable libcurl SOVERSION. Default: `ON` for supported platforms
 - `CURL_LIBCURL_VERSIONED_SYMBOLS`:         Enable libcurl versioned symbols. Default: `OFF`
+- `CURL_LIBCURL_VERSIONED_SYMBOLS_PREFIX`:  Override default versioned symbol prefix. Default: `<TLS-BACKEND>_` or `MULTISSL_`
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT with MSVC (`/MT`). Default: `OFF`
-- `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
+- `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
 - `CURL_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: =`ENABLE_DEBUG`
