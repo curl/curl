@@ -24,16 +24,16 @@
 option(CURL_HIDDEN_SYMBOLS "Hide libcurl internal symbols (=hide all symbols that are not officially external)" ON)
 mark_as_advanced(CURL_HIDDEN_SYMBOLS)
 
-set(CURL_HIDES_PRIVATE_SYMBOLS FALSE)
-set(CURL_EXTERN_SYMBOL "")
-set(CURL_CFLAG_SYMBOLS_HIDE "")
-
 if(WIN32 AND (ENABLE_DEBUG OR ENABLE_CURLDEBUG))
   # We need to export internal debug functions,
   # e.g. curl_easy_perform_ev() or curl_dbg_*(),
   # so disable symbol hiding for debug builds and for memory tracking.
   set(CURL_HIDDEN_SYMBOLS OFF)
 endif()
+
+set(CURL_HIDES_PRIVATE_SYMBOLS FALSE)
+unset(CURL_EXTERN_SYMBOL)
+unset(CURL_CFLAG_SYMBOLS_HIDE)
 
 if(CURL_HIDDEN_SYMBOLS)
   if(CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT MSVC)
