@@ -16,23 +16,6 @@ instructions below for the platform you are building on.
 CMake builds can be configured either from the command line, or from one of
 CMake's GUIs.
 
-# Current flaws in the curl CMake build
-
-Missing features in the CMake build:
-
- - Builds libcurl without large file support
- - Does not support all SSL libraries (only OpenSSL, Schannel, Secure
-   Transport, and mbedTLS, wolfSSL)
- - Does not allow different resolver backends (no c-ares build support)
- - No RTMP support built
- - Does not allow build curl and libcurl debug enabled
- - Does not allow a custom CA bundle path
- - Does not allow you to disable specific protocols from the build
- - Does not find or use krb4 or GSS
- - Rebuilds test files too eagerly, but still cannot run the tests
- - Does not detect the correct `strerror_r` flavor when cross-compiling
-   (issue #1123)
-
 # Configuring
 
 A CMake configuration of curl is similar to the autotools build of curl.
