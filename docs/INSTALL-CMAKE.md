@@ -212,7 +212,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_LTO`:                               Enable compiler Link Time Optimizations. Default: `OFF`
 - `CURL_STATIC_CRT`:                        Build libcurl with static CRT on Windows (`/MT`). Default: `OFF`
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string
-- `CURL_TEST_BUNDLES`:                      Bundle libtests/unittests into single binaries. Default: `OFF`
+- `CURL_TEST_BUNDLES`:                      Bundle `libtests`/`unittests` into single binaries. Default: `OFF`
 - `CURL_USE_BEARSSL`:                       Enable BearSSL for SSL/TLS. Default: `OFF`
 - `CURL_USE_GNUTLS`:                        Enable GnuTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_GSASL`:                         Use libgsasl. Default: `OFF`
