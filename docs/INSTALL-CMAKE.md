@@ -245,12 +245,12 @@ assumes that CMake generates `Makefile`:
 ## CMake options
 
 - `CMAKE_DEBUG_POSTFIX`:                    Default: `-d`
-- `CMAKE_IMPORT_LIBRARY_SUFFIX`
-- `CMAKE_INSTALL_BINDIR`
-- `CMAKE_INSTALL_INCLUDEDIR`
-- `CMAKE_INSTALL_LIBDIR`
-- `CMAKE_INSTALL_PREFIX`
-- `CMAKE_STATIC_LIBRARY_SUFFIX`
+- `CMAKE_IMPORT_LIBRARY_SUFFIX`             (see CMake)
+- `CMAKE_INSTALL_BINDIR`                    (see CMake)
+- `CMAKE_INSTALL_INCLUDEDIR`                (see CMake)
+- `CMAKE_INSTALL_LIBDIR`                    (see CMake)
+- `CMAKE_INSTALL_PREFIX`                    (see CMake)
+- `CMAKE_STATIC_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_UNITY_BUILD_BATCH_SIZE`:           Set the number of sources in a "unity" unit. Default: `0` (all)
 - `CMAKE_UNITY_BUILD`:                      Enable "unity" or jumbo builds. Default: `OFF`
 
