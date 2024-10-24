@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# MSH3_INCLUDE_DIR   The msh3 include directory
-# MSH3_LIBRARY       Path to msh3 library
+# - `MSH3_INCLUDE_DIR`:   The msh3 include directory.
+# - `MSH3_LIBRARY`:       Path to `msh3` library.
 #
 # Result variables:
 #
-# MSH3_FOUND         System has msh3
-# MSH3_INCLUDE_DIRS  The msh3 include directories
-# MSH3_LIBRARIES     The msh3 library names
-# MSH3_LIBRARY_DIRS  The msh3 library directories
-# MSH3_CFLAGS        Required compiler flags
-# MSH3_VERSION       Version of msh3
+# - `MSH3_FOUND`:         System has msh3.
+# - `MSH3_INCLUDE_DIRS`:  The msh3 include directories.
+# - `MSH3_LIBRARIES`:     The msh3 library names.
+# - `MSH3_LIBRARY_DIRS`:  The msh3 library directories.
+# - `MSH3_CFLAGS`:        Required compiler flags.
+# - `MSH3_VERSION`:       Version of msh3.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED MSH3_INCLUDE_DIR AND

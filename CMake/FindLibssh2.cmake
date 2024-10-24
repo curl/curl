@@ -25,15 +25,15 @@
 #
 # Input variables:
 #
-# LIBSSH2_INCLUDE_DIR   The libssh2 include directory
-# LIBSSH2_LIBRARY       Path to libssh2 library
+# - `LIBSSH2_INCLUDE_DIR`:   The libssh2 include directory.
+# - `LIBSSH2_LIBRARY`:       Path to `libssh2` library.
 #
 # Result variables:
 #
-# LIBSSH2_FOUND         System has libssh2
-# LIBSSH2_INCLUDE_DIRS  The libssh2 include directories
-# LIBSSH2_LIBRARIES     The libssh2 library names
-# LIBSSH2_VERSION       Version of libssh2
+# - `LIBSSH2_FOUND`:         System has libssh2.
+# - `LIBSSH2_INCLUDE_DIRS`:  The libssh2 include directories.
+# - `LIBSSH2_LIBRARIES`:     The libssh2 library names.
+# - `LIBSSH2_VERSION`:       Version of libssh2.
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

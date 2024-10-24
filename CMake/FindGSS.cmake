@@ -25,19 +25,19 @@
 #
 # Input variables:
 #
-# GSS_ROOT_DIR      Set this variable to the root installation of GSS
+# - `GSS_ROOT_DIR`:      Set this variable to the root installation of GSS. (also supported as environment)
 #
 # Result variables:
 #
-# GSS_FOUND         System has the Heimdal library
-# GSS_FLAVOUR       "GNU", "MIT" or "Heimdal" if anything found
-# GSS_INCLUDE_DIRS  The GSS include directories
-# GSS_LIBRARIES     The GSS library names
-# GSS_LIBRARY_DIRS  The GSS library directories
-# GSS_LDFLAGS       Required linker flags
-# GSS_CFLAGS        Required compiler flags
-# GSS_VERSION       This is set to version advertised by pkg-config or read from manifest.
-#                   In case the library is found but no version info available it is set to "unknown"
+# - `GSS_FOUND`:         System has the Heimdal library.
+# - `GSS_FLAVOUR`:       "GNU", "MIT" or "Heimdal" if anything found.
+# - `GSS_INCLUDE_DIRS`:  The GSS include directories.
+# - `GSS_LIBRARIES`:     The GSS library names.
+# - `GSS_LIBRARY_DIRS`:  The GSS library directories.
+# - `GSS_LDFLAGS`:       Required linker flags.
+# - `GSS_CFLAGS`:        Required compiler flags.
+# - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
+#                        In case the library is found but no version info available it is set to "unknown"
 
 set(_gnu_modname "gss")
 set(_mit_modname "mit-krb5-gssapi")

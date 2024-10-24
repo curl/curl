@@ -21,21 +21,21 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the rustls library
+# Find the Rustls library
 #
 # Input variables:
 #
-# RUSTLS_INCLUDE_DIR   The rustls include directory
-# RUSTLS_LIBRARY       Path to rustls library
+# - `RUSTLS_INCLUDE_DIR`:   The Rustls include directory.
+# - `RUSTLS_LIBRARY`:       Path to `rustls` library.
 #
 # Result variables:
 #
-# RUSTLS_FOUND         System has rustls
-# RUSTLS_INCLUDE_DIRS  The rustls include directories
-# RUSTLS_LIBRARIES     The rustls library names
-# RUSTLS_LIBRARY_DIRS  The rustls library directories
-# RUSTLS_CFLAGS        Required compiler flags
-# RUSTLS_VERSION       Version of rustls
+# - `RUSTLS_FOUND`:         System has Rustls.
+# - `RUSTLS_INCLUDE_DIRS`:  The Rustls include directories.
+# - `RUSTLS_LIBRARIES`:     The Rustls library names.
+# - `RUSTLS_LIBRARY_DIRS`:  The Rustls library directories.
+# - `RUSTLS_CFLAGS`:        Required compiler flags.
+# - `RUSTLS_VERSION`:       Version of Rustls.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED RUSTLS_INCLUDE_DIR AND

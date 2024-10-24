@@ -25,16 +25,16 @@
 #
 # Input variables:
 #
-# BROTLI_INCLUDE_DIR   The brotli include directory
-# BROTLICOMMON_LIBRARY Path to brotlicommon library
-# BROTLIDEC_LIBRARY    Path to brotlidec library
+# - `BROTLI_INCLUDE_DIR`:    The brotli include directory.
+# - `BROTLICOMMON_LIBRARY`:  Path to `brotlicommon` library.
+# - `BROTLIDEC_LIBRARY`:     Path to `brotlidec` library.
 #
 # Result variables:
 #
-# BROTLI_FOUND         System has brotli
-# BROTLI_INCLUDE_DIRS  The brotli include directories
-# BROTLI_LIBRARIES     The brotli library names
-# BROTLI_VERSION       Version of brotli
+# - `BROTLI_FOUND`:          System has brotli.
+# - `BROTLI_INCLUDE_DIRS`:   The brotli include directories.
+# - `BROTLI_LIBRARIES`:      The brotli library names.
+# - `BROTLI_VERSION`:        Version of brotli.
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

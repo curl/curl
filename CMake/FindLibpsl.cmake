@@ -25,15 +25,15 @@
 #
 # Input variables:
 #
-# LIBPSL_INCLUDE_DIR   The libpsl include directory
-# LIBPSL_LIBRARY       Path to libpsl library
+# - `LIBPSL_INCLUDE_DIR`:   The libpsl include directory.
+# - `LIBPSL_LIBRARY`:       Path to `libpsl` library.
 #
 # Result variables:
 #
-# LIBPSL_FOUND         System has libpsl
-# LIBPSL_INCLUDE_DIRS  The libpsl include directories
-# LIBPSL_LIBRARIES     The libpsl library names
-# LIBPSL_VERSION       Version of libpsl
+# - `LIBPSL_FOUND`:         System has libpsl.
+# - `LIBPSL_INCLUDE_DIRS`:  The libpsl include directories.
+# - `LIBPSL_LIBRARIES`:     The libpsl library names.
+# - `LIBPSL_VERSION`:       Version of libpsl.
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

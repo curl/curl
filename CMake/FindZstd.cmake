@@ -25,17 +25,15 @@
 #
 # Input variables:
 #
-# ZSTD_INCLUDE_DIR   The zstd include directory
-# Zstd_INCLUDE_DIR   The zstd include directory (deprecated)
-# ZSTD_LIBRARY       Path to zstd library
-# Zstd_LIBRARY       Path to zstd library (deprecated)
+# - `ZSTD_INCLUDE_DIR`:   The zstd include directory.
+# - `ZSTD_LIBRARY`:       Path to `zstd` library.
 #
 # Result variables:
 #
-# ZSTD_FOUND         System has zstd
-# ZSTD_INCLUDE_DIRS  The zstd include directories
-# ZSTD_LIBRARIES     The zstd library names
-# ZSTD_VERSION       Version of zstd
+# - `ZSTD_FOUND`:         System has zstd.
+# - `ZSTD_INCLUDE_DIRS`:  The zstd include directories.
+# - `ZSTD_LIBRARIES`:     The zstd library names.
+# - `ZSTD_VERSION`:       Version of zstd.
 
 if(DEFINED Zstd_INCLUDE_DIR AND NOT DEFINED ZSTD_INCLUDE_DIR)
   message(WARNING "Zstd_INCLUDE_DIR is deprecated, use ZSTD_INCLUDE_DIR instead.")

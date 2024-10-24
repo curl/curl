@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# LIBSSH_INCLUDE_DIR   The libssh include directory
-# LIBSSH_LIBRARY       Path to libssh library
+# LIBSSH_INCLUDE_DIR   The libssh include directory.
+# LIBSSH_LIBRARY       Path to libssh library.
 #
 # Result variables:
 #
-# LIBSSH_FOUND         System has libssh
-# LIBSSH_INCLUDE_DIRS  The libssh include directories
-# LIBSSH_LIBRARIES     The libssh library names
-# LIBSSH_LIBRARY_DIRS  The libssh library directories
-# LIBSSH_CFLAGS        Required compiler flags
-# LIBSSH_VERSION       Version of libssh
+# LIBSSH_FOUND         System has libssh.
+# LIBSSH_INCLUDE_DIRS  The libssh include directories.
+# LIBSSH_LIBRARIES     The libssh library names.
+# LIBSSH_LIBRARY_DIRS  The libssh library directories.
+# LIBSSH_CFLAGS        Required compiler flags.
+# LIBSSH_VERSION       Version of libssh.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND

@@ -21,19 +21,19 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the wolfssh library
+# Find the wolfSSH library
 #
 # Input variables:
 #
-# WOLFSSH_INCLUDE_DIR   The wolfssh include directory
-# WOLFSSH_LIBRARY       Path to wolfssh library
+# - `WOLFSSH_INCLUDE_DIR`:   The wolfSSH include directory.
+# - `WOLFSSH_LIBRARY`:       Path to `wolfssh` library.
 #
 # Result variables:
 #
-# WOLFSSH_FOUND         System has wolfssh
-# WOLFSSH_INCLUDE_DIRS  The wolfssh include directories
-# WOLFSSH_LIBRARIES     The wolfssh library names
-# WOLFSSH_VERSION       Version of wolfssh
+# - `WOLFSSH_FOUND`:         System has wolfSSH.
+# - `WOLFSSH_INCLUDE_DIRS`:  The wolfSSH include directories.
+# - `WOLFSSH_LIBRARIES`:     The wolfSSH library names.
+# - `WOLFSSH_VERSION`:       Version of wolfSSH.
 
 find_path(WOLFSSH_INCLUDE_DIR NAMES "wolfssh/ssh.h")
 find_library(WOLFSSH_LIBRARY NAMES "wolfssh" "libwolfssh")

@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# QUICHE_INCLUDE_DIR   The quiche include directory
-# QUICHE_LIBRARY       Path to quiche library
+# - `QUICHE_INCLUDE_DIR`:   The quiche include directory.
+# - `QUICHE_LIBRARY`:       Path to `quiche` library.
 #
 # Result variables:
 #
-# QUICHE_FOUND         System has quiche
-# QUICHE_INCLUDE_DIRS  The quiche include directories
-# QUICHE_LIBRARIES     The quiche library names
-# QUICHE_LIBRARY_DIRS  The quiche library directories
-# QUICHE_CFLAGS        Required compiler flags
-# QUICHE_VERSION       Version of quiche
+# - `QUICHE_FOUND`:         System has quiche.
+# - `QUICHE_INCLUDE_DIRS`:  The quiche include directories.
+# - `QUICHE_LIBRARIES`:     The quiche library names.
+# - `QUICHE_LIBRARY_DIRS`:  The quiche library directories.
+# - `QUICHE_CFLAGS`:        Required compiler flags.
+# - `QUICHE_VERSION`:       Version of quiche.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED QUICHE_INCLUDE_DIR AND

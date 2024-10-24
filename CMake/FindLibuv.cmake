@@ -25,17 +25,17 @@
 #
 # Input variables:
 #
-# LIBUV_INCLUDE_DIR   The libuv include directory
-# LIBUV_LIBRARY       Path to libuv library
+# - `LIBUV_INCLUDE_DIR`:   The libuv include directory.
+# - `LIBUV_LIBRARY`:       Path to `libuv` library.
 #
 # Result variables:
 #
-# LIBUV_FOUND         System has libuv
-# LIBUV_INCLUDE_DIRS  The libuv include directories
-# LIBUV_LIBRARIES     The libuv library names
-# LIBUV_LIBRARY_DIRS  The libuv library directories
-# LIBUV_CFLAGS        Required compiler flags
-# LIBUV_VERSION       Version of libuv
+# - `LIBUV_FOUND`:         System has libuv.
+# - `LIBUV_INCLUDE_DIRS`:  The libuv include directories.
+# - `LIBUV_LIBRARIES`:     The libuv library names.
+# - `LIBUV_LIBRARY_DIRS`:  The libuv library directories.
+# - `LIBUV_CFLAGS`:        Required compiler flags.
+# - `LIBUV_VERSION`:       Version of libuv.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBUV_INCLUDE_DIR AND

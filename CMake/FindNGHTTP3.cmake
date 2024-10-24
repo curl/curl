@@ -25,15 +25,15 @@
 #
 # Input variables:
 #
-# NGHTTP3_INCLUDE_DIR   The nghttp3 include directory
-# NGHTTP3_LIBRARY       Path to nghttp3 library
+# - `NGHTTP3_INCLUDE_DIR`:   The nghttp3 include directory.
+# - `NGHTTP3_LIBRARY`:       Path to `nghttp3` library.
 #
 # Result variables:
 #
-# NGHTTP3_FOUND         System has nghttp3
-# NGHTTP3_INCLUDE_DIRS  The nghttp3 include directories
-# NGHTTP3_LIBRARIES     The nghttp3 library names
-# NGHTTP3_VERSION       Version of nghttp3
+# - `NGHTTP3_FOUND`:         System has nghttp3.
+# - `NGHTTP3_INCLUDE_DIRS`:  The nghttp3 include directories.
+# - `NGHTTP3_LIBRARIES`:     The nghttp3 library names.
+# - `NGHTTP3_VERSION`:       Version of nghttp3.
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

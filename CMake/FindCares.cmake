@@ -25,15 +25,15 @@
 #
 # Input variables:
 #
-# CARES_INCLUDE_DIR   The c-ares include directory
-# CARES_LIBRARY       Path to c-ares library
+# - `CARES_INCLUDE_DIR`:   The c-ares include directory.
+# - `CARES_LIBRARY`:       Path to `cares` library.
 #
 # Result variables:
 #
-# CARES_FOUND         System has c-ares
-# CARES_INCLUDE_DIRS  The c-ares include directories
-# CARES_LIBRARIES     The c-ares library names
-# CARES_VERSION       Version of c-ares
+# - `CARES_FOUND`:         System has c-ares.
+# - `CARES_INCLUDE_DIRS`:  The c-ares include directories.
+# - `CARES_LIBRARIES`:     The c-ares library names.
+# - `CARES_VERSION`:       Version of c-ares.
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)

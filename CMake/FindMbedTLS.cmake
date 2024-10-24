@@ -21,24 +21,23 @@
 # SPDX-License-Identifier: curl
 #
 ###########################################################################
-# Find the mbedtls library
+# Find the mbedTLS library
 #
 # Input variables:
 #
-# MBEDTLS_INCLUDE_DIR   The mbedtls include directory
-# MBEDTLS_INCLUDE_DIRS  The mbedtls include directory (deprecated)
-# MBEDTLS_LIBRARY       Path to mbedtls library
-# MBEDX509_LIBRARY      Path to mbedx509 library
-# MBEDCRYPTO_LIBRARY    Path to mbedcrypto library
+# - `MBEDTLS_INCLUDE_DIR`:   The mbedTLS include directory.
+# - `MBEDTLS_LIBRARY`:       Path to `mbedtls` library.
+# - `MBEDX509_LIBRARY`:      Path to `mbedx509` library.
+# - `MBEDCRYPTO_LIBRARY`:    Path to `mbedcrypto` library.
 #
 # Result variables:
 #
-# MBEDTLS_FOUND         System has mbedtls
-# MBEDTLS_INCLUDE_DIRS  The mbedtls include directories
-# MBEDTLS_LIBRARIES     The mbedtls library names
-# MBEDTLS_LIBRARY_DIRS  The mbedtls library directories
-# MBEDTLS_CFLAGS        Required compiler flags
-# MBEDTLS_VERSION       Version of mbedtls
+# - `MBEDTLS_FOUND`:         System has mbedTLS.
+# - `MBEDTLS_INCLUDE_DIRS`:  The mbedTLS include directories.
+# - `MBEDTLS_LIBRARIES`:     The mbedTLS library names.
+# - `MBEDTLS_LIBRARY_DIRS`:  The mbedTLS library directories.
+# - `MBEDTLS_CFLAGS`:        Required compiler flags.
+# - `MBEDTLS_VERSION`:       Version of mbedTLS.
 
 if(DEFINED MBEDTLS_INCLUDE_DIRS AND NOT DEFINED MBEDTLS_INCLUDE_DIR)
   message(WARNING "MBEDTLS_INCLUDE_DIRS is deprecated, use MBEDTLS_INCLUDE_DIR instead.")

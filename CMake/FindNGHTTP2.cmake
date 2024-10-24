@@ -25,15 +25,15 @@
 #
 # Input variables:
 #
-# NGHTTP2_INCLUDE_DIR   The nghttp2 include directory
-# NGHTTP2_LIBRARY       Path to nghttp2 library
+# - `NGHTTP2_INCLUDE_DIR`:   The nghttp2 include directory.
+# - `NGHTTP2_LIBRARY`:       Path to `nghttp2` library.
 #
 # Result variables:
 #
-# NGHTTP2_FOUND         System has nghttp2
-# NGHTTP2_INCLUDE_DIRS  The nghttp2 include directories
-# NGHTTP2_LIBRARIES     The nghttp2 library names
-# NGHTTP2_VERSION       Version of nghttp2
+# - `NGHTTP2_FOUND`:         System has nghttp2.
+# - `NGHTTP2_INCLUDE_DIRS`:  The nghttp2 include directories.
+# - `NGHTTP2_LIBRARIES`:     The nghttp2 library names.
+# - `NGHTTP2_VERSION`:       Version of nghttp2.
 
 if(CURL_USE_PKGCONFIG)
   find_package(PkgConfig QUIET)
