@@ -252,8 +252,8 @@ assumes that CMake generates `Makefile`:
 - `CMAKE_UNITY_BUILD`:                      Enable "unity" or jumbo builds. Default: `OFF`
 
 Details via CMake:
-https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html
-https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html
+<https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html>
+<https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html>
 
 ## Dependencies
 
