@@ -429,7 +429,7 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   s->initial_ts = pktx->ts;
   s->handshake_timeout = QUIC_HANDSHAKE_TIMEOUT;
   s->max_window = 100 * ctx->max_stream_window;
-  s->max_stream_window = ctx->max_stream_window;
+  s->max_stream_window = 10 * ctx->max_stream_window;
 
   t->initial_max_data = 10 * ctx->max_stream_window;
   t->initial_max_stream_data_bidi_local = ctx->max_stream_window;
