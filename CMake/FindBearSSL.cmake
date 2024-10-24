@@ -26,7 +26,7 @@
 # Input variables:
 #
 # BEARSSL_INCLUDE_DIR   The bearssl include directory.
-# BEARSSL_INCLUDE_DIRS  The bearssl include directory. (deprecated)
+# BEARSSL_INCLUDE_DIRS  The bearssl include directory. (Deprecated. Use: `BEARSSL_INCLUDE_DIR`)
 # BEARSSL_LIBRARY       Path to `bearssl` library.
 #
 # Result variables:
