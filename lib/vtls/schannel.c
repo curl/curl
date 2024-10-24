@@ -2334,11 +2334,6 @@ schannel_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
         backend->recv_sspi_close_notify = TRUE;
         if(!backend->recv_connection_closed)
           backend->recv_connection_closed = TRUE;
-        /* We received the close notify just fine, any error we got
-         * from the lower filters afterwards (e.g. the socket), is not
-         * an error on the TLS data stream. That one ended here. */
-        if(*err == CURLE_RECV_ERROR)
-          *err = CURLE_OK;
         infof(data,
               "schannel: server close notification received (close_notify)");
         goto cleanup;
@@ -2593,7 +2588,9 @@ static CURLcode schannel_shutdown(struct Curl_cfilter *cf,
     if(nread > 0) {
       /* still data coming in? */
     }
-    else if(nread == 0) {
+    else if(nread == 0 ||
+            (backend->recv_connection_closed &&
+             backend->recv_sspi_close_notify)) {
       /* We got the close notify alert and are done. */
       backend->recv_connection_closed = TRUE;
       *done = TRUE;
