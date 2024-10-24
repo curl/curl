@@ -101,9 +101,9 @@ static void brotli_version(char *buf, size_t bufsz)
 static void zstd_version(char *buf, size_t bufsz)
 {
   unsigned int version = ZSTD_versionNumber();
-  unsigned int major = (version / (100 * 100));
-  unsigned int minor = ((version - (major * 100 * 100)) / 100);
-  unsigned int patch = (version - (major * 100 * 100) - (minor * 100));
+  unsigned int major = version / (100 * 100);
+  unsigned int minor = (version - (major * 100 * 100)) / 100;
+  unsigned int patch = version - (major * 100 * 100) - (minor * 100);
   (void)msnprintf(buf, bufsz, "zstd/%u.%u.%u", major, minor, patch);
 }
 #endif
