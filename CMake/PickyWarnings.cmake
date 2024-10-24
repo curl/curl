@@ -242,11 +242,11 @@ endif()
 # clang-cl
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
   # list(TRANSFORM WPICKY PREPEND "/clang:") # since CMake 3.12
-  set(_wpicky "")
+  set(_wpicky_tmp "")
   foreach(_ccopt IN LISTS WPICKY)
-    list(APPEND _wpicky "/clang:${_ccopt}")
+    list(APPEND _wpicky_tmp "/clang:${_ccopt}")
   endforeach()
-  set(WPICKY ${_wpicky})
+  set(WPICKY ${_wpicky_tmp})
 endif()
 
 if(WPICKY)
