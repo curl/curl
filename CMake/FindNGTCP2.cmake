@@ -83,6 +83,7 @@ else()
   find_path(NGTCP2_INCLUDE_DIR NAMES "ngtcp2/ngtcp2.h")
   find_library(NGTCP2_LIBRARY NAMES "ngtcp2")
 
+  unset(NGTCP2_VERSION CACHE)
   if(NGTCP2_INCLUDE_DIR AND EXISTS "${NGTCP2_INCLUDE_DIR}/ngtcp2/version.h")
     set(_version_regex "#[\t ]*define[\t ]+NGTCP2_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${NGTCP2_INCLUDE_DIR}/ngtcp2/version.h" _version_str REGEX "${_version_regex}")
