@@ -112,6 +112,9 @@ EOF
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 fi
 
+if [ "${SHARED}" = 'ON' ] && [ "${BUILD_SYSTEM}" = 'CMake' ]; then
+  /c/msys64/mingw64/bin/objdump --all-headers _bld/lib/libcurl*.dll
+fi
 find . -name '*.exe' -o -name '*.dll'
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
