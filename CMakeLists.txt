@@ -295,7 +295,12 @@ if(ENABLE_ARES)
   set(USE_ARES 1)
   find_package(Cares REQUIRED)
   list(APPEND CURL_LIBS ${CARES_LIBRARIES})
+  list(APPEND CURL_LIBDIRS ${CARES_LIBRARY_DIRS})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libcares")
+  link_directories(${CARES_LIBRARY_DIRS})
+  if(CARES_CFLAGS)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CARES_CFLAGS}")
+  endif()
   add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings
 endif()
 
