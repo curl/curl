@@ -115,7 +115,7 @@ fi
 if [ "${SHARED}" = 'ON' ] && [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   /c/msys64/mingw64/bin/objdump --all-headers _bld/lib/libcurl*.dll
 fi
-find . -name '*.exe' -o -name '*.dll'
+find . -name '*.exe' -o -name '*.dll' -o -name '*.lib'
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
 else
