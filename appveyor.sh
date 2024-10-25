@@ -130,7 +130,7 @@ fi
 
 if [[ "${TFLAGS}" != 'skipall' ]] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --verbose --target testdeps
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # run tests
@@ -158,5 +158,5 @@ fi
 
 if [[ "${EXAMPLES}" = 'ON' ]] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
-  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --verbose --target curl-examples
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
 fi
