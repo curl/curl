@@ -204,10 +204,10 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
 endif()
 
 option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
-option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 if(ENABLE_DEBUG)
   message(WARNING "This curl build is Debug-enabled, do not use in production.")
 endif()
+option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
 if(MSVC)
   set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
