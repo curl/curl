@@ -59,10 +59,8 @@ if(CURL_HIDDEN_SYMBOLS)
     set(CURL_HIDES_PRIVATE_SYMBOLS TRUE)
   endif()
 else()
- # if(MSVC)
- #   # Beware: This option is known to export non-curl symbols.
- #   set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
- # endif()
+  if(MSVC)
+    # Beware: This option is known to export non-curl symbols.
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
+  endif()
 endif()
-
-message(STATUS ">CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS: |${CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS}|<")
