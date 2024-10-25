@@ -51,6 +51,7 @@ else()
   find_path(NGHTTP3_INCLUDE_DIR NAMES "nghttp3/nghttp3.h")
   find_library(NGHTTP3_LIBRARY NAMES "nghttp3")
 
+  unset(NGHTTP3_VERSION CACHE)
   if(NGHTTP3_INCLUDE_DIR AND EXISTS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h")
     set(_version_regex "#[\t ]*define[\t ]+NGHTTP3_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${NGHTTP3_INCLUDE_DIR}/nghttp3/version.h" _version_str REGEX "${_version_regex}")
