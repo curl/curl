@@ -51,6 +51,7 @@ else()
   find_path(LIBGSASL_INCLUDE_DIR NAMES "gsasl.h")
   find_library(LIBGSASL_LIBRARY NAMES "gsasl" "libgsasl")
 
+  unset(LIBGSASL_VERSION CACHE)
   if(LIBGSASL_INCLUDE_DIR AND EXISTS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h")
     set(_version_regex "#[\t ]*define[\t ]+GSASL_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBGSASL_INCLUDE_DIR}/gsasl-version.h" _version_str REGEX "${_version_regex}")

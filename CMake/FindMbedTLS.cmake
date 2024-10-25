@@ -67,6 +67,7 @@ else()
   find_library(MBEDX509_LIBRARY NAMES "mbedx509" "libmbedx509")
   find_library(MBEDCRYPTO_LIBRARY NAMES "mbedcrypto" "libmbedcrypto")
 
+  unset(MBEDTLS_VERSION CACHE)
   if(MBEDTLS_INCLUDE_DIR)
     if(EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")  # 3.x
       set(_version_header "${MBEDTLS_INCLUDE_DIR}/mbedtls/build_info.h")

@@ -51,6 +51,7 @@ else()
   find_path(LIBUV_INCLUDE_DIR NAMES "uv.h")
   find_library(LIBUV_LIBRARY NAMES "uv" "libuv")
 
+  unset(LIBUV_VERSION CACHE)
   if(LIBUV_INCLUDE_DIR AND EXISTS "${LIBUV_INCLUDE_DIR}/uv/version.h")
     set(_version_regex1 "#[\t ]*define[\t ]+UV_VERSION_MAJOR[\t ]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[\t ]+UV_VERSION_MINOR[\t ]+([0-9]+).*")
