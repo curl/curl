@@ -31,7 +31,7 @@ import os
 import re
 import sys
 from statistics import mean
-from typing import Dict, Any, Optional, List
+from typing import Dict, Any, Optional, List, Union
 
 from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult, NghttpxQuic, RunProfile
 
@@ -47,7 +47,7 @@ class ScoreCard:
     def __init__(self, env: Env,
                  protocol: str,
                  server_descr: str,
-                 server_port: str,
+                 server_port: Union[str, int],
                  verbose: int,
                  curl_verbose: int,
                  download_parallel: int = 0,
