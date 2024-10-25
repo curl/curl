@@ -51,6 +51,7 @@ else()
   find_path(NGHTTP2_INCLUDE_DIR NAMES "nghttp2/nghttp2.h")
   find_library(NGHTTP2_LIBRARY NAMES "nghttp2" "nghttp2_static")
 
+  unset(NGHTTP2_VERSION CACHE)
   if(NGHTTP2_INCLUDE_DIR AND EXISTS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2ver.h")
     set(_version_regex "#[\t ]*define[\t ]+NGHTTP2_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2ver.h" _version_str REGEX "${_version_regex}")
