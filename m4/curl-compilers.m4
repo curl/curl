@@ -1379,7 +1379,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
   case "$compiler_id" in
     CLANG|APPLECLANG)
       dnl All versions of clang support -fvisibility=
-      tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
+      tmp_EXTERN="__attribute__((__visibility__(\"default\")))"
       tmp_CFLAGS="-fvisibility=hidden"
       supports_symbol_hiding="yes"
       ;;
@@ -1387,7 +1387,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
       dnl Only gcc 3.4 or later
       if test "$compiler_num" -ge "304"; then
         if $CC --help --verbose 2>/dev/null | grep fvisibility= >/dev/null ; then
-          tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
+          tmp_EXTERN="__attribute__((__visibility__(\"default\")))"
           tmp_CFLAGS="-fvisibility=hidden"
           supports_symbol_hiding="yes"
         fi
@@ -1406,7 +1406,7 @@ AC_DEFUN([CURL_CHECK_COMPILER_SYMBOL_HIDING], [
               printf("icc fvisibility bug test");
             ]])
           ],[
-            tmp_EXTERN="__attribute__ ((__visibility__ (\"default\")))"
+            tmp_EXTERN="__attribute__((__visibility__(\"default\")))"
             tmp_CFLAGS="-fvisibility=hidden"
             supports_symbol_hiding="yes"
           ])

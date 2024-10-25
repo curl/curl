@@ -35,7 +35,7 @@
 #include "memdebug.h"
 
 #if defined(__GNUC__)
-#define CURL_ALIGN8   __attribute__ ((aligned(8)))
+#define CURL_ALIGN8  __attribute__((aligned(8)))
 #else
 #define CURL_ALIGN8
 #endif
