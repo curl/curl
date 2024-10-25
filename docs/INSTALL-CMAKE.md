@@ -164,7 +164,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
 - `ENABLE_CURLDEBUG`:                       Enable TrackMemory feature: Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
-- `ENABLE_DEBUG`:                           Enable curl debug features. Default: `OFF`
+- `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl). Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp`
 - `LIBCURL_OUTPUT_NAME`:                    Basename of the curl library. Default: `libcurl`
 - `PICKY_COMPILER`:                         Enable picky compiler options. Default: `ON`
