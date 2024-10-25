@@ -5134,9 +5134,8 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
   } while(cf->next);
 
   if(!octx) {
-    failf(data,
-          "Failed to find SSL backend for endpoint");
-    return CURLE_SSL_ENGINE_INITFAILED;
+      /* No SSL backend, don't do channel binding */
+      return CURLE_OK;
   }
 
   cert = SSL_get1_peer_certificate(octx->ssl);
