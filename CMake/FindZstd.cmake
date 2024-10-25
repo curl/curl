@@ -60,6 +60,7 @@ else()
   find_path(ZSTD_INCLUDE_DIR NAMES "zstd.h")
   find_library(ZSTD_LIBRARY NAMES "zstd")
 
+  unset(ZSTD_VERSION CACHE)
   if(ZSTD_INCLUDE_DIR AND EXISTS "${ZSTD_INCLUDE_DIR}/zstd.h")
     set(_version_regex1 "#[\t ]*define[ \t]+ZSTD_VERSION_MAJOR[ \t]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[ \t]+ZSTD_VERSION_MINOR[ \t]+([0-9]+).*")
