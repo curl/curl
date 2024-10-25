@@ -51,6 +51,7 @@ else()
   find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h")
   find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
 
+  unset(LIBSSH2_VERSION CACHE)
   if(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
     set(_version_regex "#[\t ]*define[\t ]+LIBSSH2_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _version_str REGEX "${_version_regex}")
