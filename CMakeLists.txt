@@ -203,7 +203,7 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
 endif()
 
-option(ENABLE_DEBUG "Enable curl debug features (for developing curl)" OFF)
+option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
 option(ENABLE_CURLDEBUG "Enable TrackMemory feature" ${ENABLE_DEBUG})
 
 if(ENABLE_DEBUG)
