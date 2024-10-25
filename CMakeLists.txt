@@ -203,8 +203,11 @@ if(CMAKE_SYSTEM_NAME MATCHES "Linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
 endif()
 
-option(ENABLE_DEBUG "Enable curl debug features" OFF)
-option(ENABLE_CURLDEBUG "Enable TrackMemory feature" ${ENABLE_DEBUG})
+option(ENABLE_DEBUG "Enable curl debug features (for developing curl itself)" OFF)
+if(ENABLE_DEBUG)
+  message(WARNING "This curl build is Debug-enabled, do not use in production.")
+endif()
+option(ENABLE_CURLDEBUG "Enable TrackMemory debug feature" ${ENABLE_DEBUG})
 
 if(MSVC)
   set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
