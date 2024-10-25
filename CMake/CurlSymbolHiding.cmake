@@ -60,6 +60,7 @@ if(CURL_HIDDEN_SYMBOLS)
   endif()
 else()
   if(MSVC)
+    # Beware: This option is known to export non-curl symbols.
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS TRUE)
   endif()
 endif()
