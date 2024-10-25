@@ -33,7 +33,7 @@ import sys
 from statistics import mean
 from typing import Dict, Any, Optional, List, Union
 
-from testenv import Env, Httpd, Nghttpx, CurlClient, Caddy, ExecResult, NghttpxQuic, RunProfile
+from testenv import Env, Httpd, CurlClient, Caddy, ExecResult, NghttpxQuic, RunProfile
 
 log = logging.getLogger(__name__)
 
