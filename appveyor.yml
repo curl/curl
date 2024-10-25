@@ -97,7 +97,7 @@ environment:
       PRJ_CFG: Debug
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'ON'
-    - job_name: 'CMake, VS2022, Release, x64, Schannel, Shared, Unicode, DEBUGBULID, no-CURLDEBUG, Build-tests'
+    - job_name: 'CMake, VS2022, Release, x64, Schannel, Shared, Unicode, DEBUGBUILD, no-CURLDEBUG, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
