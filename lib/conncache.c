@@ -170,7 +170,7 @@ int Curl_cpool_init(struct cpool *cpool,
    * Probably better to have an internal handle owned by the multi that
    * can be used for cpool operations. */
   cpool->idata->multi = multi;
- #ifdef DEBUGBUILD
+#ifdef DEBUGBUILD
   if(getenv("CURL_DEBUG"))
     cpool->idata->set.verbose = TRUE;
 #endif
