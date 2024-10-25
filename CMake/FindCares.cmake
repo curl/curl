@@ -51,6 +51,7 @@ else()
   find_path(CARES_INCLUDE_DIR NAMES "ares.h")
   find_library(CARES_LIBRARY NAMES ${CARES_NAMES} "cares")
 
+  unset(CARES_VERSION CACHE)
   if(CARES_INCLUDE_DIR AND EXISTS "${CARES_INCLUDE_DIR}/ares_version.h")
     set(_version_regex1 "#[\t ]*define[\t ]+ARES_VERSION_MAJOR[\t ]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[\t ]+ARES_VERSION_MINOR[\t ]+([0-9]+).*")
