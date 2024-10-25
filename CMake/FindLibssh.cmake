@@ -51,6 +51,7 @@ else()
   find_path(LIBSSH_INCLUDE_DIR NAMES "libssh/libssh.h")
   find_library(LIBSSH_LIBRARY NAMES "ssh" "libssh")
 
+  unset(LIBSSH_VERSION CACHE)
   if(LIBSSH_INCLUDE_DIR AND EXISTS "${LIBSSH_INCLUDE_DIR}/libssh/libssh_version.h")
     set(_version_regex1 "#[\t ]*define[\t ]+LIBSSH_VERSION_MAJOR[\t ]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[\t ]+LIBSSH_VERSION_MINOR[\t ]+([0-9]+).*")

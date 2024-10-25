@@ -51,6 +51,7 @@ else()
   find_path(NETTLE_INCLUDE_DIR NAMES "nettle/sha2.h")
   find_library(NETTLE_LIBRARY NAMES "nettle")
 
+  unset(NETTLE_VERSION CACHE)
   if(NETTLE_INCLUDE_DIR AND EXISTS "${NETTLE_INCLUDE_DIR}/nettle/version.h")
     set(_version_regex1 "#[\t ]*define[ \t]+NETTLE_VERSION_MAJOR[ \t]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[ \t]+NETTLE_VERSION_MINOR[ \t]+([0-9]+).*")
