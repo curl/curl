@@ -206,6 +206,10 @@ endif()
 option(ENABLE_DEBUG "Enable curl debug features (for developing curl)" OFF)
 option(ENABLE_CURLDEBUG "Enable TrackMemory feature" ${ENABLE_DEBUG})
 
+if(ENABLE_DEBUG)
+  message(WARNING "This curl build is Debug-enabled, do not use in production.")
+endif()
+
 if(MSVC)
   set(ENABLE_CURLDEBUG OFF)  # FIXME: TrackMemory + MSVC fails test 558 and 1330. Tested with static build, Debug mode.
 endif()
