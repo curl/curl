@@ -51,6 +51,7 @@ else()
   find_path(LIBPSL_INCLUDE_DIR NAMES "libpsl.h")
   find_library(LIBPSL_LIBRARY NAMES "psl" "libpsl")
 
+  unset(LIBPSL_VERSION CACHE)
   if(LIBPSL_INCLUDE_DIR AND EXISTS "${LIBPSL_INCLUDE_DIR}/libpsl.h")
     set(_version_regex "#[\t ]*define[\t ]+PSL_VERSION[\t ]+\"([^\"]*)\"")
     file(STRINGS "${LIBPSL_INCLUDE_DIR}/libpsl.h" _version_str REGEX "${_version_regex}")
