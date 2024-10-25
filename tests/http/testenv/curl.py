@@ -55,7 +55,8 @@ class RunProfile:
         avg = {}
         stats = [p.stats for p in profiles]
         for key in cls.STAT_KEYS:
-            avg[key] = mean([s[key] for s in stats])
+            vals = [s[key] for s in stats]
+            avg[key] = mean(vals) if len(vals) else 0.0
         return avg
 
     def __init__(self, pid: int, started_at: datetime, run_dir):
@@ -461,7 +462,8 @@ class CurlClient:
                  run_dir: Optional[str] = None,
                  timeout: Optional[float] = None,
                  silent: bool = False,
-                 run_env: Optional[Dict[str, str]] = None):
+                 run_env: Optional[Dict[str, str]] = None,
+                 server_addr: Optional[str] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
         self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
@@ -472,6 +474,7 @@ class CurlClient:
         self._log_path = f'{self._run_dir}/curl.log'
         self._silent = silent
         self._run_env = run_env
+        self._server_addr = server_addr if server_addr else '127.0.0.1'
         self._rmrf(self._run_dir)
         self._mkpath(self._run_dir)
 
@@ -497,12 +500,12 @@ class CurlClient:
     def get_proxy_args(self, proto: str = 'http/1.1',
                        proxys: bool = True, tunnel: bool = False,
                        use_ip: bool = False):
-        proxy_name = '127.0.0.1' if use_ip else self.env.proxy_domain
+        proxy_name = self._server_addr if use_ip else self.env.proxy_domain
         if proxys:
             pport = self.env.pts_port(proto) if tunnel else self.env.proxys_port
             xargs = [
                 '--proxy', f'https://{proxy_name}:{pport}/',
-                '--resolve', f'{proxy_name}:{pport}:127.0.0.1',
+                '--resolve', f'{proxy_name}:{pport}:{self._server_addr}',
                 '--proxy-cacert', self.env.ca.cert_file,
             ]
             if proto == 'h2':
@@ -510,7 +513,7 @@ class CurlClient:
         else:
             xargs = [
                 '--proxy', f'http://{proxy_name}:{self.env.proxy_port}/',
-                '--resolve', f'{proxy_name}:{self.env.proxy_port}:127.0.0.1',
+                '--resolve', f'{proxy_name}:{self.env.proxy_port}:{self._server_addr}',
             ]
         if tunnel:
             xargs.append('--proxytunnel')
@@ -877,7 +880,9 @@ class CurlClient:
             if force_resolve and u.hostname and u.hostname != 'localhost' \
                     and not re.match(r'^(\d+|\[|:).*', u.hostname):
                 port = u.port if u.port else 443
-                args.extend(["--resolve", f"{u.hostname}:{port}:127.0.0.1"])
+                args.extend([
+                    '--resolve', f'{u.hostname}:{port}:{self._server_addr}',
+                ])
             if timeout is not None and int(timeout) > 0:
                 args.extend(["--connect-timeout", str(int(timeout))])
             args.append(url)
