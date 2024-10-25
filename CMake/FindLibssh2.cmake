@@ -33,48 +33,47 @@
 # - `LIBSSH2_FOUND`:         System has libssh2.
 # - `LIBSSH2_INCLUDE_DIRS`:  The libssh2 include directories.
 # - `LIBSSH2_LIBRARIES`:     The libssh2 library names.
+# - `LIBSSH2_LIBRARY_DIRS`:  The libssh2 library directories.
+# - `LIBSSH2_CFLAGS`:        Required compiler flags.
 # - `LIBSSH2_VERSION`:       Version of libssh2.
 
-if(CURL_USE_PKGCONFIG)
+if(CURL_USE_PKGCONFIG AND
+   NOT DEFINED LIBSSH2_INCLUDE_DIR AND
+   NOT DEFINED LIBSSH2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(PC_LIBSSH2 "libssh2")
+  pkg_check_modules(LIBSSH2 "libssh2")
 endif()
 
-find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h"
-  HINTS
-    ${PC_LIBSSH2_INCLUDEDIR}
-    ${PC_LIBSSH2_INCLUDE_DIRS}
-)
+if(LIBSSH2_FOUND AND LIBSSH2_INCLUDE_DIRS)
+  string(REPLACE ";" " " LIBSSH2_CFLAGS "${LIBSSH2_CFLAGS}")
+  message(STATUS "Found Libssh2 (via pkg-config): ${LIBSSH2_INCLUDE_DIRS} (found version \"${LIBSSH2_VERSION}\")")
+else()
+  find_path(LIBSSH2_INCLUDE_DIR NAMES "libssh2.h")
+  find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2")
 
-find_library(LIBSSH2_LIBRARY NAMES "ssh2" "libssh2"
-  HINTS
-    ${PC_LIBSSH2_LIBDIR}
-    ${PC_LIBSSH2_LIBRARY_DIRS}
-)
+  unset(LIBSSH2_VERSION CACHE)
+  if(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
+    set(_version_regex "#[\t ]*define[\t ]+LIBSSH2_VERSION[\t ]+\"([^\"]*)\"")
+    file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _version_str REGEX "${_version_regex}")
+    string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
+    set(LIBSSH2_VERSION "${_version_str}")
+    unset(_version_regex)
+    unset(_version_str)
+  endif()
 
-if(PC_LIBSSH2_VERSION)
-  set(LIBSSH2_VERSION ${PC_LIBSSH2_VERSION})
-elseif(LIBSSH2_INCLUDE_DIR AND EXISTS "${LIBSSH2_INCLUDE_DIR}/libssh2.h")
-  set(_version_regex "#[\t ]*define[\t ]+LIBSSH2_VERSION[\t ]+\"([^\"]*)\"")
-  file(STRINGS "${LIBSSH2_INCLUDE_DIR}/libssh2.h" _version_str REGEX "${_version_regex}")
-  string(REGEX REPLACE "${_version_regex}" "\\1" _version_str "${_version_str}")
-  set(LIBSSH2_VERSION "${_version_str}")
-  unset(_version_regex)
-  unset(_version_str)
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(Libssh2
+    REQUIRED_VARS
+      LIBSSH2_INCLUDE_DIR
+      LIBSSH2_LIBRARY
+    VERSION_VAR
+      LIBSSH2_VERSION
+  )
+
+  if(LIBSSH2_FOUND)
+    set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
+    set(LIBSSH2_LIBRARIES    ${LIBSSH2_LIBRARY})
+  endif()
+
+  mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)
 endif()
-
-include(FindPackageHandleStandardArgs)
-find_package_handle_standard_args(Libssh2
-  REQUIRED_VARS
-    LIBSSH2_INCLUDE_DIR
-    LIBSSH2_LIBRARY
-  VERSION_VAR
-    LIBSSH2_VERSION
-)
-
-if(LIBSSH2_FOUND)
-  set(LIBSSH2_INCLUDE_DIRS ${LIBSSH2_INCLUDE_DIR})
-  set(LIBSSH2_LIBRARIES    ${LIBSSH2_LIBRARY})
-endif()
-
-mark_as_advanced(LIBSSH2_INCLUDE_DIR LIBSSH2_LIBRARY)
