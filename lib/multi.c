@@ -2547,7 +2547,7 @@ static CURLMcode state_connect(struct Curl_multi *multi,
      can be entered from SETUP and from PENDING. */
   bool connected;
   bool async;
-  CURLMcode rc = CURLE_OK;
+  CURLMcode rc = CURLM_OK;
   CURLcode result = Curl_connect(data, &async, &connected);
   if(CURLE_NO_CONNECTION_AVAILABLE == result) {
     /* There was no connection available. We will go to the pending
