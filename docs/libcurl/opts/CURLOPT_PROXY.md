@@ -102,6 +102,10 @@ single port number used widely for proxies. Specify it.
 When a proxy is used, the active FTP mode as set with *CUROPT_FTPPORT(3)*,
 cannot be used.
 
+Doing FTP over an HTTP proxy without CURLOPT_HTTPPROXYTUNNEL(3) set makes
+libcurl do HTTP with an FTP URL over the proxy. For such transfers, common FTP
+specific options do not work, for example CURLOPT_USE_SSL(3).
+
 # Environment variables
 
 libcurl respects the proxy environment variables named **http_proxy**,
