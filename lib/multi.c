@@ -99,8 +99,8 @@ static CURLMcode multi_timeout(struct Curl_multi *multi,
                                long *timeout_ms);
 static void process_pending_handles(struct Curl_multi *multi);
 static void multi_xfer_bufs_free(struct Curl_multi *multi);
-static void Curl_expire_ex(struct Curl_easy *data, const struct curltime *nowp,
-                           timediff_t milli, expire_id id);
+static void expire_ex(struct Curl_easy *data, const struct curltime *nowp,
+                      timediff_t milli, expire_id id);
 
 #if defined( DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
 static const char * const multi_statename[]={
@@ -3527,7 +3527,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
         else {
           /* Expire with out current now, so we will get it below when
            * asking the splaytree for expired transfers. */
-          Curl_expire_ex(data, &mrc.now, 0, EXPIRE_RUN_NOW);
+          expire_ex(data, &mrc.now, 0, EXPIRE_RUN_NOW);
         }
       }
     }
@@ -3867,20 +3867,9 @@ multi_addtimeout(struct Curl_easy *data,
   return CURLM_OK;
 }
 
-/*
- * Curl_expire()
- *
- * given a number of milliseconds from now to use to set the 'act before
- * this'-time for the transfer, to be extracted by curl_multi_timeout()
- *
- * The timeout will be added to a queue of timeouts if it defines a moment in
- * time that is later than the current head of queue.
- *
- * Expire replaces a former timeout using the same id if already set.
- */
-static void Curl_expire_ex(struct Curl_easy *data,
-                           const struct curltime *nowp,
-                           timediff_t milli, expire_id id)
+static void expire_ex(struct Curl_easy *data,
+                      const struct curltime *nowp,
+                      timediff_t milli, expire_id id)
 {
   struct Curl_multi *multi = data->multi;
   struct curltime *curr_expire = &data->state.expiretime;
@@ -3938,10 +3927,21 @@ static void Curl_expire_ex(struct Curl_easy *data,
                                      &data->state.timenode);
 }
 
+/*
+ * Curl_expire()
+ *
+ * given a number of milliseconds from now to use to set the 'act before
+ * this'-time for the transfer, to be extracted by curl_multi_timeout()
+ *
+ * The timeout will be added to a queue of timeouts if it defines a moment in
+ * time that is later than the current head of queue.
+ *
+ * Expire replaces a former timeout using the same id if already set.
+ */
 void Curl_expire(struct Curl_easy *data, timediff_t milli, expire_id id)
 {
   struct curltime now = Curl_now();
-  Curl_expire_ex(data, &now, milli, id);
+  expire_ex(data, &now, milli, id);
 }
 
 /*

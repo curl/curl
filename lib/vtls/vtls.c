@@ -259,7 +259,7 @@ static bool clone_ssl_primary_config(struct ssl_primary_config *source,
   return TRUE;
 }
 
-static void Curl_free_primary_ssl_config(struct ssl_primary_config *sslc)
+static void free_primary_ssl_config(struct ssl_primary_config *sslc)
 {
   Curl_safefree(sslc->CApath);
   Curl_safefree(sslc->CAfile);
@@ -359,9 +359,9 @@ CURLcode Curl_ssl_conn_config_init(struct Curl_easy *data,
 
 void Curl_ssl_conn_config_cleanup(struct connectdata *conn)
 {
-  Curl_free_primary_ssl_config(&conn->ssl_config);
+  free_primary_ssl_config(&conn->ssl_config);
 #ifndef CURL_DISABLE_PROXY
-  Curl_free_primary_ssl_config(&conn->proxy_ssl_config);
+  free_primary_ssl_config(&conn->proxy_ssl_config);
 #endif
 }
 
@@ -609,7 +609,7 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *session)
     session->sessionid_free = NULL;
     session->age = 0; /* fresh */
 
-    Curl_free_primary_ssl_config(&session->ssl_config);
+    free_primary_ssl_config(&session->ssl_config);
 
     Curl_safefree(session->name);
     Curl_safefree(session->conn_to_host);
@@ -726,7 +726,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
 
   /* now init the session struct wisely */
   if(!clone_ssl_primary_config(conn_config, &store->ssl_config)) {
-    Curl_free_primary_ssl_config(&store->ssl_config);
+    free_primary_ssl_config(&store->ssl_config);
     store->sessionid = NULL; /* let caller free sessionid */
     goto out;
   }

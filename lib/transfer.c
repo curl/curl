@@ -204,10 +204,10 @@ CURLcode Curl_xfer_send_shutdown(struct Curl_easy *data, bool *done)
  * @param err error    code in case of -1 return
  * @return number of bytes read or -1 for error
  */
-static ssize_t Curl_xfer_recv_resp(struct Curl_easy *data,
-                                   char *buf, size_t blen,
-                                   bool eos_reliable,
-                                   CURLcode *err)
+static ssize_t xfer_recv_resp(struct Curl_easy *data,
+                              char *buf, size_t blen,
+                              bool eos_reliable,
+                              CURLcode *err)
 {
   ssize_t nread;
 
@@ -302,8 +302,7 @@ static CURLcode sendrecv_dl(struct Curl_easy *data,
         bytestoread = (size_t)data->set.max_recv_speed;
     }
 
-    nread = Curl_xfer_recv_resp(data, buf, bytestoread,
-                                is_multiplex, &result);
+    nread = xfer_recv_resp(data, buf, bytestoread, is_multiplex, &result);
     if(nread < 0) {
       if(CURLE_AGAIN != result)
         goto out; /* real error */
