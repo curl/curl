@@ -651,13 +651,13 @@ bool Curl_on_disconnect(struct Curl_easy *data,
 }
 
 /*
- * Curl_xfer_may_multiplex()
+ * xfer_may_multiplex()
  *
  * Return a TRUE, iff the transfer can be done over an (appropriate)
  * multiplexed connection.
  */
-static bool Curl_xfer_may_multiplex(const struct Curl_easy *data,
-                                    const struct connectdata *conn)
+static bool xfer_may_multiplex(const struct Curl_easy *data,
+                               const struct connectdata *conn)
 {
   /* If an HTTP protocol and multiplexing is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
@@ -1248,7 +1248,7 @@ ConnectionExists(struct Curl_easy *data,
   memset(&match, 0, sizeof(match));
   match.data = data;
   match.needle = needle;
-  match.may_multiplex = Curl_xfer_may_multiplex(data, needle);
+  match.may_multiplex = xfer_may_multiplex(data, needle);
 
 #ifdef USE_NTLM
   match.want_ntlm_http = ((data->state.authhost.want & CURLAUTH_NTLM) &&

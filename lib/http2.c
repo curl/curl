@@ -2810,8 +2810,8 @@ out:
   return result;
 }
 
-static bool Curl_cf_is_http2(struct Curl_cfilter *cf,
-                             const struct Curl_easy *data)
+static bool cf_is_http2(struct Curl_cfilter *cf,
+                        const struct Curl_easy *data)
 {
   (void)data;
   for(; cf; cf = cf->next) {
@@ -2827,7 +2827,7 @@ bool Curl_conn_is_http2(const struct Curl_easy *data,
                         const struct connectdata *conn,
                         int sockindex)
 {
-  return conn ? Curl_cf_is_http2(conn->cfilter[sockindex], data) : FALSE;
+  return conn ? cf_is_http2(conn->cfilter[sockindex], data) : FALSE;
 }
 
 bool Curl_http2_may_switch(struct Curl_easy *data,
@@ -2879,7 +2879,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct Curl_cfilter *cf_h2;
   CURLcode result;
 
-  DEBUGASSERT(!Curl_cf_is_http2(cf, data));
+  DEBUGASSERT(!cf_is_http2(cf, data));
 
   result = http2_cfilter_insert_after(cf, data, FALSE);
   if(result)
