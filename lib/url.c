@@ -1345,8 +1345,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->bits.proxy = (data->set.str[STRING_PROXY] &&
                       *data->set.str[STRING_PROXY]);
   conn->bits.httpproxy = (conn->bits.proxy &&
-                          (conn->http_proxy.proxytype == CURLPROXY_HTTP ||
-                           conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0 ||
+                          (IS_HTTP_PROXY(conn->http_proxy.proxytype) ||
                            IS_HTTPS_PROXY(conn->http_proxy.proxytype)));
   conn->bits.socksproxy = (conn->bits.proxy && !conn->bits.httpproxy);
 
