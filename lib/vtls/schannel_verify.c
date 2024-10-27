@@ -428,20 +428,20 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 }
 
 BOOL hostname_is_ip(PCRYPT_DATA_BLOB ip_blob,
-                    LPCTSTR hostname)
+                    LPCSTR hostname)
 {
   IN_ADDR ia;
   IN6_ADDR ia6;
   BOOL result = FALSE;
 
-  INT res = InetPton(AF_INET, hostname, &ia);
+  INT res = InetPtonA(AF_INET, hostname, &ia);
   if(res == 1) {
     ip_blob->cbData = sizeof(IN_ADDR);
     memcpy(&ip_blob->pbData, &ia, sizeof(IN_ADDR));
     result = TRUE;
   }
   else {
-    res = InetPton(AF_INET6, hostname, &ia6);
+    res = InetPtonA(AF_INET6, hostname, &ia6);
     if(res == 1) {
       ip_blob->cbData = sizeof(IN6_ADDR);
       memcpy(&ip_blob->pbData, &ia6, sizeof(IN6_ADDR));
