@@ -428,7 +428,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 }
 
 BOOL hostname_is_ip(PCRYPT_DATA_BLOB ip_blob,
-                    LPCSTR hostname)
+                    LPCTSTR hostname)
 {
   IN_ADDR ia;
   IN6_ADDR ia6;
@@ -465,7 +465,7 @@ BOOL get_alt_name_info(struct Curl_easy *data,
 #else
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
-  CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA) };
+  CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
 
   if(!ctx) {
     failf(data, "schannel: Null certificate context.");
