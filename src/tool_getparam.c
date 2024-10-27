@@ -1027,7 +1027,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
 {
   int rc;
   const char *parse = NULL;
-  time_t now;
   bool longopt = FALSE;
   bool singleopt = FALSE; /* when true means '-o foo' used '-ofoo' */
   size_t nopts = 0; /* options processed in `flag`*/
@@ -2647,8 +2646,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         nextarg++;
         break;
       }
-      now = time(NULL);
-      config->condtime = (curl_off_t)curl_getdate(nextarg, &now);
+      config->condtime = (curl_off_t)curl_getdate(nextarg, NULL);
       if(-1 == config->condtime) {
         /* now let's see if it is a filename to get the time from instead! */
         rc = getfiletime(nextarg, global, &value);
