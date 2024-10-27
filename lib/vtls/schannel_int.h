@@ -176,6 +176,17 @@ struct schannel_cert_share {
   struct curltime time;              /* when the cached store was created */
 };
 
+/*
+* size of the structure: 20 bytes.
+*/
+struct num_ip_data {
+  DWORD size; /* 04 bytes */
+  union {
+    struct in_addr  ia;  /* 04 bytes */
+    struct in6_addr ia6; /* 16 bytes */
+  } bData;
+};
+
 HCERTSTORE Curl_schannel_get_cached_cert_store(struct Curl_cfilter *cf,
                                                const struct Curl_easy *data);
 

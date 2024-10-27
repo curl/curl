@@ -39,6 +39,7 @@
 #include "schannel.h"
 #include "schannel_int.h"
 
+#include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "sendf.h"
@@ -53,7 +54,6 @@
 #include "memdebug.h"
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
-
 
 #ifdef HAS_MANUAL_VERIFY_API
 
@@ -343,7 +343,9 @@ cleanup:
 static DWORD cert_get_name_string(struct Curl_easy *data,
                                   CERT_CONTEXT *cert_context,
                                   LPTSTR host_names,
-                                  DWORD length)
+                                  DWORD length,
+                                  PCERT_ALT_NAME_INFO alt_name_info,
+                                  BOOL Win8_compat)
 {
   DWORD actual_length = 0;
 #if defined(CURL_WINDOWS_UWP)
@@ -351,21 +353,16 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   (void)cert_context;
   (void)host_names;
   (void)length;
+  (void)alt_name_info;
+  (void)Win8_compat;
 #else
   BOOL compute_content = FALSE;
-  CERT_INFO *cert_info = NULL;
-  CERT_EXTENSION *extension = NULL;
-  CRYPT_DECODE_PARA decode_para = {0, 0, 0};
-  CERT_ALT_NAME_INFO *alt_name_info = NULL;
-  DWORD alt_name_info_size = 0;
-  BOOL ret_val = FALSE;
   LPTSTR current_pos = NULL;
   DWORD i;
 
 #ifdef CERT_NAME_SEARCH_ALL_NAMES_FLAG
   /* CERT_NAME_SEARCH_ALL_NAMES_FLAG is available from Windows 8 onwards. */
-  if(curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
-                                  VERSION_GREATER_THAN_EQUAL)) {
+  if(Win8_compat) {
     /* CertGetNameString will provide the 8-bit character string without
      * any decoding */
     DWORD name_flags =
@@ -378,6 +375,9 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                       length);
     return actual_length;
   }
+#else
+  (void)cert_context;
+  (void)Win8_compat;
 #endif
 
   compute_content = host_names != NULL && length != 0;
@@ -386,43 +386,6 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   actual_length = 1;
   if(compute_content) {
     *host_names = '\0';
-  }
-
-  if(!cert_context) {
-    failf(data, "schannel: Null certificate context.");
-    return actual_length;
-  }
-
-  cert_info = cert_context->pCertInfo;
-  if(!cert_info) {
-    failf(data, "schannel: Null certificate info.");
-    return actual_length;
-  }
-
-  extension = CertFindExtension(szOID_SUBJECT_ALT_NAME2,
-                                cert_info->cExtension,
-                                cert_info->rgExtension);
-  if(!extension) {
-    failf(data, "schannel: CertFindExtension() returned no extension.");
-    return actual_length;
-  }
-
-  decode_para.cbSize = sizeof(CRYPT_DECODE_PARA);
-
-  ret_val =
-    CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
-                        szOID_SUBJECT_ALT_NAME2,
-                        extension->Value.pbData,
-                        extension->Value.cbData,
-                        CRYPT_DECODE_ALLOC_FLAG | CRYPT_DECODE_NOCOPY_FLAG,
-                        &decode_para,
-                        &alt_name_info,
-                        &alt_name_info_size);
-  if(!ret_val) {
-    failf(data,
-          "schannel: CryptDecodeObjectEx() returned no alternate name "
-          "information.");
-    return actual_length;
   }
 
   current_pos = host_names;
@@ -467,6 +430,88 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   return actual_length;
 }
 
+/*
+* Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
+* and populates the buffer with IPv4/IPv6 info.
+*/
+
+static bool get_num_host_info(struct num_ip_data *ip_blob,
+                              LPCSTR hostname)
+{
+  struct in_addr ia;
+  struct in6_addr ia6;
+  bool result = FALSE;
+
+  int res = Curl_inet_pton(AF_INET, hostname, &ia);
+  if(res) {
+    ip_blob->size = sizeof(struct in_addr);
+    memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
+    result = TRUE;
+  }
+  else {
+    res = Curl_inet_pton(AF_INET6, hostname, &ia6);
+    if(res) {
+      ip_blob->size = sizeof(struct in6_addr);
+      memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
+      result = TRUE;
+    }
+  }
+  return result;
+}
+
+static bool get_alt_name_info(struct Curl_easy *data,
+                              PCCERT_CONTEXT ctx,
+                              PCERT_ALT_NAME_INFO *alt_name_info,
+                              LPDWORD alt_name_info_size)
+{
+  bool result = FALSE;
+#if defined(CURL_WINDOWS_UWP)
+  (void)data;
+  (void)ctx;
+  (void)alt_name_info;
+  (void)alt_name_info_size;
+#else
+  PCERT_INFO cert_info = NULL;
+  PCERT_EXTENSION extension = NULL;
+  CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
+
+  if(!ctx) {
+    failf(data, "schannel: Null certificate context.");
+    return result;
+  }
+
+  cert_info = ctx->pCertInfo;
+  if(!cert_info) {
+    failf(data, "schannel: Null certificate info.");
+    return result;
+  }
+
+  extension = CertFindExtension(szOID_SUBJECT_ALT_NAME2,
+                                cert_info->cExtension,
+                                cert_info->rgExtension);
+  if(!extension) {
+    failf(data, "schannel: CertFindExtension() returned no extension.");
+    return result;
+  }
+
+  if(!CryptDecodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING,
+                          szOID_SUBJECT_ALT_NAME2,
+                          extension->Value.pbData,
+                          extension->Value.cbData,
+                          CRYPT_DECODE_ALLOC_FLAG | CRYPT_DECODE_NOCOPY_FLAG,
+                          &decode_para,
+                          alt_name_info,
+                          alt_name_info_size)) {
+    failf(data,
+          "schannel: CryptDecodeObjectEx() returned no alternate name "
+          "information.");
+    return result;
+  }
+  result = TRUE;
+#endif
+  return result;
+}
+
 /* Verify the server's hostname */
 CURLcode Curl_verify_host(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
@@ -481,6 +526,12 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   size_t hostlen = strlen(conn_hostname);
   DWORD len = 0;
   DWORD actual_len = 0;
+  PCERT_ALT_NAME_INFO alt_name_info = NULL;
+  DWORD alt_name_info_size = 0;
+  struct num_ip_data ip_blob = { 0 };
+  bool Win8_compat;
+  struct num_ip_data *p = &ip_blob;
+  DWORD i;
 
   sspi_status =
     Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
@@ -491,97 +542,123 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     char buffer[STRERROR_LEN];
     failf(data, "schannel: Failed to read remote certificate context: %s",
           Curl_sspi_strerror(sspi_status, buffer, sizeof(buffer)));
-    result = CURLE_PEER_FAILED_VERIFICATION;
     goto cleanup;
   }
 
-  /* Determine the size of the string needed for the cert hostname */
-  len = cert_get_name_string(data, pCertContextServer, NULL, 0);
-  if(len == 0) {
-    failf(data,
-          "schannel: CertGetNameString() returned no "
-          "certificate name information");
-    result = CURLE_PEER_FAILED_VERIFICATION;
-    goto cleanup;
-  }
-
-  /* CertGetNameString guarantees that the returned name will not contain
-   * embedded null bytes. This appears to be undocumented behavior.
-   */
-  cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
-  if(!cert_hostname_buff) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto cleanup;
-  }
-  actual_len = cert_get_name_string(
-    data, pCertContextServer, (LPTSTR)cert_hostname_buff, len);
-
-  /* Sanity check */
-  if(actual_len != len) {
-    failf(data,
-          "schannel: CertGetNameString() returned certificate "
-          "name information of unexpected size");
-    result = CURLE_PEER_FAILED_VERIFICATION;
-    goto cleanup;
-  }
-
-  /* cert_hostname_buff contains all DNS names, where each name is
-   * null-terminated and the last DNS name is double null-terminated. Due to
-   * this encoding, use the length of the buffer to iterate over all names.
-   */
-  result = CURLE_PEER_FAILED_VERIFICATION;
-  while(cert_hostname_buff_index < len &&
-        cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
-        result == CURLE_PEER_FAILED_VERIFICATION) {
-
-    char *cert_hostname;
-
-    /* Comparing the cert name and the connection hostname encoded as UTF-8
-     * is acceptable since both values are assumed to use ASCII
-     * (or some equivalent) encoding
-     */
-    cert_hostname = curlx_convert_tchar_to_UTF8(
-      &cert_hostname_buff[cert_hostname_buff_index]);
-    if(!cert_hostname) {
-      result = CURLE_OUT_OF_MEMORY;
+  Win8_compat = curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
+                                             VERSION_GREATER_THAN_EQUAL);
+  if(get_num_host_info(p, conn_hostname) || !Win8_compat) {
+    if(!get_alt_name_info(data, pCertContextServer,
+                          &alt_name_info, &alt_name_info_size)) {
+      goto cleanup;
     }
-    else {
-      if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
-                             conn_hostname, hostlen)) {
-        infof(data,
-              "schannel: connection hostname (%s) validated "
-              "against certificate name (%s)",
-              conn_hostname, cert_hostname);
-        result = CURLE_OK;
+  }
+
+  if(p->size) {
+    for(i = 0; i < alt_name_info->cAltEntry; ++i) {
+      PCERT_ALT_NAME_ENTRY entry = &alt_name_info->rgAltEntry[i];
+      if(entry->dwAltNameChoice == CERT_ALT_NAME_IP_ADDRESS) {
+        if(entry->IPAddress.cbData == p->size) {
+          if(!memcmp(entry->IPAddress.pbData, &p->bData,
+                     entry->IPAddress.cbData)) {
+            result = CURLE_OK;
+            infof(data,
+             "schannel: connection hostname (%s) matched cert's IP address!",
+             conn_hostname);
+            break;
+          }
+        }
+      }
+    }
+  }
+
+  else {
+    /* Determine the size of the string needed for the cert hostname */
+    len = cert_get_name_string(data, pCertContextServer,
+                               NULL, 0, alt_name_info, Win8_compat);
+    if(len == 0) {
+      failf(data,
+            "schannel: CertGetNameString() returned no "
+            "certificate name information");
+      goto cleanup;
+    }
+
+    /* CertGetNameString guarantees that the returned name will not contain
+     * embedded null bytes. This appears to be undocumented behavior.
+     */
+    cert_hostname_buff = (LPTSTR)malloc(len * sizeof(TCHAR));
+    if(!cert_hostname_buff) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto cleanup;
+    }
+    actual_len = cert_get_name_string(data, pCertContextServer,
+                 (LPTSTR)cert_hostname_buff, len, alt_name_info, Win8_compat);
+
+    /* Sanity check */
+    if(actual_len != len) {
+      failf(data,
+      "schannel: CertGetNameString() returned certificate "
+      "name information of unexpected size");
+      goto cleanup;
+    }
+
+    /* cert_hostname_buff contains all DNS names, where each name is
+     * null-terminated and the last DNS name is double null-terminated. Due to
+     * this encoding, use the length of the buffer to iterate over all names.
+     */
+    while(cert_hostname_buff_index < len &&
+          cert_hostname_buff[cert_hostname_buff_index] != TEXT('\0') &&
+          result == CURLE_PEER_FAILED_VERIFICATION) {
+
+      char *cert_hostname;
+
+      /* Comparing the cert name and the connection hostname encoded as UTF-8
+       * is acceptable since both values are assumed to use ASCII
+       * (or some equivalent) encoding
+       */
+      cert_hostname = curlx_convert_tchar_to_UTF8(
+      &cert_hostname_buff[cert_hostname_buff_index]);
+      if(!cert_hostname) {
+        result = CURLE_OUT_OF_MEMORY;
       }
       else {
-        size_t cert_hostname_len;
+        if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
+                               conn_hostname, hostlen)) {
+          infof(data,
+                "schannel: connection hostname (%s) validated "
+                "against certificate name (%s)",
+                conn_hostname, cert_hostname);
+          result = CURLE_OK;
+        }
+        else {
+          size_t cert_hostname_len;
 
-        infof(data,
-              "schannel: connection hostname (%s) did not match "
-              "against certificate name (%s)",
-              conn_hostname, cert_hostname);
+          infof(data,
+                "schannel: connection hostname (%s) did not match "
+                "against certificate name (%s)",
+                conn_hostname, cert_hostname);
 
-        cert_hostname_len =
-          _tcslen(&cert_hostname_buff[cert_hostname_buff_index]);
+          cert_hostname_len =
+            _tcslen(&cert_hostname_buff[cert_hostname_buff_index]);
 
-        /* Move on to next cert name */
-        cert_hostname_buff_index += cert_hostname_len + 1;
+          /* Move on to next cert name */
+          cert_hostname_buff_index += cert_hostname_len + 1;
 
-        result = CURLE_PEER_FAILED_VERIFICATION;
+          result = CURLE_PEER_FAILED_VERIFICATION;
+        }
+        curlx_unicodefree(cert_hostname);
       }
-      curlx_unicodefree(cert_hostname);
     }
-  }
 
-  if(result == CURLE_PEER_FAILED_VERIFICATION) {
-    failf(data,
-          "schannel: CertGetNameString() failed to match "
-          "connection hostname (%s) against server certificate names",
-          conn_hostname);
+    if(result == CURLE_PEER_FAILED_VERIFICATION) {
+      failf(data,
+            "schannel: CertGetNameString() failed to match "
+            "connection hostname (%s) against server certificate names",
+            conn_hostname);
+    }
+    else if(result != CURLE_OK)
+      failf(data, "schannel: server certificate name verification failed");
   }
-  else if(result != CURLE_OK)
-    failf(data, "schannel: server certificate name verification failed");
 
 cleanup:
   Curl_safefree(cert_hostname_buff);
@@ -591,7 +668,6 @@ cleanup:
 
   return result;
 }
-
 
 #ifdef HAS_MANUAL_VERIFY_API
 /* Verify the server's certificate and hostname */
