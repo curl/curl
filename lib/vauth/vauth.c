@@ -134,8 +134,7 @@ bool Curl_auth_user_contains_domain(const char *user)
     /* Check we have a domain name or UPN present */
     char *p = strpbrk(user, "\\/@");
 
-    valid = (p != NULL && p > user && p < user + strlen(user) - 1 ? TRUE :
-                                                                    FALSE);
+    valid = (p != NULL && p > user && p < user + strlen(user) - 1);
   }
 #if defined(HAVE_GSSAPI) || defined(USE_WINDOWS_SSPI)
   else

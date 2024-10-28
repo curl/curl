@@ -2053,7 +2053,7 @@ CURLcode Curl_cf_ssl_proxy_insert_after(struct Curl_cfilter *cf_at,
 bool Curl_ssl_supports(struct Curl_easy *data, unsigned int ssl_option)
 {
   (void)data;
-  return (Curl_ssl->supports & ssl_option) ? TRUE : FALSE;
+  return (Curl_ssl->supports & ssl_option);
 }
 
 static struct Curl_cfilter *get_ssl_filter(struct Curl_cfilter *cf)

@@ -2042,10 +2042,10 @@ static CURLcode client_write_header(struct Curl_easy *data,
    * headers from CONNECT should not automatically be part of the
    * output. */
   CURLcode result;
-  int save = data->set.include_header;
+  bool save = data->set.include_header;
   data->set.include_header = TRUE;
   result = Curl_client_write(data, CLIENTWRITE_HEADER, buf, blen);
-  data->set.include_header = save ? TRUE : FALSE;
+  data->set.include_header = save;
   return result;
 }
 
@@ -2793,7 +2793,7 @@ static CURLcode ftp_statemachine(struct Curl_easy *data,
       if(ftpcode/100 == 2)
         /* We have enabled SSL for the data connection! */
         conn->bits.ftp_use_data_ssl =
-          (data->set.use_ssl != CURLUSESSL_CONTROL) ? TRUE : FALSE;
+          (data->set.use_ssl != CURLUSESSL_CONTROL);
       /* FTP servers typically responds with 500 if they decide to reject
          our 'P' request */
       else if(data->set.use_ssl > CURLUSESSL_CONTROL)
@@ -3110,7 +3110,7 @@ static CURLcode ftp_multi_statemach(struct Curl_easy *data,
   /* Check for the state outside of the Curl_socket_check() return code checks
      since at times we are in fact already in this state when this function
      gets called. */
-  *done = (ftpc->state == FTP_STOP) ? TRUE : FALSE;
+  *done = (ftpc->state == FTP_STOP);
 
   return result;
 }

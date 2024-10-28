@@ -67,7 +67,7 @@ bool Curl_auth_is_spnego_supported(void)
   }
 
 
-  return (status == SEC_E_OK ? TRUE : FALSE);
+  return (status == SEC_E_OK);
 }
 
 /*

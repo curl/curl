@@ -1643,7 +1643,7 @@ static void cf_socket_active(struct Curl_cfilter *cf, struct Curl_easy *data)
     cf->conn->primary = ctx->ip;
     cf->conn->remote_addr = &ctx->addr;
   #ifdef USE_IPV6
-    cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6) ? TRUE : FALSE;
+    cf->conn->bits.ipv6 = (ctx->addr.family == AF_INET6);
   #endif
   }
   else {
@@ -1751,7 +1751,7 @@ static CURLcode cf_socket_query(struct Curl_cfilter *cf,
   }
   case CF_QUERY_IP_INFO:
 #ifdef USE_IPV6
-    *pres1 = (ctx->addr.family == AF_INET6) ? TRUE : FALSE;
+    *pres1 = (ctx->addr.family == AF_INET6);
 #else
     *pres1 = FALSE;
 #endif

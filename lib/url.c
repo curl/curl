@@ -1343,22 +1343,19 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   /* note that these two proxy bits are now just on what looks to be
      requested, they may be altered down the road */
   conn->bits.proxy = (data->set.str[STRING_PROXY] &&
-                      *data->set.str[STRING_PROXY]) ? TRUE : FALSE;
+                      *data->set.str[STRING_PROXY]);
   conn->bits.httpproxy = (conn->bits.proxy &&
                           (conn->http_proxy.proxytype == CURLPROXY_HTTP ||
                            conn->http_proxy.proxytype == CURLPROXY_HTTP_1_0 ||
-                           IS_HTTPS_PROXY(conn->http_proxy.proxytype))) ?
-    TRUE : FALSE;
-  conn->bits.socksproxy = (conn->bits.proxy &&
-                           !conn->bits.httpproxy) ? TRUE : FALSE;
+                           IS_HTTPS_PROXY(conn->http_proxy.proxytype)));
+  conn->bits.socksproxy = (conn->bits.proxy && !conn->bits.httpproxy);
 
   if(data->set.str[STRING_PRE_PROXY] && *data->set.str[STRING_PRE_PROXY]) {
     conn->bits.proxy = TRUE;
     conn->bits.socksproxy = TRUE;
   }
 
-  conn->bits.proxy_user_passwd =
-    (data->state.aptr.proxyuser) ? TRUE : FALSE;
+  conn->bits.proxy_user_passwd = !!data->state.aptr.proxyuser;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
 #endif /* CURL_DISABLE_PROXY */
 
@@ -1961,10 +1958,10 @@ static CURLcode setup_range(struct Curl_easy *data)
     else
       s->range = strdup(data->set.str[STRING_SET_RANGE]);
 
-    s->rangestringalloc = (s->range) ? TRUE : FALSE;
-
     if(!s->range)
       return CURLE_OUT_OF_MEMORY;
+
+    s->rangestringalloc = TRUE;
 
     /* tell ourselves to fetch this range */
     s->use_range = TRUE;        /* enable range download */

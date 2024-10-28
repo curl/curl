@@ -173,7 +173,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
           log_line_start(output, timebuf, idsbuf, type);
         (void)fwrite(data + st, i - st + 1, 1, output);
       }
-      newl = (size && (data[size - 1] != '\n')) ? TRUE : FALSE;
+      newl = (size && (data[size - 1] != '\n'));
       traced_data = FALSE;
       break;
     case CURLINFO_TEXT:
@@ -181,7 +181,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
       if(!newl)
         log_line_start(output, timebuf, idsbuf, type);
       (void)fwrite(data, size, 1, output);
-      newl = (size && (data[size - 1] != '\n')) ? TRUE : FALSE;
+      newl = (size && (data[size - 1] != '\n'));
       traced_data = FALSE;
       break;
     case CURLINFO_DATA_OUT:

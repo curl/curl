@@ -126,7 +126,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       option = line;
 
       /* the option starts with a dash? */
-      dashed_option = (option[0] == '-') ? TRUE : FALSE;
+      dashed_option = (option[0] == '-');
 
       while(*line && !ISSPACE(*line) && !ISSEP(*line, dashed_option))
         line++;
@@ -311,7 +311,7 @@ static bool my_get_line(FILE *fp, struct curlx_dynbuf *db,
        occurs while no characters have been read. */
     if(!fgets(buf, sizeof(buf), fp))
       /* only if there is data in the line, return TRUE */
-      return curlx_dyn_len(db) ? TRUE : FALSE;
+      return curlx_dyn_len(db);
     if(curlx_dyn_add(db, buf)) {
       *error = TRUE; /* error */
       return FALSE; /* stop reading */

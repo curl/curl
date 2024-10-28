@@ -66,8 +66,7 @@ bool output_expected(const char *url, const char *uploadfile)
 
 bool stdin_upload(const char *uploadfile)
 {
-  return (!strcmp(uploadfile, "-") ||
-          !strcmp(uploadfile, ".")) ? TRUE : FALSE;
+  return (!strcmp(uploadfile, "-") || !strcmp(uploadfile, "."));
 }
 
 /* Convert a CURLUcode into a CURLcode */

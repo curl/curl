@@ -677,7 +677,7 @@ output_auth_headers(struct Curl_easy *data,
           auth, data->state.aptr.user ?
           data->state.aptr.user : "");
 #endif
-    authstatus->multipass = (!authstatus->done) ? TRUE : FALSE;
+    authstatus->multipass = !authstatus->done;
   }
   else
     authstatus->multipass = FALSE;
@@ -2259,7 +2259,7 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
         conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
-        !strcmp(host, "::1") ? TRUE : FALSE;
+        !strcmp(host, "::1");
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE, CURL_LOCK_ACCESS_SINGLE);
       rc = Curl_cookie_getlist(data, data->cookies, host, data->state.up.path,
                                secure_context, &list);
@@ -3041,8 +3041,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
         char *persistentauth = Curl_copy_header_value(hd);
         if(!persistentauth)
           return CURLE_OUT_OF_MEMORY;
-        negdata->noauthpersist = checkprefix("false", persistentauth) ?
-          TRUE : FALSE;
+        negdata->noauthpersist = !!checkprefix("false", persistentauth);
         negdata->havenoauthpersist = TRUE;
         infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
               negdata->noauthpersist, persistentauth);
@@ -3083,7 +3082,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
         conn->handler->protocol&(CURLPROTO_HTTPS|CURLPROTO_WSS) ||
         strcasecompare("localhost", host) ||
         !strcmp(host, "127.0.0.1") ||
-        !strcmp(host, "::1") ? TRUE : FALSE;
+        !strcmp(host, "::1");
 
       Curl_share_lock(data, CURL_LOCK_DATA_COOKIE,
                       CURL_LOCK_ACCESS_SINGLE);
@@ -4544,7 +4543,7 @@ static void http_exp100_send_anyway(struct Curl_easy *data)
 bool Curl_http_exp100_is_selected(struct Curl_easy *data)
 {
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  return r ? TRUE : FALSE;
+  return !!r;
 }
 
 #endif /* CURL_DISABLE_HTTP */

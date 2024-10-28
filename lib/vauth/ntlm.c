@@ -485,7 +485,7 @@ CURLcode Curl_auth_create_ntlm_type3_message(struct Curl_easy *data,
   unsigned char ntresp[24]; /* fixed-size */
   unsigned char *ptr_ntresp = &ntresp[0];
   unsigned char *ntlmv2resp = NULL;
-  bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE) ? TRUE : FALSE;
+  bool unicode = (ntlm->flags & NTLMFLAG_NEGOTIATE_UNICODE);
   /* The fixed hostname we provide, in order to not leak our real local host
      name. Copy the name used by Firefox. */
   static const char host[] = "WORKSTATION";

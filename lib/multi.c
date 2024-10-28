@@ -80,7 +80,7 @@
  * are not NULL, but no longer have the MAGIC touch. This gives
  * us early warning on things only discovered by valgrind otherwise. */
 #define GOOD_MULTI_HANDLE(x) \
-  (((x) && (x)->magic == CURL_MULTI_HANDLE)? TRUE: \
+  (((x) && (x)->magic == CURL_MULTI_HANDLE)? TRUE:      \
   (DEBUGASSERT(!(x)), FALSE))
 #else
 #define GOOD_MULTI_HANDLE(x) \
@@ -801,7 +801,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
 
-  premature = (data->mstate < MSTATE_COMPLETED) ? TRUE : FALSE;
+  premature = (data->mstate < MSTATE_COMPLETED);
 
   /* If the 'state' is not INIT or COMPLETED, we might need to do something
      nice to put the easy_handle in a good known state when this returns. */
@@ -2161,7 +2161,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
      */
     CURLcode ret = Curl_retry_request(data, &newurl);
     if(!ret)
-      retry = (newurl) ? TRUE : FALSE;
+      retry = !!newurl;
     else if(!result)
       result = ret;
 

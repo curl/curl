@@ -695,7 +695,7 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
     case SSH_S_STARTUP:
       rc = ssh_connect(sshc->ssh_session);
 
-      myssh_block2waitfor(conn, (rc == SSH_AGAIN) ? TRUE : FALSE);
+      myssh_block2waitfor(conn, (rc == SSH_AGAIN));
       if(rc == SSH_AGAIN) {
         DEBUGF(infof(data, "ssh_connect -> EAGAIN"));
         break;
@@ -2085,7 +2085,7 @@ static CURLcode myssh_multi_statemach(struct Curl_easy *data,
                     implementation */
   CURLcode result = myssh_statemach_act(data, &block);
 
-  *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
+  *done = (sshc->state == SSH_STOP);
   myssh_block2waitfor(conn, block);
 
   return result;
@@ -2415,7 +2415,7 @@ static ssize_t scp_send(struct Curl_easy *data, int sockindex,
   /* The following code is misleading, mostly added as wishful thinking
    * that libssh at some point will implement non-blocking ssh_scp_write/read.
    * Currently rc can only be number of bytes read or SSH_ERROR. */
-  myssh_block2waitfor(conn, (rc == SSH_AGAIN) ? TRUE : FALSE);
+  myssh_block2waitfor(conn, (rc == SSH_AGAIN));
 
   if(rc == SSH_AGAIN) {
     *err = CURLE_AGAIN;
@@ -2447,7 +2447,7 @@ static ssize_t scp_recv(struct Curl_easy *data, int sockindex,
    * that libssh at some point will implement non-blocking ssh_scp_write/read.
    * Currently rc can only be SSH_OK or SSH_ERROR. */
 
-  myssh_block2waitfor(conn, (nread == SSH_AGAIN) ? TRUE : FALSE);
+  myssh_block2waitfor(conn, (nread == SSH_AGAIN));
   if(nread == SSH_AGAIN) {
     *err = CURLE_AGAIN;
     nread = -1;
@@ -2614,7 +2614,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
                               mem, (uint32_t)len,
                               (uint32_t)conn->proto.sshc.sftp_file_index);
 
-      myssh_block2waitfor(conn, (nread == SSH_AGAIN) ? TRUE : FALSE);
+      myssh_block2waitfor(conn, (nread == SSH_AGAIN));
 
       if(nread == SSH_AGAIN) {
         *err = CURLE_AGAIN;

@@ -1119,7 +1119,7 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   }
 
   result = Curl_pp_statemach(data, &pop3c->pp, FALSE, FALSE);
-  *done = (pop3c->state == POP3_STOP) ? TRUE : FALSE;
+  *done = (pop3c->state == POP3_STOP);
 
   return result;
 }

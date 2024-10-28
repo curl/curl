@@ -908,7 +908,7 @@ static CURLcode wssh_multi_statemach(struct Curl_easy *data, bool *done)
                  implementation */
   do {
     result = wssh_statemach_act(data, &block);
-    *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
+    *done = (sshc->state == SSH_STOP);
     /* if there is no error, it is not done and it did not EWOULDBLOCK, then
        try again */
     if(*done) {

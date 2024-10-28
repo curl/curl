@@ -2456,7 +2456,7 @@ static CURLcode add_parallel_transfers(struct GlobalConfig *global,
     all_added++;
     *addedp = TRUE;
   }
-  *morep = (per || sleeping) ? TRUE : FALSE;
+  *morep = (per || sleeping);
   return CURLE_OK;
 }
 
