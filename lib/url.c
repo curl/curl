@@ -1355,7 +1355,7 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
     conn->bits.socksproxy = TRUE;
   }
 
-  conn->bits.proxy_user_passwd = (bool)data->state.aptr.proxyuser;
+  conn->bits.proxy_user_passwd = !!data->state.aptr.proxyuser;
   conn->bits.tunnel_proxy = data->set.tunnel_thru_httpproxy;
 #endif /* CURL_DISABLE_PROXY */
 
