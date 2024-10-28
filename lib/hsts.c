@@ -490,7 +490,8 @@ static CURLcode hsts_pull(struct Curl_easy *data, struct hsts *h)
           expires = TIME_T_MAX; /* the end of time */
         result = hsts_create(h, e.name,
                              /* bitfield to bool conversion: */
-                             !!e.includeSubDomains, expires);
+                             e.includeSubDomains ? TRUE : FALSE,
+                             expires);
         if(result)
           return result;
       }
