@@ -4543,7 +4543,7 @@ static void http_exp100_send_anyway(struct Curl_easy *data)
 bool Curl_http_exp100_is_selected(struct Curl_easy *data)
 {
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
-  return r;
+  return !!r;
 }
 
 #endif /* CURL_DISABLE_HTTP */

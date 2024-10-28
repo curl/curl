@@ -2161,7 +2161,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
      */
     CURLcode ret = Curl_retry_request(data, &newurl);
     if(!ret)
-      retry = newurl;
+      retry = !!newurl;
     else if(!result)
       result = ret;
 
