@@ -366,4 +366,3 @@ class TestSSLUse:
         ])
         assert r.exit_code == 0, f'{r}'
         assert r.json, f'{r}'
-
