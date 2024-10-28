@@ -299,7 +299,7 @@ static CURLcode on_resp_header(struct Curl_cfilter *cf,
      (checkprefix("Proxy-authenticate:", header) &&
       (407 == k->httpcode))) {
 
-    bool proxy = (k->httpcode == 407) ? TRUE : FALSE;
+    bool proxy = (k->httpcode == 407);
     char *auth = Curl_copy_header_value(header);
     if(!auth)
       return CURLE_OUT_OF_MEMORY;

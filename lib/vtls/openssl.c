@@ -1015,7 +1015,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
  */
 static bool rand_enough(void)
 {
-  return (0 != RAND_status()) ? TRUE : FALSE;
+  return (0 != RAND_status());
 }
 
 static CURLcode ossl_seed(struct Curl_easy *data)

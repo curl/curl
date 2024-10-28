@@ -3067,7 +3067,7 @@ static CURLcode ssh_multi_statemach(struct Curl_easy *data, bool *done)
                  implementation */
   do {
     result = ssh_statemachine(data, &block);
-    *done = (sshc->state == SSH_STOP) ? TRUE : FALSE;
+    *done = (sshc->state == SSH_STOP);
     /* if there is no error, it is not done and it did not EWOULDBLOCK, then
        try again */
   } while(!result && !*done && !block);
@@ -3512,7 +3512,7 @@ static ssize_t scp_send(struct Curl_easy *data, int sockindex,
   /* libssh2_channel_write() returns int! */
   nwrite = (ssize_t) libssh2_channel_write(sshc->ssh_channel, mem, len);
 
-  ssh_block2waitfor(data, (nwrite == LIBSSH2_ERROR_EAGAIN) ? TRUE : FALSE);
+  ssh_block2waitfor(data, (nwrite == LIBSSH2_ERROR_EAGAIN));
 
   if(nwrite == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
@@ -3537,7 +3537,7 @@ static ssize_t scp_recv(struct Curl_easy *data, int sockindex,
   /* libssh2_channel_read() returns int */
   nread = (ssize_t) libssh2_channel_read(sshc->ssh_channel, mem, len);
 
-  ssh_block2waitfor(data, (nread == LIBSSH2_ERROR_EAGAIN) ? TRUE : FALSE);
+  ssh_block2waitfor(data, (nread == LIBSSH2_ERROR_EAGAIN));
   if(nread == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
     nread = -1;
@@ -3650,7 +3650,7 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
 
   nwrite = libssh2_sftp_write(sshc->sftp_handle, mem, len);
 
-  ssh_block2waitfor(data, (nwrite == LIBSSH2_ERROR_EAGAIN) ? TRUE : FALSE);
+  ssh_block2waitfor(data, (nwrite == LIBSSH2_ERROR_EAGAIN));
 
   if(nwrite == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;
@@ -3678,7 +3678,7 @@ static ssize_t sftp_recv(struct Curl_easy *data, int sockindex,
 
   nread = libssh2_sftp_read(sshc->sftp_handle, mem, len);
 
-  ssh_block2waitfor(data, (nread == LIBSSH2_ERROR_EAGAIN) ? TRUE : FALSE);
+  ssh_block2waitfor(data, (nread == LIBSSH2_ERROR_EAGAIN));
 
   if(nread == LIBSSH2_ERROR_EAGAIN) {
     *err = CURLE_AGAIN;

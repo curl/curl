@@ -1799,7 +1799,7 @@ static bool wolfssl_data_pending(struct Curl_cfilter *cf,
 
   backend = (struct wolfssl_ctx *)ctx->backend;
   if(backend->handle)   /* SSL is in use */
-    return (0 != wolfSSL_pending(backend->handle)) ? TRUE : FALSE;
+    return wolfSSL_pending(backend->handle);
   else
     return FALSE;
 }

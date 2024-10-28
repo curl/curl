@@ -855,7 +855,7 @@ parse_netscape(struct Cookie *co,
        * domain can access the variable. Set TRUE when the cookie says
        * .domain.com and to false when the domain is complete www.domain.com
        */
-      co->tailmatch = strcasecompare(ptr, "TRUE") ? TRUE : FALSE;
+      co->tailmatch = !!strcasecompare(ptr, "TRUE");
       break;
     case 2:
       /* The file format allows the path field to remain not filled in */

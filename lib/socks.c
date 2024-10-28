@@ -286,7 +286,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
 {
   struct connectdata *conn = cf->conn;
   const bool protocol4a =
-    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A) ? TRUE : FALSE;
+    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS4A);
   unsigned char *socksreq = sx->buffer;
   CURLcode result;
   CURLproxycode presult;
@@ -583,7 +583,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
   CURLcode result;
   CURLproxycode presult;
   bool socks5_resolve_local =
-    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5) ? TRUE : FALSE;
+    (conn->socks_proxy.proxytype == CURLPROXY_SOCKS5);
   const size_t hostname_len = strlen(sx->hostname);
   size_t len = 0;
   const unsigned char auth = data->set.socks5auth;
