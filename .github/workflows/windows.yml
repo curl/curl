@@ -86,7 +86,6 @@ jobs:
             cmake -B bld -G Ninja ${options} \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCURL_BROTLI=ON \
               ${{ matrix.config }}
           else
             PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
@@ -257,7 +256,6 @@ jobs:
               '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCURL_BROTLI=ON \
               ${{ matrix.config }}
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
@@ -581,7 +579,7 @@ jobs:
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
               -DCURL_USE_GSASL=ON -DUSE_WIN32_IDN=ON -DENABLE_UNICODE=ON
 
@@ -592,7 +590,7 @@ jobs:
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_GSASL=ON -DENABLE_ARES=ON -DCURL_USE_LIBUV=ON -DCURL_USE_GSSAPI=ON
 
@@ -603,7 +601,7 @@ jobs:
             type: 'Debug'
             tflags: 'skiprun'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
               -DCURL_USE_LIBPSL=OFF
 
@@ -614,7 +612,7 @@ jobs:
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
               -DCURL_CA_SEARCH_SAFE=ON
 
@@ -625,7 +623,7 @@ jobs:
             type: 'Debug'
             tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
               -DUSE_ECH=ON
 
@@ -636,7 +634,7 @@ jobs:
             type: 'Debug'
             tflags: '~1516'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
               -DUSE_ECH=ON
@@ -652,7 +650,7 @@ jobs:
             #          Windows. Do not use this component till there is a fix for these.
             # https://github.com/curl/curl-for-win/blob/3951808deb04df9489ee17430f236ed54436f81a/libssh.sh#L6-L8
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
+              -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
 
@@ -663,7 +661,7 @@ jobs:
             type: 'Debug'
             tflags: 'skipall'
             config: >-
-              -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DUSE_MSH3=ON
               -DCURL_USE_GSASL=ON
 
