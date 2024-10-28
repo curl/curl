@@ -3041,7 +3041,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
         char *persistentauth = Curl_copy_header_value(hd);
         if(!persistentauth)
           return CURLE_OUT_OF_MEMORY;
-        negdata->noauthpersist = checkprefix("false", persistentauth);
+        negdata->noauthpersist = !!checkprefix("false", persistentauth);
         negdata->havenoauthpersist = TRUE;
         infof(data, "Negotiate: noauthpersist -> %d, header part: %s",
               negdata->noauthpersist, persistentauth);
