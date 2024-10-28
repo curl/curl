@@ -39,6 +39,7 @@
 #include "schannel.h"
 #include "schannel_int.h"
 
+#include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
 #include "sendf.h"
@@ -74,6 +75,20 @@ struct cert_chain_engine_config_win7 {
   DWORD CycleDetectionModulus;
   HCERTSTORE hExclusiveRoot;
   HCERTSTORE hExclusiveTrustedPeople;
+};
+
+/*
+* size of the structure: 20 bytes.
+* 12 bytes remain unused when dealing with IPv4 addresses,
+* while IPv6 addresses utilize the entire allotted space.
+*/
+
+struct num_ip_data {
+  DWORD cbData; /* 04 bytes */
+  union { /* 16 bytes to accommodate the largest member (IPv6 addresses) */
+    struct in_addr  ia;  /* 04 bytes */
+    struct in6_addr ia6; /* 16 bytes */
+  } bData;
 };
 
 static int is_cr_or_lf(char c)
@@ -427,36 +442,44 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
   return actual_length;
 }
 
-BOOL hostname_is_ip(PCRYPT_DATA_BLOB ip_blob,
-                    LPCSTR hostname)
-{
-  IN_ADDR ia;
-  IN6_ADDR ia6;
-  BOOL result = FALSE;
+/*
+* Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
+* and populates the buffer with IPv4/IPv6 info. IPv4 addresses
+* require 8 bytes, and IPv6 addresses require 20 bytes.
+* num_ip_data structure is defined to accommodate the variable
+* size requirement.
+*/
 
-  INT res = InetPtonA(AF_INET, hostname, &ia);
-  if(res == 1) {
-    ip_blob->cbData = sizeof(IN_ADDR);
-    memcpy(&ip_blob->pbData, &ia, sizeof(IN_ADDR));
+static bool get_num_host_info(struct num_ip_data *ip_blob,
+                              LPCSTR hostname)
+{
+  struct in_addr ia;
+  struct in6_addr ia6;
+  bool result = FALSE;
+
+  int res = Curl_inet_pton(AF_INET, hostname, &ia);
+  if(res) {
+    ip_blob->cbData = sizeof(struct in_addr);
+    memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
     result = TRUE;
   }
   else {
-    res = InetPtonA(AF_INET6, hostname, &ia6);
-    if(res == 1) {
-      ip_blob->cbData = sizeof(IN6_ADDR);
-      memcpy(&ip_blob->pbData, &ia6, sizeof(IN6_ADDR));
+    res = Curl_inet_pton(AF_INET6, hostname, &ia6);
+    if(res) {
+      ip_blob->cbData = sizeof(struct in6_addr);
+      memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
       result = TRUE;
     }
   }
   return result;
 }
 
-BOOL get_alt_name_info(struct Curl_easy *data,
-                       PCCERT_CONTEXT ctx,
-                       PCERT_ALT_NAME_INFO *alt_name_info,
-                       LPDWORD alt_name_info_size)
+static bool get_alt_name_info(struct Curl_easy *data,
+                              PCCERT_CONTEXT ctx,
+                              PCERT_ALT_NAME_INFO *alt_name_info,
+                              LPDWORD alt_name_info_size)
 {
-  BOOL result = FALSE;
+  bool result = FALSE;
 #if defined(CURL_WINDOWS_UWP)
   (void)data;
   (void)ctx;
@@ -520,9 +543,9 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   DWORD actual_len = 0;
   PCERT_ALT_NAME_INFO alt_name_info = NULL;
   DWORD alt_name_info_size = 0;
-  BYTE ip_blob[32] = { 0 };
-  BOOL Win8_compat;
-  PCRYPT_DATA_BLOB p = (PCRYPT_DATA_BLOB)ip_blob;
+  struct num_ip_data ip_blob = { 0 };
+  bool Win8_compat;
+  struct num_ip_data *p = &ip_blob;
   DWORD i;
 
   sspi_status =
@@ -539,7 +562,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
 
   Win8_compat = curlx_verify_windows_version(6, 2, 0, PLATFORM_WINNT,
                                              VERSION_GREATER_THAN_EQUAL);
-  if(hostname_is_ip(p, conn_hostname) || !Win8_compat) {
+  if(get_num_host_info(p, conn_hostname) || !Win8_compat) {
     if(!get_alt_name_info(data, pCertContextServer,
                           &alt_name_info, &alt_name_info_size)) {
       goto cleanup;
@@ -551,7 +574,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
       PCERT_ALT_NAME_ENTRY entry = &alt_name_info->rgAltEntry[i];
       if(entry->dwAltNameChoice == CERT_ALT_NAME_IP_ADDRESS) {
         if(entry->IPAddress.cbData == p->cbData) {
-          if(!memcmp(entry->IPAddress.pbData, &p->pbData,
+          if(!memcmp(entry->IPAddress.pbData, &p->bData,
                      entry->IPAddress.cbData)) {
             result = CURLE_OK;
             infof(data,
