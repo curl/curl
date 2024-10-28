@@ -847,11 +847,9 @@ static void doh_show(struct Curl_easy *data,
     }
     else if(a->type == DNS_TYPE_AAAA) {
       int j;
-      char buffer[128];
-      char *ptr;
-      size_t len;
-      len = msnprintf(buffer, 128, "[DoH] AAAA: ");
-      ptr = &buffer[len];
+      char buffer[128] = "[DoH] AAAA: ";
+      size_t len = strlen(buffer);
+      char *ptr = &buffer[len];
       len = sizeof(buffer) - len;
       for(j = 0; j < 16; j += 2) {
         size_t l;
