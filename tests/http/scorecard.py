@@ -31,7 +31,7 @@ import os
 import re
 import sys
 from statistics import mean
-from typing import Dict, Any, Optional, List, Union
+from typing import Dict, Any, Optional, List
 
 from testenv import Env, Httpd, CurlClient, Caddy, ExecResult, NghttpxQuic, RunProfile
 
@@ -47,7 +47,7 @@ class ScoreCard:
     def __init__(self, env: Env,
                  protocol: str,
                  server_descr: str,
-                 server_port: Union[str, int],
+                 server_port: int,
                  verbose: int,
                  curl_verbose: int,
                  download_parallel: int = 0,
@@ -760,7 +760,7 @@ def main():
             test_httpd = False
             test_caddy = False
             remote_addr = m.group(1)
-            remote_port = m.group(2)
+            remote_port = int(m.group(2))
             card = ScoreCard(env=env,
                              protocol=protocol,
                              server_descr=f'Server at {args.remote}',
