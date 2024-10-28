@@ -342,7 +342,7 @@ class TestSSLUse:
                 reused_session = True
         assert reused_session, f'{r}\n{r.dump_logs()}'
 
-    # use host name with trailing dot, verify handshake
+    # use host name server has no certificate for
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_11_wrong_host(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
@@ -353,7 +353,7 @@ class TestSSLUse:
         r = curl.http_get(url=url, alpn_proto=proto)
         assert r.exit_code == 60, f'{r}'
 
-    # use host name with trailing dot, verify handshake
+    # use host name server has no cert for with --insecure
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_17_12_insecure(self, env: Env, proto):
         if proto == 'h3' and not env.have_h3():
