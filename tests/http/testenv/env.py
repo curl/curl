@@ -461,6 +461,10 @@ class Env:
         return self.CONFIG.htdocs_dir
 
     @property
+    def tld(self) -> str:
+        return self.CONFIG.tld
+
+    @property
     def domain1(self) -> str:
         return self.CONFIG.domain1
 
