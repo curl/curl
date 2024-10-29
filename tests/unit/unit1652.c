@@ -26,15 +26,6 @@
 #include "urldata.h"
 #include "sendf.h"
 
-#ifdef __GNUC__
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wformat"
-#pragma GCC diagnostic ignored "-Wformat-zero-length"
-#if !defined(__clang__) && __GNUC__ >= 7
-#pragma GCC diagnostic ignored "-Wformat-overflow"
-#endif
-#endif
-
 /*
  * This test hardcodes the knowledge of the buffer size which is internal to
  * Curl_infof(). If that buffer is changed in size, this tests needs to be
@@ -101,6 +92,15 @@ static int verify(const char *info, const char *two)
 
 UNITTEST_START
 
+#if defined(__GNUC__) && !defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wformat"
+#pragma GCC diagnostic ignored "-Wformat-zero-length"
+#if __GNUC__ >= 7
+#pragma GCC diagnostic ignored "-Wformat-overflow"
+#endif
+#endif
+
 /* Injecting a simple short string via a format */
 msnprintf(input, sizeof(input), "Simple Test");
 Curl_infof(testdata, "%s", input);
@@ -146,8 +146,8 @@ Curl_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
-UNITTEST_STOP
-
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
+
+UNITTEST_STOP

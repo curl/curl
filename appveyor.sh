@@ -38,6 +38,7 @@ openssl_root="$(cygpath "${openssl_root_win}")"
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+  [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
   [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
@@ -62,6 +63,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
     '-DCURL_USE_LIBPSL=OFF'
+  if false; then
+    cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+  fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
@@ -117,10 +121,6 @@ if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
-fi
-
-if false; then
-  cat CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 fi
 
 # build tests

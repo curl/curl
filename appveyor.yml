@@ -89,6 +89,16 @@ environment:
       SCHANNEL: 'ON'
       ENABLE_UNICODE: 'OFF'
       EXAMPLES: 'ON'
+    - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode, Build-tests & examples, clang-cl'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 17 2022'
+      TARGET: '-A x64'
+      PRJ_CFG: Debug
+      SCHANNEL: 'ON'
+      ENABLE_UNICODE: 'ON'
+      EXAMPLES: 'ON'
+      TOOLSET: 'ClangCl'
     - job_name: 'CMake, VS2022, Debug, x64, Schannel, Static, Unicode, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake

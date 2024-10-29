@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "curlcheck.h"
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
@@ -186,6 +186,6 @@ fail_unless(rc == 128, "return code should be 128");
 
 UNITTEST_STOP
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif

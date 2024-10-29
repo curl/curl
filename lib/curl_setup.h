@@ -33,7 +33,7 @@
 
 /* FIXME: Delete this once the warnings have been fixed. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #endif
 #endif
