@@ -274,8 +274,9 @@ jobs:
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 1
         run: |
+          # avoid the libtool wrapper
           mv bld/src/.libs/curl.exe bld/src/curl.exe
-          mv bld/lib/.libs/libcurl*.dll bld/src
+          mv bld/lib/.libs/libcurl*.dll bld/src || true
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
