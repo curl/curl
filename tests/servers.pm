@@ -272,6 +272,7 @@ sub clearlocks {
 
     if(os_is_win()) {
         $dir = sys_native_abs_path($dir);
+        # Must use backslashes for handle64 to find a match
         if ($^O eq 'MSWin32') {
             $dir =~ s/\//\\/g;
         }
