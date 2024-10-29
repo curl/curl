@@ -64,6 +64,10 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
     '-DCURL_USE_LIBPSL=OFF'
+  if true; then
+    find _bld
+    cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+  fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
@@ -72,9 +76,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
       find . -name BuildLog.htm -exec cat '{}' +
     fi
     false
-  fi
-  if true; then
-    cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
   if [ "${SHARED}" = 'ON' ]; then
     PATH="$PWD/_bld/lib:$PATH"
