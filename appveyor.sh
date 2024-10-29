@@ -74,7 +74,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     false
   fi
   if true; then
-    cat CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+    cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
   if [ "${SHARED}" = 'ON' ]; then
     PATH="$PWD/_bld/lib:$PATH"
