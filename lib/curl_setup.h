@@ -38,10 +38,6 @@
 #endif
 #endif
 
-#if defined(_MSC_VER) && defined(__clang__)
-#pragma GCC diagnostic ignored "-Wlanguage-extension-token"
-#endif
-
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>
