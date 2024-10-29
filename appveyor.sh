@@ -38,6 +38,7 @@ openssl_root="$(cygpath "${openssl_root_win}")"
 if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   options=''
   [[ "${TARGET:-}" = *'ARM64'* ]] && SKIP_RUN='ARM64 architecture'
+  [ -n "${TOOLSET:-}" ] && options+=" -T ${TOOLSET}"
   [ "${OPENSSL}" = 'ON' ] && options+=" -DOPENSSL_ROOT_DIR=${openssl_root_win}"
   [ -n "${CURLDEBUG:-}" ] && options+=" -DENABLE_CURLDEBUG=${CURLDEBUG}"
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
