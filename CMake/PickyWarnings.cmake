@@ -130,7 +130,7 @@ if(PICKY_COMPILER)
         ${_picky_common_old}
         -Wshift-sign-overflow              # clang  2.9
         -Wshorten-64-to-32                 # clang  1.0
-      # -Wlanguage-extension-token         # clang  3.0  # Not used: Causes bogus warnings with clang-cl
+        -Wlanguage-extension-token         # clang  3.0
         -Wformat=2                         # clang  3.0  gcc  4.8
       )
       # Enable based on compiler version
