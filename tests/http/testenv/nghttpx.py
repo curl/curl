@@ -64,7 +64,7 @@ class Nghttpx:
         return self._https_port
 
     def exists(self):
-        return os.path.exists(self._cmd)
+        return self._cmd and os.path.exists(self._cmd)
 
     def clear_logs(self):
         self._rmf(self._error_log)
