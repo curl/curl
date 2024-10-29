@@ -1169,6 +1169,22 @@ static CURLcode config2setopts(struct GlobalConfig *global,
     /* new in libcurl 7.56.0 */
     if(config->ssh_compression)
       my_setopt(curl, CURLOPT_SSH_COMPRESSION, 1L);
+
+    if(!config->insecure_ok) {
+      char *known = findfile(".ssh/known_hosts", FALSE);
+      if(known) {
+        /* new in curl 7.19.6 */
+        result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
+        curl_free(known);
+        if(result == CURLE_UNKNOWN_OPTION)
+          /* libssh2 version older than 1.1.1 */
+          result = CURLE_OK;
+        if(result)
+          return result;
+      }
+      else
+        warnf(global, "Couldn't find a known_hosts file");
+    }
   }
 
   if(config->cacert)
@@ -1343,23 +1359,6 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
   if(config->path_as_is)
     my_setopt(curl, CURLOPT_PATH_AS_IS, 1L);
-
-  if((use_proto == proto_scp || use_proto == proto_sftp) &&
-     !config->insecure_ok) {
-    char *known = findfile(".ssh/known_hosts", FALSE);
-    if(known) {
-      /* new in curl 7.19.6 */
-      result = res_setopt_str(curl, CURLOPT_SSH_KNOWNHOSTS, known);
-      curl_free(known);
-      if(result == CURLE_UNKNOWN_OPTION)
-        /* libssh2 version older than 1.1.1 */
-        result = CURLE_OK;
-      if(result)
-        return result;
-    }
-    else
-      warnf(global, "Couldn't find a known_hosts file");
-  }
 
   if(config->no_body || config->remote_time) {
     /* no body or use remote time */
