@@ -275,6 +275,7 @@ jobs:
         timeout-minutes: 1
         run: |
           mv bld/src/.libs/curl.exe bld/src/curl.exe
+          mv bld/lib/.libs/libcurl*.dll bld/src
           find . -name '*.exe' -o -name '*.dll'
           bld/src/curl.exe --disable --version
 
