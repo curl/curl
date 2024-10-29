@@ -62,11 +62,11 @@
 */
 
 struct num_ip_data {
-	DWORD size; /* 04 bytes */
-	union { /* 16 bytes to accommodate the largest member (IPv6 addresses) */
-		struct in_addr  ia;  /* 04 bytes */
-		struct in6_addr ia6; /* 16 bytes */
-	} bData;
+  DWORD size; /* 04 bytes */
+  union { /* 16 bytes to accommodate the largest member (IPv6 addresses) */
+    struct in_addr  ia;  /* 04 bytes */
+    struct in6_addr ia6; /* 16 bytes */
+  } bData;
 };
 
 #ifdef HAS_MANUAL_VERIFY_API
