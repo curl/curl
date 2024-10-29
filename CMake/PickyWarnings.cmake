@@ -32,8 +32,7 @@ if(CURL_WERROR AND
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
   list(APPEND _picky "-pedantic-errors")
   if(MSVC)  # clang-cl
-    # Override default error to make it pass __int64 size detection and in-source use
-    list(APPEND _picky "-Wno-language-extension-token")
+    list(APPEND _picky "-Wno-language-extension-token")  # Override default error to make __int64 size detection pass
   endif()
 endif()
 
