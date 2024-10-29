@@ -55,6 +55,19 @@
 
 #define BACKEND ((struct schannel_ssl_backend_data *)connssl->backend)
 
+/*
+* size of the structure: 20 bytes.
+* 12 bytes remain unused when dealing with IPv4 addresses,
+* while IPv6 addresses utilize the entire allotted space.
+*/
+
+struct num_ip_data {
+	DWORD size; /* 04 bytes */
+	union { /* 16 bytes to accommodate the largest member (IPv6 addresses) */
+		struct in_addr  ia;  /* 04 bytes */
+		struct in6_addr ia6; /* 16 bytes */
+	} bData;
+};
 
 #ifdef HAS_MANUAL_VERIFY_API
 
@@ -75,20 +88,6 @@ struct cert_chain_engine_config_win7 {
   DWORD CycleDetectionModulus;
   HCERTSTORE hExclusiveRoot;
   HCERTSTORE hExclusiveTrustedPeople;
-};
-
-/*
-* size of the structure: 20 bytes.
-* 12 bytes remain unused when dealing with IPv4 addresses,
-* while IPv6 addresses utilize the entire allotted space.
-*/
-
-struct num_ip_data {
-  DWORD cbData; /* 04 bytes */
-  union { /* 16 bytes to accommodate the largest member (IPv6 addresses) */
-    struct in_addr  ia;  /* 04 bytes */
-    struct in6_addr ia6; /* 16 bytes */
-  } bData;
 };
 
 static int is_cr_or_lf(char c)
@@ -459,14 +458,14 @@ static bool get_num_host_info(struct num_ip_data *ip_blob,
 
   int res = Curl_inet_pton(AF_INET, hostname, &ia);
   if(res) {
-    ip_blob->cbData = sizeof(struct in_addr);
+    ip_blob->size = sizeof(struct in_addr);
     memcpy(&ip_blob->bData.ia, &ia, sizeof(struct in_addr));
     result = TRUE;
   }
   else {
     res = Curl_inet_pton(AF_INET6, hostname, &ia6);
     if(res) {
-      ip_blob->cbData = sizeof(struct in6_addr);
+      ip_blob->size = sizeof(struct in6_addr);
       memcpy(&ip_blob->bData.ia6, &ia6, sizeof(struct in6_addr));
       result = TRUE;
     }
@@ -569,11 +568,11 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     }
   }
 
-  if(p->cbData) {
+  if(p->size) {
     for(i = 0; i < alt_name_info->cAltEntry; ++i) {
       PCERT_ALT_NAME_ENTRY entry = &alt_name_info->rgAltEntry[i];
       if(entry->dwAltNameChoice == CERT_ALT_NAME_IP_ADDRESS) {
-        if(entry->IPAddress.cbData == p->cbData) {
+        if(entry->IPAddress.cbData == p->size) {
           if(!memcmp(entry->IPAddress.pbData, &p->bData,
                      entry->IPAddress.cbData)) {
             result = CURLE_OK;
