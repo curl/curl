@@ -297,8 +297,7 @@ sub clearlocks {
                         # https://ss64.com/nt/taskkill.html
                         my $cmd = "taskkill.exe -f -t -fi \"IMAGENAME eq $1\" -fi \"PID eq $2\" >nul 2>&1";
                         logmsg "clearlocks: Executing kill: '$cmd'\n";
-                        my $result = system($cmd);
-                        print "clearlocks: taskkill.exe result: $result\n";
+                        system($cmd);
                         $done = 1;
                     }
                 }
