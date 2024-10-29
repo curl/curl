@@ -29,8 +29,12 @@ if(CURL_WERROR AND
    ((CMAKE_COMPILER_IS_GNUCC AND
      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
-   (CMAKE_C_COMPILER_ID MATCHES "Clang" AND NOT MSVC)))  # avoid -Werror,-Wlanguage-extension-token with clang-cl
+   CMAKE_C_COMPILER_ID MATCHES "Clang"))
   list(APPEND _picky "-pedantic-errors")
+  if(MSVC)
+    # Override default error with warning to make it pass __int64 size detection with clang-cl
+    list(APPEND _picky "-Wlanguage-extension-token")
+  endif()
 endif()
 
 if(APPLE AND
