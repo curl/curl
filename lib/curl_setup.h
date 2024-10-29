@@ -39,7 +39,6 @@
 #endif
 
 #if defined(_MSC_VER) && defined(__clang__)
-#define ssize_t intptr_t
 #pragma GCC diagnostic ignored "-Wlanguage-extension-token"
 #endif
 
