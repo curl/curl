@@ -820,7 +820,7 @@ static CURLcode url_proto_and_rewrite(char **url,
   else
     result = CURLE_OUT_OF_MEMORY;
 
-  *scheme = proto; /* Never match if not found. */
+  *scheme = proto ? proto : "?"; /* Never match if not found. */
   return result;
 }
 
