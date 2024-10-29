@@ -38,6 +38,10 @@
 #endif
 #endif
 
+#if defined(_MSC_VER) && defined(__clang__)
+#define ssize_t intptr_t
+#endif
+
 /* Set default _WIN32_WINNT */
 #ifdef __MINGW32__
 #include <_mingw.h>
