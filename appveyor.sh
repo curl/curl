@@ -58,14 +58,13 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     "-DCMAKE_UNITY_BUILD=${UNITY}" \
     '-DCURL_TEST_BUNDLES=ON' \
     '-DCURL_WERROR=ON' \
-    '-DPICKY_COMPILER=OFF' \
+    '-DPICKY_COMPILER=ON' \
     "-DENABLE_DEBUG=${DEBUG}" \
     "-DENABLE_UNICODE=${ENABLE_UNICODE}" \
     '-DCMAKE_INSTALL_PREFIX=C:/curl' \
     "-DCMAKE_BUILD_TYPE=${PRJ_CFG}" \
     '-DCURL_USE_LIBPSL=OFF'
   if true; then
-    find _bld
     cat _bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
