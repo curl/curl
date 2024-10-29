@@ -1730,14 +1730,15 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     if(!ptr || data->set.postfieldsize == -1)
       result = Curl_setstropt(&data->set.str[STRING_COPYPOSTFIELDS], ptr);
     else {
+      if(data->set.postfieldsize < 0)
+        return CURLE_BAD_FUNCTION_ARGUMENT;
+#if SIZEOF_CURL_OFF_T > SIZEOF_SIZE_T
       /*
        *  Check that requested length does not overflow the size_t type.
        */
-
-      if((data->set.postfieldsize < 0) ||
-         ((sizeof(curl_off_t) != sizeof(size_t)) &&
-          (data->set.postfieldsize > (curl_off_t)((size_t)-1))))
+      else if(data->set.postfieldsize > SIZE_T_MAX)
         return CURLE_OUT_OF_MEMORY;
+#endif
       else {
         /* Allocate even when size == 0. This satisfies the need of possible
            later address compare to detect the COPYPOSTFIELDS mode, and to
