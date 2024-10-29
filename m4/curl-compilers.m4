@@ -851,7 +851,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only clang 3.0 or later
           if test "$compiler_num" -ge "300"; then
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])
+          # CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [language-extension-token])  # Not used: Causes bogus warnings with clang-cl
             tmp_CFLAGS="$tmp_CFLAGS -Wformat=2"
           fi
           #
