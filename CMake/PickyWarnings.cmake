@@ -31,7 +31,7 @@ if(CURL_WERROR AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
   list(APPEND _picky "-pedantic-errors")
-  if(MSVC)  # clang-ci
+  if(MSVC)  # clang-cl
     # Override default error to make it pass __int64 size detection and in-source use
     list(APPEND _picky "-Wno-language-extension-token")
   endif()
