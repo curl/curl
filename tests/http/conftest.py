@@ -102,7 +102,7 @@ def httpd(env) -> Generator[Httpd, None, None]:
 @pytest.fixture(scope='package')
 def nghttpx(env, httpd) -> Generator[Nghttpx, None, None]:
     nghttpx = NghttpxQuic(env=env)
-    if env.have_h3():
+    if nghttpx.exists() and (env.have_h3() or nghttpx.https_port > 0):
         nghttpx.clear_logs()
         assert nghttpx.start()
     yield nghttpx
@@ -111,7 +111,7 @@ def nghttpx(env, httpd) -> Generator[Nghttpx, None, None]:
 @pytest.fixture(scope='package')
 def nghttpx_fwd(env, httpd) -> Generator[Nghttpx, None, None]:
     nghttpx = NghttpxFwd(env=env)
-    if env.have_h3():
+    if nghttpx.exists() and (env.have_h3() or nghttpx.https_port > 0):
         nghttpx.clear_logs()
         assert nghttpx.start()
     yield nghttpx

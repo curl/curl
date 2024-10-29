@@ -572,7 +572,7 @@ class TestDownload:
         assert r.total_connects == 1, r.dump_logs()
 
     # download parallel with h2 "Upgrade:"
-    def test_02_31_parallel_upgrade(self, env: Env, httpd):
+    def test_02_31_parallel_upgrade(self, env: Env, httpd, nghttpx):
         count = 3
         curl = CurlClient(env=env)
         urln = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
@@ -599,7 +599,6 @@ class TestDownload:
         port = env.port_for(proto)
         if proto != 'h3':
             port = env.nghttpx_https_port
-        # url = f'https://{env.domain1}:{env.port_for(proto)}/{docname}'
         url = f'https://{env.domain1}:{port}/{docname}'
         client = LocalClient(name='hx-download', env=env)
         if not client.exists():

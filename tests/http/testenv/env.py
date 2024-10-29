@@ -95,7 +95,7 @@ class EnvConfig:
                         lib.lower() for lib in m.group('libs').split(' ')
                     ]
                     self.curl_props['libs'] = [
-                        re.sub(r'/.*', '', lib) for lib in self.curl_props['lib_versions']
+                        re.sub(r'/[a-z0-9.-]*', '', lib) for lib in self.curl_props['lib_versions']
                     ]
             if line.startswith('Features: '):
                 self.curl_props['features'] = [
@@ -303,7 +303,7 @@ class Env:
 
     @staticmethod
     def have_ssl_curl() -> bool:
-        return 'ssl' in Env.CONFIG.curl_props['features']
+        return Env.curl_has_feature('ssl') or Env.curl_has_feature('multissl')
 
     @staticmethod
     def have_h2_curl() -> bool:
