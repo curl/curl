@@ -1261,7 +1261,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       rtspreq = RTSPREQ_RECEIVE;
       break;
     default:
-      rtspreq = RTSPREQ_NONE;
+      return CURLE_BAD_FUNCTION_ARGUMENT;
     }
 
     data->set.rtspreq = rtspreq;
