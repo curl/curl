@@ -776,50 +776,51 @@ skip:
 }
 
 /*
- * Return the protocol token for the scheme used in the given URL
+ * Possibly rewrite the URL for IPFS and return the protocol token for the
+ * scheme used in the given URL.
  */
-static CURLcode url_proto(char **url,
-                          struct OperationConfig *config,
-                          const char **scheme)
+static CURLcode url_proto_and_rewrite(char **url,
+                                      struct OperationConfig *config,
+                                      const char **scheme)
 {
   CURLcode result = CURLE_OK;
   CURLU *uh = curl_url();
   const char *proto = NULL;
   *scheme = NULL;
 
+  DEBUGASSERT(url && *url);
   if(uh) {
-    if(*url) {
-      char *schemep = NULL;
-
-      if(!curl_url_set(uh, CURLUPART_URL, *url,
-                       CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME) &&
-         !curl_url_get(uh, CURLUPART_SCHEME, &schemep,
-                       CURLU_DEFAULT_SCHEME)) {
+    char *schemep = NULL;
+    if(!curl_url_set(uh, CURLUPART_URL, *url,
+                     CURLU_GUESS_SCHEME | CURLU_NON_SUPPORT_SCHEME) &&
+       !curl_url_get(uh, CURLUPART_SCHEME, &schemep,
+                     CURLU_DEFAULT_SCHEME)) {
 #ifdef CURL_DISABLE_IPFS
-        (void)config;
+      (void)config;
 #else
-        if(curl_strequal(schemep, proto_ipfs) ||
-           curl_strequal(schemep, proto_ipns)) {
-          result = ipfs_url_rewrite(uh, schemep, url, config);
-          /* short-circuit proto_token, we know it is ipfs or ipns */
-          if(curl_strequal(schemep, proto_ipfs))
-            proto = proto_ipfs;
-          else if(curl_strequal(schemep, proto_ipns))
-            proto = proto_ipns;
-          if(result)
-            config->synthetic_error = TRUE;
-        }
-        else
-#endif /* !CURL_DISABLE_IPFS */
-          proto = proto_token(schemep);
-
-        curl_free(schemep);
+      if(curl_strequal(schemep, proto_ipfs) ||
+         curl_strequal(schemep, proto_ipns)) {
+        result = ipfs_url_rewrite(uh, schemep, url, config);
+        /* short-circuit proto_token, we know it is ipfs or ipns */
+        if(curl_strequal(schemep, proto_ipfs))
+          proto = proto_ipfs;
+        else if(curl_strequal(schemep, proto_ipns))
+          proto = proto_ipns;
+        if(result)
+          config->synthetic_error = TRUE;
       }
+      else
+#endif /* !CURL_DISABLE_IPFS */
+        proto = proto_token(schemep);
+
+      curl_free(schemep);
     }
     curl_url_cleanup(uh);
   }
+  else
+    result = CURLE_OUT_OF_MEMORY;
 
-  *scheme = (char *) (proto ? proto : "???"); /* Never match if not found. */
+  *scheme = proto ? proto : "?"; /* Never match if not found. */
   return result;
 }
 
@@ -885,7 +886,7 @@ static CURLcode config2setopts(struct GlobalConfig *global,
                                CURLSH *share)
 {
   const char *use_proto;
-  CURLcode result = url_proto(&per->url, config, &use_proto);
+  CURLcode result = url_proto_and_rewrite(&per->url, config, &use_proto);
 
   /* Avoid having this setopt added to the --libcurl source output. */
   if(!result)
