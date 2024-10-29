@@ -1,0 +1,127 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP POST
+POST callback
+HTTP proxy
+HTTP proxy NTLM auth
+NTLM
+</keywords>
+</info>
+# Server-side
+<reply>
+
+<data>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Negotiate
+WWW-Authenticate: NTLM
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+This is not the real page
+</data>
+
+# this is returned first since we get no proxy-auth
+<data1001>
+HTTP/1.1 401 Authorization Required
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Content-Length: 34
+
+Hey you, authenticate or go away!
+</data1001>
+
+# This is supposed to be returned when the server gets the second
+# Authorization: NTLM line passed-in from the client
+<data1002>
+HTTP/1.1 200 Things are fine
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 42
+
+Contents of that page you requested, sir.
+</data1002>
+
+# This is supposed to be returned when the server gets the second
+# request.
+<data10>
+HTTP/1.1 200 Things are fine
+Content-Type: yeah/maybe
+Content-Length: 42
+
+Contents of that second request. Differn.
+</data10>
+
+<datacheck>
+HTTP/1.1 401 Authorization Required
+Server: Apache/1.3.27 (Darwin) PHP/4.1.2
+WWW-Authenticate: Negotiate
+WWW-Authenticate: NTLM
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 26
+
+HTTP/1.1 401 Authorization Required
+WWW-Authenticate: NTLM TlRMTVNTUAACAAAAAgACADAAAACGggEAc51AYVDgyNcAAAAAAAAAAG4AbgAyAAAAQ0MCAAQAQwBDAAEAEgBFAEwASQBTAEEAQgBFAFQASAAEABgAYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAwAsAGUAbABpAHMAYQBiAGUAdABoAC4AYwBjAC4AaQBjAGUAZABlAHYALgBuAHUAAAAAAA==
+Content-Length: 34
+
+HTTP/1.1 200 Things are fine
+Server: Microsoft-IIS/5.0
+Content-Type: text/html; charset=iso-8859-1
+Content-Length: 42
+
+Contents of that page you requested, sir.
+HTTP/1.1 200 Things are fine
+Content-Type: yeah/maybe
+Content-Length: 42
+
+Contents of that second request. Differn.
+</datacheck>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# tool to use
+<tool>
+lib%TESTNUMBER
+</tool>
+<features>
+NTLM
+!SSPI
+</features>
+<name>
+HTTP with NTLM twice, verify CURLINFO_HTTPAUTH_USED
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT/path/mine http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER0010
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+
+<protocol crlf="yes">
+GET /path/mine HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /path/mine HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
+Accept: */*
+
+GET /path/mine HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAAAgACAHAAAAALAAsAcgAAAAAAAAAAAAAAhoIBAAQt1KW5CgG4YdWWcfXyfXBz1ZMCzYp37xYjBiAizmw58O6eQS7yR66eqYGWeSwl9W1lV09SS1NUQVRJT04=
+Accept: */*
+
+GET /path/6940010 HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>

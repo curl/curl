@@ -530,6 +530,8 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     pickhost = pickoneauth(&data->state.authhost, authmask);
     if(!pickhost)
       data->state.authproblem = TRUE;
+    else
+      data->info.httpauthpicked = data->state.authhost.picked;
     if(data->state.authhost.picked == CURLAUTH_NTLM &&
        conn->httpversion > 11) {
       infof(data, "Forcing HTTP/1.1 for NTLM");
@@ -545,6 +547,9 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
                             authmask & ~CURLAUTH_BEARER);
     if(!pickproxy)
       data->state.authproblem = TRUE;
+    else
+      data->info.proxyauthpicked = data->state.authproxy.picked;
+
   }
 #endif
 
@@ -851,12 +856,12 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
   struct connectdata *conn = data->conn;
 #ifdef USE_SPNEGO
   curlnegotiate *negstate = proxy ? &conn->proxy_negotiate_state :
-                                    &conn->http_negotiate_state;
+    &conn->http_negotiate_state;
 #endif
-#if defined(USE_SPNEGO) || \
-  defined(USE_NTLM) || \
-  !defined(CURL_DISABLE_DIGEST_AUTH) || \
-  !defined(CURL_DISABLE_BASIC_AUTH) || \
+#if defined(USE_SPNEGO) ||                      \
+  defined(USE_NTLM) ||                          \
+  !defined(CURL_DISABLE_DIGEST_AUTH) ||         \
+  !defined(CURL_DISABLE_BASIC_AUTH) ||          \
   !defined(CURL_DISABLE_BEARER_AUTH)
 
   unsigned long *availp;
@@ -987,7 +992,7 @@ CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
               authp->avail |= CURLAUTH_BEARER;
               if(authp->picked == CURLAUTH_BEARER) {
                 /* We asked for Bearer authentication but got a 40X back
-                  anyway, which basically means our token is not valid. */
+                   anyway, which basically means our token is not valid. */
                 authp->avail = CURLAUTH_NONE;
                 infof(data, "Authentication problem. Ignoring this.");
                 data->state.authproblem = TRUE;

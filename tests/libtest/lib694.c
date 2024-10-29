@@ -23,19 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-/*
-  Based on a bug report recipe by Rene Bernhardt in
-  https://curl.se/mail/lib-2011-10/0323.html
-
-  It is reproducible by the following steps:
-
-  - Use a proxy that offers NTLM and Negotiate ( CURLOPT_PROXY and
-  CURLOPT_PROXYPORT)
-  - Tell libcurl NOT to use Negotiate  CURL_EASY_SETOPT(CURLOPT_PROXYAUTH,
-  CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM)
-  - Start the request
-*/
-
 #include "memdebug.h"
 
 CURLcode test(char *URL)
@@ -43,6 +30,7 @@ CURLcode test(char *URL)
   CURLcode res;
   CURL *curl;
   long usedauth = 0;
+  int count = 0;
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -58,17 +46,23 @@ CURLcode test(char *URL)
 
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_PROXYAUTH,
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(curl, CURLOPT_HTTPAUTH,
               (long) (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
-  test_setopt(curl, CURLOPT_PROXYUSERPWD, "me:password");
+  test_setopt(curl, CURLOPT_USERPWD, "me:password");
 
-  res = curl_easy_perform(curl);
+  do {
 
-  res = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &usedauth);
-  if(CURLAUTH_NTLM != usedauth) {
-    printf("CURLINFO_PROXYAUTH_USED did not say NTLM\n");
-  }
+    res = curl_easy_perform(curl);
+
+    res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_USED, &usedauth);
+    if(CURLAUTH_NTLM != usedauth) {
+      printf("CURLINFO_HTTPAUTH_USED did not say NTLM\n");
+    }
+
+    /* set a new URL for the second, so that we don't restart NTLM */
+    test_setopt(curl, CURLOPT_URL, libtest_arg2);
+  } while(!res && ++count < 2);
 
 test_cleanup:
 

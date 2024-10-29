@@ -69,6 +69,8 @@ CURLcode Curl_initinfo(struct Curl_easy *data)
   info->request_size = 0;
   info->proxyauthavail = 0;
   info->httpauthavail = 0;
+  info->proxyauthpicked = 0;
+  info->httpauthpicked = 0;
   info->numconnects = 0;
 
   free(info->contenttype);
@@ -271,6 +273,14 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_PROXYAUTH_AVAIL:
     lptr.to_long = param_longp;
     *lptr.to_ulong = data->info.proxyauthavail;
+    break;
+  case CURLINFO_HTTPAUTH_USED:
+    lptr.to_long = param_longp;
+    *lptr.to_ulong = data->info.httpauthpicked;
+    break;
+  case CURLINFO_PROXYAUTH_USED:
+    lptr.to_long = param_longp;
+    *lptr.to_ulong = data->info.proxyauthpicked;
     break;
   case CURLINFO_OS_ERRNO:
     *param_longp = data->state.os_errno;
