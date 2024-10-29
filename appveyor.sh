@@ -73,6 +73,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
     fi
     false
   fi
+  if true; then
+    cat CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+  fi
   if [ "${SHARED}" = 'ON' ]; then
     PATH="$PWD/_bld/lib:$PATH"
   fi
@@ -119,10 +122,6 @@ if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
 else
   echo "Skip running curl.exe. Reason: ${SKIP_RUN}"
-fi
-
-if false; then
-  cat CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 fi
 
 # build tests
