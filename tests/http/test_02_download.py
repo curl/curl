@@ -27,7 +27,6 @@
 import difflib
 import filecmp
 import logging
-import time
 import math
 import os
 import re
