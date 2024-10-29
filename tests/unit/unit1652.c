@@ -26,11 +26,11 @@
 #include "urldata.h"
 #include "sendf.h"
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
-#if !defined(__clang__) && __GNUC__ >= 7
+#if __GNUC__ >= 7
 #pragma GCC diagnostic ignored "-Wformat-overflow"
 #endif
 #endif
@@ -148,6 +148,6 @@ fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
 UNITTEST_STOP
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
