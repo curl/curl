@@ -38,6 +38,8 @@ def pytest_report_header(config):
     env = Env()
     report = [
         f'Testing curl {env.curl_version()}',
+        f'  curl: Features: {env.curl_features_string()}',
+        f'  curl: Protocols: {env.curl_protocols_string()}',
         f'  httpd: {env.httpd_version()}, http:{env.http_port} https:{env.https_port}',
         f'  httpd-proxy: {env.httpd_version()}, http:{env.proxy_port} https:{env.proxys_port}'
     ]

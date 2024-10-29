@@ -71,7 +71,9 @@ class EnvConfig:
             'version': '',
             'os': '',
             'fullname': '',
+            'features_string': '',
             'features': [],
+            'protocols_string': '',
             'protocols': [],
             'libs': [],
             'lib_versions': [],
@@ -98,10 +100,12 @@ class EnvConfig:
                         re.sub(r'/[a-z0-9.-]*', '', lib) for lib in self.curl_props['lib_versions']
                     ]
             if line.startswith('Features: '):
+                self.curl_props['features_string'] = line[10:]
                 self.curl_props['features'] = [
                     feat.lower() for feat in line[10:].split(' ')
                 ]
             if line.startswith('Protocols: '):
+                self.curl_props['protocols_string'] = line[11:]
                 self.curl_props['protocols'] = [
                     prot.lower() for prot in line[11:].split(' ')
                 ]
@@ -324,8 +328,16 @@ class Env:
         return False
 
     @staticmethod
+    def curl_features_string() -> str:
+        return Env.CONFIG.curl_props['features_string']
+
+    @staticmethod
     def curl_has_feature(feature: str) -> bool:
         return feature.lower() in Env.CONFIG.curl_props['features']
+
+    @staticmethod
+    def curl_protocols_string() -> str:
+        return Env.CONFIG.curl_props['protocols_string']
 
     @staticmethod
     def curl_has_protocol(protocol: str) -> bool:
