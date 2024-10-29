@@ -47,7 +47,7 @@ static CURLcode unit_stop(void)
   return CURLE_OK;
 }
 
-#if defined(__GNUC__) || (defined(_MSC_VER) && defined(__clang__))
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
@@ -78,7 +78,7 @@ static const char *filecontents[] = {
   "LINE1\x1aTEST"
 };
 
-#if defined(__GNUC__) || (defined(_MSC_VER) && defined(__clang__))
+#if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic warning "-Woverlength-strings"
 #endif
 
