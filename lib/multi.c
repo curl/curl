@@ -2303,7 +2303,6 @@ static CURLMcode state_do(struct Curl_easy *data,
     /* keep connection open for application to use the socket */
     connkeep(data->conn, "CONNECT_ONLY");
     multistate(data, MSTATE_DONE);
-    result = CURLE_OK;
     rc = CURLM_CALL_MULTI_PERFORM;
   }
   else {
