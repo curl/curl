@@ -357,11 +357,11 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  size_t max_pkts,
                                  vquic_recv_pkt_cb *recv_cb, void *userp)
 {
-#define MMSG_NUM  64
+#define MMSG_NUM  2
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
   uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(uint16_t))];
-  uint8_t bufs[MMSG_NUM][2*1024];
+  uint8_t bufs[MMSG_NUM][64*1024];
   struct sockaddr_storage remote_addr[MMSG_NUM];
   size_t total_nread, pkts;
   int mcount, i, n;
