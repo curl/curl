@@ -14,6 +14,7 @@ Doing a "POST" publishes the post data to the topic and exits.
 
 
 ### Subscribing
+
 Command usage:
 
     curl mqtt://host/topic
@@ -25,6 +26,7 @@ Example subscribe:
 This will send an MQTT SUBSCRIBE packet for the topic `bedroom/temp` and listen in for incoming PUBLISH packets.
 
 ### Publishing
+
 Command usage:
 
     curl -d payload mqtt://host/topic
