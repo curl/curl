@@ -15,7 +15,7 @@ Doing a "POST" publishes the post data to the topic and exits.
 
 ### Subscribing
 Command usage:
-    
+
     curl mqtt://host/topic
 
 Example subscribe:
