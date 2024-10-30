@@ -271,8 +271,8 @@
 /* ---------------------------------------------------------------- */
 
 /* Define cpu-machine-OS */
-#ifndef OS
-#define OS "i386-pc-win32ce"
+#ifndef CURL_OS
+#define CURL_OS "i386-pc-win32ce"
 #endif
 
 /* Name of package */

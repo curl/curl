@@ -633,7 +633,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
 
   const size_t byte_count = sizeof(lm) + sizeof(nt) +
     strlen(smbc->user) + strlen(smbc->domain) +
-    strlen(OS) + strlen(CLIENTNAME) + 4; /* 4 null chars */
+    strlen(CURL_OS) + strlen(CLIENTNAME) + 4; /* 4 null chars */
   if(byte_count > sizeof(msg.bytes))
     return CURLE_FILESIZE_EXCEEDED;
 
@@ -661,7 +661,7 @@ static CURLcode smb_send_setup(struct Curl_easy *data)
                  "%s%c"  /* domain */
                  "%s%c"  /* OS */
                  "%s", /* client name */
-                 smbc->user, 0, smbc->domain, 0, OS, 0, CLIENTNAME);
+                 smbc->user, 0, smbc->domain, 0, CURL_OS, 0, CLIENTNAME);
   p++; /* count the final null termination */
   DEBUGASSERT(byte_count == (size_t)(p - msg.bytes));
   msg.byte_count = smb_swap16((unsigned short)byte_count);

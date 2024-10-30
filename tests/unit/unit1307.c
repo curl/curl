@@ -280,7 +280,7 @@ UNITTEST_START
   enum system machine;
 
 #ifdef HAVE_FNMATCH
-  if(strstr(OS, "apple") || strstr(OS, "darwin")) {
+  if(strstr(CURL_OS, "apple") || strstr(CURL_OS, "darwin")) {
     machine = SYSTEM_MACOS;
   }
   else
