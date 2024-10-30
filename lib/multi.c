@@ -4248,6 +4248,51 @@ void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf)
   data->multi->xfer_ulbuf_borrowed = FALSE;
 }
 
+CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
+                                        size_t blen, char **pbuf)
+{
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  *pbuf = NULL;
+  if(!data->multi) {
+    failf(data, "transfer has no multi handle");
+    return CURLE_FAILED_INIT;
+  }
+  if(data->multi->xfer_sockbuf_borrowed) {
+    failf(data, "attempt to borrow xfer_sockbuf when already borrowed");
+    return CURLE_AGAIN;
+  }
+
+  if(data->multi->xfer_sockbuf && blen > data->multi->xfer_sockbuf_len) {
+    /* not large enough, get a new one */
+    free(data->multi->xfer_sockbuf);
+    data->multi->xfer_sockbuf = NULL;
+    data->multi->xfer_sockbuf_len = 0;
+  }
+
+  if(!data->multi->xfer_sockbuf) {
+    data->multi->xfer_sockbuf = malloc(blen);
+    if(!data->multi->xfer_sockbuf) {
+      failf(data, "could not allocate xfer_sockbuf of %zu bytes", blen);
+      return CURLE_OUT_OF_MEMORY;
+    }
+    data->multi->xfer_sockbuf_len = blen;
+  }
+
+  data->multi->xfer_sockbuf_borrowed = TRUE;
+  *pbuf = data->multi->xfer_sockbuf;
+  return CURLE_OK;
+}
+
+void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf)
+{
+  (void)buf;
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->multi);
+  DEBUGASSERT(!buf || data->multi->xfer_sockbuf == buf);
+  data->multi->xfer_sockbuf_borrowed = FALSE;
+}
+
 static void multi_xfer_bufs_free(struct Curl_multi *multi)
 {
   DEBUGASSERT(multi);
@@ -4257,6 +4302,9 @@ static void multi_xfer_bufs_free(struct Curl_multi *multi)
   Curl_safefree(multi->xfer_ulbuf);
   multi->xfer_ulbuf_len = 0;
   multi->xfer_ulbuf_borrowed = FALSE;
+  Curl_safefree(multi->xfer_sockbuf);
+  multi->xfer_sockbuf_len = 0;
+  multi->xfer_sockbuf_borrowed = FALSE;
 }
 
 struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,

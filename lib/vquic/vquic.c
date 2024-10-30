@@ -39,6 +39,7 @@
 #include "curl_ngtcp2.h"
 #include "curl_osslq.h"
 #include "curl_quiche.h"
+#include "multiif.h"
 #include "rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
@@ -141,8 +142,8 @@ static CURLcode do_sendmsg(struct Curl_cfilter *cf,
     /* Only set this, when we need it. macOS, for example,
      * does not seem to like a msg_control of length 0. */
     msg.msg_control = msg_ctrl;
-    assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(uint16_t)));
-    msg.msg_controllen = CMSG_SPACE(sizeof(uint16_t));
+    assert(sizeof(msg_ctrl) >= CMSG_SPACE(sizeof(int)));
+    msg.msg_controllen = CMSG_SPACE(sizeof(int));
     cm = CMSG_FIRSTHDR(&msg);
     cm->cmsg_level = SOL_UDP;
     cm->cmsg_type = UDP_SEGMENT;
@@ -321,7 +322,7 @@ CURLcode vquic_send_tail_split(struct Curl_cfilter *cf, struct Curl_easy *data,
 }
 
 #if defined(HAVE_SENDMMSG) || defined(HAVE_SENDMSG)
-static size_t msghdr_get_udp_gro(struct msghdr *msg)
+static size_t vquic_msghdr_get_udp_gro(struct msghdr *msg)
 {
   int gso_size = 0;
 #if defined(__linux__) && defined(UDP_GRO)
@@ -357,21 +358,28 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
                                  size_t max_pkts,
                                  vquic_recv_pkt_cb *recv_cb, void *userp)
 {
-#define MMSG_NUM  64
+#define MMSG_NUM  16
   struct iovec msg_iov[MMSG_NUM];
   struct mmsghdr mmsg[MMSG_NUM];
-  uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(uint16_t))];
-  uint8_t bufs[MMSG_NUM][2*1024];
+  uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
   struct sockaddr_storage remote_addr[MMSG_NUM];
-  size_t total_nread, pkts;
+  size_t total_nread = 0, pkts;
   int mcount, i, n;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
   size_t gso_size;
   size_t pktlen;
   size_t offset, to;
+  char *sockbuf = NULL;
+  uint8_t (*bufs)[64*1024] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
+  result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
+                                          &sockbuf);
+  if(result)
+    goto out;
+  bufs = (uint8_t (*)[64*1024])sockbuf;
+
   pkts = 0;
   total_nread = 0;
   while(pkts < max_pkts) {
@@ -384,8 +392,8 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
       mmsg[i].msg_hdr.msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i];
-      mmsg[i].msg_hdr.msg_controllen = CMSG_SPACE(sizeof(uint16_t));
+      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i * CMSG_SPACE(sizeof(int))];
+      mmsg[i].msg_hdr.msg_controllen = CMSG_SPACE(sizeof(int));
     }
 
     while((mcount = recvmmsg(qctx->sockfd, mmsg, n, 0, NULL)) == -1 &&
@@ -415,7 +423,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     for(i = 0; i < mcount; ++i) {
       total_nread += mmsg[i].msg_len;
 
-      gso_size = msghdr_get_udp_gro(&mmsg[i].msg_hdr);
+      gso_size = vquic_msghdr_get_udp_gro(&mmsg[i].msg_hdr);
       if(gso_size == 0) {
         gso_size = mmsg[i].msg_len;
       }
@@ -443,6 +451,7 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                 pkts, total_nread, result);
+  Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
 
@@ -461,7 +470,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
   ssize_t nread;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
-  uint8_t msg_ctrl[CMSG_SPACE(sizeof(uint16_t))];
+  uint8_t msg_ctrl[CMSG_SPACE(sizeof(int))];
   size_t gso_size;
   size_t pktlen;
   size_t offset, to;
@@ -503,7 +512,7 @@ static CURLcode recvmsg_packets(struct Curl_cfilter *cf,
 
     total_nread += (size_t)nread;
 
-    gso_size = msghdr_get_udp_gro(&msg);
+    gso_size = vquic_msghdr_get_udp_gro(&msg);
     if(gso_size == 0) {
       gso_size = (size_t)nread;
     }
