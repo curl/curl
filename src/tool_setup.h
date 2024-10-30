@@ -53,8 +53,8 @@ extern FILE *tool_stderr;
 #  define main(x,y) curl_main(x,y)
 #endif
 
-#ifndef OS
-#  define OS "unknown"
+#ifndef CURL_OS
+#  define CURL_OS "unknown"
 #endif
 
 #ifndef UNPRINTABLE_CHAR
