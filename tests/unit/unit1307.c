@@ -280,11 +280,11 @@ UNITTEST_START
   enum system machine;
 
 #ifdef HAVE_FNMATCH
-  if(strstr(CURL_OS, "apple") || strstr(CURL_OS, "darwin")) {
-    machine = SYSTEM_MACOS;
-  }
-  else
-    machine = SYSTEM_LINUX;
+#ifdef __APPLE__
+  machine = SYSTEM_MACOS;
+#else
+  machine = SYSTEM_LINUX;
+#endif
   printf("Tested with system fnmatch(), %s-style\n",
          machine == SYSTEM_LINUX ? "linux" : "mac");
 #else
