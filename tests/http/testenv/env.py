@@ -34,7 +34,7 @@ import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
 from typing import Optional
 
-from .certs import CertificateSpec, TestCA, Credentials
+from .certs import CertificateSpec, Credentials, TestCA
 from .ports import alloc_ports
 
 
@@ -72,18 +72,18 @@ class EnvConfig:
             'os': '',
             'fullname': '',
             'features_string': '',
-            'features': [],
+            'features': set(),
             'protocols_string': '',
-            'protocols': [],
-            'libs': [],
-            'lib_versions': [],
+            'protocols': set(),
+            'libs': set(),
+            'lib_versions': set(),
         }
         self.curl_is_debug = False
         self.curl_protos = []
         p = subprocess.run(args=[self.curl, '-V'],
                            capture_output=True, text=True)
         if p.returncode != 0:
-            assert False, f'{self.curl} -V failed with exit code: {p.returncode}'
+            raise RuntimeError(f'{self.curl} -V failed with exit code: {p.returncode}')
         if p.stderr.startswith('WARNING:'):
             self.curl_is_debug = True
         for line in p.stdout.splitlines(keepends=False):
@@ -93,22 +93,22 @@ class EnvConfig:
                     self.curl_props['fullname'] = m.group(0)
                     self.curl_props['version'] = m.group('version')
                     self.curl_props['os'] = m.group('os')
-                    self.curl_props['lib_versions'] = [
+                    self.curl_props['lib_versions'] = {
                         lib.lower() for lib in m.group('libs').split(' ')
-                    ]
-                    self.curl_props['libs'] = [
+                    }
+                    self.curl_props['libs'] = {
                         re.sub(r'/[a-z0-9.-]*', '', lib) for lib in self.curl_props['lib_versions']
-                    ]
+                    }
             if line.startswith('Features: '):
                 self.curl_props['features_string'] = line[10:]
-                self.curl_props['features'] = [
+                self.curl_props['features'] = {
                     feat.lower() for feat in line[10:].split(' ')
-                ]
+                }
             if line.startswith('Protocols: '):
                 self.curl_props['protocols_string'] = line[11:]
-                self.curl_props['protocols'] = [
+                self.curl_props['protocols'] = {
                     prot.lower() for prot in line[11:].split(' ')
-                ]
+                }
 
         self.ports = alloc_ports(port_specs={
             'ftp': socket.SOCK_STREAM,
@@ -182,7 +182,7 @@ class EnvConfig:
                 if m:
                     self._caddy_version = m.group(1)
                 else:
-                    raise f'Unable to determine cadd version from: {p.stdout}'
+                    raise RuntimeError(f'Unable to determine cadd version from: {p.stdout}')
             # TODO: specify specific exceptions here
             except:  # noqa: E722
                 self.caddy = None
