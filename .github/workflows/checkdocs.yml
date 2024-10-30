@@ -147,3 +147,13 @@ jobs:
 
       - name: verify examples
         run: .github/scripts/verify-examples.pl docs/libcurl/curl*.3 docs/libcurl/opts/*.3
+
+  miscchecks:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        name: checkout
+
+      - name: spacecheck
+        run: .github/scripts/spacecheck.pl
