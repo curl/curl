@@ -57,13 +57,11 @@
 
 /*
 * size of the structure: 20 bytes.
-* 12 bytes remain unused when dealing with IPv4 addresses,
-* while IPv6 addresses utilize the entire allotted space.
 */
 
 struct num_ip_data {
   DWORD size; /* 04 bytes */
-  union { /* 16 bytes to accommodate the largest member (IPv6 addresses) */
+  union { /* 16 bytes to accommodate the larger member (IPv6 addresses) */
     struct in_addr  ia;  /* 04 bytes */
     struct in6_addr ia6; /* 16 bytes */
   } bData;
@@ -389,6 +387,9 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
                                       length);
     return actual_length;
   }
+#else
+  (void)cert_context;
+  (void)Win8_compat;
 #endif
 
   compute_content = host_names != NULL && length != 0;
@@ -443,10 +444,7 @@ static DWORD cert_get_name_string(struct Curl_easy *data,
 
 /*
 * Returns TRUE if the hostname is a numeric IPv4/IPv6 Address,
-* and populates the buffer with IPv4/IPv6 info. IPv4 addresses
-* require 8 bytes, and IPv6 addresses require 20 bytes.
-* num_ip_data structure is defined to accommodate the variable
-* size requirement.
+* and populates the buffer with IPv4/IPv6 info.
 */
 
 static bool get_num_host_info(struct num_ip_data *ip_blob,
