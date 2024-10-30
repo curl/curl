@@ -4,7 +4,7 @@ curl and libcurl 8.11.0
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3262
+ Contributors:                 3263
 
 This release includes the following changes:
 
@@ -130,6 +130,7 @@ This release includes the following bugfixes:
  o lib: fix disabled-verbose-strings + enable-debug build warnings
  o lib: fix unity builds with BearSSL, MSH3, Quiche, OmniOS [32]
  o lib: move curl_path.[ch] into vssh/ [182]
+ o lib: msnprintf tidy-ups [245]
  o lib: remove Curl_ prefix from static functions [202]
  o lib: remove function pointer typecasts for hmac/sha256/md5 [175]
  o lib: use bool/TRUE/FALSE properly [48]
@@ -145,6 +146,7 @@ This release includes the following bugfixes:
  o mk-lib1521: fix the long return code check [204]
  o mprintf: do not ignore length modifiers of `%o`, `%x`, `%X` [164]
  o mprintf: treat `%o` as unsigned, add tests for `%o`, `%x`, `%X` [162]
+ o mqtt: fix mqtt.md wording and add clearer explanation [172]
  o multi.c: make stronger check for paused transfer before asserting [24]
  o multi.c: warn/assert on stall only without timer [80]
  o multi: avoid reading whole struct pointer from pointer [10]
@@ -159,15 +161,20 @@ This release includes the following bugfixes:
  o openssl: convert a memcpy to dynbuf use [57]
  o openssl: improve retries on shutdown [151]
  o openssl: remove two strcpy() calls [64]
+ o OS400: don't delete source files when building with debug [235]
  o packages/OS400/curlmain: remove the strncpy calls [155]
  o processhelp.pm: improve taskkill calls (Windows) [52]
+ o pytest: fix run against multissl curl [236]
  o pytest: improve pytest_07_42a reliability [118]
  o pytest: include `buildinfo.txt` in the output [189]
+ o pytest: show curl features and protocols [150]
  o quic: use send/recvmmsg when available [93]
  o quic: use the session cache with wolfSSL as well [231]
  o request: on shutdown send, proceed normally on timeout [18]
  o runtests.md: suggest a value for -j for torture tests
+ o runtests: add comment for handle64 pathsep requirement
  o runtests: drop unused code for old/classic-mingw support [87]
+ o runtests: pass single backslashes with Windows Perl [243]
  o runtests: use deterministic sort for `TESTINFO` lines [201]
  o schannel: ignore error on recv beyond close notify [167]
  o schannel: reclassify extra-verbose schannel_recv messages [153]
@@ -175,11 +182,14 @@ This release includes the following bugfixes:
  o sendf: add condition to max-filesize check [3]
  o server/mqttd: fix two memory leaks [178]
  o setopt: avoid superfluous length checks before strcmp() [105]
+ o setopt: return error for bad input to CURLOPT_RTSP_REQUEST [240]
+ o setopt_cptr: make overflow check only done when needed [241]
  o singleuse: make `git grep` faster, add Apple `nm` support [109]
  o smb: do not redefine `getpid` on Windows [187]
  o smb: replace use of strcpy() with snprintf() [122]
  o socks_gssapi: switch to dynbuf from buffer with strcpy [42]
  o source: avoid use of 'very' in comments
+ o src/lib: remove redundant ternary operators [244]
  o src: guard for double declaration of `curl_ca_embed` in unity builds [166]
  o sws: fix unused static function with `TCP_NODELAY` undefined [134]
  o telnet: avoid two strcpy() by pointing to the strings instead [99]
@@ -233,6 +243,7 @@ This release includes the following bugfixes:
  o tests: use '-4' where needed [17]
  o tftp: avoid two memcpy/strcpy [94]
  o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
+ o tls: avoid abusing CURLE_SSL_ENGINE_INITFAILED [246]
  o tool: support --show-headers AND --remote-header-name [103]
  o tool_doswin: simplify; remove unused options and strncpy calls [65]
  o tool_getparam: drop unused time() call [177]
@@ -251,6 +262,7 @@ This release includes the following bugfixes:
  o vtls: convert Curl_pin_peer_pubkey to use dynbuf [74]
  o vtls: convert pubkey_pem_to_der to use dynbuf [90]
  o warnless: remove curlx_sktosi and curlx_sitosk [104]
+ o winbuild/README: consolidate command prompt section [193]
  o winbuild/README: document how to clean a build [163]
  o winbuild: add initial wolfSSL support [227]
  o wolfssl: convert malloc + memcpys to dynbuf for cipher string [96]
@@ -278,16 +290,16 @@ advice from friends like these:
   ad-chaos on github, Aki Sakurai, Baruch Siach, Chris Stubbs, Colton Willey,
   Dan Fandrich, Daniel Stenberg, Denis Goleshchikhin, Deniz Sökmen,
   dependabot[bot], Dylam De La Torre, Emanuel Komínek, Gabriel Marin,
-  Ian Spence, jkamp-aws on github, Jon Rumsey, Kai Pastor, Kazuho Oku,
-  lomberd2 on github, MacKenzie, Max Dymond, Michael Kaufmann,
-  Montg0mery on github, Moritz Knüsel, Nemos2024 on github, newfunction,
-  Nicolas George, Pavel Kropachev, Pierre-Etienne Meunier,
+  Ian Spence, jkamp-aws on github, John Haugabook, Jon Rumsey, Kai Pastor,
+  Kazuho Oku, lomberd2 on github, MacKenzie, Marwan Yassini, Max Dymond,
+  Michael Kaufmann, Montg0mery on github, Moritz Knüsel, Nemos2024 on github,
+  newfunction, Nicolas George, Pavel Kropachev, Pierre-Etienne Meunier,
   ralfjunker on github, Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot],
   Robert Maynard, Sebastian Walz, Sinkevich Artem, Stefan Eissing, Tal Regev,
   Tatsuhiro Tsujikawa, Tobias Bora, Tobias Wendorff, Venkat Krishna R,
   Viktor Szakats, Vollstrecker on github, vvb2060 on github, Yedaya Katsman,
   zjyhjqs
-  (47 contributors)
+  (49 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -440,6 +452,7 @@ References to bug reports and discussions on issues:
  [147] = https://curl.se/bug/?i=15316
  [148] = https://curl.se/bug/?i=15258
  [149] = https://curl.se/bug/?i=15193
+ [150] = https://curl.se/bug/?i=15452
  [151] = https://curl.se/bug/?i=15321
  [152] = https://curl.se/bug/?i=15393
  [153] = https://curl.se/bug/?i=14826
@@ -461,6 +474,7 @@ References to bug reports and discussions on issues:
  [169] = https://curl.se/bug/?i=15285
  [170] = https://curl.se/bug/?i=15285
  [171] = https://curl.se/bug/?i=15415
+ [172] = https://curl.se/bug/?i=15451
  [173] = https://curl.se/bug/?i=15289
  [174] = https://curl.se/bug/?i=15289
  [175] = https://curl.se/bug/?i=15289
@@ -481,6 +495,7 @@ References to bug reports and discussions on issues:
  [190] = https://curl.se/bug/?i=15384
  [191] = https://curl.se/bug/?i=15271
  [192] = https://curl.se/bug/?i=15257
+ [193] = https://curl.se/bug/?i=15313
  [194] = https://curl.se/bug/?i=15414
  [195] = https://curl.se/bug/?i=15416
  [196] = https://curl.se/bug/?i=15265
@@ -521,3 +536,11 @@ References to bug reports and discussions on issues:
  [232] = https://curl.se/bug/?i=15392
  [233] = https://curl.se/bug/?i=15395
  [234] = https://curl.se/bug/?i=15398
+ [235] = https://curl.se/bug/?i=15445
+ [236] = https://curl.se/bug/?i=15443
+ [240] = https://curl.se/bug/?i=15440
+ [241] = https://curl.se/bug/?i=15439
+ [243] = https://curl.se/bug/?i=15436
+ [244] = https://curl.se/bug/?i=15435
+ [245] = https://curl.se/bug/?i=15434
+ [246] = https://curl.se/bug/?i=15430
