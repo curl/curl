@@ -32,8 +32,8 @@
 #define CURL_DISABLE_LDAP 1
 
 #define NEED_REENTRANT 1
-#ifndef OS
-#define OS "plan9"
+#ifndef CURL_OS
+#define CURL_OS "plan9"
 #endif
 #define PACKAGE "curl"
 #define PACKAGE_NAME "curl"

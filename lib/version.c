@@ -562,7 +562,7 @@ static curl_version_info_data version_info = {
   CURLVERSION_NOW,
   LIBCURL_VERSION,
   LIBCURL_VERSION_NUM,
-  OS,   /* as found by configure or set by hand at build-time */
+  CURL_OS, /* as found by configure or set by hand at build-time */
   0,    /* features bitmask is built at runtime */
   NULL, /* ssl_version */
   0,    /* ssl_version_num, this is kept at zero */

@@ -36,8 +36,8 @@
 #undef VERSION
 
 /* Define cpu-machine-OS */
-#ifndef OS
-#define OS "OS/400"
+#ifndef CURL_OS
+#define CURL_OS "OS/400"
 #endif
 
 /* OS400 supports a 3-argument ASCII version of gethostbyaddr_r(), but its

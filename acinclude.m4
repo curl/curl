@@ -150,13 +150,13 @@ dnl and with our own placement rules.
 
 AC_DEFUN([CURL_CHECK_AIX_ALL_SOURCE], [
   AH_VERBATIM([_ALL_SOURCE],
-    [/* Define to 1 if OS is AIX. */
+    [/* Define to 1 if CURL_OS is AIX. */
 #ifndef _ALL_SOURCE
 #  undef _ALL_SOURCE
 #endif])
   AC_BEFORE([$0], [AC_SYS_LARGEFILE])dnl
   AC_BEFORE([$0], [CURL_CONFIGURE_REENTRANT])dnl
-  AC_MSG_CHECKING([if OS is AIX (to define _ALL_SOURCE)])
+  AC_MSG_CHECKING([if CURL_OS is AIX (to define _ALL_SOURCE)])
   AC_EGREP_CPP([yes_this_is_aix],[
 #ifdef _AIX
    yes_this_is_aix
