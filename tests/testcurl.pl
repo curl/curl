@@ -245,7 +245,7 @@ sub get_host_triplet {
 
   if(-f $configfile && -s $configfile && open(my $libconfigh, "<", "$configfile")) {
     while(<$libconfigh>) {
-      if($_ =~ /^\#define\s+OS\s+"*([^"][^"]*)"*\s*/) {
+      if($_ =~ /^\#define\s+CURL_OS\s+"*([^"][^"]*)"*\s*/) {
         $triplet = $1;
         last;
       }

@@ -35,8 +35,8 @@
 #undef VERSION
 
 /* Define cpu-machine-OS */
-#ifndef OS
-#define OS "ARM-RISC OS"
+#ifndef CURL_OS
+#define CURL_OS "ARM-RISC OS"
 #endif
 
 /* Define if you want the built-in manual */

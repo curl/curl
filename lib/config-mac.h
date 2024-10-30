@@ -30,8 +30,8 @@
 /*   On macOS you must run configure to generate curl_config.h file    */
 /* =================================================================== */
 
-#ifndef OS
-#define OS "mac"
+#ifndef CURL_OS
+#define CURL_OS "mac"
 #endif
 
 #include <ConditionalMacros.h>

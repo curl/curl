@@ -135,9 +135,9 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 
 if(CMAKE_C_COMPILER_TARGET)
-  set(OS "\"${CMAKE_C_COMPILER_TARGET}\"")
+  set(CURL_OS "\"${CMAKE_C_COMPILER_TARGET}\"")
 else()
-  set(OS "\"${CMAKE_SYSTEM_NAME}\"")
+  set(CURL_OS "\"${CMAKE_SYSTEM_NAME}\"")
 endif()
 
 include_directories("${PROJECT_SOURCE_DIR}/include")

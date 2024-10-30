@@ -436,7 +436,7 @@ dnl
 
 AC_CANONICAL_HOST
 dnl Get system canonical name
-AC_DEFINE_UNQUOTED(OS, "${host}", [cpu-machine-OS])
+AC_DEFINE_UNQUOTED(CURL_OS, "${host}", [cpu-machine-OS])
 
 # Silence warning: ar: 'u' modifier ignored since 'D' is the default
 AC_SUBST(AR_FLAGS, [cr])

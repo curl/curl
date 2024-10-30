@@ -203,13 +203,13 @@ $! Now the DCL builds usually say xxx-HP-VMS and configure scripts
 $! may put DEC or COMPAQ or HP for the middle part.
 $!
 $write cvh "#if defined(__alpha)"
-$write cvh "#define OS ""ALPHA-HP-VMS"""
+$write cvh "#define CURL_OS ""ALPHA-HP-VMS"""
 $write cvh "#elif defined(__vax)"
-$write cvh "#define OS ""VAX-HP-VMS"""
+$write cvh "#define CURL_OS ""VAX-HP-VMS"""
 $write cvh "#elif defined(__ia64)"
-$write cvh "#define OS ""IA64-HP-VMS""
+$write cvh "#define CURL_OS ""IA64-HP-VMS""
 $write cvh "#else"
-$write cvh "#define OS ""UNKNOWN-HP-VMS""
+$write cvh "#define CURL_OS ""UNKNOWN-HP-VMS""
 $write cvh "#endif"
 $write cvh ""
 $!
