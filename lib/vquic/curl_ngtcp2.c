@@ -343,7 +343,6 @@ struct pkt_io_ctx {
   struct Curl_cfilter *cf;
   struct Curl_easy *data;
   ngtcp2_tstamp ts;
-  size_t pkt_count;
   ngtcp2_path_storage ps;
 };
 
@@ -363,7 +362,6 @@ static void pktx_init(struct pkt_io_ctx *pktx,
 {
   pktx->cf = cf;
   pktx->data = data;
-  pktx->pkt_count = 0;
   ngtcp2_path_storage_zero(&pktx->ps);
   pktx_update_time(pktx, cf);
 }
@@ -1640,7 +1638,6 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
   ngtcp2_path path;
   int rv;
 
-  ++pktx->pkt_count;
   ngtcp2_addr_init(&path.local, (struct sockaddr *)&ctx->q.local_addr,
                    (socklen_t)ctx->q.local_addrlen);
   ngtcp2_addr_init(&path.remote, (struct sockaddr *)remote_addr,
@@ -1669,31 +1666,18 @@ static CURLcode cf_progress_ingress(struct Curl_cfilter *cf,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct pkt_io_ctx local_pktx;
-  size_t pkts_chunk = 128, i;
   CURLcode result = CURLE_OK;
 
   if(!pktx) {
     pktx_init(&local_pktx, cf, data);
     pktx = &local_pktx;
   }
-  else {
-    pktx_update_time(pktx, cf);
-  }
 
   result = Curl_vquic_tls_before_recv(&ctx->tls, cf, data);
   if(result)
     return result;
 
-  for(i = 0; i < 4; ++i) {
-    if(i)
-      pktx_update_time(pktx, cf);
-    pktx->pkt_count = 0;
-    result = vquic_recv_packets(cf, data, &ctx->q, pkts_chunk,
-                                recv_pkt, pktx);
-    if(result || !pktx->pkt_count) /* error or got nothing */
-      break;
-  }
-  return result;
+  return vquic_recv_packets(cf, data, &ctx->q, 1000, recv_pkt, pktx);
 }
 
 /**
