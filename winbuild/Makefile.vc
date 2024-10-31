@@ -285,11 +285,11 @@ DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 $(MODE):
 	@echo LIBCURL_OBJS = \> LIBCURL_OBJS.inc
-	@for %%i in ($(LIBCURL_OBJS)) do echo $(LIBCURL_DIROBJ)/%%i \>> LIBCURL_OBJS.inc
+	@for %%i in ($(LIBCURL_OBJS)) do @echo $(LIBCURL_DIROBJ)/%%i \>> LIBCURL_OBJS.inc
 	@echo. >> LIBCURL_OBJS.inc
 
 	@echo CURL_OBJS = \> CURL_OBJS.inc
-	@for %%i in ($(CURL_OBJS)) do echo $(CURL_DIROBJ)/%%i \>> CURL_OBJS.inc
+	@for %%i in ($(CURL_OBJS)) do @echo $(CURL_DIROBJ)/%%i \>> CURL_OBJS.inc
 	@echo. >> CURL_OBJS.inc
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
