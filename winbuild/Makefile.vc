@@ -284,15 +284,13 @@ CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
 $(MODE):
-	@SET DIROBJ=$(LIBCURL_DIROBJ)
-	@SET MACRO_NAME=LIBCURL_OBJS
-	@SET OUTFILE=LIBCURL_OBJS.inc
-	@CALL gen_resp_file.bat $(LIBCURL_OBJS)
+	@echo LIBCURL_OBJS = \> LIBCURL_OBJS.inc
+	@for %%i in ($(LIBCURL_OBJS)) do @echo $(LIBCURL_DIROBJ)/%%i \>> LIBCURL_OBJS.inc
+	@echo. >> LIBCURL_OBJS.inc
 
-	@SET DIROBJ=$(CURL_DIROBJ)
-	@SET MACRO_NAME=CURL_OBJS
-	@SET OUTFILE=CURL_OBJS.inc
-	@CALL gen_resp_file.bat $(CURL_OBJS)
+	@echo CURL_OBJS = \> CURL_OBJS.inc
+	@for %%i in ($(CURL_OBJS)) do @echo $(CURL_DIROBJ)/%%i \>> CURL_OBJS.inc
+	@echo. >> CURL_OBJS.inc
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)
