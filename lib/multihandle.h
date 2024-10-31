@@ -124,6 +124,9 @@ struct Curl_multi {
   /* buffer used for upload data, lazy initialized */
   char *xfer_ulbuf; /* the actual buffer */
   size_t xfer_ulbuf_len;      /* the allocated length */
+  /* buffer used for socket I/O operations, lazy initialized */
+  char *xfer_sockbuf; /* the actual buffer */
+  size_t xfer_sockbuf_len; /* the allocated length */
 
   /* 'sockhash' is the lookup hash for socket descriptor => easy handles (note
      the pluralis form, there can be more than one easy handle waiting on the
@@ -181,6 +184,7 @@ struct Curl_multi {
                 burn */
   BIT(xfer_buf_borrowed);      /* xfer_buf is currently being borrowed */
   BIT(xfer_ulbuf_borrowed);    /* xfer_ulbuf is currently being borrowed */
+  BIT(xfer_sockbuf_borrowed);  /* xfer_sockbuf is currently being borrowed */
 #ifdef DEBUGBUILD
   BIT(warned);                 /* true after user warned of DEBUGBUILD */
 #endif

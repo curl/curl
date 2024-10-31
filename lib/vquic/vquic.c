@@ -39,6 +39,7 @@
 #include "curl_ngtcp2.h"
 #include "curl_osslq.h"
 #include "curl_quiche.h"
+#include "multiif.h"
 #include "rand.h"
 #include "vquic.h"
 #include "vquic_int.h"
@@ -369,14 +370,16 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   size_t gso_size;
   size_t pktlen;
   size_t offset, to;
+  char *sockbuf = NULL;
   uint8_t (*bufs)[64*1024] = NULL;
 
   DEBUGASSERT(max_pkts > 0);
-  bufs = malloc(MMSG_NUM * sizeof(bufs[0])); /* 1MB of temporary buffer */
-  if(!bufs) {
-    result = CURLE_OUT_OF_MEMORY;
+  result = Curl_multi_xfer_sockbuf_borrow(data, MMSG_NUM * sizeof(bufs[0]),
+                                          &sockbuf);
+  if(result)
     goto out;
-  }
+  bufs = (uint8_t (*)[64*1024])sockbuf;
+
   pkts = 0;
   total_nread = 0;
   while(pkts < max_pkts) {
@@ -389,7 +392,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
       mmsg[i].msg_hdr.msg_iovlen = 1;
       mmsg[i].msg_hdr.msg_name = &remote_addr[i];
       mmsg[i].msg_hdr.msg_namelen = sizeof(remote_addr[i]);
-      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i];
+      mmsg[i].msg_hdr.msg_control = &msg_ctrl[i * CMSG_SPACE(sizeof(int))];
       mmsg[i].msg_hdr.msg_controllen = CMSG_SPACE(sizeof(int));
     }
 
@@ -448,7 +451,7 @@ out:
   if(total_nread || result)
     CURL_TRC_CF(data, cf, "recvd %zu packets with %zu bytes -> %d",
                 pkts, total_nread, result);
-  free(bufs);
+  Curl_multi_xfer_sockbuf_release(data, sockbuf);
   return result;
 }
 

@@ -145,6 +145,30 @@ CURLcode Curl_multi_xfer_ulbuf_borrow(struct Curl_easy *data,
 void Curl_multi_xfer_ulbuf_release(struct Curl_easy *data, char *buf);
 
 /**
+ * Borrow the socket scratch buffer from the multi, suitable
+ * for the given transfer `data`. The buffer may only be used for
+ * direct socket I/O operation by one connection at a time and MUST be
+ * returned to the multi before the I/O call returns.
+ * Pointers into the buffer remain only valid as long as it is borrowed.
+ *
+ * @param data    the easy handle
+ * @param blen    requested length of the buffer
+ * @param pbuf    on return, the buffer to use or NULL on error
+ * @return CURLE_OK when buffer is available and is returned.
+ *         CURLE_OUT_OF_MEMORy on failure to allocate the buffer,
+ *         CURLE_FAILED_INIT if the easy handle is without multi.
+ *         CURLE_AGAIN if the buffer is borrowed already.
+ */
+CURLcode Curl_multi_xfer_sockbuf_borrow(struct Curl_easy *data,
+                                        size_t blen, char **pbuf);
+/**
+ * Release the borrowed buffer. All references into the buffer become
+ * invalid after this.
+ * @param buf the buffer pointer borrowed for coding error checks.
+ */
+void Curl_multi_xfer_sockbuf_release(struct Curl_easy *data, char *buf);
+
+/**
  * Get the transfer handle for the given id. Returns NULL if not found.
  */
 struct Curl_easy *Curl_multi_get_handle(struct Curl_multi *multi,
