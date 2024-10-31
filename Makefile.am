@@ -69,7 +69,7 @@ VC_DIST = projects/README.md                           \
  projects/wolfssl_options.h                            \
  projects/wolfssl_override.props
 
-WINBUILD_DIST = winbuild/README.md winbuild/gen_resp_file.bat \
+WINBUILD_DIST = winbuild/README.md \
  winbuild/MakefileBuild.vc winbuild/Makefile.vc winbuild/makedebug.bat
 
 PLAN9_DIST = plan9/include/mkfile \
