@@ -1114,15 +1114,11 @@ mark_as_advanced(CURL_USE_LIBPSL)
 set(USE_LIBPSL OFF)
 
 if(CURL_USE_LIBPSL)
-  find_package(Libpsl)  # TODO: add REQUIRED to match autotools
-  if(LIBPSL_FOUND)
-    list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
-    list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libpsl")
-    include_directories(SYSTEM ${LIBPSL_INCLUDE_DIRS})
-    set(USE_LIBPSL ON)
-  else()
-    message(WARNING "libpsl is enabled, but not found.")
-  endif()
+  find_package(Libpsl REQUIRED)
+  list(APPEND CURL_LIBS ${LIBPSL_LIBRARIES})
+  list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libpsl")
+  include_directories(SYSTEM ${LIBPSL_INCLUDE_DIRS})
+  set(USE_LIBPSL ON)
 endif()
 
 # libssh2
