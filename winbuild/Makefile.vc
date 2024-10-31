@@ -283,17 +283,14 @@ LIBCURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-lib
 CURL_DIROBJ = ..\builds\$(CONFIG_NAME_LIB)-obj-curl
 DIRDIST = ..\builds\$(CONFIG_NAME_LIB)\
 
-LIBCURL_OUTFILE = LIBCURL_OBJS.inc
-CURL_OUTFILE = CURL_OBJS.inc
-
 $(MODE):
-	echo LIBCURL_OBJS = \> $(LIBCURL_OUTFILE)
-	@for %%i in ($(LIBCURL_OBJS)) do echo $(LIBCURL_DIROBJ)/%%i \>> $(LIBCURL_OUTFILE)
-	echo. >> $(LIBCURL_OUTFILE)
+	@echo LIBCURL_OBJS = \> LIBCURL_OBJS.inc
+	@for %%i in ($(LIBCURL_OBJS)) do echo $(LIBCURL_DIROBJ)/%%i \>> LIBCURL_OBJS.inc
+	@echo. >> LIBCURL_OBJS.inc
 
-	echo CURL_OBJS = \> $(CURL_OUTFILE)
-	@for %%i in ($(CURL_OBJS)) do echo $(CURL_DIROBJ)/%%i \>> $(CURL_OUTFILE)
-	echo. >> $(CURL_OUTFILE)
+	@echo CURL_OBJS = \> CURL_OBJS.inc
+	@for %%i in ($(CURL_OBJS)) do echo $(CURL_DIROBJ)/%%i \>> CURL_OBJS.inc
+	@echo. >> CURL_OBJS.inc
 
 	@SET CONFIG_NAME_LIB=$(CONFIG_NAME_LIB)
 	@SET MACHINE=$(MACHINE)
