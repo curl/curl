@@ -119,7 +119,7 @@ jobs:
       - name: 'autoreconf'
         run: autoreconf -if
 
-      - name: 'configure (out-of-tree, libssh2)'
+      - name: 'configure (out-of-tree, c-ares, libssh, zstd, gssapi)'
         run: |
           mkdir bld-am
           cd bld-am
