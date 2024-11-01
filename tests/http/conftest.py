@@ -25,6 +25,7 @@
 import logging
 import os
 import sys
+import platform
 from typing import Generator
 
 import pytest
@@ -38,6 +39,7 @@ def pytest_report_header(config):
     env = Env()
     report = [
         f'Testing curl {env.curl_version()}',
+        f'  platform: {platform.platform()}',
         f'  curl: Version: {env.curl_version_string()}',
         f'  curl: Features: {env.curl_features_string()}',
         f'  curl: Protocols: {env.curl_protocols_string()}',
