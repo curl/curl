@@ -68,6 +68,7 @@ class EnvConfig:
         if 'CURL' in os.environ:
             self.curl = os.environ['CURL']
         self.curl_props = {
+            'version_string': '',
             'version': '',
             'os': '',
             'fullname': '',
@@ -88,6 +89,7 @@ class EnvConfig:
             self.curl_is_debug = True
         for line in p.stdout.splitlines(keepends=False):
             if line.startswith('curl '):
+                self.curl_props['version_string'] = line
                 m = re.match(r'^curl (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', line)
                 if m:
                     self.curl_props['fullname'] = m.group(0)
@@ -326,6 +328,10 @@ class Env:
         if Env.have_h3_curl():
             return not Env.curl_uses_lib('ngtcp2') and Env.curl_uses_lib('nghttp3')
         return False
+
+    @staticmethod
+    def curl_version_string() -> str:
+        return Env.CONFIG.curl_props['version_string']
 
     @staticmethod
     def curl_features_string() -> str:
