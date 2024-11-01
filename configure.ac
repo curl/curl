@@ -1355,10 +1355,6 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   )
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"; then
-  AC_MSG_ERROR([couldn't find libraries for gethostbyname()])
-fi
-
 CURL_CHECK_LIBS_CONNECT
 
 CURL_NETWORK_LIBS=$LIBS

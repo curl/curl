@@ -126,8 +126,10 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
   int res;
 #endif
   struct Curl_addrinfo *ai = NULL;
+#if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
   struct hostent *h = NULL;
   struct hostent *buf = NULL;
+#endif
 
 #if defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE)
   struct addrinfo hints;
@@ -288,12 +290,14 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
 #endif /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
            HAVE_GETHOSTBYNAME_R */
 
+#if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
   if(h) {
     ai = Curl_he2ai(h, port);
 
     if(buf) /* used a *_r() function */
       free(buf);
   }
+#endif
 
   return ai;
 }
