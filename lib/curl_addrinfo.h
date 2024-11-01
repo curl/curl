@@ -71,8 +71,10 @@ Curl_getaddrinfo_ex(const char *nodename,
                     struct Curl_addrinfo **result);
 #endif
 
+#if !(defined(HAVE_GETADDRINFO) && defined(HAVE_GETADDRINFO_THREADSAFE))
 struct Curl_addrinfo *
 Curl_he2ai(const struct hostent *he, int port);
+#endif
 
 struct Curl_addrinfo *
 Curl_ip2addr(int af, const void *inaddr, const char *hostname, int port);

@@ -1484,52 +1484,7 @@ AC_DEFUN([CURL_CHECK_FUNC_GETADDRINFO], [
       tst_tsafe_getaddrinfo="yes"
     fi
     if test "$tst_tsafe_getaddrinfo" = "unknown"; then
-      CURL_CHECK_DEF_CC([h_errno], [
-        $curl_includes_sys_socket
-        $curl_includes_netdb
-        ], [silent])
-      if test "$curl_cv_have_def_h_errno" = "yes"; then
-        tst_h_errno_macro="yes"
-      else
-        tst_h_errno_macro="no"
-      fi
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-          $curl_includes_sys_socket
-          $curl_includes_netdb
-        ]],[[
-          h_errno = 2;
-          if(0 != h_errno)
-            return 1;
-        ]])
-      ],[
-        tst_h_errno_modifiable_lvalue="yes"
-      ],[
-        tst_h_errno_modifiable_lvalue="no"
-      ])
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-        ]],[[
-          #if defined(_POSIX_C_SOURCE) && (_POSIX_C_SOURCE >= 200809L)
-            return 0;
-          #elif defined(_XOPEN_SOURCE) && (_XOPEN_SOURCE >= 700)
-            return 0;
-          #else
-            #error force compilation error
-          #endif
-        ]])
-      ],[
-        tst_h_errno_sbs_issue_7="yes"
-      ],[
-        tst_h_errno_sbs_issue_7="no"
-      ])
-      if test "$tst_h_errno_macro" = "no" &&
-         test "$tst_h_errno_modifiable_lvalue" = "no" &&
-         test "$tst_h_errno_sbs_issue_7" = "no"; then
-        tst_tsafe_getaddrinfo="no"
-      else
-        tst_tsafe_getaddrinfo="yes"
-      fi
+      tst_tsafe_getaddrinfo="yes"
     fi
     AC_MSG_RESULT([$tst_tsafe_getaddrinfo])
     if test "$tst_tsafe_getaddrinfo" = "yes"; then
