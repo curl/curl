@@ -31,6 +31,9 @@ if [ -f /usr/local/ssl/bin/openssl ]; then
   OPENSSL=/usr/local/ssl/bin/openssl
 fi
 
+command -v "$OPENSSL"
+"$OPENSSL" version
+
 USAGE='echo Usage is genserv.sh <prefix> <caprefix>'
 
 HOME=$(pwd)
@@ -60,7 +63,7 @@ fi
 
 CAPREFIX="${2:-}"
 if [ -z "$CAPREFIX" ]; then
-  echo No CA prefix
+  echo 'No CA prefix'
   NOTOK=1
 else
   if [ ! -f "$CAPREFIX-ca.cacert" ]; then
@@ -100,7 +103,7 @@ echo 'pseudo secrets generated'
 
 "$OPENSSL" rsa -in "$PREFIX-sv.key" -pubout -outform DER -out "$PREFIX-sv.pub.der"
 "$OPENSSL" rsa -in "$PREFIX-sv.key" -pubout -outform PEM -out "$PREFIX-sv.pub.pem"
-"$OPENSSL" x509 -extfile "$PREFIX-sv.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -in "$PREFIX-sv.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX-sv.crt"
+"$OPENSSL" x509 -extfile "$PREFIX-sv.prm" -days "$DURATION" -CA "$CAPREFIX-ca.cacert" -CAkey "$CAPREFIX-ca.key" -CAcreateserial -in "$PREFIX-sv.csr" -req -text -nameopt multiline "$DIGESTALGO" > "$PREFIX-sv.crt"
 
 if [ "$P12" = YES ]; then
   "$OPENSSL" pkcs12 -export -des3 -out "$PREFIX-sv.p12" -caname "$CAPREFIX" -name "$PREFIX" -inkey "$PREFIX-sv.key" -in "$PREFIX-sv.crt" -certfile "$CAPREFIX-ca.crt"
