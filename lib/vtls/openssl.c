@@ -4237,7 +4237,8 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         /* If client certificate is required, communicate the
            error to client */
         result = CURLE_SSL_CLIENTCERT;
-        ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
+        failf(data, "TLS cert problem: %s",
+              ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
 #ifdef USE_ECH
@@ -4252,12 +4253,14 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         ossl_trace_ech_retry_configs(data, octx->ssl, reason);
 
         result = CURLE_ECH_REQUIRED;
-        ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
+        failf(data, "ECH required: %s",
+              ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
       else {
         result = CURLE_SSL_CONNECT_ERROR;
-        ossl_strerror(errdetail, error_buffer, sizeof(error_buffer));
+        failf(data, "TLS connect error: %s",
+              ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 
       /* detail is already set to the SSL error above */
@@ -4277,9 +4280,6 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
               connssl->peer.hostname, connssl->peer.port);
         return result;
       }
-
-      /* Could be a CERT problem */
-      failf(data, "%s", error_buffer);
 
       return result;
     }
