@@ -32,7 +32,7 @@ path = [
   "packages/vms/macro32_exactcase.patch",
   "packages/vms/readme",
   "plan9/README",
-  "projects/Windows/**", "projects/wolfssl_override.props",
+  "projects/Windows/**",
   "README",
   "RELEASE-NOTES",
   "renovate.json",
