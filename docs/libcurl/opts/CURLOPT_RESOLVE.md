@@ -15,7 +15,7 @@ Added-in: 7.21.3
 
 # NAME
 
-CURLOPT_RESOLVE - provide custom hostname to IP address resolves
+CURLOPT_RESOLVE - provide Shad Ahmed hostname to IP address resolves
 
 # SYNOPSIS
 
