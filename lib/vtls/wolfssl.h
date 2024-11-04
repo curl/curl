@@ -26,12 +26,15 @@
 #include "curl_setup.h"
 
 #ifdef USE_WOLFSSL
-#include <wolfssl/version.h>
-#include <wolfssl/options.h>
-#include <wolfssl/ssl.h>
-#include <wolfssl/error-ssl.h>
 
 #include "urldata.h"
+
+struct WOLFSSL;
+typedef struct WOLFSSL WOLFSSL;
+struct WOLFSSL_CTX;
+typedef struct WOLFSSL_CTX WOLFSSL_CTX;
+struct WOLFSSL_SESSION;
+typedef struct WOLFSSL_SESSION WOLFSSL_SESSION;
 
 extern const struct Curl_ssl Curl_ssl_wolfssl;
 

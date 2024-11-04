@@ -37,6 +37,7 @@
 #include "sendf.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "rustls.h"
 #include "select.h"
 #include "strerror.h"
 #include "multiif.h"

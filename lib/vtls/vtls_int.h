@@ -250,15 +250,6 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 size_t sessionid_size,
                                 Curl_ssl_sessionid_dtor *sessionid_free_cb);
 
-#include "openssl.h"        /* OpenSSL versions */
-#include "gtls.h"           /* GnuTLS versions */
-#include "wolfssl.h"        /* wolfSSL versions */
-#include "schannel.h"       /* Schannel SSPI version */
-#include "sectransp.h"      /* Secure Transport (Darwin) version */
-#include "mbedtls.h"        /* mbedTLS versions */
-#include "bearssl.h"        /* BearSSL versions */
-#include "rustls.h"         /* Rustls versions */
-
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */

@@ -145,6 +145,14 @@ if test "x$OPT_WOLFSSL" != xno; then
         )
 
       dnl if this symbol is present, we can make use of BIO filter chains
+      AC_CHECK_FUNC(wolfSSL_BIO_new,
+        [
+          AC_DEFINE(HAVE_WOLFSSL_BIO, 1,
+                    [if you have wolfSSL_BIO_new])
+          WOLFSSL_BIO=1
+        ]
+        )
+      dnl if this symbol is present, we have the full BIO feature set
       AC_CHECK_FUNC(wolfSSL_BIO_set_shutdown,
         [
           AC_DEFINE(HAVE_WOLFSSL_FULL_BIO, 1,
