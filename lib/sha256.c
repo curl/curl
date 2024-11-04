@@ -34,9 +34,6 @@
 
 #ifdef USE_WOLFSSL
 #include <wolfssl/options.h>
-#ifndef NO_SHA256
-#define USE_OPENSSL_SHA256
-#endif
 #endif
 
 #if defined(USE_OPENSSL)
