@@ -97,9 +97,9 @@
 #endif
 #endif
 
-#if defined(HAVE_WOLFSSL_BIO) && HAVE_WOLFSSL_BIO
+#ifdef HAVE_WOLFSSL_BIO
 #define USE_BIO_CHAIN
-#if defined(HAVE_WOLFSSL_FULL_BIO) && HAVE_WOLFSSL_FULL_BIO
+#ifdef HAVE_WOLFSSL_FULL_BIO
 #define USE_FULL_BIO
 #else /* HAVE_WOLFSSL_FULL_BIO */
 #undef USE_FULL_BIO
