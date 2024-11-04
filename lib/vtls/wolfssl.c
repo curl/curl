@@ -97,9 +97,25 @@
 #endif
 #endif
 
-#if defined(HAVE_WOLFSSL_FULL_BIO) && HAVE_WOLFSSL_FULL_BIO
+#ifdef HAVE_WOLFSSL_BIO
 #define USE_BIO_CHAIN
-#else
+#ifdef HAVE_WOLFSSL_FULL_BIO
+#define USE_FULL_BIO
+#else /* HAVE_WOLFSSL_FULL_BIO */
+#undef USE_FULL_BIO
+#endif
+/* wolfSSL 5.7.4 and older do not have these symbols, but only the
+ * OpenSSL ones. */
+#ifndef WOLFSSL_BIO_CTRL_GET_CLOSE
+#define WOLFSSL_BIO_CTRL_GET_CLOSE    BIO_CTRL_GET_CLOSE
+#define WOLFSSL_BIO_CTRL_SET_CLOSE    BIO_CTRL_SET_CLOSE
+#define WOLFSSL_BIO_CTRL_FLUSH        BIO_CTRL_FLUSH
+#define WOLFSSL_BIO_CTRL_DUP          BIO_CTRL_DUP
+#define wolfSSL_BIO_set_retry_write   BIO_set_retry_write
+#define wolfSSL_BIO_set_retry_read    BIO_set_retry_read
+#endif /* !WOLFSSL_BIO_CTRL_GET_CLOSE */
+
+#else /* HAVE_WOLFSSL_BIO */
 #undef USE_BIO_CHAIN
 #endif
 
@@ -237,7 +253,9 @@ static const struct group_name_map gnm[] = {
 
 static int wolfssl_bio_cf_create(WOLFSSL_BIO *bio)
 {
+#ifdef USE_FULL_BIO
   wolfSSL_BIO_set_shutdown(bio, 1);
+#endif
   wolfSSL_BIO_set_data(bio, NULL);
   return 1;
 }
@@ -251,28 +269,35 @@ static int wolfssl_bio_cf_destroy(WOLFSSL_BIO *bio)
 
 static long wolfssl_bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
 {
-  struct Curl_cfilter *cf = BIO_get_data(bio);
+  struct Curl_cfilter *cf = wolfSSL_BIO_get_data(bio);
   long ret = 1;
 
   (void)cf;
   (void)ptr;
+  (void)num;
   switch(cmd) {
-  case BIO_CTRL_GET_CLOSE:
+  case WOLFSSL_BIO_CTRL_GET_CLOSE:
+#ifdef USE_FULL_BIO
     ret = (long)wolfSSL_BIO_get_shutdown(bio);
+#else
+    ret = 0;
+#endif
     break;
-  case BIO_CTRL_SET_CLOSE:
+  case WOLFSSL_BIO_CTRL_SET_CLOSE:
+#ifdef USE_FULL_BIO
     wolfSSL_BIO_set_shutdown(bio, (int)num);
+#endif
     break;
-  case BIO_CTRL_FLUSH:
+  case WOLFSSL_BIO_CTRL_FLUSH:
     /* we do no delayed writes, but if we ever would, this
      * needs to trigger it. */
     ret = 1;
     break;
-  case BIO_CTRL_DUP:
+  case WOLFSSL_BIO_CTRL_DUP:
     ret = 1;
     break;
-#ifdef BIO_CTRL_EOF
-  case BIO_CTRL_EOF:
+#ifdef WOLFSSL_BIO_CTRL_EOF
+  case WOLFSSL_BIO_CTRL_EOF:
     /* EOF has been reached on input? */
     return (!cf->next || !cf->next->connected);
 #endif
@@ -309,9 +334,11 @@ static int wolfssl_bio_cf_out_write(WOLFSSL_BIO *bio,
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_write(len=%d) -> %zd, %d",
               blen, nwritten, result);
+#ifdef USE_FULL_BIO
   wolfSSL_BIO_clear_retry_flags(bio);
+#endif
   if(nwritten < 0 && CURLE_AGAIN == result) {
-    BIO_set_retry_write(bio);
+    wolfSSL_BIO_set_retry_write(bio);
     if(backend->shutting_down && !backend->io_send_blocked_len)
       backend->io_send_blocked_len = blen;
   }
@@ -338,9 +365,11 @@ static int wolfssl_bio_cf_in_read(WOLFSSL_BIO *bio, char *buf, int blen)
   nread = Curl_conn_cf_recv(cf->next, data, buf, blen, &result);
   backend->io_result = result;
   CURL_TRC_CF(data, cf, "bio_read(len=%d) -> %zd, %d", blen, nread, result);
+#ifdef USE_FULL_BIO
   wolfSSL_BIO_clear_retry_flags(bio);
+#endif
   if(nread < 0 && CURLE_AGAIN == result)
-    BIO_set_retry_read(bio);
+    wolfSSL_BIO_set_retry_read(bio);
   else if(nread == 0)
     connssl->peer_closed = TRUE;
   return (int)nread;
@@ -350,7 +379,8 @@ static WOLFSSL_BIO_METHOD *wolfssl_bio_cf_method = NULL;
 
 static void wolfssl_bio_cf_init_methods(void)
 {
-  wolfssl_bio_cf_method = wolfSSL_BIO_meth_new(BIO_TYPE_MEM, "wolfSSL CF BIO");
+  wolfssl_bio_cf_method = wolfSSL_BIO_meth_new(WOLFSSL_BIO_MEMORY,
+                                               "wolfSSL CF BIO");
   wolfSSL_BIO_meth_set_write(wolfssl_bio_cf_method, &wolfssl_bio_cf_out_write);
   wolfSSL_BIO_meth_set_read(wolfssl_bio_cf_method, &wolfssl_bio_cf_in_read);
   wolfSSL_BIO_meth_set_ctrl(wolfssl_bio_cf_method, &wolfssl_bio_cf_ctrl);
@@ -1248,7 +1278,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   {
     WOLFSSL_BIO *bio;
 
-    bio = BIO_new(wolfssl_bio_cf_method);
+    bio = wolfSSL_BIO_new(wolfssl_bio_cf_method);
     if(!bio)
       return CURLE_OUT_OF_MEMORY;
 
@@ -1730,6 +1760,11 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
     case WOLFSSL_ERROR_NONE:
     case WOLFSSL_ERROR_WANT_READ:
     case WOLFSSL_ERROR_WANT_WRITE:
+      if(!backend->io_result && connssl->peer_closed) {
+        CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen);
+        *curlcode = CURLE_OK;
+        return 0;
+      }
       /* there is data pending, re-invoke wolfSSL_read() */
       CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> AGAIN", blen);
       *curlcode = CURLE_AGAIN;
@@ -1740,7 +1775,12 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
         *curlcode = CURLE_AGAIN;
         return -1;
       }
-      {
+      else if(!backend->io_result && connssl->peer_closed) {
+        CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen);
+        *curlcode = CURLE_OK;
+        return 0;
+      }
+      else {
         char error_buffer[256];
         failf(data, "SSL read: %s, errno %d",
               wolfssl_strerror((unsigned long)err, error_buffer,
