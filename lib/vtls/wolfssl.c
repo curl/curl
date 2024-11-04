@@ -101,9 +101,20 @@
 #define USE_BIO_CHAIN
 #if defined(HAVE_WOLFSSL_FULL_BIO) && HAVE_WOLFSSL_FULL_BIO
 #define USE_FULL_BIO
-#else
+#else /* HAVE_WOLFSSL_FULL_BIO */
 #undef USE_FULL_BIO
 #endif
+/* wolfSSL 5.7.4 and older do not have these symbols, but only the
+ * OpenSSL ones. */
+#ifndef WOLFSSL_BIO_CTRL_GET_CLOSE
+#define WOLFSSL_BIO_CTRL_GET_CLOSE    BIO_CTRL_GET_CLOSE
+#define WOLFSSL_BIO_CTRL_SET_CLOSE    BIO_CTRL_SET_CLOSE
+#define WOLFSSL_BIO_CTRL_FLUSH        BIO_CTRL_FLUSH
+#define WOLFSSL_BIO_CTRL_DUP          BIO_CTRL_DUP
+#define wolfSSL_BIO_set_retry_write   BIO_set_retry_write
+#define wolfSSL_BIO_set_retry_read    BIO_set_retry_read
+#endif /* !WOLFSSL_BIO_CTRL_GET_CLOSE */
+
 #else /* HAVE_WOLFSSL_BIO */
 #undef USE_BIO_CHAIN
 #endif
@@ -1749,7 +1760,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
     case WOLFSSL_ERROR_NONE:
     case WOLFSSL_ERROR_WANT_READ:
     case WOLFSSL_ERROR_WANT_WRITE:
-      if(connssl->peer_closed) {
+      if(!backend->io_result && connssl->peer_closed) {
         CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen);
         *curlcode = CURLE_OK;
         return 0;
@@ -1764,7 +1775,12 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
         *curlcode = CURLE_AGAIN;
         return -1;
       }
-      {
+      else if(!backend->io_result && connssl->peer_closed) {
+        CURL_TRC_CF(data, cf, "wolfssl_recv(len=%zu) -> CLOSED", blen);
+        *curlcode = CURLE_OK;
+        return 0;
+      }
+      else {
         char error_buffer[256];
         failf(data, "SSL read: %s, errno %d",
               wolfssl_strerror((unsigned long)err, error_buffer,
