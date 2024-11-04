@@ -1986,7 +1986,7 @@ _add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
 _add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
                         OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
                         USE_MBEDTLS OR USE_SECTRANSP OR
-                        (USE_WOLFSSL AND HAVE_WOLFSSL_FULL_BIO)))
+                        (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))
 _add_if("Unicode"       ENABLE_UNICODE)
 _add_if("threadsafe"    HAVE_ATOMIC OR
                         (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
