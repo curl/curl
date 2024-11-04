@@ -4,7 +4,7 @@ curl and libcurl 8.11.0
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3263
+ Contributors:                 3267
 
 This release includes the following changes:
 
@@ -28,12 +28,14 @@ This release includes the following bugfixes:
  o build: clarify CA embed is for curl tool, mark default, improve summary [72]
  o build: detect and use `_setmode()` with Cygwin/MSYS, also use on Windows [136]
  o build: disable warning `-Wunreachable-code-break` [195]
+ o build: fix clang-cl builds, add CI job [254]
  o build: fix cross-compile check for poll with bionic [70]
  o build: fix possible `-Wformat-overflow` in lib557 [85]
  o build: limit arc4random detection to no-SSL configs [43]
  o build: show if CA bundle to embed was found [83]
  o build: tidy up and improve versioned-symbols options [5]
  o build: tidy up deprecation suppression, enable warnings for clang [12]
+ o certs: add missing `-CAcreateserial` option for LibreSSL [247]
  o checksrc: add check for spaces around logical AND operators [220]
  o checksrc: Added checks for colon operator in ternary expressions [77]
  o checksrc: check for spaces around '?', '>' and '<' [46]
@@ -83,6 +85,7 @@ This release includes the following bugfixes:
  o cmake: use `list(APPEND)` on `CURL_INCLUDES` [223]
  o cmake: use OpenSSL for LDAP detection only if available [102]
  o cmake: use the `BSD` variable [210]
+ o config: rename the OS define to CURL_OS to reduce collision risk [256]
  o configure: add GSS to `libcurl.pc` `Depends:` [126]
  o configure: catch Apple in more target triplets [6]
  o configure: drop duplicate feature checks for `poll()`, `if_nametoindex()` [135]
@@ -95,6 +98,7 @@ This release includes the following bugfixes:
  o curl.h: remove the struct pointer for CURL/CURLSH/CURLM typedefs [174]
  o curl: add build options for safe/no CA bundle search (Windows) [26]
  o curl: detect ECH support dynamically, not at build time [230]
+ o curl_addrinfo: support operating systems with only getaddrinfo(3) [239]
  o curl_multi_perform.md: fix typo [224]
  o curl_trc: fix build with verbose messages disabled [79]
  o curl_url_set.md: document HOST handling when URL is parsed [2]
@@ -156,9 +160,11 @@ This release includes the following bugfixes:
  o multi: split multi_runsingle into sub functions [200]
  o negotiate: conditional check around GSS & SSL specific code [1]
  o netrc: cache the netrc file in memory [138]
+ o ngtcp2: do not loop on recv [251]
  o ngtcp2: set max window size to 10x of initial (128KB) [232]
  o openssl quic: populate x509 store before handshake [117]
  o openssl: convert a memcpy to dynbuf use [57]
+ o openssl: extend the OpenSSL error messages [238]
  o openssl: improve retries on shutdown [151]
  o openssl: remove two strcpy() calls [64]
  o OS400: don't delete source files when building with debug [235]
@@ -167,6 +173,7 @@ This release includes the following bugfixes:
  o pytest: fix run against multissl curl [236]
  o pytest: improve pytest_07_42a reliability [118]
  o pytest: include `buildinfo.txt` in the output [189]
+ o pytest: include curl version string and python platform in log [242]
  o pytest: show curl features and protocols [150]
  o quic: use send/recvmmsg when available [93]
  o quic: use the session cache with wolfSSL as well [231]
@@ -176,6 +183,7 @@ This release includes the following bugfixes:
  o runtests: drop unused code for old/classic-mingw support [87]
  o runtests: pass single backslashes with Windows Perl [243]
  o runtests: use deterministic sort for `TESTINFO` lines [201]
+ o schannel: fix TLS cert verification by IP SAN [253]
  o schannel: ignore error on recv beyond close notify [167]
  o schannel: reclassify extra-verbose schannel_recv messages [153]
  o select: use poll() if existing, avoid poll() with no sockets [75]
@@ -241,6 +249,7 @@ This release includes the following bugfixes:
  o tests: testrunner fairness [39]
  o tests: testrunner reliability improvements [55]
  o tests: use '-4' where needed [17]
+ o tests: use a set for several of the curl_props [249]
  o tftp: avoid two memcpy/strcpy [94]
  o tidy-up: rename CURL_WINDOWS_APP to CURL_WINDOWS_UWP [36]
  o tls: avoid abusing CURLE_SSL_ENGINE_INITFAILED [246]
@@ -251,6 +260,7 @@ This release includes the following bugfixes:
  o tool_operate: make --skip-existing work for --parallel [180]
  o tool_operate: reuse the schannel backend check [130]
  o tool_xattr: create the user.creator xattr attribute [197]
+ o unit1307: tidy up Apple OS detection [252]
  o unit1660: fix unreachable code warning in no-SSL builds [30]
  o url: connection reuse on h3 connections [20]
  o url: use same credentials on redirect [181]
@@ -259,14 +269,17 @@ This release includes the following bugfixes:
  o version: minor cleanups [152]
  o version: say quictls in MSH3 builds [219]
  o vquic: fix compiler warning with gcc + MUSL [168]
+ o vquic: recv_mmsg, use fewer, but larger buffers [250]
  o vtls: convert Curl_pin_peer_pubkey to use dynbuf [74]
  o vtls: convert pubkey_pem_to_der to use dynbuf [90]
  o warnless: remove curlx_sktosi and curlx_sitosk [104]
  o winbuild/README: consolidate command prompt section [193]
  o winbuild/README: document how to clean a build [163]
  o winbuild: add initial wolfSSL support [227]
+ o winbuild: drop `gen_resp_file.bat` [248]
  o wolfssl: convert malloc + memcpys to dynbuf for cipher string [96]
  o wolfSSL: fix handling of TLSv1.3 sessions [185]
+ o wolfssl: no more use of the OpenSSL API [216]
  o wolfssl: use old version API without openssl extra [160]
 
 This release includes the following known bugs:
@@ -289,9 +302,10 @@ advice from friends like these:
 
   ad-chaos on github, Aki Sakurai, Baruch Siach, Chris Stubbs, Colton Willey,
   Dan Fandrich, Daniel Stenberg, Denis Goleshchikhin, Deniz Sökmen,
-  dependabot[bot], Dylam De La Torre, Emanuel Komínek, Gabriel Marin,
-  Ian Spence, jkamp-aws on github, John Haugabook, Jon Rumsey, Kai Pastor,
-  Kazuho Oku, lomberd2 on github, MacKenzie, Marwan Yassini, Max Dymond,
+  dependabot[bot], Dylam De La Torre, edmcln, elvinasp on github,
+  Emanuel Komínek, Gabriel Marin, Ian Spence, Jeroen Ooms, jkamp-aws on github,
+  John Haugabook, Jonas 'Sortie' Termansen, Jon Rumsey, Kai Pastor, Kazuho Oku,
+  koujaz on github, lomberd2 on github, MacKenzie, Marwan Yassini, Max Dymond,
   Michael Kaufmann, Montg0mery on github, Moritz Knüsel, Nemos2024 on github,
   newfunction, Nicolas George, Pavel Kropachev, Pierre-Etienne Meunier,
   ralfjunker on github, Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot],
@@ -299,7 +313,7 @@ advice from friends like these:
   Tatsuhiro Tsujikawa, Tobias Bora, Tobias Wendorff, Venkat Krishna R,
   Viktor Szakats, Vollstrecker on github, vvb2060 on github, Yedaya Katsman,
   zjyhjqs
-  (49 contributors)
+  (54 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -518,6 +532,7 @@ References to bug reports and discussions on issues:
  [213] = https://curl.se/bug/?i=15400
  [214] = https://curl.se/bug/?i=15353
  [215] = https://curl.se/bug/?i=15404
+ [216] = https://curl.se/bug/?i=15480
  [217] = https://curl.se/bug/?i=15403
  [218] = https://curl.se/bug/?i=15337
  [219] = https://curl.se/bug/?i=15335
@@ -538,9 +553,21 @@ References to bug reports and discussions on issues:
  [234] = https://curl.se/bug/?i=15398
  [235] = https://curl.se/bug/?i=15445
  [236] = https://curl.se/bug/?i=15443
+ [238] = https://curl.se/bug/?i=15473
+ [239] = https://curl.se/bug/?i=15475
  [240] = https://curl.se/bug/?i=15440
  [241] = https://curl.se/bug/?i=15439
+ [242] = https://curl.se/bug/?i=15470
  [243] = https://curl.se/bug/?i=15436
  [244] = https://curl.se/bug/?i=15435
  [245] = https://curl.se/bug/?i=15434
  [246] = https://curl.se/bug/?i=15430
+ [247] = https://curl.se/bug/?i=15471
+ [248] = https://curl.se/bug/?i=15463
+ [249] = https://curl.se/bug/?i=15462
+ [250] = https://curl.se/bug/?i=15267
+ [251] = https://curl.se/bug/?i=15466
+ [252] = https://curl.se/bug/?i=15461
+ [253] = https://curl.se/bug/?i=15149
+ [254] = https://curl.se/bug/?i=15449
+ [256] = https://curl.se/bug/?i=15455
