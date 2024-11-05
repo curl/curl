@@ -52,12 +52,15 @@ if(LDAP_FOUND AND LDAP_LBER_FOUND)
   list(REMOVE_DUPLICATES LDAP_LIBRARIES)
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
-elseif(NOT APPLE)
+else()
   # On Apple the SDK LDAP gets picked up from
   # 'MacOSX.sdk/System/Library/Frameworks/LDAP.framework/Headers', which contains
   # ldap.h and lber.h both being stubs to include <ldap.h> and <lber.h>.
   # This causes an infinite inclusion loop in compile.
+  set(_save_cmake_system_framework_path ${CMAKE_SYSTEM_FRAMEWORK_PATH})
+  unset(CMAKE_SYSTEM_FRAMEWORK_PATH)
   find_path(LDAP_INCLUDE_DIR NAMES "ldap.h")
+  set(CMAKE_SYSTEM_FRAMEWORK_PATH ${_save_cmake_system_framework_path})
   find_library(LDAP_LIBRARY NAMES "ldap")
   find_library(LDAP_LBER_LIBRARY NAMES "lber")
 
