@@ -132,13 +132,9 @@ if(PICKY_COMPILER)
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  3.0  gcc  4.8
       )
-      if(MSVC)
+      if(NOT MSVC)
         list(APPEND _picky_enable
-          -Wno-language-extension-token      # clang  3.0  # Avoid for clang-cl to allow __int64
-        )
-      else()
-        list(APPEND _picky_enable
-          -Wlanguage-extension-token         # clang  3.0
+          -Wlanguage-extension-token       # clang  3.0
         )
       endif()
       # Enable based on compiler version
@@ -248,6 +244,8 @@ endif()
 
 # clang-cl
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
+  list(APPEND _picky "-Wno-language-extension-token")  # Allow __int64
+
   set(_picky_tmp "")
   foreach(_ccopt IN LISTS _picky)
     # Prefix -Wall, otherwise clang-cl interprets it as an MSVC option and translates it to -Weverything
