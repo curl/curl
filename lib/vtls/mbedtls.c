@@ -1387,34 +1387,23 @@ static size_t mbedtls_version(char *buffer, size_t size)
 #endif
 }
 
+/* 'data' might be NULL */
 static CURLcode mbedtls_random(struct Curl_easy *data,
                                unsigned char *entropy, size_t length)
 {
 #if defined(MBEDTLS_CTR_DRBG_C)
-  int ret = -1;
-  char errorbuf[128];
+  int ret;
   mbedtls_entropy_context ctr_entropy;
   mbedtls_ctr_drbg_context ctr_drbg;
   mbedtls_entropy_init(&ctr_entropy);
   mbedtls_ctr_drbg_init(&ctr_drbg);
+  (void)data;
 
   ret = mbedtls_ctr_drbg_seed(&ctr_drbg, mbedtls_entropy_func,
                               &ctr_entropy, NULL, 0);
 
-  if(ret) {
-    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "mbedtls_ctr_drbg_seed returned (-0x%04X) %s",
-          -ret, errorbuf);
-  }
-  else {
+  if(!ret)
     ret = mbedtls_ctr_drbg_random(&ctr_drbg, entropy, length);
-
-    if(ret) {
-      mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-      failf(data, "mbedtls_ctr_drbg_random returned (-0x%04X) %s",
-            -ret, errorbuf);
-    }
-  }
 
   mbedtls_ctr_drbg_free(&ctr_drbg);
   mbedtls_entropy_free(&ctr_entropy);
