@@ -31,9 +31,6 @@ if(CURL_WERROR AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
   list(APPEND _picky "-pedantic-errors")
-  if(MSVC)  # clang-cl
-    list(APPEND _picky "-Wno-language-extension-token")  # Override default error to make __int64 size detection pass
-  endif()
 endif()
 
 if(APPLE AND
@@ -135,9 +132,13 @@ if(PICKY_COMPILER)
         -Wshorten-64-to-32                 # clang  1.0
         -Wformat=2                         # clang  3.0  gcc  4.8
       )
-      if(NOT MSVC)
+      if(MSVC)
         list(APPEND _picky_enable
-          -Wlanguage-extension-token         # clang  3.0  # Avoid for clang-cl to allow __int64
+          -Wno-language-extension-token      # clang  3.0  # Avoid for clang-cl to allow __int64
+        )
+      else()
+        list(APPEND _picky_enable
+          -Wlanguage-extension-token         # clang  3.0
         )
       endif()
       # Enable based on compiler version
