@@ -44,9 +44,12 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_LBER_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(LDAP "ldap")
+  pkg_check_modules(LDAP_LBER "lber")
 endif()
 
-if(LDAP_FOUND)
+if(LDAP_FOUND AND LDAP_LBER_FOUND)
+  list(APPEND LDAP_LIBRARIES ${LDAP_LBER_LIBRARIES})
+  list(REMOVE_DUPLICATES LDAP_LIBRARIES)
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 elseif(NOT APPLE)
