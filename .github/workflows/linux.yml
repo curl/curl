@@ -48,7 +48,7 @@ env:
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
   msh3-version: 0.6.0
   # renovate: datasource=github-tags depName=awslabs/aws-lc versioning=semver registryUrl=https://github.com
-  awslc-version: 1.37.0
+  awslc-version: 1.38.0
   # handled in renovate.json
   openssl-version: 3.4.0
   # handled in renovate.json

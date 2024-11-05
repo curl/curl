@@ -47,7 +47,7 @@ env:
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
-  gnutls-version: 3.8.7
+  gnutls-version: 3.8.8
   wolfssl-version: master
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
   nghttp3-version: 1.6.0
