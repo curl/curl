@@ -47,7 +47,7 @@ This release includes the following bugfixes:
  o cmake: add missed variable to comment
  o cmake: add native `pkg-config` detection for mbedTLS, MSH3, Quiche, Rustls, wolfSSL [149]
  o cmake: allow building tests in unity mode [31]
- o cmake: allow manual configuration for LDAP [144]
+ o cmake: rename LDAP dependency config variables to match Find modules [144]
  o cmake: apply `WIN32_LEAN_AND_MEAN` to all feature checks
  o cmake: avoid setting `BUILD_TESTING` [179]
  o cmake: clear package version after `pkg-config` detection [207]
