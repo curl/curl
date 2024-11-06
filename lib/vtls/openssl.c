@@ -83,7 +83,7 @@
 #include <openssl/evp.h>
 
 #ifdef USE_ECH
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
 #  include <openssl/ech.h>
 # endif
 # include "curl_base64.h"
@@ -3849,15 +3849,15 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
     if(data->set.tls_ech & CURLECH_GREASE) {
       infof(data, "ECH: will GREASE ClientHello");
-# ifdef OPENSSL_IS_BORINGSSL
+# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
       SSL_set_enable_ech_grease(octx->ssl, 1);
 # else
       SSL_set_options(octx->ssl, SSL_OP_ECH_GREASE);
 # endif
     }
     else if(data->set.tls_ech & CURLECH_CLA_CFG) {
-# ifdef OPENSSL_IS_BORINGSSL
-      /* have to do base64 decode here for boring */
+# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
+      /* have to do base64 decode here for BoringSSL */
       const char *b64 = data->set.str[STRING_ECH_CONFIG];
 
       if(!b64) {
@@ -3917,7 +3917,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
           size_t elen = rinfo->echconfiglist_len;
 
           infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
           if(SSL_ech_set1_echconfig(octx->ssl, ecl, elen) != 1) {
             infof(data, "ECH: SSL_ECH_set1_echconfig failed");
             if(data->set.tls_ech & CURLECH_HARD)
@@ -3925,7 +3925,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
           }
 # else
           if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
-            infof(data, "ECH: SSL_set1_ech_config_list failed (boring)");
+            infof(data, "ECH: SSL_set1_ech_config_list failed (BoringSSL)");
             if(data->set.tls_ech & CURLECH_HARD)
               return CURLE_SSL_CONNECT_ERROR;
           }
@@ -3943,7 +3943,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         Curl_resolv_unlink(data, &dns);
       }
     }
-# ifdef OPENSSL_IS_BORINGSSL
+# if defined(OPENSSL_IS_BORINGSSL) || defined(OPENSSL_IS_AWSLC)
     if(trying_ech_now && outername) {
       infof(data, "ECH: setting public_name not supported with BoringSSL");
       return CURLE_SSL_CONNECT_ERROR;
@@ -3960,7 +3960,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
-# endif  /* not BORING */
+# endif  /* OPENSSL_IS_BORINGSSL || OPENSSL_IS_AWSLC */
     if(trying_ech_now
        && SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
       infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
@@ -4071,7 +4071,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
   CURLcode result = CURLE_OK;
   size_t rcl = 0;
   int rv = 1;
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
   char *inner = NULL;
   unsigned char *rcs = NULL;
   char *outer = NULL;
@@ -4086,7 +4086,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
   /* nothing to trace if not doing ECH */
   if(!ECH_ENABLED(data))
     return;
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
   rv = SSL_ech_get_retry_config(ssl, &rcs, &rcl);
 # else
   SSL_get0_ech_retry_configs(ssl, &rcs, &rcl);
@@ -4103,23 +4103,23 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
     if(!result && b64str)
       infof(data, "ECH: retry_configs %s", b64str);
     free(b64str);
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
     rv = SSL_ech_get_status(ssl, &inner, &outer);
     infof(data, "ECH: retry_configs for %s from %s, %d %d",
           inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
-#else
+# else
     rv = SSL_ech_accepted(ssl);
     servername_type = SSL_get_servername_type(ssl);
     inner = SSL_get_servername(ssl, servername_type);
     SSL_get0_ech_name_override(ssl, &outer, &out_name_len);
-    /* TODO: get the inner from boring */
+    /* TODO: get the inner from BoringSSL */
     infof(data, "ECH: retry_configs for %s from %s, %d %d",
           inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
-#endif
+# endif
   }
   else
     infof(data, "ECH: no retry_configs (rv = %d)", rv);
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
   OPENSSL_free((void *)rcs);
 # endif
   return;
@@ -4243,7 +4243,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
 #endif
 #ifdef USE_ECH
       else if((lib == ERR_LIB_SSL) &&
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
               (reason == SSL_R_ECH_REQUIRED)) {
 # else
               (reason == SSL_R_ECH_REJECTED)) {
@@ -4309,7 +4309,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           OBJ_nid2sn(psigtype_nid));
 
 #ifdef USE_ECH
-# ifndef OPENSSL_IS_BORINGSSL
+# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
     if(ECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
       const char *status = NULL;
@@ -4367,7 +4367,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
    else {
       infof(data, "ECH: result: status is not attempted");
    }
-# endif  /* BORING */
+# endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
 #endif  /* USE_ECH */
 
 #ifdef HAS_ALPN
