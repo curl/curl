@@ -47,7 +47,6 @@ This release includes the following bugfixes:
  o cmake: add missed variable to comment
  o cmake: add native `pkg-config` detection for mbedTLS, MSH3, Quiche, Rustls, wolfSSL [149]
  o cmake: allow building tests in unity mode [31]
- o cmake: rename LDAP dependency config variables to match Find modules [144]
  o cmake: apply `WIN32_LEAN_AND_MEAN` to all feature checks
  o cmake: avoid setting `BUILD_TESTING` [179]
  o cmake: clear package version after `pkg-config` detection [207]
@@ -68,6 +67,7 @@ This release includes the following bugfixes:
  o cmake: make `test-ci` target skip building dependencies [88]
  o cmake: mark as advanced some internal Find* variables [212]
  o cmake: readd `generate-curl.1` dependency for `src` just in case [86]
+ o cmake: rename LDAP dependency config variables to match Find modules [144]
  o cmake: replace `check_include_file_concat()` for LDAP and GSS detection [143]
  o cmake: replace `CURL_*_DIR` with `{PROJECT,CMAKE_CURRENT}_*_DIR` [211]
  o cmake: require quictls (or fork) when using msh3 on non-Windows [14]
@@ -147,6 +147,7 @@ This release includes the following bugfixes:
  o libtests: generate the lib1521 atomically [148]
  o mbedTLS: fix handling of TLSv1.3 sessions [184]
  o mbedtls: handle session as blobs [234]
+ o mbedtls: remove failf() use from mbedtls_random [255]
  o mk-lib1521: fix the long return code check [204]
  o mprintf: do not ignore length modifiers of `%o`, `%x`, `%X` [164]
  o mprintf: treat `%o` as unsigned, add tests for `%o`, `%x`, `%X` [162]
@@ -311,9 +312,9 @@ advice from friends like these:
   ralfjunker on github, Rasmus Melchior Jacobsen, Ray Satiro, renovate[bot],
   Robert Maynard, Sebastian Walz, Sinkevich Artem, Stefan Eissing, Tal Regev,
   Tatsuhiro Tsujikawa, Tobias Bora, Tobias Wendorff, Venkat Krishna R,
-  Viktor Szakats, Vollstrecker on github, vvb2060 on github, Yedaya Katsman,
-  zjyhjqs
-  (54 contributors)
+  Viktor Szakats, Vollstrecker on github, vvb2060 on github,
+  wxiaoguang on github, Yedaya Katsman, zjyhjqs
+  (55 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -570,4 +571,5 @@ References to bug reports and discussions on issues:
  [252] = https://curl.se/bug/?i=15461
  [253] = https://curl.se/bug/?i=15149
  [254] = https://curl.se/bug/?i=15449
+ [255] = https://curl.se/bug/?i=15485
  [256] = https://curl.se/bug/?i=15455
