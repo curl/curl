@@ -1798,7 +1798,7 @@ endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
-function(transform_makefile_inc _input_file _output_file)
+function(curl_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
