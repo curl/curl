@@ -851,7 +851,7 @@ if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL)
     # Be sure that the TLS library actually supports ECH.
     if(NOT DEFINED HAVE_ECH)
-      if(USE_OPENSSL AND HAVE_BORINGSSL)
+      if(USE_OPENSSL AND (HAVE_BORINGSSL OR HAVE_AWSLC))
         openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_ECH "")
       elseif(USE_OPENSSL)
         openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h" HAVE_ECH "")
