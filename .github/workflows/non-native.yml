@@ -100,6 +100,7 @@ jobs:
               -DCURL_USE_OPENSSL=ON \
               -DCURL_BROTLI=ON \
               || { cat bld/CMakeFiles/CMake*.yaml; false; }
+            cat bld/CMakeFiles/CMake*.yaml || true
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             cmake --build bld --config Debug
