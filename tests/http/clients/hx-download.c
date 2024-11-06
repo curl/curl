@@ -534,6 +534,7 @@ int main(int argc, char *argv[])
   free(transfers);
 
   curl_share_cleanup(share);
+  curl_slist_free_all(host);
   free(resolve);
 
   return 0;
