@@ -64,6 +64,7 @@ else()
   find_library(LDAP_LIBRARY NAMES "ldap")
   find_library(LDAP_LBER_LIBRARY NAMES "lber")
 
+  unset(LDAP_VERSION CACHE)
   if(LDAP_INCLUDE_DIR AND EXISTS "${LDAP_INCLUDE_DIR}/ldap_features.h")
     set(_version_regex1 "#[\t ]*define[\t ]+LDAP_VENDOR_VERSION_MAJOR[\t ]+([0-9]+).*")
     set(_version_regex2 "#[\t ]*define[\t ]+LDAP_VENDOR_VERSION_MINOR[\t ]+([0-9]+).*")
