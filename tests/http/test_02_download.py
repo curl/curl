@@ -633,3 +633,28 @@ class TestDownload:
         elif proto == 'h3':
             # not implemented
             assert earlydata[1] == 0, f'{earlydata}'
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("max_host_conns", [0, 1, 5])
+    def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 100
+        max_parallel = 100
+        docname = 'data-10k'
+        port = env.port_for(proto)
+        url = f'https://{env.domain1}:{port}/{docname}'
+        client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',
+             '-m', f'{max_parallel}',
+             '-x',  # always use a fresh connection
+             '-M',  str(max_host_conns),  # limit conns per host
+             '-r', f'{env.domain1}:{port}:127.0.0.1',
+             '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
