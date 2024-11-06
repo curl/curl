@@ -3960,7 +3960,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
-# endif  /* not BoringSSL or AWS-LC */
+# endif  /* OPENSSL_IS_BORINGSSL || OPENSSL_IS_AWSLC */
     if(trying_ech_now
        && SSL_set_min_proto_version(octx->ssl, TLS1_3_VERSION) != 1) {
       infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
@@ -4367,7 +4367,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
    else {
       infof(data, "ECH: result: status is not attempted");
    }
-# endif  /* BoringSSL or AWS-LC */
+# endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
 #endif  /* USE_ECH */
 
 #ifdef HAS_ALPN
