@@ -26,6 +26,7 @@ Set-Cookie: blankdomain=sure; domain=; path=/
 %if !hyper
 Set-Cookie: foobar=name; domain=anything.com; path=/ ; secure
 Set-Cookie:ismatch=this  ; domain=test31.curl; path=/silly/
+Set-Cookie:ISMATCH=this  ; domain=test31.curl; path=/silly/
 Set-Cookie: overwrite=this  ; domain=test31.curl; path=/overwrite/
 Set-Cookie: overwrite=this2  ; domain=test31.curl; path=/overwrite
 Set-Cookie: sec1value=secure1  ; domain=test31.curl; path=/secure1/ ; secure
@@ -75,6 +76,7 @@ Set-Cookie: securewithspace=after    ; secure =
 %else
 Set-Cookie: foobar=name; domain=anything.com; path=/ ; secure
 Set-Cookie: ismatch=this  ; domain=test31.curl; path=/silly/
+Set-Cookie:ISMATCH=this  ; domain=test31.curl; path=/silly/
 Set-Cookie: overwrite=this  ; domain=test31.curl; path=/overwrite/
 Set-Cookie: overwrite=this2  ; domain=test31.curl; path=/overwrite
 Set-Cookie: sec1value=secure1  ; domain=test31.curl; path=/secure1/ ; secure
@@ -181,6 +183,7 @@ test31.curl	FALSE	/we/want/	FALSE	2118138987	nodomain	value
 #HttpOnly_.test31.curl	TRUE	/p2/	FALSE	0	httpo2	value2
 #HttpOnly_.test31.curl	TRUE	/p1/	FALSE	0	httpo1	value1
 .test31.curl	TRUE	/overwrite	FALSE	0	overwrite	this2
+.test31.curl	TRUE	/silly/	FALSE	0	ISMATCH	this
 .test31.curl	TRUE	/silly/	FALSE	0	ismatch	this
 test31.curl	FALSE	/	FALSE	0	blankdomain	sure
 </file>
