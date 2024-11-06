@@ -142,7 +142,7 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.15'
           # cmake
-          - name: 'OpenSSL ws gsasl AppleIDN'
+          - name: 'OpenSSL gsasl AppleIDN'
             install: gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
             macos-version-min: '10.9'
@@ -150,7 +150,7 @@ jobs:
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
             macos-version-min: '10.9'
-          - name: 'SecureTransport ws debug'
+          - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
