@@ -306,7 +306,7 @@ int main(int argc, char *argv[])
   int http_version = CURL_HTTP_VERSION_2_0;
   int ch;
   struct curl_slist *host = NULL;
-  const char *resolve = NULL;
+  char *resolve = NULL;
   size_t max_host_conns = 0;
   int fresh_connect = 0;
 
@@ -346,7 +346,7 @@ int main(int argc, char *argv[])
       pause_offset = (size_t)strtol(optarg, NULL, 10);
       break;
     case 'r':
-      resolve = optarg;
+      resolve = strdup(optarg);
       break;
     case 'V': {
       if(!strcmp("http/1.1", optarg))
@@ -534,6 +534,7 @@ int main(int argc, char *argv[])
   free(transfers);
 
   curl_share_cleanup(share);
+  free(resolve);
 
   return 0;
 #else
