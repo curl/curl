@@ -23,7 +23,7 @@
 ###########################################################################
 include(CheckCCompilerFlag)
 
-unset(_picky)
+set(_picky "")
 
 if(CURL_WERROR AND
    ((CMAKE_COMPILER_IS_GNUCC AND
