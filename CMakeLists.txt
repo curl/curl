@@ -556,7 +556,7 @@ if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
 endif()
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
-count_true(_enabled_ssl_options_count
+curl_count_true(_enabled_ssl_options_count
   CURL_USE_SCHANNEL
   CURL_USE_SECTRANSP
   CURL_USE_OPENSSL
@@ -761,7 +761,7 @@ if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
 endif()
 
 # Keep ZLIB detection after TLS detection,
-# and before calling openssl_check_symbol_exists().
+# and before calling curl_openssl_check_symbol_exists().
 
 set(HAVE_LIBZ OFF)
 curl_dependency_option(ZLIB)
@@ -801,7 +801,7 @@ if(CURL_ZSTD)
 endif()
 
 # Check symbol in an OpenSSL-like TLS backend, or in _extra_libs depending on it.
-macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
+macro(curl_openssl_check_symbol_exists _symbol _files _variable _extra_libs)
   cmake_push_check_state()
   if(USE_OPENSSL)
     set(CMAKE_REQUIRED_INCLUDES   "${OPENSSL_INCLUDE_DIR}")
@@ -832,12 +832,12 @@ macro(openssl_check_symbol_exists _symbol _files _variable _extra_libs)
 endmacro()
 
 # Ensure that the OpenSSL fork actually supports QUIC.
-macro(openssl_check_quic)
+macro(curl_openssl_check_quic)
   if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
     if(USE_OPENSSL)
-      openssl_check_symbol_exists("SSL_CTX_set_quic_method" "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
+      curl_openssl_check_symbol_exists("SSL_CTX_set_quic_method" "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD "")
     elseif(USE_WOLFSSL)
-      openssl_check_symbol_exists("wolfSSL_set_quic_method" "wolfssl/options.h;wolfssl/openssl/ssl.h"
+      curl_openssl_check_symbol_exists("wolfSSL_set_quic_method" "wolfssl/options.h;wolfssl/openssl/ssl.h"
         HAVE_SSL_CTX_SET_QUIC_METHOD "")
     endif()
   endif()
@@ -847,17 +847,18 @@ macro(openssl_check_quic)
 endmacro()
 
 if(USE_WOLFSSL)
-  openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT "")
-  openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO "")
-  openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
+  curl_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT
+    "")
+  curl_openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO "")
+  curl_openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
 endif()
 
 if(USE_OPENSSL OR USE_WOLFSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
-    openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO "")
+    curl_openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO "")
   endif()
   if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
-    openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP "")
+    curl_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP "")
   endif()
 endif()
 
@@ -868,11 +869,11 @@ if(USE_ECH)
     # Be sure that the TLS library actually supports ECH.
     if(NOT DEFINED HAVE_ECH)
       if(USE_OPENSSL AND (HAVE_BORINGSSL OR HAVE_AWSLC))
-        openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_ECH "")
+        curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_ECH "")
       elseif(USE_OPENSSL)
-        openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h" HAVE_ECH "")
+        curl_openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h" HAVE_ECH "")
       elseif(USE_WOLFSSL)
-        openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h" HAVE_ECH "")
+        curl_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h" HAVE_ECH "")
       endif()
     endif()
     if(NOT HAVE_ECH)
@@ -910,7 +911,7 @@ if(USE_NGTCP2)
       find_package(NGTCP2 REQUIRED "quictls")
       list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2_crypto_quictls")
     endif()
-    openssl_check_quic()
+    curl_openssl_check_quic()
   elseif(USE_GNUTLS)
     find_package(NGTCP2 REQUIRED "GnuTLS")
     list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "libngtcp2_crypto_gnutls")
@@ -937,7 +938,7 @@ if(USE_QUICHE)
   if(NOT HAVE_BORINGSSL)
     message(FATAL_ERROR "quiche requires BoringSSL")
   endif()
-  openssl_check_quic()
+  curl_openssl_check_quic()
   list(APPEND CURL_LIBS ${QUICHE_LIBRARIES})
   list(APPEND CURL_LIBDIRS ${QUICHE_LIBRARY_DIRS})
   list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "quiche")
@@ -964,7 +965,7 @@ if(USE_MSH3)
     if(NOT USE_OPENSSL)
       message(FATAL_ERROR "msh3/msquic requires OpenSSL fork with QUIC API")
     endif()
-    openssl_check_quic()
+    curl_openssl_check_quic()
   endif()
   find_package(MSH3 REQUIRED)
   list(APPEND CURL_LIBS ${MSH3_LIBRARIES})
@@ -1266,7 +1267,7 @@ if(USE_LIBRTMP)
   if(WIN32)
     list(APPEND _extra_libs "winmm")
   endif()
-  openssl_check_symbol_exists("RTMP_Init" "librtmp/rtmp.h" HAVE_LIBRTMP "${_extra_libs}")
+  curl_openssl_check_symbol_exists("RTMP_Init" "librtmp/rtmp.h" HAVE_LIBRTMP "${_extra_libs}")
   if(HAVE_LIBRTMP)
     list(APPEND CURL_LIBS "rtmp")
     list(APPEND LIBCURL_PC_REQUIRES_PRIVATE "librtmp")
@@ -1413,8 +1414,8 @@ endif()
 
 # Detect headers
 
-# Use check_include_file_concat() for headers required by subsequent
-# check_include_file_concat() or check_symbol_exists() detections.
+# Use check_include_file_concat_curl() for headers required by subsequent
+# check_include_file_concat_curl() or check_symbol_exists() detections.
 # Order for these is significant.
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
@@ -1422,30 +1423,30 @@ check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
 check_include_file("sys/resource.h"   HAVE_SYS_RESOURCE_H)
-check_include_file_concat("sys/select.h"     HAVE_SYS_SELECT_H)
-check_include_file_concat("sys/socket.h"     HAVE_SYS_SOCKET_H)
+check_include_file_concat_curl("sys/select.h"     HAVE_SYS_SELECT_H)
+check_include_file_concat_curl("sys/socket.h"     HAVE_SYS_SOCKET_H)
 check_include_file("sys/sockio.h"     HAVE_SYS_SOCKIO_H)
 check_include_file("sys/stat.h"       HAVE_SYS_STAT_H)
-check_include_file_concat("sys/time.h"       HAVE_SYS_TIME_H)
-check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
+check_include_file_concat_curl("sys/time.h"       HAVE_SYS_TIME_H)
+check_include_file_concat_curl("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
 check_include_file("sys/utime.h"      HAVE_SYS_UTIME_H)
 check_include_file("sys/xattr.h"      HAVE_SYS_XATTR_H)
 
-check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
+check_include_file_concat_curl("arpa/inet.h"      HAVE_ARPA_INET_H)
 check_include_file("dirent.h"         HAVE_DIRENT_H)
 check_include_file("fcntl.h"          HAVE_FCNTL_H)
-check_include_file_concat("ifaddrs.h"        HAVE_IFADDRS_H)
+check_include_file_concat_curl("ifaddrs.h"        HAVE_IFADDRS_H)
 check_include_file("io.h"             HAVE_IO_H)
-check_include_file_concat("libgen.h"         HAVE_LIBGEN_H)
+check_include_file_concat_curl("libgen.h"         HAVE_LIBGEN_H)
 check_include_file("linux/tcp.h"      HAVE_LINUX_TCP_H)
 check_include_file("locale.h"         HAVE_LOCALE_H)
 check_include_file("net/if.h"         HAVE_NET_IF_H)
-check_include_file_concat("netdb.h"          HAVE_NETDB_H)
-check_include_file_concat("netinet/in.h"     HAVE_NETINET_IN_H)
+check_include_file_concat_curl("netdb.h"          HAVE_NETDB_H)
+check_include_file_concat_curl("netinet/in.h"     HAVE_NETINET_IN_H)
 check_include_file("netinet/in6.h"    HAVE_NETINET_IN6_H)
-check_include_file_concat("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
-check_include_file_concat("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
+check_include_file_concat_curl("netinet/tcp.h"    HAVE_NETINET_TCP_H)  # sys/types.h (e.g. Cygwin) netinet/in.h
+check_include_file_concat_curl("netinet/udp.h"    HAVE_NETINET_UDP_H)  # sys/types.h (e.g. Cygwin)
 check_include_file("poll.h"           HAVE_POLL_H)
 check_include_file("pwd.h"            HAVE_PWD_H)
 check_include_file("stdatomic.h"      HAVE_STDATOMIC_H)
@@ -1454,11 +1455,11 @@ check_include_file("strings.h"        HAVE_STRINGS_H)
 check_include_file("stropts.h"        HAVE_STROPTS_H)
 check_include_file("termio.h"         HAVE_TERMIO_H)
 check_include_file("termios.h"        HAVE_TERMIOS_H)
-check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
+check_include_file_concat_curl("unistd.h"         HAVE_UNISTD_H)
 check_include_file("utime.h"          HAVE_UTIME_H)
 
 if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
-  check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
+  check_include_file_concat_curl("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
 # Pass these detection results to curl_internal_test() for use in CurlTests.c
@@ -1798,7 +1799,7 @@ endif()
 
 # Ugly (but functional) way to include "Makefile.inc" by transforming it
 # (= regenerate it).
-function(transform_makefile_inc _input_file _output_file)
+function(curl_transform_makefile_inc _input_file _output_file)
   file(READ ${_input_file} _makefile_inc_text)
   string(REPLACE "$(top_srcdir)"   "\${PROJECT_SOURCE_DIR}" _makefile_inc_text ${_makefile_inc_text})
   string(REPLACE "$(top_builddir)" "\${PROJECT_BINARY_DIR}" _makefile_inc_text ${_makefile_inc_text})
@@ -1854,7 +1855,7 @@ endif()
 
 # Helper to populate a list (_items) with a label when conditions
 # (the remaining args) are satisfied
-macro(_add_if _label)
+macro(curl_add_if _label)
   # Needs to be a macro to allow this indirection
   if(${ARGN})
     set(_items ${_items} "${_label}")
@@ -1875,40 +1876,40 @@ endif()
 
 # Clear list and try to detect available protocols
 set(_items "")
-_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
-_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
-_add_if("FTP"           NOT CURL_DISABLE_FTP)
-_add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
-_add_if("FILE"          NOT CURL_DISABLE_FILE)
-_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
-_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
+curl_add_if("HTTP"          NOT CURL_DISABLE_HTTP)
+curl_add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
+curl_add_if("FTP"           NOT CURL_DISABLE_FTP)
+curl_add_if("FTPS"          NOT CURL_DISABLE_FTP AND _ssl_enabled)
+curl_add_if("FILE"          NOT CURL_DISABLE_FILE)
+curl_add_if("TELNET"        NOT CURL_DISABLE_TELNET)
+curl_add_if("LDAP"          NOT CURL_DISABLE_LDAP)
 # CURL_DISABLE_LDAP implies CURL_DISABLE_LDAPS
-_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
-                        ((USE_OPENLDAP AND _ssl_enabled) OR
-                        (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
-_add_if("DICT"          NOT CURL_DISABLE_DICT)
-_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
-_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
-_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
-_add_if("POP3"          NOT CURL_DISABLE_POP3)
-_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
-_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
-_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
-_add_if("SMB"           NOT CURL_DISABLE_SMB AND
-                        _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-_add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
-                        _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
-_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
-_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
-_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
-_add_if("IPFS"          NOT CURL_DISABLE_IPFS)
-_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
-_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
-_add_if("RTMP"          USE_LIBRTMP)
-_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
-_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
-_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
+curl_add_if("LDAPS"         NOT CURL_DISABLE_LDAPS AND
+                            ((USE_OPENLDAP AND _ssl_enabled) OR
+                            (NOT USE_OPENLDAP AND HAVE_LDAP_SSL)))
+curl_add_if("DICT"          NOT CURL_DISABLE_DICT)
+curl_add_if("TFTP"          NOT CURL_DISABLE_TFTP)
+curl_add_if("GOPHER"        NOT CURL_DISABLE_GOPHER)
+curl_add_if("GOPHERS"       NOT CURL_DISABLE_GOPHER AND _ssl_enabled)
+curl_add_if("POP3"          NOT CURL_DISABLE_POP3)
+curl_add_if("POP3S"         NOT CURL_DISABLE_POP3 AND _ssl_enabled)
+curl_add_if("IMAP"          NOT CURL_DISABLE_IMAP)
+curl_add_if("IMAPS"         NOT CURL_DISABLE_IMAP AND _ssl_enabled)
+curl_add_if("SMB"           NOT CURL_DISABLE_SMB AND
+                            _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+curl_add_if("SMBS"          NOT CURL_DISABLE_SMB AND _ssl_enabled AND
+                            _use_curl_ntlm_core AND (SIZEOF_CURL_OFF_T GREATER 4))
+curl_add_if("SMTP"          NOT CURL_DISABLE_SMTP)
+curl_add_if("SMTPS"         NOT CURL_DISABLE_SMTP AND _ssl_enabled)
+curl_add_if("SCP"           USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+curl_add_if("SFTP"          USE_LIBSSH2 OR USE_LIBSSH OR USE_WOLFSSH)
+curl_add_if("IPFS"          NOT CURL_DISABLE_IPFS)
+curl_add_if("IPNS"          NOT CURL_DISABLE_IPFS)
+curl_add_if("RTSP"          NOT CURL_DISABLE_RTSP)
+curl_add_if("RTMP"          USE_LIBRTMP)
+curl_add_if("MQTT"          NOT CURL_DISABLE_MQTT)
+curl_add_if("WS"            NOT CURL_DISABLE_WEBSOCKETS)
+curl_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
 if(_items)
   list(SORT _items)
 endif()
@@ -1918,46 +1919,46 @@ message(STATUS "Protocols: ${_support_protocols_lower}")
 
 # Clear list and try to detect available features
 set(_items "")
-_add_if("SSL"           _ssl_enabled)
-_add_if("IPv6"          ENABLE_IPV6)
-_add_if("UnixSockets"   USE_UNIX_SOCKETS)
-_add_if("libz"          HAVE_LIBZ)
-_add_if("brotli"        HAVE_BROTLI)
-_add_if("gsasl"         USE_GSASL)
-_add_if("zstd"          HAVE_ZSTD)
-_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
-                        USE_WIN32_IDN OR
-                        USE_APPLE_IDN)
-_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
-                        ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
-_add_if("SSPI"          USE_WINDOWS_SSPI)
-_add_if("GSS-API"       HAVE_GSSAPI)
-_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
-_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
-_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
-                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
-                        (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
-_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
-                        (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
-_add_if("TLS-SRP"       USE_TLS_SRP)
-_add_if("HTTP2"         USE_NGHTTP2)
-_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
-_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
-_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
-                        OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
-                        USE_MBEDTLS OR USE_SECTRANSP OR
-                        (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))
-_add_if("Unicode"       ENABLE_UNICODE)
-_add_if("threadsafe"    HAVE_ATOMIC OR
-                        (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
-                        (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
-_add_if("Debug"         ENABLE_DEBUG)
-_add_if("TrackMemory"   ENABLE_CURLDEBUG)
-_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
-_add_if("PSL"           USE_LIBPSL)
-_add_if("CAcert"        CURL_CA_EMBED_SET)
+curl_add_if("SSL"           _ssl_enabled)
+curl_add_if("IPv6"          ENABLE_IPV6)
+curl_add_if("UnixSockets"   USE_UNIX_SOCKETS)
+curl_add_if("libz"          HAVE_LIBZ)
+curl_add_if("brotli"        HAVE_BROTLI)
+curl_add_if("gsasl"         USE_GSASL)
+curl_add_if("zstd"          HAVE_ZSTD)
+curl_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
+curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
+                            USE_WIN32_IDN OR
+                            USE_APPLE_IDN)
+curl_add_if("Largefile"     (SIZEOF_CURL_OFF_T GREATER 4) AND
+                            ((SIZEOF_OFF_T GREATER 4) OR USE_WIN32_LARGE_FILES))
+curl_add_if("SSPI"          USE_WINDOWS_SSPI)
+curl_add_if("GSS-API"       HAVE_GSSAPI)
+curl_add_if("alt-svc"       NOT CURL_DISABLE_ALTSVC)
+curl_add_if("HSTS"          NOT CURL_DISABLE_HSTS)
+curl_add_if("SPNEGO"        NOT CURL_DISABLE_NEGOTIATE_AUTH AND
+                            (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+curl_add_if("Kerberos"      NOT CURL_DISABLE_KERBEROS_AUTH AND
+                            (HAVE_GSSAPI OR USE_WINDOWS_SSPI))
+curl_add_if("NTLM"          NOT (CURL_DISABLE_NTLM) AND
+                            (_use_curl_ntlm_core OR USE_WINDOWS_SSPI))
+curl_add_if("TLS-SRP"       USE_TLS_SRP)
+curl_add_if("HTTP2"         USE_NGHTTP2)
+curl_add_if("HTTP3"         USE_NGTCP2 OR USE_QUICHE OR USE_MSH3 OR USE_OPENSSL_QUIC)
+curl_add_if("MultiSSL"      CURL_WITH_MULTI_SSL)
+curl_add_if("HTTPS-proxy"   _ssl_enabled AND (USE_OPENSSL OR USE_GNUTLS
+                            OR USE_SCHANNEL OR USE_RUSTLS OR USE_BEARSSL OR
+                            USE_MBEDTLS OR USE_SECTRANSP OR
+                            (USE_WOLFSSL AND HAVE_WOLFSSL_BIO)))
+curl_add_if("Unicode"       ENABLE_UNICODE)
+curl_add_if("threadsafe"    HAVE_ATOMIC OR
+                            (USE_THREADS_POSIX AND HAVE_PTHREAD_H) OR
+                            (WIN32 AND HAVE_WIN32_WINNT GREATER_EQUAL 0x0600))
+curl_add_if("Debug"         ENABLE_DEBUG)
+curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
+curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
+curl_add_if("PSL"           USE_LIBPSL)
+curl_add_if("CAcert"        CURL_CA_EMBED_SET)
 if(_items)
   if(NOT CMAKE_VERSION VERSION_LESS 3.13)
     list(SORT _items CASE INSENSITIVE)
@@ -1970,15 +1971,15 @@ message(STATUS "Features: ${SUPPORT_FEATURES}")
 
 # Clear list and collect SSL backends
 set(_items "")
-_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
-_add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
-_add_if("OpenSSL v3+"      _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
-_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
-_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
-_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
-_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
-_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
-_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
+curl_add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
+curl_add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
+curl_add_if("OpenSSL v3+"      _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
+curl_add_if("Secure Transport" _ssl_enabled AND USE_SECTRANSP)
+curl_add_if("mbedTLS"          _ssl_enabled AND USE_MBEDTLS)
+curl_add_if("BearSSL"          _ssl_enabled AND USE_BEARSSL)
+curl_add_if("wolfSSL"          _ssl_enabled AND USE_WOLFSSL)
+curl_add_if("GnuTLS"           _ssl_enabled AND USE_GNUTLS)
+curl_add_if("rustls"           _ssl_enabled AND USE_RUSTLS)
 
 if(_items)
   if(NOT CMAKE_VERSION VERSION_LESS 3.13)
