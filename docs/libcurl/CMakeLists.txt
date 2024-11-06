@@ -25,7 +25,7 @@
 transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-function(add_manual_pages _listname)
+function(curl_add_manual_pages _listname)
   # Maximum number of files per command to stay within shell/OS limits
   if(CMAKE_HOST_UNIX)
     set(_files_per_batch 10000)
@@ -74,7 +74,7 @@ add_custom_command(OUTPUT "libcurl-symbols.md"
   VERBATIM
 )
 
-add_manual_pages(man_MANS)
+curl_add_manual_pages(man_MANS)
 add_custom_target(curl-man ALL DEPENDS ${man_MANS})
 if(NOT CURL_DISABLE_INSTALL)
   set(_src "")

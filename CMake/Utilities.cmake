@@ -24,7 +24,7 @@
 # File containing various utilities
 
 # Returns number of arguments that evaluate to true
-function(count_true _output_count_var)
+function(curl_count_true _output_count_var)
   set(lst_len 0)
   foreach(option_var IN LISTS ARGN)
     if(${option_var})

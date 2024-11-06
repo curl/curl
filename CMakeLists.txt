@@ -556,7 +556,7 @@ if(USE_OPENSSL_QUIC AND NOT CURL_USE_OPENSSL)
 endif()
 option(CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG "Disable automatic loading of OpenSSL configuration" OFF)
 
-count_true(_enabled_ssl_options_count
+curl_count_true(_enabled_ssl_options_count
   CURL_USE_SCHANNEL
   CURL_USE_SECTRANSP
   CURL_USE_OPENSSL
