@@ -25,18 +25,18 @@
 #
 # Input variables:
 #
-# LDAP_INCLUDE_DIR   The ldap include directory
-# LDAP_LIBRARY       Path to ldap library
-# LDAP_LBER_LIBRARY  Path to mbedx509 library
+# - `LDAP_INCLUDE_DIR`:   The ldap include directory.
+# - `LDAP_LIBRARY`:       Path to `ldap` library.
+# - `LDAP_LBER_LIBRARY`:  Path to `lber` library.
 #
 # Result variables:
 #
-# LDAP_FOUND         System has ldap
-# LDAP_INCLUDE_DIRS  The ldap include directories
-# LDAP_LIBRARIES     The ldap library names
-# LDAP_LIBRARY_DIRS  The ldap library directories
-# LDAP_CFLAGS        Required compiler flags
-# LDAP_VERSION       Version of ldap
+# - `LDAP_FOUND`:         System has ldap.
+# - `LDAP_INCLUDE_DIRS`:  The ldap include directories.
+# - `LDAP_LIBRARIES`:     The ldap library names.
+# - `LDAP_LIBRARY_DIRS`:  The ldap library directories.
+# - `LDAP_CFLAGS`:        Required compiler flags.
+# - `LDAP_VERSION`:       Version of ldap.
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LDAP_INCLUDE_DIR AND
