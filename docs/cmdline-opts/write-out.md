@@ -230,6 +230,12 @@ The time, in seconds, it took from the start until the file transfer was just
 about to begin. This includes all pre-transfer commands and negotiations that
 are specific to the particular protocol(s) involved.
 
+## `time_queue`
+The time, in seconds, the transfer was queued during its run. This adds
+the queue time for each redirect step that may have happened. Transfers
+may be queued for significant amounts of time when connection or parallel
+limits are in place. (Added in 8.12.0)
+
 ## `time_redirect`
 The time, in seconds, it took for all redirection steps including name lookup,
 connect, pretransfer and transfer before the final transaction was
