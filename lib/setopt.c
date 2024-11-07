@@ -1146,7 +1146,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * raw data passed to the application when content encoding is used
      */
-    data->set.http_ce_skip = enabled;
+    data->set.http_ce_skip = !enabled; /* reversed */
     break;
 
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
