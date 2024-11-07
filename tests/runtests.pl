@@ -871,7 +871,8 @@ sub checksystemfeatures {
                "*\n");
     }
 
-    logmsg sprintf("* Env: %s%s%s%s", $valgrind?"Valgrind ":"",
+    logmsg sprintf("* Env: %s%s%s%s%s", $valgrind?"Valgrind ":"",
+                   $run_duphandle?"test-duphandle ":"",
                    $run_event_based?"event-based ":"",
                    $bundle?"bundle ":"",
                    $nghttpx_h3);
@@ -2270,9 +2271,13 @@ while(@ARGV) {
         # have the servers display protocol output
         $debugprotocol=1;
     }
-    elsif($ARGV[0] eq "-e") {
+    elsif(($ARGV[0] eq "-e") || ($ARGV[0] eq "--test-event")) {
         # run the tests cases event based if possible
         $run_event_based=1;
+    }
+    elsif($ARGV[0] eq "--test-duphandle") {
+        # run the tests with --test-duphandle
+        $run_duphandle=1;
     }
     elsif($ARGV[0] eq "-f") {
         # force - run the test case even if listed in DISABLED

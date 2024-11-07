@@ -894,6 +894,9 @@ sub singletest_run {
             $cmdargs .= "--test-event ";
             $fail_due_event_based--;
         }
+        if($run_duphandle) {
+            $cmdargs .= "--test-duphandle ";
+        }
         $cmdargs .= $cmd;
         if ($proxy_address) {
             $cmdargs .= " --proxy $proxy_address ";

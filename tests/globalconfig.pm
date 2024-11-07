@@ -54,6 +54,7 @@ BEGIN {
         $PROXYIN
         $pwd
         $randseed
+        $run_duphandle
         $run_event_based
         $SERVERCMD
         $SERVERIN
@@ -83,6 +84,7 @@ our $verbose;         # 1 to show verbose test output
 our $torture;         # 1 to enable torture testing
 our $proxy_address;   # external HTTP proxy address
 our $listonly;        # only list the tests
+our $run_duphandle;   # run curl with --test-duphandle to verify handle duplication
 our $run_event_based; # run curl with --test-event to test the event API
 our $automakestyle;   # use automake-like test status output format
 our $anyway;          # continue anyway, even if a test fail

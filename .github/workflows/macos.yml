@@ -136,7 +136,7 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.9'
-            tflags: -e
+            tflags: --test-event
           - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)

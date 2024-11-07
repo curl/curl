@@ -180,6 +180,7 @@ my %opts = (
     '--include' => 6,
 
     # for tests and debug only, can remain hidden
+    '--test-duphandle' => 6,
     '--test-event' => 6,
     '--wdebug' => 6,
     );
