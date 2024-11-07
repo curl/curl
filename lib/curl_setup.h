@@ -45,7 +45,7 @@
 
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0.
    Fixed it 14.2.0_1. We also omit the workaround for 14.2.0 because there
-   is now way to tall 14.2.0_1 and 14.2.0 apart, and the workaround breaks
+   is no macro to tell 14.2.0_1 and 14.2.0 apart, and the workaround breaks
    the fixed 14.2.0_1 version.
    that started advertising the `availability` attribute, which then gets used
    by Apple SDK, but, in a way incompatible with gcc, resulting in misc errors
