@@ -3674,14 +3674,14 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_mode(octx->ssl_ctx, SSL_MODE_ACCEPT_MOVING_WRITE_BUFFER);
 #endif
 
-#ifdef HAS_ALPN
   if(alpn && alpn_len) {
+#ifdef HAS_ALPN
     if(SSL_CTX_set_alpn_protos(octx->ssl_ctx, alpn, (int)alpn_len)) {
       failf(data, "Error setting ALPN");
       return CURLE_SSL_CONNECT_ERROR;
     }
-  }
 #endif
+  }
 
   if(ssl_cert || ssl_cert_blob || ssl_cert_type) {
     if(!result &&
