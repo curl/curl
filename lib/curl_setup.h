@@ -54,19 +54,16 @@
    Work it around by overriding the built-in feature-check macro used by the
    headers to enable the problematic attributes. This makes the feature check
    fail.
-   Fixed upstream in 14.2.0_1. We also omit the workaround for 14.2.0 because
-   there is no macro to tell 14.2.0_1 and 14.2.0 apart, and the workaround
-   breaks the fixed 14.2.0_1 version. */
-#if defined(__APPLE__) &&                                 \
-  !defined(__clang__) &&                                  \
-  !defined(CURL_NO_APPLE_AVAILABILITY_WORKAROUND) &&      \
-  defined(__GNUC__) &&                                    \
-  (defined(CURL_APPLE_AVAILABILITY_WORKAROUND) ||         \
-   __GNUC__ == 12 ||                                      \
-   __GNUC__ == 13 ||                                      \
-  (__GNUC__ == 14 &&                                      \
-    defined(__GNUC_MINOR__) && (__GNUC_MINOR__ <= 1))) && \
-  defined(__has_attribute)
+   Fixed upstream in 14.2.0_1. Disable the workaround if the fix is detected.
+ */
+#if defined(__APPLE__) &&                            \
+  !defined(__clang__) &&                             \
+  !defined(CURL_NO_APPLE_AVAILABILITY_WORKAROUND) && \
+  defined(__GNUC__) &&                               \
+  defined(__has_attribute) &&                        \
+  (defined(CURL_APPLE_AVAILABILITY_WORKAROUND) ||    \
+   !defined(__has_feature) ||                        \
+   !__has_feature(attribute_availability))
 #define availability curl_pp_attribute_disabled
 #endif
 
