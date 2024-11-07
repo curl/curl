@@ -56,15 +56,17 @@
    fail.
    Fixed upstream in 14.2.0_1. Disable the workaround if the fix is detected.
  */
-#if defined(__APPLE__) &&                            \
-  !defined(__clang__) &&                             \
-  !defined(CURL_NO_APPLE_AVAILABILITY_WORKAROUND) && \
-  defined(__GNUC__) &&                               \
-  defined(__has_attribute) &&                        \
-  (defined(CURL_APPLE_AVAILABILITY_WORKAROUND) ||    \
-   !defined(__has_feature) ||                        \
-   !__has_feature(attribute_availability))
+#if defined(__APPLE__) &&                          \
+  !defined(__clang__) &&                           \
+  defined(__GNUC__) &&                             \
+  defined(__has_attribute) &&                      \
+  !defined(CURL_NO_APPLE_AVAILABILITY_WORKAROUND)
+/* Separate #if to make it compile with some non-Apple gcc compilers */
+#if defined(CURL_APPLE_AVAILABILITY_WORKAROUND) || \
+  !defined(__has_feature) ||                       \
+  !__has_feature(attribute_availability)
 #define availability curl_pp_attribute_disabled
+#endif
 #endif
 
 #if defined(__APPLE__)
