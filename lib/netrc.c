@@ -58,9 +58,9 @@ enum found_state {
 #define NETRC_FAILED -1
 #define NETRC_SUCCESS 0
 
-#define MAX_NETRC_LINE 4096
-#define MAX_NETRC_FILE (64*1024)
-#define MAX_NETRC_TOKEN 128
+#define MAX_NETRC_LINE 16384
+#define MAX_NETRC_FILE (128*1024)
+#define MAX_NETRC_TOKEN 4096
 
 static CURLcode file2memory(const char *filename, struct dynbuf *filebuf)
 {
