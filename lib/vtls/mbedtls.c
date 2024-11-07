@@ -54,11 +54,6 @@
 #  ifdef MBEDTLS_DEBUG
 #    include <mbedtls/debug.h>
 #  endif
-
-#  ifndef MBEDTLS_THREADING_C
-#    error mbedtls is built without thread-safety, please see Mbed TLS\
- documentation about 'MBEDTLS_THREADING_C'.
-#  endif
 #endif /* MBEDTLS_VERSION_MAJOR >= 2 */
 
 #include "cipher_suite.h"
@@ -127,7 +122,7 @@ struct mbed_ssl_backend_data {
 #define HAS_SESSION_TICKETS
 #endif
 
-#if defined(THREADING_SUPPORT)
+#ifdef THREADING_SUPPORT
 static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
@@ -589,16 +584,6 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     failf(data, "Not supported SSL version");
     return CURLE_NOT_BUILT_IN;
   }
-
-#ifdef TLS13_SUPPORT
-  ret = psa_crypto_init();
-  if(ret != PSA_SUCCESS) {
-    mbedtls_strerror(ret, errorbuf, sizeof(errorbuf));
-    failf(data, "mbedTLS psa_crypto_init returned (-0x%04X) %s",
-          -ret, errorbuf);
-    return CURLE_SSL_CONNECT_ERROR;
-  }
-#endif /* TLS13_SUPPORT */
 
 #ifdef THREADING_SUPPORT
   mbedtls_ctr_drbg_init(&backend->ctr_drbg);
@@ -1576,6 +1561,20 @@ static int mbedtls_init(void)
 #ifdef THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
+#ifdef TLS13_SUPPORT
+  {
+    int ret;
+#ifdef THREADING_SUPPORT
+    Curl_mbedtlsthreadlock_lock_function(0);
+#endif
+    ret = psa_crypto_init();
+#ifdef THREADING_SUPPORT
+    Curl_mbedtlsthreadlock_unlock_function(0);
+#endif
+    if(ret != PSA_SUCCESS)
+      return 0;
+  }
+#endif /* TLS13_SUPPORT */
   return 1;
 }
 
