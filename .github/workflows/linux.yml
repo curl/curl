@@ -418,6 +418,8 @@ jobs:
           git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
           cd mbedtls
           git submodule update --init --depth=1
+          ./scripts/config.py set MBEDTLS_THREADING_C
+          ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
             -DENABLE_PROGRAMS=OFF -DENABLE_TESTING=OFF
           cmake --build .

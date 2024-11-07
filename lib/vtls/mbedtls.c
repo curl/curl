@@ -54,7 +54,12 @@
 #  ifdef MBEDTLS_DEBUG
 #    include <mbedtls/debug.h>
 #  endif
-#endif
+
+#  ifndef MBEDTLS_THREADING_C
+#    error mbedtls is built without thread-safety, please see Mbed TLS\
+ documentation about 'MBEDTLS_THREADING_C'.
+#  endif
+#endif /* MBEDTLS_VERSION_MAJOR >= 2 */
 
 #include "cipher_suite.h"
 #include "strcase.h"
