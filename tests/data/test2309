@@ -30,6 +30,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
+<features>
+proxy
+</features>
 
 # Reproducing issue 15496
 <name>
