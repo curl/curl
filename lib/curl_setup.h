@@ -53,8 +53,7 @@
    Followed by missing declarations.
    Work it around by overriding the built-in feature-check macro used by the
    headers to enable the problematic attributes. This makes the feature check
-   fail. Fixed in 14.2.0_1. Disable the workaround if the fix is detected.
- */
+   fail. Fixed in 14.2.0_1. Disable the workaround if the fix is detected. */
 #if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__) && \
   defined(__has_attribute)
 #  if !defined(__has_feature)
