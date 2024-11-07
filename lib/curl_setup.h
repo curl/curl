@@ -58,8 +58,10 @@
    to enable the problematic attributes. This makes the feature check fail. */
 #if defined(__APPLE__) &&                                 \
   !defined(__clang__) &&                                  \
+  !defined(CURL_NO_APPLE_AVAILABILITY_WORKAROUND) &&      \
   defined(__GNUC__) &&                                    \
-  (__GNUC__ == 12 ||                                      \
+  (defined(CURL_APPLE_AVAILABILITY_WORKAROUND) ||         \
+   __GNUC__ == 12 ||                                      \
    __GNUC__ == 13 ||                                      \
   (__GNUC__ == 14 &&                                      \
     defined(__GNUC_MINOR__) && (__GNUC_MINOR__ <= 1))) && \
