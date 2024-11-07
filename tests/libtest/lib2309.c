@@ -27,7 +27,7 @@
 
 #include <curl/curl.h>
 
-static size_t cb_curl(char *buffer, size_t size, size_t nmemb, void *userp)
+static size_t cb_ignore(char *buffer, size_t size, size_t nmemb, void *userp)
 {
   (void)buffer;
   (void)size;
@@ -45,7 +45,7 @@ CURLcode test(char *URL)
   global_init(CURL_GLOBAL_ALL);
   curl = curl_easy_init();
   if(curl) {
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb_curl);
+    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb_ignore);
     curl_easy_setopt(curl, CURLOPT_URL, URL);
     curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
     curl_easy_setopt(curl, CURLOPT_PROXY, libtest_arg3);
