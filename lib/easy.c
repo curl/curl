@@ -940,6 +940,7 @@ CURL *curl_easy_duphandle(CURL *d)
     goto fail;
 
   Curl_dyn_init(&outcurl->state.headerb, CURL_MAX_HTTP_HEADER);
+  Curl_netrc_init(&outcurl->state.netrc);
 
   /* the connection pool is setup on demand */
   outcurl->state.lastconnect_id = -1;
