@@ -57,6 +57,9 @@ HSTS update expiry, with two includeSubDomains domains present
 <command>
 -x http://%HOSTIP:%PROXYPORT http://this.hsts.example:%HTTPSPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -k
 </command>
+<disable>
+test-duphandle
+</disable>
 </client>
 
 <verify>

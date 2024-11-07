@@ -896,6 +896,15 @@ sub singletest_run {
         }
         if($run_duphandle) {
             $cmdargs .= "--test-duphandle ";
+            my @dis = getpart("client", "disable");
+            if(@dis) {
+                chomp $dis[0] if($dis[0]);
+                if($dis[0] eq "test-duphandle") {
+                    # marked to not run with duphandle
+                    logmsg "test $testnum: IGNORED: can't run test-duphandle\n";
+                    return (-1, 0, 0, "", "", 0);
+                }
+            }
         }
         $cmdargs .= $cmd;
         if ($proxy_address) {

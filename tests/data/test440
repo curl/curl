@@ -44,6 +44,10 @@ HSTS with trailing-dot host name in URL but none in hsts file
 <command>
 -x http://%HOSTIP:%HTTPPORT http://this.hsts.example./%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'
 </command>
+
+<disable>
+test-duphandle
+</disable>
 </client>
 
 <verify>

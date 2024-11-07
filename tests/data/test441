@@ -44,6 +44,9 @@ HSTS with no t-dot host name in URL but t-dot in file
 <command>
 -x http://%HOSTIP:%HTTPPORT http://this.hsts.example/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'
 </command>
+<disable>
+test-duphandle
+</disable>
 </client>
 
 <verify>

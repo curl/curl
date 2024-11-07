@@ -1003,9 +1003,12 @@ CURL *curl_easy_duphandle(CURL *d)
     outcurl->hsts = Curl_hsts_init();
     if(!outcurl->hsts)
       goto fail;
-    if(outcurl->set.str[STRING_HSTS])
-      (void)Curl_hsts_loadfile(outcurl,
-                               outcurl->hsts, outcurl->set.str[STRING_HSTS]);
+    if(data->state.hstslist) {
+      outcurl->state.hstslist = Curl_slist_duplicate(data->state.hstslist);
+      if(!outcurl->state.hstslist)
+        goto fail;
+      (void)Curl_hsts_loadfiles(outcurl);
+    }
     (void)Curl_hsts_loadcb(outcurl, outcurl->hsts);
   }
 #endif
