@@ -55,6 +55,9 @@ HSTS with updated expiry in response
 <command>
 -x http://%HOSTIP:%PROXYPORT http://this.hsts.example:%HTTPSPORT/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -k
 </command>
+<disable>
+test-duphandle
+</disable>
 </client>
 
 <verify>

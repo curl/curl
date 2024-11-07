@@ -43,6 +43,9 @@ HSTS and %{url_effective} after upgrade
 <command>
 -x http://%HOSTIP:%HTTPPORT http://this.hsts.example/%TESTNUMBER --hsts %LOGDIR/input%TESTNUMBER -w '%{url_effective}\n'
 </command>
+<disable>
+test-duphandle
+</disable>
 </client>
 
 <verify>

@@ -2885,6 +2885,17 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
       if(getenv("CURL_FORBID_REUSE"))
         (void)curl_easy_setopt(per->curl, CURLOPT_FORBID_REUSE, 1L);
 
+      if(global->test_duphandle) {
+        CURL *dup = curl_easy_duphandle(per->curl);
+        curl_easy_cleanup(per->curl);
+        per->curl = dup;
+        if(!dup) {
+          result = CURLE_OUT_OF_MEMORY;
+          break;
+        }
+        /* a duplicate needs the share re-added */
+        (void)curl_easy_setopt(per->curl, CURLOPT_SHARE, share);
+      }
       if(global->test_event_based)
         result = curl_easy_perform_ev(per->curl);
       else

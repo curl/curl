@@ -118,7 +118,7 @@ exclusion, the second field contains a pattern and the final field contains
 the reason why matching tests should be skipped. The exclusion types are
 *keyword*, *test*, and *tool*.
 
-## `-e`
+## `-e` or `--test-event`
 
 Run the test event-based (if possible). This makes runtests invoke curl with
 --test-event option. This option only works if both curl and libcurl were
@@ -262,6 +262,19 @@ to fail until all allocations have been tested. By setting *num* you can force
 the allocation with that number to be set to fail at once instead of looping
 through everyone, which is handy when debugging and then often in combination
 with *-g*.
+
+## `--test-duphandle`
+
+Passes the `--test-duphandle` option to curl when invoked. This command line
+option only exists in debug builds and runs curl normally, but duplicates the
+easy handle before the transfer and use the duplicate instead of the original
+handle. This verifies that the duplicate works exactly as good as the original
+handle.
+
+Because of how the curl tool uses a share object to store and keep some data,
+not everything is however perfectly copied in the duplicate. In particular
+HSTS data is not. A specific test case can be set to avoid using
+`--test-duphandle` by disabling it on a per test basis.
 
 ## `-u`
 

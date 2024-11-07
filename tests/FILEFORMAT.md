@@ -522,6 +522,7 @@ the `unit/` directory (if the tool name starts with `unit`).
 Brief test case description, shown when the test runs.
 
 ### `<setenv>`
+
     variable1=contents1
     variable2=contents2
     variable3
@@ -605,6 +606,11 @@ Pass this given data on stdin to the tool.
 
 If `nonewline` is set, we cut off the trailing newline of this given data
 before comparing with the one actually received by the client
+
+## `<disable>`
+
+If `test-duphandle` is a listed item here, this is not run when
+`--test-duphandle` is used.
 
 ## `<verify>`
 ### `<errorcode>`

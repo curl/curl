@@ -312,7 +312,10 @@ static const struct LongShort aliases[]= {
   {"tcp-fastopen",               ARG_BOOL, ' ', C_TCP_FASTOPEN},
   {"tcp-nodelay",                ARG_BOOL, ' ', C_TCP_NODELAY},
   {"telnet-option",              ARG_STRG, 't', C_TELNET_OPTION},
+#ifdef DEBUGBUILD
+  {"test-duphandle",             ARG_BOOL, ' ', C_TEST_DUPHANDLE},
   {"test-event",                 ARG_BOOL, ' ', C_TEST_EVENT},
+#endif
   {"tftp-blksize",               ARG_STRG, ' ', C_TFTP_BLKSIZE},
   {"tftp-no-options",            ARG_BOOL, ' ', C_TFTP_NO_OPTIONS},
   {"time-cond",                  ARG_STRG, 'z', C_TIME_COND},
@@ -1653,13 +1656,14 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_SASL_IR: /* --sasl-ir */
       config->sasl_ir = toggle;
       break;
-    case C_TEST_EVENT: /* --test-event */
 #ifdef DEBUGBUILD
-      global->test_event_based = toggle;
-#else
-      warnf(global, "--test-event is ignored unless a debug build");
-#endif
+    case C_TEST_DUPHANDLE: /* --test-duphandle */
+      global->test_duphandle = toggle;
       break;
+    case C_TEST_EVENT: /* --test-event */
+      global->test_event_based = toggle;
+      break;
+#endif
     case C_UNIX_SOCKET: /* --unix-socket */
       config->abstract_unix_socket = FALSE;
       err = getstr(&config->unix_socket_path, nextarg, DENY_BLANK);
