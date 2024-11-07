@@ -53,18 +53,15 @@
    Followed by missing declarations.
    Work it around by overriding the built-in feature-check macro used by the
    headers to enable the problematic attributes. This makes the feature check
-   fail.
-   Fixed upstream in 14.2.0_1. Disable the workaround if the fix is detected.
+   fail. Fixed in 14.2.0_1. Disable the workaround if the fix is detected.
  */
-#if defined(__APPLE__) &&                 \
-  !defined(__clang__) &&                  \
-  defined(__GNUC__) &&                    \
+#if defined(__APPLE__) && !defined(__clang__) && defined(__GNUC__) && \
   defined(__has_attribute)
-/* Separate #if to make it compile with some non-Apple gcc compilers */
-#if !defined(__has_feature) ||            \
-  !__has_feature(attribute_availability)
-#define availability curl_pp_attribute_disabled
-#endif
+#  if !defined(__has_feature)
+#    define availability curl_pp_attribute_disabled
+#  elif !__has_feature(attribute_availability)
+#    define availability curl_pp_attribute_disabled
+#  endif
 #endif
 
 #if defined(__APPLE__)
