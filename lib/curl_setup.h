@@ -43,10 +43,7 @@
 #include <_mingw.h>
 #endif
 
-/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0.
-   Fixed it 14.2.0_1. We also omit the workaround for 14.2.0 because there
-   is no macro to tell 14.2.0_1 and 14.2.0 apart, and the workaround breaks
-   the fixed 14.2.0_1 version.
+/* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial rev)
    that started advertising the `availability` attribute, which then gets used
    by Apple SDK, but, in a way incompatible with gcc, resulting in misc errors
    inside SDK headers, e.g.:
@@ -54,8 +51,12 @@
             definition
      error: expected ',' or '}' before
    Followed by missing declarations.
-   Fix it by overriding the built-in feature-check macro used by the headers
-   to enable the problematic attributes. This makes the feature check fail. */
+   Work it around by overriding the built-in feature-check macro used by the
+   headers to enable the problematic attributes. This makes the feature check
+   fail.
+   Fixed upstream in 14.2.0_1. We also omit the workaround for 14.2.0 because
+   there is no macro to tell 14.2.0_1 and 14.2.0 apart, and the workaround
+   breaks the fixed 14.2.0_1 version. */
 #if defined(__APPLE__) &&                                 \
   !defined(__clang__) &&                                  \
   !defined(CURL_NO_APPLE_AVAILABILITY_WORKAROUND) &&      \
