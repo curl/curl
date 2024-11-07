@@ -407,7 +407,7 @@ jobs:
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-mbedtls
         env:
-          cache-name: cache-mbedtls
+          cache-name: cache-mbedtls-threadsafe
         with:
           path: /home/runner/mbedtls
           key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.mbedtls-version }}
