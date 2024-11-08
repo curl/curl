@@ -197,7 +197,7 @@ jobs:
         uses: vmactions/omnios-vm@16b5996777bc675acd3d537f13df536a526cd16d # v1
         with:
           usesh: true
-          # https://pkg.omnios.org/r151050/core/en/index.shtml
+          # https://pkg.omnios.org/r151052/core/en/index.shtml
           prepare: pkg install build-essential libtool
           run: |
             set -e
