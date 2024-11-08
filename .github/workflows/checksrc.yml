@@ -50,12 +50,14 @@ jobs:
       - name: install
         env:
           DEBIAN_FRONTEND: noninteractive
-        run: >-
-          sudo apt-get install -y --no-install-suggests --no-install-recommends
-          codespell python3-pip python3-networkx python3-pydot python3-yaml
-          python3-toml python3-markupsafe python3-jinja2 python3-tabulate
-          python3-typing-extensions python3-libcst python3-impacket
-          python3-websockets python3-pytest &&
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+            codespell python3-pip python3-networkx python3-pydot python3-yaml \
+            python3-toml python3-markupsafe python3-jinja2 python3-tabulate \
+            python3-typing-extensions python3-libcst python3-impacket \
+            python3-websockets python3-pytest
           python3 -m pip install --break-system-packages cmakelint==1.4.3 pytype==2024.9.13 ruff==0.6.8
 
       - name: spellcheck
