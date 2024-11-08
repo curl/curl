@@ -217,6 +217,7 @@ jobs:
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           xcrun --sdk macosx --show-sdk-version || true
+          ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
@@ -226,32 +227,28 @@ jobs:
 
       - name: 'configure'
         run: |
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
+          else
+            sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+          fi
+
           if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
             CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+            CC+=" --sysroot=${sysroot}"
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-            libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
-            echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
-            for f in dispatch os AvailabilityInternal.h stdio.h; do
-              if [ -r "${libgccdir}/include-fixed/${f}" ]; then
-                echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
-                mv "${libgccdir}/include-fixed/${f}" "${libgccdir}/include-fixed/${f}-BAK"
-              fi
-            done
-          fi
           if [ -n '${{ matrix.build.configure }}' ]; then
             export CFLAGS
             if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
             fi
-            CFLAGS+=' ${{ matrix.build.cflags }}'
             if [ '${{ matrix.compiler }}' != 'clang' ]; then
-              options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
-              CFLAGS+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+              options+=" --with-sysroot=${sysroot}"
+              CFLAGS+=" --sysroot=${sysroot}"
             fi
+            CFLAGS+=' ${{ matrix.build.cflags }}'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
@@ -260,7 +257,7 @@ jobs:
           else
             cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
-              "-DCMAKE_OSX_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)" \
+              "-DCMAKE_OSX_SYSROOT=${sysroot}" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               ${{ matrix.build.generate }}
           fi
@@ -410,8 +407,7 @@ jobs:
           # Reduce build combinations, by dropping less interesting ones
           - { compiler: gcc-12, config: SecureTransport }
           - { compiler: gcc-13, build: cmake }
-          - { compiler: gcc-13, image: macos-13 }
-          - { compiler: gcc-14, config: SecureTransport }
+          - { compiler: gcc-14, build: autotools }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
@@ -429,6 +425,7 @@ jobs:
           xcodebuild -version || true
           xcrun --sdk macosx --show-sdk-path 2>/dev/null || true
           xcrun --sdk macosx --show-sdk-version || true
+          ls -l /Library/Developer/CommandLineTools/SDKs || true
           echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
           echo '::group::brew packages preinstalled'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
@@ -438,106 +435,16 @@ jobs:
 
       - name: 'configure / ${{ matrix.build }}'
         run: |
-          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
-            CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
-            CC+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
-            CC+=" --target=$(uname -m)-apple-darwin"
+          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
+            sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
+          else
+            sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
 
-          # gcc ships with an `include-fixed` header set, which overrides SDK
-          # headers with the intent of making them compatible with gcc. The
-          # source for these headers is:
-          #   https://github.com/gcc-mirror/gcc/tree/master/fixincludes
-          # with extra Apple-specific patches applied from here for Homebrew:
-          #   https://github.com/iains/gcc-12-branch
-          #
-          # They pass through a generator phase at build-time which seems to
-          # pick the SDK installed on the build machine (maintained by the
-          # Homebrew project in our case) and patches it according to a set
-          # of rules in `inclhack.def`.
-          #
-          # Homebrew builds and ships different binaries for different macOS
-          # versions and CPUs, built on machines using the same OS version as
-          # the target one. Each of these machines have a particular version
-          # of Apple CommandLineTools with a default SDK version installed with
-          # them.
-          #
-          # Then this binary gets installed onto the end-user machine,
-          # matching the OS version at the time of installation.
-          #
-          # The problem with this approach is that the SDK version picked up
-          # at gcc build-time has a high chance of being or becoming out of
-          # sync with actual SDK installed on the end-user machine. This
-          # can happen after upgrading the OS, Xcode, selecting an SDK version
-          # manually, or other reasons.
-          #
-          # When the SDK versions do not match, the gcc hacks, instead of
-          # improving compatibility the SDK, are actively _breaking_
-          # compatibility, in an unexpected, hard to diagnose way.
-          #
-          # The SDK version used for gcc-hacks is not advertised. We can
-          # extract the major SDK version from the generated gcc-hack header
-          # files, assuming someone knows what to look for and where.
-          #
-          # Basically it also means that the same `gcc-N` Homebrew package
-          # behaves differently depending on the OS it was built on. Causing
-          # an explosion of build combination. It may also mean that a minor
-          # gcc version bump is built against a different SDK version, and due
-          # to the extra patch for the hack applied by Homebrew, there may
-          # be extra changes as well.
-          #
-          # For GHA runners, it means that the default Xcode + OS combo have
-          # and SDK mismatch in 8 out of 12 combinations (66%). All fail to
-          # build, plus one more with matching SDK. This is 9 in total (75%)
-          # that fail to build out of the box. These are the 3 lucky default
-          # combinations that worked to build curl:
-          #   macos-14 + Xcode 15.0.1 + gcc-12, gcc-14
-          #
-          # Of all possible valid GHA runner, gcc, manually selected Xcode
-          # combinations, 40% are broken.
-          #
-          # Compared to mainline llvm: llvm ships the same binaries regardless
-          # of build-OS or environment, it contains no SDK-version-specific
-          # hacks, and has no 3rd party patches. This still leaves some
-          # occasional issues, but works much closer to expectations.
-          #
-          # Some of these hacks are helpful, in particular for fixing this
-          # issue via math.h:
-          #   /Applications/Xcode_14.3.1.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk/usr/include/math.h:53:5: error: #error "Unsupported value of
-          #      53 | #   error "Unsupported value of __FLT_EVAL_METHOD__."
-          #
-          # Errors seen in available CI combinations:
-          #   error: two or more data types in declaration specifiers # fatal error: AvailabilityInternalLegacy.h: No such file or directory
-          #     gcc-13 + macos-14 + Xcode 14.3.1
-          #   error: two or more data types in declaration specifiers
-          #     gcc-13 + macos-12 + Xcode 14.1, 14.2
-          #     gcc-13 + Xcode 15.0.1, 15.1, 5.2
-          #   error: expected ';' before 'extern'
-          #     gcc-12, gcc-14 + macos-12 + Xcode 14.1, 14.2
-          #   error: unknown type name 'dispatch_queue_t'
-          #     gcc-12 + macos-13 + Xcode 15.0.1, 15.1, 15.2
-          #   error: type defaults to 'int' in declaration of 'DISPATCH_DECL_FACTORY_CLASS_SWIFT' [-Wimplicit-int]
-          #     gcc-14 macos-13 Xcode 15.0.1, 15.1, 15.2
-          #   error: unknown type name 'FILE'
-          #     Xcode 16.0
-          #
-          # Unbreak Homebrew gcc builds by moving problematic SDK header overlay
-          # directories/files out of the way:
-          if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
-            # E.g.:
-            #   $(brew --prefix)/Cellar/gcc@11/11.4.0/lib/gcc/11/gcc/aarch64-apple-darwin23/11/include-fixed
-            #   $(brew --prefix)/Cellar/gcc@11/11.4.0/lib/gcc/11/gcc/x86_64-apple-darwin21/11/include-fixed
-            #   $(brew --prefix)/Cellar/gcc/14.1.0_1/lib/gcc/14/gcc/x86_64-apple-darwin21/14/include-fixed
-            libgccdir="$(dirname "$("${CC}" -print-libgcc-file-name)")"
-            echo '::group::gcc include-fixed details'; find "${libgccdir}/include-fixed" | sort; echo '::endgroup::'
-            patch_out='dispatch os AvailabilityInternal.h'
-            patch_out+=' stdio.h'  # for Xcode 16 error: unknown type name 'FILE'
-            for f in ${patch_out}; do
-              if [ -r "${libgccdir}/include-fixed/${f}" ]; then
-                echo "Zap gcc hack: '${libgccdir}/include-fixed/${f}'"
-                mv "${libgccdir}/include-fixed/${f}" "${libgccdir}/include-fixed/${f}-BAK"
-              fi
-            done
+          if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
+            CC="$(brew --prefix ${{ matrix.compiler }})/bin/clang"
+            CC+=" --sysroot=${sysroot}"
+            CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
           if [ '${{ matrix.build }}' = 'autotools' ]; then
@@ -546,8 +453,8 @@ jobs:
               options+=" --target=$(uname -m)-apple-darwin"
             fi
             if [ '${{ matrix.compiler }}' != 'clang' ]; then
-              options+=" --with-sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
-              CFLAGS+=" --sysroot=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
+              options+=" --with-sysroot=${sysroot}"
+              CFLAGS+=" --sysroot=${sysroot}"
             fi
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
@@ -565,7 +472,7 @@ jobs:
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
-              "-DCMAKE_OSX_SYSROOT=$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)" \
+              "-DCMAKE_OSX_SYSROOT=${sysroot}" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
               -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
