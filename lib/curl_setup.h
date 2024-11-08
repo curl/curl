@@ -980,26 +980,27 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define OPENSSL_SUPPRESS_DEPRECATED
 #endif
 
-#if defined(inline)
-  /* 'inline' is defined as macro and assumed to be correct */
-  /* No need for 'inline' replacement */
+#if defined(CURL_INLINE)
+/* 'CURL_INLINE' defined, use as-is */
+#elif defined(inline)
+#  define CURL_INLINE inline /* 'inline' defined, assumed correct */
 #elif defined(__cplusplus)
-  /* The code is compiled with C++ compiler.
-     C++ always supports 'inline'. */
-  /* No need for 'inline' replacement */
+/* The code is compiled with C++ compiler.
+   C++ always supports 'inline'. */
+#  define CURL_INLINE inline /* 'inline' keyword supported */
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
-  /* C99 (and later) supports 'inline' keyword */
-  /* No need for 'inline' replacement */
+/* C99 (and later) supports 'inline' keyword */
+#  define CURL_INLINE inline /* 'inline' keyword supported */
 #elif defined(__GNUC__) && __GNUC__ >= 3
-  /* GCC supports '__inline__' as an extension */
-#  define inline __inline__
+/* GCC supports '__inline__' as an extension */
+#  define CURL_INLINE __inline__
 #elif defined(_MSC_VER) && _MSC_VER >= 1400
-  /* MSC supports '__inline' from VS 2005 (or even earlier) */
-#  define inline __inline
+/* MSC supports '__inline' from VS 2005 (or even earlier) */
+#  define CURL_INLINE __inline
 #else
-  /* Probably 'inline' is not supported by compiler.
-     Define to the empty string to be on the safe side. */
-#  define inline /* empty */
+/* Probably 'inline' is not supported by compiler.
+   Define to the empty string to be on the safe side. */
+#  define CURL_INLINE /* empty */
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */
