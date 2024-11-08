@@ -433,6 +433,8 @@ static int h2_client_new(struct Curl_cfilter *cf,
 {
   struct cf_h2_ctx *ctx = cf->ctx;
   nghttp2_option *o;
+  nghttp2_mem mem = {NULL, Curl_nghttp2_malloc, Curl_nghttp2_free,
+                     Curl_nghttp2_calloc, Curl_nghttp2_realloc};
 
   int rc = nghttp2_option_new(&o);
   if(rc)
@@ -445,7 +447,7 @@ static int h2_client_new(struct Curl_cfilter *cf,
      HTTP field value. */
   nghttp2_option_set_no_rfc9113_leading_and_trailing_ws_validation(o, 1);
 #endif
-  rc = nghttp2_session_client_new2(&ctx->h2, cbs, cf, o);
+  rc = nghttp2_session_client_new3(&ctx->h2, cbs, cf, o, &mem);
   nghttp2_option_del(o);
   return rc;
 }
@@ -2958,6 +2960,30 @@ bool Curl_h2_http_1_1_error(struct Curl_easy *data)
     return (err == NGHTTP2_HTTP_1_1_REQUIRED);
   }
   return FALSE;
+}
+
+void *Curl_nghttp2_malloc(size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_cmalloc(size);
+}
+
+void Curl_nghttp2_free(void *ptr, void *user_data)
+{
+  (void)user_data;
+  Curl_cfree(ptr);
+}
+
+void *Curl_nghttp2_calloc(size_t nmemb, size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_ccalloc(nmemb, size);
+}
+
+void *Curl_nghttp2_realloc(void *ptr, size_t size, void *user_data)
+{
+  (void)user_data;
+  return Curl_crealloc(ptr, size);
 }
 
 #else /* !USE_NGHTTP2 */
