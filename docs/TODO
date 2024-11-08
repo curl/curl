@@ -113,6 +113,7 @@
  13.1 TLS-PSK with OpenSSL
  13.2 TLS channel binding
  13.3 Defeat TLS fingerprinting
+ 13.4 Consider OCSP stapling by default
  13.5 Export session ids
  13.6 Provide callback for cert verification
  13.7 Less memory massaging with Schannel
@@ -816,6 +817,14 @@
  By changing the order of TLS extensions provided in the TLS handshake, it is
  sometimes possible to circumvent TLS fingerprinting by servers. The TLS
  extension order is of course not the only way to fingerprint a client.
+
+13.4 Consider OCSP stapling by default
+
+ Treat a negative response a reason for aborting the connection. Since OCSP
+ stapling is presumed to get used much less in the future when Let's Encrypt
+ drops the OCSP support, the benefit of this might however be limited.
+
+ https://github.com/curl/curl/issues/15483
 
 13.5 Export session ids
 
