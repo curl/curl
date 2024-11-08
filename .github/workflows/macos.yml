@@ -403,11 +403,6 @@ jobs:
           - { image: macos-13, compiler: 'llvm@18' }
           - { image: macos-14, compiler: 'llvm@18' }
           - { image: macos-15, compiler: 'llvm@15' }
-          # Reduce build combinations, by dropping less interesting ones
-          - { compiler: gcc-12, config: SecureTransport }
-          - { compiler: gcc-13, build: cmake }
-          - { compiler: gcc-13, image: macos-13 }
-          - { compiler: gcc-14, config: SecureTransport }
     steps:
       - name: 'install autotools'
         if: ${{ matrix.build == 'autotools' }}
