@@ -427,10 +427,6 @@ Vista
 #  endif
 #endif
 
-#ifdef USE_WIN32_LARGE_FILES
-#define HAVE__FSEEKI64
-#endif
-
 /* Define to the size of `off_t', as computed by sizeof. */
 #if defined(__MINGW32__) && \
   defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
