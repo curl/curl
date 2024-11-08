@@ -265,16 +265,16 @@ with *-g*.
 
 ## `--test-duphandle`
 
-Passes the --test-duphandle option to curl when invoked. This command line
-option only exists in debug builds and will make curl act normally, but then
-duplicate the easy handle before the transfer and use the duplicate instead of
-the original handle. This verifies that the duplicate works exactly as good as
-the original handle.
+Passes the `--test-duphandle` option to curl when invoked. This command line
+option only exists in debug builds and runs curl normally, but duplicates the
+easy handle before the transfer and use the duplicate instead of the original
+handle. This verifies that the duplicate works exactly as good as the original
+handle.
 
 Because of how the curl tool uses a share object to store and keep some data,
 not everything is however perfectly copied in the duplicate. In particular
-HSTS data is not. A specific test case can be set to avoid using --test-duphandle
-by 
+HSTS data is not. A specific test case can be set to avoid using
+`--test-duphandle` by disabling it on a per test basis.
 
 ## `-u`
 

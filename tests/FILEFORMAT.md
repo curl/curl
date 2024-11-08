@@ -609,7 +609,7 @@ before comparing with the one actually received by the client
 
 ## `<disable>`
 
-If `test-duphandle` is a listed item here, this test will not run when
+If `test-duphandle` is a listed item here, this is not run when
 `--test-duphandle` is used.
 
 ## `<verify>`
