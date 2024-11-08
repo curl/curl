@@ -4,16 +4,26 @@ curl and libcurl 8.11.1
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3269
+ Contributors:                 3273
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o cmake: drop cmake args list from `buildinfo.txt` [8]
+ o cmdline/ech.md: formatting cleanups [13]
  o cookie: treat cookie name case sensitively [4]
+ o curl: --test-duphandle in debug builds runs "duphandled" [6]
  o duphandle: also init netrc [3]
+ o ECH: enable support for the AWS-LC backend [5]
+ o macos: disable gcc `availability` workaround as needed [7]
  o mbedtls: call psa_crypt_init() in global init [2]
+ o netrc: support large file, longer lines, longer tokens [14]
+ o nghttp2: use custom memory functions [1]
+ o setopt: fix CURLOPT_HTTP_CONTENT_DECODING [15]
+ o TODO: consider OCSP stapling by default [11]
+ o vtls: fix compile warning when ALPN is not available [12]
 
 This release includes the following known bugs:
 
@@ -32,12 +42,24 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, delogicsreal on github, Stefan Eissing,
-  tranzystorekk on github, wxiaoguang on github
-  (5 contributors)
+  Ben Greear, Bo Anderson, Daniel Stenberg, delogicsreal on github,
+  Ethan Everett, Jesus Malo Poyatos, Kai Pastor, Moritz, Nicolas F.,
+  Samuel Henrique, Stefan Eissing, tranzystorekk on github, Viktor Szakats,
+  wxiaoguang on github
+  (14 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=15527
  [2] = https://curl.se/bug/?i=15500
  [3] = https://curl.se/bug/?i=15496
  [4] = https://curl.se/bug/?i=15492
+ [5] = https://curl.se/bug/?i=15499
+ [6] = https://curl.se/bug/?i=15504
+ [7] = https://curl.se/bug/?i=15508
+ [8] = https://curl.se/bug/?i=15501
+ [11] = https://curl.se/bug/?i=15483
+ [12] = https://curl.se/bug/?i=15515
+ [13] = https://curl.se/bug/?i=15506
+ [14] = https://curl.se/bug/?i=15513
+ [15] = https://curl.se/bug/?i=15511
