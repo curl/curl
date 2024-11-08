@@ -51,7 +51,8 @@ This function may be called multiple times if redirections are enabled and are
 being followed (see CURLOPT_FOLLOWLOCATION(3)).
 
 The callback function must return *CURL_PREREQFUNC_OK* on success, or
-*CURL_PREREQFUNC_ABORT* to cause the transfer to fail.
+*CURL_PREREQFUNC_ABORT* to cause the transfer to fail with result
+*CURLE_ABORTED_BY_CALLBACK*.
 
 This function is passed the following arguments:
 
