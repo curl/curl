@@ -2893,7 +2893,7 @@ static CURLcode serial_transfers(struct GlobalConfig *global,
           result = CURLE_OUT_OF_MEMORY;
           break;
         }
-        /* a duplicate needs the share readded */
+        /* a duplicate needs the share re-added */
         (void)curl_easy_setopt(per->curl, CURLOPT_SHARE, share);
       }
       if(global->test_event_based)
