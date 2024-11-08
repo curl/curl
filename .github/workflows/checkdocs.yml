@@ -42,6 +42,7 @@ jobs:
   #      - name: install prereqs
   #        run: |
   #          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+  #          sudo apt-get update -y
   #          sudo apt-get install -y --no-install-suggests --no-install-recommends \
   #            python3-proselint
   #
