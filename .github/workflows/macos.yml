@@ -228,6 +228,7 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
+            [ ! -d "${sysroot}" ] && echo "gcc sysroot not found on disk: '${sysroot}'"
           else
             sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
@@ -431,6 +432,7 @@ jobs:
         run: |
           if [[ '${{ matrix.compiler }}' = 'gcc'* ]]; then
             sysroot="$("${CC}" --print-sysroot)"  # Must match the SDK gcc was built for
+            [ ! -d "${sysroot}" ] && echo "gcc sysroot not found on disk: '${sysroot}'"
           else
             sysroot="$(xcrun --sdk macosx --show-sdk-path 2>/dev/null)"
           fi
