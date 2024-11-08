@@ -105,14 +105,12 @@ push for it.
 Coming dates
 ------------
 
-Based on the description above, here are some planned release dates (at the
-time of this writing):
+Based on the description above, here are some planned future release dates:
 
-- September 11, 2024
-- November 6, 2024
-- January 8, 2025
-- March 5, 2025
-- April 30, 2025
-- June 25, 2025
-- August 20, 2025
-- October 15, 2025
+- December 11, 2024
+- February 5, 2025
+- April 2, 2025
+- May 28, 2025
+- July 23, 2025
+- September 17, 2025
+- November 12, 2025
