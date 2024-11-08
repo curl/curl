@@ -60,6 +60,11 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
                             struct connectdata *conn, int sockindex,
                             const char *ptr, size_t nread);
 
+void *Curl_nghttp2_malloc(size_t size, void *user_data);
+void Curl_nghttp2_free(void *ptr, void *user_data);
+void *Curl_nghttp2_calloc(size_t nmemb, size_t size, void *user_data);
+void *Curl_nghttp2_realloc(void *ptr, size_t size, void *user_data);
+
 extern struct Curl_cftype Curl_cft_nghttp2;
 
 #else /* USE_NGHTTP2 */
