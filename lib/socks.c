@@ -562,7 +562,7 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
                                struct Curl_easy *data)
 {
   /*
-    According to the RFC1928, section "6. Replies". This is what a SOCK5
+    According to the RFC1928, section "6. Replies". This is what a SOCKS5 server
     replies:
 
         +----+-----+-------+------+----------+----------+
