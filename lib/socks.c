@@ -303,7 +303,7 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     infof(data, "SOCKS4 communication to %s:%d",
           sx->hostname, sx->remote_port);
 
-    /*Curl_resolv
+    /*
      * Compose socks4 request
      *
      * Request format
@@ -410,7 +410,7 @@ CONNECT_REQ_INIT:
     if(sx->proxy_user) {
       size_t plen = strlen(sx->proxy_user);
       if(plen > 255) {
-        /* there is no real size limit to this field in the protocol, but
+        /* There is no real size limit to this field in the protocol, but
            SOCKS5 limits the proxy user field to 255 bytes and it seems likely
            that a longer field is either a mistake or malicious input */
         failf(data, "Too long SOCKS proxy username");
@@ -505,7 +505,7 @@ CONNECT_REQ_INIT:
   /* wrong version ? */
   if(socksreq[0]) {
     failf(data,
-          "SOCKS4 reply has a wrong version, version should be 0.");
+          "The SOCKS4 reply has a wrong version which should be 0.");
     return CURLPX_BAD_VERSION;
   }
 
@@ -575,15 +575,15 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
     o  VER    protocol version: X'05'
     o  REP    Reply field:
-      o  X'00' succeeded
-      o  X'01' general SOCKS server failure
-      o  X'02' connection not allowed by ruleset
-      o  X'03' Network unreachable
-      o  X'04' Host unreachable
-      o  X'05' Connection refused
-      o  X'06' TTL expired
-      o  X'07' Command not supported
-      o  X'08' Address type not supported
+       o  X'00' succeeded
+       o  X'01' general SOCKS server failure
+       o  X'02' connection not allowed by ruleset
+       o  X'03' Network unreachable
+       o  X'04' Host unreachable
+       o  X'05' Connection refused
+       o  X'06' TTL expired
+       o  X'07' Command not supported
+       o  X'08' Address type not supported
   */
   struct connectdata *conn = cf->conn;
   unsigned char *socksreq = sx->buffer;
@@ -913,9 +913,9 @@ CONNECT_RESOLVE_REMOTE:
     socksreq[len++] = 0; /* reserved, must be zero */
 
     if(!socks5_resolve_local) {
-      /* ATYP: domain name = 3,
-         IPv6 = 4,
-         IPv4 = 1
+      /* ATYP: IPv4 = 1, 
+        domain name = 3,
+        IPv6 = 4
       */
       unsigned char ip4[4];
 #ifdef USE_IPV6
@@ -993,7 +993,7 @@ CONNECT_REQ_SEND:
     }
     else if(socksreq[0] != 5) { /* version */
       failf(data,
-            "SOCKS5 reply has a wrong version, it should be 5.");
+            "The SOCKS5 reply has a wrong version which should be 5.");
       return CURLPX_BAD_VERSION;
     }
     else if(socksreq[1]) { /* Anything besides 0 is an error */
@@ -1031,7 +1031,8 @@ CONNECT_REQ_SEND:
 
        ATYP:
        o  IP v4 address: X'01', BND.ADDR = 4 bytes
-       o  domain name:  X'03', BND.ADDR = [ 1 byte length, string ]
+       o  domain name:  X'03', BND.ADDR = 1 byte for the length of the domain name,
+          followed by the domain name
        o  IP v6 address: X'04', BND.ADDR = 16 bytes
     */
 
@@ -1046,10 +1047,11 @@ CONNECT_REQ_SEND:
       len = 4 + 16 + 2;
     }
     else if(socksreq[3] == 1) {
+      /* IPv4 */
       len = 4 + 4 + 2;
     }
     else {
-      failf(data, "SOCKS5 reply has wrong address type.");
+      failf(data, "The SOCKS5 reply has a wrong address type.");
       return CURLPX_BAD_ADDRESS_TYPE;
     }
 
