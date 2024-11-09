@@ -198,7 +198,7 @@ jobs:
         with:
           usesh: true
           # https://pkg.omnios.org/r151052/core/en/index.shtml
-          prepare: pkg install build-essential libtool
+          prepare: pkg install build-essential libtool nghttp2
           run: |
             set -e
             ln -s /usr/bin/gcpp /usr/bin/cpp  # Some tests expect `cpp`, which is named `gcpp` in this env.
