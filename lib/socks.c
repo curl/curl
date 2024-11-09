@@ -303,14 +303,14 @@ static CURLproxycode do_SOCKS4(struct Curl_cfilter *cf,
     infof(data, "SOCKS4 communication to %s:%d",
           sx->hostname, sx->remote_port);
 
-    /*
+    /*Curl_resolv
      * Compose socks4 request
      *
      * Request format
      *
-     *     +----+----+----+----+----+----+----+----+----+----+....+----+
-     *     | VN | CD | DSTPORT |      DSTIP        | USERID       |NULL|
-     *     +----+----+----+----+----+----+----+----+----+----+....+----+
+     *           +----+----+----+----+----+----+----+----+----+----+....+----+
+     *           | VN | CD | DSTPORT |      DSTIP        | USERID       |NULL|
+     *           +----+----+----+----+----+----+----+----+----+----+....+----+
      * # of bytes:  1    1      2              4           variable       1
      */
 
@@ -486,9 +486,9 @@ CONNECT_REQ_INIT:
   /*
    * Response format
    *
-   *     +----+----+----+----+----+----+----+----+
-   *     | VN | CD | DSTPORT |      DSTIP        |
-   *     +----+----+----+----+----+----+----+----+
+   *           +----+----+----+----+----+----+----+----+
+   *           | VN | CD | DSTPORT |      DSTIP        |
+   *           +----+----+----+----+----+----+----+----+
    * # of bytes:  1    1      2              4
    *
    * VN is the version of the reply code and should be 0. CD is the result
@@ -505,7 +505,7 @@ CONNECT_REQ_INIT:
   /* wrong version ? */
   if(socksreq[0]) {
     failf(data,
-          "SOCKS4 reply has wrong version, version should be 0.");
+          "SOCKS4 reply has a wrong version, version should be 0.");
     return CURLPX_BAD_VERSION;
   }
 
@@ -575,7 +575,15 @@ static CURLproxycode do_SOCKS5(struct Curl_cfilter *cf,
 
     o  VER    protocol version: X'05'
     o  REP    Reply field:
-    o  X'00' succeeded
+      o  X'00' succeeded
+      o  X'01' general SOCKS server failure
+      o  X'02' connection not allowed by ruleset
+      o  X'03' Network unreachable
+      o  X'04' Host unreachable
+      o  X'05' Connection refused
+      o  X'06' TTL expired
+      o  X'07' Command not supported
+      o  X'08' Address type not supported
   */
   struct connectdata *conn = cf->conn;
   unsigned char *socksreq = sx->buffer;
@@ -858,7 +866,7 @@ CONNECT_RESOLVED:
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
     socksreq[len++] = 1; /* connect */
-    socksreq[len++] = 0; /* must be zero */
+    socksreq[len++] = 0; /* reserved, must be zero */
     if(hp->ai_family == AF_INET) {
       int i;
       struct sockaddr_in *saddr_in;
@@ -902,12 +910,13 @@ CONNECT_RESOLVE_REMOTE:
     len = 0;
     socksreq[len++] = 5; /* version (SOCKS5) */
     socksreq[len++] = 1; /* connect */
-    socksreq[len++] = 0; /* must be zero */
+    socksreq[len++] = 0; /* reserved, must be zero */
 
     if(!socks5_resolve_local) {
       /* ATYP: domain name = 3,
-         IPv6 == 4,
-         IPv4 == 1 */
+         IPv6 = 4,
+         IPv4 = 1
+      */
       unsigned char ip4[4];
 #ifdef USE_IPV6
       if(conn->bits.ipv6_ip) {
@@ -984,7 +993,7 @@ CONNECT_REQ_SEND:
     }
     else if(socksreq[0] != 5) { /* version */
       failf(data,
-            "SOCKS5 reply has wrong version, version should be 5.");
+            "SOCKS5 reply has a wrong version, it should be 5.");
       return CURLPX_BAD_VERSION;
     }
     else if(socksreq[1]) { /* Anything besides 0 is an error */
@@ -1010,9 +1019,9 @@ CONNECT_REQ_SEND:
       return rc;
     }
 
-    /* Fix: in general, returned BND.ADDR is variable length parameter by RFC
+    /* Fix: In general, the returned BND.ADDR is a variable length parameter by RFC
        1928, so the reply packet should be read until the end to avoid errors
-       at subsequent protocol level.
+       at the subsequent protocol level.
 
        +----+-----+-------+------+----------+----------+
        |VER | REP |  RSV  | ATYP | BND.ADDR | BND.PORT |
@@ -1021,9 +1030,9 @@ CONNECT_REQ_SEND:
        +----+-----+-------+------+----------+----------+
 
        ATYP:
-       o  IP v4 address: X'01', BND.ADDR = 4 byte
+       o  IP v4 address: X'01', BND.ADDR = 4 bytes
        o  domain name:  X'03', BND.ADDR = [ 1 byte length, string ]
-       o  IP v6 address: X'04', BND.ADDR = 16 byte
+       o  IP v6 address: X'04', BND.ADDR = 16 bytes
     */
 
     /* Calculate real packet size */
