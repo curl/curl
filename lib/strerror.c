@@ -151,9 +151,6 @@ curl_easy_strerror(CURLcode error)
   case CURLE_RANGE_ERROR:
     return "Requested range was not delivered by the server";
 
-  case CURLE_HTTP_POST_ERROR:
-    return "Internal problem setting up the POST";
-
   case CURLE_SSL_CONNECT_ERROR:
     return "SSL connect error";
 
@@ -168,9 +165,6 @@ curl_easy_strerror(CURLcode error)
 
   case CURLE_LDAP_SEARCH_FAILED:
     return "LDAP: search failed";
-
-  case CURLE_FUNCTION_NOT_FOUND:
-    return "A required function in the library was not found";
 
   case CURLE_ABORTED_BY_CALLBACK:
     return "Operation was aborted by an application callback";
@@ -330,7 +324,9 @@ curl_easy_strerror(CURLcode error)
   case CURLE_OBSOLETE24:
   case CURLE_OBSOLETE29:
   case CURLE_OBSOLETE32:
+  case CURLE_OBSOLETE34:
   case CURLE_OBSOLETE40:
+  case CURLE_OBSOLETE41:
   case CURLE_OBSOLETE44:
   case CURLE_OBSOLETE46:
   case CURLE_OBSOLETE50:
