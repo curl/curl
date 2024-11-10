@@ -1201,7 +1201,7 @@ if(CURL_USE_GSSAPI)
     string(REPLACE ";" " " GSS_LDFLAGS "${GSS_LDFLAGS}")
 
     foreach(_dir IN LISTS GSS_LIBRARY_DIRS)
-      set(GSS_LDFLAGS "${GSS_LDFLAGS} -L\"${_dir}\"")
+      set(GSS_LDFLAGS "${GSS_LDFLAGS} -L${_dir}")
     endforeach()
 
     if(NOT GSS_FLAVOUR STREQUAL "GNU")
