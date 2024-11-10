@@ -46,11 +46,11 @@ int main(void)
 
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* extract the available authentication types */
       long auth;
       res = curl_easy_getinfo(curl, CURLINFO_HTTPAUTH_AVAIL, &auth);
-      if(!res) {
+      if(CURLE_OK == res) {
         if(!auth)
           printf("No auth available, perhaps no 401?\n");
         else {

@@ -48,11 +48,11 @@ int main(int argc, char *argv[])
 
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* extract the available proxy authentication types */
       long used;
       res = curl_easy_getinfo(curl, CURLINFO_USED_PROXY, &used);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("The proxy was %sused\n", used ? "": "NOT ");
       }
     }

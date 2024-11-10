@@ -46,10 +46,10 @@ int main(void)
     /* typically CONNECT is used to do HTTPS over HTTP proxies */
     curl_easy_setopt(curl, CURLOPT_PROXY, "http://127.0.0.1");
     res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    if(CURLE_OK == res) {
       long code;
       res = curl_easy_getinfo(curl, CURLINFO_HTTP_CONNECTCODE, &code);
-      if(!res && code)
+      if(CURLE_OK == res && code)
         printf("The CONNECT response code: %03ld\n", code);
     }
     curl_easy_cleanup(curl);

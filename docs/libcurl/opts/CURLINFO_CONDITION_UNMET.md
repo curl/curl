@@ -60,11 +60,11 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* check the time condition */
       long unmet;
       res = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("The time condition was %sfulfilled\n", unmet?"NOT":"");
       }
     }

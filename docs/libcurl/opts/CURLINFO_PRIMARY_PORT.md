@@ -48,10 +48,10 @@ int main(void)
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    if(CURLE_OK == res) {
       long port;
       res = curl_easy_getinfo(curl, CURLINFO_PRIMARY_PORT, &port);
-      if(!res)
+      if(CURLE_OK == res)
         printf("Connected to remote port: %ld\n", port);
     }
     curl_easy_cleanup(curl);

@@ -54,11 +54,11 @@ int main(void)
 
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* extract the content-type */
       char *ct = NULL;
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_TYPE, &ct);
-      if(!res && ct) {
+      if(CURLE_OK == res && ct) {
         printf("Content-Type: %s\n", ct);
       }
     }

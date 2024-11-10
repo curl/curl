@@ -49,7 +49,7 @@ int main(void)
     if(res == CURLE_OK) {
       long size;
       res = curl_easy_getinfo(curl, CURLINFO_HEADER_SIZE, &size);
-      if(!res)
+      if(CURLE_OK == res)
         printf("Header size: %ld bytes\n", size);
     }
     curl_easy_cleanup(curl);

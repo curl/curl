@@ -50,10 +50,10 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       double speed;
       res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD, &speed);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Download speed %.0f bytes/sec\n", speed);
       }
     }

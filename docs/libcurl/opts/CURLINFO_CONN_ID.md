@@ -51,10 +51,10 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       curl_off_t conn_id;
       res = curl_easy_getinfo(curl, CURLINFO_CONN_ID, &conn_id);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Connection used: %" CURL_FORMAT_CURL_OFF_T "\n", conn_id);
       }
     }

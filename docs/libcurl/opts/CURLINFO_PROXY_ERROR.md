@@ -86,10 +86,10 @@ int main(void)
 
     curl_easy_setopt(curl, CURLOPT_PROXY, "socks5://127.0.0.1");
     res = curl_easy_perform(curl);
-    if(res == CURLE_PROXY) {
+    if(CURLE_PROXY == res) {
       long proxycode;
       res = curl_easy_getinfo(curl, CURLINFO_PROXY_ERROR, &proxycode);
-      if(!res && proxycode)
+      if(CURLE_OK == res && proxycode)
         printf("The detailed proxy error: %ld\n", proxycode);
     }
     curl_easy_cleanup(curl);

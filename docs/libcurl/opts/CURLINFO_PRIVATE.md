@@ -52,7 +52,7 @@ int main(void)
     /* extract the private pointer again */
     res = curl_easy_getinfo(curl, CURLINFO_PRIVATE, &pointer);
 
-    if(res)
+    if(res != CURLE_OK)
       printf("error: %s\n", curl_easy_strerror(res));
 
     curl_easy_cleanup(curl);

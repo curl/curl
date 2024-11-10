@@ -54,11 +54,11 @@ int main(void)
 
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* extract all known cookies */
       struct curl_slist *cookies = NULL;
       res = curl_easy_getinfo(curl, CURLINFO_COOKIELIST, &cookies);
-      if(!res && cookies) {
+      if(CURLE_OK == res && cookies) {
         /* a linked list of cookies in cookie file format */
         struct curl_slist *each = cookies;
         while(each) {

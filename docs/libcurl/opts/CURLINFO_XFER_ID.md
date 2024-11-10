@@ -51,10 +51,10 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       curl_off_t xfer_id;
       res = curl_easy_getinfo(curl, CURLINFO_XFER_ID, &xfer_id);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Transfer ID: %" CURL_FORMAT_CURL_OFF_T "\n", xfer_id);
       }
     }

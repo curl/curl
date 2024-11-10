@@ -49,11 +49,11 @@ int main(void)
 
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* extract the entry path */
       char *ep = NULL;
       res = curl_easy_getinfo(curl, CURLINFO_FTP_ENTRY_PATH, &ep);
-      if(!res && ep) {
+      if(CURLE_OK == res && ep) {
         printf("Entry path was: %s\n", ep);
       }
     }

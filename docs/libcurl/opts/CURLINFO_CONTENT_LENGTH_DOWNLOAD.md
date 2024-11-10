@@ -50,11 +50,11 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* check the size */
       double cl;
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &cl);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Size: %.0f\n", cl);
       }
     }

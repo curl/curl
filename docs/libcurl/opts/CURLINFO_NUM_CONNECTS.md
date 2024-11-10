@@ -46,10 +46,10 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
     res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    if(CURLE_OK == res) {
       long connects;
       res = curl_easy_getinfo(curl, CURLINFO_NUM_CONNECTS, &connects);
-      if(!res)
+      if(CURLE_OK == res)
         printf("It needed %ld connects\n", connects);
     }
     curl_easy_cleanup(curl);

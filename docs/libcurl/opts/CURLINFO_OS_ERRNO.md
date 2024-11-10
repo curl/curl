@@ -53,7 +53,7 @@ int main(void)
     if(res != CURLE_OK) {
       long error;
       res = curl_easy_getinfo(curl, CURLINFO_OS_ERRNO, &error);
-      if(!res && error) {
+      if(CURLE_OK == res && error) {
         printf("Errno: %ld\n", error);
       }
     }

@@ -65,7 +65,7 @@ int main(void)
 
     /* Extract the socket from the curl handle */
     res = curl_easy_getinfo(curl, CURLINFO_LASTSOCKET, &sockfd);
-    if(!res && sockfd != -1) {
+    if(CURLE_OK == res && sockfd != -1) {
       /* operate on sockfd */
     }
 

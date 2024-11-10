@@ -51,7 +51,7 @@ static int recv_pong(CURL *curl, const char *expected_payload)
   const struct curl_ws_frame *meta;
   char buffer[256];
   CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-  if(!result) {
+  if(CURLE_OK == result) {
     if(meta->flags & CURLWS_PONG) {
       int same = 0;
       fprintf(stderr, "ws: got PONG back\n");

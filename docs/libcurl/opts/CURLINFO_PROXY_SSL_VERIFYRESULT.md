@@ -53,7 +53,7 @@ int main(void)
     curl_easy_setopt(curl, CURLOPT_PROXY, "https://proxy:443");
 
     res = curl_easy_perform(curl);
-    if(res) {
+    if(res != CURLE_OK) {
       printf("error: %s\n", curl_easy_strerror(res));
       curl_easy_cleanup(curl);
       return 1;
@@ -61,7 +61,7 @@ int main(void)
 
     res = curl_easy_getinfo(curl, CURLINFO_PROXY_SSL_VERIFYRESULT,
                             &verifyresult);
-    if(!res) {
+    if(CURLE_OK == res) {
       printf("The peer verification said %s\n",
              (verifyresult ? "bad" : "fine"));
     }
