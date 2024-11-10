@@ -551,14 +551,14 @@ typedef enum {
   CURLE_FTP_COULDNT_USE_REST,    /* 31 - the REST command failed */
   CURLE_OBSOLETE32,              /* 32 - NOT USED */
   CURLE_RANGE_ERROR,             /* 33 - RANGE "command" did not work */
-  CURLE_HTTP_POST_ERROR,         /* 34 */
+  CURLE_OBSOLETE34,              /* 34 */
   CURLE_SSL_CONNECT_ERROR,       /* 35 - wrong when connecting with SSL */
   CURLE_BAD_DOWNLOAD_RESUME,     /* 36 - could not resume download */
   CURLE_FILE_COULDNT_READ_FILE,  /* 37 */
   CURLE_LDAP_CANNOT_BIND,        /* 38 */
   CURLE_LDAP_SEARCH_FAILED,      /* 39 */
   CURLE_OBSOLETE40,              /* 40 - NOT USED */
-  CURLE_FUNCTION_NOT_FOUND,      /* 41 - NOT USED starting with 7.53.0 */
+  CURLE_OBSOLETE41,              /* 41 - NOT USED starting with 7.53.0 */
   CURLE_ABORTED_BY_CALLBACK,     /* 42 */
   CURLE_BAD_FUNCTION_ARGUMENT,   /* 43 */
   CURLE_OBSOLETE44,              /* 44 - NOT USED */
@@ -642,6 +642,12 @@ typedef enum {
 
 #ifndef CURL_NO_OLDIES /* define this to test if your app builds with all
                           the obsolete stuff removed! */
+
+/* removed in 7.53.0 */
+#define CURLE_FUNCTION_NOT_FOUND CURLE_OBSOLETE41
+
+/* removed in 7.56.0 */
+#define CURLE_HTTP_POST_ERROR CURLE_OBSOLETE34
 
 /* Previously obsolete error code reused in 7.38.0 */
 #define CURLE_OBSOLETE16 CURLE_HTTP2

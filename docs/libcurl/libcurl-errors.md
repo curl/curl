@@ -203,9 +203,9 @@ Not used in modern versions.
 
 The server does not support or accept range requests.
 
-## CURLE_HTTP_POST_ERROR (34)
+## Obsolete error (34)
 
-This is an odd error that mainly occurs due to internal confusion.
+Not used since 7.56.0.
 
 ## CURLE_SSL_CONNECT_ERROR (35)
 
@@ -236,9 +236,9 @@ LDAP search failed.
 
 Not used in modern versions.
 
-## CURLE_FUNCTION_NOT_FOUND (41)
+## Obsolete error (41)
 
-Function not found. A required zlib function was not found.
+Not used since 7.53.0.
 
 ## CURLE_ABORTED_BY_CALLBACK (42)
 
