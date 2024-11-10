@@ -136,7 +136,7 @@ jobs:
           run: |
             # https://ports.freebsd.org/
             sudo pkg install -y autoconf automake libtool \
-              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
+              pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
             autoreconf -fi
             export CC='${{ matrix.compiler }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-debug --enable-warnings --enable-werror \
@@ -165,8 +165,8 @@ jobs:
           architecture: ${{ matrix.arch }}
           run: |
             # https://ports.freebsd.org/
-            sudo pkg install -y cmake ninja perl5 \
-              pkgconf brotli openldap26-client libidn2 libnghttp2 nghttp2 stunnel py311-impacket
+            sudo pkg install -y cmake-core ninja perl5 \
+              pkgconf brotli openldap26-client libidn2 libnghttp2 stunnel py311-impacket
             cmake -B bld -G Ninja \
               '-DCMAKE_C_COMPILER=${{ matrix.compiler }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
