@@ -49,11 +49,11 @@ int main(void)
     /* Perform the upload */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* check the size */
       double cl;
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_UPLOAD, &cl);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Size: %.0f\n", cl);
       }
     }

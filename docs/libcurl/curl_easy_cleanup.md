@@ -65,7 +65,7 @@ int main(void)
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     res = curl_easy_perform(curl);
-    if(res)
+    if(res != CURLE_OK)
       printf("error: %s\n", curl_easy_strerror(res));
     curl_easy_cleanup(curl);
   }

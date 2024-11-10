@@ -47,10 +47,10 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       curl_off_t speed;
       res = curl_easy_getinfo(curl, CURLINFO_SPEED_DOWNLOAD_T, &speed);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Download speed %" CURL_FORMAT_CURL_OFF_T " bytes/sec\n",
                speed);
       }

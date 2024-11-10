@@ -44,10 +44,10 @@ int main(void)
     CURLcode res;
     curl_easy_setopt(curl, CURLOPT_URL, "https://example.com");
     res = curl_easy_perform(curl);
-    if(res == CURLE_OK) {
+    if(CURLE_OK == res) {
       long req;
       res = curl_easy_getinfo(curl, CURLINFO_REQUEST_SIZE, &req);
-      if(!res)
+      if(CURLE_OK == res)
         printf("Request size: %ld bytes\n", req);
     }
     curl_easy_cleanup(curl);

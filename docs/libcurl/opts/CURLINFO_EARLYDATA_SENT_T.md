@@ -57,10 +57,10 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       curl_off_t amount;
       res = curl_easy_getinfo(curl, CURLINFO_EARLYDATA_SENT_T, &amount);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("TLS earlydata: %" CURL_FORMAT_CURL_OFF_T " bytes\n", amount);
       }
     }

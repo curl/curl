@@ -47,11 +47,11 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* check the size */
       curl_off_t cl;
       res = curl_easy_getinfo(curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Download size: %" CURL_FORMAT_CURL_OFF_T "\n", cl);
       }
     }

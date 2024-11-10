@@ -49,7 +49,7 @@ static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
 
   res = curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info);
 
-  if(!res) {
+  if(CURLE_OK == res) {
     switch(info->backend) {
     case CURLSSLBACKEND_GNUTLS:
       /* info->internals is now the gnutls_session_t */

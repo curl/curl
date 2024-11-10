@@ -147,7 +147,7 @@ static size_t wf(void *ptr, size_t size, size_t nmemb, void *stream)
 {
   const struct curl_tlssessioninfo *info = NULL;
   CURLcode res = curl_easy_getinfo(curl, CURLINFO_TLS_SSL_PTR, &info);
-  if(info && !res) {
+  if(info && CURLE_OK == res) {
     if(CURLSSLBACKEND_OPENSSL == info->backend) {
       printf("OpenSSL ver. %s\n", SSL_get_version((SSL*)info->internals));
     }

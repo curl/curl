@@ -165,7 +165,7 @@ int main(void)
 
     close(sockfd);
 
-    if(res) {
+    if(res != CURLE_OK) {
       printf("libcurl error: %d\n", res);
       return 4;
     }

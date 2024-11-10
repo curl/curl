@@ -50,10 +50,10 @@ int main(void)
     /* Perform the request */
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       double ul;
       res = curl_easy_getinfo(curl, CURLINFO_SIZE_UPLOAD, &ul);
-      if(!res) {
+      if(CURLE_OK == res) {
         printf("Uploaded %.0f bytes\n", ul);
       }
     }

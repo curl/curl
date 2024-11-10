@@ -59,7 +59,7 @@ int main(void)
   CURL *curl = curl_easy_init();
   if(curl) {
     CURLcode res = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
-    if(res)
+    if(res != CURLE_OK)
       printf("error: %s\n", curl_easy_strerror(res));
   }
 }

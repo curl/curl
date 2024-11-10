@@ -47,11 +47,11 @@ int main(void)
 
     res = curl_easy_perform(curl);
 
-    if(!res) {
+    if(CURLE_OK == res) {
       /* extract the available proxy authentication types */
       long auth;
       res = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_AVAIL, &auth);
-      if(!res) {
+      if(CURLE_OK == res) {
         if(!auth)
           printf("No proxy auth available, perhaps no 407?\n");
         else {
