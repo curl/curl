@@ -34,7 +34,6 @@
 # - `GSS_INCLUDE_DIRS`:  The GSS include directories.
 # - `GSS_LIBRARIES`:     The GSS library names.
 # - `GSS_LIBRARY_DIRS`:  The GSS library directories.
-# - `GSS_LDFLAGS`:       Required linker flags.
 # - `GSS_CFLAGS`:        Required compiler flags.
 # - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
 #                        In case the library is found but no version info available it is set to "unknown"
@@ -91,7 +90,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message(STATUS "FindGSS CFLAGS: ${_GSS_CFLAGS}")
+    message(STATUS "FindGSS krb5-config --cflags: ${_GSS_CFLAGS}")
     if(NOT _gss_configure_failed)  # 0 means success
       # Should also work in an odd case when multiple directories are given
       string(STRIP "${_GSS_CFLAGS}" _GSS_CFLAGS)
@@ -114,7 +113,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       RESULT_VARIABLE _gss_configure_failed
       OUTPUT_STRIP_TRAILING_WHITESPACE
     )
-    message(STATUS "FindGSS LDFLAGS: ${_gss_lib_flags}")
+    message(STATUS "FindGSS krb5-config --libs: ${_gss_lib_flags}")
 
     if(NOT _gss_configure_failed)  # 0 means success
       # This script gives us libraries and link directories. Blah. We have to deal with it.
@@ -129,8 +128,6 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         elseif(_flag MATCHES "^-L.*")
           string(REGEX REPLACE "^-L" "" _val "${_flag}")
           list(APPEND _GSS_LIBRARY_DIRS "${_val}")
-        else()
-          list(APPEND _GSS_LDFLAGS "${_flag}")
         endif()
       endforeach()
     endif()
@@ -286,10 +283,11 @@ else()
   message(STATUS "Found GSS/${GSS_FLAVOUR} (via pkg-config): ${_GSS_INCLUDE_DIRS} (found version \"${_GSS_VERSION}\")")
 endif()
 
+string(REPLACE ";" " " _GSS_CFLAGS "${_GSS_CFLAGS}")
+
 set(GSS_INCLUDE_DIRS ${_GSS_INCLUDE_DIRS})
 set(GSS_LIBRARIES ${_GSS_LIBRARIES})
 set(GSS_LIBRARY_DIRS ${_GSS_LIBRARY_DIRS})
-set(GSS_LDFLAGS ${_GSS_LDFLAGS})
 set(GSS_CFLAGS ${_GSS_CFLAGS})
 set(GSS_VERSION ${_GSS_VERSION})
 
@@ -346,7 +344,6 @@ mark_as_advanced(
   _GSS_CFLAGS
   _GSS_FOUND
   _GSS_INCLUDE_DIRS
-  _GSS_LDFLAGS
   _GSS_LIBRARIES
   _GSS_LIBRARY_DIRS
   _GSS_MODULE_NAME
