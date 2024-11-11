@@ -30,6 +30,7 @@ dnl ----------------------------------------------------
 if test "x$OPT_BEARSSL" != xno; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
+  _ldflagspc=$LDFLAGSPC
   ssl_msg=
 
   if test X"$OPT_BEARSSL" != Xno; then
@@ -65,6 +66,7 @@ if test "x$OPT_BEARSSL" != xno; then
       bearssllib=$OPT_BEARSSL/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
+      LDFLAGSPC="$LDFLAGSPC $addld"
       if test "$addcflags" != "-I/usr/include"; then
         CPPFLAGS="$CPPFLAGS $addcflags"
       fi
@@ -81,6 +83,7 @@ if test "x$OPT_BEARSSL" != xno; then
         [
           CPPFLAGS=$_cppflags
           LDFLAGS=$_ldflags
+          LDFLAGSPC=$_ldflagspc
         ], -lbearssl)
     fi
 

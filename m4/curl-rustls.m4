@@ -32,6 +32,7 @@ if test "x$OPT_RUSTLS" != xno; then
 
   dnl backup the pre-ssl variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
 
   ## NEW CODE
@@ -77,6 +78,7 @@ if test "x$OPT_RUSTLS" != xno; then
         addcflags=-I$PREFIX_RUSTLS/include
 
         LDFLAGS="$LDFLAGS $addld"
+        LDFLAGSPC="$LDFLAGSPC $addld"
         if test "$addcflags" != "-I/usr/include"; then
             CPPFLAGS="$CPPFLAGS $addcflags"
         fi
@@ -157,6 +159,7 @@ if test "x$OPT_RUSTLS" != xno; then
   dnl finally, set flags to use this TLS backend
   CPPFLAGS="$CLEANCPPFLAGS $SSL_CPPFLAGS"
   LDFLAGS="$CLEANLDFLAGS $SSL_LDFLAGS"
+  LDFLAGSPC="$CLEANLDFLAGSPC $SSL_LDFLAGS"
 
   if test "x$USE_RUSTLS" = "xyes"; then
     AC_MSG_NOTICE([detected Rustls])
