@@ -36,6 +36,6 @@ Version: @CURLVERSION@
 Requires: @LIBCURL_PC_REQUIRES@
 Requires.private: @LIBCURL_PC_REQUIRES_PRIVATE@
 Libs: -L${libdir} -lcurl @LIBCURL_PC_LIBS@
-Libs.private: @LDFLAGS@ @LIBCURL_PC_LIBS_PRIVATE@
+Libs.private: @LIBCURL_PC_LDFLAGS_PRIVATE@ @LIBCURL_PC_LIBS_PRIVATE@
 Cflags: -I${includedir} @LIBCURL_PC_CFLAGS@
 Cflags.private: @LIBCURL_PC_CFLAGS_PRIVATE@
