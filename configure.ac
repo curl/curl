@@ -5072,7 +5072,35 @@ CURL_CONFIGURE_SYMBOL_HIDING
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl
-LIBCURL_PC_LDFLAGS_PRIVATE="$LDFLAGSPC"
+LIBCURL_PC_LDFLAGS_PRIVATE=''
+for ldflag in $INITIAL_LDFLAGS; do
+  case "$ldflag" in
+    -L* | --library-path=*)
+      LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $ldflag"
+      ;;
+  esac
+done
+case $host in
+  *-apple-*)
+    dnl Do not quote $INITIAL_LDFLAGS
+    set -- $INITIAL_LDFLAGS
+    while [ "$#" -gt 0 ]; do
+      case "$1" in
+        -F*)
+          LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1"
+          ;;
+        -framework)
+          if [ "$#" -gt 1 ]; then
+            LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1 $2"
+            shift
+          fi
+          ;;
+      esac
+      shift
+    done
+    ;;
+esac
+LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $LDFLAGSPC"
 LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
 
 AC_SUBST(LIBCURL_PC_LDFLAGS_PRIVATE)
