@@ -286,6 +286,9 @@ else()
   message(STATUS "Found GSS/${GSS_FLAVOUR} (via pkg-config): ${_GSS_INCLUDE_DIRS} (found version \"${_GSS_VERSION}\")")
 endif()
 
+string(REPLACE ";" " " _GSS_LDFLAGS "${_GSS_LDFLAGS}")
+string(REPLACE ";" " " _GSS_CFLAGS "${_GSS_CFLAGS}")
+
 set(GSS_INCLUDE_DIRS ${_GSS_INCLUDE_DIRS})
 set(GSS_LIBRARIES ${_GSS_LIBRARIES})
 set(GSS_LIBRARY_DIRS ${_GSS_LIBRARY_DIRS})

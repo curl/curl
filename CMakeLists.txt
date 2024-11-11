@@ -1197,9 +1197,6 @@ if(CURL_USE_GSSAPI)
     cmake_push_check_state()
     list(APPEND CMAKE_REQUIRED_INCLUDES ${GSS_INCLUDE_DIRS})
 
-    string(REPLACE ";" " " GSS_CFLAGS "${GSS_CFLAGS}")
-    string(REPLACE ";" " " GSS_LDFLAGS "${GSS_LDFLAGS}")
-
     if(GSS_FLAVOUR STREQUAL "GNU")
       set(HAVE_GSSGNU 1)
     else()
