@@ -5439,7 +5439,6 @@ squeeze CFLAGS
 squeeze CPPFLAGS
 squeeze DEFS
 squeeze LDFLAGS
-squeeze LDFLAGSPC
 squeeze LIBS
 
 squeeze LIBCURL_PC_LDFLAGS_PRIVATE
@@ -5505,7 +5504,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
    CFLAGS extras:   ${CURL_CFLAG_EXTRAS}
    CPPFLAGS:        ${CPPFLAGS}
    LDFLAGS:         ${LDFLAGS}
-   LDFLAGSPC:       ${LDFLAGSPC}
+     curl-config:   ${LIBCURL_PC_LDFLAGS_PRIVATE}
    LIBS:            ${LIBS}
 
   curl version:     ${CURLVERSION}
