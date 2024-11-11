@@ -155,8 +155,8 @@ if test "x$OPT_RUSTLS" != xno; then
   fi
 
   dnl finally, set flags to use this TLS backend
-  CPPFLAGS="$CLEAN_CPPFLAGS $SSL_CPPFLAGS"
-  LDFLAGS="$CLAN_LDFLAGS $SSL_LDFLAGS"
+  CPPFLAGS="$CLEANCPPFLAGS $SSL_CPPFLAGS"
+  LDFLAGS="$CLEANLDFLAGS $SSL_LDFLAGS"
 
   if test "x$USE_RUSTLS" = "xyes"; then
     AC_MSG_NOTICE([detected Rustls])
