@@ -44,7 +44,9 @@ case $host in
     ])
     if test "x$build_for_macos" != xno; then
       AC_MSG_RESULT(yes)
-      LDFLAGS="$LDFLAGS -framework CoreFoundation -framework CoreServices -framework SystemConfiguration"
+      SYSCONFIG_LDFLAGS='-framework CoreFoundation -framework CoreServices -framework SystemConfiguration'
+      LDFLAGS="$LDFLAGS $SYSCONFIG_LDFLAGS"
+      LDFLAGSPC="$LDFLAGSPC $SYSCONFIG_LDFLAGS"
     else
       AC_MSG_RESULT(no)
     fi

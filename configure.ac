@@ -1513,6 +1513,7 @@ AS_HELP_STRING([--without-brotli], [disable BROTLI]),
 if test X"$OPT_BROTLI" != Xno; then
   dnl backup the pre-brotli variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -1548,6 +1549,7 @@ if test X"$OPT_BROTLI" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_BROTLI"
+  LDFLAGSPC="$LDFLAGSPC $LD_BROTLI"
   CPPFLAGS="$CPPFLAGS $CPP_BROTLI"
   LIBS="$LIB_BROTLI $LIBS"
 
@@ -1581,6 +1583,7 @@ if test X"$OPT_BROTLI" != Xno; then
   else
     dnl no brotli, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
+    LDFLAGSPC=$CLEANLDFLAGSPC
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
@@ -1600,6 +1603,7 @@ AS_HELP_STRING([--without-zstd], [disable libzstd]),
 if test X"$OPT_ZSTD" != Xno; then
   dnl backup the pre-zstd variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -1635,6 +1639,7 @@ if test X"$OPT_ZSTD" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_ZSTD"
+  LDFLAGSPC="$LDFLAGSPC $LD_ZSTD"
   CPPFLAGS="$CPPFLAGS $CPP_ZSTD"
   LIBS="$LIB_ZSTD $LIBS"
 
@@ -1669,6 +1674,7 @@ if test X"$OPT_ZSTD" != Xno; then
   else
     dnl no zstd, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
+    LDFLAGSPC=$CLEANLDFLAGSPC
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
@@ -2013,6 +2019,7 @@ if test x"$want_gss" = xyes; then
   if test -n "$gnu_gss"; then
     curl_gss_msg="enabled (GNU GSS)"
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+    LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
     LIBS="-lgss $LIBS"
   elif test -z "$GSSAPI_LIB_DIR"; then
     case $host in
@@ -2050,6 +2057,7 @@ if test x"$want_gss" = xyes; then
 
           if test "$GSSAPI_ROOT" != "yes"; then
             LDFLAGS="$LDFLAGS -L$GSSAPI_ROOT/lib$libsuff"
+            LDFLAGSPC="$LDFLAGSPC -L$GSSAPI_ROOT/lib$libsuff"
             LIBS="-l$gss_libname $LIBS"
           else
             LIBS="-l$gss_libname $LIBS"
@@ -2059,6 +2067,7 @@ if test x"$want_gss" = xyes; then
     esac
   else
     LDFLAGS="$LDFLAGS $GSSAPI_LIB_DIR"
+    LDFLAGSPC="$LDFLAGSPC $GSSAPI_LIB_DIR"
     case $host in
       *-hp-hpux*)
         LIBS="-lgss $LIBS"
@@ -2257,6 +2266,7 @@ AS_HELP_STRING([--without-libpsl], [disable LIBPSL]),
 if test X"$OPT_LIBPSL" != Xno; then
   dnl backup the pre-libpsl variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -2289,6 +2299,7 @@ if test X"$OPT_LIBPSL" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_PSL"
+  LDFLAGSPC="$LDFLAGSPC $LD_PSL"
   CPPFLAGS="$CPPFLAGS $CPP_PSL"
   LIBS="$LIB_PSL $LIBS"
 
@@ -2304,6 +2315,7 @@ if test X"$OPT_LIBPSL" != Xno; then
     ],
       dnl not found, revert back to clean variables
       LDFLAGS=$CLEANLDFLAGS
+      LDFLAGSPC=$CLEANLDFLAGSPC
       CPPFLAGS=$CLEANCPPFLAGS
       LIBS=$CLEANLIBS
   )
@@ -2367,6 +2379,7 @@ AS_HELP_STRING([--with-wolfssh], [enable wolfssh]),
 if test X"$OPT_LIBSSH2" != Xno; then
   dnl backup the pre-libssh2 variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -2402,6 +2415,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_SSH2"
+  LDFLAGSPC="$LDFLAGSPC $LD_SSH2"
   CPPFLAGS="$CPPFLAGS $CPP_SSH2"
   LIBS="$LIB_SSH2 $LIBS"
 
@@ -2436,12 +2450,14 @@ if test X"$OPT_LIBSSH2" != Xno; then
   else
     dnl no libssh2, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
+    LDFLAGSPC=$CLEANLDFLAGSPC
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
 elif test X"$OPT_LIBSSH" != Xno; then
   dnl backup the pre-libssh variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -2477,6 +2493,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_SSH"
+  LDFLAGSPC="$LDFLAGSPC $LD_SSH"
   CPPFLAGS="$CPPFLAGS $CPP_SSH"
   LIBS="$LIB_SSH $LIBS"
 
@@ -2514,18 +2531,22 @@ elif test X"$OPT_LIBSSH" != Xno; then
   else
     dnl no libssh, revert back to clean variables
     LDFLAGS=$CLEANLDFLAGS
+    LDFLAGSPC=$CLEANLDFLAGSPC
     CPPFLAGS=$CLEANCPPFLAGS
     LIBS=$CLEANLIBS
   fi
 elif test X"$OPT_WOLFSSH" != Xno; then
   dnl backup the pre-wolfssh variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
   if test "$OPT_WOLFSSH" != yes; then
     WOLFCONFIG="$OPT_WOLFSSH/bin/wolfssh-config"
-    LDFLAGS="$LDFLAGS `$WOLFCONFIG --libs`"
+    WOLFSSH_LIBS=`$WOLFCONFIG --libs`
+    LDFLAGS="$LDFLAGS $WOLFSSH_LIBS"
+    LDFLAGSPC="$LDFLAGSPC $WOLFSSH_LIBS"
     CPPFLAGS="$CPPFLAGS `$WOLFCONFIG --cflags`"
   fi
 
@@ -2553,6 +2574,7 @@ AS_HELP_STRING([--without-librtmp], [disable LIBRTMP]),
 if test X"$OPT_LIBRTMP" != Xno; then
   dnl backup the pre-librtmp variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -2593,6 +2615,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_RTMP"
+  LDFLAGSPC="$LDFLAGSPC $LD_RTMP"
   CPPFLAGS="$CPPFLAGS $CPP_RTMP"
   LIBS="$LIB_RTMP $LIBS"
 
@@ -2608,6 +2631,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
     ],
       dnl not found, revert back to clean variables
       LDFLAGS=$CLEANLDFLAGS
+      LDFLAGSPC=$CLEANLDFLAGSPC
       CPPFLAGS=$CLEANCPPFLAGS
       LIBS=$CLEANLIBS
   )
@@ -2736,6 +2760,7 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     dnl WinIDN library support has been requested
     clean_CPPFLAGS="$CPPFLAGS"
     clean_LDFLAGS="$LDFLAGS"
+    clean_LDFLAGSPC="$LDFLAGSPC"
     clean_LIBS="$LIBS"
     WINIDN_LIBS="-lnormaliz"
     WINIDN_CPPFLAGS=""
@@ -2749,6 +2774,7 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     #
     CPPFLAGS="$CPPFLAGS $WINIDN_CPPFLAGS"
     LDFLAGS="$LDFLAGS $WINIDN_LDFLAGS"
+    LDFLAGSPC="$LDFLAGSPC $WINIDN_LDFLAGS"
     LIBS="$WINIDN_LIBS $LIBS"
     #
     AC_MSG_CHECKING([if IdnToUnicode can be linked])
@@ -2782,6 +2808,7 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
       AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
       CPPFLAGS="$clean_CPPFLAGS"
       LDFLAGS="$clean_LDFLAGS"
+      LDFLAGSPC="$clean_LDFLAGSPC"
       LIBS="$clean_LIBS"
     fi
   fi
@@ -2871,6 +2898,7 @@ if test "$want_idn" = "yes"; then
   dnl idn library support has been requested
   clean_CPPFLAGS="$CPPFLAGS"
   clean_LDFLAGS="$LDFLAGS"
+  clean_LDFLAGSPC="$LDFLAGSPC"
   clean_LIBS="$LIBS"
   PKGCONFIG="no"
   #
@@ -2921,6 +2949,7 @@ if test "$want_idn" = "yes"; then
   #
   CPPFLAGS="$CPPFLAGS $IDN_CPPFLAGS"
   LDFLAGS="$LDFLAGS $IDN_LDFLAGS"
+  LDFLAGSPC="$LDFLAGSPC $IDN_LDFLAGS"
   LIBS="$IDN_LIBS $LIBS"
   #
   AC_MSG_CHECKING([if idn2_lookup_ul can be linked])
@@ -2952,6 +2981,7 @@ if test "$want_idn" = "yes"; then
     AC_MSG_WARN([Cannot find libidn2])
     CPPFLAGS="$clean_CPPFLAGS"
     LDFLAGS="$clean_LDFLAGS"
+    LDFLAGSPC="$clean_LDFLAGSPC"
     LIBS="$clean_LIBS"
     want_idn="no"
   fi
@@ -2994,6 +3024,7 @@ esac
 if test X"$want_nghttp2" != Xno; then
   dnl backup the pre-nghttp2 variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3027,6 +3058,7 @@ if test X"$want_nghttp2" != Xno; then
   fi
 
   LDFLAGS="$LDFLAGS $LD_H2"
+  LDFLAGSPC="$LDFLAGSPC $LD_H2"
   CPPFLAGS="$CPPFLAGS $CPP_H2"
   LIBS="$LIB_H2 $LIBS"
 
@@ -3048,6 +3080,7 @@ if test X"$want_nghttp2" != Xno; then
     ],
       dnl not found, revert back to clean variables
       LDFLAGS=$CLEANLDFLAGS
+      LDFLAGSPC=$CLEANLDFLAGSPC
       CPPFLAGS=$CLEANCPPFLAGS
       LIBS=$CLEANLIBS
   )
@@ -3094,6 +3127,7 @@ if test X"$want_tcp2" != Xno; then
 
   dnl backup the pre-ngtcp2 variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3113,6 +3147,7 @@ if test X"$want_tcp2" != Xno; then
     AC_MSG_NOTICE([-L is $LD_TCP2])
 
     LDFLAGS="$LDFLAGS $LD_TCP2"
+    LDFLAGSPC="$LDFLAGSPC $LD_TCP2"
     CPPFLAGS="$CPPFLAGS $CPP_TCP2"
     LIBS="$LIB_TCP2 $LIBS"
 
@@ -3133,6 +3168,7 @@ if test X"$want_tcp2" != Xno; then
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -3150,6 +3186,7 @@ fi
 if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BORINGSSL" != "x1"; then
   dnl backup the pre-ngtcp2_crypto_quictls variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3169,6 +3206,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_QUICTLS])
 
     LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_QUICTLS"
+    LDFLAGSPC="$LDFLAGSPC $LD_NGTCP2_CRYPTO_QUICTLS"
     CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_QUICTLS"
     LIBS="$LIB_NGTCP2_CRYPTO_QUICTLS $LIBS"
 
@@ -3189,6 +3227,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -3206,6 +3245,7 @@ fi
 if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BORINGSSL" = "x1"; then
   dnl backup the pre-ngtcp2_crypto_boringssl variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3225,6 +3265,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_BORINGSSL])
 
     LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_BORINGSSL"
+    LDFLAGSPC="$LDFLAGSPC $LD_NGTCP2_CRYPTO_BORINGSSL"
     CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_BORINGSSL"
     LIBS="$LIB_NGTCP2_CRYPTO_BORINGSSL $LIBS"
 
@@ -3245,6 +3286,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -3262,6 +3304,7 @@ fi
 if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
   dnl backup the pre-ngtcp2_crypto_gnutls variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3281,6 +3324,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_GNUTLS])
 
     LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_GNUTLS"
+    LDFLAGSPC="$LDFLAGSPC $LD_NGTCP2_CRYPTO_GNUTLS"
     CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_GNUTLS"
     LIBS="$LIB_NGTCP2_CRYPTO_GNUTLS $LIBS"
 
@@ -3301,6 +3345,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -3318,6 +3363,7 @@ fi
 if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
   dnl backup the pre-ngtcp2_crypto_wolfssl variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3337,6 +3383,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
     AC_MSG_NOTICE([-L is $LD_NGTCP2_CRYPTO_WOLFSSL])
 
     LDFLAGS="$LDFLAGS $LD_NGTCP2_CRYPTO_WOLFSSL"
+    LDFLAGSPC="$LDFLAGSPC $LD_NGTCP2_CRYPTO_WOLFSSL"
     CPPFLAGS="$CPPFLAGS $CPP_NGTCP2_CRYPTO_WOLFSSL"
     LIBS="$LIB_NGTCP2_CRYPTO_WOLFSSL $LIBS"
 
@@ -3357,6 +3404,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -3453,6 +3501,7 @@ if test X"$want_nghttp3" != Xno; then
 
   dnl backup the pre-nghttp3 variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3472,6 +3521,7 @@ if test X"$want_nghttp3" != Xno; then
     AC_MSG_NOTICE([-L is $LD_NGHTTP3])
 
     LDFLAGS="$LDFLAGS $LD_NGHTTP3"
+    LDFLAGSPC="$LDFLAGSPC $LD_NGHTTP3"
     CPPFLAGS="$CPPFLAGS $CPP_NGHTTP3"
     LIBS="$LIB_NGHTTP3 $LIBS"
 
@@ -3491,6 +3541,7 @@ if test X"$want_nghttp3" != Xno; then
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -3572,6 +3623,7 @@ if test X"$want_quiche" != Xno; then
 
   dnl backup the pre-quiche variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3591,6 +3643,7 @@ if test X"$want_quiche" != Xno; then
     AC_MSG_NOTICE([-L is $LD_QUICHE])
 
     LDFLAGS="$LDFLAGS $LD_QUICHE"
+    LDFLAGSPC="$LDFLAGSPC $LD_QUICHE"
     CPPFLAGS="$CPPFLAGS $CPP_QUICHE"
     LIBS="$LIB_QUICHE $LIBS"
 
@@ -3684,6 +3737,7 @@ if test X"$want_msh3" != Xno; then
 
   dnl backup the pre-msh3 variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3692,6 +3746,7 @@ if test X"$want_msh3" != Xno; then
     CPP_MSH3="-I$want_msh3_path/include"
     DIR_MSH3="$want_msh3_path/lib"
     LDFLAGS="$LDFLAGS $LD_MSH3"
+    LDFLAGSPC="$LDFLAGSPC $LD_MSH3"
     CPPFLAGS="$CPPFLAGS $CPP_MSH3"
   fi
   LIBS="-lmsh3 $LIBS"
@@ -3712,6 +3767,7 @@ if test X"$want_msh3" != Xno; then
     ],
       dnl not found, revert back to clean variables
       LDFLAGS=$CLEANLDFLAGS
+      LDFLAGSPC=$CLEANLDFLAGSPC
       CPPFLAGS=$CLEANCPPFLAGS
       LIBS=$CLEANLIBS
   )
@@ -3750,6 +3806,7 @@ if test X"$want_libuv" != Xno; then
 
   dnl backup the pre-libuv variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -3769,6 +3826,7 @@ if test X"$want_libuv" != Xno; then
     AC_MSG_NOTICE([-L is $LD_LIBUV])
 
     LDFLAGS="$LDFLAGS $LD_LIBUV"
+    LDFLAGSPC="$LDFLAGSPC $LD_LIBUV"
     CPPFLAGS="$CPPFLAGS $CPP_LIBUV"
     LIBS="$LIB_LIBUV $LIBS"
 
@@ -3789,6 +3847,7 @@ if test X"$want_libuv" != Xno; then
       ],
         dnl not found, revert back to clean variables
         LDFLAGS=$CLEANLDFLAGS
+        LDFLAGSPC=$CLEANLDFLAGSPC
         CPPFLAGS=$CLEANCPPFLAGS
         LIBS=$CLEANLIBS
     )
@@ -5013,8 +5072,27 @@ CURL_CONFIGURE_SYMBOL_HIDING
 dnl
 dnl All the library dependencies put into $LIB apply to libcurl only.
 dnl
+LIBCURL_PC_LDFLAGS_PRIVATE=''
+dnl Do not quote $INITIAL_LDFLAGS
+set -- $INITIAL_LDFLAGS
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    -L* | --library-path=* | -F*)
+      LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1"
+      ;;
+    -framework)
+      if [ "$#" -gt 1 ]; then
+        LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1 $2"
+        shift
+      fi
+      ;;
+  esac
+  shift
+done
+LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $LDFLAGSPC"
 LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
 
+AC_SUBST(LIBCURL_PC_LDFLAGS_PRIVATE)
 AC_SUBST(LIBCURL_PC_LIBS_PRIVATE)
 AC_SUBST(CURL_NETWORK_LIBS)
 AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
@@ -5352,6 +5430,7 @@ squeeze DEFS
 squeeze LDFLAGS
 squeeze LIBS
 
+squeeze LIBCURL_PC_LDFLAGS_PRIVATE
 squeeze LIBCURL_PC_LIBS_PRIVATE
 squeeze CURL_NETWORK_LIBS
 squeeze CURL_NETWORK_AND_TIME_LIBS
@@ -5414,6 +5493,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
    CFLAGS extras:   ${CURL_CFLAG_EXTRAS}
    CPPFLAGS:        ${CPPFLAGS}
    LDFLAGS:         ${LDFLAGS}
+     curl-config:   ${LIBCURL_PC_LDFLAGS_PRIVATE}
    LIBS:            ${LIBS}
 
   curl version:     ${CURLVERSION}

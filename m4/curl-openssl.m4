@@ -35,6 +35,7 @@ if test "x$OPT_OPENSSL" != xno; then
 
   dnl backup the pre-ssl variables
   CLEANLDFLAGS="$LDFLAGS"
+  CLEANLDFLAGSPC="$LDFLAGSPC"
   CLEANCPPFLAGS="$CPPFLAGS"
   CLEANLIBS="$LIBS"
 
@@ -139,6 +140,7 @@ if test "x$OPT_OPENSSL" != xno; then
   dnl finally, set flags to use SSL
   CPPFLAGS="$CPPFLAGS $SSL_CPPFLAGS"
   LDFLAGS="$LDFLAGS $SSL_LDFLAGS"
+  LDFLAGSPC="$LDFLAGSPC $SSL_LDFLAGS"
 
   AC_CHECK_LIB(crypto, HMAC_Update,[
     HAVECRYPTO="yes"
@@ -146,6 +148,7 @@ if test "x$OPT_OPENSSL" != xno; then
     ],[
     if test -n "$LIB_OPENSSL" ; then
       LDFLAGS="$CLEANLDFLAGS -L$LIB_OPENSSL"
+      LDFLAGSPC="$CLEANLDFLAGSPC -L$LIB_OPENSSL"
     fi
     if test "$PKGCONFIG" = "no" -a -n "$PREFIX_OPENSSL" ; then
       # only set this if pkg-config wasn't used
@@ -190,6 +193,7 @@ if test "x$OPT_OPENSSL" != xno; then
         [
           AC_MSG_RESULT(no)
           LDFLAGS="$CLEANLDFLAGS"
+          LDFLAGSPC="$CLEANLDFLAGSPC"
           CPPFLAGS="$CLEANCPPFLAGS"
           LIBS="$CLEANLIBS"
         ])

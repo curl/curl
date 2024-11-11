@@ -30,6 +30,7 @@ AC_DEFUN([CURL_WITH_MBEDTLS], [
 if test "x$OPT_MBEDTLS" != xno; then
   _cppflags=$CPPFLAGS
   _ldflags=$LDFLAGS
+  _ldflagspc=$LDFLAGSPC
   ssl_msg=
 
   if test X"$OPT_MBEDTLS" != Xno; then
@@ -65,6 +66,7 @@ if test "x$OPT_MBEDTLS" != xno; then
       mbedtlslib=$OPT_MBEDTLS/lib$libsuff
 
       LDFLAGS="$LDFLAGS $addld"
+      LDFLAGSPC="$LDFLAGSPC $addld"
       if test "$addcflags" != "-I/usr/include"; then
         CPPFLAGS="$CPPFLAGS $addcflags"
       fi
@@ -81,6 +83,7 @@ if test "x$OPT_MBEDTLS" != xno; then
         [
           CPPFLAGS=$_cppflags
           LDFLAGS=$_ldflags
+          LDFLAGSPC=$_ldflagspc
         ], -lmbedx509 -lmbedcrypto)
     fi
 

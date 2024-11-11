@@ -89,9 +89,11 @@ if test "x$OPT_GNUTLS" != xno; then
       CLEANLIBS="$LIBS"
       CLEANCPPFLAGS="$CPPFLAGS"
       CLEANLDFLAGS="$LDFLAGS"
+      CLEANLDFLAGSPC="$LDFLAGSPC"
 
       LIBS="$addlib $LIBS"
       LDFLAGS="$LDFLAGS $addld"
+      LDFLAGSPC="$LDFLAGSPC $addld"
       if test "$addcflags" != "-I/usr/include"; then
         CPPFLAGS="$CPPFLAGS $addcflags"
       fi
