@@ -570,10 +570,9 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
   char *input;
   input = getpass(prompt);
   if (input) {
-      strncpy(passwd, input, sizeof(passwd) - 1);
-      passwd[sizeof(passwd) - 1] = '\0';
+    strlcpy(passwd, input, sizeof(passwd));
   } else {
-      passwd[0] = '\0';
+    passwd[0] = '\0';
   }
 #else
     getpass_r(prompt, passwd, sizeof(passwd));
