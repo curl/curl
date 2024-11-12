@@ -825,8 +825,8 @@ static bool split_str(char *str, char ***out, size_t *count)
   if(!res)
     return FALSE;
 
-  for(i = 0, s = strtok_r(str, ",", &lasts); s && i < items;
-      s = strtok_r(NULL, ",", &lasts), i++)
+  for(i = 0, s = Curl_strtok_r(str, ",", &lasts); s && i < items;
+      s = Curl_strtok_r(NULL, ",", &lasts), i++)
     res[i] = s;
 
   *out = res;

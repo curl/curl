@@ -354,8 +354,8 @@ CF_INLINE void GetDarwinVersionNumber(int *major, int *minor)
   }
 
   /* Parse the version: */
-  os_version_major = strtok_r(os_version, ".", &tok_buf);
-  os_version_minor = strtok_r(NULL, ".", &tok_buf);
+  os_version_major = Curl_strtok_r(os_version, ".", &tok_buf);
+  os_version_minor = Curl_strtok_r(NULL, ".", &tok_buf);
   *major = atoi(os_version_major);
   *minor = atoi(os_version_minor);
   free(os_version);

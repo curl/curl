@@ -833,14 +833,16 @@ parse_netscape(struct Cookie *co,
   if(ptr)
     *ptr = 0; /* clear it */
 
-  firstptr = strtok_r((char *)lineptr, "\t", &tok_buf); /* tokenize on TAB */
+  /* tokenize on TAB */
+  firstptr = Curl_strtok_r((char *)lineptr, "\t", &tok_buf);
 
   /*
    * Now loop through the fields and init the struct we already have
    * allocated
    */
   fields = 0;
-  for(ptr = firstptr; ptr; ptr = strtok_r(NULL, "\t", &tok_buf), fields++) {
+  for(ptr = firstptr; ptr;
+      ptr = Curl_strtok_r(NULL, "\t", &tok_buf), fields++) {
     switch(fields) {
     case 0:
       if(ptr[0]=='.') /* skip preceding dots */
