@@ -34,7 +34,6 @@
 # - `GSS_INCLUDE_DIRS`:  The GSS include directories.
 # - `GSS_LIBRARIES`:     The GSS library names.
 # - `GSS_LIBRARY_DIRS`:  The GSS library directories.
-# - `GSS_LDFLAGS`:       Required linker flags.
 # - `GSS_CFLAGS`:        Required compiler flags.
 # - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
 #                        In case the library is found but no version info available it is set to "unknown"
@@ -129,8 +128,6 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
         elseif(_flag MATCHES "^-L.*")
           string(REGEX REPLACE "^-L" "" _val "${_flag}")
           list(APPEND _GSS_LIBRARY_DIRS "${_val}")
-        else()
-          list(APPEND _GSS_LDFLAGS "${_flag}")
         endif()
       endforeach()
     endif()
@@ -265,9 +262,6 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       )
     endif()
   endif()
-
-  string(REPLACE ";" " " _GSS_LDFLAGS "${_GSS_LDFLAGS}")
-  set(GSS_LDFLAGS ${_GSS_LDFLAGS})
 else()
   # _GSS_MODULE_NAME set since CMake 3.16
   if(_GSS_MODULE_NAME STREQUAL _gnu_modname OR _GSS_${_gnu_modname}_VERSION)
@@ -350,7 +344,6 @@ mark_as_advanced(
   _GSS_CFLAGS
   _GSS_FOUND
   _GSS_INCLUDE_DIRS
-  _GSS_LDFLAGS
   _GSS_LIBRARIES
   _GSS_LIBRARY_DIRS
   _GSS_MODULE_NAME
