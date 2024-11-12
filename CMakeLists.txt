@@ -129,6 +129,17 @@ if(NOT DEFINED CMAKE_UNITY_BUILD_BATCH_SIZE)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
 endif()
 
+# Having CMAKE_TRY_COMPILE_TARGET_TYPE set to STATIC_LIBRARY breaks certain
+# 'check_function_exists()' detections (possibly more), by detecting
+# non-existing features. This happens by default when using 'ios.toolchain.cmake'.
+# Work it around by setting this value to `EXECUTABLE`.
+if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+  message(STATUS "CMAKE_TRY_COMPILE_TARGET_TYPE was found set to STATIC_LIBRARY. "
+    "Overriding with EXECUTABLE for feature detections to work.")
+  set(_cmake_try_compile_target_type_save ${CMAKE_TRY_COMPILE_TARGET_TYPE})
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE "EXECUTABLE")
+endif()
+
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
 option(PICKY_COMPILER "Enable picky compiler options" ON)
 option(BUILD_CURL_EXE "Build curl executable" ON)
@@ -456,6 +467,11 @@ include(CheckCSourceCompiles)
 # Preload settings on Windows
 if(WIN32)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
+elseif(APPLE)
+  # Fast-track predicable feature detections
+  set(HAVE_EVENTFD 0)
+  set(HAVE_GETPASS_R 0)
+  set(HAVE_SENDMMSG 0)
 endif()
 
 if(ENABLE_THREADED_RESOLVER)
@@ -470,7 +486,7 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(NOT WIN32)
+if(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
     set(CURL_LIBS "socket;${CURL_LIBS}")
@@ -1749,6 +1765,11 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     set_source_files_properties("mprintf.c" PROPERTIES
       COMPILE_FLAGS ${_mprintf_compile_flags})
   endif()
+endif()
+
+if(_cmake_try_compile_target_type_save)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
+  unset(_cmake_try_compile_target_type_save)
 endif()
 
 include(CMake/OtherTests.cmake)
