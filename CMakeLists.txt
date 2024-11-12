@@ -457,6 +457,7 @@ include(CheckCSourceCompiles)
 if(WIN32)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
 elseif(APPLE)
+  set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
 endif()
 
