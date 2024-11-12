@@ -32,6 +32,7 @@ macro(add_header_include _check _header)
   endif()
 endmacro()
 
+set(_cmake_try_compile_target_type_save ${CMAKE_TRY_COMPILE_TARGET_TYPE})
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
@@ -74,7 +75,7 @@ check_c_source_compiles("${_source_epilogue}
     return 0;
   }" HAVE_STRUCT_TIMEVAL)
 
-unset(CMAKE_TRY_COMPILE_TARGET_TYPE)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
 
 # Detect HAVE_GETADDRINFO_THREADSAFE
 
