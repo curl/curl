@@ -27,14 +27,14 @@
 #include "curl_setup.h"
 
 #if defined(HAVE_EVENTFD) && \
-    defined(__x86_64__) && \
-    defined(__aarch64__) && \
-    defined(__ia64__) && \
-    defined(__ppc64__) && \
-    defined(__mips64) && \
-    defined(__sparc64__) && \
-    defined(__riscv_64e) && \
-    defined(__s390x__)
+    (defined(__x86_64__) || \
+     defined(__aarch64__) || \
+     defined(__ia64__) || \
+     defined(__ppc64__) || \
+     defined(__mips64) || \
+     defined(__sparc64__) || \
+     defined(__riscv_64e) || \
+     defined(__s390x__))
 
 /* Use eventfd only with 64-bit CPU architectures because eventfd has a
  * stringent rule of requiring the 8-byte buffer when calling read(2) and
