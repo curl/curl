@@ -567,10 +567,11 @@ static CURLcode checkpasswd(const char *kind, /* for what purpose */
 
     /* get password */
 #ifdef __APPLE__
-  char *input = getpass(prompt);
+  char *input;
+  input = getpass(prompt);
   if (input) {
       strncpy(passwd, input, sizeof(passwd) - 1);
-      passwd[sizeof(passwd) - 1] = '\0';  // null termination
+      passwd[sizeof(passwd) - 1] = '\0';
   } else {
       passwd[0] = '\0';
   }
