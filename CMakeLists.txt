@@ -1725,14 +1725,6 @@ if(NOT HAVE_IN_ADDR_T)
   set(in_addr_t "unsigned long")
 endif()
 
-# Check for nonblocking
-set(HAVE_DISABLED_NONBLOCKING 1)
-if(HAVE_FIONBIO OR
-   HAVE_IOCTLSOCKET OR
-   HAVE_IOCTLSOCKET_CASE)
-  unset(HAVE_DISABLED_NONBLOCKING)
-endif()
-
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
   include(CheckCCompilerFlag)
   check_c_compiler_flag("-Wno-long-double" HAVE_C_FLAG_Wno_long_double)
