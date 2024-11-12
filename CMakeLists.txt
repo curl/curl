@@ -462,8 +462,8 @@ if(WIN32)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
 elseif(APPLE)
   # Fast-track feature detections to avoid them being mis-detected when
-  # CMAKE_TRY_COMPILE_TARGET_TYPE=STATIC_LIBRARY is set. This happens by
-  # default when using `ios.toolchain.cmake`.
+  # CMAKE_TRY_COMPILE_TARGET_TYPE is set to STATIC_LIBRARY.
+  # This happens by default when using 'ios.toolchain.cmake'.
   set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
   set(HAVE_SENDMMSG 0)
