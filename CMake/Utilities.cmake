@@ -23,6 +23,16 @@
 ###########################################################################
 # File containing various utilities
 
+# Dump all defined variables with their values
+function(curl_dumpvars)
+  message("::group::CMake Variable Dump")
+  get_cmake_property(_vars VARIABLES)
+  foreach(_var ${_vars})
+    message("${_var} = ${${_var}}")
+  endforeach()
+  message("::endgroup::")
+endfunction()
+
 # Returns number of arguments that evaluate to true
 function(count_true _output_count_var)
   set(lst_len 0)

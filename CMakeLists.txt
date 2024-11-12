@@ -66,15 +66,6 @@ if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
   endforeach()
 endif()
 
-function(curl_dumpvars)  # Dump all defined variables with their values
-  message("::group::CMake Variable Dump")
-  get_cmake_property(_vars VARIABLES)
-  foreach(_var ${_vars})
-    message("${_var} = ${${_var}}")
-  endforeach()
-  message("::endgroup::")
-endfunction()
-
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/CMake;${CMAKE_MODULE_PATH}")
 include(Utilities)
 include(Macros)
