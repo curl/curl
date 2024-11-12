@@ -76,6 +76,7 @@ check_c_source_compiles("${_source_epilogue}
   }" HAVE_STRUCT_TIMEVAL)
 
 set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
+unset(_cmake_try_compile_target_type_save)
 
 # Detect HAVE_GETADDRINFO_THREADSAFE
 
@@ -151,3 +152,5 @@ if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
       return 0;
     }" HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
 endif()
+
+unset(_source_epilogue)
