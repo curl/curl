@@ -459,6 +459,7 @@ if(WIN32)
 elseif(APPLE)
   set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
+  set(HAVE_SENDMMSG 0)
 endif()
 
 if(ENABLE_THREADED_RESOLVER)
