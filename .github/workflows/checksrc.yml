@@ -84,7 +84,7 @@ jobs:
         name: checkout
 
       - name: REUSE Compliance Check
-        uses: fsfe/reuse-action@3ae3c6bdf1257ab19397fab11fd3312144692083 # v4
+        uses: fsfe/reuse-action@bb774aa972c2a89ff34781233d275075cbddf542 # v5
 
   miscchecks:
     runs-on: ubuntu-24.04
