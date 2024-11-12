@@ -472,7 +472,7 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(NOT WIN32)
+if(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
     set(CURL_LIBS "socket;${CURL_LIBS}")
