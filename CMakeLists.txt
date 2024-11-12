@@ -111,6 +111,10 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 message(STATUS "CMake platform flags:${_target_flags}")
 
+if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+  message(WARNING "CMAKE_TRY_COMPILE_TARGET_TYPE is set to STATIC_LIBRARY. Features may be falsely detected.")
+endif()
+
 if(CMAKE_CROSSCOMPILING)
   message(STATUS "Cross-compiling: "
     "${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> "
