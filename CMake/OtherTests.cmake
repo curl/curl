@@ -33,7 +33,7 @@ macro(add_header_include _check _header)
 endmacro()
 
 set(_cmake_try_compile_target_type_save ${CMAKE_TRY_COMPILE_TARGET_TYPE})
-set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+set(CMAKE_TRY_COMPILE_TARGET_TYPE "STATIC_LIBRARY")
 
 if(NOT DEFINED HAVE_STRUCT_SOCKADDR_STORAGE)
   cmake_push_check_state()
