@@ -34,6 +34,7 @@
 # - `RUSTLS_INCLUDE_DIRS`:  The Rustls include directories.
 # - `RUSTLS_LIBRARIES`:     The Rustls library names.
 # - `RUSTLS_LIBRARY_DIRS`:  The Rustls library directories.
+# - `RUSTLS_PC_REQUIRES`:   The Rustls pkg-config packages.
 # - `RUSTLS_CFLAGS`:        Required compiler flags.
 # - `RUSTLS_VERSION`:       Version of Rustls.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(RUSTLS_FOUND)
+  set(RUSTLS_PC_REQUIRES "rustls")
   string(REPLACE ";" " " RUSTLS_CFLAGS "${RUSTLS_CFLAGS}")
   message(STATUS "Found Rustls (via pkg-config): ${RUSTLS_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
 else()
