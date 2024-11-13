@@ -46,6 +46,26 @@
 cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
+# Collect command-line arguments for buildinfo.txt.
+# Must reside at the top of the script to work as expected.
+set(_cmake_args "")
+if(NOT "$ENV{CURL_BUILDINFO}$ENV{CURL_CI}$ENV{CI}" STREQUAL "")
+  get_cmake_property(_cache_vars CACHE_VARIABLES)
+  foreach(_cache_var IN ITEMS ${_cache_vars})
+    get_property(_cache_var_helpstring CACHE ${_cache_var} PROPERTY HELPSTRING)
+    if(_cache_var_helpstring STREQUAL "No help, variable specified on the command line.")
+      get_property(_cache_var_type CACHE ${_cache_var} PROPERTY TYPE)
+      get_property(_cache_var_value CACHE ${_cache_var} PROPERTY VALUE)
+      if(_cache_var_type STREQUAL "UNINITIALIZED")
+        set(_cache_var_type)
+      else()
+        set(_cache_var_type ":${_cache_var_type}")
+      endif()
+      set(_cmake_args "${_cmake_args} -D${_cache_var}${_cache_var_type}=\"${_cache_var_value}\"")
+    endif()
+  endforeach()
+endif()
+
 function(curl_dumpvars)  # Dump all defined variables with their values
   message("::group::CMake Variable Dump")
   get_cmake_property(_vars VARIABLES)
@@ -2289,6 +2309,7 @@ set(_buildinfo "\
 buildinfo.configure.tool: cmake
 buildinfo.configure.command: ${CMAKE_COMMAND}
 buildinfo.configure.version: ${CMAKE_VERSION}
+buildinfo.configure.args:${_cmake_args}
 buildinfo.configure.generator: ${CMAKE_GENERATOR}
 buildinfo.configure.make: ${CMAKE_MAKE_PROGRAM}
 buildinfo.host.cpu: ${CMAKE_HOST_SYSTEM_PROCESSOR}
