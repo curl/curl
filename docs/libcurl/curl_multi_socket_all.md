@@ -30,8 +30,8 @@ CURLMcode curl_multi_socket_all(CURLM *multi_handle,
 
 # DESCRIPTION
 
-This function is deprecated. Do not use. See curl_multi_socket_action(3)
-instead.
+This function is deprecated for performance reasons but there are no plans to
+remove it from the API. Use curl_multi_socket_action(3) instead.
 
 At return, the integer **running_handles** points to contains the number of
 still running easy handles within the multi handle. When this number reaches
