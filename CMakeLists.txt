@@ -1459,7 +1459,6 @@ endif()
 # Order for these is significant.
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
-check_include_file("sys/wait.h"       HAVE_SYS_WAIT_H)
 check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
