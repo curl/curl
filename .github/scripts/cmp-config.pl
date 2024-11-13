@@ -34,17 +34,18 @@ if(!$cmake) {
 # this lists complete lines that will be removed from the output if
 # matching
 my %remove = (
-    '#define _FILE_OFFSET_BITS 64' => 1,
     '#define CURL_EXTERN_SYMBOL' => 1,
-    '#define CURL_SA_FAMILY_T sa_family_t' => 1,
+    '#define CURL_OS "Linux"' => 1,
+    '#define CURL_OS "x86_64-pc-linux-gnu"' => 1,
     '#define CURL_SA_FAMILY_T ADDRESS_FAMILY' => 1,
-    '#define HAVE_ADDRESS_FAMILY 1' => 1,
-    '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
+    '#define CURL_SA_FAMILY_T sa_family_t' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 int' => 1,
+    '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
+    '#define HAVE_ADDRESS_FAMILY 1' => 1,
     '#define HAVE_BROTLI 1' => 1,
     '#define HAVE_BROTLI_DECODE_H 1' => 1,
-    '#define HAVE_DECL_GETPWUID_R 1' => 1,
     '#define HAVE_DECL_GETPWUID_R 0' => 1,
+    '#define HAVE_DECL_GETPWUID_R 1' => 1,
     '#define HAVE_DECL_GETPWUID_R_MISSING 1' => 1,
     '#define HAVE_DLFCN_H 1' => 1,
     '#define HAVE_GETHOSTBYNAME 1' => 1,
@@ -76,8 +77,6 @@ my %remove = (
     '#define HAVE_ZSTD_H 1' => 1,
     '#define LT_OBJDIR ".libs/"' => 1,
     '#define NEED_LBER_H 1' => 1,
-    '#define CURL_OS "Linux"' => 1,
-    '#define CURL_OS "x86_64-pc-linux-gnu"' => 1,
     '#define PACKAGE "curl"' => 1,
     '#define PACKAGE_BUGREPORT "a suitable curl mailing list: https://curl.se/mail/"' => 1,
     '#define PACKAGE_NAME "curl"' => 1,
@@ -87,6 +86,7 @@ my %remove = (
     '#define PACKAGE_VERSION "-"' => 1,
     '#define SIZEOF_LONG_LONG 8' => 1,
     '#define VERSION "-"' => 1,
+    '#define _FILE_OFFSET_BITS 64' => 1,
     );
 
 sub filter {
