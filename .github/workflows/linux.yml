@@ -616,6 +616,7 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
         run: |
+          sudo apt-get remove python3-blinker
           sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
 
       - name: 'run tests'
