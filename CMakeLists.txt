@@ -48,7 +48,7 @@ message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 # Collect command-line arguments for buildinfo.txt.
 # Must reside at the top of the script to work as expected.
-unset(_cmake_args)
+set(_cmake_args "")
 get_cmake_property(_cache_vars CACHE_VARIABLES)
 foreach(_cache_var IN ITEMS ${_cache_vars})
   get_property(_cache_var_helpstring CACHE ${_cache_var} PROPERTY HELPSTRING)
