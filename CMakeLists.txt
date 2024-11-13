@@ -468,7 +468,7 @@ include(CheckCSourceCompiles)
 if(WIN32)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
 elseif(APPLE)
-  # Fast-track predicable feature detections
+  # Fast-track predictable feature detections
   set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
   set(HAVE_SENDMMSG 0)
