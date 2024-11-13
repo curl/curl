@@ -134,7 +134,8 @@ endif()
 # non-existing features. This happens by default when using 'ios.toolchain.cmake'.
 # Work it around by setting this value to `EXECUTABLE`.
 if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
-  message(STATUS "CMAKE_TRY_COMPILE_TARGET_TYPE was found set to STATIC_LIBRARY. Overriding with EXECUTABLE for feature detections to work.")
+  message(STATUS "CMAKE_TRY_COMPILE_TARGET_TYPE was found set to STATIC_LIBRARY. "
+    "Overriding with EXECUTABLE for feature detections to work.")
   set(_cmake_try_compile_target_type_save ${CMAKE_TRY_COMPILE_TARGET_TYPE})
   set(CMAKE_TRY_COMPILE_TARGET_TYPE "EXECUTABLE")
 endif()
