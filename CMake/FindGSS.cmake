@@ -213,6 +213,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
         if(_GSS_INCLUDE_DIRS)
           set(GSS_FLAVOUR "GNU")
+          set(GSS_PC_REQUIRES "gss")
         endif()
       endif()
     endif()
