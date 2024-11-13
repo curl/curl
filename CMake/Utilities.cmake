@@ -23,6 +23,17 @@
 ###########################################################################
 # File containing various utilities
 
+# Returns number of arguments that evaluate to true
+function(count_true _output_count_var)
+  set(lst_len 0)
+  foreach(option_var IN LISTS ARGN)
+    if(${option_var})
+      math(EXPR lst_len "${lst_len} + 1")
+    endif()
+  endforeach()
+  set(${_output_count_var} ${lst_len} PARENT_SCOPE)
+endfunction()
+
 # Dump all defined variables with their values
 function(curl_dumpvars)
   message("::group::CMake Variable Dump")
@@ -39,15 +50,4 @@ function(curl_dumpvars)
     message("${_var}${_var_type}${_var_advanced} = ${${_var}}")
   endforeach()
   message("::endgroup::")
-endfunction()
-
-# Returns number of arguments that evaluate to true
-function(count_true _output_count_var)
-  set(lst_len 0)
-  foreach(option_var IN LISTS ARGN)
-    if(${option_var})
-      math(EXPR lst_len "${lst_len} + 1")
-    endif()
-  endforeach()
-  set(${_output_count_var} ${lst_len} PARENT_SCOPE)
 endfunction()
