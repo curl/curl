@@ -3223,8 +3223,6 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           NGTCP2_ENABLED=1
-          AC_DEFINE(USE_NGTCP2_CRYPTO_QUICTLS, 1, [if ngtcp2_crypto_quictls is in use])
-          AC_SUBST(USE_NGTCP2_CRYPTO_QUICTLS, [1])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_QUICTLS"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_QUICTLS to CURL_LIBRARY_PATH])
@@ -3282,8 +3280,6 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           NGTCP2_ENABLED=1
-          AC_DEFINE(USE_NGTCP2_CRYPTO_BORINGSSL, 1, [if ngtcp2_crypto_boringssl is in use])
-          AC_SUBST(USE_NGTCP2_CRYPTO_BORINGSSL, [1])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_BORINGSSL"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_BORINGSSL to CURL_LIBRARY_PATH])
@@ -3341,8 +3337,6 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           NGTCP2_ENABLED=1
-          AC_DEFINE(USE_NGTCP2_CRYPTO_GNUTLS, 1, [if ngtcp2_crypto_gnutls is in use])
-          AC_SUBST(USE_NGTCP2_CRYPTO_GNUTLS, [1])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_GNUTLS"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_GNUTLS to CURL_LIBRARY_PATH])
@@ -3400,8 +3394,6 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
           NGTCP2_ENABLED=1
-          AC_DEFINE(USE_NGTCP2_CRYPTO_WOLFSSL, 1, [if ngtcp2_crypto_wolfssl is in use])
-          AC_SUBST(USE_NGTCP2_CRYPTO_WOLFSSL, [1])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_WOLFSSL"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_WOLFSSL to CURL_LIBRARY_PATH])
@@ -3567,8 +3559,7 @@ dnl Check for ngtcp2 and nghttp3 (HTTP/3 with ngtcp2 + nghttp3)
 dnl **********************************************************************
 
 if test "x$NGTCP2_ENABLED" = "x1" -a "x$USE_NGHTTP3" = "x1"; then
-  AC_DEFINE(USE_NGTCP2_H3, 1, [if ngtcp2 + nghttp3 is in use])
-  AC_SUBST(USE_NGTCP2_H3, [1])
+  USE_NGTCP2_H3=1
   AC_MSG_NOTICE([HTTP3 support is experimental])
   curl_h3_msg="enabled (ngtcp2 + nghttp3)"
 fi
@@ -3579,8 +3570,7 @@ dnl **********************************************************************
 
 if test "x$USE_OPENSSL_QUIC" = "x1" -a "x$USE_NGHTTP3" = "x1"; then
   experimental="$experimental HTTP3"
-  AC_DEFINE(USE_OPENSSL_H3, 1, [if openssl quic + nghttp3 is in use])
-  AC_SUBST(USE_OPENSSL_H3, [1])
+  USE_OPENSSL_H3=1
   AC_MSG_NOTICE([HTTP3 support is experimental])
   curl_h3_msg="enabled (openssl + nghttp3)"
 fi
