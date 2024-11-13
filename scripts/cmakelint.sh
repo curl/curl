@@ -43,7 +43,7 @@
     # strip off the leading ./ to make the grep regexes work properly
     find . -type f | sed 's@^\./@@'
   fi
-} | grep -E '(/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in)$' \
+} | grep -E '(^CMake|/CMake|\.cmake$)' | grep -v -E '(\.h\.cmake|\.in)$' \
   | xargs \
   cmakelint \
     --spaces=2 --linelength=132 \
