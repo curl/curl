@@ -198,7 +198,7 @@ jobs:
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
         run: |
           echo ${{ matrix.build.generate && 'ninja' || 'automake libtool' }} \
-            pkg-config libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+            pkgconf libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
