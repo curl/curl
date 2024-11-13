@@ -34,6 +34,7 @@
 # - `GSS_INCLUDE_DIRS`:  The GSS include directories.
 # - `GSS_LIBRARIES`:     The GSS library names.
 # - `GSS_LIBRARY_DIRS`:  The GSS library directories.
+# - `GSS_PC_REQUIRES`:   The GSS pkg-config packages.
 # - `GSS_CFLAGS`:        Required compiler flags.
 # - `GSS_VERSION`:       This is set to version advertised by pkg-config or read from manifest.
 #                        In case the library is found but no version info available it is set to "unknown"
@@ -212,6 +213,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
 
         if(_GSS_INCLUDE_DIRS)
           set(GSS_FLAVOUR "GNU")
+          set(GSS_PC_REQUIRES "gss")
         endif()
       endif()
     endif()
@@ -266,16 +268,19 @@ else()
   # _GSS_MODULE_NAME set since CMake 3.16
   if(_GSS_MODULE_NAME STREQUAL _gnu_modname OR _GSS_${_gnu_modname}_VERSION)
     set(GSS_FLAVOUR "GNU")
+    set(GSS_PC_REQUIRES "gss")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_gnu_modname}_VERSION})
     endif()
   elseif(_GSS_MODULE_NAME STREQUAL _mit_modname OR _GSS_${_mit_modname}_VERSION)
     set(GSS_FLAVOUR "MIT")
+    set(GSS_PC_REQUIRES "mit-krb5-gssapi")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_mit_modname}_VERSION})
     endif()
   else()
     set(GSS_FLAVOUR "Heimdal")
+    set(GSS_PC_REQUIRES "heimdal-gssapi")
     if(NOT _GSS_VERSION)  # for old CMake versions?
       set(_GSS_VERSION ${_GSS_${_heimdal_modname}_VERSION})
     endif()

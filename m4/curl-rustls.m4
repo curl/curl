@@ -112,6 +112,8 @@ if test "x$OPT_RUSTLS" != xno; then
       ;;
   esac
 
+  link_pkgconfig=''
+
   if test "$PKGTEST" = "yes"; then
 
     CURL_CHECK_PKGCONFIG(rustls, [$RUSTLS_PCDIR])
@@ -140,6 +142,7 @@ if test "x$OPT_RUSTLS" != xno; then
       dnl additional libs may be necessary.  Hope that we
       dnl don't need any.
       LIBS="$SSL_LIBS $LIBS"
+      link_pkgconfig=1
       ssl_msg="rustls"
       AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
       AC_SUBST(USE_RUSTLS, [1])
@@ -176,7 +179,9 @@ if test "x$OPT_RUSTLS" != xno; then
         AC_MSG_NOTICE([Added $LIB_RUSTLS to CURL_LIBRARY_PATH])
       fi
     fi
-    LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE rustls"
+    if test -n "$link_pkgconfig"; then
+      LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE rustls"
+    fi
   fi
 
   test -z "$ssl_msg" || ssl_backends="${ssl_backends:+$ssl_backends, }$ssl_msg"
