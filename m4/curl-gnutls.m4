@@ -102,7 +102,6 @@ if test "x$OPT_GNUTLS" != xno; then
       AC_CHECK_LIB(gnutls, gnutls_x509_crt_get_dn2,
         [
         AC_DEFINE(USE_GNUTLS, 1, [if GnuTLS is enabled])
-        AC_SUBST(USE_GNUTLS, [1])
         GNUTLS_ENABLED=1
         USE_GNUTLS="yes"
         ssl_msg="GnuTLS"
@@ -164,7 +163,7 @@ if test "$GNUTLS_ENABLED" = "1"; then
   AC_CHECK_LIB(gnutls, gnutls_srp_verifier,
     [
       AC_DEFINE(HAVE_GNUTLS_SRP, 1, [if you have the function gnutls_srp_verifier])
-      AC_SUBST(HAVE_GNUTLS_SRP, [1])
+      HAVE_GNUTLS_SRP=1
     ])
 fi
 

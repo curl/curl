@@ -399,11 +399,8 @@
 #  include <lwip/netdb.h>
 #endif
 
-#ifdef HAVE_EXTRA_STRICMP_H
+#ifdef macintosh
 #  include <extra/stricmp.h>
-#endif
-
-#ifdef HAVE_EXTRA_STRDUP_H
 #  include <extra/strdup.h>
 #endif
 

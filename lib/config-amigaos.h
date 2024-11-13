@@ -59,8 +59,6 @@
 #define HAVE_WRITABLE_ARGV 1
 #define HAVE_SYS_IOCTL_H 1
 
-#define NEED_MALLOC_H 1
-
 #define SIZEOF_INT 4
 #define SIZEOF_SIZE_T 4
 

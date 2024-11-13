@@ -29,7 +29,6 @@ if test "x$OPT_SECURETRANSPORT" != xno; then
      (test "x$cross_compiling" != "xno" || test -d "/System/Library/Frameworks/Security.framework"); then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SECTRANSP, 1, [enable Secure Transport])
-    AC_SUBST(USE_SECTRANSP, [1])
     ssl_msg="Secure Transport"
     test secure-transport != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SECURETRANSPORT_ENABLED=1
