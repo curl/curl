@@ -111,10 +111,6 @@ if(CMAKE_CROSSCOMPILING)
 endif()
 message(STATUS "CMake platform flags:${_target_flags}")
 
-if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
-  message(WARNING "CMAKE_TRY_COMPILE_TARGET_TYPE is set to STATIC_LIBRARY. Features may be falsely detected.")
-endif()
-
 if(CMAKE_CROSSCOMPILING)
   message(STATUS "Cross-compiling: "
     "${CMAKE_HOST_SYSTEM_NAME}/${CMAKE_HOST_SYSTEM_PROCESSOR} -> "
@@ -131,6 +127,16 @@ include_directories("${PROJECT_SOURCE_DIR}/include")
 
 if(NOT DEFINED CMAKE_UNITY_BUILD_BATCH_SIZE)
   set(CMAKE_UNITY_BUILD_BATCH_SIZE 0)
+endif()
+
+# Having CMAKE_TRY_COMPILE_TARGET_TYPE set to STATIC_LIBRARY breaks certain
+# 'check_function_exists()' detections (possibly more), by detecting
+# non-existing features. This happens by default when using 'ios.toolchain.cmake'.
+# Work it around by setting this value to `EXECUTABLE`.
+if(CMAKE_TRY_COMPILE_TARGET_TYPE STREQUAL "STATIC_LIBRARY")
+  message(STATUS "CMAKE_TRY_COMPILE_TARGET_TYPE was found set to STATIC_LIBRARY. Overriding with EXECUTABLE for feature detections to work.")
+  set(_cmake_try_compile_target_type_save ${CMAKE_TRY_COMPILE_TARGET_TYPE})
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE "EXECUTABLE")
 endif()
 
 option(CURL_WERROR "Turn compiler warnings into errors" OFF)
@@ -461,9 +467,7 @@ include(CheckCSourceCompiles)
 if(WIN32)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
 elseif(APPLE)
-  # Fast-track feature detections to avoid them being mis-detected when
-  # CMAKE_TRY_COMPILE_TARGET_TYPE is set to STATIC_LIBRARY.
-  # This happens by default when using 'ios.toolchain.cmake'.
+  # Fast-track predicable feature detections
   set(HAVE_EVENTFD 0)
   set(HAVE_GETPASS_R 0)
   set(HAVE_SENDMMSG 0)
@@ -1760,6 +1764,11 @@ if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
     set_source_files_properties("mprintf.c" PROPERTIES
       COMPILE_FLAGS ${_mprintf_compile_flags})
   endif()
+endif()
+
+if(_cmake_try_compile_target_type_save)
+  set(CMAKE_TRY_COMPILE_TARGET_TYPE ${_cmake_try_compile_target_type_save})
+  unset(_cmake_try_compile_target_type_save)
 endif()
 
 include(CMake/OtherTests.cmake)
