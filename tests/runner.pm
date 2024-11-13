@@ -779,7 +779,7 @@ sub singletest_prepare {
         my $filename=$fileattr{'name'};
         if(@inputfile || $filename) {
             if(!$filename) {
-                logmsg " $testnum: IGNORED: section client=>file has no name attribute\n";
+                logmsg " $testnum: IGNORED: Section client=>file has no name attribute\n";
                 return -1;
             }
             my $fileContent = join('', @inputfile);
@@ -901,7 +901,7 @@ sub singletest_run {
                 chomp $dis[0] if($dis[0]);
                 if($dis[0] eq "test-duphandle") {
                     # marked to not run with duphandle
-                    logmsg "test $testnum: IGNORED: can't run test-duphandle\n";
+                    logmsg " $testnum: IGNORED: Can't run test-duphandle\n";
                     return (-1, 0, 0, "", "", 0);
                 }
             }

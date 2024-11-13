@@ -2451,7 +2451,8 @@ Usage: runtests.pl [options] [test selection(s)]
   -bundle  use test bundles
   -c path  use this curl executable
   -d       display server debug info
-  -e       event-based execution
+  -e, --test-event  event-based execution
+  --test-duphandle  duplicate handles before use
   -E file  load the specified file to exclude certain tests
   -f       forcibly run even if disabled
   -g       run the test case with gdb
