@@ -290,6 +290,7 @@ jobs:
             libtool autoconf automake pkgconf ninja-build stunnel4 \
             libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
+          python3 -m venv $HOME/venv
         name: 'install prereqs'
 
       - if: contains(matrix.build.name, 'i686')
@@ -301,6 +302,7 @@ jobs:
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${{ matrix.build.install_packages }}
+          python3 -m venv $HOME/venv
         name: 'install prereqs'
 
       - if: contains(matrix.build.install_steps, 'pytest')
@@ -616,7 +618,8 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
         run: |
-          sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' }}
@@ -631,6 +634,7 @@ jobs:
               TFLAGS+=' ~2077 ~2078'  # valgrind errors
             fi
           fi
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
@@ -640,7 +644,8 @@ jobs:
       - name: 'install pytest prereqs'
         if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          sudo python3 -m pip install --break-system-packages -r tests/http/requirements.txt
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
+          python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
@@ -648,6 +653,7 @@ jobs:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
         run: |
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci
           else

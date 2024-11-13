@@ -328,6 +328,7 @@ jobs:
             libtasn1-6-dev libidn2-0-dev gawk gperf libtss2-dev dns-root-data bison gtk-doc-tools \
             texinfo texlive texlive-extra-utils autopoint libev-dev \
             apache2 apache2-dev libnghttp2-dev vsftpd
+          python3 -m venv $HOME/venv
           echo 'CC=gcc-12' >> $GITHUB_ENV
           echo 'CXX=g++-12' >> $GITHUB_ENV
         name: 'install prereqs'
@@ -501,12 +502,14 @@ jobs:
 
       - name: 'install test prereqs'
         run: |
-          sudo python3 -m pip install --break-system-packages -r tests/requirements.txt
+          source $HOME/venv/bin/activate
+          python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
         run: |
+          source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target test-ci
           else
@@ -515,13 +518,15 @@ jobs:
 
       - name: 'install pytest prereqs'
         run: |
-          sudo python3 -m pip install --break-system-packages -r tests/http/requirements.txt
+          source $HOME/venv/bin/activate
+          python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
         run: |
+          source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci
           else
