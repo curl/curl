@@ -1072,6 +1072,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
   char *cp = NULL;
   unsigned int ccsid;
   curl_off_t pfsize;
+  struct Curl_easy *data = easy;
 
   va_start(arg, tag);
 
@@ -1195,7 +1196,7 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
     s = va_arg(arg, char *);
     ccsid = va_arg(arg, unsigned int);
 
-    pfsize = easy->set.postfieldsize;
+    pfsize = data->set.postfieldsize;
 
     if(!s || !pfsize || ccsid == NOCONV_CCSID || ccsid == ASCII_CCSID) {
       result = curl_easy_setopt(easy, CURLOPT_COPYPOSTFIELDS, s);
@@ -1240,12 +1241,12 @@ curl_easy_setopt_ccsid(CURL *easy, CURLoption tag, ...)
         break;
       }
 
-      easy->set.postfieldsize = pfsize;         /* Replace data size. */
+      data->set.postfieldsize = pfsize;         /* Replace data size. */
       s = cp;
     }
 
     result = curl_easy_setopt(easy, CURLOPT_POSTFIELDS, s);
-    easy->set.str[STRING_COPYPOSTFIELDS] = s;   /* Give to library. */
+    data->set.str[STRING_COPYPOSTFIELDS] = s;   /* Give to library. */
     break;
 
   default:
