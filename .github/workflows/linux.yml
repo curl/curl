@@ -618,7 +618,7 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
         run: |
-          source $HOME/venv/bin/activate
+          [ -z '${{ matrix.build.container }}' ] && source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
