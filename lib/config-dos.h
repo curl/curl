@@ -126,10 +126,6 @@
   #define strerror(e) strerror_s_((e))
 #endif
 
-#ifdef MSDOS  /* Watt-32 */
-  #define HAVE_CLOSE_S    1
-#endif
-
 #undef word
 #undef byte
 
