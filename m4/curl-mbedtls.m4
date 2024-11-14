@@ -104,6 +104,7 @@ if test "x$OPT_MBEDTLS" != xno; then
           AC_MSG_NOTICE([Added $mbedtlslib to CURL_LIBRARY_PATH])
         fi
       fi
+      dnl FIXME: Enable when mbedTLS was detected via pkg-config
       if false; then
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE mbedtls"
       fi

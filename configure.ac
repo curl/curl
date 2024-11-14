@@ -3767,6 +3767,7 @@ if test X"$want_msh3" != Xno; then
         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
         export CURL_LIBRARY_PATH
         AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
+        dnl FIXME: Enable when msh3 was detected via pkg-config
         if false; then
           LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libmsh3"
         fi

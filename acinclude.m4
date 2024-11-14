@@ -565,6 +565,7 @@ AC_DEFUN([CURL_CHECK_LIBS_LDAP], [
       else
         LIBS="$curl_cv_ldap_LIBS $curl_cv_save_LIBS"
       fi
+      # FIXME: Enable when ldap was detected via pkg-config
       if false; then
         LIBCURL_PC_REQUIRES_PRIVATE="ldap $LIBCURL_PC_REQUIRES_PRIVATE"
       fi
