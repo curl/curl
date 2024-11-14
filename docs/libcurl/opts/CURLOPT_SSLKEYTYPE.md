@@ -32,12 +32,18 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_SSLKEYTYPE, char *type);
 # DESCRIPTION
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the format of your private key. Supported formats are "PEM", "DER" and "ENG".
+the format of your private key. Supported formats are "PEM", "DER", "ENG" and
+"PROV".
 
 The format "ENG" enables you to load the private key from a crypto engine. In
 this case CURLOPT_SSLKEY(3) is used as an identifier passed to the engine. You
-have to set the crypto engine with CURLOPT_SSLENGINE(3). "DER" format key file
-currently does not work because of a bug in OpenSSL.
+have to set the crypto engine with CURLOPT_SSLENGINE(3).
+
+The format "PROV" enables you to load the private key from a crypto provider
+(Added in 8.12.0). In this case CURLOPT_SSLKEY(3) is used as an identifier
+passed to the provider.
+
+The "DER" format does not work with OpenSSL.
 
 The application does not have to keep the string around after setting this
 option.

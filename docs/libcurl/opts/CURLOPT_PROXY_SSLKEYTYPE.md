@@ -34,7 +34,8 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_PROXY_SSLKEYTYPE, char *type);
 This option is for connecting to an HTTPS proxy, not an HTTPS server.
 
 Pass a pointer to a null-terminated string as parameter. The string should be
-the format of your private key. Supported formats are "PEM", "DER" and "ENG".
+the format of your private key. Supported formats are "PEM", "DER", "ENG" and
+"PROV" (the latter added in curl 8.12.0).
 
 The application does not have to keep the string around after setting this
 option.

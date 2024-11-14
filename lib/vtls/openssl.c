@@ -104,6 +104,13 @@
 #include <openssl/engine.h>
 #endif
 
+#if OPENSSL_VERSION_NUMBER >= 0x03000000fL && !defined(OPENSSL_NO_UI_CONSOLE)
+#include <openssl/provider.h>
+#include <openssl/store.h>
+/* this is used in the following conditions to make them easier to read */
+#define OPENSSL_HAS_PROVIDERS
+#endif
+
 #include "warnless.h"
 
 /* The last #include files should be: */
@@ -125,7 +132,7 @@
 #error "OPENSSL_VERSION_NUMBER not defined"
 #endif
 
-#ifdef USE_OPENSSL_ENGINE
+#if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
 #endif
 
@@ -1081,6 +1088,9 @@ static CURLcode ossl_seed(struct Curl_easy *data)
 #ifndef SSL_FILETYPE_PKCS12
 #define SSL_FILETYPE_PKCS12 43
 #endif
+#ifndef SSL_FILETYPE_PROVIDER
+#define SSL_FILETYPE_PROVIDER 44
+#endif
 static int ossl_do_file_type(const char *type)
 {
   if(!type || !type[0])
@@ -1089,6 +1099,8 @@ static int ossl_do_file_type(const char *type)
     return SSL_FILETYPE_PEM;
   if(strcasecompare(type, "DER"))
     return SSL_FILETYPE_ASN1;
+  if(strcasecompare(type, "PROV"))
+    return SSL_FILETYPE_PROVIDER;
   if(strcasecompare(type, "ENG"))
     return SSL_FILETYPE_ENGINE;
   if(strcasecompare(type, "P12"))
@@ -1096,7 +1108,7 @@ static int ossl_do_file_type(const char *type)
   return -1;
 }
 
-#ifdef USE_OPENSSL_ENGINE
+#if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 /*
  * Supply default password to the engine user interface conversation.
  * The password is passed by OpenSSL engine from ENGINE_load_private_key()
@@ -1150,6 +1162,10 @@ static bool is_pkcs11_uri(const char *string)
 #endif
 
 static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine);
+#if !defined(USE_OPENSSL_ENGINE) && defined(OPENSSL_HAS_PROVIDERS)
+static CURLcode ossl_set_provider(struct Curl_easy *data,
+                                  const char *provider);
+#endif
 
 static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
                                 int type, const char *key_passwd)
@@ -1298,7 +1314,8 @@ int cert_stuff(struct Curl_easy *data,
 
   int file_type = ossl_do_file_type(cert_type);
 
-  if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE)) {
+  if(cert_file || cert_blob || (file_type == SSL_FILETYPE_ENGINE) ||
+     (file_type == SSL_FILETYPE_PROVIDER)) {
     SSL *ssl;
     X509 *x509;
     int cert_done = 0;
@@ -1409,8 +1426,79 @@ int cert_stuff(struct Curl_easy *data,
       }
     }
     break;
+#elif defined(OPENSSL_HAS_PROVIDERS)
+      /* fall through to compatible provider */
+    case SSL_FILETYPE_PROVIDER:
+    {
+      /* Implicitly use pkcs11 provider if none was provided and the
+       * cert_file is a PKCS#11 URI */
+      if(!data->state.provider) {
+        if(is_pkcs11_uri(cert_file)) {
+          if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+            return 0;
+          }
+        }
+      }
+
+      if(data->state.provider) {
+        /* Load the certificate from the provider */
+        OSSL_STORE_CTX *store = NULL;
+        OSSL_STORE_INFO *info = NULL;
+        X509 *cert = NULL;
+        store = OSSL_STORE_open(cert_file, NULL, NULL, NULL, NULL);
+        if(!store) {
+          failf(data, "Failed to open OpenSSL store: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          return 0;
+        }
+        if(OSSL_STORE_expect(store, OSSL_STORE_INFO_CERT) != 1) {
+          failf(data, "Failed to set store preference. Ignoring the error: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+        }
+
+        for(info = OSSL_STORE_load(store);
+            info != NULL;
+            info = OSSL_STORE_load(store)) {
+          int ossl_type = OSSL_STORE_INFO_get_type(info);
+
+          if(ossl_type == OSSL_STORE_INFO_CERT) {
+            cert = OSSL_STORE_INFO_get1_CERT(info);
+          }
+          else {
+            failf(data, "Ignoring object not matching our type: %d",
+                  ossl_type);
+            OSSL_STORE_INFO_free(info);
+            continue;
+          }
+          OSSL_STORE_INFO_free(info);
+          break;
+        }
+        OSSL_STORE_close(store);
+        if(!cert) {
+          failf(data, "No cert found in the openssl store: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          goto fail;
+        }
+
+        if(SSL_CTX_use_certificate(ctx, cert) != 1) {
+          failf(data, "unable to set client certificate [%s]",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          return 0;
+        }
+        X509_free(cert); /* we do not need the handle any more... */
+      }
+      else {
+        failf(data, "crypto provider not set, cannot load certificate");
+        return 0;
+      }
+    }
+    break;
 #else
-    failf(data, "file type ENG for certificate not implemented");
+    failf(data, "file type ENG nor PROV for certificate not implemented");
     return 0;
 #endif
 
@@ -1602,10 +1690,96 @@ fail:
       }
     }
     break;
+#elif defined(OPENSSL_HAS_PROVIDERS)
+      /* fall through to compatible provider */
+    case SSL_FILETYPE_PROVIDER:
+    {
+      /* Implicitly use pkcs11 provider if none was provided and the
+       * cert_file is a PKCS#11 URI */
+      if(!data->state.provider) {
+        if(is_pkcs11_uri(cert_file)) {
+          if(ossl_set_provider(data, "pkcs11") != CURLE_OK) {
+            return 0;
+          }
+        }
+      }
+
+      if(data->state.provider) {
+        /* Load the private key from the provider */
+        EVP_PKEY *priv_key = NULL;
+        OSSL_STORE_CTX *store = NULL;
+        OSSL_STORE_INFO *info = NULL;
+        UI_METHOD *ui_method =
+          UI_create_method((char *)"curl user interface");
+        if(!ui_method) {
+          failf(data, "unable do create " OSSL_PACKAGE
+                " user-interface method");
+          return 0;
+        }
+        UI_method_set_opener(ui_method, UI_method_get_opener(UI_OpenSSL()));
+        UI_method_set_closer(ui_method, UI_method_get_closer(UI_OpenSSL()));
+        UI_method_set_reader(ui_method, ssl_ui_reader);
+        UI_method_set_writer(ui_method, ssl_ui_writer);
+
+        store = OSSL_STORE_open(key_file, ui_method, NULL, NULL, NULL);
+        if(!store) {
+          failf(data, "Failed to open OpenSSL store: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          return 0;
+        }
+        if(OSSL_STORE_expect(store, OSSL_STORE_INFO_PKEY) != 1) {
+          failf(data, "Failed to set store preference. Ignoring the error: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+        }
+
+        for(info = OSSL_STORE_load(store);
+            info != NULL;
+            info = OSSL_STORE_load(store)) {
+          int ossl_type = OSSL_STORE_INFO_get_type(info);
+
+          if(ossl_type == OSSL_STORE_INFO_PKEY) {
+            priv_key = OSSL_STORE_INFO_get1_PKEY(info);
+          }
+          else {
+            failf(data, "Ignoring object not matching our type: %d",
+                  ossl_type);
+            OSSL_STORE_INFO_free(info);
+            continue;
+          }
+          OSSL_STORE_INFO_free(info);
+          break;
+        }
+        OSSL_STORE_close(store);
+        UI_destroy_method(ui_method);
+        if(!priv_key) {
+          failf(data, "No private key found in the openssl store: %s",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          goto fail;
+        }
+
+        if(SSL_CTX_use_PrivateKey(ctx, priv_key) != 1) {
+          failf(data, "unable to set private key [%s]",
+                ossl_strerror(ERR_get_error(), error_buffer,
+                              sizeof(error_buffer)));
+          EVP_PKEY_free(priv_key);
+          return 0;
+        }
+        EVP_PKEY_free(priv_key); /* we do not need the handle any more... */
+      }
+      else {
+        failf(data, "crypto provider not set, cannot load private key");
+        return 0;
+      }
+    }
+    break;
 #else
-    failf(data, "file type ENG for private key not supported");
+    failf(data, "file type ENG nor PROV for private key not implemented");
     return 0;
 #endif
+
     case SSL_FILETYPE_PKCS12:
       if(!cert_done) {
         failf(data, "file type P12 for private key not supported");
@@ -1872,6 +2046,40 @@ static struct curl_slist *ossl_engines_list(struct Curl_easy *data)
   (void) data;
   return list;
 }
+
+#if !defined(USE_OPENSSL_ENGINE) && defined(OPENSSL_HAS_PROVIDERS)
+/* Selects an OpenSSL crypto provider
+ */
+static CURLcode ossl_set_provider(struct Curl_easy *data, const char *provider)
+{
+  OSSL_PROVIDER *pkcs11_provider = NULL;
+  char error_buffer[256];
+
+  if(OSSL_PROVIDER_available(NULL, provider)) {
+    /* already loaded through the configuration - no action needed */
+    data->state.provider = TRUE;
+    return CURLE_OK;
+  }
+  if(data->state.provider_failed) {
+    return CURLE_SSL_ENGINE_NOTFOUND;
+  }
+
+  pkcs11_provider = OSSL_PROVIDER_try_load(NULL, provider, 1);
+  if(!pkcs11_provider) {
+    failf(data, "Failed to initialize provider: %s",
+          ossl_strerror(ERR_get_error(), error_buffer,
+                        sizeof(error_buffer)));
+    /* Do not attempt to load it again */
+    data->state.provider_failed = TRUE;
+    /* FIXME not the right error but much less fuss than creating a new
+     * public one */
+    return CURLE_SSL_ENGINE_NOTFOUND;
+  }
+  data->state.provider = TRUE;
+  return CURLE_OK;
+}
+#endif
+
 
 static CURLcode ossl_shutdown(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
