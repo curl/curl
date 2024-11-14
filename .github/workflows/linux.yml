@@ -293,7 +293,7 @@ jobs:
           python3 -m venv $HOME/venv
         name: 'install prereqs'
 
-      - if: contains(matrix.build.name, 'i686')
+      - if: matrix.build.container == null && contains(matrix.build.name, 'i686')
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo dpkg --add-architecture i386
