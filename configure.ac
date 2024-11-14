@@ -5084,13 +5084,13 @@ dnl
 LIBCURL_PC_LDFLAGS_PRIVATE=''
 dnl Do not quote $INITIAL_LDFLAGS
 set -- $INITIAL_LDFLAGS
-while [ "$#" -gt 0 ]; do
+while test -n "$1"; do
   case "$1" in
     -L* | --library-path=* | -F*)
       LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1"
       ;;
     -framework)
-      if [ "$#" -gt 1 ]; then
+      if test -n "$2"; then
         LIBCURL_PC_LDFLAGS_PRIVATE="$LIBCURL_PC_LDFLAGS_PRIVATE $1 $2"
         shift
       fi
