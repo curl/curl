@@ -67,7 +67,7 @@ const struct helptxt helptext[] = {
    "Verify server cert status OCSP-staple",
    CURLHELP_TLS},
   {"    --cert-type <type>",
-   "Certificate type (DER/PEM/ENG/P12)",
+   "Certificate type (DER/PEM/ENG/PROV/P12)",
    CURLHELP_TLS},
   {"    --ciphers <list>",
    "TLS 1.2 (1.1, 1.0) ciphers to use",
