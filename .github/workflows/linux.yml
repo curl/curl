@@ -618,7 +618,7 @@ jobs:
       - name: 'install test prereqs'
         if: ${{ matrix.build.install_steps != 'skipall' && matrix.build.container == null }}
         run: |
-          [ -z '${{ matrix.build.container }}' ] && source $HOME/venv/bin/activate
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
@@ -634,7 +634,7 @@ jobs:
               TFLAGS+=' ~2077 ~2078'  # valgrind errors
             fi
           fi
-          [ -z '${{ matrix.build.container }}' ] && source $HOME/venv/bin/activate
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           else
@@ -644,7 +644,7 @@ jobs:
       - name: 'install pytest prereqs'
         if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          [ -z '${{ matrix.build.container }}' ] && source $HOME/venv/bin/activate
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           python3 -m pip install -r tests/http/requirements.txt
 
       - name: 'run pytest'
@@ -653,7 +653,7 @@ jobs:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
         run: |
-          [ -z '${{ matrix.build.container }}' ] && source $HOME/venv/bin/activate
+          [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci
           else
