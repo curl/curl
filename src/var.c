@@ -56,19 +56,19 @@ static char *Memdup(const char *data, size_t len)
 /* free everything */
 void varcleanup(struct GlobalConfig *global)
 {
-  struct var *list = global->variables;
+  struct tool_var *list = global->variables;
   while(list) {
-    struct var *t = list;
+    struct tool_var *t = list;
     list = list->next;
     free((char *)t->content);
     free(t);
   }
 }
 
-static const struct var *varcontent(struct GlobalConfig *global,
-                                    const char *name, size_t nlen)
+static const struct tool_var *varcontent(struct GlobalConfig *global,
+                                         const char *name, size_t nlen)
 {
-  struct var *list = global->variables;
+  struct tool_var *list = global->variables;
   while(list) {
     if((strlen(list->name) == nlen) &&
        !strncmp(name, list->name, nlen)) {
@@ -285,7 +285,7 @@ ParameterError varexpand(struct GlobalConfig *global,
           char *value;
           size_t vlen = 0;
           struct curlx_dynbuf buf;
-          const struct var *v = varcontent(global, name, nlen);
+          const struct tool_var *v = varcontent(global, name, nlen);
           if(v) {
             value = (char *)v->content;
             vlen = v->clen;
@@ -351,13 +351,13 @@ static ParameterError addvariable(struct GlobalConfig *global,
                                   size_t clen,
                                   bool contalloc)
 {
-  struct var *p;
-  const struct var *check = varcontent(global, name, nlen);
+  struct tool_var *p;
+  const struct tool_var *check = varcontent(global, name, nlen);
   DEBUGASSERT(nlen);
   if(check)
     notef(global, "Overwriting variable '%s'", check->name);
 
-  p = calloc(1, sizeof(struct var) + nlen);
+  p = calloc(1, sizeof(struct tool_var) + nlen);
   if(p) {
     memcpy(p->name, name, nlen);
 
