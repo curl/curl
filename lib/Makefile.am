@@ -30,7 +30,7 @@ CHECKSRC_DIST = .checksrc vauth/.checksrc vquic/.checksrc vssh/.checksrc \
 
 EXTRA_DIST = config-win32.h config-win32ce.h config-plan9.h             \
  config-riscos.h config-mac.h curl_config.h.in libcurl.rc               \
- config-amigaos.h config-win32ce.h config-os400.h setup-os400.h         \
+ config-win32ce.h config-os400.h setup-os400.h                          \
  $(CMAKE_DIST) setup-win32.h Makefile.soname optiontable.pl libcurl.def \
  $(CHECKSRC_DIST)
 

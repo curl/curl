@@ -149,10 +149,6 @@
 #  include "config-riscos.h"
 #endif
 
-#ifdef __AMIGA__
-#  include "config-amigaos.h"
-#endif
-
 #ifdef __OS400__
 #  include "config-os400.h"
 #endif
