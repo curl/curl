@@ -345,6 +345,7 @@ Details via CMake
 - `QUICHE_LIBRARY`:                         Path to `quiche` library.
 - `RUSTLS_INCLUDE_DIR`:                     The Rustls include directory.
 - `RUSTLS_LIBRARY`:                         Path to `rustls` library.
+- `WATT_ROOT`:                              Set this variable to the root installation of Watt-32.
 - `WOLFSSH_INCLUDE_DIR`:                    The wolfSSH include directory.
 - `WOLFSSH_LIBRARY`:                        Path to `wolfssh` library.
 - `WOLFSSL_INCLUDE_DIR`:                    The wolfSSL include directory.

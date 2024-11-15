@@ -506,7 +506,16 @@ if(ENABLE_THREADED_RESOLVER)
 endif()
 
 # Check for all needed libraries
-if(NOT WIN32 AND NOT APPLE)
+if(DOS)
+  if(WATT_ROOT)
+    # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
+    list(APPEND CURL_LIBS "${WATT_ROOT}/lib/libwatt.a")
+    include_directories(SYSTEM "${WATT_ROOT}/inc")
+    set(CMAKE_REQUIRED_INCLUDES "${WATT_ROOT}/inc")
+  else()
+    message(FATAL_ERROR "Set WATT_ROOT variable to the root installation of Watt-32.")
+  endif()
+elseif(NOT WIN32 AND NOT APPLE)
   check_library_exists("socket" "connect" "" HAVE_LIBSOCKET)
   if(HAVE_LIBSOCKET)
     set(CURL_LIBS "socket;${CURL_LIBS}")
@@ -1507,10 +1516,14 @@ if(SIZEOF_SUSECONDS_T)
 endif()
 
 # Check for some functions that are used
+
+# Apply to all feature checks
 if(WIN32)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")  # Apply to all feature checks
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
 elseif(HAVE_LIBSOCKET)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")  # Apply to all feature checks
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")
+elseif(DOS)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${WATT_ROOT}/lib/libwatt.a")
 endif()
 
 check_function_exists("fnmatch"       HAVE_FNMATCH)
