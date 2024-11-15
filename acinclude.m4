@@ -1563,6 +1563,7 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   fi
   case $host_os in
     msys*) curl_pflags="${curl_pflags} MSYS";;
+    msdos*) curl_pflags="${curl_pflags} DOS";;
   esac
   if test "x$compiler_id" = 'xGNU_C'; then
     curl_pflags="${curl_pflags} GCC"
