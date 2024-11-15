@@ -496,8 +496,6 @@ include(CheckCSourceCompiles)
 # Preload settings on Windows
 if(WIN32)
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
-elseif(DOS)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/DOSCache.cmake")
 elseif(APPLE)
   # Fast-track predictable feature detections
   set(HAVE_EVENTFD 0)
