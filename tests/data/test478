@@ -30,6 +30,9 @@ Funny-head: yesyes
 <server>
 http
 </server>
+<features>
+proxy
+</features>
 <name>
 .netrc with multiple accounts for same host
 </name>

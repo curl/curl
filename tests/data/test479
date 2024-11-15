@@ -65,6 +65,9 @@ target
 <server>
 http
 </server>
+<features>
+proxy
+</features>
 <name>
 .netrc with redirect and default without password
 </name>
