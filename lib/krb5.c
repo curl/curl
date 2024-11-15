@@ -202,7 +202,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
                         data->set.str[STRING_SERVICE_NAME] :
                         "ftp";
   const char *srv_host = "host";
-  gss_buffer_desc input_buffer, output_buffer, _gssresp, *gssresp;
+  gss_buffer_desc input_buffer, output_buffer, *gssresp;
+  gss_buffer_desc _gssresp = GSS_C_EMPTY_BUFFER;
   OM_uint32 maj, min;
   gss_name_t gssname;
   gss_ctx_id_t *context = app_data;
