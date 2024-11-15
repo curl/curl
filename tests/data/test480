@@ -1,0 +1,38 @@
+<testcase>
+<info>
+<keywords>
+netrc
+pop3
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+pop3
+</server>
+<name>
+Reject .netrc with credentials using CRLF for POP3
+</name>
+<command>
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER pop3://%HOSTIP:%POP3PORT/%TESTNUMBER
+</command>
+<file name="%LOGDIR/netrc%TESTNUMBER" >
+machine %HOSTIP
+  login alice
+  password "password\r\ncommand"
+</file>
+</client>
+
+<verify>
+<errorcode>
+26
+</errorcode>
+</verify>
+</testcase>

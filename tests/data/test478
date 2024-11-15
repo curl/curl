@@ -1,0 +1,73 @@
+<testcase>
+<info>
+<keywords>
+netrc
+HTTP
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Content-Type: text/html
+Funny-head: yesyes
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+<name>
+.netrc with multiple accounts for same host
+</name>
+<command>
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER -x http://%HOSTIP:%HTTPPORT/ http://debbie@github.com/
+</command>
+<file name="%LOGDIR/netrc%TESTNUMBER" >
+
+machine github.com
+password weird
+password firstone
+login daniel
+
+machine github.com
+
+machine github.com
+login debbie
+
+machine github.com
+password weird
+password "second\r"
+login debbie
+
+</file>
+</client>
+
+<verify>
+<protocol>
+GET http://github.com/ HTTP/1.1
+Host: github.com
+Authorization: Basic %b64[debbie:second%0D]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>
