@@ -110,9 +110,6 @@
 /* Define if you have the GNU gssapi libraries */
 #undef HAVE_GSSGNU
 
-/* Define if you need the malloc.h header file even with stdlib.h  */
-/* #define NEED_MALLOC_H 1 */
-
 /* Define if you have the <netdb.h> header file. */
 #define HAVE_NETDB_H
 

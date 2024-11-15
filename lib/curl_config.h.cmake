@@ -622,9 +622,6 @@
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
 
-/* Define to 1 if you need the malloc.h header file even with stdlib.h */
-#cmakedefine NEED_MALLOC_H 1
-
 /* Define to 1 if _REENTRANT preprocessor symbol must be defined. */
 #cmakedefine NEED_REENTRANT 1
 

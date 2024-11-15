@@ -40,10 +40,6 @@
 #include <sys/types.h>
 #endif
 
-#ifdef NEED_MALLOC_H
-#include <malloc.h>
-#endif
-
 #ifdef NEED_MEMORY_H
 #include <memory.h>
 #endif
