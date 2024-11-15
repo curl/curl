@@ -161,10 +161,6 @@
 #  include "config-plan9.h"
 #endif
 
-#ifdef MSDOS
-#  include "config-dos.h"
-#endif
-
 #endif /* HAVE_CONFIG_H */
 
 /* ================================================================ */
