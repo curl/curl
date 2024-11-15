@@ -204,6 +204,9 @@ if(WIN32)
   endif()
   # Avoid storing HAVE_WIN32_WINNT in CMake cache
   unset(HAVE_WIN32_WINNT CACHE)
+elseif(DOS)
+  set(BUILD_SHARED_LIBS OFF)
+  set(BUILD_STATIC_LIBS ON)
 endif()
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
