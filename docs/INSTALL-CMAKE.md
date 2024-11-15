@@ -139,18 +139,6 @@ assumes that CMake generates `Makefile`:
     $ cd ../curl-build
     $ make install
 
-### Cross-compiling for MS-DOS using DJGPP - **EXPERIMENTAL**
-
-Install cross-toolchain and Watt-32 from:
-https://github.com/andrewwutw/build-djgpp
-
-    $ cmake . -DCMAKE_SYSTEM_NAME=DOS \
-      -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
-      -DCMAKE_C_COMPILER=path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-      -DWATT_ROOT=path/to/djgpp/net/watt \
-      -DCURL_ENABLE_SSL=OFF -DCURL_USE_LIBPSL=OFF
-    $ make
-
 # CMake build options
 
 - `BUILD_CURL_EXE`:                         Build curl executable. Default: `ON`
