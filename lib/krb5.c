@@ -364,7 +364,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       free(_gssresp.value);
 
     if(ret == AUTH_OK || service == srv_host)
-      return ret;
+      break;
 
     service = srv_host;
   }
