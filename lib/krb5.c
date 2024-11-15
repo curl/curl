@@ -202,7 +202,8 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
                         data->set.str[STRING_SERVICE_NAME] :
                         "ftp";
   const char *srv_host = "host";
-  gss_buffer_desc input_buffer, output_buffer, _gssresp, *gssresp;
+  gss_buffer_desc input_buffer, output_buffer, *gssresp;
+  gss_buffer_desc _gssresp = GSS_C_EMPTY_BUFFER;
   OM_uint32 maj, min;
   gss_name_t gssname;
   gss_ctx_id_t *context = app_data;
@@ -363,7 +364,7 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
       free(_gssresp.value);
 
     if(ret == AUTH_OK || service == srv_host)
-      return ret;
+      break;
 
     service = srv_host;
   }
@@ -612,10 +613,10 @@ static ssize_t sec_recv(struct Curl_easy *data, int sockindex,
   return total_read;
 }
 
-/* Send |length| bytes from |from| to the |fd| socket taking care of encoding
-   and negotiating with the server. |from| can be NULL. */
+/* Send |length| bytes from |from| to the |sockindex| socket taking care of
+   encoding and negotiating with the server. |from| can be NULL. */
 static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
-                        curl_socket_t fd, const char *from, int length)
+                        int sockindex, const char *from, int length)
 {
   int bytes, htonl_bytes; /* 32-bit integers for htonl */
   char *buffer = NULL;
@@ -649,12 +650,12 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
       static const char *enc = "ENC ";
       static const char *mic = "MIC ";
       if(prot_level == PROT_PRIVATE)
-        socket_write(data, fd, enc, 4);
+        socket_write(data, sockindex, enc, 4);
       else
-        socket_write(data, fd, mic, 4);
+        socket_write(data, sockindex, mic, 4);
 
-      socket_write(data, fd, cmd_buffer, cmd_size);
-      socket_write(data, fd, "\r\n", 2);
+      socket_write(data, sockindex, cmd_buffer, cmd_size);
+      socket_write(data, sockindex, "\r\n", 2);
       infof(data, "Send: %s%s", prot_level == PROT_PRIVATE ? enc : mic,
             cmd_buffer);
       free(cmd_buffer);
@@ -662,14 +663,14 @@ static void do_sec_send(struct Curl_easy *data, struct connectdata *conn,
   }
   else {
     htonl_bytes = (int)htonl((OM_uint32)bytes);
-    socket_write(data, fd, &htonl_bytes, sizeof(htonl_bytes));
-    socket_write(data, fd, buffer, curlx_sitouz(bytes));
+    socket_write(data, sockindex, &htonl_bytes, sizeof(htonl_bytes));
+    socket_write(data, sockindex, buffer, curlx_sitouz(bytes));
   }
   free(buffer);
 }
 
 static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
-                         curl_socket_t fd, const char *buffer, size_t length)
+                         int sockindex, const char *buffer, size_t length)
 {
   ssize_t tx = 0, len = conn->buffer_size;
 
@@ -679,7 +680,7 @@ static ssize_t sec_write(struct Curl_easy *data, struct connectdata *conn,
     if(length < (size_t)len)
       len = length;
 
-    do_sec_send(data, conn, fd, buffer, curlx_sztosi(len));
+    do_sec_send(data, conn, sockindex, buffer, curlx_sztosi(len));
     length -= len;
     buffer += len;
     tx += len;
@@ -693,10 +694,9 @@ static ssize_t sec_send(struct Curl_easy *data, int sockindex,
                         CURLcode *err)
 {
   struct connectdata *conn = data->conn;
-  curl_socket_t fd = conn->sock[sockindex];
   (void)eos; /* unused */
   *err = CURLE_OK;
-  return sec_write(data, conn, fd, buffer, len);
+  return sec_write(data, conn, sockindex, buffer, len);
 }
 
 int Curl_sec_read_msg(struct Curl_easy *data, struct connectdata *conn,
