@@ -372,13 +372,13 @@ krb5_auth(void *app_data, struct Curl_easy *data, struct connectdata *conn)
 
 static void krb5_end(void *app_data)
 {
-    OM_uint32 min;
-    gss_ctx_id_t *context = app_data;
-    if(*context != GSS_C_NO_CONTEXT) {
-      OM_uint32 maj = gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
-      (void)maj;
-      DEBUGASSERT(maj == GSS_S_COMPLETE);
-    }
+  OM_uint32 min;
+  gss_ctx_id_t *context = app_data;
+  if(*context != GSS_C_NO_CONTEXT) {
+    OM_uint32 maj = gss_delete_sec_context(&min, context, GSS_C_NO_BUFFER);
+    (void)maj;
+    DEBUGASSERT(maj == GSS_S_COMPLETE);
+  }
 }
 
 static const struct Curl_sec_client_mech Curl_krb5_client_mech = {

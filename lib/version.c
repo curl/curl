@@ -551,7 +551,7 @@ static const struct feat features_table[] = {
 #ifdef HAVE_ZSTD
   FEATURE("zstd",        NULL,                CURL_VERSION_ZSTD),
 #endif
-  {NULL,             NULL,                0}
+  {NULL,                 NULL,                0}
 };
 
 static const char *feature_names[sizeof(features_table) /
