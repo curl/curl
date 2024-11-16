@@ -149,20 +149,12 @@
 #  include "config-riscos.h"
 #endif
 
-#ifdef __AMIGA__
-#  include "config-amigaos.h"
-#endif
-
 #ifdef __OS400__
 #  include "config-os400.h"
 #endif
 
 #ifdef __PLAN9__
 #  include "config-plan9.h"
-#endif
-
-#ifdef MSDOS
-#  include "config-dos.h"
 #endif
 
 #endif /* HAVE_CONFIG_H */
@@ -489,6 +481,14 @@
    int curlx_win32_open(const char *filename, int oflag, ...);
    int curlx_win32_stat(const char *path, struct_stat *buffer);
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
+#endif
+
+#ifdef __DJGPP__
+/* Requires DJGPP 2.04 */
+#  include <unistd.h>
+#  undef  lseek
+#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                (offset_t)-1
 #endif
 
 /*
@@ -908,6 +908,8 @@ endings either CRLF or LF so 't' is appropriate.
 #    define CURL_SA_FAMILY_T sa_family_t
 #  elif defined(HAVE_ADDRESS_FAMILY)
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#  elif defined(__AMIGA__)
+#    define CURL_SA_FAMILY_T unsigned char
 #  else
 /* use a sensible default */
 #    define CURL_SA_FAMILY_T unsigned short

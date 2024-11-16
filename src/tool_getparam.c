@@ -45,10 +45,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef MSDOS
-#  define USE_WATT32
-#endif
-
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK FALSE
 

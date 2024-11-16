@@ -37,7 +37,7 @@ permissions: {}
 
 jobs:
   netbsd:
-    name: 'NetBSD (cmake, openssl, clang)'
+    name: 'NetBSD (CM, openssl, clang)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -77,7 +77,7 @@ jobs:
             echo '::endgroup::'
 
   openbsd:
-    name: 'OpenBSD (cmake, libressl, clang)'
+    name: 'OpenBSD (CM, libressl, clang)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
@@ -118,7 +118,7 @@ jobs:
             echo '::endgroup::'
 
   freebsd:
-    name: 'FreeBSD (${{ matrix.build }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})'
+    name: "FreeBSD (${{ matrix.build && 'CM' || 'AM' }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})"
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
@@ -194,7 +194,7 @@ jobs:
             echo '::endgroup::'
 
   omnios:
-    name: 'OmniOS (autotools, openssl, gcc, amd64)'
+    name: 'OmniOS (AM, openssl, gcc, amd64)'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
@@ -224,3 +224,199 @@ jobs:
             echo '::group::build examples'
             gmake -j3 examples
             echo '::endgroup::'
+
+  amiga:
+    name: "AmigaOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, AmiSSL, gcc, m68k)"
+    runs-on: 'ubuntu-24.04'
+    timeout-minutes: 30
+    env:
+      amissl-version: 5.18
+    strategy:
+      matrix:
+        build: [autotools, cmake]
+      fail-fast: false
+    steps:
+      - name: 'install compiler'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        run: |
+          cd "${HOME}" || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
+            --location https://github.com/bebbo/amiga-gcc/releases/download/Mechen/amiga-gcc.tgz | tar -xz
+          cd opt/appveyor || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+            --location https://github.com/jens-maus/amissl/releases/download/${{ env.amissl-version }}/AmiSSL-${{ env.amissl-version }}-SDK.lha --output bin.lha
+          7z x -bd -y bin.lha
+          rm -f bin.lha
+          mv "$HOME/opt/appveyor" /opt
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'configure'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake -B bld \
+              -DAMIGA=1 \
+              -DCMAKE_SYSTEM_NAME=Generic \
+              -DCMAKE_SYSTEM_PROCESSOR=m68k \
+              -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
+              -DCMAKE_C_COMPILER=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
+              -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              -DAMISSL_INCLUDE_DIR=/opt/appveyor/AmiSSL/Developer/include \
+              -DAMISSL_STUBS_LIBRARY=/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+              -DAMISSL_AUTO_LIBRARY=/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a
+          else
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              CC=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
+              AR=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ar \
+              RANLIB=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ranlib \
+              --host=m68k-amigaos \
+              --disable-shared \
+              --without-libpsl \
+              --with-amissl \
+              LDFLAGS=-L/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3 \
+              CPPFLAGS=-I/opt/appveyor/AmiSSL/Developer/include \
+              CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+              LIBS='-lnet -lm -latomic'
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --parallel 5
+          else
+            make -j5 -C bld
+          fi
+
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --parallel 5 --target testdeps
+          else
+            make -j5 -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --parallel 5 --target curl-examples
+          else
+            make -j5 -C bld examples
+          fi
+
+  msdos:
+    name: "MS-DOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, djgpp, i586)"
+    runs-on: 'ubuntu-24.04'
+    timeout-minutes: 30
+    env:
+      toolchain-version: '3.4'
+    strategy:
+      matrix:
+        build: [autotools, cmake]
+      fail-fast: false
+    steps:
+      - name: 'install packages'
+        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
+
+      - name: 'cache compiler (djgpp)'
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-compiler
+        with:
+          path: ~/djgpp
+          key: ${{ runner.os }}-djgpp-${{ env.toolchain-version }}-amd64
+
+      - name: 'install compiler (djgpp)'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        run: |
+          cd "${HOME}" || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
+            --location 'https://github.com/andrewwutw/build-djgpp/releases/download/v${{ env.toolchain-version }}/djgpp-linux64-gcc1220.tar.bz2' | tar -xj
+          cd djgpp || exit 1
+          for f in wat3211b.zip zlb13b.zip ssl102ub.zip; do
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+              "https://www.delorie.com/pub/djgpp/current/v2tk/$f" --output bin.zip
+            unzip -q bin.zip
+            rm -f bin.zip
+          done
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'configure'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake -B bld -G Ninja \
+              -DCMAKE_SYSTEM_NAME=DOS \
+              -DCMAKE_SYSTEM_PROCESSOR=x86 \
+              -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
+              -DCMAKE_C_COMPILER=$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_LIBPSL=OFF \
+              -DOPENSSL_INCLUDE_DIR=$HOME/djgpp/include \
+              -DOPENSSL_SSL_LIBRARY=$HOME/djgpp/lib/libssl.a \
+              -DOPENSSL_CRYPTO_LIBRARY=$HOME/djgpp/lib/libcrypto.a \
+              -DZLIB_INCLUDE_DIR=$HOME/djgpp/include" \
+              -DZLIB_LIBRARY=$HOME/djgpp/lib/libz.a" \
+              -DWATT_ROOT=$HOME/djgpp/net/watt
+          else
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              CC=$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+              AR=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar \
+              RANLIB=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+              WATT_ROOT=$HOME/djgpp/net/watt \
+              --host=i586-pc-msdosdjgpp \
+              --with-openssl=$HOME/djgpp \
+              --with-zlib=$HOME/djgpp \
+              --without-libpsl \
+              --disable-shared
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld
+          else
+            make -j5 -C bld
+          fi
+
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -j5 -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target curl-examples
+          else
+            make -j5 -C bld examples
+          fi

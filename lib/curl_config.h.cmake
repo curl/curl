@@ -736,6 +736,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* if AmiSSL is in use */
+#cmakedefine USE_AMISSL 1
+
 /* if librtmp/rtmpdump is in use */
 #cmakedefine USE_LIBRTMP 1
 
@@ -784,6 +787,9 @@ ${SIZEOF_TIME_T_CODE}
 
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
+
+/* if Watt-32 is in use */
+#cmakedefine USE_WATT32 1
 
 /* enable multiple SSL backends */
 #cmakedefine CURL_WITH_MULTI_SSL 1

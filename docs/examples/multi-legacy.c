@@ -100,11 +100,19 @@ int main(void)
 
     curl_multi_timeout(multi_handle, &curl_timeo);
     if(curl_timeo >= 0) {
+#if defined(MSDOS) || defined(__AMIGA__)
+      timeout.tv_sec = (time_t)(curl_timeo / 1000);
+#else
       timeout.tv_sec = curl_timeo / 1000;
+#endif
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
+#if defined(MSDOS) || defined(__AMIGA__)
+        timeout.tv_usec = (time_t)(curl_timeo % 1000) * 1000;
+#else
         timeout.tv_usec = (int)(curl_timeo % 1000) * 1000;
+#endif
     }
 
     /* get file descriptors from the transfers */
@@ -127,7 +135,8 @@ int main(void)
       rc = 0;
 #else
       /* Portable sleep for platforms other than Windows. */
-      struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
+      struct timeval wait = {0};
+      wait.tv_usec = 100 * 1000; /* 100ms */
       rc = select(0, NULL, NULL, NULL, &wait);
 #endif
     }

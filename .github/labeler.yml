@@ -63,7 +63,6 @@ build:
               **/CMakeLists.txt,\
               **/Makefile.am,\
               **/Makefile.inc,\
-              **/Makefile.mk,\
               **/*.m4,\
               **/*.mk,\
               *.m4,\

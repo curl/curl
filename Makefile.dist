@@ -38,10 +38,6 @@ vc-x64:
 	cd winbuild
 	nmake /f Makefile.vc MACHINE=x64
 
-djgpp%:
-	$(MAKE) -C lib -f Makefile.mk CFG=$@ CROSSPREFIX=i586-pc-msdosdjgpp-
-	$(MAKE) -C src -f Makefile.mk CFG=$@ CROSSPREFIX=i586-pc-msdosdjgpp-
-
 cygwin:
 	./configure
 	make
@@ -49,10 +45,6 @@ cygwin:
 cygwin-ssl:
 	./configure --with-openssl
 	make
-
-amiga%:
-	$(MAKE) -C lib -f Makefile.mk CFG=$@ CROSSPREFIX=m68k-amigaos-
-	$(MAKE) -C src -f Makefile.mk CFG=$@ CROSSPREFIX=m68k-amigaos-
 
 unix: all
 

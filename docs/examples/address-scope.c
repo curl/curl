@@ -28,14 +28,14 @@
 #include <stdio.h>
 #include <curl/curl.h>
 
-#ifndef _WIN32
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__AMIGA__)
 #include <net/if.h>
 #endif
 
 int main(void)
 {
-#ifndef _WIN32
-  /* Windows users need to find how to use if_nametoindex() */
+#if !defined(_WIN32) && !defined(MSDOS) && !defined(__AMIGA__)
+  /* Windows/MS-DOS users need to find how to use if_nametoindex() */
   CURL *curl;
   CURLcode res;
 

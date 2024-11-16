@@ -63,6 +63,15 @@
 int vms_show = 0;
 #endif
 
+#if defined(__AMIGA__)
+#if defined(__GNUC__)
+#define CURL_USED __attribute__((used))
+#else
+#define CURL_USED
+#endif
+static const char CURL_USED min_stack[] = "$STACK:16384";
+#endif
+
 #ifdef __MINGW32__
 /*
  * There seems to be no way to escape "*" in command-line arguments with MinGW

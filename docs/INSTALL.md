@@ -211,17 +211,34 @@ Run `make`
 
 ## MS-DOS
 
-Requires DJGPP in the search path and pointing to the Watt-32 stack via
-`WATT_PATH=c:/djgpp/net/watt`.
+You can use either autotools or cmake:
 
-Run `make -f Makefile.dist djgpp` in the root curl dir.
+    ./configure \
+      CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+      AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
+      RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+      WATT_ROOT=/path/to/djgpp/net/watt \
+      --host=i586-pc-msdosdjgpp \
+      --with-openssl=/path/to/djgpp \
+      --with-zlib=/path/to/djgpp \
+      --without-libpsl \
+      --disable-shared
 
-For build configuration options, please see the mingw-w64 section.
+    cmake . \
+      -DCMAKE_SYSTEM_NAME=DOS \
+      -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
+      -DCMAKE_C_COMPILER=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+      -DWATT_ROOT=/path/to/djgpp/net/watt \
+      -DOPENSSL_INCLUDE_DIR=/path/to/djgpp/include \
+      -DOPENSSL_SSL_LIBRARY=/path/to/djgpp/lib/libssl.a \
+      -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
+      -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
+      -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
+      -DCURL_USE_LIBPSL=OFF
 
 Notes:
 
- - DJGPP 2.04 beta has a `sscanf()` bug so the URL parsing is not done
-   properly. Use DJGPP 2.03 until they fix it.
+ - Requires DJGPP 2.04 or upper.
 
  - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
    things go wrong because things like FS-extensions and `errno` values have
@@ -229,9 +246,31 @@ Notes:
 
 ## AmigaOS
 
-Run `make -f Makefile.dist amiga` in the root curl dir.
+You can use either autotools or cmake:
 
-For build configuration options, please see the mingw-w64 section.
+    ./configure \
+      CC=/opt/amiga/bin/m68k-amigaos-gcc \
+      AR=/opt/amiga/bin/m68k-amigaos-ar \
+      RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
+      --host=m68k-amigaos \
+      --with-amissl \
+      CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+      CPPFLAGS=-I/path/to/AmiSSL/Developer/include \
+      LDFLAGS=-L/path/to/AmiSSL/Developer/lib/AmigaOS3 \
+      LIBS='-lnet -lm -latomic' \
+      --without-libpsl \
+      --disable-shared
+
+    cmake . \
+      -DAMIGA=1 \
+      -DCMAKE_SYSTEM_NAME=Generic \
+      -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
+      -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
+      -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
+      -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
+      -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+      -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
+      -DCURL_USE_LIBPSL=OFF
 
 ## Disabling Specific Protocols in Windows builds
 

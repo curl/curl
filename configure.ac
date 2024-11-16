@@ -1214,12 +1214,19 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
   dnl gethostbyname in the watt lib?
+  clean_CPPFLAGS=$CPPFLAGS
+  clean_LDFLAGS=$LDFLAGS
+  CPPFLAGS="-I${WATT_ROOT}/inc"
+  LDFLAGS="-L${WATT_ROOT}/lib"
   AC_CHECK_LIB(watt, gethostbyname,
     [
       HAVE_GETHOSTBYNAME="1"
-      CPPFLAGS="-I${WATT_ROOT}/inc"
-      LDFLAGS="-L${WATT_ROOT}/lib"
       LIBS="-lwatt $LIBS"
+      AC_DEFINE(USE_WATT32, 1, [if Watt-32 is in use])
+    ],
+    [
+      CPPFLAGS=$clean_CPPFLAGS
+      LDFLAGS=$clean_LDFLAGS
     ]
   )
 fi
@@ -1784,35 +1791,35 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
     ;;
   esac ],
 
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-    /* are AF_INET6 and sockaddr_in6 available? */
-    #include <sys/types.h>
-    #ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #else
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #if defined (__TANDEM)
-    # include <netinet/in6.h>
-    #endif
-    #endif
+  AC_COMPILE_IFELSE([
+    AC_LANG_SOURCE([[
+      /* are AF_INET6 and sockaddr_in6 available? */
+      #include <sys/types.h>
+      #ifdef _WIN32
+      #include <winsock2.h>
+      #include <ws2tcpip.h>
+      #else
+      #include <sys/socket.h>
+      #include <netinet/in.h>
+      #ifdef __TANDEM
+      #include <netinet/in6.h>
+      #endif
+      #endif
 
-    int main(void)
-    {
-      struct sockaddr_in6 s;
-      (void)s;
-      return socket(AF_INET6, SOCK_STREAM, 0) < 0;
-    }
-  ]])
+      int main(void)
+      {
+        struct sockaddr_in6 s;
+        (void)s;
+        return socket(AF_INET6, SOCK_STREAM, 0) < 0;
+      }
+    ]])
   ],
-  AC_MSG_RESULT(yes)
-  ipv6=yes,
-  AC_MSG_RESULT(no)
-  ipv6=no,
-  AC_MSG_RESULT(yes)
-  ipv6=yes
-))
+    AC_MSG_RESULT(yes)
+    ipv6=yes,
+    AC_MSG_RESULT(no)
+    ipv6=no
+  )
+)
 
 if test "$ipv6" = yes; then
   curl_ipv6_msg="enabled"
@@ -1820,24 +1827,26 @@ if test "$ipv6" = yes; then
   IPV6_ENABLED=1
 
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
-  AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
-    #include <sys/types.h>
-    #ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #else
-    #include <netinet/in.h>
-    #if defined (__TANDEM)
-    # include <netinet/in6.h>
-    #endif
-    #endif
-  ]], [[
-    struct sockaddr_in6 s;
-    s.sin6_scope_id = 0;
-  ]])], [
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <sys/types.h>
+      #ifdef _WIN32
+      #include <winsock2.h>
+      #include <ws2tcpip.h>
+      #else
+      #include <netinet/in.h>
+      #ifdef __TANDEM
+      #include <netinet/in6.h>
+      #endif
+      #endif
+    ]], [[
+      struct sockaddr_in6 s;
+      s.sin6_scope_id = 0;
+    ]])
+  ],[
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
-  ], [
+  ],[
     AC_MSG_RESULT([no])
   ])
 fi
@@ -4018,12 +4027,12 @@ AC_CHECK_TYPE([bool],[
 
 # check for sa_family_t
 AC_CHECK_TYPE(sa_family_t,
-  AC_DEFINE(CURL_SA_FAMILY_T, sa_family_t, [IP address type in sockaddr]),
+  AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),
   [
   # The Windows name?
   AC_CHECK_TYPE(ADDRESS_FAMILY,
-    AC_DEFINE(CURL_SA_FAMILY_T, ADDRESS_FAMILY, [IP address type in sockaddr]),
-    AC_DEFINE(CURL_SA_FAMILY_T, unsigned short, [IP address type in sockaddr]),
+    AC_DEFINE(HAVE_ADDRESS_FAMILY, 1, [Define to 1 if symbol `ADDRESS_FAMILY' exists]),
+    [],
     [
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN

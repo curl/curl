@@ -37,8 +37,13 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   fd_set infd, outfd, errfd;
   int res;
 
+#if defined(MSDOS) || defined(__AMIGA__)
+  tv.tv_sec = (time_t)(timeout_ms / 1000);
+  tv.tv_usec = (time_t)(timeout_ms % 1000) * 1000;
+#else
   tv.tv_sec = timeout_ms / 1000;
   tv.tv_usec = (int)(timeout_ms % 1000) * 1000;
+#endif
 
   FD_ZERO(&infd);
   FD_ZERO(&outfd);
@@ -51,6 +56,9 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#if defined(__DJGPP__)
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
 #elif defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4127)  /* conditional expression is constant */

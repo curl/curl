@@ -24,7 +24,7 @@
 
 AUTOMAKE_OPTIONS = foreign nostdinc
 
-EXTRA_DIST = README.md Makefile.example Makefile.mk CMakeLists.txt \
+EXTRA_DIST = README.md Makefile.example CMakeLists.txt \
   $(COMPLICATED_EXAMPLES) .checksrc
 
 # Specify our include paths here, and do it relative to $(top_srcdir) and

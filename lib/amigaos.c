@@ -196,12 +196,11 @@ int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
  */
 
 struct Library *SocketBase = NULL;
-extern int errno, h_errno;
 
 #ifdef __libnix__
 void __request(const char *msg);
 #else
-# define __request(msg)       Printf(msg "\n\a")
+# define __request(msg)       Printf((const unsigned char *)(msg "\n\a"), 0)
 #endif
 
 void Curl_amiga_cleanup(void)
@@ -215,7 +214,7 @@ void Curl_amiga_cleanup(void)
 CURLcode Curl_amiga_init(void)
 {
   if(!SocketBase)
-    SocketBase = OpenLibrary("bsdsocket.library", 4);
+    SocketBase = OpenLibrary((const unsigned char *)"bsdsocket.library", 4);
 
   if(!SocketBase) {
     __request("No TCP/IP Stack running!");
