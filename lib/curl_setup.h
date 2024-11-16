@@ -483,6 +483,14 @@
    FILE *curlx_win32_fopen(const char *filename, const char *mode);
 #endif
 
+#ifdef __DJGPP__
+/* Requires DJGPP 2.04 */
+#  include <unistd.h>
+#  undef  lseek
+#  define lseek(fdes,offset,whence)  llseek(fdes, offset, whence)
+#  define LSEEK_ERROR                (offset_t)-1
+#endif
+
 /*
  * Small file (<2Gb) support using Win32 functions.
  */
