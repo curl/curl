@@ -676,9 +676,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
               outs->bytes);
         fflush(outs->stream);
         /* truncate file at the position where we started appending */
-#if defined(__DJGPP__)
-        rc = (int)lseek(fileno(outs->stream), outs->init, SEEK_SET);
-#elif defined(HAVE_FTRUNCATE)
+#ifdef HAVE_FTRUNCATE
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
