@@ -717,16 +717,37 @@ static bool incoming(curl_socket_t listenfd)
     FD_ZERO(&fds_err);
 
     /* there's always a socket to wait for */
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
     FD_SET(sockfd, &fds_read);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
 
     for(i = 0; i < 2; i++) {
       if(c[i].used) {
         curl_socket_t fd = c[i].clientfd;
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
         FD_SET(fd, &fds_read);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
         if((int)fd > maxfd)
           maxfd = (int)fd;
         fd = c[i].remotefd;
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
         FD_SET(fd, &fds_read);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
         if((int)fd > maxfd)
           maxfd = (int)fd;
       }
