@@ -238,7 +238,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_FILETIME:
     if(data->info.filetime > LONG_MAX)
       *param_longp = LONG_MAX;
-    else if(data->info.filetime < LONG_MIN)
+    else if(data->info.filetime < (time_t)LONG_MIN)
       *param_longp = LONG_MIN;
     else
       *param_longp = (long)data->info.filetime;

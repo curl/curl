@@ -558,7 +558,7 @@ static int parsedate(const char *date, time_t *output)
   if(tzoff == -1)
     tzoff = 0;
 
-  if((tzoff > 0) && (t > TIME_T_MAX - tzoff)) {
+  if((tzoff > 0) && (t > (time_t)(TIME_T_MAX - tzoff))) {
     *output = TIME_T_MAX;
     return PARSEDATE_LATER; /* time_t overflow */
   }
@@ -586,7 +586,7 @@ time_t curl_getdate(const char *p, const time_t *now)
   (void)now; /* legacy argument from the past that we ignore */
 
   if(rc == PARSEDATE_OK) {
-    if(parsed == -1)
+    if(parsed == (time_t)-1)
       /* avoid returning -1 for a working scenario */
       parsed++;
     return parsed;
@@ -606,7 +606,7 @@ time_t Curl_getdate_capped(const char *p)
 
   switch(rc) {
   case PARSEDATE_OK:
-    if(parsed == -1)
+    if(parsed == (time_t)-1)
       /* avoid returning -1 for a working scenario */
       parsed++;
     return parsed;

@@ -198,7 +198,7 @@ hostcache_entry_is_stale(void *datap, void *hc)
   if(dns->timestamp) {
     /* age in seconds */
     time_t age = prune->now - dns->timestamp;
-    if(age >= prune->max_age_sec)
+    if(age >= (time_t)prune->max_age_sec)
       return TRUE;
     if(age > prune->oldest)
       prune->oldest = age;
