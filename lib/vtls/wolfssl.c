@@ -645,8 +645,8 @@ wssl_cached_x509_store_different(struct Curl_cfilter *cf,
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
-static WOLFSSL_X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
-                                                 const struct Curl_easy *data)
+static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
+                                                  const struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct wssl_x509_share *share;
@@ -735,7 +735,8 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
-  cached_store = cache_criteria_met ? get_cached_x509_store(cf, data) : NULL;
+  cached_store = cache_criteria_met ? wssl_get_cached_x509_store(cf, data)
+                                    : NULL;
   if(cached_store && wolfSSL_CTX_get_cert_store(wssl->ctx) == cached_store) {
     /* The cached store is already in use, do nothing. */
   }

@@ -3348,8 +3348,8 @@ ossl_cached_x509_store_different(struct Curl_cfilter *cf,
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
-static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
-                                         const struct Curl_easy *data)
+static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
+                                              const struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct ossl_x509_share *share;
@@ -3438,7 +3438,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
-  cached_store = get_cached_x509_store(cf, data);
+  cached_store = ossl_get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
     SSL_CTX_set_cert_store(ssl_ctx, cached_store);
   }
