@@ -3133,9 +3133,9 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 }
 #endif
 
-static CURLcode populate_x509_store(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    X509_STORE *store)
+static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -3151,7 +3151,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   bool imported_native_ca = FALSE;
   bool imported_ca_info_blob = FALSE;
 
-  CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
+  CURL_TRC_CF(data, cf, "ossl_populate_x509_store, path=%s, blob=%d",
               ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
     return CURLE_OUT_OF_MEMORY;
@@ -3445,7 +3445,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
   else {
     X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
-    result = populate_x509_store(cf, data, store);
+    result = ossl_populate_x509_store(cf, data, store);
     if(result == CURLE_OK && cache_criteria_met) {
       set_cached_x509_store(cf, data, store);
     }
@@ -3460,7 +3460,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 {
   X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
-  return populate_x509_store(cf, data, store);
+  return ossl_populate_x509_store(cf, data, store);
 }
 #endif /* HAVE_SSL_X509_STORE_SHARE */
 

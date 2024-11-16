@@ -505,10 +505,10 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode populate_x509_store(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    WOLFSSL_X509_STORE *store,
-                                    struct wolfssl_ctx *wssl)
+static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         WOLFSSL_X509_STORE *store,
+                                         struct wolfssl_ctx *wssl)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
@@ -556,7 +556,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
 #ifndef NO_FILESYSTEM
   /* load trusted cacert from file if not blob */
 
-  CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
+  CURL_TRC_CF(data, cf, "wssl_populate_x509_store, path=%s, blob=%d",
               ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
     return CURLE_OUT_OF_MEMORY;
@@ -752,7 +752,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     }
     wolfSSL_CTX_set_cert_store(wssl->ctx, store);
 
-    result = populate_x509_store(cf, data, store, wssl);
+    result = wssl_populate_x509_store(cf, data, store, wssl);
     if(!result) {
       set_cached_x509_store(cf, data, store);
     }
@@ -760,7 +760,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
   else {
    /* We never share the CTX's store, use it. */
    WOLFSSL_X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
-   result = populate_x509_store(cf, data, store, wssl);
+   result = wssl_populate_x509_store(cf, data, store, wssl);
   }
 
   return result;
