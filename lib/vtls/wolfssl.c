@@ -69,7 +69,6 @@
 #include "curl_printf.h"
 #include "multiif.h"
 
-#include <wolfssl/openssl/ssl.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
 #include "wolfssl.h"
@@ -78,13 +77,9 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef USE_ECH
-# include "curl_base64.h"
-# define ECH_ENABLED(__data__) \
-    (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & CURLECH_DISABLE)\
-    )
-#endif /* USE_ECH */
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+#define USE_ECH_WOLFSSL
+#endif
 
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
    OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
@@ -505,10 +500,10 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
   return result;
 }
 
-static CURLcode populate_x509_store(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    WOLFSSL_X509_STORE *store,
-                                    struct wolfssl_ctx *wssl)
+static CURLcode wssl_populate_x509_store(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         WOLFSSL_X509_STORE *store,
+                                         struct wolfssl_ctx *wssl)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   const struct curl_blob *ca_info_blob = conn_config->ca_info_blob;
@@ -556,7 +551,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
 #ifndef NO_FILESYSTEM
   /* load trusted cacert from file if not blob */
 
-  CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
+  CURL_TRC_CF(data, cf, "wssl_populate_x509_store, path=%s, blob=%d",
               ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
     return CURLE_OUT_OF_MEMORY;
@@ -620,8 +615,8 @@ static void wssl_x509_share_free(void *key, size_t key_len, void *p)
 }
 
 static bool
-cached_x509_store_expired(const struct Curl_easy *data,
-                          const struct wssl_x509_share *mb)
+wssl_cached_x509_store_expired(const struct Curl_easy *data,
+                               const struct wssl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   struct curltime now = Curl_now();
@@ -635,8 +630,8 @@ cached_x509_store_expired(const struct Curl_easy *data,
 }
 
 static bool
-cached_x509_store_different(struct Curl_cfilter *cf,
-                            const struct wssl_x509_share *mb)
+wssl_cached_x509_store_different(struct Curl_cfilter *cf,
+                                 const struct wssl_x509_share *mb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!mb->CAfile || !conn_config->CAfile)
@@ -645,8 +640,8 @@ cached_x509_store_different(struct Curl_cfilter *cf,
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
-static WOLFSSL_X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
-                                                 const struct Curl_easy *data)
+static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
+                                                  const struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct wssl_x509_share *share;
@@ -657,17 +652,17 @@ static WOLFSSL_X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
                                  (void *)MPROTO_WSSL_X509_KEY,
                                  sizeof(MPROTO_WSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
-     !cached_x509_store_expired(data, share) &&
-     !cached_x509_store_different(cf, share)) {
+     !wssl_cached_x509_store_expired(data, share) &&
+     !wssl_cached_x509_store_different(cf, share)) {
     store = share->store;
   }
 
   return store;
 }
 
-static void set_cached_x509_store(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data,
-                                  WOLFSSL_X509_STORE *store)
+static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
+                                       const struct Curl_easy *data,
+                                       WOLFSSL_X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi;
@@ -735,7 +730,8 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
-  cached_store = cache_criteria_met ? get_cached_x509_store(cf, data) : NULL;
+  cached_store = cache_criteria_met ? wssl_get_cached_x509_store(cf, data)
+                                    : NULL;
   if(cached_store && wolfSSL_CTX_get_cert_store(wssl->ctx) == cached_store) {
     /* The cached store is already in use, do nothing. */
   }
@@ -752,15 +748,15 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
     }
     wolfSSL_CTX_set_cert_store(wssl->ctx, store);
 
-    result = populate_x509_store(cf, data, store, wssl);
+    result = wssl_populate_x509_store(cf, data, store, wssl);
     if(!result) {
-      set_cached_x509_store(cf, data, store);
+      wssl_set_cached_x509_store(cf, data, store);
     }
   }
   else {
    /* We never share the CTX's store, use it. */
    WOLFSSL_X509_STORE *store = wolfSSL_CTX_get_cert_store(wssl->ctx);
-   result = populate_x509_store(cf, data, store, wssl);
+   result = wssl_populate_x509_store(cf, data, store, wssl);
   }
 
   return result;
@@ -1198,7 +1194,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);
   }
 
-#ifdef USE_ECH
+#ifdef USE_ECH_WOLFSSL
   if(ECH_ENABLED(data)) {
     int trying_ech_now = 0;
 
@@ -1265,14 +1261,14 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
 
-    if(trying_ech_now
-       && SSL_set_min_proto_version(backend->handle, TLS1_3_VERSION) != 1) {
+    if(trying_ech_now && wolfSSL_set_min_proto_version(backend->handle,
+                                                       TLS1_3_VERSION) != 1) {
       infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
       return CURLE_SSL_CONNECT_ERROR;
     }
 
   }
-#endif  /* USE_ECH */
+#endif  /* USE_ECH_WOLFSSL */
 
 #ifdef USE_BIO_CHAIN
   {
@@ -1441,7 +1437,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "server verification failed: certificate not valid yet.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-#ifdef USE_ECH
+#ifdef USE_ECH_WOLFSSL
     else if(-1 == detail) {
       /* try access a retry_config ECHConfigList for tracing */
       byte echConfigs[1000];
@@ -2020,7 +2016,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #endif
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
-#ifdef USE_ECH
+#ifdef USE_ECH_WOLFSSL
   SSLSUPP_ECH |
 #endif
   SSLSUPP_SSL_CTX |

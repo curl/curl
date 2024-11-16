@@ -41,6 +41,14 @@ struct Curl_ssl_session;
 #define SSLSUPP_CA_CACHE     (1<<8)
 #define SSLSUPP_CIPHER_LIST  (1<<9) /* supports TLS 1.0-1.2 ciphersuites */
 
+#ifdef USE_ECH
+# include "curl_base64.h"
+# define ECH_ENABLED(__data__) \
+    (__data__->set.tls_ech && \
+     !(__data__->set.tls_ech & CURLECH_DISABLE)\
+    )
+#endif /* USE_ECH */
+
 #define ALPN_ACCEPTED "ALPN: server accepted "
 
 #define VTLS_INFOF_NO_ALPN            \

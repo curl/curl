@@ -82,16 +82,16 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
-#ifdef USE_ECH
+#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) || \
+    defined(HAVE_SSL_ECH_SET1_ECHCONFIG)
+#define USE_ECH_OPENSSL
+#endif
+
+#ifdef USE_ECH_OPENSSL
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
 #  include <openssl/ech.h>
 # endif
-# include "curl_base64.h"
-# define ECH_ENABLED(__data__) \
-    (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & CURLECH_DISABLE)\
-    )
-#endif /* USE_ECH */
+#endif /* USE_ECH_OPENSSL */
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
@@ -3133,9 +3133,9 @@ static CURLcode import_windows_cert_store(struct Curl_easy *data,
 }
 #endif
 
-static CURLcode populate_x509_store(struct Curl_cfilter *cf,
-                                    struct Curl_easy *data,
-                                    X509_STORE *store)
+static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
+                                         struct Curl_easy *data,
+                                         X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -3151,7 +3151,7 @@ static CURLcode populate_x509_store(struct Curl_cfilter *cf,
   bool imported_native_ca = FALSE;
   bool imported_ca_info_blob = FALSE;
 
-  CURL_TRC_CF(data, cf, "populate_x509_store, path=%s, blob=%d",
+  CURL_TRC_CF(data, cf, "ossl_populate_x509_store, path=%s, blob=%d",
               ssl_cafile ? ssl_cafile : "none", !!ca_info_blob);
   if(!store)
     return CURLE_OUT_OF_MEMORY;
@@ -3322,8 +3322,8 @@ static void oss_x509_share_free(void *key, size_t key_len, void *p)
 }
 
 static bool
-cached_x509_store_expired(const struct Curl_easy *data,
-                          const struct ossl_x509_share *mb)
+ossl_cached_x509_store_expired(const struct Curl_easy *data,
+                               const struct ossl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   if(cfg->ca_cache_timeout < 0)
@@ -3338,8 +3338,8 @@ cached_x509_store_expired(const struct Curl_easy *data,
 }
 
 static bool
-cached_x509_store_different(struct Curl_cfilter *cf,
-                            const struct ossl_x509_share *mb)
+ossl_cached_x509_store_different(struct Curl_cfilter *cf,
+                                 const struct ossl_x509_share *mb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!mb->CAfile || !conn_config->CAfile)
@@ -3348,8 +3348,8 @@ cached_x509_store_different(struct Curl_cfilter *cf,
   return strcmp(mb->CAfile, conn_config->CAfile);
 }
 
-static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
-                                         const struct Curl_easy *data)
+static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
+                                              const struct Curl_easy *data)
 {
   struct Curl_multi *multi = data->multi;
   struct ossl_x509_share *share;
@@ -3360,17 +3360,17 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
                                  (void *)MPROTO_OSSL_X509_KEY,
                                  sizeof(MPROTO_OSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
-     !cached_x509_store_expired(data, share) &&
-     !cached_x509_store_different(cf, share)) {
+     !ossl_cached_x509_store_expired(data, share) &&
+     !ossl_cached_x509_store_different(cf, share)) {
     store = share->store;
   }
 
   return store;
 }
 
-static void set_cached_x509_store(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data,
-                                  X509_STORE *store)
+static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
+                                       const struct Curl_easy *data,
+                                       X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi;
@@ -3438,16 +3438,16 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
     !ssl_config->primary.CRLfile &&
     !ssl_config->native_ca_store;
 
-  cached_store = get_cached_x509_store(cf, data);
+  cached_store = ossl_get_cached_x509_store(cf, data);
   if(cached_store && cache_criteria_met && X509_STORE_up_ref(cached_store)) {
     SSL_CTX_set_cert_store(ssl_ctx, cached_store);
   }
   else {
     X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
-    result = populate_x509_store(cf, data, store);
+    result = ossl_populate_x509_store(cf, data, store);
     if(result == CURLE_OK && cache_criteria_met) {
-      set_cached_x509_store(cf, data, store);
+      ossl_set_cached_x509_store(cf, data, store);
     }
   }
 
@@ -3460,7 +3460,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 {
   X509_STORE *store = SSL_CTX_get_cert_store(ssl_ctx);
 
-  return populate_x509_store(cf, data, store);
+  return ossl_populate_x509_store(cf, data, store);
 }
 #endif /* HAVE_SSL_X509_STORE_SHARE */
 
@@ -3832,7 +3832,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
   }
 
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
   if(ECH_ENABLED(data)) {
     unsigned char *ech_config = NULL;
     size_t ech_config_len = 0;
@@ -3959,7 +3959,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#endif  /* USE_ECH */
+#endif  /* USE_ECH_OPENSSL */
 
 #endif
 
@@ -4055,7 +4055,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
 /* If we have retry configs, then trace those out */
 static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
                                          int reason)
@@ -4230,7 +4230,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
       else if((lib == ERR_LIB_SSL) &&
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
               (reason == SSL_R_ECH_REQUIRED)) {
@@ -4296,7 +4296,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           negotiated_group_name ? negotiated_group_name : "[blank]",
           OBJ_nid2sn(psigtype_nid));
 
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
     if(ECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
@@ -4356,7 +4356,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       infof(data, "ECH: result: status is not attempted");
    }
 # endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
-#endif  /* USE_ECH */
+#endif  /* USE_ECH_OPENSSL */
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -5325,7 +5325,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
   SSLSUPP_ECH |
 #endif
   SSLSUPP_CA_CACHE |
