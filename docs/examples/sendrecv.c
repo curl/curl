@@ -51,6 +51,9 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 #if defined(__GNUC__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
+#if defined(__DJGPP__)
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
 #elif defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable:4127)  /* conditional expression is constant */
