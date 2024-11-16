@@ -553,12 +553,8 @@ static CURLcode file_do(struct Curl_easy *data, bool *done)
 
   if(data->state.resume_from) {
     if(!S_ISDIR(statbuf.st_mode)) {
-#ifdef __DJGPP__
-      off_t resume_from = (off_t)data->state.resume_from;
-#else
-      curl_off_t resume_from = data->state.resume_from;
-#endif
-      if(resume_from != lseek(fd, resume_from, SEEK_SET))
+      if(data->state.resume_from !=
+          lseek(fd, data->state.resume_from, SEEK_SET))
         return CURLE_BAD_DOWNLOAD_RESUME;
     }
     else {
