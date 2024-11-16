@@ -665,9 +665,9 @@ static WOLFSSL_X509_STORE *wssl_get_cached_x509_store(struct Curl_cfilter *cf,
   return store;
 }
 
-static void set_cached_x509_store(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data,
-                                  WOLFSSL_X509_STORE *store)
+static void wssl_set_cached_x509_store(struct Curl_cfilter *cf,
+                                       const struct Curl_easy *data,
+                                       WOLFSSL_X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi;
@@ -755,7 +755,7 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
 
     result = wssl_populate_x509_store(cf, data, store, wssl);
     if(!result) {
-      set_cached_x509_store(cf, data, store);
+      wssl_set_cached_x509_store(cf, data, store);
     }
   }
   else {

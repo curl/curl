@@ -3368,9 +3368,9 @@ static X509_STORE *ossl_get_cached_x509_store(struct Curl_cfilter *cf,
   return store;
 }
 
-static void set_cached_x509_store(struct Curl_cfilter *cf,
-                                  const struct Curl_easy *data,
-                                  X509_STORE *store)
+static void ossl_set_cached_x509_store(struct Curl_cfilter *cf,
+                                       const struct Curl_easy *data,
+                                       X509_STORE *store)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct Curl_multi *multi = data->multi;
@@ -3447,7 +3447,7 @@ CURLcode Curl_ssl_setup_x509_store(struct Curl_cfilter *cf,
 
     result = ossl_populate_x509_store(cf, data, store);
     if(result == CURLE_OK && cache_criteria_met) {
-      set_cached_x509_store(cf, data, store);
+      ossl_set_cached_x509_store(cf, data, store);
     }
   }
 
