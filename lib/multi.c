@@ -1170,10 +1170,17 @@ CURLMcode curl_multi_fdset(CURLM *m,
       if(!FDSET_SOCK(data->last_poll.sockets[i]))
         /* pretend it does not exist */
         continue;
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
       if(data->last_poll.actions[i] & CURL_POLL_IN)
         FD_SET(data->last_poll.sockets[i], read_fd_set);
       if(data->last_poll.actions[i] & CURL_POLL_OUT)
         FD_SET(data->last_poll.sockets[i], write_fd_set);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
       if((int)data->last_poll.sockets[i] > this_max_fd)
         this_max_fd = (int)data->last_poll.sockets[i];
     }
