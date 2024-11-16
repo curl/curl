@@ -3338,8 +3338,8 @@ cached_x509_store_expired(const struct Curl_easy *data,
 }
 
 static bool
-cached_x509_store_different(struct Curl_cfilter *cf,
-                            const struct ossl_x509_share *mb)
+ossl_cached_x509_store_different(struct Curl_cfilter *cf,
+                                 const struct ossl_x509_share *mb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   if(!mb->CAfile || !conn_config->CAfile)
@@ -3361,7 +3361,7 @@ static X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
                                  sizeof(MPROTO_OSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
      !cached_x509_store_expired(data, share) &&
-     !cached_x509_store_different(cf, share)) {
+     !ossl_cached_x509_store_different(cf, share)) {
     store = share->store;
   }
 
