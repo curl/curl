@@ -743,6 +743,17 @@
 #define USE_SSL    /* SSL support has been enabled */
 #endif
 
+#if defined(USE_OPENSSL) && defined(USE_WOLFSSL)
+#  include <wolfssl/version.h>
+#  if LIBWOLFSSL_VERSION_HEX >= 0x05007004 /* >= 5.7.5 FIXME FIXME FIXME */
+#    ifndef OPENSSL_COEXIST
+#    define OPENSSL_COEXIST
+#    endif
+#  else
+#    error "OpenSSL can only coexist with wolfSSL v5.7.5 or upper"
+#  endif
+#endif
+
 #if defined(USE_WOLFSSL) && defined(USE_GNUTLS)
 /* Avoid defining unprefixed wolfSSL SHA macros colliding with nettle ones */
 #define NO_OLD_WC_NAMES
