@@ -620,8 +620,8 @@ static void wssl_x509_share_free(void *key, size_t key_len, void *p)
 }
 
 static bool
-cached_x509_store_expired(const struct Curl_easy *data,
-                          const struct wssl_x509_share *mb)
+wssl_cached_x509_store_expired(const struct Curl_easy *data,
+                               const struct wssl_x509_share *mb)
 {
   const struct ssl_general_config *cfg = &data->set.general_ssl;
   struct curltime now = Curl_now();
@@ -657,7 +657,7 @@ static WOLFSSL_X509_STORE *get_cached_x509_store(struct Curl_cfilter *cf,
                                  (void *)MPROTO_WSSL_X509_KEY,
                                  sizeof(MPROTO_WSSL_X509_KEY)-1) : NULL;
   if(share && share->store &&
-     !cached_x509_store_expired(data, share) &&
+     !wssl_cached_x509_store_expired(data, share) &&
      !wssl_cached_x509_store_different(cf, share)) {
     store = share->store;
   }
