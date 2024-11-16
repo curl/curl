@@ -2692,8 +2692,10 @@ static CURLcode override_login(struct Curl_easy *data,
     bool url_provided = FALSE;
 
     if(data->state.aptr.user &&
+       *data->state.aptr.user &&
        (data->state.creds_from != CREDS_NETRC)) {
-      /* there was a username in the URL. Use the URL decoded version */
+      /* there was a username with a length in the URL. Use the URL decoded
+         version */
       userp = &data->state.aptr.user;
       url_provided = TRUE;
     }
