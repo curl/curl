@@ -21,7 +21,7 @@ Show response headers in the output. HTTP response headers can include things
 like server name, cookies, date of the document, HTTP version and more. With
 non-HTTP protocols, the "headers" are other server communication.
 
-This option makes the response headers get save in the same stream/output as
+This option makes the response headers get saved in the same stream/output as
 the data. --dump-header exists to save headers in a separate stream.
 
 To view the request headers, consider the --verbose option.
