@@ -69,7 +69,6 @@
 #include "curl_printf.h"
 #include "multiif.h"
 
-#include <wolfssl/openssl/ssl.h>
 #include <wolfssl/ssl.h>
 #include <wolfssl/error-ssl.h>
 #include "wolfssl.h"
