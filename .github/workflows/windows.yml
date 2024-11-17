@@ -485,6 +485,86 @@ jobs:
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5 --target curl-examples
 
+  msdos:
+    name: "djgpp, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}"
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: C:\msys64\usr\bin\bash.exe {0}
+    env:
+      toolchain-version: '3.4'
+    strategy:
+      matrix:
+        build: [cmake]
+      fail-fast: false
+    steps:
+      - name: 'cache compiler (djgpp)'
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-compiler
+        with:
+          path: ~\djgpp
+          key: ${{ runner.os }}-djgpp-${{ env.toolchain-version }}
+
+      - name: 'install compiler (djgpp)'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        run: |
+          cd "${USERPROFILE}" || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
+            --location 'https://github.com/andrewwutw/build-djgpp/releases/download/v${{ env.toolchain-version }}/djgpp-mingw-gcc1220-standalone.zip' --output bin.zip
+          unzip bin.zip
+          rm -f bin.zip
+          cd djgpp || exit 1
+          for f in wat3211b.zip zlb13b.zip ssl102ub.zip; do
+            curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+              "https://www.delorie.com/pub/djgpp/current/v2tk/$f" --output bin.zip
+            unzip bin.zip
+            rm -f bin.zip
+          done
+
+      - run: git config --global core.autocrlf input
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'cmake configure'
+        run: |
+          DJGPP=$(cygpath "${USERPROFILE}")/djgpp
+          cmake -B bld -G 'MSYS Makefiles' \
+            -DCMAKE_SYSTEM_NAME=DOS \
+            -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
+            -DCMAKE_C_COMPILER="$DJGPP/bin/i586-pc-msdosdjgpp-gcc.exe" \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+            -DCURL_WERROR=ON \
+            -DCURL_USE_LIBPSL=OFF \
+            -DOPENSSL_INCLUDE_DIR="$DJGPP/include" \
+            -DOPENSSL_SSL_LIBRARY="$DJGPP/lib/libssl.a" \
+            -DOPENSSL_CRYPTO_LIBRARY="$DJGPP/lib/libcrypto.a" \
+            -DZLIB_LIBRARY="$DJGPP/lib/libz.a" \
+            -DZLIB_INCLUDE_DIR="$DJGPP/include" \
+            -DWATT_ROOT="$DJGPP/net/watt"
+
+      - name: 'cmake configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'cmake build'
+        run: cmake --build bld --config '${{ matrix.type }}' --parallel 5
+
+      - name: 'curl version'
+        run: |
+          PATH=/usr/bin find . -name '*.exe'
+          bld/src/curl.exe --disable --version
+
+      - name: 'cmake build tests'
+        run: cmake --build bld --parallel 5 --target testdeps
+
+      - name: 'cmake build examples'
+        run: cmake --build bld --parallel 5 --target curl-examples
+
   linux-cross-mingw-w64:
     name: "linux-mingw, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }}"
     runs-on: ubuntu-latest
