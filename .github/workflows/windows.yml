@@ -669,7 +669,7 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
               -DCURL_CA_SEARCH_SAFE=ON
 
-          - name: 'boringssl-ECH'
+          - name: 'boringssl'
             install: 'brotli zlib zstd libpsl nghttp2 boringssl libssh2[core,zlib]'
             arch: 'x64'
             plat: 'windows'
