@@ -81,14 +81,6 @@
 #define USE_ECH_WOLFSSL
 #endif
 
-#ifdef USE_ECH_WOLFSSL
-# include "curl_base64.h"
-# define ECH_ENABLED(__data__) \
-    (__data__->set.tls_ech && \
-     !(__data__->set.tls_ech & CURLECH_DISABLE)\
-    )
-#endif /* USE_ECH_WOLFSSL */
-
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
    OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
    in wolfSSL's settings.h, and the latter two are build time symbols in
