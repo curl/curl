@@ -100,7 +100,11 @@ int main(void)
 
     curl_multi_timeout(multi_handle, &curl_timeo);
     if(curl_timeo >= 0) {
-      timeout.tv_sec = (time_t)curl_timeo / 1000;
+#ifdef MSDOS
+      timeout.tv_sec = (time_t)(curl_timeo / 1000);
+#else
+      timeout.tv_sec = curl_timeo / 1000;
+#endif
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
