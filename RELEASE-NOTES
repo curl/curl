@@ -4,24 +4,48 @@ curl and libcurl 8.11.1
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3273
+ Contributors:                 3284
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o build: omit certain deps from `libcurl.pc` unless found via `pkg-config` [27]
+ o build: use `_fseeki64()` on Windows, drop detections [41]
  o cmake: drop cmake args list from `buildinfo.txt` [8]
+ o cmake: restore cmake args list in `buildinfo.txt` [26]
+ o cmake: sync GSS config code with other deps [28]
+ o cmake: typo in comment
+ o cmake: work around `ios.toolchain.cmake` breaking feature-detections [37]
+ o cmakelint: fix to check root `CMakeLists.txt` [36]
  o cmdline/ech.md: formatting cleanups [13]
+ o configure: add FIXMEs for disabled pkg-config references
+ o configure: do not echo most inherited `LDFLAGS` to config files [31]
+ o configure: replace `$#` shell syntax [25]
  o cookie: treat cookie name case sensitively [4]
+ o curl-rustls.m4: keep existing `CPPFLAGS`/`LDFLAGS` when detected [40]
+ o curl.h: mark two error codes as obsolete [19]
  o curl: --test-duphandle in debug builds runs "duphandled" [6]
+ o curl: rename struct var to fix AIX build [24]
+ o CURLOPT_PREREQFUNCTION.md: add result code on failure [23]
  o duphandle: also init netrc [3]
  o ECH: enable support for the AWS-LC backend [5]
+ o krb5: fix socket/sockindex confusion, MSVC compiler warnings [22]
+ o libssh: when using IPv6 numerical address, add brackets [43]
  o macos: disable gcc `availability` workaround as needed [7]
  o mbedtls: call psa_crypt_init() in global init [2]
+ o mk-ca-bundle: remove CKA_NSS_SERVER_DISTRUST_AFTER conditions [39]
+ o multi: add clarifying comment for wakeup_write() [9]
+ o netrc: address several netrc parser flaws [17]
  o netrc: support large file, longer lines, longer tokens [14]
  o nghttp2: use custom memory functions [1]
+ o os400: Fix IBMi builds [33]
+ o os400: Fix IBMi EBCDIC conversion of arguments [34]
  o setopt: fix CURLOPT_HTTP_CONTENT_DECODING [15]
+ o socket: handle binding to "host!<ip>" [16]
+ o socketpair: fix enabling `USE_EVENTFD` [30]
+ o strtok: use namespaced `strtok_r` macro instead of redefining it [29]
  o TODO: consider OCSP stapling by default [11]
  o vtls: fix compile warning when ALPN is not available [12]
 
@@ -42,11 +66,14 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Ben Greear, Bo Anderson, Daniel Stenberg, delogicsreal on github,
-  Ethan Everett, Jesus Malo Poyatos, Kai Pastor, Moritz, Nicolas F.,
-  Samuel Henrique, Stefan Eissing, tranzystorekk on github, Viktor Szakats,
-  wxiaoguang on github
-  (14 contributors)
+  Andrew Ayer, Andrew Kirillov, andrewkirillov-ibm, Andy Fiddaman, Ben Greear,
+  Bo Anderson, Dan Fandrich, Daniel Engberg, Daniel Stenberg, Dan Rosser,
+  delogicsreal on github, Ethan Everett, Harmen Stoppels, Harry Sintonen,
+  henrikjehgmti on github, Jesus Malo Poyatos, Kai Pastor, Logan Buth,
+  Maarten Billemont, marcos-ng on github, Moritz, Nicolas F., Peter Marko,
+  Ray Satiro, renovate[bot], Samuel Henrique, Stefan Eissing, Tal Regev,
+  Thomas, tranzystorekk on github, Viktor Szakats, wxiaoguang on github
+  (32 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -58,8 +85,30 @@ References to bug reports and discussions on issues:
  [6] = https://curl.se/bug/?i=15504
  [7] = https://curl.se/bug/?i=15508
  [8] = https://curl.se/bug/?i=15501
+ [9] = https://curl.se/bug/?i=15600
  [11] = https://curl.se/bug/?i=15483
  [12] = https://curl.se/bug/?i=15515
  [13] = https://curl.se/bug/?i=15506
  [14] = https://curl.se/bug/?i=15513
  [15] = https://curl.se/bug/?i=15511
+ [16] = https://curl.se/bug/?i=15553
+ [17] = https://curl.se/bug/?i=15586
+ [19] = https://curl.se/bug/?i=15538
+ [22] = https://curl.se/bug/?i=15585
+ [23] = https://curl.se/bug/?i=15542
+ [24] = https://curl.se/bug/?i=15580
+ [25] = https://curl.se/bug/?i=15584
+ [26] = https://curl.se/bug/?i=15563
+ [27] = https://curl.se/bug/?i=15469
+ [28] = https://curl.se/bug/?i=15545
+ [29] = https://curl.se/bug/?i=15549
+ [30] = https://curl.se/bug/?i=15561
+ [31] = https://curl.se/bug/?i=15533
+ [33] = https://curl.se/bug/?i=15566
+ [34] = https://curl.se/bug/?i=15570
+ [36] = https://curl.se/bug/?i=15565
+ [37] = https://curl.se/bug/?i=15557
+ [39] = https://curl.se/bug/?i=15547
+ [40] = https://curl.se/bug/?i=15546
+ [41] = https://curl.se/bug/?i=15525
+ [43] = https://curl.se/bug/?i=15522
