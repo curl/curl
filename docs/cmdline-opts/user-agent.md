@@ -25,3 +25,5 @@ be set with the --header or the --proxy-header options.
 If you give an empty argument to --user-agent (""), it removes the header
 completely from the request. If you prefer a blank header, you can set it to a
 single space (" ").
+
+By default, curl uses curl/VERSION, such as User-Agent: curl/`%VERSION`.
