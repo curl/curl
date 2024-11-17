@@ -1261,8 +1261,8 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
     }
 
-    if(trying_ech_now
-       && SSL_set_min_proto_version(backend->handle, TLS1_3_VERSION) != 1) {
+    if(trying_ech_now && wolfSSL_set_min_proto_version(backend->handle,
+                                                       TLS1_3_VERSION) != 1) {
       infof(data, "ECH: cannot force TLSv1.3 [ERROR]");
       return CURLE_SSL_CONNECT_ERROR;
     }
