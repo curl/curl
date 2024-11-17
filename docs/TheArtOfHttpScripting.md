@@ -456,6 +456,8 @@ SPDX-License-Identifier: curl
  it is time to set the User Agent field to fool the server into thinking you
  are one of those browsers.
 
+ By default, curl uses curl/VERSION, such as User-Agent: curl/8.11.0.
+
  To make curl look like Internet Explorer 5 on a Windows 2000 box:
 
     curl --user-agent "Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)" [URL]
