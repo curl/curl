@@ -753,7 +753,7 @@
 #    define OPENSSL_COEXIST
 #    endif
 #  else
-#    error "OpenSSL can only be built together with wolfSSL v5.7.5 or upper"
+#    error "OpenSSL can only coexist with wolfSSL v5.7.5 or upper"
 #  endif
 #endif
 
