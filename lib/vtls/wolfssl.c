@@ -32,6 +32,11 @@
 
 #ifdef USE_WOLFSSL
 
+/* Workaround for collisions of compatibility symbols
+   as of wolfSSL ff680994ba1295dbf8354ef3863928e7422b94f7 */
+#define OTHERNAME CURL_WOLFSSL_OTHERNAME
+#define MD5_CTX   CURL_WOLFSSL_MD5_CTX
+
 #define WOLFSSL_OPTIONS_IGNORE_SYS
 #include <wolfssl/options.h>
 #include <wolfssl/version.h>
