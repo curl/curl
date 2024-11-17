@@ -27,6 +27,7 @@ set(_picky "")
 
 if(CURL_WERROR AND
    ((CMAKE_COMPILER_IS_GNUCC AND
+     NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
