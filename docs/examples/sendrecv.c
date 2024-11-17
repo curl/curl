@@ -31,7 +31,7 @@
 #include <curl/curl.h>
 
 /* Auxiliary function that waits on the socket. */
-static int wait_on_socket(curl_socket_t sockfd, int for_recv, int timeout_ms)
+static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 {
   struct timeval tv;
   fd_set infd, outfd, errfd;
@@ -133,7 +133,7 @@ int main(void)
             request_len - nsent_total, &nsent);
         nsent_total += nsent;
 
-        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 0, 60000)) {
+        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 0, 60000L)) {
           printf("Error: timeout.\n");
           return 1;
         }
@@ -158,7 +158,7 @@ int main(void)
         nread = 0;
         res = curl_easy_recv(curl, buf, sizeof(buf), &nread);
 
-        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 1, 60000)) {
+        if(res == CURLE_AGAIN && !wait_on_socket(sockfd, 1, 60000L)) {
           printf("Error: timeout.\n");
           return 1;
         }
