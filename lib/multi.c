@@ -1541,6 +1541,9 @@ CURLMcode curl_multi_wakeup(CURLM *m)
   if(multi->wakeup_pair[1] != CURL_SOCKET_BAD) {
 #ifdef USE_EVENTFD
     buf = &val;
+    /* eventfd has a stringent rule of requiring the 8-byte buffer when
+       calling write(2) on it, which makes the sizeof(buf) below fine since
+       this is only used on 64-bit systems and then the pointer is 64-bit */
 #else
     buf[0] = 1;
 #endif
