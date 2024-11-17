@@ -34,8 +34,12 @@
 
 /* Workaround for collisions of compatibility symbols
    as of wolfSSL ff680994ba1295dbf8354ef3863928e7422b94f7 */
+#ifndef OTHERNAME
 #define OTHERNAME CURL_WOLFSSL_OTHERNAME
-#define MD5_CTX   CURL_WOLFSSL_MD5_CTX
+#endif
+#ifndef MD5_CTX
+#define MD5_CTX CURL_WOLFSSL_MD5_CTX
+#endif
 
 #define WOLFSSL_OPTIONS_IGNORE_SYS
 #include <wolfssl/options.h>
