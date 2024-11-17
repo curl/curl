@@ -77,13 +77,17 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifdef USE_ECH
+#ifdef HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+#define USE_ECH_WOLFSSL
+#endif
+
+#ifdef USE_ECH_WOLFSSL
 # include "curl_base64.h"
 # define ECH_ENABLED(__data__) \
     (__data__->set.tls_ech && \
      !(__data__->set.tls_ech & CURLECH_DISABLE)\
     )
-#endif /* USE_ECH */
+#endif /* USE_ECH_WOLFSSL */
 
 /* KEEP_PEER_CERT is a product of the presence of build time symbol
    OPENSSL_EXTRA without NO_CERTS, depending on the version. KEEP_PEER_CERT is
@@ -1198,7 +1202,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);
   }
 
-#ifdef USE_ECH
+#ifdef USE_ECH_WOLFSSL
   if(ECH_ENABLED(data)) {
     int trying_ech_now = 0;
 
@@ -1272,7 +1276,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     }
 
   }
-#endif  /* USE_ECH */
+#endif  /* USE_ECH_WOLFSSL */
 
 #ifdef USE_BIO_CHAIN
   {
@@ -1441,7 +1445,7 @@ wolfssl_connect_step2(struct Curl_cfilter *cf, struct Curl_easy *data)
       failf(data, "server verification failed: certificate not valid yet.");
       return CURLE_PEER_FAILED_VERIFICATION;
     }
-#ifdef USE_ECH
+#ifdef USE_ECH_WOLFSSL
     else if(-1 == detail) {
       /* try access a retry_config ECHConfigList for tracing */
       byte echConfigs[1000];
@@ -2020,7 +2024,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 #endif
   SSLSUPP_CA_PATH |
   SSLSUPP_CAINFO_BLOB |
-#ifdef USE_ECH
+#ifdef USE_ECH_WOLFSSL
   SSLSUPP_ECH |
 #endif
   SSLSUPP_SSL_CTX |

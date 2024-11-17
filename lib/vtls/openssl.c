@@ -82,7 +82,12 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
-#ifdef USE_ECH
+#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) || \
+    defined(HAVE_SSL_ECH_SET1_ECHCONFIG)
+#define USE_ECH_OPENSSL
+#endif
+
+#ifdef USE_ECH_OPENSSL
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
 #  include <openssl/ech.h>
 # endif
@@ -91,7 +96,7 @@
     (__data__->set.tls_ech && \
      !(__data__->set.tls_ech & CURLECH_DISABLE)\
     )
-#endif /* USE_ECH */
+#endif /* USE_ECH_OPENSSL */
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
 #include <openssl/ocsp.h>
@@ -3832,7 +3837,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     }
   }
 
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
   if(ECH_ENABLED(data)) {
     unsigned char *ech_config = NULL;
     size_t ech_config_len = 0;
@@ -3959,7 +3964,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       return CURLE_SSL_CONNECT_ERROR;
     }
   }
-#endif  /* USE_ECH */
+#endif  /* USE_ECH_OPENSSL */
 
 #endif
 
@@ -4055,7 +4060,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
 /* If we have retry configs, then trace those out */
 static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
                                          int reason)
@@ -4230,7 +4235,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
               ossl_strerror(errdetail, error_buffer, sizeof(error_buffer)));
       }
 #endif
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
       else if((lib == ERR_LIB_SSL) &&
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
               (reason == SSL_R_ECH_REQUIRED)) {
@@ -4296,7 +4301,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
           negotiated_group_name ? negotiated_group_name : "[blank]",
           OBJ_nid2sn(psigtype_nid));
 
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
     if(ECH_ENABLED(data)) {
       char *inner = NULL, *outer = NULL;
@@ -4356,7 +4361,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       infof(data, "ECH: result: status is not attempted");
    }
 # endif  /* !OPENSSL_IS_BORINGSSL && !OPENSSL_IS_AWSLC */
-#endif  /* USE_ECH */
+#endif  /* USE_ECH_OPENSSL */
 
 #ifdef HAS_ALPN
     /* Sets data and len to negotiated protocol, len is 0 if no protocol was
@@ -5325,7 +5330,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #ifdef HAVE_SSL_CTX_SET_CIPHERSUITES
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
-#ifdef USE_ECH
+#ifdef USE_ECH_OPENSSL
   SSLSUPP_ECH |
 #endif
   SSLSUPP_CA_CACHE |
