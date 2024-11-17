@@ -935,22 +935,21 @@ option(USE_ECH "Enable ECH support" OFF)
 if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL)
     # Be sure that the TLS library actually supports ECH.
-    if(NOT DEFINED HAVE_ECH)
-      if(USE_WOLFSSL)
-        curl_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h"
-          HAVE_WOLFSSL_CTX_GENERATEECHCONFIG "")
-      elseif(HAVE_BORINGSSL OR HAVE_AWSLC)
-        curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h"
-          HAVE_SSL_SET1_ECH_CONFIG_LIST "")
-      elseif(HAVE_OPENSSL)
-        curl_openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h"
-          HAVE_SSL_ECH_SET1_ECHCONFIG "")
-      endif()
-      if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
-         HAVE_SSL_SET1_ECH_CONFIG_LIST OR
-         HAVE_SSL_ECH_SET1_ECHCONFIG)
-        set(HAVE_ECH 1)
-      endif()
+    if(USE_WOLFSSL)
+      curl_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h"
+        HAVE_WOLFSSL_CTX_GENERATEECHCONFIG "")
+    endif()
+    if(HAVE_BORINGSSL OR HAVE_AWSLC)
+      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h"
+        HAVE_SSL_SET1_ECH_CONFIG_LIST "")
+    elseif(HAVE_OPENSSL)
+      curl_openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h"
+        HAVE_SSL_ECH_SET1_ECHCONFIG "")
+    endif()
+    if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
+       HAVE_SSL_SET1_ECH_CONFIG_LIST OR
+       HAVE_SSL_ECH_SET1_ECHCONFIG)
+      set(HAVE_ECH 1)
     endif()
     if(NOT HAVE_ECH)
       message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL")
