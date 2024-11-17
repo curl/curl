@@ -104,7 +104,7 @@ static int parsenetrc(struct store_netrc *store,
   int retcode = NETRC_FILE_MISSING;
   char *login = *loginp;
   char *password = NULL;
-  bool specific_login = login; /* points to something */
+  bool specific_login = !!login; /* points to something */
   enum host_lookup_state state = NOTHING;
   enum found_state keyword = NONE;
   unsigned char found = 0; /* login + password found bits, as they can come in
