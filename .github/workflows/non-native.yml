@@ -257,7 +257,7 @@ jobs:
             ::
           else
             autoreconf -fi
-            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               CC=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
               AR=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ar \
               RANLIB=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ranlib \
