@@ -1784,35 +1784,37 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
     ;;
   esac ],
 
-  AC_RUN_IFELSE([AC_LANG_SOURCE([[
-    /* are AF_INET6 and sockaddr_in6 available? */
-    #include <sys/types.h>
-    #ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #else
-    #include <sys/socket.h>
-    #include <netinet/in.h>
-    #if defined (__TANDEM)
-    # include <netinet/in6.h>
-    #endif
-    #endif
+  AC_RUN_IFELSE([
+    AC_LANG_SOURCE([[
+      /* are AF_INET6 and sockaddr_in6 available? */
+      #include <sys/types.h>
+      #ifdef _WIN32
+      #include <winsock2.h>
+      #include <ws2tcpip.h>
+      #else
+      #include <sys/socket.h>
+      #include <netinet/in.h>
+      #if defined (__TANDEM)
+      # include <netinet/in6.h>
+      #endif
+      #endif
 
-    int main(void)
-    {
-      struct sockaddr_in6 s;
-      (void)s;
-      return socket(AF_INET6, SOCK_STREAM, 0) < 0;
-    }
-  ]])
+      int main(void)
+      {
+        struct sockaddr_in6 s;
+        (void)s;
+        return socket(AF_INET6, SOCK_STREAM, 0) < 0;
+      }
+    ]])
   ],
-  AC_MSG_RESULT(yes)
-  ipv6=yes,
-  AC_MSG_RESULT(no)
-  ipv6=no,
-  AC_MSG_RESULT(yes)
-  ipv6=yes
-))
+    AC_MSG_RESULT(yes)
+    ipv6=yes,
+    AC_MSG_RESULT(no)
+    ipv6=no,
+    AC_MSG_RESULT(yes)
+    ipv6=yes
+  )
+)
 
 if test "$ipv6" = yes; then
   curl_ipv6_msg="enabled"
