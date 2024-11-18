@@ -4024,7 +4024,7 @@ AC_CHECK_TYPE(sa_family_t,
   [
   # The Windows name?
   AC_CHECK_TYPE(ADDRESS_FAMILY,
-    AC_DEFINE(CURL_SA_FAMILY_T, ADDRESS_FAMILY, [IP address type in sockaddr]),
+    AC_DEFINE(HAVE_ADDRESS_FAMILY, 1, [Define to 1 if symbol `ADDRESS_FAMILY' exists]),
     [],
     [
 #ifdef _WIN32
