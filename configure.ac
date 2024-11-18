@@ -1784,7 +1784,7 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
     ;;
   esac ],
 
-  AC_RUN_IFELSE([
+  AC_COMPILE_IFELSE([
     AC_LANG_SOURCE([[
       /* are AF_INET6 and sockaddr_in6 available? */
       #include <sys/types.h>
@@ -1810,9 +1810,7 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
     AC_MSG_RESULT(yes)
     ipv6=yes,
     AC_MSG_RESULT(no)
-    ipv6=no,
-    AC_MSG_RESULT(yes)
-    ipv6=yes
+    ipv6=no
   )
 )
 
