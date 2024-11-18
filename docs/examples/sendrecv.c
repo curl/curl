@@ -42,7 +42,7 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 #else
   tv.tv_sec = timeout_ms / 1000;
 #endif
-  tv.tv_usec = (int)(timeout_ms % 1000) * 1000;
+  tv.tv_usec = (time_t)(timeout_ms % 1000) * 1000;
 
   FD_ZERO(&infd);
   FD_ZERO(&outfd);
