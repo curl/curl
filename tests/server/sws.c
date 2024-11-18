@@ -902,7 +902,8 @@ static int get_request(curl_socket_t sock, struct httprequest *req)
           int rc;
           fd_set input;
           fd_set output;
-          struct timeval timeout = {1, 0}; /* 1000 ms */
+          struct timeval timeout = {0};
+          timeout.tv_sec = 1; /* 1000 ms */
 
           logmsg("Got EAGAIN from sread");
           FD_ZERO(&input);
@@ -1382,7 +1383,8 @@ static curl_socket_t connect_to(const char *ipaddr, unsigned short port)
     error = SOCKERRNO;
     if((error == EINPROGRESS) || (error == EWOULDBLOCK)) {
       fd_set output;
-      struct timeval timeout = {1, 0}; /* 1000 ms */
+      struct timeval timeout = {0};
+      timeout.tv_sec = 1; /* 1000 ms */
 
       FD_ZERO(&output);
 #if defined(__DJGPP__)
@@ -1502,9 +1504,10 @@ static void http_connect(curl_socket_t *infdp,
 
     fd_set input;
     fd_set output;
-    struct timeval timeout = {1, 0}; /* 1000 ms */
     ssize_t rc;
     curl_socket_t maxfd = (curl_socket_t)-1;
+    struct timeval timeout = {0};
+    timeout.tv_sec = 1; /* 1000 ms */
 
     FD_ZERO(&input);
     FD_ZERO(&output);
@@ -2372,9 +2375,10 @@ int main(int argc, char *argv[])
   for(;;) {
     fd_set input;
     fd_set output;
-    struct timeval timeout = {0, 250000L}; /* 250 ms */
     curl_socket_t maxfd = (curl_socket_t)-1;
     int active;
+    struct timeval timeout = {0};
+    timeout.tv_usec = 250000L; /* 250 ms */
 
     /* Clear out closed sockets */
     for(socket_idx = num_sockets - 1; socket_idx >= 1; --socket_idx) {
