@@ -238,7 +238,7 @@ static CURLcode getinfo_long(struct Curl_easy *data, CURLINFO info,
   case CURLINFO_FILETIME:
     if(data->info.filetime > LONG_MAX)
       *param_longp = LONG_MAX;
-#ifndef MSDOS
+#if !defined(MSDOS) && !defined(__AMIGA__)
     else if(data->info.filetime < LONG_MIN)
       *param_longp = LONG_MIN;
 #endif
