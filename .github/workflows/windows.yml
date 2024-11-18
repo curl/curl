@@ -552,7 +552,7 @@ jobs:
                 --with-openssl=$HOME/djgpp \
                 --with-zlib=$HOME/djgpp \
                 --without-libpsl \
-                --enable-static --disable-shared
+                --disable-shared
           fi
 
       - name: 'configure log'
