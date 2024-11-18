@@ -108,7 +108,11 @@ int main(void)
       if(timeout.tv_sec > 1)
         timeout.tv_sec = 1;
       else
+#if defined(MSDOS) || defined(__AMIGA__)
         timeout.tv_usec = (time_t)(curl_timeo % 1000) * 1000;
+#else
+        timeout.tv_usec = (int)(curl_timeo % 1000) * 1000;
+#endif
     }
 
     /* get file descriptors from the transfers */
