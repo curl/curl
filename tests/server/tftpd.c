@@ -512,21 +512,20 @@ skipit:
 
 static int synchnet(curl_socket_t f /* socket to flush */)
 {
-
-#if defined(HAVE_IOCTLSOCKET)
-  unsigned long i;
-#else
-  int i;
-#endif
   int j = 0;
   char rbuf[PKTSIZE];
   srvr_sockaddr_union_t fromaddr;
   curl_socklen_t fromaddrlen;
 
   for(;;) {
-#if defined(HAVE_IOCTLSOCKET)
+#if defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
+    long i;
+    (void) IoctlSocket(f, FIONBIO, &i);
+#elif defined(HAVE_IOCTLSOCKET)
+    unsigned long i;
     (void) ioctlsocket(f, FIONREAD, &i);
 #else
+    int i;
     (void) ioctl(f, FIONREAD, &i);
 #endif
     if(i) {
