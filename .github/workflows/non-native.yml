@@ -268,7 +268,7 @@ jobs:
               LDFLAGS=-L/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3 \
               CPPFLAGS=-I/opt/appveyor/AmiSSL/Developer/include \
               CFLAGS='-O0 -msoft-float -mcrt=clib2' \
-              LIBS='-lnet -lm -lunix -latomic'
+              LIBS='-lnet -lm -latomic'
           fi
 
       - name: 'configure log'
@@ -293,7 +293,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target testdeps
           else
-            make -j5 -C bld -C tests || true
+            make -j5 -C bld -C tests
           fi
 
       - name: 'build examples'
