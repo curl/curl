@@ -535,24 +535,23 @@ jobs:
               -DOPENSSL_INCLUDE_DIR=$HOME/djgpp/include \
               -DOPENSSL_SSL_LIBRARY=$HOME/djgpp/lib/libssl.a \
               -DOPENSSL_CRYPTO_LIBRARY=$HOME/djgpp/lib/libcrypto.a \
-              -DZLIB_LIBRARY=$HOME/djgpp/lib/libz.a" \
               -DZLIB_INCLUDE_DIR=$HOME/djgpp/include" \
+              -DZLIB_LIBRARY=$HOME/djgpp/lib/libz.a" \
               -DWATT_ROOT=$HOME/djgpp/net/watt
           else
             autoreconf -fi
-            mkdir bld && cd bld && \
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               CC=$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc \
-              ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-                AR=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar \
-                RANLIB=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
-                WATT_ROOT=$HOME/djgpp/net/watt \
-                LDFLAGS=-L$HOME/djgpp/net/watt/lib \
-                CPPFLAGS=-I$HOME/djgpp/include \
-                --host=i586-pc-msdosdjgpp \
-                --with-openssl=$HOME/djgpp \
-                --with-zlib=$HOME/djgpp \
-                --without-libpsl \
-                --disable-shared
+              AR=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar \
+              RANLIB=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+              WATT_ROOT=$HOME/djgpp/net/watt \
+              LDFLAGS=-L$HOME/djgpp/net/watt/lib \
+              CPPFLAGS=-I$HOME/djgpp/include \
+              --host=i586-pc-msdosdjgpp \
+              --with-openssl=$HOME/djgpp \
+              --with-zlib=$HOME/djgpp \
+              --without-libpsl \
+              --disable-shared
           fi
 
       - name: 'configure log'
@@ -564,7 +563,7 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'cmake build'
+      - name: 'build'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5
@@ -572,13 +571,13 @@ jobs:
             make -j5 -C bld
           fi
 
-      - name: 'cmake build tests'
+      - name: 'build tests'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target testdeps
           fi
 
-      - name: 'cmake build examples'
+      - name: 'build examples'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target curl-examples
