@@ -115,7 +115,8 @@ CURLcode test(char *URL)
       rc = 0;
 #else
       /* Portable sleep for platforms other than Windows. */
-      struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
+      struct timeval wait = {0};
+      wait.tv_usec = 100 * 1000; /* 100ms */
       rc = select(0, NULL, NULL, NULL, &wait);
 #endif
     }
