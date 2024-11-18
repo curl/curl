@@ -504,7 +504,7 @@ jobs:
         id: cache-compiler
         with:
           path: ~/djgpp
-          key: ${{ runner.os }}-linux-djgpp-${{ env.toolchain-version }}
+          key: ${{ runner.os }}-djgpp-${{ env.toolchain-version }}-amd64
 
       - name: 'install compiler (djgpp)'
         if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
