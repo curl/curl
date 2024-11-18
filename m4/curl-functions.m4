@@ -2890,19 +2890,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   ])
   #
   if test "$tst_links_ioctlsocket_camel" = "yes"; then
-    AC_MSG_CHECKING([if IoctlSocket is prototyped])
-    AC_EGREP_CPP([IoctlSocket],[
-      $curl_includes_bsdsocket
-    ],[
-      AC_MSG_RESULT([yes])
-      tst_proto_ioctlsocket_camel="yes"
-    ],[
-      AC_MSG_RESULT([no])
-      tst_proto_ioctlsocket_camel="no"
-    ])
-  fi
-  #
-  if test "$tst_proto_ioctlsocket_camel" = "yes"; then
     AC_MSG_CHECKING([if IoctlSocket is compilable])
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
@@ -2933,7 +2920,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   #
   AC_MSG_CHECKING([if IoctlSocket might be used])
   if test "$tst_links_ioctlsocket_camel" = "yes" &&
-     test "$tst_proto_ioctlsocket_camel" = "yes" &&
      test "$tst_compi_ioctlsocket_camel" = "yes" &&
      test "$tst_allow_ioctlsocket_camel" = "yes"; then
     AC_MSG_RESULT([yes])
