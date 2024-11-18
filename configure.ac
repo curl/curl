@@ -1820,24 +1820,26 @@ if test "$ipv6" = yes; then
   IPV6_ENABLED=1
 
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
-  AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
-    #include <sys/types.h>
-    #ifdef _WIN32
-    #include <winsock2.h>
-    #include <ws2tcpip.h>
-    #else
-    #include <netinet/in.h>
-    #if defined (__TANDEM)
-    # include <netinet/in6.h>
-    #endif
-    #endif
-  ]], [[
-    struct sockaddr_in6 s;
-    s.sin6_scope_id = 0;
-  ]])], [
+  AC_COMPILE_IFELSE([
+    AC_LANG_PROGRAM([[
+      #include <sys/types.h>
+      #ifdef _WIN32
+      #include <winsock2.h>
+      #include <ws2tcpip.h>
+      #else
+      #include <netinet/in.h>
+      #if defined (__TANDEM)
+      # include <netinet/in6.h>
+      #endif
+      #endif
+    ]], [[
+      struct sockaddr_in6 s;
+      s.sin6_scope_id = 0;
+    ]])
+  ],[
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID, 1, [Define to 1 if struct sockaddr_in6 has the sin6_scope_id member])
-  ], [
+  ],[
     AC_MSG_RESULT([no])
   ])
 fi
