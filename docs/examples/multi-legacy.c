@@ -100,7 +100,7 @@ int main(void)
 
     curl_multi_timeout(multi_handle, &curl_timeo);
     if(curl_timeo >= 0) {
-#ifdef MSDOS
+#if defined(MSDOS) || defined(__AMIGA__)
       timeout.tv_sec = (time_t)(curl_timeo / 1000);
 #else
       timeout.tv_sec = curl_timeo / 1000;
