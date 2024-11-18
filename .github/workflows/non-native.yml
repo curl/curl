@@ -224,3 +224,82 @@ jobs:
             echo '::group::build examples'
             gmake -j3 examples
             echo '::endgroup::'
+
+  amiga:
+    name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}"
+    runs-on: 'ubuntu-24.04'
+    timeout-minutes: 30
+    env:
+      amissl-version: '5.18'
+    strategy:
+      matrix:
+        build: [autotools]
+      fail-fast: false
+    steps:
+      - name: 'install compiler'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        run: |
+          cd "${HOME}" || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 \
+            --location https://github.com/bebbo/amiga-gcc/releases/download/Mechen/amiga-gcc.tgz | tar -xz
+          cd opt/appveyor || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 \
+            --location https://github.com/jens-maus/amissl/releases/download/${{ env.amissl-version }}/AmiSSL-${{ env.amissl-version }}-SDK.lha --output bin.lha
+          7z x -bd -y bin.lha
+          rm -f bin.lha
+          mv "$HOME/opt/appveyor" /opt
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'configure'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            ::
+          else
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles \
+              CC=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-gcc \
+              AR=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ar \
+              RANLIB=/opt/appveyor/build-agent/opt/amiga/bin/m68k-amigaos-ranlib \
+              --host=m68k-amigaos \
+              --disable-shared \
+              --without-libpsl \
+              --with-amissl \
+              LDFLAGS=-L/opt/appveyor/AmiSSL/Developer/lib/AmigaOS3 \
+              CPPFLAGS=-I/opt/appveyor/AmiSSL/Developer/include \
+              CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+              LIBS='-lnet -lm -lunix -latomic'
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --parallel 5
+          else
+            make -j5 -C bld
+          fi
+
+      - name: 'build tests'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --parallel 5 --target testdeps
+          else
+            make -j5 -C bld -C tests || true
+          fi
+
+      - name: 'build examples'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --parallel 5 --target curl-examples
+          else
+            make -j5 -C bld examples
+          fi
