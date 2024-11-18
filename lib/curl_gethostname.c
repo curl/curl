@@ -74,7 +74,7 @@ int Curl_gethostname(char * const name, GETHOSTNAME_TYPE_ARG2 namelen)
 
   name[0] = '\0';
 #ifdef __AMIGA__
-  err = gethostname((char *)name, namelen);
+  err = gethostname((unsigned char *)name, namelen);
 #else
   err = gethostname(name, namelen);
 #endif
