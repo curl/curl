@@ -1794,8 +1794,8 @@ AS_HELP_STRING([--disable-ipv6],[Disable IPv6 support]),
       #else
       #include <sys/socket.h>
       #include <netinet/in.h>
-      #if defined (__TANDEM)
-      # include <netinet/in6.h>
+      #ifdef __TANDEM
+      #include <netinet/in6.h>
       #endif
       #endif
 
@@ -1830,8 +1830,8 @@ if test "$ipv6" = yes; then
       #include <ws2tcpip.h>
       #else
       #include <netinet/in.h>
-      #if defined (__TANDEM)
-      # include <netinet/in6.h>
+      #ifdef __TANDEM
+      #include <netinet/in6.h>
       #endif
       #endif
     ]], [[
