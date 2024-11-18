@@ -226,7 +226,7 @@ jobs:
             echo '::endgroup::'
 
   amiga:
-    name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}"
+    name: "AmigaOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, AmiSSL, gcc, m68k)"
     runs-on: 'ubuntu-24.04'
     timeout-minutes: 30
     env:
