@@ -4020,7 +4020,7 @@ AC_CHECK_TYPE([bool],[
 
 # check for sa_family_t
 AC_CHECK_TYPE(sa_family_t,
-  AC_DEFINE(CURL_SA_FAMILY_T, sa_family_t, [IP address type in sockaddr]),
+  AC_DEFINE(HAVE_SA_FAMILY_T, 1, [Define to 1 if symbol `sa_family_t' exists]),
   [
   # The Windows name?
   AC_CHECK_TYPE(ADDRESS_FAMILY,
