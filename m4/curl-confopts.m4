@@ -50,7 +50,7 @@ AS_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
     *)
       dnl configure option not specified
       case $host_os in
-        msdos*)
+        msdos* | amiga*)
           want_thres="no"
           ;;
         *)
