@@ -908,6 +908,8 @@ endings either CRLF or LF so 't' is appropriate.
 #    define CURL_SA_FAMILY_T sa_family_t
 #  elif defined(HAVE_ADDRESS_FAMILY)
 #    define CURL_SA_FAMILY_T ADDRESS_FAMILY
+#  elif defined(__AMIGA__)
+#    define CURL_SA_FAMILY_T unsigned char
 #  else
 /* use a sensible default */
 #    define CURL_SA_FAMILY_T unsigned short
