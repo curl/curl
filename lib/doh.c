@@ -963,10 +963,8 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
       memcpy(&addr->sin_addr, &de->addr[i].ip.v4, sizeof(struct in_addr));
 #ifdef __MINGW32__
       addr->sin_family = (short)addrtype;
-#elif defined(__AMIGA__)
-      addr->sin_family = (unsigned char)addrtype;
 #else
-      addr->sin_family = addrtype;
+      addr->sin_family = (CURL_SA_FAMILY_T)addrtype;
 #endif
       addr->sin_port = htons((unsigned short)port);
       break;
@@ -979,7 +977,7 @@ static CURLcode doh2ai(const struct dohentry *de, const char *hostname,
 #ifdef __MINGW32__
       addr6->sin6_family = (short)addrtype;
 #else
-      addr6->sin6_family = addrtype;
+      addr6->sin6_family = (CURL_SA_FAMILY_T)addrtype;
 #endif
       addr6->sin6_port = htons((unsigned short)port);
       break;
