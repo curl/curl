@@ -214,7 +214,7 @@ void Curl_amiga_cleanup(void)
 CURLcode Curl_amiga_init(void)
 {
   if(!SocketBase)
-    SocketBase = OpenLibrary("bsdsocket.library", 4);
+    SocketBase = OpenLibrary((const unsigned char *)"bsdsocket.library", 4);
 
   if(!SocketBase) {
     __request("No TCP/IP Stack running!");
