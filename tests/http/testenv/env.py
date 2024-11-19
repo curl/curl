@@ -32,6 +32,7 @@ import socket
 import subprocess
 import tempfile
 from configparser import ConfigParser, ExtendedInterpolation
+from datetime import timedelta
 from typing import Optional
 
 from .certs import CertificateSpec, Credentials, TestCA
@@ -143,11 +144,14 @@ class EnvConfig:
         self.domain2 = f"two.{self.tld}"
         self.ftp_domain = f"ftp.{self.tld}"
         self.proxy_domain = f"proxy.{self.tld}"
+        self.expired_domain = f"expired.{self.tld}"
         self.cert_specs = [
             CertificateSpec(domains=[self.domain1, self.domain1brotli, 'localhost', '127.0.0.1'], key_type='rsa2048'),
             CertificateSpec(domains=[self.domain2], key_type='rsa2048'),
             CertificateSpec(domains=[self.ftp_domain], key_type='rsa2048'),
             CertificateSpec(domains=[self.proxy_domain, '127.0.0.1'], key_type='rsa2048'),
+            CertificateSpec(domains=[self.expired_domain], key_type='rsa2048',
+                            valid_from=timedelta(days=-100), valid_to=timedelta(days=-10)),
             CertificateSpec(name="clientsX", sub_specs=[
                CertificateSpec(name="user1", client=True),
             ]),
@@ -501,6 +505,10 @@ class Env:
     @property
     def proxy_domain(self) -> str:
         return self.CONFIG.proxy_domain
+
+    @property
+    def expired_domain(self) -> str:
+        return self.CONFIG.expired_domain
 
     @property
     def http_port(self) -> int:

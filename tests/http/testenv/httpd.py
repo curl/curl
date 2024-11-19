@@ -219,6 +219,9 @@ class Httpd:
         domain2 = self.env.domain2
         creds2 = self.env.get_credentials(domain2)
         assert creds2  # convince pytype this isn't None
+        exp_domain = self.env.expired_domain
+        exp_creds = self.env.get_credentials(exp_domain)
+        assert exp_creds  # convince pytype this isn't None
         proxy_domain = self.env.proxy_domain
         proxy_creds = self.env.get_credentials(proxy_domain)
         assert proxy_creds  # convince pytype this isn't None
@@ -342,6 +345,22 @@ class Httpd:
             conf.extend(self._curltest_conf(domain2))
             if domain2 in self._extra_configs:
                 conf.extend(self._extra_configs[domain2])
+            conf.extend([
+                '</VirtualHost>',
+                '',
+            ])
+            conf.extend([  # https host for expired domain
+                f'<VirtualHost *:{self.env.https_port}>',
+                f'    ServerName {exp_domain}',
+                '    Protocols h2 http/1.1',
+                '    SSLEngine on',
+                f'    SSLCertificateFile {exp_creds.cert_file}',
+                f'    SSLCertificateKeyFile {exp_creds.pkey_file}',
+                f'    DocumentRoot "{self._docs_dir}/expired"',
+            ])
+            conf.extend(self._curltest_conf(exp_domain))
+            if exp_domain in self._extra_configs:
+                conf.extend(self._extra_configs[exp_domain])
             conf.extend([
                 '</VirtualHost>',
                 '',
