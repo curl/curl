@@ -304,6 +304,9 @@ Details via CMake
 ## Dependency options
 
 - `PERL_EXECUTABLE`                         Perl binary used throughout the build and tests.
+- `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
+- `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
+- `AMISSL_AUTO_LIBRARY`:                    Path to `amisslauto` library.
 - `BEARSSL_INCLUDE_DIR`:                    The BearSSL include directory.
 - `BEARSSL_LIBRARY`:                        Path to `bearssl` library.
 - `BROTLI_INCLUDE_DIR`:                     The brotli include directory.
