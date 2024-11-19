@@ -182,8 +182,8 @@ assumes that CMake generates `Makefile`:
 
 - `CURL_ENABLE_SSL`:                        Enable SSL support. Default: `ON`
 - `CURL_WINDOWS_SSPI`:                      Enable SSPI on Windows. Default: =`CURL_USE_SCHANNEL`
-- `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON`
-- `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled and targets supports threading.
+- `ENABLE_IPV6`:                            Enable IPv6 support. Default: `ON` if target supports IPv6.
+- `ENABLE_THREADED_RESOLVER`:               Enable threaded DNS lookup. Default: `ON` if c-ares is not enabled and target supports threading.
 - `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
