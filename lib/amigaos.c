@@ -200,7 +200,7 @@ struct Library *SocketBase = NULL;
 #ifdef __libnix__
 void __request(const char *msg);
 #else
-# define __request(msg)       Printf(msg "\n\a")
+# define __request(msg)       Printf((const unsigned char *)(msg "\n\a"), 0)
 #endif
 
 void Curl_amiga_cleanup(void)
