@@ -207,10 +207,10 @@ if(WIN32)
   endif()
   # Avoid storing HAVE_WIN32_WINNT in CMake cache
   unset(HAVE_WIN32_WINNT CACHE)
-elseif(DOS)
+elseif(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_STATIC_LIBS ON)
-  if(CMAKE_COMPILER_IS_GNUCC)
+  if(DOS AND CMAKE_COMPILER_IS_GNUCC)
     set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
     set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
     set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
@@ -220,7 +220,7 @@ endif()
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup"
-  ON "NOT ENABLE_ARES;NOT DOS"
+  ON "NOT ENABLE_ARES;NOT DOS;NOT AMIGA"
   OFF)
 
 include(PickyWarnings)
