@@ -33,6 +33,9 @@ WARNLESS = ../../lib/warnless.c ../../lib/warnless.h
 # files used only in some libcurl test programs
 MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 
+# files used only in some libcurl test programs
+INET_PTON = ../../lib/inet_pton.c ../../lib/inet_pton.h
+
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
 FIRSTFILES = first.c first.h
@@ -641,7 +644,7 @@ lib1958_LDADD = $(TESTUTIL_LIBS)
 lib1959_SOURCES = lib1959.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib1959_LDADD = $(TESTUTIL_LIBS)
 
-lib1960_SOURCES = lib1960.c $(SUPPORTFILES)
+lib1960_SOURCES = lib1960.c $(SUPPORTFILES) $(INET_PTON)
 lib1960_LDADD = $(TESTUTIL_LIBS)
 
 lib1964_SOURCES = lib1964.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
