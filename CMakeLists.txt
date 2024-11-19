@@ -1499,7 +1499,7 @@ check_include_file("sys/stat.h"       HAVE_SYS_STAT_H)
 check_include_file_concat("sys/time.h"       HAVE_SYS_TIME_H)
 check_include_file_concat("sys/types.h"      HAVE_SYS_TYPES_H)
 check_include_file("sys/un.h"         HAVE_SYS_UN_H)
-check_include_file("sys/utime.h"      HAVE_SYS_UTIME_H)
+check_include_file_concat("sys/utime.h"      HAVE_SYS_UTIME_H)  # sys/types.h (AmigaOS)
 check_include_file("sys/xattr.h"      HAVE_SYS_XATTR_H)
 
 check_include_file_concat("arpa/inet.h"      HAVE_ARPA_INET_H)
