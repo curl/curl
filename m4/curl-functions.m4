@@ -2870,7 +2870,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTLSOCKET_CAMEL], [
   AC_REQUIRE([CURL_INCLUDES_BSDSOCKET])dnl
   #
   tst_links_ioctlsocket_camel="unknown"
-  tst_proto_ioctlsocket_camel="unknown"
   tst_compi_ioctlsocket_camel="unknown"
   tst_allow_ioctlsocket_camel="unknown"
   #
