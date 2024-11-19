@@ -48,7 +48,7 @@ if(CMAKE_VERSION VERSION_LESS 3.10)
 else()
   cmake_minimum_required(VERSION 3.10...3.16 FATAL_ERROR)
 endif()
-message(STATUS "Using CMake version ${CMAKE_VERSION}")
+message(STATUS "Using CMake version ${CMAKE_VERSION} (minimum required: ${CMAKE_MINIMUM_REQUIRED_VERSION})")
 
 # Collect command-line arguments for buildinfo.txt.
 # Must reside at the top of the script to work as expected.
