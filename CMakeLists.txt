@@ -486,6 +486,9 @@ endif()
 # If we are on Haiku, make sure that the network library is brought in.
 if(CMAKE_SYSTEM_NAME STREQUAL "Haiku")
   list(APPEND CURL_LIBS "network")
+elseif(AMIGA)
+  list(APPEND CURL_LIBS "net" "m" "atomic")
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "net" "m" "atomic")
 endif()
 
 # Include all the necessary files for macros
