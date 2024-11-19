@@ -366,3 +366,27 @@ class TestSSLUse:
         ])
         assert r.exit_code == 0, f'{r}'
         assert r.json, f'{r}'
+
+    # connect to an expired certificate
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    def test_17_14_expired_cert(self, env: Env, proto):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        curl = CurlClient(env=env)
+        url = f'https://{env.expired_domain}:{env.port_for(proto)}/'
+        r = curl.http_get(url=url, alpn_proto=proto)
+        assert r.exit_code == 60, f'{r}'  # peer failed verification
+        exp_trace = None
+        match_trace = None
+        if env.curl_uses_lib('openssl') or env.curl_uses_lib('quictls'):
+            exp_trace = r'.*SSL certificate problem: certificate has expired$'
+        elif env.curl_uses_lib('gnutls'):
+            exp_trace = r'.*server verification failed: certificate has expired\..*'
+        elif env.curl_uses_lib('wolfssl'):
+            exp_trace = r'.*server verification failed: certificate has expired\.$'
+        if exp_trace is not None:
+            for line in r.trace_lines:
+                if re.match(exp_trace, line):
+                    match_trace = line
+                    break
+            assert match_trace, f'Did not find "{exp_trace}" in trace\n{r.dump_logs()}'
