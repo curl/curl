@@ -288,8 +288,6 @@ if test "x$OPT_OPENSSL" != xno; then
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(HAVE_LIBRESSL, 1,
-        [Define to 1 if using LibreSSL.])
       ssl_msg="LibreSSL"
     ],[
       AC_MSG_RESULT([no])
