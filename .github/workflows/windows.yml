@@ -567,7 +567,7 @@ jobs:
       - name: 'build'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --parallel 5
+            cmake --build bld
           else
             make -j5 -C bld
           fi
@@ -575,13 +575,13 @@ jobs:
       - name: 'build tests'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --parallel 5 --target testdeps
+            cmake --build bld --target testdeps
           fi
 
       - name: 'build examples'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld --parallel 5 --target curl-examples
+            cmake --build bld --target curl-examples
           fi
 
   linux-cross-mingw-w64:
