@@ -181,9 +181,7 @@ int main(void)
 
 #ifdef HAVE_IOCTLSOCKET_CAMEL
 /* includes start */
-#ifdef _WIN32
-#  include <winsock2.h>
-#endif
+#include <proto/bsdsocket.h>
 int main(void)
 {
   /* IoctlSocket source code */
@@ -196,8 +194,9 @@ int main(void)
 
 #ifdef HAVE_IOCTLSOCKET_CAMEL_FIONBIO
 /* includes start */
-#ifdef _WIN32
-#  include <winsock2.h>
+#include <proto/bsdsocket.h>
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
 #endif
 int main(void)
 {
