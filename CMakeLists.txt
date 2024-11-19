@@ -43,7 +43,7 @@
 # to ON or OFF), the symbol detection is skipped.  If the variable is
 # NOT DEFINED, the symbol detection is performed.
 
-cmake_minimum_required(VERSION 3.7...3.16 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.10...3.16 FATAL_ERROR)
 message(STATUS "Using CMake version ${CMAKE_VERSION}")
 
 # Collect command-line arguments for buildinfo.txt.
