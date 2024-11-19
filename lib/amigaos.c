@@ -196,7 +196,6 @@ int Curl_amiga_select(int nfds, fd_set *readfds, fd_set *writefds,
  */
 
 struct Library *SocketBase = NULL;
-extern int errno, h_errno;
 
 #ifdef __libnix__
 void __request(const char *msg);
