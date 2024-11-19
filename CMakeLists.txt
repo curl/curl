@@ -1520,7 +1520,7 @@ check_include_file("termios.h"        HAVE_TERMIOS_H)
 check_include_file_concat("unistd.h"         HAVE_UNISTD_H)
 check_include_file("utime.h"          HAVE_UTIME_H)
 
-if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
+if(AMIGA)
   check_include_file_concat("proto/bsdsocket.h" HAVE_PROTO_BSDSOCKET_H)
 endif()
 
@@ -1634,7 +1634,7 @@ if(WIN32 OR CYGWIN)
   check_function_exists("_setmode" HAVE__SETMODE)
 endif()
 
-if(CMAKE_SYSTEM_NAME MATCHES "AmigaOS")
+if(AMIGA)
   check_symbol_exists("CloseSocket" "${CURL_INCLUDES}" HAVE_CLOSESOCKET_CAMEL)  # sys/socket.h proto/bsdsocket.h
 endif()
 
