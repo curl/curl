@@ -221,6 +221,7 @@ class Httpd:
         assert creds2  # convince pytype this isn't None
         exp_domain = self.env.expired_domain
         exp_creds = self.env.get_credentials(exp_domain)
+        assert exp_creds  # convince pytype this isn't None
         proxy_domain = self.env.proxy_domain
         proxy_creds = self.env.get_credentials(proxy_domain)
         assert proxy_creds  # convince pytype this isn't None
