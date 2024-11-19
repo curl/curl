@@ -230,21 +230,6 @@ if test "x$OPT_OPENSSL" != xno; then
         test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
-
-      if test $ac_cv_header_openssl_x509_h = no; then
-        dnl we don't use the "action" part of the AC_CHECK_HEADERS macro
-        dnl since 'err.h' might in fact find a krb4 header with the same
-        dnl name
-        AC_CHECK_HEADERS(x509.h crypto.h ssl.h)
-
-        if test $ac_cv_header_x509_h = yes &&
-           test $ac_cv_header_crypto_h = yes &&
-           test $ac_cv_header_ssl_h = yes; then
-          dnl three matches
-          ssl_msg="OpenSSL"
-          OPENSSL_ENABLED=1
-        fi
-      fi
     fi
 
     if test X"$OPENSSL_ENABLED" != X"1"; then
