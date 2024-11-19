@@ -538,8 +538,6 @@ elseif(NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
-check_function_exists("gethostname" HAVE_GETHOSTNAME)
-
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 endif()
@@ -1576,6 +1574,7 @@ check_function_exists("utime"         HAVE_UTIME)
 check_symbol_exists("gmtime_r"        "stdlib.h;time.h" HAVE_GMTIME_R)
 
 check_symbol_exists("gethostbyname_r" "netdb.h" HAVE_GETHOSTBYNAME_R)
+check_symbol_exists("gethostname"     "${CURL_INCLUDES}" HAVE_GETHOSTNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 
 check_symbol_exists("signal"          "signal.h" HAVE_SIGNAL)
 check_symbol_exists("strtoll"         "stdlib.h" HAVE_STRTOLL)
