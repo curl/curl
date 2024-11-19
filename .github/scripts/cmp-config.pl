@@ -74,7 +74,6 @@ my %remove = (
     '#define HAVE_OPENSSL_RSA_H 1' => 1,
     '#define HAVE_OPENSSL_SSL_H 1' => 1,
     '#define HAVE_OPENSSL_X509_H 1' => 1,
-    '#define HAVE_PEM_H 1' => 1,
     '#define HAVE_QUICHE_H 1' => 1,
     '#define HAVE_RSA_H 1' => 1,
     '#define HAVE_SA_FAMILY_T 1' => 1,
