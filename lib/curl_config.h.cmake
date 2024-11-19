@@ -736,6 +736,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if OpenSSL is in use */
 #cmakedefine USE_OPENSSL 1
 
+/* if AmiSSL is in use */
+#cmakedefine USE_AMISSL 1
+
 /* if librtmp/rtmpdump is in use */
 #cmakedefine USE_LIBRTMP 1
 
