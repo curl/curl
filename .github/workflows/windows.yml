@@ -527,6 +527,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=DOS \
+              -DCMAKE_SYSTEM_PROCESSOR=x86 \
               -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
               -DCMAKE_C_COMPILER=$HOME/djgpp/bin/i586-pc-msdosdjgpp-gcc \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
