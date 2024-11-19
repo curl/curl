@@ -49,7 +49,6 @@ my %remove = (
     '#define HAVE_DECL_GETPWUID_R 1' => 1,
     '#define HAVE_DECL_GETPWUID_R_MISSING 1' => 1,
     '#define HAVE_DLFCN_H 1' => 1,
-    '#define HAVE_ERR_H 1' => 1,
     '#define HAVE_GSSAPI_GSSAPI_KRB5_H 1' => 1,
     '#define HAVE_INTTYPES_H 1' => 1,
     '#define HAVE_IOCTL 1' => 1,

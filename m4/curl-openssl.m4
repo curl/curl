@@ -235,7 +235,7 @@ if test "x$OPT_OPENSSL" != xno; then
         dnl we don't use the "action" part of the AC_CHECK_HEADERS macro
         dnl since 'err.h' might in fact find a krb4 header with the same
         dnl name
-        AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h)
+        AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h)
 
         if test $ac_cv_header_x509_h = yes &&
            test $ac_cv_header_crypto_h = yes &&
