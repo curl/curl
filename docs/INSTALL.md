@@ -211,17 +211,35 @@ Run `make`
 
 ## MS-DOS
 
-Requires DJGPP in the search path and pointing to the Watt-32 stack via
-`WATT_PATH=c:/djgpp/net/watt`.
+You can use either autotools or cmake:
 
-Run `make -f Makefile.dist djgpp` in the root curl dir.
+    ./configure \
+      CC=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+      AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
+      RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
+      WATT_ROOT=/path/to/djgpp/net/watt \
+      CPPFLAGS=-I/path/to/djgpp/include \
+      --host=i586-pc-msdosdjgpp \
+      --with-openssl=/path/to/djgpp \
+      --with-zlib=/path/to/djgpp \
+      --without-libpsl \
+      --disable-shared
 
-For build configuration options, please see the mingw-w64 section.
+    cmake . \
+      -DCMAKE_SYSTEM_NAME=DOS \
+      -DCMAKE_C_COMPILER_TARGET=i586-pc-msdosdjgpp \
+      -DCMAKE_C_COMPILER=/path/to/djgpp/bin/i586-pc-msdosdjgpp-gcc \
+      -DWATT_ROOT=/path/to/djgpp/net/watt \
+      -DOPENSSL_INCLUDE_DIR=/path/to/djgpp/include \
+      -DOPENSSL_SSL_LIBRARY=/path/to/djgpp/lib/libssl.a \
+      -DOPENSSL_CRYPTO_LIBRARY=/path/to/djgpp/lib/libcrypto.a \
+      -DZLIB_INCLUDE_DIR=/path/to/djgpp/include \
+      -DZLIB_LIBRARY=/path/to/djgpp/lib/libz.a \
+      -DCURL_USE_LIBPSL=OFF
 
 Notes:
 
- - DJGPP 2.04 beta has a `sscanf()` bug so the URL parsing is not done
-   properly. Use DJGPP 2.03 until they fix it.
+ - Requires DJGPP 2.04 or upper.
 
  - Compile Watt-32 (and OpenSSL) with the same version of DJGPP. Otherwise
    things go wrong because things like FS-extensions and `errno` values have
