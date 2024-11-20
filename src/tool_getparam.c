@@ -2712,7 +2712,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   size_t wcmdln_len = wcslen(_wcmdln) + 1;
   size_t acmdln_siz = acmdln_len * sizeof(char);
   size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
-  TCHAR *tcmdln = calloc(wcmdln_len, sizeof(TCHAR));
+  TCHAR *tcmdln = calloc(CURLMAX(wcmdln_len, acmdln_len), sizeof(TCHAR));
   _tcscat(tcmdln, TEXT("\""));
   _tcscat(tcmdln, argv[0]);
   _tcscat(tcmdln, TEXT("\""));
