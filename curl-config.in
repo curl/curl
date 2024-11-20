@@ -141,8 +141,8 @@ while test "$#" -gt 0; do
     ;;
 
   --cflags)
-    if test 'X@LIBCURL_PC_CFLAGS@' = 'X-DCURL_STATICLIB'; then
-      CPPFLAG_CURL_STATICLIB='-DCURL_STATICLIB '
+    if test 'X@LIBCURL_PC_CFLAGS@' = 'X@LIBCURL_PC_CFLAGS_PRIVATE@'; then
+      CPPFLAG_CURL_STATICLIB='@LIBCURL_PC_CFLAGS_PRIVATE@ '
     else
       CPPFLAG_CURL_STATICLIB=''
     fi
