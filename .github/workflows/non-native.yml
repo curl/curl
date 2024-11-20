@@ -230,7 +230,6 @@ jobs:
     runs-on: 'ubuntu-24.04'
     timeout-minutes: 30
     env:
-      # renovate: datasource=github-tags depName=jens-maus/amissl versioning=semver registryUrl=https://github.com
       amissl-version: 5.18
     strategy:
       matrix:
