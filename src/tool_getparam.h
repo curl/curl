@@ -361,7 +361,8 @@ ParameterError getparameter(const char *flag, char *nextarg,
                             argv_item_t cleararg,
                             bool *usedarg,
                             struct GlobalConfig *global,
-                            struct OperationConfig *operation);
+                            struct OperationConfig *operation,
+                            bool *toclear);
 
 #ifdef UNITTESTS
 void parse_cert_parameter(const char *cert_parameter,
