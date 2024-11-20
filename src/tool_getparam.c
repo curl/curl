@@ -2712,17 +2712,10 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   size_t wcmdln_len = wcslen(_wcmdln) + 1;
   size_t acmdln_siz = acmdln_len * sizeof(char);
   size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
-  char *acmdln = calloc(acmdln_len, sizeof(char));
-  wchar_t *wcmdln = calloc(wcmdln_len, sizeof(wchar_t));
-#ifdef UNICODE
-  wcscat(wcmdln, L"\"");
-  wcscat(wcmdln, argv[0]);
-  wcscat(wcmdln, L"\"");
-#else
-  strcat(acmdln, "\"");
-  strcat(acmdln, argv[0]);
-  strcat(acmdln, "\"");
-#endif
+  TCHAR *tcmdln = calloc(wcmdln_len, sizeof(TCHAR));
+  _tcscat(tcmdln, TEXT("\""));
+  _tcscat(tcmdln, argv[0]);
+  _tcscat(tcmdln, TEXT("\""));
 #endif
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
@@ -2752,29 +2745,17 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                               global, config, &toclear);
 
 #ifdef _WIN32
-#ifdef UNICODE
-        wcscat(wcmdln, L" ");
-        wcscat(wcmdln, orig_opt);
+        _tcscat(tcmdln, TEXT(" "));
+        _tcscat(tcmdln, argv[i]);
         if(passarg) {
-          wcscat(wcmdln, L" ");
+          _tcscat(tcmdln, TEXT(" "));
           if(toclear) {
-            wcscat(wcmdln, L"\"\"");
-          } else {
-            wcscat(wcmdln, argv[i + 1]);
+            _tcscat(tcmdln, TEXT("\"\""));
+          }
+          else {
+            _tcscat(tcmdln, argv[i + 1]);
           }
         }
-#else
-        strcat(acmdln, " ");
-        strcat(acmdln, orig_opt);
-        if(passarg) {
-          strcat(acmdln, " ");
-          if(toclear) {
-            strcat(acmdln, "\"\"");
-          } else {
-            strcat(acmdln, argv[i + 1]);
-          }
-        }
-#endif
 #endif
 
         curlx_unicodefree(nextarg);
@@ -2821,13 +2802,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                             &toclear);
 
 #ifdef _WIN32
-#ifdef UNICODE
-      wcscat(wcmdln, L" ");
-      wcscat(wcmdln, orig_opt);
-#else
-      strcat(acmdln, " ");
-      strcat(acmdln, orig_opt);
-#endif
+      _tcscat(tcmdln, TEXT(" "));
+      _tcscat(tcmdln, argv[i]);
 #endif
     }
 
@@ -2837,16 +2813,16 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
 #ifdef _WIN32
 #ifdef UNICODE
-  memcpy(_wcmdln, wcmdln, wcmdln_siz);
-  if(!WideCharToMultiByte(CP_ACP, 0, wcmdln, -1,
+  memcpy(_wcmdln, tcmdln, wcmdln_siz);
+  if(!WideCharToMultiByte(CP_ACP, 0, _wcmdln, -1,
                           _acmdln, (int)acmdln_siz, NULL, NULL)) {
     memset(_acmdln, 0, acmdln_siz);
   }
 #else
-  memcpy(_acmdln, acmdln, acmdln_siz);
-  if(!MultiByteToWideChar(CP_ACP, 0, acmdln, -1,
+  memcpy(_acmdln, tcmdln, acmdln_siz);
+  if(!MultiByteToWideChar(CP_ACP, 0, _acmdln, -1,
                           _wcmdln, (int)wcmdln_siz)) {
-    memcpy(_wcmdln, wcmdln, wcmdln_siz);
+    memset(_wcmdln, 0, wcmdln_siz);
   }
 #endif
 #endif
