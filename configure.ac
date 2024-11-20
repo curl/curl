@@ -1214,12 +1214,18 @@ fi
 
 if test "$HAVE_GETHOSTBYNAME" != "1"; then
   dnl gethostbyname in the watt lib?
+  clean_CPPFLAGS=$CPPFLAGS
+  clean_LDFLAGS=$LDFLAGS
+  CPPFLAGS="-I${WATT_ROOT}/inc"
+  LDFLAGS="-L${WATT_ROOT}/lib"
   AC_CHECK_LIB(watt, gethostbyname,
     [
       HAVE_GETHOSTBYNAME="1"
-      CPPFLAGS="-I${WATT_ROOT}/inc"
-      LDFLAGS="-L${WATT_ROOT}/lib"
       LIBS="-lwatt $LIBS"
+    ],
+    [
+      CPPFLAGS=$clean_CPPFLAGS
+      LDFLAGS=$clean_LDFLAGS
     ]
   )
 fi
