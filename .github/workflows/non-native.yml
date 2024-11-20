@@ -230,7 +230,7 @@ jobs:
     runs-on: 'ubuntu-24.04'
     timeout-minutes: 30
     env:
-      amissl-version: '5.18'
+      amissl-version: 5.18
     strategy:
       matrix:
         build: [autotools, cmake]
