@@ -2758,7 +2758,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         if(passarg) {
           wcscat(wcmdln, L" ");
           if(toclear) {
-            wcscat(wcmdln, L"***");
+            wcscat(wcmdln, L"\"\"");
           } else {
             wcscat(wcmdln, argv[i + 1]);
           }
@@ -2769,7 +2769,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         if(passarg) {
           strcat(acmdln, " ");
           if(toclear) {
-            strcat(acmdln, "***");
+            strcat(acmdln, "\"\"");
           } else {
             strcat(acmdln, argv[i + 1]);
           }
