@@ -31,7 +31,6 @@ prefix='@prefix@'
 exec_prefix="@exec_prefix@"
 # shellcheck disable=SC2034
 includedir="@includedir@"
-cppflag_curl_staticlib='@LIBCURL_PC_CFLAGS@'
 
 usage()
 {
@@ -142,7 +141,7 @@ while test "$#" -gt 0; do
     ;;
 
   --cflags)
-    if test "X$cppflag_curl_staticlib" = 'X-DCURL_STATICLIB'; then
+    if test 'X@LIBCURL_PC_CFLAGS@' = 'X-DCURL_STATICLIB'; then
       CPPFLAG_CURL_STATICLIB='-DCURL_STATICLIB '
     else
       CPPFLAG_CURL_STATICLIB=''
