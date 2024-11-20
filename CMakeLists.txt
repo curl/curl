@@ -2073,8 +2073,7 @@ if(NOT CURL_DISABLE_INSTALL)
 
   # Filter CMAKE_SHARED_LINKER_FLAGS for libs and libpaths
   string(STRIP "${CMAKE_SHARED_LINKER_FLAGS}" _custom_ldflags)
-  string(REGEX REPLACE " +-(L|l)" ";-\\1" _custom_ldflags "${_custom_ldflags}")
-  string(REGEX REPLACE " +-([^Ll][^ \\t;]*)" ";-\\1" _custom_ldflags "${_custom_ldflags}")
+  string(REGEX REPLACE " +-([^ \\t;]*)" ";-\\1" _custom_ldflags "${_custom_ldflags}")
 
   set(_custom_libs "")
   set(_custom_libdirs "")
