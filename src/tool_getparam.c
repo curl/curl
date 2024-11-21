@@ -2755,7 +2755,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
 #elif defined(HAVE_WRITABLE_ARGV)
-        cleanarg(argv[i + 1]);
+        if(toclear)
+          cleanarg(argv[i + 1]);
 #endif
 
         curlx_unicodefree(nextarg);
