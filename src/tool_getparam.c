@@ -2692,8 +2692,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   struct OperationConfig *config = global->first;
 
 #ifdef HAVE_WIN32_ACMDLN
-  size_t acmdln_len, acmdln_siz;
-  size_t wcmdln_len, wcmdln_siz;
+  size_t acmdln_len, acmdln_siz = 0;
+  size_t wcmdln_len, wcmdln_siz = 0;
   TCHAR *tcmdln = NULL;
   if(_acmdln && _wcmdln) {
     acmdln_len = strlen(_acmdln) + 1;
