@@ -139,14 +139,6 @@ dnl we extract the numerical version for curl-config only
 VERSIONNUM=`$SED -ne 's/^#define LIBCURL_VERSION_NUM 0x\([0-9A-Fa-f]*\).*/\1/p' ${srcdir}/include/curl/curlver.h`
 AC_SUBST(VERSIONNUM)
 
-dnl Solaris pkgadd support definitions
-PKGADD_PKG="HAXXcurl"
-PKGADD_NAME="curl - a client that groks URLs"
-PKGADD_VENDOR="curl.se"
-AC_SUBST(PKGADD_PKG)
-AC_SUBST(PKGADD_NAME)
-AC_SUBST(PKGADD_VENDOR)
-
 dnl
 dnl initialize all the info variables
     curl_ssl_msg="no      (--with-{openssl,gnutls,mbedtls,wolfssl,schannel,secure-transport,amissl,bearssl,rustls} )"
