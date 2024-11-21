@@ -358,7 +358,6 @@ const struct LongShort *findlongopt(const char *opt);
 const struct LongShort *findshortopt(char letter);
 
 ParameterError getparameter(const char *flag, char *nextarg,
-                            argv_item_t cleararg,
                             bool *usedarg,
                             struct GlobalConfig *global,
                             struct OperationConfig *operation,

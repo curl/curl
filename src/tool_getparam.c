@@ -565,8 +565,6 @@ static void cleanarg(argv_item_t str)
     memset(str, ' ', len);
   }
 }
-#else
-#define cleanarg(x)
 #endif
 
 /* the maximum size we allow the dynbuf generated string */
@@ -1026,7 +1024,6 @@ const struct LongShort *findlongopt(const char *opt)
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
-                            argv_item_t cleararg,
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
@@ -1052,11 +1049,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
   };
   const struct LongShort *a = NULL;
   curl_off_t value;
-#ifdef HAVE_WRITABLE_ARGV
-  argv_item_t clearthis = NULL;
-#else
-  (void)cleararg;
-#endif
 
   *toclear = FALSE;
   *usedarg = FALSE; /* default is that we do not use the arg */
@@ -1143,9 +1135,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       else {
-#ifdef HAVE_WRITABLE_ARGV
-        clearthis = cleararg;
-#endif
         *toclear = TRUE;
         *usedarg = TRUE; /* mark it as used */
       }
@@ -1198,7 +1187,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_OAUTH2_BEARER: /* --oauth2-bearer */
       err = getstr(&config->oauth_bearer, nextarg, DENY_BLANK);
       if(!err) {
-        cleanarg(clearthis);
         *toclear = TRUE;
         config->authtype |= CURLAUTH_BEARER;
       }
@@ -1896,7 +1884,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     }
       break;
     case C_CERT: /* --cert */
-      cleanarg(clearthis);
       *toclear = TRUE;
       GetFileAndPassword(nextarg, &config->cert, &config->key_passwd);
       break;
@@ -1920,7 +1907,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PASS: /* --pass */
       err = getstr(&config->key_passwd, nextarg, DENY_BLANK);
-      cleanarg(clearthis);
       *toclear = TRUE;
       break;
     case C_ENGINE: /* --engine */
@@ -2001,7 +1987,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
       else
         err = getstr(&config->tls_username, nextarg, DENY_BLANK);
-      cleanarg(clearthis);
       *toclear = TRUE;
       break;
     case C_TLSPASSWORD: /* --tlspassword */
@@ -2009,7 +1994,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
       else
         err = getstr(&config->tls_password, nextarg, ALLOW_BLANK);
-      cleanarg(clearthis);
       *toclear = TRUE;
       break;
     case C_TLSAUTHTYPE: /* --tlsauthtype */
@@ -2060,7 +2044,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->tcp_fastopen = TRUE;
       break;
     case C_PROXY_TLSUSER: /* --proxy-tlsuser */
-      cleanarg(clearthis);
       *toclear = TRUE;
       if(!feature_tls_srp)
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -2068,7 +2051,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         err = getstr(&config->proxy_tls_username, nextarg, ALLOW_BLANK);
       break;
     case C_PROXY_TLSPASSWORD: /* --proxy-tlspassword */
-      cleanarg(clearthis);
       *toclear = TRUE;
       if(!feature_tls_srp)
         err = PARAM_LIBCURL_DOESNT_SUPPORT;
@@ -2085,7 +2067,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_PROXY_CERT: /* --proxy-cert */
-      cleanarg(clearthis);
       *toclear = TRUE;
       GetFileAndPassword(nextarg, &config->proxy_cert,
                          &config->proxy_key_passwd);
@@ -2101,7 +2082,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_PROXY_PASS: /* --proxy-pass */
       err = getstr(&config->proxy_key_passwd, nextarg, ALLOW_BLANK);
-      cleanarg(clearthis);
       *toclear = TRUE;
       break;
     case C_PROXY_CIPHERS: /* --proxy-ciphers */
@@ -2504,13 +2484,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_USER: /* --user */
       /* user:password  */
       err = getstr(&config->userpwd, nextarg, ALLOW_BLANK);
-      cleanarg(clearthis);
       *toclear = TRUE;
       break;
     case C_PROXY_USER: /* --proxy-user */
       /* Proxy user:password  */
       err = getstr(&config->proxyuserpwd, nextarg, ALLOW_BLANK);
-      cleanarg(clearthis);
       *toclear = TRUE;
       break;
     case C_VERBOSE: /* --verbose */
@@ -2746,8 +2724,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
 
-        result = getparameter(orig_opt, nextarg, argv[i + 1], &passarg,
-                              global, config, &toclear);
+        result = getparameter(orig_opt, nextarg, &passarg, global, config,
+                              &toclear);
 
 #ifdef _WIN32
         /* !checksrc! disable BANNEDFUNC 5 */
@@ -2762,6 +2740,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
             _tcscat(tcmdln, argv[i + 1]);
           }
         }
+#elif defined(HAVE_WRITABLE_ARGV)
+        cleanarg(argv[i + 1]);
 #endif
 
         curlx_unicodefree(nextarg);
@@ -2804,7 +2784,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, argv[i], &used, global, config,
+      result = getparameter("--url", orig_opt, &used, global, config,
                             &toclear);
 
 #ifdef _WIN32
