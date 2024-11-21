@@ -363,9 +363,9 @@ jobs:
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.libressl-version }} https://github.com/libressl-portable/portable.git libressl-git
-          cd libressl-git
-          ./autogen.sh
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz
+          tar -xzf libressl-${{ env.libressl-version }}.tar.gz
+          cd libressl-${{ env.libressl-version }}
           ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
@@ -386,7 +386,8 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-all --enable-all
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-all \
+            --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
           make install
 
       - name: 'cache wolfssl (opensslextra)'
@@ -406,7 +407,8 @@ jobs:
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --prefix=$HOME/wolfssl-opensslextra --enable-opensslextra
+          ./configure --disable-dependency-tracking --enable-tls13 --enable-harden --enable-opensslextra \
+            --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
           make install
 
       - name: 'cache mbedtls'
@@ -447,7 +449,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
-          CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib
+          CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make -j1 install_sw
 
       - name: 'cache quictls'
@@ -465,7 +467,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
           cd openssl
-          ./config --prefix=$HOME/quictls --libdir=lib
+          ./config --prefix=$HOME/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
           make -j1 install_sw
 
       - name: 'cache msh3'
@@ -505,7 +507,7 @@ jobs:
           tar xzf v${{ env.awslc-version }}.tar.gz
           mkdir aws-lc-${{ env.awslc-version }}-build
           cd aws-lc-${{ env.awslc-version }}-build
-          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }}
+          cmake -G Ninja -DCMAKE_INSTALL_PREFIX=$HOME/awslc ../aws-lc-${{ env.awslc-version }} -DBUILD_TOOL=OFF -DBUILD_TESTING=OFF
           cmake --build .
           cmake --install .
 
