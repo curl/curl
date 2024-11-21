@@ -358,10 +358,10 @@ const struct LongShort *findlongopt(const char *opt);
 const struct LongShort *findshortopt(char letter);
 
 ParameterError getparameter(const char *flag, char *nextarg,
+                            bool *toclear,
                             bool *usedarg,
                             struct GlobalConfig *global,
-                            struct OperationConfig *operation,
-                            bool *toclear);
+                            struct OperationConfig *operation);
 
 #ifdef UNITTESTS
 void parse_cert_parameter(const char *cert_parameter,

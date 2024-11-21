@@ -1030,11 +1030,11 @@ const struct LongShort *findlongopt(const char *opt)
 
 ParameterError getparameter(const char *flag, /* f or -long-flag */
                             char *nextarg,    /* NULL if unset */
+                            bool *toclear,    /* arg is to be cleared */
                             bool *usedarg,    /* set to TRUE if the arg
                                                  has been used */
                             struct GlobalConfig *global,
-                            struct OperationConfig *config,
-                            bool *toclear)
+                            struct OperationConfig *config)
 {
   int rc;
   const char *parse = NULL;
@@ -2740,8 +2740,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           }
         }
 
-        result = getparameter(orig_opt, nextarg, &passarg, global, config,
-                              &toclear);
+        result = getparameter(orig_opt, nextarg, &toclear, &passarg,
+                              global, config);
 
 #ifdef HAVE_WIN32_ACMDLN
         if(tcmdln) {
@@ -2802,8 +2802,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       bool used;
 
       /* Just add the URL please */
-      result = getparameter("--url", orig_opt, &used, global, config,
-                            &toclear);
+      result = getparameter("--url", orig_opt, &toclear, &used, global,
+                            config);
 
 #ifdef HAVE_WIN32_ACMDLN
       if(tcmdln) {
