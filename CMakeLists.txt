@@ -850,9 +850,9 @@ macro(openssl_check_quic)
 endmacro()
 
 if(USE_WOLFSSL)
-  openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT "")
-  openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/ssl.h" HAVE_WOLFSSL_BIO "")
-  openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
+  openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT "")
+  openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO "")
+  openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
 endif()
 
 if(USE_OPENSSL OR USE_WOLFSSL)
