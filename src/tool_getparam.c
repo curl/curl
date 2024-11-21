@@ -49,7 +49,13 @@
 #  define USE_WATT32
 #endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && ((defined(__MINGW32__) && \
+  defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 6) || \
+  (defined(_MSC_VER) && _MSC_VER >= 1900))
+#define HAVE_WIN32_ACMDLN
+#endif
+
+#ifdef HAVE_WIN32_ACMDLN
 #include <process.h> /* for _acmdln and _wcmdln */
 #endif
 
@@ -554,7 +560,7 @@ static ParameterError GetSizeParameter(struct GlobalConfig *global,
   return PARAM_OK;
 }
 
-#if defined(HAVE_WRITABLE_ARGV) && !defined(_WIN32)
+#if defined(HAVE_WRITABLE_ARGV) && !defined(HAVE_WIN32_ACMDLN)
 static void cleanarg(argv_item_t str)
 {
   /* now that getstr has copied the contents of nextarg, wipe the next
@@ -2689,16 +2695,26 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   ParameterError result = PARAM_OK;
   struct OperationConfig *config = global->first;
 
-#ifdef _WIN32
-  size_t acmdln_len = strlen(_acmdln) + 1;
-  size_t wcmdln_len = wcslen(_wcmdln) + 1;
-  size_t acmdln_siz = acmdln_len * sizeof(char);
-  size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
-  TCHAR *tcmdln = calloc(CURLMAX(wcmdln_len, acmdln_len), sizeof(TCHAR));
-  /* !checksrc! disable BANNEDFUNC 3 */
-  _tcscat(tcmdln, TEXT("\""));
-  _tcscat(tcmdln, argv[0]);
-  _tcscat(tcmdln, TEXT("\""));
+#ifdef HAVE_WIN32_ACMDLN
+  size_t acmdln_len, acmdln_siz;
+  size_t wcmdln_len, wcmdln_siz;
+  size_t tcmdln_len;
+  TCHAR *tcmdln = NULL;
+
+  acmdln_len = _acmdln ? strlen(_acmdln) + 1 : 0;
+  wcmdln_len = _wcmdln ? wcslen(_wcmdln) + 1 : 0;
+  tcmdln_len = CURLMAX(wcmdln_len, acmdln_len);
+  acmdln_siz = acmdln_len * sizeof(char);
+  wcmdln_siz = wcmdln_len * sizeof(wchar_t);
+  if(tcmdln_len) {
+    tcmdln = calloc(tcmdln_len, sizeof(TCHAR));
+    if(tcmdln) {
+      /* !checksrc! disable BANNEDFUNC 3 */
+      _tcscat(tcmdln, TEXT("\""));
+      _tcscat(tcmdln, argv[0]);
+      _tcscat(tcmdln, TEXT("\""));
+    }
+  }
 #endif
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
@@ -2727,17 +2743,19 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
         result = getparameter(orig_opt, nextarg, &passarg, global, config,
                               &toclear);
 
-#ifdef _WIN32
-        /* !checksrc! disable BANNEDFUNC 5 */
-        _tcscat(tcmdln, TEXT(" "));
-        _tcscat(tcmdln, argv[i]);
-        if(passarg) {
+#ifdef HAVE_WIN32_ACMDLN
+        if(tcmdln) {
+          /* !checksrc! disable BANNEDFUNC 5 */
           _tcscat(tcmdln, TEXT(" "));
-          if(toclear) {
-            _tcscat(tcmdln, TEXT("\"\""));
-          }
-          else {
-            _tcscat(tcmdln, argv[i + 1]);
+          _tcscat(tcmdln, argv[i]);
+          if(passarg) {
+            _tcscat(tcmdln, TEXT(" "));
+            if(toclear) {
+              _tcscat(tcmdln, TEXT("\"\""));
+            }
+            else {
+              _tcscat(tcmdln, argv[i + 1]);
+            }
           }
         }
 #elif defined(HAVE_WRITABLE_ARGV)
@@ -2787,10 +2805,12 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       result = getparameter("--url", orig_opt, &used, global, config,
                             &toclear);
 
-#ifdef _WIN32
-      /* !checksrc! disable BANNEDFUNC 2 */
-      _tcscat(tcmdln, TEXT(" "));
-      _tcscat(tcmdln, argv[i]);
+#ifdef HAVE_WIN32_ACMDLN
+      if(tcmdln) {
+        /* !checksrc! disable BANNEDFUNC 2 */
+        _tcscat(tcmdln, TEXT(" "));
+        _tcscat(tcmdln, argv[i]);
+      }
 #endif
     }
 
@@ -2798,19 +2818,28 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       curlx_unicodefree(orig_opt);
   }
 
-#ifdef _WIN32
+#ifdef HAVE_WIN32_ACMDLN
 #ifdef UNICODE
-  memcpy(_wcmdln, tcmdln, wcmdln_siz);
-  if(!WideCharToMultiByte(CP_ACP, 0, _wcmdln, -1,
-                          _acmdln, (int)acmdln_siz, NULL, NULL)) {
+  if(_wcmdln) {
+    if(tcmdln)
+      memcpy(_wcmdln, tcmdln, wcmdln_siz);
+    else
+      memset(_wcmdln, 0, wcmdln_siz);
+  }
+  if(_acmdln &&
+     !WideCharToMultiByte(CP_ACP, 0, tcmdln, -1, _acmdln, (int)acmdln_siz,
+                          NULL, NULL))
     memset(_acmdln, 0, acmdln_siz);
-  }
 #else
-  memcpy(_acmdln, tcmdln, acmdln_siz);
-  if(!MultiByteToWideChar(CP_ACP, 0, _acmdln, -1,
-                          _wcmdln, (int)wcmdln_siz)) {
-    memset(_wcmdln, 0, wcmdln_siz);
+  if(_acmdln) {
+    if(tcmdln)
+      memcpy(_acmdln, tcmdln, acmdln_siz);
+    else
+      memset(_acmdln, 0, acmdln_siz);
   }
+  if(_wcmdln &&
+     !MultiByteToWideChar(CP_ACP, 0, tcmdln, -1, _wcmdln, (int)wcmdln_siz))
+    memset(_wcmdln, 0, wcmdln_siz);
 #endif
 #endif
 
