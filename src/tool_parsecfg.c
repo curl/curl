@@ -193,8 +193,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
 #ifdef DEBUG_CONFIG
       fprintf(tool_stderr, "PARAM: \"%s\"\n",(param ? param : "(null)"));
 #endif
-      res = getparameter(option, param, &usedarg, global, operation,
-                         &toclear);
+      res = getparameter(option, param, &usedarg, global, operation, &toclear);
       operation = global->last;
 
       if(!res && param && *param && !usedarg)
