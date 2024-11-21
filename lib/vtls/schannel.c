@@ -824,8 +824,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     if(ciphers) {
       if((enabled_protocols & SP_PROT_TLS1_3_CLIENT)) {
-        infof(data, "schannel: WARNING: This version of Schannel will "
-              "negotiate a less-secure TLS version than TLS 1.3 because the "
+        infof(data, "schannel: WARNING: This version of Schannel "
+              "negotiates a less-secure TLS version than TLS 1.3 because the "
               "user set an algorithm cipher list.");
       }
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
