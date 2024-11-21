@@ -2743,12 +2743,10 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
           _tcscat(tcmdln, argv[i]);
           if(passarg) {
             _tcscat(tcmdln, TEXT(" "));
-            if(toclear) {
+            if(toclear)
               _tcscat(tcmdln, TEXT("\"\""));
-            }
-            else {
+            else
               _tcscat(tcmdln, argv[i + 1]);
-            }
           }
         }
 #elif defined(HAVE_WRITABLE_ARGV)
