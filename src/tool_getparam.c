@@ -2713,6 +2713,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   size_t acmdln_siz = acmdln_len * sizeof(char);
   size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
   TCHAR *tcmdln = calloc(CURLMAX(wcmdln_len, acmdln_len), sizeof(TCHAR));
+  /* !checksrc! disable BANNEDFUNC 3 */
   _tcscat(tcmdln, TEXT("\""));
   _tcscat(tcmdln, argv[0]);
   _tcscat(tcmdln, TEXT("\""));
@@ -2745,6 +2746,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                               global, config, &toclear);
 
 #ifdef _WIN32
+        /* !checksrc! disable BANNEDFUNC 5 */
         _tcscat(tcmdln, TEXT(" "));
         _tcscat(tcmdln, argv[i]);
         if(passarg) {
@@ -2802,6 +2804,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
                             &toclear);
 
 #ifdef _WIN32
+      /* !checksrc! disable BANNEDFUNC 2 */
       _tcscat(tcmdln, TEXT(" "));
       _tcscat(tcmdln, argv[i]);
 #endif
