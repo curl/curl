@@ -1349,8 +1349,6 @@ fi
 
 CURL_CHECK_LIBS_CONNECT
 
-CURL_NETWORK_LIBS=$LIBS
-
 dnl **********************************************************************
 dnl In case that function clock_gettime with monotonic timer is available,
 dnl check for additional required libraries.
@@ -5083,7 +5081,6 @@ LIBCURL_PC_LIBS_PRIVATE="$LIBS$PTHREAD"
 
 AC_SUBST(LIBCURL_PC_LDFLAGS_PRIVATE)
 AC_SUBST(LIBCURL_PC_LIBS_PRIVATE)
-AC_SUBST(CURL_NETWORK_LIBS)
 AC_SUBST(CURL_NETWORK_AND_TIME_LIBS)
 
 dnl BLANK_AT_MAKETIME may be used in our Makefile.am files to blank
@@ -5421,7 +5418,6 @@ squeeze LIBS
 
 squeeze LIBCURL_PC_LDFLAGS_PRIVATE
 squeeze LIBCURL_PC_LIBS_PRIVATE
-squeeze CURL_NETWORK_LIBS
 squeeze CURL_NETWORK_AND_TIME_LIBS
 
 squeeze SUPPORT_FEATURES
