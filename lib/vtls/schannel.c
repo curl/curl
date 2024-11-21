@@ -451,11 +451,6 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 }
 #endif
 
-static bool algo(const char *check, char *namep, size_t nlen)
-{
-  return (strlen(check) == nlen) && !strncmp(check, namep, nlen);
-}
-
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
