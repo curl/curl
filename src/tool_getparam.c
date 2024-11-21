@@ -2815,17 +2815,13 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 #ifdef HAVE_WIN32_ACMDLN
   if(tcmdln) {
 #ifdef UNICODE
-    if(_wcmdln)
-      memcpy(_wcmdln, tcmdln, wcmdln_siz);
-    if(_acmdln)
-      (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1,
-                                _acmdln, (int)acmdln_siz, NULL, NULL);
+    memcpy(_wcmdln, tcmdln, wcmdln_siz);
+    (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1,
+                              _acmdln, (int)acmdln_siz, NULL, NULL);
 #else
-    if(_acmdln)
-      memcpy(_acmdln, tcmdln, acmdln_siz);
-    if(_wcmdln)
-      (void)MultiByteToWideChar(CP_ACP, 0, tcmdln, -1,
-                                _wcmdln, (int)wcmdln_siz);
+    memcpy(_acmdln, tcmdln, acmdln_siz);
+    (void)MultiByteToWideChar(CP_ACP, 0, tcmdln, -1,
+                              _wcmdln, (int)wcmdln_siz);
 #endif
   }
 #endif
