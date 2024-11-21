@@ -2692,14 +2692,12 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   struct OperationConfig *config = global->first;
 
 #ifdef HAVE_WIN32_ACMDLN
-  size_t acmdln_len, acmdln_siz = 0;
-  size_t wcmdln_len, wcmdln_siz = 0;
+  size_t acmdln_len = 0;
+  size_t wcmdln_len = 0;
   TCHAR *tcmdln = NULL;
   if(_acmdln && _wcmdln) {
     acmdln_len = strlen(_acmdln) + 1;
     wcmdln_len = wcslen(_wcmdln) + 1;
-    acmdln_siz = acmdln_len * sizeof(char);
-    wcmdln_siz = wcmdln_len * sizeof(wchar_t);
     tcmdln = calloc(CURLMAX(wcmdln_len, acmdln_len) + 2, sizeof(TCHAR));
     if(tcmdln) {
       /* !checksrc! disable BANNEDFUNC 3 */
@@ -2812,6 +2810,8 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
 #ifdef HAVE_WIN32_ACMDLN
   if(tcmdln) {
+    size_t acmdln_siz = acmdln_len * sizeof(char);
+    size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
 #ifdef UNICODE
     memcpy(_wcmdln, tcmdln, wcmdln_siz);
     (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1, _acmdln, (int)acmdln_siz,
