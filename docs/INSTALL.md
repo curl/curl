@@ -218,7 +218,6 @@ You can use either autotools or cmake:
       AR=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ar \
       RANLIB=/path/to/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
       WATT_ROOT=/path/to/djgpp/net/watt \
-      CPPFLAGS=-I/path/to/djgpp/include \
       --host=i586-pc-msdosdjgpp \
       --with-openssl=/path/to/djgpp \
       --with-zlib=/path/to/djgpp \

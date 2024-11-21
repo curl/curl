@@ -377,7 +377,6 @@ jobs:
               AR=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ar \
               RANLIB=$HOME/djgpp/bin/i586-pc-msdosdjgpp-ranlib \
               WATT_ROOT=$HOME/djgpp/net/watt \
-              CPPFLAGS=-I$HOME/djgpp/include \
               --host=i586-pc-msdosdjgpp \
               --with-openssl=$HOME/djgpp \
               --with-zlib=$HOME/djgpp \
