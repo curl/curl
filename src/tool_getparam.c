@@ -49,6 +49,10 @@
 #  define USE_WATT32
 #endif
 
+#ifdef _WIN32
+#include <process.h> /* for _acmdln and _wcmdln */
+#endif
+
 #define ALLOW_BLANK TRUE
 #define DENY_BLANK FALSE
 
