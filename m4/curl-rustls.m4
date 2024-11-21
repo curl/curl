@@ -94,7 +94,6 @@ if test "x$OPT_RUSTLS" != xno; then
         AC_CHECK_LIB(rustls, rustls_connection_read,
           [
           AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
-          AC_SUBST(USE_RUSTLS, [1])
           RUSTLS_ENABLED=1
           USE_RUSTLS="yes"
           ssl_msg="rustls"
@@ -128,7 +127,6 @@ if test "x$OPT_RUSTLS" != xno; then
       SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$RUSTLS_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I rustls 2>/dev/null`
 
-      AC_SUBST(SSL_LIBS)
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
       AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
@@ -145,7 +143,6 @@ if test "x$OPT_RUSTLS" != xno; then
       link_pkgconfig=1
       ssl_msg="rustls"
       AC_DEFINE(USE_RUSTLS, 1, [if Rustls is enabled])
-      AC_SUBST(USE_RUSTLS, [1])
       USE_RUSTLS="yes"
       RUSTLS_ENABLED=1
       test rustls != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
