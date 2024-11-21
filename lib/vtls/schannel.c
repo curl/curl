@@ -451,11 +451,6 @@ get_cert_location(TCHAR *path, DWORD *store_name, TCHAR **store_path,
 }
 #endif
 
-static bool algo(const char *check, char *namep, size_t nlen)
-{
-  return (strlen(check) == nlen) && !strncmp(check, namep, nlen);
-}
-
 static CURLcode
 schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                    struct Curl_easy *data)
@@ -781,187 +776,14 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
      curlx_verify_windows_version(10, 0, 17763, PLATFORM_WINNT,
                                   VERSION_GREATER_THAN_EQUAL)) {
 
-    char *ciphers13 = 0;
-
-    bool disable_aes_gcm_sha384 = FALSE;
-    bool disable_aes_gcm_sha256 = FALSE;
-    bool disable_chacha_poly = FALSE;
-    bool disable_aes_ccm_8_sha256 = FALSE;
-    bool disable_aes_ccm_sha256 = FALSE;
-
     SCH_CREDENTIALS credentials = { 0 };
     TLS_PARAMETERS tls_parameters = { 0 };
-    CRYPTO_SETTINGS crypto_settings[4] = { { 0 } };
-    UNICODE_STRING blocked_ccm_modes[1] = { { 0 } };
-    UNICODE_STRING blocked_gcm_modes[1] = { { 0 } };
-
-    int crypto_settings_idx = 0;
-
-
-    /* If TLS 1.3 ciphers are explicitly listed, then
-     * disable all the ciphers and re-enable which
-     * ciphers the user has provided.
-     */
-    ciphers13 = conn_config->cipher_list13;
-    if(ciphers13) {
-      const int remaining_ciphers = 5;
-
-      /* detect which remaining ciphers to enable
-         and then disable everything else.
-      */
-
-      char *startCur = ciphers13;
-      int algCount = 0;
-      char *nameEnd;
-
-      disable_aes_gcm_sha384 = TRUE;
-      disable_aes_gcm_sha256 = TRUE;
-      disable_chacha_poly = TRUE;
-      disable_aes_ccm_8_sha256 = TRUE;
-      disable_aes_ccm_sha256 = TRUE;
-
-      while(startCur && (0 != *startCur) && (algCount < remaining_ciphers)) {
-        size_t n;
-        char *namep;
-        nameEnd = strchr(startCur, ':');
-        n = nameEnd ? (size_t)(nameEnd - startCur) : strlen(startCur);
-        namep = startCur;
-
-        if(disable_aes_gcm_sha384 &&
-           algo("TLS_AES_256_GCM_SHA384", namep, n)) {
-          disable_aes_gcm_sha384 = FALSE;
-        }
-        else if(disable_aes_gcm_sha256
-                && algo("TLS_AES_128_GCM_SHA256", namep, n)) {
-          disable_aes_gcm_sha256 = FALSE;
-        }
-        else if(disable_chacha_poly
-                && algo("TLS_CHACHA20_POLY1305_SHA256", namep, n)) {
-          disable_chacha_poly = FALSE;
-        }
-        else if(disable_aes_ccm_8_sha256
-                && algo("TLS_AES_128_CCM_8_SHA256", namep, n)) {
-          disable_aes_ccm_8_sha256 = FALSE;
-        }
-        else if(disable_aes_ccm_sha256
-                && algo("TLS_AES_128_CCM_SHA256", namep, n)) {
-          disable_aes_ccm_sha256 = FALSE;
-        }
-        else {
-          failf(data, "schannel: Unknown TLS 1.3 cipher: %.*s", (int)n, namep);
-          return CURLE_SSL_CIPHER;
-        }
-
-        startCur = nameEnd;
-        if(startCur)
-          startCur++;
-
-        algCount++;
-      }
-    }
-
-    if(disable_aes_gcm_sha384 && disable_aes_gcm_sha256
-       && disable_chacha_poly && disable_aes_ccm_8_sha256
-       && disable_aes_ccm_sha256) {
-      failf(data, "schannel: All available TLS 1.3 ciphers were disabled");
-      return CURLE_SSL_CIPHER;
-    }
-
-    /* Disable TLS_AES_128_CCM_8_SHA256 and/or TLS_AES_128_CCM_SHA256 */
-    if(disable_aes_ccm_8_sha256 || disable_aes_ccm_sha256) {
-      /*
-        Disallow AES_CCM algorithm.
-      */
-      blocked_ccm_modes[0].Length = sizeof(BCRYPT_CHAIN_MODE_CCM);
-      blocked_ccm_modes[0].MaximumLength = sizeof(BCRYPT_CHAIN_MODE_CCM);
-      blocked_ccm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_CCM;
-
-      crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-        TlsParametersCngAlgUsageCipher;
-      crypto_settings[crypto_settings_idx].rgstrChainingModes =
-        blocked_ccm_modes;
-      crypto_settings[crypto_settings_idx].cChainingModes =
-        ARRAYSIZE(blocked_ccm_modes);
-      crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-        sizeof(BCRYPT_AES_ALGORITHM);
-      crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-        sizeof(BCRYPT_AES_ALGORITHM);
-      crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-        (PWSTR)BCRYPT_AES_ALGORITHM;
-
-      /* only disabling one of the CCM modes */
-      if(disable_aes_ccm_8_sha256 != disable_aes_ccm_sha256) {
-        if(disable_aes_ccm_8_sha256)
-          crypto_settings[crypto_settings_idx].dwMinBitLength = 128;
-        else /* disable_aes_ccm_sha256 */
-          crypto_settings[crypto_settings_idx].dwMaxBitLength = 64;
-      }
-
-      crypto_settings_idx++;
-    }
-
-    /* Disable TLS_AES_256_GCM_SHA384 and/or TLS_AES_128_GCM_SHA256 */
-    if(disable_aes_gcm_sha384 || disable_aes_gcm_sha256) {
-
-      /*
-        Disallow AES_GCM algorithm
-      */
-      blocked_gcm_modes[0].Length = sizeof(BCRYPT_CHAIN_MODE_GCM);
-      blocked_gcm_modes[0].MaximumLength = sizeof(BCRYPT_CHAIN_MODE_GCM);
-      blocked_gcm_modes[0].Buffer = (PWSTR)BCRYPT_CHAIN_MODE_GCM;
-
-      /* if only one is disabled, then explicitly disable the
-         digest cipher suite (sha384 or sha256) */
-      if(disable_aes_gcm_sha384 != disable_aes_gcm_sha256) {
-        crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-          TlsParametersCngAlgUsageDigest;
-        crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-          sizeof(disable_aes_gcm_sha384 ?
-                 BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
-        crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-          sizeof(disable_aes_gcm_sha384 ?
-                 BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
-        crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-          (PWSTR)(disable_aes_gcm_sha384 ?
-                  BCRYPT_SHA384_ALGORITHM : BCRYPT_SHA256_ALGORITHM);
-      }
-      else { /* Disable both AES_GCM ciphers */
-        crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-          TlsParametersCngAlgUsageCipher;
-        crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-          sizeof(BCRYPT_AES_ALGORITHM);
-        crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-          sizeof(BCRYPT_AES_ALGORITHM);
-        crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-          (PWSTR)BCRYPT_AES_ALGORITHM;
-      }
-
-      crypto_settings[crypto_settings_idx].rgstrChainingModes =
-        blocked_gcm_modes;
-      crypto_settings[crypto_settings_idx].cChainingModes = 1;
-
-      crypto_settings_idx++;
-    }
-
-    /*
-      Disable ChaCha20-Poly1305.
-    */
-    if(disable_chacha_poly) {
-      crypto_settings[crypto_settings_idx].eAlgorithmUsage =
-        TlsParametersCngAlgUsageCipher;
-      crypto_settings[crypto_settings_idx].strCngAlgId.Length =
-        sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
-      crypto_settings[crypto_settings_idx].strCngAlgId.MaximumLength =
-        sizeof(BCRYPT_CHACHA20_POLY1305_ALGORITHM);
-      crypto_settings[crypto_settings_idx].strCngAlgId.Buffer =
-        (PWSTR)BCRYPT_CHACHA20_POLY1305_ALGORITHM;
-      crypto_settings_idx++;
-    }
+    CRYPTO_SETTINGS crypto_settings[1] = { { 0 } };
 
     tls_parameters.pDisabledCrypto = crypto_settings;
 
     /* The number of blocked suites */
-    tls_parameters.cDisabledCrypto = (DWORD)crypto_settings_idx;
+    tls_parameters.cDisabledCrypto = (DWORD)0;
     credentials.pTlsParameters = &tls_parameters;
     credentials.cTlsParameters = 1;
 
@@ -986,9 +808,8 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
                                          &backend->cred->time_stamp);
   }
   else {
-    /* Pre-Windows 10 1809 or the user set a legacy algorithm list. Although MS
-       does not document it, currently Schannel will not negotiate TLS 1.3 when
-       SCHANNEL_CRED is used. */
+    /* Pre-Windows 10 1809 or the user set a legacy algorithm list.
+       Schannel will not negotiate TLS 1.3 when SCHANNEL_CRED is used. */
     ALG_ID algIds[NUM_CIPHERS];
     char *ciphers = conn_config->cipher_list;
     SCHANNEL_CRED schannel_cred = { 0 };
@@ -998,15 +819,9 @@ schannel_acquire_credential_handle(struct Curl_cfilter *cf,
 
     if(ciphers) {
       if((enabled_protocols & SP_PROT_TLS1_3_CLIENT)) {
-        infof(data, "schannel: WARNING: This version of Schannel may "
-              "negotiate a less-secure TLS version than TLS 1.3 because the "
+        infof(data, "schannel: WARNING: This version of Schannel "
+              "negotiates a less-secure TLS version than TLS 1.3 because the "
               "user set an algorithm cipher list.");
-      }
-      if(conn_config->cipher_list13) {
-        failf(data, "schannel: This version of Schannel does not support "
-              "setting an algorithm cipher list and TLS 1.3 cipher list at "
-              "the same time");
-        return CURLE_SSL_CIPHER;
       }
       result = set_ssl_ciphers(&schannel_cred, ciphers, algIds);
       if(CURLE_OK != result) {
@@ -2974,7 +2789,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
 #ifndef CURL_WINDOWS_UWP
   SSLSUPP_PINNEDPUBKEY |
 #endif
-  SSLSUPP_TLS13_CIPHERSUITES |
   SSLSUPP_CA_CACHE |
   SSLSUPP_HTTPS_PROXY |
   SSLSUPP_CIPHER_LIST,

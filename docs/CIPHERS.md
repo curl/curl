@@ -42,8 +42,7 @@ common cipher suite in the list sent by curl is chosen.
 
 Setting TLS 1.3 cipher suites is supported by curl with
 OpenSSL (1.1.1+, curl 7.61.0+), LibreSSL (3.4.1+, curl 8.3.0+),
-wolfSSL (curl 8.10.0+), mbedTLS (3.6.0+, curl 8.10.0+) and
-Schannel (curl 7.85.0+).
+wolfSSL (curl 8.10.0+) and mbedTLS (3.6.0+, curl 8.10.0+).
 
 The list of cipher suites that can be used for the `--tls13-ciphers` option:
 ```
@@ -60,13 +59,6 @@ In addition to above list the following cipher suites can be used:
 `TLS_SM4_GCM_SM3` `TLS_SM4_CCM_SM3` `TLS_SHA256_SHA256` `TLS_SHA384_SHA384`.
 Usage of these cipher suites is not recommended. (The last two cipher suites
 are NULL ciphers, offering no encryption whatsoever.)
-
-### Schannel notes
-
-Schannel does not support setting individual TLS 1.3 cipher suites directly.
-To support `--tls13-ciphers` curl emulates it by adding or restricting
-algorithms to use. Due to this the specified order of preference of the
-cipher suites is not taken into account.
 
 ## TLS 1.2 (1.1, 1.0) cipher suites
 
