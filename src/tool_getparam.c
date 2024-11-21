@@ -2811,7 +2811,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   }
 
 #ifdef HAVE_WIN32_ACMDLN
-  if(tcmdln && _acmdln && _wcmdln) {
+  if(tcmdln) {
 #ifdef UNICODE
     memcpy(_wcmdln, tcmdln, wcmdln_siz);
     (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1,
