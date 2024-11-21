@@ -1331,7 +1331,6 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
     HAVE_GETHOSTBYNAME="1"
     HAVE_PROTO_BSDSOCKET_H="1"
     AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
-    AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])
   ],[
     AC_MSG_RESULT([no])
   ])
@@ -1549,7 +1548,6 @@ if test X"$OPT_BROTLI" != Xno; then
     curl_brotli_msg="enabled (libbrotlidec)"
     HAVE_BROTLI=1
     AC_DEFINE(HAVE_BROTLI, 1, [if BROTLI is in use])
-    AC_SUBST(HAVE_BROTLI, [1])
   )
 
   if test X"$OPT_BROTLI" != Xoff &&
@@ -1639,7 +1637,6 @@ if test X"$OPT_ZSTD" != Xno; then
     curl_zstd_msg="enabled (libzstd)"
     HAVE_ZSTD=1
     AC_DEFINE(HAVE_ZSTD, 1, [if libzstd is in use])
-    AC_SUBST(HAVE_ZSTD, [1])
   )
 
   if test X"$OPT_ZSTD" != Xoff &&
@@ -1817,7 +1814,6 @@ if test "$ipv6" = yes; then
   curl_ipv6_msg="enabled"
   AC_DEFINE(USE_IPV6, 1, [Define if you want to enable IPv6 support])
   IPV6_ENABLED=1
-  AC_SUBST(IPV6_ENABLED)
 
   AC_MSG_CHECKING([if struct sockaddr_in6 has sin6_scope_id member])
   AC_COMPILE_IFELSE([ AC_LANG_PROGRAM([[
@@ -2123,7 +2119,6 @@ case "$DEFAULT_SSL_BACKEND" in
     ;;
   *)
     dnl --with-default-ssl-backend option used with name
-    AC_SUBST(DEFAULT_SSL_BACKEND)
     dnl needs to be validated below
     VALID_DEFAULT_SSL_BACKEND=no
     ;;
@@ -2156,7 +2151,6 @@ Use --with-openssl, --with-gnutls, --with-wolfssl, --with-mbedtls, --with-schann
     ;;
   x1)
     # one SSL backend is enabled
-    AC_SUBST(SSL_ENABLED)
     SSL_ENABLED="1"
     AC_MSG_NOTICE([built with one SSL backend])
     ;;
@@ -2170,9 +2164,7 @@ Since these are conflicting parameters, verify which is the desired one and drop
     ;;
   *)
     # more than one SSL backend is enabled
-    AC_SUBST(SSL_ENABLED)
     SSL_ENABLED="1"
-    AC_SUBST(CURL_WITH_MULTI_SSL)
     CURL_WITH_MULTI_SSL="1"
     AC_DEFINE(CURL_WITH_MULTI_SSL, 1, [built with multiple SSL backends])
     AC_MSG_NOTICE([built with multiple SSL backends])
