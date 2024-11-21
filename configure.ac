@@ -1222,6 +1222,7 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
     [
       HAVE_GETHOSTBYNAME="1"
       LIBS="-lwatt $LIBS"
+      AC_DEFINE(USE_WATT32, 1, [if Watt-32 is in use])
     ],
     [
       CPPFLAGS=$clean_CPPFLAGS

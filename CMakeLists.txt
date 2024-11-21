@@ -527,6 +527,7 @@ endif()
 # Check for all needed libraries
 if(DOS)
   if(WATT_ROOT)
+    set(USE_WATT32 ON)
     # FIXME upstream: must specify the full path to avoid CMake converting "watt" to "watt.lib"
     list(APPEND CURL_LIBS "${WATT_ROOT}/lib/libwatt.a")
     include_directories(SYSTEM "${WATT_ROOT}/inc")

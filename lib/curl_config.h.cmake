@@ -788,6 +788,9 @@ ${SIZEOF_TIME_T_CODE}
 /* to enable Windows SSL  */
 #cmakedefine USE_SCHANNEL 1
 
+/* if Watt-32 is in use */
+#cmakedefine USE_WATT32 1
+
 /* enable multiple SSL backends */
 #cmakedefine CURL_WITH_MULTI_SSL 1
 
