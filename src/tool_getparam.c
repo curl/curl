@@ -1141,7 +1141,6 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         break;
       }
       else {
-        *toclear = TRUE;
         *usedarg = TRUE; /* mark it as used */
       }
 
