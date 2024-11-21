@@ -53,9 +53,6 @@
   defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 6) || \
   (defined(_MSC_VER) && _MSC_VER >= 1900))
 #define HAVE_WIN32_ACMDLN
-#endif
-
-#ifdef HAVE_WIN32_ACMDLN
 #include <process.h> /* for _acmdln and _wcmdln */
 #endif
 
