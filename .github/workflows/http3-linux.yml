@@ -175,7 +175,7 @@ jobs:
           cd $HOME
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl quictls
           cd quictls
-          ./config no-deprecated --prefix=$PWD/build --libdir=lib
+          ./config no-deprecated --prefix=$PWD/build --libdir=lib no-makedepend no-apps no-docs no-tests
           make
           make -j1 install_sw
         name: 'build quictls'
@@ -206,7 +206,8 @@ jobs:
           git fetch origin --depth=1 ${{ env.wolfssl-version }}
           git checkout ${{ env.wolfssl-version }}
           ./autogen.sh
-          ./configure --disable-dependency-tracking --enable-all --enable-quic --prefix=$PWD/build
+          ./configure --disable-dependency-tracking --enable-all --enable-quic \
+            --disable-benchmark --disable-crypttests --disable-examples --prefix=$PWD/build
           make
           make install
         name: 'build wolfssl'
@@ -413,7 +414,7 @@ jobs:
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
-          ./config --prefix=$HOME/openssl/build
+          ./config --prefix=$HOME/openssl/build no-makedepend no-apps no-docs no-tests
           make -j1 install_sw
           cat exporters/openssl.pc
 
