@@ -33,8 +33,8 @@
 #ifdef USE_WOLFSSL
 
 #define WOLFSSL_OPTIONS_IGNORE_SYS
-#include <wolfssl/version.h>
 #include <wolfssl/options.h>
+#include <wolfssl/version.h>
 
 #if LIBWOLFSSL_VERSION_HEX < 0x03004006 /* wolfSSL 3.4.6 (2015) */
 #error "wolfSSL version should be at least 3.4.6"
