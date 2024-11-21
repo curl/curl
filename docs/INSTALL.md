@@ -246,9 +246,31 @@ Notes:
 
 ## AmigaOS
 
-Run `make -f Makefile.dist amiga` in the root curl dir.
+You can use either autotools or cmake:
 
-For build configuration options, please see the mingw-w64 section.
+    ./configure \
+      CC=/opt/amiga/bin/m68k-amigaos-gcc \
+      AR=/opt/amiga/bin/m68k-amigaos-ar \
+      RANLIB=/opt/amiga/bin/m68k-amigaos-ranlib \
+      --host=m68k-amigaos \
+      --with-amissl \
+      CFLAGS='-O0 -msoft-float -mcrt=clib2' \
+      CPPFLAGS=-I/path/to/AmiSSL/Developer/include \
+      LDFLAGS=-L/path/to/AmiSSL/Developer/lib/AmigaOS3 \
+      LIBS='-lnet -lm -latomic' \
+      --without-libpsl \
+      --disable-shared
+
+    cmake . \
+      -DAMIGA=1 \
+      -DCMAKE_SYSTEM_NAME=Generic \
+      -DCMAKE_C_COMPILER_TARGET=m68k-unknown-amigaos \
+      -DCMAKE_C_COMPILER=/opt/amiga/bin/m68k-amigaos-gcc \
+      -DCMAKE_C_FLAGS='-O0 -msoft-float -mcrt=clib2' \
+      -DAMISSL_INCLUDE_DIR=/path/to/AmiSSL/Developer/include \
+      -DAMISSL_STUBS_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslstubs.a \
+      -DAMISSL_AUTO_LIBRARY=/path/to/AmiSSL/Developer/lib/AmigaOS3/libamisslauto.a \
+      -DCURL_USE_LIBPSL=OFF
 
 ## Disabling Specific Protocols in Windows builds
 
