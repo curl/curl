@@ -360,7 +360,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
   ],[
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_OPENSSL_SRP, 1, [if you have the functions SSL_CTX_set_srp_username and SSL_CTX_set_srp_password])
-    AC_SUBST(HAVE_OPENSSL_SRP, [1])
+    HAVE_OPENSSL_SRP=1
   ],[
     AC_MSG_RESULT([no])
   ])
