@@ -2491,17 +2491,16 @@ elif test X"$OPT_LIBSSH" != Xno; then
 
   AC_CHECK_HEADER(libssh/libssh.h,
     curl_ssh_msg="enabled (libssh)"
-    LIBSSH_ENABLED=1
     AC_DEFINE(USE_LIBSSH, 1, [if libssh is in use])
-    USE_LIBSSH=1  # DUPE: LIBSSH_ENABLED
+    USE_LIBSSH=1
   )
 
   if test X"$OPT_LIBSSH" != Xoff &&
-     test "$LIBSSH_ENABLED" != "1"; then
+     test "$USE_LIBSSH" != "1"; then
     AC_MSG_ERROR([libssh libs and/or directories were not found where specified!])
   fi
 
-  if test "$LIBSSH_ENABLED" = "1"; then
+  if test "$USE_LIBSSH" = "1"; then
     if test "$curl_cv_native_windows" = "yes"; then
       dnl for if_nametoindex
       LIBS="-liphlpapi $LIBS"
