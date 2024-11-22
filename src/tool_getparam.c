@@ -2820,6 +2820,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
     memcpy(_acmdln, tcmdln, acmdln_siz);
     (void)MultiByteToWideChar(CP_ACP, 0, tcmdln, -1, _wcmdln, (int)wcmdln_siz);
 #endif
+    free(tcmdln);
   }
 #endif
 
