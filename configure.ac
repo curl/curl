@@ -3055,9 +3055,8 @@ if test X"$want_nghttp2" != Xno; then
     [
       AC_CHECK_HEADERS(nghttp2/nghttp2.h,
         curl_h2_msg="enabled (nghttp2)"
-        NGHTTP2_ENABLED=1
         AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
-        USE_NGHTTP2=1  # DUPE: NGHTTP2_ENABLED
+        USE_NGHTTP2=1
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libnghttp2"
       )
 
