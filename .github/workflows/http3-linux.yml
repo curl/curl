@@ -89,15 +89,6 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: cache quictls
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
-        id: cache-quictls-no-deprecated
-        env:
-          cache-name: cache-quictls-no-deprecated
-        with:
-          path: /home/runner/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
-
       - name: cache gnutls
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
         id: cache-gnutls
@@ -106,16 +97,6 @@ jobs:
         with:
           path: /home/runner/gnutls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
-
-      - name: cache wolfssl
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
-        id: cache-wolfssl
-        env:
-          cache-name: cache-wolfssl
-          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
-        with:
-          path: /home/runner/wolfssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
 
       - name: cache nghttp3
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
@@ -170,8 +151,7 @@ jobs:
           echo 'CC=gcc-12' >> $GITHUB_ENV
           echo 'CXX=g++-12' >> $GITHUB_ENV
 
-      - if: steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true'
-        run: |
+      - run: |
           cd $HOME
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl quictls
           cd quictls
@@ -194,8 +174,7 @@ jobs:
           make install
         name: 'build gnutls'
 
-      - if: steps.cache-wolfssl.outputs.cache-hit != 'true'
-        env:
+      - env:
           wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
         run: |
           cd $HOME
@@ -336,16 +315,6 @@ jobs:
           echo 'CXX=g++-12' >> $GITHUB_ENV
         name: 'install prereqs'
 
-      - name: cache quictls
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
-        id: cache-quictls-no-deprecated
-        env:
-          cache-name: cache-quictls-no-deprecated
-        with:
-          path: /home/runner/quictls/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.quictls-version }}
-          fail-on-cache-miss: true
-
       - name: cache gnutls
         if: matrix.build.name == 'gnutls'
         uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
@@ -355,18 +324,6 @@ jobs:
         with:
           path: /home/runner/gnutls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
-          fail-on-cache-miss: true
-
-      - name: cache wolfssl
-        if: matrix.build.name == 'wolfssl'
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
-        id: cache-wolfssl
-        env:
-          cache-name: cache-wolfssl
-          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
-        with:
-          path: /home/runner/wolfssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
           fail-on-cache-miss: true
 
       - name: cache nghttp3
@@ -399,18 +356,8 @@ jobs:
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
           fail-on-cache-miss: true
 
-      - name: cache openssl
-        if: matrix.build.name == 'openssl-quic'
-        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
-        id: cache-openssl
-        env:
-          cache-name: cache-openssl
-        with:
-          path: /home/runner/openssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.openssl-version }}
-
       - name: 'install openssl'
-        if: matrix.build.name == 'openssl-quic' && steps.cache-openssl.outputs.cache-hit != 'true'
+        if: matrix.build.name == 'openssl-quic'
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
