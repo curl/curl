@@ -669,11 +669,11 @@ AS_HELP_STRING([--disable-http],[Disable HTTP support]),
     AC_DEFINE(CURL_DISABLE_HTTP, 1, [to disable HTTP])
     disable_http="yes"
     AC_MSG_WARN([disable HTTP disables FTP over proxy, IPFS and RTSP])
-    AC_SUBST(CURL_DISABLE_HTTP, [1])
+    CURL_DISABLE_HTTP=1
     AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
-    AC_SUBST(CURL_DISABLE_IPFS, [1])
+    CURL_DISABLE_IPFS=1
     AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-    AC_SUBST(CURL_DISABLE_RTSP, [1])
+    CURL_DISABLE_RTSP=1
     dnl toggle off alt-svc too when HTTP is disabled
     AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
     AC_DEFINE(CURL_DISABLE_HSTS, 1, [disable HSTS])
@@ -697,7 +697,7 @@ AS_HELP_STRING([--disable-ftp],[Disable FTP support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_FTP, 1, [to disable FTP])
-    AC_SUBST(CURL_DISABLE_FTP, [1])
+    CURL_DISABLE_FTP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -713,7 +713,7 @@ AS_HELP_STRING([--disable-file],[Disable FILE support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_FILE, 1, [to disable FILE])
-    AC_SUBST(CURL_DISABLE_FILE, [1])
+    CURL_DISABLE_FILE=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -729,7 +729,7 @@ AS_HELP_STRING([--disable-ipfs],[Disable IPFS support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_IPFS, 1, [to disable IPFS])
-    AC_SUBST(CURL_DISABLE_IPFS, [1])
+    CURL_DISABLE_IPFS=1
     ;;
   *)
     if test x$CURL_DISABLE_HTTP = x1; then
@@ -755,7 +755,7 @@ AS_HELP_STRING([--disable-ldap],[Disable LDAP support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-    AC_SUBST(CURL_DISABLE_LDAP, [1])
+    CURL_DISABLE_LDAP=1
     ;;
   yes)
     ldap_askedfor="yes"
@@ -775,28 +775,28 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-    AC_SUBST(CURL_DISABLE_LDAPS, [1])
+    CURL_DISABLE_LDAPS=1
     ;;
   *)
     if test "x$CURL_DISABLE_LDAP" = "x1"; then
       AC_MSG_RESULT(LDAP needs to be enabled to support LDAPS)
       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      AC_SUBST(CURL_DISABLE_LDAPS, [1])
+      CURL_DISABLE_LDAPS=1
     else
       AC_MSG_RESULT(yes)
       AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
-      AC_SUBST(HAVE_LDAP_SSL, [1])
+      HAVE_LDAP_SSL=1
     fi
     ;;
   esac ],[
     if test "x$CURL_DISABLE_LDAP" = "x1"; then
       AC_MSG_RESULT(no)
       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      AC_SUBST(CURL_DISABLE_LDAPS, [1])
+      CURL_DISABLE_LDAPS=1
     else
       AC_MSG_RESULT(yes)
       AC_DEFINE(HAVE_LDAP_SSL, 1, [Use LDAPS implementation])
-      AC_SUBST(HAVE_LDAP_SSL, [1])
+      HAVE_LDAP_SSL=1
     fi ]
 )
 
@@ -876,7 +876,7 @@ if test X"$want_hyper" != Xno; then
           curl_h1_msg="enabled (Hyper)"
           HYPER_ENABLED=1
           AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
-          AC_SUBST(USE_HYPER, [1])
+          USE_HYPER=1  # DUPE: HYPER_ENABLED
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH])
@@ -896,7 +896,7 @@ fi
 if test X"$want_hyper" != Xno; then
   AC_MSG_NOTICE([Disable RTSP support with hyper])
   AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-  AC_SUBST(CURL_DISABLE_RTSP, [1])
+  CURL_DISABLE_RTSP=1
 else
   AC_MSG_CHECKING([whether to support rtsp])
   AC_ARG_ENABLE(rtsp,
@@ -906,7 +906,7 @@ AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
     no)
       AC_MSG_RESULT(no)
       AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-      AC_SUBST(CURL_DISABLE_RTSP, [1])
+      CURL_DISABLE_RTSP=1
       ;;
     *)
       if test x$CURL_DISABLE_HTTP = x1; then
@@ -934,7 +934,7 @@ AS_HELP_STRING([--disable-proxy],[Disable proxy support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_PROXY, 1, [to disable proxies])
-    AC_SUBST(CURL_DISABLE_PROXY, [1])
+    CURL_DISABLE_PROXY=1
     https_proxy="no"
     ;;
   *)
@@ -952,7 +952,7 @@ AS_HELP_STRING([--disable-dict],[Disable DICT support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_DICT, 1, [to disable DICT])
-    AC_SUBST(CURL_DISABLE_DICT, [1])
+    CURL_DISABLE_DICT=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -969,7 +969,7 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
-    AC_SUBST(CURL_DISABLE_TELNET, [1])
+    CURL_DISABLE_TELNET=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -986,7 +986,7 @@ AS_HELP_STRING([--disable-tftp],[Disable TFTP support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_TFTP, 1, [to disable TFTP])
-    AC_SUBST(CURL_DISABLE_TFTP, [1])
+    CURL_DISABLE_TFTP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1003,7 +1003,7 @@ AS_HELP_STRING([--disable-pop3],[Disable POP3 support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_POP3, 1, [to disable POP3])
-    AC_SUBST(CURL_DISABLE_POP3, [1])
+    CURL_DISABLE_POP3=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1020,7 +1020,7 @@ AS_HELP_STRING([--disable-imap],[Disable IMAP support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_IMAP, 1, [to disable IMAP])
-    AC_SUBST(CURL_DISABLE_IMAP, [1])
+    CURL_DISABLE_IMAP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1037,7 +1037,7 @@ AS_HELP_STRING([--disable-smb],[Disable SMB/CIFS support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_SMB, 1, [to disable SMB/CIFS])
-    AC_SUBST(CURL_DISABLE_SMB, [1])
+    CURL_DISABLE_SMB=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1054,7 +1054,7 @@ AS_HELP_STRING([--disable-smtp],[Disable SMTP support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_SMTP, 1, [to disable SMTP])
-    AC_SUBST(CURL_DISABLE_SMTP, [1])
+    CURL_DISABLE_SMTP=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1071,7 +1071,7 @@ AS_HELP_STRING([--disable-gopher],[Disable Gopher support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_GOPHER, 1, [to disable Gopher])
-    AC_SUBST(CURL_DISABLE_GOPHER, [1])
+    CURL_DISABLE_GOPHER=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1088,7 +1088,7 @@ AS_HELP_STRING([--disable-mqtt],[Disable MQTT support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_MQTT, 1, [to disable MQTT])
-    AC_SUBST(CURL_DISABLE_MQTT, [1])
+    CURL_DISABLE_MQTT=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -1702,9 +1702,11 @@ if test x$CURL_DISABLE_LDAP != x1; then
       fi
       AC_MSG_WARN(["$LDAPLIBNAME" is not an LDAP library: LDAP disabled])
       AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-      AC_SUBST(CURL_DISABLE_LDAP, [1])
+      CURL_DISABLE_LDAP=1
       AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-      AC_SUBST(CURL_DISABLE_LDAPS, [1])])
+      CURL_DISABLE_LDAPS=1
+      ]
+    )
   else
     dnl Try to find the right ldap libraries for this system
     CURL_CHECK_LIBS_LDAP
@@ -1715,9 +1717,9 @@ if test x$CURL_DISABLE_LDAP != x1; then
         fi
         AC_MSG_WARN([Cannot find libraries for LDAP support: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        AC_SUBST(CURL_DISABLE_LDAP, [1])
+        CURL_DISABLE_LDAP=1
         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        AC_SUBST(CURL_DISABLE_LDAPS, [1])
+        CURL_DISABLE_LDAPS=1
         ;;
     esac
   fi
@@ -1732,9 +1734,11 @@ if test x$CURL_DISABLE_LDAP != x1; then
       AC_CHECK_LIB("$LBERLIBNAME", ber_free,, [
         AC_MSG_WARN(["$LBERLIBNAME" is not an LBER library: LDAP disabled])
         AC_DEFINE(CURL_DISABLE_LDAP, 1, [to disable LDAP])
-        AC_SUBST(CURL_DISABLE_LDAP, [1])
+        CURL_DISABLE_LDAP=1
         AC_DEFINE(CURL_DISABLE_LDAPS, 1, [to disable LDAPS])
-        AC_SUBST(CURL_DISABLE_LDAPS, [1])])
+        CURL_DISABLE_LDAPS=1
+        ]
+      )
     fi
   fi
 fi
@@ -1750,7 +1754,7 @@ if test x$CURL_DISABLE_LDAP != x1; then
     if test "x$ac_cv_func_ldap_init_fd" = "xyes"; then
       curl_ldap_msg="enabled (OpenLDAP)"
       AC_DEFINE(USE_OPENLDAP, 1, [Use OpenLDAP-specific code])
-      AC_SUBST(USE_OPENLDAP, [1])
+      USE_OPENLDAP=1
     else
       curl_ldap_msg="enabled (ancient OpenLDAP)"
     fi
@@ -2297,7 +2301,7 @@ if test X"$OPT_LIBPSL" != Xno; then
         curl_psl_msg="enabled"
         LIBPSL_ENABLED=1
         AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
-        AC_SUBST(USE_LIBPSL, [1])
+        USE_LIBPSL=1  # DUPE: LIBPSL_ENABLED
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libpsl"
       )
     ],
@@ -2414,7 +2418,7 @@ if test X"$OPT_LIBSSH2" != Xno; then
     curl_ssh_msg="enabled (libssh2)"
     LIBSSH2_ENABLED=1
     AC_DEFINE(USE_LIBSSH2, 1, [if libssh2 is in use])
-    AC_SUBST(USE_LIBSSH2, [1])
+    USE_LIBSSH2=1  # DUPE: LIBSSH2_ENABLED
   )
 
   if test X"$OPT_LIBSSH2" != Xoff &&
@@ -2491,7 +2495,7 @@ elif test X"$OPT_LIBSSH" != Xno; then
     curl_ssh_msg="enabled (libssh)"
     LIBSSH_ENABLED=1
     AC_DEFINE(USE_LIBSSH, 1, [if libssh is in use])
-    AC_SUBST(USE_LIBSSH, [1])
+    USE_LIBSSH=1  # DUPE: LIBSSH_ENABLED
   )
 
   if test X"$OPT_LIBSSH" != Xoff &&
@@ -2544,7 +2548,7 @@ elif test X"$OPT_WOLFSSH" != Xno; then
     curl_ssh_msg="enabled (wolfSSH)"
     WOLFSSH_ENABLED=1
     AC_DEFINE(USE_WOLFSSH, 1, [if wolfSSH is in use])
-    AC_SUBST(USE_WOLFSSH, [1])
+    USE_WOLFSSH=1  # DUPE: WOLFSSH_ENABLED
   )
 fi
 
@@ -2613,7 +2617,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
         curl_rtmp_msg="enabled (librtmp)"
         LIBRTMP_ENABLED=1
         AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
-        AC_SUBST(USE_LIBRTMP, [1])
+        USE_LIBRTMP=1  # DUPE: LIBRTMP_ENABLED
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE librtmp"
       )
     ],
@@ -2790,7 +2794,7 @@ AS_HELP_STRING([--without-winidn], [disable Windows native IDN]),
     #
     if test "$tst_links_winidn" = "yes"; then
       AC_DEFINE(USE_WIN32_IDN, 1, [Define to 1 if you have the `normaliz' (WinIDN) library (-lnormaliz).])
-      AC_SUBST([IDN_ENABLED], [1])
+      IDN_ENABLED=1
       curl_idn_msg="enabled (Windows-native)"
     else
       AC_MSG_WARN([Cannot find libraries for IDN support: IDN disabled])
@@ -2824,8 +2828,8 @@ AS_HELP_STRING([--without-apple-idn],[Disable AppleIDN]),
           AC_CHECK_HEADERS(unicode/uidna.h,
             curl_idn_msg="enabled (AppleIDN)"
             AC_DEFINE(USE_APPLE_IDN, 1, [if AppleIDN])
-            AC_SUBST(USE_APPLE_IDN, [1])
-            AC_SUBST([IDN_ENABLED], [1])
+            USE_APPLE_IDN=1
+            IDN_ENABLED=1
             LIBS="-licucore -liconv $LIBS"
             tst_links_appleidn='yes'
           )
@@ -2957,7 +2961,7 @@ if test "$want_idn" = "yes"; then
     AC_DEFINE(HAVE_LIBIDN2, 1, [Define to 1 if you have the `idn2' library (-lidn2).])
     dnl different versions of libidn have different setups of these:
 
-    AC_SUBST([IDN_ENABLED], [1])
+    IDN_ENABLED=1
     curl_idn_msg="enabled (libidn2)"
     if test -n "$IDN_DIR" -a "x$cross_compiling" != "xyes"; then
       CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$IDN_DIR"
@@ -3058,7 +3062,7 @@ if test X"$want_nghttp2" != Xno; then
         curl_h2_msg="enabled (nghttp2)"
         NGHTTP2_ENABLED=1
         AC_DEFINE(USE_NGHTTP2, 1, [if nghttp2 is in use])
-        AC_SUBST(USE_NGHTTP2, [1])
+        USE_NGHTTP2=1  # DUPE: NGHTTP2_ENABLED
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libnghttp2"
       )
 
@@ -3147,7 +3151,7 @@ if test X"$want_tcp2" != Xno; then
         AC_CHECK_HEADERS(ngtcp2/ngtcp2.h,
           NGTCP2_ENABLED=1
           AC_DEFINE(USE_NGTCP2, 1, [if ngtcp2 is in use])
-          AC_SUBST(USE_NGTCP2, [1])
+          USE_NGTCP2=1  # DUPE: NGTCP2_ENABLED
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
@@ -3435,7 +3439,7 @@ if test "x$want_openssl_quic" = "xyes"; then
     AC_MSG_ERROR([--with-openssl-quic requires quic support and OpenSSL >= 3.3.0])
   fi
   AC_DEFINE(USE_OPENSSL_QUIC, 1, [if openssl QUIC is in use])
-  AC_SUBST(USE_OPENSSL_QUIC, [1])
+  USE_OPENSSL_QUIC=1
 fi
 
 dnl **********************************************************************
@@ -3512,7 +3516,7 @@ if test X"$want_nghttp3" != Xno; then
       [
         AC_CHECK_HEADERS(nghttp3/nghttp3.h,
           AC_DEFINE(USE_NGHTTP3, 1, [if nghttp3 is in use])
-          AC_SUBST(USE_NGHTTP3, [1])
+          USE_NGHTTP3=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGHTTP3"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGHTTP3 to CURL_LIBRARY_PATH])
@@ -3636,7 +3640,7 @@ if test X"$want_quiche" != Xno; then
           curl_h3_msg="enabled (quiche)"
           QUICHE_ENABLED=1
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
-          AC_SUBST(USE_QUICHE, [1])
+          USE_QUICHE=1  # DUPE: QUICHE_ENABLED
           AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
           export CURL_LIBRARY_PATH
@@ -3735,7 +3739,7 @@ if test X"$want_msh3" != Xno; then
         curl_h3_msg="enabled (msh3)"
         MSH3_ENABLED=1
         AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
-        AC_SUBST(USE_MSH3, [1])
+        USE_MSH3=1  # DUPE: MSH3_ENABLED
         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
         export CURL_LIBRARY_PATH
         AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
@@ -3819,7 +3823,7 @@ if test X"$want_libuv" != Xno; then
         AC_CHECK_HEADERS(uv.h,
           LIBUV_ENABLED=1
           AC_DEFINE(USE_LIBUV, 1, [if libuv is in use])
-          AC_SUBST(USE_LIBUV, [1])
+          USE_LIBUV=1  # DUPE: LIBUV_ENABLED
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_LIBUV"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_LIBUV to CURL_LIBRARY_PATH])
@@ -4393,7 +4397,7 @@ AS_HELP_STRING([--disable-sspi],[Disable SSPI]),
     if test "$curl_cv_native_windows" = "yes"; then
       AC_MSG_RESULT(yes)
       AC_DEFINE(USE_WINDOWS_SSPI, 1, [to enable SSPI support])
-      AC_SUBST(USE_WINDOWS_SSPI, [1])
+      USE_WINDOWS_SSPI=1
       curl_sspi_msg="enabled"
     else
       AC_MSG_RESULT(no)
@@ -4613,7 +4617,7 @@ if test "x$want_unix_sockets" != "xno"; then
   else
     AC_CHECK_MEMBER([struct sockaddr_un.sun_path], [
       AC_DEFINE(USE_UNIX_SOCKETS, 1, [Use Unix domain sockets])
-      AC_SUBST(USE_UNIX_SOCKETS, [1])
+      USE_UNIX_SOCKETS=1
       curl_unix_sockets_msg="enabled"
     ], [
       if test "x$want_unix_sockets" = "xyes"; then
@@ -5021,7 +5025,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
     no)
       AC_MSG_RESULT(no)
       AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-      AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+      CURL_DISABLE_WEBSOCKETS=1
       ;;
     *)
       if test ${ac_cv_sizeof_curl_off_t} -gt 4; then
@@ -5031,7 +5035,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
         AC_MSG_RESULT(no)
         AC_MSG_WARN([WebSockets disabled due to lack of >32 bit curl_off_t])
         AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-        AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+        CURL_DISABLE_WEBSOCKETS=1
       fi
       ;;
     esac ],
@@ -5040,7 +5044,7 @@ if test "x$CURL_DISABLE_HTTP" != "x1"; then
 else
   AC_MSG_WARN([WebSockets disabled because HTTP is disabled])
   AC_DEFINE(CURL_DISABLE_WEBSOCKETS, [1], [disable WebSockets])
-  AC_SUBST(CURL_DISABLE_WEBSOCKETS, [1])
+  CURL_DISABLE_WEBSOCKETS=1
 fi
 
 dnl ************************************************************
