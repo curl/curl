@@ -3143,9 +3143,8 @@ if test X"$want_tcp2" != Xno; then
     AC_CHECK_LIB(ngtcp2, ngtcp2_conn_client_new_versioned,
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2.h,
-          NGTCP2_ENABLED=1
           AC_DEFINE(USE_NGTCP2, 1, [if ngtcp2 is in use])
-          USE_NGTCP2=1  # DUPE: NGTCP2_ENABLED
+          USE_NGTCP2=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_TCP2"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_TCP2 to CURL_LIBRARY_PATH])
@@ -3169,7 +3168,7 @@ if test X"$want_tcp2" != Xno; then
   fi
 fi
 
-if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BORINGSSL" != "x1"; then
+if test "x$USE_NGTCP2" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BORINGSSL" != "x1"; then
   dnl backup the pre-ngtcp2_crypto_quictls variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3202,7 +3201,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
     AC_CHECK_LIB(ngtcp2_crypto_quictls, ngtcp2_crypto_recv_client_initial_cb,
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
-          NGTCP2_ENABLED=1
+          USE_NGTCP2=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_QUICTLS"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_QUICTLS to CURL_LIBRARY_PATH])
@@ -3226,7 +3225,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
   fi
 fi
 
-if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BORINGSSL" = "x1"; then
+if test "x$USE_NGTCP2" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS_BORINGSSL" = "x1"; then
   dnl backup the pre-ngtcp2_crypto_boringssl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3259,7 +3258,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
     AC_CHECK_LIB(ngtcp2_crypto_boringssl, ngtcp2_crypto_recv_client_initial_cb,
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
-          NGTCP2_ENABLED=1
+          USE_NGTCP2=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_BORINGSSL"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_BORINGSSL to CURL_LIBRARY_PATH])
@@ -3283,7 +3282,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$OPENSSL_ENABLED" = "x1" -a "x$OPENSSL_IS
   fi
 fi
 
-if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
+if test "x$USE_NGTCP2" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
   dnl backup the pre-ngtcp2_crypto_gnutls variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3316,7 +3315,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
     AC_CHECK_LIB(ngtcp2_crypto_gnutls, ngtcp2_crypto_recv_client_initial_cb,
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
-          NGTCP2_ENABLED=1
+          USE_NGTCP2=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_GNUTLS"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_GNUTLS to CURL_LIBRARY_PATH])
@@ -3340,7 +3339,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$GNUTLS_ENABLED" = "x1"; then
   fi
 fi
 
-if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
+if test "x$USE_NGTCP2" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
   dnl backup the pre-ngtcp2_crypto_wolfssl variables
   CLEANLDFLAGS="$LDFLAGS"
   CLEANLDFLAGSPC="$LDFLAGSPC"
@@ -3373,7 +3372,7 @@ if test "x$NGTCP2_ENABLED" = "x1" -a "x$WOLFSSL_ENABLED" = "x1"; then
     AC_CHECK_LIB(ngtcp2_crypto_wolfssl, ngtcp2_crypto_recv_client_initial_cb,
       [
         AC_CHECK_HEADERS(ngtcp2/ngtcp2_crypto.h,
-          NGTCP2_ENABLED=1
+          USE_NGTCP2=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_NGTCP2_CRYPTO_WOLFSSL"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_NGTCP2_CRYPTO_WOLFSSL to CURL_LIBRARY_PATH])
@@ -3426,7 +3425,7 @@ esac
 curl_openssl_quic_msg="no      (--with-openssl-quic)"
 if test "x$want_openssl_quic" = "xyes"; then
 
-  if test "$NGTCP2_ENABLED" = 1; then
+  if test "$USE_NGTCP2" = 1; then
     AC_MSG_ERROR([--with-openssl-quic and --with-ngtcp2 are mutually exclusive])
   fi
   if test "$have_openssl_quic" != 1; then
@@ -3538,7 +3537,7 @@ dnl **********************************************************************
 dnl Check for ngtcp2 and nghttp3 (HTTP/3 with ngtcp2 + nghttp3)
 dnl **********************************************************************
 
-if test "x$NGTCP2_ENABLED" = "x1" -a "x$USE_NGHTTP3" = "x1"; then
+if test "x$USE_NGTCP2" = "x1" -a "x$USE_NGHTTP3" = "x1"; then
   USE_NGTCP2_H3=1
   AC_MSG_NOTICE([HTTP3 support is experimental])
   curl_h3_msg="enabled (ngtcp2 + nghttp3)"
