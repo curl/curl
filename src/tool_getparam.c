@@ -2814,11 +2814,11 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
     size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
 #ifdef UNICODE
     memcpy(_wcmdln, tcmdln, wcmdln_siz);
-    (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1, _acmdln, (int)acmdln_siz,
+    (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1, _acmdln, (int)acmdln_len,
                               NULL, NULL);
 #else
     memcpy(_acmdln, tcmdln, acmdln_siz);
-    (void)MultiByteToWideChar(CP_ACP, 0, tcmdln, -1, _wcmdln, (int)wcmdln_siz);
+    (void)MultiByteToWideChar(CP_ACP, 0, tcmdln, -1, _wcmdln, (int)wcmdln_len);
 #endif
     free(tcmdln);
   }
