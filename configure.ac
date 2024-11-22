@@ -876,7 +876,7 @@ if test X"$want_hyper" != Xno; then
           curl_h1_msg="enabled (Hyper)"
           HYPER_ENABLED=1
           AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
-          USE_HYPER=1  # DUPE: HYPER_ENABLED
+          AC_SUBST(USE_HYPER, [1])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH])
