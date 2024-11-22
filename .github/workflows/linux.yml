@@ -356,7 +356,7 @@ jobs:
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz
           tar -xzf libressl-${{ env.libressl-version }}.tar.gz
           cd libressl-${{ env.libressl-version }}
-          ./configure --disable-dependency-tracking --prefix=$HOME/libressl --disable-tests
+          ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
       - name: 'build wolfssl (all)'
