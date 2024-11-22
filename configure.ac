@@ -2299,9 +2299,8 @@ if test X"$OPT_LIBPSL" != Xno; then
     [
       AC_CHECK_HEADERS(libpsl.h,
         curl_psl_msg="enabled"
-        LIBPSL_ENABLED=1
         AC_DEFINE(USE_LIBPSL, 1, [if libpsl is in use])
-        USE_LIBPSL=1  # DUPE: LIBPSL_ENABLED
+        USE_LIBPSL=1
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libpsl"
       )
     ],
@@ -2312,7 +2311,7 @@ if test X"$OPT_LIBPSL" != Xno; then
       LIBS=$CLEANLIBS
   )
 
-  if test "$LIBPSL_ENABLED" != "1"; then
+  if test "$USE_LIBPSL" != "1"; then
     AC_MSG_ERROR([libpsl libs and/or directories were not found where specified!])
   fi
 fi
