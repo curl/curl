@@ -2611,9 +2611,8 @@ if test X"$OPT_LIBRTMP" != Xno; then
     [
       AC_CHECK_HEADERS(librtmp/rtmp.h,
         curl_rtmp_msg="enabled (librtmp)"
-        LIBRTMP_ENABLED=1
         AC_DEFINE(USE_LIBRTMP, 1, [if librtmp is in use])
-        USE_LIBRTMP=1  # DUPE: LIBRTMP_ENABLED
+        USE_LIBRTMP=1
         LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE librtmp"
       )
     ],
@@ -2625,7 +2624,7 @@ if test X"$OPT_LIBRTMP" != Xno; then
   )
 
   if test X"$OPT_LIBRTMP" != Xoff &&
-     test "$LIBRTMP_ENABLED" != "1"; then
+     test "$USE_LIBRTMP" != "1"; then
     AC_MSG_ERROR([librtmp libs and/or directories were not found where specified!])
   fi
 fi
