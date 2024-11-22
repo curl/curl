@@ -1368,7 +1368,9 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
          state machine to move on as soon as possible so we set a very short
          timeout here */
       Curl_expire(data, 0, EXPIRE_RUN_NOW);
-
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      sshc->sftp_send_state = 0;
+#endif
       state(data, SSH_STOP);
       break;
     }
@@ -1772,6 +1774,13 @@ static CURLcode myssh_statemach_act(struct Curl_easy *data, bool *block)
       /* during times we get here due to a broken transfer and then the
          sftp_handle might not have been taken down so make sure that is done
          before we proceed */
+      ssh_set_blocking(sshc->ssh_session, 0);
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+      if(sshc->sftp_aio) {
+        sftp_aio_free(sshc->sftp_aio);
+        sshc->sftp_aio = NULL;
+      }
+#endif
 
       if(sshc->sftp_file) {
         sftp_close(sshc->sftp_file);
@@ -2570,7 +2579,39 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
    */
   if(len > 32768)
     len = 32768;
-
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+  switch(conn->proto.sshc.sftp_send_state) {
+    case 0:
+      sftp_file_set_nonblocking(conn->proto.sshc.sftp_file);
+      if(sftp_aio_begin_write(conn->proto.sshc.sftp_file, mem, len,
+                              &conn->proto.sshc.sftp_aio) == SSH_ERROR) {
+        *err = CURLE_SEND_ERROR;
+        return -1;
+      }
+      conn->proto.sshc.sftp_send_state = 1;
+      FALLTHROUGH();
+    case 1:
+      nwrite = sftp_aio_wait_write(&conn->proto.sshc.sftp_aio);
+      myssh_block2waitfor(conn, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
+      if(nwrite == SSH_AGAIN) {
+        *err = CURLE_AGAIN;
+        return 0;
+      }
+      else if(nwrite < 0) {
+        *err = CURLE_SEND_ERROR;
+        return -1;
+      }
+      if(conn->proto.sshc.sftp_aio) {
+        sftp_aio_free(conn->proto.sshc.sftp_aio);
+        conn->proto.sshc.sftp_aio = NULL;
+      }
+      conn->proto.sshc.sftp_send_state = 0;
+      return nwrite;
+    default:
+      /* we never reach here */
+      return -1;
+  }
+#else
   nwrite = sftp_write(conn->proto.sshc.sftp_file, mem, len);
 
   myssh_block2waitfor(conn, FALSE);
@@ -2588,6 +2629,7 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
   }
 
   return nwrite;
+#endif
 }
 
 /*
