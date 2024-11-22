@@ -213,6 +213,11 @@ static CURLcode rtsp_done(struct Curl_easy *data,
        (data->conn->proto.rtspc.rtp_channel == -1)) {
       infof(data, "Got an RTP Receive with a CSeq of %ld", CSeq_recv);
     }
+    if(data->set.rtspreq == RTSPREQ_RECEIVE &&
+       data->req.eos_written) {
+      failf(data, "Server prematurely closed the RTSP connection.");
+      return CURLE_RECV_ERROR;
+    }
   }
 
   return httpStatus;
