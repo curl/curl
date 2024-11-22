@@ -2810,14 +2810,12 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
 
 #ifdef HAVE_WIN32_ACMDLN
   if(tcmdln) {
-    size_t acmdln_siz = acmdln_len * sizeof(char);
-    size_t wcmdln_siz = wcmdln_len * sizeof(wchar_t);
 #ifdef UNICODE
-    memcpy(_wcmdln, tcmdln, wcmdln_siz);
+    memcpy(_wcmdln, tcmdln, wcmdln_len * sizeof(wchar_t));
     (void)WideCharToMultiByte(CP_ACP, 0, tcmdln, -1, _acmdln, (int)acmdln_len,
                               NULL, NULL);
 #else
-    memcpy(_acmdln, tcmdln, acmdln_siz);
+    memcpy(_acmdln, tcmdln, acmdln_len * sizeof(char));
     (void)MultiByteToWideChar(CP_ACP, 0, tcmdln, -1, _wcmdln, (int)wcmdln_len);
 #endif
     free(tcmdln);
