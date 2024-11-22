@@ -3631,9 +3631,8 @@ if test X"$want_quiche" != Xno; then
           experimental="$experimental HTTP3"
           AC_MSG_NOTICE([HTTP3 support is experimental])
           curl_h3_msg="enabled (quiche)"
-          QUICHE_ENABLED=1
           AC_DEFINE(USE_QUICHE, 1, [if quiche is in use])
-          USE_QUICHE=1  # DUPE: QUICHE_ENABLED
+          USE_QUICHE=1
           AC_CHECK_FUNCS([quiche_conn_set_qlog_fd])
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_QUICHE"
           export CURL_LIBRARY_PATH
@@ -3706,7 +3705,7 @@ if test X"$want_msh3" != Xno; then
   if test "$NGHTTP3_ENABLED" = 1; then
     AC_MSG_ERROR([--with-msh3 and --with-ngtcp2 are mutually exclusive])
   fi
-  if test "$QUICHE_ENABLED" = 1; then
+  if test "$USE_QUICHE" = 1; then
     AC_MSG_ERROR([--with-msh3 and --with-quiche are mutually exclusive])
   fi
 
