@@ -177,6 +177,10 @@ struct ssh_conn {
   sftp_dir sftp_dir;
 
   unsigned sftp_recv_state; /* 0 or 1 */
+#if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
+  sftp_aio sftp_aio;
+  unsigned sftp_send_state; /* 0 or 1 */
+#endif
   int sftp_file_index; /* for async read */
   sftp_attributes readdir_attrs; /* used by the SFTP readdir actions */
   sftp_attributes readdir_link_attrs; /* used by the SFTP readdir actions */
