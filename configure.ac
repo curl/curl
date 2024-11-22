@@ -2543,9 +2543,8 @@ elif test X"$OPT_WOLFSSH" != Xno; then
 
   AC_CHECK_HEADERS(wolfssh/ssh.h,
     curl_ssh_msg="enabled (wolfSSH)"
-    WOLFSSH_ENABLED=1
     AC_DEFINE(USE_WOLFSSH, 1, [if wolfSSH is in use])
-    USE_WOLFSSH=1  # DUPE: WOLFSSH_ENABLED
+    USE_WOLFSSH=1
   )
 fi
 
