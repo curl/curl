@@ -3589,6 +3589,14 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
       }
     }
   }
+  else {
+    /* Asked to run due to time-out. Clear the 'last_expire_ts' variable to
+       force Curl_update_timer() to trigger a callback to the app again even
+       if the same timeout is still the one to run after this call. That
+       handles the case when the application asks libcurl to run the timeout
+       prematurely. */
+    memset(&multi->last_expire_ts, 0, sizeof(multi->last_expire_ts));
+  }
 
   result = multi_run_expired(&mrc);
   if(result)
