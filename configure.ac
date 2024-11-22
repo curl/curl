@@ -2415,17 +2415,16 @@ if test X"$OPT_LIBSSH2" != Xno; then
 
   AC_CHECK_HEADER(libssh2.h,
     curl_ssh_msg="enabled (libssh2)"
-    LIBSSH2_ENABLED=1
     AC_DEFINE(USE_LIBSSH2, 1, [if libssh2 is in use])
-    USE_LIBSSH2=1  # DUPE: LIBSSH2_ENABLED
+    USE_LIBSSH2=1
   )
 
   if test X"$OPT_LIBSSH2" != Xoff &&
-     test "$LIBSSH2_ENABLED" != "1"; then
+     test "$USE_LIBSSH2" != "1"; then
     AC_MSG_ERROR([libssh2 libs and/or directories were not found where specified!])
   fi
 
-  if test "$LIBSSH2_ENABLED" = "1"; then
+  if test "$USE_LIBSSH2" = "1"; then
     if test -n "$DIR_SSH2"; then
       dnl when the libssh2 shared libs were found in a path that the run-time
       dnl linker doesn't search through, we need to add it to CURL_LIBRARY_PATH
