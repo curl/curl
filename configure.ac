@@ -3729,9 +3729,8 @@ if test X"$want_msh3" != Xno; then
     [
       AC_CHECK_HEADERS(msh3.h,
         curl_h3_msg="enabled (msh3)"
-        MSH3_ENABLED=1
         AC_DEFINE(USE_MSH3, 1, [if msh3 is in use])
-        USE_MSH3=1  # DUPE: MSH3_ENABLED
+        USE_MSH3=1
         CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_MSH3"
         export CURL_LIBRARY_PATH
         AC_MSG_NOTICE([Added $DIR_MSH3 to CURL_LIBRARY_PATH])
