@@ -350,8 +350,18 @@ jobs:
           cp inc/*.h $HOME/bearssl/include
           cp build/libbearssl.* $HOME/bearssl/lib
 
-      - name: 'build libressl'
+      - name: 'cache libressl'
         if: contains(matrix.build.install_steps, 'libressl')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-libressl
+        env:
+          cache-name: cache-libressl
+        with:
+          path: /home/runner/libressl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.libressl-version }}
+
+      - name: 'build libressl'
+        if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz
           tar -xzf libressl-${{ env.libressl-version }}.tar.gz
@@ -359,8 +369,18 @@ jobs:
           ./configure --disable-dependency-tracking --prefix=$HOME/libressl
           make install
 
-      - name: 'build wolfssl (all)'
+      - name: 'cache wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-wolfssl-all
+        env:
+          cache-name: cache-wolfssl-all
+        with:
+          path: /home/runner/wolfssl-all
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+
+      - name: 'build wolfssl (all)'
+        if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
@@ -370,8 +390,18 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-all
           make install
 
-      - name: 'build wolfssl (opensslextra)'
+      - name: 'cache wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-wolfssl-opensslextra
+        env:
+          cache-name: cache-wolfssl-opensslextra
+        with:
+          path: /home/runner/wolfssl-opensslextra
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
+
+      - name: 'build wolfssl (opensslextra)'
+        if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
@@ -404,16 +434,36 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'build openssl (thread sanitizer)'
+      - name: 'cache openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-openssl-tsan
+        env:
+          cache-name: cache-openssl-tsan
+        with:
+          path: /home/runner/openssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl-version }}
+
+      - name: 'build openssl (thread sanitizer)'
+        if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
           CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
           make -j1 install_sw
 
-      - name: 'build quictls'
+      - name: 'cache quictls'
         if: contains(matrix.build.install_steps, 'quictls')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-quictls
+        env:
+          cache-name: cache-quictls
+        with:
+          path: /home/runner/quictls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
+
+      - name: 'build quictls'
+        if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
           cd openssl
@@ -439,8 +489,18 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'build awslc'
+      - name: 'cache awslc'
         if: contains(matrix.build.install_steps, 'awslc')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-awslc
+        env:
+          cache-name: cache-awslc
+        with:
+          path: /home/runner/awslc
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.awslc-version }}
+
+      - name: 'build awslc'
+        if: contains(matrix.build.install_steps, 'awslc') && steps.cache-awslc.outputs.cache-hit != 'true'
         run: |
           curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
             https://github.com/awslabs/aws-lc/archive/refs/tags/v${{ env.awslc-version }}.tar.gz
