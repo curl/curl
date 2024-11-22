@@ -3812,9 +3812,8 @@ if test X"$want_libuv" != Xno; then
     AC_CHECK_LIB(uv, uv_default_loop,
       [
         AC_CHECK_HEADERS(uv.h,
-          LIBUV_ENABLED=1
           AC_DEFINE(USE_LIBUV, 1, [if libuv is in use])
-          USE_LIBUV=1  # DUPE: LIBUV_ENABLED
+          USE_LIBUV=1
           CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_LIBUV"
           export CURL_LIBRARY_PATH
           AC_MSG_NOTICE([Added $DIR_LIBUV to CURL_LIBRARY_PATH])
