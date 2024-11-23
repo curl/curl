@@ -54,7 +54,7 @@ env:
   # handled in renovate.json
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=rustls/rustls-ffi versioning=semver registryUrl=https://github.com
-  rustls-version: 0.14.0
+  rustls-version: 0.14.1
 
 jobs:
   linux:
