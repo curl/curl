@@ -572,35 +572,6 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
   fi
 ])
 
-
-dnl CURL_CHECK_NTLM_WB
-dnl -------------------------------------------------
-dnl Check if support for NTLM delegation to winbind's
-dnl ntlm_auth helper will finally be enabled depending
-dnl on given configure options and target platform.
-
-AC_DEFUN([CURL_CHECK_NTLM_WB], [
-  AC_REQUIRE([CURL_CHECK_OPTION_NTLM_WB])dnl
-  AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_MSG_CHECKING([whether to enable NTLM delegation to winbind's helper])
-  if test "$curl_cv_native_windows" = "yes" ||
-    test "x$SSL_ENABLED" = "x"; then
-    want_ntlm_wb_file=""
-    want_ntlm_wb="no"
-  elif test "x$ac_cv_func_fork" != "xyes"; then
-    dnl ntlm_wb requires fork
-    want_ntlm_wb="no"
-  fi
-  AC_MSG_RESULT([$want_ntlm_wb])
-  if test "$want_ntlm_wb" = "yes"; then
-    AC_DEFINE(NTLM_WB_ENABLED, 1,
-      [Define to enable NTLM delegation to winbind's ntlm_auth helper.])
-    AC_DEFINE_UNQUOTED(NTLM_WB_FILE, "$want_ntlm_wb_file",
-      [Define absolute filename for winbind's ntlm_auth helper.])
-    NTLM_WB_ENABLED=1
-  fi
-])
-
 dnl CURL_CHECK_OPTION_HTTPSRR
 dnl -----------------------------------------------------
 dnl Verify whether configure has been invoked with option
