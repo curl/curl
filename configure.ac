@@ -2138,8 +2138,8 @@ CURL_WITH_WOLFSSL
 CURL_WITH_BEARSSL
 CURL_WITH_RUSTLS
 
-dnl link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
-if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$USE_SCHANNEL" = "x1"; then
+dnl link required libraries for USE_WIN32_CRYPTO or SCHANNEL_ENABLED
+if test "x$USE_WIN32_CRYPTO" = "x1" -o "x$SCHANNEL_ENABLED" = "x1"; then
   LIBS="-ladvapi32 -lcrypt32 $LIBS"
 fi
 

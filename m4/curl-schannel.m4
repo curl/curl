@@ -30,7 +30,6 @@ if test "x$OPT_SCHANNEL" != xno; then
      test "x$curl_cv_native_windows" = "xyes"; then
     AC_MSG_RESULT(yes)
     AC_DEFINE(USE_SCHANNEL, 1, [to enable Windows native SSL/TLS support])
-    USE_SCHANNEL=1  dnl DUPE
     ssl_msg="Schannel"
     test schannel != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
     SCHANNEL_ENABLED=1
