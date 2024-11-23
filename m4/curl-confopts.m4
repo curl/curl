@@ -572,40 +572,6 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
   fi
 ])
 
-dnl CURL_CHECK_OPTION_NTLM_WB
-dnl -------------------------------------------------
-dnl Verify if configure has been invoked with option
-dnl --enable-ntlm-wb or --disable-ntlm-wb, and set
-dnl shell variable want_ntlm_wb and want_ntlm_wb_file
-dnl as appropriate.
-
-AC_DEFUN([CURL_CHECK_OPTION_NTLM_WB], [
-  AC_BEFORE([$0],[CURL_CHECK_NTLM_WB])dnl
-  OPT_NTLM_WB="default"
-  AC_ARG_ENABLE(ntlm-wb,
-AS_HELP_STRING([--enable-ntlm-wb@<:@=FILE@:>@],[Enable NTLM delegation to winbind's ntlm_auth helper, where FILE is ntlm_auth's absolute filename (default: /usr/bin/ntlm_auth)])
-AS_HELP_STRING([--disable-ntlm-wb],[Disable NTLM delegation to winbind's ntlm_auth helper]),
-  OPT_NTLM_WB=$enableval)
-  want_ntlm_wb_file="/usr/bin/ntlm_auth"
-  case "$OPT_NTLM_WB" in
-    no)
-      dnl --disable-ntlm-wb option used
-      want_ntlm_wb="no"
-      ;;
-    default)
-      dnl configure option not specified
-      want_ntlm_wb="yes"
-      ;;
-    *)
-      dnl --enable-ntlm-wb option used
-      want_ntlm_wb="yes"
-      if test -n "$enableval" && test "$enableval" != "yes"; then
-        want_ntlm_wb_file="$enableval"
-      fi
-      ;;
-  esac
-])
-
 
 dnl CURL_CHECK_NTLM_WB
 dnl -------------------------------------------------
