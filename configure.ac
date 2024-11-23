@@ -4422,7 +4422,6 @@ AS_HELP_STRING([--disable-basic-auth],[Disable basic authentication]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_BASIC_AUTH, 1, [to disable basic authentication])
-    CURL_DISABLE_BASIC_AUTH=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4442,7 +4441,6 @@ AS_HELP_STRING([--disable-bearer-auth],[Disable bearer authentication]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_BEARER_AUTH, 1, [to disable bearer authentication])
-    CURL_DISABLE_BEARER_AUTH=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4462,7 +4460,6 @@ AS_HELP_STRING([--disable-digest-auth],[Disable digest authentication]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_DIGEST_AUTH, 1, [to disable digest authentication])
-    CURL_DISABLE_DIGEST_AUTH=1
     ;;
   *)
     AC_MSG_RESULT(yes)
@@ -4522,7 +4519,6 @@ AS_HELP_STRING([--disable-aws],[Disable AWS sig support]),
   no)
     AC_MSG_RESULT(no)
     AC_DEFINE(CURL_DISABLE_AWS, 1, [to disable AWS sig support])
-    CURL_DISABLE_AWS=1
     ;;
   *)
     AC_MSG_RESULT(yes)
