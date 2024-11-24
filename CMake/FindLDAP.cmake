@@ -35,6 +35,7 @@
 # - `LDAP_INCLUDE_DIRS`:  The ldap include directories.
 # - `LDAP_LIBRARIES`:     The ldap library names.
 # - `LDAP_LIBRARY_DIRS`:  The ldap library directories.
+# - `LDAP_PC_REQUIRES`:   The ldap pkg-config packages.
 # - `LDAP_CFLAGS`:        Required compiler flags.
 # - `LDAP_VERSION`:       Version of ldap.
 
@@ -52,6 +53,7 @@ if(LDAP_FOUND AND LDAP_LBER_FOUND)
   list(REVERSE LDAP_LIBRARIES)
   list(REMOVE_DUPLICATES LDAP_LIBRARIES)
   list(REVERSE LDAP_LIBRARIES)
+  set(LDAP_PC_REQUIRES "ldap")
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
