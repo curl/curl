@@ -342,7 +342,8 @@ jobs:
       - name: 'build bearssl'
         if: contains(matrix.build.install_steps, 'bearssl') && steps.cache-bearssl.outputs.cache-hit != 'true'
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://bearssl.org/bearssl-${{ env.bearssl-version }}.tar.gz
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://bearssl.org/bearssl-${{ env.bearssl-version }}.tar.gz
           tar -xzf bearssl-${{ env.bearssl-version }}.tar.gz
           cd bearssl-${{ env.bearssl-version }}
           make
@@ -363,7 +364,8 @@ jobs:
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz
           tar -xzf libressl-${{ env.libressl-version }}.tar.gz
           cd libressl-${{ env.libressl-version }}
           ./configure --disable-dependency-tracking --prefix=$HOME/libressl
@@ -382,7 +384,8 @@ jobs:
       - name: 'build wolfssl (all)'
         if: contains(matrix.build.install_steps, 'wolfssl-all') && steps.cache-wolfssl-all.outputs.cache-hit != 'true'
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
@@ -403,7 +406,8 @@ jobs:
       - name: 'build wolfssl (opensslextra)'
         if: contains(matrix.build.install_steps, 'wolfssl-opensslextra') && steps.cache-wolfssl-opensslextra.outputs.cache-hit != 'true'
         run: |
-          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/wolfSSL/wolfssl/archive/v${{ env.wolfssl-version }}-stable.tar.gz
           tar -xzf v${{ env.wolfssl-version }}-stable.tar.gz
           cd wolfssl-${{ env.wolfssl-version }}-stable
           ./autogen.sh
@@ -424,9 +428,10 @@ jobs:
       - name: 'build mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls') && steps.cache-mbedtls.outputs.cache-hit != 'true'
         run: |
-          git clone --quiet --depth=1 -b v${{ env.mbedtls-version }} https://github.com/Mbed-TLS/mbedtls
-          cd mbedtls
-          git submodule update --init --depth=1
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/Mbed-TLS/mbedtls/releases/download/mbedtls-${{ env.mbedtls-version }}/mbedtls-${{ env.mbedtls-version }}.tar.bz2
+          tar -xjf mbedtls-${{ env.mbedtls-version }}.tar.bz2
+          cd mbedtls-${{ env.mbedtls-version }}
           ./scripts/config.py set MBEDTLS_THREADING_C
           ./scripts/config.py set MBEDTLS_THREADING_PTHREAD
           cmake -B . -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DCMAKE_POSITION_INDEPENDENT_CODE=ON -DCMAKE_INSTALL_PREFIX=$HOME/mbedtls \
