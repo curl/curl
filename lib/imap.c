@@ -814,7 +814,11 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
     return CURLE_OUT_OF_MEMORY;
 
   /* Send the APPEND command */
-  result = imap_sendf(data, "APPEND %s (\\Seen) {%" FMT_OFF_T "}",
+  if(data->set.imap_upload_unread)
+    result = imap_sendf(data, "APPEND %s {%" FMT_OFF_T "}",
+                        mailbox, data->state.infilesize);
+  else
+    result = imap_sendf(data, "APPEND %s (\\Seen) {%" FMT_OFF_T "}",
                       mailbox, data->state.infilesize);
 
   free(mailbox);

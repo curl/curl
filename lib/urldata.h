@@ -1864,6 +1864,7 @@ struct UserDefined {
 #ifdef USE_ECH
   int tls_ech;      /* TLS ECH configuration  */
 #endif
+  BIT(imap_upload_unread);
 };
 
 #ifndef CURL_DISABLE_MIME

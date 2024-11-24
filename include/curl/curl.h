@@ -2228,6 +2228,8 @@ typedef enum {
   /* maximum number of keepalive probes (Linux, *BSD, macOS, etc.) */
   CURLOPT(CURLOPT_TCP_KEEPCNT, CURLOPTTYPE_LONG, 326),
 
+  CURLOPT(CURLOPT_IMAP_UPLOAD_UNREAD, CURLOPTTYPE_LONG, 327),
+
   CURLOPT_LASTENTRY /* the last unused */
 } CURLoption;
 

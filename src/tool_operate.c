@@ -1761,6 +1761,9 @@ static CURLcode config2setopts(struct GlobalConfig *global,
     }
 #endif
   }
+
+  if(config->imap_upload_unread)
+    my_setopt(curl, CURLOPT_IMAP_UPLOAD_UNREAD, 1L);
   return result;
 }
 

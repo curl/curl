@@ -1047,7 +1047,9 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
       return CURLE_BAD_FUNCTION_ARGUMENT;
     data->set.max_filesize = arg;
     break;
-
+  case CURLOPT_IMAP_UPLOAD_UNREAD:
+    data->set.imap_upload_unread = TRUE;
+    break;
 #ifdef USE_SSL
   case CURLOPT_USE_SSL:
     /*

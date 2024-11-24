@@ -167,6 +167,7 @@ static const struct LongShort aliases[]= {
   {"http3",                      ARG_NONE, ' ', C_HTTP3},
   {"http3-only",                 ARG_NONE, ' ', C_HTTP3_ONLY},
   {"ignore-content-length",      ARG_BOOL, ' ', C_IGNORE_CONTENT_LENGTH},
+  {"imap-upload-unread",         ARG_BOOL, ' ', C_IMAP_UPLOAD_UNREAD},
   {"include",                    ARG_BOOL, ' ', C_INCLUDE},
   {"insecure",                   ARG_BOOL, 'k', C_INSECURE},
   {"interface",                  ARG_STRG, ' ', C_INTERFACE},
@@ -2669,6 +2670,9 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       break;
     case C_MPTCP: /* --mptcp */
       config->mptcp = TRUE;
+      break;
+    case C_IMAP_UPLOAD_UNREAD: /* --imap-upload-unread */
+      config->imap_upload_unread = TRUE;
       break;
     default: /* unknown flag */
       err = PARAM_OPTION_UNKNOWN;
