@@ -415,6 +415,7 @@ jobs:
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
           ./config --prefix=$HOME/openssl/build no-makedepend no-apps no-docs no-tests
+          make
           make -j1 install_sw
           cat exporters/openssl.pc
 

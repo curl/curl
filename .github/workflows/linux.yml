@@ -450,6 +450,7 @@ jobs:
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
           CC="clang" CFLAGS="-fsanitize=thread" LDFLAGS="-fsanitize=thread" ./config --prefix=$HOME/openssl --libdir=lib no-makedepend no-apps no-docs no-tests
+          make
           make -j1 install_sw
 
       - name: 'cache quictls'
@@ -468,6 +469,7 @@ jobs:
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
           cd openssl
           ./config --prefix=$HOME/quictls --libdir=lib no-makedepend no-apps no-docs no-tests
+          make
           make -j1 install_sw
 
       - name: 'cache msh3'
