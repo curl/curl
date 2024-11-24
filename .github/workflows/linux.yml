@@ -434,8 +434,18 @@ jobs:
           cmake --build .
           cmake --install .
 
-      - name: 'build openssl (thread sanitizer)'
+      - name: 'cache openssl (thread sanitizer)'
         if: contains(matrix.build.install_steps, 'openssl-tsan')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-openssl-tsan
+        env:
+          cache-name: cache-openssl-tsan
+        with:
+          path: /home/runner/openssl
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.openssl-version }}
+
+      - name: 'build openssl (thread sanitizer)'
+        if: contains(matrix.build.install_steps, 'openssl-tsan') && steps.cache-openssl-tsan.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.openssl-version }} https://github.com/openssl/openssl
           cd openssl
@@ -443,8 +453,18 @@ jobs:
           make
           make -j1 install_sw
 
-      - name: 'build quictls'
+      - name: 'cache quictls'
         if: contains(matrix.build.install_steps, 'quictls')
+        uses: actions/cache@6849a6489940f00c2f30c0fb92c6274307ccb58a # v4
+        id: cache-quictls
+        env:
+          cache-name: cache-quictls
+        with:
+          path: /home/runner/quictls
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.quictls-version }}-quic1
+
+      - name: 'build quictls'
+        if: contains(matrix.build.install_steps, 'quictls') && steps.cache-quictls.outputs.cache-hit != 'true'
         run: |
           git clone --quiet --depth=1 -b openssl-${{ env.quictls-version }}-quic1 https://github.com/quictls/openssl
           cd openssl
