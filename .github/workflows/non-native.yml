@@ -304,16 +304,12 @@ jobs:
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target testdeps
-          else
-            make -j5 -C bld -C tests
           fi
 
       - name: 'build examples'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target curl-examples
-          else
-            make -j5 -C bld examples
           fi
 
   msdos:
