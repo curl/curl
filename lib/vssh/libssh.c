@@ -2581,15 +2581,15 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
     len = 32768;
 #if LIBSSH_VERSION_INT > SSH_VERSION_INT(0, 11, 0)
   switch(conn->proto.sshc.sftp_send_state) {
-  case 0:
+    case 0:
       sftp_file_set_nonblocking(conn->proto.sshc.sftp_file);
       if(sftp_aio_begin_write(conn->proto.sshc.sftp_file, mem, len,
-                               &conn->proto.sshc.sftp_aio) == SSH_ERROR) {
+                              &conn->proto.sshc.sftp_aio) == SSH_ERROR) {
         *err = CURLE_SEND_ERROR;
         return -1;
       }
       FALLTHROUGH();
-  case 1:
+    case 1:
       conn->proto.sshc.sftp_send_state = 1;
 
       sftp_file_set_nonblocking(conn->proto.sshc.sftp_file);
