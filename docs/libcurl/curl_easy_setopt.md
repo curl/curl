@@ -479,6 +479,10 @@ HTTP version to use. CURLOPT_HTTP_VERSION(3)
 
 Ignore Content-Length. See CURLOPT_IGNORE_CONTENT_LENGTH(3)
 
+## CURLOPT_IMAP_UPLOAD_UNREAD
+
+Specify that uploaded mail has not been read. See CURLOPT_IMAP_UPLOAD_UNREAD(3)
+
 ## CURLOPT_INFILESIZE
 
 Size of file to send. CURLOPT_INFILESIZE(3)
