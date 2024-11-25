@@ -215,7 +215,7 @@ static CURLcode rtsp_done(struct Curl_easy *data,
     }
     if(data->set.rtspreq == RTSPREQ_RECEIVE &&
        data->req.eos_written) {
-      failf(data, "End of stream.");
+      failf(data, "Server prematurely closed the RTSP connection.");
       return CURLE_RECV_ERROR;
     }
   }
