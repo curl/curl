@@ -5,6 +5,7 @@ Title: CURLOPT_IMAP_UPLOAD_UNREAD
 Section: 3
 Source: libcurl
 See-also:
+  - CURLOPT_UPLOAD (3)
 Protocol:
   - IMAP
   - IMAPS
