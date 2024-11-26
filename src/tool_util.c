@@ -125,6 +125,43 @@ struct timeval tvnow(void)
 
 #endif
 
+#if defined(_WIN32)
+
+struct timeval tvrealnow(void)
+{
+  /* UNIX EPOCH (1970-01-01) in FILETIME (1601-01-01) as 64-bit value */
+  static const curl_uint64_t EPOCH = (curl_uint64_t)116444736000000000ULL;
+  SYSTEMTIME systime;
+  FILETIME ftime; /* 100ns since 1601-01-01, as double 32-bit value */
+  curl_uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
+  struct timeval now;
+
+  GetSystemTime(&systime);
+  SystemTimeToFileTime(&systime, &ftime);
+  time = ((curl_uint64_t)ftime.dwLowDateTime);
+  time += ((curl_uint64_t)ftime.dwHighDateTime) << 32;
+
+  now.tv_sec  = (long)((time - EPOCH) / 10000000L); /* unit is 100ns */
+  now.tv_usec = (long)(systime.wMilliseconds * 1000);
+  return now;
+}
+
+#else
+
+struct timeval tvrealnow(void)
+{
+  struct timeval now;
+#ifdef HAVE_GETTIMEOFDAY
+  (void)gettimeofday(&now, NULL);
+#else
+  now.tv_sec = time(NULL);
+  now.tv_usec = 0;
+#endif
+  return now;
+}
+
+#endif
+
 /*
  * Make sure that the first argument is the more recent time, as otherwise
  * we will get a weird negative time-diff back...
