@@ -372,10 +372,19 @@ jobs:
         timeout-minutes: 1
         run: |
           find . -name '*.exe' -o -name '*.dll'
-          if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
+          #if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
             PATH="$PWD/bld/lib:$PATH"
             bld/src/curl.exe --disable --version
-          fi
+          #fi
+
+      - uses: actions/upload-artifact@v4
+        if:  ${{ matrix.test == 'uwp' }}
+        with:
+          name: 'curl-mingw-uwp'
+          retention-days: 7
+          path: |
+            bld/lib/libcurl.dll
+            bld/src/curl.exe
 
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
