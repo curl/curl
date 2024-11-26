@@ -372,7 +372,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if:  ${{ matrix.test == 'uwp' }}
         with:
-          name: 'curl-mingw-uwp'
+          name: curl-mingw-uwp-${{ matrix.name }}
           retention-days: 7
           path: |
             bld/lib/libcurl.dll
