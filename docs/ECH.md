@@ -219,9 +219,9 @@ arguments which are not described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
-is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``USE_DOH``
-is required. (There may be some configuration conflicts available for the
-determined:-)
+is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``CURL_DISABLE_DOH``
+must not be enabled. (There may be some configuration conflicts available for the
+determined :-)
 
 The main functional change, as you would expect, is in ``lib/vtls/openssl.c``
 where an ECHConfig, if available from command line or DNS cache, is fed into
