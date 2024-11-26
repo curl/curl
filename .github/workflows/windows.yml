@@ -383,10 +383,10 @@ jobs:
         timeout-minutes: 1
         run: |
           find . -name '*.exe' -o -name '*.dll'
-          #if [ '${{ matrix.test }}' != 'uwp' ]; then  # UWP missing 'msvcr120_app.dll', fails with exit code 0xc0000135
+          if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
             PATH="$PWD/bld/lib:$PATH"
             bld/src/curl.exe --disable --version
-          #fi
+          fi
 
       - name: 'cmake build tests'
         if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
