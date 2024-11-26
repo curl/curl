@@ -465,12 +465,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
                               LPDWORD alt_name_info_size)
 {
   bool result = FALSE;
-#if defined(CURL_WINDOWS_UWP)
-  (void)data;
-  (void)ctx;
-  (void)alt_name_info;
-  (void)alt_name_info_size;
-#else
   PCERT_INFO cert_info = NULL;
   PCERT_EXTENSION extension = NULL;
   CRYPT_DECODE_PARA decode_para = { sizeof(CRYPT_DECODE_PARA), NULL, NULL };
@@ -508,7 +502,6 @@ static bool get_alt_name_info(struct Curl_easy *data,
     return result;
   }
   result = TRUE;
-#endif
   return result;
 }
 
