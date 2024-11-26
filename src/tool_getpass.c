@@ -98,34 +98,27 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
+  size_t i;
   fputs(prompt, tool_stderr);
-#ifdef CURL_WINDOWS_UWP
-  fputs("\n", tool_stderr);
-  if(buflen > 0)
-    buffer[0] = '\0';
-#else
-  {
-    size_t i;
 
-    for(i = 0; i < buflen; i++) {
-      buffer[i] = (char)getch();
-      if(buffer[i] == '\r' || buffer[i] == '\n') {
-        buffer[i] = '\0';
-        break;
-      }
-      else
-        if(buffer[i] == '\b')
-          /* remove this letter and if this is not the first key, remove the
-             previous one as well */
-          i = i - (i >= 1 ? 2 : 1);
+  for(i = 0; i < buflen; i++) {
+    buffer[i] = (char)_getch();
+    if(buffer[i] == '\r' || buffer[i] == '\n') {
+      buffer[i] = '\0';
+      break;
     }
-    /* since echo is disabled, print a newline */
-    fputs("\n", tool_stderr);
-    /* if user did not hit ENTER, terminate buffer */
-    if(i == buflen)
-      buffer[buflen-1] = '\0';
-    }
-#endif
+    else
+      if(buffer[i] == '\b')
+        /* remove this letter and if this is not the first key, remove the
+           previous one as well */
+        i = i - (i >= 1 ? 2 : 1);
+  }
+  /* since echo is disabled, print a newline */
+  fputs("\n", tool_stderr);
+  /* if user did not hit ENTER, terminate buffer */
+  if(i == buflen)
+    buffer[buflen-1] = '\0';
+
   return buffer; /* we always return success */
 }
 #define DONE
