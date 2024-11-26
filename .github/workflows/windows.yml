@@ -329,7 +329,7 @@ jobs:
             pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
             if [[ '${{ matrix.env }}' != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
-              gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
+              gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
               cflags+=" -specs=$(cygpath -w "${specs}")"
             fi
             # CMake (as of v3.31.0) gets confused and applies the MSVC rc.exe command-line
