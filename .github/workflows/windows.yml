@@ -333,7 +333,7 @@ jobs:
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed \
                 -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' \
-                -e 's/-lmsvcrt/-lucrtapp/' \
+                -e 's/-lmsvcrt/-lmsvcr120_app/' \
                 -e 's/-lkernel32//g; s/-ladvapi32//g; s/-lshell32//g; s/-luser32//g' > "${specs}"
               cflags+=" -v -Wl,-v -specs=$(cygpath -w "${specs}")"
             fi
