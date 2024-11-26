@@ -130,7 +130,7 @@ struct timeval tvnow(void)
 struct timeval tvrealnow(void)
 {
   /* UNIX EPOCH (1970-01-01) in FILETIME (1601-01-01) as 64-bit value */
-  static const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
+  static const curl_uint64_t EPOCH = (curl_uint64_t)116444736000000000ULL;
   SYSTEMTIME systime;
   FILETIME ftime; /* 100ns since 1601-01-01, as double 32-bit value */
   curl_uint64_t time; /* 100ns since 1601-01-01, as 64-bit value */
