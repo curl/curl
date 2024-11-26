@@ -488,70 +488,62 @@ jobs:
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: 'autotools autoreconf'
+      - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
         run: autoreconf -fi
 
-      - name: 'autotools configure'
-        if: ${{ matrix.build == 'autotools' }}
+      - name: 'configure'
         run: |
-          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --host=${TRIPLET} \
-            --with-schannel --with-winidn \
-            --without-libpsl \
-            --disable-dependency-tracking
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake -B bld -G Ninja \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
+              -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
+              -DCURL_USE_LIBPSL=OFF
+          else
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --host=${TRIPLET} \
+              --with-schannel --with-winidn \
+              --without-libpsl \
+              --disable-dependency-tracking
+          fi
 
-      - name: 'autotools configure log'
-        if: ${{ matrix.build == 'autotools' && !cancelled() }}
-        run: cat bld/config.log 2>/dev/null || true
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        if: ${{ matrix.build == 'autotools' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'autotools build'
-        if: ${{ matrix.build == 'autotools' }}
-        run: make -C bld -j5
-
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'autotools' }}
-        run: make -C bld -j5 examples
-
-      - name: 'cmake configure'
-        if: ${{ matrix.build == 'cmake' }}
+      - name: 'build'
         run: |
-          cmake -B bld -G Ninja \
-            -DCMAKE_SYSTEM_NAME=Windows \
-            -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
-            -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
-            -DCURL_USE_LIBPSL=OFF
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld
+          else
+            make -C bld -j5
+          fi
 
-      - name: 'cmake configure log'
-        if: ${{ matrix.build == 'cmake' && !cancelled() }}
-        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        if: ${{ matrix.build == 'cmake' }}
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
         run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -C bld -j5 -C tests
+          fi
 
-      - name: 'cmake build'
-        if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld
-
-      - name: 'cmake build tests'
-        if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --target testdeps
-
-      - name: 'cmake build examples'
-        if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --target curl-examples
+      - name: 'build examples'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target curl-examples
+          else
+            make -C bld -j5 examples
+          fi
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
