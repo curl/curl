@@ -159,7 +159,7 @@ jobs:
             macos-version-min: '10.15'
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
-            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DUSE_HTTPSRR=ON -DUSE_ECH=ON
+            generate: -DCURL_USE_WOLFSSL=ON -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
             macos-version-min: '10.15'
           - name: 'mbedTLS !ldap brotli zstd'
             install: brotli mbedtls zstd
