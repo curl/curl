@@ -326,7 +326,6 @@ jobs:
           if [ '${{ matrix.test }}' = 'uwp' ]; then
             options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
             cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
-            pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
             if [[ '${{ matrix.env }}' != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
               gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
