@@ -554,7 +554,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
     }
   }
 
-  if(p->size) {
+  if(p->size && alt_name_info) {
     for(i = 0; i < alt_name_info->cAltEntry; ++i) {
       PCERT_ALT_NAME_ENTRY entry = &alt_name_info->rgAltEntry[i];
       if(entry->dwAltNameChoice == CERT_ALT_NAME_IP_ADDRESS) {
@@ -571,7 +571,6 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
       }
     }
   }
-
   else {
     /* Determine the size of the string needed for the cert hostname */
     len = cert_get_name_string(data, pCertContextServer,
