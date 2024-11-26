@@ -293,6 +293,7 @@ jobs:
           fi
 
       - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target testdeps
@@ -301,6 +302,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --parallel 5 --target curl-examples
@@ -394,6 +396,7 @@ jobs:
           fi
 
       - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target testdeps
@@ -402,6 +405,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake --build bld --target curl-examples
