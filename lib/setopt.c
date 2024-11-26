@@ -1768,6 +1768,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     Curl_safefree(data->set.str[STRING_COPYPOSTFIELDS]);
     data->set.method = HTTPREQ_POST;
     break;
+#endif /* ! CURL_DISABLE_HTTP || ! CURL_DISABLE_MQTT */
 
 #ifndef CURL_DISABLE_HTTP
   case CURLOPT_ACCEPT_ENCODING:
@@ -2186,7 +2187,7 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * proxy exception list
      */
     return Curl_setstropt(&data->set.str[STRING_NOPROXY], ptr);
-#endif
+#endif /* ! CURL_DISABLE_PROXY */
 
   case CURLOPT_RANGE:
     /*
@@ -2194,7 +2195,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      */
     return Curl_setstropt(&data->set.str[STRING_SET_RANGE], ptr);
 
-#endif /* ! CURL_DISABLE_PROXY */
   case CURLOPT_CURLU:
     /*
      * pass CURLU to set URL
