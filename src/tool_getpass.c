@@ -102,7 +102,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
   fputs(prompt, tool_stderr);
 
   for(i = 0; i < buflen; i++) {
-    buffer[i] = (char)getch();
+    buffer[i] = (char)_getch();
     if(buffer[i] == '\r' || buffer[i] == '\n') {
       buffer[i] = '\0';
       break;
