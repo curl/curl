@@ -108,7 +108,7 @@ int tool_debug_cb(CURL *handle, curl_infotype type,
   (void)handle; /* not used */
 
   if(config->tracetime) {
-    tv = tvnow();
+    tv = tvrealnow();
     msnprintf(timebuf, sizeof(timebuf), "%s.%06ld ",
               hms_for_sec(tv.tv_sec), (long)tv.tv_usec);
   }

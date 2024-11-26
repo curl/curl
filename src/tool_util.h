@@ -25,7 +25,16 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
+/**
+ * Return timeval of the MONOTONIC timer, depending on platform
+ * this may be completely unrelated to the REALTIME.
+ */
 struct timeval tvnow(void);
+
+/**
+ * Return timeval of the REALTIME clock.
+ */
+struct timeval tvrealnow(void);
 
 /*
  * Make sure that the first argument (t1) is the more recent time and t2 is
