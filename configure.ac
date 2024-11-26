@@ -5022,8 +5022,6 @@ if test "x$want_ech" != "xno"; then
 
   dnl now deal with whatever we found
   if test "x$ECH_ENABLED" = "x1"; then
-    dnl force pre-requisites for ECH
-    AC_DEFINE(USE_HTTPSRR, 1, [force HTTPS RR support for ECH])
     AC_DEFINE(USE_ECH, 1, [if ECH support is available])
     AC_MSG_RESULT($ECH_SUPPORT)
     experimental="$experimental ECH"
