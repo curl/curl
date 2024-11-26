@@ -363,7 +363,7 @@ jobs:
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}'
+        run: cmake --build bld --config '${{ matrix.type }}' --verbose
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
