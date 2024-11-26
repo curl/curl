@@ -623,6 +623,7 @@ jobs:
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_WOLFSSL=ON -DUSE_NGTCP2=ON
               -DCURL_USE_GSASL=ON
+              -DUSE_HTTPSRR=ON -DUSE_ECH=ON
 
           - name: 'mbedtls'
             install: 'brotli zlib zstd libpsl nghttp2 mbedtls libssh pkgconf gsasl'
