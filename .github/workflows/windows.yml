@@ -740,7 +740,7 @@ jobs:
         timeout-minutes: 35
         run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
-      - name: 'cmake configure'
+      - name: 'configure'
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
@@ -758,7 +758,7 @@ jobs:
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
             ${{ matrix.config }}
 
-      - name: 'cmake configure log'
+      - name: 'configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
@@ -767,7 +767,7 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'cmake build'
+      - name: 'build'
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
@@ -782,7 +782,7 @@ jobs:
             bld/src/curl.exe --disable --version
           fi
 
-      - name: 'cmake build tests'
+      - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
@@ -801,7 +801,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
-      - name: 'cmake run tests'
+      - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
@@ -815,7 +815,7 @@ jobs:
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-      - name: 'cmake build examples'
+      - name: 'build examples'
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
