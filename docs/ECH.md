@@ -39,7 +39,7 @@ To build curl ECH-enabled, making use of the above:
     git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
-    LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech --enable-httpsrr
+    LDFLAGS="-Wl,-rpath,$HOME/code/openssl-local-inst/lib/" ./configure --with-ssl=$HOME/code/openssl-local-inst --enable-ech
     ...lots of output...
     WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL...
     make
@@ -210,7 +210,7 @@ Code changes are ``#ifdef`` protected via ``USE_ECH`` or ``USE_HTTPSRR``:
 
 - ``USE_HTTPSRR`` is used for HTTPS RR retrieval code that could be generically
   used should non-ECH uses for HTTPS RRs be identified, e.g. use of ALPN values
-or IP address hints.
+  or IP address hints.
 
 - ``USE_ECH`` protects ECH specific code.
 
@@ -219,9 +219,9 @@ arguments which are not described here, but should be fairly clear.
 
 As shown in the ``configure`` usage above, there are ``configure.ac`` changes
 that allow separately dis/enabling ``USE_HTTPSRR`` and ``USE_ECH``. If ``USE_ECH``
-is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``USE_DOH``
-is required. (There may be some configuration conflicts available for the
-determined:-)
+is enabled, then ``USE_HTTPSRR`` is forced. In both cases ``CURL_DISABLE_DOH``
+must not be enabled. (There may be some configuration conflicts available for the
+determined :-)
 
 The main functional change, as you would expect, is in ``lib/vtls/openssl.c``
 where an ECHConfig, if available from command line or DNS cache, is fed into
@@ -296,7 +296,7 @@ To build with cmake, assuming our ECH-enabled OpenSSL is as before:
     cd curl
     mkdir build
     cd build
-    cmake -DOPENSSL_ROOT_DIR=$HOME/code/openssl -DUSE_ECH=1 -DUSE_HTTPSRR=1 ..
+    cmake -DOPENSSL_ROOT_DIR=$HOME/code/openssl -DUSE_ECH=1 ..
     ...
     make
     ...
@@ -328,7 +328,7 @@ Then:
     git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
-    LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech --enable-httpsrr
+    LDFLAGS="-Wl,-rpath,$HOME/code/boringssl/inst/lib" ./configure --with-ssl=$HOME/code/boringssl/inst --enable-ech
     ...lots of output...
     WARNING: ECH HTTPSRR enabled but marked EXPERIMENTAL. Use with caution.
     make
@@ -365,7 +365,7 @@ important or else we get build problems with curl below.
     git clone https://github.com/curl/curl
     cd curl
     autoreconf -fi
-    ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech --enable-httpsrr
+    ./configure --with-wolfssl=$HOME/code/wolfssl/inst --enable-ech
     make
 ```
 

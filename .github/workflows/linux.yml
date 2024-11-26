@@ -94,7 +94,7 @@ jobs:
           - name: wolfssl-all
             install_packages: zlib1g-dev
             install_steps: wolfssl-all
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-httpsrr --enable-ech --enable-debug
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-ech --enable-debug
 
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
@@ -140,12 +140,12 @@ jobs:
           - name: awslc
             install_packages: zlib1g-dev
             install_steps: awslc
-            configure: LDFLAGS="-Wl,-rpath,$HOME/awslc/lib" --with-openssl=$HOME/awslc --enable-httpsrr --enable-ech
+            configure: LDFLAGS="-Wl,-rpath,$HOME/awslc/lib" --with-openssl=$HOME/awslc --enable-ech
 
           - name: awslc
             install_packages: zlib1g-dev
             install_steps: awslc
-            generate: -DOPENSSL_ROOT_DIR=$HOME/awslc -DUSE_HTTPSRR=ON -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
+            generate: -DOPENSSL_ROOT_DIR=$HOME/awslc -DUSE_ECH=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: openssl default
             install_steps: pytest

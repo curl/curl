@@ -290,6 +290,14 @@
 #  define CURL_DISABLE_HTTP_AUTH 1
 #endif
 
+/*
+ * ECH requires HTTPSRR.
+ */
+
+#if defined(USE_ECH) && !defined(USE_HTTPSRR)
+#  define USE_HTTPSRR
+#endif
+
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
 /* point.                                                           */

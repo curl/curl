@@ -187,7 +187,7 @@ assumes that CMake generates `Makefile`:
 - `ENABLE_UNICODE`:                         Use the Unicode version of the Windows API functions. Default: `OFF`
 - `ENABLE_UNIX_SOCKETS`:                    Enable Unix domain sockets support. Default: `ON`
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
-- `USE_HTTPSRR`:                            Enable HTTPS RR support for ECH (experimental). Default: `OFF`
+- `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
 - `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 
 ## Disabling features
