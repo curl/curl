@@ -137,7 +137,7 @@ struct timeval tvrealnow(void)
   struct timeval now;
 
   GetSystemTime(&systime);
-  SystemTimeToFileTime(&system_time, &ftime);
+  SystemTimeToFileTime(&systime, &ftime);
   time = ((curl_uint64_t)ftime.dwLowDateTime);
   time += ((curl_uint64_t)ftime.dwHighDateTime) << 32;
 
