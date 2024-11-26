@@ -794,7 +794,7 @@ jobs:
           name: 'curl-msvc-uwp'
           retention-days: 7
           path: |
-            bld/lib/*.dll
+            bld/src/*.dll
             bld/src/curl.exe
 
       - name: 'curl version'
