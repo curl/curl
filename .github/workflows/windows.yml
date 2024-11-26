@@ -788,23 +788,14 @@ jobs:
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --parallel 5
 
-      - uses: actions/upload-artifact@v4
-        if:  ${{ matrix.plat == 'uwp' }}
-        with:
-          name: 'curl-msvc-uwp'
-          retention-days: 2
-          path: |
-            bld/src/*.dll
-            bld/src/curl.exe
-
       - name: 'curl version'
         timeout-minutes: 1
         run: |
           PATH=/usr/bin find . -name '*.exe' -o -name '*.dll'
-          #if [ '${{ matrix.plat }}' != 'uwp' ]; then  # ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
+          if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib:$PATH"
             bld/src/curl.exe --disable --version
-          #fi
+          fi
 
       - name: 'cmake build tests'
         if: ${{ matrix.tflags != 'skipall' }}
