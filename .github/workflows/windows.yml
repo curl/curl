@@ -373,7 +373,7 @@ jobs:
         if:  ${{ matrix.test == 'uwp' }}
         with:
           name: curl-mingw-uwp-${{ matrix.name }}
-          retention-days: 7
+          retention-days: 2
           path: |
             bld/lib/libcurl.dll
             bld/src/curl.exe
@@ -792,7 +792,7 @@ jobs:
         if:  ${{ matrix.plat == 'uwp' }}
         with:
           name: 'curl-msvc-uwp'
-          retention-days: 7
+          retention-days: 2
           path: |
             bld/src/*.dll
             bld/src/curl.exe
