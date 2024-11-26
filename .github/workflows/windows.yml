@@ -71,114 +71,92 @@ jobs:
             libbrotli-devel
             libnghttp2-devel
 
-      - name: 'autotools autoreconf'
+      - name: 'autoreconf'
         if: ${{ matrix.build == 'automake' }}
         timeout-minutes: 2
         run: autoreconf -fi
 
-      - name: 'autotools configure'
-        if: ${{ matrix.build == 'automake' }}
+      - name: 'configure'
         timeout-minutes: 5
         run: |
-          PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --prefix="${HOME}"/install \
-            --with-openssl \
-            --with-libssh2 \
-            --disable-dependency-tracking \
-            ${{ matrix.config }}
-
-      - name: 'autotools configure log'
-        if: ${{ matrix.build == 'automake' && !cancelled() }}
-        run: cat bld/config.log 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        if: ${{ matrix.build == 'automake' }}
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-
-      - name: 'autotools build'
-        if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 10
-        run: make -C bld -j5 V=1 install
-
-      - name: 'curl version'
-        if: ${{ matrix.build == 'automake' }}
-        timeout-minutes: 1
-        run: |
-          find . -name '*.exe' -o -name '*.dll'
-          bld/src/curl.exe --disable --version
-
-      - name: 'autotools build tests'
-        if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' }}
-        timeout-minutes: 15
-        run: make -C bld -j5 V=1 -C tests
-
-      - name: 'autotools run tests'
-        if: ${{ matrix.build == 'automake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 15
-        run: |
-          export TFLAGS='-j20 ${{ matrix.tflags }} ~615'
-          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
+            cmake -B bld -G Ninja ${options} \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_BROTLI=ON \
+              ${{ matrix.config }}
+          else
+            PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --prefix="${HOME}"/install \
+              --with-openssl \
+              --with-libssh2 \
+              --disable-dependency-tracking \
+              ${{ matrix.config }}
           fi
-          make -C bld -j5 V=1 test-ci
 
-      - name: 'cmake configure'
-        if: ${{ matrix.build == 'cmake' }}
-        timeout-minutes: 5
-        run: |
-          PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-          cmake -B bld -G Ninja ${options} \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DCURL_BROTLI=ON \
-            ${{ matrix.config }}
-
-      - name: 'cmake configure log'
-        if: ${{ matrix.build == 'cmake' && !cancelled() }}
-        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        if: ${{ matrix.build == 'cmake' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'cmake build'
-        if: ${{ matrix.build == 'cmake' }}
+      - name: 'build'
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --config '${{ matrix.type }}'
+          else
+            make -C bld -j5 V=1 install
+          fi
 
       - name: 'curl version'
-        if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 1
         run: |
           find . -name '*.exe' -o -name '*.dll'
-          PATH="$PWD/bld/lib:$PATH"
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            PATH="$PWD/bld/lib:$PATH"
+          fi
           bld/src/curl.exe --disable --version
 
-      - name: 'cmake build tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
+      - name: 'build tests'
+        if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 15
-        run: cmake --build bld --config '${{ matrix.type }}' --target testdeps
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --config '${{ matrix.type }}' --target testdeps
+          else
+            make -C bld -j5 V=1 -C tests
+          fi
 
-      - name: 'cmake run tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+      - name: 'run tests'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 15
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~615'
           if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
-          PATH="$PWD/bld/lib:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            PATH="$PWD/bld/lib:$PATH"
+            cmake --build bld --config '${{ matrix.type }}' --target test-ci
+          else
+            make -C bld -j5 V=1 test-ci
+          fi
 
-      - name: 'cmake build examples'
+      - name: 'build examples'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+          else
+            make -C bld -j5 V=1 examples
+          fi
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
@@ -197,7 +175,7 @@ jobs:
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '--enable-debug --disable-threaded-resolver --disable-curldebug --enable-static=no --without-zlib', name: 'default' }
           - { build: 'autotools', sys: 'mingw64', env: 'x86_64'      , tflags: '~472 ~1299 ~1613'        , config: '--enable-debug --enable-windows-unicode --enable-ares', name: 'c-ares U' }
           # FIXME: WebSockets test results ignored due to frequent failures on native Windows:
-          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: '~2301 ~2302'             , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
+          - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''                        , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', test: 'uwp', name: 'schannel' }
@@ -239,61 +217,105 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
 
-      - name: 'autotools autoreconf'
+      - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 2
         run: autoreconf -fi
 
-      - name: 'autotools configure'
-        if: ${{ matrix.build == 'autotools' }}
+      - name: 'configure'
         timeout-minutes: 5
         run: |
-          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --prefix="${HOME}"/install \
-            --with-openssl \
-            --with-libssh2 \
-            --disable-dependency-tracking \
-            ${{ matrix.config }}
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            if [[ '${{ matrix.env }}' = 'clang'* ]]; then
+              options='-DCMAKE_C_COMPILER=clang'
+            else
+              options='-DCMAKE_C_COMPILER=gcc'
+            fi
+            if [ '${{ matrix.test }}' = 'uwp' ]; then
+              options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
+              if [[ '${{ matrix.env }}' != 'clang'* ]]; then
+                specs="$(realpath gcc-specs-uwp)"
+                gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
+                cflags+=" -specs=$(cygpath -w "${specs}")"
+              fi
+              # CMake (as of v3.31.0) gets confused and applies the MSVC rc.exe command-line
+              # template to windres. Reset it to the windres template manually:
+              rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
+            else
+              rcopts=''
+            fi
+            [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
+            [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
+            cmake -B bld -G Ninja ${options} \
+              "-DCMAKE_C_FLAGS=${{ matrix.cflags }} ${cflags}" \
+              "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
+              '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_BROTLI=ON \
+              ${{ matrix.config }}
+          else
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --prefix="${HOME}"/install \
+              --with-openssl \
+              --with-libssh2 \
+              --disable-dependency-tracking \
+              ${{ matrix.config }}
+          fi
 
-      - name: 'autotools configure log'
-        if: ${{ matrix.build == 'autotools' && !cancelled() }}
-        run: cat bld/config.log 2>/dev/null || true
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        if: ${{ matrix.build == 'autotools' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'autotools build'
-        if: ${{ matrix.build == 'autotools' }}
+      - name: 'build'
         timeout-minutes: 10
-        run: make -C bld -j5 V=1 install
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --config '${{ matrix.type }}'
+          else
+            make -C bld -j5 V=1 install
+          fi
 
       - name: 'curl version'
-        if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 1
         run: |
-          # avoid libtool's curl.exe wrapper
-          mv bld/src/.libs/curl.exe bld/src/curl.exe
-          mv bld/lib/.libs/*.dll bld/src || true
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            PATH="$PWD/bld/lib:$PATH"
+          else
+            # avoid libtool's curl.exe wrapper
+            mv bld/src/.libs/curl.exe bld/src/curl.exe
+            mv bld/lib/.libs/*.dll bld/src || true
+          fi
           find . -name '*.exe' -o -name '*.dll'
-          bld/src/curl.exe --disable --version
+          if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
+            bld/src/curl.exe --disable --version
+          fi
 
-      - name: 'autotools build tests'
-        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' }}
+      - name: 'build tests'
+        if: ${{ matrix.tflags != 'skipall' }}  # Save time by skipping this for autotools
         timeout-minutes: 10
-        run: make -C bld -j5 V=1 -C tests
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --config '${{ matrix.type }}' --target testdeps
+          else
+            make -C bld -j5 V=1 -C tests
+          fi
 
       - name: 'install test prereqs'
-        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 5
         run: |
           /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
 
-      - name: 'autotools run tests'
-        if: ${{ matrix.build == 'autotools' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
+      - name: 'run tests'
+        if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
@@ -307,105 +329,22 @@ jobs:
             TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
           fi
           PATH="$PATH:/c/Program Files (x86)/stunnel/bin"
-          make -C bld -j5 V=1 test-ci
-
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'autotools' && (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}
-        timeout-minutes: 5
-        run: make -C bld -j5 V=1 examples
-
-      - name: 'cmake configure'
-        if: ${{ matrix.build == 'cmake' }}
-        timeout-minutes: 5
-        run: |
-          if [[ '${{ matrix.env }}' = 'clang'* ]]; then
-            options='-DCMAKE_C_COMPILER=clang'
-          else
-            options='-DCMAKE_C_COMPILER=gcc'
-          fi
-          if [ '${{ matrix.test }}' = 'uwp' ]; then
-            options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
-            cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
-            if [[ '${{ matrix.env }}' != 'clang'* ]]; then
-              specs="$(realpath gcc-specs-uwp)"
-              gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
-              cflags+=" -specs=$(cygpath -w "${specs}")"
-            fi
-            # CMake (as of v3.31.0) gets confused and applies the MSVC rc.exe command-line
-            # template to windres. Reset it to the windres template manually:
-            rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
-          else
-            rcopts=''
-          fi
-          [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
-          [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
-          cmake -B bld -G Ninja ${options} \
-            "-DCMAKE_C_FLAGS=${{ matrix.cflags }} ${cflags}" \
-            "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DCURL_BROTLI=ON \
-            ${{ matrix.config }}
-
-      - name: 'cmake configure log'
-        if: ${{ matrix.build == 'cmake' && !cancelled() }}
-        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        if: ${{ matrix.build == 'cmake' }}
-        run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
-
-      - name: 'cmake build'
-        if: ${{ matrix.build == 'cmake' }}
-        timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}'
-
-      - name: 'curl version'
-        if: ${{ matrix.build == 'cmake' }}
-        timeout-minutes: 1
-        run: |
-          find . -name '*.exe' -o -name '*.dll'
-          if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
-            bld/src/curl.exe --disable --version
-          fi
-
-      - name: 'cmake build tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' }}
-        timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --target testdeps
-
-      - name: 'install test prereqs'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 5
-        run: |
-          /c/ProgramData/chocolatey/choco.exe install --yes --no-progress --limit-output --timeout 180 --force stunnel || true
-          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
-
-      - name: 'cmake run tests'
-        if: ${{ matrix.build == 'cmake' && matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
-        timeout-minutes: 10
-        run: |
-          export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
-          if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~WebSockets'
-            TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
+            cmake --build bld --config '${{ matrix.type }}' --target test-ci
           else
-            TFLAGS+=' ~SFTP'
+            make -C bld -j5 V=1 test-ci
           fi
-          if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
-            TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
-          fi
-          PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
-          cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-      - name: 'cmake build examples'
-        if: ${{ matrix.build == 'cmake' }}
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' || (matrix.tflags == 'skipall' || matrix.tflags == 'skiprun') }}  # Save time by skipping this for autotools running tests
         timeout-minutes: 5
-        run: cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --config '${{ matrix.type }}' --target curl-examples
+          else
+            make -C bld -j5 V=1 examples
+          fi
 
   old-mingw-w64:
     name: 'old-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
@@ -463,7 +402,7 @@ jobs:
       - run: git config --global core.autocrlf input
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: 'cmake configure'
+      - name: 'configure'
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
@@ -477,7 +416,7 @@ jobs:
             -DCURL_USE_LIBPSL=OFF \
             ${{ matrix.config }}
 
-      - name: 'cmake configure log'
+      - name: 'configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
@@ -486,7 +425,7 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'cmake build'
+      - name: 'build'
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
@@ -499,7 +438,7 @@ jobs:
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
-      - name: 'cmake build tests'
+      - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
@@ -514,7 +453,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
-      - name: 'cmake run tests'
+      - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
@@ -526,7 +465,7 @@ jobs:
           PATH="$PWD/bld/lib:$PATH:/c/Program Files (x86)/stunnel/bin"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-      - name: 'cmake build examples'
+      - name: 'build examples'
         timeout-minutes: 5
         run: |
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
@@ -549,70 +488,62 @@ jobs:
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - name: 'autotools autoreconf'
+      - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
         run: autoreconf -fi
 
-      - name: 'autotools configure'
-        if: ${{ matrix.build == 'autotools' }}
+      - name: 'configure'
         run: |
-          mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-            --host=${TRIPLET} \
-            --with-schannel --with-winidn \
-            --without-libpsl \
-            --disable-dependency-tracking
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake -B bld -G Ninja \
+              -DCMAKE_SYSTEM_NAME=Windows \
+              -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
+              -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
+              -DCURL_USE_LIBPSL=OFF
+          else
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --host=${TRIPLET} \
+              --with-schannel --with-winidn \
+              --without-libpsl \
+              --disable-dependency-tracking
+          fi
 
-      - name: 'autotools configure log'
-        if: ${{ matrix.build == 'autotools' && !cancelled() }}
-        run: cat bld/config.log 2>/dev/null || true
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
       - name: 'curl_config.h'
-        if: ${{ matrix.build == 'autotools' }}
         run: |
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'autotools build'
-        if: ${{ matrix.build == 'autotools' }}
-        run: make -C bld -j5
-
-      - name: 'autotools build examples'
-        if: ${{ matrix.build == 'autotools' }}
-        run: make -C bld -j5 examples
-
-      - name: 'cmake configure'
-        if: ${{ matrix.build == 'cmake' }}
+      - name: 'build'
         run: |
-          cmake -B bld -G Ninja \
-            -DCMAKE_SYSTEM_NAME=Windows \
-            -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
-            -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
-            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-            -DCURL_WERROR=ON \
-            -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
-            -DCURL_USE_LIBPSL=OFF
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld
+          else
+            make -C bld -j5
+          fi
 
-      - name: 'cmake configure log'
-        if: ${{ matrix.build == 'cmake' && !cancelled() }}
-        run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
-
-      - name: 'curl_config.h'
-        if: ${{ matrix.build == 'cmake' }}
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
         run: |
-          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
-          grep -F '#define' bld/lib/curl_config.h | sort || true
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -C bld -j5 -C tests
+          fi
 
-      - name: 'cmake build'
-        if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld
-
-      - name: 'cmake build tests'
-        if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --target testdeps
-
-      - name: 'cmake build examples'
-        if: ${{ matrix.build == 'cmake' }}
-        run: cmake --build bld --target curl-examples
+      - name: 'build examples'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target curl-examples
+          else
+            make -C bld -j5 examples
+          fi
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
@@ -740,7 +671,7 @@ jobs:
         timeout-minutes: 35
         run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
-      - name: 'cmake configure'
+      - name: 'configure'
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
@@ -758,7 +689,7 @@ jobs:
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
             ${{ matrix.config }}
 
-      - name: 'cmake configure log'
+      - name: 'configure log'
         if: ${{ !cancelled() }}
         run: cat bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
 
@@ -767,7 +698,7 @@ jobs:
           echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
           grep -F '#define' bld/lib/curl_config.h | sort || true
 
-      - name: 'cmake build'
+      - name: 'build'
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
@@ -782,7 +713,7 @@ jobs:
             bld/src/curl.exe --disable --version
           fi
 
-      - name: 'cmake build tests'
+      - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
         timeout-minutes: 10
         run: |
@@ -801,7 +732,7 @@ jobs:
           curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 60 --retry 3 https://live.sysinternals.com/handle64.exe --output /bin/handle64.exe
           python3 -m pip --disable-pip-version-check --no-input --no-cache-dir install --progress-bar off --prefer-binary impacket
 
-      - name: 'cmake run tests'
+      - name: 'run tests'
         if: ${{ matrix.tflags != 'skipall' && matrix.tflags != 'skiprun' }}
         timeout-minutes: 10
         run: |
@@ -815,7 +746,7 @@ jobs:
           PATH="/c/msys64/usr/bin:$PATH"
           cmake --build bld --config '${{ matrix.type }}' --target test-ci
 
-      - name: 'cmake build examples'
+      - name: 'build examples'
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
