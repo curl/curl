@@ -201,8 +201,6 @@ jobs:
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', test: 'uwp', name: 'schannel R' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', test: 'uwp', name: 'schannel R static' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCURL_ZLIB=OFF -DUSE_NGHTTP2=OFF -DCURL_BROTLI=OFF -DUSE_LIBIDN2=OFF -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBPSL=OFF', type: 'Release', test: 'uwp', name: 'schannel R static bare' }
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
           - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', name: 'schannel R' }
       fail-fast: false
@@ -331,11 +329,8 @@ jobs:
             pacman --noconfirm --ask 20 --noprogressbar --sync --needed 'mingw-w64-${{ matrix.env }}-winstorecompat-git'
             if [[ '${{ matrix.env }}' != 'clang'* ]]; then
               specs="$(realpath gcc-specs-uwp)"
-              gcc -dumpspecs | sed \
-                -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' \
-                -e 's/-lmsvcrt/-lucrtapp/' \
-                -e 's/-lkernel32//g; s/-ladvapi32//g; s/-lshell32//g; s/-luser32//g' > "${specs}"
-              cflags+=" -v -Wl,-v -specs=$(cygpath -w "${specs}")"
+              gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp -lwindowsappcompat/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
+              cflags+=" -specs=$(cygpath -w "${specs}")"
             fi
             # CMake (as of v3.31.0) gets confused and applies the MSVC rc.exe command-line
             # template to windres. Reset it to the windres template manually:
@@ -367,16 +362,7 @@ jobs:
       - name: 'cmake build'
         if: ${{ matrix.build == 'cmake' }}
         timeout-minutes: 10
-        run: cmake --build bld --config '${{ matrix.type }}' --verbose
-
-      - uses: actions/upload-artifact@v4
-        if:  ${{ matrix.test == 'uwp' }}
-        with:
-          name: curl-mingw-uwp-${{ matrix.name }}
-          retention-days: 2
-          path: |
-            bld/lib/libcurl.dll
-            bld/src/curl.exe
+        run: cmake --build bld --config '${{ matrix.type }}'
 
       - name: 'curl version'
         if: ${{ matrix.build == 'cmake' }}
