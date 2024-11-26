@@ -39,7 +39,7 @@
 # of running runtests.pl as a child of itself sharing
 # some of the directories.
 1182
-# test 1184 causes flakiness in CI builds, mostly visible on macOS
+# test 1184 causes flakiness in CI builds
 1184
 1209
 1211
@@ -50,11 +50,9 @@
 # example: https://travis-ci.org/curl/curl/builds/81633600
 1510
 1512
-# test 1801 causes problems on macOS and GitHub
+# test 1801 causes problems in CI builds
 # https://github.com/curl/curl/issues/380
 1801
-# test 2086 causes issues on Windows only
-2086
 #
 #
 # Tests that are disabled here for Hyper are SUPPOSED to work but
