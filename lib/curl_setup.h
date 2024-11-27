@@ -43,28 +43,10 @@
 #include <_mingw.h>
 #endif
 
+/* TESTING */
 #ifdef _WIN32
 #define _CRT_DECLARE_NONSTDC_NAMES 0
 #define NO_OLDNAMES
-#define strdup _strdup
-#define fdopen _fdopen
-#define unlink _unlink
-#define close _close
-#define isatty _isatty
-#define fileno _fileno
-#define O_CREAT _O_CREAT
-#define O_RDONLY _O_RDONLY
-#define O_WRONLY _O_WRONLY
-#define O_RDWR _O_RDWR
-#define O_BINARY _O_BINARY
-#define O_APPEND _O_APPEND
-#define O_TRUNC _O_TRUNC
-#define O_EXCL _O_EXCL
-#define S_IREAD _S_IREAD
-#define S_IWRITE _S_IWRITE
-#define sys_nerr _sys_nerr
-#define sys_errlist _sys_errlist
-#define strcmpi _strcmpi
 #endif
 
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
@@ -182,6 +164,35 @@
 #endif
 
 #endif /* HAVE_CONFIG_H */
+
+/* Allow building with deprecated CRT symbols disabled */
+#if defined(_WIN32) && \
+  (defined(NO_OLDNAMES) || \
+   (defined(_CRT_DECLARE_NONSTDC_NAMES) && !_CRT_DECLARE_NONSTDC_NAMES))
+#  define strdup _strdup
+#  define fdopen _fdopen
+#  define unlink _unlink
+#  define close _close
+#  define isatty _isatty
+#  define fileno _fileno
+#  define O_CREAT _O_CREAT
+#  define O_RDONLY _O_RDONLY
+#  define O_WRONLY _O_WRONLY
+#  define O_RDWR _O_RDWR
+#  define O_BINARY _O_BINARY
+#  define O_APPEND _O_APPEND
+#  define O_TRUNC _O_TRUNC
+#  define O_EXCL _O_EXCL
+#  define S_IREAD _S_IREAD
+#  define S_IWRITE _S_IWRITE
+#  define sys_nerr _sys_nerr
+#  define sys_errlist _sys_errlist
+#  define strcmpi _strcmpi
+#  /* Workaround for dependency headers requiring deprecated symbols */
+#  if defined(HAVE_LIBZ) || defined(USE_OPENSSL)
+#    define off_t _off_t
+#  endif
+#endif
 
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
