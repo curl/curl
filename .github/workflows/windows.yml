@@ -584,7 +584,7 @@ jobs:
             install: 'brotli zlib zstd        nghttp2 nghttp3 openssl libssh2'
             arch: 'x64'
             plat: 'uwp'
-            type: 'Release'
+            type: 'Debug'
             tflags: 'skiprun'
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
