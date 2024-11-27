@@ -703,7 +703,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          cmake --build bld --config '${{ matrix.type }}' --parallel 5
+          cmake --build bld --config '${{ matrix.type }}' --parallel 5 --verbose
 
       - name: 'curl version'
         timeout-minutes: 1
