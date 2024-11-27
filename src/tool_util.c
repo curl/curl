@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H)
+#if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H) && !defined(_WIN32)
 #include <strings.h>
 #endif
 
@@ -181,7 +181,9 @@ int struplocompare(const char *p1, const char *p2)
     return p2 ? -1 : 0;
   if(!p2)
     return 1;
-#ifdef HAVE_STRCASECMP
+#if defined(_WIN32)
+  return _stricmp(p1, p2);
+#elif defined(HAVE_STRCASECMP)
   return strcasecmp(p1, p2);
 #elif defined(HAVE_STRCMPI)
   return strcmpi(p1, p2);
