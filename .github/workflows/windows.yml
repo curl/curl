@@ -685,7 +685,7 @@ jobs:
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
             "-DCMAKE_C_FLAGS=${cflags}" \
-            '-DCMAKE_VS_GLOBALS=TrackFileAccess=false;DebugSymbols=false;DebugType=none;AppxPackage=false' \
+            '-DCMAKE_VS_GLOBALS=TrackFileAccess=false;DebugType=none;AppxPackage=false' \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
@@ -695,7 +695,15 @@ jobs:
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
             '-DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO /OPT:NOREF /OPT:NOICF /APPCONTAINER:NO' \
             '-DCMAKE_SHARED_LINKER_FLAGS=/INCREMENTAL:NO /OPT:NOREF /OPT:NOICF' \
-            ${{ matrix.config }}
+            ${{ matrix.config }} --debug-trycompile
+
+      - uses: actions/upload-artifact@v4
+        if:  ${{ matrix.plat == 'uwp' }}
+        with:
+          name: 'curl-vs-uwp'
+          retention-days: 7
+          path: |
+            bld
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
