@@ -693,6 +693,8 @@ jobs:
             -DENABLE_DEBUG=ON \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG= \
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
+            '-DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO /OPT:NOREF /OPT:NOICF' \
+            '-DCMAKE_SHARED_LINKER_FLAGS=/INCREMENTAL:NO /OPT:NOREF /OPT:NOICF' \
             ${{ matrix.config }}
 
       - name: 'configure log'
