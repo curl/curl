@@ -589,7 +589,7 @@ jobs:
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_LIBPSL=OFF -DENABLE_UNICODE=ON
+              -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON -DENABLE_UNICODE=ON
 
           - name: 'libressl'
             install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
