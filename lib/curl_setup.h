@@ -43,6 +43,9 @@
 #include <_mingw.h>
 #endif
 
+#define _CRT_DECLARE_NONSTDC_NAMES 0
+#define NO_OLDNAMES
+
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
    that started advertising the `availability` attribute, which then gets used
    by Apple SDK, but, in a way incompatible with gcc, resulting in misc errors
