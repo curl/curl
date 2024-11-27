@@ -178,7 +178,7 @@ jobs:
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: ''                        , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_ARES=ON', type: 'Debug', name: 'schannel c-ares U' }
           - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DENABLE_CURLDEBUG=ON', type: 'Release', name: 'schannel R TrackMemory' }
           - { build: 'cmake'    , sys: 'clang64', env: 'clang-x86_64', tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=OFF -DCURL_USE_OPENSSL=ON  -DENABLE_UNICODE=OFF', type: 'Release', name: 'openssl' }
-          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', test: 'uwp', name: 'schannel' }
+          - { build: 'cmake'    , sys: 'ucrt64' , env: 'ucrt-x86_64' , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON', type: 'Release', test: 'uwp', name: 'schannel' }
           - { build: 'cmake'    , sys: 'mingw64', env: 'x86_64'      , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=ON  -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON -DCMAKE_VERBOSE_MAKEFILE=ON', type: 'Debug', cflags: '-DCURL_SCHANNEL_DEV_DEBUG', name: 'schannel dev debug' }
           - { build: 'cmake'    , sys: 'mingw32', env: 'i686'        , tflags: 'skiprun'                 , config: '-DENABLE_DEBUG=OFF -DBUILD_SHARED_LIBS=ON  -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON', type: 'Release', name: 'schannel R' }
       fail-fast: false
@@ -676,11 +676,20 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
+          if [ '${{ matrix.plat }}' = 'uwp' ]; then
+            options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+            cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
+            ldflags='/OPT:NOREF /OPT:NOICF /APPCONTAINER:NO'
+            vsglobals=';AppxPackage=false;WindowsAppContainer=false'
+          fi
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
-            -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
+            "-DCMAKE_C_FLAGS=${cflags}" \
+            "-DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO ${ldflags}" \
+            "-DCMAKE_SHARED_LINKER_FLAGS=/INCREMENTAL:NO ${ldflags}" \
+            "-DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}" \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \

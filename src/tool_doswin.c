@@ -616,9 +616,10 @@ CURLcode FindWin32CACert(struct OperationConfig *config,
  */
 struct curl_slist *GetLoadedModulePaths(void)
 {
+  struct curl_slist *slist = NULL;
+#if !defined(CURL_WINDOWS_UWP)
   HANDLE hnd = INVALID_HANDLE_VALUE;
   MODULEENTRY32 mod = {0};
-  struct curl_slist *slist = NULL;
 
   mod.dwSize = sizeof(MODULEENTRY32);
 
@@ -661,6 +662,7 @@ error:
 cleanup:
   if(hnd != INVALID_HANDLE_VALUE)
     CloseHandle(hnd);
+#endif
   return slist;
 }
 

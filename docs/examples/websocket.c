@@ -28,6 +28,7 @@
 #include <stdio.h>
 #include <string.h>
 #ifdef _WIN32
+#include <winsock2.h>
 #include <windows.h>
 #define sleep(s) Sleep((DWORD)(s))
 #else
