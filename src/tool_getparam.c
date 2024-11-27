@@ -600,7 +600,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
-      set_binmode(stdin);
+      CURL_SET_BINMODE(stdin);
     }
     else {
       file = fopen(p, "rb");
@@ -866,7 +866,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!strcmp("-", nextarg)) {
       file = stdin;
       if(cmd == C_DATA_BINARY) /* forced data-binary */
-        set_binmode(stdin);
+        CURL_SET_BINMODE(stdin);
     }
     else {
       file = fopen(nextarg, "rb");

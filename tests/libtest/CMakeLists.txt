@@ -75,6 +75,7 @@ foreach(_target IN LISTS LIBTESTPROGS)
   target_include_directories(${_target_name} PRIVATE
     "${PROJECT_BINARY_DIR}/lib"            # for "curl_config.h"
     "${PROJECT_SOURCE_DIR}/lib"            # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/src"            # for "tool_binmode.h"
     "${PROJECT_SOURCE_DIR}/tests/libtest"  # to be able to build generated tests
   )
   if(NOT CURL_TEST_BUNDLES)

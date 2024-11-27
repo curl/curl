@@ -35,6 +35,7 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
               -I$(top_srcdir)/lib            \
+              -I$(top_srcdir)/src            \
               -I$(top_srcdir)/tests/libtest
 
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \

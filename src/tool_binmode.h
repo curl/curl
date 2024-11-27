@@ -25,14 +25,15 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(HAVE_SETMODE) || defined(HAVE__SETMODE)
-
-void set_binmode(FILE *stream);
-
+#if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
+/* Requires io.h and/or fcntl.h when available */
+#ifdef HAVE__SETMODE
+#  define CURL_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
 #else
-
-#define set_binmode(x) Curl_nop_stmt
-
-#endif /* HAVE_SETMODE || HAVE__SETMODE */
+#  define CURL_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
+#endif
+#else
+#  define CURL_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
+#endif
 
 #endif /* HEADER_CURL_TOOL_BINMODE_H */

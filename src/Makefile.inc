@@ -60,7 +60,6 @@ CURLX_HFILES = \
 CURL_CFILES = \
   slist_wc.c \
   terminal.c \
-  tool_binmode.c \
   tool_bname.c \
   tool_cb_dbg.c \
   tool_cb_hdr.c \

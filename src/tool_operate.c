@@ -111,10 +111,12 @@ extern const unsigned char curl_ca_embed[];
 #endif
 #endif
 
-#ifndef O_BINARY
-/* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
+/* since O_BINARY is used in bitmasks, setting it to zero makes it usable in
    source code but yet it does not ruin anything */
-#  define O_BINARY 0
+#ifdef O_BINARY
+#define CURL_O_BINARY O_BINARY
+#else
+#define CURL_O_BINARY 0
 #endif
 
 #ifndef SOL_IP
@@ -379,16 +381,16 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
       case FAB$C_VAR:
       case FAB$C_VFC:
       case FAB$C_STMCR:
-        per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
+        per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
         break;
       default:
-        per->infd = open(per->uploadfile, O_RDONLY | O_BINARY,
+        per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY,
                          "rfm=stmlf", "ctx=stm");
       }
     }
     if(per->infd == -1)
 #else
-      per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
+      per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
@@ -1993,7 +1995,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
         else {
           /* always use binary mode for protocol header output */
-          set_binmode(etag_save->stream);
+          CURL_SET_BINMODE(etag_save->stream);
         }
       }
 
@@ -2038,7 +2040,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         if(!strcmp(config->headerfile, "%")) {
           heads->stream = stderr;
           /* use binary mode for protocol header output */
-          set_binmode(heads->stream);
+          CURL_SET_BINMODE(heads->stream);
         }
         else if(strcmp(config->headerfile, "-")) {
           FILE *newfile;
@@ -2079,7 +2081,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         }
         else {
           /* always use binary mode for protocol header output */
-          set_binmode(heads->stream);
+          CURL_SET_BINMODE(heads->stream);
         }
       }
 
@@ -2266,7 +2268,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
         DEBUGASSERT(per->infdopen == FALSE);
         DEBUGASSERT(per->infd == STDIN_FILENO);
 
-        set_binmode(stdin);
+        CURL_SET_BINMODE(stdin);
         if(!strcmp(per->uploadfile, ".")) {
           if(curlx_nonblock((curl_socket_t)per->infd, TRUE) < 0)
             warnf(global,
@@ -2300,7 +2302,7 @@ static CURLcode single_transfer(struct GlobalConfig *global,
          !config->use_ascii) {
         /* We get the output to stdout and we have not got the ASCII/text
            flag, then set stdout to be binary */
-        set_binmode(stdout);
+        CURL_SET_BINMODE(stdout);
       }
 
       /* explicitly passed to stdout means okaying binary gunk */

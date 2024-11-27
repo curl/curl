@@ -106,7 +106,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     curl_off_t origin;
     struct_stat sbuf;
 
-    set_binmode(stdin);
+    CURL_SET_BINMODE(stdin);
     origin = ftell(stdin);
     /* If stdin is a regular file, do not buffer data but read it
        when needed. */

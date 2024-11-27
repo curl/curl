@@ -48,8 +48,11 @@
 #include <sys/time.h>
 #endif
 
-#ifdef _WIN32
+#ifdef HAVE_IO_H
 #include <io.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
 #include <fcntl.h>
 #endif
 
