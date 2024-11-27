@@ -676,7 +676,7 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          [ '${{ matrix.plat }}' = 'uwp' ] && cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_APP'
+          [ '${{ matrix.plat }}' = 'uwp' ] && cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
