@@ -695,15 +695,7 @@ jobs:
             -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE= \
             '-DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO /OPT:NOREF /OPT:NOICF /APPCONTAINER:NO' \
             '-DCMAKE_SHARED_LINKER_FLAGS=/INCREMENTAL:NO /OPT:NOREF /OPT:NOICF' \
-            ${{ matrix.config }} --debug-trycompile
-
-      - uses: actions/upload-artifact@v4
-        if:  ${{ matrix.plat == 'uwp' }}
-        with:
-          name: 'curl-vs-uwp'
-          retention-days: 1
-          path: |
-            bld
+            ${{ matrix.config }}
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
