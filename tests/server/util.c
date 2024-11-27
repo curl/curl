@@ -278,7 +278,7 @@ curl_off_t our_getpid(void)
 {
   curl_off_t pid;
 
-  pid = (curl_off_t)getpid();
+  pid = (curl_off_t)Curl_getpid();
 #if defined(_WIN32)
   /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
    * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵

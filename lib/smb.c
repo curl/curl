@@ -27,12 +27,6 @@
 
 #if !defined(CURL_DISABLE_SMB) && defined(USE_CURL_NTLM_CORE)
 
-#ifdef _WIN32
-#define Curl_getpid() ((unsigned int)GetCurrentProcessId())
-#else
-#define Curl_getpid() ((unsigned int)getpid())
-#endif
-
 #include "smb.h"
 #include "urldata.h"
 #include "sendf.h"

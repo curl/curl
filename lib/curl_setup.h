@@ -457,6 +457,12 @@
 #include <curl/stdcheaders.h>
 #endif
 
+#ifdef _WIN32
+#define Curl_getpid() ((unsigned int)GetCurrentProcessId())
+#else
+#define Curl_getpid() ((unsigned int)getpid())
+#endif
+
 /*
  * Large file (>2Gb) support using Win32 functions.
  */
