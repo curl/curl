@@ -676,10 +676,12 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
+          [ '${{ matrix.plat }}' = 'uwp' ] && cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_APP'
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
+            "-DCMAKE_C_FLAGS=${cflags}" \
             -DCMAKE_VS_GLOBALS=TrackFileAccess=false \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
