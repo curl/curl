@@ -2588,9 +2588,9 @@ static ssize_t sftp_send(struct Curl_easy *data, int sockindex,
         *err = CURLE_SEND_ERROR;
         return -1;
       }
+      conn->proto.sshc.sftp_send_state = 1;
       FALLTHROUGH();
     case 1:
-      conn->proto.sshc.sftp_send_state = 1;
       nwrite = sftp_aio_wait_write(&conn->proto.sshc.sftp_aio);
       myssh_block2waitfor(conn, (nwrite == SSH_AGAIN) ? TRUE : FALSE);
       if(nwrite == SSH_AGAIN) {
