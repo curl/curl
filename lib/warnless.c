@@ -327,12 +327,12 @@ size_t curlx_sitouz(int sinum)
 
 ssize_t curlx_read(int fd, void *buf, size_t count)
 {
-  return (ssize_t)read(fd, buf, curlx_uztoui(count));
+  return (ssize_t)_read(fd, buf, curlx_uztoui(count));
 }
 
 ssize_t curlx_write(int fd, const void *buf, size_t count)
 {
-  return (ssize_t)write(fd, buf, curlx_uztoui(count));
+  return (ssize_t)_write(fd, buf, curlx_uztoui(count));
 }
 
 #endif /* _WIN32 */

@@ -49,6 +49,8 @@
 #define strdup _strdup
 #define fdopen _fdopen
 #define unlink _unlink
+#define close _close
+#define isatty _isatty
 #define O_CREAT _O_CREAT
 #define O_RDONLY _O_RDONLY
 #define O_WRONLY _O_WRONLY
@@ -57,10 +59,11 @@
 #define O_APPEND _O_APPEND
 #define O_TRUNC _O_TRUNC
 #define O_EXCL _O_EXCL
+#define S_IREAD _S_IREAD
+#define S_IWRITE _S_IWRITE
 #define sys_nerr _sys_nerr
 #define sys_errlist _sys_errlist
-#define read(a,b,c) _read(a,b,c)
-#define write(a,b,c) _write(a,b,c)
+#define strcmpi _strcmpi
 #endif
 
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
@@ -890,13 +893,13 @@
 #endif
 
 /* Define S_ISREG if not defined by system headers, e.g. MSVC */
-#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#if !defined(S_ISREG) && defined(_S_IFMT) && defined(_S_IFREG)
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
 #endif
 
 /* Define S_ISDIR if not defined by system headers, e.g. MSVC */
-#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#if !defined(S_ISDIR) && defined(_S_IFMT) && defined(_S_IFDIR)
+#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
