@@ -43,8 +43,25 @@
 #include <_mingw.h>
 #endif
 
+#ifdef _WIN32
 #define _CRT_DECLARE_NONSTDC_NAMES 0
 #define NO_OLDNAMES
+#define strdup _strdup
+#define fdopen _fdopen
+#define unlink _unlink
+#define O_CREAT _O_CREAT
+#define O_RDONLY _O_RDONLY
+#define O_WRONLY _O_WRONLY
+#define O_RDWR _O_RDWR
+#define O_BINARY _O_BINARY
+#define O_APPEND _O_APPEND
+#define O_TRUNC _O_TRUNC
+#define O_EXCL _O_EXCL
+#define sys_nerr _sys_nerr
+#define sys_errlist _sys_errlist
+#define read(a,b,c) _read(a,b,c)
+#define write(a,b,c) _write(a,b,c)
+#endif
 
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
    that started advertising the `availability` attribute, which then gets used
