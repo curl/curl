@@ -144,8 +144,10 @@ int main(int argc, char **argv)
 #ifdef O_BINARY
 #  ifdef __HIGHC__
   _setmode(stdout, O_BINARY);
+#  elif defined(HAVE__SETMODE)
+  (void)_setmode(fileno(stdout), O_BINARY);
 #  else
-  setmode(fileno(stdout), O_BINARY);
+  (void)setmode(fileno(stdout), O_BINARY);
 #  endif
 #endif
 
