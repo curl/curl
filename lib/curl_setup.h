@@ -107,11 +107,13 @@
 #  endif
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
+#define AAA_STRING2(x) #x
+#define AAA_STRING(x) AAA_STRING2(x)
 #ifdef _MSC_VER
-#pragma message("_WIN32_WINNT:" _WIN32_WINNT)
+#pragma message("_WIN32_WINNT:" AAA_STRING(_WIN32_WINNT))
 #endif
 #ifdef _MSC_VER
-#pragma message("WINAPI_FAMILY:" WINAPI_FAMILY)
+#pragma message("WINAPI_FAMILY:" AAA_STRING(WINAPI_FAMILY))
 #endif
 # if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
   defined(WINAPI_FAMILY)
