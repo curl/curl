@@ -196,6 +196,7 @@
 #  define sys_nerr _sys_nerr
 #  define sys_errlist _sys_errlist
 #  define strcmpi _strcmpi
+#  /* Workaround for dependency headers requiring deprecated symbols */
 #  if defined(HAVE_LIBZ) || defined(USE_OPENSSL)
 #    define off_t _off_t
 #  endif
