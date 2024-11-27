@@ -53,7 +53,11 @@ static void *custom_malloc(size_t size)
 static char *custom_strdup(const char *ptr)
 {
   seen++;
+#ifdef _WIN32
+  return (_strdup)(ptr);
+#else
   return (strdup)(ptr);
+#endif
 }
 
 static void *custom_realloc(void *ptr, size_t size)
