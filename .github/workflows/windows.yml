@@ -685,7 +685,7 @@ jobs:
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
             "-DCMAKE_C_FLAGS=${cflags}" \
-            '-DCMAKE_VS_GLOBALS=TrackFileAccess=false;UseStructuredOutput=false;UseMultiToolTask=true;DebugSymbols=false;DebugType=none;AttributeFileTracking=false;AppContainerApplication=false' \
+            '-DCMAKE_VS_GLOBALS=TrackFileAccess=false;UseStructuredOutput=false;UseMultiToolTask=true;DebugSymbols=false;DebugType=none;AttributeFileTracking=false;AppContainerApplication=false;AppxPackage=false' \
             '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
