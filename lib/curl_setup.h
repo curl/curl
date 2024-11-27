@@ -111,9 +111,13 @@
 #define AAA_STRING(x) AAA_STRING2(x)
 #ifdef _MSC_VER
 #pragma message("_WIN32_WINNT:" AAA_STRING(_WIN32_WINNT))
-#endif
-#ifdef _MSC_VER
 #pragma message("WINAPI_FAMILY:" AAA_STRING(WINAPI_FAMILY))
+#ifdef WINAPI_FAMILY
+#pragma message("trace-WINAPI_FAMILY")
+#endif
+#ifdef WINSTORECOMPAT
+#pragma message("trace-WINSTORECOMPAT")
+#endif
 #endif
 # if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
   defined(WINAPI_FAMILY)
