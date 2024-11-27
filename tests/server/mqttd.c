@@ -1029,9 +1029,9 @@ int main(int argc, char *argv[])
   win32_init();
   atexit(win32_cleanup);
 
-  setmode(fileno(stdin), O_BINARY);
-  setmode(fileno(stdout), O_BINARY);
-  setmode(fileno(stderr), O_BINARY);
+  _setmode(fileno(stdin), O_BINARY);
+  _setmode(fileno(stdout), O_BINARY);
+  _setmode(fileno(stderr), O_BINARY);
 #endif
 
   install_signal_handlers(FALSE);
