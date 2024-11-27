@@ -51,6 +51,7 @@
 #define unlink _unlink
 #define close _close
 #define isatty _isatty
+#define fileno _fileno
 #define O_CREAT _O_CREAT
 #define O_RDONLY _O_RDONLY
 #define O_WRONLY _O_WRONLY
