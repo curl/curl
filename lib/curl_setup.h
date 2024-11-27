@@ -167,7 +167,7 @@
 
 /* Allow building with deprecated CRT symbols disabled */
 #if defined(_WIN32) && \
-  (defined(NO_OLDNAMES) || \
+  ((defined(__MINGW32__) && defined(NO_OLDNAMES)) || \
    (defined(_CRT_DECLARE_NONSTDC_NAMES) && !_CRT_DECLARE_NONSTDC_NAMES))
 #  define strdup _strdup
 #  define fdopen _fdopen
