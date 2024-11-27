@@ -589,7 +589,7 @@ jobs:
             config: >-
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
-              -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON -DENABLE_UNICODE=ON
+              -DCURL_USE_LIBPSL=OFF -DENABLE_UNICODE=ON
 
           - name: 'libressl'
             install: 'brotli zlib zstd libpsl nghttp2 libressl libssh2[core,zlib] pkgconf ngtcp2[libressl] nghttp3'
@@ -676,7 +676,10 @@ jobs:
         timeout-minutes: 5
         run: |
           PATH="/c/msys64/usr/bin:$PATH"
-          [ '${{ matrix.plat }}' = 'uwp' ] && cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
+          if [ '${{ matrix.plat }}' = 'uwp' ]; then
+            options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+            cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
+          fi
           cmake -B bld ${options} \
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
