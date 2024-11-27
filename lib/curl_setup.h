@@ -65,6 +65,9 @@
 #define sys_nerr _sys_nerr
 #define sys_errlist _sys_errlist
 #define strcmpi _strcmpi
+#if defined(HAVE_LIBZ) || defined(USE_OPENSSL)
+#define off_t _off_t
+#endif
 #endif
 
 /* Workaround for Homebrew gcc 12.4.0, 13.3.0, 14.1.0, 14.2.0 (initial build)
