@@ -31,7 +31,7 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 static char const testData[] = ".abc\0xyz";
-static off_t const testDataSize = sizeof(testData) - 1;
+static curl_off_t const testDataSize = sizeof(testData) - 1;
 
 CURLcode test(char *URL)
 {
@@ -57,8 +57,7 @@ CURLcode test(char *URL)
 
   /* set the options (I left out a few, you'll get the point anyway) */
   curl_easy_setopt(easy, CURLOPT_URL, URL);
-  curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE_LARGE,
-                   (curl_off_t)testDataSize);
+  curl_easy_setopt(easy, CURLOPT_POSTFIELDSIZE_LARGE, testDataSize);
   curl_easy_setopt(easy, CURLOPT_POSTFIELDS, testData);
 
   /* we start some action by calling perform right away */
