@@ -107,14 +107,46 @@
 #  endif
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
+#ifdef _MSC_VER
+#pragma message("_WIN32_WINNT:" _WIN32_WINNT)
+#endif
+#ifdef _MSC_VER
+#pragma message("WINAPI_FAMILY:" WINAPI_FAMILY)
+#endif
 # if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
   defined(WINAPI_FAMILY)
+#ifdef _MSC_VER
+#pragma message("trace-1")
+#endif
 #  include <winapifamily.h>
+#ifdef _MSC_VER
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP)
+#pragma message("trace-WINAPI_PARTITION_APP")
+#endif
+#endif
+#ifdef _MSC_VER
+#if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#pragma message("trace-WINAPI_PARTITION_DESKTOP")
+#endif
+#endif
 #  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
      !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
 #    define CURL_WINDOWS_UWP
 #  endif
 # endif
+#endif
+
+#ifdef _MSC_VER
+#ifdef CURL_WINDOWS_UWP
+#pragma message("CURL_WINDOWS_UWP defined")
+#else
+#pragma message("CURL_WINDOWS_UWP not defined")
+#endif
+#if CURL_WINDOWS_UWP
+#pragma message("CURL_WINDOWS_UWP true")
+#else
+#pragma message("CURL_WINDOWS_UWP false")
+#endif
 #endif
 
 /* Compatibility */
