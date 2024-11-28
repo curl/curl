@@ -117,6 +117,12 @@
 # endif
 #endif
 
+/* Required build defines for the HPE NonStop platforms. */
+#if defined (__TANDEM)
+# define _XOPEN_SOURCE_EXTENDED 1
+# define __NSK_OPTIONAL_TYPES__
+#endif
+
 /* Compatibility */
 #if defined(ENABLE_IPV6)
 #  define USE_IPV6 1
