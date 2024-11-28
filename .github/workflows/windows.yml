@@ -290,7 +290,7 @@ jobs:
           else
             # avoid libtool's curl.exe wrapper
             mv bld/src/.libs/curl.exe bld/src/curl.exe
-            mv bld/lib/.libs/*.dll bld/src || true
+            cp bld/lib/.libs/*.dll bld/src || true
           fi
           find . -name '*.exe' -o -name '*.dll'
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
@@ -305,6 +305,12 @@ jobs:
             cmake --build bld --config '${{ matrix.type }}' --target testdeps
           else
             make -C bld -j5 V=1 -C tests
+          fi
+          if [ '${{ matrix.build }}' != 'cmake' ]; then
+            find . -name '*.exe' -o -name '*.dll'
+            # avoid libtool's .exe wrappers
+            mv bld/src/.libs/curl.exe bld/src/curl.exe
+            cp bld/lib/.libs/*.dll bld/src || true
           fi
 
       - name: 'install test prereqs'
