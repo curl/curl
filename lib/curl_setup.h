@@ -862,7 +862,8 @@
 #  if defined(HAVE_LIBZ) || defined(USE_OPENSSL)
 #    ifdef _MSC_VER
 #      define off_t _off_t
-#    elif defined(__MINGW32__) && !defined(_POSIX)
+#    elif defined(__MINGW32__) && !defined(_POSIX) && \
+          defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR >= 3)
 #      if defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
 #        define off_t _off64_t
 #      else

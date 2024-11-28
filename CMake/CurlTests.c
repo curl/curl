@@ -150,10 +150,15 @@ int main(void) { return 0; }
 #undef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
-#if defined(__MINGW32__) && defined(NO_OLDNAMES) && !defined(_POSIX)
-#define CURLTEST_OFF_T _off64_t
-#else
 #define CURLTEST_OFF_T off_t
+#ifdef __MINGW32__
+#  include <_mingw.h>
+#  if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR >= 3) && \
+      defined(NO_OLDNAMES) && !defined(_POSIX)
+#    undef CURLTEST_OFF_T
+#    define CURLTEST_OFF_T _off64_t
+#  else
+#  endif
 #endif
 /* Check that off_t can represent 2**63 - 1 correctly.
    We cannot simply define LARGE_OFF_T to be 9223372036854775807,
