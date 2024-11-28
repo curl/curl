@@ -171,6 +171,7 @@
 #if defined(_WIN32) && \
   ((defined(__MINGW32__) && defined(NO_OLDNAMES)) || \
    (defined(_CRT_DECLARE_NONSTDC_NAMES) && !_CRT_DECLARE_NONSTDC_NAMES))
+#  define strdup _strdup
 #  define fdopen _fdopen
 #  define unlink _unlink
 #  define close _close
