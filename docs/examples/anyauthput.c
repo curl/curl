@@ -35,6 +35,7 @@
 
 #ifdef _WIN32
 #  define stat _stat
+#  define fstat _fstat
 #  define FILENO(fp) _fileno(fp)
 #else
 #  define FILENO(fp) fileno(fp)
