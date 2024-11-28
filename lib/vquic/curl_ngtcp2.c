@@ -2310,7 +2310,10 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
     }
   }
 #else /* USE_GNUTLS */
+  (void)data;
   (void)ctx;
+  (void)quic_tp;
+  (void)quic_tp_len;
 #endif
   return result;
 }
