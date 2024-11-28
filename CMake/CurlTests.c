@@ -152,9 +152,6 @@ int main(void) { return 0; }
 #endif
 #define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
-#ifdef _WIN32
-#  define off_t _off_t
-#endif
  /* Check that off_t can represent 2**63 - 1 correctly.
     We cannot simply define LARGE_OFF_T to be 9223372036854775807,
     since some C++ compilers masquerading as C compilers
