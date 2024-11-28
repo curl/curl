@@ -150,7 +150,7 @@ int main(void) { return 0; }
 #undef _FILE_OFFSET_BITS
 #define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
-#if defined(__MINGW32__) && defined(NO_OLDNAMES)
+#if defined(__MINGW32__) && defined(NO_OLDNAMES) && !defined(_POSIX)
 #define CURLTEST_OFF_T _off64_t
 #else
 #define CURLTEST_OFF_T off_t
