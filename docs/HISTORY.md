@@ -342,7 +342,7 @@ April: added the cyassl backend (later renamed to wolfSSL)
 
  July: OSS-Fuzz started fuzzing libcurl
 
- September: Added Multi-SSL support
+ September: Added MultiSSL support
 
  The website serves 3100 GB/month
 
