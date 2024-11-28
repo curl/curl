@@ -30,6 +30,11 @@
 #include <sys/stat.h>
 #include <curl/curl.h>
 
+#ifdef _WIN32
+#undef stat
+#define stat _stat
+#endif
+
 /*
  * This example shows an HTTP PUT operation. PUTs a file given as a command
  * line argument to the URL also given on the command line.
