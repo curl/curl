@@ -31,6 +31,7 @@
 #include <curl/curl.h>
 
 #ifdef _WIN32
+#undef stat
 #define stat _stat
 #endif
 

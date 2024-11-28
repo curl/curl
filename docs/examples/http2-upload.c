@@ -39,6 +39,7 @@
 #endif
 
 #ifdef _WIN32
+#undef stat
 #define stat _stat
 #endif
 
