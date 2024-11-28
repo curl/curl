@@ -1688,7 +1688,11 @@ if(HAVE_FILE_OFFSET_BITS)
   set(_FILE_OFFSET_BITS 64)
   set(CMAKE_REQUIRED_DEFINITIONS "-D_FILE_OFFSET_BITS=64")
 endif()
-check_type_size("off_t" SIZEOF_OFF_T)
+if(WIN32)
+  check_type_size("_off_t" SIZEOF_OFF_T)
+else()
+  check_type_size("off_t" SIZEOF_OFF_T)
+endif()
 
 # fseeko may not exist with _FILE_OFFSET_BITS=64 but can exist with
 # _FILE_OFFSET_BITS unset or 32 (e.g. Android ARMv7 with NDK 26b and API level < 24)
