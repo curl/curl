@@ -33,6 +33,7 @@
 #ifdef _WIN32
 #define stat _stat
 #define fstat _fstat
+#define fileno _fileno
 #endif
 
 int main(void)
