@@ -77,7 +77,7 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
             $timestamp $notes);
 
 # version of this script
-$version='2024-08-07';
+$version='2024-11-28';
 $fixed=0;
 
 # Determine if we're running from git or a canned copy of curl,
@@ -793,5 +793,6 @@ if (($mktarball ne '') && (-x $mktarball)) {
   system($mktarball);
 }
 
+logit "enddate = ".scalar(gmtime)." UTC";  # When the run ends
 # mydie to cleanup
 mydie "ending nicely";
