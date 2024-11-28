@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_TOOL_BINMODE_H
-#define HEADER_CURL_TOOL_BINMODE_H
+#ifndef HEADER_CURL_BINMODE_H
+#define HEADER_CURL_BINMODE_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +23,16 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
+#include "curl_setup.h"
 
 #if defined(HAVE_SETMODE) || defined(HAVE__SETMODE)
 
-void set_binmode(FILE *stream);
+void curlx_set_binmode(FILE *stream);
 
 #else
 
-#define set_binmode(x) Curl_nop_stmt
+#define curlx_set_binmode(x) Curl_nop_stmt
 
 #endif /* HAVE_SETMODE || HAVE__SETMODE */
 
-#endif /* HEADER_CURL_TOOL_BINMODE_H */
+#endif /* HEADER_CURL_BINMODE_H */
