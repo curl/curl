@@ -30,6 +30,10 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
+#ifdef _WIN32
+#define stat _stat
+#endif
+
 int main(void)
 {
   CURL *curl;

@@ -34,6 +34,7 @@
 #include <curl/curl.h>
 
 #ifdef _WIN32
+#  define stat _stat
 #  define FILENO(fp) _fileno(fp)
 #else
 #  define FILENO(fp) fileno(fp)

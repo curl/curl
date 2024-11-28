@@ -31,6 +31,7 @@
 #include <errno.h>
 #ifdef _WIN32
 #include <io.h>
+#define stat _stat
 #else
 #include <unistd.h>
 #endif
