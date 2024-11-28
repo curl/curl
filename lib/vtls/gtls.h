@@ -74,15 +74,22 @@ typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         void *user_data);
 
+typedef CURLcode Curl_gtls_init_session_reuse_cb(struct Curl_cfilter *cf,
+                                                 struct Curl_easy *data,
+                                                 const char *alpn,
+                                                 const unsigned char *quic_tp,
+                                                 size_t quic_tp_len,
+                                                 bool *do_early_data);
+
 CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const unsigned char *alpn, size_t alpn_len,
-                            struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
-                            void *ssl_user_data);
+                            void *ssl_user_data,
+                            Curl_gtls_init_session_reuse_cb *sess_reuse_cb);
 
 CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
@@ -100,7 +107,9 @@ CURLcode Curl_gtls_update_session_id(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      gnutls_session_t session,
                                      struct ssl_peer *peer,
-                                     const char *alpn);
+                                     const char *alpn,
+                                     unsigned char *quic_tp,
+                                     size_t quic_tp_len);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 

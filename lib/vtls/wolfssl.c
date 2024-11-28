@@ -438,8 +438,8 @@ CURLcode wssl_cache_session(struct Curl_cfilter *cf,
   }
 
   Curl_ssl_sessionid_lock(data);
-  result = Curl_ssl_set_sessionid(cf, data, peer, NULL,
-                                  sdata, slen, wolfssl_session_free);
+  result = Curl_ssl_set_sessionid(cf, data, peer, NULL, sdata, slen,
+                                  wolfssl_session_free, NULL, 0);
   Curl_ssl_sessionid_unlock(data);
   if(result)
     failf(data, "failed to add new ssl session to cache (%d)", result);
@@ -482,7 +482,8 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   Curl_ssl_sessionid_lock(data);
-  if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen, NULL)) {
+  if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen,
+                            NULL, NULL, NULL)) {
     WOLFSSL_SESSION *session;
     sdata = psdata;
     session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);

@@ -137,6 +137,8 @@ struct cf_ngtcp2_ctx {
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
   uint64_t used_bidi_streams;        /* bidi streams we have opened */
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
+  size_t earlydata_max;              /* max amount of early data supported by
+                                        server on session reuse */
   int qlogfd;
   BIT(initialized);
   BIT(shutdown_started);             /* queued shutdown packets */
@@ -444,10 +446,20 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
 
 static CURLcode init_ngh3_conn(struct Curl_cfilter *cf);
 
-static int cb_handshake_completed(ngtcp2_conn *tconn, void *user_data)
+static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
-  (void)user_data;
+  struct Curl_cfilter *cf = user_data;
+  struct cf_ngtcp2_ctx *ctx = cf ? cf->ctx : NULL;
+  struct Curl_easy *data;
+
   (void)tconn;
+  if(ctx) {
+    ctx->handshake_at = Curl_now();
+    data = CF_DATA_CURRENT(cf);
+    if(data)
+      CURL_TRC_CF(data, cf, "handshake complete after %dms",
+                 (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
+  }
   return 0;
 }
 
@@ -739,7 +751,7 @@ static ngtcp2_callbacks ng_callbacks = {
   ngtcp2_crypto_client_initial_cb,
   NULL, /* recv_client_initial */
   ngtcp2_crypto_recv_crypto_data_cb,
-  cb_handshake_completed,
+  cf_ngtcp2_handshake_completed,
   NULL, /* recv_version_negotiation */
   ngtcp2_crypto_encrypt_cb,
   ngtcp2_crypto_decrypt_cb,
@@ -2158,7 +2170,24 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     }
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
-      (void)Curl_gtls_update_session_id(cf, data, session, &ctx->peer, "h3");
+      ngtcp2_ssize tplen;
+      uint8_t tpbuf[256];
+      unsigned char *quic_tp = NULL;
+      size_t quic_tp_len = 0;
+
+      tplen = ngtcp2_conn_encode_0rtt_transport_params(ctx->qconn, tpbuf,
+                                                       sizeof(tpbuf));
+      if(tplen < 0)
+        CURL_TRC_CF(data, cf, "error encoding 0RTT transport data: %s",
+                    ngtcp2_strerror((int)tplen));
+      else {
+        CURL_TRC_CF(data, cf, "got %zd bytes of encoded 0RTT transport data",
+                    (ssize_t)tplen);
+        quic_tp = (unsigned char *)tpbuf;
+        quic_tp_len = (size_t)tplen;
+      }
+      (void)Curl_gtls_update_session_id(cf, data, session, &ctx->peer,
+                                        "h3", quic_tp, quic_tp_len);
       break;
     }
     default:
@@ -2188,9 +2217,9 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
 }
 #endif /* USE_WOLFSSL */
 
-static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              void *user_data)
+static CURLcode cf_ngtcp2_tls_ctx_setup(struct Curl_cfilter *cf,
+                                        struct Curl_easy *data,
+                                        void *user_data)
 {
   struct curl_tls_ctx *ctx = user_data;
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -2243,6 +2272,49 @@ static CURLcode tls_ctx_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
+static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           const char *session_alpn,
+                                           const unsigned char *quic_tp,
+                                           size_t quic_tp_len,
+                                           bool *do_early_data)
+{
+  struct cf_ngtcp2_ctx *ctx = cf->ctx;
+  CURLcode result = CURLE_OK;
+
+  *do_early_data = FALSE;
+#ifdef USE_GNUTLS
+  ctx->earlydata_max =
+    gnutls_record_get_max_early_data_size(ctx->tls.gtls.session);
+  if((!ctx->earlydata_max || ctx->earlydata_max == 0xFFFFFFFFUL)) {
+    /* Seems to be GnuTLS way to signal no EarlyData in session */
+    CURL_TRC_CF(data, cf, "TLS session does not allow earlydata");
+  }
+  else if(strcmp("h3", session_alpn)) {
+    CURL_TRC_CF(data, cf, "no early data, TLS session from different ALPN");
+  }
+  else if(!quic_tp || !quic_tp_len) {
+    CURL_TRC_CF(data, cf, "no early data, missing 0RTT transport parameters");
+  }
+  else {
+    int rv;
+    rv = ngtcp2_conn_decode_and_set_0rtt_transport_params(
+      ctx->qconn, (uint8_t *)quic_tp, quic_tp_len);
+    if(rv)
+      CURL_TRC_CF(data, cf, "no early data, failed to set 0RTT transport "
+                  "parameters: %s", ngtcp2_strerror(rv));
+    else {
+      CURL_TRC_CF(data, cf, "TLS session ALMOST allows %zu earlydata bytes, "
+                  "reusing ALPN '%s'", ctx->earlydata_max, session_alpn);
+      /* TBD. */
+    }
+  }
+#else /* USE_GNUTLS */
+  (void)ctx;
+#endif
+  return result;
+}
+
 /*
  * Might be called twice for happy eyeballs.
  */
@@ -2265,7 +2337,9 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
 #define H3_ALPN "\x2h3\x5h3-29"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,
-                               tls_ctx_setup, &ctx->tls, &ctx->conn_ref);
+                               cf_ngtcp2_tls_ctx_setup, &ctx->tls,
+                               &ctx->conn_ref,
+                               cf_ngtcp2_on_session_reuse);
   if(result)
     return result;
 
@@ -2379,9 +2453,6 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
     goto out;
 
   if(ngtcp2_conn_get_handshake_completed(ctx->qconn)) {
-    ctx->handshake_at = now;
-    CURL_TRC_CF(data, cf, "handshake complete after %dms",
-               (int)Curl_timediff(now, ctx->started_at));
     result = qng_verify_peer(cf, data);
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");

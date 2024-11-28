@@ -2917,7 +2917,8 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 
     Curl_ssl_sessionid_lock(data);
     result = Curl_ssl_set_sessionid(cf, data, peer, NULL, der_session_buf,
-                                    der_session_size, ossl_session_free);
+                                    der_session_size, ossl_session_free,
+                                    NULL, 0);
     Curl_ssl_sessionid_unlock(data);
   }
 
@@ -3975,7 +3976,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   if(ssl_config->primary.cache_session) {
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, peer, (void **)&der_sessionid,
-      &der_sessionid_size, NULL)) {
+      &der_sessionid_size, NULL, NULL, NULL)) {
       /* we got a session id, use it! */
       ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
         (long)der_sessionid_size);
@@ -4711,8 +4712,8 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
         void *old_ssl_sessionid = NULL;
         bool incache;
         Curl_ssl_sessionid_lock(data);
-        incache = !(Curl_ssl_getsessionid(cf, data, peer,
-                                          &old_ssl_sessionid, NULL, NULL));
+        incache = !(Curl_ssl_getsessionid(cf, data, peer, &old_ssl_sessionid,
+                                          NULL, NULL, NULL, NULL));
         if(incache) {
           infof(data, "Remove session ID again from cache");
           Curl_ssl_delsessionid(data, old_ssl_sessionid);

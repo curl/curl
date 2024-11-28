@@ -225,13 +225,19 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
  * @param idsize  on return the size of the TLS session data
  * @param palpn   on return the ALPN string used by the session,
  *                set to NULL when not interested
+ * @param quic_tp on return, any QUIC transport parameter saved,
+ *                set to NULL when not interested
+ * @param quic_tp_len on return, the number of bytes in `quic_tp``
+ *                set to NULL when not interested
  */
 bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            const struct ssl_peer *peer,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
-                           char **palpn);
+                           char **palpn,
+                           unsigned char **quic_tp,
+                           size_t *quic_tp_len);
 
 /* Set a TLS session ID for `peer`. Replaces an existing session ID if
  * not already the same.
@@ -248,7 +254,8 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 const char *alpn,
                                 void *sessionid,
                                 size_t sessionid_size,
-                                Curl_ssl_sessionid_dtor *sessionid_free_cb);
+                                Curl_ssl_sessionid_dtor *sessionid_free_cb,
+                                unsigned char *quic_tp, size_t quic_tp_len);
 
 #endif /* USE_SSL */
 

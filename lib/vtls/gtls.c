@@ -724,7 +724,9 @@ CURLcode Curl_gtls_update_session_id(struct Curl_cfilter *cf,
                                      struct Curl_easy *data,
                                      gnutls_session_t session,
                                      struct ssl_peer *peer,
-                                     const char *alpn)
+                                     const char *alpn,
+                                     unsigned char *quic_tp,
+                                     size_t quic_tp_len)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   void *connect_sessionid;
@@ -757,7 +759,7 @@ CURLcode Curl_gtls_update_session_id(struct Curl_cfilter *cf,
   /* store this session id, takes ownership */
   result = Curl_ssl_set_sessionid(cf, data, peer, alpn,
                                   connect_sessionid, connect_idsize,
-                                  gtls_sessionid_free);
+                                  gtls_sessionid_free, quic_tp, quic_tp_len);
   Curl_ssl_sessionid_unlock(data);
   return result;
 }
@@ -768,7 +770,7 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   return Curl_gtls_update_session_id(cf, data, session, &connssl->peer,
-                                     connssl->alpn_negotiated);
+                                     connssl->alpn_negotiated, NULL, 0);
 }
 
 static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
@@ -1046,15 +1048,55 @@ static int keylog_callback(gnutls_session_t session, const char *label,
   return 0;
 }
 
+static CURLcode gtls_on_session_reuse(struct Curl_cfilter *cf,
+                                      struct Curl_easy *data,
+                                      const char *session_alpn,
+                                      const unsigned char *quic_tp,
+                                      size_t quic_tp_len,
+                                      bool *do_early_data)
+{
+  struct ssl_connect_data *connssl = cf->ctx;
+  struct gtls_ssl_backend_data *backend =
+    (struct gtls_ssl_backend_data *)connssl->backend;
+  CURLcode result = CURLE_OK;
+
+  (void)quic_tp;
+  (void)quic_tp_len;
+
+  *do_early_data = FALSE;
+  connssl->earlydata_max =
+    gnutls_record_get_max_early_data_size(backend->gtls.session);
+  if((!connssl->earlydata_max ||
+      connssl->earlydata_max == 0xFFFFFFFFUL)) {
+    /* Seems to be GnuTLS way to signal no EarlyData in session */
+    CURL_TRC_CF(data, cf, "TLS session does not allow earlydata");
+  }
+  else if(!Curl_alpn_contains_proto(connssl->alpn, session_alpn)) {
+    CURL_TRC_CF(data, cf, "TLS session has different ALPN, no early data");
+  }
+  else {
+    CURL_TRC_CF(data, cf, "TLS session allows %zu earlydata bytes, "
+                "reusing ALPN '%s'",
+                connssl->earlydata_max, session_alpn);
+    connssl->earlydata_state = ssl_earlydata_use;
+    connssl->state = ssl_connection_deferred;
+    result = Curl_alpn_set_negotiated(cf, data, connssl,
+                    (const unsigned char *)session_alpn,
+                    session_alpn ? strlen(session_alpn) : 0);
+    *do_early_data = !result;
+  }
+  return result;
+}
+
 CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
                             const unsigned char *alpn, size_t alpn_len,
-                            struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
-                            void *ssl_user_data)
+                            void *ssl_user_data,
+                            Curl_gtls_init_session_reuse_cb *sess_reuse_cb)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -1088,9 +1130,12 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     void *ssl_sessionid;
     size_t ssl_idsize;
     char *session_alpn;
+    unsigned char *quic_tp;
+    size_t quic_tp_len;
+
     Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, peer,
-                              &ssl_sessionid, &ssl_idsize, &session_alpn)) {
+    if(!Curl_ssl_getsessionid(cf, data, peer, &ssl_sessionid, &ssl_idsize,
+                              &session_alpn, &quic_tp, &quic_tp_len)) {
       /* we got a session id, use it! */
       int rc;
 
@@ -1105,27 +1150,16 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
 #else
         if(ssl_config->earlydata &&
 #endif
-           !cf->conn->connect_only && connssl &&
-           (gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3) &&
-           Curl_alpn_contains_proto(connssl->alpn, session_alpn)) {
-          connssl->earlydata_max =
-            gnutls_record_get_max_early_data_size(gctx->session);
-          if((!connssl->earlydata_max ||
-              connssl->earlydata_max == 0xFFFFFFFFUL)) {
-            /* Seems to be GnuTLS way to signal no EarlyData in session */
-            CURL_TRC_CF(data, cf, "TLS session does not allow earlydata");
-          }
-          else {
-            CURL_TRC_CF(data, cf, "TLS session allows %zu earlydata bytes, "
-                        "reusing ALPN '%s'",
-                        connssl->earlydata_max, session_alpn);
-            connssl->earlydata_state = ssl_earlydata_use;
-            connssl->state = ssl_connection_deferred;
-            result = Curl_alpn_set_negotiated(cf, data, connssl,
-                            (const unsigned char *)session_alpn,
-                            session_alpn ? strlen(session_alpn) : 0);
+           !cf->conn->connect_only &&
+           (gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3)) {
+          bool do_early_data = FALSE;
+          if(sess_reuse_cb) {
+            result = sess_reuse_cb(cf, data, session_alpn, quic_tp,
+                                   quic_tp_len, &do_early_data);
             if(result)
               return result;
+          }
+          if(do_early_data) {
             /* We only try the ALPN protocol the session used before,
              * otherwise we might send early data for the wrong protocol */
             gtls_alpns[0].data = (unsigned char *)session_alpn;
@@ -1197,7 +1231,8 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
-                              proto.data, proto.len, connssl, NULL, NULL, cf);
+                              proto.data, proto.len, NULL, NULL, cf,
+                              gtls_on_session_reuse);
   if(result)
     return result;
 
