@@ -21,7 +21,7 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
-#include "tool_setup.h"
+#include "curl_setup.h"
 
 #if defined(HAVE_SETMODE) || defined(HAVE__SETMODE)
 
@@ -33,11 +33,9 @@
 #  include <fcntl.h>
 #endif
 
-#include "tool_binmode.h"
+#include "curl_binmode.h"
 
-#include "memdebug.h" /* keep this as LAST include */
-
-void set_binmode(FILE *stream)
+void curlx_set_binmode(FILE *stream)
 {
 #ifdef O_BINARY
 #  ifdef __HIGHC__

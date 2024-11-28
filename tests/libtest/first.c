@@ -28,20 +28,13 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#ifdef HAVE_IO_H
-#  include <io.h> /* for setmode() */
-#endif
-
-#ifdef HAVE_FCNTL_H
-#  include <fcntl.h> /* for setmode() */
-#endif
-
 #ifdef CURLDEBUG
 #  define MEMDEBUG_NODEFINES
 #  include "memdebug.h"
 #endif
 
 #include "timediff.h"
+#include "curl_binmode.h"
 
 int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
                    struct timeval *tv)
@@ -141,15 +134,7 @@ int main(int argc, char **argv)
   int basearg;
   test_func_t test_func;
 
-#ifdef O_BINARY
-#  ifdef __HIGHC__
-  _setmode(stdout, O_BINARY);
-#  elif defined(HAVE__SETMODE)
-  (void)_setmode(fileno(stdout), O_BINARY);
-#  else
-  (void)setmode(fileno(stdout), O_BINARY);
-#  endif
-#endif
+  curlx_set_binmode(stdout);
 
   memory_tracking_init();
 

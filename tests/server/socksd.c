@@ -1098,11 +1098,11 @@ int main(int argc, char *argv[])
 #ifdef _WIN32
   win32_init();
   atexit(win32_cleanup);
-
-  _setmode(fileno(stdin), O_BINARY);
-  _setmode(fileno(stdout), O_BINARY);
-  _setmode(fileno(stderr), O_BINARY);
 #endif
+
+  curlx_set_binmode(stdin);
+  curlx_set_binmode(stdout);
+  curlx_set_binmode(stderr);
 
   install_signal_handlers(false);
 
