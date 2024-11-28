@@ -458,9 +458,9 @@
 #endif
 
 #ifdef _WIN32
-#define Curl_getpid() ((unsigned int)GetCurrentProcessId())
+#define Curl_getpid() GetCurrentProcessId()
 #else
-#define Curl_getpid() ((unsigned int)getpid())
+#define Curl_getpid() getpid()
 #endif
 
 /*
