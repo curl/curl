@@ -228,6 +228,9 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
+          if [ '${{ matrix.sys }}' != 'msys' ]; then
+            export CFLAGS=-DNO_OLDNAMES
+          fi
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             if [[ '${{ matrix.env }}' = 'clang'* ]]; then
               options='-DCMAKE_C_COMPILER=clang'
@@ -417,6 +420,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
+          export CFLAGS=-DNO_OLDNAMES
           PATH="$(cygpath "${USERPROFILE}")/my-cache/${{ matrix.dir }}/bin:/c/msys64/usr/bin:$PATH"
           [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
@@ -508,6 +512,7 @@ jobs:
 
       - name: 'configure'
         run: |
+          export CFLAGS=-DNO_OLDNAMES
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
@@ -702,7 +707,7 @@ jobs:
             "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
             "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
             '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
-            "-DCMAKE_C_FLAGS=${cflags}" \
+            "-DCMAKE_C_FLAGS=-D_CRT_DECLARE_NONSTDC_NAMES=0 ${cflags}" \
             "-DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO ${ldflags}" \
             "-DCMAKE_SHARED_LINKER_FLAGS=/INCREMENTAL:NO ${ldflags}" \
             "-DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}" \
