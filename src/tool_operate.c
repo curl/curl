@@ -110,10 +110,12 @@ extern const unsigned char curl_ca_embed[];
 #endif
 #endif
 
-#ifndef O_BINARY
-/* since O_BINARY as used in bitmasks, setting it to zero makes it usable in
+/* since O_BINARY is used in bitmasks, setting it to zero makes it usable in
    source code but yet it does not ruin anything */
-#  define O_BINARY 0
+#ifdef O_BINARY
+#define CURL_O_BINARY O_BINARY
+#else
+#define CURL_O_BINARY 0
 #endif
 
 #ifndef SOL_IP
@@ -378,16 +380,16 @@ static CURLcode pre_transfer(struct GlobalConfig *global,
       case FAB$C_VAR:
       case FAB$C_VFC:
       case FAB$C_STMCR:
-        per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
+        per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
         break;
       default:
-        per->infd = open(per->uploadfile, O_RDONLY | O_BINARY,
+        per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY,
                          "rfm=stmlf", "ctx=stm");
       }
     }
     if(per->infd == -1)
 #else
-      per->infd = open(per->uploadfile, O_RDONLY | O_BINARY);
+      per->infd = open(per->uploadfile, O_RDONLY | CURL_O_BINARY);
     if((per->infd == -1) || fstat(per->infd, &fileinfo))
 #endif
     {
