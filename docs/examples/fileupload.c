@@ -32,6 +32,7 @@
 
 #ifdef _WIN32
 #define stat _stat
+#define fstat _fstat
 #endif
 
 int main(void)
