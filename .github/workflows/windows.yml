@@ -261,6 +261,7 @@ jobs:
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
+            CFLAGS+=' -DFTYPE=_off64_t -D_FILE_OFFSET_BITS=64'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
@@ -523,6 +524,7 @@ jobs:
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF
           else
+            CFLAGS+=' -DFTYPE=_off64_t -D_FILE_OFFSET_BITS=64'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --host=${TRIPLET} \
               --with-schannel --with-winidn \
