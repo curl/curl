@@ -33,8 +33,8 @@ archives](https://curl.se/mail/list.cgi?list=curl-distros)).
 ## Alt Linux
 
 - curl: http://www.sisyphus.ru/srpm/Sisyphus/curl
-- curl patches: http://www.sisyphus.ru/ru/srpm/Sisyphus/curl/patches
-- curl issues: http://www.sisyphus.ru/ru/srpm/Sisyphus/curl/bugs
+- curl issues: https://packages.altlinux.org/en/sisyphus/srpms/curl/issues/
+- curl patches: https://git.altlinux.org/gears/c/curl.git?p=curl.git;a=tree;f=.gear
 
 ## Arch Linux
 
