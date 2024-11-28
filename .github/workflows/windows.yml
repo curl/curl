@@ -307,10 +307,16 @@ jobs:
             make -C bld -j5 V=1 -C tests
           fi
           if [ '${{ matrix.build }}' != 'cmake' ]; then
-            find . -name '*.exe' -o -name '*.dll'
             # avoid libtool's .exe wrappers
-            mv bld/src/.libs/curl.exe bld/src/curl.exe
-            cp bld/lib/.libs/*.dll bld/src || true
+            mv bld/tests/http/clients/.libs/*.exe bld/tests/http/clients
+            mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
+            mv bld/tests/server/.libs/*.exe bld/tests/server
+            mv bld/tests/unit/.libs/*.exe bld/tests/unit
+            cp bld/lib/.libs/*.dll bld/tests/http/clients || true
+            cp bld/lib/.libs/*.dll bld/tests/libtest || true
+            cp bld/lib/.libs/*.dll bld/tests/server || true
+            cp bld/lib/.libs/*.dll bld/tests/unit || true
+            find . -name '*.exe' -o -name '*.dll'
           fi
 
       - name: 'install test prereqs'
