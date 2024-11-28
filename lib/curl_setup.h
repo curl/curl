@@ -183,7 +183,7 @@
 #  define sys_errlist _sys_errlist
 #  define strcmpi _strcmpi
 #  /* Workaround for dependency headers requiring deprecated symbols */
-#  if defined(HAVE_LIBZ) || defined(USE_OPENSSL)
+#  if defined(_MSC_VER) && (defined(HAVE_LIBZ) || defined(USE_OPENSSL))
 #    define off_t _off_t
 #  endif
 #endif
