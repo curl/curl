@@ -237,24 +237,22 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              void *cb_user_data, void *ssl_user_data,
                              Curl_vquic_session_reuse_cb *session_reuse_cb)
 {
-  CURLcode result;
-
 #ifdef USE_OPENSSL
-  (void)result;
+  (void)session_reuse_cb;
   return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, TRNSPRT_QUIC,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
-  (void)result;
   return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_WOLFSSL)
-  result = wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
+  CURLcode result = wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
   if(result)
     return result;
 
+  (void)session_reuse_cb;
   return wssl_init_ssl(ctx, cf, data, peer, alpn, alpn_len, ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"
