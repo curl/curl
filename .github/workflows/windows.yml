@@ -311,7 +311,7 @@ jobs:
             mv bld/tests/http/clients/.libs/*.exe bld/tests/http/clients
             mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
             mv bld/tests/server/.libs/*.exe bld/tests/server
-            mv bld/tests/unit/.libs/*.exe bld/tests/unit
+            mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
             cp bld/lib/.libs/*.dll bld/tests/http/clients || true
             cp bld/lib/.libs/*.dll bld/tests/libtest || true
             cp bld/lib/.libs/*.dll bld/tests/server || true
