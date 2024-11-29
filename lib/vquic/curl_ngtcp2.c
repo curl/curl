@@ -475,6 +475,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
                                                     data, &ctx->peer);
   CURL_TRC_CF(data, cf, "handshake complete after %dms",
              (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
+#ifdef USE_GNUTLS
   if(ctx->use_earlydata) {
     int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
     ctx->earlydata_accepted = !!(flags & GNUTLS_SFLAGS_EARLY_DATA);
@@ -484,6 +485,7 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
                               (curl_off_t)ctx->earlydata_skip :
                              -(curl_off_t)ctx->earlydata_skip);
   }
+#endif
   return 0;
 }
 
