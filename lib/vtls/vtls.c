@@ -599,6 +599,10 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
         *idsize = check->idsize;
       if(palpn)
         *palpn = check->alpn;
+      if(quic_tp && quic_tp_len) {
+        *quic_tp = check->quic_tp;
+        *quic_tp_len = check->quic_tp_len;
+      }
       no_match = FALSE;
       break;
     }

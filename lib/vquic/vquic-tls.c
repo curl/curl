@@ -245,6 +245,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #elif defined(USE_GNUTLS)
   return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
                             (const unsigned char *)alpn, alpn_len,
+                            TRNSPRT_QUIC,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_WOLFSSL)

@@ -139,8 +139,14 @@ struct cf_ngtcp2_ctx {
   uint64_t max_bidi_streams;         /* max bidi streams we can open */
   size_t earlydata_max;              /* max amount of early data supported by
                                         server on session reuse */
+  size_t earlydata_skip;            /* sending bytes to skip when earlydata
+                                     * is accepted by peer */
+  CURLcode tls_vrfy_result;          /* result of TLS peer verification */
   int qlogfd;
   BIT(initialized);
+  BIT(tls_handshake_complete);       /* TLS handshake is done */
+  BIT(use_earlydata);                /* Using 0RTT data */
+  BIT(earlydata_accepted);           /* 0RTT was acceptd by server */
   BIT(shutdown_started);             /* queued shutdown packets */
 };
 
@@ -444,7 +450,8 @@ static void quic_settings(struct cf_ngtcp2_ctx *ctx,
   }
 }
 
-static CURLcode init_ngh3_conn(struct Curl_cfilter *cf);
+static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
+                               struct Curl_easy *data);
 
 static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
 {
@@ -453,12 +460,29 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
   struct Curl_easy *data;
 
   (void)tconn;
-  if(ctx) {
-    ctx->handshake_at = Curl_now();
-    data = CF_DATA_CURRENT(cf);
-    if(data)
-      CURL_TRC_CF(data, cf, "handshake complete after %dms",
-                 (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
+  DEBUGASSERT(ctx);
+  data = CF_DATA_CURRENT(cf);
+  DEBUGASSERT(data);
+  if(!ctx || !data)
+    return NGHTTP3_ERR_CALLBACK_FAILURE;
+
+  ctx->handshake_at = Curl_now();
+  ctx->tls_handshake_complete = TRUE;
+  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  cf->conn->httpversion = 30;
+
+  ctx->tls_vrfy_result = Curl_vquic_tls_verify_peer(&ctx->tls, cf,
+                                                    data, &ctx->peer);
+  CURL_TRC_CF(data, cf, "handshake complete after %dms",
+             (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
+  if(ctx->use_earlydata) {
+    int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
+    ctx->earlydata_accepted = !!(flags & GNUTLS_SFLAGS_EARLY_DATA);
+    CURL_TRC_CF(data, cf, "server did%s accept %zu bytes of early data",
+                ctx->earlydata_accepted ? "" : " not", ctx->earlydata_skip);
+    Curl_pgrsEarlyData(data, ctx->earlydata_accepted ?
+                              (curl_off_t)ctx->earlydata_skip :
+                             -(curl_off_t)ctx->earlydata_skip);
   }
   return 0;
 }
@@ -729,16 +753,19 @@ static int cb_recv_rx_key(ngtcp2_conn *tconn, ngtcp2_encryption_level level,
                           void *user_data)
 {
   struct Curl_cfilter *cf = user_data;
+  struct cf_ngtcp2_ctx *ctx = cf ? cf->ctx : NULL;
+  struct Curl_easy *data = CF_DATA_CURRENT(cf);
   (void)tconn;
 
-  if(level != NGTCP2_ENCRYPTION_LEVEL_1RTT) {
+  if(level != NGTCP2_ENCRYPTION_LEVEL_1RTT)
     return 0;
-  }
 
-  if(init_ngh3_conn(cf) != CURLE_OK) {
-    return NGTCP2_ERR_CALLBACK_FAILURE;
+  DEBUGASSERT(ctx);
+  DEBUGASSERT(data);
+  if(ctx && data && !ctx->h3conn) {
+    if(init_ngh3_conn(cf, data))
+      return NGTCP2_ERR_CALLBACK_FAILURE;
   }
-
   return 0;
 }
 
@@ -1140,14 +1167,15 @@ static nghttp3_callbacks ngh3_callbacks = {
   NULL /* recv_settings */
 };
 
-static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
+static CURLcode init_ngh3_conn(struct Curl_cfilter *cf,
+                               struct Curl_easy *data)
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
-  CURLcode result;
-  int rc;
   int64_t ctrl_stream_id, qpack_enc_stream_id, qpack_dec_stream_id;
+  int rc;
 
   if(ngtcp2_conn_get_streams_uni_left(ctx->qconn) < 3) {
+    failf(data, "QUIC connection lacks 3 uni streams to run HTTP/3");
     return CURLE_QUIC_CONNECT_ERROR;
   }
 
@@ -1159,45 +1187,47 @@ static CURLcode init_ngh3_conn(struct Curl_cfilter *cf)
                                nghttp3_mem_default(),
                                cf);
   if(rc) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto fail;
+    failf(data, "error creating nghttp3 connection instance");
+    return CURLE_OUT_OF_MEMORY;
   }
 
   rc = ngtcp2_conn_open_uni_stream(ctx->qconn, &ctrl_stream_id, NULL);
   if(rc) {
-    result = CURLE_QUIC_CONNECT_ERROR;
-    goto fail;
+    failf(data, "error creating HTTP/3 control stream: %s",
+          ngtcp2_strerror(rc));
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   rc = nghttp3_conn_bind_control_stream(ctx->h3conn, ctrl_stream_id);
   if(rc) {
-    result = CURLE_QUIC_CONNECT_ERROR;
-    goto fail;
+    failf(data, "error binding HTTP/3 control stream: %s",
+          ngtcp2_strerror(rc));
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   rc = ngtcp2_conn_open_uni_stream(ctx->qconn, &qpack_enc_stream_id, NULL);
   if(rc) {
-    result = CURLE_QUIC_CONNECT_ERROR;
-    goto fail;
+    failf(data, "error creating HTTP/3 qpack encoding stream: %s",
+          ngtcp2_strerror(rc));
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   rc = ngtcp2_conn_open_uni_stream(ctx->qconn, &qpack_dec_stream_id, NULL);
   if(rc) {
-    result = CURLE_QUIC_CONNECT_ERROR;
-    goto fail;
+    failf(data, "error creating HTTP/3 qpack decoding stream: %s",
+          ngtcp2_strerror(rc));
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   rc = nghttp3_conn_bind_qpack_streams(ctx->h3conn, qpack_enc_stream_id,
                                        qpack_dec_stream_id);
   if(rc) {
-    result = CURLE_QUIC_CONNECT_ERROR;
-    goto fail;
+    failf(data, "error binding HTTP/3 qpack streams: %s",
+          ngtcp2_strerror(rc));
+    return CURLE_QUIC_CONNECT_ERROR;
   }
 
   return CURLE_OK;
-fail:
-
-  return result;
 }
 
 static ssize_t recv_closed_stream(struct Curl_cfilter *cf,
@@ -1247,6 +1277,10 @@ static ssize_t cf_ngtcp2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   DEBUGASSERT(ctx->qconn);
   DEBUGASSERT(ctx->h3conn);
   *err = CURLE_OK;
+
+  /* handshake verification failed in callback, do not recv anything */
+  if(ctx->tls_vrfy_result)
+    return ctx->tls_vrfy_result;
 
   pktx_init(&pktx, cf, data);
 
@@ -1545,6 +1579,10 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   pktx_init(&pktx, cf, data);
   *err = CURLE_OK;
 
+  /* handshake verification failed in callback, do not send anything */
+  if(ctx->tls_vrfy_result)
+    return ctx->tls_vrfy_result;
+
   (void)eos; /* TODO: use for stream EOF and block handling */
   result = cf_progress_ingress(cf, data, &pktx);
   if(result) {
@@ -1610,6 +1648,9 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     (void)nghttp3_conn_resume_stream(ctx->h3conn, stream->id);
   }
 
+  if(sent > 0 && !ctx->tls_handshake_complete && ctx->use_earlydata)
+    ctx->earlydata_skip += sent;
+
   result = cf_progress_egress(cf, data, &pktx);
   if(result) {
     *err = result;
@@ -1626,17 +1667,6 @@ out:
               stream ? stream->id : -1, len, sent, *err);
   CF_DATA_RESTORE(cf, save);
   return sent;
-}
-
-static CURLcode qng_verify_peer(struct Curl_cfilter *cf,
-                                struct Curl_easy *data)
-{
-  struct cf_ngtcp2_ctx *ctx = cf->ctx;
-
-  cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  cf->conn->httpversion = 30;
-
-  return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
 }
 
 static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
@@ -2151,6 +2181,24 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 #endif /* USE_OPENSSL */
 
 #ifdef USE_GNUTLS
+
+static const char *gtls_hs_msg_name(int mtype)
+{
+  switch(mtype) {
+    case 1: return "ClientHello";
+    case 2: return "ServerHello";
+    case 4: return "SessionTicket";
+    case 8: return "EncryptedExtensions";
+    case 11: return "Certificate";
+    case 13: return "CertificateRequest";
+    case 15: return "CertificateVerify";
+    case 20: return "Finished";
+    case 24: return "KeyUpdate";
+    case 254: return "MessageHash";
+  }
+  return "Unknown";
+}
+
 static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
                                   unsigned when, unsigned int incoming,
                                   const gnutls_datum_t *msg)
@@ -2164,10 +2212,10 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
   if(when && cf && ctx) { /* after message has been processed */
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     DEBUGASSERT(data);
-    if(data) {
-      CURL_TRC_CF(data, cf, "handshake: %s message type %d",
-                  incoming ? "incoming" : "outgoing", htype);
-    }
+    if(!data)
+      return 0;
+    CURL_TRC_CF(data, cf, "SSL message: %s %s [%d]",
+                incoming ? "<-" : "->", gtls_hs_msg_name(htype), htype);
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
       ngtcp2_ssize tplen;
@@ -2181,8 +2229,6 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
         CURL_TRC_CF(data, cf, "error encoding 0RTT transport data: %s",
                     ngtcp2_strerror((int)tplen));
       else {
-        CURL_TRC_CF(data, cf, "got %zd bytes of encoded 0RTT transport data",
-                    (ssize_t)tplen);
         quic_tp = (unsigned char *)tpbuf;
         quic_tp_len = (size_t)tplen;
       }
@@ -2286,15 +2332,14 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
 #ifdef USE_GNUTLS
   ctx->earlydata_max =
     gnutls_record_get_max_early_data_size(ctx->tls.gtls.session);
-  if((!ctx->earlydata_max || ctx->earlydata_max == 0xFFFFFFFFUL)) {
-    /* Seems to be GnuTLS way to signal no EarlyData in session */
-    CURL_TRC_CF(data, cf, "TLS session does not allow earlydata");
+  if((!ctx->earlydata_max)) {
+    CURL_TRC_CF(data, cf, "SSL session does not allow earlydata");
   }
   else if(strcmp("h3", session_alpn)) {
-    CURL_TRC_CF(data, cf, "no early data, TLS session from different ALPN");
+    CURL_TRC_CF(data, cf, "SSL session from different ALPN, no early data");
   }
   else if(!quic_tp || !quic_tp_len) {
-    CURL_TRC_CF(data, cf, "no early data, missing 0RTT transport parameters");
+    CURL_TRC_CF(data, cf, "no 0RTT transport parameters, no early data, ");
   }
   else {
     int rv;
@@ -2304,9 +2349,14 @@ static CURLcode cf_ngtcp2_on_session_reuse(struct Curl_cfilter *cf,
       CURL_TRC_CF(data, cf, "no early data, failed to set 0RTT transport "
                   "parameters: %s", ngtcp2_strerror(rv));
     else {
-      CURL_TRC_CF(data, cf, "TLS session ALMOST allows %zu earlydata bytes, "
-                  "reusing ALPN '%s'", ctx->earlydata_max, session_alpn);
-      /* TBD. */
+      infof(data, "SSL session allows %zu bytes of early data, "
+            "reusing ALPN '%s'", ctx->earlydata_max, session_alpn);
+      result = init_ngh3_conn(cf, data);
+      if(!result) {
+        ctx->use_earlydata = TRUE;
+        cf->connected = TRUE;
+        *do_early_data = TRUE;
+      }
     }
   }
 #else /* USE_GNUTLS */
@@ -2334,23 +2384,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   int qfd;
 
   DEBUGASSERT(ctx->initialized);
-  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
-  if(result)
-    return result;
-
-#define H3_ALPN "\x2h3\x5h3-29"
-  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
-                               H3_ALPN, sizeof(H3_ALPN) - 1,
-                               cf_ngtcp2_tls_ctx_setup, &ctx->tls,
-                               &ctx->conn_ref,
-                               cf_ngtcp2_on_session_reuse);
-  if(result)
-    return result;
-
-#ifdef USE_OPENSSL
-  SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
-#endif
-
   ctx->dcid.datalen = NGTCP2_MAX_CIDLEN;
   result = Curl_rand(data, ctx->dcid.data, NGTCP2_MAX_CIDLEN);
   if(result)
@@ -2392,7 +2425,21 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   if(rc)
     return CURLE_QUIC_CONNECT_ERROR;
 
+  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
+  if(result)
+    return result;
+
+#define H3_ALPN "\x2h3\x5h3-29"
+  result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
+                               H3_ALPN, sizeof(H3_ALPN) - 1,
+                               cf_ngtcp2_tls_ctx_setup, &ctx->tls,
+                               &ctx->conn_ref,
+                               cf_ngtcp2_on_session_reuse);
+  if(result)
+    return result;
+
 #ifdef USE_OPENSSL
+  SSL_set_quic_use_legacy_codepoint(ctx->tls.ossl.ssl, 0);
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.ossl.ssl);
 #elif defined(USE_GNUTLS)
   ngtcp2_conn_set_tls_native_handle(ctx->qconn, ctx->tls.gtls.session);
@@ -2443,6 +2490,11 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
     result = cf_connect_start(cf, data, &pktx);
     if(result)
       goto out;
+    if(cf->connected) {
+      cf->conn->alpn = CURL_HTTP_VERSION_3;
+      *done = TRUE;
+      goto out;
+    }
     result = cf_progress_egress(cf, data, &pktx);
     /* we do not expect to be able to recv anything yet */
     goto out;
@@ -2457,7 +2509,7 @@ static CURLcode cf_ngtcp2_connect(struct Curl_cfilter *cf,
     goto out;
 
   if(ngtcp2_conn_get_handshake_completed(ctx->qconn)) {
-    result = qng_verify_peer(cf, data);
+    result = ctx->tls_vrfy_result;
     if(!result) {
       CURL_TRC_CF(data, cf, "peer verified");
       cf->connected = TRUE;
