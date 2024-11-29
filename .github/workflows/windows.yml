@@ -288,9 +288,9 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           else
+            PATH="$PWD/bld/lib/.libs:$PATH"
             # avoid libtool's curl.exe wrapper
             mv bld/src/.libs/curl.exe bld/src/curl.exe
-            cp bld/lib/.libs/*.dll bld/src || true
           fi
           find . -name '*.exe' -o -name '*.dll'
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
@@ -312,10 +312,6 @@ jobs:
             mv bld/tests/libtest/.libs/*.exe bld/tests/libtest
             mv bld/tests/server/.libs/*.exe bld/tests/server
             mv bld/tests/unit/.libs/*.exe bld/tests/unit || true
-            cp bld/lib/.libs/*.dll bld/tests/http/clients || true
-            cp bld/lib/.libs/*.dll bld/tests/libtest || true
-            cp bld/lib/.libs/*.dll bld/tests/server || true
-            cp bld/lib/.libs/*.dll bld/tests/unit || true
           fi
 
       - name: 'install test prereqs'
@@ -344,6 +340,7 @@ jobs:
             PATH="$PWD/bld/lib:$PATH"
             cmake --build bld --config '${{ matrix.type }}' --target test-ci
           else
+            PATH="$PWD/bld/lib/.libs:$PATH"
             make -C bld -j5 V=1 test-ci
           fi
 
