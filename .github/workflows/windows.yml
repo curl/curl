@@ -316,7 +316,6 @@ jobs:
             cp bld/lib/.libs/*.dll bld/tests/libtest || true
             cp bld/lib/.libs/*.dll bld/tests/server || true
             cp bld/lib/.libs/*.dll bld/tests/unit || true
-            find . -name '*.exe' -o -name '*.dll'
           fi
 
       - name: 'install test prereqs'
