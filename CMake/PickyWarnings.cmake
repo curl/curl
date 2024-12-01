@@ -31,9 +31,6 @@ if(CURL_WERROR AND
      NOT CMAKE_VERSION VERSION_LESS 3.23.0) OR  # to avoid check_symbol_exists() conflicting with GCC -pedantic-errors
    CMAKE_C_COMPILER_ID MATCHES "Clang"))
   list(APPEND _picky "-pedantic-errors")
-  if(MSVC)  # clang-cl
-    list(APPEND _picky "-Wno-language-extension-token")  # Override default error to make __int64 size detection pass
-  endif()
 endif()
 
 if(APPLE AND
@@ -137,7 +134,7 @@ if(PICKY_COMPILER)
       )
       if(NOT MSVC)
         list(APPEND _picky_enable
-          -Wlanguage-extension-token         # clang  3.0  # Avoid for clang-cl to allow __int64
+          -Wlanguage-extension-token       # clang  3.0
         )
       endif()
       # Enable based on compiler version
@@ -247,15 +244,18 @@ endif()
 
 # clang-cl
 if(CMAKE_C_COMPILER_ID STREQUAL "Clang" AND MSVC)
-  if(CMAKE_VERSION VERSION_LESS 3.12)
-    set(_picky_tmp "")
-    foreach(_ccopt IN LISTS _picky)
+  list(APPEND _picky "-Wno-language-extension-token")  # Allow __int64
+
+  set(_picky_tmp "")
+  foreach(_ccopt IN LISTS _picky)
+    # Prefix -Wall, otherwise clang-cl interprets it as an MSVC option and translates it to -Weverything
+    if(_ccopt MATCHES "^-W" AND NOT _ccopt STREQUAL "-Wall")
+      list(APPEND _picky_tmp ${_ccopt})
+    else()
       list(APPEND _picky_tmp "/clang:${_ccopt}")
-    endforeach()
-    set(_picky ${_picky_tmp})
-  else()
-    list(TRANSFORM _picky PREPEND "/clang:")
-  endif()
+    endif()
+  endforeach()
+  set(_picky ${_picky_tmp})
 endif()
 
 if(_picky)
