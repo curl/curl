@@ -69,7 +69,7 @@
 
 #endif
 
-static inline void curl_simple_lock_lock(curl_simple_lock *lock)
+static CURL_INLINE void curl_simple_lock_lock(curl_simple_lock *lock)
 {
   for(;;) {
     if(!atomic_exchange_explicit(lock, true, memory_order_acquire))
@@ -88,7 +88,7 @@ static inline void curl_simple_lock_lock(curl_simple_lock *lock)
   }
 }
 
-static inline void curl_simple_lock_unlock(curl_simple_lock *lock)
+static CURL_INLINE void curl_simple_lock_unlock(curl_simple_lock *lock)
 {
   atomic_store_explicit(lock, false, memory_order_release);
 }

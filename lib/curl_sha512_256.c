@@ -283,7 +283,7 @@ Curl_sha512_256_finish(unsigned char *digest,
 #ifdef __GNUC__
 #  if defined(__has_attribute) && defined(__STDC_VERSION__)
 #    if __has_attribute(always_inline) && __STDC_VERSION__ >= 199901
-#      define MHDX_INLINE inline __attribute__((always_inline))
+#      define MHDX_INLINE CURL_INLINE __attribute__((always_inline))
 #    endif
 #  endif
 #endif
@@ -296,9 +296,9 @@ Curl_sha512_256_finish(unsigned char *digest,
 #endif
 
 #if !defined(MHDX_INLINE)
-   /* Assume that 'inline' keyword works or the
+   /* Assume that 'CURL_INLINE' keyword works or the
     * macro was already defined correctly. */
-#  define MHDX_INLINE inline
+#  define MHDX_INLINE CURL_INLINE
 #endif
 
 /* Bits manipulation macros and functions.
