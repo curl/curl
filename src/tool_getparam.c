@@ -1849,6 +1849,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         errorf(global, "--continue-at is mutually exclusive with --range");
         return PARAM_BAD_USE;
       }
+      if(config->file_clobber_mode == CLOBBER_NEVER) {
+        errorf(config->global,
+               "--continue-at is mutually exclusive with --no-clobber");
+        return PARAM_BAD_USE;
+      }
       /* This makes us continue an ftp transfer at given position */
       if(strcmp(nextarg, "-")) {
         err = str2offset(&config->resume_from, nextarg);
@@ -2320,6 +2325,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->output_dir, nextarg, DENY_BLANK);
       break;
     case C_CLOBBER: /* --clobber */
+      if(config->use_resume && !toggle) {
+        errorf(config->global,
+               "--continue-at is mutually exclusive with --no-clobber");
+        return PARAM_BAD_USE;
+      }
       config->file_clobber_mode = toggle ? CLOBBER_ALWAYS : CLOBBER_NEVER;
       break;
     case C_OUTPUT: /* --output */
