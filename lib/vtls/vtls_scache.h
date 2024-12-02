@@ -122,6 +122,9 @@ struct Curl_ssl_session {
   int lifetime_secs;           /* ticket lifetime (-1 unknown) */
   int ietf_tls_id;             /* TLS protocol identifier negotiated */
   char *alpn;                  /* APLN TLS negotiated protocol string */
+  size_t earlydata_max;        /* max 0-RTT data supported by peer */
+  const unsigned char *quic_tp; /* Optional QUIC transport param bytes */
+  size_t quic_tp_len;          /* number of bytes in quic_tp */
   struct Curl_llist_node list; /*  internal storage handling */
 };
 
@@ -142,7 +145,18 @@ CURLcode
 Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
                         int ietf_tls_id, const char *alpn,
                         curl_off_t time_received, long lifetime_secs,
+                        size_t earlydata_max,
                         struct Curl_ssl_session **psession);
+
+/* Variation of session creation with quic transport parameter bytes,
+ * Takes ownership of `quic_tp` regardless of return code. */
+CURLcode
+Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
+                         int ietf_tls_id, const char *alpn,
+                         curl_off_t time_received, long lifetime_secs,
+                         size_t earlydata_max,
+                         unsigned char *quic_tp, size_t quic_tp_len,
+                         struct Curl_ssl_session **psession);
 
 /* Destroy a `session` instance. Can be called with NULL.
  * Does NOT need locking. */

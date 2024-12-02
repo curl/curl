@@ -235,7 +235,8 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct ssl_peer *peer,
                              const char *alpn, size_t alpn_len,
                              Curl_vquic_tls_ctx_setup *cb_setup,
-                             void *cb_user_data, void *ssl_user_data)
+                             void *cb_user_data, void *ssl_user_data,
+                             Curl_vquic_session_reuse_cb *session_reuse_cb)
 {
   char tls_id[80];
   CURLcode result;
@@ -250,6 +251,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 #error "no TLS lib in used, should not happen"
   return CURLE_FAILED_INIT;
 #endif
+  (void)session_reuse_cb;
   result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
   if(result)
     return result;
@@ -260,15 +262,16 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
-  (void)result;
   return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
-                            (const unsigned char *)alpn, alpn_len, NULL,
-                            cb_setup, cb_user_data, ssl_user_data);
+                            (const unsigned char *)alpn, alpn_len,
+                            cb_setup, cb_user_data, ssl_user_data,
+                            session_reuse_cb);
 #elif defined(USE_WOLFSSL)
   result = wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
   if(result)
     return result;
 
+  (void)session_reuse_cb;
   return wssl_init_ssl(ctx, cf, data, peer, alpn, alpn_len, ssl_user_data);
 #else
 #error "no TLS lib in used, should not happen"

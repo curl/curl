@@ -1309,7 +1309,7 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                QUICHE_H3_APPLICATION_PROTOCOL,
                                sizeof(QUICHE_H3_APPLICATION_PROTOCOL) - 1,
-                               NULL, NULL, cf);
+                               NULL, NULL, cf, NULL);
   if(result)
     return result;
 

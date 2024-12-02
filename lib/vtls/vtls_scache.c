@@ -103,6 +103,11 @@ static void cf_ssl_scache_clear_session(struct Curl_ssl_session *s)
     s->sdata = NULL;
   }
   s->sdata_len = 0;
+  if(s->quic_tp) {
+    free((void *)s->quic_tp);
+    s->quic_tp = NULL;
+  }
+  s->quic_tp_len = 0;
   s->ietf_tls_id = 0;
   s->time_received = 0;
   s->lifetime_secs = 0;
@@ -120,7 +125,21 @@ CURLcode
 Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
                         int ietf_tls_id, const char *alpn,
                         curl_off_t time_received, long lifetime_secs,
+                        size_t earlydata_max,
                         struct Curl_ssl_session **psession)
+{
+  return Curl_ssl_session_create2(sdata, sdata_len, ietf_tls_id, alpn,
+                                  time_received, lifetime_secs,
+                                  earlydata_max, NULL, 0, psession);
+}
+
+CURLcode
+Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
+                         int ietf_tls_id, const char *alpn,
+                         curl_off_t time_received, long lifetime_secs,
+                         size_t earlydata_max,
+                         unsigned char *quic_tp, size_t quic_tp_len,
+                         struct Curl_ssl_session **psession)
 {
   struct Curl_ssl_session *s;
 
@@ -133,6 +152,7 @@ Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
   s = calloc(1, sizeof(*s));
   if(!s) {
     free(sdata);
+    free(quic_tp);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -147,8 +167,11 @@ Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
     lifetime_secs = CURL_SCACHE_MAX_12_LIFETIME_SEC;
 
   s->lifetime_secs = (int)lifetime_secs;
+  s->earlydata_max = earlydata_max;
   s->sdata = sdata;
   s->sdata_len = sdata_len;
+  s->quic_tp = quic_tp;
+  s->quic_tp_len = quic_tp_len;
   if(alpn) {
     s->alpn = strdup(alpn);
     if(!s->alpn) {
@@ -738,8 +761,10 @@ out:
   }
   else
     CURL_TRC_CF(data, cf, "[SCACHE] added session for %s [proto=0x%x, "
-                "lifetime=%d, alpn=%s], peer has %zu sessions now",
+                "lifetime=%d, alpn=%s, earlydata=%zu, quic_tp=%s], "
+                "peer has %zu sessions now",
                 ssl_peer_key, s->ietf_tls_id, s->lifetime_secs, s->alpn,
+                s->earlydata_max, s->quic_tp ? "yes" : "no",
                 Curl_llist_count(&peer->sessions));
   return result;
 }
@@ -779,6 +804,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
   struct Curl_ssl_scache *scache = data->state.ssl_scache;
   struct Curl_ssl_scache_peer *peer = NULL;
   struct Curl_llist_node *n;
+  struct Curl_ssl_session *s = NULL;
   CURLcode result;
 
   *ps = NULL;
@@ -791,15 +817,24 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
     cf_scache_peer_remove_expired(peer, (curl_off_t)time(NULL));
     n = Curl_llist_head(&peer->sessions);
     if(n) {
-      *ps = Curl_node_take_elem(n);
+      s = Curl_node_take_elem(n);
       (scache->age)++;            /* increase general age */
       peer->age = scache->age; /* set this as used in this age */
     }
   }
   Curl_ssl_scache_unlock(data);
-
-  CURL_TRC_CF(data, cf, "[SCACHE] %s cached session for '%s'",
-              *ps ? "Found" : "No", ssl_peer_key);
+  if(s) {
+    *ps = s;
+    CURL_TRC_CF(data, cf, "[SCACHE] took session for %s [proto=0x%x, "
+                "lifetime=%d, alpn=%s, earlydata=%zu, quic_tp=%s], "
+                "%zu sessions remain",
+                ssl_peer_key, s->ietf_tls_id, s->lifetime_secs, s->alpn,
+                s->earlydata_max, s->quic_tp ? "yes" : "no",
+                Curl_llist_count(&peer->sessions));
+  }
+  else {
+    CURL_TRC_CF(data, cf, "[SCACHE] no cached session for %s", ssl_peer_key);
+  }
   return result;
 }
 
