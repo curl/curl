@@ -352,7 +352,7 @@ CURLcode Curl_auth_create_digest_md5_message(struct Curl_easy *data,
   char algorithm[64];
   char qop_options[64];
   int qop_values;
-  char cnonce[33];
+  char cnonce[17];
   char nonceCount[] = "00000001";
   char method[]     = "AUTHENTICATE";
   char qop[]        = DIGEST_QOP_VALUE_STRING_AUTH;
@@ -709,7 +709,7 @@ static CURLcode auth_create_digest_http_message(
     digest->nc = 1;
 
   if(!digest->cnonce) {
-    char cnoncebuf[33];
+    char cnoncebuf[17];
     result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
                            sizeof(cnoncebuf));
     if(result)
