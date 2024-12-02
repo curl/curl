@@ -1845,6 +1845,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       err = getstr(&config->cookiejar, nextarg, DENY_BLANK);
       break;
     case C_CONTINUE_AT: /* --continue-at */
+      if(config->range) {
+        errorf(global, "--continue-at is mutually exclusive with --range");
+        return PARAM_BAD_USE;
+      }
       /* This makes us continue an ftp transfer at given position */
       if(strcmp(nextarg, "-")) {
         err = str2offset(&config->resume_from, nextarg);
@@ -2397,6 +2401,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_RANGE: /* --range */
+      if(config->use_resume) {
+        errorf(global, "--continue-at is mutually exclusive with --range");
+        return PARAM_BAD_USE;
+      }
       /* Specifying a range WITHOUT A DASH will create an illegal HTTP range
          (and will not actually be range by definition). The manpage
          previously claimed that to be a good way, why this code is added to

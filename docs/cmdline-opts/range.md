@@ -55,3 +55,6 @@ attempt to get a range, curl instead gets the whole document.
 FTP and SFTP range downloads only support the simple 'start-stop' syntax
 (optionally with one of the numbers omitted). FTP use depends on the extended
 FTP command SIZE.
+
+This command line option is mutually exclusive with --continue-at: you can only
+use one of them for a single transfer.
