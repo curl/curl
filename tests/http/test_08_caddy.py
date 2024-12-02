@@ -210,7 +210,7 @@ class TestCaddy:
             respdata = open(curl.response_file(i)).readlines()
             assert respdata == exp_data
 
-    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_08_08_earlydata(self, env: Env, httpd, caddy, proto):
         count = 2
         docname = 'data10k.data'
@@ -230,12 +230,15 @@ class TestCaddy:
         self.check_downloads(client, srcfile, count)
         earlydata = {}
         for line in r.trace_lines:
-            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
+            m = re.match(r'^\[t-(\d+)] EarlyData: (-?\d+)', line)
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
-        # Caddy does not support early data
         assert earlydata[0] == 0, f'{earlydata}'
-        assert earlydata[1] == 0, f'{earlydata}'
+        if proto == 'h3':
+            assert earlydata[1] == 71, f'{earlydata}'
+        else:
+            # Caddy does not support early data on TCP
+            assert earlydata[1] == 0, f'{earlydata}'
 
     def check_downloads(self, client, srcfile: str, count: int,
                         complete: bool = True):

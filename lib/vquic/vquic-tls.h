@@ -35,6 +35,7 @@
 #include "vtls/wolfssl.h"
 
 struct ssl_peer;
+struct Curl_ssl_session;
 
 struct curl_tls_ctx {
 #ifdef USE_OPENSSL
@@ -57,6 +58,11 @@ typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
                                           struct Curl_easy *data,
                                           void *cb_user_data);
 
+typedef CURLcode Curl_vquic_session_reuse_cb(struct Curl_cfilter *cf,
+                                             struct Curl_easy *data,
+                                             struct Curl_ssl_session *scs,
+                                             bool *do_early_data);
+
 /**
  * Initialize the QUIC TLS instances based of the SSL configurations
  * for the connection filter, transfer and peer.
@@ -68,8 +74,9 @@ typedef CURLcode Curl_vquic_tls_ctx_setup(struct Curl_cfilter *cf,
  *                    may be NULL
  * @param alpn_len    the overall number of bytes in `alpn`
  * @param cb_setup    optional callback for early TLS config
- ± @param cb_user_data user_data param for callback
+ * @param cb_user_data user_data param for callback
  * @param ssl_user_data  optional pointer to set in TLS application context
+ * @param session_reuse_cb callback to handle session reuse, signal early data
  */
 CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              struct Curl_cfilter *cf,
@@ -78,7 +85,8 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              const char *alpn, size_t alpn_len,
                              Curl_vquic_tls_ctx_setup *cb_setup,
                              void *cb_user_data,
-                             void *ssl_user_data);
+                             void *ssl_user_data,
+                             Curl_vquic_session_reuse_cb *session_reuse_cb);
 
 /**
  * Cleanup all data that has been initialized.
