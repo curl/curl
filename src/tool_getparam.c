@@ -1849,6 +1849,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         errorf(global, "--continue-at is mutually exclusive with --range");
         return PARAM_BAD_USE;
       }
+      if(config->rm_partial) {
+        errorf(config->global,
+               "--continue-at is mutually exclusive with --remove-on-error");
+        return PARAM_BAD_USE;
+      }
       if(config->file_clobber_mode == CLOBBER_NEVER) {
         errorf(config->global,
                "--continue-at is mutually exclusive with --no-clobber");
@@ -2162,6 +2167,11 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_REMOVE_ON_ERROR: /* --remove-on-error */
+      if(config->use_resume && toggle) {
+        errorf(config->global,
+               "--continue-at is mutually exclusive with --remove-on-error");
+        return PARAM_BAD_USE;
+      }
       config->rm_partial = toggle;
       break;
     case C_FAIL: /* --fail */
