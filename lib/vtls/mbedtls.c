@@ -880,7 +880,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
     Curl_ssl_sessionid_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &sdata, &slen,
-                              NULL, NULL, NULL) && slen) {
+                              NULL, NULL, NULL, NULL) && slen) {
       mbedtls_ssl_session session;
 
       mbedtls_ssl_session_init(&session);
@@ -1161,7 +1161,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
           Curl_ssl_sessionid_lock(data);
           result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
                                           sdata, slen, mbedtls_session_free,
-                                          NULL, 0);
+                                          0, NULL, 0);
           Curl_ssl_sessionid_unlock(data);
           if(!result)
             sdata = NULL;

@@ -236,6 +236,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            char **palpn,
+                           size_t *earlydata_max,
                            unsigned char **quic_tp,
                            size_t *quic_tp_len);
 
@@ -255,6 +256,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 void *sessionid,
                                 size_t sessionid_size,
                                 Curl_ssl_sessionid_dtor *sessionid_free_cb,
+                                size_t earlydata_max,
                                 unsigned char *quic_tp, size_t quic_tp_len);
 
 #endif /* USE_SSL */

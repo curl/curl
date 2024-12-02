@@ -542,6 +542,7 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
                            void **ssl_sessionid,
                            size_t *idsize, /* set 0 if unknown */
                            char **palpn,
+                           size_t *earlydata_max,
                            unsigned char **quic_tp,
                            size_t *quic_tp_len)
 {
@@ -555,6 +556,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
   *ssl_sessionid = NULL;
   if(palpn)
     *palpn = NULL;
+  if(earlydata_max)
+    *earlydata_max = 0;
   if(quic_tp)
     *quic_tp = NULL;
   if(quic_tp_len)
@@ -599,6 +602,8 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
         *idsize = check->idsize;
       if(palpn)
         *palpn = check->alpn;
+      if(earlydata_max)
+        *earlydata_max = check->earlydata_max;
       if(quic_tp && quic_tp_len) {
         *quic_tp = check->quic_tp;
         *quic_tp_len = check->quic_tp_len;
@@ -663,6 +668,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
                                 void *ssl_sessionid,
                                 size_t idsize,
                                 Curl_ssl_sessionid_dtor *sessionid_free_cb,
+                                size_t earlydata_max,
                                 unsigned char *quic_tp, size_t quic_tp_len)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -689,7 +695,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
   }
 
   if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size,
-                            NULL, NULL, NULL)) {
+                            NULL, NULL, NULL, NULL)) {
     if((old_size == idsize) &&
        ((old_sessionid == ssl_sessionid) ||
         (idsize && !memcmp(old_sessionid, ssl_sessionid, idsize)))) {
@@ -775,6 +781,7 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
   store->conn_to_port = conn_to_port; /* connect to port number */
   store->alpn = clone_alpn;
   clone_alpn = NULL;
+  store->earlydata_max = earlydata_max;
   store->quic_tp = clone_quic_tp;
   clone_quic_tp = NULL;
   store->quic_tp_len = store->quic_tp ? quic_tp_len : 0;

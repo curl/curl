@@ -678,7 +678,10 @@ class TestUpload:
         ['http/1.1', 32*1024, 16384],  # headers+body, limited by server max
         ['h2', 10*1024, 10378],        # headers+body
         ['h2', 32*1024, 16384],        # headers+body, limited by server max
-        ['h3', 1024, 1126],            # earlydata rejected by nghttpx
+        ['h3', 1024, 1126],            # headers+body (app data)
+        ['h3', 1024 * 1024, 131177],   # headers+body (long app data). The 0RTT
+                                       # size is limited by our sendbuf size
+                                       # of 128K.
     ])
     def test_07_70_put_earlydata(self, env: Env, httpd, nghttpx, proto, upload_size, exp_early):
         if not env.curl_uses_lib('gnutls'):

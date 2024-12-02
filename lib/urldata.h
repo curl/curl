@@ -352,6 +352,7 @@ struct Curl_ssl_session {
   void *sessionid;  /* as returned from the SSL layer */
   size_t idsize;    /* if known, otherwise 0 */
   Curl_ssl_sessionid_dtor *sessionid_free; /* free `sessionid` callback */
+  size_t earlydata_max; /* max early data announced in this session */
   unsigned char *quic_tp; /* NULL, or encoded QUIC transport data */
   size_t quic_tp_len; /* number of QUIC tp bytes */
   long age;         /* just a number, the higher the more recent */
