@@ -842,7 +842,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     Curl_ssl_sessionid_lock(data);
     ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
                                  session, sizeof(*session),
-                                 bearssl_session_free, NULL, 0);
+                                 bearssl_session_free, 0, NULL, 0);
     Curl_ssl_sessionid_unlock(data);
     if(ret)
       return ret;
