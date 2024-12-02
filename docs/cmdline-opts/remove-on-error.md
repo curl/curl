@@ -19,3 +19,5 @@ save output in a local file. This prevents curl from leaving a partial file in
 the case of an error during transfer.
 
 If the output is not a regular file, this option has no effect.
+
+The --continue-at option cannot be used together with --remove-on-error.

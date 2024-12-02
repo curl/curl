@@ -28,4 +28,5 @@ transfer. It then uses the given output/input files to figure that out.
 This command line option is mutually exclusive with --range: you can only use
 one of them for a single transfer.
 
-The --no-clobber option cannot be used together with --continue-at.
+The --no-clobber and --remove-on-error options cannot be used together with
+--continue-at.
