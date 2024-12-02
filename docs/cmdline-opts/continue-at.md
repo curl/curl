@@ -24,3 +24,6 @@ the FTP server command SIZE is not used by curl.
 
 Use "-C -" to instruct curl to automatically find out where/how to resume the
 transfer. It then uses the given output/input files to figure that out.
+
+This command line option is mutually exclusive with --range: you can only use
+one of them for a single transfer.
