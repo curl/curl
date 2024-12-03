@@ -1485,7 +1485,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
   DEBUGASSERT(data);
   DEBUGASSERT(conn->handler);
 
-#if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
+#if !defined(CURL_DISABLE_HTTP)
   if(!conn->cfilter[sockindex] &&
      conn->handler->protocol == CURLPROTO_HTTPS) {
     DEBUGASSERT(ssl_mode != CURL_CF_SSL_DISABLE);
@@ -1493,7 +1493,7 @@ CURLcode Curl_conn_setup(struct Curl_easy *data,
     if(result)
       goto out;
   }
-#endif /* !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER) */
+#endif /* !defined(CURL_DISABLE_HTTP) */
 
   /* Still no cfilter set, apply default. */
   if(!conn->cfilter[sockindex]) {

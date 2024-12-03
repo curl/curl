@@ -37,7 +37,6 @@ verify
 <client>
 <features>
 SSL
-!hyper
 </features>
 <server>
 https
