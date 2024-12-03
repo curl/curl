@@ -71,13 +71,6 @@
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#else
-#  include <wolfssl/openssl/des.h>
-#  include <wolfssl/openssl/md5.h>
-#  include <wolfssl/openssl/ssl.h>
-#  include <wolfssl/openssl/rand.h>
-#endif
-
 #  if (defined(OPENSSL_VERSION_NUMBER) && \
        (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
 #    define DES_key_schedule des_key_schedule
@@ -95,6 +88,25 @@
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
 #  endif
+#else
+#  include <wolfssl/openssl/des.h>
+#  include <wolfssl/openssl/md5.h>
+#  include <wolfssl/openssl/ssl.h>
+#  include <wolfssl/openssl/rand.h>
+#  if defined(OPENSSL_COEXIST)
+#    define DES_key_schedule WOLFSSL_DES_key_schedule
+#    define DES_cblock WOLFSSL_DES_cblock
+#    define DES_set_odd_parity wolfSSL_DES_set_odd_parity
+#    define DES_set_key wolfSSL_DES_set_key
+#    define DES_set_key_unchecked wolfSSL_DES_set_key_unchecked
+#    define DES_ecb_encrypt wolfSSL_DES_ecb_encrypt
+#    define DESKEY(x) ((WOLFSSL_DES_key_schedule *)(x))
+#    define DESKEYARG(x) *x
+#  else
+#    define DESKEYARG(x) *x
+#    define DESKEY(x) &x
+#  endif
+#endif
 
 #elif defined(USE_GNUTLS)
 
