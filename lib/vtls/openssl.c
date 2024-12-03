@@ -1152,9 +1152,8 @@ static bool is_pkcs11_uri(const char *string)
 
 static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine);
 
-static int
-SSL_CTX_use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
-                             int type, const char *key_passwd)
+static int use_certificate_blob(SSL_CTX *ctx, const struct curl_blob *blob,
+                                int type, const char *key_passwd)
 {
   int ret = 0;
   X509 *x = NULL;
@@ -1190,9 +1189,8 @@ end:
   return ret;
 }
 
-static int
-SSL_CTX_use_PrivateKey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
-                            int type, const char *key_passwd)
+static int use_privatekey_blob(SSL_CTX *ctx, const struct curl_blob *blob,
+                               int type, const char *key_passwd)
 {
   int ret = 0;
   EVP_PKEY *pkey = NULL;
@@ -1221,8 +1219,8 @@ end:
 }
 
 static int
-SSL_CTX_use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
-                                   const char *key_passwd)
+use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
+                           const char *key_passwd)
 {
 /* SSL_CTX_add1_chain_cert introduced in OpenSSL 1.0.2 */
 #if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* OpenSSL 1.0.2 or later */ \
@@ -1324,7 +1322,7 @@ int cert_stuff(struct Curl_easy *data,
     case SSL_FILETYPE_PEM:
       /* SSL_CTX_use_certificate_chain_file() only works on PEM files */
       cert_use_result = cert_blob ?
-        SSL_CTX_use_certificate_chain_blob(ctx, cert_blob, key_passwd) :
+        use_certificate_chain_blob(ctx, cert_blob, key_passwd) :
         SSL_CTX_use_certificate_chain_file(ctx, cert_file);
       if(cert_use_result != 1) {
         failf(data,
@@ -1344,8 +1342,7 @@ int cert_stuff(struct Curl_easy *data,
          ASN1 files. */
 
       cert_use_result = cert_blob ?
-        SSL_CTX_use_certificate_blob(ctx, cert_blob,
-                                     file_type, key_passwd) :
+        use_certificate_blob(ctx, cert_blob, file_type, key_passwd) :
       SSL_CTX_use_certificate_file(ctx, cert_file, file_type);
       if(cert_use_result != 1) {
         failf(data,
@@ -1554,7 +1551,7 @@ fail:
       FALLTHROUGH();
     case SSL_FILETYPE_ASN1:
       cert_use_result = key_blob ?
-        SSL_CTX_use_PrivateKey_blob(ctx, key_blob, file_type, key_passwd) :
+        use_privatekey_blob(ctx, key_blob, file_type, key_passwd) :
       SSL_CTX_use_PrivateKey_file(ctx, key_file, file_type);
       if(cert_use_result != 1) {
         failf(data, "unable to set private key file: '%s' type %s",
