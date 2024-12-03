@@ -798,7 +798,9 @@ enum resolve_t Curl_resolv(struct Curl_easy *data,
         return CURLRESOLV_ERROR;
 
       if(strcasecompare(hostname, "localhost") ||
-         tailmatch(hostname, ".localhost"))
+         strcasecompare(hostname, "localhost.") ||
+         tailmatch(hostname, ".localhost") ||
+         tailmatch(hostname, ".localhost."))
         addr = get_localhost(port, hostname);
 #ifndef CURL_DISABLE_DOH
       else if(allowDOH && data->set.doh && !ipnum)
