@@ -709,13 +709,17 @@ static CURLcode auth_create_digest_http_message(
     digest->nc = 1;
 
   if(!digest->cnonce) {
-    char cnoncebuf[33];
-    result = Curl_rand_hex(data, (unsigned char *)cnoncebuf,
-                           sizeof(cnoncebuf));
+    char cnoncebuf[12];
+    result = Curl_rand_bytes(data,
+#ifdef DEBUGBUILD
+                             TRUE,
+#endif
+                             (unsigned char *)cnoncebuf,
+                             sizeof(cnoncebuf));
     if(result)
       return result;
 
-    result = Curl_base64_encode(cnoncebuf, strlen(cnoncebuf),
+    result = Curl_base64_encode(cnoncebuf, sizeof(cnoncebuf),
                                 &cnonce, &cnonce_sz);
     if(result)
       return result;
