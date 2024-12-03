@@ -356,8 +356,7 @@ sub prepro {
             # The processor does CRLF replacements in the <data*> sections if
             # necessary since those parts might be read by separate servers.
             if($s =~ /^ *<data(.*)\>/) {
-                if($1 =~ /crlf="yes"/ ||
-                   ($feature{"hyper"} && ($keywords{"HTTP"} || $keywords{"HTTPS"}))) {
+                if($1 =~ /crlf="yes"/) {
                     $data_crlf = 1;
                 }
             }

@@ -319,7 +319,7 @@ static struct trc_cft_def trc_cfts[] = {
 #ifdef USE_HTTP3
   { &Curl_cft_http3,          TRC_CT_PROTOCOL },
 #endif
-#if !defined(CURL_DISABLE_HTTP) && !defined(USE_HYPER)
+#if !defined(CURL_DISABLE_HTTP)
   { &Curl_cft_http_connect,   TRC_CT_PROTOCOL },
 #endif
 };
