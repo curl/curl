@@ -106,7 +106,8 @@ static void my_md5_final(unsigned char *digest, void *ctx)
   md5_digest(ctx, 16, digest);
 }
 
-#elif defined(USE_OPENSSL_MD5) || defined(USE_WOLFSSL_MD5)
+#elif defined(USE_OPENSSL_MD5) || \
+  (defined(USE_WOLFSSL_MD5) && !defined(OPENSSL_COEXIST))
 
 typedef MD5_CTX my_md5_ctx;
 
@@ -128,6 +129,30 @@ static void my_md5_update(void *ctx,
 static void my_md5_final(unsigned char *digest, void *ctx)
 {
   (void)MD5_Final(digest, ctx);
+}
+
+#elif defined(USE_WOLFSSL_MD5)
+
+typedef WOLFSSL_MD5_CTX my_md5_ctx;
+
+static CURLcode my_md5_init(void *ctx)
+{
+  if(!wolfSSL_MD5_Init(ctx))
+    return CURLE_OUT_OF_MEMORY;
+
+  return CURLE_OK;
+}
+
+static void my_md5_update(void *ctx,
+                          const unsigned char *input,
+                          unsigned int len)
+{
+  (void)wolfSSL_MD5_Update(ctx, input, len);
+}
+
+static void my_md5_final(unsigned char *digest, void *ctx)
+{
+  (void)wolfSSL_MD5_Final(digest, ctx);
 }
 
 #elif defined(USE_MBEDTLS)
