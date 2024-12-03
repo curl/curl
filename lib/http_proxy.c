@@ -45,12 +45,155 @@
 #include "vtls/vtls.h"
 #include "transfer.h"
 #include "multiif.h"
+#include "vauth/vauth.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
 
+static bool hd_name_eq(const char *n1, size_t n1len,
+                       const char *n2, size_t n2len)
+{
+  return (n1len == n2len) ? strncasecompare(n1, n2, n1len) : FALSE;
+}
+
+static CURLcode dynhds_add_custom(struct Curl_easy *data,
+                                  bool is_connect,
+                                  struct dynhds *hds)
+{
+  struct connectdata *conn = data->conn;
+  char *ptr;
+  struct curl_slist *h[2];
+  struct curl_slist *headers;
+  int numlists = 1; /* by default */
+  int i;
+
+  enum Curl_proxy_use proxy;
+
+  if(is_connect)
+    proxy = HEADER_CONNECT;
+  else
+    proxy = conn->bits.httpproxy && !conn->bits.tunnel_proxy ?
+      HEADER_PROXY : HEADER_SERVER;
+
+  switch(proxy) {
+  case HEADER_SERVER:
+    h[0] = data->set.headers;
+    break;
+  case HEADER_PROXY:
+    h[0] = data->set.headers;
+    if(data->set.sep_headers) {
+      h[1] = data->set.proxyheaders;
+      numlists++;
+    }
+    break;
+  case HEADER_CONNECT:
+    if(data->set.sep_headers)
+      h[0] = data->set.proxyheaders;
+    else
+      h[0] = data->set.headers;
+    break;
+  }
+
+  /* loop through one or two lists */
+  for(i = 0; i < numlists; i++) {
+    for(headers = h[i]; headers; headers = headers->next) {
+      const char *name, *value;
+      size_t namelen, valuelen;
+
+      /* There are 2 quirks in place for custom headers:
+       * 1. setting only 'name:' to suppress a header from being sent
+       * 2. setting only 'name;' to send an empty (illegal) header
+       */
+      ptr = strchr(headers->data, ':');
+      if(ptr) {
+        name = headers->data;
+        namelen = ptr - headers->data;
+        ptr++; /* pass the colon */
+        while(*ptr && ISSPACE(*ptr))
+          ptr++;
+        if(*ptr) {
+          value = ptr;
+          valuelen = strlen(value);
+        }
+        else {
+          /* quirk #1, suppress this header */
+          continue;
+        }
+      }
+      else {
+        ptr = strchr(headers->data, ';');
+
+        if(!ptr) {
+          /* neither : nor ; in provided header value. We seem
+           * to ignore this silently */
+          continue;
+        }
+
+        name = headers->data;
+        namelen = ptr - headers->data;
+        ptr++; /* pass the semicolon */
+        while(*ptr && ISSPACE(*ptr))
+          ptr++;
+        if(!*ptr) {
+          /* quirk #2, send an empty header */
+          value = "";
+          valuelen = 0;
+        }
+        else {
+          /* this may be used for something else in the future,
+           * ignore this for now */
+          continue;
+        }
+      }
+
+      DEBUGASSERT(name && value);
+      if(data->state.aptr.host &&
+         /* a Host: header was sent already, do not pass on any custom Host:
+            header as that will produce *two* in the same request! */
+         hd_name_eq(name, namelen, STRCONST("Host:")))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_FORM &&
+              /* this header (extended by formdata.c) is sent later */
+              hd_name_eq(name, namelen, STRCONST("Content-Type:")))
+        ;
+      else if(data->state.httpreq == HTTPREQ_POST_MIME &&
+              /* this header is sent later */
+              hd_name_eq(name, namelen, STRCONST("Content-Type:")))
+        ;
+      else if(data->req.authneg &&
+              /* while doing auth neg, do not allow the custom length since
+                 we will force length zero then */
+              hd_name_eq(name, namelen, STRCONST("Content-Length:")))
+        ;
+      else if(data->state.aptr.te &&
+              /* when asking for Transfer-Encoding, do not pass on a custom
+                 Connection: */
+              hd_name_eq(name, namelen, STRCONST("Connection:")))
+        ;
+      else if((conn->httpversion >= 20) &&
+              hd_name_eq(name, namelen, STRCONST("Transfer-Encoding:")))
+        /* HTTP/2 does not support chunked requests */
+        ;
+      else if((hd_name_eq(name, namelen, STRCONST("Authorization:")) ||
+               hd_name_eq(name, namelen, STRCONST("Cookie:"))) &&
+              /* be careful of sending this potentially sensitive header to
+                 other hosts */
+              !Curl_auth_allowed_to_host(data))
+        ;
+      else {
+        CURLcode result;
+
+        result = Curl_dynhds_add(hds, name, namelen, value, valuelen);
+        if(result)
+          return result;
+      }
+    }
+  }
+
+  return CURLE_OK;
+}
 
 CURLcode Curl_http_proxy_get_destination(struct Curl_cfilter *cf,
                                          const char **phostname,
@@ -146,7 +289,7 @@ CURLcode Curl_http_proxy_create_CONNECT(struct httpreq **preq,
       goto out;
   }
 
-  result = Curl_dynhds_add_custom(data, TRUE, &req->headers);
+  result = dynhds_add_custom(data, TRUE, &req->headers);
 
 out:
   if(result && req) {
