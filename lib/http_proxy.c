@@ -69,7 +69,6 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
   int numlists = 1; /* by default */
   int i;
 
-#ifndef CURL_DISABLE_PROXY
   enum Curl_proxy_use proxy;
 
   if(is_connect)
@@ -96,10 +95,6 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
       h[0] = data->set.headers;
     break;
   }
-#else
-  (void)is_connect;
-  h[0] = data->set.headers;
-#endif
 
   /* loop through one or two lists */
   for(i = 0; i < numlists; i++) {
