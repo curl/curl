@@ -1057,35 +1057,33 @@ static ParameterError parse_url(struct OperationConfig *config,
 static ParameterError parse_localport(struct OperationConfig *config,
                                       char *nextarg)
 {
-  int rc;
-  /* 16bit base 10 is 5 digits, but we allow 6 so that this catches
-     overflows, not just truncates */
-  char lrange[7]="";
+  char *pp = NULL;
   char *p = nextarg;
   while(ISDIGIT(*p))
     p++;
   if(*p) {
-    /* if there is anything more than a plain decimal number */
-    rc = sscanf(p, " - %6s", lrange);
+    pp = p;
+    /* check for ' - [end]' */
+    if(*pp && ISSPACE(*pp))
+      pp++;
+    if(*pp != '-')
+      return PARAM_BAD_USE;
+    pp++;
+    if(*pp && ISSPACE(*pp))
+      pp++;
     *p = 0; /* null-terminate to make str2unum() work below */
   }
-  else
-    rc = 0;
 
-  if(str2unum(&config->localport, nextarg) ||
-     (config->localport > 65535))
+  if(str2unummax(&config->localport, nextarg, 65535))
     return PARAM_BAD_USE;
-  if(!rc)
+  if(!pp)
     config->localportrange = 1; /* default number of ports to try */
   else {
-    if(str2unum(&config->localportrange, lrange) ||
-       (config->localportrange > 65535))
+    if(str2unummax(&config->localportrange, pp, 65535))
       return PARAM_BAD_USE;
-    else {
-      config->localportrange -= (config->localport-1);
-      if(config->localportrange < 1)
-        return PARAM_BAD_USE;
-    }
+    config->localportrange -= (config->localport-1);
+    if(config->localportrange < 1)
+      return PARAM_BAD_USE;
   }
   return PARAM_OK;
 }
