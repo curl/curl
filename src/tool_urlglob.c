@@ -191,7 +191,6 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
      expression is checked for well-formedness and collected until the next ']'
   */
   struct URLPattern *pat;
-  int rc;
   char *pattern = *patternp;
   char *c;
 
@@ -200,16 +199,20 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
 
   if(ISALPHA(*pattern)) {
     /* character range detected */
-    char min_c;
-    char max_c;
-    char end_c;
+    bool pmatch = FALSE;
+    char min_c = 0;
+    char max_c = 0;
+    char end_c = 0;
     unsigned long step = 1;
 
     pat->type = UPTCharRange;
 
-    rc = sscanf(pattern, "%c-%c%c", &min_c, &max_c, &end_c);
+    if((pattern[1] == '-') && pattern[2] && pattern[3]) {
+      min_c = pattern[0];
+      max_c = pattern[2];
+      end_c = pattern[3];
+      pmatch = TRUE;
 
-    if(rc == 3) {
       if(end_c == ':') {
         char *endp;
         errno = 0;
@@ -221,7 +224,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
       }
       else if(end_c != ']')
         /* then this is wrong */
-        rc = 0;
+        pmatch = FALSE;
       else
         /* end_c == ']' */
         pattern += 4;
@@ -229,7 +232,7 @@ static CURLcode glob_range(struct URLGlob *glob, char **patternp,
 
     *posp += (pattern - *patternp);
 
-    if(rc != 3 || !step || step > (unsigned)INT_MAX ||
+    if(!pmatch || !step || step > (unsigned)INT_MAX ||
        (min_c == max_c && step != 1) ||
        (min_c != max_c && (min_c > max_c || step > (unsigned)(max_c - min_c) ||
                            (max_c - min_c) > ('z' - 'a'))))
