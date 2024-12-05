@@ -1942,12 +1942,11 @@ static CURLcode cr_mime_init(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-static void cr_mime_done(struct Curl_easy *data,
-                         struct Curl_creader *reader, int premature)
+static void cr_mime_close(struct Curl_easy *data,
+                          struct Curl_creader *reader)
 {
   struct cr_mime_ctx *ctx = reader->ctx;
   (void)data;
-  (void)premature;
   Curl_bufq_free(&ctx->tmpbuf);
 }
 
@@ -2179,14 +2178,14 @@ static const struct Curl_crtype cr_mime = {
   "cr-mime",
   cr_mime_init,
   cr_mime_read,
-  Curl_creader_def_close,
+  cr_mime_close,
   cr_mime_needs_rewind,
   cr_mime_total_length,
   cr_mime_resume_from,
   cr_mime_rewind,
   cr_mime_unpause,
   cr_mime_is_paused,
-  cr_mime_done,
+  Curl_creader_def_done,
   sizeof(struct cr_mime_ctx)
 };
 
