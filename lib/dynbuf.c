@@ -244,6 +244,18 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   return s->bufr;
 }
 
+char *Curl_dyn_dup(const struct dynbuf *s)
+{
+  char *ptr = NULL;
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  if(s->leng) {
+    DEBUGASSERT(s->bufr);
+    return strdup(s->bufr);
+  }
+  return strdup("");
+}
+
 /*
  * Returns an unsigned pointer to the buffer.
  */

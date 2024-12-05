@@ -75,6 +75,10 @@ size_t Curl_dyn_len(const struct dynbuf *s);
 /* The implementation of this function exists in mprintf.c */
 int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
 
+/* returns an allocated copy of the string in dynbuf.
+ * Will return NULL if allocation fails. */
+char *Curl_dyn_dup(const struct dynbuf *s);
+
 /* Dynamic buffer max sizes */
 #define DYN_DOH_RESPONSE    3000
 #define DYN_DOH_CNAME       256

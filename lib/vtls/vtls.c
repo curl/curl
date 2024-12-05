@@ -532,6 +532,23 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
+static CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
+                                          struct Curl_easy *data,
+                                          const struct ssl_peer *peer,
+                                          char **pkey)
+{
+  struct dynbuf buf;
+  CURLcode result;
+
+  Curl_dyn_init(&buf, 10 * 1024);
+  result = Curl_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
+  if(result)
+    goto out:
+
+out:
+  return result;
+}
+
 /*
  * Check if there is a session ID for the given connection in the cache, and if
  * there is one suitable, it is provided. Returns TRUE when no entry matched.
@@ -575,14 +592,14 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
       /* not session ID means blank entry */
       continue;
     if(strcasecompare(peer->hostname, check->name) &&
+       (peer->port == check->remote_port) &&
+       (peer->transport == check->transport) &&
        ((!cf->conn->bits.conn_to_host && !check->conn_to_host) ||
         (cf->conn->bits.conn_to_host && check->conn_to_host &&
          strcasecompare(cf->conn->conn_to_host.name, check->conn_to_host))) &&
        ((!cf->conn->bits.conn_to_port && check->conn_to_port == -1) ||
         (cf->conn->bits.conn_to_port && check->conn_to_port != -1 &&
          cf->conn->conn_to_port == check->conn_to_port)) &&
-       (peer->port == check->remote_port) &&
-       (peer->transport == check->transport) &&
        strcasecompare(cf->conn->handler->scheme, check->scheme) &&
        match_ssl_primary_config(data, conn_config, &check->ssl_config)) {
       /* yes, we have a session ID! */
