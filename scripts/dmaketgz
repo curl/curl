@@ -40,6 +40,7 @@ if test -f Makefile; then
     make distclean
 fi
 docker build \
+       --no-cache \
        --build-arg SOURCE_DATE_EPOCH="$timestamp" \
        --build-arg UID="$(id -u)" \
        --build-arg GID="$(id -g)" \
