@@ -110,7 +110,7 @@ CURLcode Curl_input_negotiate(struct Curl_easy *data, struct connectdata *conn,
   /* Check if the connection is using SSL and get the channel binding data */
 #if defined(USE_SSL) && defined(HAVE_GSSAPI)
   if(conn->handler->flags & PROTOPT_SSL) {
-    Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE);
+    Curl_dyn_init(&neg_ctx->channel_binding_data, SSL_CB_MAX_SIZE + 1);
     result = Curl_ssl_get_channel_binding(
       data, FIRSTSOCKET, &neg_ctx->channel_binding_data);
     if(result) {
