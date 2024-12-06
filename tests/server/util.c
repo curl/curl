@@ -40,6 +40,10 @@
 #include <sys/poll.h>
 #endif
 
+#ifdef MSDOS
+#include <dos.h>  /* delay() */
+#endif
+
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"

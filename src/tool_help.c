@@ -36,10 +36,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef MSDOS
-#  define USE_WATT32
-#endif
-
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif

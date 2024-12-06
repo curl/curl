@@ -242,7 +242,8 @@ SANITIZE_ERR_OK: Good -- 'path' can be truncated
 SANITIZE_ERR_INVALID_PATH: Bad -- 'path' cannot be truncated
 != SANITIZE_ERR_OK && != SANITIZE_ERR_INVALID_PATH: Error
 */
-SANITIZEcode truncate_dryrun(const char *path, const size_t truncate_pos)
+static SANITIZEcode truncate_dryrun(const char *path,
+                                    const size_t truncate_pos)
 {
   size_t len;
 
@@ -291,8 +292,8 @@ sanitize_file_name.
 Success: (SANITIZE_ERR_OK) *sanitized points to a sanitized copy of file_name.
 Failure: (!= SANITIZE_ERR_OK) *sanitized is NULL.
 */
-SANITIZEcode msdosify(char **const sanitized, const char *file_name,
-                      int flags)
+static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
+                             int flags)
 {
   char dos_name[PATH_MAX];
   static const char illegal_chars_dos[] = ".+, ;=[]" /* illegal in DOS */

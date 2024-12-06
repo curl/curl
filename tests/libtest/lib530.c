@@ -218,7 +218,14 @@ static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
     FD_SET(sockets->sockets[i], fdset);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
     if(*maxFd < sockets->sockets[i] + 1) {
       *maxFd = sockets->sockets[i] + 1;
     }
@@ -261,8 +268,9 @@ static CURLcode testone(char *URL, int timercb, int socketcb)
   CURLcode res = CURLE_OK;
   CURL *curl = NULL;  CURLM *m = NULL;
   struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
-  struct timeval timeout = {-1, 0};
   int success = 0;
+  struct timeval timeout = {0};
+  timeout.tv_sec = (time_t)-1;
 
   /* set the limits */
   max_timer_calls = timercb;
@@ -303,14 +311,15 @@ static CURLcode testone(char *URL, int timercb, int socketcb)
   while(!checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
     curl_socket_t maxFd = 0;
-    struct timeval tv = {10, 0};
+    struct timeval tv = {0};
+    tv.tv_sec = 10;
 
     FD_ZERO(&readSet);
     FD_ZERO(&writeSet);
     updateFdSet(&sockets.read, &readSet, &maxFd);
     updateFdSet(&sockets.write, &writeSet, &maxFd);
 
-    if(timeout.tv_sec != -1) {
+    if(timeout.tv_sec != (time_t)-1) {
       int usTimeout = getMicroSecondTimeout(&timeout);
       tv.tv_sec = usTimeout / 1000000;
       tv.tv_usec = usTimeout % 1000000;
@@ -333,7 +342,7 @@ static CURLcode testone(char *URL, int timercb, int socketcb)
       goto test_cleanup;
     }
 
-    if(timeout.tv_sec != -1 && getMicroSecondTimeout(&timeout) == 0) {
+    if(timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
       if(socket_action(m, CURL_SOCKET_TIMEOUT, 0, "timeout")) {
         res = TEST_ERR_BAD_TIMEOUT;

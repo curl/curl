@@ -43,9 +43,20 @@ AS_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
       dnl --disable-threaded-resolver option used
       want_thres="no"
       ;;
+    yes)
+      dnl --enable-threaded-resolver option used
+      want_thres="yes"
+      ;;
     *)
       dnl configure option not specified
-      want_thres="yes"
+      case $host_os in
+        msdos* | amiga*)
+          want_thres="no"
+          ;;
+        *)
+          want_thres="yes"
+          ;;
+      esac
       ;;
   esac
   AC_MSG_RESULT([$want_thres])

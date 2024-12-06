@@ -676,7 +676,7 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
               outs->bytes);
         fflush(outs->stream);
         /* truncate file at the position where we started appending */
-#ifdef HAVE_FTRUNCATE
+#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */

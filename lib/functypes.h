@@ -62,6 +62,7 @@
 
 /* int send(int, const char *, int, int); */
 #define SEND_TYPE_ARG1 int
+#define SEND_QUAL_ARG2
 #define SEND_TYPE_ARG2 char *
 #define SEND_TYPE_ARG3 int
 #define SEND_TYPE_RETV int

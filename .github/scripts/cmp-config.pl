@@ -36,9 +36,6 @@ if(!$cmake) {
 my %remove = (
     '#define _FILE_OFFSET_BITS 64' => 1,
     '#define CURL_EXTERN_SYMBOL' => 1,
-    '#define CURL_SA_FAMILY_T sa_family_t' => 1,
-    '#define CURL_SA_FAMILY_T ADDRESS_FAMILY' => 1,
-    '#define HAVE_ADDRESS_FAMILY 1' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 size_t' => 1,
     '#define GETHOSTNAME_TYPE_ARG2 int' => 1,
     '#define HAVE_BROTLI 1' => 1,
@@ -65,7 +62,6 @@ my %remove = (
     '#define HAVE_OPENSSL_RSA_H 1' => 1,
     '#define HAVE_OPENSSL_SSL_H 1' => 1,
     '#define HAVE_OPENSSL_X509_H 1' => 1,
-    '#define HAVE_SA_FAMILY_T 1' => 1,
     '#define HAVE_SETJMP_H 1' => 1,
     '#define HAVE_STDINT_H 1' => 1,
     '#define HAVE_STDIO_H 1' => 1,

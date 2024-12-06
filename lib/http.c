@@ -2903,7 +2903,7 @@ CURLcode Curl_http_header(struct Curl_easy *data,
       (void)curlx_strtoofft(v, NULL, 10, &retry_after);
       if(!retry_after) {
         time_t date = Curl_getdate_capped(v);
-        if(-1 != date)
+        if((time_t)-1 != date)
           /* convert date to number of seconds into the future */
           retry_after = date - time(NULL);
       }
