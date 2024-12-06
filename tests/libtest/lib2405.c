@@ -28,6 +28,10 @@
  *  empty multi handle (expected zero descriptors),
  *  HTTP1 amd HTTP2 (no multiplexing) two transfers (expected two descriptors),
  *  HTTP2 with multiplexing (expected one descriptors)
+ *  Improper inputs to the API result in CURLM_BAD_FUNCTION_ARGUMENT.
+ *  Sending a empty ufds, and size = 0 will return the number of fds needed.
+ *  Sending a non-empty ufds, but smaller than the fds needed will result in a
+ *    CURLM_OUT_OF_MEMORY, and a number of fds that is >= to the number needed.
  *
  *  It is also expected that all transfers run by multi-handle should complete
  *  successfully.
@@ -158,10 +162,39 @@ static CURLcode test_run(char *URL, long option, unsigned int *max_fd_count)
   while(!mc) {
     /* get the count of file descriptors from the transfers */
     unsigned int fd_count = 0;
+    unsigned int fd_count_chk = 0;
 
     mc = curl_multi_perform(multi, &still_running);
     if(!still_running || mc != CURLM_OK)
       break;
+
+    /* verify improper inputs are treated correctly. */
+    mc = curl_multi_waitfds(multi, NULL, 0, NULL);
+
+    if(mc != CURLM_BAD_FUNCTION_ARGUMENT) {
+      fprintf(stderr, "curl_multi_waitfds() return code %d instead of "
+        "CURLM_BAD_FUNCTION_ARGUMENT.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    mc = curl_multi_waitfds(multi, NULL, 1, NULL);
+
+    if(mc != CURLM_BAD_FUNCTION_ARGUMENT) {
+      fprintf(stderr, "curl_multi_waitfds() return code %d instead of "
+        "CURLM_BAD_FUNCTION_ARGUMENT.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    mc = curl_multi_waitfds(multi, NULL, 1, &fd_count);
+
+    if(mc != CURLM_BAD_FUNCTION_ARGUMENT) {
+      fprintf(stderr, "curl_multi_waitfds() return code %d instead of "
+        "CURLM_BAD_FUNCTION_ARGUMENT.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
 
     mc = curl_multi_waitfds(multi, ufds, 10, &fd_count);
 
@@ -174,12 +207,62 @@ static CURLcode test_run(char *URL, long option, unsigned int *max_fd_count)
     if(!fd_count)
       continue; /* no descriptors yet */
 
+    /* verify that sending nothing but the fd_count results in at least the
+     * same number of fds */
+    mc = curl_multi_waitfds(multi, NULL, 0, &fd_count_chk);
+
+    if(mc != CURLM_OK) {
+      fprintf(stderr, "curl_multi_waitfds() failed, code %d.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    if(fd_count_chk < fd_count) {
+      fprintf(stderr, "curl_multi_waitfds() should return at least the number "
+        "of fds needed\n");
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
     /* checking case when we don't have enough space for waitfds */
-    mc = curl_multi_waitfds(multi, ufds1, fd_count - 1, NULL);
+    mc = curl_multi_waitfds(multi, ufds1, fd_count - 1, &fd_count_chk);
 
     if(mc != CURLM_OUT_OF_MEMORY) {
       fprintf(stderr, "curl_multi_waitfds() return code %d instead of "
         "CURLM_OUT_OF_MEMORY.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    if(fd_count_chk < fd_count) {
+      fprintf(stderr, "curl_multi_waitfds() sould return the amount of fds "
+        "needed if enough isn't passed in.\n");
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    /* sending ufds with zero size, is valid */
+    mc = curl_multi_waitfds(multi, ufds, 0, NULL);
+
+    if(mc != CURLM_OUT_OF_MEMORY) {
+      fprintf(stderr, "curl_multi_waitfds() return code %d instead of "
+        "CURLM_OUT_OF_MEMORY.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    mc = curl_multi_waitfds(multi, ufds, 0, &fd_count_chk);
+
+    if(mc != CURLM_OUT_OF_MEMORY) {
+      fprintf(stderr, "curl_multi_waitfds() return code %d instead of "
+        "CURLM_OUT_OF_MEMORY.\n", mc);
+      res = TEST_ERR_FAILURE;
+      break;
+    }
+
+    if(fd_count_chk < fd_count) {
+      fprintf(stderr, "curl_multi_waitfds() sould return the amount of fds "
+        "needed if enough isn't passed in.\n");
       res = TEST_ERR_FAILURE;
       break;
     }

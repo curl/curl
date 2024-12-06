@@ -140,8 +140,7 @@ void Curl_waitfds_init(struct curl_waitfds *cwfds,
                        struct curl_waitfd *static_wfds,
                        unsigned int static_count);
 
-CURLcode Curl_waitfds_add_ps(struct curl_waitfds *cwfds,
-                             struct easy_pollset *ps);
-
+unsigned int Curl_waitfds_add_ps(struct curl_waitfds *cwfds,
+                                 struct easy_pollset *ps);
 
 #endif /* HEADER_CURL_SELECT_H */
