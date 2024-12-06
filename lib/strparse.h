@@ -32,6 +32,7 @@
 #define STRE_ENDQUOTE 4
 #define STRE_BYTE     5
 #define STRE_NEWLINE  6
+#define STRE_OVERFLOW 7
 
 struct Curl_str {
   char *str;

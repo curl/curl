@@ -111,10 +111,13 @@ int Curl_str_number(char **linep, size_t *nump, size_t max)
   DEBUGASSERT(linep && *linep && nump);
   *nump = 0;
   while(ISDIGIT(**linep)) {
+    int n = **linep - '0';
+    if(num > ((SIZE_T_MAX - n) / 10))
+      return STRE_OVERFLOW;
     num *= 10;
-    num += **linep - '0';
+    num += n;
     if(num > max)
-      return 1; /** too big */
+      return STRE_BIG; /** too big */
     (*linep)++;
   }
   *nump = num;

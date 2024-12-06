@@ -206,6 +206,27 @@ UNITTEST_START
   }
 
   {
+    /* SIZE_T_MAX is typically 18446744073709551615 */
+    static const char *nums[] = {
+      "9223372036854775808", /* 2^63 */
+      "9223372036854775809", /* 2^63 + 1 */
+      "18446744073709551615", /* 2^64 - 1*/
+      "18446744073709551616", /* 2^64 */
+      "18446744073709551617", /* 2^64 + 1 */
+      NULL
+    };
+    printf("Curl_str_number / max\n");
+    for(i = 0; nums[i]; i++) {
+      size_t num;
+      char *line = (char *)nums[i];
+      char *orgline = line;
+      int rc = Curl_str_number(&line, &num, SIZE_T_MAX);
+      printf("%u: (\"%s\") %d, [%zu] line %d\n",
+             i, orgline, rc, num, (int)(line - orgline));
+    }
+  }
+
+  {
     static const char *newl[] = {
       "a",
       "aa",
