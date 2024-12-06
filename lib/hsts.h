@@ -52,7 +52,7 @@ void Curl_hsts_cleanup(struct hsts **hp);
 CURLcode Curl_hsts_parse(struct hsts *h, const char *hostname,
                          const char *sts);
 struct stsentry *Curl_hsts(struct hsts *h, const char *hostname,
-                           bool subdomain);
+                           size_t hlen, bool subdomain);
 CURLcode Curl_hsts_save(struct Curl_easy *data, struct hsts *h,
                         const char *file);
 CURLcode Curl_hsts_loadfile(struct Curl_easy *data,

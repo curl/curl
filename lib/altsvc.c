@@ -40,6 +40,7 @@
 #include "rename.h"
 #include "strdup.h"
 #include "inet_pton.h"
+#include "strparse.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -47,25 +48,26 @@
 #include "memdebug.h"
 
 #define MAX_ALTSVC_LINE 4095
-#define MAX_ALTSVC_DATELENSTR "64"
-#define MAX_ALTSVC_DATELEN 64
-#define MAX_ALTSVC_HOSTLENSTR "512"
-#define MAX_ALTSVC_HOSTLEN 512
-#define MAX_ALTSVC_ALPNLENSTR "10"
+#define MAX_ALTSVC_DATELEN 256
+#define MAX_ALTSVC_HOSTLEN 2048
 #define MAX_ALTSVC_ALPNLEN 10
 
 #define H3VERSION "h3"
 
-static enum alpnid alpn2alpnid(char *name)
+static enum alpnid alpn2alpnid(char *name, size_t len)
 {
-  if(strcasecompare(name, "h1"))
-    return ALPN_h1;
-  if(strcasecompare(name, "h2"))
-    return ALPN_h2;
-  if(strcasecompare(name, H3VERSION))
-    return ALPN_h3;
-  if(strcasecompare(name, "http/1.1"))
-    return ALPN_h1;
+  if(len == 2) {
+    if(strncasecompare(name, "h1", 2))
+      return ALPN_h1;
+    if(strncasecompare(name, "h2", 2))
+      return ALPN_h2;
+    if(strncasecompare(name, "h3", 2))
+      return ALPN_h3;
+  }
+  else if(len == 8) {
+    if(strncasecompare(name, "http/1.1", 8))
+      return ALPN_h1;
+  }
   return ALPN_none; /* unknown, probably rubbish input */
 }
 
@@ -93,18 +95,17 @@ static void altsvc_free(struct altsvc *as)
 }
 
 static struct altsvc *altsvc_createid(const char *srchost,
+                                      size_t hlen,
                                       const char *dsthost,
                                       size_t dlen, /* dsthost length */
                                       enum alpnid srcalpnid,
                                       enum alpnid dstalpnid,
-                                      unsigned int srcport,
-                                      unsigned int dstport)
+                                      size_t srcport,
+                                      size_t dstport)
 {
   struct altsvc *as = calloc(1, sizeof(struct altsvc));
-  size_t hlen;
   if(!as)
     return NULL;
-  hlen = strlen(srchost);
   DEBUGASSERT(hlen);
   DEBUGASSERT(dlen);
   if(!hlen || !dlen) {
@@ -136,8 +137,8 @@ static struct altsvc *altsvc_createid(const char *srchost,
 
   as->src.alpnid = srcalpnid;
   as->dst.alpnid = dstalpnid;
-  as->src.port = curlx_ultous(srcport);
-  as->dst.port = curlx_ultous(dstport);
+  as->src.port = (unsigned short)srcport;
+  as->dst.port = (unsigned short)dstport;
 
   return as;
 error:
@@ -145,18 +146,19 @@ error:
   return NULL;
 }
 
-static struct altsvc *altsvc_create(char *srchost,
-                                    char *dsthost,
-                                    char *srcalpn,
-                                    char *dstalpn,
-                                    unsigned int srcport,
-                                    unsigned int dstport)
+static struct altsvc *altsvc_create(struct Curl_str *srchost,
+                                    struct Curl_str *dsthost,
+                                    struct Curl_str *srcalpn,
+                                    struct Curl_str *dstalpn,
+                                    size_t srcport,
+                                    size_t dstport)
 {
-  enum alpnid dstalpnid = alpn2alpnid(dstalpn);
-  enum alpnid srcalpnid = alpn2alpnid(srcalpn);
+  enum alpnid dstalpnid = alpn2alpnid(dstalpn->str, dstalpn->len);
+  enum alpnid srcalpnid = alpn2alpnid(srcalpn->str, srcalpn->len);
   if(!srcalpnid || !dstalpnid)
     return NULL;
-  return altsvc_createid(srchost, dsthost, strlen(dsthost),
+  return altsvc_createid(srchost->str, srchost->len,
+                         dsthost->str, dsthost->len,
                          srcalpnid, dstalpnid,
                          srcport, dstport);
 }
@@ -167,31 +169,50 @@ static CURLcode altsvc_add(struct altsvcinfo *asi, char *line)
   /* Example line:
      h2 example.com 443 h3 shiny.example.com 8443 "20191231 10:00:00" 1
    */
-  char srchost[MAX_ALTSVC_HOSTLEN + 1];
-  char dsthost[MAX_ALTSVC_HOSTLEN + 1];
-  char srcalpn[MAX_ALTSVC_ALPNLEN + 1];
-  char dstalpn[MAX_ALTSVC_ALPNLEN + 1];
-  char date[MAX_ALTSVC_DATELEN + 1];
-  unsigned int srcport;
-  unsigned int dstport;
-  unsigned int prio;
-  unsigned int persist;
-  int rc;
+  struct Curl_str srchost;
+  struct Curl_str dsthost;
+  struct Curl_str srcalpn;
+  struct Curl_str dstalpn;
+  struct Curl_str date;
+  size_t srcport;
+  size_t dstport;
+  size_t persist;
+  size_t prio;
 
-  rc = sscanf(line,
-              "%" MAX_ALTSVC_ALPNLENSTR "s %" MAX_ALTSVC_HOSTLENSTR "s %u "
-              "%" MAX_ALTSVC_ALPNLENSTR "s %" MAX_ALTSVC_HOSTLENSTR "s %u "
-              "\"%" MAX_ALTSVC_DATELENSTR "[^\"]\" %u %u",
-              srcalpn, srchost, &srcport,
-              dstalpn, dsthost, &dstport,
-              date, &persist, &prio);
-  if(9 == rc) {
+  if(Curl_str_word(&line, &srcalpn, MAX_ALTSVC_ALPNLEN) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_word(&line, &srchost, MAX_ALTSVC_HOSTLEN) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_number(&line, &srcport, 65535) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_word(&line, &dstalpn, MAX_ALTSVC_ALPNLEN) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_word(&line, &dsthost, MAX_ALTSVC_HOSTLEN) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_number(&line, &dstport, 65535) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_quotedword(&line, &date, MAX_ALTSVC_DATELEN) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_number(&line, &persist, 1) ||
+     Curl_str_singlespace(&line) ||
+     Curl_str_number(&line, &prio, 0) ||
+     Curl_str_newline(&line))
+    ;
+  else {
     struct altsvc *as;
-    time_t expires = Curl_getdate_capped(date);
-    as = altsvc_create(srchost, dsthost, srcalpn, dstalpn, srcport, dstport);
+    char dbuf[MAX_ALTSVC_DATELEN + 1];
+    time_t expires;
+
+    /* The date parser works on a null terminated string. The maximum length
+       is upheld by Curl_str_quotedword(). */
+    memcpy(dbuf, date.str, date.len);
+    dbuf[date.len] = 0;
+    expires = Curl_getdate_capped(dbuf);
+    as = altsvc_create(&srchost, &dsthost, &srcalpn, &dstalpn, srcport,
+                       dstport);
     if(as) {
       as->expires = expires;
-      as->prio = prio;
+      as->prio = 0; /* not supported to just set zero */
       as->persist = persist ? 1 : 0;
       Curl_llist_append(&asi->list, as, &as->node);
     }
@@ -471,8 +492,6 @@ static time_t altsvc_debugtime(void *unused)
 #define time(x) altsvc_debugtime(x)
 #endif
 
-#define ISNEWLINE(x) (((x) == '\n') || (x) == '\r')
-
 /*
  * Curl_altsvc_parse() takes an incoming alt-svc response header and stores
  * the data correctly in the cache.
@@ -495,6 +514,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   unsigned short dstport = srcport; /* the same by default */
   CURLcode result = getalnum(&p, alpnbuf, sizeof(alpnbuf));
   size_t entries = 0;
+  size_t alpnlen = strlen(alpnbuf);
+  size_t srchostlen = strlen(srchost);
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
@@ -515,7 +536,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   do {
     if(*p == '=') {
       /* [protocol]="[host][:port]" */
-      enum alpnid dstalpnid = alpn2alpnid(alpnbuf); /* the same by default */
+      enum alpnid dstalpnid = alpn2alpnid(alpnbuf, alpnlen);
       p++;
       if(*p == '\"') {
         const char *dsthost = "";
@@ -633,7 +654,8 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                this is the first entry of the line. */
             altsvc_flush(asi, srcalpnid, srchost, srcport);
 
-          as = altsvc_createid(srchost, dsthost, dstlen,
+          as = altsvc_createid(srchost, srchostlen,
+                               dsthost, dstlen,
                                srcalpnid, dstalpnid,
                                srcport, dstport);
           if(as) {
