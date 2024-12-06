@@ -321,10 +321,10 @@ static int parsefmt(const char *format,
               fmt++;
             }
             while(ISDIGIT(*fmt)) {
-              if(precision > INT_MAX/10)
+              int n = *fmt - '0';
+              if(precision > (INT_MAX - n) / 10)
                 return PFMT_PREC;
-              precision *= 10;
-              precision += *fmt - '0';
+              precision = precision * 10 + n;
               fmt++;
             }
             if(is_neg)
@@ -397,10 +397,10 @@ static int parsefmt(const char *format,
           width = 0;
           fmt--;
           do {
-            if(width > INT_MAX/10)
+            int n = *fmt - '0';
+            if(width > (INT_MAX - n) / 10)
               return PFMT_WIDTH;
-            width *= 10;
-            width += *fmt - '0';
+            width = width * 10 + n;
             fmt++;
           } while(ISDIGIT(*fmt));
           break;
