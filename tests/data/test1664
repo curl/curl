@@ -1,0 +1,120 @@
+<testcase>
+<info>
+<keywords>
+unittest
+strparse
+</keywords>
+</info>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<features>
+unittest
+large-size
+</features>
+<name>
+unit tests for strparse.c string parsing functions
+</name>
+</client>
+
+<verify>
+<stdout>
+Curl_str_word
+0: ("word") 0, "word" [4], line 4
+1: ("word ") 0, "word" [4], line 4
+2: (" word ") 2, "" [0], line 0
+3: ("wo rd") 0, "wo" [2], line 2
+4: ("word(") 0, "word(" [5], line 5
+5: ("wor(d") 0, "wor(d" [5], line 5
+6: ("perfect") 0, "perfect" [7], line 7
+7: ("") 2, "" [0], line 0
+8: ("longerth") 1, "" [0], line 0
+Curl_str_until
+0: ("word") 0, "wor" [3], line 3
+1: ("word ") 0, "wor" [3], line 3
+2: (" word ") 0, " wor" [4], line 4
+3: ("wo rd") 0, "wo r" [4], line 4
+4: ("word(") 0, "wor" [3], line 3
+5: ("wor(d") 0, "wor(" [4], line 4
+6: ("perfect") 0, "perfect" [7], line 7
+7: ("") 2, "" [0], line 0
+8: ("longerth") 1, "" [0], line 0
+Curl_str_quotedword
+0: (""word"") 0, "word" [4], line 6
+1: (""word") 4, "" [0], line 0
+2: ("word"") 3, "" [0], line 0
+3: (""word""") 0, "word" [4], line 6
+4: (""word" ") 0, "word" [4], line 6
+5: (" "word"") 3, "" [0], line 0
+6: (""perfect"") 0, "perfect" [7], line 9
+7: (""p r e t"") 0, "p r e t" [7], line 9
+8: (""perfec\"") 0, "perfec\" [7], line 9
+9: ("""") 0, "" [0], line 2
+10: ("") 3, "" [0], line 0
+11: (""longerth"") 1, "" [0], line 0
+Curl_str_single
+0: ("a") 0, line 1
+1: ("aa") 0, line 1
+2: ("A") 5, line 0
+3: ("b") 5, line 0
+4: ("\") 5, line 0
+5: (" ") 5, line 0
+6: ("") 5, line 0
+Curl_str_singlespace
+0: ("a") 5, line 0
+1: ("aa") 5, line 0
+2: ("A") 5, line 0
+3: ("b") 5, line 0
+4: ("\") 5, line 0
+5: (" ") 0, line 1
+6: ("	") 5, line 0
+7: ("
+") 5, line 0
+8: ("") 5, line 0
+Curl_str_single
+0: ("a") 0, line 1
+1: ("aa") 0, line 1
+2: ("A") 5, line 0
+3: ("b") 5, line 0
+4: ("\") 5, line 0
+5: (" ") 5, line 0
+6: ("") 5, line 0
+Curl_str_number
+0: ("1") 0, [1] line 1
+1: ("10000") 1, [0] line 4
+2: ("1234") 0, [1234] line 4
+3: ("1235") 0, [1235] line 4
+4: ("1236") 1, [0] line 3
+5: ("01234") 0, [1234] line 5
+6: ("00000000000000000000000000001234") 0, [1234] line 32
+7: ("0123 345") 0, [123] line 4
+8: ("0123O345") 0, [123] line 4
+9: ("-12") 0, [0] line 0
+10: (" 123") 0, [0] line 0
+11: ("") 0, [0] line 0
+Curl_str_number / max
+0: ("9223372036854775808") 0, [9223372036854775808] line 19
+1: ("9223372036854775809") 0, [9223372036854775809] line 19
+2: ("18446744073709551615") 0, [18446744073709551615] line 20
+3: ("18446744073709551616") 7, [0] line 19
+4: ("18446744073709551617") 7, [0] line 19
+Curl_str_newline
+0: ("a") 6, line 0
+1: ("aa") 6, line 0
+2: ("A") 6, line 0
+3: ("b") 6, line 0
+4: ("\") 6, line 0
+5: (" ") 6, line 0
+6: ("
+") 0, line 1
+7: ("") 0, line 1
+8: ("
+") 0, line 1
+9: ("") 6, line 0
+</stdout>
+</verify>
+</testcase>
