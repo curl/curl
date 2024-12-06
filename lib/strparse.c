@@ -114,8 +114,7 @@ int Curl_str_number(char **linep, size_t *nump, size_t max)
     int n = **linep - '0';
     if(num > ((SIZE_T_MAX - n) / 10))
       return STRE_OVERFLOW;
-    num *= 10;
-    num += n;
+    num = num * 10 + n;
     if(num > max)
       return STRE_BIG; /** too big */
     (*linep)++;
