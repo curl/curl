@@ -74,6 +74,7 @@
 #include "multiif.h"
 #include "timeval.h"
 #include "curl_md5.h"
+#include "curl_sha256.h"
 #include "warnless.h"
 #include "curl_base64.h"
 #include "curl_printf.h"
@@ -532,53 +533,238 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
-static CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
-                                          struct Curl_easy *data,
-                                          const struct ssl_peer *peer,
-                                          char **pkey)
+static CURLcode cf_ssl_session_key_add_path(struct dynbuf *buf,
+                                            const char *name,
+                                            char *path)
 {
-  struct dynbuf buf;
-  CURLcode result;
-
-  Curl_dyn_init(&buf, 10 * 1024);
-  result = Curl_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
-  if(result)
-    goto out:
-
-out:
-  return result;
+  if(path && path[0]) {
+    /* We try to add absolute paths, so that the session key can stay
+     * valid when used in another process with different CWD. However,
+     * when a path does not exist, this does not work. Then, we add
+     * the path as is. */
+#ifdef _WIN32
+    char abspath[_MAX_PATH];
+    if(_fullpath(abspath, path, _MAX_PATH))
+      return Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+#else
+    if(path[0] != '/') {
+      char *abspath = realpath(path, NULL);
+      if(abspath) {
+        CURLcode r = Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+        (free)(abspath); /* allocated by libc, free without memdebug */
+        return r;
+      }
+    }
+#endif
+    return Curl_dyn_addf(buf, ":%s-%s", name, path);
+  }
+  return CURLE_OK;
 }
 
-/*
- * Check if there is a session ID for the given connection in the cache, and if
- * there is one suitable, it is provided. Returns TRUE when no entry matched.
- */
-bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const struct ssl_peer *peer,
-                           void **ssl_sessionid,
-                           size_t *idsize, /* set 0 if unknown */
-                           char **palpn)
+static CURLcode cf_ssl_session_key_add_hash(struct dynbuf *buf,
+                                            const char *name,
+                                            struct curl_blob *blob)
+{
+  CURLcode r = CURLE_OK;
+  if(blob && blob->len) {
+    unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
+    size_t i;
+
+    r = Curl_dyn_addf(buf, ":%s-", name);
+    if(r)
+      goto out;
+    r = Curl_sha256it(hash, blob->data, blob->len);
+    if(r)
+      goto out;
+    for(i = 0; i < CURL_SHA256_DIGEST_LENGTH; ++i) {
+      r = Curl_dyn_addf(buf, "%02x", hash[i]);
+      if(r)
+        goto out;
+    }
+  }
+out:
+  return r;
+}
+
+CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
+                                   const struct ssl_peer *peer,
+                                   char **pkey)
+{
+  struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
+  struct dynbuf buf;
+  CURLcode r;
+
+  *pkey = NULL;
+  Curl_dyn_init(&buf, 10 * 1024);
+
+  r = Curl_dyn_add(&buf, "SESS");
+  if(r)
+    goto out;
+
+  if(ssl->clientcert && ssl->clientcert[0]) {
+    r = Curl_dyn_add(&buf, "-CCERT");
+    if(r)
+      goto out;
+  }
+#ifdef USE_TLS_SRP
+  if(ssl->username || ssl->password) {
+    r = Curl_dyn_add(&buf, "-SRP");
+    if(r)
+      goto out;
+  }
+#endif
+
+  r = Curl_dyn_addf(&buf, ":%s:%d", peer->hostname, peer->port);
+  if(r)
+    goto out;
+
+  switch(peer->transport) {
+  case TRNSPRT_TCP:
+    break;
+  case TRNSPRT_UDP:
+    r = Curl_dyn_add(&buf, ":UDP");
+    break;
+  case TRNSPRT_QUIC:
+    r = Curl_dyn_add(&buf, ":QUIC");
+    break;
+  case TRNSPRT_UNIX:
+    r = Curl_dyn_add(&buf, ":UNIX");
+    break;
+  default:
+    r = Curl_dyn_addf(&buf, ":TRNSPRT-%d", peer->transport);
+    break;
+  }
+  if(r)
+    goto out;
+
+  if(!ssl->verifypeer) {
+    r = Curl_dyn_add(&buf, ":NO-VRFY-PEER");
+    if(r)
+      goto out;
+  }
+  if(!ssl->verifyhost) {
+    r = Curl_dyn_add(&buf, ":NO-VRFY-HOST");
+    if(r)
+      goto out;
+  }
+  if(ssl->verifystatus) {
+    r = Curl_dyn_add(&buf, ":VRFY-OCSP");
+    if(r)
+      goto out;
+  }
+  if(!ssl->verifypeer || !ssl->verifyhost) {
+    if(cf->conn->bits.conn_to_host) {
+      r = Curl_dyn_addf(&buf, ":CHOST-%s", cf->conn->conn_to_host.name);
+      if(r)
+        goto out;
+    }
+    if(cf->conn->bits.conn_to_port) {
+      r = Curl_dyn_addf(&buf, ":CPORT-%d", cf->conn->conn_to_port);
+      if(r)
+        goto out;
+    }
+  }
+
+  if(ssl->version || ssl->version_max) {
+    r = Curl_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version, ssl->version_max);
+    if(r)
+      goto out;
+  }
+  if(ssl->ssl_options) {
+    r = Curl_dyn_addf(&buf, ":TLSOPT-%x", ssl->ssl_options);
+    if(r)
+      goto out;
+  }
+  if(ssl->cipher_list) {
+    r = Curl_dyn_addf(&buf, ":CIPHER-%s", ssl->cipher_list);
+    if(r)
+      goto out;
+  }
+  if(ssl->cipher_list13) {
+    r = Curl_dyn_addf(&buf, ":CIPHER13-%s", ssl->cipher_list13);
+    if(r)
+      goto out;
+  }
+  if(ssl->curves) {
+    r = Curl_dyn_addf(&buf, ":CURVES-%s", ssl->curves);
+    if(r)
+      goto out;
+  }
+  r = cf_ssl_session_key_add_path(&buf, "CA", ssl->CAfile);
+  if(r)
+    goto out;
+  r = cf_ssl_session_key_add_path(&buf, "CApath", ssl->CApath);
+  if(r)
+    goto out;
+  r = cf_ssl_session_key_add_path(&buf, "CRL", ssl->CRLfile);
+  if(r)
+    goto out;
+  r = cf_ssl_session_key_add_path(&buf, "Issuer", ssl->issuercert);
+  if(r)
+    goto out;
+  if(ssl->pinned_key && ssl->pinned_key[0]) {
+    r = Curl_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
+    if(r)
+      goto out;
+  }
+  if(ssl->cert_blob) {
+    r = cf_ssl_session_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
+    if(r)
+      goto out;
+  }
+  if(ssl->ca_info_blob) {
+    r = cf_ssl_session_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
+    if(r)
+      goto out;
+  }
+  if(ssl->issuercert_blob) {
+    r = cf_ssl_session_key_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
+  }
+
+out:
+  if(!r) {
+    *pkey = Curl_dyn_strdup(&buf);
+    if(!*pkey)
+      r = CURLE_OUT_OF_MEMORY;
+  }
+  Curl_dyn_free(&buf);
+  return r;
+}
+
+static bool cf_ssl_session_match_auth(struct Curl_ssl_session *entry,
+                                      struct ssl_primary_config *conn_config)
+{
+  if(!Curl_safecmp(entry->clientcert, conn_config->clientcert))
+    return FALSE;
+#ifdef USE_TLS_SRP
+   if(Curl_timestrcmp(entry->srp_username, conn_config->username) ||
+      Curl_timestrcmp(entry->srp_password, conn_config->password))
+     return FALSE;
+#endif
+  return TRUE;
+}
+
+bool Curl_ssl_get_session(struct Curl_cfilter *cf,
+                          struct Curl_easy *data,
+                          const char *session_key,
+                          void **session,
+                          size_t *session_len, /* set 0 if unknown */
+                          char **palpn)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_session *check;
-  size_t i;
+  struct Curl_ssl_session *entry;
   long *general_age;
-  bool no_match = TRUE;
+  size_t i;
 
-  *ssl_sessionid = NULL;
-  if(palpn)
-    *palpn = NULL;
+  *session = NULL;
+  *session_len = 0;
   if(!ssl_config)
-    return TRUE;
+    return FALSE;
 
   DEBUGASSERT(ssl_config->primary.cache_session);
-
   if(!ssl_config->primary.cache_session || !data->state.session)
-    /* session ID reuse is disabled or the session cache has not been
-       setup */
-    return TRUE;
+    return FALSE;
 
   /* Lock if shared */
   if(SSLSESSION_SHARED(data))
@@ -587,144 +773,146 @@ bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
     general_age = &data->state.sessionage;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
-    check = &data->state.session[i];
-    if(!check->sessionid)
-      /* not session ID means blank entry */
+    entry = &data->state.session[i];
+    if(!entry->session_key)  /* unused entry */
       continue;
-    if(strcasecompare(peer->hostname, check->name) &&
-       (peer->port == check->remote_port) &&
-       (peer->transport == check->transport) &&
-       ((!cf->conn->bits.conn_to_host && !check->conn_to_host) ||
-        (cf->conn->bits.conn_to_host && check->conn_to_host &&
-         strcasecompare(cf->conn->conn_to_host.name, check->conn_to_host))) &&
-       ((!cf->conn->bits.conn_to_port && check->conn_to_port == -1) ||
-        (cf->conn->bits.conn_to_port && check->conn_to_port != -1 &&
-         cf->conn->conn_to_port == check->conn_to_port)) &&
-       strcasecompare(cf->conn->handler->scheme, check->scheme) &&
-       match_ssl_primary_config(data, conn_config, &check->ssl_config)) {
-      /* yes, we have a session ID! */
+    if(strcasecompare(session_key, entry->session_key) &&
+       cf_ssl_session_match_auth(entry, conn_config)) {
+      /* yes, we have a cached session for this! */
       (*general_age)++;          /* increase general age */
-      check->age = *general_age; /* set this as used in this age */
-      *ssl_sessionid = check->sessionid;
-      if(idsize)
-        *idsize = check->idsize;
+      entry->age = *general_age; /* set this as used in this age */
+      *session = entry->session;
+      if(session_len)
+        *session_len = entry->session_len;
       if(palpn)
-        *palpn = check->alpn;
-      no_match = FALSE;
+        *palpn = entry->alpn;
       break;
     }
   }
 
-  CURL_TRC_CF(data, cf, "%s cached session ID for %s://%s:%d",
-              no_match ? "No" : "Found",
-              cf->conn->handler->scheme, peer->hostname, peer->port);
-  return no_match;
+  CURL_TRC_CF(data, cf, "%s cached session for %s",
+              *session ? "Found" : "No", session_key);
+  return !!*session;
 }
 
 /*
  * Kill a single session ID entry in the cache.
  */
-void Curl_ssl_kill_session(struct Curl_ssl_session *session)
+void Curl_ssl_kill_session(struct Curl_ssl_session *entry)
 {
-  if(session->sessionid) {
-    /* defensive check */
-
+  if(entry->session_key) {
     /* free the ID the SSL-layer specific way */
-    session->sessionid_free(session->sessionid, session->idsize);
+    entry->sessionid_free(entry->session, entry->session_len);
 
-    session->sessionid = NULL;
-    session->sessionid_free = NULL;
-    session->age = 0; /* fresh */
+    entry->session = NULL;
+    entry->sessionid_free = NULL;
+    entry->age = 0; /* fresh */
 
-    free_primary_ssl_config(&session->ssl_config);
-
-    Curl_safefree(session->name);
-    Curl_safefree(session->conn_to_host);
-    Curl_safefree(session->alpn);
+    Curl_safefree(entry->alpn);
+    Curl_safefree(entry->clientcert);
+#ifdef USE_TLS_SRP
+    Curl_safefree(entry->srp_username);
+    Curl_safefree(entry->srp_password);
+#endif
+    Curl_safefree(entry->session_key);
   }
 }
 
 /*
- * Delete the given session ID from the cache.
+ * Delete the given session from the cache using its key.
  */
-void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
+void Curl_ssl_del_session(struct Curl_easy *data, const char *session_key)
 {
   size_t i;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
-    struct Curl_ssl_session *check = &data->state.session[i];
+    struct Curl_ssl_session *entry = &data->state.session[i];
 
-    if(check->sessionid == ssl_sessionid) {
-      Curl_ssl_kill_session(check);
+    if(entry->session_key &&
+       strcasecompare(session_key, entry->session_key)) {
+      Curl_ssl_kill_session(entry);
       break;
     }
   }
 }
 
-CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const struct ssl_peer *peer,
-                                const char *alpn,
-                                void *ssl_sessionid,
-                                size_t idsize,
-                                Curl_ssl_sessionid_dtor *sessionid_free_cb)
+CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              const char *session_key,
+                              const struct ssl_peer *peer,
+                              void *session,
+                              size_t session_len,
+                              Curl_ssl_sessionid_dtor *sessionid_free_cb,
+                              const char *alpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   size_t i;
-  struct Curl_ssl_session *store;
+  struct Curl_ssl_session *entry;
   long oldest_age;
-  char *clone_host = NULL;
-  char *clone_conn_to_host = NULL;
+  char *clone_skey = NULL;
   char *clone_alpn = NULL;
-  int conn_to_port;
+  char *clone_clientcert = NULL;
+#ifdef USE_TLS_SRP
+  char *clone_srp_username = NULL;
+  char *clone_srp_password = NULL;
+#endif
   long *general_age;
-  void *old_sessionid;
-  size_t old_size;
+  void *old_session;
+  size_t old_session_len;
   CURLcode result = CURLE_OUT_OF_MEMORY;
 
-  DEBUGASSERT(ssl_sessionid);
+  DEBUGASSERT(session);
   DEBUGASSERT(sessionid_free_cb);
 
   if(!data->state.session) {
-    sessionid_free_cb(ssl_sessionid, idsize);
+    sessionid_free_cb(session, session_len);
     return CURLE_OK;
   }
 
-  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size, NULL)) {
-    if((old_size == idsize) &&
-       ((old_sessionid == ssl_sessionid) ||
-        (idsize && !memcmp(old_sessionid, ssl_sessionid, idsize)))) {
+  if(Curl_ssl_get_session(cf, data, session_key,
+                          &old_session, &old_session_len, NULL)) {
+    if((old_session_len == session_len) &&
+       ((old_session == session) ||
+        (session_len && !memcmp(old_session, session, session_len)))) {
       /* the very same */
-      sessionid_free_cb(ssl_sessionid, idsize);
+      sessionid_free_cb(session, session_len);
       return CURLE_OK;
     }
-    Curl_ssl_delsessionid(data, old_sessionid);
+    Curl_ssl_del_session(data, session_key);
   }
 
-  store = &data->state.session[0];
+  entry = &data->state.session[0];
   oldest_age = data->state.session[0].age; /* zero if unused */
   DEBUGASSERT(ssl_config->primary.cache_session);
   (void)ssl_config;
 
-  clone_host = strdup(peer->hostname);
-  if(!clone_host)
+  clone_skey = strdup(session_key);
+  if(!clone_skey)
     goto out;
 
-  if(cf->conn->bits.conn_to_host) {
-    clone_conn_to_host = strdup(cf->conn->conn_to_host.name);
-    if(!clone_conn_to_host)
+  if(conn_config->clientcert) {
+    clone_clientcert = strdup(conn_config->clientcert);
+    if(!clone_clientcert)
       goto out;
   }
+
+#ifdef USE_TLS_SRP
+  if(conn_config->username) {
+    clone_srp_username = strdup(conn_config->username);
+    if(!clone_srp_username)
+      goto out;
+  }
+  if(conn_config->password) {
+    clone_srp_password = strdup(conn_config->password);
+    if(!clone_srp_password)
+      goto out;
+  }
+#endif
 
   clone_alpn = alpn ? strdup(alpn) : NULL;
   if(alpn && !clone_alpn)
     goto out;
-
-  if(cf->conn->bits.conn_to_port)
-    conn_to_port = cf->conn->conn_to_port;
-  else
-    conn_to_port = -1;
 
   /* Now we should add the session ID and the hostname to the cache, (remove
      the oldest if necessary) */
@@ -739,58 +927,52 @@ CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
 
   /* find an empty slot for us, or find the oldest */
   for(i = 1; (i < data->set.general_ssl.max_ssl_sessions) &&
-        data->state.session[i].sessionid; i++) {
+        data->state.session[i].session_key; i++) {
     if(data->state.session[i].age < oldest_age) {
       oldest_age = data->state.session[i].age;
-      store = &data->state.session[i];
+      entry = &data->state.session[i];
     }
   }
   if(i == data->set.general_ssl.max_ssl_sessions)
     /* cache is full, we must "kill" the oldest entry! */
-    Curl_ssl_kill_session(store);
+    Curl_ssl_kill_session(entry);
   else
-    store = &data->state.session[i]; /* use this slot */
+    entry = &data->state.session[i]; /* use this slot */
 
   /* now init the session struct wisely */
-  if(!clone_ssl_primary_config(conn_config, &store->ssl_config)) {
-    free_primary_ssl_config(&store->ssl_config);
-    store->sessionid = NULL; /* let caller free sessionid */
-    goto out;
-  }
-  store->sessionid = ssl_sessionid;
-  store->idsize = idsize;
-  store->sessionid_free = sessionid_free_cb;
-  store->age = *general_age;    /* set current age */
+  DEBUGASSERT(!entry->session_key);
+  entry->session_key = clone_skey;
+  clone_skey = NULL;
+  entry->session = session;
+  entry->session_len = session_len;
+  entry->sessionid_free = sessionid_free_cb;
+  entry->age = *general_age;    /* set current age */
   /* free it if there is one already present */
-  free(store->name);
-  free(store->conn_to_host);
-  store->name = clone_host;               /* clone hostname */
-  clone_host = NULL;
-  store->conn_to_host = clone_conn_to_host; /* clone connect to hostname */
-  clone_conn_to_host = NULL;
-  store->conn_to_port = conn_to_port; /* connect to port number */
-  store->alpn = clone_alpn;
+  DEBUGASSERT(!entry->clientcert);
+  entry->clientcert = clone_clientcert;
+  clone_clientcert = NULL;
+  entry->alpn = clone_alpn;
   clone_alpn = NULL;
-  /* port number */
-  store->remote_port = peer->port;
-  store->scheme = cf->conn->handler->scheme;
-  store->transport = peer->transport;
-
+#ifdef USE_TLS_SRP
+  DEBUGASSERT(!entry->srp_username);
+  entry->srp_username = clone_srp_username;
+  clone_srp_username = NULL;
+  DEBUGASSERT(!entry->srp_password);
+  entry->srp_password = clone_srp_password;
+  clone_srp_password = NULL;
+#endif
   result = CURLE_OK;
 
 out:
-  free(clone_host);
-  free(clone_conn_to_host);
+  free(clone_skey);
   free(clone_alpn);
   if(result) {
-    failf(data, "Failed to add Session ID to cache for %s://%s:%d [%s]",
-          store->scheme, store->name, store->remote_port,
-          Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server");
-    sessionid_free_cb(ssl_sessionid, idsize);
+    failf(data, "Failed to add SSL Session to cache for %s", session_key);
+    sessionid_free_cb(session, session_len);
     return result;
   }
-  CURL_TRC_CF(data, cf, "Added Session ID to cache for %s://%s:%d [%s]",
-              store->scheme, store->name, store->remote_port,
+  CURL_TRC_CF(data, cf, "Added SSL Session to cache for %s:%d [%s]",
+              peer->hostname, peer->port,
               Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server");
   return CURLE_OK;
 }
@@ -1597,6 +1779,7 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl->close(cf, data);
     connssl->state = ssl_connection_none;
     Curl_ssl_peer_cleanup(&connssl->peer);
+    Curl_safefree(connssl->session_key);
   }
   cf->connected = FALSE;
 }
@@ -1746,6 +1929,13 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   if(!connssl->peer.hostname) {
     result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
+    if(result)
+      goto out;
+  }
+
+  if(!connssl->session_key) {
+    result = Curl_ssl_make_session_key(cf, &connssl->peer,
+                                       &connssl->session_key);
     if(result)
       goto out;
   }

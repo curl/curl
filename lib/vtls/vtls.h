@@ -167,6 +167,23 @@ void Curl_ssl_sessionid_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
 
+/* create a key for TLS sessions
+ * Create a key of printable chars for storage of TLS sessions suitable
+ * for the given connection filter and peer. The key will reflect the
+ * SSL config for the filter's connection (ssl verssions/options/ciphers etc.).
+ * Config options using relative paths will be converted to absolute
+ * ones. config options involving BLOBs will add the SHA256 hash of the
+ * BLOB. In such configurations the key is not guarantueed to be unique,
+ * but collisions are highly unlikely since they would involve the same
+ * peer and matching other config options.
+ * @param cf      the connection filter wanting to use it
+ * @param peer    the peer the filter wants to talk to
+ * @param pkey    on successfull return, the key generated
+ */
+CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
+                                   const struct ssl_peer *peer,
+                                   char **pkey);
+
 /* Kill a single session ID entry in the cache
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * This will call engine-specific curlssl_session_free function, which must
@@ -174,13 +191,6 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
  * (e.g. decrement refcount).
  */
 void Curl_ssl_kill_session(struct Curl_ssl_session *session);
-/* delete a session from the cache
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * This will call engine-specific curlssl_session_free function, which must
- * take sessionid object ownership from sessionid cache
- * (e.g. decrement refcount).
- */
-void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid);
 
 /* get N random bytes into the buffer */
 CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,

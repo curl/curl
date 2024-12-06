@@ -41,6 +41,7 @@ struct curl_tls_ctx {
 #elif defined(USE_WOLFSSL)
   struct wolfssl_ctx wssl;
 #endif
+  char *session_key;
 };
 
 /**

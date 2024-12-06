@@ -244,9 +244,8 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   return s->bufr;
 }
 
-char *Curl_dyn_dup(const struct dynbuf *s)
+char *Curl_dyn_strdup(const struct dynbuf *s)
 {
-  char *ptr = NULL;
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
   if(s->leng) {
