@@ -46,7 +46,7 @@ function(add_runtests _targetname _test_flags)
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
-  unset(_depends)
+  set(_depends "")
   if(NOT _targetname STREQUAL "test-ci")
     set(_depends "testdeps")
   endif()
@@ -66,7 +66,7 @@ function(add_runtests _targetname _test_flags)
 endfunction()
 
 function(add_pytest _targetname _test_flags)
-  unset(_depends)
+  set(_depends "")
   if(NOT _targetname STREQUAL "pytest-ci")
     set(_depends "test-http-clients")
   endif()

@@ -95,7 +95,7 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
-unset(_target_flags)
+set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
 endif()
@@ -1046,7 +1046,7 @@ if(NOT CURL_DISABLE_LDAP)
       list(APPEND CMAKE_REQUIRED_INCLUDES ${LDAP_INCLUDE_DIR})
     endif()
 
-    unset(_include_list)
+    set(_include_list "")
     check_include_file("lber.h" HAVE_LBER_H)
     if(HAVE_LBER_H)
       list(APPEND _include_list "lber.h")
@@ -1932,7 +1932,7 @@ if(NOT CURL_DISABLE_NTLM AND
 endif()
 
 # Clear list and try to detect available protocols
-unset(_items)
+set(_items "")
 _add_if("HTTP"          NOT CURL_DISABLE_HTTP)
 _add_if("HTTPS"         NOT CURL_DISABLE_HTTP AND _ssl_enabled)
 _add_if("FTP"           NOT CURL_DISABLE_FTP)
@@ -1975,7 +1975,7 @@ string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
 message(STATUS "Protocols: ${_support_protocols_lower}")
 
 # Clear list and try to detect available features
-unset(_items)
+set(_items "")
 _add_if("SSL"           _ssl_enabled)
 _add_if("IPv6"          ENABLE_IPV6)
 _add_if("UnixSockets"   USE_UNIX_SOCKETS)
@@ -2027,7 +2027,7 @@ string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Features: ${SUPPORT_FEATURES}")
 
 # Clear list and collect SSL backends
-unset(_items)
+set(_items "")
 _add_if("Schannel"         _ssl_enabled AND USE_SCHANNEL)
 _add_if("OpenSSL"          _ssl_enabled AND USE_OPENSSL AND OPENSSL_VERSION VERSION_LESS 3.0.0)
 _add_if("OpenSSL v3+"      _ssl_enabled AND USE_OPENSSL AND NOT OPENSSL_VERSION VERSION_LESS 3.0.0)
@@ -2099,7 +2099,7 @@ if(NOT CURL_DISABLE_INSTALL)
   endforeach()
 
   # Avoid getting unnecessary -L options for known system directories.
-  unset(_sys_libdirs)
+  set(_sys_libdirs "")
   foreach(_libdir IN LISTS CMAKE_SYSTEM_PREFIX_PATH)
     if(_libdir MATCHES "/$")
       set(_libdir "${_libdir}lib")
@@ -2124,7 +2124,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
   endforeach()
 
-  unset(_implicit_libs)
+  set(_implicit_libs "")
   if(NOT MINGW AND NOT UNIX)
     set(_implicit_libs ${CMAKE_C_IMPLICIT_LINK_LIBRARIES})
   endif()
