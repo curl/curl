@@ -120,7 +120,6 @@ if test "x$OPT_OPENSSL" != xno; then
       SSL_CPPFLAGS=`CURL_EXPORT_PCDIR([$OPENSSL_PCDIR]) dnl
         $PKGCONFIG --cflags-only-I openssl 2>/dev/null`
 
-      AC_SUBST(SSL_LIBS)
       AC_MSG_NOTICE([pkg-config: SSL_LIBS: "$SSL_LIBS"])
       AC_MSG_NOTICE([pkg-config: SSL_LDFLAGS: "$SSL_LDFLAGS"])
       AC_MSG_NOTICE([pkg-config: SSL_CPPFLAGS: "$SSL_CPPFLAGS"])
@@ -230,21 +229,6 @@ if test "x$OPT_OPENSSL" != xno; then
         test openssl != "$DEFAULT_SSL_BACKEND" || VALID_DEFAULT_SSL_BACKEND=yes
         OPENSSL_ENABLED=1
         AC_DEFINE(USE_OPENSSL, 1, [if OpenSSL is in use]))
-
-      if test $ac_cv_header_openssl_x509_h = no; then
-        dnl we don't use the "action" part of the AC_CHECK_HEADERS macro
-        dnl since 'err.h' might in fact find a krb4 header with the same
-        dnl name
-        AC_CHECK_HEADERS(x509.h rsa.h crypto.h pem.h ssl.h err.h)
-
-        if test $ac_cv_header_x509_h = yes &&
-           test $ac_cv_header_crypto_h = yes &&
-           test $ac_cv_header_ssl_h = yes; then
-          dnl three matches
-          ssl_msg="OpenSSL"
-          OPENSSL_ENABLED=1
-        fi
-      fi
     fi
 
     if test X"$OPENSSL_ENABLED" != X"1"; then
@@ -303,8 +287,6 @@ if test "x$OPT_OPENSSL" != xno; then
       ]])
     ],[
       AC_MSG_RESULT([yes])
-      AC_DEFINE_UNQUOTED(HAVE_LIBRESSL, 1,
-        [Define to 1 if using LibreSSL.])
       ssl_msg="LibreSSL"
     ],[
       AC_MSG_RESULT([no])
@@ -378,7 +360,7 @@ if test "$OPENSSL_ENABLED" = "1"; then
   ],[
     AC_MSG_RESULT([yes])
     AC_DEFINE(HAVE_OPENSSL_SRP, 1, [if you have the functions SSL_CTX_set_srp_username and SSL_CTX_set_srp_password])
-    AC_SUBST(HAVE_OPENSSL_SRP, [1])
+    HAVE_OPENSSL_SRP=1
   ],[
     AC_MSG_RESULT([no])
   ])

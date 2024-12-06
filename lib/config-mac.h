@@ -97,7 +97,4 @@
 #define SEND_TYPE_ARG4 int
 #define SEND_TYPE_RETV ssize_t
 
-#define HAVE_EXTRA_STRICMP_H 1
-#define HAVE_EXTRA_STRDUP_H  1
-
 #endif /* HEADER_CURL_CONFIG_MAC_H */

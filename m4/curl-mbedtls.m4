@@ -46,7 +46,6 @@ if test "x$OPT_MBEDTLS" != xno; then
       dnl libmbedtls found, set the variable
       [
         AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-        AC_SUBST(USE_MBEDTLS, [1])
         MBEDTLS_ENABLED=1
         USE_MBEDTLS="yes"
         ssl_msg="mbedTLS"
@@ -74,7 +73,6 @@ if test "x$OPT_MBEDTLS" != xno; then
       AC_CHECK_LIB(mbedtls, mbedtls_ssl_init,
         [
         AC_DEFINE(USE_MBEDTLS, 1, [if mbedTLS is enabled])
-        AC_SUBST(USE_MBEDTLS, [1])
         MBEDTLS_ENABLED=1
         USE_MBEDTLS="yes"
         ssl_msg="mbedTLS"

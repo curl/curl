@@ -44,9 +44,6 @@
 /* Define if you have the <locale.h> header file. */
 #define HAVE_LOCALE_H 1
 
-/* Define if you need <malloc.h> header even with <stdlib.h> header file. */
-#define NEED_MALLOC_H 1
-
 /* Define if you have the <netdb.h> header file. */
 /* #define HAVE_NETDB_H 1 */
 

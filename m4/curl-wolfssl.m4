@@ -105,7 +105,6 @@ if test "x$OPT_WOLFSSL" != xno; then
       ],[
         AC_MSG_RESULT(yes)
         AC_DEFINE(USE_WOLFSSL, 1, [if wolfSSL is enabled])
-        AC_SUBST(USE_WOLFSSL, [1])
         WOLFSSL_ENABLED=1
         USE_WOLFSSL="yes"
         ssl_msg="wolfSSL"

@@ -75,8 +75,6 @@
 #define HAVE_SYS_TYPES_H       1
 #define HAVE_UNISTD_H          1
 
-#define NEED_MALLOC_H          1
-
 #define SIZEOF_INT             4
 #define SIZEOF_LONG            4
 #define SIZEOF_SIZE_T          4

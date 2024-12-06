@@ -1465,7 +1465,6 @@ endif()
 # Order for these is significant.
 check_include_file("sys/eventfd.h"    HAVE_SYS_EVENTFD_H)
 check_include_file("sys/filio.h"      HAVE_SYS_FILIO_H)
-check_include_file("sys/wait.h"       HAVE_SYS_WAIT_H)
 check_include_file("sys/ioctl.h"      HAVE_SYS_IOCTL_H)
 check_include_file("sys/param.h"      HAVE_SYS_PARAM_H)
 check_include_file("sys/poll.h"       HAVE_SYS_POLL_H)
@@ -1664,7 +1663,6 @@ foreach(_curl_test IN ITEMS
     HAVE_IOCTL_FIONBIO
     HAVE_IOCTL_SIOCGIFADDR
     HAVE_SETSOCKOPT_SO_NONBLOCK
-    HAVE_O_NONBLOCK
     HAVE_GETHOSTBYNAME_R_3
     HAVE_GETHOSTBYNAME_R_5
     HAVE_GETHOSTBYNAME_R_6
@@ -1757,15 +1755,6 @@ endif()
 
 if(NOT HAVE_IN_ADDR_T)
   set(in_addr_t "unsigned long")
-endif()
-
-# Check for nonblocking
-set(HAVE_DISABLED_NONBLOCKING 1)
-if(HAVE_FIONBIO OR
-   HAVE_IOCTLSOCKET OR
-   HAVE_IOCTLSOCKET_CASE OR
-   HAVE_O_NONBLOCK)
-  unset(HAVE_DISABLED_NONBLOCKING)
 endif()
 
 if(CMAKE_COMPILER_IS_GNUCC AND APPLE)
