@@ -142,10 +142,18 @@ void setfiletime(curl_off_t filetime, const char *filename,
     }
 
 #elif defined(HAVE_UTIME)
+#ifdef _WIN32
+    struct _utimbuf times;
+#else
     struct utimbuf times;
+#endif
     times.actime = (time_t)filetime;
     times.modtime = (time_t)filetime;
+#ifdef _WIN32
+    if(_utime(filename, &times)) {
+#else
     if(utime(filename, &times)) {
+#endif
       warnf(global, "Failed to set filetime %" CURL_FORMAT_CURL_OFF_T
             " on '%s': %s", filetime, filename, strerror(errno));
     }

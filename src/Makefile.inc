@@ -38,6 +38,7 @@ CURLTOOL_LIBCURL_CFILES = \
 # the official API, but we reuse the code here to avoid duplication.
 CURLX_CFILES = \
   ../lib/base64.c \
+  ../lib/curl_binmode.c \
   ../lib/curl_multibyte.c \
   ../lib/dynbuf.c \
   ../lib/nonblock.c \
@@ -47,6 +48,7 @@ CURLX_CFILES = \
   ../lib/warnless.c
 
 CURLX_HFILES = \
+  ../lib/curl_binmode.h \
   ../lib/curl_ctype.h \
   ../lib/curl_multibyte.h \
   ../lib/curl_setup.h \
@@ -60,7 +62,6 @@ CURLX_HFILES = \
 CURL_CFILES = \
   slist_wc.c \
   terminal.c \
-  tool_binmode.c \
   tool_bname.c \
   tool_cb_dbg.c \
   tool_cb_hdr.c \
@@ -106,7 +107,6 @@ CURL_CFILES = \
 CURL_HFILES = \
   slist_wc.h \
   terminal.h \
-  tool_binmode.h \
   tool_bname.h \
   tool_cb_dbg.h \
   tool_cb_hdr.h \

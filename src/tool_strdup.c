@@ -23,7 +23,7 @@
  ***************************************************************************/
 #include "tool_strdup.h"
 
-#ifndef HAVE_STRDUP
+#if !defined(HAVE_STRDUP) && !defined(_WIN32)
 char *strdup(const char *str)
 {
   size_t len;
