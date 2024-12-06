@@ -46,7 +46,7 @@ int Curl_str_until(char **linep, struct Curl_str *out,
   out->str = *linep;
   out->len = len;
   *linep = s; /* point to the first byte after the word */
-  return 0;
+  return STRE_OK;
 }
 
 /* Get a word until the first space or end of string. At least one byte long.
@@ -82,7 +82,7 @@ int Curl_str_quotedword(char **linep, struct Curl_str *out,
   out->str = (*linep) + 1;
   out->len = len;
   *linep = s + 1;
-  return 0;
+  return STRE_OK;
 }
 
 /* Advance over a single character.
@@ -93,7 +93,7 @@ int Curl_str_single(char **linep, char byte)
   if(**linep != byte)
     return STRE_BYTE;
   (*linep)++; /* move over it */
-  return 0;
+  return STRE_OK;
 }
 
 /* Advance over a single space.
@@ -118,7 +118,7 @@ int Curl_str_number(char **linep, size_t *nump, size_t max)
     (*linep)++;
   }
   *nump = num;
-  return 0;
+  return STRE_OK;
 }
 
 /* CR or LF
@@ -128,7 +128,7 @@ int Curl_str_newline(char **linep)
   DEBUGASSERT(linep && *linep);
   if(ISNEWLINE(**linep)) {
     (*linep)++;
-    return 0; /* yessir */
+    return STRE_OK; /* yessir */
   }
   return STRE_NEWLINE;
 }
