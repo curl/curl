@@ -223,6 +223,7 @@ LIB_CFILES =         \
   strcase.c          \
   strdup.c           \
   strerror.c         \
+  strparse.c         \
   strtok.c           \
   strtoofft.c        \
   system_win32.c     \
@@ -358,6 +359,7 @@ LIB_HFILES =         \
   strcase.h          \
   strdup.h           \
   strerror.h         \
+  strparse.h         \
   strtok.h           \
   strtoofft.h        \
   system_win32.h     \
