@@ -634,7 +634,7 @@ CURLcode Curl_output_aws_sigv4(struct Curl_easy *data, bool proxy)
 
      No string can be longer than N bytes of non-whitespace
   */
-  if(Curl_str_until(&line, &provider0, MAX_SIGV4_LEN, ':') || !provider0.len) {
+  if(Curl_str_until(&line, &provider0, MAX_SIGV4_LEN, ':')) {
     failf(data, "first aws-sigv4 provider cannot be empty");
     result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto fail;
