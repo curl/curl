@@ -170,6 +170,8 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_STARTOP:
     /* This is set at the start of a transfer */
     data->progress.t_startop = timestamp;
+    data->progress.t_startqueue = timestamp;
+    data->progress.t_postqueue = 0;
     break;
   case TIMER_STARTSINGLE:
     /* This is set at the start of each single transfer */
@@ -177,12 +179,9 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
     data->progress.is_t_startransfer_set = FALSE;
     break;
   case TIMER_POSTQUEUE:
-    /* Set when the transfer starts (after potentially having been brought
-       back from the waiting queue). It needs to count from t_startop and not
-       t_startsingle since the latter is reset when a connection is brought
-       back from the pending queue. */
-    data->progress.t_postqueue =
-      Curl_timediff_us(timestamp, data->progress.t_startop);
+    /* Queue time is accumulative from all involved redirects */
+    data->progress.t_postqueue +=
+      Curl_timediff_us(timestamp, data->progress.t_startqueue);
     break;
   case TIMER_STARTACCEPT:
     data->progress.t_acceptdata = timestamp;
@@ -220,6 +219,7 @@ void Curl_pgrsTimeWas(struct Curl_easy *data, timerid timer,
   case TIMER_REDIRECT:
     data->progress.t_redirect = Curl_timediff_us(timestamp,
                                                  data->progress.start);
+    data->progress.t_startqueue = timestamp;
     break;
   }
   if(delta) {

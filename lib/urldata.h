@@ -1090,6 +1090,7 @@ struct Progress {
   struct curltime start;
   struct curltime t_startsingle;
   struct curltime t_startop;
+  struct curltime t_startqueue;
   struct curltime t_acceptdata;
 
 #define CURR_TIME (5 + 1) /* 6 entries for 5 seconds */

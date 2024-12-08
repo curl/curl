@@ -122,6 +122,7 @@ static const struct writeoutvar variables[] = {
    writeTime},
   {"time_pretransfer", VAR_PRETRANSFER_TIME, CURLINFO_PRETRANSFER_TIME_T,
    writeTime},
+  {"time_queue", VAR_QUEUE_TIME, CURLINFO_QUEUE_TIME_T, writeTime},
   {"time_redirect", VAR_REDIRECT_TIME, CURLINFO_REDIRECT_TIME_T, writeTime},
   {"time_starttransfer", VAR_STARTTRANSFER_TIME, CURLINFO_STARTTRANSFER_TIME_T,
    writeTime},
