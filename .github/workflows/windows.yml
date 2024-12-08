@@ -188,7 +188,7 @@ jobs:
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
-      - uses: msys2/setup-msys2@c52d1fa9c7492275e60fe763540fb601f5f232a1 # v2
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
@@ -204,7 +204,7 @@ jobs:
             libpsl-devel
             libssh2-devel
 
-      - uses: msys2/setup-msys2@c52d1fa9c7492275e60fe763540fb601f5f232a1 # v2
+      - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys != 'msys' }}
         with:
           msystem: ${{ matrix.sys }}
