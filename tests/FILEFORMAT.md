@@ -453,6 +453,7 @@ Features testable here are:
 - `Kerberos`
 - `Largefile`
 - `large-time` (time_t is larger than 32-bit)
+- `large-size` (size_t is larger than 32-bit)
 - `ld_preload`
 - `libssh2`
 - `libssh`

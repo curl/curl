@@ -823,6 +823,7 @@ sub checksystemfeatures {
     $feature{"headers-api"} = 1;
     $feature{"xattr"} = 1;
     $feature{"large-time"} = 1;
+    $feature{"large-size"} = 1;
     $feature{"sha512-256"} = 1;
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";

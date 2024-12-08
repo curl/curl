@@ -46,6 +46,6 @@
 #define ISURLPUNTCS(x) (((x) == '-') || ((x) == '.') || ((x) == '_') || \
                         ((x) == '~'))
 #define ISUNRESERVED(x) (ISALNUM(x) || ISURLPUNTCS(x))
-
+#define ISNEWLINE(x) (((x) == '\n') || (x) == '\r')
 
 #endif /* HEADER_CURL_CTYPE_H */
