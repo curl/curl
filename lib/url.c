@@ -1827,7 +1827,7 @@ static CURLcode parseurlandfillconn(struct Curl_easy *data,
   /* HSTS upgrade */
   if(data->hsts && strcasecompare("http", data->state.up.scheme)) {
     /* This MUST use the IDN decoded name */
-    if(Curl_hsts(data->hsts, conn->host.name, TRUE)) {
+    if(Curl_hsts(data->hsts, conn->host.name, strlen(conn->host.name), TRUE)) {
       char *url;
       Curl_safefree(data->state.up.scheme);
       uc = curl_url_set(uh, CURLUPART_SCHEME, "https", 0);
