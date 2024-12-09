@@ -109,12 +109,8 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
-      if(!share->sslsession) {
-        share->max_ssl_sessions = 8;
-        share->sslsession = calloc(share->max_ssl_sessions,
-                                   sizeof(struct Curl_ssl_session));
-        share->sessionage = 0;
-        if(!share->sslsession)
+      if(!share->ssl_spool) {
+        if(Curl_ssl_spool_create(8, &share->ssl_spool))
           res = CURLSHE_NOMEM;
       }
 #else
@@ -175,7 +171,10 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
-      Curl_safefree(share->sslsession);
+      if(share->ssl_spool) {
+        Curl_ssl_spool_destroy(share->ssl_spool);
+        share->ssl_spool = NULL;
+      }
 #else
       res = CURLSHE_NOT_BUILT_IN;
 #endif
@@ -246,11 +245,9 @@ curl_share_cleanup(CURLSH *sh)
 #endif
 
 #ifdef USE_SSL
-  if(share->sslsession) {
-    size_t i;
-    for(i = 0; i < share->max_ssl_sessions; i++)
-      Curl_ssl_kill_session(&(share->sslsession[i]));
-    free(share->sslsession);
+  if(share->ssl_spool) {
+    Curl_ssl_spool_destroy(share->ssl_spool);
+    share->ssl_spool = NULL;
   }
 #endif
 

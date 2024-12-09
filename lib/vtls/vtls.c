@@ -90,11 +90,6 @@
 #include "memdebug.h"
 
 
-/* convenience macro to check if this handle is using a shared SSL session */
-#define SSLSESSION_SHARED(data) (data->share &&                        \
-                                 (data->share->specifier &             \
-                                  (1<<CURL_LOCK_DATA_SSL_SESSION)))
-
 #define CLONE_STRING(var)                    \
   do {                                       \
     if(source->var) {                        \
@@ -527,14 +522,9 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
-  if(data->state.session && !SSLSESSION_SHARED(data)) {
-    size_t i;
-    for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++)
-      /* the single-killer function handles empty table slots */
-      Curl_ssl_kill_session(&data->state.session[i]);
-
-    /* free the cache data */
-    Curl_safefree(data->state.session);
+  if(data->state.ssl_spool && !CURL_SHARE_SSL_SPOOL(data)) {
+    Curl_ssl_spool_destroy(data->state.ssl_spool);
+    data->state.ssl_spool = NULL;
   }
 
   Curl_ssl->close_all(data);
@@ -580,29 +570,6 @@ CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data)
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 {
   return Curl_ssl->engines_list(data);
-}
-
-/*
- * This sets up a session ID cache to the specified size. Make sure this code
- * is agnostic to what underlying SSL technology we use.
- */
-CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
-{
-  struct Curl_ssl_session *session;
-
-  if(data->state.session)
-    /* this is just a precaution to prevent multiple inits */
-    return CURLE_OK;
-
-  session = calloc(amount, sizeof(struct Curl_ssl_session));
-  if(!session)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* store the info in the SSL section */
-  data->set.general_ssl.max_ssl_sessions = amount;
-  data->state.session = session;
-  data->state.sessionage = 1; /* this is brand new */
-  return CURLE_OK;
 }
 
 static size_t multissl_version(char *buffer, size_t size);
@@ -1473,8 +1440,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   if(!connssl->ssl_conn_hash) {
-    result = Curl_ssl_conn_hash_make(cf, &connssl->peer,
-                                     &connssl->ssl_conn_hash);
+    result = Curl_ssl_spool_hash(cf, &connssl->peer, &connssl->ssl_conn_hash);
     if(result)
       goto out;
   }

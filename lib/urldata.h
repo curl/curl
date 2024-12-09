@@ -271,6 +271,7 @@ enum protection_level {
 
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
+struct Curl_ssl_spool_entry;
 
 typedef enum {
   CURL_SSL_PEER_DNS,
@@ -341,22 +342,7 @@ struct ssl_general_config {
   int ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
 };
 
-typedef void Curl_ssl_sessionid_dtor(void *sessionid, size_t idsize);
-
-/* information stored about one single SSL session */
-struct Curl_ssl_session {
-  char *ssl_conn_hash; /* Hash of relevant ssl config for connection */
-  char *alpn;          /* APLN TLS negotiated protocol string */
-  void *session;       /* as returned from the SSL layer */
-  size_t session_len;  /* if known, otherwise 0 */
-  Curl_ssl_sessionid_dtor *sessionid_free; /* free `sessionid` callback */
-  long age;            /* just a number, the higher the more recent */
-  char *clientcert;
-#ifdef USE_TLS_SRP
-  char *srp_username;
-  char *srp_password;
-#endif
-};
+typedef void Curl_ssl_session_dtor(void *session, size_t slen);
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
@@ -1231,8 +1217,7 @@ struct UrlState {
   curl_prot_t first_remote_protocol;
 
   int retrycount; /* number of retries on a new connection */
-  struct Curl_ssl_session *session; /* array of 'max_ssl_sessions' size */
-  long sessionage;                  /* number of the most recent session */
+  struct Curl_ssl_spool *ssl_spool; /* TLS session pool */
   int os_errno;  /* filled in with errno whenever an error occurs */
   long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */

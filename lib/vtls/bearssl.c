@@ -614,7 +614,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     const br_ssl_session_parameters *session;
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
-    Curl_ssl_sessionid_lock(data);
+    Curl_ssl_spool_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &sdata, &slen, NULL) &&
        slen == sizeof(*session)) {
       session = sdata;
@@ -622,7 +622,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
     }
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_spool_unlock(data);
   }
 
   if(connssl->alpn) {
@@ -838,11 +838,11 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     if(!session)
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
-    Curl_ssl_sessionid_lock(data);
+    Curl_ssl_spool_lock(data);
     ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
                                  session, sizeof(*session),
                                  bearssl_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_spool_unlock(data);
     if(ret)
       return ret;
   }

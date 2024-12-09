@@ -432,10 +432,10 @@ CURLcode wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
 
-  Curl_ssl_sessionid_lock(data);
+  Curl_ssl_spool_lock(data);
   result = Curl_ssl_set_sessionid(cf, data, peer, NULL,
                                   sdata, slen, wolfssl_session_free);
-  Curl_ssl_sessionid_unlock(data);
+  Curl_ssl_spool_unlock(data);
   if(result)
     failf(data, "failed to add new ssl session to cache (%d)", result);
   else {
@@ -476,7 +476,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
   size_t slen = 0;
   CURLcode result = CURLE_OK;
 
-  Curl_ssl_sessionid_lock(data);
+  Curl_ssl_spool_lock(data);
   if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen, NULL)) {
     WOLFSSL_SESSION *session;
     sdata = psdata;
@@ -496,7 +496,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
       failf(data, "could not decode previous session");
     }
   }
-  Curl_ssl_sessionid_unlock(data);
+  Curl_ssl_spool_unlock(data);
   return result;
 }
 

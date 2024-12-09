@@ -2907,10 +2907,10 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       goto out;
     }
 
-    Curl_ssl_sessionid_lock(data);
+    Curl_ssl_spool_lock(data);
     result = Curl_ssl_set_sessionid(cf, data, peer, NULL, der_session_buf,
                                     der_session_size, ossl_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_spool_unlock(data);
   }
 
 out:
@@ -3965,7 +3965,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_sessionid_lock(data);
+    Curl_ssl_spool_lock(data);
     if(!Curl_ssl_getsessionid(cf, data, peer, (void **)&der_sessionid,
       &der_sessionid_size, NULL)) {
       /* we got a session id, use it! */
@@ -3973,7 +3973,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
-          Curl_ssl_sessionid_unlock(data);
+          Curl_ssl_spool_unlock(data);
           SSL_SESSION_free(ssl_session);
           failf(data, "SSL: SSL_set_session failed: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
@@ -3986,11 +3986,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         octx->reused_session = TRUE;
       }
       else {
-        Curl_ssl_sessionid_unlock(data);
+        Curl_ssl_spool_unlock(data);
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_spool_unlock(data);
   }
 
   return CURLE_OK;
@@ -4698,14 +4698,14 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
       if(!Curl_ssl_cf_is_proxy(cf)) {
         void *old_ssl_sessionid = NULL;
         bool incache;
-        Curl_ssl_sessionid_lock(data);
+        Curl_ssl_spool_lock(data);
         incache = !(Curl_ssl_getsessionid(cf, data, peer,
                                           &old_ssl_sessionid, NULL, NULL));
         if(incache) {
           infof(data, "Remove session ID again from cache");
           Curl_ssl_delsessionid(data, old_ssl_sessionid);
         }
-        Curl_ssl_sessionid_unlock(data);
+        Curl_ssl_spool_unlock(data);
       }
 
       X509_free(octx->server_cert);

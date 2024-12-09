@@ -748,12 +748,12 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s) and store in cache",
               connect_idsize, alpn ? alpn : "-");
-  Curl_ssl_sessionid_lock(data);
+  Curl_ssl_spool_lock(data);
   /* Add the sesson to the cache, takes ownership */
-  result = Curl_ssl_add_session(cf, data, ssl_conn_hash,
+  result = Curl_ssl_spool_add(cf, data, ssl_conn_hash,
                                 connect_sessionid, connect_idsize,
                                 NULL, alpn);
-  Curl_ssl_sessionid_unlock(data);
+  Curl_ssl_spool_unlock(data);
   return result;
 }
 
@@ -1084,8 +1084,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     void *ssl_sessionid;
     size_t ssl_idsize;
     char *session_alpn;
-    Curl_ssl_sessionid_lock(data);
-    if(Curl_ssl_get_session(cf, data, ssl_conn_hash,
+    Curl_ssl_spool_lock(data);
+    if(Curl_ssl_spool_get(cf, data, ssl_conn_hash,
                             &ssl_sessionid, &ssl_idsize, &session_alpn)) {
       /* we got a session id, use it! */
       int rc;
@@ -1127,7 +1127,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
         }
       }
     }
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_spool_unlock(data);
   }
 
   /* convert the ALPN string from our arguments to a list of strings that

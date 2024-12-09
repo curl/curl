@@ -28,7 +28,6 @@
 struct connectdata;
 struct ssl_config_data;
 struct ssl_primary_config;
-struct Curl_ssl_session;
 
 #define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
 #define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
@@ -138,8 +137,6 @@ CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
 CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 
-/* init the SSL session ID cache */
-CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
@@ -246,9 +243,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_set_engine(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_initsessions(x,y) CURLE_OK
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start(a) FALSE
