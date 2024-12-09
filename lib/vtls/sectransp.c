@@ -38,6 +38,7 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
+#include "spool.h"
 #include "strerror.h"
 #include "cipher_suite.h"
 
@@ -1338,9 +1339,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     size_t ssl_sessionid_len;
 
     Curl_ssl_spool_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              (void **)&ssl_sessionid, &ssl_sessionid_len,
-                              NULL)) {
+    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
+                          (void **)&ssl_sessionid, &ssl_sessionid_len,
+                          NULL)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       Curl_ssl_spool_unlock(data);
@@ -1368,9 +1369,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                      ssl_sessionid, ssl_sessionid_len,
-                                      sectransp_session_free);
+      result = Curl_ssl_spool_add(cf, data, &connssl->ssl_conn_hash,
+                                  ssl_sessionid, ssl_sessionid_len,
+                                  sectransp_session_free, NULL);
       Curl_ssl_spool_unlock(data);
       if(result)
         return result;
