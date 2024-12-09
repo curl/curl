@@ -34,6 +34,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "spool.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
@@ -615,7 +616,8 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
     Curl_ssl_spool_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &sdata, &slen, NULL) &&
+    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
+                          &sdata, &slen, NULL) &&
        slen == sizeof(*session)) {
       session = sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
@@ -804,12 +806,6 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
   return ret;
 }
 
-static void bearssl_session_free(void *sessionid, size_t idsize)
-{
-  (void)idsize;
-  free(sessionid);
-}
-
 static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
@@ -839,9 +835,9 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
     Curl_ssl_spool_lock(data);
-    ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
+    ret = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
                                  session, sizeof(*session),
-                                 bearssl_session_free);
+                                 NULL, NULL);
     Curl_ssl_spool_unlock(data);
     if(ret)
       return ret;
