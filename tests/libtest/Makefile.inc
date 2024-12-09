@@ -33,6 +33,9 @@ WARNLESS = ../../lib/warnless.c ../../lib/warnless.h
 # files used only in some libcurl test programs
 MULTIBYTE = ../../lib/curl_multibyte.c ../../lib/curl_multibyte.h
 
+# files used only in some libcurl test programs
+BINMODE = ../../lib/curl_binmode.c ../../lib/curl_binmode.h
+
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
 FIRSTFILES = first.c first.h
