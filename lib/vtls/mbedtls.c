@@ -64,6 +64,7 @@
 #include "mbedtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "spool.h"
 #include "x509asn1.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -879,8 +880,8 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     size_t slen = 0;
 
     Curl_ssl_spool_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer,
-                              &sdata, &slen, NULL) && slen) {
+    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
+                          &sdata, &slen, NULL) && slen) {
       mbedtls_ssl_session session;
 
       mbedtls_ssl_session_init(&session);
@@ -1115,12 +1116,6 @@ pinnedpubkey_error:
   return CURLE_OK;
 }
 
-static void mbedtls_session_free(void *session, size_t slen)
-{
-  (void)slen;
-  free(session);
-}
-
 static CURLcode
 mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
@@ -1159,8 +1154,8 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
         }
         else {
           Curl_ssl_spool_lock(data);
-          result = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                          sdata, slen, mbedtls_session_free);
+          result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
+                                      sdata, slen, NULL, NULL);
           Curl_ssl_spool_unlock(data);
           if(!result)
             sdata = NULL;
