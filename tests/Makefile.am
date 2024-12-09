@@ -128,6 +128,11 @@ if USE_TEST_BUNDLES
 TEST_COMMON += -bundle
 endif
 
+if BUILD_DOCS
+else
+TEST_COMMON += !documentation
+endif
+
 TEST = srcdir=$(srcdir) $(PERL) $(PERLFLAGS) $(srcdir)/runtests.pl $(TEST_COMMON)
 TEST_Q = -a -s
 TEST_AM = -a -am
