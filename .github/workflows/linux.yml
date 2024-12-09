@@ -119,7 +119,7 @@ jobs:
 
           - name: mbedtls-pkg
             install_packages: libnghttp2-dev libmbedtls-dev
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF
 
           - name: mbedtls-pkg !pc
             install_packages: libnghttp2-dev libmbedtls-dev
@@ -167,7 +167,7 @@ jobs:
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
-            configure: CC=clang --with-openssl --with-gssapi --enable-debug
+            configure: CC=clang --with-openssl --with-gssapi --enable-debug --disable-docs --disable-manual
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang

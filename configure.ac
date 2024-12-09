@@ -4215,11 +4215,11 @@ fi
 
 CURL_CHECK_NONBLOCKING_SOCKET
 
-if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$CURL_CA_EMBED" != "x"; then
-  AC_PATH_PROG(PERL, perl,,
-    $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
-  AC_SUBST(PERL)
+AC_PATH_PROG(PERL, perl,,
+  $PATH:/usr/local/bin/perl:/usr/bin/:/usr/local/bin)
+AC_SUBST(PERL)
 
+if test "x$BUILD_DOCS" != "x0" -o "x$USE_MANUAL" != "x0" -o "x$CURL_CA_EMBED" != "x"; then
   if test -z "$PERL"; then
     AC_MSG_ERROR([perl was not found, needed for docs, manual and CA embed])
   fi

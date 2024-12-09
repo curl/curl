@@ -35,7 +35,11 @@ http://non-existing-host.haxx.se. --remove-on-error -C 1 -o "%LOGDIR/%TESTNUMBER
 <stderr mode="text">
 curl: --continue-at is mutually exclusive with --remove-on-error
 curl: option -C: is badly used here
+%if manual
 curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
 </stderr>
 </verify>
 </testcase>
