@@ -28,7 +28,6 @@
 struct connectdata;
 struct ssl_config_data;
 struct ssl_primary_config;
-struct Curl_ssl_session;
 
 #define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
 #define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
@@ -130,8 +129,6 @@ CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
 CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 
-/* init the SSL session ID cache */
-CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
@@ -146,33 +143,6 @@ CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
                                 const char *label, const char *value);
 
 /* Functions to be used by SSL library adaptation functions */
-
-/* Lock session cache mutex.
- * Call this before calling other Curl_ssl_*session* functions
- * Caller should unlock this mutex as soon as possible, as it may block
- * other SSL connection from making progress.
- * The purpose of explicitly locking SSL session cache data is to allow
- * individual SSL engines to manage session lifetime in their specific way.
- */
-void Curl_ssl_sessionid_lock(struct Curl_easy *data);
-
-/* Unlock session cache mutex */
-void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
-
-/* Kill a single session ID entry in the cache
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * This will call engine-specific curlssl_session_free function, which must
- * take sessionid object ownership from sessionid cache
- * (e.g. decrement refcount).
- */
-void Curl_ssl_kill_session(struct Curl_ssl_session *session);
-/* delete a session from the cache
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * This will call engine-specific curlssl_session_free function, which must
- * take sessionid object ownership from sessionid cache
- * (e.g. decrement refcount).
- */
-void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid);
 
 /* get N random bytes into the buffer */
 CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
@@ -265,9 +235,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_set_engine(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_initsessions(x,y) CURLE_OK
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start(a) FALSE

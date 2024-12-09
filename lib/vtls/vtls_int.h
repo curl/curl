@@ -104,6 +104,7 @@ typedef enum {
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
   struct ssl_peer peer;
+  char *ssl_conn_hash;              /* Lookup/storing SSL sessions */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
@@ -212,43 +213,6 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
  * Get the SSL filter below the given one or NULL if there is none.
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
-
-/* extract a session ID
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Caller must make sure that the ownership of returned sessionid object
- * is properly taken (e.g. its refcount is incremented
- * under sessionid mutex).
- * @param cf      the connection filter wanting to use it
- * @param data    the transfer involved
- * @param peer    the peer the filter wants to talk to
- * @param sessionid on return the TLS session
- * @param idsize  on return the size of the TLS session data
- * @param palpn   on return the ALPN string used by the session,
- *                set to NULL when not interested
- */
-bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const struct ssl_peer *peer,
-                           void **ssl_sessionid,
-                           size_t *idsize, /* set 0 if unknown */
-                           char **palpn);
-
-/* Set a TLS session ID for `peer`. Replaces an existing session ID if
- * not already the same.
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Call takes ownership of `ssl_sessionid`, using `sessionid_free_cb`
- * to deallocate it. Is called in all outcomes, either right away or
- * later when the session cache is cleaned up.
- * Caller must ensure that it has properly shared ownership of this sessionid
- * object with cache (e.g. incrementing refcount on success)
- */
-CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const struct ssl_peer *peer,
-                                const char *alpn,
-                                void *sessionid,
-                                size_t sessionid_size,
-                                Curl_ssl_sessionid_dtor *sessionid_free_cb);
 
 #endif /* USE_SSL */
 

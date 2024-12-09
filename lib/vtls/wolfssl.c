@@ -60,6 +60,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "spool.h"
 #include "keylog.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -408,7 +409,7 @@ static void wolfssl_session_free(void *sdata, size_t slen)
 
 CURLcode wssl_cache_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            struct ssl_peer *peer,
+                            const char *ssl_conn_hash,
                             WOLFSSL_SESSION *session)
 {
   CURLcode result = CURLE_OK;
@@ -437,10 +438,10 @@ CURLcode wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
 
-  Curl_ssl_sessionid_lock(data);
-  result = Curl_ssl_set_sessionid(cf, data, peer, NULL,
-                                  sdata, slen, wolfssl_session_free);
-  Curl_ssl_sessionid_unlock(data);
+  Curl_ssl_spool_lock(data);
+  result = Curl_ssl_spool_add(cf, data, ssl_conn_hash,
+                              sdata, slen, wolfssl_session_free, NULL);
+  Curl_ssl_spool_unlock(data);
   if(result)
     failf(data, "failed to add new ssl session to cache (%d)", result);
   else {
@@ -465,7 +466,7 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     DEBUGASSERT(connssl);
     DEBUGASSERT(data);
     if(connssl && data) {
-      (void)wssl_cache_session(cf, data, &connssl->peer, session);
+      (void)wssl_cache_session(cf, data, connssl->ssl_conn_hash, session);
     }
   }
   return 0;
@@ -474,23 +475,23 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
 CURLcode wssl_setup_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct wolfssl_ctx *wss,
-                            struct ssl_peer *peer)
+                            const char *ssl_conn_hash)
 {
   void *psdata;
   const unsigned char *sdata = NULL;
   size_t slen = 0;
   CURLcode result = CURLE_OK;
 
-  Curl_ssl_sessionid_lock(data);
-  if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen, NULL)) {
+  Curl_ssl_spool_lock(data);
+  if(Curl_ssl_spool_get(cf, data, ssl_conn_hash, &psdata, &slen, NULL)) {
     WOLFSSL_SESSION *session;
     sdata = psdata;
     session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_delsessionid(data, psdata);
-        infof(data, "previous session not accepted (%d), "
+        Curl_ssl_spool_remove(data, ssl_conn_hash);
+        infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
       }
       else
@@ -501,7 +502,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
       failf(data, "could not decode previous session");
     }
   }
-  Curl_ssl_sessionid_unlock(data);
+  Curl_ssl_spool_unlock(data);
   return result;
 }
 
@@ -1192,7 +1193,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
     /* Set session from cache if there is one */
-    (void)wssl_setup_session(cf, data, backend, &connssl->peer);
+    (void)wssl_setup_session(cf, data, backend, connssl->ssl_conn_hash);
     /* Register to get notified when a new session is received */
     wolfSSL_set_app_data(backend->handle, cf);
     wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);

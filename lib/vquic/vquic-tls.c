@@ -50,6 +50,7 @@
 #include "multiif.h"
 #include "vtls/keylog.h"
 #include "vtls/vtls.h"
+#include "vtls/spool.h"
 #include "vquic-tls.h"
 
 /* The last 3 #include files should be in this order */
@@ -221,7 +222,7 @@ static CURLcode wssl_init_ssl(struct curl_tls_ctx *ctx,
   }
 
   if(ssl_config->primary.cache_session) {
-    (void)wssl_setup_session(cf, data, &ctx->wssl, peer);
+    (void)wssl_setup_session(cf, data, &ctx->wssl, ctx->ssl_conn_hash);
   }
 
   return CURLE_OK;
@@ -238,14 +239,20 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 {
   CURLcode result;
 
+  if(!ctx->ssl_conn_hash) {
+    result = Curl_ssl_spool_hash(cf, peer, &ctx->ssl_conn_hash);
+    if(result)
+      return result;
+  }
+
 #ifdef USE_OPENSSL
   (void)result;
-  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, TRNSPRT_QUIC,
+  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, ctx->ssl_conn_hash,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
   (void)result;
-  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer,
+  return Curl_gtls_ctx_init(&ctx->gtls, cf, data, peer, ctx->ssl_conn_hash,
                             (const unsigned char *)alpn, alpn_len, NULL,
                             cb_setup, cb_user_data, ssl_user_data);
 #elif defined(USE_WOLFSSL)
@@ -277,6 +284,7 @@ void Curl_vquic_tls_cleanup(struct curl_tls_ctx *ctx)
   if(ctx->wssl.ctx)
     wolfSSL_CTX_free(ctx->wssl.ctx);
 #endif
+  free(ctx->ssl_conn_hash);
   memset(ctx, 0, sizeof(*ctx));
 }
 
@@ -346,6 +354,9 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 
   }
 #endif
+  /* on error, remove any session we might have in the pool */
+  if(result)
+    Curl_ssl_spool_remove(data, ctx->ssl_conn_hash);
   return result;
 }
 
