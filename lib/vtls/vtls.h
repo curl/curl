@@ -167,8 +167,8 @@ void Curl_ssl_sessionid_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
 
-/* create a key for TLS sessions
- * Create a key of printable chars for storage of TLS sessions suitable
+/* create a hash of the ssl connection paramter
+ * Create a hash of printable chars for storage of TLS sessions suitable
  * for the given connection filter and peer. The key will reflect the
  * SSL config for the filter's connection (ssl verssions/options/ciphers etc.).
  * Config options using relative paths will be converted to absolute
@@ -178,11 +178,11 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
  * peer and matching other config options.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
- * @param pkey    on successfull return, the key generated
+ * @param phash   on successfull return, the hash generated
  */
-CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
-                                   const struct ssl_peer *peer,
-                                   char **pkey);
+CURLcode Curl_ssl_conn_hash_make(struct Curl_cfilter *cf,
+                                 const struct ssl_peer *peer,
+                                 char **phash);
 
 /* Kill a single session ID entry in the cache
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
