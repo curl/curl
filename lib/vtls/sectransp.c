@@ -1369,7 +1369,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_spool_add(cf, data, &connssl->ssl_conn_hash,
+      result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
                                   ssl_sessionid, ssl_sessionid_len,
                                   sectransp_session_free, NULL);
       Curl_ssl_spool_unlock(data);

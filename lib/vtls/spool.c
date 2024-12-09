@@ -504,7 +504,10 @@ CURLcode Curl_ssl_spool_add(struct Curl_cfilter *cf,
         entry = &spool->entries[i];
       }
     }
+
     DEBUGASSERT(entry);
+    if(!entry)
+      return CURLE_OK;
     spool_clear_entry(entry);
     DEBUGASSERT(!entry->ssl_conn_hash);
 

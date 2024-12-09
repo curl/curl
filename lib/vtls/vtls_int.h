@@ -104,7 +104,7 @@ typedef enum {
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
   struct ssl_peer peer;
-  char *ssl_conn_hash;              /* Lookup/storeing SSL sessions */
+  char *ssl_conn_hash;              /* Lookup/storing SSL sessions */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
