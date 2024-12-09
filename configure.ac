@@ -1338,6 +1338,9 @@ if test "$HAVE_GETHOSTBYNAME" != "1" -o "${with_amissl+set}" = set; then
     AC_MSG_RESULT([yes])
     HAVE_GETHOSTBYNAME="1"
     HAVE_PROTO_BSDSOCKET_H="1"
+    HAVE_IOCTLSOCKET_CAMEL_FIONBIO="1"
+    AC_DEFINE(HAVE_IOCTLSOCKET_CAMEL_FIONBIO, 1, [Amiga NonBlock Method])
+    AC_SUBST(HAVE_IOCTLSOCKET_CAMEL_FIONBIO, 1)
     AC_DEFINE(HAVE_PROTO_BSDSOCKET_H, 1, [if Amiga bsdsocket.library is in use])
     AC_SUBST(HAVE_PROTO_BSDSOCKET_H, [1])
   ],[
