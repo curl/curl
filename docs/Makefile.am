@@ -61,6 +61,7 @@ INTERNALDOCS =                                  \
 EXTRA_DIST =                                    \
  $(CURLPAGES)                                   \
  $(INTERNALDOCS)                                \
+ ALTSVC.md                                      \
  BINDINGS.md                                    \
  BUG-BOUNTY.md                                  \
  BUGS.md                                        \
@@ -82,6 +83,7 @@ EXTRA_DIST =                                    \
  GOVERNANCE.md                                  \
  HELP-US.md                                     \
  HISTORY.md                                     \
+ HSTS.md                                        \
  HTTP-COOKIES.md                                \
  HTTP3.md                                       \
  INSTALL                                        \
