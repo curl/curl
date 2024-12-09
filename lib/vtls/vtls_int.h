@@ -214,53 +214,6 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
 
-/* extract a session ID
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Caller must make sure that the ownership of returned sessionid object
- * is properly taken (e.g. its refcount is incremented
- * under sessionid mutex).
- * @param cf      the connection filter wanting to use it
- * @param data    the transfer involved
- * @param ssl_conn_hash the key for lookup
- * @param peer    the peer the filter wants to talk to
- * @param sessionid on return the TLS session
- * @param idsize  on return the size of the TLS session data
- * @param palpn   on return the ALPN string used by the session,
- *                set to NULL when not interested
- */
-bool Curl_ssl_get_session(struct Curl_cfilter *cf,
-                          struct Curl_easy *data,
-                          const char *ssl_conn_hash,
-                          void **session,
-                          size_t *session_len, /* set 0 if unknown */
-                          char **palpn);
-
-/* delete a session from the cache
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * This will call engine-specific curlssl_session_free function, which must
- * take sessionid object ownership from sessionid cache
- * (e.g. decrement refcount).
- */
-void Curl_ssl_del_session(struct Curl_easy *data, const char *ssl_conn_hash);
-
-/* Add a TLS session for `ssl_conn_hash` to the cache. Replaces an existing
- * session ID with the same key.
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Call takes ownership of `session`, using `sessionid_free_cb`
- * to deallocate it. Is called in all outcomes, either right away or
- * later when the session cache is cleaned up.
- * Caller must ensure that it has properly shared ownership of this sessionid
- * object with cache (e.g. incrementing refcount on success)
- */
-CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
-                              struct Curl_easy *data,
-                              const char *ssl_conn_hash,
-                              const struct ssl_peer *peer,
-                              void *session,
-                              size_t session_len,
-                              Curl_ssl_sessionid_dtor *sessionid_free_cb,
-                              const char *alpn);
-
 #endif /* USE_SSL */
 
 #endif /* HEADER_CURL_VTLS_INT_H */

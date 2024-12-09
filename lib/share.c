@@ -30,6 +30,7 @@
 #include "share.h"
 #include "psl.h"
 #include "vtls/vtls.h"
+#include "vtls/spool.h"
 #include "hsts.h"
 #include "url.h"
 

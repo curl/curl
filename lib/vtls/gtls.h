@@ -101,7 +101,6 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_conn_hash,
                                  gnutls_session_t session,
-                                 struct ssl_peer *peer,
                                  const char *alpn);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
