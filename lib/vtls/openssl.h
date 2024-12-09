@@ -63,7 +63,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            int transport, /* TCP or QUIC */
+                            const char *ssl_conn_hash,
                             const unsigned char *alpn, size_t alpn_len,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
@@ -94,7 +94,7 @@ CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
  */
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               const struct ssl_peer *peer,
+                               const char *ssl_conn_hash,
                                SSL_SESSION *ssl_sessionid);
 
 /*
