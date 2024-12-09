@@ -240,7 +240,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   CURLcode result;
 
   if(!ctx->ssl_conn_hash) {
-    result = Curl_ssl_conn_hash_make(cf, peer, &ctx->ssl_conn_hash);
+    result = Curl_ssl_spool_hash(cf, peer, &ctx->ssl_conn_hash);
     if(result)
       return result;
   }
