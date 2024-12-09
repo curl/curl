@@ -222,7 +222,7 @@ static CURLcode wssl_init_ssl(struct curl_tls_ctx *ctx,
   }
 
   if(ssl_config->primary.cache_session) {
-    (void)wssl_setup_session(cf, data, &ctx->wssl, peer);
+    (void)wssl_setup_session(cf, data, &ctx->wssl, ctx->ssl_conn_hash);
   }
 
   return CURLE_OK;
