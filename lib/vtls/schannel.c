@@ -41,6 +41,7 @@
 #include "schannel_int.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "spool.h"
 #include "strcase.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
