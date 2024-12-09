@@ -61,7 +61,7 @@ void Curl_ssl_spool_unlock(struct Curl_easy *data);
  * peer and matching other config options.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
- * @param phash   on successfull return, the hash generated
+ * @param phash   on successful return, the hash generated
  */
 CURLcode Curl_ssl_spool_hash(struct Curl_cfilter *cf,
                              const struct ssl_peer *peer,
