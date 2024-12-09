@@ -119,7 +119,7 @@ jobs:
 
           - name: mbedtls-pkg
             install_packages: libnghttp2-dev libmbedtls-dev
-            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON
+            generate: -DCURL_USE_MBEDTLS=ON -DENABLE_DEBUG=ON -DBUILD_LIBCURL_DOCS=OFF
 
           - name: mbedtls-pkg !pc
             install_packages: libnghttp2-dev libmbedtls-dev
@@ -167,7 +167,7 @@ jobs:
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
-            configure: CC=clang --with-openssl --with-gssapi --enable-debug
+            configure: CC=clang --with-openssl --with-gssapi --enable-debug --disable-docs
 
           - name: openssl clang krb5
             install_packages: zlib1g-dev libkrb5-dev clang
@@ -568,12 +568,10 @@ jobs:
               -DCMAKE_C_COMPILER_TARGET=$(uname -m)-pc-linux-gnu -DBUILD_STATIC_LIBS=ON \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCURL_BROTLI=ON -DCURL_ZSTD=ON \
-              -DBUILD_LIBCURL_DOCS=OFF \
               ${{ matrix.build.generate }}
           else
             ${{ matrix.build.configure-prefix }} \
             ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --disable-docs \
               ${{ matrix.build.configure }}
           fi
 
