@@ -355,6 +355,8 @@ CURLcode Curl_ssl_spool_hash(struct Curl_cfilter *cf,
   }
   if(ssl->issuercert_blob) {
     r = cf_ssl_conn_hash_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
+    if(r)
+      goto out;
   }
 
   r = Curl_sha256it(hash, (unsigned char *)Curl_dyn_ptr(&buf),
