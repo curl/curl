@@ -43,6 +43,9 @@ function(add_runtests _targetname _test_flags)
   if(CURL_TEST_BUNDLES)
     set(_test_flags "${_test_flags} -bundle")
   endif()
+  if(NOT BUILD_LIBCURL_DOCS)
+    set(_test_flags "${_test_flags} !documentation")
+  endif()
   # Skip walking through dependent targets before running tests in CI.
   # This avoids: GNU Make doing a slow re-evaluation of all targets and
   # skipping them, MSBuild doing a re-evaluation, and actually rebuilding them.
