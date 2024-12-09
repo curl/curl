@@ -2182,7 +2182,7 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     DEBUGASSERT(data);
     if(data && ctx) {
-      (void)wssl_cache_session(cf, data, &ctx->peer, session);
+      (void)wssl_cache_session(cf, data, ctx->tls.ssl_conn_hash, session);
     }
   }
   return 0;

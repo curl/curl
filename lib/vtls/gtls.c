@@ -1091,8 +1091,10 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
       int rc;
 
       rc = gnutls_session_set_data(gctx->session, ssl_sessionid, ssl_idsize);
-      if(rc < 0)
+      if(rc < 0) {
+        Curl_ssl_spool_remove(data, ssl_conn_hash);
         infof(data, "SSL session not accepted by GnuTLS, continuing without");
+      }
       else {
         infof(data, "SSL reusing session with ALPN '%s'",
               session_alpn ? session_alpn : "-");

@@ -559,4 +559,22 @@ out:
   return result;
 }
 
+void Curl_ssl_spool_remove(struct Curl_easy *data,
+                           const char *ssl_conn_hash)
+{
+  struct Curl_ssl_spool *spool = data->state.ssl_spool;
+  size_t i;
+
+  if(!spool || !spool->count)
+    return;
+
+  for(i = 0; i < spool->count; ++i) {
+    if(spool->entries[i].ssl_conn_hash &&
+       strcasecompare(ssl_conn_hash, spool->entries[i].ssl_conn_hash)) {
+      spool_clear_entry(&spool->entries[i]);
+      return;
+    }
+  }
+}
+
 #endif /* USE_SSL */

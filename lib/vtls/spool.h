@@ -109,6 +109,11 @@ CURLcode Curl_ssl_spool_add(struct Curl_cfilter *cf,
                             Curl_ssl_session_dtor *session_free_cb,
                             const char *alpn);
 
+/* Remove any session matching `ssl_conn_hash` from the pool.
+ */
+void Curl_ssl_spool_remove(struct Curl_easy *data,
+                           const char *ssl_conn_hash);
+
 #else /* USE_SSL */
 
 #define Curl_ssl_spool_create(x,y) CURLE_OK
