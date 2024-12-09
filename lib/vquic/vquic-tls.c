@@ -247,7 +247,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
 
 #ifdef USE_OPENSSL
   (void)result;
-  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, TRNSPRT_QUIC,
+  return Curl_ossl_ctx_init(&ctx->ossl, cf, data, peer, ctx->ssl_conn_hash,
                             (const unsigned char *)alpn, alpn_len,
                             cb_setup, cb_user_data, NULL, ssl_user_data);
 #elif defined(USE_GNUTLS)
@@ -354,6 +354,9 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 
   }
 #endif
+  /* on error, remove any session we might have in the pool */
+  if(result)
+    Curl_ssl_spool_remove(data, ctx->ssl_conn_hash);
   return result;
 }
 
