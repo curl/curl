@@ -722,7 +722,7 @@ static void gtls_sessionid_free(void *sessionid, size_t idsize)
 
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 const char *session_key,
+                                 const char *ssl_conn_hash,
                                  gnutls_session_t session,
                                  struct ssl_peer *peer,
                                  const char *alpn)
@@ -756,7 +756,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
               connect_idsize, alpn ? alpn : "-");
   Curl_ssl_sessionid_lock(data);
   /* Add the sesson to the cache, takes ownership */
-  result = Curl_ssl_add_session(cf, data, session_key, peer,
+  result = Curl_ssl_add_session(cf, data, ssl_conn_hash, peer,
                                 connect_sessionid, connect_idsize,
                                 gtls_sessionid_free, alpn);
   Curl_ssl_sessionid_unlock(data);
@@ -768,7 +768,7 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
                                           gnutls_session_t session)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  return Curl_gtls_cache_session(cf, data, connssl->session_key,
+  return Curl_gtls_cache_session(cf, data, connssl->ssl_conn_hash,
                                  session, &connssl->peer,
                                  connssl->alpn_negotiated);
 }
@@ -1052,7 +1052,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const char *session_key,
+                            const char *ssl_conn_hash,
                             const unsigned char *alpn, size_t alpn_len,
                             struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
@@ -1092,7 +1092,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     size_t ssl_idsize;
     char *session_alpn;
     Curl_ssl_sessionid_lock(data);
-    if(Curl_ssl_get_session(cf, data, session_key,
+    if(Curl_ssl_get_session(cf, data, ssl_conn_hash,
                             &ssl_sessionid, &ssl_idsize, &session_alpn)) {
       /* we got a session id, use it! */
       int rc;
@@ -1200,7 +1200,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
-                              connssl->session_key, proto.data, proto.len,
+                              connssl->ssl_conn_hash, proto.data, proto.len,
                               connssl, NULL, NULL, cf);
   if(result)
     return result;

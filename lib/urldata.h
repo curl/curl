@@ -345,12 +345,12 @@ typedef void Curl_ssl_sessionid_dtor(void *sessionid, size_t idsize);
 
 /* information stored about one single SSL session */
 struct Curl_ssl_session {
-  char *session_key;
-  char *alpn;         /* APLN TLS negotiated protocol string */
-  void *session;      /* as returned from the SSL layer */
-  size_t session_len; /* if known, otherwise 0 */
+  char *ssl_conn_hash; /* Hash of relevant ssl config for connection */
+  char *alpn;          /* APLN TLS negotiated protocol string */
+  void *session;       /* as returned from the SSL layer */
+  size_t session_len;  /* if known, otherwise 0 */
   Curl_ssl_sessionid_dtor *sessionid_free; /* free `sessionid` callback */
-  long age;         /* just a number, the higher the more recent */
+  long age;            /* just a number, the higher the more recent */
   char *clientcert;
 #ifdef USE_TLS_SRP
   char *srp_username;

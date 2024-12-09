@@ -104,7 +104,7 @@ typedef enum {
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
   struct ssl_peer peer;
-  char *session_key;                /* Lookup/storeing SSL sessions */
+  char *ssl_conn_hash;              /* Lookup/storeing SSL sessions */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
@@ -221,7 +221,7 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
  * under sessionid mutex).
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
- * @param session_key the key for lookup
+ * @param ssl_conn_hash the key for lookup
  * @param peer    the peer the filter wants to talk to
  * @param sessionid on return the TLS session
  * @param idsize  on return the size of the TLS session data
@@ -230,7 +230,7 @@ bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
  */
 bool Curl_ssl_get_session(struct Curl_cfilter *cf,
                           struct Curl_easy *data,
-                          const char *session_key,
+                          const char *ssl_conn_hash,
                           void **session,
                           size_t *session_len, /* set 0 if unknown */
                           char **palpn);
@@ -241,9 +241,9 @@ bool Curl_ssl_get_session(struct Curl_cfilter *cf,
  * take sessionid object ownership from sessionid cache
  * (e.g. decrement refcount).
  */
-void Curl_ssl_del_session(struct Curl_easy *data, const char *session_key);
+void Curl_ssl_del_session(struct Curl_easy *data, const char *ssl_conn_hash);
 
-/* Add a TLS session for `session_key` to the cache. Replaces an existing
+/* Add a TLS session for `ssl_conn_hash` to the cache. Replaces an existing
  * session ID with the same key.
  * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
  * Call takes ownership of `session`, using `sessionid_free_cb`
@@ -254,7 +254,7 @@ void Curl_ssl_del_session(struct Curl_easy *data, const char *session_key);
  */
 CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              const char *session_key,
+                              const char *ssl_conn_hash,
                               const struct ssl_peer *peer,
                               void *session,
                               size_t session_len,

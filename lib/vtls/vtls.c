@@ -533,9 +533,9 @@ void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
     Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
 }
 
-static CURLcode cf_ssl_session_key_add_path(struct dynbuf *buf,
-                                            const char *name,
-                                            char *path)
+static CURLcode cf_ssl_conn_hash_add_path(struct dynbuf *buf,
+                                          const char *name,
+                                          char *path)
 {
   if(path && path[0]) {
     /* We try to add absolute paths, so that the session key can stay
@@ -561,9 +561,9 @@ static CURLcode cf_ssl_session_key_add_path(struct dynbuf *buf,
   return CURLE_OK;
 }
 
-static CURLcode cf_ssl_session_key_add_hash(struct dynbuf *buf,
-                                            const char *name,
-                                            struct curl_blob *blob)
+static CURLcode cf_ssl_conn_hash_add_hash(struct dynbuf *buf,
+                                          const char *name,
+                                          struct curl_blob *blob)
 {
   CURLcode r = CURLE_OK;
   if(blob && blob->len) {
@@ -586,15 +586,17 @@ out:
   return r;
 }
 
-CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
-                                   const struct ssl_peer *peer,
-                                   char **pkey)
+CURLcode Curl_ssl_conn_hash_make(struct Curl_cfilter *cf,
+                                 const struct ssl_peer *peer,
+                                 char **phash)
 {
   struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
   struct dynbuf buf;
+  unsigned char hash[CURL_SHA256_DIGEST_LENGTH];
+  size_t i;
   CURLcode r;
 
-  *pkey = NULL;
+  *phash = NULL;
   Curl_dyn_init(&buf, 10 * 1024);
 
   r = Curl_dyn_add(&buf, "SESS");
@@ -690,16 +692,16 @@ CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
     if(r)
       goto out;
   }
-  r = cf_ssl_session_key_add_path(&buf, "CA", ssl->CAfile);
+  r = cf_ssl_conn_hash_add_path(&buf, "CA", ssl->CAfile);
   if(r)
     goto out;
-  r = cf_ssl_session_key_add_path(&buf, "CApath", ssl->CApath);
+  r = cf_ssl_conn_hash_add_path(&buf, "CApath", ssl->CApath);
   if(r)
     goto out;
-  r = cf_ssl_session_key_add_path(&buf, "CRL", ssl->CRLfile);
+  r = cf_ssl_conn_hash_add_path(&buf, "CRL", ssl->CRLfile);
   if(r)
     goto out;
-  r = cf_ssl_session_key_add_path(&buf, "Issuer", ssl->issuercert);
+  r = cf_ssl_conn_hash_add_path(&buf, "Issuer", ssl->issuercert);
   if(r)
     goto out;
   if(ssl->pinned_key && ssl->pinned_key[0]) {
@@ -708,23 +710,34 @@ CURLcode Curl_ssl_make_session_key(struct Curl_cfilter *cf,
       goto out;
   }
   if(ssl->cert_blob) {
-    r = cf_ssl_session_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
+    r = cf_ssl_conn_hash_add_hash(&buf, "CertBlob", ssl->cert_blob);
     if(r)
       goto out;
   }
   if(ssl->ca_info_blob) {
-    r = cf_ssl_session_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
+    r = cf_ssl_conn_hash_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
     if(r)
       goto out;
   }
   if(ssl->issuercert_blob) {
-    r = cf_ssl_session_key_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
+    r = cf_ssl_conn_hash_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
+  }
+
+  r = Curl_sha256it(hash, (unsigned char *)Curl_dyn_ptr(&buf),
+                    Curl_dyn_len(&buf));
+  if(r)
+    goto out;
+  Curl_dyn_reset(&buf);
+  for(i = 0; i < CURL_SHA256_DIGEST_LENGTH; ++i) {
+    r = Curl_dyn_addf(&buf, "%02x", hash[i]);
+    if(r)
+      goto out;
   }
 
 out:
   if(!r) {
-    *pkey = Curl_dyn_strdup(&buf);
-    if(!*pkey)
+    *phash = Curl_dyn_strdup(&buf);
+    if(!*phash)
       r = CURLE_OUT_OF_MEMORY;
   }
   Curl_dyn_free(&buf);
@@ -746,7 +759,7 @@ static bool cf_ssl_session_match_auth(struct Curl_ssl_session *entry,
 
 bool Curl_ssl_get_session(struct Curl_cfilter *cf,
                           struct Curl_easy *data,
-                          const char *session_key,
+                          const char *ssl_conn_hash,
                           void **session,
                           size_t *session_len, /* set 0 if unknown */
                           char **palpn)
@@ -774,9 +787,9 @@ bool Curl_ssl_get_session(struct Curl_cfilter *cf,
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     entry = &data->state.session[i];
-    if(!entry->session_key)  /* unused entry */
+    if(!entry->ssl_conn_hash)  /* unused entry */
       continue;
-    if(strcasecompare(session_key, entry->session_key) &&
+    if(strcasecompare(ssl_conn_hash, entry->ssl_conn_hash) &&
        cf_ssl_session_match_auth(entry, conn_config)) {
       /* yes, we have a cached session for this! */
       (*general_age)++;          /* increase general age */
@@ -791,7 +804,7 @@ bool Curl_ssl_get_session(struct Curl_cfilter *cf,
   }
 
   CURL_TRC_CF(data, cf, "%s cached session for %s",
-              *session ? "Found" : "No", session_key);
+              *session ? "Found" : "No", ssl_conn_hash);
   return !!*session;
 }
 
@@ -800,7 +813,7 @@ bool Curl_ssl_get_session(struct Curl_cfilter *cf,
  */
 void Curl_ssl_kill_session(struct Curl_ssl_session *entry)
 {
-  if(entry->session_key) {
+  if(entry->ssl_conn_hash) {
     /* free the ID the SSL-layer specific way */
     entry->sessionid_free(entry->session, entry->session_len);
 
@@ -814,22 +827,22 @@ void Curl_ssl_kill_session(struct Curl_ssl_session *entry)
     Curl_safefree(entry->srp_username);
     Curl_safefree(entry->srp_password);
 #endif
-    Curl_safefree(entry->session_key);
+    Curl_safefree(entry->ssl_conn_hash);
   }
 }
 
 /*
  * Delete the given session from the cache using its key.
  */
-void Curl_ssl_del_session(struct Curl_easy *data, const char *session_key)
+void Curl_ssl_del_session(struct Curl_easy *data, const char *ssl_conn_hash)
 {
   size_t i;
 
   for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
     struct Curl_ssl_session *entry = &data->state.session[i];
 
-    if(entry->session_key &&
-       strcasecompare(session_key, entry->session_key)) {
+    if(entry->ssl_conn_hash &&
+       strcasecompare(ssl_conn_hash, entry->ssl_conn_hash)) {
       Curl_ssl_kill_session(entry);
       break;
     }
@@ -838,7 +851,7 @@ void Curl_ssl_del_session(struct Curl_easy *data, const char *session_key)
 
 CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
-                              const char *session_key,
+                              const char *ssl_conn_hash,
                               const struct ssl_peer *peer,
                               void *session,
                               size_t session_len,
@@ -870,7 +883,7 @@ CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
     return CURLE_OK;
   }
 
-  if(Curl_ssl_get_session(cf, data, session_key,
+  if(Curl_ssl_get_session(cf, data, ssl_conn_hash,
                           &old_session, &old_session_len, NULL)) {
     if((old_session_len == session_len) &&
        ((old_session == session) ||
@@ -879,7 +892,7 @@ CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
       sessionid_free_cb(session, session_len);
       return CURLE_OK;
     }
-    Curl_ssl_del_session(data, session_key);
+    Curl_ssl_del_session(data, ssl_conn_hash);
   }
 
   entry = &data->state.session[0];
@@ -887,7 +900,7 @@ CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
   DEBUGASSERT(ssl_config->primary.cache_session);
   (void)ssl_config;
 
-  clone_skey = strdup(session_key);
+  clone_skey = strdup(ssl_conn_hash);
   if(!clone_skey)
     goto out;
 
@@ -927,7 +940,7 @@ CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
 
   /* find an empty slot for us, or find the oldest */
   for(i = 1; (i < data->set.general_ssl.max_ssl_sessions) &&
-        data->state.session[i].session_key; i++) {
+        data->state.session[i].ssl_conn_hash; i++) {
     if(data->state.session[i].age < oldest_age) {
       oldest_age = data->state.session[i].age;
       entry = &data->state.session[i];
@@ -940,8 +953,8 @@ CURLcode Curl_ssl_add_session(struct Curl_cfilter *cf,
     entry = &data->state.session[i]; /* use this slot */
 
   /* now init the session struct wisely */
-  DEBUGASSERT(!entry->session_key);
-  entry->session_key = clone_skey;
+  DEBUGASSERT(!entry->ssl_conn_hash);
+  entry->ssl_conn_hash = clone_skey;
   clone_skey = NULL;
   entry->session = session;
   entry->session_len = session_len;
@@ -967,7 +980,7 @@ out:
   free(clone_skey);
   free(clone_alpn);
   if(result) {
-    failf(data, "Failed to add SSL Session to cache for %s", session_key);
+    failf(data, "Failed to add SSL Session to cache for %s", ssl_conn_hash);
     sessionid_free_cb(session, session_len);
     return result;
   }
@@ -1779,7 +1792,7 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl->close(cf, data);
     connssl->state = ssl_connection_none;
     Curl_ssl_peer_cleanup(&connssl->peer);
-    Curl_safefree(connssl->session_key);
+    Curl_safefree(connssl->ssl_conn_hash);
   }
   cf->connected = FALSE;
 }
@@ -1933,9 +1946,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
       goto out;
   }
 
-  if(!connssl->session_key) {
-    result = Curl_ssl_make_session_key(cf, &connssl->peer,
-                                       &connssl->session_key);
+  if(!connssl->ssl_conn_hash) {
+    result = Curl_ssl_conn_hash_make(cf, &connssl->peer,
+                                     &connssl->ssl_conn_hash);
     if(result)
       goto out;
   }

@@ -2158,7 +2158,7 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     }
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
-      (void)Curl_gtls_cache_session(cf, data, ctx->tls.session_key,
+      (void)Curl_gtls_cache_session(cf, data, ctx->tls.ssl_conn_hash,
                                     session, &ctx->peer, "h3");
       break;
     }
