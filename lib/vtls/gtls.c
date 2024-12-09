@@ -47,6 +47,7 @@
 #include "gtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "spool.h"
 #include "vauth/vauth.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -714,17 +715,10 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
   return CURLE_OK;
 }
 
-static void gtls_sessionid_free(void *sessionid, size_t idsize)
-{
-  (void)idsize;
-  free(sessionid);
-}
-
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_conn_hash,
                                  gnutls_session_t session,
-                                 struct ssl_peer *peer,
                                  const char *alpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -756,9 +750,9 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
               connect_idsize, alpn ? alpn : "-");
   Curl_ssl_sessionid_lock(data);
   /* Add the sesson to the cache, takes ownership */
-  result = Curl_ssl_add_session(cf, data, ssl_conn_hash, peer,
+  result = Curl_ssl_add_session(cf, data, ssl_conn_hash,
                                 connect_sessionid, connect_idsize,
-                                gtls_sessionid_free, alpn);
+                                NULL, alpn);
   Curl_ssl_sessionid_unlock(data);
   return result;
 }
@@ -769,8 +763,7 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   return Curl_gtls_cache_session(cf, data, connssl->ssl_conn_hash,
-                                 session, &connssl->peer,
-                                 connssl->alpn_negotiated);
+                                 session, connssl->alpn_negotiated);
 }
 
 static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
@@ -1099,15 +1092,11 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
 
       rc = gnutls_session_set_data(gctx->session, ssl_sessionid, ssl_idsize);
       if(rc < 0)
-        infof(data, "SSL failed to set session ID");
+        infof(data, "SSL session not accepted by GnuTLS, continuing without");
       else {
-        infof(data, "SSL reusing session ID (size=%zu, alpn=%s)",
-              ssl_idsize, session_alpn ? session_alpn : "-");
-#ifdef DEBUGBUILD
-        if((ssl_config->earlydata || !!getenv("CURL_USE_EARLYDATA")) &&
-#else
+        infof(data, "SSL reusing session with ALPN '%s'",
+              session_alpn ? session_alpn : "-");
         if(ssl_config->earlydata &&
-#endif
            !cf->conn->connect_only && connssl &&
            (gnutls_protocol_get_version(gctx->session) == GNUTLS_TLS1_3) &&
            Curl_alpn_contains_proto(connssl->alpn, session_alpn)) {

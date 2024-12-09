@@ -50,6 +50,7 @@
 #include "multiif.h"
 #include "vtls/keylog.h"
 #include "vtls/vtls.h"
+#include "vtls/spool.h"
 #include "vquic-tls.h"
 
 /* The last 3 #include files should be in this order */
