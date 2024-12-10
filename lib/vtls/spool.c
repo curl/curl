@@ -424,7 +424,8 @@ bool Curl_ssl_spool_get(struct Curl_cfilter *cf,
   struct Curl_ssl_spool_entry *entry = NULL;
 
   *session = NULL;
-  *session_len = 0;
+  if(session_len)
+    *session_len = 0;
   if(!ssl_config)
     return FALSE;
 
