@@ -55,7 +55,7 @@
 
 #include "vtls.h" /* generic SSL protos etc */
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
@@ -522,9 +522,9 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
-  if(data->state.ssl_spool && !CURL_SHARE_SSL_SPOOL(data)) {
-    Curl_ssl_spool_destroy(data->state.ssl_spool);
-    data->state.ssl_spool = NULL;
+  if(data->state.ssl_scache && !CURL_SHARE_ssl_scache(data)) {
+    Curl_ssl_scache_destroy(data->state.ssl_scache);
+    data->state.ssl_scache = NULL;
   }
 
   Curl_ssl->close_all(data);
@@ -1440,7 +1440,8 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   }
 
   if(!connssl->ssl_conn_hash) {
-    result = Curl_ssl_spool_hash(cf, &connssl->peer, &connssl->ssl_conn_hash);
+    result = Curl_ssl_scache_conn_hash(cf, &connssl->peer,
+                                       &connssl->ssl_conn_hash);
     if(result)
       goto out;
   }

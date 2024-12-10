@@ -64,7 +64,7 @@
 #include "mbedtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "x509asn1.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -879,9 +879,9 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     void *sdata = NULL;
     size_t slen = 0;
 
-    Curl_ssl_spool_lock(data);
-    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
-                          &sdata, &slen, NULL) && slen) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+                           &sdata, &slen, NULL) && slen) {
       mbedtls_ssl_session session;
 
       mbedtls_ssl_session_init(&session);
@@ -898,7 +898,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       }
       mbedtls_ssl_session_free(&session);
     }
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   mbedtls_ssl_conf_ca_chain(&backend->config,
@@ -1153,10 +1153,10 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
           failf(data, "failed to serialize session: -0x%x", -ret);
         }
         else {
-          Curl_ssl_spool_lock(data);
-          result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
-                                      sdata, slen, NULL, NULL);
-          Curl_ssl_spool_unlock(data);
+          Curl_ssl_scache_lock(data);
+          result = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+                                       sdata, slen, NULL);
+          Curl_ssl_scache_unlock(data);
           if(!result)
             sdata = NULL;
         }

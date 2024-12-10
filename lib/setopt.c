@@ -1588,8 +1588,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
         data->hsts = NULL;
 #endif
 #ifdef USE_SSL
-      if(data->share->ssl_spool == data->state.ssl_spool)
-        data->state.ssl_spool = NULL;
+      if(data->share->ssl_scache == data->state.ssl_scache)
+        data->state.ssl_scache = NULL;
 #endif
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
@@ -1632,8 +1632,8 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
       }
 #endif
 #ifdef USE_SSL
-      if(data->share->ssl_spool)
-        data->state.ssl_spool = data->share->ssl_spool;
+      if(data->share->ssl_scache)
+        data->state.ssl_scache = data->share->ssl_scache;
 #endif
 #ifdef USE_LIBPSL
       if(data->share->specifier & (1 << CURL_LOCK_DATA_PSL))

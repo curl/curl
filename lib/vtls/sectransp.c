@@ -38,7 +38,7 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "strerror.h"
 #include "cipher_suite.h"
 
@@ -1021,7 +1021,7 @@ failed:
   return ret;
 }
 
-static void sectransp_session_free(void *sessionid, size_t idsize)
+static void sectransp_session_free(void *sessionid)
 {
   /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
      cached session ID inside the Security framework. There is a private
@@ -1029,7 +1029,6 @@ static void sectransp_session_free(void *sessionid, size_t idsize)
      got your application rejected from the App Store due to the use of a
      private API, so the best we can do is free up our own char array that we
      created way back in sectransp_connect_step1... */
-  (void)idsize;
   Curl_safefree(sessionid);
 }
 
@@ -1338,13 +1337,13 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     char *ssl_sessionid;
     size_t ssl_sessionid_len;
 
-    Curl_ssl_spool_lock(data);
-    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
-                          (void **)&ssl_sessionid, &ssl_sessionid_len,
-                          NULL)) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+                           (void **)&ssl_sessionid, &ssl_sessionid_len,
+                           NULL)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
-      Curl_ssl_spool_unlock(data);
+      Curl_ssl_scache_unlock(data);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
@@ -1364,15 +1363,15 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       if(err != noErr) {
-        Curl_ssl_spool_unlock(data);
+        Curl_ssl_scache_unlock(data);
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
-                                  ssl_sessionid, ssl_sessionid_len,
-                                  sectransp_session_free, NULL);
-      Curl_ssl_spool_unlock(data);
+      result = Curl_ssl_scache_add_obj(cf, data, connssl->ssl_conn_hash,
+                                       ssl_sessionid, sectransp_session_free,
+                                       NULL);
+      Curl_ssl_scache_unlock(data);
       if(result)
         return result;
     }

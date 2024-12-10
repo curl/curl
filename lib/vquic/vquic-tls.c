@@ -50,7 +50,7 @@
 #include "multiif.h"
 #include "vtls/keylog.h"
 #include "vtls/vtls.h"
-#include "vtls/spool.h"
+#include "vtls/vtls_scache.h"
 #include "vquic-tls.h"
 
 /* The last 3 #include files should be in this order */
@@ -240,7 +240,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
   CURLcode result;
 
   if(!ctx->ssl_conn_hash) {
-    result = Curl_ssl_spool_hash(cf, peer, &ctx->ssl_conn_hash);
+    result = Curl_ssl_scache_conn_hash(cf, peer, &ctx->ssl_conn_hash);
     if(result)
       return result;
   }
@@ -356,7 +356,7 @@ CURLcode Curl_vquic_tls_verify_peer(struct curl_tls_ctx *ctx,
 #endif
   /* on error, remove any session we might have in the pool */
   if(result)
-    Curl_ssl_spool_remove(data, ctx->ssl_conn_hash);
+    Curl_ssl_scache_remove(data, ctx->ssl_conn_hash);
   return result;
 }
 

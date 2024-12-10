@@ -72,7 +72,7 @@
 #include "url.h"
 #include "getinfo.h"
 #include "vtls/vtls.h"
-#include "vtls/spool.h"
+#include "vtls/vtls_scache.h"
 #include "vquic/vquic.h"
 #include "select.h"
 #include "multiif.h"
@@ -579,9 +579,9 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.url = data->set.str[STRING_SET_URL];
 
 #ifdef USE_SSL
-  if(!data->state.ssl_spool) {
-    result = Curl_ssl_spool_create(data->set.general_ssl.max_ssl_sessions,
-                                   &data->state.ssl_spool);
+  if(!data->state.ssl_scache) {
+    result = Curl_ssl_scache_create(data->set.general_ssl.max_ssl_sessions,
+                                   &data->state.ssl_scache);
     if(result)
       return result;
   }

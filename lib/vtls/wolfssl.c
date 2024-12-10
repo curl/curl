@@ -60,7 +60,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "keylog.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -396,12 +396,6 @@ static void wolfssl_bio_cf_free_methods(void)
 
 #endif /* !USE_BIO_CHAIN */
 
-static void wolfssl_session_free(void *sdata, size_t slen)
-{
-  (void)slen;
-  free(sdata);
-}
-
 CURLcode wssl_cache_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             const char *ssl_conn_hash,
@@ -433,10 +427,10 @@ CURLcode wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
 
-  Curl_ssl_spool_lock(data);
-  result = Curl_ssl_spool_add(cf, data, ssl_conn_hash,
-                              sdata, slen, wolfssl_session_free, NULL);
-  Curl_ssl_spool_unlock(data);
+  Curl_ssl_scache_lock(data);
+  result = Curl_ssl_scache_add(cf, data, ssl_conn_hash,
+                               sdata, slen, NULL);
+  Curl_ssl_scache_unlock(data);
   if(result)
     failf(data, "failed to add new ssl session to cache (%d)", result);
   else {
@@ -477,15 +471,15 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
   size_t slen = 0;
   CURLcode result = CURLE_OK;
 
-  Curl_ssl_spool_lock(data);
-  if(Curl_ssl_spool_get(cf, data, ssl_conn_hash, &psdata, &slen, NULL)) {
+  Curl_ssl_scache_lock(data);
+  if(Curl_ssl_scache_get(cf, data, ssl_conn_hash, &psdata, &slen, NULL)) {
     WOLFSSL_SESSION *session;
     sdata = psdata;
     session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_spool_remove(data, ssl_conn_hash);
+        Curl_ssl_scache_remove(data, ssl_conn_hash);
         infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
       }
@@ -497,7 +491,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
       failf(data, "could not decode previous session");
     }
   }
-  Curl_ssl_spool_unlock(data);
+  Curl_ssl_scache_unlock(data);
   return result;
 }
 

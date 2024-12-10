@@ -271,7 +271,7 @@ enum protection_level {
 
 /* SSL backend-specific data; declared differently by each SSL backend */
 struct ssl_backend_data;
-struct Curl_ssl_spool_entry;
+struct Curl_ssl_scache_entry;
 
 typedef enum {
   CURL_SSL_PEER_DNS,
@@ -341,8 +341,6 @@ struct ssl_general_config {
   size_t max_ssl_sessions; /* SSL session id cache size */
   int ca_cache_timeout;  /* Certificate store cache timeout (seconds) */
 };
-
-typedef void Curl_ssl_session_dtor(void *session, size_t slen);
 
 #ifdef USE_WINDOWS_SSPI
 #include "curl_sspi.h"
@@ -1217,7 +1215,7 @@ struct UrlState {
   curl_prot_t first_remote_protocol;
 
   int retrycount; /* number of retries on a new connection */
-  struct Curl_ssl_spool *ssl_spool; /* TLS session pool */
+  struct Curl_ssl_scache *ssl_scache; /* TLS session pool */
   int os_errno;  /* filled in with errno whenever an error occurs */
   long followlocation; /* redirect counter */
   int requests; /* request counter: redirects + authentication retakes */

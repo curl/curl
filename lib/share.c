@@ -30,7 +30,7 @@
 #include "share.h"
 #include "psl.h"
 #include "vtls/vtls.h"
-#include "vtls/spool.h"
+#include "vtls/vtls_scache.h"
 #include "hsts.h"
 #include "url.h"
 
@@ -109,8 +109,8 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
-      if(!share->ssl_spool) {
-        if(Curl_ssl_spool_create(8, &share->ssl_spool))
+      if(!share->ssl_scache) {
+        if(Curl_ssl_scache_create(8, &share->ssl_scache))
           res = CURLSHE_NOMEM;
       }
 #else
@@ -171,9 +171,9 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
-      if(share->ssl_spool) {
-        Curl_ssl_spool_destroy(share->ssl_spool);
-        share->ssl_spool = NULL;
+      if(share->ssl_scache) {
+        Curl_ssl_scache_destroy(share->ssl_scache);
+        share->ssl_scache = NULL;
       }
 #else
       res = CURLSHE_NOT_BUILT_IN;
@@ -245,9 +245,9 @@ curl_share_cleanup(CURLSH *sh)
 #endif
 
 #ifdef USE_SSL
-  if(share->ssl_spool) {
-    Curl_ssl_spool_destroy(share->ssl_spool);
-    share->ssl_spool = NULL;
+  if(share->ssl_scache) {
+    Curl_ssl_scache_destroy(share->ssl_scache);
+    share->ssl_scache = NULL;
   }
 #endif
 
