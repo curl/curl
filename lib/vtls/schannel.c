@@ -1598,6 +1598,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
+#if 0  /* temp disable to see if this causes the CI failures */
   /* save the current session data for possible reuse */
   if(ssl_config->primary.cache_session) {
     Curl_ssl_spool_lock(data);
@@ -1610,6 +1611,7 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     if(result)
       return result;
   }
+#endif
 
   if(data->set.ssl.certinfo) {
     int certs_count = 0;
