@@ -2445,7 +2445,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* free SSPI Schannel API credential handle */
   if(backend->cred) {
     Curl_ssl_scache_lock(data);
-    schannel_session_free(backend->cred, 0);
+    schannel_session_free(backend->cred;
     Curl_ssl_scache_unlock(data);
     backend->cred = NULL;
   }
