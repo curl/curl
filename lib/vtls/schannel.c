@@ -41,7 +41,7 @@
 #include "schannel_int.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "strcase.h"
 #include "sendf.h"
 #include "connect.h" /* for the connect timeout */
@@ -955,9 +955,9 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* check for an existing reusable credential handle */
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_spool_lock(data);
-    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
-                          (void **)&old_cred, NULL, NULL)) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get_obj(cf, data, connssl->ssl_conn_hash,
+                               (void **)&old_cred, NULL)) {
       backend->cred = old_cred;
       DEBUGF(infof(data, "schannel: reusing existing credential handle"));
 
@@ -967,7 +967,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                    "schannel: incremented credential handle refcount = %d",
                    backend->cred->refcount));
     }
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   if(!backend->cred) {
@@ -1502,12 +1502,11 @@ add_cert_to_certinfo(const CERT_CONTEXT *ccert_context, bool reverse_order,
   return args->result == CURLE_OK;
 }
 
-static void schannel_session_free(void *sessionid, size_t idsize)
+static void schannel_session_free(void *sessionid)
 {
   /* this is expected to be called under sessionid lock */
   struct Curl_schannel_cred *cred = sessionid;
 
-  (void)idsize;
   if(cred) {
     cred->refcount--;
     if(cred->refcount == 0) {
@@ -1600,13 +1599,13 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* save the current session data for possible reuse */
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_spool_lock(data);
+    Curl_ssl_scache_lock(data);
     /* Up ref count since call takes ownership */
     backend->cred->refcount++;
-    result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
-                                backend->cred, 0,
-                                schannel_session_free, NULL);
-    Curl_ssl_spool_unlock(data);
+    result = Curl_ssl_scache_add_obj(cf, data, connssl->ssl_conn_hash,
+                                     backend->cred, schannel_session_free,
+                                     NULL);
+    Curl_ssl_scache_unlock(data);
     if(result)
       return result;
   }
@@ -2445,9 +2444,9 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* free SSPI Schannel API credential handle */
   if(backend->cred) {
-    Curl_ssl_spool_lock(data);
+    Curl_ssl_scache_lock(data);
     schannel_session_free(backend->cred, 0);
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_unlock(data);
     backend->cred = NULL;
   }
 

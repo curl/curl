@@ -56,7 +56,7 @@
 #include "select.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "vauth/vauth.h"
 #include "keylog.h"
 #include "strcase.h"
@@ -2901,10 +2901,11 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       goto out;
     }
 
-    Curl_ssl_spool_lock(data);
-    result = Curl_ssl_spool_add(cf, data, ssl_conn_hash,
-                                der_session_buf, der_session_size, NULL, NULL);
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_lock(data);
+    result = Curl_ssl_scache_add(cf, data, ssl_conn_hash,
+                                 der_session_buf, der_session_size,
+                                 NULL);
+    Curl_ssl_scache_unlock(data);
   }
 
 out:
@@ -3960,16 +3961,16 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_spool_lock(data);
-    if(Curl_ssl_spool_get(cf, data, ssl_conn_hash,
-                          (void **)&der_sessionid, &der_sessionid_size,
-                          NULL)) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get(cf, data, ssl_conn_hash,
+                           (void **)&der_sessionid, &der_sessionid_size,
+                           NULL)) {
       /* we got a session id, use it! */
       ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
         (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
-          Curl_ssl_spool_unlock(data);
+          Curl_ssl_scache_unlock(data);
           SSL_SESSION_free(ssl_session);
           failf(data, "SSL: SSL_set_session failed: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
@@ -3982,11 +3983,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         octx->reused_session = TRUE;
       }
       else {
-        Curl_ssl_spool_unlock(data);
+        Curl_ssl_scache_unlock(data);
         return CURLE_SSL_CONNECT_ERROR;
       }
     }
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   return CURLE_OK;
@@ -4741,7 +4742,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_done;
   else
     /* on error, remove an session we might have in the pool */
-    Curl_ssl_spool_remove(data, connssl->ssl_conn_hash);
+    Curl_ssl_scache_remove(data, connssl->ssl_conn_hash);
 
   return result;
 }

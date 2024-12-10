@@ -47,7 +47,7 @@
 #include "gtls.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "vauth/vauth.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -722,8 +722,8 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  void *connect_sessionid;
-  size_t connect_idsize = 0;
+  unsigned char *sdata;
+  size_t sdata_len = 0;
   CURLcode result = CURLE_OK;
 
   if(!ssl_config->primary.cache_session)
@@ -735,25 +735,24 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
      detect that. */
 
   /* get the session ID data size */
-  gnutls_session_get_data(session, NULL, &connect_idsize);
-  if(!connect_idsize) /* gnutls does this for some version combinations */
+  gnutls_session_get_data(session, NULL, &sdata_len);
+  if(!sdata_len) /* gnutls does this for some version combinations */
     return CURLE_OK;
 
-  connect_sessionid = malloc(connect_idsize); /* get a buffer for it */
-  if(!connect_sessionid)
+  sdata = malloc(sdata_len); /* get a buffer for it */
+  if(!sdata)
     return CURLE_OUT_OF_MEMORY;
 
   /* extract session ID to the allocated buffer */
-  gnutls_session_get_data(session, connect_sessionid, &connect_idsize);
+  gnutls_session_get_data(session, sdata, &sdata_len);
 
   CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s) and store in cache",
-              connect_idsize, alpn ? alpn : "-");
-  Curl_ssl_spool_lock(data);
+              sdata_len, alpn ? alpn : "-");
+  Curl_ssl_scache_lock(data);
   /* Add the sesson to the cache, takes ownership */
-  result = Curl_ssl_spool_add(cf, data, ssl_conn_hash,
-                                connect_sessionid, connect_idsize,
-                                NULL, alpn);
-  Curl_ssl_spool_unlock(data);
+  result = Curl_ssl_scache_add(cf, data, ssl_conn_hash,
+                               sdata, sdata_len, alpn);
+  Curl_ssl_scache_unlock(data);
   return result;
 }
 
@@ -1081,18 +1080,18 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
   if(conn_config->cache_session) {
-    void *ssl_sessionid;
-    size_t ssl_idsize;
+    unsigned char *sdata;
+    size_t sdata_len;
     char *session_alpn;
-    Curl_ssl_spool_lock(data);
-    if(Curl_ssl_spool_get(cf, data, ssl_conn_hash,
-                            &ssl_sessionid, &ssl_idsize, &session_alpn)) {
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get(cf, data, ssl_conn_hash,
+                           &sdata, &sdata_len, &session_alpn)) {
       /* we got a session id, use it! */
       int rc;
 
-      rc = gnutls_session_set_data(gctx->session, ssl_sessionid, ssl_idsize);
+      rc = gnutls_session_set_data(gctx->session, sdata, sdata_len);
       if(rc < 0) {
-        Curl_ssl_spool_remove(data, ssl_conn_hash);
+        Curl_ssl_scache_remove(data, ssl_conn_hash);
         infof(data, "SSL session not accepted by GnuTLS, continuing without");
       }
       else {
@@ -1129,7 +1128,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
         }
       }
     }
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   /* convert the ALPN string from our arguments to a list of strings that

@@ -34,7 +34,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
-#include "spool.h"
+#include "vtls_scache.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
@@ -615,16 +615,16 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
     const br_ssl_session_parameters *session;
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
-    Curl_ssl_spool_lock(data);
-    if(Curl_ssl_spool_get(cf, data, connssl->ssl_conn_hash,
-                          &sdata, &slen, NULL) &&
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+                           &sdata, &slen, NULL) &&
        slen == sizeof(*session)) {
       session = sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
     }
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   if(connssl->alpn) {
@@ -834,11 +834,11 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     if(!session)
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
-    Curl_ssl_spool_lock(data);
-    ret = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
-                                 session, sizeof(*session),
-                                 NULL, NULL);
-    Curl_ssl_spool_unlock(data);
+    Curl_ssl_scache_lock(data);
+    ret = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+                              session, sizeof(*session),
+                              NULL);
+    Curl_ssl_scache_unlock(data);
     if(ret)
       return ret;
   }
