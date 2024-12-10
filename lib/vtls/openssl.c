@@ -3475,9 +3475,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   const char *ciphers;
   SSL_METHOD_QUAL SSL_METHOD *req_method = NULL;
   ctx_option_t ctx_options = 0;
-  SSL_SESSION *ssl_session = NULL;
-  const unsigned char *der_sessionid = NULL;
-  size_t der_sessionid_size = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const long int ssl_version_min = conn_config->version;
@@ -3961,13 +3958,17 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
+    const unsigned char *der_sessionid = NULL;
+    size_t der_sessionid_size = 0;
+
     Curl_ssl_scache_lock(data);
     if(Curl_ssl_scache_get(cf, data, ssl_conn_hash,
-                           (void **)&der_sessionid, &der_sessionid_size,
+                           &der_sessionid, &der_sessionid_size,
                            NULL)) {
-      /* we got a session id, use it! */
+      SSL_SESSION *ssl_session = NULL;
+
       ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
-        (long)der_sessionid_size);
+                                    (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
           Curl_ssl_scache_unlock(data);
