@@ -1080,7 +1080,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   /* This might be a reconnect, so we check for a session ID in the cache
      to speed up things */
   if(conn_config->cache_session) {
-    unsigned char *sdata;
+    const unsigned char *sdata;
     size_t sdata_len;
     char *session_alpn;
     Curl_ssl_scache_lock(data);

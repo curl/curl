@@ -77,7 +77,7 @@ CURLcode Curl_ssl_scache_conn_hash(struct Curl_cfilter *cf,
 bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
                          const char *ssl_conn_hash,
-                         unsigned char **sdata,
+                         const unsigned char **sdata,
                          size_t *sdata_len,
                          char **palpn);
 

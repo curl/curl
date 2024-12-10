@@ -466,15 +466,13 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
                             struct wolfssl_ctx *wss,
                             const char *ssl_conn_hash)
 {
-  void *psdata;
   const unsigned char *sdata = NULL;
   size_t slen = 0;
   CURLcode result = CURLE_OK;
 
   Curl_ssl_scache_lock(data);
-  if(Curl_ssl_scache_get(cf, data, ssl_conn_hash, &psdata, &slen, NULL)) {
+  if(Curl_ssl_scache_get(cf, data, ssl_conn_hash, &sdata, &slen, NULL)) {
     WOLFSSL_SESSION *session;
-    sdata = psdata;
     session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);

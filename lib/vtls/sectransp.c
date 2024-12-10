@@ -1021,17 +1021,6 @@ failed:
   return ret;
 }
 
-static void sectransp_session_free(void *sessionid)
-{
-  /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
-     cached session ID inside the Security framework. There is a private
-     function that does this, but I do not want to have to explain to you why I
-     got your application rejected from the App Store due to the use of a
-     private API, so the best we can do is free up our own char array that we
-     created way back in sectransp_connect_step1... */
-  Curl_safefree(sessionid);
-}
-
 static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
@@ -1339,8 +1328,8 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
     Curl_ssl_scache_lock(data);
     if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
-                           (void **)&ssl_sessionid, &ssl_sessionid_len,
-                           NULL)) {
+                           (unsigned char **)&ssl_sessionid,
+                           &ssl_sessionid_len, NULL)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
       Curl_ssl_scache_unlock(data);
@@ -1368,9 +1357,9 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_scache_add_obj(cf, data, connssl->ssl_conn_hash,
-                                       ssl_sessionid, sectransp_session_free,
-                                       NULL);
+      result = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+                                   ssl_sessionid, ssl_sessionid_len,
+                                   NULL);
       Curl_ssl_scache_unlock(data);
       if(result)
         return result;

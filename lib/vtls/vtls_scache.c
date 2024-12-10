@@ -427,7 +427,7 @@ cf_ssl_find_entry(struct Curl_cfilter *cf,
 bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
                         struct Curl_easy *data,
                         const char *ssl_conn_hash,
-                        unsigned char **sdata, size_t *sdata_len,
+                        const unsigned char **sdata, size_t *sdata_len,
                         char **palpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
