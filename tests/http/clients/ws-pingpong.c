@@ -108,6 +108,13 @@ static CURLcode pingpong(CURL *curl, const char *payload)
     if(res == CURLE_AGAIN) {
 #ifdef _WIN32
       Sleep(100);
+#elif defined (__TANDEM)
+      /* NonStop only defines usleep when building for a threading model */
+# if defined(_PUT_MODEL_) || defined(_KLT_MODEL_)
+      usleep(100*1000);
+# else
+      sleep(100);
+# endif
 #else
       usleep(100*1000);
 #endif
