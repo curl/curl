@@ -718,7 +718,7 @@ parse_cookie_header(struct Curl_easy *data,
            * If the date cannot get parsed for whatever reason, the cookie
            * will be treated as a session cookie
            */
-          char dbuf[MAX_DATE_LENGTH];
+          char dbuf[MAX_DATE_LENGTH + 1];
           memcpy(dbuf, valuep, vlen);
           dbuf[vlen] = 0;
           co->expires = Curl_getdate_capped(dbuf);
