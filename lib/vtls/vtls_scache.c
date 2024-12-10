@@ -461,7 +461,7 @@ bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
 bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              const char *ssl_conn_hash,
-                             unsigned char **sobj,
+                             void **sobj,
                              char **palpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
