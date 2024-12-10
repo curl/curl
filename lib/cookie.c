@@ -469,6 +469,13 @@ static int invalid_octets(const char *p)
 #define CERR_PSL           14 /* a public suffix */
 #define CERR_LIVE_WINS     15
 
+/* The maximum length we accept a date string for the 'expire' keyword. The
+   standard date formats are within the 30 bytes range. This adds an extra
+   margin just to make sure it realistically works with what is used out
+   there.
+*/
+#define MAX_DATE_LENGTH 80
+
 static int
 parse_cookie_header(struct Curl_easy *data,
                     struct Cookie *co,
@@ -709,14 +716,17 @@ parse_cookie_header(struct Curl_easy *data,
         }
       }
       else if((nlen == 7) && strncasecompare("expires", namep, 7)) {
-        if(!co->expires) {
+        if(!co->expires && (vlen < MAX_DATE_LENGTH)) {
           /*
            * Let max-age have priority.
            *
            * If the date cannot get parsed for whatever reason, the cookie
            * will be treated as a session cookie
            */
-          co->expires = Curl_getdate_capped(valuep);
+          char dbuf[MAX_DATE_LENGTH + 1];
+          memcpy(dbuf, valuep, vlen);
+          dbuf[vlen] = 0;
+          co->expires = Curl_getdate_capped(dbuf);
 
           /*
            * Session cookies have expires set to 0 so if we get that back
