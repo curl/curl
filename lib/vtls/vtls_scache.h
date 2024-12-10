@@ -51,7 +51,7 @@ void Curl_ssl_scache_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_scache_unlock(struct Curl_easy *data);
 
-/* Create a cryptographic hash of all SSL relevant paramters used
+/* Create a cryptographic hash of all SSL relevant parameters used
  * for the connection filter instance.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
@@ -115,7 +115,7 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
 bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              const char *ssl_conn_hash,
-                             unsigned char **sobj,
+                             void **sobj,
                              char **palpn);
 
 typedef void Curl_ssl_scache_obj_dtor(void *sobj);
