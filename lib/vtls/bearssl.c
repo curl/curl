@@ -610,7 +610,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   br_ssl_engine_set_x509(&backend->ctx.eng, &backend->x509.vtable);
 
   if(ssl_config->primary.cache_session) {
-    unsigned char *sdata;
+    const unsigned char *sdata;
     size_t sdata_len;
     const br_ssl_session_parameters *session;
 
