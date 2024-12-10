@@ -469,6 +469,11 @@ static int invalid_octets(const char *p)
 #define CERR_PSL           14 /* a public suffix */
 #define CERR_LIVE_WINS     15
 
+/* The maximum length we accept a date string for the 'expire' keyword. The
+   standard date formats are within the 30 bytes range. This adds an extra
+   margin just to make sure it realistically works with what is used out
+   there.
+*/
 #define MAX_DATE_LENGTH 80
 
 static int
