@@ -1598,20 +1598,20 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 #endif
 
-#if 0  /* temp disable to see if this causes the CI failures */
   /* save the current session data for possible reuse */
   if(ssl_config->primary.cache_session) {
     Curl_ssl_spool_lock(data);
     /* Up ref count since call takes ownership */
-    backend->cred->refcount++;
-    result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
-                                backend->cred, 0,
-                                schannel_session_free, NULL);
+    if(FALSE) {
+      backend->cred->refcount++;
+      result = Curl_ssl_spool_add(cf, data, connssl->ssl_conn_hash,
+                                  backend->cred, 0,
+                                  schannel_session_free, NULL);
+    }
     Curl_ssl_spool_unlock(data);
     if(result)
       return result;
   }
-#endif
 
   if(data->set.ssl.certinfo) {
     int certs_count = 0;
