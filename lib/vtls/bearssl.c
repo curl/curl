@@ -34,6 +34,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "vtls_scache.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
@@ -609,20 +610,21 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   br_ssl_engine_set_x509(&backend->ctx.eng, &backend->x509.vtable);
 
   if(ssl_config->primary.cache_session) {
-    void *sdata;
-    size_t slen;
+    const unsigned char *sdata;
+    size_t sdata_len;
     const br_ssl_session_parameters *session;
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &sdata, &slen, NULL) &&
-       slen == sizeof(*session)) {
-      session = sdata;
+    Curl_ssl_scache_lock(data);
+    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+                           &sdata, &sdata_len, NULL) &&
+       sdata_len == sizeof(*session)) {
+      session = (br_ssl_session_parameters *)(void *)sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
     }
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_scache_unlock(data);
   }
 
   if(connssl->alpn) {
@@ -804,12 +806,6 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
   return ret;
 }
 
-static void bearssl_session_free(void *sessionid, size_t idsize)
-{
-  (void)idsize;
-  free(sessionid);
-}
-
 static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
@@ -838,11 +834,11 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     if(!session)
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
-    Curl_ssl_sessionid_lock(data);
-    ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                 session, sizeof(*session),
-                                 bearssl_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_scache_lock(data);
+    ret = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+                              (unsigned char *)session, sizeof(*session),
+                              NULL);
+    Curl_ssl_scache_unlock(data);
     if(ret)
       return ret;
   }
