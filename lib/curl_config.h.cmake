@@ -841,3 +841,12 @@ ${SIZEOF_TIME_T_CODE}
 
 /* if ECH support is available */
 #cmakedefine USE_ECH 1
+
+/* Define to 1 if you have the wolfSSL_CTX_GenerateEchConfig function. */
+#cmakedefine HAVE_WOLFSSL_CTX_GENERATEECHCONFIG
+
+/* Define to 1 if you have the SSL_set1_ech_config_list function. */
+#cmakedefine HAVE_SSL_SET1_ECH_CONFIG_LIST
+
+/* Define to 1 if you have the SSL_ech_set1_echconfig function. */
+#cmakedefine HAVE_SSL_ECH_SET1_ECHCONFIG
