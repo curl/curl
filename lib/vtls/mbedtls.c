@@ -876,7 +876,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
-    unsigned char *sdata = NULL;
+    const unsigned char *sdata = NULL;
     size_t slen = 0;
 
     Curl_ssl_scache_lock(data);
