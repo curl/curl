@@ -160,13 +160,19 @@
 
 #elif defined(__TANDEM)
 # if ! defined(__LP64)
-   /* Required for 32-bit NonStop builds only. */
 #  define CURL_TYPEOF_CURL_OFF_T     long long
 #  define CURL_FORMAT_CURL_OFF_T     "lld"
 #  define CURL_FORMAT_CURL_OFF_TU    "llu"
 #  define CURL_SUFFIX_CURL_OFF_T     LL
 #  define CURL_SUFFIX_CURL_OFF_TU    ULL
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
+# else
+#  define CURL_TYPEOF_CURL_OFF_T     long
+#  define CURL_FORMAT_CURL_OFF_T     "ld"
+#  define CURL_FORMAT_CURL_OFF_TU    "lu"
+#  define CURL_SUFFIX_CURL_OFF_T     L
+#  define CURL_SUFFIX_CURL_OFF_TU    UL
+#  define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 # endif
 
 #elif defined(_WIN32_WCE)
