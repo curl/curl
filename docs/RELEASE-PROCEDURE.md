@@ -56,6 +56,10 @@ inform
 - send an email to curl-users, curl-announce and curl-library. Insert the
   RELEASE-NOTES into the mail.
 
+- if there are any advisories associated with the release, send each markdown
+  file to the above lists as well as to `oss-security@lists.openwall.com`
+  (unless the problem is unique to the non-open operating systems)
+
 celebrate
 ---------
 
@@ -107,7 +111,6 @@ Coming dates
 
 Based on the description above, here are some planned future release dates:
 
-- December 11, 2024
 - February 5, 2025
 - April 2, 2025
 - May 28, 2025
