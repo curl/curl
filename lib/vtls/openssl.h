@@ -36,6 +36,8 @@
 
 #include "urldata.h"
 
+struct ssl_peer;
+
 /* Struct to hold a Curl OpenSSL instance */
 struct ossl_ctx {
   /* these ones requires specific SSL-types */
