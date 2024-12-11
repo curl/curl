@@ -113,8 +113,6 @@ typedef bool Curl_cpool_done_match_cb(bool result, void *userdata);
  * @param dest_len    destination length, including terminating NUL
  * @param conn_cb     must be present, called for each connection in the
  *                    bundle until it returns TRUE
- * @param result_cb   if not NULL, is called at the end with the result
- *                    of the `conn_cb` or FALSE if never called.
  * @return combined result of last conn_db and result_cb or FALSE if no
                       connections were present.
  */
