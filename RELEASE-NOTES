@@ -44,6 +44,7 @@ This release includes the following bugfixes:
  o digest: produce a shorter cnonce in Digest headers [70]
  o DISTROS: update Alt Linux links
  o dmaketgz: use --no-cache when building docker image [66]
+ o docs: bring back ALTSVC.md and HSTS.md [76]
  o docs: document default `User-Agent` [57]
  o docs: suggest --ssl-reqd instead of --ftp-ssl [62]
  o duphandle: also init netrc [3]
@@ -60,6 +61,7 @@ This release includes the following bugfixes:
  o mbedtls: call psa_crypt_init() in global init [2]
  o mime: fix reader stall on small read lengths [65]
  o mk-ca-bundle: remove CKA_NSS_SERVER_DISTRUST_AFTER conditions [39]
+ o mprintf: fix the integer overflow checks [44]
  o multi: add clarifying comment for wakeup_write() [9]
  o multi: fix callback for `CURLMOPT_TIMERFUNCTION` not being called again when... [48]
  o netrc: address several netrc parser flaws [17]
@@ -165,6 +167,7 @@ References to bug reports and discussions on issues:
  [41] = https://curl.se/bug/?i=15525
  [42] = https://curl.se/bug/?i=15642
  [43] = https://curl.se/bug/?i=15522
+ [44] = https://curl.se/bug/?i=15699
  [45] = https://curl.se/bug/?i=15676
  [46] = https://curl.se/bug/?i=15638
  [47] = https://curl.se/bug/?i=15625
@@ -195,3 +198,4 @@ References to bug reports and discussions on issues:
  [72] = https://curl.se/bug/?i=15679
  [73] = https://curl.se/bug/?i=15650
  [74] = https://curl.se/bug/?i=15472
+ [76] = https://curl.se/bug/?i=15705
