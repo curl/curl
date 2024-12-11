@@ -1504,9 +1504,11 @@ static CURLcode append_cert_to_array(struct Curl_easy *data,
       case CURLE_OK:
         break;
       case CURLE_PEER_FAILED_VERIFICATION:
+        CFRelease(cacert);
         return CURLE_SSL_CACERT_BADFILE;
       case CURLE_OUT_OF_MEMORY:
       default:
+        CFRelease(cacert);
         return result;
     }
     free(certp);
@@ -2424,7 +2426,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
   struct st_ssl_backend_data *backend =
     (struct st_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t nread = 0;
   char buf[1024];
   size_t i;
 
