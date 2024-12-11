@@ -2426,7 +2426,7 @@ static CURLcode sectransp_shutdown(struct Curl_cfilter *cf,
   struct st_ssl_backend_data *backend =
     (struct st_ssl_backend_data *)connssl->backend;
   CURLcode result = CURLE_OK;
-  ssize_t nread;
+  ssize_t nread = 0;
   char buf[1024];
   size_t i;
 
