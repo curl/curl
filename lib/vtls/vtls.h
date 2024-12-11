@@ -28,6 +28,7 @@
 struct connectdata;
 struct ssl_config_data;
 struct ssl_primary_config;
+struct Curl_cfilter;
 
 #define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
 #define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
@@ -64,7 +65,22 @@ struct ssl_primary_config;
 
 /* Curl_multi SSL backend-specific data; declared differently by each SSL
    backend */
-struct Curl_cfilter;
+
+typedef enum {
+  CURL_SSL_PEER_DNS,
+  CURL_SSL_PEER_IPV4,
+  CURL_SSL_PEER_IPV6
+} ssl_peer_type;
+
+struct ssl_peer {
+  char *hostname;        /* hostname for verification */
+  char *dispname;        /* display version of hostname */
+  char *sni;             /* SNI version of hostname or NULL if not usable */
+  char *scache_key;      /* for lookups in session cache */
+  ssl_peer_type type;    /* type of the peer information */
+  int port;              /* port we are talking to */
+  int transport;         /* one of TRNSPRT_* defines */
+};
 
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
                                    const curl_ssl_backend ***avail);

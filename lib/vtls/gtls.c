@@ -717,7 +717,7 @@ CURLcode Curl_gtls_client_trust_setup(struct Curl_cfilter *cf,
 
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 const char *ssl_conn_hash,
+                                 const char *ssl_peer_key,
                                  gnutls_session_t session,
                                  const char *alpn)
 {
@@ -750,7 +750,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
               sdata_len, alpn ? alpn : "-");
   Curl_ssl_scache_lock(data);
   /* Add the sesson to the cache, takes ownership */
-  result = Curl_ssl_scache_add(cf, data, ssl_conn_hash,
+  result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
                                sdata, sdata_len, alpn);
   Curl_ssl_scache_unlock(data);
   return result;
@@ -761,7 +761,7 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
                                           gnutls_session_t session)
 {
   struct ssl_connect_data *connssl = cf->ctx;
-  return Curl_gtls_cache_session(cf, data, connssl->ssl_conn_hash,
+  return Curl_gtls_cache_session(cf, data, connssl->peer.scache_key,
                                  session, connssl->alpn_negotiated);
 }
 
@@ -1044,7 +1044,6 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const char *ssl_conn_hash,
                             const unsigned char *alpn, size_t alpn_len,
                             struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
@@ -1084,14 +1083,14 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     size_t sdata_len;
     char *session_alpn;
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, ssl_conn_hash,
+    if(Curl_ssl_scache_get(cf, data, peer->scache_key,
                            &sdata, &sdata_len, &session_alpn)) {
       /* we got a session id, use it! */
       int rc;
 
       rc = gnutls_session_set_data(gctx->session, sdata, sdata_len);
       if(rc < 0) {
-        Curl_ssl_scache_remove(data, ssl_conn_hash);
+        Curl_ssl_scache_remove(data, peer->scache_key);
         infof(data, "SSL session not accepted by GnuTLS, continuing without");
       }
       else {
@@ -1190,7 +1189,7 @@ gtls_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 
   result = Curl_gtls_ctx_init(&backend->gtls, cf, data, &connssl->peer,
-                              connssl->ssl_conn_hash, proto.data, proto.len,
+                              proto.data, proto.len,
                               connssl, NULL, NULL, cf);
   if(result)
     return result;

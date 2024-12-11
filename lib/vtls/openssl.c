@@ -2867,7 +2867,7 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               const char *ssl_conn_hash,
+                               const char *ssl_peer_key,
                                SSL_SESSION *session)
 {
   const struct ssl_config_data *config;
@@ -2902,7 +2902,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     }
 
     Curl_ssl_scache_lock(data);
-    result = Curl_ssl_scache_add(cf, data, ssl_conn_hash,
+    result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
                                  der_session_buf, der_session_size,
                                  NULL);
     Curl_ssl_scache_unlock(data);
@@ -2925,7 +2925,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   connssl = cf ? cf->ctx : NULL;
   data = connssl ? CF_DATA_CURRENT(cf) : NULL;
   if(data && connssl)
-    Curl_ossl_add_session(cf, data, connssl->ssl_conn_hash, ssl_sessionid);
+    Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid);
   return 0;
 }
 
@@ -3464,7 +3464,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const char *ssl_conn_hash,
                             const unsigned char *alpn, size_t alpn_len,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
@@ -3962,7 +3961,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     size_t der_sessionid_size = 0;
 
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, ssl_conn_hash,
+    if(Curl_ssl_scache_get(cf, data, peer->scache_key,
                            &der_sessionid, &der_sessionid_size,
                            NULL)) {
       SSL_SESSION *ssl_session = NULL;
@@ -4017,7 +4016,6 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
 #endif
 
   result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer,
-                              connssl->ssl_conn_hash,
                               proto.data, proto.len, NULL, NULL,
                               ossl_new_session_cb, cf);
   if(result)
@@ -4743,7 +4741,7 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
     connssl->connecting_state = ssl_connect_done;
   else
     /* on error, remove an session we might have in the pool */
-    Curl_ssl_scache_remove(data, connssl->ssl_conn_hash);
+    Curl_ssl_scache_remove(data, connssl->peer.scache_key);
 
   return result;
 }

@@ -273,21 +273,6 @@ enum protection_level {
 struct ssl_backend_data;
 struct Curl_ssl_scache_entry;
 
-typedef enum {
-  CURL_SSL_PEER_DNS,
-  CURL_SSL_PEER_IPV4,
-  CURL_SSL_PEER_IPV6
-} ssl_peer_type;
-
-struct ssl_peer {
-  char *hostname;        /* hostname for verification */
-  char *dispname;        /* display version of hostname */
-  char *sni;             /* SNI version of hostname or NULL if not usable */
-  ssl_peer_type type;    /* type of the peer information */
-  int port;              /* port we are talking to */
-  int transport;         /* one of TRNSPRT_* defines */
-};
-
 struct ssl_primary_config {
   char *CApath;          /* certificate dir (does not work on Windows) */
   char *CAfile;          /* certificate to verify peer against */

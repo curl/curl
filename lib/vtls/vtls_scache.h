@@ -51,15 +51,18 @@ void Curl_ssl_scache_lock(struct Curl_easy *data);
 /* Unlock session cache mutex */
 void Curl_ssl_scache_unlock(struct Curl_easy *data);
 
-/* Create a cryptographic hash of all SSL relevant parameters used
- * for the connection filter instance.
+/* Create a key from peer and TLS configuration information that is
+ * unique for how the connection filter wants to establish a TLS
+ * connection to the peer.
+ * If the filter is a TLS proxy filter, it will use the proxy relevant
+ * information.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
- * @param phash   on successful return, the hash generated
+ * @param ppeer_key on successful return, the key generated
  */
-CURLcode Curl_ssl_scache_conn_hash(struct Curl_cfilter *cf,
-                                   const struct ssl_peer *peer,
-                                   char **phash);
+CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
+                                const struct ssl_peer *peer,
+                                char **ppeer_key);
 
 /* Get TLS session data from the cache.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
@@ -68,7 +71,7 @@ CURLcode Curl_ssl_scache_conn_hash(struct Curl_cfilter *cf,
  * under scache mutex).
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
- * @param ssl_conn_hash the key for lookup
+ * @param ssl_peer_key the key for lookup
  * @param sdata   on return the TLS session
  * @param sdata_len  on return the amount of bytes in sdata
  * @param palpn   on return the ALPN string used by the session,
@@ -76,25 +79,25 @@ CURLcode Curl_ssl_scache_conn_hash(struct Curl_cfilter *cf,
  */
 bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
                          struct Curl_easy *data,
-                         const char *ssl_conn_hash,
+                         const char *ssl_peer_key,
                          const unsigned char **sdata,
                          size_t *sdata_len,
                          char **palpn);
 
 /* Add TLS session data to the cache.
- * Replaces an existing session data/object with the same hash.
+ * Replaces an existing session data/object with the same peer_key.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Call takes ownership of `sdata` (must be allocated) in all outcomes.
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
- * @param ssl_conn_hash the key for lookup
+ * @param ssl_peer_key the key for lookup
  * @param sdata   the TLS session data, plain bytes
  * @param sdata_len the length of the TLS session data
  * @param alpn    the ALPN negotiated for the session or NULL
  */
 CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
-                             const char *ssl_conn_hash,
+                             const char *ssl_peer_key,
                              unsigned char *sdata,
                              size_t sdata_len,
                              const char *alpn);
@@ -106,7 +109,7 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
  * under scache mutex).
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
- * @param ssl_conn_hash the key for lookup
+ * @param ssl_peer_key the key for lookup
  * @param sdata   on return the TLS session
  * @param sdata_len  on return the amount of bytes in sdata
  * @param palpn   on return the ALPN string used by the session,
@@ -114,14 +117,14 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
  */
 bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
-                             const char *ssl_conn_hash,
+                             const char *ssl_peer_key,
                              void **sobj,
                              char **palpn);
 
 typedef void Curl_ssl_scache_obj_dtor(void *sobj);
 
 /* Add a TLS session object to the cache.
- * Replaces an existing session data/object with the same hash.
+ * Replaces an existing session data/object with the same peer_key.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Call takes ownership of `sobj`, using `sobj_dtor_cb`
  * to deallocate it. Is called in all outcomes, either right away or
@@ -130,22 +133,22 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * with cache (e.g. incrementing refcount on success)
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
- * @param ssl_conn_hash the key for lookup
+ * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
  * @param sobj_free_cb callback to free the session objectt
  * @param alpn    the ALPN negotiated for the session or NULL
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 const char *ssl_conn_hash,
+                                 const char *ssl_peer_key,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb,
                                  const char *alpn);
 
-/* Remove any session matching the hash from the cache.
+/* Remove any session matching the peer_key from the cache.
  */
 void Curl_ssl_scache_remove(struct Curl_easy *data,
-                            const char *ssl_conn_hash);
+                            const char *ssl_peer_key);
 
 #else /* USE_SSL */
 

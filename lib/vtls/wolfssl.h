@@ -54,11 +54,11 @@ CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
 CURLcode wssl_setup_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct wolfssl_ctx *wss,
-                            const char *ssl_conn_hash);
+                            const char *ssl_peer_key);
 
 CURLcode wssl_cache_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            const char *ssl_conn_hash,
+                            const char *ssl_peer_key,
                             WOLFSSL_SESSION *session);
 
 

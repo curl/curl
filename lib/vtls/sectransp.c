@@ -1327,7 +1327,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     size_t ssl_sessionid_len;
 
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+    if(Curl_ssl_scache_get(cf, data, connssl->peer.scache_key,
                            (const unsigned char **)&ssl_sessionid,
                            &ssl_sessionid_len, NULL)) {
       /* we got a session id, use it! */
@@ -1357,7 +1357,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
-      result = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+      result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                                    (unsigned char *)ssl_sessionid,
                                    ssl_sessionid_len, NULL);
       Curl_ssl_scache_unlock(data);

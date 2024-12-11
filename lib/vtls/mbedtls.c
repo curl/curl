@@ -880,7 +880,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     size_t slen = 0;
 
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+    if(Curl_ssl_scache_get(cf, data, connssl->peer.scache_key,
                            &sdata, &slen, NULL) && slen) {
       mbedtls_ssl_session session;
 
@@ -1154,7 +1154,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
         }
         else {
           Curl_ssl_scache_lock(data);
-          result = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+          result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                                        sdata, slen, NULL);
           Curl_ssl_scache_unlock(data);
           if(!result)

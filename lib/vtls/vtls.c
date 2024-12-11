@@ -1270,11 +1270,12 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
 {
+  Curl_safefree(peer->sni);
   if(peer->dispname != peer->hostname)
     free(peer->dispname);
-  free(peer->sni);
-  free(peer->hostname);
-  peer->hostname = peer->sni = peer->dispname = NULL;
+  peer->dispname = NULL;
+  Curl_safefree(peer->hostname);
+  Curl_safefree(peer->scache_key);
   peer->type = CURL_SSL_PEER_DNS;
 }
 
@@ -1285,7 +1286,6 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     Curl_ssl->close(cf, data);
     connssl->state = ssl_connection_none;
     Curl_ssl_peer_cleanup(&connssl->peer);
-    Curl_safefree(connssl->ssl_conn_hash);
   }
   cf->connected = FALSE;
 }
@@ -1371,7 +1371,8 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
       peer->sni[len] = 0;
     }
   }
-  result = CURLE_OK;
+
+  result = Curl_ssl_peer_key_make(cf, peer, &peer->scache_key);
 
 out:
   if(result)
@@ -1435,13 +1436,6 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   if(!connssl->peer.hostname) {
     result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
-    if(result)
-      goto out;
-  }
-
-  if(!connssl->ssl_conn_hash) {
-    result = Curl_ssl_scache_conn_hash(cf, &connssl->peer,
-                                       &connssl->ssl_conn_hash);
     if(result)
       goto out;
   }

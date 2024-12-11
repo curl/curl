@@ -78,7 +78,6 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            const char *ssl_conn_hash,
                             const unsigned char *alpn, size_t alpn_len,
                             struct ssl_connect_data *connssl,
                             Curl_gtls_ctx_setup_cb *cb_setup,
@@ -99,7 +98,7 @@ CURLcode Curl_gtls_verifyserver(struct Curl_easy *data,
 /* Extract TLS session and place in cache, if configured. */
 CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
-                                 const char *ssl_conn_hash,
+                                 const char *ssl_peer_key,
                                  gnutls_session_t session,
                                  const char *alpn);
 

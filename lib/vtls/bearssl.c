@@ -616,7 +616,7 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
     CURL_TRC_CF(data, cf, "connect_step1, check session cache");
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, connssl->ssl_conn_hash,
+    if(Curl_ssl_scache_get(cf, data, connssl->peer.scache_key,
                            &sdata, &sdata_len, NULL) &&
        sdata_len == sizeof(*session)) {
       session = (br_ssl_session_parameters *)(void *)sdata;
@@ -835,7 +835,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
     Curl_ssl_scache_lock(data);
-    ret = Curl_ssl_scache_add(cf, data, connssl->ssl_conn_hash,
+    ret = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                               (unsigned char *)session, sizeof(*session),
                               NULL);
     Curl_ssl_scache_unlock(data);

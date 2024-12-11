@@ -398,7 +398,7 @@ static void wolfssl_bio_cf_free_methods(void)
 
 CURLcode wssl_cache_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
-                            const char *ssl_conn_hash,
+                            const char *ssl_peer_key,
                             WOLFSSL_SESSION *session)
 {
   CURLcode result = CURLE_OK;
@@ -428,7 +428,7 @@ CURLcode wssl_cache_session(struct Curl_cfilter *cf,
   }
 
   Curl_ssl_scache_lock(data);
-  result = Curl_ssl_scache_add(cf, data, ssl_conn_hash,
+  result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
                                sdata, slen, NULL);
   Curl_ssl_scache_unlock(data);
   if(result)
@@ -455,7 +455,7 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     DEBUGASSERT(connssl);
     DEBUGASSERT(data);
     if(connssl && data) {
-      (void)wssl_cache_session(cf, data, connssl->ssl_conn_hash, session);
+      (void)wssl_cache_session(cf, data, connssl->peer.scache_key, session);
     }
   }
   return 0;
@@ -464,20 +464,20 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
 CURLcode wssl_setup_session(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct wolfssl_ctx *wss,
-                            const char *ssl_conn_hash)
+                            const char *ssl_peer_key)
 {
   const unsigned char *sdata = NULL;
   size_t slen = 0;
   CURLcode result = CURLE_OK;
 
   Curl_ssl_scache_lock(data);
-  if(Curl_ssl_scache_get(cf, data, ssl_conn_hash, &sdata, &slen, NULL)) {
+  if(Curl_ssl_scache_get(cf, data, ssl_peer_key, &sdata, &slen, NULL)) {
     WOLFSSL_SESSION *session;
     session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_scache_remove(data, ssl_conn_hash);
+        Curl_ssl_scache_remove(data, ssl_peer_key);
         infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
       }
@@ -1181,7 +1181,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
     /* Set session from cache if there is one */
-    (void)wssl_setup_session(cf, data, backend, connssl->ssl_conn_hash);
+    (void)wssl_setup_session(cf, data, backend, connssl->peer.scache_key);
     /* Register to get notified when a new session is received */
     wolfSSL_set_app_data(backend->handle, cf);
     wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);
