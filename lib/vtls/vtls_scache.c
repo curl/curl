@@ -543,9 +543,9 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
   result = cf_ssl_find_entry(cf, data, ssl_peer_key, &entry);
   if(result) {
     CURL_TRC_CF(data, cf, "failure finding session: %d", result);
-    cf_ssl_scache_data_free(sdata);
-    return result;
+    goto out;
   }
+
   if(entry) {
     /* Have a matching entry. Does it hold the same sdata already? */
     if(entry->sdata && (entry->sdata_len == sdata_len) &&
@@ -570,9 +570,12 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
       }
     }
 
+    result = CURLE_OUT_OF_MEMORY; /* default, pessimistic */
     DEBUGASSERT(entry);
-    if(!entry)
+    if(!entry) {
+      cf_ssl_scache_data_free(sdata);
       return CURLE_OK;
+    }
     cf_ssl_scache_clear_entry(entry);
     DEBUGASSERT(!entry->ssl_peer_key);
 
