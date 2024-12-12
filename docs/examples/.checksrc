@@ -1,3 +1,4 @@
 disable TYPEDEFSTRUCT
 disable SNPRINTF
 disable BANNEDFUNC
+disable SSCANF

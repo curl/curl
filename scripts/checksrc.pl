@@ -99,6 +99,7 @@ my %warnings = (
     'SPACEBEFOREPAREN'      => 'space before an open parenthesis',
     'SPACESEMICOLON'        => 'space before semicolon',
     'SPACESWITCHCOLON'      => 'space before colon of switch label',
+    "SSCANF"                => 'use of sscanf',
     'TABS'                  => 'TAB characters not allowed',
     'TRAILINGSPACE'         => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'         => 'typedefed struct',
@@ -813,6 +814,16 @@ sub scanfile {
             checkwarn("BANNEDFUNC",
                       $line, length($1), $file, $ol,
                       "use of $2 is banned");
+        }
+        # scan for use of sscanf. This is not a BANNEDFUNC to allow for
+        # individual enable/disable of this warning.
+        if($l =~ /^(.*\W)(sscanf)\s*\(/x) {
+            if($1 !~ /^ *\#/) {
+                # skip preprocessor lines
+                checkwarn("SSCANF",
+                          $line, length($1), $file, $ol,
+                          "use of $2 is banned");
+            }
         }
         if($warnings{"STRERROR"}) {
             # scan for use of banned strerror. This is not a BANNEDFUNC to
