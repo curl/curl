@@ -46,7 +46,7 @@ Next we append `:VRFY-STATUS` to the peek_key if that is enabled. We
 do not want to reuse session in connections that want to check revocation
 information that did not do this before.
 
-#### connect-to 
+#### connect-to
 
 If curl was configured with `--connect-to` parameters and either peer or
 host verification was off, the `connect-to` host and port are appended
@@ -81,7 +81,7 @@ Client certificates and SRP username/password are **not** added to the
 peer key. However, when they are used, `:CCERT` or `:SRP-AUTH` is added
 to the key. This prevents mixing of TLS sessions between connections
 that differ here. (There are more checks in the session cache that
-prevent mixup of different client certificates and user info. See below.)
+prevent mix up of different client certificates and user info. See below.)
 
 Finally, the peer_key gets the TLS implementation name and version
 added as `:IMPL-<name>/<version>`. This prevents giving session data to
@@ -126,7 +126,7 @@ data should be stored more permanent, issues with security and privacy
 have to be considered.
 
 libcurl will not offer the export of TLS session data that has been
-obtained useing a client certificat or SRP authentication. An attacker
+obtained using a client certificate or SRP authentication. An attacker
 could use that session to impersonate a user at a server.
 
 #### salted hashes
@@ -149,7 +149,7 @@ the cache will find no immediate match.
 
 Instead, it will used the passed peer key and the salt of an entry
 to compute the hash again and see if it matches. If an entry matches,
-there is a high likelyhood that the session has been made using the
+there is a high likelihood that the session has been made using the
 same peer key.
 
 The matching peer key is then remembered at the matched cache entry. No
