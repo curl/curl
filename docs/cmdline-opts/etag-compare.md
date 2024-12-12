@@ -25,3 +25,5 @@ line with the desired ETag. An empty file is parsed as an empty ETag.
 
 Use the option --etag-save to first save the ETag from a response, and then
 use this option to compare against the saved ETag in a subsequent request.
+
+Use this option with a single URL only.
