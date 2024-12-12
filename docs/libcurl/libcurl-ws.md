@@ -47,44 +47,48 @@ WebSocket" request header field. When the upgrade is accepted by the server,
 it responds with a 101 Switching and then the client can speak WebSocket with
 the server. The communication can happen in both directions at the same time.
 
+# EXTENSIONS
+
+The WebSocket protocol allows the client to request and negotiate *extensions*
+can add additional features and restrictions to the protocol.
+
+libcurl does not support the use of extensions and always sets up a connection
+without them.
+
 # MESSAGES
 
 WebSocket communication is message based. That means that both ends send and
 receive entire messages, not streams like TCP. A WebSocket message is sent
-over the wire in one or more frames. Each frame in a message can have a size
-up to 2^63 bytes.
+over the wire in one or more frames. A message which is split into several
+frames is referred to as a *fragmented* message and the individual frames are
+called *fragments*. Each frame (or fragment) in a message can have a size of
+up to 2^63 bytes and declares the frame size in the header. The total size of
+a message that is fragmented into multiple frames is not limited by the
+protocol and the number of fragments is not known until the final fragment is
+received.
 
-libcurl delivers WebSocket data as frame fragments. It might send a whole
-frame, but it might also deliver them in pieces depending on size and network
-patterns. It makes sure to provide the API user about the exact specifics
-about the fragment: type, offset, size and how much data there is pending to
-arrive for the same frame.
+Transmission of a frame must not be interrupted by any other data transfers and
+transmission of the different fragments of a message must not be interrupted by
+other user data frames. Control frames - PING, PONG and CLOSE - may be
+transmitted in between any other two frames, even in between two fragments of
+the same user data message. The control frames themselves on the other hand
+must never be fragmented and are limited to a size of 125 bytes.
 
-A message has an unknown size until the last frame header for the message has
-been received since only frames have set sizes.
-
-# Raw mode
-
-libcurl can be told to speak WebSocket in "raw mode" by setting the
-**CURLWS_RAW_MODE** bit to the CURLOPT_WS_OPTIONS(3) option.
-
-Raw WebSocket means that libcurl passes on the data from the network without
-parsing it leaving that entirely to the application. This mode assumes that
-the user of this knows WebSocket and can parse and figure out the data all by
-itself.
-
-This mode is intended for applications that already have a WebSocket
-parser/engine that want to switch over to use libcurl for enabling WebSocket,
-and keep parts of the existing software architecture.
+libcurl delivers WebSocket data as chunks of frames. It might deliver a whole
+frame as a single chunk, but it might also deliver it in several pieces
+depending on size and network patterns. See the individual API documentations
+for further information.
 
 # PING
 
 WebSocket is designed to allow long-lived sessions and in order to keep the
 connections alive, both ends can send PING messages for the other end to
-respond with a PONG.
+respond with a PONG. Both ends may also send unsolicited PONG messages as
+unidirectional heartbeat.
 
-libcurl automatically responds to server PING messages with a PONG. It does
-not send any PING messages automatically.
+libcurl automatically responds to server PING messages with a PONG that echoes
+the payload of the PING message. libcurl does neither send any PING messages
+nor any unsolicited PONG messages automatically.
 
 # MODELS
 
@@ -92,26 +96,40 @@ Because of the many different ways WebSocket can be used, which is much more
 flexible than limited to plain downloads or uploads, libcurl offers two
 different API models to use it:
 
-1. Using a write callback with CURLOPT_WRITEFUNCTION(3) much like other
+1. CURLOPT_WRITEFUNCTION model:
+Using a write callback with CURLOPT_WRITEFUNCTION(3) much like other
 downloads for when the traffic is download oriented.
 
-2. Using CURLOPT_CONNECT_ONLY(3) and use the WebSocket recv/send
-functions.
+2. CURLOPT_CONNECT_ONLY model:
+Using curl_ws_recv(3) and curl_ws_send(3) functions.
 
-# Callback model
+## CURLOPT_WRITEFUNCTION MODEL
 
-When a write callback is set and a WebSocket transfer is performed, the
-callback is called to deliver all WebSocket data that arrives.
+CURLOPT_CONNECT_ONLY(3) must be unset or **0L** for this model to take effect.
 
-The callback can then call curl_ws_meta(3) to learn about the details of
-the incoming data fragment.
+curl_easy_perform(3) establishes and sets up the WebSocket communication and
+then blocks for the whole duration of the connection. libcurl calls the
+callback configured in CURLOPT_WRITEFUNCTION(3), whenever an incoming chunk
+of WebSocket data is received. The callback is handed a pointer to the payload
+data as an argument and can call curl_ws_meta(3) to get relevant metadata.
 
-# CONNECT_ONLY model
+## CURLOPT_CONNECT_ONLY MODEL
 
-By setting CURLOPT_CONNECT_ONLY(3) to **2L**, the transfer only
-establishes and setups the WebSocket communication and then returns control
-back to the application.
+CURLOPT_CONNECT_ONLY(3) must be **2L** for this model to take effect.
 
-Once such a setup has been successfully performed, the application can proceed
-and use curl_ws_recv(3) and curl_ws_send(3) freely to exchange
-WebSocket messages with the server.
+curl_easy_perform(3) only establishes and sets up the WebSocket communication
+and then returns control back to the application. The application can then use
+curl_ws_recv(3) and curl_ws_send(3) to exchange WebSocket messages with the
+server.
+
+# RAW MODE
+
+libcurl can be told to speak WebSocket in "raw mode" by setting the
+**CURLWS_RAW_MODE** bit of the CURLOPT_WS_OPTIONS(3) option.
+
+Raw WebSocket means that libcurl passes on the data from the network without
+parsing it, leaving that entirely to the application.
+
+This mode is intended for applications that already have a WebSocket
+parser/engine and want to switch over to use libcurl for enabling WebSocket,
+and keep parts of the existing software architecture.
