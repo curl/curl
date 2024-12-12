@@ -1441,8 +1441,7 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
   *done = FALSE;
   if(!connssl->peer.hostname) {
     char tls_id[80];
-    size_t n = connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
-    tls_id[n] = 0;
+    connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
     result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
     if(result)
       goto out;
