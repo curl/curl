@@ -34,7 +34,11 @@ http://example.com/%TESTNUMBER http://example.net/fooo --etag-save %LOGDIR/etag%
 <stderr mode="text">
 curl: The etag options only work on a single URL
 curl: option --etag-save: is badly used here
+%if manual
 curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
 </stderr>
 </verify>
 </testcase>

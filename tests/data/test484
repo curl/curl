@@ -34,7 +34,11 @@ http://example.com/%TESTNUMBER --etag-compare %LOGDIR/etag%TESTNUMBER --etag-sav
 <stderr mode="text">
 curl: The etag options only work on a single URL
 curl: option --url: is badly used here
+%if manual
 curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
 </stderr>
 </verify>
 </testcase>
