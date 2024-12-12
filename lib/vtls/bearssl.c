@@ -1150,7 +1150,7 @@ const struct Curl_ssl Curl_ssl_bearssl = {
 
   sizeof(struct bearssl_ssl_backend_data),
 
-  Curl_none_init,                  /* init */
+  bearssl_init,                    /* init */
   Curl_none_cleanup,               /* cleanup */
   bearssl_version,                 /* version */
   Curl_none_check_cxn,             /* check_cxn */

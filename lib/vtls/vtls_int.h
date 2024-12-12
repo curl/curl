@@ -29,6 +29,7 @@
 
 #ifdef USE_SSL
 
+struct Curl_ssl;
 struct ssl_connect_data;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
@@ -103,7 +104,8 @@ typedef enum {
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
-  struct ssl_peer peer;
+  const struct Curl_ssl *ssl_impl;  /* TLS backend for this filter */
+  struct ssl_peer peer;             /* peer the filter talks to */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */

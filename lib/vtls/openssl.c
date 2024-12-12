@@ -961,8 +961,6 @@ static const char *SSL_ERROR_to_str(int err)
   }
 }
 
-static size_t ossl_version(char *buffer, size_t size);
-
 /* Return error string for last OpenSSL error
  */
 static char *ossl_strerror(unsigned long error, char *buf, size_t size)
@@ -971,7 +969,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
   DEBUGASSERT(size);
   *buf = '\0';
 
-  len = ossl_version(buf, size);
+  len = Curl_ossl_version(buf, size);
   DEBUGASSERT(len < (size - 2));
   if(len < (size - 2)) {
     buf += len;
@@ -5157,7 +5155,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 #endif
 }
 
-static size_t ossl_version(char *buffer, size_t size)
+size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef LIBRESSL_VERSION_NUMBER
 #ifdef HAVE_OPENSSL_VERSION
@@ -5321,7 +5319,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 
   ossl_init,                /* init */
   ossl_cleanup,             /* cleanup */
-  ossl_version,             /* version */
+  Curl_ossl_version,        /* version */
   Curl_none_check_cxn,      /* check_cxn */
   ossl_shutdown,            /* shutdown */
   ossl_data_pending,        /* data_pending */

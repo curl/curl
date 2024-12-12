@@ -222,7 +222,7 @@ static CURLcode wssl_init_ssl(struct curl_tls_ctx *ctx,
   }
 
   if(ssl_config->primary.cache_session) {
-    (void)wssl_setup_session(cf, data, &ctx->wssl, peer->scache_key);
+    (void)Curl_wssl_setup_session(cf, data, &ctx->wssl, peer->scache_key);
   }
 
   return CURLE_OK;
@@ -237,7 +237,22 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                              Curl_vquic_tls_ctx_setup *cb_setup,
                              void *cb_user_data, void *ssl_user_data)
 {
+  char tls_id[80];
   CURLcode result;
+
+#ifdef USE_OPENSSL
+  Curl_ossl_version(tls_id, sizeof(tls_id));
+#elif defined(USE_GNUTLS)
+  Curl_gtls_version(tls_id, sizeof(tls_id));
+#elif defined(USE_WOLFSSL)
+  Curl_wssl_version(tls_id, sizeof(tls_id));
+#else
+#error "no TLS lib in used, should not happen"
+  return CURLE_FAILED_INIT;
+#endif
+  result = Curl_ssl_peer_init(peer, cf, tls_id, TRNSPRT_QUIC);
+  if(result)
+    return result;
 
 #ifdef USE_OPENSSL
   (void)result;

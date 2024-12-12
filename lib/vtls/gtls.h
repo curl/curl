@@ -70,6 +70,8 @@ struct gtls_ctx {
   BIT(sent_shutdown);
 };
 
+size_t Curl_gtls_version(char *buffer, size_t size);
+
 typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         void *user_data);

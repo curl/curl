@@ -55,6 +55,8 @@ struct ossl_ctx {
   BIT(reused_session);              /* session-ID was reused for this */
 };
 
+size_t Curl_ossl_version(char *buffer, size_t size);
+
 typedef CURLcode Curl_ossl_ctx_setup_cb(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
                                         void *user_data);

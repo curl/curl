@@ -47,19 +47,21 @@ struct wolfssl_ctx {
   BIT(shutting_down);      /* TLS is being shut down */
 };
 
+size_t Curl_wssl_version(char *buffer, size_t size);
+
 CURLcode Curl_wssl_setup_x509_store(struct Curl_cfilter *cf,
                                     struct Curl_easy *data,
                                     struct wolfssl_ctx *wssl);
 
-CURLcode wssl_setup_session(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct wolfssl_ctx *wss,
-                            const char *ssl_peer_key);
+CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct wolfssl_ctx *wss,
+                                 const char *ssl_peer_key);
 
-CURLcode wssl_cache_session(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            const char *ssl_peer_key,
-                            WOLFSSL_SESSION *session);
+CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 const char *ssl_peer_key,
+                                 WOLFSSL_SESSION *session);
 
 
 #endif /* USE_WOLFSSL */

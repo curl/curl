@@ -58,10 +58,14 @@ void Curl_ssl_scache_unlock(struct Curl_easy *data);
  * information.
  * @param cf      the connection filter wanting to use it
  * @param peer    the peer the filter wants to talk to
+ * @param tls_id  identifier of TLS implementation for sessions. Should
+ *                include full version if session data from other versions
+ *                is to be avoided.
  * @param ppeer_key on successful return, the key generated
  */
 CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const struct ssl_peer *peer,
+                                const char *tls_id,
                                 char **ppeer_key);
 
 /* Get TLS session data from the cache.

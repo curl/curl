@@ -2182,7 +2182,7 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     DEBUGASSERT(data);
     if(data && ctx) {
-      (void)wssl_cache_session(cf, data, ctx->peer.scache_key, session);
+      (void)Curl_wssl_cache_session(cf, data, ctx->peer.scache_key, session);
     }
   }
   return 0;
@@ -2259,10 +2259,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   int qfd;
 
   DEBUGASSERT(ctx->initialized);
-  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
-  if(result)
-    return result;
-
 #define H3_ALPN "\x2h3\x5h3-29"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,

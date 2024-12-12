@@ -33,6 +33,8 @@
 
 #include "vtls/wolfssl.h"
 
+struct ssl_peer;
+
 struct curl_tls_ctx {
 #ifdef USE_OPENSSL
   struct ossl_ctx ossl;

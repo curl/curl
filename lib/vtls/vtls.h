@@ -136,7 +136,9 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
  * Init SSL peer information for filter. Can be called repeatedly.
  */
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                            struct Curl_cfilter *cf, int transport);
+                            struct Curl_cfilter *cf,
+                            const char *tls_id,
+                            int transport);
 /**
  * Free all allocated data and reset peer information.
  */

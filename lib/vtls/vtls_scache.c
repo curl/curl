@@ -235,6 +235,7 @@ out:
 
 CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const struct ssl_peer *peer,
+                                const char *tls_id,
                                 char **ppeer_key)
 {
   struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
@@ -243,23 +244,6 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
 
   *ppeer_key = NULL;
   Curl_dyn_init(&buf, 10 * 1024);
-
-  r = Curl_dyn_add(&buf, "SESS");
-  if(r)
-    goto out;
-
-  if(ssl->clientcert && ssl->clientcert[0]) {
-    r = Curl_dyn_add(&buf, "-CCERT");
-    if(r)
-      goto out;
-  }
-#ifdef USE_TLS_SRP
-  if(ssl->username || ssl->password) {
-    r = Curl_dyn_add(&buf, "-SRP");
-    if(r)
-      goto out;
-  }
-#endif
 
   r = Curl_dyn_addf(&buf, ":%s:%d", peer->hostname, peer->port);
   if(r)
@@ -295,7 +279,7 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
       goto out;
   }
   if(ssl->verifystatus) {
-    r = Curl_dyn_add(&buf, ":VRFY-OCSP");
+    r = Curl_dyn_add(&buf, ":VRFY-STATUS");
     if(r)
       goto out;
   }
@@ -369,6 +353,27 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     if(r)
       goto out;
   }
+
+  if(ssl->clientcert && ssl->clientcert[0]) {
+    r = Curl_dyn_add(&buf, ":CCERT");
+    if(r)
+      goto out;
+  }
+#ifdef USE_TLS_SRP
+  if(ssl->username || ssl->password) {
+    r = Curl_dyn_add(&buf, ":SRP-AUTH");
+    if(r)
+      goto out;
+  }
+#endif
+
+  if(!tls_id || !tls_id[0]) {
+    r = CURLE_FAILED_INIT;
+    goto out;
+  }
+  r = Curl_dyn_addf(&buf, ":IMPL-%s", tls_id);
+  if(r)
+    goto out;
 
   *ppeer_key = Curl_dyn_strdup(&buf);
   if(!*ppeer_key)

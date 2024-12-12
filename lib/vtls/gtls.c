@@ -2206,7 +2206,7 @@ out:
   return ret;
 }
 
-static size_t gtls_version(char *buffer, size_t size)
+size_t Curl_gtls_version(char *buffer, size_t size)
 {
   return msnprintf(buffer, size, "GnuTLS/%s", gnutls_check_version(NULL));
 }
@@ -2261,7 +2261,7 @@ const struct Curl_ssl Curl_ssl_gnutls = {
 
   gtls_init,                     /* init */
   gtls_cleanup,                  /* cleanup */
-  gtls_version,                  /* version */
+  Curl_gtls_version,             /* version */
   Curl_none_check_cxn,           /* check_cxn */
   gtls_shutdown,                 /* shutdown */
   gtls_data_pending,             /* data_pending */

@@ -460,9 +460,10 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
   if(!ctx)
     return NULL;
 
+  ctx->ssl_impl = Curl_ssl;
   ctx->alpn = alpn;
   Curl_bufq_init2(&ctx->earlydata, CURL_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
-  ctx->backend = calloc(1, Curl_ssl->sizeof_ssl_backend_data);
+  ctx->backend = calloc(1, ctx->ssl_impl->sizeof_ssl_backend_data);
   if(!ctx->backend) {
     free(ctx);
     return NULL;
@@ -491,7 +492,7 @@ static CURLcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* mark this is being ssl-enabled from here on. */
   connssl->state = ssl_connection_negotiating;
 
-  result = Curl_ssl->connect_blocking(cf, data);
+  result = connssl->ssl_impl->connect_blocking(cf, data);
 
   if(!result) {
     DEBUGASSERT(connssl->state == ssl_connection_complete);
@@ -504,11 +505,13 @@ static CURLcode
 ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool *done)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
+
   if(!ssl_prefs_check(data))
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl requested from here on. */
-  return Curl_ssl->connect_nonblocking(cf, data, done);
+  return connssl->ssl_impl->connect_nonblocking(cf, data, done);
 }
 
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
@@ -1283,7 +1286,7 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   if(connssl) {
-    Curl_ssl->close(cf, data);
+    connssl->ssl_impl->close(cf, data);
     connssl->state = ssl_connection_none;
     Curl_ssl_peer_cleanup(&connssl->peer);
   }
@@ -1309,7 +1312,9 @@ static ssl_peer_type get_peer_type(const char *hostname)
   return CURL_SSL_PEER_DNS;
 }
 
-CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
+CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
+                            struct Curl_cfilter *cf,
+                            const char *tls_id,
                             int transport)
 {
   const char *ehostname, *edispname;
@@ -1372,7 +1377,7 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
     }
   }
 
-  result = Curl_ssl_peer_key_make(cf, peer, &peer->scache_key);
+  result = Curl_ssl_peer_key_make(cf, peer, tls_id, &peer->scache_key);
 
 out:
   if(result)
@@ -1435,7 +1440,10 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(!connssl->peer.hostname) {
-    result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
+    char tls_id[80];
+    size_t n = connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
+    tls_id[n] = 0;
+    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
     if(result)
       goto out;
   }
@@ -1464,11 +1472,12 @@ out:
 static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
                                 const struct Curl_easy *data)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   bool result;
 
   CF_DATA_SAVE(save, cf, data);
-  if(Curl_ssl->data_pending(cf, data))
+  if(connssl->ssl_impl->data_pending(cf, data))
     result = TRUE;
   else
     result = cf->next->cft->has_data_pending(cf->next, data);
@@ -1480,6 +1489,7 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
                            struct Curl_easy *data, const void *buf, size_t len,
                            bool eos, CURLcode *err)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   ssize_t nwritten = 0;
 
@@ -1488,7 +1498,7 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
   *err = CURLE_OK;
   if(len > 0) {
     CF_DATA_SAVE(save, cf, data);
-    nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);
+    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, len, err);
     CF_DATA_RESTORE(cf, save);
   }
   return nwritten;
@@ -1498,12 +1508,13 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
                            struct Curl_easy *data, char *buf, size_t len,
                            CURLcode *err)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
-  nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
+  nread = connssl->ssl_impl->recv_plain(cf, data, buf, len, err);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= len);
   }
@@ -1521,6 +1532,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 bool *done)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   CURLcode result = CURLE_OK;
 
   *done = TRUE;
@@ -1528,7 +1540,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
     struct cf_call_data save;
 
     CF_DATA_SAVE(save, cf, data);
-    result = Curl_ssl->shut_down(cf, data, TRUE, done);
+    result = connssl->ssl_impl->shut_down(cf, data, TRUE, done);
     CURL_TRC_CF(data, cf, "cf_shutdown -> %d, done=%d", result, *done);
     CF_DATA_RESTORE(cf, save);
     cf->shutdown = (result || *done);
@@ -1540,10 +1552,11 @@ static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct easy_pollset *ps)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
-  Curl_ssl->adjust_pollset(cf, data, ps);
+  connssl->ssl_impl->adjust_pollset(cf, data, ps);
   CF_DATA_RESTORE(cf, save);
 }
 
@@ -1551,22 +1564,23 @@ static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              int event, int arg1, void *arg2)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
 
   (void)arg1;
   (void)arg2;
   switch(event) {
   case CF_CTRL_DATA_ATTACH:
-    if(Curl_ssl->attach_data) {
+    if(connssl->ssl_impl->attach_data) {
       CF_DATA_SAVE(save, cf, data);
-      Curl_ssl->attach_data(cf, data);
+      connssl->ssl_impl->attach_data(cf, data);
       CF_DATA_RESTORE(cf, save);
     }
     break;
   case CF_CTRL_DATA_DETACH:
-    if(Curl_ssl->detach_data) {
+    if(connssl->ssl_impl->detach_data) {
       CF_DATA_SAVE(save, cf, data);
-      Curl_ssl->detach_data(cf, data);
+      connssl->ssl_impl->detach_data(cf, data);
       CF_DATA_RESTORE(cf, save);
     }
     break;
@@ -1600,6 +1614,7 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool *input_pending)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   int result;
   /*
@@ -1611,7 +1626,7 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
    *    -1 means the connection status is unknown
    */
   CF_DATA_SAVE(save, cf, data);
-  result = Curl_ssl->check_cxn(cf, data);
+  result = connssl->ssl_impl->check_cxn(cf, data);
   CF_DATA_RESTORE(cf, save);
   if(result > 0) {
     *input_pending = TRUE;
@@ -1797,9 +1812,10 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
     /* get first SSL filter in chain, if any is present */
     cf = get_ssl_filter(data->conn->cfilter[sockindex]);
     if(cf) {
+      struct ssl_connect_data *connssl = cf->ctx;
       struct cf_call_data save;
       CF_DATA_SAVE(save, cf, data);
-      result = Curl_ssl->get_internals(cf->ctx, info);
+      result = connssl->ssl_impl->get_internals(cf->ctx, info);
       CF_DATA_RESTORE(cf, save);
     }
   }
@@ -1832,7 +1848,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    result = Curl_ssl->shut_down(cf, data, send_shutdown, done);
+    result = connssl->ssl_impl->shut_down(cf, data, send_shutdown, done);
     if(result ||*done)
       goto out;
 
