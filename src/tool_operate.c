@@ -1940,12 +1940,9 @@ static CURLcode single_transfer(struct GlobalConfig *global,
 
         /* open file for reading: */
         FILE *file = fopen(config->etag_compare_file, FOPEN_READTEXT);
-        if(!file && !config->etag_save_file) {
-          errorf(global,
-                 "Failed to open %s", config->etag_compare_file);
-          result = CURLE_READ_ERROR;
-          break;
-        }
+        if(!file)
+          warnf(global, "Failed to open %s: %s", config->etag_compare_file,
+                strerror(errno));
 
         if((PARAM_OK == file2string(&etag_from_file, file)) &&
            etag_from_file) {
