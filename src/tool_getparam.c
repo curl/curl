@@ -1019,7 +1019,8 @@ const struct LongShort *findlongopt(const char *opt)
                  sizeof(aliases[0]), findarg);
 }
 
-static ParameterError parse_url(struct OperationConfig *config,
+static ParameterError parse_url(struct GlobalConfig *global,
+                                struct OperationConfig *config,
                                 const char *nextarg)
 {
   ParameterError err = PARAM_OK;
@@ -1050,6 +1051,11 @@ static ParameterError parse_url(struct OperationConfig *config,
     /* fill in the URL */
     err = getstr(&url->url, nextarg, DENY_BLANK);
     url->flags |= GETOUT_URL;
+    if((++config->num_urls > 1) && (config->etag_save_file ||
+                                    config->etag_compare_file)) {
+      errorf(global, "The etag options only work on a single URL");
+      return PARAM_BAD_USE;
+    }
   }
   return err;
 }
@@ -1911,7 +1917,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       config->xattr = toggle;
       break;
     case C_URL: /* --url */
-      err = parse_url(config, nextarg);
+      err = parse_url(global, config, nextarg);
       break;
     case C_FTP_SSL: /* --ftp-ssl */
     case C_SSL: /* --ssl */
@@ -2549,10 +2555,20 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->socks5_auth &= ~CURLAUTH_GSSAPI;
       break;
     case C_ETAG_SAVE: /* --etag-save */
-      err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
+      if(config->num_urls > 1) {
+        errorf(global, "The etag options only work on a single URL");
+        err = PARAM_BAD_USE;
+      }
+      else
+        err = getstr(&config->etag_save_file, nextarg, DENY_BLANK);
       break;
     case C_ETAG_COMPARE: /* --etag-compare */
-      err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
+      if(config->num_urls > 1) {
+        errorf(global, "The etag options only work on a single URL");
+        err = PARAM_BAD_USE;
+      }
+      else
+        err = getstr(&config->etag_compare_file, nextarg, DENY_BLANK);
       break;
     case C_CURVES: /* --curves */
       err = getstr(&config->ssl_ec_curves, nextarg, DENY_BLANK);

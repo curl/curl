@@ -1,0 +1,44 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+etags
+</keywords>
+</info>
+
+#
+# Server-side
+<reply>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+none
+</server>
+<name>
+Use --etag-compare and -save with more than one URL, URLs specified first
+</name>
+<command>
+http://example.com/%TESTNUMBER http://example.net/fooo --etag-save %LOGDIR/etag%TESTNUMBER
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<errorcode>
+2
+</errorcode>
+<stderr mode="text">
+curl: The etag options only work on a single URL
+curl: option --etag-save: is badly used here
+%if manual
+curl: try 'curl --help' or 'curl --manual' for more information
+%else
+curl: try 'curl --help' for more information
+%endif
+</stderr>
+</verify>
+</testcase>
