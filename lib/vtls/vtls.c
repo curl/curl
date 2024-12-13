@@ -474,7 +474,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if(ctx) {
-    Curl_safefree(ctx->alpn_negotiated);
+    Curl_safefree(ctx->negotiated.alpn);
     Curl_bufq_free(&ctx->earlydata);
     free(ctx->backend);
     free(ctx);
@@ -1999,28 +1999,28 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 #endif
     ;
 
-  if(connssl->alpn_negotiated) {
+  if(connssl->negotiated.alpn) {
     /* When we ask for a specific ALPN protocol, we need the confirmation
      * of it by the server, as we have installed protocol handler and
      * connection filter chain for exactly this protocol. */
     if(!proto_len) {
       failf(data, "ALPN: asked for '%s' from previous session, "
             "but server did not confirm it. Refusing to continue.",
-            connssl->alpn_negotiated);
+            connssl->negotiated.alpn);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    else if((strlen(connssl->alpn_negotiated) != proto_len) ||
-            memcmp(connssl->alpn_negotiated, proto, proto_len)) {
+    else if((strlen(connssl->negotiated.alpn) != proto_len) ||
+            memcmp(connssl->negotiated.alpn, proto, proto_len)) {
       failf(data, "ALPN: asked for '%s' from previous session, but server "
             "selected '%.*s'. Refusing to continue.",
-            connssl->alpn_negotiated, (int)proto_len, proto);
+            connssl->negotiated.alpn, (int)proto_len, proto);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
     /* ALPN is exactly what we asked for, done. */
     infof(data, "ALPN: server confirmed to use '%s'",
-          connssl->alpn_negotiated);
+          connssl->negotiated.alpn);
     goto out;
   }
 
@@ -2031,11 +2031,11 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    connssl->alpn_negotiated = malloc(proto_len + 1);
-    if(!connssl->alpn_negotiated)
+    connssl->negotiated.alpn = malloc(proto_len + 1);
+    if(!connssl->negotiated.alpn)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(connssl->alpn_negotiated, proto, proto_len);
-    connssl->alpn_negotiated[proto_len] = 0;
+    memcpy(connssl->negotiated.alpn, proto, proto_len);
+    connssl->negotiated.alpn[proto_len] = 0;
   }
 
   if(proto && proto_len) {

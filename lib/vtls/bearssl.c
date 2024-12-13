@@ -623,6 +623,8 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
+      /* single use of sessions */
+      Curl_ssl_scache_remove(cf, data, connssl->peer.scache_key, sdata);
     }
     Curl_ssl_scache_unlock(data);
   }
@@ -837,7 +839,8 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     Curl_ssl_scache_lock(data);
     ret = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                               (unsigned char *)session, sizeof(*session),
-                              NULL);
+                              -1, (int)session->version,
+                              connssl->negotiated.alpn);
     Curl_ssl_scache_unlock(data);
     if(ret)
       return ret;

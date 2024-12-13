@@ -1604,7 +1604,8 @@ schannel_connect_step3(struct Curl_cfilter *cf, struct Curl_easy *data)
     backend->cred->refcount++;
     result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
                                      backend->cred, schannel_session_free,
-                                     NULL);
+                                     -1, CURL_IETF_PROTO_UNKNOWN,
+                                     connssl->negotiated.alpn);
     Curl_ssl_scache_unlock(data);
     if(result)
       return result;

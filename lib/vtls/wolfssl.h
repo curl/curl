@@ -61,7 +61,9 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
 CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
-                                 WOLFSSL_SESSION *session);
+                                 WOLFSSL_SESSION *session,
+                                 int ietf_tls_id,
+                                 const char *alpn);
 
 
 #endif /* USE_WOLFSSL */

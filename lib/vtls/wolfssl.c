@@ -399,11 +399,14 @@ static void wolfssl_bio_cf_free_methods(void)
 CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
-                                 WOLFSSL_SESSION *session)
+                                 WOLFSSL_SESSION *session,
+                                 int ietf_tls_id,
+                                 const char *alpn)
 {
   CURLcode result = CURLE_OK;
   unsigned char *sdata = NULL;
   unsigned int slen;
+  long lifetime_sec;
 
   if(!session)
     goto out;
@@ -427,9 +430,16 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
 
+  lifetime_sec = wolfSSL_SESSION_get_timeout(session);
+  if(lifetime_sec < 0)
+    lifetime_sec = -1; /* unknown */
+  else if(lifetime_sec > CURL_SCACHE_MAX_LIFETIME_SEC)
+    lifetime_sec = CURL_SCACHE_MAX_LIFETIME_SEC;
+
   Curl_ssl_scache_lock(data);
   result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
-                               sdata, slen, NULL);
+                               sdata, slen, (int)lifetime_sec,
+                               ietf_tls_id, alpn);
   Curl_ssl_scache_unlock(data);
   if(result)
     failf(data, "failed to add new ssl session to cache (%d)", result);
@@ -456,7 +466,8 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     DEBUGASSERT(data);
     if(connssl && data) {
       (void)Curl_wssl_cache_session(cf, data, connssl->peer.scache_key,
-                                    session);
+                                    session, wolfSSL_version(ssl),
+                                    connssl->negotiated.alpn);
     }
   }
   return 0;
@@ -478,7 +489,7 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_scache_remove(data, ssl_peer_key);
+        Curl_ssl_scache_remove_all(cf, data, ssl_peer_key);
         infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
       }

@@ -887,16 +887,18 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
       mbedtls_ssl_session_init(&session);
       ret = mbedtls_ssl_session_load(&session, sdata, slen);
       if(ret) {
-        failf(data, "error loading cached session: -0x%x", -ret);
+        failf(data, "SSL session error loading: -0x%x", -ret);
       }
       else {
         ret = mbedtls_ssl_set_session(&backend->ssl, &session);
         if(ret)
-          failf(data, "error setting session: -0x%x", -ret);
+          failf(data, "SSL session error setting: -0x%x", -ret);
         else
           infof(data, "SSL reusing session ID");
       }
       mbedtls_ssl_session_free(&session);
+      /* single use of sessions from cache */
+      Curl_ssl_scache_remove(cf, data, connssl->peer.scache_key, sdata);
     }
     Curl_ssl_scache_unlock(data);
   }
@@ -1153,9 +1155,13 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
           failf(data, "failed to serialize session: -0x%x", -ret);
         }
         else {
+          int ietf_tls_id = mbedtls_ssl_get_version_number(&backend->ssl);
           Curl_ssl_scache_lock(data);
           result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
-                                       sdata, slen, NULL);
+                                       sdata, slen,
+                                       -1, /* unknown lifetime */
+                                       ietf_tls_id,
+                                       connssl->negotiated.alpn);
           Curl_ssl_scache_unlock(data);
           if(!result)
             sdata = NULL;

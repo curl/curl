@@ -26,6 +26,7 @@
 #include "curl_setup.h"
 #include "cfilters.h"
 #include "urldata.h"
+#include "vtls.h"
 
 #ifdef USE_SSL
 
@@ -110,7 +111,9 @@ struct ssl_connect_data {
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
-  char *alpn_negotiated;            /* negotiated ALPN value or NULL */
+  struct {
+    char *alpn;                     /* ALPN value or NULL */
+  } negotiated;
   struct bufq earlydata;            /* earlydata to be send to peer */
   size_t earlydata_max;             /* max earlydata allowed by peer */
   size_t earlydata_skip;            /* sending bytes to skip when earlydata

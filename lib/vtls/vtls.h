@@ -29,6 +29,8 @@ struct connectdata;
 struct ssl_config_data;
 struct ssl_primary_config;
 struct Curl_cfilter;
+struct Curl_easy;
+struct dynbuf;
 
 #define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
 #define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
@@ -63,8 +65,15 @@ struct Curl_cfilter;
 #define VTLS_INFOF_ALPN_DEFERRED      \
   "ALPN: deferred handshake for early data using '%.*s'."
 
-/* Curl_multi SSL backend-specific data; declared differently by each SSL
-   backend */
+/* IETF defined version numbers used in TLS protocol negotiation */
+#define CURL_IETF_PROTO_UNKNOWN       -1
+#define CURL_IETF_PROTO_SSL3          0x0300
+#define CURL_IETF_PROTO_TLS1          0x0301
+#define CURL_IETF_PROTO_TLS1_1        0x0302
+#define CURL_IETF_PROTO_TLS1_2        0x0303
+#define CURL_IETF_PROTO_TLS1_3        0x0304
+#define CURL_IETF_PROTO_DTLS1         0xFEFF
+#define CURL_IETF_PROTO_DTLS1_2       0xFEFD
 
 typedef enum {
   CURL_SSL_PEER_DNS,

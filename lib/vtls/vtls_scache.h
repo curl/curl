@@ -33,6 +33,9 @@ struct Curl_cfilter;
 struct Curl_easy;
 struct Curl_ssl_scache;
 
+/* RFC 8446 (TLSv1.3) restrict lifetime to one week max */
+#define CURL_SCACHE_MAX_LIFETIME_SEC    (60*60*24*7)
+
 /* Create a session cache for up to max_entries SSL sessions */
 CURLcode Curl_ssl_scache_create(size_t max_entries,
                                 struct Curl_ssl_scache **pscache);
@@ -97,6 +100,9 @@ bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
  * @param ssl_peer_key the key for lookup
  * @param sdata   the TLS session data, plain bytes
  * @param sdata_len the length of the TLS session data
+ * @param lifetime_secs seconds of session data lifetime, as announced
+ *                by the peer, -1 if not known
+ * @param ietf_tls_id negotiated TLS protocol version from RFCs
  * @param alpn    the ALPN negotiated for the session or NULL
  */
 CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
@@ -104,7 +110,15 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
                              const char *ssl_peer_key,
                              unsigned char *sdata,
                              size_t sdata_len,
+                             int lifetime_secs,
+                             int ietf_tls_id,
                              const char *alpn);
+
+/* Remove the given session data from the cache. */
+void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            const char *ssl_peer_key,
+                            const unsigned char *sdata);
 
 /* Get TLS session object from the cache.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
@@ -140,6 +154,9 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
  * @param sobj_free_cb callback to free the session objectt
+ * @param lifetime_secs seconds of session data lifetime, as announced
+ *                by the peer, 0 if not known
+ * @param ietf_tls_id negotiated TLS protocol version from RFCs
  * @param alpn    the ALPN negotiated for the session or NULL
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
@@ -147,12 +164,15 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  const char *ssl_peer_key,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb,
+                                 int lifetime_secs,
+                                 int ietf_tls_id,
                                  const char *alpn);
 
-/* Remove any session matching the peer_key from the cache.
+/* Remove all sessions matching the peer_key from the cache.
  */
-void Curl_ssl_scache_remove(struct Curl_easy *data,
-                            const char *ssl_peer_key);
+void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const char *ssl_peer_key);
 
 #else /* USE_SSL */
 

@@ -26,6 +26,7 @@
 
 #include "curl_setup.h"
 #include "bufq.h"
+#include "vtls/vtls.h"
 #include "vtls/openssl.h"
 
 #if defined(USE_HTTP3) && \

@@ -38,6 +38,7 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
+#include "vtls.h"
 #include "vtls_scache.h"
 #include "strerror.h"
 #include "cipher_suite.h"
@@ -1335,10 +1336,11 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       Curl_ssl_scache_unlock(data);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
-        return CURLE_SSL_CONNECT_ERROR;
       }
-      /* Informational message */
-      infof(data, "SSL reusing session ID");
+      else
+        infof(data, "SSL reusing session ID");
+      Curl_ssl_scache_remove(cf, data, connssl->peer.scache_key,
+                            (const unsigned char *)ssl_sessionid);
     }
     /* If there is not one, then let's make one up! This has to be done prior
        to starting the handshake. */
@@ -1357,9 +1359,12 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
         return CURLE_SSL_CONNECT_ERROR;
       }
 
+      /* This is all a bit weird, as we have not handshaked yet.
+       * I hope this backen will go away soon. */
       result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                                    (unsigned char *)ssl_sessionid,
-                                   ssl_sessionid_len, NULL);
+                                   ssl_sessionid_len, -1,
+                                   CURL_IETF_PROTO_TLS1_2, NULL);
       Curl_ssl_scache_unlock(data);
       if(result)
         return result;

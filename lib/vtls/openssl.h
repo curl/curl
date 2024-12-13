@@ -98,7 +98,8 @@ CURLcode Curl_ossl_ctx_configure(struct Curl_cfilter *cf,
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
-                               SSL_SESSION *ssl_sessionid);
+                               SSL_SESSION *ssl_sessionid,
+                               const char *alpn);
 
 /*
  * Get the server cert, verify it and show it, etc., only call failf() if

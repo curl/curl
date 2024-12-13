@@ -719,6 +719,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  gnutls_session_t session,
+                                 int lifetime_secs,
                                  const char *alpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
@@ -751,9 +752,28 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
   Curl_ssl_scache_lock(data);
   /* Add the sesson to the cache, takes ownership */
   result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
-                               sdata, sdata_len, alpn);
+                               sdata, sdata_len, lifetime_secs,
+                               Curl_glts_get_ietf_proto(session), alpn);
   Curl_ssl_scache_unlock(data);
   return result;
+}
+
+int Curl_glts_get_ietf_proto(gnutls_session_t session)
+{
+  switch(gnutls_protocol_get_version(session)) {
+  case GNUTLS_SSL3:
+    return CURL_IETF_PROTO_SSL3;
+  case GNUTLS_TLS1_0:
+    return CURL_IETF_PROTO_TLS1;
+  case GNUTLS_TLS1_1:
+    return CURL_IETF_PROTO_TLS1_1;
+  case GNUTLS_TLS1_2:
+    return CURL_IETF_PROTO_TLS1_2;
+  case GNUTLS_TLS1_3:
+    return CURL_IETF_PROTO_TLS1_3;
+  default:
+    return CURL_IETF_PROTO_UNKNOWN;
+  }
 }
 
 static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
@@ -762,7 +782,8 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   return Curl_gtls_cache_session(cf, data, connssl->peer.scache_key,
-                                 session, connssl->alpn_negotiated);
+                                 session, -1,
+                                 connssl->negotiated.alpn);
 }
 
 static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
@@ -1090,7 +1111,6 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
 
       rc = gnutls_session_set_data(gctx->session, sdata, sdata_len);
       if(rc < 0) {
-        Curl_ssl_scache_remove(data, peer->scache_key);
         infof(data, "SSL session not accepted by GnuTLS, continuing without");
       }
       else {
@@ -1126,6 +1146,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
           }
         }
       }
+      /* remove session in any case, they are single-use */
+      Curl_ssl_scache_remove(cf, data, peer->scache_key, sdata);
     }
     Curl_ssl_scache_unlock(data);
   }

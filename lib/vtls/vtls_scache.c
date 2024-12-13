@@ -83,6 +83,9 @@ struct Curl_ssl_scache_entry {
   void *sobj;           /* session object instance or NULL */
   Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
   long age;             /* just a number, the higher the more recent */
+  curl_off_t time_received; /* seconds since EPOCH session was received */
+  int lifetime_secs;    /* peer announced entry lifetime (-1 unknown) */
+  int ietf_tls_id;      /* TLS protocol identifier negotiated */
   char *alpn;           /* APLN TLS negotiated protocol string */
   char *clientcert;
 #ifdef USE_TLS_SRP
@@ -531,6 +534,8 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
                              const char *ssl_peer_key,
                              unsigned char *sdata,
                              size_t sdata_len,
+                             int lifetime_secs,
+                             int ietf_tls_id,
                              const char *alpn)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -585,6 +590,9 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
     DEBUGASSERT(!entry->ssl_peer_key);
 
     /* setup entry with everything but the session data */
+    entry->ietf_tls_id = ietf_tls_id;
+    entry->time_received = (curl_off_t)time(NULL);
+    entry->lifetime_secs = lifetime_secs;
     entry->ssl_peer_key = strdup(ssl_peer_key);
     if(!entry->ssl_peer_key)
       goto out;
@@ -641,6 +649,8 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  const char *ssl_peer_key,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb,
+                                 int lifetime_secs,
+                                 int ietf_tls_id,
                                  const char *alpn)
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
@@ -690,6 +700,10 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
     DEBUGASSERT(entry);
     if(!entry)
       return CURLE_OK;
+
+    entry->ietf_tls_id = ietf_tls_id;
+    entry->time_received = (curl_off_t)time(NULL);
+    entry->lifetime_secs = lifetime_secs;
     cf_ssl_scache_clear_entry(entry);
     DEBUGASSERT(!entry->ssl_peer_key);
 
@@ -746,12 +760,35 @@ out:
   return result;
 }
 
-void Curl_ssl_scache_remove(struct Curl_easy *data,
-                            const char *ssl_peer_key)
+void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            const char *ssl_peer_key,
+                            const unsigned char *sdata)
 {
   struct Curl_ssl_scache *spool = data->state.ssl_scache;
   size_t i;
 
+  (void)cf;
+  if(!spool || !spool->count)
+    return;
+
+  for(i = 0; i < spool->count; ++i) {
+    if(spool->entries[i].ssl_peer_key &&
+       strcasecompare(ssl_peer_key, spool->entries[i].ssl_peer_key) &&
+       spool->entries[i].sdata == sdata) {
+      cf_ssl_scache_clear_entry(&spool->entries[i]);
+    }
+  }
+}
+
+void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const char *ssl_peer_key)
+{
+  struct Curl_ssl_scache *spool = data->state.ssl_scache;
+  size_t i;
+
+  (void)cf;
   if(!spool || !spool->count)
     return;
 
@@ -759,7 +796,6 @@ void Curl_ssl_scache_remove(struct Curl_easy *data,
     if(spool->entries[i].ssl_peer_key &&
        strcasecompare(ssl_peer_key, spool->entries[i].ssl_peer_key)) {
       cf_ssl_scache_clear_entry(&spool->entries[i]);
-      return;
     }
   }
 }
