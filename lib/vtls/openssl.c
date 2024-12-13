@@ -2910,7 +2910,11 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     Curl_ssl_scache_lock(data);
     result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
                                  der_session_buf, der_session_size,
+#if (OPENSSL_VERSION_NUMBER >= 0x10101000L)
                                  SSL_SESSION_get_protocol_version(session),
+#else
+                                 CURL_IETF_PROTO_UNKNOWN,
+#endif
                                  (int)lifetime_sec, alpn);
     Curl_ssl_scache_unlock(data);
   }
