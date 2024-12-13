@@ -32,6 +32,7 @@
 struct Curl_cfilter;
 struct Curl_easy;
 struct Curl_ssl_scache;
+struct ssl_peer;
 
 /* RFC 8446 (TLSv1.3) restrict lifetime to one week max */
 #define CURL_SCACHE_MAX_LIFETIME_SEC    (60*60*24*7)

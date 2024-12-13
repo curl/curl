@@ -38,7 +38,6 @@
 #include "multiif.h"
 #include "strcase.h"
 #include "x509asn1.h"
-#include "vtls.h"
 #include "vtls_scache.h"
 #include "strerror.h"
 #include "cipher_suite.h"
