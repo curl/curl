@@ -1155,7 +1155,11 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
           failf(data, "failed to serialize session: -0x%x", -ret);
         }
         else {
+#if MBEDTLS_VERSION_NUMBER >= 0x03020000
           int ietf_tls_id = mbedtls_ssl_get_version_number(&backend->ssl);
+#else
+          int ietf_tls_id = CURL_IETF_PROTO_UNKNOWN;
+#endif
           Curl_ssl_scache_lock(data);
           result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                                        sdata, slen,
