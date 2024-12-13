@@ -4,16 +4,25 @@ curl and libcurl 8.11.2
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3298
+ Contributors:                 3300
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o async-thread: avoid closing eventfd twice [9]
+ o checksrc: ban use of sscanf() [7]
+ o conncache: result_cb comment removed from function docs [1]
  o cookie: parse only the exact expire date [3]
+ o curl: return error if etag options are used with multiple URLs [5]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
+ o netrc: restore _netrc fallback logic [6]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
+ o sectransp: free certificate on error [12]
+ o strparse: string parsing helper functions [8]
+ o system.h: add 64-bit curl_off_t definitions for NonStop [11]
+ o tests/http/clients: use proper sleep() call on NonStop [10]
 
 This release includes the following known bugs:
 
@@ -32,11 +41,21 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Daniel Stenberg, Viktor Szakats
-  (2 contributors)
+  Andy Pan, Christian Heusel, Christian Schmitz, Daniel Stenberg, Kevin Sun,
+  Randall S. Becker, renovate[bot], Tamir Duberstein, Viktor Szakats
+  (9 contributors)
 
 References to bug reports and discussions on issues:
 
+ [1] = https://curl.se/bug/?i=15720
  [2] = https://curl.se/bug/?i=15714
  [3] = https://curl.se/bug/?i=15709
  [4] = https://curl.se/bug/?i=15708
+ [5] = https://curl.se/bug/?i=15729
+ [6] = https://curl.se/bug/?i=15734
+ [7] = https://curl.se/bug/?i=15687
+ [8] = https://curl.se/bug/?i=15692
+ [9] = https://curl.se/bug/?i=15725
+ [10] = https://curl.se/bug/?i=15711
+ [11] = https://curl.se/bug/?i=15723
+ [12] = https://curl.se/bug/?i=15721
