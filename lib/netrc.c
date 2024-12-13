@@ -390,7 +390,7 @@ int Curl_parsenetrc(struct store_netrc *store, const char *host,
     retcode = parsenetrc(store, host, loginp, passwordp, filealloc);
     free(filealloc);
 #ifdef _WIN32
-    if(retcode == NETRC_FILE_MISSING) {
+    if((retcode == NETRC_FILE_MISSING) || (retcode == NETRC_FAILED)) {
       /* fallback to the old-style "_netrc" file */
       filealloc = aprintf("%s%s_netrc", home, DIR_CHAR);
       if(!filealloc) {
