@@ -127,8 +127,7 @@ CURLcode Curl_ssl_scache_create(size_t max_entries,
 
 static void cf_ssl_scache_clear_data(struct Curl_ssl_scache_entry *entry)
 {
-  if(entry->sdata)
-    Curl_safefree(entry->sdata);
+  Curl_safefree(entry->sdata);
   entry->sdata_len = 0;
   if(entry->sobj) {
     DEBUGASSERT(entry->sobj_free);
@@ -137,13 +136,16 @@ static void cf_ssl_scache_clear_data(struct Curl_ssl_scache_entry *entry)
     entry->sobj = NULL;
   }
   entry->sobj_free = NULL;
+  entry->ietf_tls_id = 0;
+  entry->time_received = 0;
+  entry->lifetime_secs = 0;
+  Curl_safefree(entry->alpn);
 }
 
 static void cf_ssl_scache_clear_entry(struct Curl_ssl_scache_entry *entry)
 {
   cf_ssl_scache_clear_data(entry);
   entry->age = 0; /* fresh */
-  Curl_safefree(entry->alpn);
   Curl_safefree(entry->clientcert);
 #ifdef USE_TLS_SRP
   Curl_safefree(entry->srp_username);
@@ -619,18 +621,19 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
   DEBUGASSERT(entry->ssl_peer_key);
   DEBUGASSERT(!entry->sdata);
   DEBUGASSERT(!entry->sobj);
+  if(alpn) {
+    entry->alpn = strdup(alpn);
+    if(!entry->alpn) {
+      result = CURLE_OUT_OF_MEMORY;
+      goto out;
+    }
+  }
   entry->ietf_tls_id = ietf_tls_id;
   entry->time_received = (curl_off_t)time(NULL);
   entry->lifetime_secs = lifetime_secs;
   entry->age = spool->age;
   entry->sdata = sdata;
   entry->sdata_len = sdata_len;
-  Curl_safefree(entry->alpn);
-  entry->alpn = alpn ? strdup(alpn) : NULL;
-  if(alpn && !entry->alpn) {
-    result = CURLE_OUT_OF_MEMORY;
-    goto out;
-  }
   result = CURLE_OK;
 
 out:
