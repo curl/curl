@@ -248,7 +248,7 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   *ppeer_key = NULL;
   Curl_dyn_init(&buf, 10 * 1024);
 
-  r = Curl_dyn_addf(&buf, ":%s:%d", peer->hostname, peer->port);
+  r = Curl_dyn_addf(&buf, "%s:%d", peer->hostname, peer->port);
   if(r)
     goto out;
 
@@ -590,15 +590,8 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
     DEBUGASSERT(!entry->ssl_peer_key);
 
     /* setup entry with everything but the session data */
-    entry->ietf_tls_id = ietf_tls_id;
-    entry->time_received = (curl_off_t)time(NULL);
-    entry->lifetime_secs = lifetime_secs;
     entry->ssl_peer_key = strdup(ssl_peer_key);
     if(!entry->ssl_peer_key)
-      goto out;
-    DEBUGASSERT(!entry->alpn);
-    entry->alpn = alpn ? strdup(alpn) : NULL;
-    if(alpn && !entry->alpn)
       goto out;
     /* If the connection uses TLS authentication data, we need to remember
      * it for lookups */
@@ -626,21 +619,33 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
   DEBUGASSERT(entry->ssl_peer_key);
   DEBUGASSERT(!entry->sdata);
   DEBUGASSERT(!entry->sobj);
+  entry->ietf_tls_id = ietf_tls_id;
+  entry->time_received = (curl_off_t)time(NULL);
+  entry->lifetime_secs = lifetime_secs;
   entry->age = spool->age;
   entry->sdata = sdata;
   entry->sdata_len = sdata_len;
+  Curl_safefree(entry->alpn);
+  entry->alpn = alpn ? strdup(alpn) : NULL;
+  if(alpn && !entry->alpn) {
+    result = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
   result = CURLE_OK;
 
 out:
   if(result) {
-    failf(data, "Failed to add SSL Session to cache for %s", ssl_peer_key);
+    failf(data, "Failed to add SSL Session to cache for %s, error=%d",
+          ssl_peer_key, result);
     cf_ssl_scache_data_free(sdata);
     if(entry)
       cf_ssl_scache_clear_entry(entry);
   }
   else
-    CURL_TRC_CF(data, cf, "Added %sSSL Session to cache for '%s",
-                Curl_ssl_cf_is_proxy(cf) ? "PROXY " : "", ssl_peer_key);
+    CURL_TRC_CF(data, cf, "added TLS session for %s, proto=0x%x, "
+                "lifetime=%d, alpn=%s",
+                entry->ssl_peer_key, entry->ietf_tls_id,
+                entry->lifetime_secs, entry->alpn);
   return result;
 }
 

@@ -441,12 +441,8 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                sdata, slen, (int)lifetime_sec,
                                ietf_tls_id, alpn);
   Curl_ssl_scache_unlock(data);
-  if(result)
-    failf(data, "failed to add new ssl session to cache (%d)", result);
-  else {
-    CURL_TRC_CF(data, cf, "added new session to cache");
+  if(!result)
     sdata = NULL;
-  }
 
 out:
   free(sdata);

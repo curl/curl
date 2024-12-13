@@ -1103,6 +1103,8 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     const unsigned char *sdata;
     size_t sdata_len;
     char *session_alpn;
+
+    result = CURLE_OK;
     Curl_ssl_scache_lock(data);
     if(Curl_ssl_scache_get(cf, data, peer->scache_key,
                            &sdata, &sdata_len, &session_alpn)) {
@@ -1136,13 +1138,24 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
             result = Curl_alpn_set_negotiated(cf, data, connssl,
                             (const unsigned char *)session_alpn,
                             session_alpn ? strlen(session_alpn) : 0);
-            if(result)
+            if(result) {
+              Curl_ssl_scache_unlock(data);
               return result;
+            }
             /* We only try the ALPN protocol the session used before,
              * otherwise we might send early data for the wrong protocol */
             gtls_alpns[0].data = (unsigned char *)session_alpn;
             gtls_alpns[0].size = (unsigned)strlen(session_alpn);
-            gtls_alpns_count = 1;
+            if(gnutls_alpn_set_protocols(gctx->session,
+                                         gtls_alpns, 1,
+                                         GNUTLS_ALPN_MANDATORY)) {
+              failf(data, "failed setting ALPN");
+              Curl_ssl_scache_unlock(data);
+              return CURLE_SSL_CONNECT_ERROR;
+            }
+            /* don't set again below */
+            gtls_alpns_count = 0;
+            alpn = NULL;
           }
         }
       }
