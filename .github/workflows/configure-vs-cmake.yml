@@ -33,6 +33,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: run configure --with-openssl
         run: |
@@ -71,6 +73,8 @@ jobs:
          echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: run configure --with-openssl
         run: |
@@ -108,6 +112,8 @@ jobs:
         run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: run configure --with-schannel
         run: |

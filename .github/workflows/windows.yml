@@ -55,6 +55,8 @@ jobs:
       - run: git config --global core.autocrlf input
         shell: pwsh
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
       - uses: cygwin/cygwin-install-action@006ad0b0946ca6d0a3ea2d4437677fa767392401 # v4
         with:
           platform: ${{ matrix.platform }}
@@ -187,6 +189,8 @@ jobs:
         shell: pwsh
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys == 'msys' }}
@@ -409,6 +413,8 @@ jobs:
 
       - run: git config --global core.autocrlf input
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'configure'
         timeout-minutes: 5
@@ -495,6 +501,8 @@ jobs:
         run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
@@ -662,6 +670,8 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7

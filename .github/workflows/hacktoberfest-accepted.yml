@@ -28,6 +28,7 @@ jobs:
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
+          persist-credentials: false
           fetch-depth: 100
 
       - name: Check whether repo participates in Hacktoberfest
@@ -40,13 +41,13 @@ jobs:
 
       - name: Search relevant commit message lines starting with Closes/Merges
         run: |
-          git log --format=email ${{ github.event.before }}..${{ github.event.after }} | \
-            grep -Ei "^Close[sd]? " | sort | uniq | tee log
+          git log --format=email '${{ github.event.before }}..${{ github.event.after }}' | \
+            grep -Ei '^Close[sd]? ' | sort | uniq | tee log
         if: steps.check.outputs.label == 'hacktoberfest'
 
       - name: Search for Number-based PR references
         run: |
-          grep -Eo "#([0-9]+)" log | cut -d# -f2 | sort | uniq | xargs -t -n1 -I{} \
+          grep -Eo '#([0-9]+)' log | cut -d# -f2 | sort | uniq | xargs -t -n1 -I{} \
             gh pr view {} --json number,createdAt \
               --jq '{number, opened: .createdAt} | [.number, .opened] | join(":")' | tee /dev/stderr | \
             grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
@@ -57,8 +58,8 @@ jobs:
 
       - name: Search for URL-based PR references
         run: |
-          grep -Eo "github.com/(.+)/(.+)/pull/([0-9]+)" log | sort | uniq | xargs -t -n1 -I{} \
-            gh pr view "https://{}" --json number,createdAt \
+          grep -Eo 'github.com/(.+)/(.+)/pull/([0-9]+)' log | sort | uniq | xargs -t -n1 -I{} \
+            gh pr view 'https://{}' --json number,createdAt \
               --jq '{number, opened: .createdAt} | [.number, .opened] | join(":")' | tee /dev/stderr | \
             grep -Eo '^([0-9]+):[0-9]{4}-(09-30T|10-|11-01T)' | cut -d: -f1 | sort | uniq | xargs -t -n1 -I {} \
               gh pr edit {} --add-label 'hacktoberfest-accepted'
