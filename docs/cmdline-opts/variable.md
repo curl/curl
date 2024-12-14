@@ -48,11 +48,27 @@ Available functions:
 ## trim
 removes all leading and trailing white space.
 
+Example:
+
+    curl --expand-url https.//example.com/{{url:trim}}
+
 ## json
 outputs the content using JSON string quoting rules.
+
+Example:
+
+    curl --expand-data {{data:json}} https://example.com
 
 ## url
 shows the content URL (percent) encoded.
 
+Example:
+
+    curl --expand-url https://example.com/{{path:url}}
+
 ## b64
 expands the variable base64 encoded
+
+Example:
+
+    curl --expand-url https://example.com/{{var:b64}}
