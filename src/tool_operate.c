@@ -111,14 +111,6 @@ extern const unsigned char curl_ca_embed[];
 #endif
 #endif
 
-/* since O_BINARY is used in bitmasks, setting it to zero makes it usable in
-   source code but yet it does not ruin anything */
-#ifdef O_BINARY
-#define CURL_O_BINARY O_BINARY
-#else
-#define CURL_O_BINARY 0
-#endif
-
 #ifndef SOL_IP
 #  define SOL_IP IPPROTO_IP
 #endif

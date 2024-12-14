@@ -948,7 +948,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
     defined(USE_QUICHE) || defined(USE_MSH3)
 
 #ifdef CURL_WITH_MULTI_SSL
-#error "Multi-SSL combined with QUIC is not supported"
+#error "MultiSSL combined with QUIC is not supported"
 #endif
 
 #define USE_HTTP3

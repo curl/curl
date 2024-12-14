@@ -53,7 +53,7 @@ int Curl_pipe(curl_socket_t socks[2], bool nonblocking)
     return -1;
 #ifdef HAVE_FCNTL
   if(fcntl(socks[0], F_SETFD, FD_CLOEXEC) ||
-     fcntl(socks[1], F_SETFD, FD_CLOEXEC) ) {
+     fcntl(socks[1], F_SETFD, FD_CLOEXEC)) {
     close(socks[0]);
     close(socks[1]);
     socks[0] = socks[1] = CURL_SOCKET_BAD;

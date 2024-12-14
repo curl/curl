@@ -45,7 +45,7 @@
 #include "curl_printf.h"
 
 #ifdef _WIN32
-#define sleep(sec) Sleep ((sec)*1000)
+#define sleep(sec) Sleep((sec)*1000)
 #endif
 
 #define test_setopt(A,B,C)                                      \
