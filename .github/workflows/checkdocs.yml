@@ -85,22 +85,14 @@ jobs:
   #      - name: check special prose
   #        run: proselint docs/internals/CHECKSRC.md docs/libcurl/curl_mprintf.md docs/libcurl/opts/CURLOPT_INTERFACE.md docs/cmdline-opts/interface.md
 
-  # Docs: https://github.com/UmbrellaDocs/action-linkspector
   linkcheck:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         name: checkout
 
-      - name: trim the cmdline docs markdown files
-        run: find docs/cmdline-opts -name "*.md" ! -name "_*" ! -name MANPAGE.md -print0 | xargs -0 -n1 .github/scripts/cleancmd.pl
-
-      - name: Run linkspector
-        uses: umbrelladocs/action-linkspector@fc382e19892aca958e189954912fe379a8df270c # v1
-        with:
-          github_token: ${{ secrets.github_token }}
-          reporter: github-pr-review
-          fail_on_error: true
+      - name: Run mdlinkcheck
+        run: ./scripts/mdlinkcheck
 
   spellcheck:
     runs-on: ubuntu-latest

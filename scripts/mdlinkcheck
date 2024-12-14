@@ -1,0 +1,165 @@
+#!/usr/bin/env perl
+#***************************************************************************
+#                                  _   _ ____  _
+#  Project                     ___| | | |  _ \| |
+#                             / __| | | | |_) | |
+#                            | (__| |_| |  _ <| |___
+#                             \___|\___/|_| \_\_____|
+#
+# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+#
+# This software is licensed as described in the file COPYING, which
+# you should have received as part of this distribution. The terms
+# are also available at https://curl.se/docs/copyright.html.
+#
+# You may opt to use, copy, modify, merge, publish, distribute and/or sell
+# copies of the Software, and permit persons to whom the Software is
+# furnished to do so, under the terms of the COPYING file.
+#
+# This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+# KIND, either express or implied.
+#
+# SPDX-License-Identifier: curl
+#
+###########################################################################
+
+my %whitelist = (
+    'https://curl.se/' => 1,
+    'https://curl.se/changes.html' => 1,
+    'https://curl.se/dev/advisory.html' => 1,
+    'https://curl.se/dev/builds.html' => 1,
+    'https://curl.se/dev/code-style.html' => 1,
+    'https://curl.se/dev/contribute.html' => 1,
+    'https://curl.se/dev/internals.html' => 1,
+    'https://curl.se/dev/secprocess.html' => 1,
+    'https://curl.se/dev/sourceactivity.html' => 1,
+    'https://curl.se/docs/' => 1,
+    'https://curl.se/docs/bugbounty.html' => 1,
+    'https://curl.se/docs/caextract.html' => 1,
+    'https://curl.se/docs/copyright.html' => 1,
+    'https://curl.se/docs/install.html' => 1,
+    'https://curl.se/docs/knownbugs.html' => 1,
+    'https://curl.se/docs/manpage.html' => 1,
+    'https://curl.se/docs/security.html' => 1,
+    'https://curl.se/docs/sslcerts.html' => 1,
+    'https://curl.se/docs/thanks.html' => 1,
+    'https://curl.se/docs/todo.html' => 1,
+    'https://curl.se/docs/vulnerabilities.html' => 1,
+    'https://curl.se/libcurl/' => 1,
+    'https://curl.se/libcurl/c/CURLOPT_SSLVERSION.html' => 1,
+    'https://curl.se/libcurl/c/CURLOPT_SSL_CIPHER_LIST.html' => 1,
+    'https://curl.se/libcurl/c/CURLOPT_TLS13_CIPHERS.html' => 1,
+    'https://curl.se/libcurl/c/libcurl.html' => 1,
+    'https://curl.se/logo/curl-logo.svg' => 1,
+    'https://curl.se/mail/' => 1,
+    'https://curl.se/mail/etiquette.html' => 1,
+    'https://curl.se/mail/list.cgi?list=curl-distros' => 1,
+    'https://curl.se/mail/list.cgi?list=curl-library' => 1,
+    'https://curl.se/rfc/cookie_spec.html' => 1,
+    'https://curl.se/rfc/rfc2255.txt' => 1,
+    'https://curl.se/sponsors.html' => 1,
+    'https://curl.se/support.html' => 1,
+
+    'https://github.com/curl/curl' => 1,
+    'https://github.com/curl/curl-fuzzer' => 1,
+    'https://github.com/curl/curl-www' => 1,
+    'https://github.com/curl/curl/discussions' => 1,
+    'https://github.com/curl/curl/issues' => 1,
+    'https://github.com/curl/curl/labels/help%20wanted' => 1,
+    'https://github.com/curl/curl/pulls' => 1,
+
+    );
+
+# list all .md files in the repo
+my @files=`git ls-files '**.md'`;
+
+sub storelink {
+    my ($f, $line, $link) = @_;
+    my $o = $link;
+
+    if($link =~ /^\#/) {
+        # ignore local-only links
+        return;
+    }
+    # cut off any anchor
+    $link =~ s:\#.*\z::;
+
+    if($link =~ /^(https|http):/) {
+        $url{$link} .= "$f:$line ";
+        return;
+    }
+
+    # a file link
+    my $dir = $f;
+    $dir =~ s:([^/]*\z)::;
+
+    while($link =~ s:^\.\.\/::) {
+        $dir =~ s:^([^/]*)/::;
+    }
+
+    $flink{"./$dir$link"} .= "$f:$line ";
+}
+
+sub findlinks {
+    my ($f) = @_;
+    my $line = 1;
+    open(F, "<:crlf", "$f") ||
+        return;
+
+    while(<F>) {
+        if(/\]\(([^)]*)/) {
+            my $link = $1;
+            #print "$f:$line $link\n";
+            storelink($f, $line, $link);
+        }
+        $line++;
+    }
+    close(F);
+}
+
+sub checkurl {
+    my ($url) = @_;
+
+    if($whitelist{$url}) {
+        #print "$url is whitelisted\n";
+        return 0;
+    }
+
+    print "check $url\n";
+    my $curlcmd="curl -ILfsm10 --retry 2 --retry-delay 5 -A \"Mozilla/curl.se link-probe\"";
+    my @content = `$curlcmd \"$url\"`;
+    if(!$content[0]) {
+        print STDERR "FAIL\n";
+        return 1; # fail
+    }
+    return 0; # ok
+}
+
+for my $f (@files) {
+    chomp $f;
+    findlinks($f);
+}
+
+my $error;
+
+for my $u (sort keys %url) {
+    my $r = checkurl($u);
+
+    if($r) {
+        for my $f (split(/ /, $url{$l})) {
+            printf "%s ERROR links to missing URL %s\n", $f, $u;
+            $error++;
+        }
+    }
+}
+
+for my $l (sort keys %flink) {
+    if(! -r $l) {
+        for my $f (split(/ /, $flink{$l})) {
+            printf "%s ERROR links to missing file %s\n", $f, $l;
+            $error++;
+        }
+    }
+}
+
+exit 1 if ($error);
