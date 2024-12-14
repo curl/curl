@@ -450,6 +450,8 @@ jobs:
         name: 'build quiche and boringssl'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}

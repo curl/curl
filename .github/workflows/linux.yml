@@ -320,6 +320,8 @@ jobs:
         name: 'install dependencies'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'Fix kernel mmap rnd bits'
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with

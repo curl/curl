@@ -25,6 +25,8 @@ jobs:
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
@@ -129,6 +131,8 @@ jobs:
     needs: maketgz-and-verify-in-tree
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - uses: actions/download-artifact@fa0a91b85d4f404e444e00e005971372dc801d16 # v4
         with:
@@ -141,6 +145,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
