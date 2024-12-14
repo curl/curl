@@ -1051,8 +1051,8 @@ static ParameterError parse_url(struct GlobalConfig *global,
     /* fill in the URL */
     err = getstr(&url->url, nextarg, DENY_BLANK);
     url->flags |= GETOUT_URL;
-    if((++config->num_urls > 1) && (config->etag_save_file ||
-                                    config->etag_compare_file)) {
+    if(!err && (++config->num_urls > 1) && (config->etag_save_file ||
+                                            config->etag_compare_file)) {
       errorf(global, "The etag options only work on a single URL");
       return PARAM_BAD_USE;
     }
