@@ -64,11 +64,11 @@ shows the content URL (percent) encoded.
 
 Example:
 
-    curl --expand-url https.//example.com/{{path:url}}
+    curl --expand-url https://example.com/{{path:url}}
 
 ## b64
 expands the variable base64 encoded
 
 Example:
 
-    curl --expand-url https.//example.com/{{var:b64}}
+    curl --expand-url https://example.com/{{var:b64}}
