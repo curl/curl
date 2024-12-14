@@ -147,7 +147,7 @@ for my $u (sort keys %url) {
 
     if($r) {
         for my $f (split(/ /, $url{$l})) {
-            printf "%s ERROR links to missing %s\n", $f, $r;
+            printf "%s ERROR links to missing URL %s\n", $f, $u;
             $error++;
         }
     }
@@ -156,7 +156,7 @@ for my $u (sort keys %url) {
 for my $l (sort keys %flink) {
     if(! -r $l) {
         for my $f (split(/ /, $flink{$l})) {
-            printf "%s ERROR links to missing %s\n", $f, $l;
+            printf "%s ERROR links to missing file %s\n", $f, $l;
             $error++;
         }
     }
