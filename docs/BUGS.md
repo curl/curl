@@ -25,8 +25,8 @@ SPDX-License-Identifier: curl
 
  Please read the rest of this document below first before doing that.
 
- If you feel you need to ask around first, find a suitable [mailing list](
- https://curl.se/mail/) and post your questions there.
+ If you feel you need to ask around first, find a suitable [mailing
+ list](https://curl.se/mail/) and post your questions there.
 
 ## Security bugs
 
