@@ -659,9 +659,13 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
                                srcalpnid, dstalpnid,
                                srcport, dstport);
           if(as) {
-            /* The expires time also needs to take the Age: value (if any) into
-               account. [See RFC 7838 section 3.1] */
-            as->expires = maxage + time(NULL);
+            time_t secs = time(NULL);
+            /* The expires time also needs to take the Age: value (if any)
+               into account. [See RFC 7838 section 3.1] */
+            if(maxage > (TIME_T_MAX - secs))
+              as->expires = TIME_T_MAX;
+            else
+              as->expires = maxage + secs;
             as->persist = persist;
             Curl_llist_append(&asi->list, as, &as->node);
             infof(data, "Added alt-svc: %s:%d over %s", dsthost, dstport,
