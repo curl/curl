@@ -60,14 +60,21 @@ is allowed to modify the address or refuse to connect completely. The callback
 function should return the newly created socket or *CURL_SOCKET_BAD* in
 case no connection could be established or another error was detected. Any
 additional *setsockopt(2)* calls can of course be done on the socket at
-the user's discretion. A *CURL_SOCKET_BAD* return value from the callback
-function signals an unrecoverable error to libcurl and it returns
-*CURLE_COULDNT_CONNECT* from the function that triggered this callback.
-This return code can be used for IP address block listing.
+the user's discretion.
+
+If *CURL_SOCKET_BAD* is returned by the callback then libcurl treats it as a
+failed connection and tries to open a socket to connect to a different IP
+address associated with the transfer. If there are no more addresses to try
+then libcurl fails the transfer with error code *CURLE_COULDNT_CONNECT*.
+
+You can get the IP address that curl is opening the socket for by casting
+*address-\>addr* to `sockaddr_in` if *address-\>family* is `AF_INET`, or to
+`sockaddr_in6` if *address-\>family* is `AF_INET6`. For an example of how that
+data can be compared against refer to *docs/examples/block_ip.c*.
 
 If you want to pass in a socket with an already established connection, pass
-the socket back with this callback and then use
-CURLOPT_SOCKOPTFUNCTION(3) to signal that it already is connected.
+the socket back with this callback and then use CURLOPT_SOCKOPTFUNCTION(3) to
+signal that it already is connected.
 
 # DEFAULT
 
