@@ -41,7 +41,7 @@ jobs:
 
       - name: Search relevant commit message lines starting with Closes/Merges
         run: |
-          git log --format=email ${{ github.event.before }}..${{ github.event.after }} | \
+          git log --format=email '${{ github.event.before }}..${{ github.event.after }}' | \
             grep -Ei "^Close[sd]? " | sort | uniq | tee log
         if: steps.check.outputs.label == 'hacktoberfest'
 
