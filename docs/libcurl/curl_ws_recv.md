@@ -30,8 +30,6 @@ CURLcode curl_ws_recv(CURL *curl, void *buffer, size_t buflen,
 
 # DESCRIPTION
 
-This function call is EXPERIMENTAL.
-
 Retrieves as much as possible of a received WebSocket data fragment into the
 **buffer**, but not more than **buflen** bytes. *recv* is set to the
 number of bytes actually stored.
