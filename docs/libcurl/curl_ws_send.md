@@ -31,8 +31,6 @@ CURLcode curl_ws_send(CURL *curl, const void *buffer, size_t buflen,
 
 # DESCRIPTION
 
-This function call is EXPERIMENTAL.
-
 Send the specific message fragment over an established WebSocket
 connection. The *buffer* holds the data to send and it is *buflen*
 number of payload bytes in that memory area.
