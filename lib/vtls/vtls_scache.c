@@ -231,6 +231,7 @@ out:
 static void cf_scache_session_remove(struct Curl_ssl_scache_peer *peer,
                                      struct Curl_ssl_scache_session *s)
 {
+  (void)peer;
   DEBUGASSERT(Curl_node_llist(&s->list) == &peer->sessions);
   Curl_ssl_scache_session_destroy(s);
 }
