@@ -75,6 +75,8 @@ const char *param2text(ParameterError error)
     return "variable expansion failure";
   case PARAM_BLANK_STRING:
     return "blank argument where content is expected";
+  case PARAM_VAR_SYNTAX:
+    return "syntax error in --variable argument";
   default:
     return "unknown error";
   }

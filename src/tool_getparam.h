@@ -348,6 +348,7 @@ typedef enum {
   PARAM_READ_ERROR,
   PARAM_EXPAND_ERROR, /* --expand problem */
   PARAM_BLANK_STRING,
+  PARAM_VAR_SYNTAX, /* --variable syntax error */
   PARAM_LAST
 } ParameterError;
 

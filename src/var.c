@@ -374,6 +374,8 @@ static ParameterError addvariable(struct GlobalConfig *global,
   return PARAM_NO_MEM;
 }
 
+#define MAX_FILENAME 10000
+
 ParameterError setvariable(struct GlobalConfig *global,
                            const char *input)
 {
@@ -427,21 +429,56 @@ ParameterError setvariable(struct GlobalConfig *global,
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
+    char *range;
+    struct dynbuf fname;
+    curl_off_t startoffset = 0;
+    curl_off_t endoffset = CURL_OFF_T_MAX;
     line++;
+
+    Curl_dyn_init(&fname, MAX_FILENAME);
+
+    /* is there a byte range specified? ;[num-num] */
+    range = strstr(line, ";[");
+    if(range && ISDIGIT(range[2])) {
+      char *p = range;
+      char *endp;
+      if(curlx_strtoofft(&p[2], &endp, 10, &startoffset) || (*endp != '-'))
+        return PARAM_VAR_SYNTAX;
+      else {
+        p = endp + 1; /* pass the '-' */
+        if(*p != ']') {
+          if(curlx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
+            return PARAM_VAR_SYNTAX;
+        }
+      }
+      if(startoffset > endoffset)
+        return PARAM_VAR_SYNTAX;
+      /* create a dynbuf for the filename without the range */
+      if(Curl_dyn_addn(&fname, line, (range - line)))
+        return PARAM_NO_MEM;
+      /* point to the new file name buffer */
+      line = Curl_dyn_ptr(&fname);
+    }
+
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
       file = stdin;
     else {
       file = fopen(line, "rb");
       if(!file) {
-        errorf(global, "Failed to open %s", line);
-        return PARAM_READ_ERROR;
+        errorf(global, "Failed to open %s: %s", line,
+               strerror(errno));
+        err = PARAM_READ_ERROR;
       }
     }
-    err = file2memory(&content, &clen, file);
-    /* in case of out of memory, this should fail the entire operation */
-    contalloc = TRUE;
-    if(!use_stdin)
+    if(!err) {
+      err = file2memory_range(&content, &clen, file, startoffset, endoffset);
+      /* in case of out of memory, this should fail the entire operation */
+      if(clen)
+        contalloc = TRUE;
+    }
+    Curl_dyn_free(&fname);
+    if(!use_stdin && file)
       fclose(file);
     if(err)
       return err;

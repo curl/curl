@@ -37,6 +37,8 @@ ParameterError file2string(char **bufp, FILE *file);
 #endif
 
 ParameterError file2memory(char **bufp, size_t *size, FILE *file);
+ParameterError file2memory_range(char **bufp, size_t *size, FILE *file,
+                                 curl_off_t starto, curl_off_t endo);
 
 ParameterError str2num(long *val, const char *str);
 ParameterError str2unum(long *val, const char *str);
