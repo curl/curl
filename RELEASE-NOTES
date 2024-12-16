@@ -4,25 +4,36 @@ curl and libcurl 8.11.2
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3300
+ Contributors:                 3302
 
 This release includes the following changes:
 
 
 This release includes the following bugfixes:
 
+ o altsvc: avoid integer overflow in expire calculation [16]
  o async-thread: avoid closing eventfd twice [9]
  o checksrc: ban use of sscanf() [7]
+ o cmake/FindMbedTLS: drop lib duplicates early [17]
  o conncache: result_cb comment removed from function docs [1]
  o cookie: parse only the exact expire date [3]
  o curl: return error if etag options are used with multiple URLs [5]
+ o docs/BUGS.md: remove leading space from a link
  o lib517: extend the getdate test with quotes and leading "junk" [4]
  o netrc: restore _netrc fallback logic [6]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
+ o scripts/mdlinkcheck: markdown link checker [19]
  o sectransp: free certificate on error [12]
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
  o tests/http/clients: use proper sleep() call on NonStop [10]
+ o tool_getparam: fix "Ignored Return Value" [21]
+ o tool_getparam: fix memory leak on error in parse_ech [14]
+ o tool_getparam: fix the ECH parser [20]
+ o tool_operate: make --etag-compare always accept a non-existing file [22]
+ o variable.md: mention --expand-variable for variables to variables [13]
+ o variable.md: show function use with examples [18]
+ o ws-docs: remove the outdated texts saying ws support is experimental [15]
 
 This release includes the following known bugs:
 
@@ -41,9 +52,10 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Pan, Christian Heusel, Christian Schmitz, Daniel Stenberg, Kevin Sun,
-  Randall S. Becker, renovate[bot], Tamir Duberstein, Viktor Szakats
-  (9 contributors)
+  Andy Pan, Christian Heusel, Christian Schmitz, Daniel Stenberg, Hermes Zhang,
+  Kai Pastor, Kevin Sun, Mohammed Sadiq, Randall S. Becker, Ray Satiro,
+  renovate[bot], Tamir Duberstein, Viktor Szakats
+  (13 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -59,3 +71,13 @@ References to bug reports and discussions on issues:
  [10] = https://curl.se/bug/?i=15711
  [11] = https://curl.se/bug/?i=15723
  [12] = https://curl.se/bug/?i=15721
+ [13] = https://curl.se/bug/?i=15752
+ [14] = https://curl.se/bug/?i=15753
+ [15] = https://curl.se/bug/?i=15749
+ [16] = https://issues.oss-fuzz.com/issues/383911309
+ [17] = https://curl.se/bug/?i=15495
+ [18] = https://curl.se/bug/?i=15743
+ [19] = https://curl.se/bug/?i=15742
+ [20] = https://curl.se/bug/?i=15741
+ [21] = https://curl.se/bug/?i=15740
+ [22] = https://curl.se/bug/?i=15737
