@@ -739,8 +739,7 @@ static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
 
   if(!spool || !spool->peer_count) {
     Curl_ssl_scache_session_destroy(s);
-    result = CURLE_FAILED_INIT;
-    goto out;
+    return CURLE_OK;
   }
 
   result = cf_ssl_add_peer(cf, data, spool, ssl_peer_key, &peer);

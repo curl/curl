@@ -440,13 +440,12 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
   result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
                                sdata, slen, (int)lifetime_sec,
                                ietf_tls_id, alpn);
+  sdata = NULL;
   Curl_ssl_scache_unlock(data);
-  if(!result)
-    sdata = NULL;
 
 out:
   free(sdata);
-  return 0;
+  return result;
 }
 
 static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
