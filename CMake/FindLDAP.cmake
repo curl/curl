@@ -62,7 +62,7 @@ else()
   # ldap.h and lber.h both being stubs to include <ldap.h> and <lber.h>.
   # This causes an infinite inclusion loop in compile.
   set(_save_cmake_system_framework_path ${CMAKE_SYSTEM_FRAMEWORK_PATH})
-  unset(CMAKE_SYSTEM_FRAMEWORK_PATH)
+  set(CMAKE_SYSTEM_FRAMEWORK_PATH "")
   find_path(LDAP_INCLUDE_DIR NAMES "ldap.h")
   set(CMAKE_SYSTEM_FRAMEWORK_PATH ${_save_cmake_system_framework_path})
   find_library(LDAP_LIBRARY NAMES "ldap")
