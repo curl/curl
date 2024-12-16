@@ -980,16 +980,17 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define OPENSSL_SUPPRESS_DEPRECATED
 #endif
 
-#if defined(inline)
-/* 'inline' is defined as macro and assumed to be correct */
-#  define CURL_INLINE inline /* No need for 'inline' replacement */
+#if defined(CURL_INLINE)
+/* 'CURL_INLINE' defined, use as-is */
+#elif defined(inline)
+#  define CURL_INLINE inline /* 'inline' defined, assumed correct */
 #elif defined(__cplusplus)
 /* The code is compiled with C++ compiler.
    C++ always supports 'inline'. */
-#  define CURL_INLINE inline /* No need for 'inline' replacement */
+#  define CURL_INLINE inline /* 'inline' keyword supported */
 #elif defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901
 /* C99 (and later) supports 'inline' keyword */
-#  define CURL_INLINE inline /* No need for 'inline' replacement */
+#  define CURL_INLINE inline /* 'inline' keyword supported */
 #elif defined(__GNUC__) && __GNUC__ >= 3
 /* GCC supports '__inline__' as an extension */
 #  define CURL_INLINE __inline__
