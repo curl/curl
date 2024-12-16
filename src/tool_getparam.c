@@ -1169,9 +1169,9 @@ static ParameterError parse_ech(struct GlobalConfig *global,
       if(err)
         return err;
       config->ech_config = aprintf("ecl:%s",tmpcfg);
+      free(tmpcfg);
       if(!config->ech_config)
         return PARAM_NO_MEM;
-      free(tmpcfg);
     } /* file done */
   }
   else {
