@@ -863,6 +863,7 @@ void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
                       ssl_peer_key, Curl_llist_count(&peer->sessions));
       break;
     }
+    n = Curl_node_next(n);
   }
 }
 
