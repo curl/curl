@@ -847,7 +847,8 @@ macro(curl_openssl_check_quic)
 endmacro()
 
 if(USE_WOLFSSL)
-  curl_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT "")
+  curl_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT
+    "")
   curl_openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO "")
   curl_openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO "")
 endif()
