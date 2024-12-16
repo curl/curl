@@ -42,7 +42,7 @@ struct ssl_peer;
  * of up to max_sessions SSL sessions per peer */
 CURLcode Curl_ssl_scache_create(size_t max_peers,
                                 size_t max_sessions_per_peer,
-                                struct Curl_ssl_scache **pspool);
+                                struct Curl_ssl_scache **pscache);
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
 
@@ -178,6 +178,31 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key);
 
+/* a cached session */
+struct Curl_ssl_scache_session {
+  struct Curl_llist_node list;
+  unsigned char *sdata;    /* session data, plain bytes */
+  size_t sdata_len;        /* number of bytes in sdata */
+  void *sobj;              /* session object instance or NULL */
+  Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
+  curl_off_t time_received; /* seconds since EPOCH session was received */
+  int lifetime_secs;       /* peer announced entry lifetime (-1 unknown) */
+  int ietf_tls_id;         /* TLS protocol identifier negotiated */
+  char *alpn;              /* APLN TLS negotiated protocol string */
+};
+
+/* Create a `session` instance.
+ * Takes ownership of `sdata` and `sobj` irregardless of return code.
+ * @param sdata     bytes of SSL session data or NULL (sobj then required)
+ * @param sdata_len amount of session data bytes
+ * @param sobj      session instance object (sdata must then be NULL)
+ * @param sobj_free callback to free `sobj`
+ * @param ietf_tls_id  IETF protocol version, e.g. 0x304 for TLSv1.3
+ * @param alpn      ALPN protocol selected or NULL
+ * @param time_received seconds since EPOCH session was received
+ * @param lifetime_secs seconds of announced lifetime, -1 if unknown
+ * @param psession on return the scached session instance created
+ */
 CURLcode
 Curl_ssl_scache_session_create(unsigned char *sdata,
                                size_t sdata_len,
@@ -189,7 +214,31 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
                                int lifetime_secs,
                                struct Curl_ssl_scache_session **psession);
 
+/* Destroy a `session` instance */
 void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s);
+
+/* Put the scache session into the cache. Does NOT need locking.
+ * Call takes ownership of `s` in all outcomes.
+ * @param cf      the connection filter wanting to use it
+ * @param data    the transfer involved
+ * @param ssl_peer_key the key for lookup
+ * @param s       the scache session object
+ */
+CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             const char *ssl_peer_key,
+                             struct Curl_ssl_scache_session *s);
+
+/* Take a matching scache session from the cache. Does NOT need locking.
+ * @param cf      the connection filter wanting to use it
+ * @param data    the transfer involved
+ * @param ssl_peer_key the key for lookup
+ * @param s       on return, the scache session object or NULL
+ */
+CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
+                              struct Curl_easy *data,
+                              const char *ssl_peer_key,
+                              struct Curl_ssl_scache_session **ps);
 
 #else /* USE_SSL */
 
