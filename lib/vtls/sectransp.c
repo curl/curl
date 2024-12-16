@@ -1359,7 +1359,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
       }
 
       /* This is all a bit weird, as we have not handshaked yet.
-       * I hope this backen will go away soon. */
+       * I hope this backend will go away soon. */
       result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
                                    (unsigned char *)ssl_sessionid,
                                    ssl_sessionid_len, -1,

@@ -1166,9 +1166,8 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
                                        -1, /* unknown lifetime */
                                        ietf_tls_id,
                                        connssl->negotiated.alpn);
+          sdata = NULL;
           Curl_ssl_scache_unlock(data);
-          if(!result)
-            sdata = NULL;
         }
       }
     }
