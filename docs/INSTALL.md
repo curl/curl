@@ -577,17 +577,17 @@ and runs on, that is not listed, please let us know.
     AIX, AmigaOS, Android, ArcoOS, Aros, Atari FreeMiNT, BeOS, Blackberry
     10, Blackberry Tablet OS, Cell OS, CheriBSD, Chrome OS, Cisco IOS,
     DG/UX, DR DOS, Dragonfly BSD, eCOS, FreeBSD, FreeDOS, FreeRTOS, Fuchsia,
-    Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, illumos, Integrity,
-    iOS, ipadOS, IRIX, Linux, Lua RTOS, Mac OS 9, macOS, Maemo, Mbed, Meego,
-    Micrium, MINIX, Minoca, Moblin, MorphOS, MPE/iX, MS-DOS, NCR MP-RAS,
-    NetBSD, Netware, NextStep, Nintendo 3DS Nintendo Switch, NonStop OS,
-    NuttX, OpenBSD, OpenStep, Orbis OS, OS/2, OS/400, OS21, Plan 9,
+    Garmin OS, Genode, Haiku, HardenedBSD, HP-UX, Hurd, IBM I, illumos,
+    Integrity, iOS, ipadOS, IRIX, Linux, Lua RTOS, Mac OS 9, macOS, Maemo,
+    Mbed, Meego, Micrium, MINIX, Minoca, Moblin, MorphOS, MPE/iX, MS-DOS,
+    NCR MP-RAS, NetBSD, Netware, NextStep, Nintendo 3DS Nintendo Switch,
+    NonStop OS, NuttX, OpenBSD, OpenStep, Orbis OS, OS/2, OS21, Plan 9,
     PlayStation Portable, QNX, Qubes OS, ReactOS, Redox, RISC OS, ROS,
-    RTEMS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, Solaris, Sortix,
-    SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS, ucLinux, Ultrix,
-    UNICOS, UnixWare, VMS, vxWorks, watchOS, Wear OS, WebOS, Wii system
-    software, Wii U, Windows CE, Windows, Xbox System, Xenix, Zephyr, z/OS,
-    z/TPF, z/VM, z/VSE
+    RTEMS, Sailfish OS, SCO Unix, Serenity, SINIX-Z, SkyOS, software,
+    Solaris, Sortix, SunOS, Syllable OS, Symbian, Tizen, TPF, Tru64, tvOS,
+    ucLinux, Ultrix, UNICOS, UnixWare, VMS, vxWorks, watchOS, Wear OS,
+    WebOS, Wii system Wii U, Windows CE, Windows, Xbox System, Xenix, z/OS,
+    z/TPF, z/VM, z/VSE, Zephyr
 
 ## 28 CPU Architectures
 
