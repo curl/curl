@@ -32,14 +32,17 @@
 struct Curl_cfilter;
 struct Curl_easy;
 struct Curl_ssl_scache;
+struct Curl_ssl_scache_session;
 struct ssl_peer;
 
 /* RFC 8446 (TLSv1.3) restrict lifetime to one week max */
 #define CURL_SCACHE_MAX_LIFETIME_SEC    (60*60*24*7)
 
-/* Create a session cache for up to max_entries SSL sessions */
-CURLcode Curl_ssl_scache_create(size_t max_entries,
-                                struct Curl_ssl_scache **pscache);
+/* Create a session cache for up to max_peers endpoints with a total
+ * of up to max_sessions SSL sessions per peer */
+CURLcode Curl_ssl_scache_create(size_t max_peers,
+                                size_t max_sessions_per_peer,
+                                struct Curl_ssl_scache **pspool);
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
 
@@ -174,6 +177,19 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
 void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key);
+
+CURLcode
+Curl_ssl_scache_session_create(unsigned char *sdata,
+                               size_t sdata_len,
+                               void *sobj,
+                               Curl_ssl_scache_obj_dtor *sobj_free,
+                               int ietf_tls_id,
+                               const char *alpn,
+                               curl_off_t time_received,
+                               int lifetime_secs,
+                               struct Curl_ssl_scache_session **psession);
+
+void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s);
 
 #else /* USE_SSL */
 

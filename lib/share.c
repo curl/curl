@@ -110,7 +110,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       if(!share->ssl_scache) {
-        if(Curl_ssl_scache_create(8, &share->ssl_scache))
+        if(Curl_ssl_scache_create(8, 2, &share->ssl_scache))
           res = CURLSHE_NOMEM;
       }
 #else

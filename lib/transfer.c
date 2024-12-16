@@ -581,7 +581,7 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 #ifdef USE_SSL
   if(!data->state.ssl_scache) {
     result = Curl_ssl_scache_create(data->set.general_ssl.max_ssl_sessions,
-                                   &data->state.ssl_scache);
+                                    2, &data->state.ssl_scache);
     if(result)
       return result;
   }
