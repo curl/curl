@@ -192,7 +192,7 @@ struct Curl_ssl_scache_session {
 };
 
 /* Create a `session` instance.
- * Takes ownership of `sdata` and `sobj` irregardless of return code.
+ * Takes ownership of `sdata` and `sobj` regardless of return code.
  * @param sdata     bytes of SSL session data or NULL (sobj then required)
  * @param sdata_len amount of session data bytes
  * @param sobj      session instance object (sdata must then be NULL)
