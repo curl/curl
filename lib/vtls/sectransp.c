@@ -1021,6 +1021,17 @@ failed:
   return ret;
 }
 
+static void sectransp_session_free(void *sessionid)
+{
+  /* ST, as of iOS 5 and Mountain Lion, has no public method of deleting a
+     cached session ID inside the Security framework. There is a private
+     function that does this, but I do not want to have to explain to you why I
+     got your application rejected from the App Store due to the use of a
+     private API, so the best we can do is free up our own char array that we
+     created way back in sectransp_connect_step1... */
+  Curl_safefree(sessionid);
+}
+
 static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
                                         struct Curl_easy *data)
 {
@@ -1327,19 +1338,18 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
     size_t ssl_sessionid_len;
 
     Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, connssl->peer.scache_key,
-                           (const unsigned char **)&ssl_sessionid,
-                           &ssl_sessionid_len, NULL)) {
+    if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
+                               (void **)&ssl_sessionid, NULL)) {
       /* we got a session id, use it! */
-      err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid, ssl_sessionid_len);
+      err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid,
+                         strlen(ssl_sessionid));
       Curl_ssl_scache_unlock(data);
       if(err != noErr) {
         failf(data, "SSL: SSLSetPeerID() failed: OSStatus %d", err);
+        return CURLE_SSL_CONNECT_ERROR;
       }
       else
         infof(data, "SSL reusing session ID");
-      Curl_ssl_scache_remove(cf, data, connssl->peer.scache_key,
-                            (const unsigned char *)ssl_sessionid);
     }
     /* If there is not one, then let's make one up! This has to be done prior
        to starting the handshake. */
@@ -1360,10 +1370,10 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
       /* This is all a bit weird, as we have not handshaked yet.
        * I hope this backend will go away soon. */
-      result = Curl_ssl_scache_add(cf, data, connssl->peer.scache_key,
-                                   (unsigned char *)ssl_sessionid,
-                                   ssl_sessionid_len, -1,
-                                   CURL_IETF_PROTO_TLS1_2, NULL);
+      result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
+                                      (void *)ssl_sessionid,
+                                      sectransp_session_free,
+                                      -1, CURL_IETF_PROTO_TLS1_2, NULL);
       Curl_ssl_scache_unlock(data);
       if(result)
         return result;
