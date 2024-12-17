@@ -124,7 +124,7 @@ void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
                             const char *ssl_peer_key,
                             const unsigned char *sdata);
 
-/* Get TLS session object from the cache.
+/* Get TLS session object from the cache for the ssl_peer_ey.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Caller must make sure that the ownership of returned session object
  * is properly taken (e.g. its refcount is incremented
@@ -132,21 +132,17 @@ void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
  * @param cf      the connection filter wanting to use it
  * @param data    the transfer involved
  * @param ssl_peer_key the key for lookup
- * @param sdata   on return the TLS session
- * @param sdata_len  on return the amount of bytes in sdata
- * @param palpn   on return the ALPN string used by the session,
- *                set to NULL when not interested
+ * @param sobj    on return, the object for the peer key or NULL
  */
 bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              const char *ssl_peer_key,
-                             void **sobj,
-                             char **palpn);
+                             void **sobj);
 
 typedef void Curl_ssl_scache_obj_dtor(void *sobj);
 
-/* Add a TLS session object to the cache.
- * Replaces an existing session data/object with the same peer_key.
+/* Add a TLS session related object to the cache.
+ * Replaces an existing object with the same peer_key.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
  * Call takes ownership of `sobj`, using `sobj_dtor_cb`
  * to deallocate it. Is called in all outcomes, either right away or
@@ -158,19 +154,12 @@ typedef void Curl_ssl_scache_obj_dtor(void *sobj);
  * @param ssl_peer_key the key for lookup
  * @param sobj    the TLS session object
  * @param sobj_free_cb callback to free the session objectt
- * @param lifetime_secs seconds of session data lifetime, as announced
- *                by the peer, 0 if not known
- * @param ietf_tls_id negotiated TLS protocol version from RFCs
- * @param alpn    the ALPN negotiated for the session or NULL
  */
 CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  void *sobj,
-                                 Curl_ssl_scache_obj_dtor *sobj_dtor_cb,
-                                 int lifetime_secs,
-                                 int ietf_tls_id,
-                                 const char *alpn);
+                                 Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
 
 /* Remove all sessions matching the peer_key from the cache.
  */
@@ -183,8 +172,6 @@ struct Curl_ssl_scache_session {
   struct Curl_llist_node list;
   const unsigned char *sdata; /* session data, plain bytes */
   size_t sdata_len;        /* number of bytes in sdata */
-  void *sobj;              /* session object instance or NULL */
-  Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
   curl_off_t time_received; /* seconds since EPOCH session was received */
   int lifetime_secs;       /* peer announced entry lifetime (-1 unknown) */
   int ietf_tls_id;         /* TLS protocol identifier negotiated */
@@ -195,8 +182,6 @@ struct Curl_ssl_scache_session {
  * Takes ownership of `sdata` and `sobj` regardless of return code.
  * @param sdata     bytes of SSL session data or NULL (sobj then required)
  * @param sdata_len amount of session data bytes
- * @param sobj      session instance object (sdata must then be NULL)
- * @param sobj_free callback to free `sobj`
  * @param ietf_tls_id  IETF protocol version, e.g. 0x304 for TLSv1.3
  * @param alpn      ALPN protocol selected or NULL
  * @param time_received seconds since EPOCH session was received, pass 0
@@ -209,8 +194,6 @@ struct Curl_ssl_scache_session {
 CURLcode
 Curl_ssl_scache_session_create(unsigned char *sdata,
                                size_t sdata_len,
-                               void *sobj,
-                               Curl_ssl_scache_obj_dtor *sobj_free,
                                int ietf_tls_id,
                                const char *alpn,
                                curl_off_t time_received,

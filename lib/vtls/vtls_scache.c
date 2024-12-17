@@ -80,6 +80,8 @@ struct Curl_ssl_scache_peer {
   char *srp_username;
   char *srp_password;
   struct Curl_llist sessions;
+  void *sobj;              /* object instance or NULL */
+  Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
   unsigned char key_salt[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
   unsigned char key_hmac[CURL_SHA256_DIGEST_LENGTH]; /* for entry export */
   size_t max_sessions;
@@ -100,13 +102,6 @@ static void cf_ssl_scache_clear_session(struct Curl_ssl_scache_session *s)
     s->sdata = NULL;
   }
   s->sdata_len = 0;
-  if(s->sobj) {
-    DEBUGASSERT(s->sobj_free);
-    if(s->sobj_free)
-      s->sobj_free(s->sobj);
-    s->sobj = NULL;
-  }
-  s->sobj_free = NULL;
   s->ietf_tls_id = 0;
   s->time_received = 0;
   s->lifetime_secs = 0;
@@ -123,8 +118,6 @@ static void cf_ssl_scache_sesssion_ldestroy(void *udata, void *s)
 CURLcode
 Curl_ssl_scache_session_create(unsigned char *sdata,
                                size_t sdata_len,
-                               void *sobj,
-                               Curl_ssl_scache_obj_dtor *sobj_free,
                                int ietf_tls_id,
                                const char *alpn,
                                curl_off_t time_received,
@@ -133,11 +126,8 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
 {
   struct Curl_ssl_scache_session *s;
 
-  if((sdata && sobj) || (!sdata && !sobj) ||
-     (sdata && !sdata_len) || (sobj && !sobj_free)) {
+  if(!sdata || !sdata_len) {
     free(sdata);
-    if(sobj_free)
-      sobj_free(sobj);
     return CURLE_BAD_FUNCTION_ARGUMENT;
   }
 
@@ -145,8 +135,6 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
   s = calloc(1, sizeof(*s));
   if(!s) {
     free(sdata);
-    if(sobj_free)
-      sobj_free(sobj);
     return CURLE_OUT_OF_MEMORY;
   }
 
@@ -159,8 +147,6 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
   s->lifetime_secs = (int)lifetime_secs;
   s->sdata = sdata;
   s->sdata_len = sdata_len;
-  s->sobj = sobj;
-  s->sobj_free = sobj_free;
   if(alpn) {
     s->alpn = strdup(alpn);
     if(!s->alpn) {
@@ -187,6 +173,13 @@ void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s)
 static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)
 {
   Curl_llist_destroy(&peer->sessions, NULL);
+  if(peer->sobj) {
+    DEBUGASSERT(peer->sobj_free);
+    if(peer->sobj_free)
+      peer->sobj_free(peer->sobj);
+    peer->sobj = NULL;
+  }
+  peer->sobj_free = NULL;
   Curl_safefree(peer->clientcert);
 #ifdef USE_TLS_SRP
   Curl_safefree(peer->srp_username);
@@ -195,6 +188,18 @@ static void cf_ssl_scache_clear_peer(struct Curl_ssl_scache_peer *peer)
   Curl_safefree(peer->ssl_peer_key);
   peer->age = 0;
   peer->hmac_set = FALSE;
+}
+
+static void cf_ssl_scache_peer_set_obj(struct Curl_ssl_scache_peer *peer,
+                                       void *sobj,
+                                       Curl_ssl_scache_obj_dtor *sobj_free)
+{
+  DEBUGASSERT(peer);
+  if(peer->sobj_free) {
+    peer->sobj_free(peer->sobj);
+  }
+  peer->sobj = sobj;
+  peer->sobj_free = sobj_free;
 }
 
 static CURLcode cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
@@ -690,46 +695,6 @@ bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
   return !!*sdata;
 }
 
-bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             const char *ssl_peer_key,
-                             void **sobj,
-                             char **palpn)
-{
-  struct Curl_ssl_scache *spool = data->state.ssl_scache;
-  struct Curl_ssl_scache_peer *peer = NULL;
-  struct Curl_llist_node *n;
-  CURLcode result;
-
-  *sobj = NULL;
-  if(!spool)
-    return FALSE;
-
-  result = cf_ssl_find_peer(cf, data, spool, ssl_peer_key, &peer);
-  if(result)
-    return FALSE;
-
-  if(peer) {
-    cf_scache_peer_remove_expired(peer, (curl_off_t)time(NULL));
-    n = Curl_llist_head(&peer->sessions);
-    while(n) {
-      struct Curl_ssl_scache_session *s = Curl_node_elem(n);
-      if(s->sobj) {
-        (spool->age)++;            /* increase general age */
-        peer->age = spool->age; /* set this as used in this age */
-        *sobj = s->sobj;
-        if(palpn)
-          *palpn = s->alpn;
-        break;
-      }
-      n = Curl_node_next(n);
-    }
-  }
-  CURL_TRC_CF(data, cf, "[SACHE] %s cached session for '%s'",
-              *sobj ? "Found" : "No", ssl_peer_key);
-  return !!*sobj;
-}
-
 static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct Curl_ssl_scache *spool,
@@ -848,8 +813,7 @@ CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
   DEBUGASSERT(sdata);
   DEBUGASSERT(sdata_len);
   time_received = (curl_off_t)time(NULL);
-  result = Curl_ssl_scache_session_create(sdata, sdata_len, NULL, NULL,
-                                          ietf_tls_id, alpn,
+  result = Curl_ssl_scache_session_create(sdata, sdata_len, ietf_tls_id, alpn,
                                           time_received, lifetime_secs, &s);
   sdata = NULL; /* kept in `s` now */
   if(result) {
@@ -868,31 +832,53 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  void *sobj,
-                                 Curl_ssl_scache_obj_dtor *sobj_free,
-                                 int lifetime_secs,
-                                 int ietf_tls_id,
-                                 const char *alpn)
+                                 Curl_ssl_scache_obj_dtor *sobj_free)
 {
   struct Curl_ssl_scache *spool = data->state.ssl_scache;
-  struct Curl_ssl_scache_session *s = NULL;
-  curl_off_t time_received = 0;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
+  struct Curl_ssl_scache_peer *peer = NULL;
+  CURLcode result;
 
   DEBUGASSERT(sobj);
   DEBUGASSERT(sobj_free);
-  time_received = (curl_off_t)time(NULL);
-  result = Curl_ssl_scache_session_create(NULL, 0, sobj, sobj_free,
-                                          ietf_tls_id, alpn,
-                                          time_received, lifetime_secs, &s);
-  sobj = NULL; /* kept in `s` now */
-  if(result)
+
+  result = cf_ssl_add_peer(cf, data, spool, ssl_peer_key, &peer);
+  if(result || !peer) {
+    CURL_TRC_CF(data, cf, "[SCACHE] unable to add scache peer: %d", result);
     goto out;
-  result = cf_scache_session_add(cf, data, spool, ssl_peer_key, s);
+  }
+
+  cf_ssl_scache_peer_set_obj(peer, sobj, sobj_free);
+  sobj = NULL;  /* peer took ownership */
 
 out:
   if(sobj && sobj_free)
     sobj_free(sobj);
   return result;
+}
+
+bool Curl_ssl_scache_get_obj(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             const char *ssl_peer_key,
+                             void **sobj)
+{
+  struct Curl_ssl_scache *spool = data->state.ssl_scache;
+  struct Curl_ssl_scache_peer *peer = NULL;
+  CURLcode result;
+
+  *sobj = NULL;
+  if(!spool)
+    return FALSE;
+
+  result = cf_ssl_find_peer(cf, data, spool, ssl_peer_key, &peer);
+  if(result)
+    return FALSE;
+
+  if(peer)
+    *sobj = peer->sobj;
+
+  CURL_TRC_CF(data, cf, "[SACHE] %s cached session for '%s'",
+              *sobj ? "Found" : "No", ssl_peer_key);
+  return !!*sobj;
 }
 
 void Curl_ssl_scache_remove(struct Curl_cfilter *cf,

@@ -1339,7 +1339,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
 
     Curl_ssl_scache_lock(data);
     if(Curl_ssl_scache_get_obj(cf, data, connssl->peer.scache_key,
-                               (void **)&ssl_sessionid, NULL)) {
+                               (void **)&ssl_sessionid)) {
       /* we got a session id, use it! */
       err = SSLSetPeerID(backend->ssl_ctx, ssl_sessionid,
                          strlen(ssl_sessionid));
@@ -1372,8 +1372,7 @@ static CURLcode sectransp_connect_step1(struct Curl_cfilter *cf,
        * I hope this backend will go away soon. */
       result = Curl_ssl_scache_add_obj(cf, data, connssl->peer.scache_key,
                                       (void *)ssl_sessionid,
-                                      sectransp_session_free,
-                                      -1, CURL_IETF_PROTO_TLS1_2, NULL);
+                                      sectransp_session_free);
       Curl_ssl_scache_unlock(data);
       if(result)
         return result;
