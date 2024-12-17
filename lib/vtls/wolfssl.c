@@ -404,44 +404,41 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_ssl_scache_session *sc_session = NULL;
   unsigned char *sdata = NULL;
-  unsigned int slen;
-  long lifetime_sec;
+  unsigned int sdata_len;
 
   if(!session)
     goto out;
 
-  slen = wolfSSL_i2d_SSL_SESSION(session, NULL);
-  if(slen <= 0) {
-    CURL_TRC_CF(data, cf, "fail to assess session length: %u", slen);
+  sdata_len = wolfSSL_i2d_SSL_SESSION(session, NULL);
+  if(sdata_len <= 0) {
+    CURL_TRC_CF(data, cf, "fail to assess session length: %u", sdata_len);
     result = CURLE_FAILED_INIT;
     goto out;
   }
-  sdata = calloc(1, slen);
+  sdata = calloc(1, sdata_len);
   if(!sdata) {
-    failf(data, "unable to allocate session buffer of %u bytes", slen);
+    failf(data, "unable to allocate session buffer of %u bytes", sdata_len);
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  slen = wolfSSL_i2d_SSL_SESSION(session, &sdata);
-  if(slen <= 0) {
-    CURL_TRC_CF(data, cf, "fail to serialize session: %u", slen);
+  sdata_len = wolfSSL_i2d_SSL_SESSION(session, &sdata);
+  if(sdata_len <= 0) {
+    CURL_TRC_CF(data, cf, "fail to serialize session: %u", sdata_len);
     result = CURLE_FAILED_INIT;
     goto out;
   }
 
-  lifetime_sec = wolfSSL_SESSION_get_timeout(session);
-  if(lifetime_sec < 0)
-    lifetime_sec = -1; /* unknown */
-  else if(lifetime_sec > CURL_SCACHE_MAX_LIFETIME_SEC)
-    lifetime_sec = CURL_SCACHE_MAX_LIFETIME_SEC;
-
-  Curl_ssl_scache_lock(data);
-  result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
-                               sdata, slen, (int)lifetime_sec,
-                               ietf_tls_id, alpn);
-  sdata = NULL;
-  Curl_ssl_scache_unlock(data);
+  result = Curl_ssl_scache_session_create(sdata, sdata_len, NULL, NULL,
+                                          ietf_tls_id, alpn, 0,
+                                          wolfSSL_SESSION_get_timeout(session),
+                                          &sc_session);
+  sdata = NULL;  /* took ownership of sdata */
+  if(!result) {
+    result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
+    /* took ownership of `sc_session` */
+  }
 
 out:
   free(sdata);
@@ -473,14 +470,16 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
                                  struct wolfssl_ctx *wss,
                                  const char *ssl_peer_key)
 {
-  const unsigned char *sdata = NULL;
-  size_t slen = 0;
-  CURLcode result = CURLE_OK;
+  struct Curl_ssl_scache_session *sc_session = NULL;
+  CURLcode result;
 
-  Curl_ssl_scache_lock(data);
-  if(Curl_ssl_scache_get(cf, data, ssl_peer_key, &sdata, &slen, NULL)) {
+  result = Curl_ssl_scache_take(cf, data, ssl_peer_key, &sc_session);
+  if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
     WOLFSSL_SESSION *session;
-    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
+    /* wolfSSL changes the passed pointer for whatever reasons, yikes */
+    const unsigned char *sdata = sc_session->sdata;
+    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata,
+                                      (long)sc_session->sdata_len);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
@@ -496,7 +495,7 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
       failf(data, "could not decode previous session");
     }
   }
-  Curl_ssl_scache_unlock(data);
+  Curl_ssl_scache_reuse(cf, data, ssl_peer_key, sc_session);
   return result;
 }
 

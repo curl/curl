@@ -95,7 +95,10 @@ struct Curl_ssl_scache {
 
 static void cf_ssl_scache_clear_session(struct Curl_ssl_scache_session *s)
 {
-  Curl_safefree(s->sdata);
+  if(s->sdata) {
+    free((void *)s->sdata);
+    s->sdata = NULL;
+  }
   s->sdata_len = 0;
   if(s->sobj) {
     DEBUGASSERT(s->sobj_free);
@@ -125,7 +128,7 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
                                int ietf_tls_id,
                                const char *alpn,
                                curl_off_t time_received,
-                               int lifetime_secs,
+                               long lifetime_secs,
                                struct Curl_ssl_scache_session **psession)
 {
   struct Curl_ssl_scache_session *s;
@@ -148,8 +151,12 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
   }
 
   s->ietf_tls_id = ietf_tls_id;
-  s->time_received = time_received;
-  s->lifetime_secs = lifetime_secs;
+  s->time_received = time_received ? time_received : (curl_off_t)time(NULL);
+  if(lifetime_secs < 0)
+    lifetime_secs = -1; /* unknown */
+  else if(lifetime_secs > CURL_SCACHE_MAX_LIFETIME_SEC)
+    lifetime_secs = CURL_SCACHE_MAX_LIFETIME_SEC;
+  s->lifetime_secs = (int)lifetime_secs;
   s->sdata = sdata;
   s->sdata_len = sdata_len;
   s->sobj = sobj;
@@ -780,6 +787,19 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
   return result;
 }
 
+void Curl_ssl_scache_reuse(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           const char *ssl_peer_key,
+                           struct Curl_ssl_scache_session *s)
+{
+  /* See RFC 8446 C.4:
+   * "Clients SHOULD NOT reuse a ticket for multiple connections." */
+  if(s && s->ietf_tls_id < 0x304)
+    (void)Curl_ssl_scache_put(cf, data, ssl_peer_key, s);
+  else
+    Curl_ssl_scache_session_destroy(s);
+}
+
 CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               const char *ssl_peer_key,
@@ -806,7 +826,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
     }
   }
 
-  CURL_TRC_CF(data, cf, "[SACHE] %s cached session for '%s'",
+  CURL_TRC_CF(data, cf, "[SCACHE] %s cached session for '%s'",
               *ps ? "Found" : "No", ssl_peer_key);
   return result;
 }

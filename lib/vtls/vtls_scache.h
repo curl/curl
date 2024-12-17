@@ -181,7 +181,7 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
 /* a cached session */
 struct Curl_ssl_scache_session {
   struct Curl_llist_node list;
-  unsigned char *sdata;    /* session data, plain bytes */
+  const unsigned char *sdata; /* session data, plain bytes */
   size_t sdata_len;        /* number of bytes in sdata */
   void *sobj;              /* session object instance or NULL */
   Curl_ssl_scache_obj_dtor *sobj_free; /* free `sobj` callback */
@@ -199,8 +199,11 @@ struct Curl_ssl_scache_session {
  * @param sobj_free callback to free `sobj`
  * @param ietf_tls_id  IETF protocol version, e.g. 0x304 for TLSv1.3
  * @param alpn      ALPN protocol selected or NULL
- * @param time_received seconds since EPOCH session was received
- * @param lifetime_secs seconds of announced lifetime, -1 if unknown
+ * @param time_received seconds since EPOCH session was received, pass 0
+ *                  to have the value set to time of call
+ * @param lifetime_secs seconds of announced lifetime, <0 if unknown.
+ *                      values longer than 1 week will be capped as
+ *                      required by RFC 8446
  * @param psession on return the scached session instance created
  */
 CURLcode
@@ -211,10 +214,10 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
                                int ietf_tls_id,
                                const char *alpn,
                                curl_off_t time_received,
-                               int lifetime_secs,
+                               long lifetime_secs,
                                struct Curl_ssl_scache_session **psession);
 
-/* Destroy a `session` instance */
+/* Destroy a `session` instance. Can be called with NULL. */
 void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s);
 
 /* Put the scache session into the cache. Does NOT need locking.
@@ -239,6 +242,15 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               const char *ssl_peer_key,
                               struct Curl_ssl_scache_session **ps);
+
+/* Reuse a taken scache session to the cache. Depending on TLS version
+ * and other criteria, it may cache it again or destroy it.
+ * Maybe called with a NULL session.
+ */
+void Curl_ssl_scache_reuse(struct Curl_cfilter *cf,
+                           struct Curl_easy *data,
+                           const char *ssl_peer_key,
+                           struct Curl_ssl_scache_session *s);
 
 #else /* USE_SSL */
 

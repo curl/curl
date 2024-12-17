@@ -752,8 +752,8 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
               sdata_len, alpn ? alpn : "-");
   result = Curl_ssl_scache_session_create(sdata, sdata_len, NULL, NULL,
                                           Curl_glts_get_ietf_proto(session),
-                                          alpn, (curl_off_t)time(NULL),
-                                          lifetime_secs, &sc_session);
+                                          alpn, 0, lifetime_secs,
+                                          &sc_session);
   /* call took ownership of `sdata`*/
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -1193,8 +1193,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   }
 
 out:
-  if(scs)
-    Curl_ssl_scache_session_destroy(scs);
+  Curl_ssl_scache_reuse(cf, data, peer->scache_key, scs);
   return result;
 }
 
