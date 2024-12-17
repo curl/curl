@@ -267,7 +267,8 @@ static int parsenetrc(struct store_netrc *store,
             retcode = NETRC_FAILED; /* allocation failed */
             goto out;
           }
-          found |= FOUND_PASSWORD;
+          if(!specific_login || our_login)
+            found |= FOUND_PASSWORD;
           keyword = NONE;
         }
         else if(strcasecompare("login", tok))
@@ -276,6 +277,10 @@ static int parsenetrc(struct store_netrc *store,
           keyword = PASSWORD;
         else if(strcasecompare("machine", tok)) {
           /* a new machine here */
+          if(found & FOUND_PASSWORD) {
+            done = TRUE;
+            break;
+          }
           state = HOSTFOUND;
           keyword = NONE;
           found = 0;
