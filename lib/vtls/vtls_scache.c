@@ -678,7 +678,19 @@ static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OUT_OF_MEMORY;
   curl_off_t now = (curl_off_t)time(NULL);
 
-  if(!scache || !scache->peer_count || cf_scache_session_expired(s, now)) {
+  if(!scache || !scache->peer_count) {
+    Curl_ssl_scache_session_destroy(s);
+    return CURLE_OK;
+  }
+
+  if(!s->time_received)
+    s->time_received = now;
+  if(s->lifetime_secs < 0)
+    s->lifetime_secs = scache->default_lifetime_secs;
+
+
+  if(cf_scache_session_expired(s, now)) {
+    CURL_TRC_CF(data, cf, "[SCACHE] add, session already expired");
     Curl_ssl_scache_session_destroy(s);
     return CURLE_OK;
   }
@@ -689,11 +701,6 @@ static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
     Curl_ssl_scache_session_destroy(s);
     goto out;
   }
-
-  if(!s->time_received)
-    s->time_received = now;
-  if(s->lifetime_secs < 0)
-    s->lifetime_secs = scache->default_lifetime_secs;
 
   /* Expire existing, append, trim from head to obey max_sessions */
   cf_scache_peer_remove_expired(peer, now);
