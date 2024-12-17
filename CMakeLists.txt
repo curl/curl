@@ -2401,21 +2401,28 @@ if(NOT CURL_DISABLE_INSTALL)
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL OPENSSL_VERSION_MAJOR
   #   HAVE_LIBZ ZLIB_VERSION_MAJOR
-  #   HAVE_BROTLI
-  #   HAVE_GSSAPI
-  #   HAVE_ZSTD
-  #   USE_ARES
   #   USE_BEARSSL
-  #   USE_GNUTLS
+  #   HAVE_BROTLI
+  #   USE_ARES
+  #   HAVE_GSSAPI
   #   USE_GSASL
+  #   USE_WIN32_LDAP CURL_DISABLE_LDAP
+  #   HAVE_LIBIDN2
   #   USE_LIBPSL
   #   USE_LIBSSH
+  #   USE_LIBSSH2
   #   USE_LIBUV
+  #   USE_MSH3
   #   USE_MBEDTLS
+  #   USE_NGHTTP2
+  #   USE_NGHTTP3
+  #   USE_NGTCP2
+  #   USE_GNUTLS
   #   USE_QUICHE
   #   USE_RUSTLS
   #   USE_WOLFSSH
   #   USE_WOLFSSL
+  #   HAVE_ZSTD
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
