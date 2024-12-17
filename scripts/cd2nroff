@@ -134,6 +134,9 @@ sub outtls {
     if($t[0] eq "All") {
         push @o, "\nAll TLS backends support this option.";
     }
+    elsif($t[0] eq "none") {
+        push @o, "\nNo TLS backend supports this option.";
+    }
     else {
         push @o, "\nThis option works only with the following TLS backends:\n";
         my @s = sort @t;
@@ -192,6 +195,7 @@ my %knowntls = (
     'Secure Transport' => 1,
     'wolfSSL' => 1,
     'All' => 1,
+    'none' => 1,
     );
 
 sub single {
