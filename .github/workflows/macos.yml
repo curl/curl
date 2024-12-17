@@ -69,33 +69,26 @@ jobs:
             compiler: clang
             install: brotli zstd
             configure: --without-ssl --with-brotli --with-zstd
-            macos-version-min: '10.9'
           - name: '!ssl !debug'
             compiler: gcc-12
             configure: --without-ssl
-            macos-version-min: '10.9'
           - name: '!ssl'
             compiler: clang
             configure: --enable-debug --without-ssl
-            macos-version-min: '10.9'
           - name: '!ssl libssh2 AppleIDN'
             compiler: clang
             configure: --enable-debug --with-libssh2=$(brew --prefix libssh2) --without-ssl --with-apple-idn
-            macos-version-min: '10.9'
           - name: 'OpenSSL libssh c-ares'
             compiler: clang
             install: libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl) --enable-ares
-            macos-version-min: '10.9'
           - name: 'OpenSSL libssh'
             compiler: llvm@15
             install: libssh
             configure: --enable-debug --with-libssh --with-openssl=$(brew --prefix openssl)
-            macos-version-min: '10.9'
           - name: '!ssl c-ares'
             compiler: clang
             configure: --enable-debug --enable-ares --without-ssl
-            macos-version-min: '10.9'
           - name: '!ssl HTTP-only'
             compiler: clang
             configure: >-
@@ -123,15 +116,12 @@ jobs:
             compiler: clang
             install: libressl
             configure: --enable-debug --with-openssl=$(brew --prefix libressl)
-            macos-version-min: '10.9'
           - name: 'OpenSSL'
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
-            macos-version-min: '10.9'
           - name: 'OpenSSL event-based'
             compiler: clang
             configure: --enable-debug --with-openssl=$(brew --prefix openssl)
-            macos-version-min: '10.9'
             tflags: --test-event
           - name: 'OpenSSL libssh2 !ldap 10.15'
             compiler: clang
@@ -141,39 +131,31 @@ jobs:
           - name: 'OpenSSL gsasl AppleIDN'
             install: gsasl
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
-            macos-version-min: '10.9'
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
-            macos-version-min: '10.9'
           - name: 'SecureTransport debug'
             generate: -DCURL_USE_SECTRANSP=ON -DENABLE_DEBUG=ON
             macos-version-min: '10.8'
           - name: 'LibreSSL !ldap heimdal c-ares +examples'
             install: libressl heimdal
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix libressl) -DENABLE_ARES=ON -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix heimdal) -DCURL_DISABLE_LDAP=ON
-            macos-version-min: '10.15'
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
-            macos-version-min: '10.15'
           - name: 'mbedTLS !ldap brotli zstd'
             install: brotli mbedtls zstd
             generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON
-            macos-version-min: '10.15'
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON
-            macos-version-min: '10.15'
           - name: 'OpenSSL torture !FTP'
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=$(brew --prefix openssl)
             tflags: -t --shallow=25 !FTP
-            macos-version-min: '10.9'
             torture: true
           - name: 'OpenSSL torture FTP'
             generate: -DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DENABLE_THREADED_RESOLVER=OFF -DOPENSSL_ROOT_DIR=$(brew --prefix openssl)
             tflags: -t --shallow=20 FTP
-            macos-version-min: '10.9'
             torture: true
         exclude:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
@@ -246,18 +228,17 @@ jobs:
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            CFLAGS+=' ${{ matrix.build.cflags }}'
-            CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
+            [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
               ${{ matrix.build.configure }} ${options}
           else
+            [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
             cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }} \
               "-DCMAKE_OSX_SYSROOT=${sysroot}" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-              ${{ matrix.build.generate }}
+              ${{ matrix.build.generate }} ${options}
           fi
 
       - name: 'configure log'
@@ -378,7 +359,7 @@ jobs:
         #xcode: ['14.1', '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3', '15.4', '16.0', '16.1']  # all SDK
         #xcode: [        '14.2', '14.3.1', '15.0.1'        , '15.2', '15.3'        , '16.0'        ]  # coverage
         xcode: ['']  # default Xcodes
-        macos-version-min: ['10.8']
+        macos-version-min: ['']
         build: [autotools, cmake]
         exclude:
           # Combinations uncovered by runner images:
@@ -458,7 +439,7 @@ jobs:
             fi
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=" --with-openssl=$(brew --prefix openssl)"
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' --with-secure-transport'
-            CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
+            [ -n '${{ matrix.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
@@ -469,9 +450,9 @@ jobs:
           else
             [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
+            [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, and libssh2
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }} \
               "-DCMAKE_OSX_SYSROOT=${sysroot}" \
               "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
               "-DCMAKE_IGNORE_PREFIX_PATH=$(brew --prefix)" \
