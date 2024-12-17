@@ -46,18 +46,6 @@ CURLcode Curl_ssl_scache_create(size_t max_peers,
 
 void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache);
 
-/* Lock session cache mutex.
- * Call this before calling other Curl_ssl_*session* functions
- * Caller should unlock this mutex as soon as possible, as it may block
- * other SSL connection from making progress.
- * The purpose of explicitly locking SSL session cache data is to allow
- * individual SSL engines to manage session lifetime in their specific way.
- */
-void Curl_ssl_scache_lock(struct Curl_easy *data);
-
-/* Unlock session cache mutex */
-void Curl_ssl_scache_unlock(struct Curl_easy *data);
-
 /* Create a key from peer and TLS configuration information that is
  * unique for how the connection filter wants to establish a TLS
  * connection to the peer.
@@ -75,11 +63,17 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const char *tls_id,
                                 char **ppeer_key);
 
-/* Remove the given session data from the cache. */
-void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            const char *ssl_peer_key,
-                            const unsigned char *sdata);
+/* Lock session cache mutex.
+ * Call this before calling other Curl_ssl_*session* functions
+ * Caller should unlock this mutex as soon as possible, as it may block
+ * other SSL connection from making progress.
+ * The purpose of explicitly locking SSL session cache data is to allow
+ * individual SSL engines to manage session lifetime in their specific way.
+ */
+void Curl_ssl_scache_lock(struct Curl_easy *data);
+
+/* Unlock session cache mutex */
+void Curl_ssl_scache_unlock(struct Curl_easy *data);
 
 /* Get TLS session object from the cache for the ssl_peer_ey.
  * scache mutex must be locked (see Curl_ssl_scache_lock).
@@ -118,24 +112,23 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
 
-/* Remove all sessions matching the peer_key from the cache.
- */
+/* Remove all sessions for the peer_key. Does NOT need locking. */
 void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key);
 
-/* a cached session */
+/* cached session data */
 struct Curl_ssl_scache_session {
   struct Curl_llist_node list;
   const unsigned char *sdata; /* session data, plain bytes */
-  size_t sdata_len;        /* number of bytes in sdata */
-  curl_off_t time_received; /* seconds since EPOCH session was received */
-  int lifetime_secs;       /* peer announced entry lifetime (-1 unknown) */
-  int ietf_tls_id;         /* TLS protocol identifier negotiated */
-  char *alpn;              /* APLN TLS negotiated protocol string */
+  size_t sdata_len;           /* number of bytes in sdata */
+  curl_off_t time_received;   /* seconds since EPOCH session was received */
+  int lifetime_secs;          /* peer announced entry lifetime (-1 unknown) */
+  int ietf_tls_id;            /* TLS protocol identifier negotiated */
+  char *alpn;                 /* APLN TLS negotiated protocol string */
 };
 
-/* Create a `session` instance.
+/* Create a `session` instance. Does NOT need locking.
  * Takes ownership of `sdata` and `sobj` regardless of return code.
  * @param sdata     bytes of SSL session data or NULL (sobj then required)
  * @param sdata_len amount of session data bytes
@@ -157,7 +150,8 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
                                long lifetime_secs,
                                struct Curl_ssl_scache_session **psession);
 
-/* Destroy a `session` instance. Can be called with NULL. */
+/* Destroy a `session` instance. Can be called with NULL.
+ * Does NOT need locking. */
 void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s);
 
 /* Put the scache session into the cache. Does NOT need locking.
@@ -183,9 +177,9 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               const char *ssl_peer_key,
                               struct Curl_ssl_scache_session **ps);
 
-/* Return a taken scache session to the cache. Depending on TLS version
- * and other criteria, it may cache it again or destroy it.
- * Maybe called with a NULL session.
+/* Return a taken scache session to the cache. Does NOT need locking.
+ * Depending on TLS version and other criteria, it may cache it again
+ * or destroy it. Maybe called with a NULL session.
  */
 void Curl_ssl_scache_return(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
