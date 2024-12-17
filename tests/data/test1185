@@ -46,7 +46,7 @@ if(a == 2){ /* followed by comment */
   ;
 }
 
-func() ;
+func_return() ;
 
 a = sprintf(buffer, "%s", moo);
 
@@ -120,9 +120,9 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:24:11: warning: missing space after close paren (PARENBRACE)
  if(a == 2){  
            ^
-./%LOGDIR/code1185.c:28:7: warning: no space before semicolon (SPACESEMICOLON)
- func() ;
-       ^
+./%LOGDIR/code1185.c:28:14: warning: no space before semicolon (SPACESEMICOLON)
+ func_return() ;
+              ^
 ./%LOGDIR/code1185.c:30:5: warning: use of sprintf is banned (BANNEDFUNC)
  a = sprintf(buffer, "%s", moo);
      ^

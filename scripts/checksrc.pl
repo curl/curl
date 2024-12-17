@@ -714,7 +714,7 @@ sub scanfile {
         }
 
         # check for "return(" without space
-        if($l =~ /^(.*)return\(/) {
+        if($l =~ /^(.*\W)return\(/) {
             if($1 =~ / *\#/) {
                 # this is a #if, treat it differently
             }
