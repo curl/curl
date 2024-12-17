@@ -495,14 +495,15 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       ;
 
     if(!endct && checkprefix("type=", p)) {
+      size_t tlen;
       for(p += 5; ISSPACE(*p); p++)
         ;
       /* set type pointer */
       type = p;
 
       /* find end of content-type */
-      while(*p && (ISALPHA(*p) || (*p == '/') || (*p == '-')))
-        p++;
+      tlen = strcspn(p, "()<>@,;:\\\"[]?=\r\n ");
+      p += tlen;
       endct = p;
       sep = *p;
     }
