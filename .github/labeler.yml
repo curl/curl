@@ -292,14 +292,6 @@ HTTP/3:
               tests/nghttpx.conf\
               }"
 
-Hyper:
-  - all:
-      - changed-files:
-          - any-glob-to-all-files: "{\
-              docs/HYPER.md,\
-              lib/c-hyper.*\
-              }"
-
 IMAP:
   - all:
       - changed-files:

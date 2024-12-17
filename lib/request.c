@@ -162,9 +162,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data)
   req->no_body = data->set.opt_no_body;
   req->authneg = FALSE;
   req->shutdown = FALSE;
-#ifdef USE_HYPER
-  req->bodywritten = FALSE;
-#endif
 }
 
 void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data)
@@ -261,7 +258,7 @@ static CURLcode req_send_buffer_flush(struct Curl_easy *data)
   return result;
 }
 
-CURLcode Curl_req_set_upload_done(struct Curl_easy *data)
+static CURLcode req_set_upload_done(struct Curl_easy *data)
 {
   DEBUGASSERT(!data->req.upload_done);
   data->req.upload_done = TRUE;
@@ -339,7 +336,7 @@ static CURLcode req_flush(struct Curl_easy *data)
       if(!done)
         return CURLE_AGAIN;
     }
-    return Curl_req_set_upload_done(data);
+    return req_set_upload_done(data);
   }
   return CURLE_OK;
 }
@@ -359,8 +356,6 @@ static ssize_t add_from_client(void *reader_ctx,
     data->req.eos_read = TRUE;
   return (ssize_t)nread;
 }
-
-#ifndef USE_HYPER
 
 static CURLcode req_send_buffer_add(struct Curl_easy *data,
                                     const char *buf, size_t blen,
@@ -411,7 +406,6 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req)
   }
   return CURLE_OK;
 }
-#endif /* !USE_HYPER */
 
 bool Curl_req_sendbuf_empty(struct Curl_easy *data)
 {
@@ -464,7 +458,7 @@ CURLcode Curl_req_abort_sending(struct Curl_easy *data)
     data->req.upload_aborted = TRUE;
     /* no longer KEEP_SEND and KEEP_SEND_PAUSE */
     data->req.keepon &= ~KEEP_SENDBITS;
-    return Curl_req_set_upload_done(data);
+    return req_set_upload_done(data);
   }
   return CURLE_OK;
 }

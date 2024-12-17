@@ -112,7 +112,6 @@ LIB_CFILES =         \
   base64.c           \
   bufq.c             \
   bufref.c           \
-  c-hyper.c          \
   cf-h1-proxy.c      \
   cf-h2-proxy.c      \
   cf-haproxy.c       \
@@ -246,7 +245,6 @@ LIB_HFILES =         \
   asyn.h             \
   bufq.h             \
   bufref.h           \
-  c-hyper.h          \
   cf-h1-proxy.h      \
   cf-h2-proxy.h      \
   cf-haproxy.h       \

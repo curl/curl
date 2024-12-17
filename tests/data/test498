@@ -43,14 +43,8 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-redirs 400 --location
 # Verify data after the test has been "shot"
 <verify>
 # curl: (56) Too large response headers: 6144086 > 6144000
-# hyper returns a generic error that libcurl converts to an even more
-# generic error
 <errorcode>
-%if hyper
-1
-%else
 56
-%endif
 </errorcode>
 </verify>
 </testcase>

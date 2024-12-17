@@ -54,38 +54,6 @@
 # https://github.com/curl/curl/issues/380
 1801
 #
-#
-# Tests that are disabled here for Hyper are SUPPOSED to work but
-# still need adjustments in tests or code. Tests that cannot be
-# fixed for hyper should be adjusted for it in the test file.
-#
-# hyper support remains EXPERIMENTAL as long as there's a test number
-# listed below
-#
-# Several tests fail due to hyper's lack of trailers support: 266, 1417, 1540,
-# 1591, 1943. See https://github.com/hyperium/hyper/issues/2699 for details.
-%if hyper
-266
-477
-500
-579
-587
-# 1021 re-added here due to flakiness
-1021
-1060
-1417
-1460
-1533
-1540
-1591
-1598
-1943
-2301
-2302
-2305
-# response body seem not to be handled by hyper
-2307
-%endif
 2043
 # The CRL test doesn't work with wolfSSL
 %if wolfssl

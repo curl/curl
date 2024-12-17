@@ -69,11 +69,6 @@ int main(void)
 
 Support for FTP added in 7.46.0.
 
-# NOTES
-
-This option is not working for HTTP when libcurl is built to use the hyper
-backend.
-
 # %AVAILABILITY%
 
 # RETURN VALUE

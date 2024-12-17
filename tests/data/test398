@@ -54,11 +54,7 @@ Accept: */*
 
 </protocol>
 <errorcode>
-%if hyper
-1
-%else
 8
-%endif
 </errorcode>
 </verify>
 </testcase>

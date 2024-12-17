@@ -644,13 +644,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     break;
 
   case CURLOPT_HTTP09_ALLOWED:
-#ifdef USE_HYPER
-    /* Hyper does not support HTTP/0.9 */
-    if(enabled)
-      return CURLE_BAD_FUNCTION_ARGUMENT;
-#else
     data->set.http09_allowed = enabled;
-#endif
     break;
 #endif /* ! CURL_DISABLE_HTTP */
 

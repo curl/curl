@@ -53,15 +53,9 @@ User-Agent: curl/%VERSION
 Accept: */*
 
 </protocol>
-
-# Hyper curl returns unsupported protocol
-# built-in curl returns weird_server_reply
+# weird_server_reply
 <errorcode>
-%if hyper
-1
-%else
 8
-%endif
 </errorcode>
 </verify>
 </testcase>

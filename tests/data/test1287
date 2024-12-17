@@ -83,10 +83,8 @@ Accept: */*
 
 </protocol>
 <file name="%LOGDIR/stderr%TESTNUMBER" mode="text">
-%if !hyper
 * Ignoring Content-Length in CONNECT 200 response
 * Ignoring Transfer-Encoding in CONNECT 200 response
-%endif
 </file>
 <stripfile>
 s/^.*(?=\* Ignoring (?:Content-Length|Transfer-Encoding) )// or $_ = ''

@@ -53,22 +53,14 @@ Accept: */*
 <file name="%LOGDIR/out%TESTNUMBER">
 HTTP/1.1 200 OK
 Date: Tue, 09 Nov 2010 14:49:00 GMT
-%if hyper
-Server: test-server/ fake folded
-%else
 Server: test-server/
  fake
  folded
-%endif
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
 ETag: "21025-dc7-39462498"
 Content-Length: 6
-%if hyper
-Connection: close
-%else
 Connection:                                              
    close
-%endif
 
 </file>
 </verify>

@@ -40,10 +40,6 @@ verify
 #
 # Client-side
 <client>
-# hyper doesn't support HTTP/0.9
-<features>
-!hyper
-</features>
 <server>
 http
 </server>

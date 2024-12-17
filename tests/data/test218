@@ -46,11 +46,7 @@ User-Agent: curl/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 
-%if hyper
-1E
-%else
 1e
-%endif
 just some tiny teeny contents
 
 0
