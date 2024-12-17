@@ -653,48 +653,6 @@ out:
   return result;
 }
 
-bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
-                        struct Curl_easy *data,
-                        const char *ssl_peer_key,
-                        const unsigned char **sdata, size_t *sdata_len,
-                        char **palpn)
-{
-  struct Curl_ssl_scache *spool = data->state.ssl_scache;
-  struct Curl_ssl_scache_peer *peer = NULL;
-  struct Curl_llist_node *n;
-  CURLcode result;
-
-  *sdata = NULL;
-  *sdata_len = 0;
-  if(!spool)
-    return FALSE;
-
-  result = cf_ssl_find_peer(cf, data, spool, ssl_peer_key, &peer);
-  if(result)
-    return FALSE;
-
-  if(peer) {
-    cf_scache_peer_remove_expired(peer, (curl_off_t)time(NULL));
-    n = Curl_llist_head(&peer->sessions);
-    while(n) {
-      struct Curl_ssl_scache_session *s = Curl_node_elem(n);
-      if(s->sdata) {
-        (spool->age)++;            /* increase general age */
-        peer->age = spool->age; /* set this as used in this age */
-        *sdata = s->sdata;
-        *sdata_len = s->sdata_len;
-        if(palpn)
-          *palpn = s->alpn;
-        break;
-      }
-      n = Curl_node_next(n);
-    }
-  }
-  CURL_TRC_CF(data, cf, "[SACHE] %s cached session for '%s'",
-              *sdata ? "Found" : "No", ssl_peer_key);
-  return !!*sdata;
-}
-
 static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
                                       struct Curl_easy *data,
                                       struct Curl_ssl_scache *spool,
@@ -793,38 +751,6 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "[SCACHE] %s cached session for '%s'",
               *ps ? "Found" : "No", ssl_peer_key);
-  return result;
-}
-
-CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             const char *ssl_peer_key,
-                             unsigned char *sdata,
-                             size_t sdata_len,
-                             int lifetime_secs,
-                             int ietf_tls_id,
-                             const char *alpn)
-{
-  struct Curl_ssl_scache *spool = data->state.ssl_scache;
-  struct Curl_ssl_scache_session *s = NULL;
-  curl_off_t time_received = 0;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-
-  DEBUGASSERT(sdata);
-  DEBUGASSERT(sdata_len);
-  time_received = (curl_off_t)time(NULL);
-  result = Curl_ssl_scache_session_create(sdata, sdata_len, ietf_tls_id, alpn,
-                                          time_received, lifetime_secs, &s);
-  sdata = NULL; /* kept in `s` now */
-  if(result) {
-    CURL_TRC_CF(data, cf, "[SCACHE] unable to create scache session: %d",
-                result);
-    goto out;
-  }
-  result = cf_scache_session_add(cf, data, spool, ssl_peer_key, s);
-
-out:
-  free(sdata);
   return result;
 }
 

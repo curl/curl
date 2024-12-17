@@ -75,49 +75,6 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
                                 const char *tls_id,
                                 char **ppeer_key);
 
-/* Get TLS session data from the cache.
- * scache mutex must be locked (see Curl_ssl_scache_lock).
- * Caller must make sure that the ownership of returned session object
- * is properly taken (e.g. its refcount is incremented
- * under scache mutex).
- * @param cf      the connection filter wanting to use it
- * @param data    the transfer involved
- * @param ssl_peer_key the key for lookup
- * @param sdata   on return the TLS session
- * @param sdata_len  on return the amount of bytes in sdata
- * @param palpn   on return the ALPN string used by the session,
- *                set to NULL when not interested
- */
-bool Curl_ssl_scache_get(struct Curl_cfilter *cf,
-                         struct Curl_easy *data,
-                         const char *ssl_peer_key,
-                         const unsigned char **sdata,
-                         size_t *sdata_len,
-                         char **palpn);
-
-/* Add TLS session data to the cache.
- * Replaces an existing session data/object with the same peer_key.
- * scache mutex must be locked (see Curl_ssl_scache_lock).
- * Call takes ownership of `sdata` (must be allocated) in all outcomes.
- * @param cf      the connection filter wanting to use it
- * @param data    the transfer involved
- * @param ssl_peer_key the key for lookup
- * @param sdata   the TLS session data, plain bytes
- * @param sdata_len the length of the TLS session data
- * @param lifetime_secs seconds of session data lifetime, as announced
- *                by the peer, -1 if not known
- * @param ietf_tls_id negotiated TLS protocol version from RFCs
- * @param alpn    the ALPN negotiated for the session or NULL
- */
-CURLcode Curl_ssl_scache_add(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             const char *ssl_peer_key,
-                             unsigned char *sdata,
-                             size_t sdata_len,
-                             int lifetime_secs,
-                             int ietf_tls_id,
-                             const char *alpn);
-
 /* Remove the given session data from the cache. */
 void Curl_ssl_scache_remove(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
