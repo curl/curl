@@ -42,6 +42,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 /*
  * Curl_auth_is_gssapi_supported()
  *
@@ -320,5 +325,9 @@ void Curl_auth_cleanup_gssapi(struct kerberos5data *krb5)
     krb5->spn = GSS_C_NO_NAME;
   }
 }
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* HAVE_GSSAPI && USE_KERBEROS5 */

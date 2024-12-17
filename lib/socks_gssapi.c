@@ -42,6 +42,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #define MAX_GSS_LEN 1024
 
 static gss_ctx_id_t gss_context = GSS_C_NO_CONTEXT;
@@ -536,5 +541,9 @@ CURLcode Curl_SOCKS5_gssapi_negotiate(struct Curl_cfilter *cf,
 
   return CURLE_OK;
 }
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* HAVE_GSSAPI && !CURL_DISABLE_PROXY */

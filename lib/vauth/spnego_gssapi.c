@@ -42,6 +42,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 /*
  * Curl_auth_is_spnego_supported()
  *
@@ -287,5 +292,9 @@ void Curl_auth_cleanup_spnego(struct negotiatedata *nego)
   nego->havenegdata = FALSE;
   nego->havemultiplerequests = FALSE;
 }
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* HAVE_GSSAPI && USE_SPNEGO */
