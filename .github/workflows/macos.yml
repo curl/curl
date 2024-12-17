@@ -45,9 +45,6 @@ permissions: {}
 #
 # For Secure Transport, curl implements features that require a target
 # newer than the 10.8 required by `CFURLCreateDataAndPropertiesFromResource`.
-# In this case `-Wno-deprecated-declarations` still comes handy to pacify
-# deprecation warnings, though the real solution would be to avoid calling
-# that function.
 
 env:
   LDFLAGS: -w  # suppress 'object file was built for newer macOS version than being linked' warnings
@@ -118,7 +115,6 @@ jobs:
             compiler: clang
             configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
             macos-version-min: '10.12'  # for monotonic timers
-            cflags: '-Wno-deprecated-declarations'
           - name: 'SecureTransport libssh2'
             compiler: gcc-12
             configure: --enable-debug --with-secure-transport --with-libssh2=$(brew --prefix libssh2)
