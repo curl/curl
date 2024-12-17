@@ -483,7 +483,8 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_scache_remove_all(cf, data, ssl_peer_key);
+        Curl_ssl_scache_session_destroy(sc_session);
+        sc_session = NULL;
         infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
       }

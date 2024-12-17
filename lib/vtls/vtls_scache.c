@@ -774,6 +774,7 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
       peer->age = scache->age; /* set this as used in this age */
     }
   }
+  Curl_ssl_scache_unlock(data);
 
   CURL_TRC_CF(data, cf, "[SCACHE] %s cached session for '%s'",
               *ps ? "Found" : "No", ssl_peer_key);
