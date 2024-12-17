@@ -51,6 +51,11 @@
 #pragma GCC diagnostic ignored "-Waddress"
 #endif
 
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 #include <limits.h>
 
 #include <Security/Security.h>
@@ -2769,6 +2774,10 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   sectransp_send,                     /* send data to encrypt */
   NULL,                               /* get_channel_binding */
 };
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #ifdef __GNUC__
 #pragma GCC diagnostic pop

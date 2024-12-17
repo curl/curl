@@ -63,6 +63,11 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+#endif
+
 static CURLcode ftpsend(struct Curl_easy *data, struct connectdata *conn,
                         const char *cmd)
 {
@@ -923,5 +928,9 @@ Curl_sec_end(struct connectdata *conn)
   conn->data_prot = PROT_CLEAR;
   conn->mech = NULL;
 }
+
+#if defined(__GNUC__) && defined(__APPLE__)
+#pragma GCC diagnostic pop
+#endif
 
 #endif /* HAVE_GSSAPI && !CURL_DISABLE_FTP */
