@@ -501,7 +501,7 @@ static int get_param_part(struct OperationConfig *config, char endchar,
       type = p;
 
       /* find end of content-type */
-      while(*p && (ISALPHA(*p) || (*p == '/') || (*p == '-')))
+      while(*p && (ISALNUM(*p) || (*p == '/') || (*p == '-')))
         p++;
       endct = p;
       sep = *p;
