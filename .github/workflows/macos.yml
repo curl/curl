@@ -246,7 +246,6 @@ jobs:
               options+=" --with-sysroot=${sysroot}"
               CFLAGS+=" --sysroot=${sysroot}"
             fi
-            CFLAGS+=' ${{ matrix.build.cflags }}'
             CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --disable-dependency-tracking \
