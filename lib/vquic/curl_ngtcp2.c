@@ -2132,7 +2132,7 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   data = cf ? CF_DATA_CURRENT(cf) : NULL;
   if(cf && data && ctx) {
     Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
-                          "h3");
+                          SSL_version(ssl), "h3");
     return 1;
   }
   return 0;

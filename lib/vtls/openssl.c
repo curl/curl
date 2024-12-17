@@ -2867,20 +2867,21 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
                                SSL_SESSION *session,
+                               int ietf_tls_id,
                                const char *alpn)
 {
   const struct ssl_config_data *config;
+  unsigned char *der_session_buf = NULL;
   CURLcode result = CURLE_OK;
-  size_t der_session_size;
-  unsigned char *der_session_buf;
-  unsigned char *der_session_ptr;
-  long lifetime_sec;
 
   if(!cf || !data)
     goto out;
 
   config = Curl_ssl_cf_get_config(cf, data);
   if(config->primary.cache_session) {
+    struct Curl_ssl_scache_session *sc_session = NULL;
+    size_t der_session_size;
+    unsigned char *der_session_ptr;
 
     der_session_size = i2d_SSL_SESSION(session, NULL);
     if(der_session_size == 0) {
@@ -2897,29 +2898,23 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     der_session_size = i2d_SSL_SESSION(session, &der_session_ptr);
     if(der_session_size == 0) {
       result = CURLE_OUT_OF_MEMORY;
-      free(der_session_buf);
       goto out;
     }
 
-    lifetime_sec = SSL_SESSION_get_timeout(session);
-    if(lifetime_sec < 0)
-      lifetime_sec = -1; /* unknown */
-    else if(lifetime_sec > CURL_SCACHE_MAX_LIFETIME_SEC)
-      lifetime_sec = CURL_SCACHE_MAX_LIFETIME_SEC;
-
-    Curl_ssl_scache_lock(data);
-    result = Curl_ssl_scache_add(cf, data, ssl_peer_key,
-                                 der_session_buf, der_session_size,
-#if (OPENSSL_VERSION_NUMBER >= 0x10101000L)
-                                 SSL_SESSION_get_protocol_version(session),
-#else
-                                 CURL_IETF_PROTO_UNKNOWN,
-#endif
-                                 (int)lifetime_sec, alpn);
-    Curl_ssl_scache_unlock(data);
+    result = Curl_ssl_scache_session_create(der_session_buf, der_session_size,
+                                            NULL, NULL,
+                                            ietf_tls_id, alpn, 0,
+                                            SSL_SESSION_get_timeout(session),
+                                            &sc_session);
+    der_session_buf = NULL;  /* took ownership of sdata */
+    if(!result) {
+      result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
+      /* took ownership of `sc_session` */
+    }
   }
 
 out:
+  free(der_session_buf);
   return result;
 }
 
@@ -2937,7 +2932,7 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   data = connssl ? CF_DATA_CURRENT(cf) : NULL;
   if(data && connssl)
     Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
-                          connssl->negotiated.alpn);
+                          SSL_version(ssl), connssl->negotiated.alpn);
   return 0;
 }
 
@@ -3969,13 +3964,12 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
-    const unsigned char *der_sessionid = NULL;
-    size_t der_sessionid_size = 0;
+    struct Curl_ssl_scache_session *sc_session = NULL;
 
-    Curl_ssl_scache_lock(data);
-    if(Curl_ssl_scache_get(cf, data, peer->scache_key,
-                           &der_sessionid, &der_sessionid_size,
-                           NULL)) {
+    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &sc_session);
+    if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
+      const unsigned char *der_sessionid = sc_session->sdata;
+      size_t der_sessionid_size = sc_session->sdata_len;
       SSL_SESSION *ssl_session = NULL;
 
       /* If OpenSSL does not accept the session from the cache, this
@@ -3998,10 +3992,8 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       else {
         infof(data, "SSL session not accepted by OpenSSL, continuing without");
       }
-      /* remove in any case, single use */
-      Curl_ssl_scache_remove(cf, data, peer->scache_key, der_sessionid);
     }
-    Curl_ssl_scache_unlock(data);
+    Curl_ssl_scache_reuse(cf, data, peer->scache_key, sc_session);
   }
 
   return CURLE_OK;

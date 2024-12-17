@@ -99,6 +99,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
                                const char *ssl_peer_key,
                                SSL_SESSION *ssl_sessionid,
+                               int ietf_tls_id,
                                const char *alpn);
 
 /*
