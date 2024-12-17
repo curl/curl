@@ -23,7 +23,7 @@
 ###########################################################################
 @PACKAGE_INIT@
 
-if(UNIX OR VCPKG_TOOLCHAIN OR MINGW)  # Keep in sync with root CMakeLists.txt
+if(UNIX OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))  # Keep in sync with root CMakeLists.txt
   set(_curl_use_pkgconfig_default ON)
 else()
   set(_curl_use_pkgconfig_default OFF)
