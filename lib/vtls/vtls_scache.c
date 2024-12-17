@@ -787,7 +787,7 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
   return result;
 }
 
-void Curl_ssl_scache_reuse(struct Curl_cfilter *cf,
+void Curl_ssl_scache_return(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            const char *ssl_peer_key,
                            struct Curl_ssl_scache_session *s)

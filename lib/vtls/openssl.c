@@ -3993,7 +3993,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         infof(data, "SSL session not accepted by OpenSSL, continuing without");
       }
     }
-    Curl_ssl_scache_reuse(cf, data, peer->scache_key, sc_session);
+    Curl_ssl_scache_return(cf, data, peer->scache_key, sc_session);
   }
 
   return CURLE_OK;

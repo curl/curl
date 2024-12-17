@@ -1193,7 +1193,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
   }
 
 out:
-  Curl_ssl_scache_reuse(cf, data, peer->scache_key, scs);
+  Curl_ssl_scache_return(cf, data, peer->scache_key, scs);
   return result;
 }
 

@@ -243,14 +243,14 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               const char *ssl_peer_key,
                               struct Curl_ssl_scache_session **ps);
 
-/* Reuse a taken scache session to the cache. Depending on TLS version
+/* Return a taken scache session to the cache. Depending on TLS version
  * and other criteria, it may cache it again or destroy it.
  * Maybe called with a NULL session.
  */
-void Curl_ssl_scache_reuse(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const char *ssl_peer_key,
-                           struct Curl_ssl_scache_session *s);
+void Curl_ssl_scache_return(struct Curl_cfilter *cf,
+                            struct Curl_easy *data,
+                            const char *ssl_peer_key,
+                            struct Curl_ssl_scache_session *s);
 
 #else /* USE_SSL */
 

@@ -495,7 +495,7 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
       failf(data, "could not decode previous session");
     }
   }
-  Curl_ssl_scache_reuse(cf, data, ssl_peer_key, sc_session);
+  Curl_ssl_scache_return(cf, data, ssl_peer_key, sc_session);
   return result;
 }
 
