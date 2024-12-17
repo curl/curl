@@ -2902,7 +2902,6 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     }
 
     result = Curl_ssl_scache_session_create(der_session_buf, der_session_size,
-                                            NULL, NULL,
                                             ietf_tls_id, alpn, 0,
                                             SSL_SESSION_get_timeout(session),
                                             &sc_session);

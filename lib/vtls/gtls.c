@@ -750,7 +750,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s) and store in cache",
               sdata_len, alpn ? alpn : "-");
-  result = Curl_ssl_scache_session_create(sdata, sdata_len, NULL, NULL,
+  result = Curl_ssl_scache_session_create(sdata, sdata_len,
                                           Curl_glts_get_ietf_proto(session),
                                           alpn, 0, lifetime_secs,
                                           &sc_session);

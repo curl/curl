@@ -430,7 +430,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
 
-  result = Curl_ssl_scache_session_create(sdata, sdata_len, NULL, NULL,
+  result = Curl_ssl_scache_session_create(sdata, sdata_len,
                                           ietf_tls_id, alpn, 0,
                                           wolfSSL_SESSION_get_timeout(session),
                                           &sc_session);
