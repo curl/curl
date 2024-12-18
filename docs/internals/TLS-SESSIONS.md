@@ -13,7 +13,7 @@ TLS over a plain unix domain socket, so this can vary a lot.)
 
 By "resuming", the TLS protocol means that the security context from
 before can be fully or partially resurrected when the TLS client presents
-the proper crypto stuff to the server. This saves on the amount of 
+the proper crypto stuff to the server. This saves on the amount of
 TLS packets that need to be sent back and forth, reducing amount
 of data and even latency. In the case of QUIC, resumption may send
 application data without having seen any reply from the server, hence
@@ -46,8 +46,8 @@ string that carries hostname and port and any non-default TLS
 parameters involved in the connection.
 
 Examples:
-- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for 
-   a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA  
+- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for
+   a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA
    trust anchors and GnuTLS/3.8.7 as TLS backend.
 - `curl.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
    same as the previous, except it is configured to use TLSv1.2 as
@@ -58,7 +58,7 @@ curl needs when handling SSL session tickets.
 
 One important thing: peer keys do not contain confidential
 information. If you configure a client certificate or SRP authentication
-with username/password, these will not be part of the peer key. 
+with username/password, these will not be part of the peer key.
 
 However, peer keys carry the hostnames you use curl for. The *do*
 leak the privacy of your communication. We recommend to *not* persist
@@ -81,8 +81,8 @@ filters talking through a tunnel will differ, as they talk to different
 peers.
 
 If the connection filter wants to use a client certificate or SRP
-authentication, the cache will check those as well. If the cache peer 
-carries client cert or SRP autth, the connection filter must have 
+authentication, the cache will check those as well. If the cache peer
+carries client cert or SRP autth, the connection filter must have
 those with the same values (and vice versa).
 
 On a match, the connection filter gets the session ticket and feeds that
@@ -124,7 +124,7 @@ concurrent connections will not reuse the same ticket.
 
 #### Privacy and Security
 
-As mentioned above, ssl peer keys are not intended for storage in a 
+As mentioned above, ssl peer keys are not intended for storage in a
 file system. They'll clearly show which hosts the user talked to. This
 maybe "just" privacy relevant, but has security implications as an
 attacker might find worthy targets amoung your peer keys.
