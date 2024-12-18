@@ -134,16 +134,12 @@ Curl_llist_append(struct Curl_llist *list, const void *p,
   Curl_llist_insert_next(list, list->_tail, p, ne);
 }
 
-/*
- * @unittest: 1300
- */
-void
-Curl_node_uremove(struct Curl_llist_node *e, void *user)
+void *Curl_node_take_elem(struct Curl_llist_node *e)
 {
   void *ptr;
   struct Curl_llist *list;
   if(!e)
-    return;
+    return NULL;
 
   list = e->_list;
   DEBUGASSERT(list);
@@ -179,8 +175,23 @@ Curl_node_uremove(struct Curl_llist_node *e, void *user)
 #endif
 
   --list->_size;
+  return ptr;
+}
 
-  /* call the dtor() last for when it actually frees the 'e' memory itself */
+/*
+ * @unittest: 1300
+ */
+void
+Curl_node_uremove(struct Curl_llist_node *e, void *user)
+{
+  struct Curl_llist *list;
+  void *ptr;
+  if(!e)
+    return;
+
+  list = e->_list;
+  DEBUGASSERT(list);
+  ptr = Curl_node_take_elem(e);
   if(list->_dtor)
     list->_dtor(user, ptr);
 }

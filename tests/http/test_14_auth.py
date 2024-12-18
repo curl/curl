@@ -134,4 +134,4 @@ class TestAuth:
         # Depending on protocol, we might have an error sending or
         # the server might shutdown the connection and we see the error
         # on receiving
-        assert r.exit_code in [55, 56], f'{self.dump_logs()}'
+        assert r.exit_code in [55, 56], f'{r.dump_logs()}'

@@ -31,6 +31,8 @@
 #include "urldata.h"
 #include "conncache.h"
 
+struct Curl_ssl_scache;
+
 #define CURL_GOOD_SHARE 0x7e117a1e
 #define GOOD_SHARE_HANDLE(x) ((x) && (x)->magic == CURL_GOOD_SHARE)
 
@@ -58,14 +60,17 @@ struct Curl_share {
   struct hsts *hsts;
 #endif
 #ifdef USE_SSL
-  struct Curl_ssl_session *sslsession;
-  size_t max_ssl_sessions;
-  long sessionage;
+  struct Curl_ssl_scache *ssl_scache;
 #endif
 };
 
 CURLSHcode Curl_share_lock(struct Curl_easy *, curl_lock_data,
                            curl_lock_access);
 CURLSHcode Curl_share_unlock(struct Curl_easy *, curl_lock_data);
+
+/* convenience macro to check if this handle is using a shared SSL spool */
+#define CURL_SHARE_ssl_scache(data) (data->share &&                      \
+                                    (data->share->specifier &           \
+                                     (1<<CURL_LOCK_DATA_SSL_SESSION)))
 
 #endif /* HEADER_CURL_SHARE_H */

@@ -55,6 +55,7 @@
 
 #include "vtls.h" /* generic SSL protos etc */
 #include "vtls_int.h"
+#include "vtls_scache.h"
 
 #include "openssl.h"        /* OpenSSL versions */
 #include "gtls.h"           /* GnuTLS versions */
@@ -74,6 +75,7 @@
 #include "multiif.h"
 #include "timeval.h"
 #include "curl_md5.h"
+#include "curl_sha256.h"
 #include "warnless.h"
 #include "curl_base64.h"
 #include "curl_printf.h"
@@ -87,11 +89,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
-/* convenience macro to check if this handle is using a shared SSL session */
-#define SSLSESSION_SHARED(data) (data->share &&                        \
-                                 (data->share->specifier &             \
-                                  (1<<CURL_LOCK_DATA_SSL_SESSION)))
 
 #define CLONE_STRING(var)                    \
   do {                                       \
@@ -465,9 +462,10 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
   if(!ctx)
     return NULL;
 
+  ctx->ssl_impl = Curl_ssl;
   ctx->alpn = alpn;
   Curl_bufq_init2(&ctx->earlydata, CURL_SSL_EARLY_MAX, 1, BUFQ_OPT_NO_SPARES);
-  ctx->backend = calloc(1, Curl_ssl->sizeof_ssl_backend_data);
+  ctx->backend = calloc(1, ctx->ssl_impl->sizeof_ssl_backend_data);
   if(!ctx->backend) {
     free(ctx);
     return NULL;
@@ -478,7 +476,7 @@ static struct ssl_connect_data *cf_ctx_new(struct Curl_easy *data,
 static void cf_ctx_free(struct ssl_connect_data *ctx)
 {
   if(ctx) {
-    Curl_safefree(ctx->alpn_negotiated);
+    Curl_safefree(ctx->negotiated.alpn);
     Curl_bufq_free(&ctx->earlydata);
     free(ctx->backend);
     free(ctx);
@@ -496,7 +494,7 @@ static CURLcode ssl_connect(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* mark this is being ssl-enabled from here on. */
   connssl->state = ssl_connection_negotiating;
 
-  result = Curl_ssl->connect_blocking(cf, data);
+  result = connssl->ssl_impl->connect_blocking(cf, data);
 
   if(!result) {
     DEBUGASSERT(connssl->state == ssl_connection_complete);
@@ -509,275 +507,13 @@ static CURLcode
 ssl_connect_nonblocking(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool *done)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
+
   if(!ssl_prefs_check(data))
     return CURLE_SSL_CONNECT_ERROR;
 
   /* mark this is being ssl requested from here on. */
-  return Curl_ssl->connect_nonblocking(cf, data, done);
-}
-
-/*
- * Lock shared SSL session data
- */
-void Curl_ssl_sessionid_lock(struct Curl_easy *data)
-{
-  if(SSLSESSION_SHARED(data))
-    Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
-}
-
-/*
- * Unlock shared SSL session data
- */
-void Curl_ssl_sessionid_unlock(struct Curl_easy *data)
-{
-  if(SSLSESSION_SHARED(data))
-    Curl_share_unlock(data, CURL_LOCK_DATA_SSL_SESSION);
-}
-
-/*
- * Check if there is a session ID for the given connection in the cache, and if
- * there is one suitable, it is provided. Returns TRUE when no entry matched.
- */
-bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const struct ssl_peer *peer,
-                           void **ssl_sessionid,
-                           size_t *idsize, /* set 0 if unknown */
-                           char **palpn)
-{
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_session *check;
-  size_t i;
-  long *general_age;
-  bool no_match = TRUE;
-
-  *ssl_sessionid = NULL;
-  if(palpn)
-    *palpn = NULL;
-  if(!ssl_config)
-    return TRUE;
-
-  DEBUGASSERT(ssl_config->primary.cache_session);
-
-  if(!ssl_config->primary.cache_session || !data->state.session)
-    /* session ID reuse is disabled or the session cache has not been
-       setup */
-    return TRUE;
-
-  /* Lock if shared */
-  if(SSLSESSION_SHARED(data))
-    general_age = &data->share->sessionage;
-  else
-    general_age = &data->state.sessionage;
-
-  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
-    check = &data->state.session[i];
-    if(!check->sessionid)
-      /* not session ID means blank entry */
-      continue;
-    if(strcasecompare(peer->hostname, check->name) &&
-       ((!cf->conn->bits.conn_to_host && !check->conn_to_host) ||
-        (cf->conn->bits.conn_to_host && check->conn_to_host &&
-         strcasecompare(cf->conn->conn_to_host.name, check->conn_to_host))) &&
-       ((!cf->conn->bits.conn_to_port && check->conn_to_port == -1) ||
-        (cf->conn->bits.conn_to_port && check->conn_to_port != -1 &&
-         cf->conn->conn_to_port == check->conn_to_port)) &&
-       (peer->port == check->remote_port) &&
-       (peer->transport == check->transport) &&
-       strcasecompare(cf->conn->handler->scheme, check->scheme) &&
-       match_ssl_primary_config(data, conn_config, &check->ssl_config)) {
-      /* yes, we have a session ID! */
-      (*general_age)++;          /* increase general age */
-      check->age = *general_age; /* set this as used in this age */
-      *ssl_sessionid = check->sessionid;
-      if(idsize)
-        *idsize = check->idsize;
-      if(palpn)
-        *palpn = check->alpn;
-      no_match = FALSE;
-      break;
-    }
-  }
-
-  CURL_TRC_CF(data, cf, "%s cached session ID for %s://%s:%d",
-              no_match ? "No" : "Found",
-              cf->conn->handler->scheme, peer->hostname, peer->port);
-  return no_match;
-}
-
-/*
- * Kill a single session ID entry in the cache.
- */
-void Curl_ssl_kill_session(struct Curl_ssl_session *session)
-{
-  if(session->sessionid) {
-    /* defensive check */
-
-    /* free the ID the SSL-layer specific way */
-    session->sessionid_free(session->sessionid, session->idsize);
-
-    session->sessionid = NULL;
-    session->sessionid_free = NULL;
-    session->age = 0; /* fresh */
-
-    free_primary_ssl_config(&session->ssl_config);
-
-    Curl_safefree(session->name);
-    Curl_safefree(session->conn_to_host);
-    Curl_safefree(session->alpn);
-  }
-}
-
-/*
- * Delete the given session ID from the cache.
- */
-void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid)
-{
-  size_t i;
-
-  for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++) {
-    struct Curl_ssl_session *check = &data->state.session[i];
-
-    if(check->sessionid == ssl_sessionid) {
-      Curl_ssl_kill_session(check);
-      break;
-    }
-  }
-}
-
-CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const struct ssl_peer *peer,
-                                const char *alpn,
-                                void *ssl_sessionid,
-                                size_t idsize,
-                                Curl_ssl_sessionid_dtor *sessionid_free_cb)
-{
-  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-  size_t i;
-  struct Curl_ssl_session *store;
-  long oldest_age;
-  char *clone_host = NULL;
-  char *clone_conn_to_host = NULL;
-  char *clone_alpn = NULL;
-  int conn_to_port;
-  long *general_age;
-  void *old_sessionid;
-  size_t old_size;
-  CURLcode result = CURLE_OUT_OF_MEMORY;
-
-  DEBUGASSERT(ssl_sessionid);
-  DEBUGASSERT(sessionid_free_cb);
-
-  if(!data->state.session) {
-    sessionid_free_cb(ssl_sessionid, idsize);
-    return CURLE_OK;
-  }
-
-  if(!Curl_ssl_getsessionid(cf, data, peer, &old_sessionid, &old_size, NULL)) {
-    if((old_size == idsize) &&
-       ((old_sessionid == ssl_sessionid) ||
-        (idsize && !memcmp(old_sessionid, ssl_sessionid, idsize)))) {
-      /* the very same */
-      sessionid_free_cb(ssl_sessionid, idsize);
-      return CURLE_OK;
-    }
-    Curl_ssl_delsessionid(data, old_sessionid);
-  }
-
-  store = &data->state.session[0];
-  oldest_age = data->state.session[0].age; /* zero if unused */
-  DEBUGASSERT(ssl_config->primary.cache_session);
-  (void)ssl_config;
-
-  clone_host = strdup(peer->hostname);
-  if(!clone_host)
-    goto out;
-
-  if(cf->conn->bits.conn_to_host) {
-    clone_conn_to_host = strdup(cf->conn->conn_to_host.name);
-    if(!clone_conn_to_host)
-      goto out;
-  }
-
-  clone_alpn = alpn ? strdup(alpn) : NULL;
-  if(alpn && !clone_alpn)
-    goto out;
-
-  if(cf->conn->bits.conn_to_port)
-    conn_to_port = cf->conn->conn_to_port;
-  else
-    conn_to_port = -1;
-
-  /* Now we should add the session ID and the hostname to the cache, (remove
-     the oldest if necessary) */
-
-  /* If using shared SSL session, lock! */
-  if(SSLSESSION_SHARED(data)) {
-    general_age = &data->share->sessionage;
-  }
-  else {
-    general_age = &data->state.sessionage;
-  }
-
-  /* find an empty slot for us, or find the oldest */
-  for(i = 1; (i < data->set.general_ssl.max_ssl_sessions) &&
-        data->state.session[i].sessionid; i++) {
-    if(data->state.session[i].age < oldest_age) {
-      oldest_age = data->state.session[i].age;
-      store = &data->state.session[i];
-    }
-  }
-  if(i == data->set.general_ssl.max_ssl_sessions)
-    /* cache is full, we must "kill" the oldest entry! */
-    Curl_ssl_kill_session(store);
-  else
-    store = &data->state.session[i]; /* use this slot */
-
-  /* now init the session struct wisely */
-  if(!clone_ssl_primary_config(conn_config, &store->ssl_config)) {
-    free_primary_ssl_config(&store->ssl_config);
-    store->sessionid = NULL; /* let caller free sessionid */
-    goto out;
-  }
-  store->sessionid = ssl_sessionid;
-  store->idsize = idsize;
-  store->sessionid_free = sessionid_free_cb;
-  store->age = *general_age;    /* set current age */
-  /* free it if there is one already present */
-  free(store->name);
-  free(store->conn_to_host);
-  store->name = clone_host;               /* clone hostname */
-  clone_host = NULL;
-  store->conn_to_host = clone_conn_to_host; /* clone connect to hostname */
-  clone_conn_to_host = NULL;
-  store->conn_to_port = conn_to_port; /* connect to port number */
-  store->alpn = clone_alpn;
-  clone_alpn = NULL;
-  /* port number */
-  store->remote_port = peer->port;
-  store->scheme = cf->conn->handler->scheme;
-  store->transport = peer->transport;
-
-  result = CURLE_OK;
-
-out:
-  free(clone_host);
-  free(clone_conn_to_host);
-  free(clone_alpn);
-  if(result) {
-    failf(data, "Failed to add Session ID to cache for %s://%s:%d [%s]",
-          store->scheme, store->name, store->remote_port,
-          Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server");
-    sessionid_free_cb(ssl_sessionid, idsize);
-    return result;
-  }
-  CURL_TRC_CF(data, cf, "Added Session ID to cache for %s://%s:%d [%s]",
-              store->scheme, store->name, store->remote_port,
-              Curl_ssl_cf_is_proxy(cf) ? "PROXY" : "server");
-  return CURLE_OK;
+  return connssl->ssl_impl->connect_nonblocking(cf, data, done);
 }
 
 CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
@@ -791,14 +527,9 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
   /* kill the session ID cache if not shared */
-  if(data->state.session && !SSLSESSION_SHARED(data)) {
-    size_t i;
-    for(i = 0; i < data->set.general_ssl.max_ssl_sessions; i++)
-      /* the single-killer function handles empty table slots */
-      Curl_ssl_kill_session(&data->state.session[i]);
-
-    /* free the cache data */
-    Curl_safefree(data->state.session);
+  if(data->state.ssl_scache && !CURL_SHARE_ssl_scache(data)) {
+    Curl_ssl_scache_destroy(data->state.ssl_scache);
+    data->state.ssl_scache = NULL;
   }
 
   if(Curl_ssl->close_all)
@@ -851,29 +582,6 @@ struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
   if(Curl_ssl->engines_list)
     return Curl_ssl->engines_list(data);
   return NULL;
-}
-
-/*
- * This sets up a session ID cache to the specified size. Make sure this code
- * is agnostic to what underlying SSL technology we use.
- */
-CURLcode Curl_ssl_initsessions(struct Curl_easy *data, size_t amount)
-{
-  struct Curl_ssl_session *session;
-
-  if(data->state.session)
-    /* this is just a precaution to prevent multiple inits */
-    return CURLE_OK;
-
-  session = calloc(amount, sizeof(struct Curl_ssl_session));
-  if(!session)
-    return CURLE_OUT_OF_MEMORY;
-
-  /* store the info in the SSL section */
-  data->set.general_ssl.max_ssl_sessions = amount;
-  data->state.session = session;
-  data->state.sessionage = 1; /* this is brand new */
-  return CURLE_OK;
 }
 
 static size_t multissl_version(char *buffer, size_t size);
@@ -1494,11 +1202,12 @@ CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
 
 void Curl_ssl_peer_cleanup(struct ssl_peer *peer)
 {
+  Curl_safefree(peer->sni);
   if(peer->dispname != peer->hostname)
     free(peer->dispname);
-  free(peer->sni);
-  free(peer->hostname);
-  peer->hostname = peer->sni = peer->dispname = NULL;
+  peer->dispname = NULL;
+  Curl_safefree(peer->hostname);
+  Curl_safefree(peer->scache_key);
   peer->type = CURL_SSL_PEER_DNS;
 }
 
@@ -1506,7 +1215,7 @@ static void cf_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 {
   struct ssl_connect_data *connssl = cf->ctx;
   if(connssl) {
-    Curl_ssl->close(cf, data);
+    connssl->ssl_impl->close(cf, data);
     connssl->state = ssl_connection_none;
     Curl_ssl_peer_cleanup(&connssl->peer);
   }
@@ -1532,7 +1241,9 @@ static ssl_peer_type get_peer_type(const char *hostname)
   return CURL_SSL_PEER_DNS;
 }
 
-CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
+CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
+                            struct Curl_cfilter *cf,
+                            const char *tls_id,
                             int transport)
 {
   const char *ehostname, *edispname;
@@ -1594,7 +1305,8 @@ CURLcode Curl_ssl_peer_init(struct ssl_peer *peer, struct Curl_cfilter *cf,
       peer->sni[len] = 0;
     }
   }
-  result = CURLE_OK;
+
+  result = Curl_ssl_peer_key_make(cf, peer, tls_id, &peer->scache_key);
 
 out:
   if(result)
@@ -1657,7 +1369,9 @@ static CURLcode ssl_cf_connect(struct Curl_cfilter *cf,
 
   *done = FALSE;
   if(!connssl->peer.hostname) {
-    result = Curl_ssl_peer_init(&connssl->peer, cf, TRNSPRT_TCP);
+    char tls_id[80];
+    connssl->ssl_impl->version(tls_id, sizeof(tls_id) - 1);
+    result = Curl_ssl_peer_init(&connssl->peer, cf, tls_id, TRNSPRT_TCP);
     if(result)
       goto out;
   }
@@ -1686,11 +1400,13 @@ out:
 static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
                                 const struct Curl_easy *data)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   bool result;
 
   CF_DATA_SAVE(save, cf, data);
-  if(Curl_ssl->data_pending && Curl_ssl->data_pending(cf, data))
+  if(connssl->ssl_impl->data_pending &&
+     connssl->ssl_impl->data_pending(cf, data))
     result = TRUE;
   else
     result = cf->next->cft->has_data_pending(cf->next, data);
@@ -1702,6 +1418,7 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
                            struct Curl_easy *data, const void *buf, size_t len,
                            bool eos, CURLcode *err)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   ssize_t nwritten = 0;
 
@@ -1710,7 +1427,7 @@ static ssize_t ssl_cf_send(struct Curl_cfilter *cf,
   *err = CURLE_OK;
   if(len > 0) {
     CF_DATA_SAVE(save, cf, data);
-    nwritten = Curl_ssl->send_plain(cf, data, buf, len, err);
+    nwritten = connssl->ssl_impl->send_plain(cf, data, buf, len, err);
     CF_DATA_RESTORE(cf, save);
   }
   return nwritten;
@@ -1720,12 +1437,13 @@ static ssize_t ssl_cf_recv(struct Curl_cfilter *cf,
                            struct Curl_easy *data, char *buf, size_t len,
                            CURLcode *err)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
   ssize_t nread;
 
   CF_DATA_SAVE(save, cf, data);
   *err = CURLE_OK;
-  nread = Curl_ssl->recv_plain(cf, data, buf, len, err);
+  nread = connssl->ssl_impl->recv_plain(cf, data, buf, len, err);
   if(nread > 0) {
     DEBUGASSERT((size_t)nread <= len);
   }
@@ -1743,6 +1461,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 bool *done)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   CURLcode result = CURLE_OK;
 
   *done = TRUE;
@@ -1750,7 +1469,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
     struct cf_call_data save;
 
     CF_DATA_SAVE(save, cf, data);
-    result = Curl_ssl->shut_down(cf, data, TRUE, done);
+    result = connssl->ssl_impl->shut_down(cf, data, TRUE, done);
     CURL_TRC_CF(data, cf, "cf_shutdown -> %d, done=%d", result, *done);
     CF_DATA_RESTORE(cf, save);
     cf->shutdown = (result || *done);
@@ -1762,10 +1481,11 @@ static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
                                   struct Curl_easy *data,
                                   struct easy_pollset *ps)
 {
+  struct ssl_connect_data *connssl = cf->ctx;
   struct cf_call_data save;
 
   CF_DATA_SAVE(save, cf, data);
-  Curl_ssl->adjust_pollset(cf, data, ps);
+  connssl->ssl_impl->adjust_pollset(cf, data, ps);
   CF_DATA_RESTORE(cf, save);
 }
 
@@ -1971,9 +1691,10 @@ void *Curl_ssl_get_internals(struct Curl_easy *data, int sockindex,
     /* get first SSL filter in chain, if any is present */
     cf = get_ssl_filter(data->conn->cfilter[sockindex]);
     if(cf) {
+      struct ssl_connect_data *connssl = cf->ctx;
       struct cf_call_data save;
       CF_DATA_SAVE(save, cf, data);
-      result = Curl_ssl->get_internals(cf->ctx, info);
+      result = connssl->ssl_impl->get_internals(cf->ctx, info);
       CF_DATA_RESTORE(cf, save);
     }
   }
@@ -2006,7 +1727,7 @@ static CURLcode vtls_shutdown_blocking(struct Curl_cfilter *cf,
       return CURLE_OPERATION_TIMEDOUT;
     }
 
-    result = Curl_ssl->shut_down(cf, data, send_shutdown, done);
+    result = connssl->ssl_impl->shut_down(cf, data, send_shutdown, done);
     if(result ||*done)
       goto out;
 
@@ -2158,28 +1879,28 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
 #endif
     ;
 
-  if(connssl->alpn_negotiated) {
+  if(connssl->negotiated.alpn) {
     /* When we ask for a specific ALPN protocol, we need the confirmation
      * of it by the server, as we have installed protocol handler and
      * connection filter chain for exactly this protocol. */
     if(!proto_len) {
       failf(data, "ALPN: asked for '%s' from previous session, "
             "but server did not confirm it. Refusing to continue.",
-            connssl->alpn_negotiated);
+            connssl->negotiated.alpn);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    else if((strlen(connssl->alpn_negotiated) != proto_len) ||
-            memcmp(connssl->alpn_negotiated, proto, proto_len)) {
+    else if((strlen(connssl->negotiated.alpn) != proto_len) ||
+            memcmp(connssl->negotiated.alpn, proto, proto_len)) {
       failf(data, "ALPN: asked for '%s' from previous session, but server "
             "selected '%.*s'. Refusing to continue.",
-            connssl->alpn_negotiated, (int)proto_len, proto);
+            connssl->negotiated.alpn, (int)proto_len, proto);
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
     /* ALPN is exactly what we asked for, done. */
     infof(data, "ALPN: server confirmed to use '%s'",
-          connssl->alpn_negotiated);
+          connssl->negotiated.alpn);
     goto out;
   }
 
@@ -2190,11 +1911,11 @@ CURLcode Curl_alpn_set_negotiated(struct Curl_cfilter *cf,
       result = CURLE_SSL_CONNECT_ERROR;
       goto out;
     }
-    connssl->alpn_negotiated = malloc(proto_len + 1);
-    if(!connssl->alpn_negotiated)
+    connssl->negotiated.alpn = malloc(proto_len + 1);
+    if(!connssl->negotiated.alpn)
       return CURLE_OUT_OF_MEMORY;
-    memcpy(connssl->alpn_negotiated, proto, proto_len);
-    connssl->alpn_negotiated[proto_len] = 0;
+    memcpy(connssl->negotiated.alpn, proto, proto_len);
+    connssl->negotiated.alpn[proto_len] = 0;
   }
 
   if(proto && proto_len) {

@@ -34,6 +34,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "vtls_scache.h"
 #include "connect.h"
 #include "select.h"
 #include "multiif.h"
@@ -609,20 +610,19 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
   br_ssl_engine_set_x509(&backend->ctx.eng, &backend->x509.vtable);
 
   if(ssl_config->primary.cache_session) {
-    void *sdata;
-    size_t slen;
+    struct Curl_ssl_session *sc_session = NULL;
     const br_ssl_session_parameters *session;
 
-    CURL_TRC_CF(data, cf, "connect_step1, check session cache");
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, &connssl->peer, &sdata, &slen, NULL) &&
-       slen == sizeof(*session)) {
-      session = sdata;
+    ret = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
+                               &sc_session);
+    if(!ret && sc_session && sc_session->sdata && sc_session->sdata_len) {
+      session = (br_ssl_session_parameters *)(void *)sc_session->sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
+      /* single use of sessions */
+      Curl_ssl_scache_return(cf, data, connssl->peer.scache_key, sc_session);
     }
-    Curl_ssl_sessionid_unlock(data);
   }
 
   if(connssl->alpn) {
@@ -804,12 +804,6 @@ static CURLcode bearssl_connect_step2(struct Curl_cfilter *cf,
   return ret;
 }
 
-static void bearssl_session_free(void *sessionid, size_t idsize)
-{
-  (void)idsize;
-  free(sessionid);
-}
-
 static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
                                       struct Curl_easy *data)
 {
@@ -832,17 +826,22 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
   }
 
   if(ssl_config->primary.cache_session) {
+    struct Curl_ssl_session *sc_session;
     br_ssl_session_parameters *session;
 
     session = malloc(sizeof(*session));
     if(!session)
       return CURLE_OUT_OF_MEMORY;
     br_ssl_engine_get_session_parameters(&backend->ctx.eng, session);
-    Curl_ssl_sessionid_lock(data);
-    ret = Curl_ssl_set_sessionid(cf, data, &connssl->peer, NULL,
-                                 session, sizeof(*session),
-                                 bearssl_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    ret = Curl_ssl_session_create((unsigned char *)session, sizeof(*session),
+                                  (int)session->version,
+                                  connssl->negotiated.alpn,
+                                  0, -1, &sc_session);
+    if(!ret) {
+      ret = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,
+                                sc_session);
+      /* took ownership of `sc_session` */
+    }
     if(ret)
       return ret;
   }

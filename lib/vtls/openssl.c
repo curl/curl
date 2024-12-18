@@ -56,6 +56,7 @@
 #include "select.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "vtls_scache.h"
 #include "vauth/vauth.h"
 #include "keylog.h"
 #include "strcase.h"
@@ -960,8 +961,6 @@ static const char *SSL_ERROR_to_str(int err)
   }
 }
 
-static size_t ossl_version(char *buffer, size_t size);
-
 /* Return error string for last OpenSSL error
  */
 static char *ossl_strerror(unsigned long error, char *buf, size_t size)
@@ -970,7 +969,7 @@ static char *ossl_strerror(unsigned long error, char *buf, size_t size)
   DEBUGASSERT(size);
   *buf = '\0';
 
-  len = ossl_version(buf, size);
+  len = Curl_ossl_version(buf, size);
   DEBUGASSERT(len < (size - 2));
   if(len < (size - 2)) {
     buf += len;
@@ -2013,13 +2012,6 @@ static void ossl_close(struct Curl_cfilter *cf, struct Curl_easy *data)
   }
 }
 
-static void ossl_session_free(void *sessionid, size_t idsize)
-{
-  /* free the ID */
-  (void)idsize;
-  free(sessionid);
-}
-
 /*
  * This function is called when the 'data' struct is going away. Close
  * down everything and free all resources!
@@ -2873,20 +2865,23 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 
 CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
                                struct Curl_easy *data,
-                               const struct ssl_peer *peer,
-                               SSL_SESSION *session)
+                               const char *ssl_peer_key,
+                               SSL_SESSION *session,
+                               int ietf_tls_id,
+                               const char *alpn)
 {
   const struct ssl_config_data *config;
+  unsigned char *der_session_buf = NULL;
   CURLcode result = CURLE_OK;
-  size_t der_session_size;
-  unsigned char *der_session_buf;
-  unsigned char *der_session_ptr;
 
   if(!cf || !data)
     goto out;
 
   config = Curl_ssl_cf_get_config(cf, data);
   if(config->primary.cache_session) {
+    struct Curl_ssl_session *sc_session = NULL;
+    size_t der_session_size;
+    unsigned char *der_session_ptr;
 
     der_session_size = i2d_SSL_SESSION(session, NULL);
     if(der_session_size == 0) {
@@ -2903,17 +2898,22 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     der_session_size = i2d_SSL_SESSION(session, &der_session_ptr);
     if(der_session_size == 0) {
       result = CURLE_OUT_OF_MEMORY;
-      free(der_session_buf);
       goto out;
     }
 
-    Curl_ssl_sessionid_lock(data);
-    result = Curl_ssl_set_sessionid(cf, data, peer, NULL, der_session_buf,
-                                    der_session_size, ossl_session_free);
-    Curl_ssl_sessionid_unlock(data);
+    result = Curl_ssl_session_create(der_session_buf, der_session_size,
+                                     ietf_tls_id, alpn, 0,
+                                     SSL_SESSION_get_timeout(session),
+                                     &sc_session);
+    der_session_buf = NULL;  /* took ownership of sdata */
+    if(!result) {
+      result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
+      /* took ownership of `sc_session` */
+    }
   }
 
 out:
+  free(der_session_buf);
   return result;
 }
 
@@ -2929,7 +2929,9 @@ static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
   connssl = cf ? cf->ctx : NULL;
   data = connssl ? CF_DATA_CURRENT(cf) : NULL;
-  Curl_ossl_add_session(cf, data, &connssl->peer, ssl_sessionid);
+  if(data && connssl)
+    Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
+                          SSL_version(ssl), connssl->negotiated.alpn);
   return 0;
 }
 
@@ -3468,7 +3470,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
                             struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             struct ssl_peer *peer,
-                            int transport, /* TCP or QUIC */
                             const unsigned char *alpn, size_t alpn_len,
                             Curl_ossl_ctx_setup_cb *cb_setup,
                             void *cb_user_data,
@@ -3479,9 +3480,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   const char *ciphers;
   SSL_METHOD_QUAL SSL_METHOD *req_method = NULL;
   ctx_option_t ctx_options = 0;
-  SSL_SESSION *ssl_session = NULL;
-  const unsigned char *der_sessionid = NULL;
-  size_t der_sessionid_size = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   const long int ssl_version_min = conn_config->version;
@@ -3498,7 +3496,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   ssl_config->certverifyresult = !X509_V_OK;
 
-  switch(transport) {
+  switch(peer->transport) {
   case TRNSPRT_TCP:
     /* check to see if we have been told to use an explicit SSL/TLS version */
     switch(ssl_version_min) {
@@ -3542,7 +3540,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 #endif
     break;
   default:
-    failf(data, "unsupported transport %d in SSL init", transport);
+    failf(data, "unsupported transport %d in SSL init", peer->transport);
     return CURLE_SSL_CONNECT_ERROR;
   }
 
@@ -3965,32 +3963,36 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
-    Curl_ssl_sessionid_lock(data);
-    if(!Curl_ssl_getsessionid(cf, data, peer, (void **)&der_sessionid,
-      &der_sessionid_size, NULL)) {
-      /* we got a session id, use it! */
+    struct Curl_ssl_session *sc_session = NULL;
+
+    result = Curl_ssl_scache_take(cf, data, peer->scache_key, &sc_session);
+    if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
+      const unsigned char *der_sessionid = sc_session->sdata;
+      size_t der_sessionid_size = sc_session->sdata_len;
+      SSL_SESSION *ssl_session = NULL;
+
+      /* If OpenSSL does not accept the session from the cache, this
+       * is not an error. We just continue without it. */
       ssl_session = d2i_SSL_SESSION(NULL, &der_sessionid,
-        (long)der_sessionid_size);
+                                    (long)der_sessionid_size);
       if(ssl_session) {
         if(!SSL_set_session(octx->ssl, ssl_session)) {
-          Curl_ssl_sessionid_unlock(data);
-          SSL_SESSION_free(ssl_session);
-          failf(data, "SSL: SSL_set_session failed: %s",
+          infof(data, "SSL: SSL_set_session not accepted, "
+                "continuing without: %s",
                 ossl_strerror(ERR_get_error(), error_buffer,
                               sizeof(error_buffer)));
-          return CURLE_SSL_CONNECT_ERROR;
+        }
+        else {
+          infof(data, "SSL reusing session");
+          octx->reused_session = TRUE;
         }
         SSL_SESSION_free(ssl_session);
-        /* Informational message */
-        infof(data, "SSL reusing session ID");
-        octx->reused_session = TRUE;
       }
       else {
-        Curl_ssl_sessionid_unlock(data);
-        return CURLE_SSL_CONNECT_ERROR;
+        infof(data, "SSL session not accepted by OpenSSL, continuing without");
       }
     }
-    Curl_ssl_sessionid_unlock(data);
+    Curl_ssl_scache_return(cf, data, peer->scache_key, sc_session);
   }
 
   return CURLE_OK;
@@ -4018,7 +4020,7 @@ static CURLcode ossl_connect_step1(struct Curl_cfilter *cf,
   }
 #endif
 
-  result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer, TRNSPRT_TCP,
+  result = Curl_ossl_ctx_init(octx, cf, data, &connssl->peer,
                               proto.data, proto.len, NULL, NULL,
                               ossl_new_session_cb, cf);
   if(result)
@@ -4693,21 +4695,6 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
     /* do not do this after Session ID reuse */
     result = verifystatus(cf, data, octx);
     if(result) {
-      /* when verifystatus failed, remove the session id from the cache again
-         if present */
-      if(!Curl_ssl_cf_is_proxy(cf)) {
-        void *old_ssl_sessionid = NULL;
-        bool incache;
-        Curl_ssl_sessionid_lock(data);
-        incache = !(Curl_ssl_getsessionid(cf, data, peer,
-                                          &old_ssl_sessionid, NULL, NULL));
-        if(incache) {
-          infof(data, "Remove session ID again from cache");
-          Curl_ssl_delsessionid(data, old_ssl_sessionid);
-        }
-        Curl_ssl_sessionid_unlock(data);
-      }
-
       X509_free(octx->server_cert);
       octx->server_cert = NULL;
       return result;
@@ -4757,6 +4744,9 @@ static CURLcode ossl_connect_step3(struct Curl_cfilter *cf,
   result = Curl_oss_check_peer_cert(cf, data, octx, &connssl->peer);
   if(!result)
     connssl->connecting_state = ssl_connect_done;
+  else
+    /* on error, remove sessions we might have in the pool */
+    Curl_ssl_scache_remove_all(cf, data, connssl->peer.scache_key);
 
   return result;
 }
@@ -5172,7 +5162,7 @@ static CURLcode ossl_get_channel_binding(struct Curl_easy *data, int sockindex,
 #endif
 }
 
-static size_t ossl_version(char *buffer, size_t size)
+size_t Curl_ossl_version(char *buffer, size_t size)
 {
 #ifdef LIBRESSL_VERSION_NUMBER
 #ifdef HAVE_OPENSSL_VERSION
@@ -5336,7 +5326,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
 
   ossl_init,                /* init */
   ossl_cleanup,             /* cleanup */
-  ossl_version,             /* version */
+  Curl_ossl_version,        /* version */
   ossl_shutdown,            /* shutdown */
   ossl_data_pending,        /* data_pending */
   ossl_random,              /* random */
