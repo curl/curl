@@ -8,8 +8,7 @@ SPDX-License-Identifier: curl
 
 The TLS protocol offers methods of "resuming" a previous "session". A
 TLS "session" is a negotiated security context across a connection
-(which may be via TCP or UDP or other transports. Yes, you can do
-TLS over a plain unix domain socket, so this can vary a lot.)
+(which may be via TCP or UDP or other transports.)
 
 By "resuming", the TLS protocol means that the security context from
 before can be fully or partially resurrected when the TLS client presents
@@ -82,7 +81,7 @@ peers.
 
 If the connection filter wants to use a client certificate or SRP
 authentication, the cache will check those as well. If the cache peer
-carries client cert or SRP autth, the connection filter must have
+carries client cert or SRP auth, the connection filter must have
 those with the same values (and vice versa).
 
 On a match, the connection filter gets the session ticket and feeds that
@@ -127,14 +126,14 @@ concurrent connections will not reuse the same ticket.
 As mentioned above, ssl peer keys are not intended for storage in a
 file system. They'll clearly show which hosts the user talked to. This
 maybe "just" privacy relevant, but has security implications as an
-attacker might find worthy targets amoung your peer keys.
+attacker might find worthy targets among your peer keys.
 
 Also, we do not recommend to persist TLSv1.2 tickets.
 
 ### Salted Hashes
 
 The TLS session cache offers an alternative to storing peer keys:
-it provides a salted SHA256 hash of the peer key for im- and export.
+it provides a salted SHA256 hash of the peer key for import and export.
 
 #### Export
 
@@ -166,4 +165,4 @@ This is a performance penalty in the order of "unknown" peer keys
 which will diminish over time when keys are rediscovered. Note that
 this also works for putting a new ticket into the cache: when no
 present entry matches, a new one with peer key is created. This
-peer key will then no longer bear the cost of hash comparisions.
+peer key will then no longer bear the cost of hash computes.
