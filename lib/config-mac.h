@@ -65,10 +65,6 @@
 
 #define HAVE_SIGACTION          1
 
-#ifdef MACOS_SSL_SUPPORT
-#  define USE_OPENSSL           1
-#endif
-
 #define CURL_DISABLE_LDAP       1
 
 #define HAVE_IOCTL_FIONBIO      1
