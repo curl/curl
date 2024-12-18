@@ -1801,6 +1801,19 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
     FALSE; /* pessimistic in absence of data */
 }
 
+/* do nothing */
+static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf, struct Curl_easy *data,
+                             int event, int arg1, void *arg2)
+{
+  (void)cf;
+  (void)data;
+  (void)event;
+  (void)arg1;
+  (void)arg2;
+  return CURLE_OK;
+}
+
+
 struct Curl_cftype Curl_cft_ssl = {
   "SSL",
   CF_TYPE_SSL,
@@ -1814,7 +1827,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  NULL,
+  ssl_cf_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,

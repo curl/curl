@@ -644,8 +644,7 @@ CURLcode Curl_conn_cf_cntrl(struct Curl_cfilter *cf,
   for(; cf; cf = cf->next) {
     if(Curl_cf_def_cntrl == cf->cft->cntrl)
       continue;
-    if(cf->cft->cntrl)
-      result = cf->cft->cntrl(cf, data, event, arg1, arg2);
+    result = cf->cft->cntrl(cf, data, event, arg1, arg2);
     if(!ignore_result && result)
       break;
   }
