@@ -435,6 +435,8 @@ static int compare_func(const void *a, const void *b)
   const struct pair *aa = a;
   const struct pair *bb = b;
   /* If one element is empty, the other is always sorted higher */
+  if(aa->len == 0 && bb->len == 0)
+    return 0;
   if(aa->len == 0)
     return -1;
   if(bb->len == 0)
