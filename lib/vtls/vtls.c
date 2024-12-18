@@ -1769,6 +1769,18 @@ static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
   CF_DATA_RESTORE(cf, save);
 }
 
+static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
+                             struct Curl_easy *data,
+                             int event, int arg1, void *arg2)
+{
+  (void)cf;
+  (void)data;
+  (void)event;
+  (void)arg1;
+  (void)arg2;
+  return CURLE_OK;
+}
+
 static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              int query, int *pres1, void *pres2)
@@ -1800,19 +1812,6 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
     cf->next->cft->is_alive(cf->next, data, input_pending) :
     FALSE; /* pessimistic in absence of data */
 }
-
-/* do nothing */
-static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf, struct Curl_easy *data,
-                             int event, int arg1, void *arg2)
-{
-  (void)cf;
-  (void)data;
-  (void)event;
-  (void)arg1;
-  (void)arg2;
-  return CURLE_OK;
-}
-
 
 struct Curl_cftype Curl_cft_ssl = {
   "SSL",
