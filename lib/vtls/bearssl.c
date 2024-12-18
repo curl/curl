@@ -1172,8 +1172,6 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   NULL,                            /* engines_list */
   NULL,                            /* false_start */
   bearssl_sha256sum,               /* sha256sum */
-  NULL,                            /* associate_connection */
-  NULL,                            /* disassociate_connection */
   bearssl_recv,                    /* recv decrypted data */
   bearssl_send,                    /* send data to encrypt */
   NULL,                            /* get_channel_binding */

@@ -173,10 +173,6 @@ struct Curl_ssl {
   bool (*false_start)(void);
   CURLcode (*sha256sum)(const unsigned char *input, size_t inputlen,
                     unsigned char *sha256sum, size_t sha256sumlen);
-
-  bool (*attach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
-  void (*detach_data)(struct Curl_cfilter *cf, struct Curl_easy *data);
-
   ssize_t (*recv_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         char *buf, size_t len, CURLcode *code);
   ssize_t (*send_plain)(struct Curl_cfilter *cf, struct Curl_easy *data,

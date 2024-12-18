@@ -2767,8 +2767,6 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   NULL,                               /* engines_list */
   sectransp_false_start,              /* false_start */
   sectransp_sha256sum,                /* sha256sum */
-  NULL,                               /* associate_connection */
-  NULL,                               /* disassociate_connection */
   sectransp_recv,                     /* recv decrypted data */
   sectransp_send,                     /* send data to encrypt */
   NULL,                               /* get_channel_binding */
