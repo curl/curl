@@ -1200,11 +1200,6 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   return ret;
 }
 
-static void mbedtls_close_all(struct Curl_easy *data)
-{
-  (void)data;
-}
-
 static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  bool send_shutdown, bool *done)
@@ -1648,21 +1643,21 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_init,                     /* init */
   mbedtls_cleanup,                  /* cleanup */
   mbedtls_version,                  /* version */
-  Curl_none_check_cxn,              /* check_cxn */
+  NULL,                             /* check_cxn */
   mbedtls_shutdown,                 /* shutdown */
   mbedtls_data_pending,             /* data_pending */
   mbedtls_random,                   /* random */
-  Curl_none_cert_status_request,    /* cert_status_request */
+  NULL,                             /* cert_status_request */
   mbedtls_connect,                  /* connect */
   mbedtls_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_adjust_pollset,          /* adjust_pollset */
   mbedtls_get_internals,            /* get_internals */
   mbedtls_close,                    /* close_one */
-  mbedtls_close_all,                /* close_all */
-  Curl_none_set_engine,             /* set_engine */
-  Curl_none_set_engine_default,     /* set_engine_default */
-  Curl_none_engines_list,           /* engines_list */
-  Curl_none_false_start,            /* false_start */
+  NULL,                             /* close_all */
+  NULL,                             /* set_engine */
+  NULL,                             /* set_engine_default */
+  NULL,                             /* engines_list */
+  NULL,                             /* false_start */
   mbedtls_sha256sum,                /* sha256sum */
   NULL,                             /* associate_connection */
   NULL,                             /* disassociate_connection */
