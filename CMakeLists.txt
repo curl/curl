@@ -199,8 +199,8 @@ if(WIN32)
   # Detect actual value of _WIN32_WINNT and store as HAVE_WIN32_WINNT
   curl_internal_test(HAVE_WIN32_WINNT)
   if(HAVE_WIN32_WINNT)
-    string(REGEX MATCH ".*_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
-    string(REGEX REPLACE ".*_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX MATCH "_WIN32_WINNT=0x[0-9a-fA-F]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
+    string(REGEX REPLACE "_WIN32_WINNT=" "" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
     string(REGEX REPLACE "0x([0-9a-f][0-9a-f][0-9a-f])$" "0x0\\1" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")  # pad to 4 digits
     string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
@@ -2198,7 +2198,7 @@ if(NOT CURL_DISABLE_INSTALL)
     endif()
     if(_lib MATCHES "^-")  # '-framework <name>'
       list(APPEND _ldflags "${_lib}")
-    elseif(_lib MATCHES ".*/.*")
+    elseif(_lib MATCHES "/")
       # This gets a bit more complex, because we want to specify the
       # directory separately, and only once per directory
       get_filename_component(_libdir ${_lib} DIRECTORY)
