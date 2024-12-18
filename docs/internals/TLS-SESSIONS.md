@@ -4,153 +4,166 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# TLS Session Handling
+# TLS Sessions and Tickets
 
-The TLS protocol offers what is commonly named "sessions" to allow
-for faster resumptions and even sending of 0-RTT data when opening
-a connection to a previously visited server. The exact mechanism
-varies a bit between TLSv1.2 and TLSv1.3.
+The TLS protocol offers methods of "resuming" a previous "session". A
+TLS "session" is a negotiated security context across a connection
+(which may be via TCP or UDP or other transports. Yes, you can do
+TLS over a plain unix domain socket, so this can vary a lot.)
 
-## Curl's `peer_key`
+By "resuming", the TLS protocol means that the security context from
+before can be fully or partially resurrected when the TLS client presents
+the proper crypto stuff to the server. This saves on the amount of 
+TLS packets that need to be sent back and forth, reducing amount
+of data and even latency. In the case of QUIC, resumption may send
+application data without having seen any reply from the server, hence
+this is named 0-RTT data.
 
-To allow reusing these sessions, libcurl provides the capability
-to cache up to a fixed number of them. This can be achieved by
-configuring a curl share instance.
+The exact mechanism of session tickets in TLSv1.2 (and earlier) and
+TLSv1.3 differs. TLSv1.2 tickets have several weaknesses (that can
+be exploited by attackers) which TLSv1.3 then fixed. See
+[Session Tickets in the real world](https://words.filippo.io/we-need-to-talk-about-session-tickets/)
+for an insight into this topic.
 
-The TLS session cache uses a `peer_key` to identify for which server
-and settings a session is about. This is a printable string, created
-as described below.
+These difference between TLS protocol versions are reflected in curl's
+handling of session tickets. More below.
 
-#### peer name
+## Curl's `ssl_peer_key`
 
-Such a key always starts with `<hostname>:<port>` of the server
-curl talks to. Because we do not want to use a TLS session for
-another server (even if the server is not malicious, it comes at
-a performance penalty).
+In order to find a ticket from a previous TLS session, curl
+needs a name for TLS sessions that uniquely identifies the peer
+it talks to.
 
-If the connection is not using TCP, curl appends the transport used
-to the key. `curl.se:443:QUIC` would be the start of a peer_key when
-talking to curl.se via QUIC. Another transport is `UNIX` when talking
-over a socket.
+This name has to reflect also the various TLS parameters that can
+be configured in curl for a connection. We do not want to use
+a ticket from an different configuration. Example: when setting
+the maximum TLS version to 1.2, we do not want to reuse a ticket
+we got from a TLSv1.3 session, although we are talking to the
+same host.
 
-#### peer verification
+Internally, we call this name a `ssl_peer_key`. It is a printable
+string that carries hostname and port and any non-default TLS
+parameters involved in the connection.
 
-Next in the key come indications when the transfer's TLS settings
-vary from the defaults. `:NO-VRFY-PEER` is appended when the peer
-verification is configured off. `:NO-VRFY-HOST` when hostname verification
-is off. The reason for these is that a successfully resumed TLS session
-will not longer verify the certificate. Mixing sessions for these TLS
-settings then would not give the results as intended.
+Examples:
+- `curl.se:443:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is a peer key for 
+   a connection to `curl.se:443` using `/etc/ssl/cert.pem` as CA  
+   trust anchors and GnuTLS/3.8.7 as TLS backend.
+- `curl.se:443:TLSVER-6-6:CA-/etc/ssl/cert.pem:IMPL-GnuTLS/3.8.7` is the
+   same as the previous, except it is configured to use TLSv1.2 as
+   min and max versions.
 
-Next we append `:VRFY-STATUS` to the peek_key if that is enabled. We
-do not want to reuse session in connections that want to check revocation
-information that did not do this before.
+Different configurations produce different keys which is just what
+curl needs when handling SSL session tickets.
 
-#### connect-to
+One important thing: peer keys do not contain confidential
+information. If you configure a client certificate or SRP authentication
+with username/password, these will not be part of the peer key. 
 
-If curl was configured with `--connect-to` parameters and either peer or
-host verification was off, the `connect-to` host and port are appended
-as well. This is because when the peer certificate had been fully verified
-before, it does not matter via which address or SSH tunnel curl is talking
-to it (more on trust aspects below).
+However, peer keys carry the hostnames you use curl for. The *do*
+leak the privacy of your communication. We recommend to *not* persist
+peer keys for this reason.
 
-Furthermore we make the configured TLS versions, options, ciphers and curve
-settings part of the peer_key when they are not default. If a transfer
-wants TLSv1.3, it should not reused a TLSv1.2 session.
+**Caveat**: The key may contain file names or paths. It does not
+reflect the *contents* in the filesystem. If you change `/etc/ssl/cert.pem`
+and reuse a previous ticket, curl might trust a server which no
+longer has a root certificate in the file.
 
-### trust anchors
 
-All certificate verification relies on the trust anchors that are used.
-These can be configured in various ways as `CAfile`, `CApath`, `IssuerCert`,
-`CertBlob`, `CAInfoBlob` or `IssuerBlob`. When they are set, the are added
-to the peer_key in the following ways:
-
- * file and path names are converted to absolute paths. This makes the
-   peer_key independent of the current working directory.
- * Blobs are hashed using SHA256 and appended in hexadecimal notation.
-
-This makes the peer_key unique for the trust anchors you have configured.
-However, when the files or paths configured change their *content*, this
-may mess peer verification up. Example: you remove a trust anchor from
-a `--cacert` file. Connections reusing a TLS session from a peer no
-longer trusted could then still be successful for a while.
-
-#### client certificate and SRP username/password
-
-Client certificates and SRP username/password are **not** added to the
-peer key. However, when they are used, `:CCERT` or `:SRP-AUTH` is added
-to the key. This prevents mixing of TLS sessions between connections
-that differ here. (There are more checks in the session cache that
-prevent mix up of different client certificates and user info. See below.)
-
-Finally, the peer_key gets the TLS implementation name and version
-added as `:IMPL-<name>/<version>`. This prevents giving session data to
-TLS implementations that might choke on them.
-
-## TLS Session Cache Access
+## Session Cache Access
 
 #### Lookups
 
 When a new connection is being established, each SSL connection filter creates
-its own peer_key and calls into the cache. The cache then looks for an entry
+its own peer_key and calls into the cache. The cache then looks for a ticket
 with exactly this peer_key. Peer keys between proxy SSL filters and SSL
-filters talking through a tunnel will be different, as they talk to different
+filters talking through a tunnel will differ, as they talk to different
 peers.
 
 If the connection filter wants to use a client certificate or SRP
-authentication, the entry also needs to carry the same or is not a match.
-This works both ways. If the entry carries client cert or SRP auth, a
-connection filter which does not have those will not match either.
+authentication, the cache will check those as well. If the cache peer 
+carries client cert or SRP autth, the connection filter must have 
+those with the same values (and vice versa).
 
-On a match, the connection filter gets the session data and feeds that
+On a match, the connection filter gets the session ticket and feeds that
 to the TLS implementation which, on accepting it, will try to resume it
 for a shorter handshake. In addition, the filter gets the ALPN used
 before and the amount of 0-RTT data that the server announced to be
 willing to accept. The filter can then decide if it wants to attempt
-0-RTT or not.
+0-RTT or not. (The ALPN is needed to know if the server speaks the
+protocol you want to send in 0-RTT. It makes no sense to send HTTP/2
+requests to a server that only knows HTTP/1.1.)
 
 #### Updates
 
-When a new TLS session is received by a filter, it adds it to the
+When a new TLS session ticket is received by a filter, it adds it to the
 cache using its peer_key and SSL configuration. The cache looks for
-a matching entry and, should it find one, replaces the entries data
-with the new session.
+a matching entry and, should it find one, adds the ticket for this
+peer.
 
-Otherwise, it looks for a free entry or purges the oldest or an expired
-entry to make room.
+### Put, Take and Return
 
-## TLS Session Persistence
+when a filter accesses the session cache, it *takes*
+a ticket from the cache, meaning a returned ticket is removed. The filter
+then configures its TLS backend and *returns* the ticket to the cache.
 
-Peer key and other information work will when only in memory. When session
-data should be stored more permanent, issues with security and privacy
-have to be considered.
+The cache needs to treat tickets from TLSv1.2 and 1.3 differently.
+1.2 tickets should be reused, but 1.3 tickets SHOULD NOT (RFC 8446).
+The session cache will simply drop 1.3 tickets when they are returned
+after use, but keep a 1.2 ticket.
 
-libcurl will not offer the export of TLS session data that has been
-obtained using a client certificate or SRP authentication. An attacker
-could use that session to impersonate a user at a server.
+When a ticket is *put* into the cache, there is also a difference. There
+can be several 1.3 tickets at the same time, but only a single 1.2 ticket.
+TLSv1.2 tickets replace any other. 1.3 tickets accumulate up to a max
+amount.
 
-#### salted hashes
+By having a "put/take/return" we reflect the 1.3 use case nicely. Two
+concurrent connections will not reuse the same ticket.
 
-TLS session without such will be exportable. For privacy reasons, we
-do **not** recommend storing peer_keys in plain form. Instead, libcurl
-offers salted hashes of peer keys for export and re-import. This means
-that an attacker cannot easily find out to which hosts a user has made
-connections. They would have to guess and brute-force attempt the existing
-salt and hashes to find a match.
+## Session Ticket Persistence
 
-Note however, that if someone has a curl session file and wants to check
-if a connection to `google.com` has been made, the salted hash provides
-no real obstacle. In fact, this is done by the session cache for imported
-sessions.
+#### Privacy and Security
 
-When sessions are imported from a file, they will only have the salted
-hashes, but no peer keys. When a connection does a lookup with a peer key,
-the cache will find no immediate match.
+As mentioned above, ssl peer keys are not intended for storage in a 
+file system. They'll clearly show which hosts the user talked to. This
+maybe "just" privacy relevant, but has security implications as an
+attacker might find worthy targets amoung your peer keys.
 
-Instead, it will used the passed peer key and the salt of an entry
-to compute the hash again and see if it matches. If an entry matches,
-there is a high likelihood that the session has been made using the
-same peer key.
+Also, we do not recommend to persist TLSv1.2 tickets.
 
-The matching peer key is then remembered at the matched cache entry. No
-future lookups will need to check against the salted hash again.
+### Salted Hashes
+
+The TLS session cache offers an alternative to storing peer keys:
+it provides a salted SHA256 hash of the peer key for im- and export.
+
+#### Export
+
+The salt is generated randomly for each peer key on export. The
+SHA256 makes sure that the peer key cannot be reversed and that
+a slightly different key still produces a very different result.
+
+This means an attacker cannot just "grep" a session file for a
+particular entry, e.g. if they want to know if you accessed a
+specific host. They *can* however compute the SHA256 hashes for
+all salts in the file and find a specific entry. But they *cannot*
+find a hostname they do not know. They'd have to brute force by
+guessing.
+
+#### Import
+
+When session tickets are imported from a file, curl only gets the
+salted hashes. The tickets imported will belong to an *unknown*
+peer key.
+
+When a connection filter tries to *take* a session ticket, it will
+pass its peer key. This peer key will initially not match any
+tickets in the cache. The cache then checks all entries with
+unknown peer keys if the passed key matches their salted hash. If
+it does, the peer key is recovered and remembered at the cache
+entry.
+
+This is a performance penalty in the order of "unknown" peer keys
+which will diminish over time when keys are rediscovered. Note that
+this also works for putting a new ticket into the cache: when no
+present entry matches, a new one with peer key is created. This
+peer key will then no longer bear the cost of hash comparisions.

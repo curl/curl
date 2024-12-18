@@ -140,8 +140,12 @@ Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
   s->time_received = time_received;
   if(lifetime_secs < 0)
     lifetime_secs = -1; /* unknown */
-  else if(lifetime_secs > CURL_SCACHE_MAX_LIFETIME_SEC)
-    lifetime_secs = CURL_SCACHE_MAX_LIFETIME_SEC;
+  else if((s->ietf_tls_id == CURL_IETF_PROTO_TLS1_3) &&
+          (lifetime_secs > CURL_SCACHE_MAX_13_LIFETIME_SEC))
+    lifetime_secs = CURL_SCACHE_MAX_13_LIFETIME_SEC;
+  else if(lifetime_secs > CURL_SCACHE_MAX_12_LIFETIME_SEC)
+    lifetime_secs = CURL_SCACHE_MAX_12_LIFETIME_SEC;
+
   s->lifetime_secs = (int)lifetime_secs;
   s->sdata = sdata;
   s->sdata_len = sdata_len;
@@ -257,6 +261,17 @@ static void cf_scache_peer_remove_expired(struct Curl_ssl_scache_peer *peer,
     struct Curl_ssl_session *s = Curl_node_elem(n);
     n = Curl_node_next(n);
     if(cf_scache_session_expired(s, now))
+      cf_scache_session_remove(peer, s);
+  }
+}
+
+static void cf_scache_peer_remove_non13(struct Curl_ssl_scache_peer *peer)
+{
+  struct Curl_llist_node *n = Curl_llist_head(&peer->sessions);
+  while(n) {
+    struct Curl_ssl_session *s = Curl_node_elem(n);
+    n = Curl_node_next(n);
+    if(s->ietf_tls_id != CURL_IETF_PROTO_TLS1_3)
       cf_scache_session_remove(peer, s);
   }
 }
@@ -437,7 +452,8 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   }
 
   if(ssl->version || ssl->version_max) {
-    r = Curl_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version, ssl->version_max);
+    r = Curl_dyn_addf(&buf, ":TLSVER-%d-%d", ssl->version,
+                      (ssl->version_max >> 16));
     if(r)
       goto out;
   }
@@ -461,35 +477,37 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
     if(r)
       goto out;
   }
-  r = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile);
-  if(r)
-    goto out;
-  r = cf_ssl_peer_key_add_path(&buf, "CApath", ssl->CApath);
-  if(r)
-    goto out;
-  r = cf_ssl_peer_key_add_path(&buf, "CRL", ssl->CRLfile);
-  if(r)
-    goto out;
-  r = cf_ssl_peer_key_add_path(&buf, "Issuer", ssl->issuercert);
-  if(r)
-    goto out;
+  if(ssl->verifypeer) {
+    r = cf_ssl_peer_key_add_path(&buf, "CA", ssl->CAfile);
+    if(r)
+      goto out;
+    r = cf_ssl_peer_key_add_path(&buf, "CApath", ssl->CApath);
+    if(r)
+      goto out;
+    r = cf_ssl_peer_key_add_path(&buf, "CRL", ssl->CRLfile);
+    if(r)
+      goto out;
+    r = cf_ssl_peer_key_add_path(&buf, "Issuer", ssl->issuercert);
+    if(r)
+      goto out;
+    if(ssl->cert_blob) {
+      r = cf_ssl_peer_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
+      if(r)
+        goto out;
+    }
+    if(ssl->ca_info_blob) {
+      r = cf_ssl_peer_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
+      if(r)
+        goto out;
+    }
+    if(ssl->issuercert_blob) {
+      r = cf_ssl_peer_key_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
+      if(r)
+        goto out;
+    }
+  }
   if(ssl->pinned_key && ssl->pinned_key[0]) {
     r = Curl_dyn_addf(&buf, ":Pinned-%s", ssl->pinned_key);
-    if(r)
-      goto out;
-  }
-  if(ssl->cert_blob) {
-    r = cf_ssl_peer_key_add_hash(&buf, "CertBlob", ssl->cert_blob);
-    if(r)
-      goto out;
-  }
-  if(ssl->ca_info_blob) {
-    r = cf_ssl_peer_key_add_hash(&buf, "CAInfoBlob", ssl->ca_info_blob);
-    if(r)
-      goto out;
-  }
-  if(ssl->issuercert_blob) {
-    r = cf_ssl_peer_key_add_hash(&buf, "IssuerBlob", ssl->issuercert_blob);
     if(r)
       goto out;
   }
@@ -702,6 +720,7 @@ static CURLcode cf_scache_peer_add_session(struct Curl_cfilter *cf,
   else {
     /* Expire existing, append, trim from head to obey max_sessions */
     cf_scache_peer_remove_expired(peer, now);
+    cf_scache_peer_remove_non13(peer);
     Curl_llist_append(&peer->sessions, s, &s->list);
     while(Curl_llist_count(&peer->sessions) > peer->max_sessions) {
       Curl_node_remove(Curl_llist_head(&peer->sessions));

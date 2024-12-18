@@ -35,8 +35,10 @@ struct Curl_ssl_scache;
 struct Curl_ssl_session;
 struct ssl_peer;
 
-/* RFC 8446 (TLSv1.3) restrict lifetime to one week max */
-#define CURL_SCACHE_MAX_LIFETIME_SEC    (60*60*24*7)
+/* RFC 8446 (TLSv1.3) restrict lifetime to one week max, for
+ * other, less secure versions, we restrict it to a day */
+#define CURL_SCACHE_MAX_13_LIFETIME_SEC    (60*60*24*7)
+#define CURL_SCACHE_MAX_12_LIFETIME_SEC    (60*60*24)
 
 /* Create a session cache for up to max_peers endpoints with a total
  * of up to max_sessions SSL sessions per peer */
@@ -112,15 +114,15 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
 
-/* All about a SSL session */
+/* All about a SSL session ticket */
 struct Curl_ssl_session {
-  struct Curl_llist_node list;
-  const unsigned char *sdata; /* session data, plain bytes */
-  size_t sdata_len;           /* number of bytes in sdata */
-  curl_off_t time_received;   /* seconds since EPOCH session was received */
-  int lifetime_secs;          /* peer announced entry lifetime (-1 unknown) */
-  int ietf_tls_id;            /* TLS protocol identifier negotiated */
-  char *alpn;                 /* APLN TLS negotiated protocol string */
+  const unsigned char *sdata;  /* session ticket data, plain bytes */
+  size_t sdata_len;            /* number of bytes in sdata */
+  curl_off_t time_received;    /* seconds since EPOCH ticket was received */
+  int lifetime_secs;           /* ticket lifetime (-1 unknown) */
+  int ietf_tls_id;             /* TLS protocol identifier negotiated */
+  char *alpn;                  /* APLN TLS negotiated protocol string */
+  struct Curl_llist_node list; /*  internal storage handling */
 };
 
 /* Create a `session` instance. Does NOT need locking.
