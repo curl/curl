@@ -1847,7 +1847,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  NULL,
+  ssl_cf_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,
