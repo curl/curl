@@ -2798,7 +2798,6 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_init,                     /* init */
   schannel_cleanup,                  /* cleanup */
   schannel_version,                  /* version */
-  NULL,                              /* check_cxn */
   schannel_shutdown,                 /* shutdown */
   schannel_data_pending,             /* data_pending */
   schannel_random,                   /* random */

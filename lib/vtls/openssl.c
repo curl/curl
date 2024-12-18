@@ -5337,7 +5337,6 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_init,                /* init */
   ossl_cleanup,             /* cleanup */
   ossl_version,             /* version */
-  NULL,                     /* check_cxn */
   ossl_shutdown,            /* shutdown */
   ossl_data_pending,        /* data_pending */
   ossl_random,              /* random */

@@ -1284,7 +1284,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   multissl_init,                     /* init */
   NULL,                              /* cleanup */
   multissl_version,                  /* version */
-  NULL,                              /* check_cxn */
   NULL,                              /* shutdown */
   NULL,                              /* data_pending */
   NULL,                              /* random */
@@ -1825,30 +1824,9 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool *input_pending)
 {
-  int result = -1;
   /*
    * This function tries to determine connection status.
-   *
-   * Return codes:
-   *     1 means the connection is still in place
-   *     0 means the connection has been closed
-   *    -1 means the connection status is unknown
    */
-  if(Curl_ssl->check_cxn) {
-    struct cf_call_data save;
-    CF_DATA_SAVE(save, cf, data);
-    result = Curl_ssl->check_cxn(cf, data);
-    CF_DATA_RESTORE(cf, save);
-  }
-  if(result > 0) {
-    *input_pending = TRUE;
-    return TRUE;
-  }
-  if(result == 0) {
-    *input_pending = FALSE;
-    return FALSE;
-  }
-  /* ssl backend does not know */
   return cf->next ?
     cf->next->cft->is_alive(cf->next, data, input_pending) :
     FALSE; /* pessimistic in absence of data */
