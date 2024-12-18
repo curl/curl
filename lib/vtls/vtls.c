@@ -832,7 +832,7 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
 CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
 {
   if(Curl_ssl->set_engine)
-    Curl_ssl->set_engine(data, engine);
+    return Curl_ssl->set_engine(data, engine);
   return CURLE_NOT_BUILT_IN;
 }
 
