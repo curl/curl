@@ -1643,7 +1643,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   mbedtls_init,                     /* init */
   mbedtls_cleanup,                  /* cleanup */
   mbedtls_version,                  /* version */
-  NULL,                             /* check_cxn */
   mbedtls_shutdown,                 /* shutdown */
   mbedtls_data_pending,             /* data_pending */
   mbedtls_random,                   /* random */

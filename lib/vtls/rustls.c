@@ -1079,7 +1079,6 @@ const struct Curl_ssl Curl_ssl_rustls = {
   NULL,                            /* init */
   NULL,                            /* cleanup */
   cr_version,                      /* version */
-  NULL,                            /* check_cxn */
   cr_shutdown,                     /* shutdown */
   cr_data_pending,                 /* data_pending */
   cr_random,                       /* random */

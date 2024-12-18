@@ -2752,7 +2752,6 @@ const struct Curl_ssl Curl_ssl_sectransp = {
   NULL,                               /* init */
   NULL,                               /* cleanup */
   sectransp_version,                  /* version */
-  NULL,                               /* check_cxn */
   sectransp_shutdown,                 /* shutdown */
   sectransp_data_pending,             /* data_pending */
   sectransp_random,                   /* random */

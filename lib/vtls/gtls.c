@@ -2269,7 +2269,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   gtls_init,                     /* init */
   gtls_cleanup,                  /* cleanup */
   gtls_version,                  /* version */
-  NULL,                          /* check_cxn */
   gtls_shutdown,                 /* shutdown */
   gtls_data_pending,             /* data_pending */
   gtls_random,                   /* random */

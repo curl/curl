@@ -142,7 +142,6 @@ struct Curl_ssl {
   void (*cleanup)(void);
 
   size_t (*version)(char *buffer, size_t size);
-  int (*check_cxn)(struct Curl_cfilter *cf, struct Curl_easy *data);
   CURLcode (*shut_down)(struct Curl_cfilter *cf, struct Curl_easy *data,
                         bool send_shutdown, bool *done);
   bool (*data_pending)(struct Curl_cfilter *cf,

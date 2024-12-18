@@ -1157,7 +1157,6 @@ const struct Curl_ssl Curl_ssl_bearssl = {
   NULL,                            /* init */
   NULL,                            /* cleanup */
   bearssl_version,                 /* version */
-  NULL,                            /* check_cxn */
   bearssl_shutdown,                /* shutdown */
   bearssl_data_pending,            /* data_pending */
   bearssl_random,                  /* random */
