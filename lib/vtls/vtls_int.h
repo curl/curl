@@ -190,23 +190,8 @@ struct Curl_ssl {
 
 extern const struct Curl_ssl *Curl_ssl;
 
-
-int Curl_none_init(void);
-void Curl_none_cleanup(void);
-CURLcode Curl_none_shutdown(struct Curl_cfilter *cf, struct Curl_easy *data,
-                            bool send_shutdown, bool *done);
-int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data);
-void Curl_none_close_all(struct Curl_easy *data);
-void Curl_none_session_free(void *ptr);
-bool Curl_none_data_pending(struct Curl_cfilter *cf,
-                            const struct Curl_easy *data);
-bool Curl_none_cert_status_request(void);
-CURLcode Curl_none_set_engine(struct Curl_easy *data, const char *engine);
-CURLcode Curl_none_set_engine_default(struct Curl_easy *data);
-struct curl_slist *Curl_none_engines_list(struct Curl_easy *data);
-bool Curl_none_false_start(void);
 void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
-                              struct easy_pollset *ps);
+                             struct easy_pollset *ps);
 
 /**
  * Get the SSL filter below the given one or NULL if there is none.

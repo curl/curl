@@ -1154,24 +1154,24 @@ const struct Curl_ssl Curl_ssl_bearssl = {
 
   sizeof(struct bearssl_ssl_backend_data),
 
-  Curl_none_init,                  /* init */
-  Curl_none_cleanup,               /* cleanup */
+  NULL,                            /* init */
+  NULL,                            /* cleanup */
   bearssl_version,                 /* version */
-  Curl_none_check_cxn,             /* check_cxn */
+  NULL,                            /* check_cxn */
   bearssl_shutdown,                /* shutdown */
   bearssl_data_pending,            /* data_pending */
   bearssl_random,                  /* random */
-  Curl_none_cert_status_request,   /* cert_status_request */
+  NULL,                            /* cert_status_request */
   bearssl_connect,                 /* connect */
   bearssl_connect_nonblocking,     /* connect_nonblocking */
   Curl_ssl_adjust_pollset,         /* adjust_pollset */
   bearssl_get_internals,           /* get_internals */
   bearssl_close,                   /* close_one */
-  Curl_none_close_all,             /* close_all */
-  Curl_none_set_engine,            /* set_engine */
-  Curl_none_set_engine_default,    /* set_engine_default */
-  Curl_none_engines_list,          /* engines_list */
-  Curl_none_false_start,           /* false_start */
+  NULL,                            /* close_all */
+  NULL,                            /* set_engine */
+  NULL,                            /* set_engine_default */
+  NULL,                            /* engines_list */
+  NULL,                            /* false_start */
   bearssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
   NULL,                            /* disassociate_connection */

@@ -2798,21 +2798,21 @@ const struct Curl_ssl Curl_ssl_schannel = {
   schannel_init,                     /* init */
   schannel_cleanup,                  /* cleanup */
   schannel_version,                  /* version */
-  Curl_none_check_cxn,               /* check_cxn */
+  NULL,                              /* check_cxn */
   schannel_shutdown,                 /* shutdown */
   schannel_data_pending,             /* data_pending */
   schannel_random,                   /* random */
-  Curl_none_cert_status_request,     /* cert_status_request */
+  NULL,                              /* cert_status_request */
   schannel_connect,                  /* connect */
   schannel_connect_nonblocking,      /* connect_nonblocking */
   Curl_ssl_adjust_pollset,           /* adjust_pollset */
   schannel_get_internals,            /* get_internals */
   schannel_close,                    /* close_one */
-  Curl_none_close_all,               /* close_all */
-  Curl_none_set_engine,              /* set_engine */
-  Curl_none_set_engine_default,      /* set_engine_default */
-  Curl_none_engines_list,            /* engines_list */
-  Curl_none_false_start,             /* false_start */
+  NULL,                              /* close_all */
+  NULL,                              /* set_engine */
+  NULL,                              /* set_engine_default */
+  NULL,                              /* engines_list */
+  NULL,                              /* false_start */
   schannel_sha256sum,                /* sha256sum */
   NULL,                              /* associate_connection */
   NULL,                              /* disassociate_connection */

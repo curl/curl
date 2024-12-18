@@ -426,7 +426,9 @@ int Curl_ssl_init(void)
     return 1;
   init_ssl = TRUE; /* never again */
 
-  return Curl_ssl->init();
+  if(Curl_ssl->init)
+    return Curl_ssl->init();
+  return 1;
 }
 
 static bool ssl_prefs_check(struct Curl_easy *data)
@@ -799,7 +801,8 @@ void Curl_ssl_close_all(struct Curl_easy *data)
     Curl_safefree(data->state.session);
   }
 
-  Curl_ssl->close_all(data);
+  if(Curl_ssl->close_all)
+    Curl_ssl->close_all(data);
 }
 
 void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
@@ -828,20 +831,26 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
  */
 CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine)
 {
-  return Curl_ssl->set_engine(data, engine);
+  if(Curl_ssl->set_engine)
+    return Curl_ssl->set_engine(data, engine);
+  return CURLE_NOT_BUILT_IN;
 }
 
 /* Selects the default SSL crypto engine
  */
 CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data)
 {
-  return Curl_ssl->set_engine_default(data);
+  if(Curl_ssl->set_engine_default)
+    return Curl_ssl->set_engine_default(data);
+  return CURLE_NOT_BUILT_IN;
 }
 
 /* Return list of OpenSSL crypto engine names. */
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data)
 {
-  return Curl_ssl->engines_list(data);
+  if(Curl_ssl->engines_list)
+    return Curl_ssl->engines_list(data);
+  return NULL;
 }
 
 /*
@@ -1185,96 +1194,18 @@ end:
  */
 bool Curl_ssl_cert_status_request(void)
 {
-  return Curl_ssl->cert_status_request();
+  if(Curl_ssl->cert_status_request)
+    return Curl_ssl->cert_status_request();
+  return FALSE;
 }
 
 /*
  * Check whether the SSL backend supports false start.
  */
-bool Curl_ssl_false_start(struct Curl_easy *data)
+bool Curl_ssl_false_start(void)
 {
-  (void)data;
-  return Curl_ssl->false_start();
-}
-
-/*
- * Default implementations for unsupported functions.
- */
-
-int Curl_none_init(void)
-{
-  return 1;
-}
-
-void Curl_none_cleanup(void)
-{ }
-
-CURLcode Curl_none_shutdown(struct Curl_cfilter *cf UNUSED_PARAM,
-                            struct Curl_easy *data UNUSED_PARAM,
-                            bool send_shutdown UNUSED_PARAM,
-                            bool *done)
-{
-  (void)data;
-  (void)cf;
-  (void)send_shutdown;
-  /* Every SSL backend should have a shutdown implementation. Until we
-   * have implemented that, we put this fake in place. */
-  *done = TRUE;
-  return CURLE_OK;
-}
-
-int Curl_none_check_cxn(struct Curl_cfilter *cf, struct Curl_easy *data)
-{
-  (void)cf;
-  (void)data;
-  return -1;
-}
-
-void Curl_none_close_all(struct Curl_easy *data UNUSED_PARAM)
-{
-  (void)data;
-}
-
-void Curl_none_session_free(void *ptr UNUSED_PARAM)
-{
-  (void)ptr;
-}
-
-bool Curl_none_data_pending(struct Curl_cfilter *cf UNUSED_PARAM,
-                            const struct Curl_easy *data UNUSED_PARAM)
-{
-  (void)cf;
-  (void)data;
-  return 0;
-}
-
-bool Curl_none_cert_status_request(void)
-{
-  return FALSE;
-}
-
-CURLcode Curl_none_set_engine(struct Curl_easy *data UNUSED_PARAM,
-                              const char *engine UNUSED_PARAM)
-{
-  (void)data;
-  (void)engine;
-  return CURLE_NOT_BUILT_IN;
-}
-
-CURLcode Curl_none_set_engine_default(struct Curl_easy *data UNUSED_PARAM)
-{
-  (void)data;
-  return CURLE_NOT_BUILT_IN;
-}
-
-struct curl_slist *Curl_none_engines_list(struct Curl_easy *data UNUSED_PARAM)
-{
-  (void)data;
-  return (struct curl_slist *)NULL;
-}
-
-bool Curl_none_false_start(void)
-{
+  if(Curl_ssl->false_start)
+    return Curl_ssl->false_start();
   return FALSE;
 }
 
@@ -1351,23 +1282,23 @@ static const struct Curl_ssl Curl_ssl_multi = {
   (size_t)-1, /* something insanely large to be on the safe side */
 
   multissl_init,                     /* init */
-  Curl_none_cleanup,                 /* cleanup */
+  NULL,                              /* cleanup */
   multissl_version,                  /* version */
-  Curl_none_check_cxn,               /* check_cxn */
-  Curl_none_shutdown,                /* shutdown */
-  Curl_none_data_pending,            /* data_pending */
+  NULL,                              /* check_cxn */
+  NULL,                              /* shutdown */
+  NULL,                              /* data_pending */
   NULL,                              /* random */
-  Curl_none_cert_status_request,     /* cert_status_request */
+  NULL,                              /* cert_status_request */
   multissl_connect,                  /* connect */
   multissl_connect_nonblocking,      /* connect_nonblocking */
-  multissl_adjust_pollset,          /* adjust_pollset */
+  multissl_adjust_pollset,           /* adjust_pollset */
   multissl_get_internals,            /* get_internals */
   multissl_close,                    /* close_one */
-  Curl_none_close_all,               /* close_all */
-  Curl_none_set_engine,              /* set_engine */
-  Curl_none_set_engine_default,      /* set_engine_default */
-  Curl_none_engines_list,            /* engines_list */
-  Curl_none_false_start,             /* false_start */
+  NULL,                              /* close_all */
+  NULL,                              /* set_engine */
+  NULL,                              /* set_engine_default */
+  NULL,                              /* engines_list */
+  NULL,                              /* false_start */
   NULL,                              /* sha256sum */
   NULL,                              /* associate_connection */
   NULL,                              /* disassociate_connection */
@@ -1432,7 +1363,8 @@ void Curl_ssl_cleanup(void)
 {
   if(init_ssl) {
     /* only cleanup if we did a previous init */
-    Curl_ssl->cleanup();
+    if(Curl_ssl->cleanup)
+      Curl_ssl->cleanup();
 #if defined(CURL_WITH_MULTI_SSL)
     Curl_ssl = &Curl_ssl_multi;
 #endif
@@ -1761,7 +1693,7 @@ static bool ssl_cf_data_pending(struct Curl_cfilter *cf,
   bool result;
 
   CF_DATA_SAVE(save, cf, data);
-  if(Curl_ssl->data_pending(cf, data))
+  if(Curl_ssl->data_pending && Curl_ssl->data_pending(cf, data))
     result = TRUE;
   else
     result = cf->next->cft->has_data_pending(cf->next, data);
@@ -1817,7 +1749,7 @@ static CURLcode ssl_cf_shutdown(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
 
   *done = TRUE;
-  if(!cf->shutdown) {
+  if(!cf->shutdown && Curl_ssl->shut_down) {
     struct cf_call_data save;
 
     CF_DATA_SAVE(save, cf, data);
@@ -1893,8 +1825,7 @@ static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
 static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
                             bool *input_pending)
 {
-  struct cf_call_data save;
-  int result;
+  int result = -1;
   /*
    * This function tries to determine connection status.
    *
@@ -1903,9 +1834,12 @@ static bool cf_ssl_is_alive(struct Curl_cfilter *cf, struct Curl_easy *data,
    *     0 means the connection has been closed
    *    -1 means the connection status is unknown
    */
-  CF_DATA_SAVE(save, cf, data);
-  result = Curl_ssl->check_cxn(cf, data);
-  CF_DATA_RESTORE(cf, save);
+  if(Curl_ssl->check_cxn) {
+    struct cf_call_data save;
+    CF_DATA_SAVE(save, cf, data);
+    result = Curl_ssl->check_cxn(cf, data);
+    CF_DATA_RESTORE(cf, save);
+  }
   if(result > 0) {
     *input_pending = TRUE;
     return TRUE;

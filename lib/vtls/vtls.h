@@ -192,7 +192,7 @@ CURLcode Curl_pin_peer_pubkey(struct Curl_easy *data,
 
 bool Curl_ssl_cert_status_request(void);
 
-bool Curl_ssl_false_start(struct Curl_easy *data);
+bool Curl_ssl_false_start(void);
 
 /* The maximum size of the SSL channel binding is 85 bytes, as defined in
  * RFC 5929, Section 4.1. The 'tls-server-end-point:' prefix is 21 bytes long,
@@ -278,7 +278,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
-#define Curl_ssl_false_start(a) FALSE
+#define Curl_ssl_false_start() FALSE
 #define Curl_ssl_get_internals(a,b,c,d) NULL
 #define Curl_ssl_supports(a,b) FALSE
 #define Curl_ssl_cfilter_add(a,b,c) CURLE_NOT_BUILT_IN

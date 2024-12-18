@@ -991,7 +991,7 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
     /*
      * Enable TLS false start.
      */
-    if(!Curl_ssl_false_start(data))
+    if(!Curl_ssl_false_start())
       return CURLE_NOT_BUILT_IN;
 
     data->set.ssl.falsestart = enabled;

@@ -2031,21 +2031,21 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_init,                    /* init */
   wolfssl_cleanup,                 /* cleanup */
   wolfssl_version,                 /* version */
-  Curl_none_check_cxn,             /* check_cxn */
+  NULL,                            /* check_cxn */
   wolfssl_shutdown,                /* shutdown */
   wolfssl_data_pending,            /* data_pending */
   wolfssl_random,                  /* random */
-  Curl_none_cert_status_request,   /* cert_status_request */
+  NULL,                            /* cert_status_request */
   wolfssl_connect,                 /* connect */
   wolfssl_connect_nonblocking,     /* connect_nonblocking */
   Curl_ssl_adjust_pollset,         /* adjust_pollset */
   wolfssl_get_internals,           /* get_internals */
   wolfssl_close,                   /* close_one */
-  Curl_none_close_all,             /* close_all */
-  Curl_none_set_engine,            /* set_engine */
-  Curl_none_set_engine_default,    /* set_engine_default */
-  Curl_none_engines_list,          /* engines_list */
-  Curl_none_false_start,           /* false_start */
+  NULL,                            /* close_all */
+  NULL,                            /* set_engine */
+  NULL,                            /* set_engine_default */
+  NULL,                            /* engines_list */
+  NULL,                            /* false_start */
   wolfssl_sha256sum,               /* sha256sum */
   NULL,                            /* associate_connection */
   NULL,                            /* disassociate_connection */
