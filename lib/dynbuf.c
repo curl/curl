@@ -244,6 +244,18 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   return s->bufr;
 }
 
+char *Curl_dyn_take(struct dynbuf *s, size_t *plen)
+{
+  char *ptr = s->bufr;
+  DEBUGASSERT(s);
+  DEBUGASSERT(s->init == DYNINIT);
+  *plen = s->leng;
+  s->bufr = NULL;
+  s->leng = 0;
+  s->allc = 0;
+  return ptr;
+}
+
 /*
  * Returns an unsigned pointer to the buffer.
  */

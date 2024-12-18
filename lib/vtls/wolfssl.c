@@ -60,6 +60,7 @@
 #include "inet_pton.h"
 #include "vtls.h"
 #include "vtls_int.h"
+#include "vtls_scache.h"
 #include "keylog.h"
 #include "parsedate.h"
 #include "connect.h" /* for the connect timeout */
@@ -395,57 +396,53 @@ static void wolfssl_bio_cf_free_methods(void)
 
 #endif /* !USE_BIO_CHAIN */
 
-static void wolfssl_session_free(void *sdata, size_t slen)
-{
-  (void)slen;
-  free(sdata);
-}
-
-CURLcode wssl_cache_session(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct ssl_peer *peer,
-                            WOLFSSL_SESSION *session)
+CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 const char *ssl_peer_key,
+                                 WOLFSSL_SESSION *session,
+                                 int ietf_tls_id,
+                                 const char *alpn)
 {
   CURLcode result = CURLE_OK;
+  struct Curl_ssl_session *sc_session = NULL;
   unsigned char *sdata = NULL;
-  unsigned int slen;
+  unsigned int sdata_len;
 
   if(!session)
     goto out;
 
-  slen = wolfSSL_i2d_SSL_SESSION(session, NULL);
-  if(slen <= 0) {
-    CURL_TRC_CF(data, cf, "fail to assess session length: %u", slen);
+  sdata_len = wolfSSL_i2d_SSL_SESSION(session, NULL);
+  if(sdata_len <= 0) {
+    CURL_TRC_CF(data, cf, "fail to assess session length: %u", sdata_len);
     result = CURLE_FAILED_INIT;
     goto out;
   }
-  sdata = calloc(1, slen);
+  sdata = calloc(1, sdata_len);
   if(!sdata) {
-    failf(data, "unable to allocate session buffer of %u bytes", slen);
+    failf(data, "unable to allocate session buffer of %u bytes", sdata_len);
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  slen = wolfSSL_i2d_SSL_SESSION(session, &sdata);
-  if(slen <= 0) {
-    CURL_TRC_CF(data, cf, "fail to serialize session: %u", slen);
+  sdata_len = wolfSSL_i2d_SSL_SESSION(session, &sdata);
+  if(sdata_len <= 0) {
+    CURL_TRC_CF(data, cf, "fail to serialize session: %u", sdata_len);
     result = CURLE_FAILED_INIT;
     goto out;
   }
 
-  Curl_ssl_sessionid_lock(data);
-  result = Curl_ssl_set_sessionid(cf, data, peer, NULL,
-                                  sdata, slen, wolfssl_session_free);
-  Curl_ssl_sessionid_unlock(data);
-  if(result)
-    failf(data, "failed to add new ssl session to cache (%d)", result);
-  else {
-    CURL_TRC_CF(data, cf, "added new session to cache");
-    sdata = NULL;
+  result = Curl_ssl_session_create(sdata, sdata_len,
+                                   ietf_tls_id, alpn, 0,
+                                   wolfSSL_SESSION_get_timeout(session),
+                                   &sc_session);
+  sdata = NULL;  /* took ownership of sdata */
+  if(!result) {
+    result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
+    /* took ownership of `sc_session` */
   }
 
 out:
   free(sdata);
-  return 0;
+  return result;
 }
 
 static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
@@ -460,32 +457,35 @@ static int wssl_vtls_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     DEBUGASSERT(connssl);
     DEBUGASSERT(data);
     if(connssl && data) {
-      (void)wssl_cache_session(cf, data, &connssl->peer, session);
+      (void)Curl_wssl_cache_session(cf, data, connssl->peer.scache_key,
+                                    session, wolfSSL_version(ssl),
+                                    connssl->negotiated.alpn);
     }
   }
   return 0;
 }
 
-CURLcode wssl_setup_session(struct Curl_cfilter *cf,
-                            struct Curl_easy *data,
-                            struct wolfssl_ctx *wss,
-                            struct ssl_peer *peer)
+CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 struct wolfssl_ctx *wss,
+                                 const char *ssl_peer_key)
 {
-  void *psdata;
-  const unsigned char *sdata = NULL;
-  size_t slen = 0;
-  CURLcode result = CURLE_OK;
+  struct Curl_ssl_session *sc_session = NULL;
+  CURLcode result;
 
-  Curl_ssl_sessionid_lock(data);
-  if(!Curl_ssl_getsessionid(cf, data, peer, &psdata, &slen, NULL)) {
+  result = Curl_ssl_scache_take(cf, data, ssl_peer_key, &sc_session);
+  if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {
     WOLFSSL_SESSION *session;
-    sdata = psdata;
-    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata, (long)slen);
+    /* wolfSSL changes the passed pointer for whatever reasons, yikes */
+    const unsigned char *sdata = sc_session->sdata;
+    session = wolfSSL_d2i_SSL_SESSION(NULL, &sdata,
+                                      (long)sc_session->sdata_len);
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_delsessionid(data, psdata);
-        infof(data, "previous session not accepted (%d), "
+        Curl_ssl_session_destroy(sc_session);
+        sc_session = NULL;
+        infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
       }
       else
@@ -496,7 +496,7 @@ CURLcode wssl_setup_session(struct Curl_cfilter *cf,
       failf(data, "could not decode previous session");
     }
   }
-  Curl_ssl_sessionid_unlock(data);
+  Curl_ssl_scache_return(cf, data, ssl_peer_key, sc_session);
   return result;
 }
 
@@ -1188,7 +1188,7 @@ wolfssl_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
     /* Set session from cache if there is one */
-    (void)wssl_setup_session(cf, data, backend, &connssl->peer);
+    (void)Curl_wssl_setup_session(cf, data, backend, connssl->peer.scache_key);
     /* Register to get notified when a new session is received */
     wolfSSL_set_app_data(backend->handle, cf);
     wolfSSL_CTX_sess_set_new_cb(backend->ctx, wssl_vtls_new_session_cb);
@@ -1792,7 +1792,7 @@ static ssize_t wolfssl_recv(struct Curl_cfilter *cf,
 }
 
 
-static size_t wolfssl_version(char *buffer, size_t size)
+size_t Curl_wssl_version(char *buffer, size_t size)
 {
 #if LIBWOLFSSL_VERSION_HEX >= 0x03006000
   return msnprintf(buffer, size, "wolfSSL/%s", wolfSSL_lib_version());
@@ -2030,7 +2030,7 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
 
   wolfssl_init,                    /* init */
   wolfssl_cleanup,                 /* cleanup */
-  wolfssl_version,                 /* version */
+  Curl_wssl_version,               /* version */
   wolfssl_shutdown,                /* shutdown */
   wolfssl_data_pending,            /* data_pending */
   wolfssl_random,                  /* random */

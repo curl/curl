@@ -132,3 +132,14 @@ CURLcode Curl_dyn_setlen(struct dynbuf *s, size_t len);
 Sets the new shorter length of the buffer in number of bytes. Keeps the
 leftmost set number of bytes, discards the rest. To instead keep the tail part
 of the buffer, see `Curl_dyn_tail()`.
+
+## `Curl_dyn_take`
+
+```c
+char *Curl_dyn_take(struct dynbuf *s, size_t *plen);
+```
+
+Transfers ownership of the internal buffer to the caller. The dynbuf
+resets to its initial state. The returned pointer may be `NULL` if the
+dynbuf never allocated memory. The returned length is the amount of
+data written to the buffer. The actual allocated memory might be larger.
