@@ -876,7 +876,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
   /* Check if there is a cached ID we can/should use here! */
   if(ssl_config->primary.cache_session) {
-    struct Curl_ssl_scache_session *sc_session = NULL;
+    struct Curl_ssl_session *sc_session = NULL;
     CURLcode result;
 
     result = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
@@ -1126,7 +1126,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   mbedtls_ssl_session session;
   bool msession_alloced = FALSE;
-  struct Curl_ssl_scache_session *sc_session = NULL;
+  struct Curl_ssl_session *sc_session = NULL;
   unsigned char *sdata = NULL;
   size_t slen = 0;
   int ietf_tls_id;
@@ -1169,10 +1169,10 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 #else
   ietf_tls_id = CURL_IETF_PROTO_UNKNOWN;
 #endif
-  result = Curl_ssl_scache_session_create(sdata, slen,
-                                          ietf_tls_id,
-                                          connssl->negotiated.alpn, 0, -1,
-                                          &sc_session);
+  result = Curl_ssl_session_create(sdata, slen,
+                                   ietf_tls_id,
+                                   connssl->negotiated.alpn, 0, -1,
+                                   &sc_session);
   sdata = NULL;  /* call took ownership */
   if(!result)
     result = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,

@@ -2879,7 +2879,7 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
 
   config = Curl_ssl_cf_get_config(cf, data);
   if(config->primary.cache_session) {
-    struct Curl_ssl_scache_session *sc_session = NULL;
+    struct Curl_ssl_session *sc_session = NULL;
     size_t der_session_size;
     unsigned char *der_session_ptr;
 
@@ -2901,10 +2901,10 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
       goto out;
     }
 
-    result = Curl_ssl_scache_session_create(der_session_buf, der_session_size,
-                                            ietf_tls_id, alpn, 0,
-                                            SSL_SESSION_get_timeout(session),
-                                            &sc_session);
+    result = Curl_ssl_session_create(der_session_buf, der_session_size,
+                                     ietf_tls_id, alpn, 0,
+                                     SSL_SESSION_get_timeout(session),
+                                     &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
     if(!result) {
       result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -3963,7 +3963,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   octx->reused_session = FALSE;
   if(ssl_config->primary.cache_session) {
-    struct Curl_ssl_scache_session *sc_session = NULL;
+    struct Curl_ssl_session *sc_session = NULL;
 
     result = Curl_ssl_scache_take(cf, data, peer->scache_key, &sc_session);
     if(!result && sc_session && sc_session->sdata && sc_session->sdata_len) {

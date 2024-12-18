@@ -66,7 +66,7 @@ struct dynbuf;
   "ALPN: deferred handshake for early data using '%.*s'."
 
 /* IETF defined version numbers used in TLS protocol negotiation */
-#define CURL_IETF_PROTO_UNKNOWN       -1
+#define CURL_IETF_PROTO_UNKNOWN       0x0
 #define CURL_IETF_PROTO_SSL3          0x0300
 #define CURL_IETF_PROTO_TLS1          0x0301
 #define CURL_IETF_PROTO_TLS1_1        0x0302

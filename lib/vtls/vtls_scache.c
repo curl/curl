@@ -96,7 +96,7 @@ struct Curl_ssl_scache {
   long age;
 };
 
-static void cf_ssl_scache_clear_session(struct Curl_ssl_scache_session *s)
+static void cf_ssl_scache_clear_session(struct Curl_ssl_session *s)
 {
   if(s->sdata) {
     free((void *)s->sdata);
@@ -117,15 +117,12 @@ static void cf_ssl_scache_sesssion_ldestroy(void *udata, void *s)
 }
 
 CURLcode
-Curl_ssl_scache_session_create(unsigned char *sdata,
-                               size_t sdata_len,
-                               int ietf_tls_id,
-                               const char *alpn,
-                               curl_off_t time_received,
-                               long lifetime_secs,
-                               struct Curl_ssl_scache_session **psession)
+Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
+                        int ietf_tls_id, const char *alpn,
+                        curl_off_t time_received, long lifetime_secs,
+                        struct Curl_ssl_session **psession)
 {
-  struct Curl_ssl_scache_session *s;
+  struct Curl_ssl_session *s;
 
   if(!sdata || !sdata_len) {
     free(sdata);
@@ -159,7 +156,7 @@ Curl_ssl_scache_session_create(unsigned char *sdata,
   return CURLE_OK;
 }
 
-void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s)
+void Curl_ssl_session_destroy(struct Curl_ssl_session *s)
 {
   if(s) {
     /* if in the list, the list destructor takes care of it */
@@ -238,14 +235,14 @@ out:
 }
 
 static void cf_scache_session_remove(struct Curl_ssl_scache_peer *peer,
-                                     struct Curl_ssl_scache_session *s)
+                                     struct Curl_ssl_session *s)
 {
   (void)peer;
   DEBUGASSERT(Curl_node_llist(&s->list) == &peer->sessions);
-  Curl_ssl_scache_session_destroy(s);
+  Curl_ssl_session_destroy(s);
 }
 
-static bool cf_scache_session_expired(struct Curl_ssl_scache_session *s,
+static bool cf_scache_session_expired(struct Curl_ssl_session *s,
                                       curl_off_t now)
 {
   return (s->lifetime_secs > 0 &&
@@ -257,7 +254,7 @@ static void cf_scache_peer_remove_expired(struct Curl_ssl_scache_peer *peer,
 {
   struct Curl_llist_node *n = Curl_llist_head(&peer->sessions);
   while(n) {
-    struct Curl_ssl_scache_session *s = Curl_node_elem(n);
+    struct Curl_ssl_session *s = Curl_node_elem(n);
     n = Curl_node_next(n);
     if(cf_scache_session_expired(s, now))
       cf_scache_session_remove(peer, s);
@@ -309,18 +306,14 @@ void Curl_ssl_scache_destroy(struct Curl_ssl_scache *scache)
   }
 }
 
-/*
- * Lock shared SSL session data
- */
+/* Lock shared SSL session data */
 void Curl_ssl_scache_lock(struct Curl_easy *data)
 {
   if(CURL_SHARE_ssl_scache(data))
     Curl_share_lock(data, CURL_LOCK_DATA_SSL_SESSION, CURL_LOCK_ACCESS_SINGLE);
 }
 
-/*
- * Unlock shared SSL session data
- */
+/* Unlock shared SSL session data */
 void Curl_ssl_scache_unlock(struct Curl_easy *data)
 {
   if(CURL_SHARE_ssl_scache(data))
@@ -668,18 +661,18 @@ out:
   return result;
 }
 
-static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
-                                      struct Curl_easy *data,
-                                      struct Curl_ssl_scache *scache,
-                                      const char *ssl_peer_key,
-                                      struct Curl_ssl_scache_session *s)
+static CURLcode cf_scache_peer_add_session(struct Curl_cfilter *cf,
+                                           struct Curl_easy *data,
+                                           struct Curl_ssl_scache *scache,
+                                           const char *ssl_peer_key,
+                                           struct Curl_ssl_session *s)
 {
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
   curl_off_t now = (curl_off_t)time(NULL);
 
   if(!scache || !scache->peer_count) {
-    Curl_ssl_scache_session_destroy(s);
+    Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
 
@@ -688,25 +681,31 @@ static CURLcode cf_scache_session_add(struct Curl_cfilter *cf,
   if(s->lifetime_secs < 0)
     s->lifetime_secs = scache->default_lifetime_secs;
 
-
   if(cf_scache_session_expired(s, now)) {
     CURL_TRC_CF(data, cf, "[SCACHE] add, session already expired");
-    Curl_ssl_scache_session_destroy(s);
+    Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
 
   result = cf_ssl_add_peer(cf, data, scache, ssl_peer_key, &peer);
   if(result || !peer) {
     CURL_TRC_CF(data, cf, "[SCACHE] unable to add scache peer: %d", result);
-    Curl_ssl_scache_session_destroy(s);
+    Curl_ssl_session_destroy(s);
     goto out;
   }
 
-  /* Expire existing, append, trim from head to obey max_sessions */
-  cf_scache_peer_remove_expired(peer, now);
-  Curl_llist_append(&peer->sessions, s, &s->list);
-  while(Curl_llist_count(&peer->sessions) > peer->max_sessions) {
-    Curl_node_remove(Curl_llist_head(&peer->sessions));
+  /* A session not from TLSv1.3 replaces all other. */
+  if(s->ietf_tls_id != CURL_IETF_PROTO_TLS1_3) {
+    Curl_llist_destroy(&peer->sessions, NULL);
+    Curl_llist_append(&peer->sessions, s, &s->list);
+  }
+  else {
+    /* Expire existing, append, trim from head to obey max_sessions */
+    cf_scache_peer_remove_expired(peer, now);
+    Curl_llist_append(&peer->sessions, s, &s->list);
+    while(Curl_llist_count(&peer->sessions) > peer->max_sessions) {
+      Curl_node_remove(Curl_llist_head(&peer->sessions));
+    }
   }
 
 out:
@@ -725,13 +724,13 @@ out:
 CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              const char *ssl_peer_key,
-                             struct Curl_ssl_scache_session *s)
+                             struct Curl_ssl_session *s)
 {
   struct Curl_ssl_scache *scache = data->state.ssl_scache;
   CURLcode result;
 
   Curl_ssl_scache_lock(data);
-  result = cf_scache_session_add(cf, data, scache, ssl_peer_key, s);
+  result = cf_scache_peer_add_session(cf, data, scache, ssl_peer_key, s);
   Curl_ssl_scache_unlock(data);
   return result;
 }
@@ -739,20 +738,20 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
 void Curl_ssl_scache_return(struct Curl_cfilter *cf,
                            struct Curl_easy *data,
                            const char *ssl_peer_key,
-                           struct Curl_ssl_scache_session *s)
+                           struct Curl_ssl_session *s)
 {
   /* See RFC 8446 C.4:
    * "Clients SHOULD NOT reuse a ticket for multiple connections." */
   if(s && s->ietf_tls_id < 0x304)
     (void)Curl_ssl_scache_put(cf, data, ssl_peer_key, s);
   else
-    Curl_ssl_scache_session_destroy(s);
+    Curl_ssl_session_destroy(s);
 }
 
 CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               const char *ssl_peer_key,
-                              struct Curl_ssl_scache_session **ps)
+                              struct Curl_ssl_session **ps)
 {
   struct Curl_ssl_scache *scache = data->state.ssl_scache;
   struct Curl_ssl_scache_peer *peer = NULL;

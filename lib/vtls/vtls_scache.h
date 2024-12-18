@@ -32,7 +32,7 @@
 struct Curl_cfilter;
 struct Curl_easy;
 struct Curl_ssl_scache;
-struct Curl_ssl_scache_session;
+struct Curl_ssl_session;
 struct ssl_peer;
 
 /* RFC 8446 (TLSv1.3) restrict lifetime to one week max */
@@ -112,13 +112,8 @@ CURLcode Curl_ssl_scache_add_obj(struct Curl_cfilter *cf,
                                  void *sobj,
                                  Curl_ssl_scache_obj_dtor *sobj_dtor_cb);
 
-/* Remove all sessions for the peer_key. Does NOT need locking. */
-void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const char *ssl_peer_key);
-
-/* cached session data */
-struct Curl_ssl_scache_session {
+/* All about a SSL session */
+struct Curl_ssl_session {
   struct Curl_llist_node list;
   const unsigned char *sdata; /* session data, plain bytes */
   size_t sdata_len;           /* number of bytes in sdata */
@@ -142,17 +137,14 @@ struct Curl_ssl_scache_session {
  * @param psession on return the scached session instance created
  */
 CURLcode
-Curl_ssl_scache_session_create(unsigned char *sdata,
-                               size_t sdata_len,
-                               int ietf_tls_id,
-                               const char *alpn,
-                               curl_off_t time_received,
-                               long lifetime_secs,
-                               struct Curl_ssl_scache_session **psession);
+Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
+                        int ietf_tls_id, const char *alpn,
+                        curl_off_t time_received, long lifetime_secs,
+                        struct Curl_ssl_session **psession);
 
 /* Destroy a `session` instance. Can be called with NULL.
  * Does NOT need locking. */
-void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s);
+void Curl_ssl_session_destroy(struct Curl_ssl_session *s);
 
 /* Put the scache session into the cache. Does NOT need locking.
  * Call takes ownership of `s` in all outcomes.
@@ -164,7 +156,7 @@ void Curl_ssl_scache_session_destroy(struct Curl_ssl_scache_session *s);
 CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              const char *ssl_peer_key,
-                             struct Curl_ssl_scache_session *s);
+                             struct Curl_ssl_session *s);
 
 /* Take a matching scache session from the cache. Does NOT need locking.
  * @param cf      the connection filter wanting to use it
@@ -175,7 +167,7 @@ CURLcode Curl_ssl_scache_put(struct Curl_cfilter *cf,
 CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
                               struct Curl_easy *data,
                               const char *ssl_peer_key,
-                              struct Curl_ssl_scache_session **ps);
+                              struct Curl_ssl_session **ps);
 
 /* Return a taken scache session to the cache. Does NOT need locking.
  * Depending on TLS version and other criteria, it may cache it again
@@ -184,7 +176,13 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
 void Curl_ssl_scache_return(struct Curl_cfilter *cf,
                             struct Curl_easy *data,
                             const char *ssl_peer_key,
-                            struct Curl_ssl_scache_session *s);
+                            struct Curl_ssl_session *s);
+
+/* Remove all sessions and obj for the peer_key. Does NOT need locking. */
+void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
+                                struct Curl_easy *data,
+                                const char *ssl_peer_key);
+
 
 #else /* USE_SSL */
 

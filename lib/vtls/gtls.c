@@ -723,7 +723,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn)
 {
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_scache_session *sc_session;
+  struct Curl_ssl_session *sc_session;
   unsigned char *sdata;
   size_t sdata_len = 0;
   CURLcode result = CURLE_OK;
@@ -750,10 +750,10 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s) and store in cache",
               sdata_len, alpn ? alpn : "-");
-  result = Curl_ssl_scache_session_create(sdata, sdata_len,
-                                          Curl_glts_get_ietf_proto(session),
-                                          alpn, 0, lifetime_secs,
-                                          &sc_session);
+  result = Curl_ssl_session_create(sdata, sdata_len,
+                                   Curl_glts_get_ietf_proto(session),
+                                   alpn, 0, lifetime_secs,
+                                   &sc_session);
   /* call took ownership of `sdata`*/
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -1077,7 +1077,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
 {
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-  struct Curl_ssl_scache_session *scs = NULL;
+  struct Curl_ssl_session *scs = NULL;
   gnutls_datum_t gtls_alpns[5];
   size_t gtls_alpns_count = 0;
   CURLcode result;

@@ -404,7 +404,7 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
                                  const char *alpn)
 {
   CURLcode result = CURLE_OK;
-  struct Curl_ssl_scache_session *sc_session = NULL;
+  struct Curl_ssl_session *sc_session = NULL;
   unsigned char *sdata = NULL;
   unsigned int sdata_len;
 
@@ -430,10 +430,10 @@ CURLcode Curl_wssl_cache_session(struct Curl_cfilter *cf,
     goto out;
   }
 
-  result = Curl_ssl_scache_session_create(sdata, sdata_len,
-                                          ietf_tls_id, alpn, 0,
-                                          wolfSSL_SESSION_get_timeout(session),
-                                          &sc_session);
+  result = Curl_ssl_session_create(sdata, sdata_len,
+                                   ietf_tls_id, alpn, 0,
+                                   wolfSSL_SESSION_get_timeout(session),
+                                   &sc_session);
   sdata = NULL;  /* took ownership of sdata */
   if(!result) {
     result = Curl_ssl_scache_put(cf, data, ssl_peer_key, sc_session);
@@ -470,7 +470,7 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
                                  struct wolfssl_ctx *wss,
                                  const char *ssl_peer_key)
 {
-  struct Curl_ssl_scache_session *sc_session = NULL;
+  struct Curl_ssl_session *sc_session = NULL;
   CURLcode result;
 
   result = Curl_ssl_scache_take(cf, data, ssl_peer_key, &sc_session);
@@ -483,7 +483,7 @@ CURLcode Curl_wssl_setup_session(struct Curl_cfilter *cf,
     if(session) {
       int ret = wolfSSL_set_session(wss->handle, session);
       if(ret != WOLFSSL_SUCCESS) {
-        Curl_ssl_scache_session_destroy(sc_session);
+        Curl_ssl_session_destroy(sc_session);
         sc_session = NULL;
         infof(data, "cached session not accepted (%d), "
               "removing from cache", ret);
