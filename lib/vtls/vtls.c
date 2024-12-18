@@ -1299,8 +1299,6 @@ static const struct Curl_ssl Curl_ssl_multi = {
   NULL,                              /* engines_list */
   NULL,                              /* false_start */
   NULL,                              /* sha256sum */
-  NULL,                              /* associate_connection */
-  NULL,                              /* disassociate_connection */
   multissl_recv_plain,               /* recv decrypted data */
   multissl_send_plain,               /* send data to encrypt */
   NULL,                              /* get_channel_binding */
@@ -1771,35 +1769,6 @@ static void ssl_cf_adjust_pollset(struct Curl_cfilter *cf,
   CF_DATA_RESTORE(cf, save);
 }
 
-static CURLcode ssl_cf_cntrl(struct Curl_cfilter *cf,
-                             struct Curl_easy *data,
-                             int event, int arg1, void *arg2)
-{
-  struct cf_call_data save;
-
-  (void)arg1;
-  (void)arg2;
-  switch(event) {
-  case CF_CTRL_DATA_ATTACH:
-    if(Curl_ssl->attach_data) {
-      CF_DATA_SAVE(save, cf, data);
-      Curl_ssl->attach_data(cf, data);
-      CF_DATA_RESTORE(cf, save);
-    }
-    break;
-  case CF_CTRL_DATA_DETACH:
-    if(Curl_ssl->detach_data) {
-      CF_DATA_SAVE(save, cf, data);
-      Curl_ssl->detach_data(cf, data);
-      CF_DATA_RESTORE(cf, save);
-    }
-    break;
-  default:
-    break;
-  }
-  return CURLE_OK;
-}
-
 static CURLcode ssl_cf_query(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              int query, int *pres1, void *pres2)
@@ -1845,7 +1814,7 @@ struct Curl_cftype Curl_cft_ssl = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  ssl_cf_cntrl,
+  Curl_cf_def_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   ssl_cf_query,
@@ -1866,7 +1835,7 @@ struct Curl_cftype Curl_cft_ssl_proxy = {
   ssl_cf_data_pending,
   ssl_cf_send,
   ssl_cf_recv,
-  ssl_cf_cntrl,
+  Curl_cf_def_cntrl,
   cf_ssl_is_alive,
   Curl_cf_def_conn_keep_alive,
   Curl_cf_def_query,

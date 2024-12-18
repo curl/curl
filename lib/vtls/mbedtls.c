@@ -1658,8 +1658,6 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   NULL,                             /* engines_list */
   NULL,                             /* false_start */
   mbedtls_sha256sum,                /* sha256sum */
-  NULL,                             /* associate_connection */
-  NULL,                             /* disassociate_connection */
   mbed_recv,                        /* recv decrypted data */
   mbed_send,                        /* send data to encrypt */
   NULL,                             /* get_channel_binding */

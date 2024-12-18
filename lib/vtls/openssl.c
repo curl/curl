@@ -5356,8 +5356,6 @@ const struct Curl_ssl Curl_ssl_openssl = {
 #else
   NULL,                     /* sha256sum */
 #endif
-  NULL,                     /* use of data in this connection */
-  NULL,                     /* remote of data from this connection */
   ossl_recv,                /* recv decrypted data */
   ossl_send,                /* send data to encrypt */
   ossl_get_channel_binding  /* get_channel_binding */

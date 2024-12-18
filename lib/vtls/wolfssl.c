@@ -2046,8 +2046,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   NULL,                            /* engines_list */
   NULL,                            /* false_start */
   wolfssl_sha256sum,               /* sha256sum */
-  NULL,                            /* associate_connection */
-  NULL,                            /* disassociate_connection */
   wolfssl_recv,                    /* recv decrypted data */
   wolfssl_send,                    /* send data to encrypt */
   NULL,                            /* get_channel_binding */

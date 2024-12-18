@@ -2284,8 +2284,6 @@ const struct Curl_ssl Curl_ssl_gnutls = {
   NULL,                          /* engines_list */
   NULL,                          /* false_start */
   gtls_sha256sum,                /* sha256sum */
-  NULL,                          /* associate_connection */
-  NULL,                          /* disassociate_connection */
   gtls_recv,                     /* recv decrypted data */
   gtls_send,                     /* send data to encrypt */
   NULL,                          /* get_channel_binding */
