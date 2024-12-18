@@ -2031,7 +2031,6 @@ const struct Curl_ssl Curl_ssl_wolfssl = {
   wolfssl_init,                    /* init */
   wolfssl_cleanup,                 /* cleanup */
   Curl_wssl_version,               /* version */
-  wolfssl_version,                 /* version */
   wolfssl_shutdown,                /* shutdown */
   wolfssl_data_pending,            /* data_pending */
   wolfssl_random,                  /* random */
