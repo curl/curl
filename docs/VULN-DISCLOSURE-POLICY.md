@@ -153,6 +153,15 @@ levels depending how serious we consider the problem to be. We use **Low**,
 **Medium**, **High** and **Critical**. We refrain from using numerical scoring
 of vulnerabilities.
 
+We do not support CVSS as a method to grade security vulnerabilities, so we do
+not set them for CVE records published by the curl project. We believe CVSS is
+a broken system that often does not properly evaluate to suitable severity
+levels that reflect all dimensions and factors involved. Other organizations
+however set and provide CVSS scores for curl vulnerabilities. You need to
+decide for yourself if you believe they know enough about the subjects
+involved to make reasonable assessments. Deciding between four different
+severity levels is hard enough for us.
+
 When deciding severity level on a particular issue, we take all the factors
 into account: attack vector, attack complexity, required privileges, necessary
 build configuration, protocols involved, platform specifics and also what
