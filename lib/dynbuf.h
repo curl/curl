@@ -39,6 +39,7 @@
 #define Curl_dyn_uptr(a) curlx_dyn_uptr(a)
 #define Curl_dyn_len(a) curlx_dyn_len(a)
 #define Curl_dyn_reset(a) curlx_dyn_reset(a)
+#define Curl_dyn_strdup(a) curlx_dyn_strdup(a)
 #define Curl_dyn_tail(a,b) curlx_dyn_tail(a,b)
 #define Curl_dyn_setlen(a,b) curlx_dyn_setlen(a,b)
 #define curlx_dynbuf dynbuf /* for the struct name */
@@ -74,6 +75,10 @@ size_t Curl_dyn_len(const struct dynbuf *s);
 /* returns 0 on success, -1 on error */
 /* The implementation of this function exists in mprintf.c */
 int Curl_dyn_vprintf(struct dynbuf *dyn, const char *format, va_list ap_save);
+
+/* returns an allocated copy of the string in dynbuf.
+ * Will return NULL if allocation fails. */
+char *Curl_dyn_strdup(const struct dynbuf *s);
 
 /* Dynamic buffer max sizes */
 #define DYN_DOH_RESPONSE    3000

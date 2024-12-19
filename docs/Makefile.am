@@ -57,6 +57,7 @@ INTERNALDOCS =                                  \
  internals/README.md                            \
  internals/SPLAY.md                             \
  internals/STRPARSE.md                          \
+ internals/TLS-SESSIONS.md                      \
  internals/WEBSOCKET.md
 
 EXTRA_DIST =                                    \

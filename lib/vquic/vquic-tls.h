@@ -26,12 +26,15 @@
 
 #include "curl_setup.h"
 #include "bufq.h"
+#include "vtls/vtls.h"
 #include "vtls/openssl.h"
 
 #if defined(USE_HTTP3) && \
   (defined(USE_OPENSSL) || defined(USE_GNUTLS) || defined(USE_WOLFSSL))
 
 #include "vtls/wolfssl.h"
+
+struct ssl_peer;
 
 struct curl_tls_ctx {
 #ifdef USE_OPENSSL

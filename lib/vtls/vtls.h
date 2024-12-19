@@ -28,7 +28,9 @@
 struct connectdata;
 struct ssl_config_data;
 struct ssl_primary_config;
-struct Curl_ssl_session;
+struct Curl_cfilter;
+struct Curl_easy;
+struct dynbuf;
 
 #define SSLSUPP_CA_PATH      (1<<0) /* supports CAPATH */
 #define SSLSUPP_CERTINFO     (1<<1) /* supports CURLOPT_CERTINFO */
@@ -63,9 +65,31 @@ struct Curl_ssl_session;
 #define VTLS_INFOF_ALPN_DEFERRED      \
   "ALPN: deferred handshake for early data using '%.*s'."
 
-/* Curl_multi SSL backend-specific data; declared differently by each SSL
-   backend */
-struct Curl_cfilter;
+/* IETF defined version numbers used in TLS protocol negotiation */
+#define CURL_IETF_PROTO_UNKNOWN       0x0
+#define CURL_IETF_PROTO_SSL3          0x0300
+#define CURL_IETF_PROTO_TLS1          0x0301
+#define CURL_IETF_PROTO_TLS1_1        0x0302
+#define CURL_IETF_PROTO_TLS1_2        0x0303
+#define CURL_IETF_PROTO_TLS1_3        0x0304
+#define CURL_IETF_PROTO_DTLS1         0xFEFF
+#define CURL_IETF_PROTO_DTLS1_2       0xFEFD
+
+typedef enum {
+  CURL_SSL_PEER_DNS,
+  CURL_SSL_PEER_IPV4,
+  CURL_SSL_PEER_IPV6
+} ssl_peer_type;
+
+struct ssl_peer {
+  char *hostname;        /* hostname for verification */
+  char *dispname;        /* display version of hostname */
+  char *sni;             /* SNI version of hostname or NULL if not usable */
+  char *scache_key;      /* for lookups in session cache */
+  ssl_peer_type type;    /* type of the peer information */
+  int port;              /* port we are talking to */
+  int transport;         /* one of TRNSPRT_* defines */
+};
 
 CURLsslset Curl_init_sslset_nolock(curl_sslbackend id, const char *name,
                                    const curl_ssl_backend ***avail);
@@ -121,7 +145,9 @@ void Curl_ssl_conn_config_update(struct Curl_easy *data, bool for_proxy);
  * Init SSL peer information for filter. Can be called repeatedly.
  */
 CURLcode Curl_ssl_peer_init(struct ssl_peer *peer,
-                            struct Curl_cfilter *cf, int transport);
+                            struct Curl_cfilter *cf,
+                            const char *tls_id,
+                            int transport);
 /**
  * Free all allocated data and reset peer information.
  */
@@ -138,8 +164,6 @@ CURLcode Curl_ssl_set_engine(struct Curl_easy *data, const char *engine);
 CURLcode Curl_ssl_set_engine_default(struct Curl_easy *data);
 struct curl_slist *Curl_ssl_engines_list(struct Curl_easy *data);
 
-/* init the SSL session ID cache */
-CURLcode Curl_ssl_initsessions(struct Curl_easy *, size_t);
 void Curl_ssl_version(char *buffer, size_t size);
 
 /* Certificate information list handling. */
@@ -154,33 +178,6 @@ CURLcode Curl_ssl_push_certinfo(struct Curl_easy *data, int certnum,
                                 const char *label, const char *value);
 
 /* Functions to be used by SSL library adaptation functions */
-
-/* Lock session cache mutex.
- * Call this before calling other Curl_ssl_*session* functions
- * Caller should unlock this mutex as soon as possible, as it may block
- * other SSL connection from making progress.
- * The purpose of explicitly locking SSL session cache data is to allow
- * individual SSL engines to manage session lifetime in their specific way.
- */
-void Curl_ssl_sessionid_lock(struct Curl_easy *data);
-
-/* Unlock session cache mutex */
-void Curl_ssl_sessionid_unlock(struct Curl_easy *data);
-
-/* Kill a single session ID entry in the cache
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * This will call engine-specific curlssl_session_free function, which must
- * take sessionid object ownership from sessionid cache
- * (e.g. decrement refcount).
- */
-void Curl_ssl_kill_session(struct Curl_ssl_session *session);
-/* delete a session from the cache
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * This will call engine-specific curlssl_session_free function, which must
- * take sessionid object ownership from sessionid cache
- * (e.g. decrement refcount).
- */
-void Curl_ssl_delsessionid(struct Curl_easy *data, void *ssl_sessionid);
 
 /* get N random bytes into the buffer */
 CURLcode Curl_ssl_random(struct Curl_easy *data, unsigned char *buffer,
@@ -273,9 +270,7 @@ extern struct Curl_cftype Curl_cft_ssl_proxy;
 #define Curl_ssl_set_engine(x,y) CURLE_NOT_BUILT_IN
 #define Curl_ssl_set_engine_default(x) CURLE_NOT_BUILT_IN
 #define Curl_ssl_engines_list(x) NULL
-#define Curl_ssl_initsessions(x,y) CURLE_OK
 #define Curl_ssl_free_certinfo(x) Curl_nop_stmt
-#define Curl_ssl_kill_session(x) Curl_nop_stmt
 #define Curl_ssl_random(x,y,z) ((void)x, CURLE_NOT_BUILT_IN)
 #define Curl_ssl_cert_status_request() FALSE
 #define Curl_ssl_false_start() FALSE

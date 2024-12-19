@@ -617,7 +617,7 @@ class TestDownload:
         earlydata = {}
         reused_session = False
         for line in r.trace_lines:
-            m = re.match(r'^\[t-(\d+)] EarlyData: (\d+)', line)
+            m = re.match(r'^\[t-(\d+)] EarlyData: (-?\d+)', line)
             if m:
                 earlydata[int(m.group(1))] = int(m.group(2))
                 continue

@@ -1278,10 +1278,6 @@ static CURLcode cf_quiche_ctx_open(struct Curl_cfilter *cf,
   if(result)
     return result;
 
-  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
-  if(result)
-    return result;
-
   ctx->cfg = quiche_config_new(QUICHE_PROTOCOL_VERSION);
   if(!ctx->cfg) {
     failf(data, "cannot create quiche config");

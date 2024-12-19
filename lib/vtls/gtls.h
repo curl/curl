@@ -47,6 +47,8 @@ struct ssl_config_data;
 struct ssl_peer;
 struct ssl_connect_data;
 
+int Curl_glts_get_ietf_proto(gnutls_session_t session);
+
 struct gtls_shared_creds {
   gnutls_certificate_credentials_t creds;
   char *CAfile; /* CAfile path used to generate X509 store */
@@ -69,6 +71,8 @@ struct gtls_ctx {
   CURLcode io_result; /* result of last IO cfilter operation */
   BIT(sent_shutdown);
 };
+
+size_t Curl_gtls_version(char *buffer, size_t size);
 
 typedef CURLcode Curl_gtls_ctx_setup_cb(struct Curl_cfilter *cf,
                                         struct Curl_easy *data,
@@ -96,11 +100,12 @@ CURLcode Curl_gtls_verifyserver(struct Curl_easy *data,
                                 const char *pinned_key);
 
 /* Extract TLS session and place in cache, if configured. */
-CURLcode Curl_gtls_update_session_id(struct Curl_cfilter *cf,
-                                     struct Curl_easy *data,
-                                     gnutls_session_t session,
-                                     struct ssl_peer *peer,
-                                     const char *alpn);
+CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
+                                 struct Curl_easy *data,
+                                 const char *ssl_peer_key,
+                                 gnutls_session_t session,
+                                 int lifetime_secs,
+                                 const char *alpn);
 
 extern const struct Curl_ssl Curl_ssl_gnutls;
 

@@ -2131,7 +2131,8 @@ static int quic_ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
   ctx = cf ? cf->ctx : NULL;
   data = cf ? CF_DATA_CURRENT(cf) : NULL;
   if(cf && data && ctx) {
-    Curl_ossl_add_session(cf, data, &ctx->peer, ssl_sessionid);
+    Curl_ossl_add_session(cf, data, ctx->peer.scache_key, ssl_sessionid,
+                          SSL_version(ssl), "h3");
     return 1;
   }
   return 0;
@@ -2158,7 +2159,8 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
     }
     switch(htype) {
     case GNUTLS_HANDSHAKE_NEW_SESSION_TICKET: {
-      (void)Curl_gtls_update_session_id(cf, data, session, &ctx->peer, "h3");
+      (void)Curl_gtls_cache_session(cf, data, ctx->peer.scache_key,
+                                    session, -1, "h3");
       break;
     }
     default:
@@ -2181,7 +2183,8 @@ static int wssl_quic_new_session_cb(WOLFSSL *ssl, WOLFSSL_SESSION *session)
     struct Curl_easy *data = CF_DATA_CURRENT(cf);
     DEBUGASSERT(data);
     if(data && ctx) {
-      (void)wssl_cache_session(cf, data, &ctx->peer, session);
+      (void)Curl_wssl_cache_session(cf, data, ctx->peer.scache_key,
+                                    session, wolfSSL_version(ssl), "h3");
     }
   }
   return 0;
@@ -2258,10 +2261,6 @@ static CURLcode cf_connect_start(struct Curl_cfilter *cf,
   int qfd;
 
   DEBUGASSERT(ctx->initialized);
-  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
-  if(result)
-    return result;
-
 #define H3_ALPN "\x2h3\x5h3-29"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,
                                H3_ALPN, sizeof(H3_ALPN) - 1,

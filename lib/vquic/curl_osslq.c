@@ -1162,9 +1162,6 @@ static CURLcode cf_osslq_ctx_start(struct Curl_cfilter *cf,
   BIO_ADDR *baddr = NULL;
 
   DEBUGASSERT(ctx->initialized);
-  result = Curl_ssl_peer_init(&ctx->peer, cf, TRNSPRT_QUIC);
-  if(result)
-    goto out;
 
 #define H3_ALPN "\x2h3"
   result = Curl_vquic_tls_init(&ctx->tls, cf, data, &ctx->peer,

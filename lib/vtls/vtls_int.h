@@ -26,9 +26,11 @@
 #include "curl_setup.h"
 #include "cfilters.h"
 #include "urldata.h"
+#include "vtls.h"
 
 #ifdef USE_SSL
 
+struct Curl_ssl;
 struct ssl_connect_data;
 
 /* see https://www.iana.org/assignments/tls-extensiontype-values/ */
@@ -103,12 +105,15 @@ typedef enum {
 
 /* Information in each SSL cfilter context: cf->ctx */
 struct ssl_connect_data {
-  struct ssl_peer peer;
+  const struct Curl_ssl *ssl_impl;  /* TLS backend for this filter */
+  struct ssl_peer peer;             /* peer the filter talks to */
   const struct alpn_spec *alpn;     /* ALPN to use or NULL for none */
   void *backend;                    /* vtls backend specific props */
   struct cf_call_data call_data;    /* data handle used in current call */
   struct curltime handshake_done;   /* time when handshake finished */
-  char *alpn_negotiated;            /* negotiated ALPN value or NULL */
+  struct {
+    char *alpn;                     /* ALPN value or NULL */
+  } negotiated;
   struct bufq earlydata;            /* earlydata to be send to peer */
   size_t earlydata_max;             /* max earlydata allowed by peer */
   size_t earlydata_skip;            /* sending bytes to skip when earlydata
@@ -192,43 +197,6 @@ void Curl_ssl_adjust_pollset(struct Curl_cfilter *cf, struct Curl_easy *data,
  * Get the SSL filter below the given one or NULL if there is none.
  */
 bool Curl_ssl_cf_is_proxy(struct Curl_cfilter *cf);
-
-/* extract a session ID
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Caller must make sure that the ownership of returned sessionid object
- * is properly taken (e.g. its refcount is incremented
- * under sessionid mutex).
- * @param cf      the connection filter wanting to use it
- * @param data    the transfer involved
- * @param peer    the peer the filter wants to talk to
- * @param sessionid on return the TLS session
- * @param idsize  on return the size of the TLS session data
- * @param palpn   on return the ALPN string used by the session,
- *                set to NULL when not interested
- */
-bool Curl_ssl_getsessionid(struct Curl_cfilter *cf,
-                           struct Curl_easy *data,
-                           const struct ssl_peer *peer,
-                           void **ssl_sessionid,
-                           size_t *idsize, /* set 0 if unknown */
-                           char **palpn);
-
-/* Set a TLS session ID for `peer`. Replaces an existing session ID if
- * not already the same.
- * Sessionid mutex must be locked (see Curl_ssl_sessionid_lock).
- * Call takes ownership of `ssl_sessionid`, using `sessionid_free_cb`
- * to deallocate it. Is called in all outcomes, either right away or
- * later when the session cache is cleaned up.
- * Caller must ensure that it has properly shared ownership of this sessionid
- * object with cache (e.g. incrementing refcount on success)
- */
-CURLcode Curl_ssl_set_sessionid(struct Curl_cfilter *cf,
-                                struct Curl_easy *data,
-                                const struct ssl_peer *peer,
-                                const char *alpn,
-                                void *sessionid,
-                                size_t sessionid_size,
-                                Curl_ssl_sessionid_dtor *sessionid_free_cb);
 
 #endif /* USE_SSL */
 

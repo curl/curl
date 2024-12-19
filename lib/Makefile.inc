@@ -56,6 +56,7 @@ LIB_VTLS_CFILES =           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
   vtls/vtls.c               \
+  vtls/vtls_scache.c        \
   vtls/wolfssl.c            \
   vtls/x509asn1.c
 
@@ -74,6 +75,7 @@ LIB_VTLS_HFILES =           \
   vtls/sectransp.h          \
   vtls/vtls.h               \
   vtls/vtls_int.h           \
+  vtls/vtls_scache.h        \
   vtls/wolfssl.h            \
   vtls/x509asn1.h
 
