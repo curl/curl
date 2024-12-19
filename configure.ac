@@ -677,7 +677,7 @@ AS_HELP_STRING([--disable-http],[Disable HTTP support]),
     dnl toggle off alt-svc too when HTTP is disabled
     AC_DEFINE(CURL_DISABLE_ALTSVC, 1, [disable alt-svc])
     AC_DEFINE(CURL_DISABLE_HSTS, 1, [disable HSTS])
-    curl_h1_msg="no      (--enable-http, --with-hyper)"
+    curl_h1_msg="no      (--enable-http)"
     curl_altsvc_msg="no";
     curl_hsts_msg="no      (--enable-hsts)";
     enable_altsvc="no"
@@ -800,110 +800,12 @@ AS_HELP_STRING([--disable-ldaps],[Disable LDAPS support]),
     fi ]
 )
 
-dnl **********************************************************************
-dnl Check for Hyper
-dnl **********************************************************************
-
-OPT_HYPER="no"
-
-AC_ARG_WITH(hyper,
-AS_HELP_STRING([--with-hyper=PATH],[Enable hyper usage])
-AS_HELP_STRING([--without-hyper],[Disable hyper usage]),
-  [OPT_HYPER=$withval])
-case "$OPT_HYPER" in
-  no)
-    dnl --without-hyper option used
-    want_hyper="no"
-    ;;
-  yes)
-    dnl --with-hyper option used without path
-    want_hyper="default"
-    want_hyper_path=""
-    ;;
-  *)
-    dnl --with-hyper option used with path
-    want_hyper="yes"
-    want_hyper_path="$withval"
-    ;;
-esac
-
-if test X"$want_hyper" != Xno; then
-  if test "x$disable_http" = "xyes"; then
-    AC_MSG_ERROR([--with-hyper is not compatible with --disable-http])
-  fi
-
-  dnl backup the pre-hyper variables
-  CLEANLDFLAGS="$LDFLAGS"
-  CLEANCPPFLAGS="$CPPFLAGS"
-  CLEANLIBS="$LIBS"
-
-  CURL_CHECK_PKGCONFIG(hyper, $want_hyper_path)
-
-  if test "$PKGCONFIG" != "no"; then
-    LIB_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
-      $PKGCONFIG --libs-only-l hyper`
-    CPP_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path]) dnl
-      $PKGCONFIG --cflags-only-I hyper`
-    LD_HYPER=`CURL_EXPORT_PCDIR([$want_hyper_path])
-      $PKGCONFIG --libs-only-L hyper`
-  else
-    dnl no hyper pkg-config found
-    LIB_HYPER="-lhyper -ldl -lpthread -lm"
-    if test X"$want_hyper" != Xdefault; then
-      CPP_HYPER=-I"$want_hyper_path/capi/include"
-      LD_HYPER="-L$want_hyper_path/target/release -L$want_hyper_path/target/debug"
-    fi
-  fi
-  if test -n "$LIB_HYPER"; then
-    AC_MSG_NOTICE([-l is $LIB_HYPER])
-    AC_MSG_NOTICE([-I is $CPP_HYPER])
-    AC_MSG_NOTICE([-L is $LD_HYPER])
-
-    LDFLAGS="$LDFLAGS $LD_HYPER"
-    CPPFLAGS="$CPPFLAGS $CPP_HYPER"
-    LIBS="$LIB_HYPER $LIBS"
-
-    if test "x$cross_compiling" != "xyes"; then
-      dnl remove -L, separate with colon if more than one
-      DIR_HYPER=`echo $LD_HYPER | $SED -e 's/^-L//' -e 's/ -L/:/g'`
-    fi
-
-    AC_CHECK_LIB(hyper, hyper_io_new,
-      [
-        AC_CHECK_HEADERS(hyper.h,
-          experimental="$experimental Hyper"
-          AC_MSG_NOTICE([Hyper support is experimental])
-          curl_h1_msg="enabled (Hyper)"
-          HYPER_ENABLED=1
-          AC_DEFINE(USE_HYPER, 1, [if hyper is in use])
-          AC_SUBST(USE_HYPER, [1])
-          CURL_LIBRARY_PATH="$CURL_LIBRARY_PATH:$DIR_HYPER"
-          export CURL_LIBRARY_PATH
-          AC_MSG_NOTICE([Added $DIR_HYPER to CURL_LIBRARY_PATH])
-          LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE hyper"
-        )
-      ],
-      for d in `echo $DIR_HYPER | $SED -e 's/:/ /'`; do
-        if test -f "$d/libhyper.a"; then
-          AC_MSG_ERROR([hyper was found in $d but was probably built with wrong flags. See docs/HYPER.md.])
-        fi
-      done
-      AC_MSG_ERROR([--with-hyper but hyper was not found. See docs/HYPER.md.])
-    )
-  fi
-fi
-
-if test X"$want_hyper" != Xno; then
-  AC_MSG_NOTICE([Disable RTSP support with hyper])
-  AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
-  CURL_DISABLE_RTSP=1
-else
-  AC_MSG_CHECKING([whether to support rtsp])
-  AC_ARG_ENABLE(rtsp,
+AC_MSG_CHECKING([whether to support rtsp])
+AC_ARG_ENABLE(rtsp,
 AS_HELP_STRING([--enable-rtsp],[Enable RTSP support])
 AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
   [ case "$enableval" in
-    no)
+      no)
       AC_MSG_RESULT(no)
       AC_DEFINE(CURL_DISABLE_RTSP, 1, [to disable RTSP])
       CURL_DISABLE_RTSP=1
@@ -923,8 +825,7 @@ AS_HELP_STRING([--disable-rtsp],[Disable RTSP support]),
       else
         AC_MSG_RESULT(no)
       fi
-  )
-fi
+)
 
 AC_MSG_CHECKING([whether to support proxies])
 AC_ARG_ENABLE(proxy,
@@ -2989,8 +2890,8 @@ dnl **********************************************************************
 
 OPT_H2="yes"
 
-if test "x$disable_http" = "xyes" -o X"$want_hyper" != Xno; then
-  # without HTTP or with Hyper, nghttp2 is no use
+if test "x$disable_http" = "xyes"; then
+  # without HTTP nghttp2 is no use
   OPT_H2="no"
 fi
 

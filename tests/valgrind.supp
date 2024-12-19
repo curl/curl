@@ -1,13 +1,4 @@
 {
-   zstd_decompression-1.3.3-on-Ubuntu-18.04_with_hyper
-   Memcheck:Cond
-   fun:ZSTD_decompressStream
-   fun:zstd_unencode_write
-   fun:Curl_unencode_write
-   fun:hyper_body_chunk
-}
-
-{
    zstd_decompression-1.3.3-on-Ubuntu-18.04
    Memcheck:Cond
    fun:ZSTD_decompressStream

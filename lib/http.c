@@ -47,10 +47,6 @@
 #include <sys/param.h>
 #endif
 
-#ifdef USE_HYPER
-#include <hyper.h>
-#endif
-
 #include "urldata.h"
 #include <curl/curl.h>
 #include "transfer.h"
@@ -88,7 +84,6 @@
 #include "altsvc.h"
 #include "hsts.h"
 #include "ws.h"
-#include "c-hyper.h"
 #include "curl_ctype.h"
 
 /* The last 3 #include files should be in this order */
@@ -104,6 +99,31 @@ static bool http_should_fail(struct Curl_easy *data, int httpcode);
 static bool http_exp100_is_waiting(struct Curl_easy *data);
 static CURLcode http_exp100_add_reader(struct Curl_easy *data);
 static void http_exp100_send_anyway(struct Curl_easy *data);
+static bool http_exp100_is_selected(struct Curl_easy *data);
+static void http_exp100_got100(struct Curl_easy *data);
+static CURLcode http_firstwrite(struct Curl_easy *data);
+static CURLcode http_header(struct Curl_easy *data,
+                            const char *hd, size_t hdlen);
+static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn);
+static CURLcode http_range(struct Curl_easy *data,
+                           Curl_HttpReq httpreq);
+static CURLcode http_req_complete(struct Curl_easy *data,
+                                  struct dynbuf *r, Curl_HttpReq httpreq);
+static CURLcode http_req_set_reader(struct Curl_easy *data,
+                                    Curl_HttpReq httpreq,
+                                    const char **tep);
+static CURLcode http_size(struct Curl_easy *data);
+static CURLcode http_statusline(struct Curl_easy *data,
+                                     struct connectdata *conn);
+static CURLcode http_target(struct Curl_easy *data, struct connectdata *conn,
+                            struct dynbuf *req);
+static CURLcode http_useragent(struct Curl_easy *data);
+#ifdef HAVE_LIBZ
+static CURLcode http_transferencode(struct Curl_easy *data);
+#endif
+static bool use_http_1_1plus(const struct Curl_easy *data,
+                             const struct connectdata *conn);
+
 
 /*
  * HTTP handler interface.
@@ -1169,7 +1189,6 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   data->state.authproxy.multipass = FALSE;
 
   Curl_dyn_reset(&data->state.headerb);
-  Curl_hyper_done(data);
 
   if(status)
     return status;
@@ -1202,8 +1221,8 @@ CURLcode Curl_http_done(struct Curl_easy *data,
  * - if any server previously contacted to handle this request only supports
  * 1.0.
  */
-bool Curl_use_http_1_1plus(const struct Curl_easy *data,
-                           const struct connectdata *conn)
+static bool use_http_1_1plus(const struct Curl_easy *data,
+                             const struct connectdata *conn)
 {
   if((data->state.httpversion == 10) || (conn->httpversion == 10))
     return FALSE;
@@ -1214,7 +1233,6 @@ bool Curl_use_http_1_1plus(const struct Curl_easy *data,
           (data->state.httpwant >= CURL_HTTP_VERSION_1_1));
 }
 
-#ifndef USE_HYPER
 static const char *get_http_string(const struct Curl_easy *data,
                                    const struct connectdata *conn)
 {
@@ -1222,21 +1240,15 @@ static const char *get_http_string(const struct Curl_easy *data,
     return "3";
   if(Curl_conn_is_http2(data, conn, FIRSTSOCKET))
     return "2";
-  if(Curl_use_http_1_1plus(data, conn))
+  if(use_http_1_1plus(data, conn))
     return "1.1";
 
   return "1.0";
 }
-#endif
 
 CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect,
-#ifndef USE_HYPER
-                                 struct dynbuf *req
-#else
-                                 void *req
-#endif
-  )
+                                 struct dynbuf *req)
 {
   struct connectdata *conn = data->conn;
   char *ptr;
@@ -1303,9 +1315,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
               /* copy the source */
               semicolonp = strdup(headers->data);
               if(!semicolonp) {
-#ifndef USE_HYPER
                 Curl_dyn_free(req);
-#endif
                 return CURLE_OUT_OF_MEMORY;
               }
               /* put a colon where the semicolon is */
@@ -1364,11 +1374,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                   !Curl_auth_allowed_to_host(data))
             ;
           else {
-#ifdef USE_HYPER
-            result = Curl_hyper_header(data, req, compare);
-#else
             result = Curl_dyn_addf(req, "%s\r\n", compare);
-#endif
           }
           if(semicolonp)
             free(semicolonp);
@@ -1385,12 +1391,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
 
 #ifndef CURL_DISABLE_PARSEDATE
 CURLcode Curl_add_timecondition(struct Curl_easy *data,
-#ifndef USE_HYPER
-                                struct dynbuf *req
-#else
-                                void *req
-#endif
-  )
+                                struct dynbuf *req)
 {
   const struct tm *tm;
   struct tm keeptime;
@@ -1453,12 +1454,7 @@ CURLcode Curl_add_timecondition(struct Curl_easy *data,
             tm->tm_min,
             tm->tm_sec);
 
-#ifndef USE_HYPER
   result = Curl_dyn_add(req, datestr);
-#else
-  result = Curl_hyper_header(data, req, datestr);
-#endif
-
   return result;
 }
 #else
@@ -1512,7 +1508,7 @@ void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
   *reqp = httpreq;
 }
 
-CURLcode Curl_http_useragent(struct Curl_easy *data)
+static CURLcode http_useragent(struct Curl_easy *data)
 {
   /* The User-Agent string might have been allocated in url.c already, because
      it might have been used in the proxy connect, but if we have got a header
@@ -1526,7 +1522,7 @@ CURLcode Curl_http_useragent(struct Curl_easy *data)
 }
 
 
-CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
+static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn)
 {
   const char *ptr;
   struct dynamically_allocated_data *aptr = &data->state.aptr;
@@ -1616,9 +1612,9 @@ CURLcode Curl_http_host(struct Curl_easy *data, struct connectdata *conn)
 /*
  * Append the request-target to the HTTP request
  */
-CURLcode Curl_http_target(struct Curl_easy *data,
-                          struct connectdata *conn,
-                          struct dynbuf *r)
+static CURLcode http_target(struct Curl_easy *data,
+                            struct connectdata *conn,
+                            struct dynbuf *r)
 {
   CURLcode result = CURLE_OK;
   const char *path = data->state.up.path;
@@ -1898,9 +1894,9 @@ static CURLcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
   return CURLE_OK;
 }
 
-CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
-                                  Curl_HttpReq httpreq,
-                                  const char **tep)
+static CURLcode http_req_set_reader(struct Curl_easy *data,
+                                    Curl_HttpReq httpreq,
+                                    const char **tep)
 {
   CURLcode result = CURLE_OK;
   const char *ptr;
@@ -1920,7 +1916,7 @@ CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
       Curl_compareheader(ptr,
                          STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
     if(data->req.upload_chunky &&
-       Curl_use_http_1_1plus(data, data->conn) &&
+       use_http_1_1plus(data, data->conn) &&
        (data->conn->httpversion >= 20)) {
        infof(data, "suppressing chunked transfer encoding on connection "
              "using HTTP version 2 or higher");
@@ -1932,7 +1928,7 @@ CURLcode Curl_http_req_set_reader(struct Curl_easy *data,
 
     if(req_clen < 0) {
       /* indeterminate request content length */
-      if(Curl_use_http_1_1plus(data, data->conn)) {
+      if(use_http_1_1plus(data, data->conn)) {
         /* On HTTP/1.1, enable chunked, on HTTP/2 and later we do not
          * need it */
         data->req.upload_chunky = (data->conn->httpversion < 20);
@@ -1974,7 +1970,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
       Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
   }
   else if(!data->state.disableexpect &&
-          Curl_use_http_1_1plus(data, data->conn) &&
+          use_http_1_1plus(data, data->conn) &&
           (data->conn->httpversion < 20)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
@@ -1990,21 +1986,19 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
   return CURLE_OK;
 }
 
-CURLcode Curl_http_req_complete(struct Curl_easy *data,
-                                struct dynbuf *r, Curl_HttpReq httpreq)
+static CURLcode http_req_complete(struct Curl_easy *data,
+                                  struct dynbuf *r, Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
   curl_off_t req_clen;
   bool announced_exp100 = FALSE;
 
   DEBUGASSERT(data->conn);
-#ifndef USE_HYPER
   if(data->req.upload_chunky) {
     result = Curl_httpchunk_add_reader(data);
     if(result)
       return result;
   }
-#endif
 
   /* Get the request body length that has been set up */
   req_clen = Curl_creader_total_length(data);
@@ -2079,9 +2073,9 @@ out:
 
 #if !defined(CURL_DISABLE_COOKIES)
 
-CURLcode Curl_http_cookies(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           struct dynbuf *r)
+static CURLcode http_cookies(struct Curl_easy *data,
+                             struct connectdata *conn,
+                             struct dynbuf *r)
 {
   CURLcode result = CURLE_OK;
   char *addcookies = NULL;
@@ -2157,8 +2151,8 @@ CURLcode Curl_http_cookies(struct Curl_easy *data,
 }
 #endif
 
-CURLcode Curl_http_range(struct Curl_easy *data,
-                         Curl_HttpReq httpreq)
+static CURLcode http_range(struct Curl_easy *data,
+                           Curl_HttpReq httpreq)
 {
   if(data->state.use_range) {
     /*
@@ -2214,7 +2208,7 @@ CURLcode Curl_http_range(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_http_firstwrite(struct Curl_easy *data)
+static CURLcode http_firstwrite(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   struct SingleRequest *k = &data->req;
@@ -2277,7 +2271,7 @@ CURLcode Curl_http_firstwrite(struct Curl_easy *data)
 }
 
 #ifdef HAVE_LIBZ
-CURLcode Curl_transferencode(struct Curl_easy *data)
+static CURLcode http_transferencode(struct Curl_easy *data)
 {
   if(!Curl_checkheaders(data, STRCONST("TE")) &&
      data->set.http_transfer_encoding) {
@@ -2309,7 +2303,6 @@ CURLcode Curl_transferencode(struct Curl_easy *data)
 }
 #endif
 
-#ifndef USE_HYPER
 /*
  * Curl_http() gets called from the generic multi_do() function when an HTTP
  * request is to be performed. This creates and sends a properly constructed
@@ -2370,11 +2363,11 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(result)
     goto fail;
 
-  result = Curl_http_host(data, conn);
+  result = http_host(data, conn);
   if(result)
     goto fail;
 
-  result = Curl_http_useragent(data);
+  result = http_useragent(data);
   if(result)
     goto fail;
 
@@ -2415,19 +2408,19 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
 #ifdef HAVE_LIBZ
   /* we only consider transfer-encoding magic if libz support is built-in */
-  result = Curl_transferencode(data);
+  result = http_transferencode(data);
   if(result)
     goto fail;
 #endif
 
-  result = Curl_http_req_set_reader(data, httpreq, &te);
+  result = http_req_set_reader(data, httpreq, &te);
   if(result)
     goto fail;
 
   p_accept = Curl_checkheaders(data,
                                STRCONST("Accept")) ? NULL : "Accept: */*\r\n";
 
-  result = Curl_http_range(data, httpreq);
+  result = http_range(data, httpreq);
   if(result)
     goto fail;
 
@@ -2444,7 +2437,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   /* GET/HEAD/POST/PUT */
   result = Curl_dyn_addf(&req, "%s ", request);
   if(!result)
-    result = Curl_http_target(data, conn, &req);
+    result = http_target(data, conn, &req);
   if(result) {
     Curl_dyn_free(&req);
     goto fail;
@@ -2538,7 +2531,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     }
   }
 
-  result = Curl_http_cookies(data, conn, &req);
+  result = http_cookies(data, conn, &req);
 #ifndef CURL_DISABLE_WEBSOCKETS
   if(!result && conn->handler->protocol&(CURLPROTO_WS|CURLPROTO_WSS))
     result = Curl_ws_request(data, &req);
@@ -2550,7 +2543,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   if(!result) {
     /* req_send takes ownership of the 'req' memory on success */
-    result = Curl_http_req_complete(data, &req, httpreq);
+    result = http_req_complete(data, &req, httpreq);
     if(!result)
       result = Curl_req_send(data, &req);
   }
@@ -2568,8 +2561,6 @@ fail:
     failf(data, "HTTP request too large");
   return result;
 }
-
-#endif /* USE_HYPER */
 
 typedef enum {
   STATUS_UNKNOWN, /* not enough data to tell yet */
@@ -2657,10 +2648,10 @@ checkprotoprefix(struct Curl_easy *data, struct connectdata *conn,
    Curl_compareheader(hd, STRCONST(n), STRCONST(v)))
 
 /*
- * Curl_http_header() parses a single response header.
+ * http_header() parses a single response header.
  */
-CURLcode Curl_http_header(struct Curl_easy *data,
-                          const char *hd, size_t hdlen)
+static CURLcode http_header(struct Curl_easy *data,
+                            const char *hd, size_t hdlen)
 {
   struct connectdata *conn = data->conn;
   CURLcode result;
@@ -3022,8 +3013,8 @@ CURLcode Curl_http_header(struct Curl_easy *data,
  * Called after the first HTTP response line (the status line) has been
  * received and parsed.
  */
-CURLcode Curl_http_statusline(struct Curl_easy *data,
-                              struct connectdata *conn)
+static CURLcode http_statusline(struct Curl_easy *data,
+                                struct connectdata *conn)
 {
   struct SingleRequest *k = &data->req;
 
@@ -3116,7 +3107,7 @@ CURLcode Curl_http_statusline(struct Curl_easy *data,
    figured out here after all headers have been received but before the final
    call to the user's header callback, so that a valid content length can be
    retrieved by the user in the final call. */
-CURLcode Curl_http_size(struct Curl_easy *data)
+static CURLcode http_size(struct Curl_easy *data)
 {
   struct SingleRequest *k = &data->req;
   if(data->req.ignore_cl || k->chunk) {
@@ -3264,7 +3255,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
        * that tells us that the server is OK with this and ready
        * to receive the data.
        */
-      Curl_http_exp100_got100(data);
+      http_exp100_got100(data);
       break;
     case 101:
       /* Switching Protocols only allowed from HTTP/1.1 */
@@ -3423,7 +3414,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
          * connection for closure after we have read the entire response.
          */
         if(!Curl_req_done_sending(data)) {
-          if((k->httpcode == 417) && Curl_http_exp100_is_selected(data)) {
+          if((k->httpcode == 417) && http_exp100_is_selected(data)) {
             /* 417 Expectation Failed - try again without the Expect
                header */
             if(!k->writebytecount && http_exp100_is_waiting(data)) {
@@ -3486,13 +3477,13 @@ static CURLcode http_on_response(struct Curl_easy *data,
     k->download_done = TRUE;
 
   /* final response without error, prepare to receive the body */
-  result = Curl_http_firstwrite(data);
+  result = http_firstwrite(data);
 
   if(!result)
     /* This is the last response that we get for the current request.
      * Check on the body size and determine if the response is complete.
      */
-    result = Curl_http_size(data);
+    result = http_size(data);
 
 out:
   if(last_hd) {
@@ -3645,7 +3636,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
     }
 
     if(fine_statusline) {
-      result = Curl_http_statusline(data, data->conn);
+      result = http_statusline(data, data->conn);
       if(result)
         return result;
       writetype |= CLIENTWRITE_STATUS;
@@ -3660,7 +3651,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   if(result)
     return result;
 
-  result = Curl_http_header(data, hd, hdlen);
+  result = http_header(data, hd, hdlen);
   if(result)
     return result;
 
@@ -4359,7 +4350,7 @@ static CURLcode http_exp100_add_reader(struct Curl_easy *data)
   return result;
 }
 
-void Curl_http_exp100_got100(struct Curl_easy *data)
+static void http_exp100_got100(struct Curl_easy *data)
 {
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
   if(r)
@@ -4383,7 +4374,7 @@ static void http_exp100_send_anyway(struct Curl_easy *data)
     http_exp100_continue(data, r);
 }
 
-bool Curl_http_exp100_is_selected(struct Curl_easy *data)
+static bool http_exp100_is_selected(struct Curl_easy *data)
 {
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
   return !!r;

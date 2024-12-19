@@ -29,9 +29,6 @@
 #if !defined(CURL_DISABLE_HTTP) && !defined(CURL_DISABLE_PROXY)
 
 #include <curl/curl.h>
-#ifdef USE_HYPER
-#include <hyper.h>
-#endif
 #include "sendf.h"
 #include "http.h"
 #include "url.h"
