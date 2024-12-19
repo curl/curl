@@ -31,7 +31,7 @@
 
 #ifdef __AMIGA__
 #include <stdio.h>
-int main(void) { printf("amigaos isn't supported.\n"); return 1; }
+int main(void) { printf("AmigaOS is not supported.\n"); return 1; }
 #else
 
 #ifdef _WIN32
