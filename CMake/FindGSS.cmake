@@ -99,7 +99,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       string(REGEX REPLACE " +-([^I][^ \\t;]*)" ";-\\1" _GSS_CFLAGS "${_GSS_CFLAGS}")
 
       foreach(_flag IN LISTS _GSS_CFLAGS)
-        if(_flag MATCHES "^-I.*")
+        if(_flag MATCHES "^-I")
           string(REGEX REPLACE "^-I" "" _val "${_flag}")
           list(APPEND _GSS_INCLUDE_DIRS "${_val}")
         else()
@@ -123,10 +123,10 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
       string(REGEX REPLACE " +-([^Ll][^ \\t;]*)" ";-\\1" _gss_lib_flags "${_gss_lib_flags}")
 
       foreach(_flag IN LISTS _gss_lib_flags)
-        if(_flag MATCHES "^-l.*")
+        if(_flag MATCHES "^-l")
           string(REGEX REPLACE "^-l" "" _val "${_flag}")
           list(APPEND _GSS_LIBRARIES "${_val}")
-        elseif(_flag MATCHES "^-L.*")
+        elseif(_flag MATCHES "^-L")
           string(REGEX REPLACE "^-L" "" _val "${_flag}")
           list(APPEND _GSS_LIBRARY_DIRS "${_val}")
         endif()
@@ -156,7 +156,7 @@ if(NOT _GSS_FOUND)  # Not found by pkg-config. Let us take more traditional appr
     if(_gss_configure_failed)
       set(GSS_FLAVOUR "Heimdal")  # most probably, should not really matter
     else()
-      if(_gss_vendor MATCHES ".*H|heimdal.*")
+      if(_gss_vendor MATCHES "H|heimdal")
         set(GSS_FLAVOUR "Heimdal")
       else()
         set(GSS_FLAVOUR "MIT")
