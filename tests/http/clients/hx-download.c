@@ -37,6 +37,10 @@
 #include <unistd.h>  /* getopt() */
 #endif
 
+#ifdef _WIN32
+#define strdup _strdup
+#endif
+
 #ifndef CURLPIPE_MULTIPLEX
 #error "too old libcurl, cannot do HTTP/2 server push!"
 #endif

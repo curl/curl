@@ -124,6 +124,7 @@ LIB_CFILES =         \
   content_encoding.c \
   cookie.c           \
   curl_addrinfo.c    \
+  curl_binmode.c     \
   curl_des.c         \
   curl_endian.c      \
   curl_fnmatch.c     \
@@ -258,6 +259,7 @@ LIB_HFILES =         \
   content_encoding.h \
   cookie.h           \
   curl_addrinfo.h    \
+  curl_binmode.h     \
   curl_base64.h      \
   curl_ctype.h       \
   curl_des.h         \

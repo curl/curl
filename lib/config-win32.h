@@ -158,16 +158,8 @@
 /* Define if you have the socket function. */
 #define HAVE_SOCKET 1
 
-/* Define if you have the strcasecmp function. */
-#if defined(__MINGW32__)
-#define HAVE_STRCASECMP 1
-#endif
-
 /* Define if you have the strdup function. */
 #define HAVE_STRDUP 1
-
-/* Define if you have the stricmp function. */
-#define HAVE_STRICMP 1
 
 /* Define if you have the strtoll function. */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)

@@ -147,19 +147,27 @@ int main(void) { return 0; }
 #endif
 
 #ifdef HAVE_FILE_OFFSET_BITS
-#ifdef _FILE_OFFSET_BITS
 #undef _FILE_OFFSET_BITS
-#endif
 #define _FILE_OFFSET_BITS 64
 #include <sys/types.h>
- /* Check that off_t can represent 2**63 - 1 correctly.
-    We cannot simply define LARGE_OFF_T to be 9223372036854775807,
-    since some C++ compilers masquerading as C compilers
-    incorrectly reject 9223372036854775807.  */
-#define LARGE_OFF_T (((off_t) 1 << 62) - 1 + ((off_t) 1 << 62))
-  int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
-                       && LARGE_OFF_T % 2147483647 == 1)
-                      ? 1 : -1];
+#define CURLTEST_OFF_T off_t
+#ifdef __MINGW32__
+#  include <_mingw.h>
+#  if defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR >= 3) && \
+      defined(NO_OLDNAMES) && !defined(_POSIX)
+#    undef CURLTEST_OFF_T
+#    define CURLTEST_OFF_T _off64_t
+#  else
+#  endif
+#endif
+/* Check that off_t can represent 2**63 - 1 correctly.
+   We cannot simply define LARGE_OFF_T to be 9223372036854775807,
+   since some C++ compilers masquerading as C compilers
+   incorrectly reject 9223372036854775807.  */
+#define LARGE_OFF_T (((CURLTEST_OFF_T)1 << 62) - 1 + ((CURLTEST_OFF_T)1 << 62))
+int off_t_is_large[(LARGE_OFF_T % 2147483629 == 721
+                     && LARGE_OFF_T % 2147483647 == 1)
+                    ? 1 : -1];
 int main(void) { return 0; }
 #endif
 

@@ -4507,7 +4507,12 @@ AC_DEFUN([CURL_SIZEOF], [
   dnl The #define name to make autoheader put the name in curl_config.h.in
   define(TYPE, translit(sizeof_$1, [a-z *], [A-Z_P]))dnl
 
-  AC_MSG_CHECKING(size of $1)
+  _type="$1"
+  if test "$curl_cv_native_windows" = 'yes' -a "$_type" = 'off_t'; then
+    _type='_off_t'
+  fi
+
+  AC_MSG_CHECKING(size of $_type)
   r=0
   dnl Check the sizes in a reasonable order
   for typesize in 8 4 2 16 1; do
@@ -4517,7 +4522,7 @@ $2
 ]],
     [switch(0) {
       case 0:
-      case (sizeof($1) == $typesize):;
+      case (sizeof($_type) == $typesize):;
     }
     ]) ],
       [
@@ -4530,7 +4535,7 @@ $2
     fi
   done
   if test $r -eq 0; then
-    AC_MSG_ERROR([Failed to find size of $1])
+    AC_MSG_ERROR([Failed to find size of $_type])
   fi
   AC_MSG_RESULT($r)
   dnl lowercase and underscore instead of space

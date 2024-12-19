@@ -66,6 +66,14 @@ extern FILE *tool_stderr;
 #  include "tool_strdup.h"
 #endif
 
+/* since O_BINARY is used in bitmasks, setting it to zero makes it usable in
+   source code but yet it does not ruin anything */
+#ifdef O_BINARY
+#define CURL_O_BINARY O_BINARY
+#else
+#define CURL_O_BINARY 0
+#endif
+
 #if defined(_WIN32)
 /* set in win32_init() */
 extern LARGE_INTEGER tool_freq;

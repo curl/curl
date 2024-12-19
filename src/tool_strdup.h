@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#ifndef HAVE_STRDUP
+#if !defined(HAVE_STRDUP) && !defined(_WIN32)
 extern char *strdup(const char *str);
 #endif
 
