@@ -156,7 +156,7 @@ of vulnerabilities.
 We do not support CVSS as a method to grade security vulnerabilities, so we do
 not set them for CVE records published by the curl project. We believe CVSS is
 a broken system that often does not properly evaluate to suitable severity
-levels that reflects all dimensions and factors involved. Other organizations
+levels that reflect all dimensions and factors involved. Other organizations
 however set and provide CVSS scores for curl vulnerabilities. You need to
 decide for yourself if you believe they know enough about the subjects
 involved to make reasonable assessments. Deciding between four different
