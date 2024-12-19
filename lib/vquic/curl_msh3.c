@@ -132,15 +132,23 @@ struct cf_msh3_ctx {
 
 static void h3_stream_hash_free(void *stream);
 
-static void cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
-                             const struct Curl_addrinfo *ai)
+static CURLcode cf_msh3_ctx_init(struct cf_msh3_ctx *ctx,
+                                 const struct Curl_addrinfo *ai)
 {
+  CURLcode result;
+
   DEBUGASSERT(!ctx->initialized);
   Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
-  Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
+
+  result = Curl_sock_assign_addr(&ctx->addr, ai, TRNSPRT_QUIC);
+  if(result)
+    return result;
+
   ctx->sock[SP_LOCAL] = CURL_SOCKET_BAD;
   ctx->sock[SP_REMOTE] = CURL_SOCKET_BAD;
   ctx->initialized = TRUE;
+
+  return result;
 }
 
 static void cf_msh3_ctx_free(struct cf_msh3_ctx *ctx)
@@ -1087,7 +1095,10 @@ CURLcode Curl_cf_msh3_create(struct Curl_cfilter **pcf,
     result = CURLE_OUT_OF_MEMORY;
     goto out;
   }
-  cf_msh3_ctx_init(ctx, ai);
+
+  result = cf_msh3_ctx_init(ctx, ai);
+  if(result)
+    goto out;
 
   result = Curl_cf_create(&cf, &Curl_cft_http3, ctx);
 
