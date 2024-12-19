@@ -28,6 +28,7 @@ check_PROGRAMS = \
   address-scope \
   altsvc \
   anyauthput \
+  block_ip \
   certinfo \
   chkspeed \
   connect-to \
