@@ -22,20 +22,39 @@
 #
 ###########################################################################
 
-# Get 'noinst_PROGRAMS', '<target>_SOURCES' variables
+# Get 'SERVERPROGS', 'OTHERPROGS', '<target>_SOURCES' variables, 'CURLX_SRCS', 'USEFUL', 'INET_PTON', 'UTIL', 'UTIL_BUNDLE'
 curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
-set_source_files_properties("../../lib/memdebug.c" "../../lib/curl_multibyte.c" PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+set_source_files_properties(
+  "getpart.c"
+  "../../lib/memdebug.c"
+  "../../lib/curl_multibyte.c"
+  PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
-foreach(_target IN LISTS noinst_PROGRAMS)
+if(CURL_TEST_BUNDLES)
+  add_custom_command(
+    OUTPUT "server_bundle.c"
+    COMMAND ${PERL_EXECUTABLE} "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${SERVERPROGS} > "server_bundle.c"
+    DEPENDS
+      "${CURL_SOURCE_DIR}/tests/mk-bundle-server.pl" ${UTIL_BUNDLE}
+      "${CMAKE_CURRENT_SOURCE_DIR}/Makefile.inc"
+    VERBATIM)
+
+  set(SERVERPROGS "servers")
+  set(servers_SOURCES "server_bundle.c")
+  list(APPEND servers_SOURCES ${CURLX_SRCS} ${USEFUL} ${INET_PTON} ${UTIL} ${UTIL_BUNDLE})
+endif()
+
+foreach(_target IN LISTS SERVERPROGS OTHERPROGS)
   set(_target_name "${_target}")
   add_executable(${_target_name} EXCLUDE_FROM_ALL ${${_target}_SOURCES})
   add_dependencies(testdeps ${_target_name})
   target_include_directories(${_target_name} PRIVATE
-    "${PROJECT_BINARY_DIR}/lib"  # for "curl_config.h"
-    "${PROJECT_SOURCE_DIR}/lib"  # for "curl_setup.h"
-    "${PROJECT_SOURCE_DIR}/src"  # for "tool_xattr.h" in disabled_SOURCES
+    "${PROJECT_BINARY_DIR}/lib"           # for "curl_config.h"
+    "${PROJECT_SOURCE_DIR}/lib"           # for "curl_setup.h"
+    "${PROJECT_SOURCE_DIR}/src"           # for "tool_xattr.h" in disabled_SOURCES
+    "${PROJECT_SOURCE_DIR}/tests/server"  # for "first.h"
   )
   target_link_libraries(${_target_name} ${CURL_LIBS})
   # Test servers simply are standalone programs that do not use libcurl

@@ -131,16 +131,15 @@
   test 1003 which tests exceedingly large server response lines */
 #define BUFFER_SIZE 17010
 
-const char *serverlogfile = DEFAULT_LOGFILE;
-
 static bool verbose = FALSE;
 static bool bind_only = FALSE;
 #ifdef USE_IPV6
 static bool use_ipv6 = FALSE;
 #endif
 static const char *ipv_inuse = "IPv4";
-static unsigned short port = DEFAULT_PORT;
-static unsigned short connectport = 0; /* if non-zero, we activate this mode */
+static unsigned short server_port = DEFAULT_PORT;
+static unsigned short server_connectport = 0; /* if non-zero,
+                                                 we activate this mode */
 
 enum sockmode {
   PASSIVE_LISTEN,    /* as a server waiting for connections */
@@ -1132,7 +1131,8 @@ static bool juggle(curl_socket_t *sockfdp,
     else if(!memcmp("PORT", buffer, 4)) {
       /* Question asking us what PORT number we are listening to.
          Replies to PORT with "IPv[num]/[port]" */
-      msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n", ipv_inuse, port);
+      msnprintf((char *)buffer, sizeof(buffer), "%s/%hu\n",
+                ipv_inuse, server_port);
       buffer_len = (ssize_t)strlen((char *)buffer);
       msnprintf(data, sizeof(data), "PORT\n%04zx\n", buffer_len);
       if(!write_stdout(data, 10))
@@ -1394,6 +1394,8 @@ int main(int argc, char *argv[])
   enum sockmode mode = PASSIVE_LISTEN; /* default */
   const char *addr = NULL;
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("sockfilt IPv4%s\n",
@@ -1448,7 +1450,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = curlx_ultous(ulnum);
+        server_port = curlx_ultous(ulnum);
         arg++;
       }
     }
@@ -1465,7 +1467,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        connectport = curlx_ultous(ulnum);
+        server_connectport = curlx_ultous(ulnum);
         arg++;
       }
     }
@@ -1521,7 +1523,7 @@ int main(int argc, char *argv[])
     goto sockfilt_cleanup;
   }
 
-  if(connectport) {
+  if(server_connectport) {
     /* Active mode, we should connect to the given port number */
     mode = ACTIVE;
 #ifdef USE_IPV6
@@ -1529,7 +1531,7 @@ int main(int argc, char *argv[])
 #endif
       memset(&me.sa4, 0, sizeof(me.sa4));
       me.sa4.sin_family = AF_INET;
-      me.sa4.sin_port = htons(connectport);
+      me.sa4.sin_port = htons(server_connectport);
       me.sa4.sin_addr.s_addr = INADDR_ANY;
       if(!addr)
         addr = "127.0.0.1";
@@ -1541,7 +1543,7 @@ int main(int argc, char *argv[])
     else {
       memset(&me.sa6, 0, sizeof(me.sa6));
       me.sa6.sin6_family = AF_INET6;
-      me.sa6.sin6_port = htons(connectport);
+      me.sa6.sin6_port = htons(server_connectport);
       if(!addr)
         addr = "::1";
       Curl_inet_pton(AF_INET6, addr, &me.sa6.sin6_addr);
@@ -1552,7 +1554,7 @@ int main(int argc, char *argv[])
     if(rc) {
       error = SOCKERRNO;
       logmsg("Error connecting to port %hu: (%d) %s",
-             connectport, error, sstrerror(error));
+             server_connectport, error, sstrerror(error));
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
     }
@@ -1561,7 +1563,7 @@ int main(int argc, char *argv[])
   }
   else {
     /* passive daemon style */
-    sock = sockdaemon(sock, &port);
+    sock = sockdaemon(sock, &server_port);
     if(CURL_SOCKET_BAD == sock) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;
@@ -1571,12 +1573,12 @@ int main(int argc, char *argv[])
 
   logmsg("Running %s version", ipv_inuse);
 
-  if(connectport)
-    logmsg("Connected to port %hu", connectport);
+  if(server_connectport)
+    logmsg("Connected to port %hu", server_connectport);
   else if(bind_only)
-    logmsg("Bound without listening on port %hu", port);
+    logmsg("Bound without listening on port %hu", server_port);
   else
-    logmsg("Listening on port %hu", port);
+    logmsg("Listening on port %hu", server_port);
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
@@ -1584,7 +1586,7 @@ int main(int argc, char *argv[])
     goto sockfilt_cleanup;
   }
   if(portname) {
-    wroteportfile = write_portfile(portname, port);
+    wroteportfile = write_portfile(portname, server_port);
     if(!wroteportfile) {
       write_stdout("FAIL\n", 5);
       goto sockfilt_cleanup;

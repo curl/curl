@@ -65,15 +65,7 @@
 #define ERANGE  34 /* errno.h value */
 #endif
 
-static enum {
-  socket_domain_inet = AF_INET
-#ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
-#endif
-#ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
-#endif
-} socket_domain = AF_INET;
+static int socket_domain = AF_INET;
 static bool use_gopher = FALSE;
 static int serverlogslocked = 0;
 static bool is_proxy = FALSE;
@@ -141,7 +133,6 @@ static void storerequest(const char *reqbuf, size_t totalsize);
 #define DEFAULT_LOGFILE "log/sws.log"
 #endif
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *logdir = "log";
 static char loglockfile[256];
 
@@ -190,13 +181,6 @@ const char *cmdfile = DEFAULT_CMDFILE;
 #define CMD_NOEXPECT "no-expect"
 
 #define END_OF_HEADERS "\r\n\r\n"
-
-enum {
-  DOCNUMBER_NOTHING = -4,
-  DOCNUMBER_QUIT    = -3,
-  DOCNUMBER_WERULEZ = -2,
-  DOCNUMBER_404     = -1
-};
 
 static const char *end_of_headers = END_OF_HEADERS;
 
@@ -2070,6 +2054,8 @@ int main(int argc, char *argv[])
 
   /* a default CONNECT port is basically pointless but still ... */
   size_t socket_idx;
+
+  serverlogfile = DEFAULT_LOGFILE;
 
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {

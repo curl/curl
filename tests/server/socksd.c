@@ -136,12 +136,11 @@ struct configurable {
 
 static struct configurable config;
 
-const char *serverlogfile = DEFAULT_LOGFILE;
 static const char *reqlogfile = DEFAULT_REQFILE;
 static const char *configfile = DEFAULT_CONFIG;
 
 static const char *socket_type = "IPv4";
-static unsigned short port = DEFAULT_PORT;
+static unsigned short server_port = DEFAULT_PORT;
 
 static void resetdefaults(void)
 {
@@ -171,15 +170,7 @@ static unsigned short shortval(char *value)
   return num & 0xffff;
 }
 
-static enum {
-  socket_domain_inet = AF_INET
-#ifdef USE_IPV6
-  , socket_domain_inet6 = AF_INET6
-#endif
-#ifdef USE_UNIX_SOCKETS
-  , socket_domain_unix = AF_UNIX
-#endif
-} socket_domain = AF_INET;
+static int socket_domain = AF_INET;
 
 static void getconfig(void)
 {
@@ -989,6 +980,8 @@ int main(int argc, char *argv[])
   bool unlink_socket = false;
 #endif
 
+  serverlogfile = DEFAULT_LOGFILE;
+
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("socksd IPv4%s\n",
@@ -1072,7 +1065,7 @@ int main(int argc, char *argv[])
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = curlx_ultous(ulnum);
+        server_port = curlx_ultous(ulnum);
         arg++;
       }
     }
@@ -1117,7 +1110,7 @@ int main(int argc, char *argv[])
 
   {
     /* passive daemon style */
-    sock = sockdaemon(sock, &port
+    sock = sockdaemon(sock, &server_port
 #ifdef USE_UNIX_SOCKETS
             , unix_socket
 #endif
@@ -1138,7 +1131,7 @@ int main(int argc, char *argv[])
     logmsg("Listening on Unix socket %s", unix_socket);
   else
 #endif
-  logmsg("Listening on port %hu", port);
+  logmsg("Listening on port %hu", server_port);
 
   wrotepidfile = write_pidfile(pidname);
   if(!wrotepidfile) {
@@ -1146,7 +1139,7 @@ int main(int argc, char *argv[])
   }
 
   if(portname) {
-    wroteportfile = write_portfile(portname, port);
+    wroteportfile = write_portfile(portname, server_port);
     if(!wroteportfile) {
       goto socks5_cleanup;
     }

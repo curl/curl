@@ -56,6 +56,8 @@
 #define EINVAL  22 /* errno.h value */
 #endif
 
+const char *serverlogfile = "log/server_default.log";
+
 static struct timeval tvnow(void);
 
 /* This function returns a pointer to STATIC memory. It converts the given
@@ -204,12 +206,12 @@ const char *sstrerror(int err)
 /* set by the main code to point to where the test dir is */
 const char *path = ".";
 
-FILE *test2fopen(long testno, const char *logdir)
+FILE *test2fopen(long testno, const char *logdir2)
 {
   FILE *stream;
   char filename[256];
   /* first try the alternative, preprocessed, file */
-  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, logdir, testno);
+  msnprintf(filename, sizeof(filename), ALTTEST_DATA_PATH, logdir2, testno);
   stream = fopen(filename, "rb");
   if(stream)
     return stream;

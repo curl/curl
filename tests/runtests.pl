@@ -85,10 +85,14 @@ use Digest::MD5 qw(md5);
 use List::Util 'sum';
 use I18N::Langinfo qw(langinfo CODESET);
 
+use serverhelp qw(
+    server_exe
+    );
+
 use pathhelp qw(
-    exe_ext
     sys_native_current_path
     );
+
 use processhelp qw(
     portable_sleep
     );
@@ -511,7 +515,7 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", "server/disabled".exe_ext('TOOL'));
+    open(my $disabledh, "-|", server_exe("disabled", 'TOOL'));
     @disabled = <$disabledh>;
     close($disabledh);
 
@@ -765,7 +769,7 @@ sub checksystemfeatures {
         # client has IPv6 support
 
         # check if the HTTP server has it!
-        my $cmd = "server/sws".exe_ext('SRV')." --version";
+        my $cmd = server_exe("sws")." --version";
         my @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # HTTP server has IPv6 support!
@@ -773,7 +777,7 @@ sub checksystemfeatures {
         }
 
         # check if the FTP server has it!
-        $cmd = "server/sockfilt".exe_ext('SRV')." --version";
+        $cmd = server_exe("sockfilt")." --version";
         @sws = `$cmd`;
         if($sws[0] =~ /IPv6/) {
             # FTP server has IPv6 support!
@@ -783,7 +787,7 @@ sub checksystemfeatures {
 
     if($feature{"UnixSockets"}) {
         # client has Unix sockets support, check whether the HTTP server has it
-        my $cmd = "server/sws".exe_ext('SRV')." --version";
+        my $cmd = server_exe("sws")." --version";
         my @sws = `$cmd`;
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
