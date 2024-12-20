@@ -1030,9 +1030,9 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-  curlx_set_binmode(stdin);
-  curlx_set_binmode(stdout);
-  curlx_set_binmode(stderr);
+  CURL_SET_BINMODE(stdin);
+  CURL_SET_BINMODE(stdout);
+  CURL_SET_BINMODE(stderr);
 
   install_signal_handlers(FALSE);
 

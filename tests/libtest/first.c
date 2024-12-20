@@ -133,7 +133,7 @@ int main(int argc, char **argv)
   int basearg;
   test_func_t test_func;
 
-  curlx_set_binmode(stdout);
+  CURL_SET_BINMODE(stdout);
 
   memory_tracking_init();
 
