@@ -118,18 +118,16 @@ static void mcode_or_die(const char *where, CURLMcode code)
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(GlobalInfo *g)
 {
-  char *eff_url;
   CURLMsg *msg;
   int msgs_left;
-  ConnInfo *conn;
-  CURL *easy;
-  CURLcode res;
 
   MSG_OUT("REMAINING: %d\n", g->still_running);
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
-      easy = msg->easy_handle;
-      res = msg->data.result;
+      CURL *easy = msg->easy_handle;
+      CURLcode res = msg->data.result;
+      char *eff_url;
+      ConnInfo *conn;
       curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
       curl_easy_getinfo(easy, CURLINFO_EFFECTIVE_URL, &eff_url);
       MSG_OUT("DONE: %s => (%d) %s\n", eff_url, res, conn->error);
@@ -386,7 +384,7 @@ int init_fifo(void)
   const char *fifo = "hiper.fifo";
   int socket;
 
-  if(lstat (fifo, &st) == 0) {
+  if(lstat(fifo, &st) == 0) {
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
@@ -411,13 +409,12 @@ int init_fifo(void)
   return socket;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
-  GlobalInfo *g;
+  GlobalInfo *g = g_malloc0(sizeof(GlobalInfo));
   GMainLoop*gmain;
   int fd;
   GIOChannel* ch;
-  g = g_malloc0(sizeof(GlobalInfo));
 
   fd = init_fifo();
   ch = g_io_channel_unix_new(fd);
