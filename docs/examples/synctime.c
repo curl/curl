@@ -95,6 +95,8 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#else
+#error "This example requires Windows."
 #endif
 
 
@@ -110,36 +112,36 @@ typedef struct
   char timeserver[MAX_STRING1];
 } conf_t;
 
-const char DefaultTimeServer[3][MAX_STRING1] =
+static const char DefaultTimeServer[3][MAX_STRING1] =
 {
   "https://nist.time.gov/",
   "https://www.google.com/"
 };
 
-const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-const char *MthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+static const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+static const char *MthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
-int  ShowAllHeader;
-int  AutoSyncTime;
-SYSTEMTIME SYSTime;
-SYSTEMTIME LOCALTime;
+static int ShowAllHeader;
+static int AutoSyncTime;
+static SYSTEMTIME SYSTime;
+static SYSTEMTIME LOCALTime;
 
 #define HTTP_COMMAND_HEAD       0
 #define HTTP_COMMAND_GET        1
 
 
-size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
-                                 void *stream)
+static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
+                                        void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
   return (nmemb*size);
 }
 
-size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
-                                 void *stream)
+static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
+                                        void *stream)
 {
-  char  TmpStr1[26], TmpStr2[26];
+  char TmpStr1[26], TmpStr2[26];
 
   (void)stream;
 
@@ -167,7 +169,7 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
           SYSTime.wMilliseconds = 500;    /* adjust to midpoint, 0.5 sec */
           for(i = 0; i < 12; i++) {
             if(strcmp(MthStr[i], TmpStr2) == 0) {
-              SYSTime.wMonth = i + 1;
+              SYSTime.wMonth = (WORD)(i + 1);
               break;
             }
           }
@@ -188,8 +190,8 @@ size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   return (nmemb*size);
 }
 
-void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
-                        char *proxy_user_password)
+static void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
+                               char *proxy_user_password)
 {
   if(strlen(proxy_port) > 0)
     curl_easy_setopt(curl, CURLOPT_PROXY, proxy_port);
@@ -197,15 +199,13 @@ void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
   if(strlen(proxy_user_password) > 0)
     curl_easy_setopt(curl, CURLOPT_PROXYUSERPWD, proxy_user_password);
 
-#ifdef SYNCTIME_UA
   curl_easy_setopt(curl, CURLOPT_USERAGENT, SYNCTIME_UA);
-#endif
   curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, SyncTime_CURL_WriteOutput);
   curl_easy_setopt(curl, CURLOPT_HEADERFUNCTION, SyncTime_CURL_WriteHeader);
 }
 
-int SyncTime_CURL_Fetch(CURL *curl, char *URL_Str, char *OutFileName,
-                        int HttpGetBody)
+static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
+                                    const char *OutFileName, int HttpGetBody)
 {
   FILE *outfile;
   CURLcode res;
@@ -225,7 +225,7 @@ int SyncTime_CURL_Fetch(CURL *curl, char *URL_Str, char *OutFileName,
   return res;  /* (CURLE_OK) */
 }
 
-void showUsage(void)
+static void showUsage(void)
 {
   fprintf(stderr, "SYNCTIME: Synchronising computer clock with time server"
           " using HTTP protocol.\n");
@@ -245,7 +245,7 @@ void showUsage(void)
   return;
 }
 
-int conf_init(conf_t *conf)
+static int conf_init(conf_t *conf)
 {
   int i;
 
@@ -323,9 +323,9 @@ int main(int argc, char *argv[])
     tzonediffWord  = (int)(tzonediffFloat/3600.0);
 
     if((double)(tzonediffWord * 3600) == tzonediffFloat)
-      snprintf(tzoneBuf, 15, "%+03d'00'", tzonediffWord);
+      snprintf(tzoneBuf, 16, "%+03d'00'", tzonediffWord);
     else
-      snprintf(tzoneBuf, 15, "%+03d'30'", tzonediffWord);
+      snprintf(tzoneBuf, 16, "%+03d'30'", tzonediffWord);
 
     /* Get current system time and local time */
     GetSystemTime(&SYSTime);
