@@ -73,7 +73,7 @@ include Makefile.inc
 if USE_UNITY
 # Keep these separate to avoid duplicate definitions when linking libtests
 # in static mode.
-curl_EXCLUDE = curl_binmode.c curl_threads.c timediff.c warnless.c
+curl_EXCLUDE = curl_threads.c timediff.c warnless.c
 if DEBUGBUILD
 # We must compile these sources separately to avoid memdebug.h redefinitions
 # applying to them.

@@ -34,7 +34,6 @@ CURLX_SRCS = \
  ../../lib/dynbuf.c \
  ../../lib/strdup.c \
  ../../lib/strcase.c \
- ../../lib/curl_binmode.c \
  ../../lib/curl_multibyte.c
 
 CURLX_HDRS = \
@@ -46,7 +45,6 @@ CURLX_HDRS = \
  ../../lib/curl_ctype.h \
  ../../lib/dynbuf.h \
  ../../lib/strdup.h \
- ../../lib/curl_binmode.h \
  ../../lib/curl_multibyte.h
 
 USEFUL = \

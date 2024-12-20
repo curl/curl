@@ -164,7 +164,6 @@ rem
       call :element %1 lib "timediff.c" %3
       call :element %1 lib "nonblock.c" %3
       call :element %1 lib "warnless.c" %3
-      call :element %1 lib "curl_binmode.c" %3
       call :element %1 lib "curl_multibyte.c" %3
       call :element %1 lib "version_win32.c" %3
       call :element %1 lib "dynbuf.c" %3
@@ -176,7 +175,6 @@ rem
       call :element %1 lib "timediff.h" %3
       call :element %1 lib "nonblock.h" %3
       call :element %1 lib "warnless.h" %3
-      call :element %1 lib "curl_binmode.h" %3
       call :element %1 lib "curl_ctype.h" %3
       call :element %1 lib "curl_multibyte.h" %3
       call :element %1 lib "version_win32.h" %3

@@ -31,9 +31,8 @@ THREADS = ../../lib/curl_threads.c ../../lib/curl_threads.h
 
 # these files are used in every single test program below
 TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h
-BINMODE = ../../lib/curl_binmode.c ../../lib/curl_binmode.h
 FIRSTFILES = first.c first.h
-SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) $(BINMODE) test.h
+SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h
 
 # These are all libcurl test programs
 LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
