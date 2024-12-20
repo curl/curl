@@ -47,7 +47,8 @@ static size_t wrfu(void *ptr, size_t size, size_t nmemb, void *stream)
   (void)stream;
   (void)ptr;
 
-  res = curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info);
+  res = CURL_IGNORE_DEPRECATION(
+    curl_easy_getinfo(curl, CURLINFO_TLS_SESSION, &info));
 
   if(!res) {
     switch(info->backend) {
