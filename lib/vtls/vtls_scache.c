@@ -395,6 +395,7 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
 {
   struct ssl_primary_config *ssl = Curl_ssl_cf_get_primary_config(cf);
   struct dynbuf buf;
+  size_t key_len;
   CURLcode r;
 
   *ppeer_key = NULL;
@@ -533,9 +534,10 @@ CURLcode Curl_ssl_peer_key_make(struct Curl_cfilter *cf,
   if(r)
     goto out;
 
-  *ppeer_key = Curl_dyn_strdup(&buf);
-  if(!*ppeer_key)
-    r = CURLE_OUT_OF_MEMORY;
+  *ppeer_key = Curl_dyn_take(&buf, &key_len);
+  /* we just added printable char, and dynbuf always 0 terminates,
+   * no need to track length */
+
 
 out:
   Curl_dyn_free(&buf);

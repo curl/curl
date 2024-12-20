@@ -244,15 +244,16 @@ char *Curl_dyn_ptr(const struct dynbuf *s)
   return s->bufr;
 }
 
-char *Curl_dyn_strdup(const struct dynbuf *s)
+char *Curl_dyn_take(struct dynbuf *s, size_t *plen)
 {
+  char *ptr = s->bufr;
   DEBUGASSERT(s);
   DEBUGASSERT(s->init == DYNINIT);
-  if(s->leng) {
-    DEBUGASSERT(s->bufr);
-    return strdup(s->bufr);
-  }
-  return strdup("");
+  *plen = s->leng;
+  s->bufr = NULL;
+  s->leng = 0;
+  s->allc = 0;
+  return ptr;
 }
 
 /*
