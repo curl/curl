@@ -69,13 +69,13 @@ extern FILE *tool_stderr;
 #if defined(_WIN32)
 #  define CURL_STRICMP(p1, p2)  _stricmp(p1, p2)
 #elif defined(HAVE_STRCASECMP)
-#  define CURL_STRICMP(p1, p2)  strcasecmp(p1, p2);
+#  define CURL_STRICMP(p1, p2)  strcasecmp(p1, p2)
 #elif defined(HAVE_STRCMPI)
-#  define CURL_STRICMP(p1, p2)  strcmpi(p1, p2);
+#  define CURL_STRICMP(p1, p2)  strcmpi(p1, p2)
 #elif defined(HAVE_STRICMP)
-#  define CURL_STRICMP(p1, p2)  stricmp(p1, p2);
+#  define CURL_STRICMP(p1, p2)  stricmp(p1, p2)
 #else
-#  define CURL_STRICMP(p1, p2)  strcmp(p1, p2);
+#  define CURL_STRICMP(p1, p2)  strcmp(p1, p2)
 #endif
 
 #if defined(_WIN32)
