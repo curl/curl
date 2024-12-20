@@ -27,9 +27,7 @@
 
 #if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
 /* Requires io.h and/or fcntl.h when available */
-#ifdef __HIGHC__
-#  define CURL_SET_BINMODE(stream)  _setmode(stream, O_BINARY)
-#elif defined(HAVE__SETMODE)
+#ifdef HAVE__SETMODE
 #  define CURL_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
 #else
 #  define CURL_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
