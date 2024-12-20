@@ -27,23 +27,11 @@
  */
 /* This example code only builds as-is on Windows.
  *
- * While Unix/Linux user, you do not need this software.
- * You can achieve the same result as synctime using curl, awk and date.
- * Set proxy as according to your network, but beware of proxy Cache-Control.
- *
- * To set your system clock, root access is required.
- * # date -s "`curl -sI https://nist.time.gov/timezone.cgi?UTC/s/0 \
- *        | awk -F': ' '/Date: / {print $2}'`"
- *
- * To view remote webserver date and time.
- * $ curl -sI https://nist.time.gov/timezone.cgi?UTC/s/0 \
- *        | awk -F': ' '/Date: / {print $2}'
- *
  * Synchronising your computer clock via Internet time server usually relies
  * on DAYTIME, TIME, or NTP protocols. These protocols provide good accurate
- * time synchronization but it does not work well through a
- * firewall/proxy. Some adjustment has to be made to the firewall/proxy for
- * these protocols to work properly.
+ * time synchronization but it does not work well through a firewall/proxy.
+ * Some adjustment has to be made to the firewall/proxy for these protocols to
+ * work properly.
  *
  * There is an indirect method. Since most webserver provide server time in
  * their HTTP header, therefore you could synchronise your computer clock
@@ -63,12 +51,6 @@
  *    GMT/UTC time. Therefore your computer timezone must be properly set.
  * 6. Webserver data should not be cached by the proxy server. Some
  *    webserver provide Cache-Control to prevent caching.
- *
- * References:
- * https://web.archive.org/web/20100228012139/ \
- *    tf.nist.gov/timefreq/service/its.htm
- * https://web.archive.org/web/20100409024302/ \
- *    tf.nist.gov/timefreq/service/firewall.htm
  *
  * Usage:
  * This software synchronises your computer clock only when you issue
