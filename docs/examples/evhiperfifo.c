@@ -208,7 +208,7 @@ static void event_cb(EV_P_ struct ev_io *w, int revents)
   g = (GlobalInfo*) w->data;
 
   action = ((revents & EV_READ) ? CURL_POLL_IN : 0) |
-    ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
+           ((revents & EV_WRITE) ? CURL_POLL_OUT : 0);
   rc = curl_multi_socket_action(g->multi, w->fd, action, &g->still_running);
   mcode_or_die("event_cb: curl_multi_socket_action", rc);
   check_multi_info(g);
