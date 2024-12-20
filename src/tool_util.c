@@ -181,17 +181,7 @@ int struplocompare(const char *p1, const char *p2)
     return p2 ? -1 : 0;
   if(!p2)
     return 1;
-#if defined(_WIN32)
-  return _stricmp(p1, p2);
-#elif defined(HAVE_STRCASECMP)
-  return strcasecmp(p1, p2);
-#elif defined(HAVE_STRCMPI)
-  return strcmpi(p1, p2);
-#elif defined(HAVE_STRICMP)
-  return stricmp(p1, p2);
-#else
-  return strcmp(p1, p2);
-#endif
+  return CURL_STRICMP(p1, p2);
 }
 
 /* Indirect version to use as qsort callback. */
