@@ -227,9 +227,9 @@ static CURLcode SyncTime_CURL_Fetch(CURL *curl, const char *URL_Str,
 
 static void showUsage(void)
 {
-  fprintf(stderr, "SYNCTIME: Synchronising computer clock with time server"
+  fprintf(stderr, "synctime: Synchronising computer clock with time server"
           " using HTTP protocol.\n");
-  fprintf(stderr, "Usage   : SYNCTIME [Option]\n");
+  fprintf(stderr, "Usage   : synctime [Option]\n");
   fprintf(stderr, "Options :\n");
   fprintf(stderr, " --server=WEBSERVER        Use this time server instead"
           " of default.\n");
