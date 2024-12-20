@@ -1015,7 +1015,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #  define CURL_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
 #endif
 #else
-#  define CURL_SET_BINMODE(stream)  (void)stream;
+#  define CURL_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
 #endif
 
 #endif /* HEADER_CURL_SETUP_H */
