@@ -41,7 +41,7 @@
   https://curl.se/libcurl/c/threadsafe.html
 
 */
-const char * const urls[NUMT]= {
+static const char * const urls[NUMT]= {
   "https://curl.se/",
   "ftp://example.com/",
   "https://example.net/",
@@ -71,6 +71,9 @@ int main(int argc, char **argv)
 {
   pthread_t tid[NUMT];
   int i;
+
+  (void)argc;
+  (void)argv;
 
   /* Must initialize libcurl before any threads are started */
   curl_global_init(CURL_GLOBAL_ALL);
