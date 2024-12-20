@@ -4,7 +4,7 @@ curl and libcurl 8.11.2
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3302
+ Contributors:                 3307
 
 This release includes the following changes:
 
@@ -13,13 +13,33 @@ This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
  o async-thread: avoid closing eventfd twice [9]
+ o build: drop unused feature macros, update exception list [51]
+ o cd2nroff: support "none" as a TLS backend [29]
  o checksrc: ban use of sscanf() [7]
+ o checksrc: fix the return() checker [35]
  o cmake/FindMbedTLS: drop lib duplicates early [17]
+ o cmake: add LDAP Find module [46]
+ o cmake: add native `pkg-config` detection for remaining Find modules [37]
+ o cmake: clang-cl improvements [42]
+ o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
+ o cmake: extend zlib's `AUTO` option to brotli, zstd and enable if found [36]
+ o cmake: improve `curl_dumpvars()` and move to `Utilities.cmake` [50]
+ o cmake: make libpsl required by default [45]
+ o cmake: namespace functions and macros [41]
+ o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
+ o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
  o conncache: result_cb comment removed from function docs [1]
  o cookie: parse only the exact expire date [3]
  o curl: return error if etag options are used with multiple URLs [5]
+ o CURLOPT_RESOLVE.md: fix wording [30]
  o docs/BUGS.md: remove leading space from a link
+ o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
+ o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
+ o lib: supress deprecation warnings in apple builds [32]
+ o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
+ o multissl: make openssl + wolfssl builds work [34]
+ o netrc: fix password-only entries [28]
  o netrc: restore _netrc fallback logic [6]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
  o scripts/mdlinkcheck: markdown link checker [19]
@@ -27,12 +47,17 @@ This release includes the following bugfixes:
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
  o tests/http/clients: use proper sleep() call on NonStop [10]
+ o tool_formparse: accept digits in --form type= strings [33]
  o tool_getparam: fix "Ignored Return Value" [21]
  o tool_getparam: fix memory leak on error in parse_ech [14]
  o tool_getparam: fix the ECH parser [20]
  o tool_operate: make --etag-compare always accept a non-existing file [22]
  o variable.md: mention --expand-variable for variables to variables [13]
  o variable.md: show function use with examples [18]
+ o vtls: remove 'detach/attach' functions from TLS handler struct [25]
+ o vtls: remove unusued 'check_cxn' from TLS handler struct [26]
+ o vtls: replace "none"-functions with NULL pointers [27]
+ o VULN-DISCLOSURE-POLICY.md: mention the not setting CVSS [23]
  o ws-docs: remove the outdated texts saying ws support is experimental [15]
 
 This release includes the following known bugs:
@@ -52,10 +77,12 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Pan, Christian Heusel, Christian Schmitz, Daniel Stenberg, Hermes Zhang,
-  Kai Pastor, Kevin Sun, Mohammed Sadiq, Randall S. Becker, Ray Satiro,
-  renovate[bot], Tamir Duberstein, Viktor Szakats
-  (13 contributors)
+  Andy Pan, Ben Zanin, Christian Heusel, Christian Schmitz, Daniel Stenberg,
+  Darren Banfi, dwickr, Hermes Zhang, IcedCoffeee on github, Kai Pastor,
+  Kevin Sun, Kuan-Wei Chiu, Mohammed Sadiq, Randall S. Becker, Ray Satiro,
+  renovate[bot], Samuel Henrique, Stefan Eissing, Tamir Duberstein,
+  Viktor Szakats
+  (20 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -81,3 +108,28 @@ References to bug reports and discussions on issues:
  [20] = https://curl.se/bug/?i=15741
  [21] = https://curl.se/bug/?i=15740
  [22] = https://curl.se/bug/?i=15737
+ [23] = https://curl.se/bug/?i=15779
+ [24] = https://curl.se/bug/?i=15778
+ [25] = https://curl.se/bug/?i=15776
+ [26] = https://curl.se/bug/?i=15775
+ [27] = https://curl.se/bug/?i=15772
+ [28] = https://curl.se/bug/?i=15767
+ [29] = https://curl.se/bug/?i=15769
+ [30] = https://curl.se/bug/?i=15770
+ [32] = https://curl.se/bug/?i=15763
+ [33] = https://curl.se/bug/?i=15761
+ [34] = https://curl.se/bug/?i=15596
+ [35] = https://curl.se/bug/?i=15764
+ [36] = https://curl.se/bug/?i=15431
+ [37] = https://curl.se/bug/?i=15408
+ [38] = https://curl.se/bug/?i=15543
+ [41] = https://curl.se/bug/?i=15498
+ [42] = https://curl.se/bug/?i=15478
+ [43] = https://curl.se/bug/?i=15255
+ [45] = https://curl.se/bug/?i=15464
+ [46] = https://curl.se/bug/?i=15273
+ [47] = https://curl.se/bug/?i=15523
+ [48] = https://curl.se/bug/?i=15280
+ [49] = https://curl.se/bug/?i=15465
+ [50] = https://curl.se/bug/?i=15562
+ [51] = https://curl.se/bug/?i=15577
