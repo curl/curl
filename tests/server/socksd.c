@@ -78,6 +78,8 @@
 #include "server_sockaddr.h"
 #include "warnless.h"
 
+#include "tool_binmode.h"
+
 /* include memdebug.h last */
 #include "memdebug.h"
 

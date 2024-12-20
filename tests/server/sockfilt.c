@@ -107,6 +107,8 @@
 #include "timediff.h"
 #include "warnless.h"
 
+#include "tool_binmode.h"
+
 /* include memdebug.h last */
 #include "memdebug.h"
 

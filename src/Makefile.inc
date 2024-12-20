@@ -105,6 +105,7 @@ CURL_CFILES = \
 CURL_HFILES = \
   slist_wc.h \
   terminal.h \
+  tool_binmode.h \
   tool_bname.h \
   tool_cb_dbg.h \
   tool_cb_hdr.h \

@@ -27,6 +27,7 @@
 
 #include "curlx.h"
 
+#include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
 #include "tool_filetime.h"

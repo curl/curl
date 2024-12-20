@@ -86,17 +86,4 @@ int tool_ftruncate64(int fd, curl_off_t where);
 
 #endif /* _WIN32 && ! HAVE_FTRUNCATE */
 
-#if (defined(HAVE_SETMODE) || defined(HAVE__SETMODE)) && defined(O_BINARY)
-/* Requires io.h and/or fcntl.h when available */
-#ifdef __HIGHC__
-#  define CURL_SET_BINMODE(stream)  _setmode(stream, O_BINARY)
-#elif defined(HAVE__SETMODE)
-#  define CURL_SET_BINMODE(stream)  (void)_setmode(fileno(stream), O_BINARY)
-#else
-#  define CURL_SET_BINMODE(stream)  (void)setmode(fileno(stream), O_BINARY)
-#endif
-#else
-#  define CURL_SET_BINMODE(stream)  (void)stream; Curl_nop_stmt
-#endif
-
 #endif /* HEADER_CURL_TOOL_SETUP_H */
