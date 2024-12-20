@@ -86,4 +86,5 @@ int tool_ftruncate64(int fd, curl_off_t where);
 
 #endif /* _WIN32 && ! HAVE_FTRUNCATE */
 
+
 #endif /* HEADER_CURL_TOOL_SETUP_H */
