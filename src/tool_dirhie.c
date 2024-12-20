@@ -37,7 +37,11 @@
 #include "memdebug.h" /* keep this as LAST include */
 
 #if defined(_WIN32) || (defined(MSDOS) && !defined(__DJGPP__))
-#  define mkdir(x,y) (mkdir)((x))
+#  ifdef _WIN32
+#    define mkdir(x,y) (_mkdir)((x))
+#  else
+#    define mkdir(x,y) (mkdir)((x))
+#  endif
 #  ifndef F_OK
 #    define F_OK 0
 #  endif

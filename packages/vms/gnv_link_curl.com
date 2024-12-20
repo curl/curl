@@ -396,7 +396,7 @@ $   if f$search("[.src]curl.exe") .eqs. ""
 $   then
 $       define/user gnv$libcurl 'gnv_libcurl_share'
 $       link'ldebug'/exe=[.src]curl.exe/dsf=[.src]curl.dsf -
-           [.src]curl-tool_main.o, [.src]curl-tool_binmode.o, -
+           [.src]curl-tool_main.o, -
            [.src]curl-tool_bname.o, [.src]curl-tool_cb_dbg.o, -
            [.src]curl-tool_cb_hdr.o, [.src]curl-tool_cb_prg.o, -
            [.src]curl-tool_cb_rea.o, [.src]curl-tool_cb_see.o, -

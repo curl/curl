@@ -27,7 +27,6 @@
 
 #include "curlx.h"
 
-#include "tool_binmode.h"
 #include "tool_cfgable.h"
 #include "tool_cb_prg.h"
 #include "tool_filetime.h"
@@ -600,7 +599,7 @@ static ParameterError data_urlencode(struct GlobalConfig *global,
     /* a '@' letter, it means that a filename or - (stdin) follows */
     if(!strcmp("-", p)) {
       file = stdin;
-      set_binmode(stdin);
+      curlx_set_binmode(stdin);
     }
     else {
       file = fopen(p, "rb");
@@ -866,7 +865,7 @@ static ParameterError set_data(cmdline_t cmd,
     if(!strcmp("-", nextarg)) {
       file = stdin;
       if(cmd == C_DATA_BINARY) /* forced data-binary */
-        set_binmode(stdin);
+        curlx_set_binmode(stdin);
     }
     else {
       file = fopen(nextarg, "rb");

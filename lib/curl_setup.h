@@ -835,6 +835,44 @@
 #include "curl_setup_once.h"
 #endif
 
+/* Allow building with deprecated CRT symbols disabled */
+#if defined(_WIN32) && \
+  ((defined(__MINGW32__) && defined(NO_OLDNAMES)) || \
+   (defined(_CRT_DECLARE_NONSTDC_NAMES) && !_CRT_DECLARE_NONSTDC_NAMES))
+#  define strdup _strdup
+#  define fdopen _fdopen
+#  define unlink _unlink
+#  define close _close
+#  define isatty _isatty
+#  define fileno _fileno
+#  define O_CREAT _O_CREAT
+#  define O_RDONLY _O_RDONLY
+#  define O_WRONLY _O_WRONLY
+#  define O_RDWR _O_RDWR
+#  define O_BINARY _O_BINARY
+#  define O_APPEND _O_APPEND
+#  define O_TRUNC _O_TRUNC
+#  define O_EXCL _O_EXCL
+#  define S_IREAD _S_IREAD
+#  define S_IWRITE _S_IWRITE
+#  define sys_nerr _sys_nerr
+#  define sys_errlist _sys_errlist
+#  define strcmpi _strcmpi
+#  /* Workaround for dependency headers requiring deprecated symbols */
+#  if defined(HAVE_LIBZ) || defined(USE_OPENSSL)
+#    ifdef _MSC_VER
+#      define off_t _off_t
+#    elif defined(__MINGW32__) && !defined(_POSIX) && \
+          defined(__MINGW64_VERSION_MAJOR) && (__MINGW64_VERSION_MAJOR >= 3)
+#      if defined(_FILE_OFFSET_BITS) && (_FILE_OFFSET_BITS == 64)
+#        define off_t _off64_t
+#      else
+#        define off_t long
+#      endif
+#    endif
+#  endif
+#endif
+
 /*
  * Definition of our NOP statement Object-like macro
  */
@@ -870,13 +908,13 @@
 #endif
 
 /* Define S_ISREG if not defined by system headers, e.g. MSVC */
-#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
-#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#if !defined(S_ISREG) && defined(_S_IFMT) && defined(_S_IFREG)
+#define S_ISREG(m) (((m) & _S_IFMT) == _S_IFREG)
 #endif
 
 /* Define S_ISDIR if not defined by system headers, e.g. MSVC */
-#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
-#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#if !defined(S_ISDIR) && defined(_S_IFMT) && defined(_S_IFDIR)
+#define S_ISDIR(m) (((m) & _S_IFMT) == _S_IFDIR)
 #endif
 
 /* In Windows the default file mode is text but an application can override it.
@@ -949,7 +987,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
     defined(USE_QUICHE) || defined(USE_MSH3)
 
 #ifdef CURL_WITH_MULTI_SSL
-#error "Multi-SSL combined with QUIC is not supported"
+#error "MultiSSL combined with QUIC is not supported"
 #endif
 
 #define USE_HTTP3

@@ -53,6 +53,12 @@
   curlx_uztosi()
 */
 
+#include "curl_binmode.h"
+/* "curl_binmode.h" provides this function:
+
+  curlx_set_binmode()
+*/
+
 #include "curl_multibyte.h"
 /* "curl_multibyte.h" provides these functions and macros:
 
