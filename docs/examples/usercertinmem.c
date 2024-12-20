@@ -31,6 +31,10 @@
  * must be used in real circumstances when a secure connection is required.
  */
 
+#ifndef OPENSSL_SUPPRESS_DEPRECATED
+#define OPENSSL_SUPPRESS_DEPRECATED
+#endif
+
 #include <openssl/ssl.h>
 #include <openssl/x509.h>
 #include <openssl/pem.h>
@@ -50,6 +54,11 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   BIO *kbio = NULL;
   RSA *rsa = NULL;
   int ret;
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Woverlength-strings"
+#endif
 
   const char *mypem = /* www.cacert.org */
     "-----BEGIN CERTIFICATE-----\n"\
@@ -114,6 +123,10 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"\
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"\
     "-----END RSA PRIVATE KEY-----\n";
+
+#if defined(__GNUC__) || defined(__clang__)
+#pragma GCC diagnostic pop
+#endif
 
   (void)curl; /* avoid warnings */
   (void)parm; /* avoid warnings */
@@ -223,5 +236,5 @@ int main(void)
 
   curl_easy_cleanup(ch);
   curl_global_cleanup();
-  return rv;
+  return (int)rv;
 }
