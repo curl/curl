@@ -330,8 +330,7 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
   (void)uln;
 
   fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
-          "/%" CURL_FORMAT_CURL_OFF_T ")\n",
-          conn->url, dlnow, dltotal);
+          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
