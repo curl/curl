@@ -323,9 +323,9 @@ int main(int argc, char *argv[])
     tzonediffWord  = (int)(tzonediffFloat/3600.0);
 
     if((double)(tzonediffWord * 3600) == tzonediffFloat)
-      snprintf(tzoneBuf, 16, "%+03d'00'", tzonediffWord);
+      snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'00'", tzonediffWord);
     else
-      snprintf(tzoneBuf, 16, "%+03d'30'", tzonediffWord);
+      snprintf(tzoneBuf, sizeof(tzoneBuf), "%+03d'30'", tzonediffWord);
 
     /* Get current system time and local time */
     GetSystemTime(&SYSTime);
