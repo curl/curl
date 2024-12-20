@@ -32,9 +32,9 @@
 #include <event2/event.h>
 #include <curl/curl.h>
 
-struct event_base *base;
-CURLM *curl_handle;
-struct event *timeout;
+static struct event_base *base;
+static CURLM *curl_handle;
+static struct event *timeout;
 
 typedef struct curl_context_s {
   struct event *event;
@@ -127,6 +127,8 @@ static void curl_perform(int fd, short event, void *arg)
   int flags = 0;
   curl_context_t *context;
 
+  (void)fd;
+
   if(event & EV_READ)
     flags |= CURL_CSELECT_IN;
   if(event & EV_WRITE)
@@ -143,6 +145,9 @@ static void curl_perform(int fd, short event, void *arg)
 static void on_timeout(evutil_socket_t fd, short events, void *arg)
 {
   int running_handles;
+  (void)fd;
+  (void)events;
+  (void)arg;
   curl_multi_socket_action(curl_handle, CURL_SOCKET_TIMEOUT, 0,
                            &running_handles);
   check_multi_info();
@@ -150,13 +155,15 @@ static void on_timeout(evutil_socket_t fd, short events, void *arg)
 
 static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
 {
+  (void)multi;
+  (void)userp;
   if(timeout_ms < 0) {
     evtimer_del(timeout);
   }
   else {
+    struct timeval tv;
     if(timeout_ms == 0)
       timeout_ms = 1; /* 0 means call socket_action asap */
-    struct timeval tv;
     tv.tv_sec = timeout_ms / 1000;
     tv.tv_usec = (timeout_ms % 1000) * 1000;
     evtimer_del(timeout);
@@ -166,10 +173,13 @@ static int start_timeout(CURLM *multi, long timeout_ms, void *userp)
 }
 
 static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
-                  void *socketp)
+                         void *socketp)
 {
   curl_context_t *curl_context;
   int events = 0;
+
+  (void)easy;
+  (void)userp;
 
   switch(action) {
   case CURL_POLL_IN:
@@ -188,8 +198,8 @@ static int handle_socket(CURL *easy, curl_socket_t s, int action, void *userp,
     events |= EV_PERSIST;
 
     event_del(curl_context->event);
-    event_assign(curl_context->event, base, curl_context->sockfd, events,
-      curl_perform, curl_context);
+    event_assign(curl_context->event, base, curl_context->sockfd,
+      (short)events, curl_perform, curl_context);
     event_add(curl_context->event, NULL);
 
     break;

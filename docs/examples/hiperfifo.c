@@ -259,7 +259,7 @@ static void setsock(SockInfo *f, curl_socket_t s, CURL *e, int act,
   if(event_initialized(&f->ev)) {
     event_del(&f->ev);
   }
-  event_assign(&f->ev, g->evbase, f->sockfd, kind, event_cb, g);
+  event_assign(&f->ev, g->evbase, f->sockfd, (short)kind, event_cb, g);
   event_add(&f->ev, NULL);
 }
 
@@ -315,26 +315,27 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
 
 
 /* CURLOPT_PROGRESSFUNCTION */
-static int prog_cb(void *p, double dltotal, double dlnow, double ult,
-                   double uln)
+static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
+                       curl_off_t ult, curl_off_t uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
   (void)ult;
   (void)uln;
 
-  fprintf(MSG_OUT, "Progress: %s (%g/%g)\n", conn->url, dlnow, dltotal);
+  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
+          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(char *url, GlobalInfo *g)
+static void new_conn(const char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;
 
   conn = calloc(1, sizeof(ConnInfo));
-  conn->error[0]='\0';
+  conn->error[0] = '\0';
 
   conn->easy = curl_easy_init();
   if(!conn->easy) {
@@ -350,7 +351,7 @@ static void new_conn(char *url, GlobalInfo *g)
   curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
   curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
   curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(conn->easy, CURLOPT_PROGRESSFUNCTION, prog_cb);
+  curl_easy_setopt(conn->easy, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
   curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
   curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1L);
   fprintf(MSG_OUT,

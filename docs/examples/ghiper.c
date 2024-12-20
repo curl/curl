@@ -118,18 +118,16 @@ static void mcode_or_die(const char *where, CURLMcode code)
 /* Check for completed transfers, and remove their easy handles */
 static void check_multi_info(GlobalInfo *g)
 {
-  char *eff_url;
   CURLMsg *msg;
   int msgs_left;
-  ConnInfo *conn;
-  CURL *easy;
-  CURLcode res;
 
   MSG_OUT("REMAINING: %d\n", g->still_running);
   while((msg = curl_multi_info_read(g->multi, &msgs_left))) {
     if(msg->msg == CURLMSG_DONE) {
-      easy = msg->easy_handle;
-      res = msg->data.result;
+      CURL *easy = msg->easy_handle;
+      CURLcode res = msg->data.result;
+      char *eff_url;
+      ConnInfo *conn;
       curl_easy_getinfo(easy, CURLINFO_PRIVATE, &conn);
       curl_easy_getinfo(easy, CURLINFO_EFFECTIVE_URL, &eff_url);
       MSG_OUT("DONE: %s => (%d) %s\n", eff_url, res, conn->error);
@@ -281,23 +279,27 @@ static size_t write_cb(void *ptr, size_t size, size_t nmemb, void *data)
   return realsize;
 }
 
-/* CURLOPT_PROGRESSFUNCTION */
-static int prog_cb(void *p, double dltotal, double dlnow, double ult,
-                   double uln)
+/* CURLOPT_XFERINFOFUNCTION */
+static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
+                       curl_off_t ult, curl_off_t uln)
 {
   ConnInfo *conn = (ConnInfo *)p;
-  MSG_OUT("Progress: %s (%g/%g)\n", conn->url, dlnow, dltotal);
+  (void)ult;
+  (void)uln;
+
+  fprintf(MSG_OUT, "Progress: %s (%" CURL_FORMAT_CURL_OFF_T
+          "/%" CURL_FORMAT_CURL_OFF_T ")\n", conn->url, dlnow, dltotal);
   return 0;
 }
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(char *url, GlobalInfo *g)
+static void new_conn(const char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;
 
   conn = g_malloc0(sizeof(ConnInfo));
-  conn->error[0]='\0';
+  conn->error[0] = '\0';
   conn->easy = curl_easy_init();
   if(!conn->easy) {
     MSG_OUT("curl_easy_init() failed, exiting!\n");
@@ -312,7 +314,7 @@ static void new_conn(char *url, GlobalInfo *g)
   curl_easy_setopt(conn->easy, CURLOPT_ERRORBUFFER, conn->error);
   curl_easy_setopt(conn->easy, CURLOPT_PRIVATE, conn);
   curl_easy_setopt(conn->easy, CURLOPT_NOPROGRESS, SHOW_PROGRESS ? 0L : 1L);
-  curl_easy_setopt(conn->easy, CURLOPT_PROGRESSFUNCTION, prog_cb);
+  curl_easy_setopt(conn->easy, CURLOPT_XFERINFOFUNCTION, xferinfo_cb);
   curl_easy_setopt(conn->easy, CURLOPT_PROGRESSDATA, conn);
   curl_easy_setopt(conn->easy, CURLOPT_FOLLOWLOCATION, 1L);
   curl_easy_setopt(conn->easy, CURLOPT_CONNECTTIMEOUT, 30L);
@@ -386,7 +388,7 @@ int init_fifo(void)
   const char *fifo = "hiper.fifo";
   int socket;
 
-  if(lstat (fifo, &st) == 0) {
+  if(lstat(fifo, &st) == 0) {
     if((st.st_mode & S_IFMT) == S_IFREG) {
       errno = EEXIST;
       perror("lstat");
@@ -411,13 +413,12 @@ int init_fifo(void)
   return socket;
 }
 
-int main(int argc, char **argv)
+int main(void)
 {
-  GlobalInfo *g;
+  GlobalInfo *g = g_malloc0(sizeof(GlobalInfo));
   GMainLoop*gmain;
   int fd;
   GIOChannel* ch;
-  g = g_malloc0(sizeof(GlobalInfo));
 
   fd = init_fifo();
   ch = g_io_channel_unix_new(fd);
