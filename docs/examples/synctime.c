@@ -192,8 +192,8 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
   return (nmemb*size);
 }
 
-static void SyncTime_CURL_Init(CURL *curl, char *proxy_port,
-                               char *proxy_user_password)
+static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,
+                               const char *proxy_user_password)
 {
   if(strlen(proxy_port) > 0)
     curl_easy_setopt(curl, CURLOPT_PROXY, proxy_port);

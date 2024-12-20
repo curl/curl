@@ -86,7 +86,7 @@ static size_t writer(char *data, size_t size, size_t nmemb,
 //  libcurl connection initialization
 //
 
-static bool init(CURL *&conn, char *url)
+static bool init(CURL *&conn, const char *url)
 {
   CURLcode code;
 

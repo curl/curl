@@ -329,13 +329,13 @@ static int xferinfo_cb(void *p, curl_off_t dltotal, curl_off_t dlnow,
 
 
 /* Create a new easy handle, and add it to the global curl_multi */
-static void new_conn(char *url, GlobalInfo *g)
+static void new_conn(const char *url, GlobalInfo *g)
 {
   ConnInfo *conn;
   CURLMcode rc;
 
   conn = calloc(1, sizeof(ConnInfo));
-  conn->error[0]='\0';
+  conn->error[0] = '\0';
 
   conn->easy = curl_easy_init();
   if(!conn->easy) {

@@ -119,7 +119,7 @@ static CURL *make_handle(const char *url)
 }
 
 /* HREF finder implemented in libxml2 but could be any HTML parser */
-static size_t follow_links(CURLM *multi_handle, memory *mem, char *url)
+static size_t follow_links(CURLM *multi_handle, memory *mem, const char *url)
 {
   int opts = HTML_PARSE_NOBLANKS | HTML_PARSE_NOERROR | \
              HTML_PARSE_NOWARNING | HTML_PARSE_NONET;
