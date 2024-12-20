@@ -118,9 +118,11 @@ static const char DefaultTimeServer[3][MAX_STRING1] =
   "https://www.google.com/"
 };
 
-static const char *DayStr[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
-static const char *MthStr[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                               "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+static const char *DayStr[] = {
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+static const char *MthStr[] = {
+  "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+  "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 static int ShowAllHeader;
 static int AutoSyncTime;
