@@ -2331,8 +2331,30 @@ if(NOT CURL_DISABLE_INSTALL)
   # Consumed custom variables:
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
-  #   USE_OPENSSL
-  #   HAVE_LIBZ
+  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
+  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
+  #   USE_BEARSSL
+  #   HAVE_BROTLI
+  #   USE_ARES
+  #   HAVE_GSSAPI
+  #   USE_GSASL
+  #   USE_WIN32_LDAP CURL_DISABLE_LDAP
+  #   HAVE_LIBIDN2
+  #   USE_LIBPSL
+  #   USE_LIBSSH
+  #   USE_LIBSSH2
+  #   USE_LIBUV
+  #   USE_MSH3
+  #   USE_MBEDTLS
+  #   USE_NGHTTP2
+  #   USE_NGHTTP3
+  #   USE_NGTCP2
+  #   USE_GNUTLS
+  #   USE_QUICHE
+  #   USE_RUSTLS
+  #   USE_WOLFSSH
+  #   USE_WOLFSSL
+  #   HAVE_ZSTD
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
@@ -2344,7 +2366,31 @@ if(NOT CURL_DISABLE_INSTALL)
       DESTINATION ${_install_cmake_dir})
   endif()
 
-  install(FILES ${_version_config} ${_project_config}
+  install(
+    FILES
+      ${_version_config}
+      ${_project_config}
+      "${PROJECT_SOURCE_DIR}/CMake/FindBearSSL.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindBrotli.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindCares.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindGSS.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibssh.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibuv.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindMSH3.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindMbedTLS.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNGHTTP2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNGHTTP3.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNGTCP2.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindNettle.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindQuiche.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindRustls.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindWolfSSH.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindWolfSSL.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindZstd.cmake"
     DESTINATION ${_install_cmake_dir})
 
   # Workaround for MSVS10 to avoid the Dialog Hell
