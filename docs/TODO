@@ -158,7 +158,6 @@
  18.13 Acknowledge Ratelimit headers
  18.14 --dry-run
  18.15 --retry should resume
- 18.16 send only part of --data
  18.17 consider filename from the redirected URL with -O ?
  18.18 retry on network is unreachable
  18.19 expand ~/ in config files
@@ -1124,15 +1123,6 @@
  already transferred before the retry.
 
  See https://github.com/curl/curl/issues/1084
-
-18.16 send only part of --data
-
- When the user only wants to send a small piece of the data provided with
- --data or --data-binary, like when that data is a huge file, consider a way
- to specify that curl should only send a piece of that. One suggested syntax
- would be: "--data-binary @largefile.zip!1073741823-2147483647".
-
- See https://github.com/curl/curl/issues/1200
 
 18.17 consider filename from the redirected URL with -O ?
 
