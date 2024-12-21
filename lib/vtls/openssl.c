@@ -2922,16 +2922,13 @@ out:
  */
 static int ossl_new_session_cb(SSL *ssl, SSL_SESSION *ssl_sessionid)
 {
-  struct Curl_cfilter *cf;
-  struct Curl_easy *data;
-  struct ssl_connect_data *connssl;
-
-  cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
-  connssl = cf ? cf->ctx : NULL;
-  data = connssl ? CF_DATA_CURRENT(cf) : NULL;
-  if(data && connssl)
+  struct Curl_cfilter *cf = (struct Curl_cfilter*) SSL_get_app_data(ssl);
+  if(cf) {
+    struct Curl_easy *data = CF_DATA_CURRENT(cf);
+    struct ssl_connect_data *connssl = cf->ctx;
     Curl_ossl_add_session(cf, data, connssl->peer.scache_key, ssl_sessionid,
                           SSL_version(ssl), connssl->negotiated.alpn);
+  }
   return 0;
 }
 
