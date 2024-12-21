@@ -146,24 +146,26 @@ void *Curl_node_take_elem(struct Curl_llist_node *e)
   DEBUGASSERT(list->_init == LLISTINIT);
   DEBUGASSERT(list->_size);
   DEBUGASSERT(e->_init == NODEINIT);
-  if(e == list->_head) {
-    list->_head = e->_next;
+  if(list) {
+    if(e == list->_head) {
+      list->_head = e->_next;
 
-    if(!list->_head)
-      list->_tail = NULL;
-    else
-      e->_next->_prev = NULL;
+      if(!list->_head)
+        list->_tail = NULL;
+      else
+        e->_next->_prev = NULL;
+    }
+    else {
+      if(e->_prev)
+        e->_prev->_next = e->_next;
+
+      if(!e->_next)
+        list->_tail = e->_prev;
+      else
+        e->_next->_prev = e->_prev;
+    }
+    --list->_size;
   }
-  else {
-    if(e->_prev)
-      e->_prev->_next = e->_next;
-
-    if(!e->_next)
-      list->_tail = e->_prev;
-    else
-      e->_next->_prev = e->_prev;
-  }
-
   ptr = e->_ptr;
 
   e->_list = NULL;
@@ -174,7 +176,6 @@ void *Curl_node_take_elem(struct Curl_llist_node *e)
   e->_init = NODEREM; /* specific pattern on remove - not zero */
 #endif
 
-  --list->_size;
   return ptr;
 }
 
@@ -191,9 +192,11 @@ Curl_node_uremove(struct Curl_llist_node *e, void *user)
 
   list = e->_list;
   DEBUGASSERT(list);
-  ptr = Curl_node_take_elem(e);
-  if(list->_dtor)
-    list->_dtor(user, ptr);
+  if(list) {
+    ptr = Curl_node_take_elem(e);
+    if(list->_dtor)
+      list->_dtor(user, ptr);
+  }
 }
 
 void Curl_node_remove(struct Curl_llist_node *e)
