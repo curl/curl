@@ -39,9 +39,6 @@ line 1
 #
 # Client-side
 <client>
-<features>
-!hyper
-</features>
 <server>
 http
 </server>

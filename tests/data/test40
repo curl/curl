@@ -26,11 +26,7 @@ body
 </data2>
 <datacheck>
 HTTP/1.1 302 OK swsclose
-%if !hyper
 Location: ../moo.html/?name=d a niel&testcase=/%TESTNUMBER0002    
-%else
-Location: ../moo.html/?name=d a niel&testcase=/%TESTNUMBER0002
-%endif
 Date: Tue, 09 Nov 2010 14:49:00 GMT
 Connection: close
 

@@ -31,11 +31,6 @@ Pass a long to tell libcurl how to act on transfer decoding. If set to zero,
 transfer decoding is disabled, if set to 1 it is enabled (default). libcurl
 does chunked transfer decoding by default unless this option is set to zero.
 
-# NOTES
-
-This option does not work with the hyper backend as that always has transfer
-decoding enabled.
-
 # DEFAULT
 
 1

@@ -54,14 +54,6 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER0002
 #
 # Verify data after the test has been "shot"
 <verify>
-# hyper doesn't like the bad header in the second request
-<errorcode>
-%if hyper
-1
-%else
-0
-%endif
-</errorcode>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT

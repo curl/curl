@@ -152,9 +152,6 @@ struct SingleRequest {
   BIT(sendbuf_init); /* sendbuf is initialized */
   BIT(shutdown);     /* request end will shutdown connection */
   BIT(shutdown_err_ignore); /* errors in shutdown will not fail request */
-#ifdef USE_HYPER
-  BIT(bodywritten);
-#endif
 };
 
 /**
@@ -196,7 +193,6 @@ void Curl_req_free(struct SingleRequest *req, struct Curl_easy *data);
  */
 void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
 
-#ifndef USE_HYPER
 /**
  * Send request headers. If not all could be sent
  * they will be buffered. Use `Curl_req_flush()` to make sure
@@ -206,8 +202,6 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
 CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf);
-
-#endif /* !USE_HYPER */
 
 /**
  * TRUE iff the request has sent all request headers and data.

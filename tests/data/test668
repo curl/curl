@@ -72,11 +72,7 @@ Transfer-Encoding: chunked
 Content-Type: multipart/form-data; boundary=----------------------------
 Expect: 100-continue
 
-%if hyper
-CD
-%else
 cd
-%endif
 ------------------------------
 Content-Disposition: form-data; name="field1"
 
@@ -94,11 +90,7 @@ Content-Disposition: form-data; name="field3"; filename="file%TESTNUMBER.txt"
 Content-Type: text/plain
 
 
-%if hyper
-4F
-%else
 4f
-%endif
 This is data from a file
 
 --------------------------------

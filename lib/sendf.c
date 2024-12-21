@@ -316,9 +316,6 @@ static CURLcode cw_download_write(struct Curl_easy *data,
   }
   /* Update stats, write and report progress */
   data->req.bytecount += nwrite;
-#ifdef USE_HYPER
-  data->req.bodywritten = TRUE;
-#endif
   result = Curl_pgrsSetDownloadCounter(data, data->req.bytecount);
   if(result)
     return result;
@@ -495,22 +492,6 @@ struct Curl_cwriter *Curl_cwriter_get_by_type(struct Curl_easy *data,
       return writer;
   }
   return NULL;
-}
-
-void Curl_cwriter_remove_by_name(struct Curl_easy *data,
-                                 const char *name)
-{
-  struct Curl_cwriter **anchor = &data->req.writer_stack;
-
-  while(*anchor) {
-    if(!strcmp(name, (*anchor)->cwt->name)) {
-      struct Curl_cwriter *w = (*anchor);
-      *anchor = w->next;
-      Curl_cwriter_free(data, w);
-      continue;
-    }
-    anchor = &((*anchor)->next);
-  }
 }
 
 bool Curl_cwriter_is_paused(struct Curl_easy *data)

@@ -208,9 +208,6 @@ together as a single identifier. Most keywords are only there to provide a way
 for users to skip certain classes of tests, if desired, but a few are treated
 specially by the test harness or build system.
 
-When using curl built with Hyper, the keywords must include `HTTP` or `HTTPS`
-for 'hyper mode' to kick in and make line ending checks work for tests.
-
 When running a unit test and the keywords include `unittest`, the `<tool>`
 section can be left empty to use the standard unit test tool name `unitN` where
 `N` is the test number.
@@ -447,7 +444,6 @@ Features testable here are:
 - `http/2`
 - `http/3`
 - `HTTPS-proxy`
-- `hyper`
 - `IDN`
 - `IPv6`
 - `Kerberos`
