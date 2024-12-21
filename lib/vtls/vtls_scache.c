@@ -591,12 +591,14 @@ static CURLcode cf_ssl_find_peer(struct Curl_cfilter *cf,
       unsigned char my_hmac[CURL_SHA256_DIGEST_LENGTH];
       if(!peer_key_len) /* we are lazy */
         peer_key_len = strlen(ssl_peer_key);
-      (void)Curl_hmacit(&Curl_HMAC_SHA256,
-                        scache->peers[i].key_salt,
-                        sizeof(scache->peers[i].key_salt),
-                        (const unsigned char *)ssl_peer_key,
-                        peer_key_len,
-                        my_hmac);
+      result = Curl_hmacit(&Curl_HMAC_SHA256,
+                           scache->peers[i].key_salt,
+                           sizeof(scache->peers[i].key_salt),
+                           (const unsigned char *)ssl_peer_key,
+                           peer_key_len,
+                           my_hmac);
+      if(result)
+        goto out;
       if(!memcmp(scache->peers[i].key_hmac, my_hmac, sizeof(my_hmac))) {
         /* remember peer_key for future lookups */
         scache->peers[i].ssl_peer_key = strdup(ssl_peer_key);
