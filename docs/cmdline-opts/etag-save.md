@@ -20,3 +20,6 @@ Save an HTTP ETag to the specified file. An ETag is a caching related header,
 usually returned in a response. Use this option with a single URL only.
 
 If no ETag is sent by the server, an empty file is created.
+
+Starting in curl 8.12.0, using the --create-dirs option can also create
+missing directory components for the path provided in --etag-save.
