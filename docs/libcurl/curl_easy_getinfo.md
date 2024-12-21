@@ -146,6 +146,10 @@ Number of bytes of all headers received. See CURLINFO_HEADER_SIZE(3)
 
 Available HTTP authentication methods. See CURLINFO_HTTPAUTH_AVAIL(3)
 
+## CURLINFO_HTTPAUTH_USED
+
+Used HTTP authentication method. See CURLINFO_HTTPAUTH_USED(3)
+
 ## CURLINFO_HTTP_CONNECTCODE
 
 Last proxy CONNECT response code. See CURLINFO_HTTP_CONNECTCODE(3)
@@ -224,6 +228,10 @@ CURLINFO_PROTOCOL(3)
 ## CURLINFO_PROXYAUTH_AVAIL
 
 Available HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_AVAIL(3)
+
+## CURLINFO_PROXYAUTH_USED
+
+Used HTTP proxy authentication methods. See CURLINFO_PROXYAUTH_USED(3)
 
 ## CURLINFO_PROXY_ERROR
 

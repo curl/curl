@@ -983,6 +983,8 @@ struct PureInfo {
   curl_off_t request_size; /* the amount of bytes sent in the request(s) */
   unsigned long proxyauthavail; /* what proxy auth types were announced */
   unsigned long httpauthavail;  /* what host auth types were announced */
+  unsigned long proxyauthpicked; /* selected proxy auth type */
+  unsigned long httpauthpicked;  /* selected host auth type */
   long numconnects; /* how many new connection did libcurl created */
   char *contenttype; /* the content type of the object */
   char *wouldredirect; /* URL this would have been redirected to if asked to */
