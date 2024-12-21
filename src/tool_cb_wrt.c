@@ -39,11 +39,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifdef O_BINARY
-#define CURL_O_BINARY O_BINARY
-#else
-#define CURL_O_BINARY 0
-#endif
 #ifdef _WIN32
 #define OPENMODE S_IREAD | S_IWRITE
 #else
