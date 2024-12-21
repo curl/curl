@@ -50,7 +50,8 @@ be checked for being ready to read or write.
 
 The client code can pass *size* equal to zero just to get the number of the
 descriptors and allocate appropriate storage for them to be used in a
-subsequent function call.
+subsequent function call. In this case, *fd_count* receives a number greater
+than or equal to the number of descriptors.
 
 # %PROTOCOLS%
 

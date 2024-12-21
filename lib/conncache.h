@@ -183,8 +183,8 @@ void Curl_cpool_do_locked(struct Curl_easy *data,
  */
 CURLcode Curl_cpool_add_pollfds(struct cpool *connc,
                                 struct curl_pollfds *cpfds);
-CURLcode Curl_cpool_add_waitfds(struct cpool *connc,
-                                struct curl_waitfds *cwfds);
+unsigned int Curl_cpool_add_waitfds(struct cpool *connc,
+                                    struct curl_waitfds *cwfds);
 
 /**
  * Perform maintenance on connections in the pool. Specifically,
