@@ -23,10 +23,6 @@
  ***************************************************************************/
 #include "tool_setup.h"
 
-#if defined(HAVE_STRCASECMP) && defined(HAVE_STRINGS_H) && !defined(_WIN32)
-#include <strings.h>
-#endif
-
 #include "tool_util.h"
 
 #include "curlx.h"

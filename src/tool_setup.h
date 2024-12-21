@@ -69,6 +69,9 @@ extern FILE *tool_stderr;
 #if defined(_WIN32)
 #  define CURL_STRICMP(p1, p2)  _stricmp(p1, p2)
 #elif defined(HAVE_STRCASECMP)
+#  ifdef HAVE_STRINGS_H
+#    include <strings.h>
+#  endif
 #  define CURL_STRICMP(p1, p2)  strcasecmp(p1, p2)
 #elif defined(HAVE_STRCMPI)
 #  define CURL_STRICMP(p1, p2)  strcmpi(p1, p2)
