@@ -4,15 +4,20 @@ curl and libcurl 8.11.2
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3307
+ Contributors:                 3308
 
 This release includes the following changes:
 
+ o curl: add byte range support to --variable reading from file [56]
+ o curl: make --etag-save acknowledge --create-dirs [31]
+ o getinfo: fix CURLINFO_QUEUE_TIME_T and add 'time_queue' var [55]
+ o hyper: drop support [57]
 
 This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
  o async-thread: avoid closing eventfd twice [9]
+ o binmode: convert to macro and use it from tests [44]
  o build: drop unused feature macros, update exception list [51]
  o cd2nroff: support "none" as a TLS backend [29]
  o checksrc: ban use of sscanf() [7]
@@ -22,21 +27,27 @@ This release includes the following bugfixes:
  o cmake: add native `pkg-config` detection for remaining Find modules [37]
  o cmake: clang-cl improvements [42]
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
+ o cmake: drop redundant opening/closing `.*` from `MATCH` expressions [64]
  o cmake: extend zlib's `AUTO` option to brotli, zstd and enable if found [36]
  o cmake: improve `curl_dumpvars()` and move to `Utilities.cmake` [50]
  o cmake: make libpsl required by default [45]
  o cmake: namespace functions and macros [41]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
  o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
+ o config-mac: drop `MACOS_SSL_SUPPORT` macro [63]
  o conncache: result_cb comment removed from function docs [1]
  o cookie: parse only the exact expire date [3]
  o curl: return error if etag options are used with multiple URLs [5]
  o CURLOPT_RESOLVE.md: fix wording [30]
  o docs/BUGS.md: remove leading space from a link
+ o examples/complicated: fix warnings, bump deprecated callback, tidy up [59]
+ o examples/synctime.c: remove references to dead URLs and functionality [62]
+ o examples: make them compile with compatibility functions disabled (Windows) [58]
  o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
  o lib: supress deprecation warnings in apple builds [32]
+ o lib: TLS session ticket caching reworked [60]
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o multissl: make openssl + wolfssl builds work [34]
  o netrc: fix password-only entries [28]
@@ -47,6 +58,7 @@ This release includes the following bugfixes:
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
  o tests/http/clients: use proper sleep() call on NonStop [10]
+ o tool_formparse.c: make curlx_uztoso a static in here [39]
  o tool_formparse: accept digits in --form type= strings [33]
  o tool_getparam: fix "Ignored Return Value" [21]
  o tool_getparam: fix memory leak on error in parse_ech [14]
@@ -79,10 +91,10 @@ advice from friends like these:
 
   Andy Pan, Ben Zanin, Christian Heusel, Christian Schmitz, Daniel Stenberg,
   Darren Banfi, dwickr, Hermes Zhang, IcedCoffeee on github, Kai Pastor,
-  Kevin Sun, Kuan-Wei Chiu, Mohammed Sadiq, Randall S. Becker, Ray Satiro,
-  renovate[bot], Samuel Henrique, Stefan Eissing, Tamir Duberstein,
+  Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt, Mohammed Sadiq, Randall S. Becker,
+  Ray Satiro, renovate[bot], Samuel Henrique, Stefan Eissing, Tamir Duberstein,
   Viktor Szakats
-  (20 contributors)
+  (21 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -116,6 +128,7 @@ References to bug reports and discussions on issues:
  [28] = https://curl.se/bug/?i=15767
  [29] = https://curl.se/bug/?i=15769
  [30] = https://curl.se/bug/?i=15770
+ [31] = https://curl.se/bug/?i=15730
  [32] = https://curl.se/bug/?i=15763
  [33] = https://curl.se/bug/?i=15761
  [34] = https://curl.se/bug/?i=15596
@@ -123,9 +136,11 @@ References to bug reports and discussions on issues:
  [36] = https://curl.se/bug/?i=15431
  [37] = https://curl.se/bug/?i=15408
  [38] = https://curl.se/bug/?i=15543
+ [39] = https://curl.se/bug/?i=15796
  [41] = https://curl.se/bug/?i=15498
  [42] = https://curl.se/bug/?i=15478
  [43] = https://curl.se/bug/?i=15255
+ [44] = https://curl.se/bug/?i=15787
  [45] = https://curl.se/bug/?i=15464
  [46] = https://curl.se/bug/?i=15273
  [47] = https://curl.se/bug/?i=15523
@@ -133,3 +148,12 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=15465
  [50] = https://curl.se/bug/?i=15562
  [51] = https://curl.se/bug/?i=15577
+ [55] = https://curl.se/bug/?i=15512
+ [56] = https://curl.se/bug/?i=15739
+ [57] = https://curl.se/bug/?i=15120
+ [58] = https://curl.se/bug/?i=15789
+ [59] = https://curl.se/bug/?i=15785
+ [60] = https://curl.se/bug/?i=15774
+ [62] = https://curl.se/bug/?i=15786
+ [63] = https://curl.se/bug/?i=15777
+ [64] = https://curl.se/bug/?i=15773
