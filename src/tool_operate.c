@@ -1976,6 +1976,12 @@ static CURLcode single_transfer(struct GlobalConfig *global,
       }
 
       if(config->etag_save_file) {
+        if(config->create_dirs) {
+          result = create_dir_hierarchy(config->etag_save_file, global);
+          if(result)
+            break;
+        }
+
         /* open file for output: */
         if(strcmp(config->etag_save_file, "-")) {
           FILE *newfile = fopen(config->etag_save_file, "ab");
