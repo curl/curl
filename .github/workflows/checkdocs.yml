@@ -14,7 +14,8 @@ name: Docs
       - '*/ci'
     paths:
       - '.github/workflows/checkdocs.yml'
-      - '.github/scripts/**'
+      - '.github/scripts/mdlinkcheck'
+      - '/scripts/**'
       - '**.md'
       - 'docs/*'
   pull_request:
@@ -23,6 +24,7 @@ name: Docs
     paths:
       - '.github/workflows/checkdocs.yml'
       - '.github/scripts/**'
+      - '.github/scripts/mdlinkcheck'
       - '**.md'
       - 'docs/*'
 
