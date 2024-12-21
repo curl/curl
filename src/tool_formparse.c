@@ -75,6 +75,31 @@ static struct tool_mime *tool_mime_new_data(struct tool_mime *parent,
   return m;
 }
 
+/*
+** unsigned size_t to signed curl_off_t
+*/
+
+#define CURL_MASK_UCOFFT  ((unsigned CURL_TYPEOF_CURL_OFF_T)~0)
+#define CURL_MASK_SCOFFT  (CURL_MASK_UCOFFT >> 1)
+
+static curl_off_t uztoso(size_t uznum)
+{
+#ifdef __INTEL_COMPILER
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
+#elif defined(_MSC_VER)
+#  pragma warning(push)
+#  pragma warning(disable:4310) /* cast truncates constant value */
+#endif
+
+  DEBUGASSERT(uznum <= (size_t) CURL_MASK_SCOFFT);
+  return (curl_off_t)(uznum & (size_t) CURL_MASK_SCOFFT);
+
+#if defined(__INTEL_COMPILER) || defined(_MSC_VER)
+#  pragma warning(pop)
+#endif
+}
+
 static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
                                                 const char *filename,
                                                 bool isremotefile,
@@ -137,7 +162,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
         }
         break;
       }
-      size = curlx_uztoso(stdinsize);
+      size = uztoso(stdinsize);
       origin = 0;
     }
     m = tool_mime_new(parent, TOOLMIME_STDIN);
@@ -186,7 +211,7 @@ size_t tool_mime_stdin_read(char *buffer,
     if(sip->curpos >= sip->size)
       return 0;  /* At eof. */
     bytesleft = sip->size - sip->curpos;
-    if(curlx_uztoso(nitems) > bytesleft)
+    if(uztoso(nitems) > bytesleft)
       nitems = curlx_sotouz(bytesleft);
   }
   if(nitems) {
@@ -206,7 +231,7 @@ size_t tool_mime_stdin_read(char *buffer,
         return CURL_READFUNC_ABORT;
       }
     }
-    sip->curpos += curlx_uztoso(nitems);
+    sip->curpos += uztoso(nitems);
   }
   return nitems;
 }
