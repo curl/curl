@@ -94,7 +94,7 @@ sub storelink {
     $dir =~ s:([^/]*\z)::;
 
     while($link =~ s:^\.\.\/::) {
-        $dir =~ s:^([^/]*)/::;
+        $dir =~ s:([^/]*)\/\z::;
     }
 
     $flink{"./$dir$link"} .= "$f:$line ";
