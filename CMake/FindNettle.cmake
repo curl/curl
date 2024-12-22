@@ -34,6 +34,7 @@
 # - `NETTLE_INCLUDE_DIRS`:  The nettle include directories.
 # - `NETTLE_LIBRARIES`:     The nettle library names.
 # - `NETTLE_LIBRARY_DIRS`:  The nettle library directories.
+# - `NETTLE_PC_REQUIRES`:   The nettle pkg-config packages.
 # - `NETTLE_CFLAGS`:        Required compiler flags.
 # - `NETTLE_VERSION`:       Version of nettle.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NETTLE_FOUND)
+  set(NETTLE_PC_REQUIRES "nettle")
   string(REPLACE ";" " " NETTLE_CFLAGS "${NETTLE_CFLAGS}")
   message(STATUS "Found Nettle (via pkg-config): ${NETTLE_INCLUDE_DIRS} (found version \"${NETTLE_VERSION}\")")
 else()
