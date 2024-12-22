@@ -34,6 +34,7 @@
 # - `NGHTTP2_INCLUDE_DIRS`:  The nghttp2 include directories.
 # - `NGHTTP2_LIBRARIES`:     The nghttp2 library names.
 # - `NGHTTP2_LIBRARY_DIRS`:  The nghttp2 library directories.
+# - `NGHTTP2_PC_REQUIRES`:   The nghttp2 pkg-config packages.
 # - `NGHTTP2_CFLAGS`:        Required compiler flags.
 # - `NGHTTP2_VERSION`:       Version of nghttp2.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NGHTTP2_FOUND)
+  set(NGHTTP2_PC_REQUIRES "libnghttp2")
   string(REPLACE ";" " " NGHTTP2_CFLAGS "${NGHTTP2_CFLAGS}")
   message(STATUS "Found NGHTTP2 (via pkg-config): ${NGHTTP2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
 else()
