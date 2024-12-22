@@ -55,6 +55,8 @@ LIB_VTLS_CFILES =           \
   vtls/schannel.c           \
   vtls/schannel_verify.c    \
   vtls/sectransp.c          \
+  vtls/security.c           \
+  vtls/networkfmwk.c        \
   vtls/vtls.c               \
   vtls/vtls_scache.c        \
   vtls/vtls_spack.c         \

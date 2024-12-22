@@ -62,6 +62,7 @@
 #include "wolfssl.h"        /* wolfSSL versions */
 #include "schannel.h"       /* Schannel SSPI version */
 #include "sectransp.h"      /* Secure Transport (Darwin) version */
+#include "networkfmwk.h"    /* Network.frmework version */
 #include "mbedtls.h"        /* mbedTLS versions */
 #include "bearssl.h"        /* BearSSL versions */
 #include "rustls.h"         /* Rustls versions */
@@ -982,6 +983,8 @@ const struct Curl_ssl *Curl_ssl =
   &Curl_ssl_openssl;
 #elif defined(USE_SECTRANSP)
   &Curl_ssl_sectransp;
+#elif defined(USE_NETWORKFMWK)
+  &Curl_ssl_networkfmwk;
 #elif defined(USE_SCHANNEL)
   &Curl_ssl_schannel;
 #elif defined(USE_BEARSSL)
@@ -1005,6 +1008,9 @@ static const struct Curl_ssl *available_backends[] = {
 #endif
 #if defined(USE_SECTRANSP)
   &Curl_ssl_sectransp,
+#endif
+#if defined(USE_NETWORKFMWK)
+  &Curl_ssl_networkfmwk,
 #endif
 #if defined(USE_SCHANNEL)
   &Curl_ssl_schannel,
