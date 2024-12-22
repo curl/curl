@@ -34,6 +34,7 @@
 # - `NGHTTP3_INCLUDE_DIRS`:  The nghttp3 include directories.
 # - `NGHTTP3_LIBRARIES`:     The nghttp3 library names.
 # - `NGHTTP3_LIBRARY_DIRS`:  The nghttp3 library directories.
+# - `NGHTTP3_PC_REQUIRES`:   The nghttp3 pkg-config packages.
 # - `NGHTTP3_CFLAGS`:        Required compiler flags.
 # - `NGHTTP3_VERSION`:       Version of nghttp3.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(NGHTTP3_FOUND)
+  set(NGHTTP3_PC_REQUIRES "libnghttp3")
   string(REPLACE ";" " " NGHTTP3_CFLAGS "${NGHTTP3_CFLAGS}")
   message(STATUS "Found NGHTTP3 (via pkg-config): ${NGHTTP3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
 else()
