@@ -34,6 +34,7 @@
 # - `CARES_INCLUDE_DIRS`:  The c-ares include directories.
 # - `CARES_LIBRARIES`:     The c-ares library names.
 # - `CARES_LIBRARY_DIRS`:  The c-ares library directories.
+# - `CARES_PC_REQUIRES`:   The c-ares pkg-config packages.
 # - `CARES_CFLAGS`:        Required compiler flags.
 # - `CARES_VERSION`:       Version of c-ares.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(CARES_FOUND)
+  set(CARES_PC_REQUIRES "libcares")
   string(REPLACE ";" " " CARES_CFLAGS "${CARES_CFLAGS}")
   message(STATUS "Found Cares (via pkg-config): ${CARES_INCLUDE_DIRS} (found version \"${CARES_VERSION}\")")
 else()
