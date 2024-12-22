@@ -38,15 +38,16 @@
 # - `LIBUV_CFLAGS`:        Required compiler flags.
 # - `LIBUV_VERSION`:       Version of libuv.
 
+set(LIBUV_PC_REQUIRES "libuv")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBUV_INCLUDE_DIR AND
    NOT DEFINED LIBUV_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBUV "libuv")
+  pkg_check_modules(LIBUV ${LIBUV_PC_REQUIRES})
 endif()
 
 if(LIBUV_FOUND)
-  set(LIBUV_PC_REQUIRES "libuv")
   string(REPLACE ";" " " LIBUV_CFLAGS "${LIBUV_CFLAGS}")
   message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()
