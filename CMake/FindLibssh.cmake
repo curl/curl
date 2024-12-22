@@ -34,6 +34,7 @@
 # - `LIBSSH_INCLUDE_DIRS`:  The libssh include directories.
 # - `LIBSSH_LIBRARIES`:     The libssh library names.
 # - `LIBSSH_LIBRARY_DIRS`:  The libssh library directories.
+# - `LIBSSH_PC_REQUIRES`:   The libssh pkg-config packages.
 # - `LIBSSH_CFLAGS`:        Required compiler flags.
 # - `LIBSSH_VERSION`:       Version of libssh.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBSSH_FOUND)
+  set(LIBSSH_PC_REQUIRES "libssh")
   string(REPLACE ";" " " LIBSSH_CFLAGS "${LIBSSH_CFLAGS}")
   message(STATUS "Found Libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
