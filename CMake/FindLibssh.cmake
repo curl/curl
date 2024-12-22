@@ -38,15 +38,16 @@
 # - `LIBSSH_CFLAGS`:        Required compiler flags.
 # - `LIBSSH_VERSION`:       Version of libssh.
 
+set(LIBSSH_PC_REQUIRES "libssh")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBSSH_INCLUDE_DIR AND
    NOT DEFINED LIBSSH_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBSSH "libssh")
+  pkg_check_modules(LIBSSH ${LIBSSH_PC_REQUIRES})
 endif()
 
 if(LIBSSH_FOUND)
-  set(LIBSSH_PC_REQUIRES "libssh")
   string(REPLACE ";" " " LIBSSH_CFLAGS "${LIBSSH_CFLAGS}")
   message(STATUS "Found Libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()
