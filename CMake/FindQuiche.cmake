@@ -34,6 +34,7 @@
 # - `QUICHE_INCLUDE_DIRS`:  The quiche include directories.
 # - `QUICHE_LIBRARIES`:     The quiche library names.
 # - `QUICHE_LIBRARY_DIRS`:  The quiche library directories.
+# - `QUICHE_PC_REQUIRES`:   The quiche pkg-config packages.
 # - `QUICHE_CFLAGS`:        Required compiler flags.
 # - `QUICHE_VERSION`:       Version of quiche.
 
@@ -45,6 +46,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(QUICHE_FOUND)
+  set(QUICHE_PC_REQUIRES "quiche")
   string(REPLACE ";" " " QUICHE_CFLAGS "${QUICHE_CFLAGS}")
   message(STATUS "Found Quiche (via pkg-config): ${QUICHE_INCLUDE_DIRS} (found version \"${QUICHE_VERSION}\")")
 else()
