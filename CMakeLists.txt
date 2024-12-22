@@ -2252,6 +2252,21 @@ if(NOT CURL_DISABLE_INSTALL)
     set(ENABLE_STATIC       "no")
   endif()
 
+  # on Windows, normalize to Windows [import] library format
+  if(WIN32)
+    # remove -l prefix + turn back into a list while adding .lib suffices
+    string(REPLACE "-l" "" LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE}")
+    string(
+      REPLACE " " ".lib;"
+      LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_WIN32_PC_LIBS_PRIVATE}")
+    # add .lib suffix to final library
+    set(LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_WIN32_PC_LIBS_PRIVATE}.lib")
+    # turn back into space-separated string
+    string(
+      REPLACE ";" " "
+      LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_WIN32_PC_LIBS_PRIVATE}")
+  endif()
+
   # Generate a "curl-config" matching this config.
   # Consumed variables:
   #   CC
@@ -2265,6 +2280,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_LDFLAGS_PRIVATE
   #   LIBCURL_PC_LIBS_PRIVATE
+  #   LIBCURL_WIN32_PC_LIBS_PRIVATE
   #   libdir
   #   libext
   #   prefix
@@ -2272,15 +2288,21 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
+  # configure_file(
+  #   "${PROJECT_SOURCE_DIR}/curl-config.in"
+  #   "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
+  # install(FILES "${PROJECT_BINARY_DIR}/curl-config"
+  #   DESTINATION ${CMAKE_INSTALL_BINDIR}
+  #   PERMISSIONS
+  #     OWNER_READ OWNER_WRITE OWNER_EXECUTE
+  #     GROUP_READ GROUP_EXECUTE
+  #     WORLD_READ WORLD_EXECUTE)
   configure_file(
-    "${PROJECT_SOURCE_DIR}/curl-config.in"
-    "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
-  install(FILES "${PROJECT_BINARY_DIR}/curl-config"
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
-    PERMISSIONS
-      OWNER_READ OWNER_WRITE OWNER_EXECUTE
-      GROUP_READ GROUP_EXECUTE
-      WORLD_READ WORLD_EXECUTE)
+    "${PROJECT_SOURCE_DIR}/curl-config.c.in"
+    "${PROJECT_BINARY_DIR}/curl-config.c" @ONLY)
+  # add the actual program
+  add_executable(curl-config "${PROJECT_BINARY_DIR}/curl-config.c")
+  install(TARGETS curl-config)
 
   # Generate a pkg-config file matching this config.
   # Consumed variables:

@@ -1,0 +1,427 @@
+/***************************************************************************
+ *                                  _   _ ____  _
+ *  Project                     ___| | | |  _ \| |
+ *                             / __| | | | |_) | |
+ *                            | (__| |_| |  _ <| |___
+ *                             \___|\___/|_| \_\_____|
+ *
+ * Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
+ *
+ * This software is licensed as described in the file COPYING, which
+ * you should have received as part of this distribution. The terms
+ * are also available at https://curl.se/docs/copyright.html.
+ *
+ * You may opt to use, copy, modify, merge, publish, distribute and/or sell
+ * copies of the Software, and permit persons to whom the Software is
+ * furnished to do so, under the terms of the COPYING file.
+ *
+ * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
+ * KIND, either express or implied.
+ *
+ * SPDX-License-Identifier: curl
+ *
+ ***************************************************************************/
+
+#include <ctype.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+/* install prefix */
+/*
+  FIXME: if someone uses --prefix with cmake --install, this will not match
+  the actual installation directory. should run a CMake script on install to
+  reconfigure and recompile as necessary in order to ensure coherency. note
+  tht the pkg-config file generated will have the same problem.
+*/
+static const char *prefix="@prefix@";  /* CMAKE_INSTALL_PREFIX */
+/*
+  exec prefix has the same issue. we also can't use it since it doesn't expand
+  into a full string path; it is a shell expansion of prefix
+*/
+/* static const char *exec_prefix = "@exec_prefix@"; */
+/* pkg-config C/C++ flags */
+static const char *cppflag_curl_staticlib = "@LIBCURL_PC_CFLAGS@";
+/* space-separated feature list */
+static const char *curl_features = "@SUPPORT_FEATURES@";
+/* space-separated protocol list */
+static const char *curl_protocols = "@SUPPORT_PROTOCOLS@";
+/* libcurl version, major.minor.patch[-info] */
+static const char *curl_version = "@CURLVERSION@";
+/* curl-config help text */
+static const char *usage = "Usage: curl-config [OPTION]\n"
+  "\n"
+  "Available values for OPTION include:\n"
+  "\n"
+  "  --built-shared says 'yes' if libcurl was built shared\n"
+  "  --ca                  CA bundle install path\n"
+  "  --cc                  compiler\n"
+  "  --cflags              preprocessor and compiler flags\n"
+  "  --checkfor [version]  check for (lib)curl of the specified version\n"
+  "  --configure           the arguments given to configure when building curl\n"
+  "  --features            newline separated list of enabled features\n"
+  "  --help                display this help and exit\n"
+  "  --libs                library linking information\n"
+  "  --prefix              curl install prefix\n"
+  "  --protocols           newline separated list of enabled protocols\n"
+  "  --ssl-backends        output the SSL backends libcurl was built to support\n"
+  "  --static-libs         static libcurl library linking information\n"
+  "  --version             output version information\n"
+  "  --vernum              output version as a hexadecimal number";
+
+/**
+ * Helper macro to check for string equality.
+ */
+#define STREQ(s1, s2) !strcmp(s1, s2)
+
+/**
+ * Print all items in a space-separated list on their own line to stdout.
+ *
+ * @param list String of space-separated tokens
+ */
+static void
+print_list_items(const char *list)
+{
+  /* print chars, replacing spaces with newlines */
+  while(*list) {
+    if(isspace(*list))
+      putchar((int) '\n');
+    else
+      putchar(*list);
+    list++;
+  }
+  /* print final newline */
+  putchar((int) '\n');
+}
+
+/**
+ * libcurl version struct.
+ */
+struct curlver {
+  int major;
+  int minor;
+  int patch;
+};
+
+/**
+ * Return 1 if the left curlver is weakly ordered before the right curlver.
+ *
+ * @param v1 First libcurl version
+ * @param v2 Second libcurl version
+ */
+static int
+curlver_leq(const struct curlver *v1, const struct curlver *v2)
+{
+  /* major comparison */
+  if(v1->major < v2->major)
+    return 1;
+  if(v1->major > v2->major)
+    return 0;
+  /* minor comparison */
+  if(v1-> minor < v2->minor)
+    return 1;
+  if(v1->minor > v2->minor)
+    return 0;
+  /* patch comparison */
+  if(v1->patch <= v2->patch)
+    return 1;
+  /* major, minor match, but v1->patch > v2->patch */
+  return 0;
+}
+
+/**
+ * Convert a substring to a libcurl version component.
+ *
+ * The substring must be fully numeric and be 9 or less characters. This allows
+ * us to ensure the converted value will fit in a standard 4-byte int.
+ *
+ * @param begin Pointer to first substring char
+ * @param end Pointer to one past the last substring char
+ * @returns Nonnegative value on success, -1 on error
+ */
+static int
+get_curlver_component(const char *begin, const char *end)
+{
+  int vernum = 0;
+  /* 9 characters or less */
+  if(end - begin > 9)
+    return -1;
+  /* begin constructing version */
+  while(begin != end) {
+    /* numeric chars required */
+    if(!isdigit(*begin))
+      return -1;
+    /* otherwise, convert to int, and add to version component */
+    vernum = 10 * vernum + (*begin - '0');
+    begin++;
+  }
+  return vernum;
+}
+
+/**
+ * Create a curlver struct from a null-terminated string.
+ *
+ * On failure, i.e. if the string is malformed, 0 is returned, 1 for success.
+ * This substring must be in major[.minor[.patch[-text]]] form. The minor and
+ * patch components are optional and the -text component is ignored.
+ *
+ * @param ver Version struct to populate
+ * @param str String to interpret as a version
+ */
+static int
+curlver_from_string(struct curlver* ver, const char *str)
+{
+  /* begin and end iterators */
+  const char *s_begin = str;
+  const char *s_end = str;
+  /* until we hit a period or end of string, skip */
+  while(*s_end && *s_end != '.')
+    s_end++;
+  /* get major version component, negative if error */
+  ver->major = get_curlver_component(s_begin, s_end);
+  if(ver->major < 0)
+    return 0;
+  /* if end of string, minor and patch are zero */
+  if(!*s_end) {
+    ver->minor = ver->patch = 0;
+    return 1;
+  }
+  /* update pos + until we hit a period of end of string, skip */
+  s_end++;  /* move past . */
+  s_begin = s_end;
+  while(*s_end && *s_end != '.')
+    s_end++;
+  /* get minor version component, negative if error */
+  ver->minor = get_curlver_component(s_begin, s_end);
+  if(ver->minor < 0)
+    return 0;
+  /* if end of string, patch is zero */
+  if(!*s_end) {
+    ver->patch = 0;
+    return 1;
+  }
+  /* update pos + until we hit end of string or '-' */
+  s_end++;  /* move past . */
+  s_begin = s_end;
+  while(*s_end && *s_end != '-')
+    s_end++;
+  /* get patch version component, negative if error */
+  ver->patch = get_curlver_component(s_begin, s_end);
+  if(ver->patch < 0)
+    return 0;
+  /* success, ignore rest of string if any */
+  return 1;
+}
+
+/**
+ * Check the requested libcurl version against the actual installed version.
+ *
+ * Compared to the original curl-config logic, this function is more robust, as
+ * it will detect if a string is not in major.minor.patch form.
+ *
+ * @param str libcurl version string, e.g. 8.11.1
+ *
+ * @returns 1 if version is <= installed libcurl version, 0 otherwise
+ */
+static int
+check_curl_version(const char *str)
+{
+  /* known + requested versions */
+  struct curlver act_ver;
+  struct curlver req_ver;
+  /* get known version. should not fail, but check just in case */
+  if(!curlver_from_string(&act_ver, curl_version)) {
+    printf("%d %d %d\n", act_ver.major, act_ver.minor, act_ver.patch);
+    fprintf(stderr,
+            "error: installed version %s is invalid. inform developers as this "
+            "is a developer error\n",
+            curl_version);
+    exit(EXIT_FAILURE);
+  }
+  /* get requested version with message on failure */
+  if(!curlver_from_string(&req_ver, str)) {
+    fprintf(stderr, "error: provided version %s is invalid\n", str);
+    exit(EXIT_FAILURE);
+  }
+  /* check if requested version is <= actual */
+  return curlver_leq(&req_ver, &act_ver);
+}
+
+/**
+ * Print the required C/C++ compile flags to stdout.
+ *
+ * This follows the original curl-config --cflags logic.
+ *
+ * @note Due to how includedir is expanded for a Bash script, not fully
+ *  expanded, we have to manually use prefix/include together.
+ */
+static void
+print_cflags(void)
+{
+  const char *static_flag;
+  const char *include_flag;
+  /* static lib flag */
+  if(STREQ(cppflag_curl_staticlib, "-DCURL_STATICLIB"))
+    static_flag = "-DCURL_STATICLIB ";  /* note trailing space */
+  else
+    static_flag = "";
+  /* include dir flag */
+  if(STREQ("@prefix@/include", "/usr/include"))
+    include_flag = "";
+  else
+    include_flag = "-I@prefix@/include";
+  /* print cflags */
+  /* note: this can be "-DCURL_STATICLIB " if installed in /usr/include */
+  printf("%s%s\n", static_flag, include_flag);
+}
+
+/**
+ * Print the required C/C++ linker flags to stdout.
+ *
+ * This follows the original curl-config --libs logic but also correctly
+ * formats linker flags when compiling under MSVC.
+ *
+ * @note Due to how libdir is expanded for a Bash script, not fully expanded
+ *  as a path, we have to manually use prefix/lib together.
+ */
+static void
+print_ldflags(void)
+{
+  const char *lib_dir;
+  const char *libs;
+  /* library dir */
+  if(STREQ("@prefix@/lib", "/usr/lib") || STREQ("@prefix@/lib", "/usr/lib64"))
+    lib_dir = "";
+  else
+#if defined(_MSC_VER)
+    lib_dir = "/LIBPATH:@prefix@/lib ";  /* note trailing space */
+#else
+    lib_dir = "-L@prefix@/lib ";
+#endif  /* !defined(_MSC_VER) */
+  /* shared/static libs */
+  if(STREQ("@ENABLE_SHARED@", "no"))
+#if defined(_MSC_VER)
+    /* note: libcurl_imp.lib hardcoded, could use IMPORT_LIB_SUFFIX */
+    libs = "libcurl_impl.lib @LIBCURL_WIN32_PC_LIBS_PRIVATE@";
+#else
+    libs = "-lcurl @LIBCURL_PC_LIBS_PRIVATE@";
+#endif  /* !defined(_MSC_VER) */
+  else
+#if defined(_MSC_VER)
+    libs = "libcurl_imp.lib";  /* note: hardcoded, could use IMPORT_LIB_SUFFIX */
+#else
+    libs = "-lcurl";
+#endif  /* !defined(_MSC_VER) */
+  /* print ldflags */
+  printf("%s%s\n", lib_dir, libs);
+}
+
+/**
+ * Print the libcurl static linking flags to stdout.
+ *
+ * This follows the original curl-config --static-libs logic but also correctly
+ * formats linker flags when compiling under MSVC.
+ *
+ * @note Due to how libdir is expanded for a Bash script, not fully expanded
+ *  as a path, we have to manually use prefix/lib together.
+ */
+static void
+print_static_ldflags(void)
+{
+  if(!STREQ("@ENABLE_SHARED@", "no"))
+    puts("@prefix@/lib/libcurl.@libext@ @LIBCURL_PC_LDFLAGS_PRIVATE@ "
+#if defined(_MSC_VER)
+         "@LIBCURL_WIN32_PC_LIBS_PRIVATE@"
+#else
+         "@LIBCURL_PC_LIBS_PRIVATE@"
+#endif  /* !defined(_MSC_VER) */
+         );
+  else {
+    puts("curl was built with static libraries disabled");
+    exit(EXIT_FAILURE);
+  }
+}
+
+int
+main(int argc, char **argv)
+{
+  /* print usage if no args */
+  if(argc == 1) {
+    puts(usage);
+    return EXIT_FAILURE;  /* following original logic */
+  }
+  /* cycle through flags. this follows the original curl-config logic */
+  for(int i = 1; i < argc; i++) {
+    /* --built-shared */
+    if(STREQ(argv[i], "--built-shared"))
+      puts("@ENABLE_SHARED@");
+    /* --ca */
+    else if(STREQ(argv[i], "--ca"))
+      puts("@CURL_CA_BUNDLE@");
+    /* --cc */
+    else if(STREQ(argv[i], "--cc"))
+      puts("@CC@");
+    /* --prefix */
+    else if(STREQ(argv[i], "--prefix"))
+      puts(prefix);
+    /* --features (note: also accepts --feature. is this desired?) */
+    else if(STREQ(argv[i], "--feature") || STREQ(argv[i], "--features"))
+      print_list_items(curl_features);
+    /* --protocols */
+    else if(STREQ(argv[i], "--protocols"))
+      print_list_items(curl_protocols);
+    /* --version */
+    else if(STREQ(argv[i], "--version")) {
+      puts("libcurl @CURLVERSION@");
+      return EXIT_SUCCESS;  /* following original logic */
+    }
+    /* --checkfor */
+    else if(STREQ(argv[i], "--checkfor")) {
+      /* must be provided an argument (enhancement) */
+      if(i + 1 >= argc) {
+        fprintf(stderr, "error: --checkfor missing required argument\n");
+        return EXIT_FAILURE;
+      }
+      /* check version */
+      if(check_curl_version(argv[i + 1]))
+        return EXIT_SUCCESS;
+      else {
+        printf("requested version %s is newer than existing %s\n",
+               argv[i + 1], curl_version);
+        return EXIT_FAILURE;
+      }
+    }
+    /* --vernum */
+    else if(STREQ(argv[i], "--vernum")) {
+      puts("@VERSIONNUM@");
+      return EXIT_SUCCESS;  /* following original logic */
+    }
+    /* --help */
+    else if(STREQ(argv[i], "--help")) {
+      puts(usage);
+      return EXIT_SUCCESS;
+    }
+    /* --cflags */
+    else if(STREQ(argv[i], "--cflags"))
+      print_cflags();
+    /* --libs */
+    else if(STREQ(argv[i], "--libs"))
+      print_ldflags();
+    /* --ssl-backends */
+    else if(STREQ(argv[i], "--ssl-backends"))
+      puts("@SSL_BACKENDS@");
+    /* --static-libs */
+    else if(STREQ(argv[i], "--static-libs"))
+      print_static_ldflags();
+    /* --configure */
+    else if(STREQ(argv[i], "--configure"))
+      puts("@CONFIGURE_OPTIONS@");
+    /* unknown option */
+    else {
+      printf("unknown option: %s\n", argv[i]);
+      puts(usage);
+      return EXIT_FAILURE;
+    }
+  }
+  return EXIT_SUCCESS;
+}
