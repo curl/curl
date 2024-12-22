@@ -38,15 +38,16 @@
 # - `NGHTTP3_CFLAGS`:        Required compiler flags.
 # - `NGHTTP3_VERSION`:       Version of nghttp3.
 
+set(NGHTTP3_PC_REQUIRES "libnghttp3")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP3_INCLUDE_DIR AND
    NOT DEFINED NGHTTP3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP3 "libnghttp3")
+  pkg_check_modules(NGHTTP3 ${NGHTTP3_PC_REQUIRES})
 endif()
 
 if(NGHTTP3_FOUND)
-  set(NGHTTP3_PC_REQUIRES "libnghttp3")
   string(REPLACE ";" " " NGHTTP3_CFLAGS "${NGHTTP3_CFLAGS}")
   message(STATUS "Found NGHTTP3 (via pkg-config): ${NGHTTP3_INCLUDE_DIRS} (found version \"${NGHTTP3_VERSION}\")")
 else()
