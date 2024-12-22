@@ -38,15 +38,16 @@
 # - `NGHTTP2_CFLAGS`:        Required compiler flags.
 # - `NGHTTP2_VERSION`:       Version of nghttp2.
 
+set(NGHTTP2_PC_REQUIRES "libnghttp2")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP2 "libnghttp2")
+  pkg_check_modules(NGHTTP2 ${NGHTTP2_PC_REQUIRES})
 endif()
 
 if(NGHTTP2_FOUND)
-  set(NGHTTP2_PC_REQUIRES "libnghttp2")
   string(REPLACE ";" " " NGHTTP2_CFLAGS "${NGHTTP2_CFLAGS}")
   message(STATUS "Found NGHTTP2 (via pkg-config): ${NGHTTP2_INCLUDE_DIRS} (found version \"${NGHTTP2_VERSION}\")")
 else()
