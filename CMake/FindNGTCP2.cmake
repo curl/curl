@@ -42,6 +42,7 @@
 # - `NGTCP2_INCLUDE_DIRS`:  The ngtcp2 include directories.
 # - `NGTCP2_LIBRARIES`:     The ngtcp2 library names.
 # - `NGTCP2_LIBRARY_DIRS`:  The ngtcp2 library directories.
+# - `NGTCP2_PC_REQUIRES`:   The ngtcp2 pkg-config packages.
 # - `NGTCP2_CFLAGS`:        Required compiler flags.
 # - `NGTCP2_VERSION`:       Version of ngtcp2.
 
@@ -77,6 +78,7 @@ endif()
 if(NGTCP2_FOUND AND "${${_crypto_library_upper}_FOUND}")
   list(APPEND NGTCP2_LIBRARIES "${${_crypto_library_upper}_LIBRARIES}")
   list(REMOVE_DUPLICATES NGTCP2_LIBRARIES)
+  set(NGTCP2_PC_REQUIRES "libngtcp2;lib${_crypto_library_lower}")
   string(REPLACE ";" " " NGTCP2_CFLAGS "${NGTCP2_CFLAGS}")
   message(STATUS "Found NGTCP2 (via pkg-config): ${NGTCP2_INCLUDE_DIRS} (found version \"${NGTCP2_VERSION}\")")
 else()
