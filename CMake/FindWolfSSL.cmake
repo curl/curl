@@ -34,6 +34,7 @@
 # - `WOLFSSL_INCLUDE_DIRS`:  The wolfSSL include directories.
 # - `WOLFSSL_LIBRARIES`:     The wolfSSL library names.
 # - `WOLFSSL_LIBRARY_DIRS`:  The wolfSSL library directories.
+# - `WOLFSSL_PC_REQUIRES`:   The wolfSSL pkg-config packages.
 # - `WOLFSSL_CFLAGS`:        Required compiler flags.
 # - `WOLFSSL_VERSION`:       Version of wolfSSL.
 
@@ -54,6 +55,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(WOLFSSL_FOUND)
+  set(WOLFSSL_PC_REQUIRES "wolfssl")
   string(REPLACE ";" " " WOLFSSL_CFLAGS "${WOLFSSL_CFLAGS}")
   message(STATUS "Found WolfSSL (via pkg-config): ${WOLFSSL_INCLUDE_DIRS} (found version \"${WOLFSSL_VERSION}\")")
 else()
