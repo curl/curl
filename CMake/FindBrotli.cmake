@@ -35,6 +35,7 @@
 # - `BROTLI_INCLUDE_DIRS`:   The brotli include directories.
 # - `BROTLI_LIBRARIES`:      The brotli library names.
 # - `BROTLI_LIBRARY_DIRS`:   The brotli library directories.
+# - `BROTLI_PC_REQUIRES`:    The brotli pkg-config packages.
 # - `BROTLI_CFLAGS`:         Required compiler flags.
 # - `BROTLI_VERSION`:        Version of brotli.
 
@@ -53,6 +54,7 @@ if(BROTLI_FOUND AND BROTLIDEC_FOUND)
   list(REMOVE_DUPLICATES BROTLIDEC_LIBRARIES)
   list(REVERSE BROTLIDEC_LIBRARIES)
   set(BROTLI_LIBRARIES ${BROTLIDEC_LIBRARIES})
+  set(BROTLI_PC_REQUIRES "libbrotlidec")
   string(REPLACE ";" " " BROTLI_CFLAGS "${BROTLI_CFLAGS}")
   message(STATUS "Found Brotli (via pkg-config): ${BROTLI_INCLUDE_DIRS} (found version \"${BROTLI_VERSION}\")")
 else()
