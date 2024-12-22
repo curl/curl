@@ -363,7 +363,7 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
   struct mmsghdr mmsg[MMSG_NUM];
   uint8_t msg_ctrl[MMSG_NUM * CMSG_SPACE(sizeof(int))];
   struct sockaddr_storage remote_addr[MMSG_NUM];
-  size_t total_nread = 0, pkts;
+  size_t total_nread = 0, pkts = 0;
   int mcount, i, n;
   char errstr[STRERROR_LEN];
   CURLcode result = CURLE_OK;
@@ -380,7 +380,6 @@ static CURLcode recvmmsg_packets(struct Curl_cfilter *cf,
     goto out;
   bufs = (uint8_t (*)[64*1024])sockbuf;
 
-  pkts = 0;
   total_nread = 0;
   while(pkts < max_pkts) {
     n = (int)CURLMIN(MMSG_NUM, max_pkts);
