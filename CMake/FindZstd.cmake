@@ -47,15 +47,16 @@ if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
   set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
 endif()
 
+set(ZSTD_PC_REQUIRES "libzstd")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(ZSTD "libzstd")
+  pkg_check_modules(ZSTD ${ZSTD_PC_REQUIRES})
 endif()
 
 if(ZSTD_FOUND)
-  set(ZSTD_PC_REQUIRES "libzstd")
   string(REPLACE ";" " " ZSTD_CFLAGS "${ZSTD_CFLAGS}")
   message(STATUS "Found Zstd (via pkg-config): ${ZSTD_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
 else()
