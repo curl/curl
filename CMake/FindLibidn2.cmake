@@ -38,15 +38,16 @@
 # - `LIBIDN2_CFLAGS`:        Required compiler flags.
 # - `LIBIDN2_VERSION`:       Version of libidn2.
 
+set(LIBIDN2_PC_REQUIRES "libidn2")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBIDN2_INCLUDE_DIR AND
    NOT DEFINED LIBIDN2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBIDN2 "libidn2")
+  pkg_check_modules(LIBIDN2 ${LIBIDN2_PC_REQUIRES})
 endif()
 
 if(LIBIDN2_FOUND)
-  set(LIBIDN2_PC_REQUIRES "libidn2")
   string(REPLACE ";" " " LIBIDN2_CFLAGS "${LIBIDN2_CFLAGS}")
   message(STATUS "Found Libidn2 (via pkg-config): ${LIBIDN2_INCLUDE_DIRS} (found version \"${LIBIDN2_VERSION}\")")
 else()
