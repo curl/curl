@@ -34,6 +34,7 @@
 # - `ZSTD_INCLUDE_DIRS`:  The zstd include directories.
 # - `ZSTD_LIBRARIES`:     The zstd library names.
 # - `ZSTD_LIBRARY_DIRS`:  The zstd library directories.
+# - `ZSTD_PC_REQUIRES`:   The zstd pkg-config packages.
 # - `ZSTD_CFLAGS`:        Required compiler flags.
 # - `ZSTD_VERSION`:       Version of zstd.
 
@@ -54,6 +55,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(ZSTD_FOUND)
+  set(ZSTD_PC_REQUIRES "libzstd")
   string(REPLACE ";" " " ZSTD_CFLAGS "${ZSTD_CFLAGS}")
   message(STATUS "Found Zstd (via pkg-config): ${ZSTD_INCLUDE_DIRS} (found version \"${ZSTD_VERSION}\")")
 else()
