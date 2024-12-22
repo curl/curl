@@ -34,6 +34,7 @@
 # - `WOLFSSL_INCLUDE_DIRS`:  The wolfSSL include directories.
 # - `WOLFSSL_LIBRARIES`:     The wolfSSL library names.
 # - `WOLFSSL_LIBRARY_DIRS`:  The wolfSSL library directories.
+# - `WOLFSSL_PC_REQUIRES`:   The wolfSSL pkg-config packages.
 # - `WOLFSSL_CFLAGS`:        Required compiler flags.
 # - `WOLFSSL_VERSION`:       Version of wolfSSL.
 
@@ -46,11 +47,13 @@ if(DEFINED WolfSSL_LIBRARY AND NOT DEFINED WOLFSSL_LIBRARY)
   set(WOLFSSL_LIBRARY "${WolfSSL_LIBRARY}")
 endif()
 
+set(WOLFSSL_PC_REQUIRES "wolfssl")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED WOLFSSL_INCLUDE_DIR AND
    NOT DEFINED WOLFSSL_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(WOLFSSL "wolfssl")
+  pkg_check_modules(WOLFSSL ${WOLFSSL_PC_REQUIRES})
 endif()
 
 if(WOLFSSL_FOUND)

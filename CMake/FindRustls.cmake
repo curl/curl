@@ -38,18 +38,21 @@
 # - `RUSTLS_CFLAGS`:        Required compiler flags.
 # - `RUSTLS_VERSION`:       Version of Rustls.
 
+set(RUSTLS_PC_REQUIRES "rustls")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED RUSTLS_INCLUDE_DIR AND
    NOT DEFINED RUSTLS_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(RUSTLS "rustls")
+  pkg_check_modules(RUSTLS ${RUSTLS_PC_REQUIRES})
 endif()
 
 if(RUSTLS_FOUND)
-  set(RUSTLS_PC_REQUIRES "rustls")
   string(REPLACE ";" " " RUSTLS_CFLAGS "${RUSTLS_CFLAGS}")
   message(STATUS "Found Rustls (via pkg-config): ${RUSTLS_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
 else()
+  set(RUSTLS_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
+
   find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h")
   find_library(RUSTLS_LIBRARY NAMES "rustls")
 

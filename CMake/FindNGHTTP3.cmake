@@ -34,14 +34,17 @@
 # - `NGHTTP3_INCLUDE_DIRS`:  The nghttp3 include directories.
 # - `NGHTTP3_LIBRARIES`:     The nghttp3 library names.
 # - `NGHTTP3_LIBRARY_DIRS`:  The nghttp3 library directories.
+# - `NGHTTP3_PC_REQUIRES`:   The nghttp3 pkg-config packages.
 # - `NGHTTP3_CFLAGS`:        Required compiler flags.
 # - `NGHTTP3_VERSION`:       Version of nghttp3.
+
+set(NGHTTP3_PC_REQUIRES "libnghttp3")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP3_INCLUDE_DIR AND
    NOT DEFINED NGHTTP3_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP3 "libnghttp3")
+  pkg_check_modules(NGHTTP3 ${NGHTTP3_PC_REQUIRES})
 endif()
 
 if(NGHTTP3_FOUND)

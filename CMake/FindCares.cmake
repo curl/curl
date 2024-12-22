@@ -34,14 +34,17 @@
 # - `CARES_INCLUDE_DIRS`:  The c-ares include directories.
 # - `CARES_LIBRARIES`:     The c-ares library names.
 # - `CARES_LIBRARY_DIRS`:  The c-ares library directories.
+# - `CARES_PC_REQUIRES`:   The c-ares pkg-config packages.
 # - `CARES_CFLAGS`:        Required compiler flags.
 # - `CARES_VERSION`:       Version of c-ares.
+
+set(CARES_PC_REQUIRES "libcares")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED CARES_INCLUDE_DIR AND
    NOT DEFINED CARES_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(CARES "libcares")
+  pkg_check_modules(CARES ${CARES_PC_REQUIRES})
 endif()
 
 if(CARES_FOUND)

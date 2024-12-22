@@ -35,8 +35,11 @@
 # - `BROTLI_INCLUDE_DIRS`:   The brotli include directories.
 # - `BROTLI_LIBRARIES`:      The brotli library names.
 # - `BROTLI_LIBRARY_DIRS`:   The brotli library directories.
+# - `BROTLI_PC_REQUIRES`:    The brotli pkg-config packages.
 # - `BROTLI_CFLAGS`:         Required compiler flags.
 # - `BROTLI_VERSION`:        Version of brotli.
+
+set(BROTLI_PC_REQUIRES "libbrotlidec")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED BROTLI_INCLUDE_DIR AND
@@ -44,7 +47,7 @@ if(CURL_USE_PKGCONFIG AND
    NOT DEFINED BROTLIDEC_LIBRARY)
   find_package(PkgConfig QUIET)
   pkg_check_modules(BROTLI "libbrotlicommon")
-  pkg_check_modules(BROTLIDEC "libbrotlidec")
+  pkg_check_modules(BROTLIDEC ${BROTLI_PC_REQUIRES})
 endif()
 
 if(BROTLI_FOUND AND BROTLIDEC_FOUND)

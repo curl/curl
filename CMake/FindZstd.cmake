@@ -34,6 +34,7 @@
 # - `ZSTD_INCLUDE_DIRS`:  The zstd include directories.
 # - `ZSTD_LIBRARIES`:     The zstd library names.
 # - `ZSTD_LIBRARY_DIRS`:  The zstd library directories.
+# - `ZSTD_PC_REQUIRES`:   The zstd pkg-config packages.
 # - `ZSTD_CFLAGS`:        Required compiler flags.
 # - `ZSTD_VERSION`:       Version of zstd.
 
@@ -46,11 +47,13 @@ if(DEFINED Zstd_LIBRARY AND NOT DEFINED ZSTD_LIBRARY)
   set(ZSTD_LIBRARY "${Zstd_LIBRARY}")
 endif()
 
+set(ZSTD_PC_REQUIRES "libzstd")
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED ZSTD_INCLUDE_DIR AND
    NOT DEFINED ZSTD_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(ZSTD "libzstd")
+  pkg_check_modules(ZSTD ${ZSTD_PC_REQUIRES})
 endif()
 
 if(ZSTD_FOUND)

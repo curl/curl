@@ -34,14 +34,17 @@
 # - `NETTLE_INCLUDE_DIRS`:  The nettle include directories.
 # - `NETTLE_LIBRARIES`:     The nettle library names.
 # - `NETTLE_LIBRARY_DIRS`:  The nettle library directories.
+# - `NETTLE_PC_REQUIRES`:   The nettle pkg-config packages.
 # - `NETTLE_CFLAGS`:        Required compiler flags.
 # - `NETTLE_VERSION`:       Version of nettle.
+
+set(NETTLE_PC_REQUIRES "nettle")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NETTLE_INCLUDE_DIR AND
    NOT DEFINED NETTLE_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NETTLE "nettle")
+  pkg_check_modules(NETTLE ${NETTLE_PC_REQUIRES})
 endif()
 
 if(NETTLE_FOUND)
