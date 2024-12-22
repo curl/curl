@@ -2496,9 +2496,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   /* Send out our SETTINGS and ACKs and such. If that blocks, we
    * have it buffered and  can count this filter as being connected */
   result = h2_progress_egress(cf, data);
-  if(result == CURLE_AGAIN)
-    result = CURLE_OK;
-  else if(result)
+  if(result && (result != CURLE_AGAIN))
     goto out;
 
   *done = TRUE;
