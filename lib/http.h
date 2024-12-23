@@ -82,13 +82,6 @@ CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
 
 void Curl_http_method(struct Curl_easy *data, struct connectdata *conn,
                       const char **method, Curl_HttpReq *);
-#ifndef CURL_DISABLE_COOKIES
-CURLcode Curl_http_cookies(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           struct dynbuf *r);
-#else
-#define Curl_http_cookies(a,b,c) CURLE_OK
-#endif
 
 /* protocol-specific functions set up to be called by the main engine */
 CURLcode Curl_http_setup_conn(struct Curl_easy *data,
