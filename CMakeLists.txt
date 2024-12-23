@@ -86,6 +86,8 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
+message(STATUS "CMake install prefix: ${CMAKE_INSTALL_PREFIX}")
+
 set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
