@@ -1521,7 +1521,7 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 {
   struct cf_ngtcp2_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream = H3_STREAM_CTX(ctx, data);
-  ssize_t sent = 0;
+  ssize_t sent = -1;
   struct cf_call_data save;
   struct pkt_io_ctx pktx;
   CURLcode result;
@@ -1537,14 +1537,12 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   result = cf_progress_ingress(cf, data, &pktx);
   if(result) {
     *err = result;
-    sent = -1;
   }
 
   if(!stream || stream->id < 0) {
     if(ctx->shutdown_started) {
       CURL_TRC_CF(data, cf, "cannot open stream on closed connection");
       *err = CURLE_SEND_ERROR;
-      sent = -1;
       goto out;
     }
     sent = h3_stream_open(cf, data, buf, len, err);
@@ -1558,7 +1556,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "[%" FMT_PRId64 "] xfer write failed", stream->id);
     cf_ngtcp2_stream_close(cf, data, stream);
     *err = stream->xfer_result;
-    sent = -1;
     goto out;
   }
   else if(stream->closed) {
@@ -1583,7 +1580,6 @@ static ssize_t cf_ngtcp2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   else if(ctx->shutdown_started) {
     CURL_TRC_CF(data, cf, "cannot send on closed connection");
     *err = CURLE_SEND_ERROR;
-    sent = -1;
     goto out;
   }
   else {
@@ -1696,7 +1692,7 @@ static ssize_t read_pkt_to_send(void *userp,
   uint32_t flags;
   int64_t stream_id;
   int fin;
-  ssize_t nwritten, n;
+  ssize_t nwritten = 0, n;
   veccnt = 0;
   stream_id = -1;
   fin = 0;
@@ -1708,7 +1704,6 @@ static ssize_t read_pkt_to_send(void *userp,
    * When ngtcp2 is happy (because it has no other frame that would fit
    * or it has nothing more to send), it returns the total length
    * of the assembled packet. This may be 0 if there was nothing to send. */
-  nwritten = 0;
   *err = CURLE_OK;
   for(;;) {
 
