@@ -75,7 +75,6 @@ if(PICKY_COMPILER)
     list(APPEND _picky_enable
       -Wbad-function-cast                  # clang  2.7  gcc  2.95
       -Wconversion                         # clang  2.7  gcc  2.95
-      -Winline                             # clang  1.0  gcc  1.0
       -Wmissing-declarations               # clang  1.0  gcc  2.7
       -Wmissing-prototypes                 # clang  1.0  gcc  1.0
       -Wnested-externs                     # clang  1.0  gcc  2.7
@@ -88,6 +87,14 @@ if(PICKY_COMPILER)
       -Wunused                             # clang  1.1  gcc  2.95
       -Wwrite-strings                      # clang  1.0  gcc  1.4
     )
+
+    if(NOT (ENABLE_DEBUG OR ENABLE_CURLDEBUG))
+      # If building DEBUG images, do not error on -Winline as in may not
+      # be supported
+      list(APPEND WPICKY_ENABLE
+        -Winline                           # clang  1.0  gcc  1.0
+      )
+    endif()
 
     # Always enable with clang, version dependent with gcc
     set(_picky_common_old
