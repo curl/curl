@@ -67,7 +67,7 @@ if(MBEDTLS_FOUND AND MBEDX509_FOUND AND MBEDCRYPTO_FOUND)
   string(REPLACE ";" " " MBEDTLS_CFLAGS "${MBEDTLS_CFLAGS}")
   message(STATUS "Found MbedTLS (via pkg-config): ${MBEDTLS_INCLUDE_DIRS} (found version \"${MBEDTLS_VERSION}\")")
 else()
-  set(MBEDTLS_PC_REQUIRES "")
+  set(MBEDTLS_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
 
   find_path(MBEDTLS_INCLUDE_DIR NAMES "mbedtls/ssl.h")
   find_library(MBEDTLS_LIBRARY NAMES "mbedtls" "libmbedtls")

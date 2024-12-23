@@ -58,7 +58,7 @@ if(LDAP_FOUND AND LDAP_LBER_FOUND)
   string(REPLACE ";" " " LDAP_CFLAGS "${LDAP_CFLAGS}")
   message(STATUS "Found LDAP (via pkg-config): ${LDAP_INCLUDE_DIRS} (found version \"${LDAP_VERSION}\")")
 else()
-  set(LDAP_PC_REQUIRES "")
+  set(LDAP_PC_REQUIRES "")  # Depend on pkg-config only when found via pkg-config
 
   # On Apple the SDK LDAP gets picked up from
   # 'MacOSX.sdk/System/Library/Frameworks/LDAP.framework/Headers', which contains
