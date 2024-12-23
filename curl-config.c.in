@@ -34,12 +34,9 @@
   reconfigure and recompile as necessary in order to ensure coherency. note
   tht the pkg-config file generated will have the same problem.
 */
-static const char *prefix="@prefix@";  /* CMAKE_INSTALL_PREFIX */
-/*
-  exec prefix has the same issue. we also can't use it since it doesn't expand
-  into a full string path; it is a shell expansion of prefix
-*/
-/* static const char *exec_prefix = "@exec_prefix@"; */
+static const char *prefix = "@prefix@";  /* CMAKE_INSTALL_PREFIX */
+/* exec prefix (fully expanded). we don't use this however */
+/* static const char *exec_prefix = "@lit_exec_prefix@"; */
 /* pkg-config C/C++ flags */
 static const char *cppflag_curl_staticlib = "@LIBCURL_PC_CFLAGS@";
 /* space-separated feature list */
@@ -71,8 +68,10 @@ static const char *usage = "Usage: curl-config [OPTION]\n"
 
 /**
  * Helper macro to check for string equality.
+ *
+ * This relieves us from writing `strcmp(a, b) == 0` or `!strcmp(a, b)`.
  */
-#define STREQ(s1, s2) !strcmp(s1, s2)
+#define STREQ !strcmp
 
 /**
  * Print all items in a space-separated list on their own line to stdout.
@@ -250,10 +249,8 @@ check_curl_version(const char *str)
 /**
  * Print the required C/C++ compile flags to stdout.
  *
- * This follows the original curl-config --cflags logic.
- *
- * @note Due to how includedir is expanded for a Bash script, not fully
- *  expanded, we have to manually use prefix/include together.
+ * This follows the original curl-config --cflags logic but uses lit_includedir
+ * as unlike includedir, it is a fully-expanded path name.
  */
 static void
 print_cflags(void)
@@ -266,10 +263,10 @@ print_cflags(void)
   else
     static_flag = "";
   /* include dir flag */
-  if(STREQ("@prefix@/include", "/usr/include"))
+  if(STREQ("@lit_includedir@", "/usr/include"))
     include_flag = "";
   else
-    include_flag = "-I@prefix@/include";
+    include_flag = "-I@lit_includedir@";
   /* print cflags */
   /* note: this can be "-DCURL_STATICLIB " if installed in /usr/include */
   printf("%s%s\n", static_flag, include_flag);
@@ -290,19 +287,19 @@ print_ldflags(void)
   const char *lib_dir;
   const char *libs;
   /* library dir */
-  if(STREQ("@prefix@/lib", "/usr/lib") || STREQ("@prefix@/lib", "/usr/lib64"))
+  if(STREQ("@lit_libdir@", "/usr/lib") || STREQ("@lit_libdir@", "/usr/lib64"))
     lib_dir = "";
   else
 #if defined(_MSC_VER)
-    lib_dir = "/LIBPATH:@prefix@/lib ";  /* note trailing space */
+    lib_dir = "/LIBPATH:@lit_libdir@ ";  /* note trailing space */
 #else
-    lib_dir = "-L@prefix@/lib ";
+    lib_dir = "-L@lit_libdir@ ";
 #endif  /* !defined(_MSC_VER) */
   /* shared/static libs */
   if(STREQ("@ENABLE_SHARED@", "no"))
 #if defined(_MSC_VER)
     /* note: libcurl_imp.lib hardcoded, could use IMPORT_LIB_SUFFIX */
-    libs = "libcurl_impl.lib @LIBCURL_WIN32_PC_LIBS_PRIVATE@";
+    libs = "libcurl_imp.lib @LIBCURL_WIN32_PC_LIBS_PRIVATE@";
 #else
     libs = "-lcurl @LIBCURL_PC_LIBS_PRIVATE@";
 #endif  /* !defined(_MSC_VER) */
@@ -329,7 +326,7 @@ static void
 print_static_ldflags(void)
 {
   if(!STREQ("@ENABLE_SHARED@", "no"))
-    puts("@prefix@/lib/libcurl.@libext@ @LIBCURL_PC_LDFLAGS_PRIVATE@ "
+    puts("@lit_libdir@/libcurl.@libext@ @LIBCURL_PC_LDFLAGS_PRIVATE@ "
 #if defined(_MSC_VER)
          "@LIBCURL_WIN32_PC_LIBS_PRIVATE@"
 #else

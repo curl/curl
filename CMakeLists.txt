@@ -2105,7 +2105,8 @@ endif()
 
 if(NOT CURL_DISABLE_INSTALL)
 
-  # curl-config needs the following options to be set.
+  # curl-config needs the following options to be set. note that we have to
+  # perform a full string literal expansion for the C program
   set(CC                      "${CMAKE_C_COMPILER}")
   # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
@@ -2113,15 +2114,20 @@ if(NOT CURL_DISABLE_INSTALL)
   set(VERSIONNUM              "${_curl_version_num}")
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
+  set(lit_exec_prefix         "${prefix}")  # note $ is *not* escaped
   if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
     set(includedir            "${CMAKE_INSTALL_INCLUDEDIR}")
+    set(lit_includedir        "${includedir}")
   else()
     set(includedir            "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+    set(lit_includedir        "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
   endif()
   if(IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
     set(libdir                "${CMAKE_INSTALL_LIBDIR}")
+    set(lit_libdir            "${libdir}")
   else()
     set(libdir                "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+    set(lit_libdir            "${lit_exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
   endif()
   # "a" (Linux) or "lib" (Windows)
   string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -2275,13 +2281,13 @@ if(NOT CURL_DISABLE_INSTALL)
   #   CURL_CA_BUNDLE
   #   ENABLE_SHARED
   #   ENABLE_STATIC
-  #   exec_prefix
-  #   includedir
+  #   lit_exec_prefix
+  #   lit_includedir
   #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_LDFLAGS_PRIVATE
   #   LIBCURL_PC_LIBS_PRIVATE
   #   LIBCURL_WIN32_PC_LIBS_PRIVATE
-  #   libdir
+  #   lit_libdir
   #   libext
   #   prefix
   #   SSL_BACKENDS
