@@ -13,7 +13,7 @@ See-also:
   - curl_url_strerror (3)
 Protocol:
   - All
-Added-in: 7.78.0
+Added-in: 7.62.0
 ---
 
 # NAME
