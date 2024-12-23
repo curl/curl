@@ -2265,7 +2265,6 @@ if(NOT CURL_DISABLE_INSTALL)
   #   exec_prefix
   #   includedir
   #   LIBCURL_PC_CFLAGS
-  #   LIBCURL_PC_CFLAGS_PRIVATE
   #   LIBCURL_PC_LDFLAGS_PRIVATE
   #   LIBCURL_PC_LIBS_PRIVATE
   #   libdir
