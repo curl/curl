@@ -2154,6 +2154,8 @@ static CURLcode http_cookies(struct Curl_easy *data,
   }
   return result;
 }
+#else
+#define http_cookies(a,b,c) CURLE_OK
 #endif
 
 static CURLcode http_range(struct Curl_easy *data,
