@@ -797,7 +797,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [all extra])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [pointer-arith write-strings])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [shadow])
-          CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [inline nested-externs])
+          CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [nested-externs])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-declarations])
           CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-prototypes])
           tmp_CFLAGS="$tmp_CFLAGS -Wno-long-long"
@@ -943,7 +943,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           #
           dnl Only gcc 2.7 or later
           if test "$compiler_num" -ge "207"; then
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [inline nested-externs])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [nested-externs])
             dnl If not cross-compiling with a gcc older than 3.0
             if test "x$cross_compiling" != "xyes" ||
               test "$compiler_num" -ge "300"; then

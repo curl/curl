@@ -75,7 +75,6 @@ if(PICKY_COMPILER)
     list(APPEND _picky_enable
       -Wbad-function-cast                  # clang  2.7  gcc  2.95
       -Wconversion                         # clang  2.7  gcc  2.95
-      -Winline                             # clang  1.0  gcc  1.0
       -Wmissing-declarations               # clang  1.0  gcc  2.7
       -Wmissing-prototypes                 # clang  1.0  gcc  1.0
       -Wnested-externs                     # clang  1.0  gcc  2.7
