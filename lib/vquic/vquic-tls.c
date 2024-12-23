@@ -267,7 +267,7 @@ CURLcode Curl_vquic_tls_init(struct curl_tls_ctx *ctx,
                             cb_setup, cb_user_data, ssl_user_data,
                             session_reuse_cb);
 #elif defined(USE_WOLFSSL)
-  CURLcode result = wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
+  result = wssl_init_ctx(ctx, cf, data, cb_setup, cb_user_data);
   if(result)
     return result;
 
