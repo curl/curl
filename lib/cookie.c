@@ -807,7 +807,7 @@ parse_cookie_header(struct Curl_easy *data,
 static int
 parse_netscape(struct Cookie *co,
                struct CookieInfo *ci,
-               const char *lineptr,
+               const char *line,
                bool secure)  /* TRUE if connection is over secure
                                 origin */
 {
@@ -817,8 +817,17 @@ parse_netscape(struct Cookie *co,
    */
   char *ptr;
   char *firstptr;
+  char *buffer = NULL;
   char *tok_buf = NULL;
   int fields;
+  int result = CERR_OK;
+
+  buffer = strdup(line);
+  if(!buffer) {
+    result = CERR_OUT_OF_MEMORY;
+    goto out;
+  }
+  firstptr = buffer;
 
   /*
    * In 2008, Internet Explorer introduced HTTP-only cookies to prevent XSS
@@ -826,25 +835,27 @@ parse_netscape(struct Cookie *co,
    * Firefox's cookie files, they are prefixed #HttpOnly_ and the rest
    * remains as usual, so we skip 10 characters of the line.
    */
-  if(strncmp(lineptr, "#HttpOnly_", 10) == 0) {
-    lineptr += 10;
+  if(strncmp(firstptr, "#HttpOnly_", 10) == 0) {
+    firstptr += 10;
     co->httponly = TRUE;
   }
 
-  if(lineptr[0]=='#')
+  if(firstptr[0]=='#') {
     /* do not even try the comments */
-    return CERR_COMMENT;
+    result = CERR_COMMENT;
+    goto out;
+  }
 
   /* strip off the possible end-of-line characters */
-  ptr = strchr(lineptr, '\r');
+  ptr = strchr(firstptr, '\r');
   if(ptr)
     *ptr = 0; /* clear it */
-  ptr = strchr(lineptr, '\n');
+  ptr = strchr(firstptr, '\n');
   if(ptr)
     *ptr = 0; /* clear it */
 
   /* tokenize on TAB */
-  firstptr = Curl_strtok_r((char *)lineptr, "\t", &tok_buf);
+  firstptr = Curl_strtok_r(firstptr, "\t", &tok_buf);
 
   /*
    * Now loop through the fields and init the struct we already have
@@ -858,8 +869,10 @@ parse_netscape(struct Cookie *co,
       if(ptr[0]=='.') /* skip preceding dots */
         ptr++;
       co->domain = strdup(ptr);
-      if(!co->domain)
-        return CERR_OUT_OF_MEMORY;
+      if(!co->domain) {
+        result = CERR_OUT_OF_MEMORY;
+        goto out;
+      }
       break;
     case 1:
       /*
@@ -874,22 +887,30 @@ parse_netscape(struct Cookie *co,
       if(strcmp("TRUE", ptr) && strcmp("FALSE", ptr)) {
         /* only if the path does not look like a boolean option! */
         co->path = strdup(ptr);
-        if(!co->path)
-          return CERR_OUT_OF_MEMORY;
+        if(!co->path) {
+          result = CERR_OUT_OF_MEMORY;
+          goto out;
+        }
         else {
           co->spath = sanitize_cookie_path(co->path);
-          if(!co->spath)
-            return CERR_OUT_OF_MEMORY;
+          if(!co->spath) {
+            result = CERR_OUT_OF_MEMORY;
+            goto out;
+          }
         }
         break;
       }
       /* this does not look like a path, make one up! */
       co->path = strdup("/");
-      if(!co->path)
-        return CERR_OUT_OF_MEMORY;
+      if(!co->path) {
+        result = CERR_OUT_OF_MEMORY;
+        goto out;
+      }
       co->spath = strdup("/");
-      if(!co->spath)
-        return CERR_OUT_OF_MEMORY;
+      if(!co->spath) {
+        result = CERR_OUT_OF_MEMORY;
+        goto out;
+      }
       fields++; /* add a field and fall down to secure */
       FALLTHROUGH();
     case 3:
@@ -897,18 +918,24 @@ parse_netscape(struct Cookie *co,
       if(strcasecompare(ptr, "TRUE")) {
         if(secure || ci->running)
           co->secure = TRUE;
-        else
-          return CERR_BAD_SECURE;
+        else {
+          result = CERR_BAD_SECURE;
+          goto out;
+        }
       }
       break;
     case 4:
-      if(curlx_strtoofft(ptr, NULL, 10, &co->expires))
-        return CERR_RANGE;
+      if(curlx_strtoofft(ptr, NULL, 10, &co->expires)) {
+        result = CERR_RANGE;
+        goto out;
+      }
       break;
     case 5:
       co->name = strdup(ptr);
-      if(!co->name)
-        return CERR_OUT_OF_MEMORY;
+      if(!co->name) {
+        result = CERR_OUT_OF_MEMORY;
+        goto out;
+      }
       else {
         /* For Netscape file format cookies we check prefix on the name */
         if(strncasecompare("__Secure-", co->name, 9))
@@ -919,25 +946,33 @@ parse_netscape(struct Cookie *co,
       break;
     case 6:
       co->value = strdup(ptr);
-      if(!co->value)
-        return CERR_OUT_OF_MEMORY;
+      if(!co->value) {
+        result = CERR_OUT_OF_MEMORY;
+        goto out;
+      }
       break;
     }
   }
   if(6 == fields) {
     /* we got a cookie with blank contents, fix it */
     co->value = strdup("");
-    if(!co->value)
-      return CERR_OUT_OF_MEMORY;
+    if(!co->value) {
+      result = CERR_OUT_OF_MEMORY;
+      goto out;
+    }
     else
       fields++;
   }
 
-  if(7 != fields)
+  if(7 != fields) {
     /* we did not find the sufficient number of fields */
-    return CERR_FIELDS;
+    result = CERR_FIELDS;
+    goto out;
+  }
 
-  return CERR_OK;
+out:
+  free(buffer);
+  return result;
 }
 
 static int

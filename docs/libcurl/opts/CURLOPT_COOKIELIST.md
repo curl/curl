@@ -81,7 +81,7 @@ NULL
 
 int main(void)
 {
-  char *my_cookie =
+  const char *my_cookie =
     "example.com"    /* Hostname */
     SEP "FALSE"      /* Include subdomains */
     SEP "/"          /* Path */
