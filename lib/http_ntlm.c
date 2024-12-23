@@ -252,6 +252,12 @@ CURLcode Curl_output_ntlm(struct Curl_easy *data, bool proxy)
     break;
 
   case NTLMSTATE_LAST:
+    /* since this is a little artificial in that this is used without any
+       outgoing auth headers being set, we need to set the bit by force */
+    if(proxy)
+      data->info.proxyauthpicked = CURLAUTH_NTLM;
+    else
+      data->info.httpauthpicked = CURLAUTH_NTLM;
     Curl_safefree(*allocuserpwd);
     authp->done = TRUE;
     break;
