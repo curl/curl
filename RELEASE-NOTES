@@ -4,28 +4,35 @@ curl and libcurl 8.11.2
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3308
+ Contributors:                 3309
 
 This release includes the following changes:
 
  o curl: add byte range support to --variable reading from file [56]
  o curl: make --etag-save acknowledge --create-dirs [31]
  o getinfo: fix CURLINFO_QUEUE_TIME_T and add 'time_queue' var [55]
+ o getinfo: provide info which auth was used for HTTP and proxy [40]
  o hyper: drop support [57]
+ o QUIC: 0RTT for gnutls via CURLSSLOPT_EARLYDATA [61]
 
 This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
  o async-thread: avoid closing eventfd twice [9]
  o binmode: convert to macro and use it from tests [44]
+ o build: drop `-Winline` picky warning [53]
  o build: drop unused feature macros, update exception list [51]
+ o build: fix the tidy targets for autotools [52]
  o cd2nroff: support "none" as a TLS backend [29]
+ o cf-socket: error if address can't be copied [72]
  o checksrc: ban use of sscanf() [7]
  o checksrc: fix the return() checker [35]
+ o cmake/FindLibssh: sync header comment with other modules
  o cmake/FindMbedTLS: drop lib duplicates early [17]
  o cmake: add LDAP Find module [46]
  o cmake: add native `pkg-config` detection for remaining Find modules [37]
  o cmake: clang-cl improvements [42]
+ o cmake: delete accidental debug message
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
  o cmake: drop redundant opening/closing `.*` from `MATCH` expressions [64]
  o cmake: extend zlib's `AUTO` option to brotli, zstd and enable if found [36]
@@ -38,11 +45,15 @@ This release includes the following bugfixes:
  o conncache: result_cb comment removed from function docs [1]
  o cookie: parse only the exact expire date [3]
  o curl: return error if etag options are used with multiple URLs [5]
+ o curl_multibyte: support Windows paths longer than MAX_PATH [76]
+ o CURLOPT_PROXY.md: clarify the crendential support in proxy URLs [66]
  o CURLOPT_RESOLVE.md: fix wording [30]
  o docs/BUGS.md: remove leading space from a link
+ o examples/block-ip: show how to block IP addresses [74]
  o examples/complicated: fix warnings, bump deprecated callback, tidy up [59]
  o examples/synctime.c: remove references to dead URLs and functionality [62]
  o examples: make them compile with compatibility functions disabled (Windows) [58]
+ o http2: fix value stored to 'result' is never read [71]
  o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
@@ -52,9 +63,13 @@ This release includes the following bugfixes:
  o multissl: make openssl + wolfssl builds work [34]
  o netrc: fix password-only entries [28]
  o netrc: restore _netrc fallback logic [6]
+ o ngtcp2: fix two cases of value stored never read [65]
+ o openssl: fix ECH logic [67]
+ o projects/Windows: remove wolfSSL from legacy projects [75]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
  o scripts/mdlinkcheck: markdown link checker [19]
  o sectransp: free certificate on error [12]
+ o src: add `CURL_STRICMP()` macro, use `_stricmp()` on Windows [54]
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
  o tests/http/clients: use proper sleep() call on NonStop [10]
@@ -66,6 +81,8 @@ This release includes the following bugfixes:
  o tool_operate: make --etag-compare always accept a non-existing file [22]
  o variable.md: mention --expand-variable for variables to variables [13]
  o variable.md: show function use with examples [18]
+ o vquic: fix 4th function call argument is an uninitialized value [70]
+ o vquic: make vquic_send_packets not return without setting psent [69]
  o vtls: remove 'detach/attach' functions from TLS handler struct [25]
  o vtls: remove unusued 'check_cxn' from TLS handler struct [26]
  o vtls: replace "none"-functions with NULL pointers [27]
@@ -90,11 +107,11 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andy Pan, Ben Zanin, Christian Heusel, Christian Schmitz, Daniel Stenberg,
-  Darren Banfi, dwickr, Hermes Zhang, IcedCoffeee on github, Kai Pastor,
-  Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt, Mohammed Sadiq, Randall S. Becker,
-  Ray Satiro, renovate[bot], Samuel Henrique, Stefan Eissing, Tamir Duberstein,
-  Viktor Szakats
-  (21 contributors)
+  Darren Banfi, dwickr, Ganesh Viswanathan, Hermes Zhang,
+  IcedCoffeee on github, Kai Pastor, Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt,
+  Mohammed Sadiq, Randall S. Becker, Ray Satiro, renovate[bot], Rudi Heitbaum,
+  Samuel Henrique, Stefan Eissing, Tamir Duberstein, Viktor Szakats
+  (23 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -137,6 +154,7 @@ References to bug reports and discussions on issues:
  [37] = https://curl.se/bug/?i=15408
  [38] = https://curl.se/bug/?i=15543
  [39] = https://curl.se/bug/?i=15796
+ [40] = https://curl.se/bug/?i=15450
  [41] = https://curl.se/bug/?i=15498
  [42] = https://curl.se/bug/?i=15478
  [43] = https://curl.se/bug/?i=15255
@@ -148,12 +166,26 @@ References to bug reports and discussions on issues:
  [49] = https://curl.se/bug/?i=15465
  [50] = https://curl.se/bug/?i=15562
  [51] = https://curl.se/bug/?i=15577
+ [52] = https://curl.se/bug/?i=15813
+ [53] = https://curl.se/bug/?i=15815
+ [54] = https://curl.se/bug/?i=15788
  [55] = https://curl.se/bug/?i=15512
  [56] = https://curl.se/bug/?i=15739
  [57] = https://curl.se/bug/?i=15120
  [58] = https://curl.se/bug/?i=15789
  [59] = https://curl.se/bug/?i=15785
  [60] = https://curl.se/bug/?i=15774
+ [61] = https://curl.se/bug/?i=15667
  [62] = https://curl.se/bug/?i=15786
  [63] = https://curl.se/bug/?i=15777
  [64] = https://curl.se/bug/?i=15773
+ [65] = https://curl.se/bug/?i=15812
+ [66] = https://curl.se/bug/?i=15805
+ [67] = https://curl.se/bug/?i=15814
+ [69] = https://curl.se/bug/?i=15807
+ [70] = https://curl.se/bug/?i=15808
+ [71] = https://curl.se/bug/?i=15806
+ [72] = https://curl.se/bug/?i=15784
+ [74] = https://curl.se/bug/?i=15748
+ [75] = https://curl.se/bug/?i=15468
+ [76] = https://curl.se/bug/?i=13522
