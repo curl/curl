@@ -44,7 +44,7 @@ jobs:
         run: |
           SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
-      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4
+      - uses: actions/upload-artifact@6f51ac03b9356f520e9adb1b1b7802705f340c2b # v4
         with:
           name: 'release-tgz'
           path: 'curl-99.98.97.tar.gz'
