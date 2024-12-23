@@ -4085,28 +4085,27 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
 # endif
 
   if(rv && rcs) {
-# define HEXSTR_MAX 800
     char *b64str = NULL;
     size_t blen = 0;
 
-    result = Curl_base64_encode((const char *)rcs, rcl,
-                                &b64str, &blen);
-    if(!result && b64str)
+    result = Curl_base64_encode((const char *)rcs, rcl, &b64str, &blen);
+    if(!result && b64str) {
       infof(data, "ECH: retry_configs %s", b64str);
-    free(b64str);
-# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
-    rv = SSL_ech_get_status(ssl, &inner, &outer);
-    infof(data, "ECH: retry_configs for %s from %s, %d %d",
-          inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
-# else
-    rv = SSL_ech_accepted(ssl);
-    servername_type = SSL_get_servername_type(ssl);
-    inner = SSL_get_servername(ssl, servername_type);
-    SSL_get0_ech_name_override(ssl, &outer, &out_name_len);
-    /* TODO: get the inner from BoringSSL */
-    infof(data, "ECH: retry_configs for %s from %s, %d %d",
-          inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
-# endif
+      free(b64str);
+#if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
+      rv = SSL_ech_get_status(ssl, &inner, &outer);
+      infof(data, "ECH: retry_configs for %s from %s, %d %d",
+            inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
+#else
+      rv = SSL_ech_accepted(ssl);
+      servername_type = SSL_get_servername_type(ssl);
+      inner = SSL_get_servername(ssl, servername_type);
+      SSL_get0_ech_name_override(ssl, &outer, &out_name_len);
+      /* TODO: get the inner from BoringSSL */
+      infof(data, "ECH: retry_configs for %s from %s, %d %d",
+            inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
+#endif
+    }
   }
   else
     infof(data, "ECH: no retry_configs (rv = %d)", rv);
