@@ -168,7 +168,7 @@ get_curlver_component(const char *begin, const char *end)
  * @param str String to interpret as a version
  */
 static int
-curlver_from_string(struct curlver* ver, const char *str)
+curlver_from_string(struct curlver *ver, const char *str)
 {
   /* begin and end iterators */
   const char *s_begin = str;
