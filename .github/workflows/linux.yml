@@ -210,6 +210,12 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
+          - name: clang-tidy
+            install_packages: clang-tools clang clang-tidy libssl-dev libssh2-1-dev
+            install_steps: skipall
+            configure: --with-openssl --with-libssh2
+            make-extra-target: tidy
+
           - name: scanbuild
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
             install_steps: skipall
@@ -596,6 +602,9 @@ jobs:
             ${{ matrix.build.make-prefix }} cmake --build . --verbose
           else
             ${{ matrix.build.make-prefix }} make V=1
+            if [ -n '${{ make-extra-target }}' ]; then
+              ${{ matrix.build.make-prefix }} make V=1 tidy
+            fi
           fi
 
       - name: 'single-use function check'
