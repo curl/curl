@@ -602,8 +602,8 @@ jobs:
             ${{ matrix.build.make-prefix }} cmake --build . --verbose
           else
             ${{ matrix.build.make-prefix }} make V=1
-            if [ -n '${{ make-extra-target }}' ]; then
-              ${{ matrix.build.make-prefix }} make V=1 tidy
+            if [ -n '${{ matrix.build.make-extra-target }}' ]; then
+              ${{ matrix.build.make-prefix }} make V=1 '${{ matrix.build.make-extra-target }}'
             fi
           fi
 
