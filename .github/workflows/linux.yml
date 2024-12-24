@@ -615,8 +615,9 @@ jobs:
           fi
           ./scripts/singleuse.pl --unit ${libcurla}
 
-      - run: ./src/curl -V
-        name: 'check curl -V output'
+      - name: 'check curl -V output'
+        if: ${{ matrix.build.make-custom-target != 'tidy' }}
+        run: ./src/curl -V
 
       - run: cmake --install . --prefix $HOME/curl --strip
         if: ${{ matrix.build.generate }}
@@ -677,6 +678,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
             ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples
