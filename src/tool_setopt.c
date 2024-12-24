@@ -619,7 +619,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
   if(tag < CURLOPTTYPE_OBJECTPOINT) {
     /* Value is expected to be a long */
-    long lval = va_arg(arg, long);
+    long lval = va_arg(arg, long); /* NOLINT */
     long defval = 0L;
     const struct NameValue *nv = NULL;
     for(nv = setopt_nv_CURLNONZERODEFAULTS; nv->name; nv++) {
@@ -637,7 +637,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   }
   else if(tag < CURLOPTTYPE_OFF_T) {
     /* Value is some sort of object pointer */
-    void *pval = va_arg(arg, void *);
+    void *pval = va_arg(arg, void *); /* NOLINT */
 
     /* function pointers are never printable */
     if(tag >= CURLOPTTYPE_FUNCTIONPOINT) {
@@ -665,7 +665,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   }
   else if(tag < CURLOPTTYPE_BLOB) {
     /* Value is expected to be curl_off_t */
-    curl_off_t oval = va_arg(arg, curl_off_t);
+    curl_off_t oval = va_arg(arg, curl_off_t); /* NOLINT */
     msnprintf(buf, sizeof(buf),
               "(curl_off_t)%" CURL_FORMAT_CURL_OFF_T, oval);
     value = buf;
@@ -676,7 +676,7 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
   }
   else {
     /* Value is a blob */
-    void *pblob = va_arg(arg, void *);
+    void *pblob = va_arg(arg, void *); /* NOLINT */
 
     /* blobs are never printable */
     if(pblob) {
