@@ -74,7 +74,6 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
   va_start(param, option);
 
-  /* NOLINTBEGIN */
   switch(option) {
   case CURLSHOPT_SHARE:
     /* this is a type this share will share */
@@ -209,7 +208,6 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     res = CURLSHE_BAD_OPTION;
     break;
   }
-  /* NOLINTEND */
 
   va_end(param);
 
