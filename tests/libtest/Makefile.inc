@@ -75,7 +75,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
- lib3100 lib3101 lib3102 lib3103 lib3207
+ lib3100 lib3101 lib3102 lib3103 lib3104 lib3207
 
 libntlmconnect_SOURCES = libntlmconnect.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 libntlmconnect_LDADD = $(TESTUTIL_LIBS)
@@ -717,6 +717,8 @@ lib3102_LDADD = $(TESTUTIL_LIBS)
 
 lib3103_SOURCES = lib3103.c $(SUPPORTFILES)
 lib3103_LDADD = $(TESTUTIL_LIBS)
+
+lib3104_SOURCES = lib3104.c $(SUPPORTFILES)
 
 lib3207_SOURCES = lib3207.c $(SUPPORTFILES) $(TESTUTIL) $(THREADS) $(WARNLESS) $(MULTIBYTE)
 lib3207_LDADD = $(TESTUTIL_LIBS)
