@@ -155,7 +155,7 @@ all-local: checksrc
 endif
 
 # disable the tests that are mostly causing false positives
-TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-valist.Uninitialized,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
 if CURL_WERROR
 TIDYFLAGS += --warnings-as-errors=*
 endif
