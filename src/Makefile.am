@@ -194,7 +194,7 @@ TIDYFLAGS=-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-op
 
 TIDY:=clang-tidy
 
-tidy:
+tidy: $(HUGE) $(CA_EMBED_CSOURCE)
 	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
