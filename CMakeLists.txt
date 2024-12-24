@@ -259,6 +259,9 @@ if(CURL_CLANG_TIDY)
   find_program(CLANG_TIDY NAMES "clang-tidy" REQUIRED)
   set(CMAKE_C_CLANG_TIDY "${CLANG_TIDY}" "-checks=${_tidy_checks}" "-quiet")
   unset(_tidy_checks)
+  if(CURL_WERROR)
+    list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
+  endif()
 endif()
 
 # For debug libs and exes, add "-d" postfix
