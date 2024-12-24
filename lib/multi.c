@@ -3651,6 +3651,7 @@ CURLMcode curl_multi_setopt(CURLM *m,
 
   va_start(param, option);
 
+  /* NOLINTBEGIN */
   switch(option) {
   case CURLMOPT_SOCKETFUNCTION:
     multi->socket_cb = va_arg(param, curl_socket_callback);
@@ -3710,6 +3711,7 @@ CURLMcode curl_multi_setopt(CURLM *m,
     res = CURLM_UNKNOWN_OPTION;
     break;
   }
+  /* NOLINTEND */
   va_end(param);
   return res;
 }

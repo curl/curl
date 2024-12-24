@@ -617,6 +617,8 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
   va_start(arg, tag);
 
+  /* NOLINTBEGIN */
+
   if(tag < CURLOPTTYPE_OBJECTPOINT) {
     /* Value is expected to be a long */
     long lval = va_arg(arg, long);
@@ -688,6 +690,8 @@ CURLcode tool_setopt(CURL *curl, bool str, struct GlobalConfig *global,
 
     ret = curl_easy_setopt(curl, tag, pblob);
   }
+
+  /* NOLINTEND */
 
   va_end(arg);
 

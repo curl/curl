@@ -626,6 +626,8 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
 
   va_start(arg, info);
 
+  /* NOLINTBEGIN */
+
   type = CURLINFO_TYPEMASK & (int)info;
   switch(type) {
   case CURLINFO_STRING:
@@ -661,6 +663,8 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   default:
     break;
   }
+
+  /* NOLINTEND */
 
   va_end(arg);
 
