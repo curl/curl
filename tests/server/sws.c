@@ -832,12 +832,10 @@ static void storerequest(const char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  do {
-    res = fclose(dump);
-  } while(res && ((error = errno) == EINTR));
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           dumpfile, error, strerror(error));
+           dumpfile, errno, strerror(errno));
 }
 
 static void init_httprequest(struct httprequest *req)
@@ -1217,12 +1215,10 @@ retry:
     }
   } while((count > 0) && !got_exit_signal);
 
-  do {
-    res = fclose(dump);
-  } while(res && ((error = errno) == EINTR));
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           responsedump, error, strerror(error));
+           responsedump, errno, strerror(errno));
 
   if(got_exit_signal) {
     free(ptr);
@@ -2527,7 +2523,7 @@ sws_cleanup:
     sclose(sock);
 
 #ifdef USE_UNIX_SOCKETS
-  if(unlink_socket && socket_domain == AF_UNIX) {
+  if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
     rc = unlink(unix_socket);
     logmsg("unlink(%s) = %d (%s)", unix_socket, rc, strerror(rc));
   }

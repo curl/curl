@@ -1167,7 +1167,7 @@ socks5_cleanup:
     sclose(sock);
 
 #ifdef USE_UNIX_SOCKETS
-  if(unlink_socket && socket_domain == AF_UNIX) {
+  if(unlink_socket && socket_domain == AF_UNIX && unix_socket) {
     error = unlink(unix_socket);
     logmsg("unlink(%s) = %d (%s)", unix_socket, error, strerror(error));
   }

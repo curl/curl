@@ -155,12 +155,15 @@ all-local: checksrc
 endif
 
 # disable the tests that are mostly causing false positives
-TIDYFLAGS=-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+if CURL_WERROR
+TIDYFLAGS += --warnings-as-errors=*
+endif
 
-TIDY:=clang-tidy
+TIDY := clang-tidy
 
 tidy:
-	$(TIDY) $(CSOURCES) $(TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CSOURCES) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(AM_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
 
 optiontable:
 	perl optiontable.pl < $(top_srcdir)/include/curl/curl.h > easyoptions.c

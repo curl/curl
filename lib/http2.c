@@ -2337,7 +2337,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(should_close_session(ctx)) {
     /* nghttp2 thinks this session is done. If the stream has not been
      * closed, this is an error state for out transfer */
-    if(stream->closed) {
+    if(stream && stream->closed) {
       nwritten = http2_handle_stream_close(cf, data, stream, err);
     }
     else {

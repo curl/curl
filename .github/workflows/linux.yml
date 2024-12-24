@@ -37,6 +37,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 5
+  CURL_CLANG_TIDYFLAGS: '-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,-clang-analyzer-valist.Uninitialized'
   # unhandled
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
@@ -210,6 +211,12 @@ jobs:
           - name: '!ssl !http !smtp !imap'
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
+          - name: clang-tidy
+            install_packages: clang-tidy libssl-dev libssh2-1-dev
+            install_steps: skipall
+            configure: --with-openssl --with-libssh2
+            make-custom-target: tidy
+
           - name: scanbuild
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
             install_steps: skipall
@@ -287,7 +294,8 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
-            libtool autoconf automake pkgconf ninja-build stunnel4 \
+            libtool autoconf automake pkgconf ninja-build \
+            ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
           python3 -m venv $HOME/venv
@@ -595,7 +603,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             ${{ matrix.build.make-prefix }} cmake --build . --verbose
           else
-            ${{ matrix.build.make-prefix }} make V=1
+            ${{ matrix.build.make-prefix }} make V=1 ${{ matrix.build.make-custom-target }}
           fi
 
       - name: 'single-use function check'
@@ -609,8 +617,9 @@ jobs:
           fi
           ./scripts/singleuse.pl --unit ${libcurla}
 
-      - run: ./src/curl -V
-        name: 'check curl -V output'
+      - name: 'check curl -V output'
+        if: ${{ matrix.build.make-custom-target != 'tidy' }}
+        run: ./src/curl -V
 
       - run: cmake --install . --prefix $HOME/curl --strip
         if: ${{ matrix.build.generate }}
@@ -671,6 +680,7 @@ jobs:
           fi
 
       - name: 'build examples'
+        if: ${{ matrix.build.make-custom-target != 'tidy' }}
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
             ${{ matrix.build.make-prefix }} cmake --build . --verbose --target curl-examples

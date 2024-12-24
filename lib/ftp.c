@@ -4253,7 +4253,7 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
       else
         n -= ftpc->file ? strlen(ftpc->file) : 0;
 
-      if((strlen(oldPath) == n) && !strncmp(rawPath, oldPath, n)) {
+      if((strlen(oldPath) == n) && rawPath && !strncmp(rawPath, oldPath, n)) {
         infof(data, "Request has same path as previous transfer");
         ftpc->cwddone = TRUE;
       }

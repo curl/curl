@@ -1850,7 +1850,7 @@ static CURLcode cf_udp_setup_quic(struct Curl_cfilter *cf,
   /* QUIC needs a connected socket, nonblocking */
   DEBUGASSERT(ctx->sock != CURL_SOCKET_BAD);
 
-  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,
+  rc = connect(ctx->sock, &ctx->addr.curl_sa_addr,  /* NOLINT FIXME */
                (curl_socklen_t)ctx->addr.addrlen);
   if(-1 == rc) {
     return socket_connect_result(data, ctx->ip.remote_ip, SOCKERRNO);
