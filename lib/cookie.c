@@ -807,7 +807,7 @@ parse_cookie_header(struct Curl_easy *data,
 static int
 parse_netscape(struct Cookie *co,
                struct CookieInfo *ci,
-               const char *line,
+               const char *lineptr,
                bool secure)  /* TRUE if connection is over secure
                                 origin */
 {
@@ -822,40 +822,31 @@ parse_netscape(struct Cookie *co,
   int fields;
   int result = CERR_OK;
 
-  buffer = strdup(line);
-  if(!buffer) {
-    result = CERR_OUT_OF_MEMORY;
-    goto out;
-  }
-  firstptr = buffer;
-
   /*
    * In 2008, Internet Explorer introduced HTTP-only cookies to prevent XSS
    * attacks. Cookies marked httpOnly are not accessible to JavaScript. In
    * Firefox's cookie files, they are prefixed #HttpOnly_ and the rest
    * remains as usual, so we skip 10 characters of the line.
    */
-  if(strncmp(firstptr, "#HttpOnly_", 10) == 0) {
-    firstptr += 10;
+  if(strncmp(lineptr, "#HttpOnly_", 10) == 0) {
+    lineptr += 10;
     co->httponly = TRUE;
   }
 
-  if(firstptr[0]=='#') {
+  if(lineptr[0]=='#') {
     /* do not even try the comments */
     result = CERR_COMMENT;
     goto out;
   }
 
-  /* strip off the possible end-of-line characters */
-  ptr = strchr(firstptr, '\r');
-  if(ptr)
-    *ptr = 0; /* clear it */
-  ptr = strchr(firstptr, '\n');
-  if(ptr)
-    *ptr = 0; /* clear it */
+  buffer = Curl_memdup0(lineptr, strcspn(lineptr, "\r\n"));
+  if(!buffer) {
+    result = CERR_OUT_OF_MEMORY;
+    goto out;
+  }
 
   /* tokenize on TAB */
-  firstptr = Curl_strtok_r(firstptr, "\t", &tok_buf);
+  firstptr = Curl_strtok_r(buffer, "\t", &tok_buf);
 
   /*
    * Now loop through the fields and init the struct we already have
