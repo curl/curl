@@ -77,7 +77,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
   switch(option) {
   case CURLSHOPT_SHARE:
     /* this is a type this share will share */
-    type = va_arg(param, int);
+    type = va_arg(param, int); /* NOLINT */
 
     switch(type) {
     case CURL_LOCK_DATA_DNS:
@@ -142,7 +142,7 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
 
   case CURLSHOPT_UNSHARE:
     /* this is a type this share will no longer share */
-    type = va_arg(param, int);
+    type = va_arg(param, int); /* NOLINT */
     share->specifier &= ~(unsigned int)(1 << type);
     switch(type) {
     case CURL_LOCK_DATA_DNS:
@@ -190,17 +190,17 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     break;
 
   case CURLSHOPT_LOCKFUNC:
-    lockfunc = va_arg(param, curl_lock_function);
+    lockfunc = va_arg(param, curl_lock_function); /* NOLINT */
     share->lockfunc = lockfunc;
     break;
 
   case CURLSHOPT_UNLOCKFUNC:
-    unlockfunc = va_arg(param, curl_unlock_function);
+    unlockfunc = va_arg(param, curl_unlock_function); /* NOLINT */
     share->unlockfunc = unlockfunc;
     break;
 
   case CURLSHOPT_USERDATA:
-    ptr = va_arg(param, void *);
+    ptr = va_arg(param, void *); /* NOLINT */
     share->clientdata = ptr;
     break;
 
