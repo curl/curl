@@ -190,9 +190,9 @@ all-local: checksrc
 endif
 
 # disable the tests that are mostly causing false positives
-TIDYFLAGS=-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-valist.Uninitialized,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-valist.Uninitialized,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
 
-TIDY:=clang-tidy
+TIDY := clang-tidy
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
 	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
