@@ -53,7 +53,7 @@ env:
 jobs:
   macos:
     name: "${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.compiler }} ${{ matrix.build.name }}"
-    runs-on: 'macos-latest'
+    runs-on: "${{ matrix.build.image || 'macos-latest' }}"
     timeout-minutes: 45
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
@@ -131,6 +131,10 @@ jobs:
           - name: 'OpenSSL gsasl rtmp AppleIDN'
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
+          - name: 'OpenSSL AppleIDN +examples clang-tidy'
+            install: llvm
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy -DCURL_WERROR=OFF
+            image: macos-15
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
@@ -161,6 +165,8 @@ jobs:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
           - { compiler: llvm@15, build: { torture: true } }
           - { compiler: gcc-12, build: { torture: true } }
+          - { compiler: llvm@15, build: { image: macos-15 } }
+          - { compiler: gcc-12, build: { image: macos-15 } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@15, build: { compiler: 'clang' } }
           - { compiler: llvm@15, build: { compiler: 'gcc-12' } }
