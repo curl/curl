@@ -214,7 +214,7 @@ jobs:
             install_packages: clang-tools clang clang-tidy libssl-dev libssh2-1-dev
             install_steps: skipall
             configure: --with-openssl --with-libssh2
-            make-extra-target: tidy
+            make-custom-target: tidy
 
           - name: scanbuild
             install_packages: clang-tools clang libssl-dev libssh2-1-dev
@@ -601,10 +601,7 @@ jobs:
           if [ -n '${{ matrix.build.generate }}' ]; then
             ${{ matrix.build.make-prefix }} cmake --build . --verbose
           else
-            ${{ matrix.build.make-prefix }} make V=1
-            if [ -n '${{ matrix.build.make-extra-target }}' ]; then
-              ${{ matrix.build.make-prefix }} make V=1 '${{ matrix.build.make-extra-target }}'
-            fi
+            ${{ matrix.build.make-prefix }} make V=1 ${{ matrix.build.make-custom-target }}
           fi
 
       - name: 'single-use function check'
