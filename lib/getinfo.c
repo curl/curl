@@ -629,32 +629,32 @@ CURLcode Curl_getinfo(struct Curl_easy *data, CURLINFO info, ...)
   type = CURLINFO_TYPEMASK & (int)info;
   switch(type) {
   case CURLINFO_STRING:
-    param_charp = va_arg(arg, const char **);
+    param_charp = va_arg(arg, const char **); /* NOLINT */
     if(param_charp)
       result = getinfo_char(data, info, param_charp);
     break;
   case CURLINFO_LONG:
-    param_longp = va_arg(arg, long *);
+    param_longp = va_arg(arg, long *); /* NOLINT */
     if(param_longp)
       result = getinfo_long(data, info, param_longp);
     break;
   case CURLINFO_DOUBLE:
-    param_doublep = va_arg(arg, double *);
+    param_doublep = va_arg(arg, double *); /* NOLINT */
     if(param_doublep)
       result = getinfo_double(data, info, param_doublep);
     break;
   case CURLINFO_OFF_T:
-    param_offt = va_arg(arg, curl_off_t *);
+    param_offt = va_arg(arg, curl_off_t *); /* NOLINT */
     if(param_offt)
       result = getinfo_offt(data, info, param_offt);
     break;
   case CURLINFO_SLIST:
-    param_slistp = va_arg(arg, struct curl_slist **);
+    param_slistp = va_arg(arg, struct curl_slist **); /* NOLINT */
     if(param_slistp)
       result = getinfo_slist(data, info, param_slistp);
     break;
   case CURLINFO_SOCKET:
-    param_socketp = va_arg(arg, curl_socket_t *);
+    param_socketp = va_arg(arg, curl_socket_t *); /* NOLINT */
     if(param_socketp)
       result = getinfo_socket(data, info, param_socketp);
     break;
