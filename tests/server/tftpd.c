@@ -448,7 +448,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
   struct tftphdr *dp;
 
   b = &bfs[nextone];
-  if(b->counter < -1)            /* anything to flush? */
+  if(b->counter < -1)             /* anything to flush? */
     return 0;                     /* just nop if nothing to do */
 
   if(!test->ofile) {
@@ -459,10 +459,11 @@ static ssize_t write_behind(struct testcase *test, int convert)
 #else
     test->ofile = open(outfile, O_CREAT|O_RDWR, 0777);
 #endif
-    if(test->ofile == -1) {
-      logmsg("Couldn't create and/or open file %s for upload!", outfile);
-      return -1; /* failure! */
-    }
+  }
+
+  if(test->ofile == -1) {
+    logmsg("Couldn't create and/or open file %s for upload!", outfile);
+    return -1; /* failure! */
   }
 
   count = b->counter;             /* remember byte count */
