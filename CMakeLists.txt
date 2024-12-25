@@ -261,6 +261,9 @@ if(CURL_CLANG_TIDY)
   if(CURL_WERROR)
     list(APPEND CMAKE_C_CLANG_TIDY "--warnings-as-errors=*")
   endif()
+  if(CURL_CLANG_TIDYFLAGS)
+    list(APPEND CMAKE_C_CLANG_TIDY ${CURL_CLANG_TIDYFLAGS})
+  endif()
 endif()
 
 # For debug libs and exes, add "-d" postfix

@@ -150,6 +150,7 @@ assumes that CMake generates `Makefile`:
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
+- `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
