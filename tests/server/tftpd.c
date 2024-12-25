@@ -953,7 +953,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
       break;
   } while(1);
 
-  if(*cp) {
+  if(*cp || !mode) {
     nak(EBADOP);
     fclose(server);
     return 3;
