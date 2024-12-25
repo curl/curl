@@ -59,7 +59,7 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: 'ubuntu-24.04'
+    runs-on: "${{ matrix.build.image || 'ubuntu-24.04' }}"
     container: ${{ matrix.build.container }}
     timeout-minutes: 45
     strategy:
@@ -211,9 +211,10 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: clang-tidy
-            install_packages: clang-tools clang clang-tidy libssl-dev libssh2-1-dev
+            install_packages: clang-tools clang clang-tidy-11 libssl-dev libssh2-1-dev
             install_steps: skipall
             configure: --with-openssl --with-libssh2
+            image: 'ubuntu-22.04'
             make-custom-target: tidy
 
           - name: scanbuild
