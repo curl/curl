@@ -37,6 +37,7 @@ permissions: {}
 
 env:
   MAKEFLAGS: -j 5
+  CURL_TINYFLAGS: -checks=-clang-analyzer-valist.Uninitialized
   # unhandled
   bearssl-version: 0.6
   # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
@@ -213,7 +214,7 @@ jobs:
           - name: clang-tidy
             install_packages: clang-tidy libssl-dev libssh2-1-dev
             install_steps: skipall
-            configure: CURL_TINYFLAGS=-checks=-clang-analyzer-valist.Uninitialized --with-openssl --with-libssh2
+            configure: --with-openssl --with-libssh2
             make-custom-target: tidy
 
           - name: scanbuild
