@@ -211,7 +211,7 @@ jobs:
             configure: --without-ssl --enable-debug --disable-http --disable-smtp --disable-imap --disable-unity
 
           - name: clang-tidy
-            install_packages: clang-tools-11 clang-11 clang-tidy-11 libssl-dev libssh2-1-dev
+            install_packages: clang-tidy-11 libssl-dev libssh2-1-dev
             install_steps: skipall
             configure: --with-openssl --with-libssh2
             image: 'ubuntu-22.04'
