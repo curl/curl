@@ -1215,12 +1215,10 @@ retry:
     }
   } while((count > 0) && !got_exit_signal);
 
-  do {
-    res = fclose(dump);
-  } while(res && ((error = errno) == EINTR));
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           responsedump, error, strerror(error));
+           responsedump, errno, strerror(errno));
 
   if(got_exit_signal) {
     free(ptr);
