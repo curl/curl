@@ -467,6 +467,9 @@ static ssize_t write_behind(struct testcase *test, int convert)
       return -1; /* failure! */
     }
   }
+  else if(test->ofile <= 0) {
+    return -1; /* failure! */
+  }
 
   count = b->counter;             /* remember byte count */
   b->counter = BF_FREE;           /* reset flag */
