@@ -341,12 +341,10 @@ void set_advisor_read_lock(const char *filename)
     return;
   }
 
-  do {
-    res = fclose(lockfile);
-  } while(res && ((error = errno) == EINTR));
+  res = fclose(lockfile);
   if(res)
     logmsg("Error closing lock file %s error: %d %s",
-           filename, error, strerror(error));
+           filename, errno, strerror(errno));
 }
 
 void clear_advisor_read_lock(const char *filename)
