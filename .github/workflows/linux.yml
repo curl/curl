@@ -294,7 +294,8 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
-            libtool autoconf automake pkgconf ninja-build stunnel4 \
+            libtool autoconf automake pkgconf ninja-build \
+            ${{ matrix.build.make-custom-target = 'tidy' && '' || 'stunnel4' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
             ${{ matrix.build.install_packages }}
           python3 -m venv $HOME/venv
