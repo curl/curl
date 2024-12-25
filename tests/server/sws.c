@@ -832,12 +832,10 @@ static void storerequest(const char *reqbuf, size_t totalsize)
 
 storerequest_cleanup:
 
-  do {
-    res = fclose(dump);
-  } while(res && ((error = errno) == EINTR));
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           dumpfile, error, strerror(error));
+           dumpfile, errno, strerror(errno));
 }
 
 static void init_httprequest(struct httprequest *req)
