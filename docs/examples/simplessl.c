@@ -146,5 +146,7 @@ int main(void)
 
   curl_global_cleanup();
 
+  fclose(headerfile);
+
   return 0;
 }
