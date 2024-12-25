@@ -74,6 +74,8 @@ int main(void)
 #endif
 
   headerfile = fopen(pHeaderFile, "wb");
+  if(!headerfile)
+    return 1;
 
   curl_global_init(CURL_GLOBAL_DEFAULT);
 
