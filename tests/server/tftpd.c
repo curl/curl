@@ -424,8 +424,10 @@ static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
 {
   bfs[current].counter = ct;      /* set size of data to write */
   current = !current;             /* switch to other buffer */
-  if(bfs[current].counter != BF_FREE)     /* if not free */
-    write_behind(test, convert);          /* flush it */
+  if(bfs[current].counter != BF_FREE) {   /* if not free */
+    if(write_behind(test, convert) < 0)   /* flush it */
+      return -1;
+  }
   bfs[current].counter = BF_ALLOC;        /* mark as alloc'd */
   *dpp = &bfs[current].buf.hdr;
   return ct;                      /* this is a lie of course */
@@ -462,12 +464,6 @@ static ssize_t write_behind(struct testcase *test, int convert)
 
     if(test->ofile == -1) {
       logmsg("Couldn't create and/or open file %s for upload!", outfile);
-      return -1; /* failure! */
-    }
-  }
-  else {
-    if(test->ofile == -1) {
-      logmsg("File for upload not open");
       return -1; /* failure! */
     }
   }
@@ -1277,7 +1273,10 @@ send_ack:
       logmsg("write: fail");
       goto abort;
     }
-    write_behind(test, pf->f_convert);
+    if(write_behind(test, pf->f_convert) < 0) {
+      logmsg("write_behind: fail");
+      goto abort;
+    }
     for(;;) {
 #ifdef HAVE_ALARM
       alarm(rexmtval);
