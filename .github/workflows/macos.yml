@@ -133,7 +133,7 @@ jobs:
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
           - name: 'OpenSSL AppleIDN +examples clang-tidy'
             install: llvm
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy -DCURL_WERROR=OFF
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
             clang-tidy: true
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
