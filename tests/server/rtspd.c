@@ -974,12 +974,10 @@ static int send_doc(curl_socket_t sock, struct httprequest *req)
     req->rtp_buffersize = 0;
   }
 
-  do {
-    res = fclose(dump);
-  } while(res && ((error = errno) == EINTR));
+  res = fclose(dump);
   if(res)
     logmsg("Error closing file %s error: %d %s",
-           responsedump, error, strerror(error));
+           responsedump, errno, strerror(errno));
 
   if(got_exit_signal) {
     free(ptr);
