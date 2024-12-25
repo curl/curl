@@ -542,12 +542,14 @@ static curl_socket_t mqttit(curl_socket_t fd)
       break;
 
     if(remaining_length >= buff_size) {
+      unsigned char *newbuffer;
       buff_size = remaining_length;
-      buffer = realloc(buffer, buff_size);
-      if(!buffer) {
+      newbuffer = realloc(buffer, buff_size);
+      if(!newbuffer) {
         logmsg("Failed realloc of size %zu", buff_size);
         goto end;
       }
+      buffer = newbuffer;
     }
 
     if(remaining_length) {
