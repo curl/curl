@@ -198,7 +198,7 @@ endif
 TIDY := clang-tidy
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
-	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) $(CURL_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
