@@ -459,11 +459,17 @@ static ssize_t write_behind(struct testcase *test, int convert)
 #else
     test->ofile = open(outfile, O_CREAT|O_RDWR, 0777);
 #endif
-  }
 
-  if(test->ofile == -1) {
-    logmsg("Couldn't create and/or open file %s for upload!", outfile);
-    return -1; /* failure! */
+    if(test->ofile == -1) {
+      logmsg("Couldn't create and/or open file %s for upload!", outfile);
+      return -1; /* failure! */
+    }
+  }
+  else {
+    if(test->ofile == -1) {
+      logmsg("File for upload not open");
+      return -1; /* failure! */
+    }
   }
 
   count = b->counter;             /* remember byte count */
