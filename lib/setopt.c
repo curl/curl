@@ -1519,7 +1519,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
     /*
      * Set to make us do HTTP POST. Legacy API-style.
      */
-    data->set.httppost = va_arg(param, struct curl_httppost *); /* NOLINT */
+    data->set.httppost = va_arg(param, struct curl_httppost *);
     data->set.method = HTTPREQ_POST_FORM;
     data->set.opt_no_body = FALSE; /* this is implied */
     Curl_mime_cleanpart(data->state.formp);
@@ -1536,7 +1536,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
      * Set to make us do MIME POST
      */
     result = Curl_mime_set_subparts(&data->set.mimepost,
-                                    va_arg(param, curl_mime *), /* NOLINT */
+                                    va_arg(param, curl_mime *),
                                     FALSE);
     if(!result) {
       data->set.method = HTTPREQ_POST_MIME;
@@ -1555,13 +1555,13 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
      * Set to a FILE * that should receive all error writes. This
      * defaults to stderr for normal operations.
      */
-    data->set.err = va_arg(param, FILE *); /* NOLINT */
+    data->set.err = va_arg(param, FILE *);
     if(!data->set.err)
       data->set.err = stderr;
     break;
   case CURLOPT_SHARE:
   {
-    struct Curl_share *set = va_arg(param, struct Curl_share *); /* NOLINT */
+    struct Curl_share *set = va_arg(param, struct Curl_share *);
 
     /* disconnect from old share, if any */
     if(data->share) {
@@ -1644,7 +1644,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 #ifdef USE_HTTP2
   case CURLOPT_STREAM_DEPENDS:
   case CURLOPT_STREAM_DEPENDS_E: {
-    struct Curl_easy *dep = va_arg(param, struct Curl_easy *); /* NOLINT */
+    struct Curl_easy *dep = va_arg(param, struct Curl_easy *);
     if(!dep || GOOD_EASY_HANDLE(dep))
       return Curl_data_priority_add_child(dep, data,
                                           option == CURLOPT_STREAM_DEPENDS_E);
@@ -2696,7 +2696,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * Progress callback function
      */
-    data->set.fprogress = va_arg(param, curl_progress_callback); /* NOLINT */
+    data->set.fprogress = va_arg(param, curl_progress_callback);
     if(data->set.fprogress)
       data->progress.callback = TRUE; /* no longer internal */
     else
@@ -2707,7 +2707,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * Transfer info callback function
      */
-    data->set.fxferinfo = va_arg(param, curl_xferinfo_callback); /* NOLINT */
+    data->set.fxferinfo = va_arg(param, curl_xferinfo_callback);
     if(data->set.fxferinfo)
       data->progress.callback = TRUE; /* no longer internal */
     else
@@ -2718,7 +2718,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * stderr write callback.
      */
-    data->set.fdebug = va_arg(param, curl_debug_callback); /* NOLINT */
+    data->set.fdebug = va_arg(param, curl_debug_callback);
     /*
      * if the callback provided is NULL, it will use the default callback
      */
@@ -2727,13 +2727,13 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * Set header write callback
      */
-    data->set.fwrite_header = va_arg(param, curl_write_callback); /* NOLINT */
+    data->set.fwrite_header = va_arg(param, curl_write_callback);
     break;
   case CURLOPT_WRITEFUNCTION:
     /*
      * Set data write callback
      */
-    data->set.fwrite_func = va_arg(param, curl_write_callback); /* NOLINT */
+    data->set.fwrite_func = va_arg(param, curl_write_callback);
     if(!data->set.fwrite_func)
       /* When set to NULL, reset to our internal default function */
       data->set.fwrite_func = (curl_write_callback)fwrite;
@@ -2742,7 +2742,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * Read data callback
      */
-    data->set.fread_func_set = va_arg(param, curl_read_callback); /* NOLINT */
+    data->set.fread_func_set = va_arg(param, curl_read_callback);
     if(!data->set.fread_func_set) {
       data->set.is_fread_set = 0;
       /* When set to NULL, reset to our internal default function */
@@ -2755,13 +2755,13 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * Seek callback. Might be NULL.
      */
-    data->set.seek_func = va_arg(param, curl_seek_callback); /* NOLINT */
+    data->set.seek_func = va_arg(param, curl_seek_callback);
     break;
   case CURLOPT_IOCTLFUNCTION:
     /*
      * I/O control callback. Might be NULL.
      */
-    data->set.ioctl_func = va_arg(param, curl_ioctl_callback); /* NOLINT */
+    data->set.ioctl_func = va_arg(param, curl_ioctl_callback);
     break;
   case CURLOPT_SSL_CTX_FUNCTION:
     /*
@@ -2769,8 +2769,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      */
 #ifdef USE_SSL
     if(Curl_ssl_supports(data, SSLSUPP_SSL_CTX))
-      data->set.ssl.fsslctx =
-        va_arg(param, curl_ssl_ctx_callback); /* NOLINT */
+      data->set.ssl.fsslctx = va_arg(param, curl_ssl_ctx_callback);
     else
 #endif
       return CURLE_NOT_BUILT_IN;
@@ -2780,7 +2779,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
     /*
      * socket callback function: called after socket() but before connect()
      */
-    data->set.fsockopt = va_arg(param, curl_sockopt_callback); /* NOLINT */
+    data->set.fsockopt = va_arg(param, curl_sockopt_callback);
     break;
 
   case CURLOPT_OPENSOCKETFUNCTION:
@@ -2788,8 +2787,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      * open/create socket callback function: called instead of socket(),
      * before connect()
      */
-    data->set.fopensocket =
-      va_arg(param, curl_opensocket_callback); /* NOLINT */
+    data->set.fopensocket = va_arg(param, curl_opensocket_callback);
     break;
 
   case CURLOPT_CLOSESOCKETFUNCTION:
@@ -2797,8 +2795,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      * close socket callback function: called instead of close()
      * when shutting down a connection
      */
-    data->set.fclosesocket =
-      va_arg(param, curl_closesocket_callback); /* NOLINT */
+    data->set.fclosesocket = va_arg(param, curl_closesocket_callback);
     break;
 
   case CURLOPT_RESOLVER_START_FUNCTION:
@@ -2806,8 +2803,7 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
      * resolver start callback function: called before a new resolver request
      * is started
      */
-    data->set.resolver_start =
-      va_arg(param, curl_resolver_start_callback); /* NOLINT */
+    data->set.resolver_start = va_arg(param, curl_resolver_start_callback);
     break;
 
 
@@ -2815,15 +2811,14 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
 #ifdef USE_LIBSSH2
   case CURLOPT_SSH_HOSTKEYFUNCTION:
     /* the callback to check the hostkey without the knownhost file */
-    data->set.ssh_hostkeyfunc =
-      va_arg(param, curl_sshhostkeycallback); /* NOLINT */
+    data->set.ssh_hostkeyfunc = va_arg(param, curl_sshhostkeycallback);
     break;
 #endif
 
   case CURLOPT_SSH_KEYFUNCTION:
     /* setting to NULL is fine since the ssh.c functions themselves will
        then revert to use the internal default */
-    data->set.ssh_keyfunc = va_arg(param, curl_sshkeycallback); /* NOLINT */
+    data->set.ssh_keyfunc = va_arg(param, curl_sshkeycallback);
     break;
 
 #endif /* USE_SSH */
@@ -2831,36 +2826,35 @@ static CURLcode setopt_func(struct Curl_easy *data, CURLoption option,
 #ifndef CURL_DISABLE_RTSP
   case CURLOPT_INTERLEAVEFUNCTION:
     /* Set the user defined RTP write function */
-    data->set.fwrite_rtp = va_arg(param, curl_write_callback); /* NOLINT */
+    data->set.fwrite_rtp = va_arg(param, curl_write_callback);
     break;
 #endif
 #ifndef CURL_DISABLE_FTP
   case CURLOPT_CHUNK_BGN_FUNCTION:
-    data->set.chunk_bgn = va_arg(param, curl_chunk_bgn_callback); /* NOLINT */
+    data->set.chunk_bgn = va_arg(param, curl_chunk_bgn_callback);
     break;
   case CURLOPT_CHUNK_END_FUNCTION:
-    data->set.chunk_end = va_arg(param, curl_chunk_end_callback); /* NOLINT */
+    data->set.chunk_end = va_arg(param, curl_chunk_end_callback);
     break;
   case CURLOPT_FNMATCH_FUNCTION:
-    data->set.fnmatch = va_arg(param, curl_fnmatch_callback); /* NOLINT */
+    data->set.fnmatch = va_arg(param, curl_fnmatch_callback);
     break;
 #endif
 #ifndef CURL_DISABLE_HTTP
   case CURLOPT_TRAILERFUNCTION:
-    data->set.trailer_callback =
-      va_arg(param, curl_trailer_callback); /* NOLINT */
+    data->set.trailer_callback = va_arg(param, curl_trailer_callback);
     break;
 #endif
 #ifndef CURL_DISABLE_HSTS
   case CURLOPT_HSTSREADFUNCTION:
-    data->set.hsts_read = va_arg(param, curl_hstsread_callback); /* NOLINT */
+    data->set.hsts_read = va_arg(param, curl_hstsread_callback);
     break;
   case CURLOPT_HSTSWRITEFUNCTION:
-    data->set.hsts_write = va_arg(param, curl_hstswrite_callback); /* NOLINT */
+    data->set.hsts_write = va_arg(param, curl_hstswrite_callback);
     break;
 #endif
   case CURLOPT_PREREQFUNCTION:
-    data->set.fprereq = va_arg(param, curl_prereq_callback); /* NOLINT */
+    data->set.fprereq = va_arg(param, curl_prereq_callback);
     break;
   default:
     return CURLE_UNKNOWN_OPTION;
@@ -3018,7 +3012,7 @@ static CURLcode setopt_blob(struct Curl_easy *data, CURLoption option,
 CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
 {
   if(option < CURLOPTTYPE_OBJECTPOINT)
-    return setopt_long(data, option, va_arg(param, long)); /* NOLINT */
+    return setopt_long(data, option, va_arg(param, long));
   else if(option < CURLOPTTYPE_FUNCTIONPOINT) {
     /* unfortunately, different pointer types cannot be identified any other
        way than being listed explicitly */
@@ -3033,8 +3027,7 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
     case CURLOPT_RESOLVE:
     case CURLOPT_PROXYHEADER:
     case CURLOPT_CONNECT_TO:
-      return setopt_slist(data, option,
-                          va_arg(param, struct curl_slist *)); /* NOLINT */
+      return setopt_slist(data, option, va_arg(param, struct curl_slist *));
     case CURLOPT_HTTPPOST:         /* curl_httppost * */
     case CURLOPT_MIMEPOST:         /* curl_mime * */
     case CURLOPT_STDERR:           /* FILE * */
@@ -3046,14 +3039,13 @@ CURLcode Curl_vsetopt(struct Curl_easy *data, CURLoption option, va_list param)
       break;
     }
     /* the char pointer options */
-    return setopt_cptr(data, option, va_arg(param, char *)); /* NOLINT */
+    return setopt_cptr(data, option, va_arg(param, char *));
   }
   else if(option < CURLOPTTYPE_OFF_T)
     return setopt_func(data, option, param);
   else if(option < CURLOPTTYPE_BLOB)
-    return setopt_offt(data, option, va_arg(param, curl_off_t)); /* NOLINT */
-  return setopt_blob(data, option,
-                     va_arg(param, struct curl_blob *)); /* NOLINT */
+    return setopt_offt(data, option, va_arg(param, curl_off_t));
+  return setopt_blob(data, option, va_arg(param, struct curl_blob *));
 }
 
 /*
