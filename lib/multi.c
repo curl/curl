@@ -3653,40 +3653,39 @@ CURLMcode curl_multi_setopt(CURLM *m,
 
   switch(option) {
   case CURLMOPT_SOCKETFUNCTION:
-    multi->socket_cb = va_arg(param, curl_socket_callback); /* NOLINT */
+    multi->socket_cb = va_arg(param, curl_socket_callback);
     break;
   case CURLMOPT_SOCKETDATA:
-    multi->socket_userp = va_arg(param, void *); /* NOLINT */
+    multi->socket_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PUSHFUNCTION:
-    multi->push_cb = va_arg(param, curl_push_callback); /* NOLINT */
+    multi->push_cb = va_arg(param, curl_push_callback);
     break;
   case CURLMOPT_PUSHDATA:
-    multi->push_userp = va_arg(param, void *); /* NOLINT */
+    multi->push_userp = va_arg(param, void *);
     break;
   case CURLMOPT_PIPELINING:
-    multi->multiplexing = va_arg(param, long) & /* NOLINT */
-      CURLPIPE_MULTIPLEX ? 1 : 0;
+    multi->multiplexing = va_arg(param, long) & CURLPIPE_MULTIPLEX ? 1 : 0;
     break;
   case CURLMOPT_TIMERFUNCTION:
-    multi->timer_cb = va_arg(param, curl_multi_timer_callback); /* NOLINT */
+    multi->timer_cb = va_arg(param, curl_multi_timer_callback);
     break;
   case CURLMOPT_TIMERDATA:
-    multi->timer_userp = va_arg(param, void *); /* NOLINT */
+    multi->timer_userp = va_arg(param, void *);
     break;
   case CURLMOPT_MAXCONNECTS:
-    uarg = va_arg(param, unsigned long); /* NOLINT */
+    uarg = va_arg(param, unsigned long);
     if(uarg <= UINT_MAX)
       multi->maxconnects = (unsigned int)uarg;
     break;
   case CURLMOPT_MAX_HOST_CONNECTIONS:
-    multi->max_host_connections = va_arg(param, long); /* NOLINT */
+    multi->max_host_connections = va_arg(param, long);
     break;
   case CURLMOPT_MAX_TOTAL_CONNECTIONS:
-    multi->max_total_connections = va_arg(param, long); /* NOLINT */
+    multi->max_total_connections = va_arg(param, long);
     /* for now, let this also decide the max number of connections
      * in shutdown handling */
-    multi->max_shutdown_connections = va_arg(param, long); /* NOLINT */
+    multi->max_shutdown_connections = va_arg(param, long);
     break;
     /* options formerly used for pipelining */
   case CURLMOPT_MAX_PIPELINE_LENGTH:
@@ -3701,7 +3700,7 @@ CURLMcode curl_multi_setopt(CURLM *m,
     break;
   case CURLMOPT_MAX_CONCURRENT_STREAMS:
     {
-      long streams = va_arg(param, long); /* NOLINT */
+      long streams = va_arg(param, long);
       if((streams < 1) || (streams > INT_MAX))
         streams = 100;
       multi->max_concurrent_streams = (unsigned int)streams;
