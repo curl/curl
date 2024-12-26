@@ -2899,9 +2899,11 @@ static CURLcode http_header(struct Curl_easy *data,
       (void)curlx_strtoofft(v, NULL, 10, &retry_after);
       if(!retry_after) {
         time_t date = Curl_getdate_capped(v);
-        if((time_t)-1 != date)
+        time_t current = time(NULL);
+        if((time_t)-1 != date && date > current) {
           /* convert date to number of seconds into the future */
-          retry_after = date - time(NULL);
+          retry_after = date - current;
+        }
       }
       data->info.retry_after = retry_after; /* store it */
       return CURLE_OK;
