@@ -13,9 +13,9 @@ If-Modified-Since
 <reply>
 <data nocheck="yes">
 HTTP/1.1 429 Too Many Requests
-Date: Thu, 11 Jul 2019 02:26:59 GMT
+Date: Wed, 31 Dec 2036 02:26:59 GMT
 Server: test-server/swsclose
-Retry-After: Thu, 11 Jul 2024 02:26:59 GMT
+Retry-After: Wed, 31 Dec 2036 02:26:59 GMT
 
 </data>
 </reply>
@@ -43,7 +43,7 @@ Accept: */*
 
 </protocol>
 <stdout>
-Retry-After 172066
+Retry-After 211430
 </stdout>
 </verify>
 </testcase>
