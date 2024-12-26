@@ -324,6 +324,8 @@ Details via CMake
 - `LIBIDN2_LIBRARY`:                        Path to `libidn2` library.
 - `LIBPSL_INCLUDE_DIR`:                     The libpsl include directory.
 - `LIBPSL_LIBRARY`:                         Path to `libpsl` library.
+- `LIBRTMP_INCLUDE_DIR`:                    The librtmp include directory.
+- `LIBRTMP_LIBRARY`:                        Path to `librtmp` library.
 - `LIBSSH_INCLUDE_DIR`:                     The libssh include directory.
 - `LIBSSH_LIBRARY`:                         Path to `libssh` library.
 - `LIBSSH2_INCLUDE_DIR`:                    The libssh2 include directory.
