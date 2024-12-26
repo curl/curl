@@ -128,9 +128,9 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.15'
           # cmake
-          - name: 'OpenSSL gsasl AppleIDN'
-            install: gsasl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
+          - name: 'OpenSSL gsasl rtmp AppleIDN'
+            install: gsasl rtmpdump
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
