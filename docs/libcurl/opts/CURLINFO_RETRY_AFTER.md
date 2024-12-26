@@ -36,6 +36,11 @@ While the HTTP header might contain a fixed date string, the
 CURLINFO_RETRY_AFTER(3) always returns the number of seconds to wait -
 or zero if there was no header or the header could not be parsed.
 
+This option used to return a negative wait time if the server provided a date
+in the past. Since 8.12.0, a negative wait time is returned as zero. In any
+case we recommend checking that the wait time is within an acceptable range for
+your circumstance.
+
 # DEFAULT
 
 Zero if there was no header.
