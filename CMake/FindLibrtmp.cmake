@@ -54,11 +54,33 @@ else()
   find_path(LIBRTMP_INCLUDE_DIR NAMES "librtmp/rtmp.h")
   find_library(LIBRTMP_LIBRARY NAMES "rtmp")
 
+  unset(LIBRTMP_VERSION CACHE)
+  if(LIBRTMP_INCLUDE_DIR AND EXISTS "${LIBRTMP_INCLUDE_DIR}/librtmp/rtmp.h")
+    set(_version_regex "#[\t ]*define[\t ]+RTMP_LIB_VERSION[\t ]+0x([0-9a-fA-F][0-9a-fA-F])([0-9a-fA-F][0-9a-fA-F]).*")
+    file(STRINGS "${LIBRTMP_INCLUDE_DIR}/librtmp/rtmp.h" _version_str REGEX "${_version_regex}")
+    string(REGEX REPLACE "${_version_regex}" "\\1" _version_str1 "${_version_str}")
+    string(REGEX REPLACE "${_version_regex}" "\\2" _version_str2 "${_version_str}")
+    if(CMAKE_VERSION VERSION_LESS 3.13)
+      # No support for hex version numbers, just strip leading zeroes
+      string(REGEX REPLACE "^0" "" _version_str1 "${_version_str1}")
+      string(REGEX REPLACE "^0" "" _version_str2 "${_version_str2}")
+    else()
+      math(EXPR _version_str1 "0x${_version_str1}" OUTPUT_FORMAT DECIMAL)
+      math(EXPR _version_str2 "0x${_version_str2}" OUTPUT_FORMAT DECIMAL)
+    endif()
+    set(LIBRTMP_VERSION "${_version_str1}.${_version_str2}")
+    unset(_version_regex)
+    unset(_version_str1)
+    unset(_version_str2)
+  endif()
+
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Librtmp
     REQUIRED_VARS
       LIBRTMP_INCLUDE_DIR
       LIBRTMP_LIBRARY
+    VERSION_VAR
+      LIBRTMP_VERSION
   )
 
   if(LIBRTMP_FOUND)
