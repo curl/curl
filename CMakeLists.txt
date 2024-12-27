@@ -2366,6 +2366,7 @@ if(NOT CURL_DISABLE_INSTALL)
   #   USE_WIN32_LDAP CURL_DISABLE_LDAP
   #   HAVE_LIBIDN2
   #   USE_LIBPSL
+  #   USE_LIBRTMP
   #   USE_LIBSSH
   #   USE_LIBSSH2
   #   USE_LIBUV
@@ -2403,6 +2404,7 @@ if(NOT CURL_DISABLE_INSTALL)
       "${PROJECT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLibrtmp.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibssh.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibssh2.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibuv.cmake"
