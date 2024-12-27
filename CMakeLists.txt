@@ -2442,6 +2442,7 @@ if(NOT CURL_DISABLE_INSTALL)
       "${PROJECT_SOURCE_DIR}/CMake/FindBrotli.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindCares.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindGSS.cmake"
+      "${PROJECT_SOURCE_DIR}/CMake/FindLDAP.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibgsasl.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibidn2.cmake"
       "${PROJECT_SOURCE_DIR}/CMake/FindLibpsl.cmake"
