@@ -89,6 +89,12 @@ else()
   endif()
 
   mark_as_advanced(LIBRTMP_INCLUDE_DIR LIBRTMP_LIBRARY)
+
+  # Necessary when linking a static librtmp
+  find_package(OpenSSL)
+  if(OPENSSL_FOUND)
+    list(APPEND LIBRTMP_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
+  endif()
 endif()
 
 if(WIN32)
