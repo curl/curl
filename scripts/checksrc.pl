@@ -862,7 +862,7 @@ sub scanfile {
             $l =~ s/$prefix$bad$suff/$prefix$replace/;
             goto again;
       }
-        $l = $bl; # retore to pre-bannedfunc content
+        $l = $bl; # restore to pre-bannedfunc content
 
         if($warnings{"STDERR"}) {
             # scan for use of banned stderr. This is not a BANNEDFUNC to
