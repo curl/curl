@@ -1,2 +1,1 @@
-enable STRNCPY
-disable SSCANF
+banfunc STRNCPY

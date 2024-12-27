@@ -891,7 +891,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
   }
 #else
   {
-    /* !checksrc! disable STRERROR 1 */
+    /* !checksrc! disable BANNEDFUNC 1 */
     const char *msg = strerror(err);
     if(msg)
       msnprintf(buf, buflen, "%s", msg);

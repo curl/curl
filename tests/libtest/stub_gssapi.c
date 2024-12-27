@@ -30,8 +30,6 @@
 
 #include "stub_gssapi.h"
 
-/* !checksrc! disable SNPRINTF all */
-
 #define MAX_CREDS_LENGTH 250
 #define APPROX_TOKEN_LEN 250
 

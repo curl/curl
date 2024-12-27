@@ -16,7 +16,7 @@ checksrc
 </name>
 
 <command type="perl">
-%SRCDIR/../scripts/checksrc.pl %LOGDIR/code%TESTNUMBER.c
+%SRCDIR/../scripts/checksrc.pl -bmagicbad -balsobad %LOGDIR/code%TESTNUMBER.c
 </command>
 <file name="%LOGDIR/code%TESTNUMBER.c">
 /* test source code
@@ -71,7 +71,7 @@ void startfunc(int a, int b) {
  }
 
  int a = sizeof int;
- int a = snprintf(buffer, sizeof(buffer), "%d", 99);
+ int a = magicbad(buffer, alsobad(buffer), "%d", 99);
  int moo = hej?wrong:a>b;
  int moo2 = wrong2:(a)>(b);
 
@@ -162,9 +162,12 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:52:16: warning: sizeof without parenthesis (SIZEOFNOPAREN)
   int a = sizeof int;
                 ^
-./%LOGDIR/code1185.c:53:10: warning: use of snprintf is banned (SNPRINTF)
-  int a = snprintf(buffer, sizeof(buffer), "%d", 99);
+./%LOGDIR/code1185.c:53:10: warning: use of magicbad is banned (BANNEDFUNC)
+  int a = magicbad(buffer, alsobad(buffer), "%d", 99);
           ^
+./%LOGDIR/code1185.c:53:27: warning: use of alsobad is banned (BANNEDFUNC)
+  int a = magicbad(buffer, alsobad(buffer), "%d", 99);
+                           ^
 ./%LOGDIR/code1185.c:54:21: warning: missing space before colon (NOSPACEC)
   int moo = hej?wrong:a>b;
                      ^
@@ -201,7 +204,7 @@ void startfunc(int a, int b) {
 ./%LOGDIR/code1185.c:1:1: error: Missing closing comment (OPENCOMMENT)
  
  ^
-checksrc: 0 errors and 38 warnings
+checksrc: 0 errors and 39 warnings
 </stdout>
 <errorcode>
 5

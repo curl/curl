@@ -47,10 +47,34 @@ my %ignore_set;
 my %ignore_used;
 my @ignore_line;
 
+my %banfunc = (
+    "gmtime" => 1,
+    "localtime" => 1,
+    "gets" => 1,
+    "strtok" => 1,
+    "sprintf" => 1,
+    "vsprintf" => 1,
+    "strcat" => 1,
+    "strncat" => 1,
+    "_mbscat" => 1,
+    "_mbsncat" => 1,
+    "_tcscat" => 1,
+    "_tcsncat" => 1,
+    "_wcscat" => 1,
+    "_wcsncat" => 1,
+    "LoadLibrary" => 1,
+    "LoadLibraryA" => 1,
+    "LoadLibraryW" => 1,
+    "LoadLibraryEx" => 1,
+    "LoadLibraryExA" => 1,
+    "LoadLibraryExW" => 1,
+    "_waccess" => 1,
+    "_access" => 1,
+    "access" => 1,
+    );
+
 my %warnings_extended = (
     'COPYRIGHTYEAR'    => 'copyright year incorrect',
-    'STRERROR',        => 'strerror() detected',
-    'STRNCPY',         => 'strncpy() detected',
     'STDERR',          => 'stderr detected',
     );
 
@@ -92,14 +116,12 @@ my %warnings = (
     'RETURNNOSPACE'         => 'return without space',
     'SEMINOSPACE'           => 'semicolon without following space',
     'SIZEOFNOPAREN'         => 'use of sizeof without parentheses',
-    'SNPRINTF'              => 'use of snprintf',
     'SPACEAFTERPAREN'       => 'space after open parenthesis',
     'SPACEBEFORECLOSE'      => 'space before a close parenthesis',
     'SPACEBEFORECOMMA'      => 'space before a comma',
     'SPACEBEFOREPAREN'      => 'space before an open parenthesis',
     'SPACESEMICOLON'        => 'space before semicolon',
     'SPACESWITCHCOLON'      => 'space before colon of switch label',
-    "SSCANF"                => 'use of sscanf',
     'TABS'                  => 'TAB characters not allowed',
     'TRAILINGSPACE'         => 'Trailing whitespace on the line',
     'TYPEDEFSTRUCT'         => 'typedefed struct',
@@ -144,20 +166,26 @@ sub readlocalfile {
         if (/^\s*(#.*)/) {
             next;
         }
-        elsif (/^\s*enable ([A-Z]+)$/) {
+        elsif (/^enable ([A-Z]+)$/) {
             if(!defined($warnings_extended{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
                 next;
             }
             $warnings{$1} = $warnings_extended{$1};
         }
-        elsif (/^\s*disable ([A-Z]+)$/) {
+        elsif (/^disable ([A-Z]+)$/) {
             if(!defined($warnings{$1})) {
                 print STDERR "invalid warning specified in .checksrc: \"$1\"\n";
                 next;
             }
             # Accept-list
             push @alist, $1;
+        }
+        elsif (/^banfunc ([^ ]*)/) {
+            $banfunc{$1} = $1;
+        }
+        elsif (/^allowfunc ([^ ]*)/) {
+            undef $banfunc{$1};
         }
         else {
             die "Invalid format in $dir/.checksrc on line $i\n";
@@ -223,27 +251,38 @@ $file = shift @ARGV;
 
 while(defined $file) {
 
-    if($file =~ /-D(.*)/) {
+    if($file =~ /^-D(.*)/) {
         $dir = $1;
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-W(.*)/) {
+    elsif($file =~ /^-W(.*)/) {
         $wlist .= " $1 ";
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-A(.+)/) {
+    elsif($file =~ /^-b(.*)/) {
+        $banfunc{$1} = $1;
+        print STDERR "ban use of \"$1\"\n";
+        $file = shift @ARGV;
+        next;
+    }
+    elsif($file =~ /^-a(.*)/) {
+        undef $banfunc{$1};
+        $file = shift @ARGV;
+        next;
+    }
+    elsif($file =~ /^-A(.+)/) {
         push @alist, $1;
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-i([1-9])/) {
+    elsif($file =~ /^-i([1-9])/) {
         $indent = $1 + 0;
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-m([0-9]+)/) {
+    elsif($file =~ /^-m([0-9]+)/) {
         $max_column = $1 + 0;
         $file = shift @ARGV;
         next;
@@ -260,6 +299,8 @@ if(!$file) {
     print "checksrc.pl [option] <file1> [file2] ...\n";
     print " Options:\n";
     print "  -A[rule]  Accept this violation, can be used multiple times\n";
+    print "  -a[func]  Allow use of this function\n";
+    print "  -b[func]  Ban use of this function\n";
     print "  -D[DIR]   Directory to prepend file names\n";
     print "  -h        Show help output\n";
     print "  -W[file]  Skip the given file - ignore all its flaws\n";
@@ -277,6 +318,11 @@ if(!$file) {
         }
     }
     print " [*] = disabled by default\n";
+
+    print "\nDetects and bans use of these functions:\n";
+    for my $f (sort keys %banfunc) {
+        printf (" %-18s\n", $f);
+    }
     exit;
 }
 
@@ -801,54 +847,23 @@ sub scanfile {
         }
 
         # scan for use of banned functions
-        if($l =~ /^(.*\W)
-                   (gmtime|localtime|
-                    gets|
-                    strtok|
-                    v?sprintf|
-                    (str|_mbs|_tcs|_wcs)n?cat|
-                    LoadLibrary(Ex)?(A|W)?|
-                    _?w?access)
-                   \s*\(
-                 /x) {
+        my $bl = $l;
+      again:
+        if(($l =~ /^(.*?\W)(\w+)(\s*\()/x) && $banfunc{$2}) {
+            my $bad = $2;
+            my $prefix = $1;
+            my $suff = $3;
             checkwarn("BANNEDFUNC",
-                      $line, length($1), $file, $ol,
-                      "use of $2 is banned");
-        }
-        # scan for use of sscanf. This is not a BANNEDFUNC to allow for
-        # individual enable/disable of this warning.
-        if($l =~ /^(.*\W)(sscanf)\s*\(/x) {
-            if($1 !~ /^ *\#/) {
-                # skip preprocessor lines
-                checkwarn("SSCANF",
-                          $line, length($1), $file, $ol,
-                          "use of $2 is banned");
-            }
-        }
-        if($warnings{"STRERROR"}) {
-            # scan for use of banned strerror. This is not a BANNEDFUNC to
-            # allow for individual enable/disable of this warning.
-            if($l =~ /^(.*\W)(strerror)\s*\(/x) {
-                if($1 !~ /^ *\#/) {
-                    # skip preprocessor lines
-                    checkwarn("STRERROR",
-                              $line, length($1), $file, $ol,
-                              "use of $2 is banned");
-                }
-            }
-        }
-        if($warnings{"STRNCPY"}) {
-            # scan for use of banned strncpy. This is not a BANNEDFUNC to
-            # allow for individual enable/disable of this warning.
-            if($l =~ /^(.*\W)(strncpy)\s*\(/x) {
-                if($1 !~ /^ *\#/) {
-                    # skip preprocessor lines
-                    checkwarn("STRNCPY",
-                              $line, length($1), $file, $ol,
-                              "use of $2 is banned");
-                }
-            }
-        }
+                      $line, length($prefix), $file, $ol,
+                      "use of $bad is banned");
+            my $replace = 'x' x (length($bad) + 1);
+            $prefix =~ s/\*/\\*/;
+            $suff =~ s/\(/\\(/;
+            $l =~ s/$prefix$bad$suff/$prefix$replace/;
+            goto again;
+      }
+        $l = $bl; # restore to pre-bannedfunc content
+
         if($warnings{"STDERR"}) {
             # scan for use of banned stderr. This is not a BANNEDFUNC to
             # allow for individual enable/disable of this warning.
@@ -860,12 +875,6 @@ sub scanfile {
                               "use of $2 is banned (use tool_stderr instead)");
                 }
             }
-        }
-        # scan for use of snprintf for curl-internals reasons
-        if($l =~ /^(.*\W)(v?snprintf)\s*\(/x) {
-            checkwarn("SNPRINTF",
-                      $line, length($1), $file, $ol,
-                      "use of $2 is banned");
         }
 
         # scan for use of non-binary fopen without the macro
