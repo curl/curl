@@ -251,37 +251,38 @@ $file = shift @ARGV;
 
 while(defined $file) {
 
-    if($file =~ /-D(.*)/) {
+    if($file =~ /^-D(.*)/) {
         $dir = $1;
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-W(.*)/) {
+    elsif($file =~ /^-W(.*)/) {
         $wlist .= " $1 ";
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-b(.*)/) {
+    elsif($file =~ /^-b(.*)/) {
         $banfunc{$1} = $1;
+        print STDERR "ban use of \"$1\"\n";
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-a(.*)/) {
+    elsif($file =~ /^-a(.*)/) {
         undef $banfunc{$1};
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-A(.+)/) {
+    elsif($file =~ /^-A(.+)/) {
         push @alist, $1;
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-i([1-9])/) {
+    elsif($file =~ /^-i([1-9])/) {
         $indent = $1 + 0;
         $file = shift @ARGV;
         next;
     }
-    elsif($file =~ /-m([0-9]+)/) {
+    elsif($file =~ /^-m([0-9]+)/) {
         $max_column = $1 + 0;
         $file = shift @ARGV;
         next;
@@ -846,11 +847,23 @@ sub scanfile {
         }
 
         # scan for use of banned functions
-        if(($l =~ /^(.*\W)(\w+)\s*\(/x) && $banfunc{$2}) {
+        my $bl = $l;
+      again:
+        if(($l =~ /^(.*?\W)(\w+)(\s*\()/x) && $banfunc{$2}) {
+            my $bad = $2;
+            my $prefix = $1;
+            my $suff = $3;
             checkwarn("BANNEDFUNC",
-                      $line, length($1), $file, $ol,
-                      "use of $2 is banned");
-        }
+                      $line, length($prefix), $file, $ol,
+                      "use of $bad is banned");
+            my $replace = 'x' x (length($bad) + 1);
+            $prefix =~ s/\*/\\*/;
+            $suff =~ s/\(/\\(/;
+            $l =~ s/$prefix$bad$suff/$prefix$replace/;
+            goto again;
+      }
+        $l = $bl; # retore to pre-bannedfunc content
+
         if($warnings{"STDERR"}) {
             # scan for use of banned stderr. This is not a BANNEDFUNC to
             # allow for individual enable/disable of this warning.

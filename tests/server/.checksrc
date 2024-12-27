@@ -1,1 +1,1 @@
-enable STRNCPY
+banfunc STRNCPY
