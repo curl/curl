@@ -42,7 +42,7 @@ If the function call is successful, the *meta* pointer gets set to point to a
 *const struct curl_ws_frame* that contains information about the received
 data. That struct must not be freed and its contents must not be relied upon
 anymore once another WebSocket function is called. See the curl_ws_meta(3) for
-details on that struct.a
+details on that struct.
 
 # %PROTOCOLS%
 
