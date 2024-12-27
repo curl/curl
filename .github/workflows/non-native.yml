@@ -117,7 +117,7 @@ jobs:
             echo '::endgroup::'
 
   freebsd:
-    name: "FreeBSD (${{ matrix.build && 'CM' || 'AM' }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})"
+    name: "FreeBSD (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})"
     runs-on: ubuntu-latest
     timeout-minutes: 60
     strategy:
