@@ -60,6 +60,7 @@ CMAKE_DIST =                                    \
  CMake/OtherTests.cmake                         \
  CMake/PickyWarnings.cmake                      \
  CMake/Utilities.cmake                          \
+ CMake/macos-cache.cmake                        \
  CMake/win32-cache.cmake                        \
  CMakeLists.txt                                 \
  tests/cmake/CMakeLists.txt                     \
