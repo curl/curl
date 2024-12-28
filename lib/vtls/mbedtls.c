@@ -1220,7 +1220,7 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
       ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
     ret = -1;
-    if((*curlcode == CURLE_AGAIN) && !backend->send_blocked_len) {
+    if((*curlcode == CURLE_AGAIN) && !backend->send_blocked) {
       backend->send_blocked = TRUE;
       backend->send_blocked_len = len;
     }
