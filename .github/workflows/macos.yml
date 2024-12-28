@@ -245,6 +245,7 @@ jobs:
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --cache-file=../CMake/macos-cache.configure \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
               ${{ matrix.build.configure }} ${options}
@@ -467,6 +468,7 @@ jobs:
             [ -n '${{ matrix.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --cache-file=../CMake/macos-cache.configure \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
