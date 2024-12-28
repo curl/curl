@@ -101,8 +101,10 @@ struct mbed_ssl_backend_data {
   const char *protocols[3];
 #endif
   int *ciphersuites;
+  size_t send_blocked_len;
   BIT(initialized); /* mbedtls_ssl_context is initialized */
   BIT(sent_shutdown);
+  BIT(send_blocked);
 };
 
 /* apply threading? */
@@ -1196,6 +1198,17 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 
   (void)data;
   DEBUGASSERT(backend);
+  /* mbedtls is picky when a mbedtls_ssl_write) was previously blocked.
+   * It requires to be called with the same amount of bytes again, or it
+   * will lose bytes, e.g. reporting all was sent but they were not.
+   * Remember the blocked length and use that when set. */
+  if(backend->send_blocked) {
+    DEBUGASSERT(backend->send_blocked_len <= len);
+    CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> previously blocked "
+                "on %zu bytes", len, backend->send_blocked_len);
+    len = backend->send_blocked_len;
+  }
+
   ret = mbedtls_ssl_write(&backend->ssl, (unsigned char *)mem, len);
 
   if(ret < 0) {
@@ -1207,6 +1220,14 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
 #endif
       ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
     ret = -1;
+    if((*curlcode == CURLE_AGAIN) && !backend->send_blocked) {
+      backend->send_blocked = TRUE;
+      backend->send_blocked_len = len;
+    }
+  }
+  else {
+    CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> %d", len, ret);
+    backend->send_blocked = FALSE;
   }
 
   return ret;

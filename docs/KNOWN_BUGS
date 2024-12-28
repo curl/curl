@@ -21,6 +21,7 @@ problems may have been fixed or changed somewhat since this was written.
  2.7 Client cert (MTLS) issues with Schannel
  2.11 Schannel TLS 1.2 handshake bug in old Windows versions
  2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
+ 2.14 mbedTLS and CURLE_AGAIN handling
 
  3. Email protocols
  3.1 IMAP SEARCH ALL truncated response
@@ -158,6 +159,10 @@ problems may have been fixed or changed somewhat since this was written.
 2.13 CURLOPT_CERTINFO results in CURLE_OUT_OF_MEMORY with Schannel
 
  https://github.com/curl/curl/issues/8741
+
+2.14 mbedTLS and CURLE_AGAIN handling
+
+ https://github.com/curl/curl/issues/15801
 
 3. Email protocols
 
