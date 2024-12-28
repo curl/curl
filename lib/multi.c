@@ -787,7 +787,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
     return CURLM_BAD_HANDLE;
 
   /* Verify that we got a somewhat good easy handle too */
-  if(!GOOD_EASY_HANDLE(data) || !multi->num_easy)
+  if(!GOOD_EASY_HANDLE(data))
     return CURLM_BAD_EASY_HANDLE;
 
   /* Prevent users from trying to remove same easy handle more than once */
@@ -797,6 +797,11 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
   /* Prevent users from trying to remove an easy handle from the wrong multi */
   if(data->multi != multi)
     return CURLM_BAD_EASY_HANDLE;
+
+  if(!multi->num_easy) {
+    DEBUGASSERT(0);
+    return CURLM_INTERNAL_ERROR;
+  }
 
   if(multi->in_callback)
     return CURLM_RECURSIVE_API_CALL;
