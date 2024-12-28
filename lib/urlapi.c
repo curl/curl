@@ -274,20 +274,25 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   else
     protsep += 2; /* pass the slashes */
 
-  if('/' != relurl[0]) {
+  if(('/' != relurl[0]) && ('#' != relurl[0])) {
     int level = 0;
 
-    /* First we need to find out if there is a ?-letter in the URL,
+    /* First we need to find out if there is a ?-letter in the original URL,
        and cut it and the right-side of that off */
     pathsep = strchr(protsep, '?');
     if(pathsep)
       *pathsep = 0;
+    else {
+      /* if not, cut off the potential fragment */
+      pathsep = strchr(protsep, '#');
+      if(pathsep)
+        *pathsep = 0;
+    }
 
     /* we have a relative path to append to the last slash if there is one
-       available, or the new URL is just a query string (starts with a '?') or
-       a fragment (starts with '#') we append the new one at the end of the
-       current URL */
-    if((useurl[0] != '?') && (useurl[0] != '#')) {
+       available, or the new URL is just a query string (starts with a '?') we
+       append the new one at the end of the current URL */
+    if(useurl[0] != '?') {
       pathsep = strrchr(protsep, '/');
       if(pathsep)
         *pathsep = 0;
@@ -329,7 +334,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
     else
       skip_slash = TRUE;
   }
-  else {
+  else if('/' == relurl[0]) {
     /* We got a new absolute path for this server */
 
     if(relurl[1] == '/') {
@@ -363,6 +368,15 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
           *pathsep = 0;
       }
     }
+  }
+  else {
+    /* the relative piece starts with '#' */
+
+    /* If there is a fragment in the original URL, cut it off */
+    pathsep = strchr(protsep, '#');
+    if(pathsep)
+      *pathsep = 0;
+    skip_slash = TRUE;
   }
 
   Curl_dyn_init(&newest, CURL_MAX_INPUT_LENGTH);
