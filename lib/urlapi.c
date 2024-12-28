@@ -258,78 +258,41 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
    problems in the future...
   */
   struct dynbuf newest;
-  char *protsep;
-  char *pathsep;
   bool host_changed = FALSE;
   const char *useurl = relurl;
   CURLcode result = CURLE_OK;
   CURLUcode uc;
-  bool skip_slash = FALSE;
-  *newurl = NULL;
-
   /* protsep points to the start of the hostname */
-  protsep = strstr(base, "//");
+  char *protsep = strstr(base, "//");
+  DEBUGASSERT(protsep);
   if(!protsep)
     protsep = base;
   else
     protsep += 2; /* pass the slashes */
 
-  if('/' != relurl[0]) {
-    int level = 0;
-
-    /* First we need to find out if there is a ?-letter in the URL,
+  *newurl = NULL;
+  if(('/' != relurl[0]) && ('#' != relurl[0])) {
+    /* First we need to find out if there is a ?-letter in the original URL,
        and cut it and the right-side of that off */
-    pathsep = strchr(protsep, '?');
+    char *pathsep = strchr(protsep, '?');
     if(pathsep)
       *pathsep = 0;
-
-    /* we have a relative path to append to the last slash if there is one
-       available, or the new URL is just a query string (starts with a '?') or
-       a fragment (starts with '#') we append the new one at the end of the
-       current URL */
-    if((useurl[0] != '?') && (useurl[0] != '#')) {
-      pathsep = strrchr(protsep, '/');
+    else {
+      /* if not, cut off the potential fragment */
+      pathsep = strchr(protsep, '#');
       if(pathsep)
         *pathsep = 0;
-
-      /* Check if there is any slash after the hostname, and if so, remember
-         that position instead */
-      pathsep = strchr(protsep, '/');
-      if(pathsep)
-        protsep = pathsep + 1;
-      else
-        protsep = NULL;
-
-      /* now deal with one "./" or any amount of "../" in the newurl
-         and act accordingly */
-
-      if((useurl[0] == '.') && (useurl[1] == '/'))
-        useurl += 2; /* just skip the "./" */
-
-      while((useurl[0] == '.') &&
-            (useurl[1] == '.') &&
-            (useurl[2] == '/')) {
-        level++;
-        useurl += 3; /* pass the "../" */
-      }
-
-      if(protsep) {
-        while(level--) {
-          /* cut off one more level from the right of the original URL */
-          pathsep = strrchr(protsep, '/');
-          if(pathsep)
-            *pathsep = 0;
-          else {
-            *protsep = 0;
-            break;
-          }
-        }
-      }
     }
-    else
-      skip_slash = TRUE;
+
+    /* if the redirect-to piece is not just a query, cut the path after the
+       last slash */
+    if(useurl[0] != '?') {
+      pathsep = strrchr(protsep, '/');
+      if(pathsep)
+        pathsep[1] = 0; /* leave the slash */
+    }
   }
-  else {
+  else if('/' == relurl[0]) {
     /* We got a new absolute path for this server */
 
     if(relurl[1] == '/') {
@@ -341,28 +304,19 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
       host_changed = TRUE;
     }
     else {
-      /* cut off the original URL from the first slash, or deal with URLs
-         without slash */
-      pathsep = strchr(protsep, '/');
-      if(pathsep) {
-        /* When people use badly formatted URLs, such as
-           "http://www.example.com?dir=/home/daniel" we must not use the first
-           slash, if there is a ?-letter before it! */
-        char *sep = strchr(protsep, '?');
-        if(sep && (sep < pathsep))
-          pathsep = sep;
+      /* cut the original URL at first slash */
+      char *pathsep = strchr(protsep, '/');
+      if(pathsep)
         *pathsep = 0;
-      }
-      else {
-        /* There was no slash. Now, since we might be operating on a badly
-           formatted URL, such as "http://www.example.com?id=2380" which does
-           not use a slash separator as it is supposed to, we need to check
-           for a ?-letter as well! */
-        pathsep = strchr(protsep, '?');
-        if(pathsep)
-          *pathsep = 0;
-      }
     }
+  }
+  else {
+    /* the relative piece starts with '#' */
+
+    /* If there is a fragment in the original URL, cut it off */
+    char *pathsep = strchr(protsep, '#');
+    if(pathsep)
+      *pathsep = 0;
   }
 
   Curl_dyn_init(&newest, CURL_MAX_INPUT_LENGTH);
@@ -371,15 +325,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   result = Curl_dyn_add(&newest, base);
   if(result)
     return result;
-
-  /* check if we need to append a slash */
-  if(('/' == useurl[0]) || (protsep && !*protsep) || skip_slash)
-    ;
-  else {
-    result = Curl_dyn_addn(&newest, "/", 1);
-    if(result)
-      return result;
-  }
 
   /* then append the new piece on the right side */
   uc = urlencode_str(&newest, useurl, strlen(useurl), !host_changed,
@@ -1882,7 +1827,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     if(result)
       return cc2cu(result);
 
-    uc = parseurl_and_replace(redired_url, u, flags);
+    uc = parseurl_and_replace(redired_url, u, flags&~CURLU_PATH_AS_IS);
     free(redired_url);
     return uc;
   }

@@ -41,6 +41,9 @@ order to try out server implementations.
 
 By default libcurl normalizes such sequences before using the path.
 
+This is a request for the *first* request libcurl issues. When following
+redirects, it may no longer apply.
+
 The corresponding flag for the curl_url_set(3) function is called
 **CURLU_PATH_AS_IS**.
 
