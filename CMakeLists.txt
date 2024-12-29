@@ -225,7 +225,7 @@ cmake_dependent_option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup"
 
 include(PickyWarnings)
 
-if(CMAKE_SYSTEM_NAME MATCHES "Linux")
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D_GNU_SOURCE")  # Required for sendmmsg()
 endif()
 
