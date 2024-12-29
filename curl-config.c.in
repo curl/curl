@@ -90,7 +90,7 @@ print_list_items(const char *list)
 {
   /* print chars, replacing spaces with newlines */
   while(*list) {
-    if(isspace(*list))
+    if(isspace((unsigned char) *list))
       putchar((int) '\n');
     else
       putchar(*list);
@@ -155,7 +155,7 @@ get_curlver_component(const char *begin, const char *end)
   /* begin constructing version */
   while(begin != end) {
     /* numeric chars required */
-    if(!isdigit(*begin))
+    if(!isdigit((unsigned char) *begin))
       return -1;
     /* otherwise, convert to int, and add to version component */
     vernum = 10 * vernum + (*begin - '0');
@@ -326,11 +326,16 @@ print_ldflags(void)
  *
  * @note Due to how libdir is expanded for a Bash script, not fully expanded
  *  as a path, we have to manually use prefix/lib together.
+ *
+ * @note To prevent the compiler from complaining about the function not being
+ *  noreturn if ENABLE_SHARED is `no`, we need to return a status.
+ *
+ * @returns 1 if libcurl was built with static libraries, 0 otherwise
  */
-static void
+static int
 print_static_ldflags(void)
 {
-  if(!STREQ("@ENABLE_SHARED@", "no"))
+  if(!STREQ("@ENABLE_SHARED@", "no")) {
     puts("@lit_libdir@/libcurl.@libext@ @LIBCURL_PC_LDFLAGS_PRIVATE@ "
 #if defined(_MSC_VER)
          "@LIBCURL_WIN32_PC_LIBS_PRIVATE@"
@@ -338,9 +343,11 @@ print_static_ldflags(void)
          "@LIBCURL_PC_LIBS_PRIVATE@"
 #endif  /* !defined(_MSC_VER) */
          );
+    return 1;
+  }
   else {
     puts("curl was built with static libraries disabled");
-    exit(EXIT_FAILURE);
+    return 0;
   }
 }
 
@@ -413,8 +420,10 @@ main(int argc, char **argv)
     else if(STREQ(argv[i], "--ssl-backends"))
       puts("@SSL_BACKENDS@");
     /* --static-libs */
-    else if(STREQ(argv[i], "--static-libs"))
-      print_static_ldflags();
+    else if(STREQ(argv[i], "--static-libs")) {
+      if(!print_static_ldflags())
+        return EXIT_FAILURE;
+    }
     /* --configure */
     else if(STREQ(argv[i], "--configure"))
       puts("@CONFIGURE_OPTIONS@");
