@@ -34,14 +34,17 @@
 # - `NGHTTP2_INCLUDE_DIRS`:  The nghttp2 include directories.
 # - `NGHTTP2_LIBRARIES`:     The nghttp2 library names.
 # - `NGHTTP2_LIBRARY_DIRS`:  The nghttp2 library directories.
+# - `NGHTTP2_PC_REQUIRES`:   The nghttp2 pkg-config packages.
 # - `NGHTTP2_CFLAGS`:        Required compiler flags.
 # - `NGHTTP2_VERSION`:       Version of nghttp2.
+
+set(NGHTTP2_PC_REQUIRES "libnghttp2")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGHTTP2_INCLUDE_DIR AND
    NOT DEFINED NGHTTP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGHTTP2 "libnghttp2")
+  pkg_check_modules(NGHTTP2 ${NGHTTP2_PC_REQUIRES})
 endif()
 
 if(NGHTTP2_FOUND)

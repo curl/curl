@@ -128,9 +128,13 @@ jobs:
             configure: --enable-debug --disable-ldap --with-openssl=$(brew --prefix openssl)
             macos-version-min: '10.15'
           # cmake
-          - name: 'OpenSSL gsasl AppleIDN'
-            install: gsasl
-            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_APPLE_IDN=ON
+          - name: 'OpenSSL gsasl rtmp AppleIDN'
+            install: gsasl rtmpdump
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
+          - name: 'OpenSSL AppleIDN clang-tidy +examples'
+            install: llvm
+            generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DUSE_APPLE_IDN=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
+            clang-tidy: true
           - name: 'OpenSSL +static libssh +examples'
             install: libssh
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DBUILD_STATIC_LIBS=ON -DCURL_USE_LIBSSH2=OFF -DCURL_USE_LIBSSH=ON
@@ -161,6 +165,8 @@ jobs:
           - { compiler: llvm@15, build: { macos-version-min: '10.15' } }
           - { compiler: llvm@15, build: { torture: true } }
           - { compiler: gcc-12, build: { torture: true } }
+          - { compiler: llvm@15, build: { clang-tidy: true } }
+          - { compiler: gcc-12, build: { clang-tidy: true } }
           # opt out jobs from combinations that have the compiler set manually
           - { compiler: llvm@15, build: { compiler: 'clang' } }
           - { compiler: llvm@15, build: { compiler: 'gcc-12' } }
@@ -176,7 +182,9 @@ jobs:
         # https://github.com/curl/curl/runs/4095721123?check_suite_focus=true
         run: |
           echo ${{ matrix.build.generate && 'ninja' || 'automake libtool' }} \
-            pkgconf libpsl libssh2 nghttp2 stunnel ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+            pkgconf libpsl libssh2 \
+            ${{ !matrix.build.clang-tidy && 'nghttp2 stunnel' || '' }} \
+            ${{ matrix.build.install }} | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
       - name: 'brew unlink openssl'
@@ -281,12 +289,14 @@ jobs:
           fi
 
       - name: 'install test prereqs'
+        if: ${{ !matrix.build.clang-tidy }}
         run: |
           python3 -m venv $HOME/venv
           source $HOME/venv/bin/activate
           python3 -m pip install -r tests/requirements.txt
 
       - name: 'run tests'
+        if: ${{ !matrix.build.clang-tidy }}
         timeout-minutes: ${{ matrix.build.torture && 20 || 10 }}
         run: |
           export TFLAGS='-j20 ${{ matrix.build.tflags }}'

@@ -865,7 +865,9 @@ static int tunnel_recv_callback(nghttp2_session *session, uint8_t flags,
   if(nwritten < 0) {
     if(result != CURLE_AGAIN)
       return NGHTTP2_ERR_CALLBACK_FAILURE;
+#ifdef DEBUGBUILD
     nwritten = 0;
+#endif
   }
   DEBUGASSERT((size_t)nwritten == len);
   return 0;

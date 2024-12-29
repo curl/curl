@@ -283,22 +283,22 @@ Curl_sha512_256_finish(unsigned char *digest,
 #ifdef __GNUC__
 #  if defined(__has_attribute) && defined(__STDC_VERSION__)
 #    if __has_attribute(always_inline) && __STDC_VERSION__ >= 199901
-#      define MHDX_INLINE CURL_INLINE __attribute__((always_inline))
+#      define CURL_FORCEINLINE CURL_INLINE __attribute__((always_inline))
 #    endif
 #  endif
 #endif
 
-#if !defined(MHDX_INLINE) && \
+#if !defined(CURL_FORCEINLINE) && \
   defined(_MSC_VER) && !defined(__GNUC__) && !defined(__clang__)
 #  if _MSC_VER >= 1400
-#    define MHDX_INLINE __forceinline
+#    define CURL_FORCEINLINE __forceinline
 #  endif
 #endif
 
-#if !defined(MHDX_INLINE)
+#if !defined(CURL_FORCEINLINE)
    /* Assume that 'CURL_INLINE' keyword works or the
     * macro was already defined correctly. */
-#  define MHDX_INLINE CURL_INLINE
+#  define CURL_FORCEINLINE CURL_INLINE
 #endif
 
 /* Bits manipulation macros and functions.
@@ -328,7 +328,7 @@ Curl_sha512_256_finish(unsigned char *digest,
 /* Defined as a function. The macro version may duplicate the binary code
  * size as each argument is used twice, so if any calculation is used
  * as an argument, the calculation could be done twice. */
-static MHDX_INLINE curl_uint64_t
+static CURL_FORCEINLINE curl_uint64_t
 MHDx_rotr64(curl_uint64_t value, unsigned int bits)
 {
   bits %= 64;

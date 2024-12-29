@@ -1014,7 +1014,7 @@ number:
       /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
          output characters */
 #ifdef HAVE_SNPRINTF
-      (snprintf)(work, sizeof(work), formatbuf, iptr->val.dnum);
+      (snprintf)(work, sizeof(work), formatbuf, iptr->val.dnum); /* NOLINT */
 #else
       (sprintf)(work, formatbuf, iptr->val.dnum);
 #endif

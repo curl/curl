@@ -34,14 +34,17 @@
 # - `LIBUV_INCLUDE_DIRS`:  The libuv include directories.
 # - `LIBUV_LIBRARIES`:     The libuv library names.
 # - `LIBUV_LIBRARY_DIRS`:  The libuv library directories.
+# - `LIBUV_PC_REQUIRES`:   The libuv pkg-config packages.
 # - `LIBUV_CFLAGS`:        Required compiler flags.
 # - `LIBUV_VERSION`:       Version of libuv.
+
+set(LIBUV_PC_REQUIRES "libuv")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBUV_INCLUDE_DIR AND
    NOT DEFINED LIBUV_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBUV "libuv")
+  pkg_check_modules(LIBUV ${LIBUV_PC_REQUIRES})
 endif()
 
 if(LIBUV_FOUND)

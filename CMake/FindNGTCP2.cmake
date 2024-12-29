@@ -42,6 +42,7 @@
 # - `NGTCP2_INCLUDE_DIRS`:  The ngtcp2 include directories.
 # - `NGTCP2_LIBRARIES`:     The ngtcp2 library names.
 # - `NGTCP2_LIBRARY_DIRS`:  The ngtcp2 library directories.
+# - `NGTCP2_PC_REQUIRES`:   The ngtcp2 pkg-config packages.
 # - `NGTCP2_CFLAGS`:        Required compiler flags.
 # - `NGTCP2_VERSION`:       Version of ngtcp2.
 
@@ -62,17 +63,24 @@ if(NGTCP2_FIND_COMPONENTS)
   endif()
 endif()
 
+set(NGTCP2_PC_REQUIRES "libngtcp2")
+if(_ngtcp2_crypto_backend)
+  set(NGTCP2_CRYPTO_PC_REQUIRES "lib${_crypto_library_lower}")
+endif()
+
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED NGTCP2_INCLUDE_DIR AND
    NOT DEFINED NGTCP2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(NGTCP2 "libngtcp2")
+  pkg_check_modules(NGTCP2 ${NGTCP2_PC_REQUIRES})
   if(_ngtcp2_crypto_backend)
-    pkg_check_modules("${_crypto_library_upper}" "lib${_crypto_library_lower}")
+    pkg_check_modules("${_crypto_library_upper}" ${NGTCP2_CRYPTO_PC_REQUIRES})
   else()
     set("${_crypto_library_upper}_FOUND" TRUE)
   endif()
 endif()
+
+list(APPEND NGTCP2_PC_REQUIRES ${NGTCP2_CRYPTO_PC_REQUIRES})
 
 if(NGTCP2_FOUND AND "${${_crypto_library_upper}_FOUND}")
   list(APPEND NGTCP2_LIBRARIES "${${_crypto_library_upper}_LIBRARIES}")

@@ -23,56 +23,43 @@
  ***************************************************************************/
 #include "test.h"
 
-/*
-  Based on a bug report recipe by Rene Bernhardt in
-  https://curl.se/mail/lib-2011-10/0323.html
-
-  It is reproducible by the following steps:
-
-  - Use a proxy that offers NTLM and Negotiate ( CURLOPT_PROXY and
-  CURLOPT_PROXYPORT)
-  - Tell libcurl NOT to use Negotiate  CURL_EASY_SETOPT(CURLOPT_PROXYAUTH,
-  CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM)
-  - Start the request
-*/
-
 #include "memdebug.h"
 
 CURLcode test(char *URL)
 {
-  CURLcode res;
+  CURLcode res = CURLE_OK;
+  CURLSH *share;
   CURL *curl;
-  long usedauth = 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
-    return TEST_ERR_MAJOR_BAD;
-  }
+  curl_global_init(CURL_GLOBAL_ALL);
+
+  share = curl_share_init();
+  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
 
   curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
-    return TEST_ERR_MAJOR_BAD;
-  }
+  test_setopt(curl, CURLOPT_SHARE, share);
 
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
   test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_PROXYAUTH,
-              (long) (CURLAUTH_BASIC | CURLAUTH_DIGEST | CURLAUTH_NTLM));
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2); /* set in first.c */
-  test_setopt(curl, CURLOPT_PROXYUSERPWD, "me:password");
+  test_setopt(curl, CURLOPT_PROXY, URL);
+  test_setopt(curl, CURLOPT_URL, "http://example.com/");
+
+  test_setopt(curl, CURLOPT_COOKIEFILE, "");
+
+  test_setopt(curl, CURLOPT_COOKIELIST,
+              "example.com\tFALSE\t/\tFALSE\t0\tname\tvalue");
 
   res = curl_easy_perform(curl);
-
-  res = curl_easy_getinfo(curl, CURLINFO_PROXYAUTH_USED, &usedauth);
-  if(CURLAUTH_NTLM != usedauth) {
-    printf("CURLINFO_PROXYAUTH_USED did not say NTLM\n");
+  if(res) {
+    fprintf(stderr, "curl_easy_perform() failed: %s\n",
+            curl_easy_strerror(res));
   }
 
 test_cleanup:
 
+  /* always cleanup */
   curl_easy_cleanup(curl);
+  curl_share_cleanup(share);
   curl_global_cleanup();
 
   return res;

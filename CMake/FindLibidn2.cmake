@@ -34,14 +34,17 @@
 # - `LIBIDN2_INCLUDE_DIRS`:  The libidn2 include directories.
 # - `LIBIDN2_LIBRARIES`:     The libidn2 library names.
 # - `LIBIDN2_LIBRARY_DIRS`:  The libidn2 library directories.
+# - `LIBIDN2_PC_REQUIRES`:   The libidn2 pkg-config packages.
 # - `LIBIDN2_CFLAGS`:        Required compiler flags.
 # - `LIBIDN2_VERSION`:       Version of libidn2.
+
+set(LIBIDN2_PC_REQUIRES "libidn2")
 
 if(CURL_USE_PKGCONFIG AND
    NOT DEFINED LIBIDN2_INCLUDE_DIR AND
    NOT DEFINED LIBIDN2_LIBRARY)
   find_package(PkgConfig QUIET)
-  pkg_check_modules(LIBIDN2 "libidn2")
+  pkg_check_modules(LIBIDN2 ${LIBIDN2_PC_REQUIRES})
 endif()
 
 if(LIBIDN2_FOUND)

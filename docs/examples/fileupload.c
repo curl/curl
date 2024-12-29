@@ -51,8 +51,10 @@ int main(void)
     return 1; /* cannot continue */
 
   /* to get the file size */
-  if(fstat(fileno(fd), &file_info) != 0)
+  if(fstat(fileno(fd), &file_info) != 0) {
+    fclose(fd);
     return 1; /* cannot continue */
+  }
 
   curl = curl_easy_init();
   if(curl) {

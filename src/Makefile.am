@@ -190,12 +190,15 @@ all-local: checksrc
 endif
 
 # disable the tests that are mostly causing false positives
-TIDYFLAGS=-checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-valist.Uninitialized,-clang-analyzer-core.NonNullParamChecker,-clang-analyzer-core.NullDereference
+TIDYFLAGS := -checks=-clang-analyzer-security.insecureAPI.strcpy,-clang-analyzer-optin.performance.Padding,-clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling -quiet
+if CURL_WERROR
+TIDYFLAGS += --warnings-as-errors=*
+endif
 
-TIDY:=clang-tidy
+TIDY := clang-tidy
 
-tidy:
-	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) -DHAVE_CONFIG_H
+tidy: $(HUGE) $(CA_EMBED_CSOURCE)
+	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)

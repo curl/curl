@@ -631,8 +631,7 @@ class TestDownload:
         elif proto == 'h2':
             assert earlydata[1] == 107, f'{earlydata}'
         elif proto == 'h3':
-            # not implemented
-            assert earlydata[1] == 0, f'{earlydata}'
+            assert earlydata[1] == 67, f'{earlydata}'
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
     @pytest.mark.parametrize("max_host_conns", [0, 1, 5])

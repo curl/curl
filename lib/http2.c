@@ -2337,7 +2337,7 @@ static ssize_t cf_h2_send(struct Curl_cfilter *cf, struct Curl_easy *data,
   if(should_close_session(ctx)) {
     /* nghttp2 thinks this session is done. If the stream has not been
      * closed, this is an error state for out transfer */
-    if(stream->closed) {
+    if(stream && stream->closed) {
       nwritten = http2_handle_stream_close(cf, data, stream, err);
     }
     else {
@@ -2496,9 +2496,7 @@ static CURLcode cf_h2_connect(struct Curl_cfilter *cf,
   /* Send out our SETTINGS and ACKs and such. If that blocks, we
    * have it buffered and  can count this filter as being connected */
   result = h2_progress_egress(cf, data);
-  if(result == CURLE_AGAIN)
-    result = CURLE_OK;
-  else if(result)
+  if(result && (result != CURLE_AGAIN))
     goto out;
 
   *done = TRUE;

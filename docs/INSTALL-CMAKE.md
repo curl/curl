@@ -149,6 +149,8 @@ assumes that CMake generates `Makefile`:
 - `BUILD_STATIC_CURL`:                      Build curl executable with static libcurl. Default: `OFF`
 - `BUILD_STATIC_LIBS`:                      Build static libraries. Default: `OFF`
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
+- `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
+- `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`
@@ -303,6 +305,7 @@ Details via CMake
 
 ## Dependency options
 
+- `CLANG_TIDY`:                             `clang-tidy` tool used with `CURL_CLANG_TIDY=ON`. Default: `clang-tidy`
 - `PERL_EXECUTABLE`                         Perl binary used throughout the build and tests.
 - `AMISSL_INCLUDE_DIR`:                     The AmiSSL include directory.
 - `AMISSL_STUBS_LIBRARY`:                   Path to `amisslstubs` library.
@@ -324,6 +327,8 @@ Details via CMake
 - `LIBIDN2_LIBRARY`:                        Path to `libidn2` library.
 - `LIBPSL_INCLUDE_DIR`:                     The libpsl include directory.
 - `LIBPSL_LIBRARY`:                         Path to `libpsl` library.
+- `LIBRTMP_INCLUDE_DIR`:                    The librtmp include directory.
+- `LIBRTMP_LIBRARY`:                        Path to `librtmp` library.
 - `LIBSSH_INCLUDE_DIR`:                     The libssh include directory.
 - `LIBSSH_LIBRARY`:                         Path to `libssh` library.
 - `LIBSSH2_INCLUDE_DIR`:                    The libssh2 include directory.

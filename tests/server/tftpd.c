@@ -425,9 +425,9 @@ static int writeit(struct testcase *test, struct tftphdr * volatile *dpp,
   bfs[current].counter = ct;      /* set size of data to write */
   current = !current;             /* switch to other buffer */
   if(bfs[current].counter != BF_FREE)     /* if not free */
-    write_behind(test, convert);     /* flush it */
+    write_behind(test, convert);          /* flush it */
   bfs[current].counter = BF_ALLOC;        /* mark as alloc'd */
-  *dpp =  &bfs[current].buf.hdr;
+  *dpp = &bfs[current].buf.hdr;
   return ct;                      /* this is a lie of course */
 }
 
@@ -448,7 +448,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
   struct tftphdr *dp;
 
   b = &bfs[nextone];
-  if(b->counter < -1)            /* anything to flush? */
+  if(b->counter < -1)             /* anything to flush? */
     return 0;                     /* just nop if nothing to do */
 
   if(!test->ofile) {
@@ -463,6 +463,9 @@ static ssize_t write_behind(struct testcase *test, int convert)
       logmsg("Couldn't create and/or open file %s for upload!", outfile);
       return -1; /* failure! */
     }
+  }
+  else if(test->ofile <= 0) {
+    return -1; /* failure! */
   }
 
   count = b->counter;             /* remember byte count */
@@ -952,7 +955,7 @@ static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size)
       break;
   } while(1);
 
-  if(*cp) {
+  if(*cp || !mode) {
     nak(EBADOP);
     fclose(server);
     return 3;

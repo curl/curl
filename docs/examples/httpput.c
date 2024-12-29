@@ -86,6 +86,8 @@ int main(int argc, char **argv)
      fdopen() from the previous descriptor, but hey this is just
      an example! */
   hd_src = fopen(file, "rb");
+  if(!hd_src)
+    return 2;
 
   /* In Windows, this inits the Winsock stuff */
   curl_global_init(CURL_GLOBAL_ALL);
