@@ -528,6 +528,8 @@ include(CheckCSourceCompiles)
 if(WIN32)
   # Preload settings on Windows
   include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
+elseif(_CURL_LOAD_CACHE AND UNIX)
+  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/unix-cache.cmake")
 elseif(APPLE)
   # Fast-track predictable feature detections
   set(HAVE_EVENTFD 0)
