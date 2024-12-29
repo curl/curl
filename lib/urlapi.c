@@ -288,7 +288,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
        available, or the new URL is just a query string (starts with a '?') we
        append the new one at the end of the current URL */
     if(useurl[0] != '?') {
-      int level = 0;
       pathsep = strrchr(protsep, '/');
       if(pathsep)
         *pathsep = 0;
@@ -300,32 +299,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
         protsep = pathsep + 1;
       else
         protsep = NULL;
-
-      /* now deal with one "./" or any amount of "../" in the newurl
-         and act accordingly */
-
-      if((useurl[0] == '.') && (useurl[1] == '/'))
-        useurl += 2; /* just skip the "./" */
-
-      while((useurl[0] == '.') &&
-            (useurl[1] == '.') &&
-            (useurl[2] == '/')) {
-        level++;
-        useurl += 3; /* pass the "../" */
-      }
-
-      if(protsep) {
-        while(level--) {
-          /* cut off one more level from the right of the original URL */
-          pathsep = strrchr(protsep, '/');
-          if(pathsep)
-            *pathsep = 0;
-          else {
-            *protsep = 0;
-            break;
-          }
-        }
-      }
     }
     else
       skip_slash = TRUE;
