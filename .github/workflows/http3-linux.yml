@@ -433,17 +433,12 @@ jobs:
               ${{ matrix.build.generate }}
           else
             ./configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --cache-file=config.cache \
               ${{ matrix.build.configure }}
           fi
 
       - name: 'configure log'
         if: ${{ !cancelled() }}
         run: cat config.log CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
-
-      - name: 'configure cache'
-        if: ${{ !cancelled() }}
-        run: cat config.cache CMakeCache.txt 2>/dev/null || true
 
       - name: 'curl_config.h'
         run: |
