@@ -516,7 +516,7 @@ Windows:
           - any-glob-to-all-files: "{\
               appveyor.*,\
               .github/workflows/windows.yml,\
-              CMake/Platforms/WindowsCache.cmake,\
+              CMake/win32-cache.cmake,\
               lib/*win32*,\
               lib/curl_multibyte.*,\
               lib/rename.*,\

@@ -59,8 +59,8 @@ CMAKE_DIST =                                    \
  CMake/Macros.cmake                             \
  CMake/OtherTests.cmake                         \
  CMake/PickyWarnings.cmake                      \
- CMake/Platforms/WindowsCache.cmake             \
  CMake/Utilities.cmake                          \
+ CMake/win32-cache.cmake                        \
  CMakeLists.txt
 
 VC_DIST = projects/README.md                           \
