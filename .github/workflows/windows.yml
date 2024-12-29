@@ -85,7 +85,7 @@ jobs:
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-            cmake -B bld -G Ninja ${options} -DCMAKE_TOOLCHAIN_FILE=CMake/unix-cache.cmake \
+            cmake -B bld -G Ninja ${options} -D_CURL_QUICK_DETECT=ON \
               -DCMAKE_UNITY_BUILD=ON -DCMAKE_UNITY_BUILD_BATCH_SIZE=30 -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
@@ -246,7 +246,7 @@ jobs:
             else
               options='-DCMAKE_C_COMPILER=gcc'
             fi
-            [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_LOAD_CACHE=ON'
+            [ '${{ matrix.sys }}' = 'msys' ] && options+=' -D_CURL_QUICK_DETECT=ON'
             [ '${{ matrix.test }}' = 'uwp' ] && options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
             [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
             [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
