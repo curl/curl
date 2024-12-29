@@ -2042,6 +2042,7 @@ curl_add_if("WSS"           NOT CURL_DISABLE_WEBSOCKETS AND _ssl_enabled)
 if(_items)
   list(SORT _items)
 endif()
+set(CURL_SUPPORTED_PROTOCOLS_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_PROTOCOLS "${_items}")
 string(TOLOWER "${SUPPORT_PROTOCOLS}" _support_protocols_lower)
 message(STATUS "Protocols: ${_support_protocols_lower}")
@@ -2095,6 +2096,7 @@ if(_items)
     list(SORT _items)
   endif()
 endif()
+set(CURL_SUPPORTED_FEATURES_LIST "${_items}")
 string(REPLACE ";" " " SUPPORT_FEATURES "${_items}")
 message(STATUS "Features: ${SUPPORT_FEATURES}")
 
@@ -2349,10 +2351,13 @@ if(NOT CURL_DISABLE_INSTALL)
     ${_generated_version_config}")
 
   # Consumed custom variables:
+  #   CURLVERSION
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL
   #   HAVE_LIBZ
+  #   CURL_SUPPORTED_FEATURES_LIST
+  #   CURL_SUPPORTED_PROTOCOLS_LIST
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
