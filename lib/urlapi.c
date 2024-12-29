@@ -262,9 +262,9 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   const char *useurl = relurl;
   CURLcode result = CURLE_OK;
   CURLUcode uc;
-  bool skip_slash = FALSE;
   /* protsep points to the start of the hostname */
   char *protsep = strstr(base, "//");
+  DEBUGASSERT(protsep);
   if(!protsep)
     protsep = base;
   else
@@ -284,24 +284,13 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
         *pathsep = 0;
     }
 
-    /* we have a relative path to append to the last slash if there is one
-       available, or the new URL is just a query string (starts with a '?') we
-       append the new one at the end of the current URL */
+    /* if the redirect-to piece is not just a query, cut the path after the
+       last slash */
     if(useurl[0] != '?') {
       pathsep = strrchr(protsep, '/');
       if(pathsep)
-        *pathsep = 0;
-
-      /* Check if there is any slash after the hostname, and if so, remember
-         that position instead */
-      pathsep = strchr(protsep, '/');
-      if(pathsep)
-        protsep = pathsep + 1;
-      else
-        protsep = NULL;
+        pathsep[1] = 0; /* leave the slash */
     }
-    else
-      skip_slash = TRUE;
   }
   else if('/' == relurl[0]) {
     /* We got a new absolute path for this server */
@@ -328,7 +317,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
     char *pathsep = strchr(protsep, '#');
     if(pathsep)
       *pathsep = 0;
-    skip_slash = TRUE;
   }
 
   Curl_dyn_init(&newest, CURL_MAX_INPUT_LENGTH);
@@ -337,15 +325,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   result = Curl_dyn_add(&newest, base);
   if(result)
     return result;
-
-  /* check if we need to append a slash */
-  if(('/' == useurl[0]) || (protsep && !*protsep) || skip_slash)
-    ;
-  else {
-    result = Curl_dyn_addn(&newest, "/", 1);
-    if(result)
-      return result;
-  }
 
   /* then append the new piece on the right side */
   uc = urlencode_str(&newest, useurl, strlen(useurl), !host_changed,
