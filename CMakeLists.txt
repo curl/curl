@@ -2304,21 +2304,17 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_FEATURES
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
-  # configure_file(
-  #   "${PROJECT_SOURCE_DIR}/curl-config.in"
-  #   "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
-  # install(FILES "${PROJECT_BINARY_DIR}/curl-config"
-  #   DESTINATION ${CMAKE_INSTALL_BINDIR}
-  #   PERMISSIONS
-  #     OWNER_READ OWNER_WRITE OWNER_EXECUTE
-  #     GROUP_READ GROUP_EXECUTE
-  #     WORLD_READ WORLD_EXECUTE)
   configure_file(
     "${PROJECT_SOURCE_DIR}/curl-config.c.in"
     "${PROJECT_BINARY_DIR}/curl-config.c" @ONLY)
   # add the actual program
   add_executable(curl-config "${PROJECT_BINARY_DIR}/curl-config.c")
-  install(TARGETS curl-config)
+  install(TARGETS curl-config
+    DESTINATION "${CMAKE_INSTALL_BINDIR}"
+    PERMISSIONS
+      OWNER_READ OWNER_WRITE OWNER_EXECUTE
+      GROUP_READ GROUP_EXECUTE
+      WORLD_READ WORLD_EXECUTE)
 
   # Generate a pkg-config file matching this config.
   # Consumed variables:
