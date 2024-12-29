@@ -185,9 +185,8 @@ curlver_from_string(struct curlver *ver, const char *str)
     ver->minor = ver->patch = 0;
     return 1;
   }
-  /* update pos + until we hit a period of end of string, skip */
-  s_end++;  /* move past . */
-  s_begin = s_end;
+  /* update pos + until we hit a period or end of string, skip */
+  s_begin = ++s_end;  /* move s_begin, s_end past '.' */
   while(*s_end && *s_end != '.')
     s_end++;
   /* get minor version component, negative if error */
@@ -200,8 +199,7 @@ curlver_from_string(struct curlver *ver, const char *str)
     return 1;
   }
   /* update pos + until we hit end of string or '-' */
-  s_end++;  /* move past . */
-  s_begin = s_end;
+  s_begin = ++s_end;  /* move s_begin, s_end past '.' */
   while(*s_end && *s_end != '-')
     s_end++;
   /* get patch version component, negative if error */
