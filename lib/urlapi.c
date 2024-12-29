@@ -315,11 +315,8 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
       host_changed = TRUE;
     }
     else {
-      /* cut the original URL at question mark then first slash */
-      char *pathsep = strchr(protsep, '?');
-      if(pathsep)
-        *pathsep = 0;
-      pathsep = strchr(protsep, '/');
+      /* cut the original URL at first slash */
+      char *pathsep = strchr(protsep, '/');
       if(pathsep)
         *pathsep = 0;
     }
