@@ -83,7 +83,7 @@ jobs:
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="/usr/bin:$(cygpath "${SYSTEMROOT}")/System32"
-            cmake -B bld -G Ninja ${options} \
+            cmake -B bld -G Ninja ${options} -DCMAKE_TOOLCHAIN_FILE=CMake/unix-cache.cmake \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
@@ -248,6 +248,7 @@ jobs:
             else
               rcopts=''
             fi
+            [ '${{ matrix.sys }}' = 'msys' ] && options+=' -DCMAKE_TOOLCHAIN_FILE=CMake/unix-cache.cmake'
             [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
             [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
             cmake -B bld -G Ninja ${options} \
