@@ -525,9 +525,9 @@ include(CheckSymbolExists)
 include(CheckTypeSize)
 include(CheckCSourceCompiles)
 
-# Preload settings on Windows
 if(WIN32)
-  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/Platforms/WindowsCache.cmake")
+  # Preload settings on Windows
+  include("${CMAKE_CURRENT_SOURCE_DIR}/CMake/win32-cache.cmake")
 elseif(APPLE)
   # Fast-track predictable feature detections
   set(HAVE_EVENTFD 0)
