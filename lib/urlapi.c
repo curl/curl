@@ -342,27 +342,13 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
       host_changed = TRUE;
     }
     else {
-      /* cut off the original URL from the first slash, or deal with URLs
-         without slash */
-      char *pathsep = strchr(protsep, '/');
-      if(pathsep) {
-        /* When people use badly formatted URLs, such as
-           "http://www.example.com?dir=/home/daniel" we must not use the first
-           slash, if there is a ?-letter before it! */
-        char *sep = strchr(protsep, '?');
-        if(sep && (sep < pathsep))
-          pathsep = sep;
+      /* cut the original URL at question mark then first slash */
+      char *pathsep = strchr(protsep, '?');
+      if(pathsep)
         *pathsep = 0;
-      }
-      else {
-        /* There was no slash. Now, since we might be operating on a badly
-           formatted URL, such as "http://www.example.com?id=2380" which does
-           not use a slash separator as it is supposed to, we need to check
-           for a ?-letter as well! */
-        pathsep = strchr(protsep, '?');
-        if(pathsep)
-          *pathsep = 0;
-      }
+      pathsep = strchr(protsep, '/');
+      if(pathsep)
+        *pathsep = 0;
     }
   }
   else {
