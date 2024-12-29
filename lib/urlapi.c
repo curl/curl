@@ -1827,7 +1827,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
     if(result)
       return cc2cu(result);
 
-    uc = parseurl_and_replace(redired_url, u, flags);
+    uc = parseurl_and_replace(redired_url, u, flags&~CURLU_PATH_AS_IS);
     free(redired_url);
     return uc;
   }
