@@ -2354,6 +2354,8 @@ if(NOT CURL_DISABLE_INSTALL)
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL
   #   HAVE_LIBZ
+  #   SUPPORT_FEATURES
+  #   SUPPORT_PROTOCOLS
   configure_package_config_file("CMake/curl-config.cmake.in"
     "${_project_config}"
     INSTALL_DESTINATION ${_install_cmake_dir}
