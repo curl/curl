@@ -258,25 +258,21 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
    problems in the future...
   */
   struct dynbuf newest;
-  char *protsep;
   char *pathsep;
   bool host_changed = FALSE;
   const char *useurl = relurl;
   CURLcode result = CURLE_OK;
   CURLUcode uc;
   bool skip_slash = FALSE;
-  *newurl = NULL;
-
   /* protsep points to the start of the hostname */
-  protsep = strstr(base, "//");
+  char *protsep = strstr(base, "//");
   if(!protsep)
     protsep = base;
   else
     protsep += 2; /* pass the slashes */
 
+  *newurl = NULL;
   if(('/' != relurl[0]) && ('#' != relurl[0])) {
-    int level = 0;
-
     /* First we need to find out if there is a ?-letter in the original URL,
        and cut it and the right-side of that off */
     pathsep = strchr(protsep, '?');
@@ -293,6 +289,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
        available, or the new URL is just a query string (starts with a '?') we
        append the new one at the end of the current URL */
     if(useurl[0] != '?') {
+      int level = 0;
       pathsep = strrchr(protsep, '/');
       if(pathsep)
         *pathsep = 0;
