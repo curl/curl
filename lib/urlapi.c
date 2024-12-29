@@ -258,7 +258,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
    problems in the future...
   */
   struct dynbuf newest;
-  char *pathsep;
   bool host_changed = FALSE;
   const char *useurl = relurl;
   CURLcode result = CURLE_OK;
@@ -275,7 +274,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   if(('/' != relurl[0]) && ('#' != relurl[0])) {
     /* First we need to find out if there is a ?-letter in the original URL,
        and cut it and the right-side of that off */
-    pathsep = strchr(protsep, '?');
+    char *pathsep = strchr(protsep, '?');
     if(pathsep)
       *pathsep = 0;
     else {
@@ -345,7 +344,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
     else {
       /* cut off the original URL from the first slash, or deal with URLs
          without slash */
-      pathsep = strchr(protsep, '/');
+      char *pathsep = strchr(protsep, '/');
       if(pathsep) {
         /* When people use badly formatted URLs, such as
            "http://www.example.com?dir=/home/daniel" we must not use the first
@@ -370,7 +369,7 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
     /* the relative piece starts with '#' */
 
     /* If there is a fragment in the original URL, cut it off */
-    pathsep = strchr(protsep, '#');
+    char *pathsep = strchr(protsep, '#');
     if(pathsep)
       *pathsep = 0;
     skip_slash = TRUE;
