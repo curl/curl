@@ -27,7 +27,6 @@ appleOS:
       - changed-files:
           - any-glob-to-all-files: "{\
               .github/workflows/macos.yml,\
-              CMake/macos-cache.cmake,\
               lib/config-mac.h,\
               lib/macos*,\
               lib/vtls/sectransp*,\
