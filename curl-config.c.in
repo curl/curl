@@ -46,7 +46,14 @@ static const char *curl_protocols = "@SUPPORT_PROTOCOLS@";
 /* libcurl version, major.minor.patch[-info] */
 static const char *curl_version = "@CURLVERSION@";
 /* curl-config help text */
+/*
+  TODO: --configure should be used for the CMake configuration variables. not
+  yet sure if we should include only user-supplied cache variables or also any
+  feature variables that may be set during the running of CMake.
+*/
 static const char *usage = "Usage: curl-config [OPTION]\n"
+  "\n"
+  "This version of curl-config was configured with CMake @CMAKE_VERSION@.\n"
   "\n"
   "Available values for OPTION include:\n"
   "\n"
