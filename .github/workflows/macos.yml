@@ -229,7 +229,7 @@ jobs:
 
           if [ -n '${{ matrix.build.generate }}' ]; then
             [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
-            cmake -B bld -G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/macos-cache.cmake \
+            cmake -B bld -G Ninja -DCMAKE_TOOLCHAIN_FILE=CMake/unix-cache.cmake \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -245,7 +245,7 @@ jobs:
             fi
             [ -n '${{ matrix.build.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.build.macos-version-min }}'
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --cache-file=../CMake/macos-cache.configure \
+              --cache-file=../CMake/unix-cache.configure \
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
               ${{ matrix.build.configure }} ${options}
@@ -445,7 +445,7 @@ jobs:
             [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
             [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, and libssh2
-            cmake -B bld -DCMAKE_TOOLCHAIN_FILE=CMake/macos-cache.cmake \
+            cmake -B bld -DCMAKE_TOOLCHAIN_FILE=CMake/unix-cache.cmake \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_OSX_SYSROOT="${sysroot}" \
               -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -468,7 +468,7 @@ jobs:
             [ -n '${{ matrix.macos-version-min }}' ] && CFLAGS+=' -mmacosx-version-min=${{ matrix.macos-version-min }}'
             # would pick up nghttp2, libidn2, but libssh2 is disabled by default
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --cache-file=../CMake/macos-cache.configure \
+              --cache-file=../CMake/unix-cache.configure \
               --disable-dependency-tracking \
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
