@@ -753,8 +753,8 @@ out:
   }
   else
     CURL_TRC_CF(data, cf, "[SCACHE] added session for %s [proto=0x%x, "
-                "valid_secs=%zd, alpn=%s, earlydata=%zu, quic_tp=%s], "
-                "peer has %zu sessions now",
+                "valid_secs=%" FMT_OFF_T ", alpn=%s, earlydata=%zu, "
+                "quic_tp=%s], peer has %zu sessions now",
                 ssl_peer_key, s->ietf_tls_id, s->valid_until - now, s->alpn,
                 s->earlydata_max, s->quic_tp ? "yes" : "no",
                 Curl_llist_count(&peer->sessions));
