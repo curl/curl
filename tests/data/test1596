@@ -42,8 +42,9 @@ Host: %HOSTIP:%HTTPPORT
 Accept: */*
 
 </protocol>
+# Retry-After time is limited to 6 hours (21600 seconds)
 <stdout>
-Retry-After 211430
+Retry-After 21600
 </stdout>
 </verify>
 </testcase>

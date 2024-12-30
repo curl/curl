@@ -2905,7 +2905,13 @@ static CURLcode http_header(struct Curl_easy *data,
           retry_after = date - current;
         }
       }
-      data->info.retry_after = retry_after; /* store it */
+      if(retry_after < 0)
+        retry_after = 0;
+      /* limit to 6 hours max. this is not documented so that it can be changed
+         in the future if necessary. */
+      if(retry_after > 21600)
+        retry_after = 21600;
+      data->info.retry_after = retry_after;
       return CURLE_OK;
     }
     break;
