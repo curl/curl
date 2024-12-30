@@ -35,7 +35,7 @@ http
 --variable with a file byte range
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable name"@%LOGDIR/in%TESTNUMBER;[5-15]" --expand-data '{{name}}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[5-15]@%LOGDIR/in%TESTNUMBER" --expand-data '{{name}}'
 </command>
 <file name="%LOGDIR/in%TESTNUMBER">
 On the first Monday of the month of April, 1625, the market town of Meung
