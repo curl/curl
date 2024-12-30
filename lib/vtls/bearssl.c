@@ -836,7 +836,7 @@ static CURLcode bearssl_connect_step3(struct Curl_cfilter *cf,
     ret = Curl_ssl_session_create((unsigned char *)session, sizeof(*session),
                                   (int)session->version,
                                   connssl->negotiated.alpn,
-                                  0, -1, 0, &sc_session);
+                                  0, 0, &sc_session);
     if(!ret) {
       ret = Curl_ssl_scache_put(cf, data, connssl->peer.scache_key,
                                 sc_session);

@@ -1173,7 +1173,7 @@ mbed_new_session(struct Curl_cfilter *cf, struct Curl_easy *data)
 #endif
   result = Curl_ssl_session_create(sdata, slen,
                                    ietf_tls_id,
-                                   connssl->negotiated.alpn, 0, -1, 0,
+                                   connssl->negotiated.alpn, 0, 0,
                                    &sc_session);
   sdata = NULL;  /* call took ownership */
   if(!result)

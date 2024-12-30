@@ -110,7 +110,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  gnutls_session_t session,
-                                 int lifetime_secs,
+                                 curl_off_t valid_until,
                                  const char *alpn,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len);

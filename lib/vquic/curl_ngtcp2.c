@@ -2232,7 +2232,7 @@ static int quic_gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
         quic_tp_len = (size_t)tplen;
       }
       (void)Curl_gtls_cache_session(cf, data, ctx->peer.scache_key,
-                                    session, -1, "h3", quic_tp, quic_tp_len);
+                                    session, 0, "h3", quic_tp, quic_tp_len);
       break;
     }
     default:

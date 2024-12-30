@@ -720,7 +720,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
                                  struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  gnutls_session_t session,
-                                 int lifetime_secs,
+                                 curl_off_t valid_until,
                                  const char *alpn,
                                  unsigned char *quic_tp,
                                  size_t quic_tp_len)
@@ -765,7 +765,7 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   result = Curl_ssl_session_create2(sdata, sdata_len,
                                     Curl_glts_get_ietf_proto(session),
-                                    alpn, 0, lifetime_secs, earlydata_max,
+                                    alpn, valid_until, earlydata_max,
                                     qtp_clone, quic_tp_len,
                                     &sc_session);
   /* call took ownership of `sdata` and `qtp_clone` */
@@ -800,8 +800,8 @@ static CURLcode cf_gtls_update_session_id(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   return Curl_gtls_cache_session(cf, data, connssl->peer.scache_key,
-                                 session, -1,
-                                 connssl->negotiated.alpn, NULL, 0);
+                                 session, 0, connssl->negotiated.alpn,
+                                 NULL, 0);
 }
 
 static int gtls_handshake_cb(gnutls_session_t session, unsigned int htype,
