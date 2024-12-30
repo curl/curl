@@ -161,7 +161,7 @@ SPDX-License-Identifier: curl
     curl https://curl.se
 
  you get a webpage returned in your terminal window. The entire HTML document
- that that URL holds.
+ this URL identifies.
 
  All HTTP replies contain a set of response headers that are normally hidden,
  use curl's [`--include`](https://curl.se/docs/manpage.html#-i) (`-i`)
