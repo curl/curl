@@ -47,6 +47,10 @@ For example, getting the first one hundred bytes from a given file:
 
     curl --variable "fraction[0-99]@filename"
 
+Given a byte range that has no data results in an empty string. Asking for a
+range that is larger than the content makes curl use the piece of the data
+that exists.
+
 To assign a variable using contents from another variable, use
 --expand-variable. Like for example assigning a new variable using contents
 from two other:
