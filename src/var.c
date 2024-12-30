@@ -389,6 +389,8 @@ ParameterError setvariable(struct GlobalConfig *global,
   bool import = FALSE;
   char *ge = NULL;
   char buf[MAX_VAR_LEN];
+  curl_off_t startoffset = 0;
+  curl_off_t endoffset = CURL_OFF_T_MAX;
 
   if(*input == '%') {
     import = TRUE;
@@ -423,42 +425,36 @@ ParameterError setvariable(struct GlobalConfig *global,
       clen = strlen(ge);
     }
   }
+  if(*line == '[') {
+    /* is there a byte range specified? [num-num] */
+    if(ISDIGIT(line[1])) {
+      char *endp;
+      if(curlx_strtoofft(&line[1], &endp, 10, &startoffset) || (*endp != '-'))
+        return PARAM_VAR_SYNTAX;
+      else {
+        char *p = endp + 1; /* pass the '-' */
+        if(*p != ']') {
+          if(curlx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
+            return PARAM_VAR_SYNTAX;
+          line = &endp[1];  /* pass the ']' */
+        }
+        else
+          line = &p[1]; /* pass the ']' */
+      }
+      if(startoffset > endoffset)
+        return PARAM_VAR_SYNTAX;
+    }
+  }
   if(content)
     ;
   else if(*line == '@') {
     /* read from file or stdin */
     FILE *file;
     bool use_stdin;
-    char *range;
     struct dynbuf fname;
-    curl_off_t startoffset = 0;
-    curl_off_t endoffset = CURL_OFF_T_MAX;
     line++;
 
     Curl_dyn_init(&fname, MAX_FILENAME);
-
-    /* is there a byte range specified? ;[num-num] */
-    range = strstr(line, ";[");
-    if(range && ISDIGIT(range[2])) {
-      char *p = range;
-      char *endp;
-      if(curlx_strtoofft(&p[2], &endp, 10, &startoffset) || (*endp != '-'))
-        return PARAM_VAR_SYNTAX;
-      else {
-        p = endp + 1; /* pass the '-' */
-        if(*p != ']') {
-          if(curlx_strtoofft(p, &endp, 10, &endoffset) || (*endp != ']'))
-            return PARAM_VAR_SYNTAX;
-        }
-      }
-      if(startoffset > endoffset)
-        return PARAM_VAR_SYNTAX;
-      /* create a dynbuf for the filename without the range */
-      if(Curl_dyn_addn(&fname, line, (range - line)))
-        return PARAM_NO_MEM;
-      /* point to the new file name buffer */
-      line = Curl_dyn_ptr(&fname);
-    }
 
     use_stdin = !strcmp(line, "-");
     if(use_stdin)
@@ -485,9 +481,20 @@ ParameterError setvariable(struct GlobalConfig *global,
   }
   else if(*line == '=') {
     line++;
+    clen = strlen(line);
     /* this is the exact content */
     content = (char *)line;
-    clen = strlen(line);
+    if(startoffset || (endoffset != CURL_OFF_T_MAX)) {
+      if(startoffset >= (curl_off_t)clen)
+        clen = 0;
+      else {
+        /* make the end offset no larger than the last byte */
+        if(endoffset >= (curl_off_t)clen)
+          endoffset = clen - 1;
+        clen = (size_t)(endoffset - startoffset) + 1;
+        content += startoffset;
+      }
+    }
   }
   else {
     warnf(global, "Bad --variable syntax, skipping: %s", input);

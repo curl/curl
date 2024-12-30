@@ -32,14 +32,11 @@ Funny-head: yesyes
 http
 </server>
 <name>
---variable with a file and single-byte byte range
+--variable with a byte range using plain assign, out of range
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[15-15]@%LOGDIR/in%TESTNUMBER" --expand-data '{{name}}'
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[10-30]=0123456789abcdef" --expand-data '{{name}}'
 </command>
-<file name="%LOGDIR/in%TESTNUMBER">
-On the first Monday of the month of April, 1625, the market town of Meung
-</file>
 </client>
 
 #
@@ -50,10 +47,10 @@ POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 User-Agent: curl/%VERSION
 Accept: */*
-Content-Length: 1
+Content-Length: 6
 Content-Type: application/x-www-form-urlencoded
 
-n
+abcdef
 </protocol>
 </verify>
 </testcase>
