@@ -56,12 +56,13 @@ set(CURL_SUPPORTED_FEATURES "@CURL_SUPPORTED_FEATURES_LIST@")
 
 foreach(_item IN LISTS CURL_SUPPORTED_PROTOCOLS CURL_SUPPORTED_FEATURES)
   set(CURL_SUPPORTED_${_item}_FOUND TRUE)
-  set(CURL_${_item}_FOUND TRUE)  # for compatibility. May be overwritten by CMake's FindCURL.
 endforeach()
 
 set(_anymissing FALSE)
 foreach(_item IN LISTS CURL_FIND_COMPONENTS)
-  if(NOT CURL_SUPPORTED_${_item}_FOUND)
+  if(CURL_SUPPORTED_${_item}_FOUND)
+    set(CURL_${_item}_FOUND TRUE)  # for compatibility
+  else()
     if(CURL_FIND_REQUIRED_${_item})
       set(CURL_FOUND FALSE)
       set(_anymissing TRUE)
