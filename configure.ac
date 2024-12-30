@@ -3815,7 +3815,6 @@ AC_CHECK_HEADERS(
   sys/socket.h \
   sys/ioctl.h \
   unistd.h \
-  stdlib.h \
   arpa/inet.h \
   net/if.h \
   netinet/in.h \
@@ -3849,6 +3848,7 @@ dnl to do if found
 [],
 dnl default includes
 [
+#include <stdlib.h>
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
