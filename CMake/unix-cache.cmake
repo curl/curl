@@ -272,6 +272,7 @@ if(CYGWIN OR
 else()
   set(HAVE_TERMIO_H 0)
 endif()
+set(HAVE_TIME_T_UNSIGNED 0)
 set(HAVE_UNISTD_H 1)
 set(HAVE_UTIME 1)
 set(HAVE_UTIMES 1)
