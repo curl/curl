@@ -2352,6 +2352,7 @@ if(NOT CURL_DISABLE_INSTALL)
     ${_generated_version_config}")
 
   # Consumed custom variables:
+  #   CURLVERSION
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
   #   USE_OPENSSL
