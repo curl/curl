@@ -536,6 +536,9 @@ elseif(APPLE)
 elseif(AMIGA)
   set(HAVE_GETADDRINFO 0)  # Breaks the build when detected and used.
 endif()
+if(DOS OR AMIGA)
+  set(HAVE_TIME_T_UNSIGNED 1)
+endif()
 
 if(ENABLE_THREADED_RESOLVER)
   if(WIN32)
