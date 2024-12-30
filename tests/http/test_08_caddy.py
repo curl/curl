@@ -212,6 +212,8 @@ class TestCaddy:
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_08_08_earlydata(self, env: Env, httpd, caddy, proto):
+        if not env.curl_uses_lib('gnutls'):
+            pytest.skip('TLS earlydata only implemented in GnuTLS')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
