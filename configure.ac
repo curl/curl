@@ -3970,10 +3970,9 @@ AC_MSG_CHECKING([if time_t is unsigned])
 CURL_RUN_IFELSE(
   [
   #include <time.h>
-  #include <limits.h>
   int main(void) {
     time_t t = -1;
-    return (t < 0);
+    return t < 0;
   }
   ],[
   AC_MSG_RESULT([yes])

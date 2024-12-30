@@ -622,6 +622,9 @@
 /* Define this symbol if your OS supports changing the contents of argv */
 #cmakedefine HAVE_WRITABLE_ARGV 1
 
+/* Define this if time_t is unsigned */
+#cmakedefine HAVE_TIME_T_UNSIGNED 1
+
 /* Define to 1 if _REENTRANT preprocessor symbol must be defined. */
 #cmakedefine NEED_REENTRANT 1
 

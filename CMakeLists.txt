@@ -1787,6 +1787,16 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
     }" HAVE_WRITABLE_ARGV)
 endif()
 
+if(NOT CMAKE_CROSSCOMPILING)
+  include(CheckCSourceRuns)
+  check_c_source_runs("
+    #include <time.h>
+    int main(void) {
+      time_t t = -1;
+      return t < 0;
+    }" HAVE_TIME_T_UNSIGNED)
+endif()
+
 curl_internal_test(HAVE_GLIBC_STRERROR_R)
 curl_internal_test(HAVE_POSIX_STRERROR_R)
 
