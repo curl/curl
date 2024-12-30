@@ -2501,7 +2501,7 @@ dnl Verify if ioctl is available, prototyped, and
 dnl can be compiled. If all of these are true, and
 dnl usage has not been previously disallowed with
 dnl shell variable curl_disallow_ioctl, then
-dnl HAVE_IOCTL will be defined.
+dnl curl_cv_func_ioctl is set to "yes".
 
 AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
   AC_REQUIRE([CURL_INCLUDES_STROPTS])dnl
@@ -2570,8 +2570,6 @@ AC_DEFUN([CURL_CHECK_FUNC_IOCTL], [
      test "$tst_compi_ioctl" = "yes" &&
      test "$tst_allow_ioctl" = "yes"; then
     AC_MSG_RESULT([yes])
-    AC_DEFINE_UNQUOTED(HAVE_IOCTL, 1,
-      [Define to 1 if you have the ioctl function.])
     curl_cv_func_ioctl="yes"
     CURL_CHECK_FUNC_IOCTL_FIONBIO
     CURL_CHECK_FUNC_IOCTL_SIOCGIFADDR
