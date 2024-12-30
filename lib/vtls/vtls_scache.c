@@ -109,8 +109,7 @@ static void cf_ssl_scache_clear_session(struct Curl_ssl_session *s)
   }
   s->quic_tp_len = 0;
   s->ietf_tls_id = 0;
-  s->time_received = 0;
-  s->lifetime_secs = 0;
+  s->valid_until = 0;
   Curl_safefree(s->alpn);
 }
 
@@ -124,20 +123,18 @@ static void cf_ssl_scache_sesssion_ldestroy(void *udata, void *s)
 CURLcode
 Curl_ssl_session_create(unsigned char *sdata, size_t sdata_len,
                         int ietf_tls_id, const char *alpn,
-                        curl_off_t time_received, long lifetime_secs,
-                        size_t earlydata_max,
+                        curl_off_t valid_until, size_t earlydata_max,
                         struct Curl_ssl_session **psession)
 {
   return Curl_ssl_session_create2(sdata, sdata_len, ietf_tls_id, alpn,
-                                  time_received, lifetime_secs,
-                                  earlydata_max, NULL, 0, psession);
+                                  valid_until, earlydata_max,
+                                  NULL, 0, psession);
 }
 
 CURLcode
 Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
                          int ietf_tls_id, const char *alpn,
-                         curl_off_t time_received, long lifetime_secs,
-                         size_t earlydata_max,
+                         curl_off_t valid_until, size_t earlydata_max,
                          unsigned char *quic_tp, size_t quic_tp_len,
                          struct Curl_ssl_session **psession)
 {
@@ -157,16 +154,7 @@ Curl_ssl_session_create2(unsigned char *sdata, size_t sdata_len,
   }
 
   s->ietf_tls_id = ietf_tls_id;
-  s->time_received = time_received;
-  if(lifetime_secs < 0)
-    lifetime_secs = -1; /* unknown */
-  else if((s->ietf_tls_id == CURL_IETF_PROTO_TLS1_3) &&
-          (lifetime_secs > CURL_SCACHE_MAX_13_LIFETIME_SEC))
-    lifetime_secs = CURL_SCACHE_MAX_13_LIFETIME_SEC;
-  else if(lifetime_secs > CURL_SCACHE_MAX_12_LIFETIME_SEC)
-    lifetime_secs = CURL_SCACHE_MAX_12_LIFETIME_SEC;
-
-  s->lifetime_secs = (int)lifetime_secs;
+  s->valid_until = valid_until;
   s->earlydata_max = earlydata_max;
   s->sdata = sdata;
   s->sdata_len = sdata_len;
@@ -272,8 +260,7 @@ static void cf_scache_session_remove(struct Curl_ssl_scache_peer *peer,
 static bool cf_scache_session_expired(struct Curl_ssl_session *s,
                                       curl_off_t now)
 {
-  return (s->lifetime_secs > 0 &&
-         (s->time_received + s->lifetime_secs) < now);
+  return (s->valid_until > 0) && (s->valid_until < now);
 }
 
 static void cf_scache_peer_remove_expired(struct Curl_ssl_scache_peer *peer,
@@ -715,16 +702,21 @@ static CURLcode cf_scache_peer_add_session(struct Curl_cfilter *cf,
   struct Curl_ssl_scache_peer *peer = NULL;
   CURLcode result = CURLE_OUT_OF_MEMORY;
   curl_off_t now = (curl_off_t)time(NULL);
+  curl_off_t max_lifetime;
 
   if(!scache || !scache->peer_count) {
     Curl_ssl_session_destroy(s);
     return CURLE_OK;
   }
 
-  if(!s->time_received)
-    s->time_received = now;
-  if(s->lifetime_secs < 0)
-    s->lifetime_secs = scache->default_lifetime_secs;
+  if(s->valid_until <= 0)
+    s->valid_until = now + scache->default_lifetime_secs;
+
+  max_lifetime = (s->ietf_tls_id == CURL_IETF_PROTO_TLS1_3) ?
+                 CURL_SCACHE_MAX_13_LIFETIME_SEC :
+                 CURL_SCACHE_MAX_12_LIFETIME_SEC;
+  if(s->valid_until > (now + max_lifetime))
+    s->valid_until = now + max_lifetime;
 
   if(cf_scache_session_expired(s, now)) {
     CURL_TRC_CF(data, cf, "[SCACHE] add, session already expired");
@@ -761,9 +753,9 @@ out:
   }
   else
     CURL_TRC_CF(data, cf, "[SCACHE] added session for %s [proto=0x%x, "
-                "lifetime=%d, alpn=%s, earlydata=%zu, quic_tp=%s], "
-                "peer has %zu sessions now",
-                ssl_peer_key, s->ietf_tls_id, s->lifetime_secs, s->alpn,
+                "valid_secs=%" FMT_OFF_T ", alpn=%s, earlydata=%zu, "
+                "quic_tp=%s], peer has %zu sessions now",
+                ssl_peer_key, s->ietf_tls_id, s->valid_until - now, s->alpn,
                 s->earlydata_max, s->quic_tp ? "yes" : "no",
                 Curl_llist_count(&peer->sessions));
   return result;
@@ -826,9 +818,8 @@ CURLcode Curl_ssl_scache_take(struct Curl_cfilter *cf,
   if(s) {
     *ps = s;
     CURL_TRC_CF(data, cf, "[SCACHE] took session for %s [proto=0x%x, "
-                "lifetime=%d, alpn=%s, earlydata=%zu, quic_tp=%s], "
-                "%zu sessions remain",
-                ssl_peer_key, s->ietf_tls_id, s->lifetime_secs, s->alpn,
+                "alpn=%s, earlydata=%zu, quic_tp=%s], %zu sessions remain",
+                ssl_peer_key, s->ietf_tls_id, s->alpn,
                 s->earlydata_max, s->quic_tp ? "yes" : "no",
                 Curl_llist_count(&peer->sessions));
   }

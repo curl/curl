@@ -2902,7 +2902,8 @@ CURLcode Curl_ossl_add_session(struct Curl_cfilter *cf,
     }
 
     result = Curl_ssl_session_create(der_session_buf, der_session_size,
-                                     ietf_tls_id, alpn, 0,
+                                     ietf_tls_id, alpn,
+                                     (curl_off_t)time(NULL) +
                                      SSL_SESSION_get_timeout(session), 0,
                                      &sc_session);
     der_session_buf = NULL;  /* took ownership of sdata */
