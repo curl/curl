@@ -536,6 +536,9 @@ elseif(APPLE)
 elseif(AMIGA)
   set(HAVE_GETADDRINFO 0)  # Breaks the build when detected and used.
 endif()
+if(DOS OR AMIGA)
+  set(HAVE_TIME_T_UNSIGNED 1)
+endif()
 
 if(ENABLE_THREADED_RESOLVER)
   if(WIN32)
@@ -1785,6 +1788,16 @@ if(NOT WIN32 AND NOT CMAKE_CROSSCOMPILING)
       argv[0][0] = ' ';
       return (argv[0][0] == ' ')?0:1;
     }" HAVE_WRITABLE_ARGV)
+endif()
+
+if(NOT CMAKE_CROSSCOMPILING)
+  include(CheckCSourceRuns)
+  check_c_source_runs("
+    #include <time.h>
+    int main(void) {
+      time_t t = -1;
+      return t < 0;
+    }" HAVE_TIME_T_UNSIGNED)
 endif()
 
 curl_internal_test(HAVE_GLIBC_STRERROR_R)
