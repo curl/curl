@@ -3842,8 +3842,7 @@ AC_CHECK_HEADERS(
   locale.h \
   stdbool.h \
   sys/filio.h \
-  sys/eventfd.h \
-  setjmp.h,
+  sys/eventfd.h,
 dnl to do if not found
 [],
 dnl to do if found
