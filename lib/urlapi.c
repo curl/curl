@@ -86,6 +86,9 @@ struct Curl_URL {
 
 #define DEFAULT_SCHEME "https"
 
+static CURLUcode parseurl_and_replace(const char *url, CURLU *u,
+                                      unsigned int flags);
+
 static void free_urlhandle(struct Curl_URL *u)
 {
   free(u->scheme);
@@ -244,20 +247,13 @@ size_t Curl_is_absolute_url(const char *url, char *buf, size_t buflen,
 
 /*
  * Concatenate a relative URL to a base URL making it absolute.
- * URL-encodes any spaces.
- * The returned pointer must be freed by the caller unless NULL
- * (returns NULL on out of memory).
  *
  * Note that this function destroys the 'base' string.
  */
-static CURLcode concat_url(char *base, const char *relurl, char **newurl)
+static CURLUcode redirect_url(char *base, const char *relurl,
+                              CURLU *u, unsigned int flags)
 {
-  /***
-   TRY to append this new path to the old URL
-   to the right of the host part. Oh crap, this is doomed to cause
-   problems in the future...
-  */
-  struct dynbuf newest;
+  struct dynbuf urlbuf;
   bool host_changed = FALSE;
   const char *useurl = relurl;
   CURLcode result = CURLE_OK;
@@ -270,7 +266,6 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
   else
     protsep += 2; /* pass the slashes */
 
-  *newurl = NULL;
   if(('/' != relurl[0]) && ('#' != relurl[0])) {
     /* First we need to find out if there is a ?-letter in the original URL,
        and cut it and the right-side of that off */
@@ -319,21 +314,21 @@ static CURLcode concat_url(char *base, const char *relurl, char **newurl)
       *pathsep = 0;
   }
 
-  Curl_dyn_init(&newest, CURL_MAX_INPUT_LENGTH);
+  Curl_dyn_init(&urlbuf, CURL_MAX_INPUT_LENGTH);
 
   /* copy over the root URL part */
-  result = Curl_dyn_add(&newest, base);
+  result = Curl_dyn_add(&urlbuf, base);
   if(result)
-    return result;
+    return cc2cu(result);
 
   /* then append the new piece on the right side */
-  uc = urlencode_str(&newest, useurl, strlen(useurl), !host_changed,
+  uc = urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed,
                      FALSE);
-  if(uc)
-    return (uc == CURLUE_TOO_LARGE) ? CURLE_TOO_LARGE : CURLE_OUT_OF_MEMORY;
-
-  *newurl = Curl_dyn_ptr(&newest);
-  return CURLE_OK;
+  if(!uc)
+    uc = parseurl_and_replace(Curl_dyn_ptr(&urlbuf), u,
+                              flags&~CURLU_PATH_AS_IS);
+  Curl_dyn_free(&urlbuf);
+  return uc;
 }
 
 /* scan for byte values <= 31, 127 and sometimes space */
@@ -1801,34 +1796,24 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
      * If the existing contents is enough for a URL, allow a relative URL to
      * replace it.
      */
-    CURLcode result;
     CURLUcode uc;
     char *oldurl;
-    char *redired_url;
 
     if(!nalloc)
       /* a blank URL is not a valid URL */
       return CURLUE_MALFORMED_INPUT;
 
-    /* if the new thing is absolute or the old one is not
-     * (we could not get an absolute URL in 'oldurl'),
-     * then replace the existing with the new. */
+    /* if the new thing is absolute or the old one is not (we could not get an
+     * absolute URL in 'oldurl'), then replace the existing with the new. */
     if(Curl_is_absolute_url(part, NULL, 0,
-                            flags & (CURLU_GUESS_SCHEME|
-                                     CURLU_DEFAULT_SCHEME))
+                            flags & (CURLU_GUESS_SCHEME|CURLU_DEFAULT_SCHEME))
        || curl_url_get(u, CURLUPART_URL, &oldurl, flags)) {
       return parseurl_and_replace(part, u, flags);
     }
 
-    /* apply the relative part to create a new URL
-     * and replace the existing one with it. */
-    result = concat_url(oldurl, part, &redired_url);
+    /* apply the relative part to create a new URL */
+    uc = redirect_url(oldurl, part, u, flags);
     free(oldurl);
-    if(result)
-      return cc2cu(result);
-
-    uc = parseurl_and_replace(redired_url, u, flags&~CURLU_PATH_AS_IS);
-    free(redired_url);
     return uc;
   }
   default:
