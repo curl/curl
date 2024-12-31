@@ -35,7 +35,7 @@
 #   HAVE_SSL_SET0_WBIO: `SSL_set0_wbio` present in OpenSSL/wolfSSL
 #   HAVE_OPENSSL_SRP: `SSL_CTX_set_srp_username` present in OpenSSL/wolfSSL
 #   HAVE_GNUTLS_SRP: `gnutls_srp_verifier` present in GnuTLS
-#   HAVE_SSL_CTX_SET_QUIC_METHOD: `SSL_CTX_set_quic_method` present in OpenSSL/wolfSSL
+#   HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT: `SSL_set_quic_use_legacy_codepoint` present in OpenSSL/wolfSSL
 #   HAVE_QUICHE_CONN_SET_QLOG_FD: `quiche_conn_set_qlog_fd` present in quiche
 #   HAVE_ECH: ECH API checks for OpenSSL, BoringSSL or wolfSSL
 #
@@ -921,16 +921,16 @@ endmacro()
 
 # Ensure that the OpenSSL fork actually supports QUIC.
 macro(curl_openssl_check_quic)
-  if(NOT DEFINED HAVE_SSL_CTX_SET_QUIC_METHOD)
+  if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     if(USE_OPENSSL)
-      curl_openssl_check_symbol_exists("SSL_CTX_set_quic_method" "openssl/ssl.h" HAVE_SSL_CTX_SET_QUIC_METHOD)
+      curl_openssl_check_symbol_exists("SSL_set_quic_use_legacy_codepoint" "openssl/ssl.h" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
     if(USE_WOLFSSL)
-      curl_openssl_check_symbol_exists("wolfSSL_set_quic_method" "wolfssl/options.h;wolfssl/openssl/ssl.h"
-        HAVE_SSL_CTX_SET_QUIC_METHOD)
+      curl_openssl_check_symbol_exists("wolfSSL_set_quic_use_legacy_codepoint" "wolfssl/options.h;wolfssl/openssl/ssl.h"
+        HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
   endif()
-  if(NOT HAVE_SSL_CTX_SET_QUIC_METHOD)
+  if(NOT HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     message(FATAL_ERROR "QUIC support is missing in OpenSSL fork. Try setting -DOPENSSL_ROOT_DIR")
   endif()
 endmacro()
