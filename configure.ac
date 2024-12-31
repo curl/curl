@@ -3985,7 +3985,7 @@ case $host_os in
     ],[
       AC_MSG_RESULT([no])
     ],[
-      dnl cross-compiling, most systems are unsigned
+      dnl cross-compiling, most systems are signed
       AC_MSG_RESULT([no])
     ])
     ;;
