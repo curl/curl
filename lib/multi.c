@@ -3031,8 +3031,10 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
 
   sigpipe_apply(multi->cpool.idata, &pipe_st);
   Curl_cpool_multi_perform(multi);
-
   sigpipe_restore(&pipe_st);
+
+  if(multi_ischanged(m, TRUE))
+    process_pending_handles(m);
 
   /*
    * Simply remove all expired timers from the splay since handles are dealt
@@ -3629,6 +3631,9 @@ out:
   }
   sigpipe_restore(&mrc.pipe_st);
 
+  if(multi_ischanged(multi, TRUE))
+    process_pending_handles(multi);
+
   if(running_handles)
     *running_handles = (int)multi->num_alive;
 
@@ -3686,9 +3691,6 @@ CURLMcode curl_multi_setopt(CURLM *m,
     break;
   case CURLMOPT_MAX_TOTAL_CONNECTIONS:
     multi->max_total_connections = va_arg(param, long);
-    /* for now, let this also decide the max number of connections
-     * in shutdown handling */
-    multi->max_shutdown_connections = va_arg(param, long);
     break;
     /* options formerly used for pipelining */
   case CURLMOPT_MAX_PIPELINE_LENGTH:

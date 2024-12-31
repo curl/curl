@@ -100,6 +100,8 @@ static void cpool_shutdown_all(struct cpool *cpool,
                                struct Curl_easy *data, int timeout_ms);
 static void cpool_close_and_destroy_all(struct cpool *cpool);
 static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool);
+static size_t cpool_shutdown_dest_count(struct cpool *cpool,
+                                        const char *destination);
 
 static struct cpool_bundle *cpool_bundle_create(const char *dest,
                                                 size_t dest_len)
@@ -285,6 +287,7 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
   struct cpool_bundle *bundle;
   size_t dest_limit = 0;
   size_t total_limit = 0;
+  size_t shutdowns;
   int result = CPOOL_LIMIT_OK;
 
   if(!cpool)
@@ -300,8 +303,12 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
   CPOOL_LOCK(cpool);
   if(dest_limit) {
+    size_t live;
+
     bundle = cpool_find_bundle(cpool, conn);
-    while(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
+    live = bundle ? Curl_llist_count(&bundle->conns) : 0;
+    shutdowns = cpool_shutdown_dest_count(cpool, conn->destination);
+    while(!shutdowns && bundle && live >= dest_limit) {
       struct connectdata *oldest_idle = NULL;
       /* The bundle is full. Extract the oldest connection that may
        * be removed now, if there is one. */
@@ -317,15 +324,18 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
       /* in case the bundle was destroyed in disconnect, look it up again */
       bundle = cpool_find_bundle(cpool, conn);
+      live = bundle ? Curl_llist_count(&bundle->conns) : 0;
+      shutdowns = cpool_shutdown_dest_count(cpool, conn->destination);
     }
-    if(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
+    if((live + shutdowns) >= dest_limit) {
       result = CPOOL_LIMIT_DEST;
       goto out;
     }
   }
 
   if(total_limit) {
-    while(cpool->num_conn >= total_limit) {
+    shutdowns = Curl_llist_count(&cpool->shutdowns);
+    while((cpool->num_conn + shutdowns) >= total_limit) {
       struct connectdata *oldest_idle = cpool_get_oldest_idle(cpool);
       if(!oldest_idle)
         break;
@@ -335,8 +345,9 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
                    "limit of %zu",
                    oldest_idle->connection_id, cpool->num_conn, total_limit));
       Curl_cpool_disconnect(data, oldest_idle, FALSE);
+      shutdowns = Curl_llist_count(&cpool->shutdowns);
     }
-    if(cpool->num_conn >= total_limit) {
+    if((cpool->num_conn + shutdowns) >= total_limit) {
       result = CPOOL_LIMIT_TOTAL;
       goto out;
     }
@@ -374,7 +385,8 @@ CURLcode Curl_cpool_add_conn(struct Curl_easy *data,
   cpool->num_conn++;
   DEBUGF(infof(data, "Added connection %" FMT_OFF_T ". "
                "The cache now contains %zu members",
-               conn->connection_id, cpool->num_conn));
+               conn->connection_id,
+               cpool->num_conn + Curl_llist_count(&cpool->shutdowns)));
 out:
   CPOOL_UNLOCK(cpool);
 
@@ -612,6 +624,21 @@ bool Curl_cpool_find(struct Curl_easy *data,
   return result;
 }
 
+/* How many connections to the given destination are in shutdown? */
+static size_t cpool_shutdown_dest_count(struct cpool *cpool,
+                                        const char *destination)
+{
+  size_t n = 0;
+  struct Curl_llist_node *e = Curl_llist_head(&cpool->shutdowns);
+  while(e) {
+    struct connectdata *conn = Curl_node_elem(e);
+    if(!strcmp(destination, conn->destination))
+      ++n;
+    e = Curl_node_next(e);
+  }
+  return n;
+}
+
 static void cpool_shutdown_discard_all(struct cpool *cpool)
 {
   struct Curl_llist_node *e = Curl_llist_head(&cpool->shutdowns);
@@ -742,12 +769,12 @@ static void cpool_discard_conn(struct cpool *cpool,
 
   /* Add the connection to our shutdown list for non-blocking shutdown
    * during multi processing. */
-  if(data->multi && data->multi->max_shutdown_connections > 0 &&
-     (data->multi->max_shutdown_connections >=
-      (long)Curl_llist_count(&cpool->shutdowns))) {
+  if(data->multi && data->multi->max_total_connections > 0 &&
+     (data->multi->max_total_connections <=
+      (long)(cpool->num_conn + Curl_llist_count(&cpool->shutdowns)))) {
     DEBUGF(infof(data, "[CCACHE] discarding oldest shutdown connection "
-                       "due to limit of %ld",
-                       data->multi->max_shutdown_connections));
+                       "due to connection limit of %ld",
+                       data->multi->max_total_connections));
     cpool_shutdown_destroy_oldest(cpool);
   }
 
@@ -767,8 +794,8 @@ static void cpool_discard_conn(struct cpool *cpool,
 
   Curl_llist_append(&cpool->shutdowns, conn, &conn->cpool_node);
   DEBUGF(infof(data, "[CCACHE] added #%" FMT_OFF_T
-               " to shutdown list of length %zu", conn->connection_id,
-               Curl_llist_count(&cpool->shutdowns)));
+               " to shutdowns, now %zu conns in shutdown",
+               conn->connection_id, Curl_llist_count(&cpool->shutdowns)));
 }
 
 void Curl_cpool_disconnect(struct Curl_easy *data,
@@ -1049,6 +1076,11 @@ static void cpool_close_and_destroy(struct cpool *cpool,
   Curl_detach_connection(data);
 
   Curl_conn_free(data, conn);
+
+  if(cpool && cpool->multi) {
+    DEBUGF(infof(data, "[CCACHE] trigger multi connchanged"));
+    Curl_multi_connchanged(cpool->multi);
+  }
 }
 
 
