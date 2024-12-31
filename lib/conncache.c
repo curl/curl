@@ -100,6 +100,8 @@ static void cpool_shutdown_all(struct cpool *cpool,
                                struct Curl_easy *data, int timeout_ms);
 static void cpool_close_and_destroy_all(struct cpool *cpool);
 static struct connectdata *cpool_get_oldest_idle(struct cpool *cpool);
+static size_t cpool_shutdown_dest_count(struct cpool *cpool,
+                                        const char *destination);
 
 static struct cpool_bundle *cpool_bundle_create(const char *dest,
                                                 size_t dest_len)
@@ -300,8 +302,12 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
   CPOOL_LOCK(cpool);
   if(dest_limit) {
+    size_t shutdowns, live;
+
     bundle = cpool_find_bundle(cpool, conn);
-    while(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
+    live = bundle ? Curl_llist_count(&bundle->conns) : 0;
+    shutdowns = cpool_shutdown_dest_count(cpool, conn->destination);
+    while(!shutdowns && bundle && live >= dest_limit) {
       struct connectdata *oldest_idle = NULL;
       /* The bundle is full. Extract the oldest connection that may
        * be removed now, if there is one. */
@@ -317,8 +323,9 @@ int Curl_cpool_check_limits(struct Curl_easy *data,
 
       /* in case the bundle was destroyed in disconnect, look it up again */
       bundle = cpool_find_bundle(cpool, conn);
+      live = bundle ? Curl_llist_count(&bundle->conns) : 0;
     }
-    if(bundle && (Curl_llist_count(&bundle->conns) >= dest_limit)) {
+    if((live + shutdowns) >= dest_limit) {
       result = CPOOL_LIMIT_DEST;
       goto out;
     }
@@ -610,6 +617,21 @@ bool Curl_cpool_find(struct Curl_easy *data,
   }
   CPOOL_UNLOCK(cpool);
   return result;
+}
+
+/* How many connections to the given destination are in shutdown? */
+static size_t cpool_shutdown_dest_count(struct cpool *cpool,
+                                        const char *destination)
+{
+  size_t n = 0;
+  struct Curl_llist_node *e = Curl_llist_head(&cpool->shutdowns);
+  while(e) {
+    struct connectdata *conn = Curl_node_elem(e);
+    if(!strcmp(destination, conn->destination))
+      ++n;
+    e = Curl_node_next(e);
+  }
+  return n;
 }
 
 static void cpool_shutdown_discard_all(struct cpool *cpool)
@@ -1049,6 +1071,9 @@ static void cpool_close_and_destroy(struct cpool *cpool,
   Curl_detach_connection(data);
 
   Curl_conn_free(data, conn);
+
+  if(cpool && cpool->multi)
+    Curl_multi_connchanged(cpool->multi);
 }
 
 
