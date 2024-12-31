@@ -31,6 +31,7 @@ Connection: close
 http
 </server>
 <features>
+cookies
 large-time
 </features>
 <name>
