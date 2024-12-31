@@ -927,7 +927,8 @@ endings either CRLF or LF so 't' is appropriate.
 #define STRCONST(x) x,sizeof(x)-1
 
 /* Some versions of the Android SDK is missing the declaration */
-#if defined(HAVE_GETPWUID_R) && defined(HAVE_DECL_GETPWUID_R_MISSING)
+#if defined(HAVE_GETPWUID_R) && \
+  defined(__ANDROID_API__) && (__ANDROID_API__ < 21)
 struct passwd;
 int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
                size_t buflen, struct passwd **result);
