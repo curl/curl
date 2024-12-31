@@ -324,10 +324,9 @@ static CURLUcode redirect_url(char *base, const char *relurl,
   /* then append the new piece on the right side */
   uc = urlencode_str(&urlbuf, useurl, strlen(useurl), !host_changed,
                      FALSE);
-  if(uc)
-    return uc;
-
-  uc = parseurl_and_replace(Curl_dyn_ptr(&urlbuf), u, flags&~CURLU_PATH_AS_IS);
+  if(!uc)
+    uc = parseurl_and_replace(Curl_dyn_ptr(&urlbuf), u,
+                              flags&~CURLU_PATH_AS_IS);
   Curl_dyn_free(&urlbuf);
   return uc;
 }
