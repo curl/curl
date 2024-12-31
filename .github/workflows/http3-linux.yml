@@ -11,10 +11,8 @@ name: Linux HTTP/3
       - '*/ci'
     paths-ignore:
       - '**/*.md'
-      - '**/CMakeLists.txt'
       - '.circleci/**'
       - 'appveyor.*'
-      - 'CMake/**'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
@@ -24,10 +22,8 @@ name: Linux HTTP/3
       - master
     paths-ignore:
       - '**/*.md'
-      - '**/CMakeLists.txt'
       - '.circleci/**'
       - 'appveyor.*'
-      - 'CMake/**'
       - 'packages/**'
       - 'plan9/**'
       - 'projects/**'
