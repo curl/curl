@@ -503,7 +503,10 @@ static unsigned int cwfds_add_sock(struct curl_waitfds *cwfds,
                                    curl_socket_t sock, short events)
 {
   int i;
-
+  if(!cwfds->wfds) {
+    DEBUGASSERT(!cwfds->count && !cwfds->n);
+    return 1;
+  }
   if(cwfds->n <= INT_MAX) {
     for(i = (int)cwfds->n - 1; i >= 0; --i) {
       if(sock == cwfds->wfds[i].fd) {
