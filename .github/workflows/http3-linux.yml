@@ -158,7 +158,7 @@ jobs:
       - if: steps.cache-wolfssl.outputs.cache-hit != 'true'
         run: |
           cd $HOME
-          git clone --quiet --depth=1 -b ${{ env.wolfssl-version }} https://github.com/wolfSSL/wolfssl.git
+          git clone --quiet --depth=1 -b v${{ env.wolfssl-version }}-stable https://github.com/wolfSSL/wolfssl.git
           cd wolfssl
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
