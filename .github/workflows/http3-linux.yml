@@ -44,7 +44,8 @@ env:
   quictls-version: 3.3.0
   # renovate: datasource=github-tags depName=gnutls/gnutls versioning=semver registryUrl=https://github.com
   gnutls-version: 3.8.8
-  wolfssl-version: master
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  wolfssl-version: 5.7.6
   # renovate: datasource=github-tags depName=ngtcp2/nghttp3 versioning=semver registryUrl=https://github.com
   nghttp3-version: 1.7.0
   # renovate: datasource=github-tags depName=ngtcp2/ngtcp2 versioning=semver registryUrl=https://github.com
@@ -55,33 +56,7 @@ env:
   quiche-version: 0.22.0
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      wolfssl-version: ${{ steps.wolfssl-version.outputs.result }}
-
-    steps:
-      - id: wolfssl-version
-        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
-        with:
-          result-encoding: string
-          script: |
-            let version = '${{ env.wolfssl-version }}'
-
-            if (version != 'master') {
-                return version
-            }
-
-            let { data: commits } = await github.rest.repos.listCommits({
-                owner: 'wolfSSL',
-                repo: 'wolfssl',
-            })
-
-            return commits[0].sha
-
   build-cache:
-    needs:
-      - setup
     runs-on: ubuntu-latest
 
     steps:
@@ -108,7 +83,6 @@ jobs:
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
-          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
         with:
           path: /home/runner/wolfssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
@@ -129,7 +103,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: /home/runner/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}-${{ env.quictls-version }}-${{ env.gnutls-version }}-${{ env.wolfssl-version }}
 
       - name: cache nghttp2
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -138,7 +112,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: /home/runner/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}-${{ env.quictls-version }}-${{ env.ngtcp2-version }}-${{ env.nghttp3-version }}
 
       - id: settings
         if: |
@@ -191,16 +165,10 @@ jobs:
         name: 'build gnutls'
 
       - if: steps.cache-wolfssl.outputs.cache-hit != 'true'
-        env:
-          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
         run: |
           cd $HOME
-          mkdir wolfssl
+          git clone --quiet --depth=1 -b v${{ env.wolfssl-version }}-stable https://github.com/wolfSSL/wolfssl.git
           cd wolfssl
-          git init
-          git remote add origin https://github.com/wolfSSL/wolfssl.git
-          git fetch origin --depth=1 ${{ env.wolfssl-version }}
-          git checkout ${{ env.wolfssl-version }}
           ./autogen.sh
           ./configure --disable-dependency-tracking --enable-all --enable-quic \
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$PWD/build
@@ -215,7 +183,9 @@ jobs:
           cd nghttp3
           git submodule update --init --depth=1
           autoreconf -fi
-          ./configure --disable-dependency-tracking --prefix=$PWD/build PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig" --enable-lib-only
+          ./configure --disable-dependency-tracking --prefix=$PWD/build \
+            PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig" \
+            --enable-lib-only
           make
           make install
         name: 'build nghttp3'
@@ -248,7 +218,6 @@ jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs:
-      - setup
       - build-cache
     runs-on: 'ubuntu-24.04'
     timeout-minutes: 45
@@ -359,7 +328,6 @@ jobs:
         id: cache-wolfssl
         env:
           cache-name: cache-wolfssl
-          wolfssl-version: ${{ needs.setup.outputs.wolfssl-version }}
         with:
           path: /home/runner/wolfssl/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
@@ -382,7 +350,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: /home/runner/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}-${{ env.quictls-version }}-${{ env.gnutls-version }}-${{ env.wolfssl-version }}
           fail-on-cache-miss: true
 
       - name: cache nghttp2
@@ -392,7 +360,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: /home/runner/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}-${{ env.quictls-version }}-${{ env.ngtcp2-version }}-${{ env.nghttp3-version }}
           fail-on-cache-miss: true
 
       - name: cache openssl
