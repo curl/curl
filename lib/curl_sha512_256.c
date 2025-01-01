@@ -388,7 +388,7 @@ Curl_rotr64(curl_uint64_t value, unsigned int bits)
 /**
  * SHA-512/256 calculation context
  */
-struct mhdx_sha512_256ctx
+struct Curl_sha512_256ctx
 {
   /**
    * Intermediate hash value. The variable is properly aligned. Smart
@@ -416,7 +416,7 @@ struct mhdx_sha512_256ctx
 /**
  * Context type used for SHA-512/256 calculations
  */
-typedef struct mhdx_sha512_256ctx Curl_sha512_256_ctx;
+typedef struct Curl_sha512_256ctx Curl_sha512_256_ctx;
 
 
 /**
@@ -428,7 +428,7 @@ typedef struct mhdx_sha512_256ctx Curl_sha512_256_ctx;
 static CURLcode
 Curl_sha512_256_init(void *context)
 {
-  struct mhdx_sha512_256ctx *const ctx = (struct mhdx_sha512_256ctx *) context;
+  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
 
   /* Check whether the header and this file use the same numbers */
   DEBUGASSERT(CURL_SHA512_256_DIGEST_LENGTH == CURL_SHA512_256_DIGEST_SIZE);
@@ -633,7 +633,7 @@ Curl_sha512_256_update(void *context,
                        size_t length)
 {
   unsigned int bytes_have; /**< Number of bytes in the context buffer */
-  struct mhdx_sha512_256ctx *const ctx = (struct mhdx_sha512_256ctx *)context;
+  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
   /* the void pointer here is required to mute Intel compiler warning */
   void *const ctx_buf = ctx->buffer;
 
@@ -708,7 +708,7 @@ static CURLcode
 Curl_sha512_256_finish(unsigned char *digest,
                        void *context)
 {
-  struct mhdx_sha512_256ctx *const ctx = (struct mhdx_sha512_256ctx *)context;
+  struct Curl_sha512_256ctx *const ctx = (struct Curl_sha512_256ctx *)context;
   curl_uint64_t num_bits;   /**< Number of processed bits */
   unsigned int bytes_have; /**< Number of bytes in the context buffer */
   /* the void pointer here is required to mute Intel compiler warning */
@@ -775,7 +775,7 @@ Curl_sha512_256_finish(unsigned char *digest,
   CURL_PUT_64BIT_BE((digest + 3 * SHA512_256_BYTES_IN_WORD), ctx->H[3]);
 
   /* Erase potentially sensitive data. */
-  memset(ctx, 0, sizeof(struct mhdx_sha512_256ctx));
+  memset(ctx, 0, sizeof(struct Curl_sha512_256ctx));
 
   return CURLE_OK;
 }
