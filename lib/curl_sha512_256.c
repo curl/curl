@@ -426,7 +426,7 @@ typedef struct mhdx_sha512_256ctx Curl_sha512_256_ctx;
  * @return always CURLE_OK
  */
 static CURLcode
-MHDx_sha512_256_init(void *context)
+Curl_sha512_256_init(void *context)
 {
   struct mhdx_sha512_256ctx *const ctx = (struct mhdx_sha512_256ctx *) context;
 
@@ -628,7 +628,7 @@ MHDx_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
  * @return always CURLE_OK
  */
 static CURLcode
-MHDx_sha512_256_update(void *context,
+Curl_sha512_256_update(void *context,
                        const unsigned char *data,
                        size_t length)
 {
@@ -705,7 +705,7 @@ MHDx_sha512_256_update(void *context,
  * @return always CURLE_OK
  */
 static CURLcode
-MHDx_sha512_256_finish(unsigned char *digest,
+Curl_sha512_256_finish(unsigned char *digest,
                        void *context)
 {
   struct mhdx_sha512_256ctx *const ctx = (struct mhdx_sha512_256ctx *)context;
@@ -779,11 +779,6 @@ MHDx_sha512_256_finish(unsigned char *digest,
 
   return CURLE_OK;
 }
-
-/* Map to the local implementation */
-#define Curl_sha512_256_init    MHDx_sha512_256_init
-#define Curl_sha512_256_update  MHDx_sha512_256_update
-#define Curl_sha512_256_finish  MHDx_sha512_256_finish
 
 #endif /* Local SHA-512/256 code */
 
