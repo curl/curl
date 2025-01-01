@@ -129,7 +129,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: /home/runner/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}-${{ env.quictls-version }}-${{ env.gnutls-version }}-${{ env.wolfssl-version }}
 
       - name: cache nghttp2
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -382,7 +382,7 @@ jobs:
           cache-name: cache-ngtcp2
         with:
           path: /home/runner/ngtcp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}-${{ env.quictls-version }}-${{ env.gnutls-version }}-${{ env.wolfssl-version }}
           fail-on-cache-miss: true
 
       - name: cache nghttp2
