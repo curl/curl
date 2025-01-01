@@ -812,12 +812,91 @@ init_config_builder_keylog(struct Curl_easy *data,
 }
 
 static CURLcode
+init_config_builder_client_auth(struct Curl_easy *data,
+                                const struct ssl_primary_config *conn_config,
+                                const struct ssl_config_data *ssl_config,
+                                struct rustls_client_config_builder *builder)
+{
+  struct dynbuf cert_contents;
+  struct dynbuf key_contents;
+  rustls_result rr;
+  const struct rustls_certified_key *certified_key = NULL;
+  CURLcode result = CURLE_OK;
+
+  if(conn_config->clientcert && !ssl_config->key) {
+    failf(data, "rustls: must provide key with certificate '%s'",
+          conn_config->clientcert);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+  else if(!conn_config->clientcert && ssl_config->key) {
+    failf(data, "rustls: must provide certificate with key '%s'",
+          conn_config->clientcert);
+    return CURLE_SSL_CERTPROBLEM;
+  }
+
+  Curl_dyn_init(&cert_contents, SIZE_MAX);
+  Curl_dyn_init(&key_contents, SIZE_MAX);
+
+  if(!read_file_into(conn_config->clientcert, &cert_contents)) {
+    failf(data, "rustls: failed to read client certificate file: '%s'",
+          conn_config->clientcert);
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  if(!read_file_into(ssl_config->key, &key_contents)) {
+    failf(data, "rustls: failed to read key file: '%s'", ssl_config->key);
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  rr = rustls_certified_key_build(Curl_dyn_uptr(&cert_contents),
+                                  Curl_dyn_len(&cert_contents),
+                                  Curl_dyn_uptr(&key_contents),
+                                  Curl_dyn_len(&key_contents),
+                                  &certified_key);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls: failed to build certified key");
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  rr = rustls_certified_key_keys_match(certified_key);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data,
+                 rr,
+                 "rustls: client certificate and keypair files do not match:");
+
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+  rr = rustls_client_config_builder_set_certified_key(builder,
+                                                      &certified_key,
+                                                      1);
+  if(rr != RUSTLS_RESULT_OK) {
+    rustls_failf(data, rr, "rustls: failed to set certified key");
+    result = CURLE_SSL_CERTPROBLEM;
+    goto cleanup;
+  }
+
+cleanup:
+  Curl_dyn_free(&cert_contents);
+  Curl_dyn_free(&key_contents);
+  if(certified_key) {
+    rustls_certified_key_free(certified_key);
+  }
+  return result;
+}
+
+static CURLcode
 cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                 struct rustls_ssl_backend_data *const backend)
 {
   const struct ssl_connect_data *connssl = cf->ctx;
   const struct ssl_primary_config *conn_config =
     Curl_ssl_cf_get_primary_config(cf);
+  struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
   struct rustls_connection *rconn = NULL;
   struct rustls_client_config_builder *config_builder = NULL;
 
@@ -850,6 +929,17 @@ cr_init_backend(struct Curl_cfilter *cf, struct Curl_easy *data,
                                           conn_config,
                                           ca_info_blob,
                                           ssl_cafile);
+    if(result != CURLE_OK) {
+      rustls_client_config_builder_free(config_builder);
+      return result;
+    }
+  }
+
+  if(conn_config->clientcert || ssl_config->key) {
+    result = init_config_builder_client_auth(data,
+                                             conn_config,
+                                             ssl_config,
+                                             config_builder);
     if(result != CURLE_OK) {
       rustls_client_config_builder_free(config_builder);
       return result;
