@@ -207,7 +207,6 @@ jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
     needs:
-      - setup
       - build-cache
     runs-on: 'ubuntu-24.04'
     timeout-minutes: 45
