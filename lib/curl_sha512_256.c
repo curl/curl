@@ -462,7 +462,7 @@ Curl_sha512_256_init(void *context)
  * @param data  the data buffer with #CURL_SHA512_256_BLOCK_SIZE bytes block
  */
 static void
-MHDx_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
+Curl_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
                           const void *data)
 {
   /* Working variables,
@@ -661,7 +661,7 @@ Curl_sha512_256_update(void *context,
              bytes_left);
       data += bytes_left;
       length -= bytes_left;
-      MHDx_sha512_256_transform(ctx->H, ctx->buffer);
+      Curl_sha512_256_transform(ctx->H, ctx->buffer);
       bytes_have = 0;
     }
   }
@@ -669,7 +669,7 @@ Curl_sha512_256_update(void *context,
   while(CURL_SHA512_256_BLOCK_SIZE <= length) {
     /* Process any full blocks of new data directly,
        without copying to the buffer. */
-    MHDx_sha512_256_transform(ctx->H, data);
+    Curl_sha512_256_transform(ctx->H, data);
     data += CURL_SHA512_256_BLOCK_SIZE;
     length -= CURL_SHA512_256_BLOCK_SIZE;
   }
@@ -742,7 +742,7 @@ Curl_sha512_256_finish(unsigned char *digest,
       memset(((unsigned char *) ctx_buf) + bytes_have, 0,
              CURL_SHA512_256_BLOCK_SIZE - bytes_have);
     /* Process the full block. */
-    MHDx_sha512_256_transform(ctx->H, ctx->buffer);
+    Curl_sha512_256_transform(ctx->H, ctx->buffer);
     /* Start the new block. */
     bytes_have = 0;
   }
@@ -764,7 +764,7 @@ Curl_sha512_256_finish(unsigned char *digest,
                       + SHA512_256_BYTES_IN_WORD,         \
                       num_bits);
   /* Process the full final block. */
-  MHDx_sha512_256_transform(ctx->H, ctx->buffer);
+  Curl_sha512_256_transform(ctx->H, ctx->buffer);
 
   /* Put in BE mode the leftmost part of the hash as the final digest.
      See FIPS PUB 180-4 section 6.7. */
