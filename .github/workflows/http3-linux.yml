@@ -227,7 +227,7 @@ jobs:
           cd ngtcp2
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
-            PKG_CONFIG_PATH="$PWD/build/lib/pkgconfig:$HOME/quictls/build/lib/pkgconfig:$HOME/gnutls/build/lib/pkgconfig:$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig" \
+            PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig:$HOME/gnutls/build/lib/pkgconfig:$HOME/wolfssl/build/lib/pkgconfig" \
             --enable-lib-only --with-openssl --with-gnutls --with-wolfssl
           make install
         name: 'build ngtcp2'
@@ -239,7 +239,7 @@ jobs:
           cd nghttp2
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
-            PKG_CONFIG_PATH="$HOME/build/lib/pkgconfig:$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig" \
+            PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig" \
             LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib" \
             --enable-http3
           make install
