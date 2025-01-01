@@ -304,7 +304,7 @@ Curl_sha512_256_finish(unsigned char *digest,
 /* Bits manipulation macros and functions.
    Can be moved to other headers to reuse. */
 
-#define MHDX_GET_64BIT_BE(ptr)                                  \
+#define CURL_GET_64BIT_BE(ptr)                                  \
   ( ((curl_uint64_t)(((const unsigned char*)(ptr))[0]) << 56) | \
     ((curl_uint64_t)(((const unsigned char*)(ptr))[1]) << 48) | \
     ((curl_uint64_t)(((const unsigned char*)(ptr))[2]) << 40) | \
@@ -314,7 +314,7 @@ Curl_sha512_256_finish(unsigned char *digest,
     ((curl_uint64_t)(((const unsigned char*)(ptr))[6]) << 8)  | \
     (curl_uint64_t)(((const unsigned char*)(ptr))[7]) )
 
-#define MHDX_PUT_64BIT_BE(ptr,val) do {                                 \
+#define CURL_PUT_64BIT_BE(ptr,val) do {                                 \
     ((unsigned char*)(ptr))[7]=(unsigned char)((curl_uint64_t)(val));   \
     ((unsigned char*)(ptr))[6]=(unsigned char)(((curl_uint64_t)(val)) >> 8); \
     ((unsigned char*)(ptr))[5]=(unsigned char)(((curl_uint64_t)(val)) >> 16); \
@@ -577,7 +577,7 @@ MHDx_sha512_256_transform(curl_uint64_t H[SHA512_256_HASH_SIZE_WORDS],
        Input data must be read in big-endian bytes order,
        see FIPS PUB 180-4 section 3.1.2. */
 #define SHA512_GET_W_FROM_DATA(buf,t)                                   \
-    MHDX_GET_64BIT_BE(                                                  \
+    CURL_GET_64BIT_BE(                                                  \
       ((const unsigned char*) (buf)) + (t) * SHA512_256_BYTES_IN_WORD)
 
     /* During first 16 steps, before making any calculation on each step, the
@@ -754,11 +754,11 @@ Curl_sha512_256_finish(unsigned char *digest,
      part of number of bits as big-endian values.
      See FIPS PUB 180-4 section 5.1.2. */
   /* Note: the target location is predefined and buffer is always aligned */
-  MHDX_PUT_64BIT_BE(((unsigned char *) ctx_buf)  \
+  CURL_PUT_64BIT_BE(((unsigned char *) ctx_buf)  \
                       + CURL_SHA512_256_BLOCK_SIZE    \
                       - SHA512_256_SIZE_OF_LEN_ADD,   \
                       ctx->count_bits_hi);
-  MHDX_PUT_64BIT_BE(((unsigned char *) ctx_buf)      \
+  CURL_PUT_64BIT_BE(((unsigned char *) ctx_buf)      \
                       + CURL_SHA512_256_BLOCK_SIZE        \
                       - SHA512_256_SIZE_OF_LEN_ADD        \
                       + SHA512_256_BYTES_IN_WORD,         \
@@ -769,10 +769,10 @@ Curl_sha512_256_finish(unsigned char *digest,
   /* Put in BE mode the leftmost part of the hash as the final digest.
      See FIPS PUB 180-4 section 6.7. */
 
-  MHDX_PUT_64BIT_BE((digest + 0 * SHA512_256_BYTES_IN_WORD), ctx->H[0]);
-  MHDX_PUT_64BIT_BE((digest + 1 * SHA512_256_BYTES_IN_WORD), ctx->H[1]);
-  MHDX_PUT_64BIT_BE((digest + 2 * SHA512_256_BYTES_IN_WORD), ctx->H[2]);
-  MHDX_PUT_64BIT_BE((digest + 3 * SHA512_256_BYTES_IN_WORD), ctx->H[3]);
+  CURL_PUT_64BIT_BE((digest + 0 * SHA512_256_BYTES_IN_WORD), ctx->H[0]);
+  CURL_PUT_64BIT_BE((digest + 1 * SHA512_256_BYTES_IN_WORD), ctx->H[1]);
+  CURL_PUT_64BIT_BE((digest + 2 * SHA512_256_BYTES_IN_WORD), ctx->H[2]);
+  CURL_PUT_64BIT_BE((digest + 3 * SHA512_256_BYTES_IN_WORD), ctx->H[3]);
 
   /* Erase potentially sensitive data. */
   memset(ctx, 0, sizeof(struct mhdx_sha512_256ctx));
