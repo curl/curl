@@ -91,7 +91,7 @@ else()
 endif()
 
 if(NOT WIN32)
-  find_library(_math_library "m")
+  find_library(_math_library NAMES "m")
   if(_math_library)
     list(APPEND WOLFSSL_LIBRARIES "m")  # for log and pow
   endif()
