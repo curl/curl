@@ -122,6 +122,24 @@ jobs:
           path: /home/runner/nghttp3/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp3-version }}
 
+      - name: cache ngtcp2
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-ngtcp2
+        env:
+          cache-name: cache-ngtcp2
+        with:
+          path: /home/runner/ngtcp2/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.ngtcp2-version }}
+
+      - name: cache nghttp2
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-nghttp2
+        env:
+          cache-name: cache-nghttp2
+        with:
+          path: /home/runner/nghttp2/build
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+
       - id: settings
         if: |
           steps.cache-quictls-no-deprecated.outputs.cache-hit != 'true' ||
@@ -219,10 +237,6 @@ jobs:
           cd $HOME
           git clone --quiet --depth=1 -b v${{ env.nghttp2-version }} https://github.com/nghttp2/nghttp2
           cd nghttp2
-          echo '----------'
-          ls -lA $HOME/build || true
-          find $HOME/build || true
-          echo '----------'
           autoreconf -fi
           ./configure --disable-dependency-tracking --prefix=$PWD/build \
             PKG_CONFIG_PATH="$HOME/quictls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig" \
