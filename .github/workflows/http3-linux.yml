@@ -138,7 +138,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: /home/runner/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}-${{ env.quictls-version }}-${{ env.ngtcp2-version }}-${{ env.nghttp3-version }}
 
       - id: settings
         if: |
@@ -392,7 +392,7 @@ jobs:
           cache-name: cache-nghttp2
         with:
           path: /home/runner/nghttp2/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}
+          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.nghttp2-version }}-${{ env.quictls-version }}-${{ env.ngtcp2-version }}-${{ env.nghttp3-version }}
           fail-on-cache-miss: true
 
       - name: cache openssl
