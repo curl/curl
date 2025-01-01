@@ -84,12 +84,6 @@
 #define AMIGA_FILESYSTEM 1
 #endif
 
-#ifdef OPEN_NEEDS_ARG3
-#  define open_readonly(p,f) open((p),(f),(0))
-#else
-#  define open_readonly(p,f) open((p),(f))
-#endif
-
 /*
  * Forward declarations.
  */
@@ -209,7 +203,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open_readonly(actual_path, O_RDONLY|O_BINARY);
+  fd = open(actual_path, O_RDONLY|O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
@@ -233,16 +227,16 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
     extern int __unix_path_semantics;
     if(strchr(real_path + 1, ':')) {
       /* Amiga absolute path */
-      fd = open_readonly(real_path + 1, O_RDONLY);
+      fd = open(real_path + 1, O_RDONLY);
       file->path++;
     }
     else if(__unix_path_semantics) {
       /* -lunix fallback */
-      fd = open_readonly(real_path, O_RDONLY);
+      fd = open(real_path, O_RDONLY);
     }
   }
   #else
-  fd = open_readonly(real_path, O_RDONLY);
+  fd = open(real_path, O_RDONLY);
   file->path = real_path;
   #endif
 #endif
