@@ -4,7 +4,7 @@ curl and libcurl 8.12.0
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3309
+ Contributors:                 3312
 
 This release includes the following changes:
 
@@ -13,6 +13,7 @@ This release includes the following changes:
  o getinfo: fix CURLINFO_QUEUE_TIME_T and add 'time_queue' var [55]
  o getinfo: provide info which auth was used for HTTP and proxy [40]
  o hyper: drop support [57]
+ o openssl: add support to use keys and certificates from PKCS#11 provider [77]
  o QUIC: 0RTT for gnutls via CURLSSLOPT_EARLYDATA [61]
 
 This release includes the following bugfixes:
@@ -23,10 +24,13 @@ This release includes the following bugfixes:
  o build: drop `-Winline` picky warning [53]
  o build: drop unused feature macros, update exception list [51]
  o build: fix the tidy targets for autotools [52]
+ o build: fix unsigned `time_t` detection for cmake, MS-DOS, AmigaOS [104]
+ o build: replace configure check with PP condition (Android <21) [97]
  o cd2nroff: support "none" as a TLS backend [29]
  o cf-socket: error if address can't be copied [72]
  o checksrc: ban use of sscanf() [7]
  o checksrc: fix the return() checker [35]
+ o checksrc: introduce 'banfunc' to ban specific functions [117]
  o cmake/FindLDAP: avoid empty 'Requires' item when omitting `pkg-config` module [90]
  o cmake/FindLibpsl: protect against `pkg-config` "half-detection" [89]
  o cmake/FindLibssh: sync header comment with other modules
@@ -42,6 +46,7 @@ This release includes the following bugfixes:
  o cmake: drop redundant opening/closing `.*` from `MATCH` expressions [64]
  o cmake: drop unused `HAVE_SYS_XATTR_H` detection [79]
  o cmake: extend zlib's `AUTO` option to brotli, zstd and enable if found [36]
+ o cmake: fix `net/in.h` detection for MS-DOS [103]
  o cmake: improve `curl_dumpvars()` and move to `Utilities.cmake` [50]
  o cmake: make libpsl required by default [45]
  o cmake: move `pkg-config` names to Find modules [87]
@@ -49,9 +54,11 @@ This release includes the following bugfixes:
  o cmake: namespace functions and macros [41]
  o cmake: optimize out 4 picky warning option detections with gcc [78]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
+ o cmake: sync OpenSSL QUIC fork detection with autotools [102]
  o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
  o cmake: use `STREQUAL` to detect Linux [68]
  o config-mac: drop `MACOS_SSL_SUPPORT` macro [63]
+ o configure: drop unused detections and macros [105]
  o conncache: result_cb comment removed from function docs [1]
  o cookie: fix crash in netscape cookie parsing [84]
  o cookie: parse only the exact expire date [3]
@@ -62,19 +69,27 @@ This release includes the following bugfixes:
  o CURLOPT_PROXY.md: clarify the crendential support in proxy URLs [66]
  o CURLOPT_RESOLVE.md: fix wording [30]
  o docs/BUGS.md: remove leading space from a link
+ o examples/block-ip: drop redundant `memory.h` include
  o examples/block-ip: show how to block IP addresses [74]
  o examples/complicated: fix warnings, bump deprecated callback, tidy up [59]
  o examples/synctime.c: remove references to dead URLs and functionality [62]
  o examples: make them compile with compatibility functions disabled (Windows) [58]
+ o file: drop `OPEN_NEEDS_ARG3` option [91]
+ o file: fix Android compiler warning [85]
  o http2: fix value stored to 'result' is never read [71]
  o http: fix build with `CURL_DISABLE_COOKIES` [95]
+ o http: ignore invalid Retry-After times [107]
  o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
+ o lib: remove `__EMX__` guards [83]
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
  o lib: supress deprecation warnings in apple builds [32]
  o lib: TLS session ticket caching reworked [60]
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
+ o mbedtls: fix handling of blocked sends [116]
  o multi: fix curl_multi_waitfds reporting of fd_count [73]
+ o multi: fix return code for an already-removed easy handle [106]
+ o multissl: auto-enable `OPENSSL_COEXIST` for wolfSSL + OpenSSL [92]
  o multissl: make openssl + wolfssl builds work [34]
  o netrc: fix password-only entries [28]
  o netrc: restore _netrc fallback logic [6]
@@ -87,17 +102,21 @@ This release includes the following bugfixes:
  o src: add `CURL_STRICMP()` macro, use `_stricmp()` on Windows [54]
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
+ o test483: require cookie support [98]
  o tests/http/clients: use proper sleep() call on NonStop [10]
+ o TheArtOfHttpScripting.md: rewrite double 'that' [115]
  o tool_formparse.c: make curlx_uztoso a static in here [39]
  o tool_formparse: accept digits in --form type= strings [33]
  o tool_getparam: fix "Ignored Return Value" [21]
  o tool_getparam: fix memory leak on error in parse_ech [14]
  o tool_getparam: fix the ECH parser [20]
  o tool_operate: make --etag-compare always accept a non-existing file [22]
+ o urlapi: fix redirect to a new fragment or query (only) [118]
  o variable.md: mention --expand-variable for variables to variables [13]
  o variable.md: show function use with examples [18]
  o vquic: fix 4th function call argument is an uninitialized value [70]
  o vquic: make vquic_send_packets not return without setting psent [69]
+ o vtls: only remember the expiry timestamp in session cache [110]
  o vtls: remove 'detach/attach' functions from TLS handler struct [25]
  o vtls: remove unusued 'check_cxn' from TLS handler struct [26]
  o vtls: replace "none"-functions with NULL pointers [27]
@@ -122,12 +141,13 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andy Pan, Ben Zanin, Christian Heusel, Christian Schmitz,
-  Christopher Dannemiller, Daniel Stenberg, Darren Banfi, dwickr,
-  Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jeroen Ooms,
-  Kai Pastor, Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt, Marcel Raad,
-  Mohammed Sadiq, Randall S. Becker, Ray Satiro, renovate[bot], Rudi Heitbaum,
-  Samuel Henrique, Stefan Eissing, Tamir Duberstein, Viktor Szakats
-  (26 contributors)
+  Christopher Dannemiller, Daniel Stenberg, Darren Banfi, dependabot[bot],
+  dwickr, Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
+  Jeroen Ooms, Kai Pastor, Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt,
+  Marcel Raad, Mohammed Sadiq, Ralph Sennhauser, Randall S. Becker, Ray Satiro,
+  renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
+  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats
+  (30 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -207,15 +227,33 @@ References to bug reports and discussions on issues:
  [74] = https://curl.se/bug/?i=15748
  [75] = https://curl.se/bug/?i=15468
  [76] = https://curl.se/bug/?i=13522
+ [77] = https://curl.se/bug/?i=15587
  [78] = https://curl.se/bug/?i=15850
  [79] = https://curl.se/bug/?i=15845
  [81] = https://curl.se/bug/?i=15840
+ [83] = https://curl.se/bug/?i=15884
  [84] = https://curl.se/bug/?i=15826
+ [85] = https://curl.se/bug/?i=15883
  [86] = https://curl.se/bug/?i=15832
  [87] = https://curl.se/bug/?i=15800
  [88] = https://curl.se/bug/?i=15829
  [89] = https://curl.se/bug/?i=15827
  [90] = https://curl.se/bug/?i=15828
+ [91] = https://curl.se/bug/?i=15882
+ [92] = https://curl.se/bug/?i=15765
  [93] = https://curl.se/bug/?i=15809
  [94] = https://curl.se/bug/?i=15822
  [95] = https://curl.se/bug/?i=15820
+ [97] = https://curl.se/bug/?i=15871
+ [98] = https://curl.se/bug/?i=15876
+ [102] = https://curl.se/bug/?i=15873
+ [103] = https://curl.se/bug/?i=15869
+ [104] = https://curl.se/bug/?i=15868
+ [105] = https://curl.se/bug/?i=15867
+ [106] = https://curl.se/bug/?i=15844
+ [107] = https://curl.se/bug/?i=15833
+ [110] = https://curl.se/bug/?i=15861
+ [115] = https://curl.se/bug/?i=15863
+ [116] = https://curl.se/bug/?i=15801
+ [117] = https://curl.se/bug/?i=15835
+ [118] = https://curl.se/bug/?i=15836
