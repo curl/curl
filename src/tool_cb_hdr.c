@@ -392,26 +392,6 @@ static char *parse_filename(const char *ptr, size_t len)
   }
 #endif /* _WIN32 || MSDOS */
 
-  /* in case we built debug enabled, we allow an environment variable
-   * named CURL_TESTDIR to prefix the given filename to put it into a
-   * specific directory
-   */
-#ifdef DEBUGBUILD
-  {
-    char *tdir = curl_getenv("CURL_TESTDIR");
-    if(tdir) {
-      char buffer[512]; /* suitably large */
-      msnprintf(buffer, sizeof(buffer), "%s/%s", tdir, copy);
-      Curl_safefree(copy);
-      copy = strdup(buffer); /* clone the buffer, we do not use the libcurl
-                                aprintf() or similar since we want to use the
-                                same memory code as the "real" parse_filename
-                                function */
-      curl_free(tdir);
-    }
-  }
-#endif
-
   return copy;
 }
 
