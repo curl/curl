@@ -323,7 +323,12 @@ static CURLcode file_upload(struct Curl_easy *data)
   else
     mode = MODE_DEFAULT|O_TRUNC;
 
+#if (defined(ANDROID) || defined(__ANDROID__)) && \
+    (defined(__i386__) || defined(__arm__))
+  fd = open(file->path, mode, (mode_t)data->set.new_file_perms);
+#else
   fd = open(file->path, mode, data->set.new_file_perms);
+#endif
   if(fd < 0) {
     failf(data, "cannot open %s for writing", file->path);
     return CURLE_WRITE_ERROR;
