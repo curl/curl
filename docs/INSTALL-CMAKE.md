@@ -317,6 +317,7 @@ Details via CMake
 - `BROTLIDEC_LIBRARY`:                      Path to `brotlidec` library.
 - `CARES_INCLUDE_DIR`:                      The c-ares include directory.
 - `CARES_LIBRARY`:                          Path to `cares` library.
+- `DL_LIBRARY`:                             Path to `dl` library. (for Rustls)
 - `GSS_ROOT_DIR`:                           Set this variable to the root installation of GSS. (also supported as environment)
 - `LDAP_LIBRARY`:                           Name or full path to `ldap` library. Default: `ldap`
 - `LDAP_LBER_LIBRARY`:                      Name or full path to `lber` library. Default: `lber`
@@ -335,12 +336,13 @@ Details via CMake
 - `LIBSSH2_LIBRARY`:                        Path to `libssh2` library.
 - `LIBUV_INCLUDE_DIR`:                      The libuv include directory.
 - `LIBUV_LIBRARY`:                          Path to `libuv` library.
-- `MSH3_INCLUDE_DIR`:                       The msh3 include directory.
-- `MSH3_LIBRARY`:                           Path to `msh3` library.
+- `MATH_LIBRARY`:                           Path to `m` library. (for Rustls, wolfSSL)
 - `MBEDTLS_INCLUDE_DIR`:                    The mbedTLS include directory.
 - `MBEDTLS_LIBRARY`:                        Path to `mbedtls` library.
 - `MBEDX509_LIBRARY`:                       Path to `mbedx509` library.
 - `MBEDCRYPTO_LIBRARY`:                     Path to `mbedcrypto` library.
+- `MSH3_INCLUDE_DIR`:                       The msh3 include directory.
+- `MSH3_LIBRARY`:                           Path to `msh3` library.
 - `NGHTTP2_INCLUDE_DIR`:                    The nghttp2 include directory.
 - `NGHTTP2_LIBRARY`:                        Path to `nghttp2` library.
 - `NGHTTP3_INCLUDE_DIR`:                    The nghttp3 include directory.
@@ -349,6 +351,7 @@ Details via CMake
 - `NGTCP2_LIBRARY`:                         Path to `ngtcp2` library.
 - `NETTLE_INCLUDE_DIR`:                     The nettle include directory.
 - `NETTLE_LIBRARY`:                         Path to `nettle` library.
+- `PTHREAD_LIBRARY`:                        Path to `pthread` library. (for Rustls)
 - `QUICHE_INCLUDE_DIR`:                     The quiche include directory.
 - `QUICHE_LIBRARY`:                         Path to `quiche` library.
 - `RUSTLS_INCLUDE_DIR`:                     The Rustls include directory.
