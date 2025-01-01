@@ -121,51 +121,51 @@ SPDX-License-Identifier: curl
 
 ## Cookies with libcurl
 
-  libcurl offers several ways to enable and interface the cookie engine. These
-  options are the ones provided by the native API. libcurl bindings may offer
-  access to them using other means.
+libcurl offers several ways to enable and interface the cookie engine. These
+options are the ones provided by the native API. libcurl bindings may offer
+access to them using other means.
 
-  [CURLOPT_COOKIE](https://curl.se/libcurl/c/CURLOPT_COOKIE.html)
+[`CURLOPT_COOKIE`](https://curl.se/libcurl/c/CURLOPT_COOKIE.html)
 
-  Is used when you want to specify the exact contents of a cookie header to
-  send to the server.
+Is used when you want to specify the exact contents of a cookie header to
+send to the server.
 
-  [CURLOPT_COOKIEFILE](https://curl.se/libcurl/c/CURLOPT_COOKIEFILE.html))
+[`CURLOPT_COOKIEFILE`](https://curl.se/libcurl/c/CURLOPT_COOKIEFILE.html))
 
-  Tell libcurl to activate the cookie engine, and to read the initial set of
-  cookies from the given file. Read-only.
+Tell libcurl to activate the cookie engine, and to read the initial set of
+cookies from the given file. Read-only.
 
-  [CURLOPT_COOKIEJAR](https://curl.se/libcurl/c/CURLOPT_COOKIEJAR.html)
+[`CURLOPT_COOKIEJAR`](https://curl.se/libcurl/c/CURLOPT_COOKIEJAR.html)
 
-  Tell libcurl to activate the cookie engine, and when the easy handle is
-  closed save all known cookies to the given cookie jar file. Write-only.
+Tell libcurl to activate the cookie engine, and when the easy handle is
+closed save all known cookies to the given cookie jar file. Write-only.
 
-  [CURLOPT_COOKIELIST](https://curl.se/libcurl/c/CURLOPT_COOKIELIST.html)
+[`CURLOPT_COOKIELIST`](https://curl.se/libcurl/c/CURLOPT_COOKIELIST.html)
 
-  Provide detailed information about a single cookie to add to the internal
-  storage of cookies. Pass in the cookie as an HTTP header with all the
-  details set, or pass in a line from a Netscape cookie file. This option can
-  also be used to flush the cookies etc.
+Provide detailed information about a single cookie to add to the internal
+storage of cookies. Pass in the cookie as an HTTP header with all the
+details set, or pass in a line from a Netscape cookie file. This option can
+also be used to flush the cookies etc.
 
-  [CURLOPT_COOKIESESSION](https://curl.se/libcurl/c/CURLOPT_COOKIESESSION.html)
+[`CURLOPT_COOKIESESSION`](https://curl.se/libcurl/c/CURLOPT_COOKIESESSION.html)
 
-  Tell libcurl to ignore all cookies it is about to load that are session
-  cookies.
+Tell libcurl to ignore all cookies it is about to load that are session
+cookies.
 
-  [CURLINFO_COOKIELIST](https://curl.se/libcurl/c/CURLINFO_COOKIELIST.html)
+[`CURLINFO_COOKIELIST`](https://curl.se/libcurl/c/CURLINFO_COOKIELIST.html)
 
-  Extract cookie information from the internal cookie storage as a linked
-  list.
+Extract cookie information from the internal cookie storage as a linked
+list.
 
 ## Cookies with JavaScript
 
-  These days a lot of the web is built up by JavaScript. The web browser loads
-  complete programs that render the page you see. These JavaScript programs
-  can also set and access cookies.
+These days a lot of the web is built up by JavaScript. The web browser loads
+complete programs that render the page you see. These JavaScript programs
+can also set and access cookies.
 
-  Since curl and libcurl are plain HTTP clients without any knowledge of or
-  capability to handle JavaScript, such cookies are not detected or used.
+Since curl and libcurl are plain HTTP clients without any knowledge of or
+capability to handle JavaScript, such cookies are not detected or used.
 
-  Often, if you want to mimic what a browser does on such websites, you can
-  record web browser HTTP traffic when using such a site and then repeat the
-  cookie operations using curl or libcurl.
+Often, if you want to mimic what a browser does on such websites, you can
+record web browser HTTP traffic when using such a site and then repeat the
+cookie operations using curl or libcurl.
