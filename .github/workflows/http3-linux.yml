@@ -78,15 +78,6 @@ jobs:
           path: /home/runner/gnutls/build
           key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.gnutls-version }}
 
-      - name: cache wolfssl
-        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
-        id: cache-wolfssl
-        env:
-          cache-name: cache-wolfssl
-        with:
-          path: /home/runner/wolfssl/build
-          key: ${{ runner.os }}-http3-build-${{ env.cache-name }}-${{ env.wolfssl-version }}
-
       - name: cache nghttp3
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
         id: cache-nghttp3
