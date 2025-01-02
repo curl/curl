@@ -10,7 +10,9 @@ This is an additional test suite using a combination of Apache httpd and nghttpx
 
 # Usage
 
-The test cases and necessary files are in `tests/http`. You can invoke `pytest` from there or from the top level curl checkout and it will find all tests.
+The test cases and necessary files are in `tests/http`. You can invoke
+`pytest` from there or from the top level curl checkout and it finds all
+tests.
 
 ```
 curl> pytest test/http
@@ -29,16 +31,18 @@ curl/tests/http> pytest -vv -k test_01_02
 
 runs all test cases that have `test_01_02` in their name. This does not have to be the start of the name.
 
-Depending on your setup, some test cases may be skipped and appear as `s` in the output. If you run pytest verbose, it will also give you the reason for skipping.
+Depending on your setup, some test cases may be skipped and appear as `s` in
+the output. If you run pytest verbose, it also gives you the reason for
+skipping.
 
 # Prerequisites
 
-You will need:
+You need:
 
 1. a recent Python, the `cryptography` module and, of course, `pytest`
-2. an apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this.
+2. an apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this
 3. a local `curl` project build
-3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases will be skipped.
+3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases are skipped
 
 ### Configuration
 
@@ -85,12 +89,23 @@ There is a lot of [`pytest` documentation](https://docs.pytest.org/) with exampl
 
 In `conftest.py` 3 "fixtures" are defined that are used by all test cases:
 
-1. `env`: the test environment. It is an instance of class `testenv/env.py:Env`. It holds all information about paths, availability of features (HTTP/3), port numbers to use, domains and SSL certificates for those.
-2. `httpd`: the Apache httpd instance, configured and started, then stopped at the end of the test suite. It has sites configured for the domains from `env`. It also loads a local module `mod_curltest?` and makes it available in certain locations. (more on mod_curltest below).
-3. `nghttpx`: an instance of nghttpx that provides HTTP/3 support. `nghttpx` proxies those requests to the `httpd` server. In a direct mapping, so you may access all the resources under the same path as with HTTP/2. Only the port number used for HTTP/3 requests will be different.
+1. `env`: the test environment. It is an instance of class
+   `testenv/env.py:Env`. It holds all information about paths, availability of
+   features (HTTP/3), port numbers to use, domains and SSL certificates for
+   those.
+2. `httpd`: the Apache httpd instance, configured and started, then stopped at
+   the end of the test suite. It has sites configured for the domains from
+   `env`. It also loads a local module `mod_curltest?` and makes it available
+   in certain locations. (more on mod_curltest below).
+3. `nghttpx`: an instance of nghttpx that provides HTTP/3 support. `nghttpx`
+   proxies those requests to the `httpd` server. In a direct mapping, so you
+   may access all the resources under the same path as with HTTP/2. Only the
+   port number used for HTTP/3 requests are different.
 
-`pytest` manages these fixture so that they are created once and terminated before exit. This means you can `Ctrl-C` a running pytest and the server will shutdown. Only when you brutally chop its head off, might there be servers left
-behind.
+`pytest` manages these fixture so that they are created once and terminated
+before exit. This means you can `Ctrl-C` a running pytest and the server then
+shutdowns. Only when you brutally chop its head off, might there be servers
+left behind.
 
 ### Test Cases
 
@@ -126,4 +141,10 @@ The module adds 2 "handlers" to the Apache server (right now). Handler are piece
   * `s`: seconds (the default)
   * `ms`: milliseconds
 
-As you can see, `mod_curltest`'s tweak handler allow to simulate many kinds of responses. An example of its use is `test_03_01` where responses are delayed using `chunk_delay`. This gives the response a defined duration and the test uses that to reload `httpd` in the middle of the first request. A graceful reload in httpd lets ongoing requests finish, but will close the connection afterwards and tear down the serving process. The following request need then to open a new connection. This is verified by the test case.
+As you can see, `mod_curltest`'s tweak handler allow to simulate many kinds of
+responses. An example of its use is `test_03_01` where responses are delayed
+using `chunk_delay`. This gives the response a defined duration and the test
+uses that to reload `httpd` in the middle of the first request. A graceful
+reload in httpd lets ongoing requests finish, but closes the connection
+afterwards and tears down the serving process. The following request then
+needs to open a new connection. This is verified by the test case.

@@ -12,9 +12,9 @@ big and complicated, we should split them into smaller and testable ones.
 ## Build Unit Tests
 
 `./configure --enable-debug` is required for the unit tests to build. To
-enable unit tests, there will be a separate static libcurl built that will be
-used exclusively for linking unit test programs. Just build everything as
-normal, and then you can run the unit test cases as well.
+enable unit tests, there is a separate static libcurl built that is used
+exclusively for linking unit test programs. Just build everything as normal,
+and then you can run the unit test cases as well.
 
 ## Run Unit Tests
 
@@ -25,8 +25,8 @@ can `cd tests` and `make` and then invoke individual unit tests with
 
 ## Debug Unit Tests
 
-If a specific test fails you will get told. The test case then has output left
-in the %LOGDIR subdirectory, but most importantly you can re-run the test again
+If a specific test fails you get told. The test case then has output left in
+the %LOGDIR subdirectory, but most importantly you can re-run the test again
 using gdb by doing `./runtests.pl -g NNNN`. That is, add a `-g` to make it
 start up gdb and run the same case using that.
 
@@ -37,7 +37,7 @@ source file. The source file should be named `unitNNNN.c` where `NNNN` is a
 previously unused number.
 
 Add your test to `tests/unit/Makefile.inc` (if it is a unit test). Add your
-test data file name to `tests/data/Makefile.am`
+test data filename to `tests/data/Makefile.am`
 
 You also need a separate file called `tests/data/testNNNN` (using the same
 number) that describes your test case. See the test1300 file for inspiration

@@ -6,7 +6,7 @@ SPDX-License-Identifier: curl
 
 # [![curl logo](https://curl.se/logo/curl-logo.svg)](https://curl.se/)
 
-Curl is a command-line tool for transferring data specified with URL syntax.
+curl is a command-line tool for transferring data specified with URL syntax.
 Learn how to use curl by reading [the
 manpage](https://curl.se/docs/manpage.html) or [everything
 curl](https://everything.curl.dev/).
@@ -55,7 +55,7 @@ page](https://hackerone.com/curl) and not in public.
 
 ## Notice
 
-Curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
+curl contains pieces of source code that is Copyright (c) 1998, 1999 Kungliga
 Tekniska Högskolan. This notice is included here to comply with the
 distribution terms.
 
