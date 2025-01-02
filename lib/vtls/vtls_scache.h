@@ -195,6 +195,15 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key);
 
+CURLcode Curl_ssl_session_import(struct Curl_ssl_scache *scache,
+                                 const char *ssl_peer_key,
+                                 const unsigned char *shmac, size_t shmac_len,
+                                 const unsigned char *sdata, size_t sdata_len);
+
+CURLcode Curl_ssl_session_export(struct Curl_ssl_scache *scache,
+                                 curl_ssl_export_function *export_fn,
+                                 void *userptr);
+
 
 #else /* USE_SSL */
 
