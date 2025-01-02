@@ -44,6 +44,11 @@
 #include <sys/time.h>
 #endif
 
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
+#endif
+
 static
 void dump(const char *text, unsigned char *ptr, size_t size,
           char nohex)
