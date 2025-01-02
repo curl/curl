@@ -678,14 +678,14 @@ if(_use_core_foundation_and_core_services)
   if(NOT COREFOUNDATION_FRAMEWORK)
     message(FATAL_ERROR "CoreFoundation framework not found")
   endif()
+  list(APPEND CURL_LIBS "-framework CoreFoundation")
 
   find_library(CORESERVICES_FRAMEWORK NAMES "CoreServices")
   mark_as_advanced(CORESERVICES_FRAMEWORK)
   if(NOT CORESERVICES_FRAMEWORK)
     message(FATAL_ERROR "CoreServices framework not found")
   endif()
-
-  list(APPEND CURL_LIBS "-framework CoreFoundation" "-framework CoreServices")
+  list(APPEND CURL_LIBS "-framework CoreServices")
 endif()
 
 if(CURL_USE_OPENSSL)
