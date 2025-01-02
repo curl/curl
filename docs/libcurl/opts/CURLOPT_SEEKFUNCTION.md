@@ -10,7 +10,9 @@ See-also:
   - CURLOPT_SEEKDATA (3)
   - CURLOPT_STDERR (3)
 Protocol:
-  - All
+  - FTP
+  - HTTP
+  - SFTP
 Added-in: 7.18.0
 ---
 
