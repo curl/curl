@@ -67,9 +67,14 @@ int main(void)
 
 # RETURN VALUE
 
-Returns **CURLE_OK** if everything is okay, and a non-zero number for
-errors. Returns **CURLE_GOT_NOTHING** if the associated connection is
-closed.
+This function returns a CURLcode indicating success or error.
+
+CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
+libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+there can be an error message stored in the error buffer when non-zero is
+returned.
+
+Returns **CURLE_GOT_NOTHING** if the associated connection is closed.
 
 Instead of blocking, the function returns **CURLE_AGAIN**. The correct
 behavior is then to wait for the socket to signal readability before calling

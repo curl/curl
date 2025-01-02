@@ -437,5 +437,9 @@ int main(void)
 
 # RETURN VALUE
 
-If the operation was successful, CURLE_OK is returned. Otherwise an
-appropriate error code is returned.
+This function returns a CURLcode indicating success or error.
+
+CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
+libcurl-errors(3). If CURLOPT_ERRORBUFFER(3) was set with curl_easy_setopt(3)
+there can be an error message stored in the error buffer when non-zero is
+returned.

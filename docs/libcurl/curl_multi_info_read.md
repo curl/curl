@@ -100,6 +100,6 @@ int main(void)
 
 # RETURN VALUE
 
-A pointer to a filled-in struct, or NULL if it failed or ran out of
-structs. It also writes the number of messages left in the queue (after this
-read) in the integer the second argument points to.
+A pointer to a filled-in struct, or NULL if it failed or ran out of structs.
+It also writes the number of messages left in the queue (after this read) in
+the integer the second argument points to.

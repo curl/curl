@@ -243,7 +243,6 @@ int main(void)
 # RETURN VALUE
 
 Returns a CURLUcode error value, which is CURLUE_OK (0) if everything went
-fine. See the libcurl-errors(3) man page for the full list with
-descriptions.
+fine. See the libcurl-errors(3) man page for the full list with descriptions.
 
 If this function returns an error, no URL part is returned.

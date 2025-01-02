@@ -95,12 +95,15 @@ int main(void)
 
 # RETURN VALUE
 
-CURLMcode type, general libcurl multi interface error code.
+This function returns a CURLMcode indicating success or error.
+
+CURLM_OK (0) means everything was OK, non-zero means an error occurred, see
+libcurl-errors(3).
 
 This function returns errors regarding the whole multi stack. Problems on
 individual transfers may have occurred even when this function returns
-*CURLM_OK*. Use curl_multi_info_read(3) to figure out how individual
-transfers did.
+*CURLM_OK*. Use curl_multi_info_read(3) to figure out how individual transfers
+did.
 
 # TYPICAL USAGE
 
