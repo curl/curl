@@ -50,7 +50,7 @@ addresses starting with "192.168".
 
 ## `APPDATA` <dir>
 On Windows, this variable is used when trying to find the home directory. If
-the primary home variable are all unset.
+the primary home variables are all unset.
 
 ## `COLUMNS` <terminal width>
 If set, the specified number of characters is used as the terminal width when
