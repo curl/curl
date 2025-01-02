@@ -52,7 +52,7 @@ int main(void)
   CURLMsg *msg; /* for picking up messages with the transfer status */
   int msgs_left; /* how many messages are left */
 
-  /* Allocate one CURL handle per transfer */
+  /* Allocate one curl handle per transfer */
   for(i = 0; i < HANDLECOUNT; i++)
     handles[i] = curl_easy_init();
 

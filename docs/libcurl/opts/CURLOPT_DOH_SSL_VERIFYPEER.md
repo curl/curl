@@ -44,7 +44,7 @@ This option is the DoH equivalent of CURLOPT_SSL_VERIFYPEER(3) and
 only affects requests to the DoH server.
 
 When negotiating a TLS or SSL connection, the server sends a certificate
-indicating its identity. Curl verifies whether the certificate is authentic,
+indicating its identity. curl verifies whether the certificate is authentic,
 i.e. that you can trust that the server is who the certificate says it is.
 This trust is based on a chain of digital signatures, rooted in certification
 authority (CA) certificates you supply. curl uses a default bundle of CA

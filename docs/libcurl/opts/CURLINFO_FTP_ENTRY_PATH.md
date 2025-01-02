@@ -32,8 +32,8 @@ logging on to the remote FTP server. This stores a NULL as pointer if
 something is wrong.
 
 The **path** pointer is NULL or points to private memory. You MUST NOT free
-- it gets freed when you call curl_easy_cleanup(3) on the corresponding
-CURL handle.
+- it gets freed when you call curl_easy_cleanup(3) on the corresponding curl
+handle.
 
 # %PROTOCOLS%
 

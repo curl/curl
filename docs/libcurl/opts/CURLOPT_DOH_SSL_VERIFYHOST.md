@@ -42,9 +42,9 @@ When CURLOPT_DOH_SSL_VERIFYHOST(3) is 2, the SSL certificate provided by
 the DoH server must indicate that the server name is the same as the server
 name to which you meant to connect to, or the connection fails.
 
-Curl considers the DoH server the intended one when the Common Name field or a
+curl considers the DoH server the intended one when the Common Name field or a
 Subject Alternate Name field in the certificate matches the hostname in the
-DoH URL to which you told Curl to connect.
+DoH URL to which you told curl to connect.
 
 When the *verify* value is set to 1L it is treated the same as 2L. However
 for consistency with the other *VERIFYHOST* options we suggest use 2 and

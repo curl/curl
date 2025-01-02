@@ -46,7 +46,7 @@ CURLcode test(char *URL)
 
   global_init(CURL_GLOBAL_ALL);
 
-  /* Allocate one CURL handle per transfer */
+  /* Allocate one curl handle per transfer */
   easy = curl_easy_init();
 
   /* init a multi stack */
@@ -152,7 +152,7 @@ CURLcode test(char *URL)
 test_cleanup:
   curl_multi_cleanup(multi_handle);
 
-  /* Free the CURL handles */
+  /* Free the curl handles */
   curl_easy_cleanup(easy);
   curl_global_cleanup();
 

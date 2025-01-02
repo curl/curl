@@ -35,7 +35,7 @@ this CURL **handle**.
 
 The **scheme** pointer is NULL or points to private memory. You MUST NOT
 free - it gets freed when you call curl_easy_cleanup(3) on the corresponding
-CURL handle.
+curl handle.
 
 The returned scheme might be upper or lowercase. Do comparisons case
 insensitively.

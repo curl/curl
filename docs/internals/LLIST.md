@@ -65,12 +65,11 @@ See also `Curl_llist_insert_next`.
 ## Remove a node
 
 Remove a node again from a list by calling `Curl_llist_remove()`. This
-will destroy the node's `elem` (e.g. calling a registered free function).
+destroys the node's `elem` (e.g. calling a registered free function).
 
-To remove a node without destroying it's `elem`, use
-`Curl_node_take_elem()` which returns the `elem` pointer and
-removes the node from the list. The caller then owns this pointer
-and has to take care of it.
+To remove a node without destroying its `elem`, use `Curl_node_take_elem()`
+which returns the `elem` pointer and removes the node from the list. The
+caller then owns this pointer and has to take care of it.
 
 ## Iterate
 

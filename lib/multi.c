@@ -59,7 +59,7 @@
 /*
   CURL_SOCKET_HASH_TABLE_SIZE should be a prime number. Increasing it from 97
   to 911 takes on a 32-bit machine 4 x 804 = 3211 more bytes. Still, every
-  CURL handle takes 45-50 K memory, therefore this 3K are not significant.
+  curl handle takes 6K memory, therefore this 3K are not significant.
 */
 #ifndef CURL_SOCKET_HASH_TABLE_SIZE
 #define CURL_SOCKET_HASH_TABLE_SIZE 911

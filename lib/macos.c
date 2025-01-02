@@ -37,7 +37,7 @@ CURLcode Curl_macos_init(void)
   /*
    * The automagic conversion from IPv4 literals to IPv6 literals only
    * works if the SCDynamicStoreCopyProxies system function gets called
-   * first. As Curl currently does not support system-wide HTTP proxies, we
+   * first. As curl currently does not support system-wide HTTP proxies, we
    * therefore do not use any value this function might return.
    *
    * This function is only available on macOS and is not needed for

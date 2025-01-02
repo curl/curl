@@ -38,7 +38,7 @@
 
 struct ssl_peer;
 
-/* Struct to hold a Curl OpenSSL instance */
+/* Struct to hold a curl OpenSSL instance */
 struct ossl_ctx {
   /* these ones requires specific SSL-types */
   SSL_CTX* ssl_ctx;

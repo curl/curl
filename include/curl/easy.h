@@ -78,7 +78,7 @@ CURL_EXTERN CURL *curl_easy_duphandle(CURL *curl);
  *
  * DESCRIPTION
  *
- * Re-initializes a CURL handle to the default values. This puts back the
+ * Re-initializes a curl handle to the default values. This puts back the
  * handle to the same state as it was in when it was just created.
  *
  * It does keep: live connections, the Session ID cache, the DNS cache and the

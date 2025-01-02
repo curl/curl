@@ -4,7 +4,7 @@ Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 -->
 
-# The Art Of Scripting HTTP Requests Using Curl
+# The Art Of Scripting HTTP Requests Using curl
 
 ## Background
 
@@ -15,12 +15,12 @@ SPDX-License-Identifier: curl
  extract information from the web, to fake users, to post or upload data to
  web servers are all important tasks today.
 
- Curl is a command line tool for doing all sorts of URL manipulations and
+ curl is a command line tool for doing all sorts of URL manipulations and
  transfers, but this particular document focuses on how to use it when doing
  HTTP requests for fun and profit. This documents assumes that you know how to
  invoke `curl --help` or `curl --manual` to get basic information about it.
 
- Curl is not written to do everything for you. It makes the requests, it gets
+ curl is not written to do everything for you. It makes the requests, it gets
  the data, it sends data and it retrieves the information. You probably need
  to glue everything together using some kind of script language or repeated
  manual invokes.
@@ -475,7 +475,7 @@ SPDX-License-Identifier: curl
  new page keeping newly generated output. The header that tells the browser to
  redirect is `Location:`.
 
- Curl does not follow `Location:` headers by default, but simply displays such
+ curl does not follow `Location:` headers by default, but simply displays such
  pages in the same manner it displays all HTTP replies. It does however
  feature an option that makes it attempt to follow the `Location:` pointers.
 
@@ -485,7 +485,7 @@ SPDX-License-Identifier: curl
 
  If you use curl to POST to a site that immediately redirects you to another
  page, you can safely use [`--location`](https://curl.se/docs/manpage.html#-L)
- (`-L`) and `--data`/`--form` together. Curl only uses POST in the first
+ (`-L`) and `--data`/`--form` together. curl only uses POST in the first
  request, and then revert to GET in the following operations.
 
 ## Other redirects
@@ -532,7 +532,7 @@ SPDX-License-Identifier: curl
  [`--cookie-jar`](https://curl.se/docs/manpage.html#-c) option described
  below is a better way to store cookies.)
 
- Curl has a full blown cookie parsing engine built-in that comes in use if you
+ curl has a full blown cookie parsing engine built-in that comes in use if you
  want to reconnect to a server and use cookies that were stored from a
  previous connection (or hand-crafted manually to fool the server into
  believing you had a previous connection). To use previously stored cookies,
@@ -540,7 +540,7 @@ SPDX-License-Identifier: curl
 
     curl --cookie stored_cookies_in_file http://www.example.com
 
- Curl's "cookie engine" gets enabled when you use the
+ curl's "cookie engine" gets enabled when you use the
  [`--cookie`](https://curl.se/docs/manpage.html#-b) option. If you only
  want curl to understand received cookies, use `--cookie` with a file that
  does not exist. Example, if you want to let curl understand cookies from a
@@ -549,7 +549,7 @@ SPDX-License-Identifier: curl
 
     curl --cookie nada --location http://www.example.com
 
- Curl has the ability to read and write cookie files that use the same file
+ curl has the ability to read and write cookie files that use the same file
  format that Netscape and Mozilla once used. It is a convenient way to share
  cookies between scripts or invokes. The `--cookie` (`-b`) switch
  automatically detects if a given file is such a cookie file and parses it,
@@ -571,7 +571,7 @@ SPDX-License-Identifier: curl
  SSL (or TLS as the current version of the standard is called) offers a set of
  advanced features to do secure transfers over HTTP.
 
- Curl supports encrypted fetches when built to use a TLS library and it can be
+ curl supports encrypted fetches when built to use a TLS library and it can be
  built to use one out of a fairly large set of libraries - `curl -V` shows
  which one your curl was built to use (if any). To get a page from an HTTPS
  server, simply run curl like:
@@ -581,7 +581,7 @@ SPDX-License-Identifier: curl
 ## Certificates
 
  In the HTTPS world, you use certificates to validate that you are the one you
- claim to be, as an addition to normal passwords. Curl supports client- side
+ claim to be, as an addition to normal passwords. curl supports client- side
  certificates. All certificates are locked with a passphrase, which you need
  to enter before the certificate can be used by curl. The passphrase can be
  specified on the command line or if not, entered interactively when curl

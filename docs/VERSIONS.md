@@ -7,7 +7,7 @@ SPDX-License-Identifier: curl
 Version Numbers and Releases
 ============================
 
- Curl is not only curl. Curl is also libcurl. They are actually individually
+ The command line tool curl and the library libcurl are individually
  versioned, but they usually follow each other closely.
 
  The version numbering is always built up using the same system:

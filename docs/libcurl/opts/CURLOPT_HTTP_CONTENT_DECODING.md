@@ -29,7 +29,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_HTTP_CONTENT_DECODING,
 # DESCRIPTION
 
 Pass a long to tell libcurl how to act on content decoding. If set to zero,
-content decoding is disabled. If set to 1 it is enabled. Libcurl has no
+content decoding is disabled. If set to 1 it is enabled. libcurl has no
 default content decoding but requires you to use
 CURLOPT_ACCEPT_ENCODING(3) for that.
 

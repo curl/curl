@@ -29,7 +29,7 @@ CURLcode curl_easy_setopt(CURL *handle, CURLOPT_STREAM_DEPENDS_E,
 
 # DESCRIPTION
 
-Pass a CURL pointer in *dephandle* to identify the stream within the same
+Pass a `CURL` pointer in *dephandle* to identify the stream within the same
 connection that this stream is depending upon exclusively. That means it
 depends on it and sets the Exclusive bit.
 

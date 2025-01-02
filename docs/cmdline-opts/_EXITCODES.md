@@ -33,14 +33,14 @@ FTP accept failed. While waiting for the server to connect back when an active
 FTP session is used, an error code was sent over the control connection or
 similar.
 ## 11
-FTP weird PASS reply. Curl could not parse the reply sent to the PASS request.
+FTP weird PASS reply. curl could not parse the reply sent to the PASS request.
 ## 12
 During an active FTP session while waiting for the server to connect back to
 curl, the timeout expired.
 ## 13
-FTP weird PASV reply, Curl could not parse the reply sent to the PASV request.
+FTP weird PASV reply, curl could not parse the reply sent to the PASV request.
 ## 14
-FTP weird 227 format. Curl could not parse the 227-line the server sent.
+FTP weird 227 format. curl could not parse the 227-line the server sent.
 ## 15
 FTP cannot use host. Could not resolve the host IP we got in the 227-line.
 ## 16
@@ -61,7 +61,7 @@ HTTP page not retrieved. The requested URL was not found or returned another
 error with the HTTP error code being 400 or above. This return code only
 appears if --fail is used.
 ## 23
-Write error. Curl could not write data to a local filesystem or similar.
+Write error. curl could not write data to a local filesystem or similar.
 ## 25
 Failed starting the upload. For FTP, the server typically denied the STOR
 command.

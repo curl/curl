@@ -137,7 +137,7 @@ jobs:
         name: checkout
 
       - name: badwords
-        run: .github/scripts/badwords.pl < .github/scripts/badwords.txt docs/*.md docs/libcurl/*.md docs/libcurl/opts/*.md docs/cmdline-opts/*.md docs/TODO docs/KNOWN_BUGS tests/*.md
+        run: .github/scripts/badwords.pl < .github/scripts/badwords.txt `git ls-files '**.md'` docs/TODO docs/KNOWN_BUGS packages/OS400/README.OS400
 
       - name: verify-synopsis
         run: .github/scripts/verify-synopsis.pl docs/libcurl/curl*.md

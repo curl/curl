@@ -7,10 +7,9 @@ SPDX-License-Identifier: curl
 # Building curl with Visual C++
 
  This document describes how to compile, build and install curl and libcurl
- from sources using the Visual C++ build tool. To build with VC++, you will of
- course have to first install VC++. The minimum required version of VC is 6
- (part of Visual Studio 6). However using a more recent version is strongly
- recommended.
+ from sources using the Visual C++ build tool. To build with VC++, you have to
+ first install VC++. The minimum required version of VC is 6 (part of Visual
+ Studio 6). However using a more recent version is strongly recommended.
 
  VC++ is also part of the Windows Platform SDK. You do not have to install the
  full Visual Studio or Visual C++ if all you want is to build curl.
@@ -21,8 +20,8 @@ SPDX-License-Identifier: curl
 
 ## Prerequisites
 
- If you wish to support zlib, OpenSSL, c-ares, ssh2, you will have to download
- them separately and copy them to the `deps` directory as shown below:
+ If you wish to support zlib, OpenSSL, c-ares, ssh2, you have to download them
+ separately and copy them to the `deps` directory as shown below:
 
     somedirectory\
      |_curl-src
@@ -62,14 +61,14 @@ Open a Visual Studio Command prompt:
 
 ## Build in the console
 
- Once you are in the console, go to the winbuild directory in the Curl
+ Once you are in the console, go to the winbuild directory in the curl
  sources:
 
     cd curl-src\winbuild
 
  Then you can call `nmake /f Makefile.vc` with the desired options (see
- below). The builds will be in the top src directory, `builds\` directory, in
- a directory named using the options given to the nmake call.
+ below). The builds are in the top src directory, `builds\` directory, in a
+ directory named using the options given to the nmake call.
 
     nmake /f Makefile.vc mode=<static or dll> <options>
 
@@ -124,12 +123,12 @@ where `<options>` is one or many of:
 
 ## Static linking of Microsoft's C runtime (CRT):
 
- If you are using mode=static nmake will create and link to the static build
- of libcurl but *not* the static CRT. If you must you can force nmake to link
- in the static CRT by passing `RTLIBCFG=static`. Typically you shouldn't use
- that option, and nmake will default to the DLL CRT. `RTLIBCFG` is rarely used
- and therefore rarely tested. When passing `RTLIBCFG` for a configuration that
- was already built but not with that option, or if the option was specified
+ If you are using mode=static, nmake creates and links to the static build of
+ libcurl but *not* the static CRT. If you must you can force nmake to link in
+ the static CRT by passing `RTLIBCFG=static`. Typically you shouldn't use that
+ option, and nmake defaults to the DLL CRT. `RTLIBCFG` is rarely used and
+ therefore rarely tested. When passing `RTLIBCFG` for a configuration that was
+ already built but not with that option, or if the option was specified
  differently, you must destroy the build directory containing the
  configuration so that nmake can build it from scratch.
 
@@ -139,17 +138,17 @@ where `<options>` is one or many of:
 
 ## Building your own application with libcurl (Visual Studio example)
 
- When you build curl and libcurl, nmake will show the relative path where the
- output directory is. The output directory is named from the options nmake used
- when building. You may also see temp directories of the same name but with
- suffixes -obj-curl and -obj-lib.
+ When you build curl and libcurl, nmake shows the relative path where the
+ output directory is. The output directory is named from the options nmake
+ used when building. You may also see temp directories of the same name but
+ with suffixes -obj-curl and -obj-lib.
 
- For example let's say you've built curl.exe and libcurl.dll from the Visual
+ For example let's say you have built curl.exe and libcurl.dll from the Visual
  Studio 2010 x64 Win64 Command Prompt:
 
     nmake /f Makefile.vc mode=dll VC=10
 
- The output directory will have a name similar to
+ The output directory has a name similar to
  `..\builds\libcurl-vc10-x64-release-dll-ipv6-sspi-schannel`.
 
  The output directory contains subdirectories bin, lib and include. Those are
@@ -177,14 +176,14 @@ where `<options>` is one or many of:
  need to make a separate x86 build of libcurl.
 
  If you build libcurl static (`mode=static`) or debug (`DEBUG=yes`) then the
- library name will vary and separate builds may be necessary for separate
+ library name varies and separate builds may be necessary for separate
  configurations of your project within the same platform. This is discussed in
  the next section.
 
 ## Building your own application with a static libcurl
 
  When building an application that uses the static libcurl library on Windows,
- you must define `CURL_STATICLIB`. Otherwise the linker will look for dynamic
+ you must define `CURL_STATICLIB`. Otherwise the linker looks for dynamic
  import symbols.
 
  The static library name has an `_a` suffix in the basename and the debug
@@ -201,8 +200,8 @@ where `<options>` is one or many of:
 ## Legacy Windows and SSL
 
  When you build curl using the build files in this directory the default SSL
- backend will be Schannel (Windows SSPI), the native SSL library that comes
- with the Windows OS. Schannel in Windows 8 and earlier is not able to connect
- to servers that no longer support the legacy handshakes and algorithms used by
- those versions. If you will be using curl in one of those earlier versions of
+ backend is Schannel (Windows SSPI), the native SSL library that comes with
+ the Windows OS. Schannel in Windows 8 and earlier is not able to connect to
+ servers that no longer support the legacy handshakes and algorithms used by
+ those versions. If you are using curl in one of those earlier versions of
  Windows you should choose another SSL backend like OpenSSL.
