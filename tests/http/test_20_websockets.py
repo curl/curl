@@ -103,40 +103,51 @@ class TestWebsockets:
         r = client.run(args=[url, payload])
         r.check_exit_code(56)
 
-    # the python websocket server does not like 'large' control frames
     def test_20_04_data_small(self, env: Env, ws_echo, repeat):
         client = LocalClient(env=env, name='ws-data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
-        r = client.run(args=[url, str(0), str(10)])
+        r = client.run(args=['-m', str(0), '-M', str(10), url])
         r.check_exit_code(0)
 
-    # the python websocket server does not like 'large' control frames
     def test_20_05_data_med(self, env: Env, ws_echo, repeat):
         client = LocalClient(env=env, name='ws-data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
-        r = client.run(args=[url, str(120), str(130)])
+        r = client.run(args=['-m', str(120), '-M', str(130), url])
         r.check_exit_code(0)
 
-    # the python websocket server does not like 'large' control frames
     def test_20_06_data_large(self, env: Env, ws_echo, repeat):
         client = LocalClient(env=env, name='ws-data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
-        r = client.run(args=[url, str(65535 - 5), str(65535 + 5)])
+        r = client.run(args=['-m', str(65535 - 5), '-M', str(65535 + 5), url])
         r.check_exit_code(0)
 
-    # the python websocket server does not like 'large' control frames
     def test_20_07_data_large_small_recv(self, env: Env, ws_echo, repeat):
-        client = LocalClient(env=env, name='ws-data', run_env={
-            'CURL_WS_CHUNK_SIZE': '1024',
-        })
+        run_env = os.environ.copy()
+        run_env['CURL_WS_CHUNK_SIZE'] = '1024'
+        client = LocalClient(env=env, name='ws-data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
         url = f'ws://localhost:{env.ws_port}/'
-        r = client.run(args=[url, str(65535 - 5), str(65535 + 5)])
+        r = client.run(args=['-m', str(65535 - 5), '-M', str(65535 + 5), url])
+        r.check_exit_code(0)
+
+    # Send large frames and simulate send blocking on 8192 bytes chunks
+    # Simlates error reported in #15865
+    def test_20_08_data_very_large(self, env: Env, ws_echo, repeat):
+        run_env = os.environ.copy()
+        run_env['CURL_WS_CHUNK_EAGAIN'] = '8192'
+        client = LocalClient(env=env, name='ws-data', run_env=run_env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        url = f'ws://localhost:{env.ws_port}/'
+        count = 10
+        large = 512 * 1024
+        large = 20000
+        r = client.run(args=['-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)
