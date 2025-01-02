@@ -267,7 +267,7 @@ int main(int argc, char *argv[])
     switch(ch) {
     case 'h':
       usage(NULL);
-      res = 2;
+      res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     case 'c':
       count = (size_t)strtol(optarg, NULL, 10);
@@ -280,7 +280,7 @@ int main(int argc, char *argv[])
       break;
     default:
       usage("invalid option");
-      res = 1;
+      res = CURLE_BAD_FUNCTION_ARGUMENT;
       goto cleanup;
     }
   }
@@ -293,13 +293,13 @@ int main(int argc, char *argv[])
   if(plen_max < plen_min) {
     fprintf(stderr, "maxlen must be >= minlen, got %ld-%ld\n",
             (long)plen_min, (long)plen_max);
-    res = 2;
+    res = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }
 
   if(argc != 1) {
     usage(NULL);
-    res = 2;
+    res = CURLE_BAD_FUNCTION_ARGUMENT;
     goto cleanup;
   }
   url = argv[0];
