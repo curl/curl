@@ -370,7 +370,7 @@ static struct passwd *vms_getpwuid(uid_t uid)
 
 #define USE_UPPERCASE_KRBAPI 1
 
-/* AI_NUMERICHOST needed for IP V6 support in Curl */
+/* AI_NUMERICHOST needed for IP V6 support in curl */
 #ifdef HAVE_NETDB_H
 #include <netdb.h>
 #ifndef AI_NUMERICHOST
