@@ -62,5 +62,7 @@ This option is only supported on Linux and macOS 10.11 or later.
 
 # RETURN VALUE
 
-Returns CURLE_OK if fast open is supported by the operating system, otherwise
-returns CURLE_NOT_BUILT_IN.
+curl_easy_setopt(3) returns a CURLcode indicating success or error.
+
+CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
+libcurl-errors(3).

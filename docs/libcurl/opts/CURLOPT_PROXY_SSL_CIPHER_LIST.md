@@ -102,4 +102,7 @@ Since curl 8.10.0 returns CURLE_NOT_BUILT_IN when not supported.
 
 # RETURN VALUE
 
-Returns CURLE_OK if supported, CURLE_NOT_BUILT_IN otherwise.
+curl_easy_setopt(3) returns a CURLcode indicating success or error.
+
+CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
+libcurl-errors(3).

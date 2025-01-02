@@ -88,6 +88,7 @@ int main(void)
 
 # RETURN VALUE
 
-Returns CURLE_OK if TLS is supported, and CURLE_UNKNOWN_OPTION if not.
+curl_easy_setopt(3) returns a CURLcode indicating success or error.
 
-If 1 is set as argument, *CURLE_BAD_FUNCTION_ARGUMENT* is returned.
+CURLE_OK (0) means everything was OK, non-zero means an error occurred, see
+libcurl-errors(3).
