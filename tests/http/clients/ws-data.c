@@ -241,8 +241,6 @@ out:
   return r;
 }
 
-#endif
-
 static void usage(const char *msg)
 {
   if(msg)
@@ -253,6 +251,8 @@ static void usage(const char *msg)
     "  -M number  maximum frame size\n"
   );
 }
+
+#endif
 
 int main(int argc, char *argv[])
 {
