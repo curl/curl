@@ -167,8 +167,9 @@ static CURLcode data_echo(CURL *curl, size_t count,
         r = curl_ws_send(curl, sbuf, slen, &nwritten, 0, CURLWS_BINARY);
         sblock = (r == CURLE_AGAIN);
         if(!r || (r == CURLE_AGAIN)) {
-          fprintf(stderr, "curl_ws_send(len=%ld) -> %d, %zu (%zu/%zu)\n",
-                  (long)slen, r, nwritten, len - slen, len);
+          fprintf(stderr, "curl_ws_send(len=%ld) -> %d, %ld (%ld/%ld)\n",
+                  (long)slen, r, (long)nwritten,
+                  (long)(len - slen), (long)len);
           sbuf += nwritten;
           slen -= nwritten;
         }
@@ -187,8 +188,8 @@ static CURLcode data_echo(CURL *curl, size_t count,
                          &nread, &frame);
         if(!r || (r == CURLE_AGAIN)) {
           rblock = (r == CURLE_AGAIN);
-          fprintf(stderr, "curl_ws_recv(len=%ld) -> %d, %zu (%zu/%zu) \n",
-                  (long)rlen, r, nread, len - rlen, len);
+          fprintf(stderr, "curl_ws_recv(len=%ld) -> %d, %ld (%ld/%ld) \n",
+                  (long)rlen, r, (long)nread, (long)(len - rlen), (long)len);
           if(!r) {
             r = check_recv(frame, len - rlen, nread, len);
             if(r)
