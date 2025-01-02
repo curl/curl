@@ -63,13 +63,14 @@ else()
   # On Apple the SDK LDAP gets picked up from
   # 'MacOSX.sdk/System/Library/Frameworks/LDAP.framework/Headers', which contains
   # ldap.h and lber.h both being stubs to include <ldap.h> and <lber.h>.
-  # This causes an infinite inclusion loop in compile.
+  # This causes an infinite inclusion loop in compile. Also do this for libraries
+  # to avoid picking up the 'ldap.framework' with a full path.
   set(_save_cmake_system_framework_path ${CMAKE_SYSTEM_FRAMEWORK_PATH})
   set(CMAKE_SYSTEM_FRAMEWORK_PATH "")
   find_path(LDAP_INCLUDE_DIR NAMES "ldap.h")
-  set(CMAKE_SYSTEM_FRAMEWORK_PATH ${_save_cmake_system_framework_path})
   find_library(LDAP_LIBRARY NAMES "ldap")
   find_library(LDAP_LBER_LIBRARY NAMES "lber")
+  set(CMAKE_SYSTEM_FRAMEWORK_PATH ${_save_cmake_system_framework_path})
 
   unset(LDAP_VERSION CACHE)
   if(LDAP_INCLUDE_DIR AND EXISTS "${LDAP_INCLUDE_DIR}/ldap_features.h")
