@@ -23,7 +23,8 @@ Example subscribe:
 
     curl mqtt://host.home/bedroom/temp
 
-This will send an MQTT SUBSCRIBE packet for the topic `bedroom/temp` and listen in for incoming PUBLISH packets.
+This sends an MQTT SUBSCRIBE packet for the topic `bedroom/temp` and listen in
+for incoming PUBLISH packets.
 
 ### Publishing
 
@@ -35,7 +36,8 @@ Example publish:
 
     curl -d 75 mqtt://host.home/bedroom/dimmer
 
-This will send an MQTT PUBLISH packet to the topic `bedroom/dimmer` with the payload `75`.
+This sends an MQTT PUBLISH packet to the topic `bedroom/dimmer` with the
+payload `75`.
 
 ## What does curl deliver as a response to a subscribe
 

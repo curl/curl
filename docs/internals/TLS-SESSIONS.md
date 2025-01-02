@@ -27,7 +27,7 @@ for an insight into this topic.
 These difference between TLS protocol versions are reflected in curl's
 handling of session tickets. More below.
 
-## Curl's `ssl_peer_key`
+## curl's `ssl_peer_key`
 
 In order to find a ticket from a previous TLS session, curl
 needs a name for TLS sessions that uniquely identifies the peer
@@ -55,18 +55,18 @@ Examples:
 Different configurations produce different keys which is just what
 curl needs when handling SSL session tickets.
 
-One important thing: peer keys do not contain confidential
-information. If you configure a client certificate or SRP authentication
-with username/password, these will not be part of the peer key.
+One important thing: peer keys do not contain confidential information. If you
+configure a client certificate or SRP authentication with username/password,
+these are not part of the peer key.
 
 However, peer keys carry the hostnames you use curl for. The *do*
 leak the privacy of your communication. We recommend to *not* persist
 peer keys for this reason.
 
-**Caveat**: The key may contain file names or paths. It does not
-reflect the *contents* in the filesystem. If you change `/etc/ssl/cert.pem`
-and reuse a previous ticket, curl might trust a server which no
-longer has a root certificate in the file.
+**Caveat**: The key may contain filenames or paths. It does not reflect the
+*contents* in the filesystem. If you change `/etc/ssl/cert.pem` and reuse a
+previous ticket, curl might trust a server which no longer has a root
+certificate in the file.
 
 
 ## Session Cache Access
@@ -76,22 +76,20 @@ longer has a root certificate in the file.
 When a new connection is being established, each SSL connection filter creates
 its own peer_key and calls into the cache. The cache then looks for a ticket
 with exactly this peer_key. Peer keys between proxy SSL filters and SSL
-filters talking through a tunnel will differ, as they talk to different
-peers.
+filters talking through a tunnel differ, as they talk to different peers.
 
 If the connection filter wants to use a client certificate or SRP
-authentication, the cache will check those as well. If the cache peer
-carries client cert or SRP auth, the connection filter must have
-those with the same values (and vice versa).
+authentication, the cache checks those as well. If the cache peer carries
+client cert or SRP auth, the connection filter must have those with the same
+values (and vice versa).
 
-On a match, the connection filter gets the session ticket and feeds that
-to the TLS implementation which, on accepting it, will try to resume it
-for a shorter handshake. In addition, the filter gets the ALPN used
-before and the amount of 0-RTT data that the server announced to be
-willing to accept. The filter can then decide if it wants to attempt
-0-RTT or not. (The ALPN is needed to know if the server speaks the
-protocol you want to send in 0-RTT. It makes no sense to send HTTP/2
-requests to a server that only knows HTTP/1.1.)
+On a match, the connection filter gets the session ticket and feeds that to
+the TLS implementation which, on accepting it, tries to resume it for a
+shorter handshake. In addition, the filter gets the ALPN used before and the
+amount of 0-RTT data that the server announced to be willing to accept. The
+filter can then decide if it wants to attempt 0-RTT or not. (The ALPN is
+needed to know if the server speaks the protocol you want to send in 0-RTT. It
+makes no sense to send HTTP/2 requests to a server that only knows HTTP/1.1.)
 
 #### Updates
 
@@ -106,10 +104,10 @@ when a filter accesses the session cache, it *takes*
 a ticket from the cache, meaning a returned ticket is removed. The filter
 then configures its TLS backend and *returns* the ticket to the cache.
 
-The cache needs to treat tickets from TLSv1.2 and 1.3 differently.
-1.2 tickets should be reused, but 1.3 tickets SHOULD NOT (RFC 8446).
-The session cache will simply drop 1.3 tickets when they are returned
-after use, but keep a 1.2 ticket.
+The cache needs to treat tickets from TLSv1.2 and 1.3 differently. 1.2 tickets
+should be reused, but 1.3 tickets SHOULD NOT (RFC 8446). The session cache
+simply drops 1.3 tickets when they are returned after use, but keeps a 1.2
+ticket.
 
 When a ticket is *put* into the cache, there is also a difference. There
 can be several 1.3 tickets at the same time, but only a single 1.2 ticket.
@@ -117,16 +115,16 @@ TLSv1.2 tickets replace any other. 1.3 tickets accumulate up to a max
 amount.
 
 By having a "put/take/return" we reflect the 1.3 use case nicely. Two
-concurrent connections will not reuse the same ticket.
+concurrent connections do not reuse the same ticket.
 
 ## Session Ticket Persistence
 
 #### Privacy and Security
 
-As mentioned above, ssl peer keys are not intended for storage in a
-file system. They'll clearly show which hosts the user talked to. This
-maybe "just" privacy relevant, but has security implications as an
-attacker might find worthy targets among your peer keys.
+As mentioned above, ssl peer keys are not intended for storage in a file
+system. They clearly show which hosts the user talked to. This maybe "just"
+privacy relevant, but has security implications as an attacker might find
+worthy targets among your peer keys.
 
 Also, we do not recommend to persist TLSv1.2 tickets.
 
@@ -137,32 +135,29 @@ it provides a salted SHA256 hash of the peer key for import and export.
 
 #### Export
 
-The salt is generated randomly for each peer key on export. The
-SHA256 makes sure that the peer key cannot be reversed and that
-a slightly different key still produces a very different result.
+The salt is generated randomly for each peer key on export. The SHA256 makes
+sure that the peer key cannot be reversed and that a slightly different key
+still produces a different result.
 
-This means an attacker cannot just "grep" a session file for a
-particular entry, e.g. if they want to know if you accessed a
-specific host. They *can* however compute the SHA256 hashes for
-all salts in the file and find a specific entry. But they *cannot*
-find a hostname they do not know. They'd have to brute force by
-guessing.
+This means an attacker cannot just "grep" a session file for a particular
+entry, e.g. if they want to know if you accessed a specific host. They *can*
+however compute the SHA256 hashes for all salts in the file and find a
+specific entry. They *cannot* find a hostname they do not know. They would
+have to brute force by guessing.
 
 #### Import
 
-When session tickets are imported from a file, curl only gets the
-salted hashes. The tickets imported will belong to an *unknown*
-peer key.
+When session tickets are imported from a file, curl only gets the salted
+hashes. The imported tickets belong to an *unknown* peer key.
 
-When a connection filter tries to *take* a session ticket, it will
-pass its peer key. This peer key will initially not match any
-tickets in the cache. The cache then checks all entries with
-unknown peer keys if the passed key matches their salted hash. If
-it does, the peer key is recovered and remembered at the cache
-entry.
+When a connection filter tries to *take* a session ticket, it passes its peer
+key. This peer key initially does not match any tickets in the cache. The
+cache then checks all entries with unknown peer keys if the passed key matches
+their salted hash. If it does, the peer key is recovered and remembered at the
+cache entry.
 
-This is a performance penalty in the order of "unknown" peer keys
-which will diminish over time when keys are rediscovered. Note that
-this also works for putting a new ticket into the cache: when no
-present entry matches, a new one with peer key is created. This
-peer key will then no longer bear the cost of hash computes.
+This is a performance penalty in the order of "unknown" peer keys which
+diminishes over time when keys are rediscovered. Note that this also works for
+putting a new ticket into the cache: when no present entry matches, a new one
+with peer key is created. This peer key then no longer bears the cost of hash
+computes.
