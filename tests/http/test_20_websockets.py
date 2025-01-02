@@ -147,4 +147,3 @@ class TestWebsockets:
         large = 512 * 1024
         r = client.run(args=['-c', str(count), '-m', str(large), url])
         r.check_exit_code(0)
-
