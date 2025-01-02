@@ -3052,6 +3052,23 @@ CURL_EXTERN CURLSHcode curl_share_setopt(CURLSH *share, CURLSHoption option,
                                          ...);
 CURL_EXTERN CURLSHcode curl_share_cleanup(CURLSH *share);
 
+CURL_EXTERN CURLcode
+curl_share_ssl_session_import(CURLSH *share, const char *session_key,
+                              const unsigned char *shmac, size_t shmac_len,
+                              const unsigned char *sdata, size_t sdata_len);
+
+typedef CURLcode curl_ssl_export_function(void *userptr,
+                                          const char *session_key,
+                                          const unsigned char *shmac,
+                                          size_t shmac_len,
+                                          const unsigned char *sdata,
+                                          size_t sdata_len);
+
+CURL_EXTERN CURLcode
+curl_share_ssl_session_export(CURLSH *share,
+                              curl_ssl_export_function *export_fn,
+                              void *userptr);
+
 /****************************************************************************
  * Structures for querying information about the curl library at runtime.
  */

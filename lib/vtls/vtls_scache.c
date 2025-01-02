@@ -22,22 +22,6 @@
  *
  ***************************************************************************/
 
-/* This file is for implementing all "generic" SSL functions that all libcurl
-   internals should use. It is then responsible for calling the proper
-   "backend" function.
-
-   SSL-functions in libcurl should call functions in this source file, and not
-   to any specific SSL-layer.
-
-   Curl_ssl_ - prefix for generic ones
-
-   Note that this source code uses the functions of the configured SSL
-   backend via the global Curl_ssl instance.
-
-   "SSL/TLS Strong Encryption: An Introduction"
-   https://httpd.apache.org/docs/2.0/ssl/ssl_intro.html
-*/
-
 #include "curl_setup.h"
 
 #ifdef USE_SSL
@@ -58,6 +42,7 @@
 #include "vtls.h" /* generic SSL protos etc */
 #include "vtls_int.h"
 #include "vtls_scache.h"
+#include "vtls_spack.h"
 
 #include "strcase.h"
 #include "url.h"
@@ -65,6 +50,7 @@
 #include "share.h"
 #include "curl_trc.h"
 #include "curl_sha256.h"
+#include "rand.h"
 #include "warnless.h"
 #include "curl_printf.h"
 #include "strdup.h"
@@ -246,6 +232,28 @@ static CURLcode cf_ssl_scache_peer_init(struct Curl_ssl_scache_peer *peer,
 out:
   if(result)
     cf_ssl_scache_clear_peer(peer);
+  return result;
+}
+
+static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
+{
+  CURLcode result;
+
+  DEBUGASSERT(peer);
+  if(!peer->ssl_peer_key)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  result = Curl_rand(NULL, peer->key_salt, sizeof(peer->key_salt));
+  if(result)
+    return result;
+
+  result = Curl_hmacit(&Curl_HMAC_SHA256,
+                       peer->key_salt, sizeof(peer->key_salt),
+                       (const unsigned char *)peer->ssl_peer_key,
+                       strlen(peer->ssl_peer_key),
+                       peer->key_hmac);
+  if(!result)
+    peer->hmac_set = TRUE;
   return result;
 }
 
@@ -899,6 +907,96 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
   if(!result && peer)
     cf_ssl_scache_clear_peer(peer);
   Curl_ssl_scache_unlock(data);
+}
+
+#define CURL_SSL_TICKET_MAX   (16*1024)
+
+CURLcode Curl_ssl_session_import(struct Curl_ssl_scache *scache,
+                                 const char *ssl_peer_key,
+                                 const unsigned char *shmac, size_t shmac_len,
+                                 const unsigned char *sdata, size_t sdata_len)
+{
+  struct Curl_ssl_session *s = NULL;
+  CURLcode r;
+
+  DEBUGASSERT(scache);
+  if(!ssl_peer_key && (!shmac || !shmac_len))
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  r = Curl_ssl_session_unpack(sdata, sdata_len, &s);
+  if(r)
+    goto out;
+
+  /* FIXME! need to find/add peer and give it session */
+out:
+  if(r)
+    Curl_ssl_session_destroy(s);
+  return r;
+}
+
+CURLcode Curl_ssl_session_export(struct Curl_ssl_scache *scache,
+                                 curl_ssl_export_function *export_fn,
+                                 void *userptr)
+{
+  struct Curl_ssl_scache_peer *peer;
+  struct dynbuf sbuf, hbuf;
+  struct Curl_llist_node *n;
+  size_t i;
+  curl_off_t now = time(NULL);
+  CURLcode r = CURLE_OK;
+
+  DEBUGASSERT(scache);
+  if(!export_fn)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  Curl_dyn_init(&hbuf, (CURL_SHA256_DIGEST_LENGTH * 2) + 1);
+  Curl_dyn_init(&sbuf, CURL_SSL_TICKET_MAX);
+
+  for(i = 0; scache && i < scache->peer_count; i++) {
+    peer = &scache->peers[i];
+    if(!peer->ssl_peer_key && !peer->hmac_set)
+      continue;  /* skip free entry */
+    if(peer->clientcert || peer->srp_username || peer->srp_password)
+      continue;  /* not exporting those */
+
+    Curl_dyn_reset(&hbuf);
+    cf_scache_peer_remove_expired(peer, now);
+    n = Curl_llist_head(&peer->sessions);
+    while(n) {
+      struct Curl_ssl_session *s = Curl_node_elem(n);
+      if(!peer->hmac_set) {
+        r = cf_ssl_scache_peer_set_hmac(peer);
+        if(r)
+          goto out;
+      }
+      if(!Curl_dyn_len(&hbuf)) {
+        r = Curl_dyn_addn(&hbuf, peer->key_salt, sizeof(peer->key_salt));
+        if(r)
+          goto out;
+        r = Curl_dyn_addn(&hbuf, peer->key_hmac, sizeof(peer->key_hmac));
+        if(r)
+          goto out;
+      }
+      Curl_dyn_reset(&sbuf);
+      r = Curl_ssl_session_pack(s, &sbuf);
+      if(r)
+        goto out;
+
+      r = export_fn(userptr, peer->ssl_peer_key,
+                    Curl_dyn_uptr(&hbuf), Curl_dyn_len(&hbuf),
+                    Curl_dyn_uptr(&sbuf), Curl_dyn_len(&sbuf));
+      if(r)
+        goto out;
+      n = Curl_node_next(n);
+    }
+
+  }
+  r = CURLE_OK;
+
+out:
+  Curl_dyn_free(&hbuf);
+  Curl_dyn_free(&sbuf);
+  return r;
 }
 
 #endif /* USE_SSL */
