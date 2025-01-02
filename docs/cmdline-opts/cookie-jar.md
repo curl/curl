@@ -20,7 +20,7 @@ Example:
 # `--cookie-jar`
 
 Specify to which file you want curl to write all cookies after a completed
-operation. Curl writes all cookies from its in-memory cookie storage to the
+operation. curl writes all cookies from its in-memory cookie storage to the
 given file at the end of operations. Even if no cookies are known, a file is
 created so that it removes any formerly existing cookies from the file. The
 file uses the Netscape cookie file format. If you set the filename to a single

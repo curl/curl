@@ -32,8 +32,8 @@ Pass in a pointer to a char pointer and get the referrer header used in the
 most recent request.
 
 The **hdrp** pointer is NULL or points to private memory you MUST NOT free -
-it gets freed when you call curl_easy_cleanup(3) on the corresponding
-CURL handle.
+it gets freed when you call curl_easy_cleanup(3) on the corresponding curl
+handle.
 
 # %PROTOCOLS%
 

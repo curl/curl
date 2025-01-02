@@ -28,7 +28,7 @@ void curl_easy_reset(CURL *handle);
 
 # DESCRIPTION
 
-Re-initializes all options previously set on a specified CURL handle to the
+Re-initializes all options previously set on a specified curl handle to the
 default values. This puts back the handle to the same state as it was in when
 it was just created with curl_easy_init(3).
 

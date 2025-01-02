@@ -16,7 +16,7 @@ Example:
 
 # `--disable-epsv`
 
-Disable the use of the EPSV command when doing passive FTP transfers. Curl
+Disable the use of the EPSV command when doing passive FTP transfers. curl
 normally first attempts to use EPSV before PASV, but with this option, it does
 not try EPSV.
 

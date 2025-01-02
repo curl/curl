@@ -115,7 +115,7 @@ matching public key file must be specified using the `--pubkey` option.
 
 ### HTTP
 
-Curl also supports user and password in HTTP URLs, thus you can pick a file
+curl also supports user and password in HTTP URLs, thus you can pick a file
 like:
 
     curl http://name:passwd@http.server.example/full/path/to/file
@@ -170,7 +170,7 @@ curl uses HTTP/1.0 instead of HTTP/1.1 for any `CONNECT` attempts.
 
 curl also supports SOCKS4 and SOCKS5 proxies with `--socks4` and `--socks5`.
 
-See also the environment variables Curl supports that offer further proxy
+See also the environment variables curl supports that offer further proxy
 control.
 
 Most FTP proxy servers are set up to appear as a normal FTP server from the
@@ -199,7 +199,7 @@ should be read from STDIN.
 ## Ranges
 
 HTTP 1.1 introduced byte-ranges. Using this, a client can request to get only
-one or more sub-parts of a specified document. Curl supports this with the
+one or more sub-parts of a specified document. curl supports this with the
 `-r` flag.
 
 Get the first 100 bytes of a document:
@@ -210,7 +210,7 @@ Get the last 500 bytes of a document:
 
     curl -r -500 http://www.example.com/
 
-Curl also supports simple ranges for FTP files as well. Then you can only
+curl also supports simple ranges for FTP files as well. Then you can only
 specify start and stop position.
 
 Get the first 100 bytes of a document using FTP:
@@ -238,7 +238,7 @@ Upload a local file to get appended to the remote file:
 
     curl -T localfile -a ftp://ftp.example.com/remotefile
 
-Curl also supports ftp upload through a proxy, but only if the proxy is
+curl also supports ftp upload through a proxy, but only if the proxy is
 configured to allow that kind of tunneling. If it does, you can run curl in a
 fashion similar to:
 
@@ -264,7 +264,7 @@ For other ways to do HTTP data upload, see the POST section below.
 
 If curl fails where it is not supposed to, if the servers do not let you in,
 if you cannot understand the responses: use the `-v` flag to get verbose
-fetching. Curl outputs lots of info and what it sends and receives in order to
+fetching. curl outputs lots of info and what it sends and receives in order to
 let the user see all client-server interaction (but it does not show you the
 actual data).
 
@@ -286,7 +286,7 @@ info on a single file for HTTP and FTP. The HTTP information is a lot more
 extensive.
 
 For HTTP, you can get the header information (the same as `-I` would show)
-shown before the data by using `-i`/`--include`. Curl understands the
+shown before the data by using `-i`/`--include`. curl understands the
 `-D`/`--dump-header` option when getting files from both FTP and HTTP, and it
 then stores the headers in the specified file.
 
@@ -407,7 +407,7 @@ contain certain data.
 ## User Agent
 
 An HTTP request has the option to include information about the browser that
-generated the request. Curl allows it to be specified on the command line. It
+generated the request. curl allows it to be specified on the command line. It
 is especially useful to fool or trick stupid servers or CGI scripts that only
 accept certain browsers.
 
@@ -456,7 +456,7 @@ Example, get a page that wants my name passed in a cookie:
 
     curl -b "name=Daniel" www.example.com
 
-Curl also has the ability to use previously received cookies in following
+curl also has the ability to use previously received cookies in following
 sessions. If you get cookies from a server and store them in a file in a
 manner similar to:
 
@@ -482,7 +482,7 @@ non-existing file to trigger the cookie awareness like:
     curl -L -b empty.txt www.example.com
 
 The file to read cookies from must be formatted using plain HTTP headers OR as
-Netscape's cookie file. Curl determines what kind it is based on the file
+Netscape's cookie file. curl determines what kind it is based on the file
 contents. In the above command, curl parses the header and store the cookies
 received from www.example.com. curl sends the stored cookies which match the
 request to the server as it follows the location. The file `empty.txt` may be
@@ -523,7 +523,7 @@ much explanation!
 
 ## Speed Limit
 
-Curl allows the user to set the transfer speed conditions that must be met to
+curl allows the user to set the transfer speed conditions that must be met to
 let the transfer keep going. By using the switch `-y` and `-Y` you can make
 curl abort transfers if the transfer speed is below the specified lowest limit
 for a specified time.
@@ -562,7 +562,7 @@ stalls during periods.
 
 ## Config File
 
-Curl automatically tries to read the `.curlrc` file (or `_curlrc` file on
+curl automatically tries to read the `.curlrc` file (or `_curlrc` file on
 Microsoft Windows systems) from the user's home directory on startup.
 
 The config file could be made up with normal command line switches, but you
@@ -822,7 +822,7 @@ with current logon credentials (SSPI/SPNEGO).
 
 ## Environment Variables
 
-Curl reads and understands the following environment variables:
+curl reads and understands the following proxy related environment variables:
 
     http_proxy, HTTPS_PROXY, FTP_PROXY
 
@@ -855,7 +855,7 @@ this is a big security risk if someone else gets hold of your passwords,
 therefore most Unix programs do not read this file unless it is only readable
 by yourself (curl does not care though).
 
-Curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
+curl supports `.netrc` files if told to (using the `-n`/`--netrc` and
 `--netrc-optional` options). This is not restricted to just FTP, so curl can
 use it for all protocols where authentication is used.
 
@@ -876,7 +876,7 @@ ending newline:
 
 ## Kerberos FTP Transfer
 
-Curl supports kerberos4 and kerberos5/GSSAPI for FTP transfers. You need the
+curl supports kerberos4 and kerberos5/GSSAPI for FTP transfers. You need the
 kerberos package installed and used at curl build time for it to be available.
 
 First, get the krb-ticket the normal way, like with the `kinit`/`kauth` tool.
@@ -889,7 +889,7 @@ ask for one and you already entered the real password to `kinit`/`kauth`.
 
 ## TELNET
 
-The curl telnet support is basic and easy to use. Curl passes all data passed
+The curl telnet support is basic and easy to use. curl passes all data passed
 to it on stdin to the remote server. Connect to a remote telnet server using a
 command line similar to:
 

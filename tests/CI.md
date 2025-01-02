@@ -6,7 +6,7 @@ SPDX-License-Identifier: curl
 
 # Continuous Integration for curl
 
-Curl runs in many different environments, so every change is run against a
+curl runs in many different environments, so every change is run against a
 large number of test suites.
 
 Every pull request is verified for each of the following:
@@ -58,7 +58,7 @@ GitHub Actions runs the following tests:
 - macOS tests with a variety of different compilation options
 - Fuzz tests ([see the curl-fuzzer repo for more
   info](https://github.com/curl/curl-fuzzer)).
-- Curl compiled using the Rust TLS backend with Hyper
+- curl compiled using the Rust TLS backend with Hyper
 
 These are each configured in different files in `.github/workflows`.
 

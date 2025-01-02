@@ -6,7 +6,7 @@ SPDX-License-Identifier: curl
 
 # Rustls
 
-[Rustls is a TLS backend written in Rust](https://docs.rs/rustls/). Curl can
+[Rustls is a TLS backend written in Rust](https://docs.rs/rustls/). curl can
 be built to use it as an alternative to OpenSSL or other TLS backends. We use
 the [rustls-ffi C bindings](https://github.com/rustls/rustls-ffi/). This
 version of curl depends on version v0.14.0 of rustls-ffi.

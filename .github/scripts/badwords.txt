@@ -66,3 +66,8 @@ couldn't:could not
 64-bits:64 bits or 64-bit
 32-bits:32 bits or 32-bit
 \bvery\b:rephrase using an alternative word
+\bCurl\b=curl
+\bLibcurl\b=libcurl
+---WWW::Curl
+---NET::Curl
+---Curl Corporation

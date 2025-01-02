@@ -17,7 +17,7 @@ Example:
 
 # `--silent`
 
-Silent or quiet mode. Do not show progress meter or error messages. Makes Curl
+Silent or quiet mode. Do not show progress meter or error messages. Makes curl
 mute. It still outputs the data you ask for, potentially even to the
 terminal/stdout unless you redirect it.
 

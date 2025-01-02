@@ -4,10 +4,10 @@ Implementation notes:
   This is a true OS/400 ILE implementation, not a PASE implementation (for
 PASE, use AIX implementation).
 
-  The biggest problem with OS/400 is EBCDIC. Libcurl implements an internal
+  The biggest problem with OS/400 is EBCDIC. libcurl implements an internal
 conversion mechanism, but it has been designed for computers that have a
 single native character set. OS/400 default native character set varies
-depending on the country for which it has been localized. And more, a job
+depending on the country for which it has been localized. Further, a job
 may dynamically alter its "native" character set.
   Several characters that do not have fixed code in EBCDIC variants are
 used in libcurl strings. As a consequence, using the existing conversion
@@ -33,7 +33,7 @@ NOT converted, so text gathered this way is (probably !) ASCII.
   Another OS/400 problem comes from the fact that the last fixed argument of a
 vararg procedure may not be of type char, unsigned char, short or unsigned
 short. Enums that are internally implemented by the C compiler as one of these
-types are also forbidden. Libcurl uses enums as vararg procedure tagfields...
+types are also forbidden. libcurl uses enums as vararg procedure tagfields...
 Happily, there is a pragma forcing enums to type "int". The original libcurl
 header files are thus altered during build process to use this pragma, in
 order to force libcurl enums of being type int (the pragma disposition in use
@@ -201,7 +201,7 @@ _ curl_pushheader_bynum_cssid() and curl_pushheader_byname_ccsid()
 should be released with curl_free() after use, as opposite to the non-ccsid
 versions of these procedures.
   Please note that HTTP2 is not (yet) implemented on OS/400, thus these
-functions will always return NULL.
+functions always return NULL.
 
 _ curl_easy_option_by_name_ccsid() returns a pointer to an untranslated option
 metadata structure. As each curl_easyoption structure holds the option name in
@@ -216,15 +216,15 @@ hout parameter is kept in libcurl's encoding and should not be altered.
 _ curl_from_ccsid() and curl_to_ccsid() are string encoding conversion
 functions between ASCII (latin1) and the given CCSID. The first parameter is
 the source string, the second is the CCSID and the returned value is a pointer
-to the dynamically allocated string. These functions do not impact on Curl's
+to the dynamically allocated string. These functions do not impact on curl's
 behavior and are only provided for user convenience. After use, returned values
 must be released with curl_free().
 
 
-  Standard compilation environment does support neither autotools nor make;
-in fact, very few common utilities are available. As a consequence, the
-config-os400.h has been coded manually and the compilation scripts are
-a set of shell scripts stored in subdirectory packages/OS400.
+  Standard compilation environment does support neither autotools nor make; in
+fact, few common utilities are available. As a consequence, the config-os400.h
+has been coded manually and the compilation scripts are a set of shell scripts
+stored in subdirectory packages/OS400.
 
   The test environment is currently not supported on OS/400.
 
@@ -259,7 +259,7 @@ _ TFTP
 Compiling on OS/400:
 
   These instructions targets people who knows about OS/400, compiling, IFS and
-archive extraction. Do not ask questions about these subjects if you're not
+archive extraction. Do not ask questions about these subjects if you are not
 familiar with.
 
 _ As a prerequisite, QADRT development environment must be installed.
@@ -286,20 +286,20 @@ _ Enter the command "sh makefile.sh > makelog 2>&1"
 _ Examine the makelog file to check for compilation errors. CZM0383 warnings on
   C or system standard API come from QADRT inlining and can safely be ignored.
 
-  Without configuration parameters override, this will produce the following
+  Without configuration parameters override, this produces the following
 OS/400 objects:
-_ Library CURL. All other objects will be stored in this library.
+_ libcurl. All other objects are stored in this library.
 _ Modules for all libcurl units.
 _ Binding directory CURL_A, to be used at calling program link time for
   statically binding the modules (specify BNDSRVPGM(QADRTTS QGLDCLNT QGLDBRDR)
   when creating a program using CURL_A).
 _ Service program CURL.<soname>, where <soname> is extracted from the
-  lib/Makefile.am VERSION variable. To be used at calling program run-time
+  lib/Makefile.am VERSION variable. To be used at calling program runtime
   when this program has dynamically bound curl at link time.
 _ Binding directory CURL. To be used to dynamically bind libcurl when linking a
   calling program.
-- CLI tool bound program CURL.
-- CLI command CURL.
+- CLI tool bound program curl.
+- CLI command curl.
 _ Source file H. It contains all the include members needed to compile a C/C++
   module using libcurl, and an ILE/RPG /copy member for support in this
   language.

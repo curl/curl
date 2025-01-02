@@ -8,13 +8,21 @@
 # If separator is '=', the string will be compared case sensitively.
 # If separator is ':', the check is done case insensitively.
 #
+# To add white listed uses of bad words that are removed before checking for
+# the bad ones:
+#
+# ---(accepted word)
+#
 my $w;
 while(<STDIN>) {
     chomp;
     if($_ =~ /^#/) {
         next;
     }
-    if($_ =~ /^([^:=]*)([:=])(.*)/) {
+    if($_ =~ /^---(.*)/) {
+        push @whitelist, $1;
+    }
+    elsif($_ =~ /^([^:=]*)([:=])(.*)/) {
         my ($bad, $sep, $better)=($1, $2, $3);
         push @w, $bad;
         $alt{$bad} = $better;
@@ -41,6 +49,10 @@ sub file {
         $in =~ s/(\[.*\])\(.*\)/$1/g;
         # remove backticked texts
         $in =~ s/\`.*\`//g;
+        # remove whitelisted patterns
+        for my $p (@whitelist) {
+            $in =~ s/$p//g;
+        }
         foreach my $w (@w) {
             my $case = $exactcase{$w};
             if(($in =~ /^(.*)$w/i && !$case) ||

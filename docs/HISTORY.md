@@ -74,7 +74,7 @@ November: configure script and reported successful compiles on several
 major operating systems. The never-quite-understood -F option was added and
 curl could now simulate quite a lot of a browser. TELNET support was added.
 
-Curl 5 was released in December 1998 and introduced the first ever curl man
+curl 5 was released in December 1998 and introduced the first ever curl man
 page. People started making Linux RPM packages out of it.
 
 1999
@@ -187,7 +187,7 @@ June: curl 7.12.0 introduced IDN support. 10 official web mirrors.
 This release bumped the major SONAME to 3 due to the removal of the
 `curl_formparse()` function
 
-August: Curl and libcurl 7.12.1
+August: curl and libcurl 7.12.1
 
     Public curl release number:                82
     Releases counted from the beginning:      109
@@ -377,7 +377,7 @@ April: added the cyassl backend (later renamed to wolfSSL)
  curl and libcurl are installed in an estimated 5 *billion* instances
  world-wide.
 
- October 31: Curl and libcurl 7.62.0
+ October 31: curl and libcurl 7.62.0
 
     Public curl releases:         177
     Command line options:         219

@@ -17,7 +17,7 @@ Example:
 # `--hostpubsha256`
 
 Pass a string containing a Base64-encoded SHA256 hash of the remote host's
-public key. Curl refuses the connection with the host unless the hashes match.
+public key. curl refuses the connection with the host unless the hashes match.
 
 This feature requires libcurl to be built with libssh2 and does not work with
 other SSH backends.

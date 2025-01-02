@@ -1959,10 +1959,10 @@ typedef enum {
   /* Set stream weight, 1 - 256 (default is 16) */
   CURLOPT(CURLOPT_STREAM_WEIGHT, CURLOPTTYPE_LONG, 239),
 
-  /* Set stream dependency on another CURL handle */
+  /* Set stream dependency on another curl handle */
   CURLOPT(CURLOPT_STREAM_DEPENDS, CURLOPTTYPE_OBJECTPOINT, 240),
 
-  /* Set E-xclusive stream dependency on another CURL handle */
+  /* Set E-xclusive stream dependency on another curl handle */
   CURLOPT(CURLOPT_STREAM_DEPENDS_E, CURLOPTTYPE_OBJECTPOINT, 241),
 
   /* Do not send any tftp option requests to the server */

@@ -77,7 +77,7 @@ introduced in later libcurl versions.
 ## CURL_PUSH_OK (0)
 
 The application has accepted the stream and it can now start receiving data,
-the ownership of the CURL handle has been taken over by the application.
+the ownership of the curl handle has been taken over by the application.
 
 ## CURL_PUSH_DENY (1)
 

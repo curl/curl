@@ -30,8 +30,8 @@ CURL *curl_easy_init();
 
 # DESCRIPTION
 
-This function allocates and returns a CURL easy handle. Such a handle is used
-as input to other functions in the easy interface. This call must have a
+This function allocates and returns an easy handle. Such a handle is used as
+input to other functions in the easy interface. This call must have a
 corresponding call to curl_easy_cleanup(3) when the operation is complete.
 
 The easy handle is used to hold and control a single network transfer. It is

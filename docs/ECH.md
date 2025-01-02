@@ -59,7 +59,7 @@ not be the best solution.
 
 ## Using ECH and DoH
 
-Curl supports using DoH for A/AAAA lookups so it was relatively easy to add
+curl supports using DoH for A/AAAA lookups so it was relatively easy to add
 retrieval of HTTPS RRs in that situation. To use ECH and DoH together:
 
 ```bash
@@ -153,7 +153,7 @@ For now, this only works for the OpenSSL and BoringSSL/AWS-LC builds.
 
 ## Default settings
 
-Curl has various ways to configure default settings, e.g. in ``$HOME/.curlrc``,
+curl has various ways to configure default settings, e.g. in ``$HOME/.curlrc``,
 so one can set the DoH URL and enable ECH that way:
 
 ```bash

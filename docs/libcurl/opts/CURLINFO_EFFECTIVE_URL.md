@@ -33,8 +33,8 @@ In cases when you have asked libcurl to follow redirects, it may not be the same
 value you set with CURLOPT_URL(3).
 
 The **urlp** pointer is NULL or points to private memory. You MUST NOT free
-- it gets freed when you call curl_easy_cleanup(3) on the corresponding
-CURL handle.
+- it gets freed when you call curl_easy_cleanup(3) on the corresponding curl
+handle.
 
 # %PROTOCOLS%
 
