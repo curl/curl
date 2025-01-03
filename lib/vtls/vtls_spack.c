@@ -35,6 +35,10 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
+#ifndef UINT16_MAX
+#define UINT16_MAX    65535
+#endif
+
 #define CURL_SPACK_VERSION       0x01
 #define CURL_SPACK_IETF_ID       0x02
 #define CURL_SPACK_VALID_UNTIL   0x03
