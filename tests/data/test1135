@@ -67,6 +67,8 @@ curl_version_info
 curl_easy_strerror
 curl_share_strerror
 curl_easy_pause
+curl_easy_ssls_import
+curl_easy_ssls_export
 curl_easy_init
 curl_easy_setopt
 curl_easy_perform
