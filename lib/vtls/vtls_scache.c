@@ -738,7 +738,7 @@ cf_ssl_add_peer(struct Curl_ssl_scache *scache,
                 struct Curl_ssl_scache_peer **ppeer)
 {
   struct Curl_ssl_scache_peer *peer = NULL;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
 
   *ppeer = NULL;
   if(ssl_peer_key) {
