@@ -47,7 +47,16 @@ $curl_protocols =~ /\w+: (.*)$/;
 
 # Read the output of curl-config
 my @curl_config;
-open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what list\n";
+# curl-config as C program (from CMake)
+if (-B $ARGV[0]) {
+    open(CURLCONFIG, "$ARGV[0] --$what|") ||
+    die "Can't get curl-config C program $what list\n";
+}
+# curl-config as shell script (autotools)
+else {
+    open(CURLCONFIG, "sh $ARGV[0] --$what|") ||
+    die "Can't get curl-config shell script $what list\n";
+}
 while( <CURLCONFIG> )
 {
     chomp;

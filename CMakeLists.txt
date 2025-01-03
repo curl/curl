@@ -86,6 +86,8 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
+message(STATUS "CMake install prefix: ${CMAKE_INSTALL_PREFIX}")
+
 set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
@@ -2125,7 +2127,8 @@ endif()
 
 if(NOT CURL_DISABLE_INSTALL)
 
-  # curl-config needs the following options to be set.
+  # curl-config needs the following options to be set. note that we have to
+  # perform a full string literal expansion for the C program
   set(CC                      "${CMAKE_C_COMPILER}")
   # TODO: probably put a -D... options here?
   set(CONFIGURE_OPTIONS       "")
@@ -2133,15 +2136,20 @@ if(NOT CURL_DISABLE_INSTALL)
   set(VERSIONNUM              "${_curl_version_num}")
   set(prefix                  "${CMAKE_INSTALL_PREFIX}")
   set(exec_prefix             "\${prefix}")
+  set(lit_exec_prefix         "${prefix}")  # note $ is *not* escaped
   if(IS_ABSOLUTE ${CMAKE_INSTALL_INCLUDEDIR})
     set(includedir            "${CMAKE_INSTALL_INCLUDEDIR}")
+    set(lit_includedir        "${includedir}")
   else()
     set(includedir            "\${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
+    set(lit_includedir        "${prefix}/${CMAKE_INSTALL_INCLUDEDIR}")
   endif()
   if(IS_ABSOLUTE ${CMAKE_INSTALL_LIBDIR})
     set(libdir                "${CMAKE_INSTALL_LIBDIR}")
+    set(lit_libdir            "${libdir}")
   else()
     set(libdir                "\${exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
+    set(lit_libdir            "${lit_exec_prefix}/${CMAKE_INSTALL_LIBDIR}")
   endif()
   # "a" (Linux) or "lib" (Windows)
   string(REPLACE "." "" libext "${CMAKE_STATIC_LIBRARY_SUFFIX}")
@@ -2272,6 +2280,21 @@ if(NOT CURL_DISABLE_INSTALL)
     set(ENABLE_STATIC       "no")
   endif()
 
+  # on Windows, normalize to Windows [import] library format
+  if(WIN32)
+    # remove -l prefix + turn back into a list while adding .lib suffices
+    string(REPLACE "-l" "" LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_PC_LIBS_PRIVATE}")
+    string(
+      REPLACE " " ".lib;"
+      LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_WIN32_PC_LIBS_PRIVATE}")
+    # add .lib suffix to final library
+    set(LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_WIN32_PC_LIBS_PRIVATE}.lib")
+    # turn back into space-separated string
+    string(
+      REPLACE ";" " "
+      LIBCURL_WIN32_PC_LIBS_PRIVATE "${LIBCURL_WIN32_PC_LIBS_PRIVATE}")
+  endif()
+
   # Generate a "curl-config" matching this config.
   # Consumed variables:
   #   CC
@@ -2280,12 +2303,13 @@ if(NOT CURL_DISABLE_INSTALL)
   #   CURL_CA_BUNDLE
   #   ENABLE_SHARED
   #   ENABLE_STATIC
-  #   exec_prefix
-  #   includedir
+  #   lit_exec_prefix
+  #   lit_includedir
   #   LIBCURL_PC_CFLAGS
   #   LIBCURL_PC_LDFLAGS_PRIVATE
   #   LIBCURL_PC_LIBS_PRIVATE
-  #   libdir
+  #   LIBCURL_WIN32_PC_LIBS_PRIVATE
+  #   lit_libdir
   #   libext
   #   prefix
   #   SSL_BACKENDS
@@ -2293,10 +2317,12 @@ if(NOT CURL_DISABLE_INSTALL)
   #   SUPPORT_PROTOCOLS
   #   VERSIONNUM
   configure_file(
-    "${PROJECT_SOURCE_DIR}/curl-config.in"
-    "${PROJECT_BINARY_DIR}/curl-config" @ONLY)
-  install(FILES "${PROJECT_BINARY_DIR}/curl-config"
-    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    "${PROJECT_SOURCE_DIR}/curl-config.c.in"
+    "${PROJECT_BINARY_DIR}/curl-config.c" @ONLY)
+  # add the actual program
+  add_executable(curl-config "${PROJECT_BINARY_DIR}/curl-config.c")
+  install(TARGETS curl-config
+    DESTINATION "${CMAKE_INSTALL_BINDIR}"
     PERMISSIONS
       OWNER_READ OWNER_WRITE OWNER_EXECUTE
       GROUP_READ GROUP_EXECUTE
