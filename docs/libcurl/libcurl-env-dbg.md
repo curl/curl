@@ -130,6 +130,11 @@ greater. There is a number of debug levels, refer to *openldap.c* comments.
 Used to influence the buffer chunk size used for WebSocket encoding and
 decoding.
 
+## CURL_WS_CHUNK_EAGAIN
+
+Used to simulate blocking sends after this chunk size for WebSocket
+connections.
+
 ## CURL_FORBID_REUSE
 
 Used to set the CURLOPT_FORBID_REUSE flag on each transfer initiated
