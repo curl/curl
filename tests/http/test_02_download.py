@@ -638,8 +638,8 @@ class TestDownload:
     def test_02_33_max_host_conns(self, env: Env, httpd, nghttpx, proto, max_host_conns):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        count = 100
-        max_parallel = 100
+        count = 50
+        max_parallel = 50
         docname = 'data-10k'
         port = env.port_for(proto)
         url = f'https://{env.domain1}:{port}/{docname}'
@@ -657,3 +657,46 @@ class TestDownload:
         r.check_exit_code(0)
         srcfile = os.path.join(httpd.docs_dir, docname)
         self.check_downloads(client, srcfile, count)
+        if max_host_conns > 0:
+            matched_lines = 0
+            for line in r.trace_lines:
+                m = re.match(r'.*The cache now contains (\d+) members.*', line)
+                if m:
+                    matched_lines += 1
+                    n = int(m.group(1))
+                    assert n <= max_host_conns
+            assert matched_lines > 0
+
+    @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
+    @pytest.mark.parametrize("max_total_conns", [0, 1, 5])
+    def test_02_34_max_total_conns(self, env: Env, httpd, nghttpx, proto, max_total_conns):
+        if proto == 'h3' and not env.have_h3():
+            pytest.skip("h3 not supported")
+        count = 50
+        max_parallel = 50
+        docname = 'data-10k'
+        port = env.port_for(proto)
+        url = f'https://{env.domain1}:{port}/{docname}'
+        client = LocalClient(name='hx-download', env=env)
+        if not client.exists():
+            pytest.skip(f'example client not built: {client.name}')
+        r = client.run(args=[
+             '-n', f'{count}',
+             '-m', f'{max_parallel}',
+             '-x',  # always use a fresh connection
+             '-T',  str(max_total_conns),  # limit total connections
+             '-r', f'{env.domain1}:{port}:127.0.0.1',
+             '-V', proto, url
+        ])
+        r.check_exit_code(0)
+        srcfile = os.path.join(httpd.docs_dir, docname)
+        self.check_downloads(client, srcfile, count)
+        if max_total_conns > 0:
+            matched_lines = 0
+            for line in r.trace_lines:
+                m = re.match(r'.*The cache now contains (\d+) members.*', line)
+                if m:
+                    matched_lines += 1
+                    n = int(m.group(1))
+                    assert n <= max_total_conns
+            assert matched_lines > 0
