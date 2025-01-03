@@ -26,14 +26,18 @@
  * </DESC>
  */
 /* curl stuff */
-#include "curl_setup.h"
 #include <curl/curl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef CURL_DISABLE_WEBSOCKETS
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
+
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
+#endif
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -44,10 +48,6 @@
 #include <sys/time.h>
 #endif
 
-#ifndef _MSC_VER
-/* somewhat Unix-specific */
-#include <unistd.h>  /* getopt() */
-#endif
 
 static
 void dump(const char *text, unsigned char *ptr, size_t size,
@@ -147,19 +147,20 @@ static CURLcode data_echo(CURL *curl, size_t count,
   CURLcode r = CURLE_OK;
   const struct curl_ws_frame *frame;
   size_t len;
-  char *send_buf, *recv_buf;
+  char *send_buf = NULL, *recv_buf = NULL;
   size_t i, scount = count, rcount = count;
   int rblock, sblock;
 
-  send_buf = calloc(1, plen_max);
-  if(!send_buf)
-    return CURLE_OUT_OF_MEMORY;
+  send_buf = calloc(1, plen_max + 1);
+  recv_buf = calloc(1, plen_max + 1);
+  if(!send_buf || !recv_buf) {
+    r = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
   for(i = 0; i < plen_max; ++i) {
     send_buf[i] = (char)('0' + ((int)i % 10));
   }
-  recv_buf = calloc(1, plen_max);
-  if(!recv_buf)
-    return CURLE_OUT_OF_MEMORY;
 
   for(len = plen_min; len <= plen_max; ++len) {
     size_t nwritten, nread, slen = len, rlen = len;
@@ -261,7 +262,7 @@ static void usage(const char *msg)
 
 int main(int argc, char *argv[])
 {
-#ifndef CURL_DISABLE_WEBSOCKETS
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url;
