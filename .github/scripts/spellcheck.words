@@ -123,6 +123,7 @@ CNAME
 CNAMEs
 CODESET
 codeset
+CodeSonar
 Comcast
 commit's
 Config
@@ -766,8 +767,8 @@ SOCKOPT
 SOCKSv
 Solaris
 SONAME
-SOVERSION
 Soref
+SOVERSION
 SPARC
 SPDX
 SPNEGO
