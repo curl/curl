@@ -37,6 +37,9 @@ while(<F>) {
     }
     next if($ignore);
 
+    # strip out backticked words
+    $_ =~ s/`[^`]+`//g;
+
     # strip out all long command line options
     $_ =~ s/--[a-z0-9-]+//g;
 
