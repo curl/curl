@@ -57,8 +57,8 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
-    unsiged char *shmac, *sdata;
-    size_t shmac_len, sdata_len;
+    unsigned char *shmac, *sdata;
+    size_t hlen, slen;
 
     curl_easy_setopt(curl, CURLOPT_SHARE, share);
 

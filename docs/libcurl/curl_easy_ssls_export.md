@@ -111,18 +111,19 @@ The maximum amount of bytes the server supports to receive in early data
 # EXAMPLE
 
 ~~~c
-CURLcode myexport_cb(CURL *handle,
-                     void *userptr,
-                     const char *session_key,
-                     const unsigned char *shmac,
-                     size_t shmac_len,
-                     const unsigned char *sdata,
-                     size_t sdata_len,
-                     curl_off_t valid_until,
-                     int ietf_tls_id,
-                     const char *alpn,
-                     size_t earlydata_max)
+CURLcode my_export_cb(CURL *handle,
+                      void *userptr,
+                      const char *session_key,
+                      const unsigned char *shmac,
+                      size_t shmac_len,
+                      const unsigned char *sdata,
+                      size_t sdata_len,
+                      curl_off_t valid_until,
+                      int ietf_tls_id,
+                      const char *alpn,
+                      size_t earlydata_max)
 {
+  /* persist sdata */
   return CURLE_OK;
 }
 
