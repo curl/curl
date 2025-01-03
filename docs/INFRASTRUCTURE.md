@@ -129,6 +129,9 @@ Using this setup, we provide four IPv4 addresses and eight IPv6 addresses for
 anycast access to the site. Should be snappy from virtually everywhere across
 the globe.
 
+The CDN servers support HTTP/1, HTTP/2 and HTTP/3. They set HSTS for a year.
+The `HTTP://` version of the site redirects to `HTTPS://`.
+
 Fastly manages the TLS certificates from Let's Encrypt for the servers they
 run on the behalf of curl.
 
