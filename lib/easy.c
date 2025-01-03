@@ -1375,4 +1375,3 @@ CURLcode curl_easy_ssls_export(CURL *d,
   return CURLE_NOT_BUILT_IN;
 #endif
 }
-
