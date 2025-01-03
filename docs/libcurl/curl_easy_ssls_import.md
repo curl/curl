@@ -57,8 +57,12 @@ int main(void)
 
   curl = curl_easy_init();
   if(curl) {
+    unsiged char *shmac, *sdata;
+    size_t shmac_len, sdata_len;
+
     curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
+    /* read shmac and sdata from storage */
     rc = curl_easy_ssls_import(curl, NULL, shmac, hlen, sdata, slen);
 
     /* always cleanup */
