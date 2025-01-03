@@ -1521,7 +1521,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
 out:
   free(poll_items);
   free(curl_items);
-  return CURLE_OK;
+  return res;
 }
 
 static CURLcode h3_send_streams(struct Curl_cfilter *cf,
