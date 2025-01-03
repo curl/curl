@@ -104,9 +104,16 @@ static CURLcode check_recv(const struct curl_ws_frame *frame,
   if(!frame)
     return CURLE_OK;
 
+  if(frame->flags & CURLWS_CLOSE) {
+    fprintf(stderr, "recv_data: unexpected CLOSE frame from server, "
+            "got %ld bytes, offset=%ld, rflags %x\n",
+            (long)nread, (long)r_offset, frame->flags);
+    return CURLE_RECV_ERROR;
+  }
   if(!r_offset && !(frame->flags & CURLWS_BINARY)) {
-    fprintf(stderr, "recv_data: wrong frame, got %ld bytes rflags %x\n",
-            (long)r_offset, frame->flags);
+    fprintf(stderr, "recv_data: wrong frame, got %ld bytes, offset=%ld, "
+            "rflags %x\n",
+            (long)nread, (long)r_offset, frame->flags);
     return CURLE_RECV_ERROR;
   }
   if(frame->offset != (curl_off_t)r_offset) {
