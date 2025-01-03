@@ -89,7 +89,7 @@ and **shmac**.
 Seconds since EPOCH (1970-01-01) until the session ticket is considered
 valid.
 
-## ietf_tls_id
+## TLS Version
 
 The IETF assigned number for the TLS version the session ticket originates
 from. This is **0x0304** for TLSv1.3, **0x0303** for 1.2, etc. Session
