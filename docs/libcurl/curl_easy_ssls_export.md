@@ -57,7 +57,7 @@ on specific session tickets.
 
 # Export Function Parameter
 
-## session_key
+## Session Key
 
 This is a printable, 0-terminated string that starts with **hostname:port**
 the session ticket is originating from and also contains all relevant
@@ -65,10 +65,10 @@ SSL parameters used in the connection. The key also carries the name
 and version number of the TLS backend used.
 
 It is recommended to only persist **session_key** when it can be protected
-from outside access. Since the hostname appeary in plain text, it would
+from outside access. Since the hostname appears in plain text, it would
 allow any third party to see how curl has been used for.
 
-## shmac + shmac_len
+## Salted Hash
 
 A binary blob of **shmac_len** bytes that contains a random salt and
 a cryptographic hash of the salt and **session_key**. The salt is generated
@@ -78,7 +78,7 @@ placing session tickets in a file, for example.
 A third party may brute-force known hostnames, but cannot just "grep" for
 them.
 
-## sdata + sdata_len
+## Session Data
 
 A binary blob of **sdata_len** bytes, **sdata** contains all relevant
 SSL session ticket information for a later import - apart from **session_key**
@@ -91,17 +91,17 @@ valid.
 
 ## ietf_tls_id
 
-The IETF assigned number for the TLS version the session ticket orignates
+The IETF assigned number for the TLS version the session ticket originates
 from. This is **0x0304** for TLSv1.3, **0x0303** for 1.2, etc. Session
 tickets from version 1.3 have better security properties, so an export
 might store only those.
 
-## alpn
+## ALPN
 
 The ALPN protocol that had been negotiated with the host. This may be
 **NULL** if negotiation gave no result or had not been attempted.
 
-## earlydata_max
+## Early Data
 
 The maximum amount of bytes the server supports to receive in early data
 (0-RTT). This is 0 unless the server explicitly indicates support.
