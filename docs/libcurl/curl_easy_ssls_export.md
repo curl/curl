@@ -111,6 +111,21 @@ The maximum amount of bytes the server supports to receive in early data
 # EXAMPLE
 
 ~~~c
+CURLcode myexport_cb(CURL *handle,
+                     void *userptr,
+                     const char *session_key,
+                     const unsigned char *shmac,
+                     size_t shmac_len,
+                     const unsigned char *sdata,
+                     size_t sdata_len,
+                     curl_off_t valid_until,
+                     int ietf_tls_id,
+                     const char *alpn,
+                     size_t earlydata_max)
+{
+  return CURLE_OK;
+}
+
 int main(void)
 {
   CURLSHcode sh;
@@ -126,7 +141,7 @@ int main(void)
   if(curl) {
     curl_easy_setopt(curl, CURLOPT_SHARE, share);
 
-    rc = curl_easy_ssls_export(curl, my_export_fn, my_userdata);
+    rc = curl_easy_ssls_export(curl, my_export_cb, NULL);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
