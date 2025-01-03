@@ -292,6 +292,9 @@ struct cf_osslq_ctx {
   struct Curl_hash streams;          /* hash `data->mid` to `h3_stream_ctx` */
   size_t max_stream_window;          /* max flow window for one stream */
   uint64_t max_idle_ms;              /* max idle time for QUIC connection */
+  SSL_POLL_ITEM *poll_items;         /* Array for polling on writable state */
+  struct Curl_easy **curl_items;     /* Array of easy objs */
+  size_t item_count;                 /* count of elements in poll/curl_items */
   BIT(initialized);
   BIT(got_first_byte);               /* if first byte was received */
   BIT(x509_store_setup);             /* if x509 store has been set up */
@@ -308,6 +311,9 @@ static void cf_osslq_ctx_init(struct cf_osslq_ctx *ctx)
   Curl_bufcp_init(&ctx->stream_bufcp, H3_STREAM_CHUNK_SIZE,
                   H3_STREAM_POOL_SPARES);
   Curl_hash_offt_init(&ctx->streams, 63, h3_stream_hash_free);
+  ctx->poll_items = NULL;
+  ctx->curl_items = NULL;
+  ctx->item_count = 0;
   ctx->initialized = TRUE;
 }
 
@@ -318,6 +324,8 @@ static void cf_osslq_ctx_free(struct cf_osslq_ctx *ctx)
     Curl_hash_clean(&ctx->streams);
     Curl_hash_destroy(&ctx->streams);
     Curl_ssl_peer_cleanup(&ctx->peer);
+    free(ctx->poll_items);
+    free(ctx->curl_items);
   }
   free(ctx);
 }
@@ -1461,24 +1469,80 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
 {
   struct cf_osslq_ctx *ctx = cf->ctx;
   struct h3_stream_ctx *stream;
+  size_t poll_count = 0;
+  size_t result_count = 0;
+  size_t idx_count = 0;
+  CURLcode res = CURLE_OK;
+  struct timeval timeout;
+  void *tmpptr;
 
   if(ctx->h3.conn) {
     struct Curl_llist_node *e;
+
+    res = CURLE_OUT_OF_MEMORY;
+
+    if(ctx->item_count < Curl_llist_count(&data->multi->process)) {
+      ctx->item_count = 0;
+      tmpptr = realloc(ctx->poll_items,
+                       Curl_llist_count(&data->multi->process) *
+                       sizeof(SSL_POLL_ITEM));
+      if(!tmpptr) {
+        free(ctx->poll_items);
+        ctx->poll_items = NULL;
+        goto out;
+      }
+      ctx->poll_items = tmpptr;
+
+      tmpptr = realloc(ctx->curl_items,
+                       Curl_llist_count(&data->multi->process) *
+                       sizeof(struct Curl_easy *));
+      if(!tmpptr) {
+        free(ctx->curl_items);
+        ctx->curl_items = NULL;
+        goto out;
+      }
+      ctx->curl_items = tmpptr;
+
+      ctx->item_count = Curl_llist_count(&data->multi->process);
+    }
+
     for(e = Curl_llist_head(&data->multi->process); e; e = Curl_node_next(e)) {
       struct Curl_easy *sdata = Curl_node_elem(e);
       if(sdata->conn == data->conn) {
         stream = H3_STREAM_CTX(ctx, sdata);
-        if(stream && stream->s.ssl && stream->s.send_blocked &&
-           !SSL_want_write(stream->s.ssl)) {
-          nghttp3_conn_unblock_stream(ctx->h3.conn, stream->s.id);
-          stream->s.send_blocked = FALSE;
-          h3_drain_stream(cf, sdata);
-          CURL_TRC_CF(sdata, cf, "unblocked");
+        if(stream && stream->s.ssl && stream->s.send_blocked) {
+          ctx->poll_items[poll_count].desc =
+            SSL_as_poll_descriptor(stream->s.ssl);
+          ctx->poll_items[poll_count].events = SSL_POLL_EVENT_W;
+          ctx->curl_items[poll_count] = sdata;
+          poll_count++;
         }
       }
     }
+
+    memset(&timeout, 0, sizeof(struct timeval));
+    res = CURLE_UNRECOVERABLE_POLL;
+    if(!SSL_poll(ctx->poll_items, poll_count, sizeof(SSL_POLL_ITEM), &timeout,
+                 0, &result_count))
+        goto out;
+
+    res = CURLE_OK;
+
+    for(idx_count = 0; idx_count < poll_count && result_count > 0;
+        idx_count++) {
+      if(ctx->poll_items[idx_count].revents & SSL_POLL_EVENT_W) {
+        stream = H3_STREAM_CTX(ctx, ctx->curl_items[idx_count]);
+        nghttp3_conn_unblock_stream(ctx->h3.conn, stream->s.id);
+        stream->s.send_blocked = FALSE;
+        h3_drain_stream(cf, ctx->curl_items[idx_count]);
+        CURL_TRC_CF(ctx->curl_items[idx_count], cf, "unblocked");
+        result_count--;
+      }
+    }
   }
-  return CURLE_OK;
+
+out:
+  return res;
 }
 
 static CURLcode h3_send_streams(struct Curl_cfilter *cf,
