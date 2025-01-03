@@ -1,0 +1,105 @@
+<testcase>
+<info>
+<keywords>
+netrc
+HTTP
+</keywords>
+</info>
+#
+# Server-side
+<reply>
+<data crlf="yes">
+HTTP/1.1 301 Follow this you fool
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Location: http://b.com/%TESTNUMBER0002
+
+-foo-
+</data>
+
+<data2 crlf="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 7
+Connection: close
+
+target
+</data2>
+
+<datacheck crlf="yes">
+HTTP/1.1 301 Follow this you fool
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 6
+Connection: close
+Location: http://b.com/%TESTNUMBER0002
+
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+ETag: "21025-dc7-39462498"
+Accept-Ranges: bytes
+Content-Length: 7
+Connection: close
+
+target
+</datacheck>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<features>
+proxy
+</features>
+<name>
+.netrc with redirect and "default" with no password or login
+</name>
+<command>
+--netrc --netrc-file %LOGDIR/netrc%TESTNUMBER -L -x http://%HOSTIP:%HTTPPORT/ http://a.com/
+</command>
+<file name="%LOGDIR/netrc%TESTNUMBER" >
+
+machine a.com
+  login alice
+  password alicespassword
+
+default
+
+</file>
+</client>
+
+<verify>
+<protocol>
+GET http://a.com/ HTTP/1.1
+Host: a.com
+Authorization: Basic %b64[alice:alicespassword]b64%
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+GET http://b.com/%TESTNUMBER0002 HTTP/1.1
+Host: b.com
+User-Agent: curl/%VERSION
+Accept: */*
+Proxy-Connection: Keep-Alive
+
+</protocol>
+</verify>
+</testcase>

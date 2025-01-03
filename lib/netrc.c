@@ -316,11 +316,16 @@ static int parsenetrc(struct store_netrc *store,
 
 out:
   Curl_dyn_free(&token);
-  if(!retcode && !password && our_login) {
-    /* success without a password, set a blank one */
-    password = strdup("");
-    if(!password)
-      retcode = 1; /* out of memory */
+  if(!retcode) {
+    if(!password && our_login) {
+      /* success without a password, set a blank one */
+      password = strdup("");
+      if(!password)
+        retcode = 1; /* out of memory */
+    }
+    else if(!login && !password)
+      /* a default with no credentials */
+      retcode = NETRC_FILE_MISSING;
   }
   if(!retcode) {
     /* success */
