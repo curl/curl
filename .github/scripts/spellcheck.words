@@ -123,6 +123,7 @@ CNAME
 CNAMEs
 CODESET
 codeset
+CodeSonar
 Comcast
 commit's
 Config
@@ -596,6 +597,7 @@ Orbis
 ORing
 Osipov
 OSS
+PaaS
 pac
 pacman
 parser's
@@ -766,8 +768,8 @@ SOCKOPT
 SOCKSv
 Solaris
 SONAME
-SOVERSION
 Soref
+SOVERSION
 SPARC
 SPDX
 SPNEGO
@@ -911,6 +913,7 @@ VC
 vcpkg
 vexxhost
 Viktor
+Virtuozzo
 VLAN
 VM
 VMS
