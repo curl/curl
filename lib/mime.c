@@ -1561,6 +1561,14 @@ CURLcode Curl_mime_set_subparts(curl_mimepart *part,
       }
     }
 
+    /* If subparts have already been used as a top-level MIMEPOST,
+       they might not be positioned at start. Rewind them now, as
+       a future check while rewinding the parent may cause this
+       content to be skipped. */
+    if(mime_subparts_seek(subparts, (curl_off_t) 0, SEEK_SET) !=
+       CURL_SEEKFUNC_OK)
+      return CURLE_SEND_FAIL_REWIND;
+
     subparts->parent = part;
     /* Subparts are processed internally: no read callback. */
     part->seekfunc = mime_subparts_seek;
