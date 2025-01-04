@@ -1139,14 +1139,14 @@ static CURLcode ws_send_raw(struct Curl_easy *data, const void *buffer,
   return result;
 }
 
-CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer,
+CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
                                   size_t buflen, size_t *sent,
                                   curl_off_t fragsize,
                                   unsigned int flags)
 {
   struct websocket *ws;
+  const unsigned char *buffer = buffer_arg;
   ssize_t n;
-  size_t space, payload_added;
   CURLcode result;
   struct Curl_easy *data = d;
 
@@ -1171,22 +1171,13 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer,
   }
   ws = data->conn->proto.ws;
 
-  /* try flushing any content still waiting to be sent. */
-  result = ws_flush(data, ws, FALSE);
-  if(result)
-    goto out;
-
-  if(ws->eagain_encoded) {
-    /* The buffer had already been encoded and is now flushed. report
-     * success. */
-    DEBUGASSERT(buflen <= 1);
-    ws->eagain_encoded = FALSE;
-    *sent = buflen;
-    goto out;
-  }
-
   if(data->set.ws_raw_mode) {
     /* In raw mode, we write directly to the connection */
+    /* try flushing any content still waiting to be sent. */
+    result = ws_flush(data, ws, FALSE);
+    if(result)
+      goto out;
+
     if(fragsize || flags) {
       failf(data, "ws_send, raw mode: fragsize and flags cannot be non-zero");
       return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1196,77 +1187,105 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer,
   }
 
   /* Not RAW mode, buf we do the frame encoding */
-  space = Curl_bufq_space(&ws->sendbuf);
-  CURL_TRC_WS(data, "curl_ws_send(len=%zu), sendbuf=%zu space_left=%zu",
-              buflen, Curl_bufq_len(&ws->sendbuf), space);
-  if(space < 14) {
-    result = CURLE_AGAIN;
+
+  if(ws->sendbuf_payload && (buflen < ws->sendbuf_payload)) {
+    /* We have been called with LESS buffer data than before. This
+     * is not how it's supposed too work. */
+    failf(data, "curl_ws_send() called with less data then a previous "
+          "call that got CURLE_AGAIN as result.");
+    result = CURLE_BAD_FUNCTION_ARGUMENT;
     goto out;
   }
 
-  if(flags & CURLWS_OFFSET) {
-    if(fragsize) {
-      /* a frame series 'fragsize' bytes big, this is the first */
-      n = ws_enc_write_head(data, &ws->enc, flags, fragsize,
+  if(ws->enc_ack_pending) {
+    /* Flushed a frame that we EAGAINed before */
+    CURL_TRC_WS(data, "OK on previously EAGAINed payload: %zu/%zu",
+                ws->sendbuf_payload, buflen);
+    *sent = ws->sendbuf_payload;
+    ws->enc_ack_pending = FALSE;
+    ws->sendbuf_payload = 0;
+    goto out;
+  }
+  else if(ws->sendbuf_payload) {
+    /* Flushed all payload */
+  }
+  else if((flags & CURLWS_OFFSET) ||
+          (!ws->enc.payload_remain && !ws->sendbuf_payload)) {
+    /* starting a new frame, space enough? */
+    size_t space = Curl_bufq_space(&ws->sendbuf);
+    if(space < 14) {
+      CURL_TRC_WS(data, "curl_ws_send(len=%zu), space_left=%zu -> EAGAIN",
+                  buflen, space);
+      result = CURLE_AGAIN;
+      goto out;
+    }
+
+    if(flags & CURLWS_OFFSET) {
+      if(fragsize) {
+        /* a frame series 'fragsize' bytes big, this is the first */
+        n = ws_enc_write_head(data, &ws->enc, flags, fragsize,
+                              &ws->sendbuf, &result);
+        if(n < 0)
+          goto out;
+      }
+      else {
+        if((curl_off_t)buflen > ws->enc.payload_remain) {
+          infof(data, "WS: unaligned frame size (sending %zu instead of %"
+                      FMT_OFF_T ")",
+                buflen, ws->enc.payload_remain);
+        }
+      }
+    }
+    else {
+      /* previous frame complete, start a new one */
+      n = ws_enc_write_head(data, &ws->enc, flags, (curl_off_t)buflen,
                             &ws->sendbuf, &result);
       if(n < 0)
         goto out;
     }
-    else {
-      if((curl_off_t)buflen > ws->enc.payload_remain) {
-        infof(data, "WS: unaligned frame size (sending %zu instead of %"
-                    FMT_OFF_T ")",
-              buflen, ws->enc.payload_remain);
-      }
+  }
+
+  /* While there is either sendbuf to flush OR more payload to encode... */
+  while(!Curl_bufq_is_empty(&ws->sendbuf) || (buflen > ws->sendbuf_payload)) {
+    /* Try to add more payload to senbuf */
+    if(buflen > ws->sendbuf_payload) {
+      size_t prev_len = Curl_bufq_len(&ws->sendbuf);
+      n = ws_enc_write_payload(&ws->enc, data,
+                               buffer + ws->sendbuf_payload,
+                               buflen - ws->sendbuf_payload,
+                               &ws->sendbuf, &result);
+      if(n < 0 && (result != CURLE_AGAIN))
+        goto out;
+      ws->sendbuf_payload += Curl_bufq_len(&ws->sendbuf) - prev_len;
     }
-  }
-  else if(!ws->enc.payload_remain) {
-    n = ws_enc_write_head(data, &ws->enc, flags, (curl_off_t)buflen,
-                          &ws->sendbuf, &result);
-    if(n < 0)
-      goto out;
-  }
 
-  n = ws_enc_write_payload(&ws->enc, data,
-                           buffer, buflen, &ws->sendbuf, &result);
-  if(n < 0)
-    goto out;
-  payload_added = (size_t)n;
-
-  while(!result && (buflen || !Curl_bufq_is_empty(&ws->sendbuf))) {
     /* flush, blocking when in callback */
     result = ws_flush(data, ws, Curl_is_in_callback(data));
-    if(!result) {
-      DEBUGASSERT(payload_added <= buflen);
-      /* all buffered data sent. Try sending the rest if there is any. */
-      *sent += payload_added;
-      buffer = (const char *)buffer + payload_added;
-      buflen -= payload_added;
-      payload_added = 0;
-      if(buflen) {
-        n = ws_enc_write_payload(&ws->enc, data,
-                                 buffer, buflen, &ws->sendbuf, &result);
-        if(n < 0)
-          goto out;
-        payload_added = Curl_bufq_len(&ws->sendbuf);
-      }
-    }
-    else if(result == CURLE_AGAIN) {
-      /* partially sent. how much of the call data has been part of it? what
-      * should we report to our caller so it can retry/send the rest? */
-      if(payload_added < buflen) {
-        /* We did not add everything the caller wanted. Return just
-         * the partial write to our buffer. */
-        *sent = payload_added;
+    if(result == CURLE_AGAIN) {
+      if(ws->sendbuf_payload > Curl_bufq_len(&ws->sendbuf)) {
+        /* We did sent part of the payload before we became blocked. */
+        *sent = ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf);
+        ws->sendbuf_payload -= *sent;
         result = CURLE_OK;
         goto out;
       }
-      /* We added the complete data to our sendbuf. Report one byte less,
-       * if possible, as sent. The EAGAIN should make the caller invoke us
-       * again with the remainder, which we will not add again. */
-      *sent = buflen ? (buflen - 1) : 0;
-      ws->eagain_encoded = TRUE;
+      /* blocked sending frame start. */
+      CURL_TRC_WS(data, "EAGAIN flushing sendbuf, payload_encoded: %zu/%zu",
+                  ws->sendbuf_payload, buflen);
+      *sent = 0;
+      ws->enc_ack_pending = TRUE;
+      result = CURLE_AGAIN;
+      goto out;
     }
+    else if(result) {
+      /* real error sending the data */
+      break;
+    }
+  }
+
+  if(!result) {
+    *sent = ws->sendbuf_payload;
+    ws->sendbuf_payload = 0;
   }
 
 out:

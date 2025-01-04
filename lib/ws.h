@@ -65,7 +65,8 @@ struct websocket {
   struct bufq recvbuf;    /* raw data from the server */
   struct bufq sendbuf;    /* raw data to be sent to the server */
   struct curl_ws_frame frame;  /* the current WS FRAME received */
-  BIT(eagain_encoded); /* EAGAIN on already encoded frame */
+  size_t sendbuf_payload; /* number of payload bytes in sendbuf */
+  BIT(enc_ack_pending);   /* sending was EGAINed, need OK after flush */
 };
 
 CURLcode Curl_ws_request(struct Curl_easy *data, struct dynbuf *req);
