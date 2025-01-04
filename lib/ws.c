@@ -1147,7 +1147,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
   struct websocket *ws;
   const unsigned char *buffer = buffer_arg;
   ssize_t n;
-  CURLcode result;
+  CURLcode result = CURLE_OK;
   struct Curl_easy *data = d;
 
   CURL_TRC_WS(data, "curl_ws_send(len=%zu, fragsize=%" FMT_OFF_T
