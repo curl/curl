@@ -111,12 +111,12 @@ provided for download at <https://curl.se/snapshots/>.
 
 CA certificate bundles are extracted from the Firefox source code, hosted by
 Mozilla and converted to PEM file format and is offered for download. The
-conversion checks for updates daily. The bundle is provide for download at
+conversion checks for updates daily. The bundle is provided for download at
 <https://curl.se/docs/caextract.html>.
 
 There is an automated "download check bot" that runs twice daily to scan for
 available curl downloads to populate the curl download page appropriately with
-the correct updated information. The bot uses URLs and patters for all
+the correct updated information. The bot uses URLs and patterns for all
 download packages and is maintained in a database, maintained by Daniel
 Stenberg and Dan Fandrich.
 
