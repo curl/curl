@@ -40,7 +40,6 @@ struct sigpipe_ignore {
 static void sigpipe_init(struct sigpipe_ignore *ig)
 {
   memset(ig, 0, sizeof(*ig));
-  ig->no_signal = TRUE;
 }
 
 /*
@@ -77,6 +76,14 @@ static void sigpipe_restore(struct sigpipe_ignore *ig)
     sigaction(SIGPIPE, &ig->old_pipe_act, NULL);
 }
 
+static void sigpipe_save(struct sigpipe_ignore *ig)
+{
+  if(!ig->no_signal) {
+    /* save the outside state */
+    sigaction(SIGPIPE, NULL, &ig->old_pipe_act);
+  }
+}
+
 static void sigpipe_apply(struct Curl_easy *data,
                           struct sigpipe_ignore *ig)
 {
@@ -91,6 +98,7 @@ static void sigpipe_apply(struct Curl_easy *data,
 #define sigpipe_ignore(x,y) Curl_nop_stmt
 #define sigpipe_apply(x,y) Curl_nop_stmt
 #define sigpipe_init(x)  Curl_nop_stmt
+#define sigpipe_save(x)  Curl_nop_stmt
 #define sigpipe_restore(x)  Curl_nop_stmt
 #define SIGPIPE_VARIABLE(x)
 #define SIGPIPE_MEMBER(x)   bool x

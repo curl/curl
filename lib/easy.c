@@ -790,6 +790,7 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   data->multi_easy = multi;
 
   sigpipe_init(&pipe_st);
+  sigpipe_save(&pipe_st);
   sigpipe_apply(data, &pipe_st);
 
   /* run the transfer */

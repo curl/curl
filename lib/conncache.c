@@ -640,6 +640,7 @@ static void cpool_close_and_destroy_all(struct cpool *cpool)
   DEBUGASSERT(cpool);
   /* Move all connections to the shutdown list */
   sigpipe_init(&pipe_st);
+  sigpipe_save(&pipe_st);
   CPOOL_LOCK(cpool);
   conn = cpool_get_live_conn(cpool);
   while(conn) {
@@ -685,6 +686,7 @@ static void cpool_shutdown_destroy_oldest(struct cpool *cpool)
     conn = Curl_node_elem(e);
     Curl_node_remove(e);
     sigpipe_init(&pipe_st);
+    sigpipe_save(&pipe_st);
     sigpipe_apply(cpool->idata, &pipe_st);
     cpool_close_and_destroy(cpool, conn, NULL, FALSE);
     sigpipe_restore(&pipe_st);

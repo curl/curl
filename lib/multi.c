@@ -3010,6 +3010,7 @@ CURLMcode curl_multi_perform(CURLM *m, int *running_handles)
     return CURLM_RECURSIVE_API_CALL;
 
   sigpipe_init(&pipe_st);
+  sigpipe_save(&pipe_st);
   for(e = Curl_llist_head(&multi->process); e; e = n) {
     struct Curl_easy *data = Curl_node_elem(e);
     CURLMcode result;
@@ -3546,6 +3547,7 @@ static CURLMcode multi_socket(struct Curl_multi *multi,
   mrc.multi = multi;
   mrc.now = Curl_now();
   sigpipe_init(&mrc.pipe_st);
+  sigpipe_save(&mrc.pipe_st);
 
   if(checkall) {
     struct Curl_llist_node *e;
