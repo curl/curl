@@ -45,11 +45,6 @@ static size_t chunk_len(const struct buf_chunk *chunk)
   return chunk->w_offset - chunk->r_offset;
 }
 
-static size_t chunk_space(const struct buf_chunk *chunk)
-{
-  return chunk->dlen - chunk->w_offset;
-}
-
 static void chunk_reset(struct buf_chunk *chunk)
 {
   chunk->next = NULL;
@@ -285,24 +280,6 @@ size_t Curl_bufq_len(const struct bufq *q)
     chunk = chunk->next;
   }
   return len;
-}
-
-size_t Curl_bufq_space(const struct bufq *q)
-{
-  size_t space = 0;
-  if(q->tail)
-    space += chunk_space(q->tail);
-  if(q->spare) {
-    struct buf_chunk *chunk = q->spare;
-    while(chunk) {
-      space += chunk->dlen;
-      chunk = chunk->next;
-    }
-  }
-  if(q->chunk_count < q->max_chunks) {
-    space += (q->max_chunks - q->chunk_count) * q->chunk_size;
-  }
-  return space;
 }
 
 bool Curl_bufq_is_empty(const struct bufq *q)
