@@ -42,7 +42,6 @@ if($ARGV[0] eq "--unit") {
 my $file = $ARGV[0];
 
 my %wl = (
-    'Curl_bufq_space' => 'internal api',
     'Curl_xfer_write_resp' => 'internal api',
     'Curl_creader_def_init' => 'internal api',
     'Curl_creader_def_close' => 'internal api',
