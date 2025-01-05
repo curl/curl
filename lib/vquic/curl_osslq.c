@@ -1474,6 +1474,7 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
   size_t idx_count = 0;
   CURLcode res = CURLE_OK;
   struct timeval timeout;
+  void *tmpptr;
 
   if(ctx->h3.conn) {
     struct Curl_llist_node *e;
@@ -1482,17 +1483,25 @@ static CURLcode cf_osslq_check_and_unblock(struct Curl_cfilter *cf,
 
     if(ctx->item_count < Curl_llist_count(&data->multi->process)) {
       ctx->item_count = 0;
-      ctx->poll_items = realloc(ctx->poll_items,
-                                Curl_llist_count(&data->multi->process) *
-                                sizeof(SSL_POLL_ITEM));
-      if(!ctx->poll_items)
+      tmpptr = realloc(ctx->poll_items,
+                       Curl_llist_count(&data->multi->process) *
+                       sizeof(SSL_POLL_ITEM));
+      if(!tmpptr) {
+        free(ctx->poll_items);
+        ctx->poll_items = NULL;
         goto out;
+      }
+      ctx->poll_items = tmpptr;
 
-      ctx->curl_items = realloc(ctx->curl_items,
-                                Curl_llist_count(&data->multi->process) *
-                                sizeof(struct Curl_easy *));
-      if(!ctx->curl_items)
+      tmpptr = realloc(ctx->curl_items,
+                       Curl_llist_count(&data->multi->process) *
+                       sizeof(struct Curl_easy *));
+      if(!tmpptr) {
+        free(ctx->curl_items);
+        ctx->curl_items = NULL;
         goto out;
+      }
+      ctx->curl_items = tmpptr;
 
       ctx->item_count = Curl_llist_count(&data->multi->process);
     }
