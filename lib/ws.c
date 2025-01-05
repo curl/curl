@@ -1188,28 +1188,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
 
   /* Not RAW mode, buf we do the frame encoding */
 
-  if(ws->enc_ack_pending) {
-    /* Flush a frame that we EAGAINed before */
-    if(buflen < ws->sendbuf_payload) {
-      /* We have been called with LESS buffer data than before. This
-       * is not how it's supposed too work. */
-      failf(data, "curl_ws_send() called with less data then a previous "
-            "call that got CURLE_AGAIN as result.");
-      result = CURLE_BAD_FUNCTION_ARGUMENT;
-      goto out;
-    }
-
-    result = ws_flush(data, ws, Curl_is_in_callback(data));
-    if(!result) {
-      CURL_TRC_WS(data, "OK on previously EAGAINed payload: %zu/%zu",
-                  ws->sendbuf_payload, buflen);
-      *sent = ws->sendbuf_payload;
-      ws->enc_ack_pending = FALSE;
-      ws->sendbuf_payload = 0;
-    }
-    goto out;
-  }
-  else if(ws->sendbuf_payload || ws->enc.payload_remain) {
+  if(ws->enc.payload_remain || !Curl_bufq_is_empty(&ws->sendbuf)) {
     /* a frame is ongoing with payload buffered or more payload
      * that needs to be encoded into the buffer */
     if(buflen < ws->sendbuf_payload) {
@@ -1221,7 +1200,9 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
     }
-    if((curl_off_t)(buflen - ws->sendbuf_payload) > ws->enc.payload_remain) {
+    if((curl_off_t)buflen >
+       (ws->enc.payload_remain + (curl_off_t)ws->sendbuf_payload)) {
+      /* too large buflen beyond payload length of frame */
       infof(data, "WS: unaligned frame size (sending %zu instead of %"
                   FMT_OFF_T ")",
             buflen, ws->enc.payload_remain + ws->sendbuf_payload);
@@ -1245,7 +1226,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
 
   /* While there is either sendbuf to flush OR more payload to encode... */
   while(!Curl_bufq_is_empty(&ws->sendbuf) || (buflen > ws->sendbuf_payload)) {
-    /* Try to add more payload to senbuf */
+    /* Try to add more payload to sendbuf */
     if(buflen > ws->sendbuf_payload) {
       size_t prev_len = Curl_bufq_len(&ws->sendbuf);
       n = ws_enc_write_payload(&ws->enc, data,
@@ -1267,7 +1248,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
     }
     else if(result == CURLE_AGAIN) {
       if(ws->sendbuf_payload > Curl_bufq_len(&ws->sendbuf)) {
-        /* bloccked, part of payload bytes remain, report length
+        /* blocked, part of payload bytes remain, report length
          * that we managed to send. */
         size_t flushed = (ws->sendbuf_payload - Curl_bufq_len(&ws->sendbuf));
         *sent += flushed;
@@ -1276,12 +1257,11 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
         goto out;
       }
       else {
-        /* blocked before sending 1st payload byte. We cannot report
-         * OK on 0-length send (caller counts only payload) and EGAIN */
+        /* blocked before sending headers or 1st payload byte. We cannot report
+         * OK on 0-length send (caller counts only payload) and EAGAIN */
         CURL_TRC_WS(data, "EAGAIN flushing sendbuf, payload_encoded: %zu/%zu",
                     ws->sendbuf_payload, buflen);
-        *sent = 0;
-        ws->enc_ack_pending = TRUE;
+        DEBUGASSERT(*sent == 0);
         result = CURLE_AGAIN;
         goto out;
       }
