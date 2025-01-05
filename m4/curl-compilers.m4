@@ -1046,7 +1046,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             fi
             case $host_os in
               cygwin*)
-                dnl Silence bogus warnings in 'lt_fatal' libtool function
+                dnl Silence warnings in 'lt_fatal' libtool function
                 tmp_CFLAGS="$tmp_CFLAGS -Wno-suggest-attribute=noreturn"
                 ;;
             esac
