@@ -1194,7 +1194,7 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
     if(buflen < ws->sendbuf_payload) {
       /* We have been called with LESS buffer data than before. This
        * is not how it's supposed too work. */
-      failf(data, "curl_ws_send() called with smaller 'buflen' than "
+      failf(data, "WS: curl_ws_send() called with smaller 'buflen' than "
             "bytes already buffered in previous call, %zu vs %zu",
             buflen, ws->sendbuf_payload);
       result = CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1203,9 +1203,13 @@ CURL_EXTERN CURLcode curl_ws_send(CURL *d, const void *buffer_arg,
     if((curl_off_t)buflen >
        (ws->enc.payload_remain + (curl_off_t)ws->sendbuf_payload)) {
       /* too large buflen beyond payload length of frame */
-      infof(data, "WS: unaligned frame size (sending %zu instead of %"
-                  FMT_OFF_T ")",
-            buflen, ws->enc.payload_remain + ws->sendbuf_payload);
+      curl_off_t already_sent = (ws->enc.payload_len -
+                                 ws->enc.payload_remain -
+                                 ws->sendbuf_payload);
+      failf(data, "WS: curl_ws_send() called with %zu bytes on a frame "
+            "where %" FMT_OFF_T "/%" FMT_OFF_T " already sent, "
+            "exceeding the length of the frame.",
+            buflen, already_sent, ws->enc.payload_len);
       result = CURLE_BAD_FUNCTION_ARGUMENT;
       goto out;
     }
