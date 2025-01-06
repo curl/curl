@@ -751,10 +751,11 @@ CURLcode Curl_gtls_cache_session(struct Curl_cfilter *cf,
 
   /* extract session ID to the allocated buffer */
   gnutls_session_get_data(session, sdata, &sdata_len);
-
-  CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s) and store in cache",
-              sdata_len, alpn ? alpn : "-");
   earlydata_max = gnutls_record_get_max_early_data_size(session);
+
+  CURL_TRC_CF(data, cf, "get session id (len=%zu, alpn=%s, earlymax=%zu) "
+              "and store in cache", sdata_len, alpn ? alpn : "-",
+              earlydata_max);
   if(quic_tp && quic_tp_len) {
     qtp_clone = Curl_memdup0((char *)quic_tp, quic_tp_len);
     if(!qtp_clone) {

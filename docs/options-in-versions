@@ -235,6 +235,7 @@
 --ssl-no-revoke                      7.44.0
 --ssl-reqd                           7.20.0
 --ssl-revoke-best-effort             7.70.0
+--ssl-sessions                       8.12.0
 --sslv2 (-2)                         5.9
 --sslv3 (-3)                         5.9
 --stderr                             6.2

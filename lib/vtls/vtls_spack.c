@@ -27,6 +27,7 @@
 #ifdef USE_SSL
 
 #include "urldata.h"
+#include "curl_trc.h"
 #include "vtls_scache.h"
 #include "vtls_spack.h"
 #include "strdup.h"
@@ -88,6 +89,27 @@ spack_dec16(uint16_t *val, const uint8_t **src, const uint8_t *end)
     return CURLE_READ_ERROR;
   *val = (uint16_t)((*src)[0] << 8 | (*src)[1]);
   *src += 2;
+  return CURLE_OK;
+}
+
+static CURLcode spack_enc32(struct dynbuf *buf, uint32_t val)
+{
+  uint8_t nval[4];
+  nval[0] = (uint8_t)(val >> 24);
+  nval[1] = (uint8_t)(val >> 16);
+  nval[2] = (uint8_t)(val >> 8);
+  nval[3] = (uint8_t)val;
+  return Curl_dyn_addn(buf, nval, sizeof(nval));
+}
+
+static CURLcode
+spack_dec32(uint32_t *val, const uint8_t **src, const uint8_t *end)
+{
+  if(end - *src < 4)
+    return CURLE_READ_ERROR;
+  *val = (uint32_t)(*src)[0] << 24 | (uint32_t)(*src)[1] << 16 |
+         (uint32_t)(*src)[2] << 8 | (*src)[3];
+  *src += 4;
   return CURLE_OK;
 }
 
@@ -180,7 +202,8 @@ spack_decdata16(uint8_t **val, size_t *val_len,
   return *val ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
-CURLcode Curl_ssl_session_pack(struct Curl_ssl_session *s,
+CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
+                               struct Curl_ssl_session *s,
                                struct dynbuf *buf)
 {
   CURLcode r;
@@ -209,12 +232,12 @@ CURLcode Curl_ssl_session_pack(struct Curl_ssl_session *s,
       r = spack_encstr16(buf, s->alpn);
   }
   if(!r && s->earlydata_max) {
-    if(s->earlydata_max > UINT16_MAX)
+    if(s->earlydata_max > UINT32_MAX)
       r = CURLE_BAD_FUNCTION_ARGUMENT;
     if(!r)
       r = spack_enc8(buf, CURL_SPACK_EARLYDATA);
     if(!r)
-      r = spack_enc16(buf, (uint16_t)s->earlydata_max);
+      r = spack_enc32(buf, (uint32_t)s->earlydata_max);
   }
   if(!r && s->quic_tp && s->quic_tp_len) {
     r = spack_enc8(buf, CURL_SPACK_QUICTP);
@@ -222,16 +245,20 @@ CURLcode Curl_ssl_session_pack(struct Curl_ssl_session *s,
       r = spack_encdata16(buf, s->quic_tp, s->quic_tp_len);
   }
 
+  if(r)
+    CURL_TRC_SCACHE(data, "error packing data: %d", r);
   return r;
 }
 
-CURLcode Curl_ssl_session_unpack(const unsigned char *buf, size_t buflen,
+CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
+                                 const unsigned char *buf, size_t buflen,
                                  struct Curl_ssl_session **ps)
 {
   struct Curl_ssl_session *s = NULL;
   const unsigned char *end = buf + buflen;
   uint8_t val8, *pval8;
   uint16_t val16;
+  uint32_t val32;
   uint64_t val64;
   CURLcode r;
 
@@ -265,10 +292,10 @@ CURLcode Curl_ssl_session_unpack(const unsigned char *buf, size_t buflen,
         goto out;
       break;
     case CURL_SPACK_EARLYDATA:
-      r = spack_dec16(&val16, &buf, end);
+      r = spack_dec32(&val32, &buf, end);
       if(r)
         goto out;
-      s->earlydata_max = val16;
+      s->earlydata_max = val32;
       break;
     case CURL_SPACK_IETF_ID:
       r = spack_dec16(&val16, &buf, end);
@@ -303,8 +330,10 @@ CURLcode Curl_ssl_session_unpack(const unsigned char *buf, size_t buflen,
   }
 
 out:
-  if(r)
+  if(r) {
+    CURL_TRC_SCACHE(data, "error unpacking data: %d", r);
     Curl_ssl_session_destroy(s);
+  }
   else
     *ps = s;
   return r;

@@ -30,10 +30,12 @@
 struct dynbuf;
 struct Curl_ssl_session;
 
-CURLcode Curl_ssl_session_pack(struct Curl_ssl_session *s,
+CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
+                               struct Curl_ssl_session *s,
                                struct dynbuf *buf);
 
-CURLcode Curl_ssl_session_unpack(const unsigned char *buf, size_t buflen,
+CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
+                                 const unsigned char *buf, size_t buflen,
                                  struct Curl_ssl_session **ps);
 
 #endif /* USE_SSL (else) */
