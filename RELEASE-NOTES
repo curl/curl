@@ -4,7 +4,7 @@ curl and libcurl 8.12.0
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3312
+ Contributors:                 3316
 
 This release includes the following changes:
 
@@ -20,6 +20,7 @@ This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
  o async-thread: avoid closing eventfd twice [9]
+ o autotools: silence gcc warnings in libtool code [96]
  o binmode: convert to macro and use it from tests [44]
  o build: drop `-Winline` picky warning [53]
  o build: drop unused feature macros, update exception list [51]
@@ -32,6 +33,7 @@ This release includes the following bugfixes:
  o checksrc: fix the return() checker [35]
  o checksrc: introduce 'banfunc' to ban specific functions [117]
  o cmake/FindLDAP: avoid empty 'Requires' item when omitting `pkg-config` module [90]
+ o cmake/FindLDAP: avoid framework locations for libs too (Apple) [122]
  o cmake/FindLibpsl: protect against `pkg-config` "half-detection" [89]
  o cmake/FindLibssh: sync header comment with other modules
  o cmake/FindMbedTLS: drop lib duplicates early [17]
@@ -49,10 +51,12 @@ This release includes the following bugfixes:
  o cmake: fix `net/in.h` detection for MS-DOS [103]
  o cmake: improve `curl_dumpvars()` and move to `Utilities.cmake` [50]
  o cmake: make libpsl required by default [45]
+ o cmake: make system libraries `dl`, `m`, `pthread` customizable [123]
  o cmake: move `pkg-config` names to Find modules [87]
  o cmake: move GSS init before feature detections [93]
  o cmake: namespace functions and macros [41]
  o cmake: optimize out 4 picky warning option detections with gcc [78]
+ o cmake: publish/check supported protocols/features via `CURLConfig.cmake` [100]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
  o cmake: sync OpenSSL QUIC fork detection with autotools [102]
  o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
@@ -64,11 +68,18 @@ This release includes the following bugfixes:
  o cookie: parse only the exact expire date [3]
  o curl: return error if etag options are used with multiple URLs [5]
  o curl_multibyte: support Windows paths longer than MAX_PATH [76]
+ o curl_sha512_256: rename symbols to the curl namespace [124]
  o curl_url_set.md: adjust the added-in to 7.62.0 [94]
  o curl_ws_recv.md: fix typo
  o CURLOPT_PROXY.md: clarify the crendential support in proxy URLs [66]
  o CURLOPT_RESOLVE.md: fix wording [30]
+ o CURLOPT_SEEKFUNCTION.md: used for FTP, HTTP and SFTP (only) [109]
  o docs/BUGS.md: remove leading space from a link
+ o docs/cmdline-opts/_ENVIRONMENT.md: minor language fix [119]
+ o docs/HTTP-COOKIES.md: link to more information [125]
+ o docs/libcurl/opts: clarify the return values [114]
+ o docs/libcurl: return value overhall [120]
+ o docs: use lowercase curl and libcurl [113]
  o examples/block-ip: drop redundant `memory.h` include
  o examples/block-ip: show how to block IP addresses [74]
  o examples/complicated: fix warnings, bump deprecated callback, tidy up [59]
@@ -76,10 +87,12 @@ This release includes the following bugfixes:
  o examples: make them compile with compatibility functions disabled (Windows) [58]
  o file: drop `OPEN_NEEDS_ARG3` option [91]
  o file: fix Android compiler warning [85]
+ o hash: add asserts in hash_element_dtor() [126]
  o http2: fix value stored to 'result' is never read [71]
  o http: fix build with `CURL_DISABLE_COOKIES` [95]
  o http: ignore invalid Retry-After times [107]
  o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
+ o INFRASTRUCTURE.md: project infra [99]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
  o lib: remove `__EMX__` guards [83]
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
@@ -87,10 +100,12 @@ This release includes the following bugfixes:
  o lib: TLS session ticket caching reworked [60]
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o mbedtls: fix handling of blocked sends [116]
+ o mime: explicitly rewind subparts at attachment time. [80]
  o multi: fix curl_multi_waitfds reporting of fd_count [73]
  o multi: fix return code for an already-removed easy handle [106]
  o multissl: auto-enable `OPENSSL_COEXIST` for wolfSSL + OpenSSL [92]
  o multissl: make openssl + wolfssl builds work [34]
+ o netrc: 'default' with no credentials is not a match [108]
  o netrc: fix password-only entries [28]
  o netrc: restore _netrc fallback logic [6]
  o ngtcp2: fix two cases of value stored never read [65]
@@ -99,7 +114,10 @@ This release includes the following bugfixes:
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
  o scripts/mdlinkcheck: markdown link checker [19]
  o sectransp: free certificate on error [12]
+ o select: avoid a NULL deref in cwfds_add_sock [128]
+ o smb: fix compiler warning [112]
  o src: add `CURL_STRICMP()` macro, use `_stricmp()` on Windows [54]
+ o src: drop support for `CURL_TESTDIR` debug env [121]
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
  o test483: require cookie support [98]
@@ -142,12 +160,14 @@ advice from friends like these:
 
   Andy Pan, Ben Zanin, Christian Heusel, Christian Schmitz,
   Christopher Dannemiller, Daniel Stenberg, Darren Banfi, dependabot[bot],
-  dwickr, Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
-  Jeroen Ooms, Kai Pastor, Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt,
-  Marcel Raad, Mohammed Sadiq, Ralph Sennhauser, Randall S. Becker, Ray Satiro,
-  renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
-  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats
-  (30 contributors)
+  Derek Huang, dwickr, Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github,
+  Jakub Jelen, Jeroen Ooms, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
+  Manuel Einfalt, Marcel Raad, Mohammed Sadiq, Patrick Monnerat,
+  prpr19xx on github, Qriist on github, Ralph Sennhauser, Randall S. Becker,
+  Ray Satiro, renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
+  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats, Yedaya Katsman,
+  Yihang Zhou
+  (36 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -230,6 +250,7 @@ References to bug reports and discussions on issues:
  [77] = https://curl.se/bug/?i=15587
  [78] = https://curl.se/bug/?i=15850
  [79] = https://curl.se/bug/?i=15845
+ [80] = https://curl.se/bug/?i=15842
  [81] = https://curl.se/bug/?i=15840
  [83] = https://curl.se/bug/?i=15884
  [84] = https://curl.se/bug/?i=15826
@@ -244,16 +265,33 @@ References to bug reports and discussions on issues:
  [93] = https://curl.se/bug/?i=15809
  [94] = https://curl.se/bug/?i=15822
  [95] = https://curl.se/bug/?i=15820
+ [96] = https://curl.se/bug/?i=15915
  [97] = https://curl.se/bug/?i=15871
  [98] = https://curl.se/bug/?i=15876
+ [99] = https://curl.se/bug/?i=15906
+ [100] = https://curl.se/bug/?i=15854
  [102] = https://curl.se/bug/?i=15873
  [103] = https://curl.se/bug/?i=15869
  [104] = https://curl.se/bug/?i=15868
  [105] = https://curl.se/bug/?i=15867
  [106] = https://curl.se/bug/?i=15844
  [107] = https://curl.se/bug/?i=15833
+ [108] = https://curl.se/bug/?i=15908
+ [109] = https://curl.se/bug/?i=15903
  [110] = https://curl.se/bug/?i=15861
+ [112] = https://curl.se/bug/?i=15902
+ [113] = https://curl.se/bug/?i=15898
+ [114] = https://curl.se/bug/?i=15900
  [115] = https://curl.se/bug/?i=15863
  [116] = https://curl.se/bug/?i=15801
  [117] = https://curl.se/bug/?i=15835
  [118] = https://curl.se/bug/?i=15836
+ [119] = https://curl.se/bug/?i=15897
+ [120] = https://curl.se/bug/?i=15899
+ [121] = https://curl.se/bug/?i=15893
+ [122] = https://curl.se/bug/?i=15895
+ [123] = https://curl.se/bug/?i=15892
+ [124] = https://curl.se/bug/?i=15894
+ [125] = https://curl.se/bug/?i=15891
+ [126] = https://curl.se/bug/?i=15889
+ [128] = https://curl.se/bug/?i=15881
