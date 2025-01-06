@@ -106,6 +106,7 @@ where `<options>` is one or many of:
  - `WOLFSSL_PATH=<path>`         - Custom path for wolfSSL
  - `NGHTTP2_PATH=<path>`         - Custom path for nghttp2
  - `MSH3_PATH=<path>`            - Custom path for msh3
+ - `SSH_PATH=<path>`             - Custom path for libssh
  - `SSH2_PATH=<path>`            - Custom path for libssh2
  - `SSL_PATH=<path>`             - Custom path for OpenSSL
  - `ZLIB_PATH=<path>`            - Custom path for zlib

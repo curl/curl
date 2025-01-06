@@ -252,6 +252,7 @@ assumes that CMake generates `Makefile`:
 
 ## CMake options
 
+- `CMAKE_BUILD_TYPE`:                       (see CMake)
 - `CMAKE_DEBUG_POSTFIX`:                    Default: `-d`
 - `CMAKE_IMPORT_LIBRARY_SUFFIX`             (see CMake)
 - `CMAKE_INSTALL_BINDIR`                    (see CMake)
@@ -374,3 +375,95 @@ Details via CMake
 - `HTTPD`:                                  Default: `apache2`
 - `TEST_NGHTTPX`:                           Default: `nghttpx`
 - `VSFTPD`:                                 Default: `vsftps`
+
+# Migrating from Visual Studio IDE Project Files
+
+We recommend CMake to build curl with MSVC.
+
+The project build files reside in project/Windows/VC\* for VS2010, VS2010 and
+VS2013 respectively.
+
+These CMake Visual Studio generators require CMake v3.24 or older. You can
+download them from <https://cmake.org/files/v3.24/>.
+
+You can also use `-G "NMake Makefiles"`, which is supported by all CMake
+versions.
+
+Configuration element             | Equivalent CMake options
+:-------------------------------- | :--------------------------------
+`VC10`                            | `-G "Visual Studio 10 2010"`
+`VC11`                            | `-G "Visual Studio 11 2012"`
+`VC12`                            | `-G "Visual Studio 12 2013"`
+`x64`                             | `-A x64`
+`Win32`                           | `-A Win32`
+`DLL`                             | `BUILD_SHARED_LIBS=ON`, `BUILD_STATIC_LIBS=OFF`, (default)
+`LIB`                             | `BUILD_SHARED_LIBS=OFF`, `BUILD_STATIC_LIBS=ON`
+`Debug`                           | `CMAKE_BUILD_TYPE=Debug`
+`Release`                         | `CMAKE_BUILD_TYPE=Release`
+`DLL Windows SSPI`                | `CURL_USE_SCHANNEL=ON` (with SSPI enabled by default)
+`DLL OpenSSL`                     | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
+`DLL libssh2`                     | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
+`DLL WinIDN`                      | `USE_WIN32_IDN=ON`
+
+For example these commands:
+
+    > cd projects
+    > ./generate.bat VC12
+    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
+
+translate to:
+
+    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
+
+# Migrating from winbuild builds
+
+We recommend CMake to build curl with MSVC. The winbuild build method is
+deprecated and may be dropped in a future release.
+
+In CMake you can customize the path of dependencies by passing the absolute
+header path and the full path of the library via `*_INCLUDE_DIR` and
+`*_LIBRARY` options (see the complete list in the option listing above).
+The full path to the library can point to a static library or an import
+library, which defines if the dependency is linked as a dll or statically.
+For OpenSSL this works
+[differently](https://cmake.org/cmake/help/latest/module/FindOpenSSL.html):
+You can pass the root directory of the OpenSSL installation via
+`OPENSSL_ROOT_DIR`, then pass `OPENSSL_USE_STATIC_LIBS=ON` to select static
+libs.
+
+winbuild options                  | Equivalent CMake options
+:-------------------------------- | :--------------------------------
+`DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
+`GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
+`LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
+`VC`                              | see CMake `-G` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+`MACHINE`: `x64`, `x86`           | `-A x64`, `-A Win32`
+`MODE`: `dll`, `static`           | `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: dll)
+`RTLIBCFG`: `static`              | `CURL_STATIC_CRT=ON`
+`ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
+`ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
+`ENABLE_MSH3`                     | `USE_MSH3=ON`
+`ENABLE_NGHTTP2`                  | `USE_NGHTTP2=ON`
+`ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
+`ENABLE_SCHANNEL`                 | `CURL_USE_SCHANNEL=ON`
+`ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON` (default with Schannel)
+`ENABLE_UNICODE`                  | `ENABLE_UNICODE=ON`
+`WITH_PREFIX`                     | `CMAKE_INSTALL_PREFIX=<path>`
+`WITH_DEVEL`                      | see individual `*_INCLUDE_DIR` and `*_LIBRARY` options and `OPENSSL_ROOT_DIR`
+`WITH_CARES`, `CARES_PATH`        | `ENABLE_ARES=ON`, optional: `CARES_INCLUDE_DIR`, `CARES_LIBRARY`
+`WITH_MBEDTLS`, `MBEDTLS_PATH`    | `CURL_USE_MBEDTLS=ON`, optional: `MBEDTLS_INCLUDE_DIR`, `MBEDTLS_LIBRARY`, `MBEDX509_LIBRARY`, `MBEDCRYPTO_LIBRARY`
+`WITH_MSH3`, `MSH_PATH`           | `USE_MSH3=ON`, optional: `MSH3_INCLUDE_DIR`, `MSH3_LIBRARY`
+`WITH_NGHTTP2`, `NGHTTP2_PATH`    | `USE_NGHTTP2=ON`, optional: `NGHTTP2_INCLUDE_DIR`, `NGHTTP2_LIBRARY`
+`WITH_SSH`, `SSH_PATH`            | `CURL_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
+`WITH_SSH2`, `SSH2_PATH`          | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
+`WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
+`WITH_WOLFSSL`, `WOLFSSL_PATH`    | `CURL_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
+`WITH_ZLIB`, `ZLIB_PATH`          | `CURL_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
+
+For example this command-line:
+
+    > nmake -f Makefile.vc VC=17 MACHINE=x64 DEBUG=ON mode=dll SSL_PATH=C:\OpenSSL WITH_SSL=dll ENABLE_UNICODE=ON
+
+translates to:
+
+    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF

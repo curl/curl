@@ -22,6 +22,21 @@
 #
 #***************************************************************************
 
+!MESSAGE
+!MESSAGE WARNING:
+!MESSAGE
+!MESSAGE The winbuild build system is deprecated and will be removed in
+!MESSAGE September 2025 in favor of the CMake build system.
+!MESSAGE
+!MESSAGE Please see docs/INSTALL-CMAKE.md : "Migrating from winbuild builds"
+!MESSAGE
+!MESSAGE To use the winbuild build system you must acknowledge this warning by
+!MESSAGE setting command line option WINBUILD_ACKNOWLEDGE_DEPRECATED=yes
+!MESSAGE
+!IF "$(WINBUILD_ACKNOWLEDGE_DEPRECATED)"!="yes"
+!ERROR The user must acknowledge the deprecation warning to continue.
+!ENDIF
+
 !IF "$(MODE)"=="static"
 TARGET = $(LIB_NAME_STATIC)
 AS_DLL = false

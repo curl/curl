@@ -37,6 +37,13 @@ their experimental status in a future.
 
 We remove msh3 support from the curl source tree in July 2025.
 
+## winbuild build system
+
+curl drops support for the winbuild build method after September 2025.
+
+We recommend migrating to CMake. See the migration guide in
+`docs/INSTALL-CMAKE.md`.
+
 ## Past removals
 
  - Pipelining
