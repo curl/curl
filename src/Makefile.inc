@@ -32,7 +32,8 @@
 # libcurl sources to include in curltool lib we use for test binaries
 CURLTOOL_LIBCURL_CFILES = \
   ../lib/base64.c \
-  ../lib/dynbuf.c
+  ../lib/dynbuf.c \
+  ../lib/curl_get_line.c
 
 # libcurl has sources that provide functions named curlx_* that are not part of
 # the official API, but we reuse the code here to avoid duplication.
