@@ -50,6 +50,9 @@ typedef unsigned __int64 uint64_t;
 #ifndef UINT16_MAX
 #define UINT16_MAX    0xffff
 #endif
+#ifndef UINT32_MAX
+#define UINT32_MAX    0xffffffff
+#endif
 
 #define CURL_SPACK_VERSION       0x01
 #define CURL_SPACK_IETF_ID       0x02
