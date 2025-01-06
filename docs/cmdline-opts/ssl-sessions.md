@@ -26,7 +26,7 @@ get replaced or purged from the cache for space reasons.
 
 Using a session file allows `--tls-earlydata` to send the first request
 in "0-RTT" mode, should an SSL session with the feature be found. Note that
-a server may not support early data. And also note that early data does
+a server may not support early data. Also note that early data does
 not provide forward secrecy, e.g. is not as secure.
 
 The SSL session tickets are stored as base64 encoded text, each ticket on
