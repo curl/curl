@@ -51,6 +51,7 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
+    -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
     "-DCURL_USE_OPENSSL=${OPENSSL}" \
     "-DCURL_USE_SCHANNEL=${SCHANNEL}" \
     "-DHTTP_ONLY=${HTTP_ONLY}" \
