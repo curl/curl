@@ -300,6 +300,13 @@ GSS-API Negotiation Mechanism, defined in RFC 2478.) (added in 7.10.8)
 
 supports SSL (HTTPS/FTPS) (Added in 7.10)
 
+## SSLS-EXPORT
+
+*features* mask bit: non-existent
+
+libcurl was built with SSL session import/export support
+(experimental, added in 8.12.0)
+
 ## SSPI
 
 *features* mask bit: CURL_VERSION_SSPI

@@ -390,3 +390,37 @@ class TestSSLUse:
                     match_trace = line
                     break
             assert match_trace, f'Did not find "{exp_trace}" in trace\n{r.dump_logs()}'
+
+    @pytest.mark.skipif(condition=not Env.curl_has_feature('SSLS-EXPORT'),
+                        reason='curl lacks SSL session export support')
+    def test_17_15_session_export(self, env: Env, httpd):
+        proto = 'http/1.1'
+        if env.curl_uses_lib('libressl'):
+           pytest.skip('Libressl resumption does not work inTLSv1.3')
+        if env.curl_uses_lib('rustls-ffi'):
+            pytest.skip('rustsls does not expose sessions')
+        if env.curl_uses_lib('bearssl'):
+            pytest.skip('BearSSL does not support TLSv1.3')
+        if env.curl_uses_lib('mbedtls') and \
+           not env.curl_lib_version_at_least('mbedtls', '3.6.0'):
+            pytest.skip('mbedtls TLSv1.3 session resume not working before 3.6.0')
+        run_env = os.environ.copy()
+        run_env['CURL_DEBUG'] = 'ssl,scache'
+        # clean session file first, then reuse
+        session_file = os.path.join(env.gen_dir, 'test_17_15.sessions')
+        if os.path.exists(session_file):
+            return os.remove(session_file)
+        xargs = ['--tls-max', '1.3', '--tlsv1.3', '--ssl-sessions', session_file]
+        curl = CurlClient(env=env, run_env=run_env)
+        # tell the server to close the connection after each request
+        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=xargs)
+        assert r.exit_code == 0, f'{r}'
+        assert r.json['HTTPS'] == 'on', f'{r.json}'
+        assert r.json['SSL_SESSION_RESUMED'] == 'Initial', f'{r.json}\n{r.dump_logs()}'
+        # ok, run again, sessions should be imported
+        run_dir2 = os.path.join(env.gen_dir, 'curl2')
+        curl = CurlClient(env=env, run_env=run_env, run_dir=run_dir2)
+        r = curl.http_get(url=url, alpn_proto=proto, extra_args=xargs)
+        assert r.exit_code == 0, f'{r}'
+        assert r.json['SSL_SESSION_RESUMED'] == 'Resumed', f'{r.json}\n{r.dump_logs()}'

@@ -87,6 +87,7 @@
 #include "tool_parsecfg.h"
 #include "tool_setopt.h"
 #include "tool_sleep.h"
+#include "tool_ssls.h"
 #include "tool_urlglob.h"
 #include "tool_util.h"
 #include "tool_writeout.h"
@@ -3232,18 +3233,31 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-          /* Get the required arguments for each operation */
-          do {
-            result = get_args(operation, count++);
+          if(global->ssl_sessions && feature_ssls_export)
+            result = tool_ssls_load(global, global->first, share,
+                                    global->ssl_sessions);
 
-            operation = operation->next;
-          } while(!result && operation);
+          if(!result) {
+            /* Get the required arguments for each operation */
+            do {
+              result = get_args(operation, count++);
 
-          /* Set the current operation pointer */
-          global->current = global->first;
+              operation = operation->next;
+            } while(!result && operation);
 
-          /* now run! */
-          result = run_all_transfers(global, share, result);
+            /* Set the current operation pointer */
+            global->current = global->first;
+
+            /* now run! */
+            result = run_all_transfers(global, share, result);
+
+            if(global->ssl_sessions && feature_ssls_export) {
+              CURLcode r2 = tool_ssls_save(global, global->first, share,
+                                           global->ssl_sessions);
+              if(r2 && !result)
+                result = r2;
+            }
+          }
 
           curl_share_cleanup(share);
           if(global->libcurl) {

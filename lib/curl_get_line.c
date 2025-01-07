@@ -28,7 +28,9 @@
   !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
 
 #include "curl_get_line.h"
+#ifdef BUILDING_LIBCURL
 #include "curl_memory.h"
+#endif
 /* The last #include file should be: */
 #include "memdebug.h"
 

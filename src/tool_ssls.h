@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_GET_LINE_H
-#define HEADER_CURL_GET_LINE_H
+#ifndef HEADER_CURL_TOOL_SSLS_H
+#define HEADER_CURL_TOOL_SSLS_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +23,15 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "tool_setup.h"
+#include "tool_operate.h"
 
-#include "dynbuf.h"
 
-#ifndef BUILDING_LIBCURL
-/* this renames functions so that the tool code can use the same code
-   without getting symbol collisions */
-#define Curl_get_line(a,b) curlx_get_line(a,b)
-#endif
+CURLcode tool_ssls_load(struct GlobalConfig *global,
+                        struct OperationConfig *config,
+                        CURLSH *share, const char *filename);
+CURLcode tool_ssls_save(struct GlobalConfig *global,
+                        struct OperationConfig *config,
+                        CURLSH *share, const char *filename);
 
-/* Curl_get_line() returns complete lines that end with a newline. */
-int Curl_get_line(struct dynbuf *buf, FILE *input);
-
-#endif /* HEADER_CURL_GET_LINE_H */
+#endif /* HEADER_CURL_TOOL_SSLS_H */

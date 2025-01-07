@@ -330,6 +330,7 @@ struct GlobalConfig {
   bool styled_output;             /* enable fancy output style detection */
   long ms_per_transfer;           /* start next transfer after (at least) this
                                      many milliseconds */
+  char *ssl_sessions;             /* file to load/save SSL session tickets */
 #ifdef DEBUGBUILD
   bool test_duphandle;
   bool test_event_based;

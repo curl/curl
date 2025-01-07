@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_GET_LINE_H
-#define HEADER_CURL_GET_LINE_H
+#ifndef HEADER_CURL_VTLS_SPACK_H
+#define HEADER_CURL_VTLS_SPACK_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -23,16 +23,21 @@
  * SPDX-License-Identifier: curl
  *
  ***************************************************************************/
+#include "curl_setup.h"
 
-#include "dynbuf.h"
+#ifdef USE_SSLS_EXPORT
 
-#ifndef BUILDING_LIBCURL
-/* this renames functions so that the tool code can use the same code
-   without getting symbol collisions */
-#define Curl_get_line(a,b) curlx_get_line(a,b)
-#endif
+struct dynbuf;
+struct Curl_ssl_session;
 
-/* Curl_get_line() returns complete lines that end with a newline. */
-int Curl_get_line(struct dynbuf *buf, FILE *input);
+CURLcode Curl_ssl_session_pack(struct Curl_easy *data,
+                               struct Curl_ssl_session *s,
+                               struct dynbuf *buf);
 
-#endif /* HEADER_CURL_GET_LINE_H */
+CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
+                                 const unsigned char *buf, size_t buflen,
+                                 struct Curl_ssl_session **ps);
+
+#endif /* USE_SSLS_EXPORT */
+
+#endif /* HEADER_CURL_VTLS_SPACK_H */

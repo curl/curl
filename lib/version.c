@@ -523,6 +523,9 @@ static const struct feat features_table[] = {
 #ifdef USE_SSL
   FEATURE("SSL",         NULL,                CURL_VERSION_SSL),
 #endif
+#if defined(USE_SSLS_EXPORT)
+  FEATURE("SSLS-EXPORT", NULL,                0),
+#endif
 #ifdef USE_WINDOWS_SSPI
   FEATURE("SSPI",        NULL,                CURL_VERSION_SSPI),
 #endif
