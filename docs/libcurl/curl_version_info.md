@@ -304,7 +304,7 @@ supports SSL (HTTPS/FTPS) (Added in 7.10)
 
 *features* mask bit: non-existent
 
-libcurl was built with SSL session im-/export support
+libcurl was built with SSL session import/export support
 (experimental, added in 8.12.0)
 
 ## SSPI
