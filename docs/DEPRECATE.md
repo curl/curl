@@ -23,6 +23,20 @@ and use TLS 1.3, or else it is not good enough.
 As of May 2024, the libraries that need to get fixed to remain supported after
 May 2025 are: BearSSL and Secure Transport.
 
+## msh3 support
+
+The msh3 backed for QUIC and HTTP/3 was introduced in April 2022 but has never
+been made to work properly. It has seen no visible traction or developer
+activity from the msh3 main author (or anyone else seemingly interested) in
+two years. As a non-functional backend, it only adds friction and "weight" to
+the development and maintenance.
+
+Meanwhile, we have a fully working backend in the ngtcp2 one and we have two
+fully working backends in OpenSSL-QUIC and quiche well on their way of ending
+their experimental status in a future.
+
+We remove msh3 support from the curl source tree in July 2025.
+
 ## Past removals
 
  - Pipelining
