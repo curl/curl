@@ -654,17 +654,6 @@ jobs:
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_MBEDTLS=ON
               -DCURL_USE_GSASL=ON
 
-          - name: 'msh3'
-            install: 'brotli zlib zstd libpsl nghttp2 msh3 libssh2 pkgconf gsasl'
-            arch: 'x64'
-            plat: 'windows'
-            type: 'Debug'
-            tflags: 'skipall'
-            config: >-
-              -DCURL_USE_LIBSSH2=ON
-              -DCURL_USE_SCHANNEL=OFF -DUSE_MSH3=ON
-              -DCURL_USE_GSASL=ON
-
       fail-fast: false
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
