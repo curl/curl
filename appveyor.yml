@@ -61,6 +61,23 @@ environment:
       ENABLE_UNICODE: 'OFF'
       SHARED: 'ON'
       EXAMPLES: 'ON'
+    - job_name: 'CMake, VS2015, Debug, x64, OpenSSL 1.1.1, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 14 2015 Win64'
+      PRJ_CFG: Debug
+      SCHANNEL: 'OFF'
+      ENABLE_UNICODE: 'OFF'
+      SHARED: 'ON'
+    - job_name: 'CMake, VS2017, Debug, x64, OpenSSL 3.3, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 15 2017'
+      TARGET: '-A x64'
+      PRJ_CFG: Debug
+      SCHANNEL: 'OFF'
+      ENABLE_UNICODE: 'OFF'
+      SHARED: 'ON'
     - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.3, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
