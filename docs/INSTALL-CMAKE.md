@@ -378,45 +378,45 @@ Details via CMake
 
 # Migrating from winbuild builds
 
- In CMake you can customize the path of dependencies by passing the absolute
- header path and the full path of the library via `*_INCLUDE_DIR` and
- `*_LIBRARY` options, where `*` is the name of the dependency. Except for
- OpenSSL where you can pass the root directory of the OpenSSL installation
- via `OPENSSL_ROOT_DIR`. The full path to the library can point to a static
- library or an import library, which defines if the dependency is linked as
- a dll or statically.
+In CMake you can customize the path of dependencies by passing the absolute
+header path and the full path of the library via `*_INCLUDE_DIR` and
+`*_LIBRARY` options, where `*` is the name of the dependency. Except for
+OpenSSL where you can pass the root directory of the OpenSSL installation
+via `OPENSSL_ROOT_DIR`. The full path to the library can point to a static
+library or an import library, which defines if the dependency is linked as
+a dll or statically.
 
- winbuild options                  | equivalent CMake options
- :-------------------------------- | :--------------------------------
- `DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
- `GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
- `LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
- `MACHINE`, `VC`                   | see CMake `-G` `-A` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
- `MODE`                            | `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF`
- `ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
- `ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
- `ENABLE_MSH3`                     | `USE_MSH3=ON`
- `ENABLE_NGHTTP2`                  | `USE_NGHTTP2=ON`
- `ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
- `ENABLE_SCHANNEL`                 | `CURL_USE_SCHANNEL=ON`
- `ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON`
- `ENABLE_UNICODE`                  | `ENABLE_UNICODE=ON`
- `WITH_PREFIX`                     | `CMAKE_INSTALL_PREFIX=<path>`
- `WITH_DEVEL`                      | see individual `*_INCLUDE_DIR` and `*_LIBRARY` options and `OPENSSL_ROOT_DIR`
- `WITH_CARES`, `CARES_PATH`        | `ENABLE_ARES=ON`, optional: `CARES_INCLUDE_DIR`, `CARES_LIBRARY`
- `WITH_MBEDTLS`, `MBEDTLS_PATH`    | `CURL_USE_MBEDTLS=ON`, optional: `MBEDTLS_INCLUDE_DIR`, `MBEDTLS_LIBRARY`, `MBEDX509_LIBRARY`, `MBEDCRYPTO_LIBRARY`
- `WITH_MSH3`, `MSH_PATH`           | `USE_MSH3=ON`, optional: `MSH3_INCLUDE_DIR`, `MSH3_LIBRARY`
- `WITH_NGHTTP2`, `NGHTTP2_PATH`    | `USE_NGHTTP2=ON`, optional: `NGHTTP2_INCLUDE_DIR`, `NGHTTP2_LIBRARY`
- `WITH_SSH`, `SSH_PATH`            | `CURL_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
- `WITH_SSH2`, `SSH2_PATH`          | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
- `WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`
- `WITH_WOLFSSL`, `WOLFSSL_PATH`    | `CURL_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
- `WITH_ZLIB`, `ZLIB_PATH`          | `CURL_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
+winbuild options                  | equivalent CMake options
+:-------------------------------- | :--------------------------------
+`DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
+`GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
+`LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
+`MACHINE`, `VC`                   | see CMake `-G` `-A` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+`MODE`                            | `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF`
+`ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
+`ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
+`ENABLE_MSH3`                     | `USE_MSH3=ON`
+`ENABLE_NGHTTP2`                  | `USE_NGHTTP2=ON`
+`ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
+`ENABLE_SCHANNEL`                 | `CURL_USE_SCHANNEL=ON`
+`ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON`
+`ENABLE_UNICODE`                  | `ENABLE_UNICODE=ON`
+`WITH_PREFIX`                     | `CMAKE_INSTALL_PREFIX=<path>`
+`WITH_DEVEL`                      | see individual `*_INCLUDE_DIR` and `*_LIBRARY` options and `OPENSSL_ROOT_DIR`
+`WITH_CARES`, `CARES_PATH`        | `ENABLE_ARES=ON`, optional: `CARES_INCLUDE_DIR`, `CARES_LIBRARY`
+`WITH_MBEDTLS`, `MBEDTLS_PATH`    | `CURL_USE_MBEDTLS=ON`, optional: `MBEDTLS_INCLUDE_DIR`, `MBEDTLS_LIBRARY`, `MBEDX509_LIBRARY`, `MBEDCRYPTO_LIBRARY`
+`WITH_MSH3`, `MSH_PATH`           | `USE_MSH3=ON`, optional: `MSH3_INCLUDE_DIR`, `MSH3_LIBRARY`
+`WITH_NGHTTP2`, `NGHTTP2_PATH`    | `USE_NGHTTP2=ON`, optional: `NGHTTP2_INCLUDE_DIR`, `NGHTTP2_LIBRARY`
+`WITH_SSH`, `SSH_PATH`            | `CURL_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
+`WITH_SSH2`, `SSH2_PATH`          | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
+`WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`
+`WITH_WOLFSSL`, `WOLFSSL_PATH`    | `CURL_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
+`WITH_ZLIB`, `ZLIB_PATH`          | `CURL_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
 
- For example this command-line:
+For example this command-line:
 
     > nmake -f Makefile.vc mode=dll VC=17 SSL_PATH=C:\OpenSSL WITH_SSL=dll MACHINE=x64 DEBUG=ON ENABLE_UNICODE=ON
 
- Translates to:
+Translates to:
 
     > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_UNICODE=ON
