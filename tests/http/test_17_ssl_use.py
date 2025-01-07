@@ -410,7 +410,7 @@ class TestSSLUse:
         session_file = os.path.join(env.gen_dir, 'test_17_15.sessions')
         if os.path.exists(session_file):
             return os.remove(session_file)
-        xargs = ['--tls-max', '1.3', f'--tlsv1.3', '--ssl-sessions', session_file]
+        xargs = ['--tls-max', '1.3', '--tlsv1.3', '--ssl-sessions', session_file]
         curl = CurlClient(env=env, run_env=run_env)
         # tell the server to close the connection after each request
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'
