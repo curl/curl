@@ -64,9 +64,9 @@ Graduation requirements:
 - it has been given time to mature, so no earlier than April 2025 (twelve
   months after being added here)
 
-## SSL session im-/export
+## SSL session import/export
 
-Import/Export of SSL sessions tickets in libcurl and curl commandline
+Import/Export of SSL sessions tickets in libcurl and curl command line
 option '--ssl-session <filename>' for faster TLS handshakes and use
 of TLSv1.3/QUIC Early Data (0-RTT).
 
