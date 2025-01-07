@@ -105,6 +105,10 @@ Tracing of DNS-over-HTTP operations to resolve hostnames.
 
 Traces reading of upload data from the application in order to send it to the server.
 
+## `ssls`
+
+Tracing of SSL Session handling, e.g. caching/import/export.
+
 ## `smtp`
 
 Tracing of SMTP operations when this protocol is enabled in your build.

@@ -239,6 +239,24 @@ void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
 }
 #endif /* !CURL_DISABLE_SMTP */
 
+#ifdef USE_SSL
+struct curl_trc_feat Curl_trc_feat_ssls = {
+  "SSLS",
+  CURL_LOG_LVL_NONE,
+};
+
+void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_ssls, fmt, ap);
+    va_end(ap);
+  }
+}
+#endif /* USE_SSL */
+
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 struct curl_trc_feat Curl_trc_feat_ws = {
   "WS",
@@ -278,6 +296,9 @@ static struct trc_feat_def trc_feats[] = {
 #endif
 #ifndef CURL_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
+#endif
+#ifdef USE_SSL
+  { &Curl_trc_feat_ssls,      TRC_CT_NETWORK },
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
   { &Curl_trc_feat_ws,        TRC_CT_PROTOCOL },

@@ -653,3 +653,41 @@ AS_HELP_STRING([--disable-ech],[Disable ECH support]),
   esac
 ])
 ])
+
+dnl CURL_CHECK_OPTION_SSLS_EXPORT
+dnl -----------------------------------------------------
+dnl Verify whether configure has been invoked with option
+dnl --enable-ssl-session-export or --disable-ssl-session-export, and set
+dnl shell variable want_ech as appropriate.
+
+AC_DEFUN([CURL_CHECK_OPTION_SSLS_EXPORT], [
+  AC_MSG_CHECKING([whether to enable SSL session export support])
+  OPT_SSLS_EXPORT="default"
+  AC_ARG_ENABLE(ssls-export,
+AS_HELP_STRING([--enable-ssls-export],
+               [Enable SSL session export support])
+AS_HELP_STRING([--disable-ssls-export],
+               [Disable SSL session export support]),
+  OPT_SSLS_EXPORT=$enableval)
+  case "$OPT_SSLS_EXPORT" in
+    no)
+      dnl --disable-ssls-export option used
+      want_ssls_export="no"
+      curl_ssls_export_msg="no      (--enable-ssls-export)"
+      AC_MSG_RESULT([no])
+      ;;
+    default)
+      dnl configure option not specified
+      want_ssls_export="no"
+      curl_ssls_export_msg="no      (--enable-ssls-export)"
+      AC_MSG_RESULT([no])
+      ;;
+    *)
+      dnl --enable-ssls-export option used
+      want_ssls_export="yes"
+      curl_ssls_export_msg="enabled (--disable-ssls-export)"
+      AC_MSG_RESULT([yes])
+      ;;
+  esac
+])
+])

@@ -688,6 +688,7 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj \
+ $(CURL_DIROBJ)\curl_get_line.obj \
  $(CURL_DIROBJ)\curl_multibyte.obj \
  $(CURL_DIROBJ)\version_win32.obj \
  $(CURL_DIROBJ)\dynbuf.obj \
@@ -708,6 +709,8 @@ $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/strtoofft.c
 $(CURL_DIROBJ)\warnless.obj: ../lib/warnless.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/warnless.c
+$(CURL_DIROBJ)\curl_get_line.obj: ../lib/curl_get_line.c
+	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_get_line.c
 $(CURL_DIROBJ)\curl_multibyte.obj: ../lib/curl_multibyte.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/curl_multibyte.c
 $(CURL_DIROBJ)\version_win32.obj: ../lib/version_win32.c

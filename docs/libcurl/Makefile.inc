@@ -41,6 +41,8 @@ man_MANS = \
  curl_easy_reset.3 \
  curl_easy_send.3 \
  curl_easy_setopt.3 \
+ curl_easy_ssls_import.3 \
+ curl_easy_ssls_export.3 \
  curl_easy_strerror.3 \
  curl_easy_unescape.3 \
  curl_easy_upkeep.3 \

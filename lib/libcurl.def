@@ -15,6 +15,8 @@ curl_easy_recv
 curl_easy_reset
 curl_easy_send
 curl_easy_setopt
+curl_easy_ssls_export
+curl_easy_ssls_import
 curl_easy_strerror
 curl_easy_unescape
 curl_easy_upkeep

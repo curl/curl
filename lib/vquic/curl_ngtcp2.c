@@ -476,6 +476,10 @@ static int cf_ngtcp2_handshake_completed(ngtcp2_conn *tconn, void *user_data)
                                                     data, &ctx->peer);
   CURL_TRC_CF(data, cf, "handshake complete after %dms",
              (int)Curl_timediff(ctx->handshake_at, ctx->started_at));
+  /* In case of earlydata, where we simulate being connected, update
+   * the handshake time when we really did connect */
+  if(ctx->use_earlydata)
+    Curl_pgrsTimeWas(data, TIMER_APPCONNECT, ctx->handshake_at);
 #ifdef USE_GNUTLS
   if(ctx->use_earlydata) {
     int flags = gnutls_session_get_flags(ctx->tls.gtls.session);
