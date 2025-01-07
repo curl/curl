@@ -79,10 +79,12 @@
 #define GZIP_MAGIC_1 0x8b
 
 /* gzip flag byte */
-#define CURL_GZIPFLAG_ASCII        0x01 /* bit 0 set: file probably ASCII text */
+#define CURL_GZIPFLAG_ASCII        0x01 /* bit 0 set: file probably ASCII
+                                           text */
 #define CURL_GZIPFLAG_HEAD_CRC     0x02 /* bit 1 set: header CRC present */
 #define CURL_GZIPFLAG_EXTRA_FIELD  0x04 /* bit 2 set: extra field present */
-#define CURL_GZIPFLAG_ORIG_NAME    0x08 /* bit 3 set: original filename present */
+#define CURL_GZIPFLAG_ORIG_NAME    0x08 /* bit 3 set: original filename
+                                           present */
 #define CURL_GZIPFLAG_COMMENT      0x10 /* bit 4 set: file comment present */
 #define CURL_GZIPFLAG_RESERVED     0xE0 /* bits 5..7: reserved */
 
