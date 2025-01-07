@@ -415,8 +415,8 @@ Details via CMake
 
  For example this command-line:
 
-    > nmake -f Makefile.vc mode=dll VC=14 SSL_PATH=C:\OpenSSL WITH_SSL=dll MACHINE=x64 DEBUG=ON ENABLE_UNICODE=ON
+    > nmake -f Makefile.vc mode=dll VC=17 SSL_PATH=C:\OpenSSL WITH_SSL=dll MACHINE=x64 DEBUG=ON ENABLE_UNICODE=ON
 
  Translates to:
 
-    > cmake . -G "Visual Studio 14 2015 Win64" -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:/OpenSSL -DCURL_USE_OPENSSL=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_UNICODE=ON
+    > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DCMAKE_BUILD_TYPE=Debug -DENABLE_UNICODE=ON
