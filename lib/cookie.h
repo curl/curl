@@ -38,7 +38,7 @@ struct Cookie {
   char *spath;        /* sanitized cookie path */
   char *domain;       /* domain = <this> */
   curl_off_t expires; /* expires = <this> */
-  int creationtime;   /* time when the cookie was written */
+  unsigned int creationtime; /* time when the cookie was written */
   BIT(tailmatch);     /* tail-match the domain name */
   BIT(secure);        /* the 'secure' keyword was used */
   BIT(livecookie);    /* updated from a server, not a stored file */
@@ -60,10 +60,10 @@ struct CookieInfo {
   /* linked lists of cookies we know of */
   struct Curl_llist cookielist[COOKIE_HASH_SIZE];
   curl_off_t next_expiration; /* the next time at which expiration happens */
-  int numcookies;  /* number of cookies in the "jar" */
-  int lastct;      /* last creation-time used in the jar */
-  bool running;    /* state info, for cookie adding information */
-  bool newsession; /* new session, discard session cookies on load */
+  unsigned int numcookies;  /* number of cookies in the "jar" */
+  unsigned int lastct;      /* last creation-time used in the jar */
+  BIT(running);    /* state info, for cookie adding information */
+  BIT(newsession); /* new session, discard session cookies on load */
 };
 
 /* The maximum sizes we accept for cookies. RFC 6265 section 6.1 says
