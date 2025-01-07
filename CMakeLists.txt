@@ -1703,8 +1703,8 @@ if(APPLE)
   check_function_exists("mach_absolute_time" HAVE_MACH_ABSOLUTE_TIME)
 endif()
 check_symbol_exists("inet_ntop" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_NTOP)  # arpa/inet.h
-if(MSVC AND (MSVC_VERSION LESS_EQUAL 1600))
-  set(HAVE_INET_NTOP OFF)
+if(MSVC AND (MSVC_VERSION LESS_EQUAL 1900))
+  set(HAVE_INET_NTOP 0)
 endif()
 check_symbol_exists("inet_pton" "${CURL_INCLUDES};stdlib.h;string.h" HAVE_INET_PTON)  # arpa/inet.h
 
