@@ -44,11 +44,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-  if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-    [ "${DEBUG}" = 'ON' ] && [ "${SHARED}" = 'ON' ] && SKIP_RUN='Crash on startup in ENABLE_DEBUG=ON shared builds'
-    # Fails to run without this due to missing MSVCR90.dll / MSVCR90D.dll
-    options+=' -DCURL_STATIC_CRT=ON'
-  fi
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
     "-DCURL_USE_OPENSSL=${OPENSSL}" \
@@ -69,10 +64,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
   if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
-    if [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ]; then
-      find . -name BuildLog.htm -exec dos2unix '{}' +
-      find . -name BuildLog.htm -exec cat '{}' +
-    fi
     false
   fi
   if [ "${SHARED}" = 'ON' ]; then
