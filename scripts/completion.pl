@@ -43,6 +43,9 @@ my @opts = parse_main_opts('--help all', $regex);
 
 if ($shell eq 'fish') {
     print "# curl fish completion\n\n";
+    print "# Complete file paths after @\n";
+    print q(complete -c curl -n 'string match -qr "^@" -- (commandline -ct)' -k -xa "(printf '%s\n' -- @(__fish_complete_suffix --complete=(commandline -ct | string replace -r '^@' '') ''))");
+    print "\n\n";
     print qq{$_ \n} foreach (@opts);
 } elsif ($shell eq 'zsh') {
     my $opts_str;
