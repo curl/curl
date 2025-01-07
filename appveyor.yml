@@ -61,6 +61,16 @@ environment:
       ENABLE_UNICODE: 'OFF'
       SHARED: 'ON'
       EXAMPLES: 'ON'
+    - job_name: 'CMake, VS2012, Debug, x64, OpenSSL 1.1.1, Build-only'
+      APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
+      BUILD_SYSTEM: CMake
+      PRJ_GEN: 'Visual Studio 11 2012'
+      TARGET: '-A x64'
+      PRJ_CFG: Debug
+      OPENSSL: 'ON'
+      SCHANNEL: 'OFF'
+      ENABLE_UNICODE: 'OFF'
+      SHARED: 'ON'
     - job_name: 'CMake, VS2013, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2015'
       BUILD_SYSTEM: CMake
