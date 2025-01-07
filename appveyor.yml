@@ -83,7 +83,7 @@ environment:
       ENABLE_UNICODE: 'OFF'
       SHARED: 'ON'
       TFLAGS: 'skipall'
-    - job_name: 'CMake, VS2017, Debug, x64, OpenSSL 3.3, Build-only'
+    - job_name: 'CMake, VS2017, Debug, x64, OpenSSL 1.1.1, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2017'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 15 2017'
