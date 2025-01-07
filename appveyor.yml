@@ -201,7 +201,7 @@ environment:
     - job_name: 'CMake, VS2017, Debug, x64, OpenSSL 3.3, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
-      PRJ_GEN: 'Visual Studio 17 2022'
+      PRJ_GEN: 'Visual Studio 15 2017'
       TARGET: '-A x64'
       PRJ_CFG: Debug
       SCHANNEL: 'OFF'
@@ -211,7 +211,7 @@ environment:
     - job_name: 'CMake, VS2017, Release, x64, OpenSSL 3.3, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
-      PRJ_GEN: 'Visual Studio 17 2022'
+      PRJ_GEN: 'Visual Studio 15 2017'
       TARGET: '-A x64'
       PRJ_CFG: Release
       SCHANNEL: 'OFF'
@@ -239,7 +239,7 @@ environment:
     - job_name: 'CMake, VS2017, Debug, x64, OpenSSL 3.3, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
-      PRJ_GEN: 'Visual Studio 17 2022'
+      PRJ_GEN: 'Visual Studio 15 2017'
       TARGET: '-A x64'
       PRJ_CFG: Debug
       SCHANNEL: 'OFF'
@@ -249,7 +249,7 @@ environment:
     - job_name: 'CMake, VS2017, Release, x64, OpenSSL 3.3, Unicode, Build-only'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
-      PRJ_GEN: 'Visual Studio 17 2022'
+      PRJ_GEN: 'Visual Studio 15 2017'
       TARGET: '-A x64'
       PRJ_CFG: Release
       SCHANNEL: 'OFF'
