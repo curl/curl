@@ -136,7 +136,7 @@ jobs:
             install_packages: zlib1g-dev
             install_steps: quictls msh3 skipall
             PKG_CONFIG_PATH: '$HOME/msh3/lib/pkgconfig'  # Broken as of v0.6.0
-            generate: -DOPENSSL_ROOT_DIR=$HOME/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=$HOME/msh3/include -DMSH3_LIBRARY=$HOME/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON
+            generate: -DOPENSSL_ROOT_DIR=$HOME/quictls -DUSE_MSH3=ON -DMSH3_INCLUDE_DIR=$HOME/msh3/include -DMSH3_LIBRARY=$HOME/msh3/lib/libmsh3.so -DENABLE_DEBUG=ON -DCMAKE_UNITY_BUILD=OFF
 
           - name: awslc
             install_packages: zlib1g-dev
