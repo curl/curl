@@ -25,7 +25,7 @@
  ***************************************************************************/
 #include "curl_setup.h"
 
-#ifdef USE_SSL
+#ifdef USE_SSLS_EXPORT
 
 struct dynbuf;
 struct Curl_ssl_session;
@@ -38,6 +38,6 @@ CURLcode Curl_ssl_session_unpack(struct Curl_easy *data,
                                  const unsigned char *buf, size_t buflen,
                                  struct Curl_ssl_session **ps);
 
-#endif /* USE_SSL (else) */
+#endif /* USE_SSLS_EXPORT */
 
 #endif /* HEADER_CURL_VTLS_SPACK_H */

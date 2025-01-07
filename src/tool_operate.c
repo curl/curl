@@ -3233,7 +3233,7 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_PSL);
           curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_HSTS);
 
-          if(global->ssl_sessions)
+          if(global->ssl_sessions && feature_ssls_export)
             result = tool_ssls_load(global, global->first, share,
                                     global->ssl_sessions);
 
@@ -3251,9 +3251,12 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
             /* now run! */
             result = run_all_transfers(global, share, result);
 
-            if(!result && global->ssl_sessions)
-              result = tool_ssls_save(global, global->first, share,
-                                      global->ssl_sessions);
+            if(global->ssl_sessions && feature_ssls_export) {
+              CURLcode r2 = tool_ssls_save(global, global->first, share,
+                                           global->ssl_sessions);
+              if(r2 && !result)
+                result = r2;
+            }
           }
 
           curl_share_cleanup(share);

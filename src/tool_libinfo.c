@@ -84,6 +84,7 @@ bool feature_ssl = FALSE;
 bool feature_tls_srp = FALSE;
 bool feature_zstd = FALSE;
 bool feature_ech = FALSE;
+bool feature_ssls_export = FALSE;
 
 static struct feature_name_presentp {
   const char   *feature_name;
@@ -115,6 +116,7 @@ static struct feature_name_presentp {
   {"SPNEGO",         &feature_spnego,     CURL_VERSION_SPNEGO},
   {"SSL",            &feature_ssl,        CURL_VERSION_SSL},
   {"SSPI",           NULL,                CURL_VERSION_SSPI},
+  {"SSLS-EXPORT",    &feature_ssls_export, 0},
   {"threadsafe",     NULL,                CURL_VERSION_THREADSAFE},
   {"TLS-SRP",        &feature_tls_srp,    CURL_VERSION_TLSAUTH_SRP},
   {"TrackMemory",    NULL,                CURL_VERSION_CURLDEBUG},

@@ -1342,7 +1342,7 @@ CURLcode curl_easy_ssls_import(CURL *d, const char *session_key,
                                const unsigned char *shmac, size_t shmac_len,
                                const unsigned char *sdata, size_t sdata_len)
 {
-#ifdef USE_SSL
+#ifdef USE_SSLS_EXPORT
   struct Curl_easy *data = d;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;
@@ -1363,7 +1363,7 @@ CURLcode curl_easy_ssls_export(CURL *d,
                                curl_ssls_export_cb *export_fn,
                                void *userptr)
 {
-#ifdef USE_SSL
+#ifdef USE_SSLS_EXPORT
   struct Curl_easy *data = d;
   if(!GOOD_EASY_HANDLE(data))
     return CURLE_BAD_FUNCTION_ARGUMENT;

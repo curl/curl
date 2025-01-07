@@ -250,28 +250,6 @@ out:
   return result;
 }
 
-static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
-{
-  CURLcode result;
-
-  DEBUGASSERT(peer);
-  if(!peer->ssl_peer_key)
-    return CURLE_BAD_FUNCTION_ARGUMENT;
-
-  result = Curl_rand(NULL, peer->key_salt, sizeof(peer->key_salt));
-  if(result)
-    return result;
-
-  result = Curl_hmacit(&Curl_HMAC_SHA256,
-                       peer->key_salt, sizeof(peer->key_salt),
-                       (const unsigned char *)peer->ssl_peer_key,
-                       strlen(peer->ssl_peer_key),
-                       peer->key_hmac);
-  if(!result)
-    peer->hmac_set = TRUE;
-  return result;
-}
-
 static void cf_scache_session_remove(struct Curl_ssl_scache_peer *peer,
                                      struct Curl_ssl_session *s)
 {
@@ -656,55 +634,6 @@ out:
   return result;
 }
 
-static CURLcode
-cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
-                         const unsigned char *salt,
-                         const unsigned char *hmac,
-                         struct Curl_ssl_scache_peer **ppeer)
-{
-  size_t i;
-  CURLcode result = CURLE_OK;
-
-  *ppeer = NULL;
-  /* look for an entry that matches salt+hmac exactly or has a known
-   * ssl_peer_key which salt+hmac's to the same. */
-  for(i = 0; scache && i < scache->peer_count; i++) {
-    struct Curl_ssl_scache_peer *peer = &scache->peers[i];
-    if(!cf_ssl_scache_match_auth(peer, NULL))
-      continue;
-    if(scache->peers[i].hmac_set &&
-       !memcmp(peer->key_salt, salt, sizeof(peer->key_salt)) &&
-       !memcmp(peer->key_hmac, hmac, sizeof(peer->key_hmac))) {
-      /* found exact match, return */
-      *ppeer = peer;
-      goto out;
-    }
-    else if(peer->ssl_peer_key) {
-      unsigned char my_hmac[CURL_SHA256_DIGEST_LENGTH];
-      /* compute hmac for the passed salt */
-      result = Curl_hmacit(&Curl_HMAC_SHA256,
-                           salt, sizeof(peer->key_salt),
-                           (const unsigned char *)peer->ssl_peer_key,
-                           strlen(peer->ssl_peer_key),
-                           my_hmac);
-      if(result)
-        goto out;
-      if(!memcmp(my_hmac, hmac, sizeof(my_hmac))) {
-        /* cryptohash match, take over salt+hmac if no set and return */
-        if(!peer->hmac_set) {
-          memcpy(peer->key_salt, salt, sizeof(peer->key_salt));
-          memcpy(peer->key_hmac, hmac, sizeof(peer->key_hmac));
-          peer->hmac_set = TRUE;
-        }
-        *ppeer = peer;
-        goto out;
-      }
-    }
-  }
-out:
-  return result;
-}
-
 static struct Curl_ssl_scache_peer *
 cf_ssl_get_free_peer(struct Curl_ssl_scache *scache)
 {
@@ -1011,7 +940,80 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
   Curl_ssl_scache_unlock(data);
 }
 
+#ifdef USE_SSLS_EXPORT
+
 #define CURL_SSL_TICKET_MAX   (16*1024)
+
+static CURLcode cf_ssl_scache_peer_set_hmac(struct Curl_ssl_scache_peer *peer)
+{
+  CURLcode result;
+
+  DEBUGASSERT(peer);
+  if(!peer->ssl_peer_key)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+
+  result = Curl_rand(NULL, peer->key_salt, sizeof(peer->key_salt));
+  if(result)
+    return result;
+
+  result = Curl_hmacit(&Curl_HMAC_SHA256,
+                       peer->key_salt, sizeof(peer->key_salt),
+                       (const unsigned char *)peer->ssl_peer_key,
+                       strlen(peer->ssl_peer_key),
+                       peer->key_hmac);
+  if(!result)
+    peer->hmac_set = TRUE;
+  return result;
+}
+
+static CURLcode
+cf_ssl_find_peer_by_hmac(struct Curl_ssl_scache *scache,
+                         const unsigned char *salt,
+                         const unsigned char *hmac,
+                         struct Curl_ssl_scache_peer **ppeer)
+{
+  size_t i;
+  CURLcode result = CURLE_OK;
+
+  *ppeer = NULL;
+  /* look for an entry that matches salt+hmac exactly or has a known
+   * ssl_peer_key which salt+hmac's to the same. */
+  for(i = 0; scache && i < scache->peer_count; i++) {
+    struct Curl_ssl_scache_peer *peer = &scache->peers[i];
+    if(!cf_ssl_scache_match_auth(peer, NULL))
+      continue;
+    if(scache->peers[i].hmac_set &&
+       !memcmp(peer->key_salt, salt, sizeof(peer->key_salt)) &&
+       !memcmp(peer->key_hmac, hmac, sizeof(peer->key_hmac))) {
+      /* found exact match, return */
+      *ppeer = peer;
+      goto out;
+    }
+    else if(peer->ssl_peer_key) {
+      unsigned char my_hmac[CURL_SHA256_DIGEST_LENGTH];
+      /* compute hmac for the passed salt */
+      result = Curl_hmacit(&Curl_HMAC_SHA256,
+                           salt, sizeof(peer->key_salt),
+                           (const unsigned char *)peer->ssl_peer_key,
+                           strlen(peer->ssl_peer_key),
+                           my_hmac);
+      if(result)
+        goto out;
+      if(!memcmp(my_hmac, hmac, sizeof(my_hmac))) {
+        /* cryptohash match, take over salt+hmac if no set and return */
+        if(!peer->hmac_set) {
+          memcpy(peer->key_salt, salt, sizeof(peer->key_salt));
+          memcpy(peer->key_hmac, hmac, sizeof(peer->key_hmac));
+          peer->hmac_set = TRUE;
+        }
+        *ppeer = peer;
+        goto out;
+      }
+    }
+  }
+out:
+  return result;
+}
 
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,
@@ -1161,5 +1163,7 @@ out:
   Curl_dyn_free(&sbuf);
   return r;
 }
+
+#endif /* USE_SSLS_EXPORT */
 
 #endif /* USE_SSL */

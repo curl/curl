@@ -2472,7 +2472,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
         config->ssl_revoke_best_effort = TRUE;
       break;
     case C_SSL_SESSIONS: /* --ssl-sessions */
-      if(feature_ssl)
+      if(feature_ssls_export)
         err = getstr(&global->ssl_sessions, nextarg, DENY_BLANK);
       else
         err = PARAM_LIBCURL_DOESNT_SUPPORT;

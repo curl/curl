@@ -195,6 +195,8 @@ void Curl_ssl_scache_remove_all(struct Curl_cfilter *cf,
                                 struct Curl_easy *data,
                                 const char *ssl_peer_key);
 
+#ifdef USE_SSLS_EXPORT
+
 CURLcode Curl_ssl_session_import(struct Curl_easy *data,
                                  const char *ssl_peer_key,
                                  const unsigned char *shmac, size_t shmac_len,
@@ -204,6 +206,7 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
                                  curl_ssls_export_cb *export_fn,
                                  void *userptr);
 
+#endif /* USE_SSLS_EXPORT */
 
 #else /* USE_SSL */
 
