@@ -67,6 +67,7 @@ environment:
       PRJ_GEN: 'Visual Studio 12 2013'
       TARGET: '-A x64'
       PRJ_CFG: Debug
+      OPENSSL: 'ON'
       SCHANNEL: 'OFF'
       ENABLE_UNICODE: 'OFF'
       SHARED: 'ON'
@@ -77,6 +78,7 @@ environment:
       PRJ_GEN: 'Visual Studio 14 2015'
       TARGET: '-A x64'
       PRJ_CFG: Debug
+      OPENSSL: 'ON'
       SCHANNEL: 'OFF'
       ENABLE_UNICODE: 'OFF'
       SHARED: 'ON'
@@ -87,6 +89,7 @@ environment:
       PRJ_GEN: 'Visual Studio 15 2017'
       TARGET: '-A x64'
       PRJ_CFG: Debug
+      OPENSSL: 'ON'
       SCHANNEL: 'OFF'
       ENABLE_UNICODE: 'OFF'
       SHARED: 'ON'
