@@ -438,7 +438,7 @@ static bool bad_domain(const char *domain, size_t len)
   fine. The prime reason for filtering out control bytes is that some HTTP
   servers return 400 for requests that contain such.
 */
-static int invalid_octets(const char *p)
+static bool invalid_octets(const char *p)
 {
   /* Reject all bytes \x01 - \x1f (*except* \x09, TAB) + \x7f */
   static const char badoctets[] = {
