@@ -378,13 +378,19 @@ Details via CMake
 
 # Migrating from winbuild builds
 
+We recommend CMake to build curl with MSVC. The winbuild build method is
+deprecated and may be dropped in a future release.
+
 In CMake you can customize the path of dependencies by passing the absolute
 header path and the full path of the library via `*_INCLUDE_DIR` and
-`*_LIBRARY` options, where `*` is the name of the dependency. Except for
-OpenSSL where you can pass the root directory of the OpenSSL installation
-via `OPENSSL_ROOT_DIR`. The full path to the library can point to a static
-library or an import library, which defines if the dependency is linked as
-a dll or statically.
+`*_LIBRARY` options (see the complete list in the option listing above).
+The full path to the library can point to a static library or an import
+library, which defines if the dependency is linked as a dll or statically.
+For OpenSSL this works
+[differently](https://cmake.org/cmake/help/latest/module/FindOpenSSL.html):
+You can pass the root directory of the OpenSSL installation via
+`OPENSSL_ROOT_DIR`, then pass `OPENSSL_USE_STATIC_LIBS=ON` to select static
+libs.
 
 winbuild options                  | equivalent CMake options
 :-------------------------------- | :--------------------------------
@@ -409,7 +415,7 @@ winbuild options                  | equivalent CMake options
 `WITH_NGHTTP2`, `NGHTTP2_PATH`    | `USE_NGHTTP2=ON`, optional: `NGHTTP2_INCLUDE_DIR`, `NGHTTP2_LIBRARY`
 `WITH_SSH`, `SSH_PATH`            | `CURL_USE_LIBSSH=ON`, optional: `LIBSSH_INCLUDE_DIR`, `LIBSSH_LIBRARY`
 `WITH_SSH2`, `SSH2_PATH`          | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
-`WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`
+`WITH_SSL`, `SSL_PATH`            | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
 `WITH_WOLFSSL`, `WOLFSSL_PATH`    | `CURL_USE_WOLFSSL=ON`, optional: `WOLFSSL_INCLUDE_DIR`, `WOLFSSL_LIBRARY`
 `WITH_ZLIB`, `ZLIB_PATH`          | `CURL_ZLIB=ON`, optional: `ZLIB_INCLUDE_DIR`, `ZLIB_LIBRARY`
 
