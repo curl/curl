@@ -63,15 +63,9 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   fi
   echo 'curl_config.h'; grep -F '#define' _bld/lib/curl_config.h | sort || true
   # shellcheck disable=SC2086
-  if ! cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}; then
-    false
-  fi
-  if [ "${SHARED}" = 'ON' ]; then
-    PATH="$PWD/_bld/lib:$PATH"
-  fi
-  if [ "${OPENSSL}" = 'ON' ]; then
-    PATH="$PWD/_bld/lib:${openssl_root}:$PATH"
-  fi
+  cmake --build _bld --config "${PRJ_CFG}" --parallel 2 -- ${BUILD_OPT:-}
+  [ "${SHARED}" = 'ON' ] && PATH="$PWD/_bld/lib:$PATH"
+  [ "${OPENSSL}" = 'ON' ] && PATH="${openssl_root}:$PATH"
   curl='_bld/src/curl.exe'
 elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   (
@@ -116,15 +110,15 @@ fi
 
 # build tests
 
-if [[ "${TFLAGS}" != 'skipall' ]] && \
+if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # run tests
 
-if [[ "${TFLAGS}" != 'skipall' ]] && \
-   [[ "${TFLAGS}" != 'skiprun' ]]; then
+if [ "${TFLAGS}" != 'skipall' ] && \
+   [ "${TFLAGS}" != 'skiprun' ]; then
   if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
@@ -144,7 +138,7 @@ fi
 
 # build examples
 
-if [[ "${EXAMPLES}" = 'ON' ]] && \
+if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
 fi
