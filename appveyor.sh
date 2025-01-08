@@ -116,15 +116,15 @@ fi
 
 # build tests
 
-if [[ "${TFLAGS}" != 'skipall' ]] && \
+if [ "${TFLAGS}" != 'skipall' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target testdeps
 fi
 
 # run tests
 
-if [[ "${TFLAGS}" != 'skipall' ]] && \
-   [[ "${TFLAGS}" != 'skiprun' ]]; then
+if [ "${TFLAGS}" != 'skipall' ] && \
+   [ "${TFLAGS}" != 'skiprun' ]; then
   if [ -x "$(cygpath "${SYSTEMROOT}/System32/curl.exe")" ]; then
     TFLAGS+=" -ac $(cygpath "${SYSTEMROOT}/System32/curl.exe")"
   elif [ -x "$(cygpath 'C:/msys64/usr/bin/curl.exe')" ]; then
@@ -144,7 +144,7 @@ fi
 
 # build examples
 
-if [[ "${EXAMPLES}" = 'ON' ]] && \
+if [ "${EXAMPLES}" = 'ON' ] && \
    [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   cmake --build _bld --config "${PRJ_CFG}" --parallel 2 --target curl-examples
 fi
