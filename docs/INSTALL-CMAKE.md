@@ -420,8 +420,9 @@ winbuild options                  | Equivalent CMake options
 `DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
 `GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
 `LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
-`MACHINE`, `VC`                   | see CMake `-G` `-A` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
-`MODE`                            | `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF`
+`VC`                              | see CMake `-G` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
+`MACHINE` (`x64`, `x86`)          | `-A x64`, `-A Win32`
+`MODE` (`dll`, `static`)          | `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: shared)
 `ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
 `ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
 `ENABLE_MSH3`                     | `USE_MSH3=ON`
