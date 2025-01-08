@@ -91,15 +91,14 @@ domain..tld	FALSE	/want/	FALSE	0	simplyhuge	zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz
 domain..tld	FALSE	/	FALSE	0	justaname	
 domain..tld	FALSE	/	FALSE	0	ASPSESSIONIDQGGQQSJJ	GKNBDIFAAOFDPDAIEAKDIBKE
 domain..tld	FALSE	/	FALSE	0	ckySession	temporary
+domain..tld	FALSE	/	FALSE	%days[400]	ckyPersistent	permanent
 %if large-time
-domain..tld	FALSE	/	FALSE	17517902187	ckyPersistent	permanent
 domain..tld	FALSE	/want	FALSE	0	empty	
 #HttpOnly_domain..tld	FALSE	/want	FALSE	22139150993	mooo2	indeed2
 domain..tld	FALSE	/	FALSE	22139150993	mooo	indeed
 www.loser.com	FALSE	/	FALSE	22139150993	UID	99
 www.fake.come	FALSE	/	FALSE	22147483647	cookiecliente	si
 %else
-domain..tld	FALSE	/	FALSE	2118138987	ckyPersistent	permanent
 domain..tld	FALSE	/want	FALSE	0	empty	
 #HttpOnly_domain..tld	FALSE	/want	FALSE	2139150993	mooo2	indeed2
 domain..tld	FALSE	/	FALSE	2139150993	mooo	indeed

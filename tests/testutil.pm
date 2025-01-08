@@ -136,6 +136,16 @@ sub subbase64 {
         $$thing =~ s/%%REPEAT%%/$all/;
     }
 
+    # days
+    while($$thing =~ s/%days\[(.*?)\]/%%DAYS%%/i) {
+        # convert to now + given days in epoch seconds, align to a 60 second
+        # boundary
+        my $now = time();
+        my $d = ($1 * 24 * 3600) + $now + 30;
+        $d = int($d/60) * 60;
+        $$thing =~ s/%%DAYS%%/$d/;
+    }
+
     # include a file
     $$thing =~ s/%include ([^%]*)%[\n\r]+/includefile($1)/ge;
 }
