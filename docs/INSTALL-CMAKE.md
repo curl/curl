@@ -405,7 +405,7 @@ For example these commands:
     > ./generate.bat VC12
     > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
 
-Translate to:
+translate to:
 
     > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
 
@@ -457,6 +457,6 @@ For example this command-line:
 
     > nmake -f Makefile.vc VC=17 MACHINE=x64 DEBUG=ON mode=dll SSL_PATH=C:\OpenSSL WITH_SSL=dll ENABLE_UNICODE=ON
 
-Translates to:
+translates to:
 
     > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
