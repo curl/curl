@@ -95,6 +95,7 @@ chomp $taggednice;
 $now=`date +%s`;
 $elapsed=$now - $tagged; # number of seconds since tag
 $total=$now - `date -d 19980320 +%s`;
+$totalhttpget=$now - `date -d 19961111 +%s`;
 
 # Number of public functions in libcurl
 $apublic=`git grep ^CURL_EXTERN -- include/curl | wc -l`;
@@ -141,8 +142,8 @@ close(F);
 
 print "== Since $start $taggednice ==\n";
 my $days = $elapsed / 3600 / 24;
-printf "Elapsed time:                   %.1f days (total %d)\n",
-    $days, $total / 3600 / 24;
+printf "Elapsed time:                   %.1f days (total %d / %d)\n",
+    $days, $total / 3600 / 24, $totalhttpget / 3600 / 24;
 printf "Commits:                        %d (total %d)\n",
     $commits, $acommits;
 printf "Commit authors:                 %d, %d new (total %d)\n",
