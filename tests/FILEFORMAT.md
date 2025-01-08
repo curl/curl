@@ -74,6 +74,13 @@ For example, to insert the word hello 100 times:
 
     %repeat[100 x hello]%
 
+## Insert capped epoch days
+
+Mostly to test capped cookie expire dates: `%days[NUM]` inserts the number of
+seconds for the given number of days into the future, aligned to the nearest
+minute. That is the same calculation the cookie engine uses to cap expiration
+dates.
+
 ## Include file
 
 This instruction allows a test case to include another file. It is helpful to

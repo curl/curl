@@ -97,6 +97,26 @@ Example set of cookies:
 
 static void strstore(char **str, const char *newstr, size_t len);
 
+/* number of seconds in 400 days */
+#define COOKIES_MAXAGE (400*24*3600)
+
+/* Make sure cookies never expire further away in time than 400 days into the
+   future. (from RFC6265bis draft-19)
+
+   For the sake of easier testing, align the capped time to an even 60 second
+   boundary.
+*/
+static void cap_expires(time_t now, struct Cookie *co)
+{
+  if((TIME_T_MAX - COOKIES_MAXAGE - 30) > now) {
+    timediff_t cap = now + COOKIES_MAXAGE;
+    if(co->expires > cap) {
+      cap += 30;
+      co->expires = (cap/60)*60;
+    }
+  }
+}
+
 static void freecookie(struct Cookie *co)
 {
   free(co->domain);
@@ -714,6 +734,7 @@ parse_cookie_header(struct Curl_easy *data,
             co->expires += now;
           break;
         }
+        cap_expires(now, co);
       }
       else if((nlen == 7) && strncasecompare("expires", namep, 7)) {
         if(!co->expires && (vlen < MAX_DATE_LENGTH)) {
@@ -737,6 +758,7 @@ parse_cookie_header(struct Curl_easy *data,
             co->expires = 1;
           else if(co->expires < 0)
             co->expires = 0;
+          cap_expires(now, co);
         }
       }
 
