@@ -299,7 +299,7 @@ necessary to make the definition of the preprocessor symbol `USE_LWIPSOCK`
 visible to libcurl and curl compilation processes. To set this definition you
 have the following alternatives:
 
- - Modify `lib/config-win32.h` and `src/config-win32.h`
+ - Modify `lib/config-win32.h`
  - Modify `winbuild/Makefile.vc`
  - Modify the "Preprocessor Definitions" in the libcurl project
 
