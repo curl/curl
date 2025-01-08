@@ -4121,7 +4121,9 @@ struct name_const {
   size_t namelen;
 };
 
+/* keep them sorted by length! */
 static struct name_const H2_NON_FIELD[] = {
+  { STRCONST("TE") },
   { STRCONST("Host") },
   { STRCONST("Upgrade") },
   { STRCONST("Connection") },
