@@ -407,7 +407,7 @@ For example these commands:
 
 Translate to:
 
-    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON
+    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON -DCURL_USE_LIBPSL=OFF
 
 # Migrating from winbuild builds
 
@@ -459,4 +459,4 @@ For example this command-line:
 
 Translates to:
 
-    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON
+    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCURL_USE_LIBPSL=OFF
