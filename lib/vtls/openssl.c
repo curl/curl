@@ -83,8 +83,7 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
-#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) || \
-    defined(HAVE_SSL_ECH_SET1_ECHCONFIG)
+#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST)
 #define USE_ECH_OPENSSL
 #endif
 
@@ -4069,7 +4068,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       }
       if(SSL_set1_ech_config_list(octx->ssl, ech_config,
                                   ech_config_len) != 1) {
-        infof(data, "ECH: SSL_ECH_set1_echconfig failed");
+        infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
         if(data->set.tls_ech & CURLECH_HARD) {
           free(ech_config);
           return CURLE_SSL_CONNECT_ERROR;
@@ -4084,8 +4083,9 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
         return CURLE_SSL_CONNECT_ERROR;
       }
       ech_config_len = strlen(data->set.str[STRING_ECH_CONFIG]);
-      if(SSL_ech_set1_echconfig(octx->ssl, ech_config, ech_config_len) != 1) {
-        infof(data, "ECH: SSL_ECH_set1_echconfig failed");
+      if(SSL_set1_ech_config_list(octx->ssl, ech_config,
+                                  ech_config_len) != 1) {
+        infof(data, "ECH: SSL_ECH_set1_ech_config_list failed");
         if(data->set.tls_ech & CURLECH_HARD)
           return CURLE_SSL_CONNECT_ERROR;
       }
@@ -4113,19 +4113,11 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
           size_t elen = rinfo->echconfiglist_len;
 
           infof(data, "ECH: ECHConfig from DoH HTTPS RR");
-# if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
-          if(SSL_ech_set1_echconfig(octx->ssl, ecl, elen) != 1) {
-            infof(data, "ECH: SSL_ECH_set1_echconfig failed");
-            if(data->set.tls_ech & CURLECH_HARD)
-              return CURLE_SSL_CONNECT_ERROR;
-          }
-# else
           if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
-            infof(data, "ECH: SSL_set1_ech_config_list failed (BoringSSL)");
+            infof(data, "ECH: SSL_set1_ech_config_list failed");
             if(data->set.tls_ech & CURLECH_HARD)
               return CURLE_SSL_CONNECT_ERROR;
           }
-# endif
           else {
             trying_ech_now = 1;
             infof(data, "ECH: imported ECHConfigList of length %zu", elen);
@@ -4148,7 +4140,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
     if(trying_ech_now && outername) {
       infof(data, "ECH: inner: '%s', outer: '%s'",
             peer->hostname ? peer->hostname : "NULL", outername);
-      result = SSL_ech_set_server_names(octx->ssl,
+      result = SSL_ech_set1_server_names(octx->ssl,
                                         peer->hostname, outername,
                                         0 /* do send outer */);
       if(result != 1) {
@@ -4287,7 +4279,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
   if(!ECH_ENABLED(data))
     return;
 # if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
-  rv = SSL_ech_get_retry_config(ssl, &rcs, &rcl);
+  rv = SSL_ech_get1_retry_config(ssl, &rcs, &rcl);
 # else
   SSL_get0_ech_retry_configs(ssl, &rcs, &rcl);
   rv = (int)rcl;
@@ -4302,7 +4294,7 @@ static void ossl_trace_ech_retry_configs(struct Curl_easy *data, SSL* ssl,
       infof(data, "ECH: retry_configs %s", b64str);
       free(b64str);
 #if !defined(OPENSSL_IS_BORINGSSL) && !defined(OPENSSL_IS_AWSLC)
-      rv = SSL_ech_get_status(ssl, &inner, &outer);
+      rv = SSL_ech_get1_status(ssl, &inner, &outer);
       infof(data, "ECH: retry_configs for %s from %s, %d %d",
             inner ? inner : "NULL", outer ? outer : "NULL", reason, rv);
 #else
@@ -4510,7 +4502,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
       const char *status = NULL;
       int rv;
 
-      rv = SSL_ech_get_status(octx->ssl, &inner, &outer);
+      rv = SSL_ech_get1_status(octx->ssl, &inner, &outer);
       switch(rv) {
       case SSL_ECH_STATUS_SUCCESS:
         status = "succeeded";

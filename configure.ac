@@ -4878,13 +4878,7 @@ if test "x$want_ech" != "xno"; then
   ECH_ENABLED=0
   ECH_SUPPORT=''
 
-  dnl check for OpenSSL
-  if test "x$OPENSSL_ENABLED" = "x1"; then
-    AC_CHECK_FUNCS(SSL_ech_set1_echconfig,
-      ECH_SUPPORT="ECH support available via OpenSSL with SSL_ech_set1_echconfig"
-      ECH_ENABLED=1)
-  fi
-  dnl check for BoringSSL equivalent
+  dnl check for OpenSSL equivalent
   if test "x$OPENSSL_ENABLED" = "x1"; then
     AC_CHECK_FUNCS(SSL_set1_ech_config_list,
       ECH_SUPPORT="ECH support available via BoringSSL with SSL_set1_ech_config_list"
