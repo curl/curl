@@ -95,9 +95,9 @@ void Curl_failf(struct Curl_easy *data,
          Curl_trc_smtp(data, __VA_ARGS__); } while(0)
 #endif /* !CURL_DISABLE_SMTP */
 #ifdef USE_SSL
-#define CURL_TRC_SCACHE(data, ...) \
-  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_scache)) \
-         Curl_trc_scache(data, __VA_ARGS__); } while(0)
+#define CURL_TRC_SSLS(data, ...) \
+  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_ssls)) \
+         Curl_trc_ssls(data, __VA_ARGS__); } while(0)
 #endif /* USE_SSL */
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS(data, ...)                             \
@@ -119,7 +119,7 @@ void Curl_failf(struct Curl_easy *data,
 #define CURL_TRC_SMTP  Curl_trc_smtp
 #endif
 #ifdef USE_SSL
-#define CURL_TRC_SCACHE  Curl_trc_scache
+#define CURL_TRC_SSLS  Curl_trc_ssls
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 #define CURL_TRC_WS    Curl_trc_ws
@@ -176,9 +176,9 @@ void Curl_trc_smtp(struct Curl_easy *data,
                    const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 #ifdef USE_SSL
-extern struct curl_trc_feat Curl_trc_feat_scache;
-void Curl_trc_scache(struct Curl_easy *data,
-                     const char *fmt, ...) CURL_PRINTF(2, 3);
+extern struct curl_trc_feat Curl_trc_feat_ssls;
+void Curl_trc_ssls(struct Curl_easy *data,
+                   const char *fmt, ...) CURL_PRINTF(2, 3);
 #endif
 #if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(CURL_DISABLE_HTTP)
 extern struct curl_trc_feat Curl_trc_feat_ws;

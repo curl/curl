@@ -10,6 +10,12 @@ See-also:
   - curl_easy_ssls_import (3)
 Protocol:
   - All
+TLS-backend:
+  - GnuTLS
+  - OpenSSL
+  - BearSSL
+  - wolfSSL
+  - mbedTLS
 Added-in: 8.12.0
 ---
 

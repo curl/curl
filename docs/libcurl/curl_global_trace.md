@@ -105,9 +105,9 @@ Tracing of DNS-over-HTTP operations to resolve hostnames.
 
 Traces reading of upload data from the application in order to send it to the server.
 
-## `scache`
+## `ssls`
 
-Tracing of SSL Session cache operations.
+Tracing of SSL Session handling, e.g. caching/import/export.
 
 ## `smtp`
 
