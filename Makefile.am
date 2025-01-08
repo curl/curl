@@ -184,21 +184,6 @@ rpm:
 	mv $$RPM_TOPDIR/RPMS/i386/$(RPMDIST)-*.rpm . ; \
 	mv $$RPM_TOPDIR/SRPMS/$(RPMDIST)-*.src.rpm .
 
-#
-# Build a Solaris pkgadd format file
-# run 'make pkgadd' once you've done './configure' and 'make' to make a Solaris pkgadd format
-# file (which ends up back in this directory).
-# The pkgadd file is in 'pkgtrans' format, so to install on Solaris, do
-# pkgadd -d ./HAXXcurl-*
-#
-
-# gak - libtool requires an absolute directory, hence the pwd below...
-pkgadd:
-	umask 022 ; \
-	$(MAKE) install DESTDIR=`/bin/pwd`/packages/Solaris/root ; \
-	cat COPYING > $(srcdir)/packages/Solaris/copyright ; \
-	cd $(srcdir)/packages/Solaris && $(MAKE) package
-
 # We extend the standard install with a custom hook:
 if BUILD_DOCS
 install-data-hook:
