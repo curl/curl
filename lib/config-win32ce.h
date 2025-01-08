@@ -32,52 +32,52 @@
 /*                          HEADER FILES                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the <arpa/inet.h> header file.  */
+/* Define if you have the <arpa/inet.h> header file. */
 /* #define HAVE_ARPA_INET_H 1 */
 
-/* Define if you have the <fcntl.h> header file.  */
+/* Define if you have the <fcntl.h> header file. */
 #define HAVE_FCNTL_H 1
 
-/* Define if you have the <io.h> header file.  */
+/* Define if you have the <io.h> header file. */
 #define HAVE_IO_H 1
 
-/* Define if you have the <netdb.h> header file.  */
+/* Define if you have the <netdb.h> header file. */
 /* #define HAVE_NETDB_H 1 */
 
-/* Define if you have the <netinet/in.h> header file.  */
+/* Define if you have the <netinet/in.h> header file. */
 /* #define HAVE_NETINET_IN_H 1 */
 
-/* Define if you have the <sys/param.h> header file.  */
+/* Define if you have the <sys/param.h> header file. */
 /* #define HAVE_SYS_PARAM_H 1 */
 
-/* Define if you have the <sys/select.h> header file.  */
+/* Define if you have the <sys/select.h> header file. */
 /* #define HAVE_SYS_SELECT_H 1 */
 
-/* Define if you have the <sys/socket.h> header file.  */
+/* Define if you have the <sys/socket.h> header file. */
 /* #define HAVE_SYS_SOCKET_H 1 */
 
-/* Define if you have the <sys/sockio.h> header file.  */
+/* Define if you have the <sys/sockio.h> header file. */
 /* #define HAVE_SYS_SOCKIO_H 1 */
 
-/* Define if you have the <sys/stat.h> header file.  */
+/* Define if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
-/* Define if you have the <sys/time.h> header file */
+/* Define if you have the <sys/time.h> header file. */
 /* #define HAVE_SYS_TIME_H 1 */
 
-/* Define if you have the <sys/types.h> header file.  */
+/* Define if you have the <sys/types.h> header file. */
 /* #define HAVE_SYS_TYPES_H 1 */
 
-/* Define if you have the <sys/utime.h> header file */
+/* Define if you have the <sys/utime.h> header file. */
 #define HAVE_SYS_UTIME_H 1
 
-/* Define if you have the <termio.h> header file.  */
+/* Define if you have the <termio.h> header file. */
 /* #define HAVE_TERMIO_H 1 */
 
-/* Define if you have the <termios.h> header file.  */
+/* Define if you have the <termios.h> header file. */
 /* #define HAVE_TERMIOS_H 1 */
 
-/* Define if you have the <unistd.h> header file.  */
+/* Define if you have the <unistd.h> header file. */
 #if defined(__MINGW32__)
 #define HAVE_UNISTD_H 1
 #endif
@@ -86,20 +86,20 @@
 /*                        OTHER HEADER INFO                         */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the ANSI C header files.  */
+/* Define if you have the ANSI C header files. */
 #define STDC_HEADERS 1
 
 /* ---------------------------------------------------------------- */
 /*                             FUNCTIONS                            */
 /* ---------------------------------------------------------------- */
 
-/* Define if you have the closesocket function.  */
+/* Define if you have the closesocket function. */
 #define HAVE_CLOSESOCKET 1
 
-/* Define if you have the gethostname function.  */
+/* Define if you have the gethostname function. */
 #define HAVE_GETHOSTNAME 1
 
-/* Define if you have the gettimeofday function.  */
+/* Define if you have the gettimeofday function. */
 /*  #define HAVE_GETTIMEOFDAY 1 */
 
 /* Define if you have the ioctlsocket function. */
@@ -108,21 +108,21 @@
 /* Define if you have a working ioctlsocket FIONBIO function. */
 #define HAVE_IOCTLSOCKET_FIONBIO 1
 
-/* Define if you have the select function.  */
+/* Define if you have the select function. */
 #define HAVE_SELECT 1
 
-/* Define if you have the socket function.  */
+/* Define if you have the socket function. */
 #define HAVE_SOCKET 1
 
-/* Define if you have the strdup function.  */
+/* Define if you have the strdup function. */
 /* #define HAVE_STRDUP 1 */
 
-/* Define if you have the strtoll function.  */
+/* Define if you have the strtoll function. */
 #if defined(__MINGW32__)
 #define HAVE_STRTOLL 1
 #endif
 
-/* Define if you have the utime function */
+/* Define if you have the utime function. */
 #define HAVE_UTIME 1
 
 /* Define if you have the recv function. */
@@ -168,10 +168,10 @@
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
 
-/* Define this if in_addr_t is not an available 'typedefed' type */
+/* Define if in_addr_t is not an available 'typedefed' type. */
 #define in_addr_t unsigned long
 
-/* Define ssize_t if it is not an available 'typedefed' type */
+/* Define if ssize_t is not an available 'typedefed' type. */
 #if defined(_WIN64)
 #define ssize_t __int64
 #else
@@ -182,16 +182,16 @@
 /*                            TYPE SIZES                            */
 /* ---------------------------------------------------------------- */
 
-/* The size of `int', as computed by sizeof. */
+/* Define to the size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
-/* The size of `long long', as computed by sizeof. */
+/* Define to the size of `long long', as computed by sizeof. */
 /* #define SIZEOF_LONG_LONG 8 */
 
 /* Define to the size of `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
 
-/* The size of `size_t', as computed by sizeof. */
+/* Define to the size of `size_t', as computed by sizeof. */
 #if defined(_WIN64)
 #  define SIZEOF_SIZE_T 8
 #else
@@ -215,10 +215,10 @@
 /*                        COMPILER SPECIFIC                         */
 /* ---------------------------------------------------------------- */
 
-/* Undef keyword 'const' if it does not work.  */
+/* Undef keyword 'const' if it does not work. */
 /* #undef const */
 
-/* Define to avoid VS2005 complaining about portable C functions */
+/* Define to avoid VS2005 complaining about portable C functions. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #define _CRT_SECURE_NO_DEPRECATE 1
 #define _CRT_NONSTDC_NO_DEPRECATE 1
