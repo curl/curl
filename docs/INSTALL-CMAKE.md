@@ -388,8 +388,8 @@ Configuration element             | Equivalent CMake options
 `VC10`                            | `-G "Visual Studio 10 2010"`
 `VC11`                            | `-G "Visual Studio 11 2012"`
 `VC12`                            | `-G "Visual Studio 12 2013"`
-`Win32`                           | `-A Win32`
 `x64`                             | `-A x64`
+`Win32`                           | `-A Win32`
 `DLL`                             | `BUILD_SHARED_LIBS=ON`, `BUILD_STATIC_LIBS=OFF`, (default)
 `LIB`                             | `BUILD_SHARED_LIBS=OFF`, `BUILD_STATIC_LIBS=ON`
 `Debug`                           | `CMAKE_BUILD_TYPE=Debug`
