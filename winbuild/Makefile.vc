@@ -25,8 +25,8 @@
 !MESSAGE
 !MESSAGE WARNING:
 !MESSAGE
-!MESSAGE The winbuild build system is deprecated and will be removed in 2026
-!MESSAGE in favor of the CMake build system.
+!MESSAGE The winbuild build system is deprecated and will be removed in
+!MESSAGE September 2025 in favor of the CMake build system.
 !MESSAGE
 !MESSAGE Please see docs/INSTALL-CMAKE.md : "Migrating from winbuild builds"
 !MESSAGE
