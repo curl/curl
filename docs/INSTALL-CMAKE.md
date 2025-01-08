@@ -395,13 +395,19 @@ Configuration element             | Equivalent CMake options
 `Debug`                           | `CMAKE_BUILD_TYPE=Debug`
 `Release`                         | `CMAKE_BUILD_TYPE=Release`
 `DLL OpenSSL`                     | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
-`DLL Windows SSPI`                | `CURL_WINDOWS_SSPI=ON`
+`DLL Windows SSPI`                | `CURL_USE_SCHANNEL=ON` (with SSPI enabled by default)
 `DLL libssh2`                     | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
 `DLL WinIDN`                      | `USE_WIN32_IDN=ON`
 
-Example:
+For example these commands:
 
-    > cmake . -G "Visual Studio 10 2010" -A x64 -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DUSE_WIN32_IDN=ON -DCMAKE_BUILD_TYPE=Release
+    > cd projects
+    > ./generate.bat VC12
+    > msbuild "-property:Configuration=DLL Debug - DLL Windows SSPI - DLL WinIDN" Windows/VC12/curl-all.sln
+
+Translate to:
+
+    > cmake . -G "Visual Studio 12 2013" -A x64 -DCMAKE_BUILD_TYPE=Debug -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON
 
 # Migrating from winbuild builds
 
@@ -433,7 +439,7 @@ winbuild options                  | Equivalent CMake options
 `ENABLE_NGHTTP2`                  | `USE_NGHTTP2=ON`
 `ENABLE_OPENSSL_AUTO_LOAD_CONFIG` | `CURL_DISABLE_OPENSSL_AUTO_LOAD_CONFIG=OFF` (default)
 `ENABLE_SCHANNEL`                 | `CURL_USE_SCHANNEL=ON`
-`ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON`
+`ENABLE_SSPI`                     | `CURL_WINDOWS_SSPI=ON` (default with Schannel)
 `ENABLE_UNICODE`                  | `ENABLE_UNICODE=ON`
 `WITH_PREFIX`                     | `CMAKE_INSTALL_PREFIX=<path>`
 `WITH_DEVEL`                      | see individual `*_INCLUDE_DIR` and `*_LIBRARY` options and `OPENSSL_ROOT_DIR`
@@ -449,8 +455,8 @@ winbuild options                  | Equivalent CMake options
 
 For example this command-line:
 
-    > nmake -f Makefile.vc mode=dll VC=17 SSL_PATH=C:\OpenSSL WITH_SSL=dll MACHINE=x64 DEBUG=ON ENABLE_UNICODE=ON
+    > nmake -f Makefile.vc VC=17 MACHINE=x64 DEBUG=ON mode=dll SSL_PATH=C:\OpenSSL WITH_SSL=dll ENABLE_UNICODE=ON
 
 Translates to:
 
-    > cmake . -G "Visual Studio 17 2022" -A x64 -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON -DCMAKE_BUILD_TYPE=Debug
+    > cmake . -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=ON -DOPENSSL_ROOT_DIR=C:\OpenSSL -DCURL_USE_OPENSSL=ON -DENABLE_UNICODE=ON
