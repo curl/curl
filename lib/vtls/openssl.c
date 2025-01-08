@@ -4115,7 +4115,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
           infof(data, "ECH: ECHConfig from DoH HTTPS RR");
           if(SSL_set1_ech_config_list(octx->ssl, ecl, elen) != 1) {
-            infof(data, "ECH: SSL_set1_ech_config_list failed (BoringSSL)");
+            infof(data, "ECH: SSL_set1_ech_config_list failed");
             if(data->set.tls_ech & CURLECH_HARD)
               return CURLE_SSL_CONNECT_ERROR;
           }
