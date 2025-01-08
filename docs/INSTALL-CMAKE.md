@@ -422,7 +422,7 @@ winbuild options                  | Equivalent CMake options
 `LIB_NAME_DLL`, `LIB_NAME_STATIC` | `IMPORT_LIB_SUFFIX`, `LIBCURL_OUTPUT_NAME`, `STATIC_LIB_SUFFIX`
 `VC`                              | see CMake `-G` [options](https://cmake.org/cmake/help/latest/manual/cmake-generators.7.html)
 `MACHINE` (`x64`, `x86`)          | `-A x64`, `-A Win32`
-`MODE` (`dll`, `static`)          | `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: shared)
+`MODE` (`dll`, `static`)          | `BUILD_SHARED_LIBS=ON/OFF`, `BUILD_STATIC_LIBS=ON/OFF`, `BUILD_STATIC_CURL=ON/OFF` (default: dll)
 `ENABLE_IDN`                      | `USE_WIN32_IDN=ON`
 `ENABLE_IPV6`                     | `ENABLE_IPV6=ON`
 `ENABLE_MSH3`                     | `USE_MSH3=ON`
