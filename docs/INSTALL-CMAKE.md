@@ -191,6 +191,7 @@ assumes that CMake generates `Makefile`:
 - `USE_ECH`:                                Enable ECH support. Default: `OFF`
 - `USE_HTTPSRR`:                            Enable HTTPS RR support. Default: `OFF`
 - `USE_OPENSSL_QUIC`:                       Use OpenSSL and nghttp3 libraries for HTTP/3 support. Default: `OFF`
+- `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export. Default: `OFF` 
 
 ## Disabling features
 
@@ -294,7 +295,6 @@ Details via CMake
 - `USE_NGHTTP2`:                            Use nghttp2 library. Default: `ON`
 - `USE_NGTCP2`:                             Use ngtcp2 and nghttp3 libraries for HTTP/3 support. Default: `OFF`
 - `USE_QUICHE`:                             Use quiche library for HTTP/3 support. Default: `OFF`
-- `USE_SSLS_EXPORT`:                        Enable experimental SSL session import/export
 - `USE_WIN32_IDN`:                          Use WinIDN for IDN support. Default: `OFF`
 - `USE_WIN32_LDAP`:                         Use Windows LDAP implementation. Default: `ON`
 
