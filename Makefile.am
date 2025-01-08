@@ -85,8 +85,6 @@ EXTRA_DIST = CHANGES.md COPYING Makefile.dist             \
  RELEASE-NOTES $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
  $(PLAN9_DIST) buildconf.bat Dockerfile
 
-CLEANFILES =
-
 DISTCLEANFILES = buildinfo.txt
 
 bin_SCRIPTS = curl-config
