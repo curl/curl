@@ -199,12 +199,6 @@ pkgadd:
 	cat COPYING > $(srcdir)/packages/Solaris/copyright ; \
 	cd $(srcdir)/packages/Solaris && $(MAKE) package
 
-#
-# Build a Cygwin binary tarball installation file
-# resulting .tar.bz2 file will end up at packages/Win32/cygwin
-cygwinbin:
-	$(MAKE) -C packages/Win32/cygwin cygwinbin
-
 # We extend the standard install with a custom hook:
 if BUILD_DOCS
 install-data-hook:
