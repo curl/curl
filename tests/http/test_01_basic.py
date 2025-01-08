@@ -149,4 +149,3 @@ class TestBasic:
         assert len(r.responses) == 1, f'{r.responses}'
         assert r.responses[0]['status'] == 200, f'{r.responses[1]}'
         assert r.responses[0]['protocol'] == 'HTTP/2', f'{r.responses[1]}'
-
