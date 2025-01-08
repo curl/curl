@@ -159,8 +159,6 @@
 
 #endif /* HAVE_CONFIG_H */
 
-#include <stdint.h>
-
 /* ================================================================ */
 /* Definition of preprocessor macros/symbols which modify compiler  */
 /* behavior or generated code characteristics must be done here,   */
