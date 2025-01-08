@@ -62,13 +62,13 @@
 /* Define if you have the <sys/stat.h> header file. */
 #define HAVE_SYS_STAT_H 1
 
-/* Define if you have the <sys/time.h> header file */
+/* Define if you have the <sys/time.h> header file. */
 /* #define HAVE_SYS_TIME_H 1 */
 
 /* Define if you have the <sys/types.h> header file. */
 /* #define HAVE_SYS_TYPES_H 1 */
 
-/* Define if you have the <sys/utime.h> header file */
+/* Define if you have the <sys/utime.h> header file. */
 #define HAVE_SYS_UTIME_H 1
 
 /* Define if you have the <termio.h> header file. */
@@ -122,7 +122,7 @@
 #define HAVE_STRTOLL 1
 #endif
 
-/* Define if you have the utime function */
+/* Define if you have the utime function. */
 #define HAVE_UTIME 1
 
 /* Define if you have the recv function. */
@@ -168,10 +168,10 @@
 /*                       TYPEDEF REPLACEMENTS                       */
 /* ---------------------------------------------------------------- */
 
-/* Define this if in_addr_t is not an available 'typedefed' type */
+/* Define if in_addr_t is not an available 'typedefed' type. */
 #define in_addr_t unsigned long
 
-/* Define ssize_t if it is not an available 'typedefed' type */
+/* Define if ssize_t is not an available 'typedefed' type. */
 #if defined(_WIN64)
 #define ssize_t __int64
 #else
@@ -182,16 +182,16 @@
 /*                            TYPE SIZES                            */
 /* ---------------------------------------------------------------- */
 
-/* The size of `int', as computed by sizeof. */
+/* Define to the size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4
 
-/* The size of `long long', as computed by sizeof. */
+/* Define to the size of `long long', as computed by sizeof. */
 /* #define SIZEOF_LONG_LONG 8 */
 
 /* Define to the size of `long', as computed by sizeof. */
 #define SIZEOF_LONG 4
 
-/* The size of `size_t', as computed by sizeof. */
+/* Define to the size of `size_t', as computed by sizeof. */
 #if defined(_WIN64)
 #  define SIZEOF_SIZE_T 8
 #else
@@ -218,7 +218,7 @@
 /* Undef keyword 'const' if it does not work. */
 /* #undef const */
 
-/* Define to avoid VS2005 complaining about portable C functions */
+/* Define to avoid VS2005 complaining about portable C functions. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
 #define _CRT_SECURE_NO_DEPRECATE 1
 #define _CRT_NONSTDC_NO_DEPRECATE 1
