@@ -31,7 +31,7 @@
 /* Tell "curl/curl.h" not to include "curl/mprintf.h" */
 #define CURL_SKIP_INCLUDE_MPRINTF
 
-/* FIXME: Delete this once the warnings have been fixed. */
+/* Make these warnings visible with an option. */
 #if !defined(CURL_WARN_SIGN_CONVERSION)
 #if defined(__GNUC__) || defined(__clang__)
 #pragma GCC diagnostic ignored "-Wsign-conversion"
