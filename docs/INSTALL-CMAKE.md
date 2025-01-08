@@ -392,7 +392,7 @@ You can pass the root directory of the OpenSSL installation via
 `OPENSSL_ROOT_DIR`, then pass `OPENSSL_USE_STATIC_LIBS=ON` to select static
 libs.
 
-winbuild options                  | equivalent CMake options
+winbuild options                  | Equivalent CMake options
 :-------------------------------- | :--------------------------------
 `DEBUG`                           | `CMAKE_BUILD_TYPE=Debug`
 `GEN_PDB`                         | `CMAKE_EXE_LINKER_FLAGS=/Fd<path>`, `CMAKE_SHARED_LINKER_FLAGS=/Fd<path>`
