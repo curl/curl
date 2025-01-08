@@ -376,6 +376,29 @@ Details via CMake
 - `TEST_NGHTTPX`:                           Default: `nghttpx`
 - `VSFTPD`:                                 Default: `vsftps`
 
+# Migrating from Visual Studio IDE Project Files
+
+We recommend CMake to build curl with MSVC.
+
+The project build files reside in project/Windows/VC\*
+for VS2010, VS2010 and VS2013 respectively.
+
+Configuration element             | Equivalent CMake options
+:-------------------------------- | :--------------------------------
+`VC10`                            | `-G "Visual Studio 10 2010"`
+`VC11`                            | `-G "Visual Studio 11 2012"`
+`VC12`                            | `-G "Visual Studio 12 2013"`
+`Win32`                           | `-A Win32`
+`x64`                             | `-A x64`
+`DLL`                             | `BUILD_STATIC_LIBS=OFF`, `BUILD_SHARED_LIBS=ON` (default)
+`LIB`                             | `BUILD_STATIC_LIBS=ON`, `BUILD_SHARED_LIBS=OFF`
+`Debug`                           | `CMAKE_BUILD_TYPE=Debug`
+`Release`                         | `CMAKE_BUILD_TYPE=Release`
+`DLL OpenSSL`                     | `CURL_USE_OPENSSL=ON`, optional: `OPENSSL_ROOT_DIR`, `OPENSSL_USE_STATIC_LIBS=ON`
+`DLL Windows SSPI`                | `CURL_WINDOWS_SSPI=ON`
+`DLL libssh2`                     | `CURL_USE_LIBSSH2=ON`, optional: `LIBSSH2_INCLUDE_DIR`, `LIBSSH2_LIBRARY`
+`DLL WinIDN`                      | `USE_WIN32_IDN=ON`
+
 # Migrating from winbuild builds
 
 We recommend CMake to build curl with MSVC. The winbuild build method is
