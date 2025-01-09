@@ -85,13 +85,17 @@
 #endif
 #endif
 
-/*
- * Disable Visual Studio warnings:
- * 4127 "conditional expression is constant"
- */
 #ifdef _MSC_VER
+/* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
+/* Avoid VS2005 and upper complaining about portable C functions. */
+#ifndef _CRT_NONSTDC_NO_DEPRECATE
+#define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
 #endif
+#ifndef _CRT_SECURE_NO_DEPRECATE
+#define _CRT_SECURE_NO_DEPRECATE  /* for fopen(), getenv(), etc. */
+#endif
+#endif /* _MSC_VER */
 
 #ifdef _WIN32
 /*
