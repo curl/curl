@@ -12,13 +12,6 @@ email the
 as soon as possible and explain to us why this is a problem for you and
 how your use case cannot be satisfied properly using a workaround.
 
-## winbuild build system
-
-curl drops support for the winbuild build method after September 2025.
-
-We recommend migrating to CMake. See the migration guide in
-`docs/INSTALL-CMAKE.md`.
-
 ## TLS libraries without 1.3 support
 
 curl drops support for TLS libraries without TLS 1.3 capability after May
@@ -43,6 +36,13 @@ fully working backends in OpenSSL-QUIC and quiche well on their way of ending
 their experimental status in a future.
 
 We remove msh3 support from the curl source tree in July 2025.
+
+## winbuild build system
+
+curl drops support for the winbuild build method after September 2025.
+
+We recommend migrating to CMake. See the migration guide in
+`docs/INSTALL-CMAKE.md`.
 
 ## Past removals
 
