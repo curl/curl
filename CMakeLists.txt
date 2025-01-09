@@ -887,7 +887,7 @@ if(ZSTD_FOUND)
   endif()
 endif()
 
-# Check symbol in an OpenSSL-like TLS backend, or in _extra_libs depending on it.
+# Check symbol in an OpenSSL-like TLS backend.
 macro(curl_openssl_check_symbol_exists _symbol _files _variable)
   cmake_push_check_state()
   if(USE_OPENSSL)
