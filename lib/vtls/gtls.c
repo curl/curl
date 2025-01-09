@@ -1969,6 +1969,9 @@ gtls_connect_common(struct Curl_cfilter *cf,
       goto out;
 
     if(connssl->earlydata_state == ssl_earlydata_sent) {
+      /* report the true time the handshake was done */
+      connssl->handshake_done = Curl_now();
+      Curl_pgrsTimeWas(data, TIMER_APPCONNECT, connssl->handshake_done);
       if(gnutls_session_get_flags(backend->gtls.session) &
          GNUTLS_SFLAGS_EARLY_DATA) {
         connssl->earlydata_state = ssl_earlydata_accepted;
