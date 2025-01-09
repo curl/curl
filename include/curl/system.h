@@ -360,7 +360,7 @@
 #    define CURL_FORMAT_CURL_OFF_TU    PRIu64
 #    define CURL_SUFFIX_CURL_OFF_T     i64
 #    define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  elif (_MSC_VER >= 900) && (_INTEGRAL_MAX_BITS >= 64)
+#  elif (_INTEGRAL_MAX_BITS >= 64)
 #    define CURL_TYPEOF_CURL_OFF_T     __int64
 #    define CURL_FORMAT_CURL_OFF_T     "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU    "I64u"
