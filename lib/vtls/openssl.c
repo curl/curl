@@ -83,8 +83,7 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
-#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST) || \
-    defined(HAVE_SSL_ECH_SET1_ECHCONFIG)
+#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST)
 #define USE_ECH_OPENSSL
 #endif
 

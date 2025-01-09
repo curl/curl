@@ -850,6 +850,3 @@ ${SIZEOF_TIME_T_CODE}
 
 /* Define to 1 if you have the SSL_set1_ech_config_list function. */
 #cmakedefine HAVE_SSL_SET1_ECH_CONFIG_LIST
-
-/* Define to 1 if you have the SSL_ech_set1_echconfig function. */
-#cmakedefine HAVE_SSL_ECH_SET1_ECHCONFIG

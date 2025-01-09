@@ -961,11 +961,10 @@ if(USE_ECH)
     if(HAVE_BORINGSSL OR HAVE_AWSLC)
       curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     elseif(HAVE_OPENSSL)
-      curl_openssl_check_symbol_exists("SSL_ech_set1_echconfig" "openssl/ech.h" HAVE_SSL_ECH_SET1_ECHCONFIG)
+      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ech.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     endif()
     if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
-       HAVE_SSL_SET1_ECH_CONFIG_LIST OR
-       HAVE_SSL_ECH_SET1_ECHCONFIG)
+       HAVE_SSL_SET1_ECH_CONFIG_LIST)
       set(HAVE_ECH 1)
     endif()
     if(NOT HAVE_ECH)
