@@ -820,7 +820,7 @@
 #if (defined(__GNUC__) && (__GNUC__ >= 3)) || defined(__clang__) || \
   defined(__IAR_SYSTEMS_ICC__)
 #  define CURL_NORETURN  __attribute__((__noreturn__))
-#elif defined(_MSC_VER) && (_MSC_VER >= 1200)
+#elif defined(_MSC_VER)
 #  define CURL_NORETURN  __declspec(noreturn)
 #else
 #  define CURL_NORETURN
@@ -1007,8 +1007,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #elif defined(__GNUC__) && __GNUC__ >= 3
 /* GCC supports '__inline__' as an extension */
 #  define CURL_INLINE __inline__
-#elif defined(_MSC_VER) && _MSC_VER >= 1400
-/* MSC supports '__inline' from VS 2005 (or even earlier) */
+#elif defined(_MSC_VER)
 #  define CURL_INLINE __inline
 #else
 /* Probably 'inline' is not supported by compiler.
