@@ -218,12 +218,6 @@
 /* Undef keyword 'const' if it does not work. */
 /* #undef const */
 
-/* Define to avoid VS2005 and upper complaining about portable C functions. */
-#ifdef _MSC_VER
-#define _CRT_SECURE_NO_DEPRECATE
-#define _CRT_NONSTDC_NO_DEPRECATE
-#endif
-
 /* VS2005 and later default size for time_t is 64-bit, unless */
 /* _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
 #if defined(_MSC_VER) && (_MSC_VER >= 1400)
