@@ -448,4 +448,53 @@ CURLcode Curl_trc_init(void)
   return CURLE_OK;
 }
 
+void Curl_infof(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+void Curl_trc_cf_infof(struct Curl_easy *data,
+                       struct Curl_cfilter *cf,
+                       const char *fmt, ...)
+{
+  (void)data; (void)cf; (void)fmt;
+}
+
+struct curl_trc_feat;
+
+void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+
+#ifndef CURL_DISABLE_FTP
+void Curl_trc_ftp(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+#ifndef CURL_DISABLE_SMTP
+void Curl_trc_smtp(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+#if !defined(CURL_DISABLE_WEBSOCKETS) || !defined(CURL_DISABLE_HTTP)
+void Curl_trc_ws(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data; (void)fmt;
+}
+#endif
+
+void Curl_trc_ssls(struct Curl_easy *data, const char *fmt, ...)
+{
+  (void)data;
+  (void)fmt;
+}
+
 #endif /* !defined(CURL_DISABLE_VERBOSE_STRINGS) */
