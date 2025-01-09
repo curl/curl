@@ -110,7 +110,12 @@ curl_share_setopt(CURLSH *sh, CURLSHoption option, ...)
     case CURL_LOCK_DATA_SSL_SESSION:
 #ifdef USE_SSL
       if(!share->ssl_scache) {
-        if(Curl_ssl_scache_create(8, 2, &share->ssl_scache))
+        /* There is no way (yet) for the application to configure the
+         * session cache size, shared between many transfers. As for curl
+         * itself, a high session count will impact startup time. Also, the
+         * scache is not optimized for several hundreds of peers. So,
+         * keep it at a reasonable level. */
+        if(Curl_ssl_scache_create(25, 2, &share->ssl_scache))
           res = CURLSHE_NOMEM;
       }
 #else
