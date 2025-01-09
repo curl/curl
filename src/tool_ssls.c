@@ -48,7 +48,7 @@ static CURLcode tool_ssls_easy(struct GlobalConfig *global,
     return CURLE_OUT_OF_MEMORY;
 
   result = curl_easy_setopt(*peasy, CURLOPT_SHARE, share);
-  if(global->tracetype != TRACE_NONE) {
+  if(!result && (global->tracetype != TRACE_NONE)) {
     my_setopt(*peasy, CURLOPT_DEBUGFUNCTION, tool_debug_cb);
     my_setopt(*peasy, CURLOPT_DEBUGDATA, config);
     my_setopt(*peasy, CURLOPT_VERBOSE, 1L);
