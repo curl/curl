@@ -308,15 +308,48 @@ sub striparray {
 sub compareparts {
  my ($firstref, $secondref)=@_;
 
+ # we cannot compare arrays index per index since with the base64 chunks,
+ # they may not be "evenly" distributed
  my $first = join("", @$firstref);
  my $second = join("", @$secondref);
 
- # we cannot compare arrays index per index since with the base64 chunks,
- # they may not be "evenly" distributed
+ if($first =~ /%alternatives\[/) {
+     die "bad use of compareparts\n";
+ }
 
- # NOTE: this no longer strips off carriage returns from the arrays. Is that
- # really necessary? It ruins the testing of newlines. I believe it was once
- # added to enable tests on Windows.
+ if($second =~ /%alternatives\[([^,]*),([^\]]*)\]/) {
+     # there can be many %alternatives in this chunk, so we call
+     # this function recursively
+     my $alt = $second;
+     $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$1/;
+
+     # check first alternative
+     {
+         my @f;
+         my @s;
+         push @f, $first;
+         push @s, $alt;
+         if(!compareparts(\@f, \@s)) {
+             return 0;
+         }
+     }
+
+     $alt = $second;
+     $alt =~ s/%alternatives\[([^,]*),([^\]]*)\]/$2/;
+     # check second alternative
+     {
+         my @f;
+         my @s;
+         push @f, $first;
+         push @s, $alt;
+         if(!compareparts(\@f, \@s)) {
+             return 0;
+         }
+     }
+
+     # neither matched
+     return 1;
+ }
 
  if($first ne $second) {
      return 1;
