@@ -41,11 +41,9 @@ typedef enum {
 SANITIZEcode sanitize_file_name(char **const sanitized, const char *file_name,
                                 int flags);
 
-#if defined(MSDOS) && (defined(__DJGPP__) || defined(__GO32__))
-
+#ifdef __DJGPP__
 char **__crt0_glob_function(char *arg);
-
-#endif /* MSDOS && (__DJGPP__ || __GO32__) */
+#endif
 
 #ifdef _WIN32
 

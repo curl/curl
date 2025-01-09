@@ -151,7 +151,7 @@ static CURLcode main_init(struct GlobalConfig *config)
 {
   CURLcode result = CURLE_OK;
 
-#if defined(__DJGPP__) || defined(__GO32__)
+#ifdef __DJGPP__
   /* stop stat() wasting time */
   _djstat_flags |= _STAT_INODE | _STAT_EXEC_MAGIC | _STAT_DIRSIZE;
 #endif
