@@ -355,24 +355,15 @@
 #elif defined(_MSC_VER)
 #  if (_MSC_VER >= 1800)
 #    include <inttypes.h>
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
 #    define CURL_FORMAT_CURL_OFF_T     PRId64
 #    define CURL_FORMAT_CURL_OFF_TU    PRIu64
-#    define CURL_SUFFIX_CURL_OFF_T     i64
-#    define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  elif (_INTEGRAL_MAX_BITS >= 64)
-#    define CURL_TYPEOF_CURL_OFF_T     __int64
+#  else
 #    define CURL_FORMAT_CURL_OFF_T     "I64d"
 #    define CURL_FORMAT_CURL_OFF_TU    "I64u"
-#    define CURL_SUFFIX_CURL_OFF_T     i64
-#    define CURL_SUFFIX_CURL_OFF_TU    ui64
-#  else
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
 #  endif
+#  define CURL_TYPEOF_CURL_OFF_T     __int64
+#  define CURL_SUFFIX_CURL_OFF_T     i64
+#  define CURL_SUFFIX_CURL_OFF_TU    ui64
 #  define CURL_TYPEOF_CURL_SOCKLEN_T int
 
 /* ===================================== */
