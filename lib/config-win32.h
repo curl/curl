@@ -293,10 +293,10 @@
 #define HAVE_LONGLONG 1
 #endif
 
-/* Define to avoid VS2005 complaining about portable C functions. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
-#define _CRT_SECURE_NO_DEPRECATE 1
-#define _CRT_NONSTDC_NO_DEPRECATE 1
+/* Define to avoid VS2005 and upper complaining about portable C functions. */
+#ifdef _MSC_VER
+#define _CRT_SECURE_NO_DEPRECATE
+#define _CRT_NONSTDC_NO_DEPRECATE
 #endif
 
 /* mingw-w64 and visual studio >= 2005 (MSVCR80)
