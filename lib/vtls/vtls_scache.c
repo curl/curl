@@ -783,7 +783,7 @@ out:
                   "quic_tp=%s], peer has %zu sessions now",
                   ssl_peer_key, s->ietf_tls_id, s->valid_until - now,
                   s->alpn, s->earlydata_max, s->quic_tp ? "yes" : "no",
-                  Curl_llist_count(&peer->sessions));
+                  peer ? Curl_llist_count(&peer->sessions) : 0);
   return result;
 }
 
