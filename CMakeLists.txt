@@ -904,7 +904,7 @@ if(CURL_DEFAULT_SSL_BACKEND AND NOT _valid_default_ssl_backend)
 endif()
 
 # Keep ZLIB detection after TLS detection,
-# and before calling curl_openssl_check_symbol_exists().
+# and before calling curl_openssl_check_exists().
 
 set(HAVE_LIBZ OFF)
 curl_dependency_option(CURL_ZLIB ZLIB "ZLIB")
@@ -948,8 +948,8 @@ if(ZSTD_FOUND)
   endif()
 endif()
 
-# Check symbol in an OpenSSL-like TLS backend.
-macro(curl_openssl_check_symbol_exists _symbol _files _variable)
+# Check function in an OpenSSL-like TLS backend.
+macro(curl_openssl_check_exists)
   cmake_push_check_state()
   if(USE_OPENSSL)
     list(APPEND CMAKE_REQUIRED_LIBRARIES OpenSSL::SSL OpenSSL::Crypto)
@@ -974,7 +974,11 @@ macro(curl_openssl_check_symbol_exists _symbol _files _variable)
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
-  check_symbol_exists("${_symbol}" "${_files}" "${_variable}")
+  if(${ARGC} EQUAL 2)
+    check_function_exists(${ARGN})
+  else()
+    check_symbol_exists(${ARGN})  # Uses CMAKE_REQUIRED_INCLUDES and CMAKE_REQUIRED_DEFINITIONS
+  endif()
   cmake_pop_check_state()
 endmacro()
 
@@ -982,11 +986,10 @@ endmacro()
 macro(curl_openssl_check_quic)
   if(NOT DEFINED HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     if(USE_OPENSSL)
-      curl_openssl_check_symbol_exists("SSL_set_quic_use_legacy_codepoint" "openssl/ssl.h" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+      curl_openssl_check_exists("SSL_set_quic_use_legacy_codepoint" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
     if(USE_WOLFSSL)
-      curl_openssl_check_symbol_exists("wolfSSL_set_quic_use_legacy_codepoint" "wolfssl/options.h;wolfssl/openssl/ssl.h"
-        HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
+      curl_openssl_check_exists("wolfSSL_set_quic_use_legacy_codepoint" HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
     endif()
   endif()
   if(NOT HAVE_SSL_SET_QUIC_USE_LEGACY_CODEPOINT)
@@ -995,17 +998,17 @@ macro(curl_openssl_check_quic)
 endmacro()
 
 if(USE_WOLFSSL)
-  curl_openssl_check_symbol_exists("wolfSSL_DES_ecb_encrypt" "wolfssl/options.h;wolfssl/openssl/des.h" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
-  curl_openssl_check_symbol_exists("wolfSSL_BIO_new" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_BIO)
-  curl_openssl_check_symbol_exists("wolfSSL_BIO_set_shutdown" "wolfssl/options.h;wolfssl/ssl.h" HAVE_WOLFSSL_FULL_BIO)
+  curl_openssl_check_exists("wolfSSL_DES_ecb_encrypt" HAVE_WOLFSSL_DES_ECB_ENCRYPT)
+  curl_openssl_check_exists("wolfSSL_BIO_new" HAVE_WOLFSSL_BIO)
+  curl_openssl_check_exists("wolfSSL_BIO_set_shutdown" HAVE_WOLFSSL_FULL_BIO)
 endif()
 
 if(USE_OPENSSL)
   if(NOT DEFINED HAVE_SSL_SET0_WBIO)
-    curl_openssl_check_symbol_exists("SSL_set0_wbio" "openssl/ssl.h" HAVE_SSL_SET0_WBIO)
+    curl_openssl_check_exists("SSL_set0_wbio" HAVE_SSL_SET0_WBIO)
   endif()
   if(NOT DEFINED HAVE_OPENSSL_SRP AND NOT CURL_DISABLE_SRP)
-    curl_openssl_check_symbol_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
+    curl_openssl_check_exists("SSL_CTX_set_srp_username" "openssl/ssl.h" HAVE_OPENSSL_SRP)
   endif()
 endif()
 
@@ -1015,13 +1018,10 @@ if(USE_ECH)
   if(USE_OPENSSL OR USE_WOLFSSL)
     # Be sure that the TLS library actually supports ECH.
     if(USE_WOLFSSL)
-      curl_openssl_check_symbol_exists("wolfSSL_CTX_GenerateEchConfig" "wolfssl/options.h;wolfssl/ssl.h"
-        HAVE_WOLFSSL_CTX_GENERATEECHCONFIG)
+      curl_openssl_check_exists("wolfSSL_CTX_GenerateEchConfig" HAVE_WOLFSSL_CTX_GENERATEECHCONFIG)
     endif()
-    if(HAVE_BORINGSSL OR HAVE_AWSLC)
-      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ssl.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
-    elseif(USE_OPENSSL)
-      curl_openssl_check_symbol_exists("SSL_set1_ech_config_list" "openssl/ech.h" HAVE_SSL_SET1_ECH_CONFIG_LIST)
+    if(USE_OPENSSL)
+      curl_openssl_check_exists("SSL_set1_ech_config_list" HAVE_SSL_SET1_ECH_CONFIG_LIST)
     endif()
     if(HAVE_WOLFSSL_CTX_GENERATEECHCONFIG OR
        HAVE_SSL_SET1_ECH_CONFIG_LIST)
