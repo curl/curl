@@ -14,7 +14,9 @@ versions of libs and build tools.
 
 We write curl and libcurl to compile with C89 compilers on 32-bit and up
 machines. Most of libcurl assumes more or less POSIX compliance but that is
-not a requirement.
+not a requirement. The compiler must support a 64-bit integer type as well as
+supply a stdint.h header file that defines C99-style fixed-width integer types
+like uint32_t.
 
 We write libcurl to build and work with lots of third party tools, and we
 want it to remain functional and buildable with these and later versions
