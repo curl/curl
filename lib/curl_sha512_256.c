@@ -290,9 +290,7 @@ Curl_sha512_256_finish(unsigned char *digest,
 
 #if !defined(CURL_FORCEINLINE) && \
   defined(_MSC_VER) && !defined(__GNUC__) && !defined(__clang__)
-#  if _MSC_VER >= 1400
-#    define CURL_FORCEINLINE __forceinline
-#  endif
+#  define CURL_FORCEINLINE __forceinline
 #endif
 
 #if !defined(CURL_FORCEINLINE)
