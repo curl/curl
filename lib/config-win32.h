@@ -394,11 +394,7 @@ Vista
 /* ---------------------------------------------------------------- */
 
 #if defined(_MSC_VER) && !defined(_WIN32_WCE)
-#  if (_INTEGRAL_MAX_BITS >= 64)
-#    define USE_WIN32_LARGE_FILES
-#  else
-#    define USE_WIN32_SMALL_FILES
-#  endif
+#  define USE_WIN32_LARGE_FILES
 #endif
 
 #if defined(__MINGW32__) && !defined(USE_WIN32_LARGE_FILES)

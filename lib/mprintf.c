@@ -37,7 +37,7 @@
 #ifdef HAVE_LONGLONG
 #  define LONG_LONG_TYPE long long
 #  define HAVE_LONG_LONG_TYPE
-#elif defined(_MSC_VER) && (_INTEGRAL_MAX_BITS >= 64)
+#elif defined(_MSC_VER)
 #  define LONG_LONG_TYPE __int64
 #  define HAVE_LONG_LONG_TYPE
 #else
