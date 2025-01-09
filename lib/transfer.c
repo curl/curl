@@ -568,8 +568,10 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 
 #ifdef USE_SSL
   if(!data->state.ssl_scache) {
-    result = Curl_ssl_scache_create(data->set.general_ssl.max_ssl_sessions,
-                                    2, &data->state.ssl_scache);
+    /* There was no ssl session cache set via a share, so we create
+     * one just for this transfer alone. Most transfers talk to just
+     * one host, but redirects may involve several occasionally. */
+    result = Curl_ssl_scache_create(3, 2, &data->state.ssl_scache);
     if(result)
       return result;
   }
