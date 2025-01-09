@@ -250,6 +250,11 @@ the result.
 ## `time_total`
 The total time, in seconds, that the full operation lasted.
 
+## `tls_earlydata`
+The amount of bytes that were sent as TLSv1.3 early data. This is 0
+if this TLS feature was not used and negative if the data sent had
+been rejected by the server. (Added in 8.12.0)
+
 ## `url`
 The URL that was fetched. (Added in 7.75.0)
 
