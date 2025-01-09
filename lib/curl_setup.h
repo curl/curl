@@ -88,7 +88,7 @@
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
-/* Define to avoid VS2005 and upper complaining about portable C functions. */
+/* Avoid VS2005 and upper complaining about portable C functions. */
 #ifndef _CRT_NONSTDC_NO_DEPRECATE
 #define _CRT_NONSTDC_NO_DEPRECATE  /* for strdup(), write(), etc. */
 #endif
