@@ -97,6 +97,7 @@ typedef enum {
   VAR_STARTTRANSFER_TIME,
   VAR_STDERR,
   VAR_STDOUT,
+  VAR_TLS_EARLYDATA_SENT,
   VAR_TOTAL_TIME,
   VAR_URLNUM,
   VAR_NUM_OF_VARS /* must be the last */
