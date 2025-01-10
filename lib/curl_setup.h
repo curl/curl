@@ -735,8 +735,6 @@
 #error "libidn2 cannot be enabled with WinIDN or AppleIDN, choose one."
 #endif
 
-#define LIBIDN_REQUIRED_VERSION "0.4.1"
-
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_MBEDTLS) || \
   defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
   defined(USE_BEARSSL) || defined(USE_RUSTLS)
