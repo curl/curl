@@ -4,7 +4,7 @@ curl and libcurl 8.12.0
  Command line options:         266
  curl_easy_setopt() options:   306
  Public functions in libcurl:  94
- Contributors:                 3316
+ Contributors:                 3320
 
 This release includes the following changes:
 
@@ -15,6 +15,7 @@ This release includes the following changes:
  o hyper: drop support [57]
  o openssl: add support to use keys and certificates from PKCS#11 provider [77]
  o QUIC: 0RTT for gnutls via CURLSSLOPT_EARLYDATA [61]
+ o vtls: feature ssls-export for SSL session im-/export [141]
 
 This release includes the following bugfixes:
 
@@ -22,6 +23,7 @@ This release includes the following bugfixes:
  o async-thread: avoid closing eventfd twice [9]
  o autotools: silence gcc warnings in libtool code [96]
  o binmode: convert to macro and use it from tests [44]
+ o build: delete `-Wsign-conversion` related FIXMEs [137]
  o build: drop `-Winline` picky warning [53]
  o build: drop unused feature macros, update exception list [51]
  o build: fix the tidy targets for autotools [52]
@@ -56,14 +58,19 @@ This release includes the following bugfixes:
  o cmake: move GSS init before feature detections [93]
  o cmake: namespace functions and macros [41]
  o cmake: optimize out 4 picky warning option detections with gcc [78]
+ o cmake: pre-fill `HAVE_STDINT_H` on Windows [149]
  o cmake: publish/check supported protocols/features via `CURLConfig.cmake` [100]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
  o cmake: sync OpenSSL QUIC fork detection with autotools [102]
  o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
  o cmake: use `STREQUAL` to detect Linux [68]
+ o completion.pl: add completion for paths after @ for fish [82]
  o config-mac: drop `MACOS_SSL_SUPPORT` macro [63]
  o configure: drop unused detections and macros [105]
+ o conncache: count shutdowns against host and max limits [154]
  o conncache: result_cb comment removed from function docs [1]
+ o content_encoding: namespace GZIP flag constants [147]
+ o cookie: cap expire times to 400 days [111]
  o cookie: fix crash in netscape cookie parsing [84]
  o cookie: parse only the exact expire date [3]
  o curl: return error if etag options are used with multiple URLs [5]
@@ -80,6 +87,7 @@ This release includes the following bugfixes:
  o docs/libcurl/opts: clarify the return values [114]
  o docs/libcurl: return value overhall [120]
  o docs: use lowercase curl and libcurl [113]
+ o ECH: update APIs to those agreed with OpenSSL maintainers [101]
  o examples/block-ip: drop redundant `memory.h` include
  o examples/block-ip: show how to block IP addresses [74]
  o examples/complicated: fix warnings, bump deprecated callback, tidy up [59]
@@ -87,7 +95,9 @@ This release includes the following bugfixes:
  o examples: make them compile with compatibility functions disabled (Windows) [58]
  o file: drop `OPEN_NEEDS_ARG3` option [91]
  o file: fix Android compiler warning [85]
+ o GnuTLS: fix 'time_appconnect' for early data [127]
  o hash: add asserts in hash_element_dtor() [126]
+ o HTTP/2: strip TE request header [140]
  o http2: fix value stored to 'result' is never read [71]
  o http: fix build with `CURL_DISABLE_COOKIES` [95]
  o http: ignore invalid Retry-After times [107]
@@ -101,6 +111,8 @@ This release includes the following bugfixes:
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o mbedtls: fix handling of blocked sends [116]
  o mime: explicitly rewind subparts at attachment time. [80]
+ o msvc: drop checks for ancient versions [133]
+ o msvc: fix building with `HAVE_INET_NTOP` and MSVC <=1900 [151]
  o multi: fix curl_multi_waitfds reporting of fd_count [73]
  o multi: fix return code for an already-removed easy handle [106]
  o multissl: auto-enable `OPENSSL_COEXIST` for wolfSSL + OpenSSL [92]
@@ -110,6 +122,7 @@ This release includes the following bugfixes:
  o netrc: restore _netrc fallback logic [6]
  o ngtcp2: fix two cases of value stored never read [65]
  o openssl: fix ECH logic [67]
+ o osslq: use SSL_poll to determine writeability of QUIC streams [139]
  o projects/Windows: remove wolfSSL from legacy projects [75]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
  o scripts/mdlinkcheck: markdown link checker [19]
@@ -151,6 +164,7 @@ For all changes ever done in curl:
 
 Planned upcoming removals include:
 
+ o Support for the msh3 HTTP/3 backend
  o TLS libraries not supporting TLS 1.3
 
  See https://curl.se/dev/deprecate.html for details
@@ -158,16 +172,17 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Pan, Ben Zanin, Christian Heusel, Christian Schmitz,
-  Christopher Dannemiller, Daniel Stenberg, Darren Banfi, dependabot[bot],
-  Derek Huang, dwickr, Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github,
-  Jakub Jelen, Jeroen Ooms, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
-  Manuel Einfalt, Marcel Raad, Mohammed Sadiq, Patrick Monnerat,
+  Andy Pan, Asger Hautop Drewsen, baranyaib90 on github, Ben Zanin,
+  Christian Heusel, Christian Schmitz, Christopher Dannemiller,
+  Daniel Stenberg, Darren Banfi, dependabot[bot], Derek Huang, dwickr,
+  Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
+  Jeroen Ooms, Jiri Stary, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
+  Manuel Einfalt, Marcel Raad, Mohammed Sadiq, Neil Horman, Patrick Monnerat,
   prpr19xx on github, Qriist on github, Ralph Sennhauser, Randall S. Becker,
   Ray Satiro, renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
-  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats, Yedaya Katsman,
-  Yihang Zhou
-  (36 contributors)
+  Stephen Farrell, Tal Regev, Tamás Bálint Misius, Tamir Duberstein,
+  Viktor Szakats, Yedaya Katsman, Yihang Zhou
+  (42 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -252,6 +267,7 @@ References to bug reports and discussions on issues:
  [79] = https://curl.se/bug/?i=15845
  [80] = https://curl.se/bug/?i=15842
  [81] = https://curl.se/bug/?i=15840
+ [82] = https://curl.se/bug/?i=15928
  [83] = https://curl.se/bug/?i=15884
  [84] = https://curl.se/bug/?i=15826
  [85] = https://curl.se/bug/?i=15883
@@ -270,6 +286,7 @@ References to bug reports and discussions on issues:
  [98] = https://curl.se/bug/?i=15876
  [99] = https://curl.se/bug/?i=15906
  [100] = https://curl.se/bug/?i=15854
+ [101] = https://curl.se/bug/?i=15945
  [102] = https://curl.se/bug/?i=15873
  [103] = https://curl.se/bug/?i=15869
  [104] = https://curl.se/bug/?i=15868
@@ -279,6 +296,7 @@ References to bug reports and discussions on issues:
  [108] = https://curl.se/bug/?i=15908
  [109] = https://curl.se/bug/?i=15903
  [110] = https://curl.se/bug/?i=15861
+ [111] = https://curl.se/bug/?i=15937
  [112] = https://curl.se/bug/?i=15902
  [113] = https://curl.se/bug/?i=15898
  [114] = https://curl.se/bug/?i=15900
@@ -294,4 +312,14 @@ References to bug reports and discussions on issues:
  [124] = https://curl.se/bug/?i=15894
  [125] = https://curl.se/bug/?i=15891
  [126] = https://curl.se/bug/?i=15889
+ [127] = https://curl.se/bug/?i=15954
  [128] = https://curl.se/bug/?i=15881
+ [133] = https://curl.se/bug/?i=15946
+ [137] = https://curl.se/bug/?i=15939
+ [139] = https://curl.se/bug/?i=15909
+ [140] = https://curl.se/bug/?i=15941
+ [141] = https://curl.se/bug/?i=15924
+ [147] = https://curl.se/bug/?i=15929
+ [149] = https://curl.se/bug/?i=15925
+ [151] = https://curl.se/bug/?i=15923
+ [154] = https://curl.se/bug/?i=15857
