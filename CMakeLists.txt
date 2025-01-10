@@ -582,7 +582,10 @@ elseif(NOT WIN32 AND NOT APPLE)
   endif()
 endif()
 
-if(WIN32)
+if(WINCE)
+  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
+  list(APPEND CURL_LIBS "${CEGCC_LIBRARY_DIR}/libws2.a")
+elseif(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 endif()
 
@@ -1628,7 +1631,9 @@ endif()
 # Check for some functions that are used
 
 # Apply to all feature checks
-if(WIN32)
+if(WINCE)
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${CEGCC_LIBRARY_DIR}/libws2.a")
+elseif(WIN32)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
 elseif(HAVE_LIBSOCKET)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")
