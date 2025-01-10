@@ -29,7 +29,6 @@
 
 #include "curl_printf.h"
 
-#include <errno.h>
 #include <rustls.h>
 
 #include "inet_pton.h"

@@ -25,7 +25,7 @@
 
 #include <sys/stat.h>
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
 #  include <direct.h>
 #endif
 

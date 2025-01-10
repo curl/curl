@@ -465,7 +465,9 @@
  */
 
 #ifdef USE_WIN32_LARGE_FILES
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
 #  undef  lseek
@@ -496,10 +498,12 @@
  */
 
 #if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
+#  ifdef HAVE_IO_H
 #  include <io.h>
+#  endif
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifndef _WIN32_WCE
+#  ifndef UNDER_CE
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
@@ -827,6 +831,24 @@
 
 #ifndef HEADER_CURL_SETUP_ONCE_H
 #include "curl_setup_once.h"
+#endif
+
+#ifdef UNDER_CE
+#define getenv curl_getenv  /* Windows CE does not support getenv() */
+#define raise(s) ((void)(s))
+/* Terrible workarounds to make Windows CE compile */
+#define errno 0
+#define CURL_SETERRNO(x) ((void)(x))
+#define EAGAIN 11
+#define ENOMEM 12
+#define EACCES 13
+#define EEXIST 17
+#define EISDIR 21
+#define ENOSPC 28
+#define ERANGE 34
+#define strerror(x) "?"
+#else
+#define CURL_SETERRNO(x) (errno = (x))
 #endif
 
 /*

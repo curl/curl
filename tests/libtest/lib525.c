@@ -63,7 +63,11 @@ CURLcode test(char *URL)
   }
 
   /* get the file size of the local file */
+#ifdef UNDER_CE
+  hd = stat(libtest_arg2, &file_info);
+#else
   hd = fstat(fileno(hd_src), &file_info);
+#endif
   if(hd == -1) {
     /* can't open file, bail out */
     fprintf(stderr, "fstat() failed with error: %d (%s)\n",

@@ -35,15 +35,17 @@
 /* Define if you have the <arpa/inet.h> header file. */
 /* #define HAVE_ARPA_INET_H 1 */
 
+#ifndef UNDER_CE
+
 /* Define if you have the <fcntl.h> header file. */
-#define HAVE_FCNTL_H 1
+#define HAVE_FCNTL_H 1  /* exists on __MINGW32CE__ */
 
 /* Define if you have the <io.h> header file. */
-#define HAVE_IO_H 1
+#define HAVE_IO_H 1  /* exists on __MINGW32CE__ */
 
 /* Define if you have the <locale.h> header file. */
-#ifndef UNDER_CE
 #define HAVE_LOCALE_H 1
+
 #endif
 
 /* Define if you have the <netdb.h> header file. */
@@ -53,8 +55,10 @@
 /* #define HAVE_NETINET_IN_H 1 */
 
 /* Define to 1 if you have the <stdbool.h> header file. */
+#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_STDBOOL_H 1
+#define HAVE_STDBOOL_H 1  /* exists on __MINGW32CE__ */
+#endif
 #endif
 
 /* Define if you have the <sys/param.h> header file. */
@@ -109,8 +113,10 @@
 #define STDC_HEADERS 1
 
 /* Define to 1 if bool is an available type. */
+#ifndef UNDER_CE
 #if (defined(_MSC_VER) && (_MSC_VER >= 1800)) || defined(__MINGW32__)
-#define HAVE_BOOL_T 1
+#define HAVE_BOOL_T 1  /* exists on __MINGW32CE__ */
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -499,11 +505,9 @@ Vista
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
 
-#define ENOSPC 1
-#define ENOMEM 2
-#define EAGAIN 3
-
+#ifndef _MSC_VER
 extern int stat(const char *path, struct stat *buffer);
+#endif
 
 #endif /* UNDER_CE */
 

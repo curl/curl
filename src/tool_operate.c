@@ -664,7 +664,8 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
               outs->bytes);
         fflush(outs->stream);
         /* truncate file at the position where we started appending */
-#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__)
+#if defined(HAVE_FTRUNCATE) && !defined(__DJGPP__) && !defined(__AMIGA__) && \
+  !defined(__MINGW32CE__)
         if(ftruncate(fileno(outs->stream), outs->init)) {
           /* when truncate fails, we cannot just append as then we will
              create something strange, bail out */
@@ -3003,7 +3004,8 @@ static CURLcode cacertpaths(struct OperationConfig *config)
       fclose(cafile);
       config->cacert = strdup(cacert);
     }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
+#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+  !defined(CURL_DISABLE_CA_SEARCH)
     result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       goto fail;
@@ -3130,7 +3132,12 @@ static CURLcode run_all_transfers(struct GlobalConfig *global,
 CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
 {
   CURLcode result = CURLE_OK;
-  char *first_arg = argc > 1 ? curlx_convert_tchar_to_UTF8(argv[1]) : NULL;
+  char *first_arg;
+#ifdef UNDER_CE
+  first_arg = argc > 1 ? strdup(argv[1]) : NULL;
+#else
+  first_arg = argc > 1 ? curlx_convert_tchar_to_UTF8(argv[1]) : NULL;
+#endif
 
 #ifdef HAVE_SETLOCALE
   /* Override locale for number parsing (only) */

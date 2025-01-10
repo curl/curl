@@ -590,6 +590,111 @@ jobs:
             make -C bld -j5 examples
           fi
 
+  wince:
+    name: "mingw32ce, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} 4.4.0-arm schannel"
+    runs-on: 'macos-latest'
+    timeout-minutes: 10
+    env:
+      toolchain-version: '0.59.1'
+    strategy:
+      matrix:
+        build: [autotools, cmake]
+      fail-fast: false
+    steps:
+      - name: 'install packages'
+        if: ${{ matrix.build == 'autotools' }}
+        run: |
+          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+
+      - name: 'cache compiler (mingw32ce)'
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-compiler
+        with:
+          path: ~/opt/mingw32ce
+          key: ${{ runner.os }}-mingw32ce-${{ env.toolchain-version }}-amd64
+
+      - name: 'install compiler (mingw32ce)'
+        if: ${{ steps.cache-compiler.outputs.cache-hit != 'true' }}
+        run: |
+          cd "${HOME}" || exit 1
+          curl --disable --fail --silent --show-error --connect-timeout 15 --max-time 120 --retry 3 --retry-connrefused --proto-redir =https \
+            --location 'https://downloads.sourceforge.net/cegcc/cegcc/${{ env.toolchain-version }}/cegcc_mingw32ce_snowleopard_r1397.tar.bz2' | tar -x
+          ls -l
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'configure'
+        run: |
+          MINGW32CE_ROOT="${HOME}/opt/mingw32ce"
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake -B bld \
+              -DCMAKE_SYSTEM_NAME=WindowsCE \
+              -DCMAKE_SYSTEM_VERSION=8.0 \
+              -DCMAKE_SYSTEM_PROCESSOR=arm \
+              -DCMAKE_C_COMPILER_TARGET=arm-wince-mingw32ce \
+              -DCMAKE_C_COMPILER="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
+              -DCMAKE_RC_COMPILER="${MINGW32CE_ROOT}/bin/arm-mingw32ce-windres" \
+              -DMINGW32CE_LIBRARY_DIR="${MINGW32CE_ROOT}/arm-mingw32ce/lib" \
+              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
+              -DCURL_WERROR=ON \
+              -DCURL_USE_SCHANNEL=ON \
+              -DCURL_USE_LIBPSL=OFF
+          else
+            autoreconf -fi
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              ac_cv_prog_cc_c99=no \
+              CC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
+              AR="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ar" \
+              RANLIB="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ranlib" \
+              RC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-windres" \
+              --host=arm-wince-mingw32ce \
+              --with-schannel \
+              --without-libpsl \
+              --disable-shared
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld
+          else
+            make -j5 -C bld
+          fi
+
+      - name: 'curl info'
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -j5 -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target curl-examples
+          else
+            make -j5 -C bld examples
+          fi
+
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
     runs-on: windows-latest

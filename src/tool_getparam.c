@@ -2714,7 +2714,7 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
     case C_BUFFER: /* --buffer */
       /* disable the output I/O buffering. note that the option is called
          --buffer but is mostly used in the negative form: --no-buffer */
-      config->nobuffer = longopt ? !toggle : TRUE;
+      config->nobuffer = (bool)(longopt ? !toggle : TRUE);
       break;
     case C_REMOTE_NAME_ALL: /* --remote-name-all */
       config->default_node_flags = toggle ? GETOUT_USEREMOTE : 0;
@@ -2873,7 +2873,11 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   struct OperationConfig *config = global->first;
 
   for(i = 1, stillflags = TRUE; i < argc && !result; i++) {
+#ifdef UNDER_CE
+    orig_opt = strdup(argv[i]);
+#else
     orig_opt = curlx_convert_tchar_to_UTF8(argv[i]);
+#endif
     if(!orig_opt)
       return PARAM_NO_MEM;
 
@@ -2887,7 +2891,11 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
       else {
         char *nextarg = NULL;
         if(i < (argc - 1)) {
+#ifdef UNDER_CE
+          nextarg = strdup(argv[i + 1]);
+#else
           nextarg = curlx_convert_tchar_to_UTF8(argv[i + 1]);
+#endif
           if(!nextarg) {
             curlx_unicodefree(orig_opt);
             return PARAM_NO_MEM;
