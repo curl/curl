@@ -24,7 +24,6 @@
  *
  ***************************************************************************/
 
-
 /*
  * Inclusion of common header files.
  */
@@ -106,8 +105,8 @@
 
 #ifndef HAVE_STRUCT_TIMEVAL
 struct timeval {
- long tv_sec;
- long tv_usec;
+  long tv_sec;
+  long tv_usec;
 };
 #endif
 
@@ -228,8 +227,8 @@ struct timeval {
 
 #ifndef HAVE_BOOL_T
   typedef enum {
-      bool_false = 0,
-      bool_true  = 1
+    bool_false = 0,
+    bool_true  = 1
   } bool;
 
 /*
@@ -392,7 +391,7 @@ typedef unsigned int bit;
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
 #elif defined(_UNICODE)
-#define argv_item_t wchar_t *
+#define argv_item_t  wchar_t *
 #else
 #define argv_item_t  char *
 #endif

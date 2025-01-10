@@ -104,26 +104,26 @@
  * Make sure to define this macro before including any Windows headers.
  */
 #  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
 #  endif
 #  ifndef NOGDI
-#    define NOGDI
+#  define NOGDI
 #  endif
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
-# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-  defined(WINAPI_FAMILY)
-#  include <winapifamily.h>
-#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#    define CURL_WINDOWS_UWP
+#  if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+     defined(WINAPI_FAMILY)
+#    include <winapifamily.h>
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+       !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#      define CURL_WINDOWS_UWP
+#    endif
 #  endif
-# endif
 #endif
 
 /* Compatibility */
-#if defined(ENABLE_IPV6)
-#  define USE_IPV6 1
+#ifdef ENABLE_IPV6
+#define USE_IPV6 1
 #endif
 
 /*
@@ -139,10 +139,8 @@
 
 #ifdef _WIN32_WCE
 #  include "config-win32ce.h"
-#else
-#  ifdef _WIN32
-#    include "config-win32.h"
-#  endif
+#elif defined(_WIN32)
+#  include "config-win32.h"
 #endif
 
 #ifdef macintosh
@@ -179,7 +177,7 @@
 
 #ifdef NEED_THREAD_SAFE
 #  ifndef _THREAD_SAFE
-#    define _THREAD_SAFE
+#  define _THREAD_SAFE
 #  endif
 #endif
 
@@ -191,14 +189,14 @@
 
 #ifdef NEED_REENTRANT
 #  ifndef _REENTRANT
-#    define _REENTRANT
+#  define _REENTRANT
 #  endif
 #endif
 
 /* Solaris needs this to get a POSIX-conformant getpwuid_r */
 #if defined(sun) || defined(__sun)
 #  ifndef _POSIX_PTHREAD_SEMANTICS
-#    define _POSIX_PTHREAD_SEMANTICS 1
+#  define _POSIX_PTHREAD_SEMANTICS 1
 #  endif
 #endif
 
@@ -449,9 +447,9 @@
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
-# if ! defined __LP64
-#  include <floss.h> /* FLOSS is only used for 32-bit builds. */
-# endif
+#  if ! defined __LP64
+#    include <floss.h> /* FLOSS is only used for 32-bit builds. */
+#  endif
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
@@ -519,11 +517,11 @@
 #endif
 
 #ifndef struct_stat
-#  define struct_stat struct stat
+#define struct_stat struct stat
 #endif
 
 #ifndef LSEEK_ERROR
-#  define LSEEK_ERROR (off_t)-1
+#define LSEEK_ERROR (off_t)-1
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -594,8 +592,8 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-# define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-# define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
+#  define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
+#  define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
 #endif
 
 #define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
@@ -694,9 +692,9 @@
 /*
  * MSVC threads support requires a multi-threaded runtime library.
  * _beginthreadex() is not available in single-threaded ones.
+ * Single-threaded option was last available in VS2005: _MSC_VER <= 1400
  */
-
-#if defined(_MSC_VER) && !defined(_MT)
+#if defined(_MSC_VER) && !defined(_MT)  /* available in _MSC_VER <= 1400 */
 #  undef USE_THREADS_POSIX
 #  undef USE_THREADS_WIN32
 #endif
@@ -738,8 +736,6 @@
 #if defined(USE_LIBIDN2) && (defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN))
 #error "libidn2 cannot be enabled with WinIDN or AppleIDN, choose one."
 #endif
-
-#define LIBIDN_REQUIRED_VERSION "0.4.1"
 
 #if defined(USE_GNUTLS) || defined(USE_OPENSSL) || defined(USE_MBEDTLS) || \
   defined(USE_WOLFSSL) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
@@ -786,10 +782,6 @@
 #  if defined(USE_CURL_NTLM_CORE) || defined(USE_WINDOWS_SSPI)
 #    define USE_NTLM
 #  endif
-#endif
-
-#ifdef CURL_WANTS_CA_BUNDLE_ENV
-#error "No longer supported. Set CURLOPT_CAINFO at runtime instead."
 #endif
 
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH) || defined(USE_WOLFSSH)
@@ -855,7 +847,7 @@
  */
 
 #ifndef Curl_nop_stmt
-#  define Curl_nop_stmt do { } while(0)
+#define Curl_nop_stmt do { } while(0)
 #endif
 
 /*
@@ -955,7 +947,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #define UNITTEST static
 #endif
 
-#if defined(USE_NGHTTP2)
+#ifdef USE_NGHTTP2
 #define USE_HTTP2
 #endif
 

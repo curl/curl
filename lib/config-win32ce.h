@@ -264,11 +264,11 @@
 /* ---------------------------------------------------------------- */
 
 #ifndef UNICODE
-#  define UNICODE
+#define UNICODE
 #endif
 
 #ifndef _UNICODE
-#  define _UNICODE
+#define _UNICODE
 #endif
 
 #define CURL_DISABLE_FILE 1
