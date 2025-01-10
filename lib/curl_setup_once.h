@@ -33,7 +33,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
