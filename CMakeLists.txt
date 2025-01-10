@@ -1935,7 +1935,9 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 
-  set(USE_WIN32_LARGE_FILES ON)
+  if(NOT WINCE)
+    set(USE_WIN32_LARGE_FILES ON)
+  endif()
 
   # Use the manifest embedded in the Windows Resource
   string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
