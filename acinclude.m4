@@ -1525,7 +1525,12 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
     *-apple-*) curl_pflags="${curl_pflags} APPLE";;
   esac
   if test "$curl_cv_native_windows" = 'yes'; then
-    curl_pflags="${curl_pflags} WIN32"
+    case $host_os in
+      mingwce*)
+        curl_pflags="${curl_pflags} WINCE";;
+      *)
+        curl_pflags="${curl_pflags} WIN32";;
+    esac
   else
     case $host in
       *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
