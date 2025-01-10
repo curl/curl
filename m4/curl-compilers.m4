@@ -1030,7 +1030,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [type-limits old-style-declaration])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [missing-parameter-type empty-body])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [clobbered ignored-qualifiers])
-            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion trampolines])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [conversion])
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [sign-conversion])
             tmp_CFLAGS="$tmp_CFLAGS -Wno-error=sign-conversion"
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [vla])
@@ -1055,6 +1055,7 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
           dnl Only gcc 4.6 or later
           if test "$compiler_num" -ge "406"; then
             CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [double-promotion])
+            CURL_ADD_COMPILER_WARNINGS([tmp_CFLAGS], [trampolines])
           fi
           #
           dnl only gcc 4.8 or later
