@@ -239,9 +239,6 @@
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
-#    if defined(_ILP32)
-#    elif defined(_LP64)
-#    endif
 #    if defined(_LONG_LONG)
 #      define CURL_TYPEOF_CURL_OFF_T     long long
 #      define CURL_FORMAT_CURL_OFF_T     "lld"
