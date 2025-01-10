@@ -244,6 +244,13 @@ elseif(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_STATIC_LIBS ON)
 endif()
+if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR CEGCC)
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif()
+
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
 if(NOT DOS AND NOT AMIGA)
