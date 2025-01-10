@@ -976,7 +976,7 @@ int getpwuid_r(uid_t uid, struct passwd *pwd, char *buf,
 #    define UNIX_PATH_MAX 108
      /* !checksrc! disable TYPEDEFSTRUCT 1 */
      typedef struct sockaddr_un {
-       ADDRESS_FAMILY sun_family;
+       CURL_SA_FAMILY_T sun_family;
        char sun_path[UNIX_PATH_MAX];
      } SOCKADDR_UN, *PSOCKADDR_UN;
 #    define WIN32_SOCKADDR_UN
