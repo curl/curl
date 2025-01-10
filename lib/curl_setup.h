@@ -782,10 +782,6 @@
 #  endif
 #endif
 
-#ifdef CURL_WANTS_CA_BUNDLE_ENV
-#error "No longer supported. Set CURLOPT_CAINFO at runtime instead."
-#endif
-
 #if defined(USE_LIBSSH2) || defined(USE_LIBSSH) || defined(USE_WOLFSSH)
 #define USE_SSH
 #endif
