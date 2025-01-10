@@ -135,10 +135,8 @@
 
 #ifdef _WIN32_WCE
 #  include "config-win32ce.h"
-#else
-#  ifdef _WIN32
-#    include "config-win32.h"
-#  endif
+#elif defined(_WIN32)
+#  include "config-win32.h"
 #endif
 
 #ifdef macintosh
