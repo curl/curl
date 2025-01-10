@@ -188,13 +188,7 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  elif defined(_LP64)
-#    define CURL_TYPEOF_CURL_OFF_T     long
-#    define CURL_FORMAT_CURL_OFF_T     "ld"
-#    define CURL_FORMAT_CURL_OFF_TU    "lu"
-#    define CURL_SUFFIX_CURL_OFF_T     L
-#    define CURL_SUFFIX_CURL_OFF_TU    UL
-#  else
+#  else /* _LP64 and default */
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
@@ -207,22 +201,13 @@
 
 #elif defined(__370__)
 #  if defined(__IBMC__) || defined(__IBMCPP__)
-#    if defined(_ILP32)
-#    elif defined(_LP64)
-#    endif
 #    if defined(_LONG_LONG)
 #      define CURL_TYPEOF_CURL_OFF_T     long long
 #      define CURL_FORMAT_CURL_OFF_T     "lld"
 #      define CURL_FORMAT_CURL_OFF_TU    "llu"
 #      define CURL_SUFFIX_CURL_OFF_T     LL
 #      define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    elif defined(_LP64)
-#      define CURL_TYPEOF_CURL_OFF_T     long
-#      define CURL_FORMAT_CURL_OFF_T     "ld"
-#      define CURL_FORMAT_CURL_OFF_TU    "lu"
-#      define CURL_SUFFIX_CURL_OFF_T     L
-#      define CURL_SUFFIX_CURL_OFF_TU    UL
-#    else
+#    else /* _LP64 and default */
 #      define CURL_TYPEOF_CURL_OFF_T     long
 #      define CURL_FORMAT_CURL_OFF_T     "ld"
 #      define CURL_FORMAT_CURL_OFF_TU    "lu"
