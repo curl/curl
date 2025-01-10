@@ -1574,7 +1574,7 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
   if(HAVE_WIN32_WINNT)
-    if(HAVE_WIN32_WINNT LESS 0x0501)
+    if(HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
       # Windows XP is required for freeaddrinfo, getaddrinfo
       message(FATAL_ERROR "Building for Windows XP or newer is required.")
     endif()
