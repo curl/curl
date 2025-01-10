@@ -22,7 +22,9 @@
  *
  ***************************************************************************/
 
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 #include "curl_setup.h"
 
 #include "strtoofft.h"
