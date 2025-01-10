@@ -226,7 +226,7 @@
 #    define CURL_FORMAT_CURL_OFF_TU    "llu"
 #    define CURL_SUFFIX_CURL_OFF_T     LL
 #    define CURL_SUFFIX_CURL_OFF_TU    ULL
-#  else
+#  else /* _LP64 and default */
 #    define CURL_TYPEOF_CURL_OFF_T     long
 #    define CURL_FORMAT_CURL_OFF_T     "ld"
 #    define CURL_FORMAT_CURL_OFF_TU    "lu"
@@ -245,7 +245,7 @@
 #      define CURL_FORMAT_CURL_OFF_TU    "llu"
 #      define CURL_SUFFIX_CURL_OFF_T     LL
 #      define CURL_SUFFIX_CURL_OFF_TU    ULL
-#    else
+#    else /* _LP64 and default */
 #      define CURL_TYPEOF_CURL_OFF_T     long
 #      define CURL_FORMAT_CURL_OFF_T     "ld"
 #      define CURL_FORMAT_CURL_OFF_TU    "lu"
