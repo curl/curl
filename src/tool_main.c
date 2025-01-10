@@ -29,7 +29,9 @@
 #include <tchar.h>
 #endif
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
