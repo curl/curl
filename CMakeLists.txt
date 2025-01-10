@@ -91,6 +91,35 @@ if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
   set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+elseif(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # mingw32ce build
+  if(NOT MINGW32CE_LIBRARY_DIR)
+    message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
+  endif()
+
+  set(MINGW 1)
+  set(MINGW32CE 1)
+
+  # Build implib with libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
+  set(_str "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS>")
+  set(_str "${_str} <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET>")
+  set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+  set(CMAKE_C_CREATE_SHARED_LIBRARY "${_str}")
+  unset(_str)
+
+  # Build resources. Copied from CMake's 'Modules/Platform/Windows-windres.cmake'.
+  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+  enable_language(RC)
+
+  set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
+
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+  set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
+  set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
+  set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
 elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
   set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
   set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
@@ -957,8 +986,8 @@ macro(curl_openssl_check_exists)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)
     endif()
-    if(WIN32)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+    if(WIN32 AND NOT WINCE)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
   endif()
@@ -970,7 +999,7 @@ macro(curl_openssl_check_exists)
       list(APPEND CMAKE_REQUIRED_LIBRARIES ZLIB::ZLIB)  # Public wolfSSL headers also require zlib headers
     endif()
     if(WIN32)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}" "${_win32_crypt32}")
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
@@ -1688,7 +1717,7 @@ endif()
 
 # Apply to all feature checks
 if(WIN32)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
 elseif(HAVE_LIBSOCKET)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")
 elseif(DOS)
@@ -1933,7 +1962,22 @@ include(CMake/OtherTests.cmake)
 set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 
 if(WIN32)
-  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
+  if(WINCE)
+    set(_win32_winsock "ws2")
+  else()
+    set(_win32_winsock "ws2_32")
+  endif()
+  set(_win32_crypt32 "crypt32")
+
+  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
+    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
+    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
+  endif()
+
+  list(APPEND CURL_LIBS "${_win32_winsock}")
+  if(NOT WINCE)
+    list(APPEND CURL_LIBS "bcrypt")
+  endif()
 
   if(NOT WINCE)
     set(USE_WIN32_LARGE_FILES ON)
@@ -1949,7 +1993,10 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    list(APPEND CURL_LIBS "advapi32" "crypt32")
+    if(NOT WINCE)
+      list(APPEND CURL_LIBS "advapi32")
+    endif()
+    list(APPEND CURL_LIBS "${_win32_crypt32}")
   endif()
 endif()
 
