@@ -1769,7 +1769,6 @@ check_symbol_exists("getpeername"     "${CURL_INCLUDES}" HAVE_GETPEERNAME)  # wi
 check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # winsock2.h unistd.h proto/bsdsocket.h
 check_function_exists("getrlimit"       HAVE_GETRLIMIT)
 check_function_exists("setlocale"       HAVE_SETLOCALE)
-check_function_exists("setmode"         HAVE_SETMODE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
 if(NOT WIN32)
@@ -1781,8 +1780,11 @@ if(NOT WIN32)
   check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 endif()
 
-if(WIN32 OR CYGWIN)
-  check_function_exists("_setmode" HAVE__SETMODE)
+if(NOT MINGW32CE)  # Avoid false detections
+  check_function_exists("setmode" HAVE_SETMODE)
+  if(WIN32 OR CYGWIN)
+    check_function_exists("_setmode" HAVE__SETMODE)
+  endif()
 endif()
 
 if(AMIGA)
