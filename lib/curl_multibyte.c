@@ -32,7 +32,7 @@
 
 #include "curl_setup.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 #include "curl_multibyte.h"
 
@@ -325,7 +325,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
       target = fixed;
     else
       target = path_w;
-#if defined(USE_WIN32_LARGE_FILES)
+#ifdef USE_WIN32_LARGE_FILES
     result = _wstati64(target, buffer);
 #else
     result = _wstat(target, buffer);
@@ -339,7 +339,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     target = fixed;
   else
     target = path;
-#if defined(USE_WIN32_LARGE_FILES)
+#ifdef USE_WIN32_LARGE_FILES
   result = _stati64(target, buffer);
 #else
   result = _stat(target, buffer);
