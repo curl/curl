@@ -76,12 +76,12 @@ Curl_inet_pton(int af, const char *src, void *dst)
 {
   switch(af) {
   case AF_INET:
-    return (inet_pton4(src, (unsigned char *)dst));
+    return inet_pton4(src, (unsigned char *)dst);
   case AF_INET6:
-    return (inet_pton6(src, (unsigned char *)dst));
+    return inet_pton6(src, (unsigned char *)dst);
   default:
     errno = EAFNOSUPPORT;
-    return (-1);
+    return -1;
   }
   /* NOTREACHED */
 }
@@ -116,29 +116,29 @@ inet_pton4(const char *src, unsigned char *dst)
                          (unsigned int)(pch - digits);
 
       if(saw_digit && *tp == 0)
-        return (0);
+        return 0;
       if(val > 255)
-        return (0);
+        return 0;
       *tp = (unsigned char)val;
       if(!saw_digit) {
         if(++octets > 4)
-          return (0);
+          return 0;
         saw_digit = 1;
       }
     }
     else if(ch == '.' && saw_digit) {
       if(octets == 4)
-        return (0);
+        return 0;
       *++tp = 0;
       saw_digit = 0;
     }
     else
-      return (0);
+      return 0;
   }
   if(octets < 4)
-    return (0);
+    return 0;
   memcpy(dst, tmp, INADDRSZ);
-  return (1);
+  return 1;
 }
 
 /* int
@@ -170,7 +170,7 @@ inet_pton6(const char *src, unsigned char *dst)
   /* Leading :: requires some special handling. */
   if(*src == ':')
     if(*++src != ':')
-      return (0);
+      return 0;
   curtok = src;
   saw_xdigit = 0;
   val = 0;
@@ -185,19 +185,19 @@ inet_pton6(const char *src, unsigned char *dst)
       val <<= 4;
       val |= (pch - xdigits);
       if(++saw_xdigit > 4)
-        return (0);
+        return 0;
       continue;
     }
     if(ch == ':') {
       curtok = src;
       if(!saw_xdigit) {
         if(colonp)
-          return (0);
+          return 0;
         colonp = tp;
         continue;
       }
       if(tp + INT16SZ > endp)
-        return (0);
+        return 0;
       *tp++ = (unsigned char) ((val >> 8) & 0xff);
       *tp++ = (unsigned char) (val & 0xff);
       saw_xdigit = 0;
@@ -210,11 +210,11 @@ inet_pton6(const char *src, unsigned char *dst)
       saw_xdigit = 0;
       break;    /* '\0' was seen by inet_pton4(). */
     }
-    return (0);
+    return 0;
   }
   if(saw_xdigit) {
     if(tp + INT16SZ > endp)
-      return (0);
+      return 0;
     *tp++ = (unsigned char) ((val >> 8) & 0xff);
     *tp++ = (unsigned char) (val & 0xff);
   }
@@ -227,7 +227,7 @@ inet_pton6(const char *src, unsigned char *dst)
     ssize_t i;
 
     if(tp == endp)
-      return (0);
+      return 0;
     for(i = 1; i <= n; i++) {
       *(endp - i) = *(colonp + n - i);
       *(colonp + n - i) = 0;
@@ -235,9 +235,9 @@ inet_pton6(const char *src, unsigned char *dst)
     tp = endp;
   }
   if(tp != endp)
-    return (0);
+    return 0;
   memcpy(dst, tmp, IN6ADDRSZ);
-  return (1);
+  return 1;
 }
 
 #endif /* HAVE_INET_PTON */
