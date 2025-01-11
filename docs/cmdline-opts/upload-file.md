@@ -31,7 +31,7 @@ filename or curl thinks that your last directory name is the remote filename
 to use.
 
 When putting the local filename at the end of the URL, curl ignores what is on
-the left side of any slash (/) or backslash (\) used in the filename and only
+the left side of any slash (/) or backslash (\\) used in the filename and only
 appends what is on the right side of the rightmost such character.
 
 Use the filename `-` (a single dash) to use stdin instead of a given file.

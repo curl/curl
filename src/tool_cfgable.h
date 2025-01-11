@@ -216,6 +216,7 @@ struct OperationConfig {
     CLOBBER_NEVER, /* If the file exists, always fail */
     CLOBBER_ALWAYS /* If the file exists, always overwrite it */
   } file_clobber_mode;
+  unsigned char upload_flags; /* Bitmask for --upload-flags */
   unsigned short porttouse;
   BIT(remote_time);
   BIT(cookiesession);       /* new session? */

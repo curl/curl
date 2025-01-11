@@ -1723,6 +1723,7 @@ struct UserDefined {
                              to be used in the library's request(s) */
   unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
                           file 0 - whatever, 1 - v2, 2 - v6 */
+  unsigned char upload_flags; /* flags set by CURLOPT_UPLOAD_FLAGS */
 #ifdef HAVE_GSSAPI
   /* GSS-API credential delegation, see the documentation of
      CURLOPT_GSSAPI_DELEGATION */

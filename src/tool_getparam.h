@@ -293,6 +293,7 @@ typedef enum {
   C_IP_TOS,
   C_UNIX_SOCKET,
   C_UPLOAD_FILE,
+  C_UPLOAD_FLAGS,
   C_URL,
   C_URL_QUERY,
   C_USE_ASCII,
