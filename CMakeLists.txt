@@ -655,7 +655,7 @@ if(ENABLE_IPV6)
     endif()
   endif()
 endif()
-if(ENABLE_IPV6)
+if(ENABLE_IPV6 AND NOT WINCE)
   set(USE_IPV6 ON)
 endif()
 
