@@ -325,10 +325,10 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
       target = fixed;
     else
       target = path_w;
-#ifdef USE_WIN32_LARGE_FILES
-    result = _wstati64(target, buffer);
-#else
+#ifndef USE_WIN32_LARGE_FILES
     result = _wstat(target, buffer);
+#else
+    result = _wstati64(target, buffer);
 #endif
     curlx_unicodefree(path_w);
   }
@@ -339,10 +339,10 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     target = fixed;
   else
     target = path;
-#ifdef USE_WIN32_LARGE_FILES
-  result = _stati64(target, buffer);
-#else
+#ifndef USE_WIN32_LARGE_FILES
   result = _stat(target, buffer);
+#else
+  result = _stati64(target, buffer);
 #endif
 #endif
 
