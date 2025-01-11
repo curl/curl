@@ -832,6 +832,16 @@
 /* Windows CE does not support getenv() */
 #ifdef UNDER_CE
 #define getenv curl_getenv
+
+/* Terrible workaround to make Windows CE compile */
+#define errno  0
+#define EAGAIN 11
+#define ENOMEM 12
+#define EACCES 13
+#define EEXIST 17
+#define EISDIR 21
+#define ENOSPC 28
+#define ERANGE 34
 #endif
 
 /*

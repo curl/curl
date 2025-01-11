@@ -499,10 +499,6 @@ Vista
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
 
-#define ENOSPC 1
-#define ENOMEM 2
-#define EAGAIN 3
-
 extern int stat(const char *path, struct stat *buffer);
 
 #endif /* UNDER_CE */
