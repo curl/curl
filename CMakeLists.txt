@@ -1872,7 +1872,9 @@ add_definitions("-DHAVE_CONFIG_H")
 
 # For Windows, all compilers used by CMake should support large files
 if(WIN32)
-  set(USE_WIN32_LARGE_FILES ON)
+  if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))  # _fseeki64() requires VS2005
+    set(USE_WIN32_LARGE_FILES ON)
+  endif()
 
   # Use the manifest embedded in the Windows Resource
   set(CMAKE_RC_FLAGS "${CMAKE_RC_FLAGS} -DCURL_EMBED_MANIFEST")
