@@ -401,10 +401,6 @@ Vista
 #  define USE_WIN32_LARGE_FILES
 #endif
 
-#if !defined(USE_WIN32_LARGE_FILES) && !defined(USE_WIN32_SMALL_FILES)
-#  define USE_WIN32_SMALL_FILES
-#endif
-
 /* Number of bits in a file offset, on hosts where this is settable. */
 #if defined(USE_WIN32_LARGE_FILES) && defined(__MINGW32__)
 #  ifndef _FILE_OFFSET_BITS
