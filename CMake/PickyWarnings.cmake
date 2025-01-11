@@ -236,6 +236,11 @@ if(PICKY_COMPILER)
         list(APPEND _picky "${_ccopt}")
       endif()
     endforeach()
+
+    if(WINCE)
+      # Workaround for endless false-positives with CeGCC (GCC 4.4)
+      list(APPEND _picky "-Wno-unreachable-code")
+    endif()
   endif()
 endif()
 
