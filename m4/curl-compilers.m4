@@ -1113,6 +1113,23 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             fi
           fi
         fi
+        if test "$compiler_num" -lt "405"; then
+          dnl Avoid false positives
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
+        fi
+        if test "$compiler_num" -ge "402" -a "$compiler_num" -lt "406"; then
+          dnl GCC <4.6 do not support #pragma to suppress warnings locally. Disable globally instead.
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-overlength-strings"
+        fi
+        if test "$compiler_num" -ge "400" -a "$compiler_num" -lt "407"; then
+          dnl https://gcc.gnu.org/bugzilla/show_bug.cgi?id=84685
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-missing-field-initializers"
+        fi
+        if test "$compiler_num" -ge "403" -a "$compiler_num" -lt "408"; then
+          dnl Avoid false positives
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-type-limits"
+        fi
         ;;
         #
       HP_UX_C)

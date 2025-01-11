@@ -92,7 +92,7 @@ static int verify(const char *info, const char *two)
 
 UNITTEST_START
 
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
@@ -146,7 +146,7 @@ Curl_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
-#if defined(__GNUC__) && !defined(__clang__)
+#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

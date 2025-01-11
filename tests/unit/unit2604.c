@@ -46,7 +46,7 @@ struct set {
 UNITTEST_START
 #ifdef USE_SSH
 {
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
@@ -78,7 +78,7 @@ UNITTEST_START
     { NULL, NULL, NULL, NULL, CURLE_OK }
   };
 
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic warning "-Woverlength-strings"
 #endif
 
@@ -114,7 +114,7 @@ UNITTEST_START
 
   free((void *)list[0].cp);
 }
-#if defined(__GNUC__) || defined(__clang__)
+#if defined(CURL_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

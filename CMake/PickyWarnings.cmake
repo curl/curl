@@ -236,6 +236,24 @@ if(PICKY_COMPILER)
         list(APPEND _picky "${_ccopt}")
       endif()
     endforeach()
+
+    if(CMAKE_COMPILER_IS_GNUCC)
+      if(CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
+        # Avoid false positives
+        list(APPEND _picky "-Wno-shadow")
+        list(APPEND _picky "-Wno-unreachable-code")
+      endif()
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
+        # GCC <4.6 do not support #pragma to suppress warnings locally. Disable them globally instead.
+        list(APPEND _picky "-Wno-overlength-strings")
+      endif()
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
+        list(APPEND _picky "-Wno-missing-field-initializers")  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36750
+      endif()
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+        list(APPEND _picky "-Wno-type-limits")  # Avoid false positives
+      endif()
+    endif()
   endif()
 endif()
 
