@@ -493,7 +493,7 @@ UNITTEST CURLUcode Curl_parse_port(struct Curl_URL *u, struct dynbuf *host,
     if(!ISDIGIT(*portptr))
       return CURLUE_BAD_PORT_NUMBER;
 
-    errno = 0;
+    CURL_SETERRNO(0);
     port = strtoul(portptr, &rest, 10);  /* Port number must be decimal */
 
     if(errno || (port > 0xffff) || *rest)
@@ -615,7 +615,7 @@ static int ipv4_normalize(struct dynbuf *host)
   if(*c == '[')
     return HOST_IPV6;
 
-  errno = 0; /* for strtoul */
+  CURL_SETERRNO(0); /* for strtoul */
   while(!done) {
     char *endp = NULL;
     unsigned long l;
@@ -1760,7 +1760,7 @@ CURLUcode curl_url_set(CURLU *u, CURLUPart what,
       char *tmp;
       char *endp;
       unsigned long port;
-      errno = 0;
+      CURL_SETERRNO(0);
       port = strtoul(part, &endp, 10);  /* must be decimal */
       if(errno || (port > 0xffff) || *endp)
         /* weirdly provided number, not good! */
