@@ -1396,18 +1396,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
       ])
     fi
     if test "$curl_win32_file_api" = "no"; then
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-        ]],[[
-          #if defined(_WIN32_WCE) || defined(__MINGW32__) || defined(_MSC_VER)
-            int dummy=1;
-          #else
-            #error Win32 small file API not supported.
-          #endif
-        ]])
-      ],[
-        curl_win32_file_api="win32_small_files"
-      ])
+      curl_win32_file_api="win32_small_files"
     fi
   fi
   case "$curl_win32_file_api" in
