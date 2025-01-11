@@ -238,7 +238,7 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-/* No large file support on Windows CE */
+/* Windows CE does not support large files */
 
 /* ---------------------------------------------------------------- */
 /*                           LDAP SUPPORT                           */
