@@ -1378,40 +1378,31 @@ dnl Check if curl's Win32 large file will be used
 
 AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
-  AC_MSG_CHECKING([whether build target supports Win32 file API])
-  curl_win32_file_api="no"
-  if test "$curl_cv_native_windows" = "yes"; then
-    if test x"$enable_largefile" != "xno"; then
-      AC_COMPILE_IFELSE([
-        AC_LANG_PROGRAM([[
-        ]],[[
-          #if !defined(_WIN32_WCE) && defined(__MINGW32__)
-            int dummy=1;
-          #else
-            #error Win32 large file API not supported.
-          #endif
-        ]])
-      ],[
-        curl_win32_file_api="win32_large_files"
-      ])
-    fi
-    if test "$curl_win32_file_api" = "no"; then
-      curl_win32_file_api="win32_small_files"
-    fi
+  if test "$curl_cv_native_windows" = 'yes'; then
+    AC_MSG_CHECKING([whether build target supports Win32 large files])
+    case $host_os in
+      mingw32ce*|cegcc*)
+        curl_win32_has_largefile='no'  dnl Windows CE does not support large files
+        ;;
+      *)
+        curl_win32_has_largefile='yes'  dnl All mingw-w64 versions support large files
+        ;;
+    esac
+    case "$curl_win32_has_largefile" in
+      yes)
+        if test x"$enable_largefile" = 'xno'; then
+          AC_MSG_RESULT([yes (large file disabled)])
+        else
+          AC_MSG_RESULT([yes (large file enabled)])
+          AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
+            [Define to 1 if you are building a Windows target with large file support.])
+        fi
+        ;;
+      *)
+        AC_MSG_RESULT([no])
+        ;;
+    esac
   fi
-  case "$curl_win32_file_api" in
-    win32_large_files)
-      AC_MSG_RESULT([yes (large file enabled)])
-      AC_DEFINE_UNQUOTED(USE_WIN32_LARGE_FILES, 1,
-        [Define to 1 if you are building a Windows target with large file support.])
-      ;;
-    win32_small_files)
-      AC_MSG_RESULT([yes (large file disabled)])
-      ;;
-    *)
-      AC_MSG_RESULT([no])
-      ;;
-  esac
 ])
 
 dnl CURL_CHECK_WIN32_CRYPTO
