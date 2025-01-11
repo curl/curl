@@ -602,7 +602,7 @@ static int ipv4_normalize(struct dynbuf *host)
   if(*c == '[')
     return HOST_IPV6;
 
-  errno = 0; /* for strtoul */
+  CURL_SETERRNO(0); /* for strtoul */
   while(!done) {
     int rc;
     curl_off_t l;

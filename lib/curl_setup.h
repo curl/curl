@@ -835,6 +835,7 @@
 
 /* Terrible workaround to make Windows CE compile */
 #define errno  0
+#define CURL_SETERRNO(x) do { (void)x; } while(0)
 #define EAGAIN 11
 #define ENOMEM 12
 #define EACCES 13
@@ -842,6 +843,8 @@
 #define EISDIR 21
 #define ENOSPC 28
 #define ERANGE 34
+#else
+#define CURL_SETERRNO(x) do { errno = x; } while(0)
 #endif
 
 /*

@@ -230,7 +230,7 @@ static ParameterError getnum(long *val, const char *str, int base)
     long num;
     if(!str[0])
       return PARAM_BLANK_STRING;
-    errno = 0;
+    CURL_SETERRNO(0);
     num = strtol(str, &endptr, base);
     if(errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
@@ -319,7 +319,7 @@ static ParameterError str2double(double *val, const char *str, double max)
   if(str) {
     char *endptr;
     double num;
-    errno = 0;
+    CURL_SETERRNO(0);
     num = strtod(str, &endptr);
     if(errno == ERANGE)
       return PARAM_NUMBER_TOO_LARGE;
@@ -577,7 +577,7 @@ ParameterError str2offset(curl_off_t *val, const char *str)
       return PARAM_BAD_NUMERIC;
   }
 #else
-  errno = 0;
+  CURL_SETERRNO(0);
   *val = strtol(str, &endptr, 0);
   if((*val == LONG_MIN || *val == LONG_MAX) && errno == ERANGE)
     return PARAM_NUMBER_TOO_LARGE;
