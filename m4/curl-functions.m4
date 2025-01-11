@@ -4509,19 +4509,21 @@ AC_DEFUN([CURL_SIZEOF], [
   r=0
   dnl Check the sizes in a reasonable order
   for typesize in 8 4 2 16 1; do
-    AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
-#include <sys/types.h>
-$2
-]],
-    [switch(0) {
-      case 0:
-      case (sizeof($1) == $typesize):;
-    }
-    ]) ],
-      [
-        r=$typesize],
-      [
-        r=0])
+    AC_COMPILE_IFELSE([
+      AC_LANG_PROGRAM([[
+        #include <sys/types.h>
+        $2
+      ]],[
+        switch(0) {
+          case 0:
+          case (sizeof($1) == $typesize):;
+        }
+      ])
+    ],[
+      r=$typesize
+    ],[
+      r=0
+    ])
     dnl get out of the loop once matched
     if test $r -gt 0; then
       break;
