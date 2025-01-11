@@ -34,7 +34,6 @@ foreach(_target IN LISTS check_PROGRAMS)
   add_dependencies(curl-examples ${_target_name})
   target_link_libraries(${_target_name} ${LIB_SELECTED} ${CURL_LIBS})
   target_compile_definitions(${_target_name} PRIVATE "CURL_NO_OLDIES"
-    "$<$<BOOL:MSVC>:_CRT_NONSTDC_NO_DEPRECATE>"
     "$<$<BOOL:MSVC>:_CRT_SECURE_NO_DEPRECATE>")
   if(LIB_SELECTED STREQUAL LIB_STATIC AND WIN32)
     set_property(TARGET ${_target_name} APPEND PROPERTY COMPILE_DEFINITIONS "CURL_STATICLIB")
