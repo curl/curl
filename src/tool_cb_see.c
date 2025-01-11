@@ -49,7 +49,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
 {
   struct per_transfer *per = userdata;
 
-#if(SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
+#if (SIZEOF_CURL_OFF_T > SIZEOF_OFF_T) && !defined(USE_WIN32_LARGE_FILES)
 
   /* The offset check following here is only interesting if curl_off_t is
      larger than off_t and we are not using the Win32 large file support
