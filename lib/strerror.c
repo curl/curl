@@ -911,7 +911,7 @@ const char *Curl_strerror(int err, char *buf, size_t buflen)
     *p = '\0';
 
   if(errno != old_errno)
-    errno = old_errno;
+    CURL_SETERRNO(old_errno);
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   if(old_win_err != GetLastError())
@@ -951,7 +951,7 @@ const char *Curl_winapi_strerror(DWORD err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    errno = old_errno;
+    CURL_SETERRNO(old_errno);
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   if(old_win_err != GetLastError())
@@ -1100,7 +1100,7 @@ const char *Curl_sspi_strerror(int err, char *buf, size_t buflen)
 #endif
 
   if(errno != old_errno)
-    errno = old_errno;
+    CURL_SETERRNO(old_errno);
 
 #ifdef PRESERVE_WINDOWS_ERROR_CODE
   if(old_win_err != GetLastError())
