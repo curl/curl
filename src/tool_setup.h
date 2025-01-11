@@ -105,6 +105,8 @@ int tool_ftruncate64(int fd, curl_off_t where);
 #  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
 #  undef _get_osfhandle
 #  define _get_osfhandle(fd) (fd)
+#  undef isatty
+#  define isatty(fd) (0)
 #endif
 
 #endif /* _WIN32 && ! HAVE_FTRUNCATE */
