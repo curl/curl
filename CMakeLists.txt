@@ -1900,7 +1900,7 @@ if(MSVC)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /W4")
   endif()
 
-  # Use multithreaded compilation on VS 2008+
+  # Use multithreaded compilation on VS2008+
   if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1500)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /MP")
   endif()
