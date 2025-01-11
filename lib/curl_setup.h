@@ -100,10 +100,10 @@
  * Make sure to define this macro before including any Windows headers.
  */
 #  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
+#  define WIN32_LEAN_AND_MEAN
 #  endif
 #  ifndef NOGDI
-#    define NOGDI
+#  define NOGDI
 #  endif
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
@@ -173,7 +173,7 @@
 
 #ifdef NEED_THREAD_SAFE
 #  ifndef _THREAD_SAFE
-#    define _THREAD_SAFE
+#  define _THREAD_SAFE
 #  endif
 #endif
 
@@ -185,14 +185,14 @@
 
 #ifdef NEED_REENTRANT
 #  ifndef _REENTRANT
-#    define _REENTRANT
+#  define _REENTRANT
 #  endif
 #endif
 
 /* Solaris needs this to get a POSIX-conformant getpwuid_r */
 #if defined(sun) || defined(__sun)
 #  ifndef _POSIX_PTHREAD_SEMANTICS
-#    define _POSIX_PTHREAD_SEMANTICS 1
+#  define _POSIX_PTHREAD_SEMANTICS 1
 #  endif
 #endif
 
