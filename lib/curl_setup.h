@@ -497,7 +497,7 @@
  * Small file (<2Gb) support using Win32 functions.
  */
 
-#ifdef USE_WIN32_SMALL_FILES
+#if defined(_WIN32) && !defined(USE_WIN32_LARGE_FILES)
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>

@@ -387,22 +387,13 @@ Vista
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #  define USE_WIN32_LARGE_FILES
-#endif
-
-#if defined(__MINGW32__) && !defined(USE_WIN32_LARGE_FILES)
-#  define USE_WIN32_LARGE_FILES
-#endif
-
-#if !defined(USE_WIN32_LARGE_FILES) && !defined(USE_WIN32_SMALL_FILES)
-#  define USE_WIN32_SMALL_FILES
-#endif
-
 /* Number of bits in a file offset, on hosts where this is settable. */
-#if defined(USE_WIN32_LARGE_FILES) && defined(__MINGW32__)
-#  ifndef _FILE_OFFSET_BITS
-#  define _FILE_OFFSET_BITS 64
+#  ifdef __MINGW32__
+#    ifndef _FILE_OFFSET_BITS
+#    define _FILE_OFFSET_BITS 64
+#    endif
 #  endif
 #endif
 

@@ -32,7 +32,7 @@
 
 #include "curl_setup.h"
 
-#if defined(_WIN32)
+#ifdef _WIN32
 
 #include "curl_multibyte.h"
 
@@ -83,10 +83,6 @@ char *curlx_convert_wchar_to_UTF8(const wchar_t *str_w)
 
   return str_utf8;
 }
-
-#endif /* _WIN32 */
-
-#if defined(USE_WIN32_LARGE_FILES) || defined(USE_WIN32_SMALL_FILES)
 
 /* declare GetFullPathNameW for mingw-w64 UWP builds targeting old windows */
 #if defined(CURL_WINDOWS_UWP) && defined(__MINGW32__) && \
@@ -329,7 +325,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
       target = fixed;
     else
       target = path_w;
-#if defined(USE_WIN32_SMALL_FILES)
+#ifndef USE_WIN32_LARGE_FILES
     result = _wstat(target, buffer);
 #else
     result = _wstati64(target, buffer);
@@ -343,7 +339,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     target = fixed;
   else
     target = path;
-#if defined(USE_WIN32_SMALL_FILES)
+#ifndef USE_WIN32_LARGE_FILES
   result = _stat(target, buffer);
 #else
   result = _stati64(target, buffer);
@@ -354,4 +350,4 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
   return result;
 }
 
-#endif /* USE_WIN32_LARGE_FILES || USE_WIN32_SMALL_FILES */
+#endif /* _WIN32 */
