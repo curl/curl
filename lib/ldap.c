@@ -1087,7 +1087,7 @@ static int _ldap_url_parse(struct Curl_easy *data,
     ludp = NULL;
   }
   *ludpp = ludp;
-  return (rc);
+  return rc;
 }
 
 static void _ldap_free_urldesc(LDAPURLDesc *ludp)
