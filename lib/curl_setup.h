@@ -829,6 +829,11 @@
 #include "curl_setup_once.h"
 #endif
 
+/* Windows CE does not support getenv() */
+#ifdef UNDER_CE
+#define getenv curl_getenv
+#endif
+
 /*
  * Definition of our NOP statement Object-like macro
  */
