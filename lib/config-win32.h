@@ -393,7 +393,7 @@ Vista
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
+#if defined(_MSC_VER)
 #  define USE_WIN32_LARGE_FILES
 #endif
 
