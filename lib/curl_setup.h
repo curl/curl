@@ -493,11 +493,6 @@
 #  define LSEEK_ERROR                (offset_t)-1
 #endif
 
-#if defined(_MSC_VER) && (_MSC_VER == 1310)
-/* VS2003 misses the declaration in stdio.h, but the CRT has it */
-extern int __cdecl _fseeki64(FILE *stream, __int64 offset, int whence);
-#endif
-
 /*
  * Small file (<2Gb) support using Win32 functions.
  */
