@@ -3003,7 +3003,8 @@ static CURLcode cacertpaths(struct OperationConfig *config)
       fclose(cafile);
       config->cacert = strdup(cacert);
     }
-#elif !defined(CURL_WINDOWS_UWP) && !defined(CURL_DISABLE_CA_SEARCH)
+#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE) && \
+  !defined(CURL_DISABLE_CA_SEARCH)
     result = FindWin32CACert(config, TEXT("curl-ca-bundle.crt"));
     if(result)
       goto fail;

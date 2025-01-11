@@ -40,7 +40,7 @@
 /* return 0 on success, 1 on error */
 int Curl_rename(const char *oldpath, const char *newpath)
 {
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
   /* rename() on Windows does not overwrite, so we cannot use it here.
      MoveFileEx() will overwrite and is usually atomic, however it fails
      when there are open handles to the file. */

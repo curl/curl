@@ -64,7 +64,7 @@ int parseconfig(const char *filename, struct GlobalConfig *global)
       }
       filename = pathalloc = curlrc;
     }
-#ifdef _WIN32 /* Windows */
+#if defined(_WIN32) && !defined(UNDER_CE)
     else {
       char *fullp;
       /* check for .curlrc then _curlrc in the dir of the executable */
