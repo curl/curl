@@ -138,7 +138,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
   struct OperationConfig *config = per->config;
   size_t bytes = sz * nmemb;
   bool is_tty = config->global->isatty;
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
   CONSOLE_SCREEN_BUFFER_INFO console_info;
   intptr_t fhnd;
 #endif
@@ -210,7 +210,7 @@ size_t tool_write_cb(char *buffer, size_t sz, size_t nmemb, void *userdata)
     }
   }
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
   fhnd = _get_osfhandle(fileno(outs->stream));
   /* if Windows console then UTF-8 must be converted to UTF-16 */
   if(isatty(fileno(outs->stream)) &&

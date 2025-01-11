@@ -175,7 +175,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
  */
 HMODULE Curl_load_library(LPCTSTR filename)
 {
-#ifndef CURL_WINDOWS_UWP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   HMODULE hModule = NULL;
   LOADLIBRARYEX_FN pLoadLibraryEx = NULL;
 
