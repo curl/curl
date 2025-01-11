@@ -180,7 +180,7 @@ if(WIN32)
   endif()
 
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
-  if(WINDOWS_STORE)
+  if(WINDOWS_STORE OR WINCE)
     set(ENABLE_UNICODE ON)
   endif()
   if(ENABLE_UNICODE)
