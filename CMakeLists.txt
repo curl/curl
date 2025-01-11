@@ -204,6 +204,12 @@ if(WIN32)
   if(WINDOWS_STORE OR WINCE)
     set(ENABLE_UNICODE ON)
   endif()
+  if(CEGCC)
+    # CMake's Modules/Compiler/GNU.cmake (as of v3.30.3) sets this to '-fPIC'.
+    # This confuses the toolchain and breaks building executables. Zap this
+    # option as a workaround.
+    set(CMAKE_C_COMPILE_OPTIONS_PIC "")
+  endif()
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
@@ -241,7 +247,7 @@ if(WIN32)
     unset(MINGW64_VERSION CACHE)  # Avoid storing in CMake cache
   endif()
 endif()
-if(DOS OR AMIGA OR WINCE)
+if(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_STATIC_LIBS ON)
 endif()
