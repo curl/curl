@@ -238,9 +238,7 @@
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-#if defined(_MSC_VER) && !defined(_WIN32_WCE)
-#  define USE_WIN32_LARGE_FILES
-#endif
+/* No large file support on Windows CE */
 
 /* ---------------------------------------------------------------- */
 /*                           LDAP SUPPORT                           */
