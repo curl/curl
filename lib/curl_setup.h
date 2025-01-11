@@ -107,14 +107,14 @@
 #  endif
 /* Detect Windows App environment which has a restricted access
  * to the Win32 APIs. */
-# if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
-  defined(WINAPI_FAMILY)
-#  include <winapifamily.h>
-#  if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
-     !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
-#    define CURL_WINDOWS_UWP
+#  if (defined(_WIN32_WINNT) && (_WIN32_WINNT >= 0x0602)) || \
+     defined(WINAPI_FAMILY)
+#    include <winapifamily.h>
+#    if WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_APP) &&  \
+       !WINAPI_FAMILY_PARTITION(WINAPI_PARTITION_DESKTOP)
+#      define CURL_WINDOWS_UWP
+#    endif
 #  endif
-# endif
 #endif
 
 /* Compatibility */
@@ -443,9 +443,9 @@
 #include <assert.h>
 
 #ifdef __TANDEM /* for ns*-tandem-nsk systems */
-# if ! defined __LP64
-#  include <floss.h> /* FLOSS is only used for 32-bit builds. */
-# endif
+#  if ! defined __LP64
+#    include <floss.h> /* FLOSS is only used for 32-bit builds. */
+#  endif
 #endif
 
 #ifndef STDC_HEADERS /* no standard C headers! */
@@ -513,11 +513,11 @@
 #endif
 
 #ifndef struct_stat
-#  define struct_stat struct stat
+#define struct_stat struct stat
 #endif
 
 #ifndef LSEEK_ERROR
-#  define LSEEK_ERROR (off_t)-1
+#define LSEEK_ERROR (off_t)-1
 #endif
 
 #ifndef SIZEOF_TIME_T
@@ -588,8 +588,8 @@
 #  endif
 #  define CURL_UINT64_SUFFIX  CURL_SUFFIX_CURL_OFF_TU
 #  define CURL_UINT64_C(val)  CURL_CONC_MACROS(val,CURL_UINT64_SUFFIX)
-# define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
-# define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
+#  define FMT_PRId64  CURL_FORMAT_CURL_OFF_T
+#  define FMT_PRIu64  CURL_FORMAT_CURL_OFF_TU
 #endif
 
 #define FMT_OFF_T CURL_FORMAT_CURL_OFF_T
@@ -843,7 +843,7 @@
  */
 
 #ifndef Curl_nop_stmt
-#  define Curl_nop_stmt do { } while(0)
+#define Curl_nop_stmt do { } while(0)
 #endif
 
 /*
