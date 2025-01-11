@@ -2056,7 +2056,7 @@ message(STATUS "Protocols: ${_support_protocols_lower}")
 # Clear list and try to detect available features
 set(_items "")
 curl_add_if("SSL"           _ssl_enabled)
-curl_add_if("IPv6"          ENABLE_IPV6)
+curl_add_if("IPv6"          USE_IPV6)
 curl_add_if("UnixSockets"   USE_UNIX_SOCKETS)
 curl_add_if("libz"          HAVE_LIBZ)
 curl_add_if("brotli"        HAVE_BROTLI)
