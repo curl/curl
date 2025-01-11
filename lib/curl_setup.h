@@ -843,6 +843,7 @@
 #define EISDIR 21
 #define ENOSPC 28
 #define ERANGE 34
+#define strerror(x) "?"
 #else
 #define CURL_SETERRNO(x) do { errno = x; } while(0)
 #endif
