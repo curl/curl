@@ -118,8 +118,8 @@
 #endif
 
 /* Compatibility */
-#if defined(ENABLE_IPV6)
-#  define USE_IPV6 1
+#ifdef ENABLE_IPV6
+#define USE_IPV6 1
 #endif
 
 /*
