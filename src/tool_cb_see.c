@@ -80,7 +80,7 @@ int tool_seek_cb(void *userdata, curl_off_t offset, int whence)
   }
 #endif
 
-#ifdef __AMIGA__
+#if defined(__AMIGA__) || defined(__MINGW32CE__)
   if(LSEEK_ERROR == lseek(per->infd, (off_t)offset, whence))
 #else
   if(LSEEK_ERROR == lseek(per->infd, offset, whence))
