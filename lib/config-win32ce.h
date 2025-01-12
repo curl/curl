@@ -78,9 +78,7 @@
 /* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
-#if defined(__MINGW32__)
-#define HAVE_UNISTD_H 1
-#endif
+/* #define HAVE_UNISTD_H 1 */
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
@@ -118,9 +116,7 @@
 /* #define HAVE_STRDUP 1 */
 
 /* Define if you have the strtoll function. */
-#if defined(__MINGW32__)
-#define HAVE_STRTOLL 1
-#endif
+/* #define HAVE_STRTOLL 1 */
 
 /* Define if you have the utime function. */
 #define HAVE_UTIME 1
