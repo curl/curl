@@ -28,12 +28,6 @@
 /*               Hand crafted config file for RISC OS               */
 /* ================================================================ */
 
-/* Name of this package! */
-#undef PACKAGE
-
-/* Version number of this archive. */
-#undef VERSION
-
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
 #define CURL_OS "ARM-RISC OS"
@@ -179,9 +173,6 @@
 
 /* Define if you have the <unistd.h> header file. */
 #define HAVE_UNISTD_H
-
-/* Name of package */
-#undef PACKAGE
 
 /* The size of `int', as computed by sizeof. */
 #define SIZEOF_INT 4

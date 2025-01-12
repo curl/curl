@@ -631,24 +631,6 @@
 /* cpu-machine-OS */
 #cmakedefine CURL_OS ${CURL_OS}
 
-/* Name of package */
-#cmakedefine PACKAGE ${PACKAGE}
-
-/* Define to the address where bug reports for this package should be sent. */
-#cmakedefine PACKAGE_BUGREPORT ${PACKAGE_BUGREPORT}
-
-/* Define to the full name of this package. */
-#cmakedefine PACKAGE_NAME ${PACKAGE_NAME}
-
-/* Define to the full name and version of this package. */
-#cmakedefine PACKAGE_STRING ${PACKAGE_STRING}
-
-/* Define to the one symbol short name of this package. */
-#cmakedefine PACKAGE_TARNAME ${PACKAGE_TARNAME}
-
-/* Define to the version of this package. */
-#cmakedefine PACKAGE_VERSION ${PACKAGE_VERSION}
-
 /*
  Note: SIZEOF_* variables are fetched with CMake through check_type_size().
  As per CMake documentation on CheckTypeSize, C preprocessor code is
@@ -796,9 +778,6 @@ ${SIZEOF_TIME_T_CODE}
 
 /* enable multiple SSL backends */
 #cmakedefine CURL_WITH_MULTI_SSL 1
-
-/* Version number of package */
-#cmakedefine VERSION ${VERSION}
 
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}

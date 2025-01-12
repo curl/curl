@@ -35,13 +35,6 @@
 #ifndef CURL_OS
 #define CURL_OS "plan9"
 #endif
-#define PACKAGE "curl"
-#define PACKAGE_NAME "curl"
-#define PACKAGE_BUGREPORT "a suitable mailing list: https://curl.se/mail/"
-#define PACKAGE_STRING "curl -"
-#define PACKAGE_TARNAME "curl"
-#define PACKAGE_VERSION "-"
-#define VERSION "0.0.0" /* TODO */
 
 #define STDC_HEADERS 1
 

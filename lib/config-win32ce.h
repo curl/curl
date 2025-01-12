@@ -78,9 +78,7 @@
 /* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
-#if defined(__MINGW32__)
-#define HAVE_UNISTD_H 1
-#endif
+/* #define HAVE_UNISTD_H 1 */
 
 /* ---------------------------------------------------------------- */
 /*                        OTHER HEADER INFO                         */
@@ -118,9 +116,7 @@
 /* #define HAVE_STRDUP 1 */
 
 /* Define if you have the strtoll function. */
-#if defined(__MINGW32__)
-#define HAVE_STRTOLL 1
-#endif
+/* #define HAVE_STRTOLL 1 */
 
 /* Define if you have the utime function. */
 #define HAVE_UTIME 1
@@ -172,11 +168,7 @@
 #define in_addr_t unsigned long
 
 /* Define if ssize_t is not an available 'typedefed' type. */
-#if defined(_WIN64)
-#define ssize_t __int64
-#else
 #define ssize_t int
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                            TYPE SIZES                            */
@@ -192,11 +184,7 @@
 #define SIZEOF_LONG 4
 
 /* Define to the size of `size_t', as computed by sizeof. */
-#if defined(_WIN64)
-#  define SIZEOF_SIZE_T 8
-#else
-#  define SIZEOF_SIZE_T 4
-#endif
+#define SIZEOF_SIZE_T 4
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
@@ -249,9 +237,6 @@
 #ifndef CURL_OS
 #define CURL_OS "i386-pc-win32ce"
 #endif
-
-/* Name of package */
-#define PACKAGE "curl"
 
 /* ---------------------------------------------------------------- */
 /*                            Windows CE                            */
