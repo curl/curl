@@ -267,7 +267,7 @@ int curlx_win32_open(const char *filename, int oflag, ...)
     curlx_unicodefree(filename_w);
   }
   else
-    errno = EINVAL;
+    CURL_SETERRNO(EINVAL);
 #else
   if(fix_excessive_path(filename, &fixed))
     target = fixed;
@@ -297,7 +297,7 @@ FILE *curlx_win32_fopen(const char *filename, const char *mode)
     result = _wfopen(target, mode_w);
   }
   else
-    errno = EINVAL;
+    CURL_SETERRNO(EINVAL);
   curlx_unicodefree(filename_w);
   curlx_unicodefree(mode_w);
 #else
@@ -333,7 +333,7 @@ int curlx_win32_stat(const char *path, struct_stat *buffer)
     curlx_unicodefree(path_w);
   }
   else
-    errno = EINVAL;
+    CURL_SETERRNO(EINVAL);
 #else
   if(fix_excessive_path(path, &fixed))
     target = fixed;
