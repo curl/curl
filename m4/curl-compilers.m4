@@ -1113,6 +1113,11 @@ AC_DEFUN([CURL_SET_COMPILER_WARNING_OPTS], [
             fi
           fi
         fi
+        if test "$curl_cv_wince" = 'yes'; then
+          dnl Workaround for false-positives with CeGCC (GCC 4.4)
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-shadow"
+          tmp_CFLAGS="$tmp_CFLAGS -Wno-unreachable-code"
+        fi
         ;;
         #
       HP_UX_C)
