@@ -210,8 +210,8 @@ CURLcode Curl_ssl_session_export(struct Curl_easy *data,
 
 #else /* USE_SSL */
 
-#define Curl_ssl_scache_create(x,y) CURLE_OK
-#define Curl_ssl_scache_destroy(x) CURLE_OK
+#define Curl_ssl_scache_create(x,y,z) ((void)x, CURLE_OK)
+#define Curl_ssl_scache_destroy(x) do {} while(0)
 
 #endif /* USE_SSL (else) */
 
