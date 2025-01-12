@@ -2633,7 +2633,11 @@ dnl ----------------------------
 dnl check Windows Unicode option
 dnl ----------------------------
 
-want_winuni="no"
+if test "$curl_cv_wince" = 'yes'; then
+  want_winuni="yes"
+else
+  want_winuni="no"
+fi
 if test "$curl_cv_native_windows" = "yes"; then
   AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
   AC_ARG_ENABLE(windows-unicode,
