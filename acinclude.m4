@@ -1381,7 +1381,7 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   if test "$curl_cv_native_windows" = 'yes'; then
     AC_MSG_CHECKING([whether build target supports Win32 large files])
     case $host_os in
-      mingw32ce* | cegcc*)
+      mingw32ce*|cegcc*)
         curl_win32_has_largefile='no'  dnl Windows CE does not support large files
         ;;
       *)
