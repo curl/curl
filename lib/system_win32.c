@@ -96,9 +96,15 @@ CURLcode Curl_win32_init(long flags)
   s_hIpHlpApiDll = Curl_load_library(TEXT("iphlpapi.dll"));
   if(s_hIpHlpApiDll) {
     /* Get the address of the if_nametoindex function */
+#ifdef UNDER_CE
+    #define CURL_TEXT(n) TEXT(n)
+#else
+    #define CURL_TEXT(n) (n)
+#endif
     IF_NAMETOINDEX_FN pIfNameToIndex =
       CURLX_FUNCTION_CAST(IF_NAMETOINDEX_FN,
-                          (GetProcAddress(s_hIpHlpApiDll, "if_nametoindex")));
+                          (GetProcAddress(s_hIpHlpApiDll,
+                                          CURL_TEXT("if_nametoindex"))));
 
     if(pIfNameToIndex)
       Curl_if_nametoindex = pIfNameToIndex;
