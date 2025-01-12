@@ -460,7 +460,7 @@ Vista
 #ifndef CURL_OS
 #if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
 #define CURL_OS "i386-pc-win32"
-#elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (MSVC >=2005 or gcc) */
+#elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
 #define CURL_OS "x86_64-pc-win32"
 #elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
 #define CURL_OS "ia64-pc-win32"
