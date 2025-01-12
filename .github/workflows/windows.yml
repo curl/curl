@@ -118,7 +118,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          find . -name '*.exe' -o -name '*.dll'
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
@@ -294,7 +294,7 @@ jobs:
             # avoid libtool's curl.exe wrapper
             mv bld/src/.libs/curl.exe bld/src/curl.exe
           fi
-          find . -name '*.exe' -o -name '*.dll'
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
             bld/src/curl.exe --disable --version
           fi
@@ -356,8 +356,8 @@ jobs:
             make -C bld -j5 V=1 examples
           fi
 
-  old-mingw-w64:
-    name: 'old-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
+  mingw-w64-standalone-downloads:
+    name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
@@ -446,7 +446,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          PATH=/usr/bin find . -name '*.exe' -o -name '*.dll'
+          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           PATH="$PWD/bld/lib:$PATH"
           bld/src/curl.exe --disable --version
 
@@ -541,6 +541,10 @@ jobs:
           else
             make -C bld -j5
           fi
+
+      - name: 'curl info'
+        run: |
+          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
@@ -722,7 +726,7 @@ jobs:
       - name: 'curl version'
         timeout-minutes: 1
         run: |
-          PATH=/usr/bin find . -name '*.exe' -o -name '*.dll'
+          PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
           if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib:$PATH"
             bld/src/curl.exe --disable --version

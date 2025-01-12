@@ -101,7 +101,7 @@ EOF
   curl="builds/libcurl-vc14.10-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 fi
 
-find . -name '*.exe' -o -name '*.dll'
+find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
 if [ -z "${SKIP_RUN:-}" ]; then
   "${curl}" --disable --version
 else
