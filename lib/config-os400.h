@@ -30,9 +30,6 @@
 
 #pragma enum(int)
 
-/* Version number of this archive. */
-#undef VERSION
-
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
 #define CURL_OS "OS/400"

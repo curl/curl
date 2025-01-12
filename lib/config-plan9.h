@@ -35,7 +35,6 @@
 #ifndef CURL_OS
 #define CURL_OS "plan9"
 #endif
-#define VERSION "0.0.0" /* TODO */
 
 #define STDC_HEADERS 1
 

@@ -28,9 +28,6 @@
 /*               Hand crafted config file for RISC OS               */
 /* ================================================================ */
 
-/* Version number of this archive. */
-#undef VERSION
-
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
 #define CURL_OS "ARM-RISC OS"
