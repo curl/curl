@@ -1685,7 +1685,7 @@ static CURLcode http_target(struct Curl_easy *data,
       data->set.str[STRING_TARGET] : url);
     free(url);
     if(result)
-      return (result);
+      return result;
 
     if(strcasecompare("ftp", data->state.up.scheme)) {
       if(data->set.proxy_transfer_mode) {
