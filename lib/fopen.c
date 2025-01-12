@@ -105,9 +105,13 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
   *fh = fopen(filename, FOPEN_WRITETEXT);
   if(!*fh)
     goto fail;
+#ifdef _WIN32_WCE
+  memset(&sb, 0, sizeof(sb));
+#else
   if(fstat(fileno(*fh), &sb) == -1 || !S_ISREG(sb.st_mode)) {
     return CURLE_OK;
   }
+#endif
   fclose(*fh);
   *fh = NULL;
 
