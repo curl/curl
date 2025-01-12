@@ -125,7 +125,11 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
     }
   }
   else {        /* Standard input. */
+#ifdef UNDER_CE
+    int fd = 0;
+#else
     int fd = fileno(stdin);
+#endif
     char *data = NULL;
     curl_off_t size;
     curl_off_t origin;
