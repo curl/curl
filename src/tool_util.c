@@ -187,7 +187,17 @@ int struplocompare4sort(const void *p1, const void *p2)
 }
 
 #ifdef USE_TOOL_FTRUNCATE
-/* Truncate a file handle at a 64-bit position 'where'. */
+
+#ifdef _WIN32_WCE
+/* 64-bit lseek-like function unavailable */
+#  undef _lseeki64
+#  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
+#endif
+
+/*
+ * Truncate a file handle at a 64-bit position 'where'.
+ */
+
 int tool_ftruncate64(int fd, curl_off_t where)
 {
   intptr_t handle = _get_osfhandle(fd);
@@ -200,6 +210,7 @@ int tool_ftruncate64(int fd, curl_off_t where)
 
   return 0;
 }
+
 #endif /* USE_TOOL_FTRUNCATE */
 
 #if defined(_WIN32) && !defined(UNDER_CE)
