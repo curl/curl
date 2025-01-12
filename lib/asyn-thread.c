@@ -477,7 +477,7 @@ err_exit:
   destroy_async_data(data);
 
 errno_exit:
-  errno = err;
+  CURL_SETERRNO(err);
   return FALSE;
 }
 
