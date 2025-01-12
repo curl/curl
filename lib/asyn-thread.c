@@ -503,7 +503,7 @@ err_exit:
   destroy_async_data(asp);
 
 errno_exit:
-  errno = err;
+  CURL_SETERRNO(err);
   return FALSE;
 }
 
