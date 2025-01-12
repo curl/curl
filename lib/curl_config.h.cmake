@@ -779,9 +779,6 @@ ${SIZEOF_TIME_T_CODE}
 /* enable multiple SSL backends */
 #cmakedefine CURL_WITH_MULTI_SSL 1
 
-/* Version number of package */
-#cmakedefine VERSION ${VERSION}
-
 /* Number of bits in a file offset, on hosts where this is settable. */
 #cmakedefine _FILE_OFFSET_BITS ${_FILE_OFFSET_BITS}
 
