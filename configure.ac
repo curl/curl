@@ -4125,7 +4125,9 @@ if test "$curl_cv_native_windows" != 'yes'; then
 fi
 
 if test "$curl_cv_native_windows" = 'yes' -o "$curl_cv_cygwin" = 'yes'; then
-  AC_CHECK_FUNCS([_setmode])
+  if test "$curl_cv_wince" = 'no'; then
+    AC_CHECK_FUNCS([_setmode])
+  fi
 fi
 
 if test -z "$ssl_backends"; then
