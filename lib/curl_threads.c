@@ -127,9 +127,10 @@ curl_thread_t Curl_thread_create(
   if((t == 0) || (t == LongToHandle(-1L))) {
 #ifdef _WIN32_WCE
     DWORD gle = GetLastError();
-    errno = ((gle == ERROR_ACCESS_DENIED ||
-              gle == ERROR_NOT_ENOUGH_MEMORY) ?
-             EACCES : EINVAL);
+    int err = (gle == ERROR_ACCESS_DENIED ||
+               gle == ERROR_NOT_ENOUGH_MEMORY) ?
+               EACCES : EINVAL;
+    CURL_SETERRNO(err);
 #endif
     return curl_thread_t_null;
   }
