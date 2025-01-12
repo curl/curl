@@ -37,7 +37,9 @@
 
 #include "memdebug.h"
 
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6)))) || \
+  defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
@@ -1601,6 +1603,8 @@ CURLcode test(char *URL)
     return CURLE_OK;
 }
 
-#if defined(__GNUC__) || defined(__clang__)
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6)))) || \
+  defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
