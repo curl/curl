@@ -25,6 +25,16 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+enum {
+  DOCNUMBER_NOTHING = -7,
+  DOCNUMBER_QUIT    = -6,
+  DOCNUMBER_BADCONNECT = -5,
+  DOCNUMBER_INTERNAL = -4,
+  DOCNUMBER_CONNECT = -3,
+  DOCNUMBER_WERULEZ = -2,
+  DOCNUMBER_404     = -1
+};
+
 char *data_to_hex(char *data, size_t len);
 void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
 long timediff(struct timeval newer, struct timeval older);
