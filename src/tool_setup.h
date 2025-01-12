@@ -93,6 +93,8 @@ extern bool tool_term_has_bold;
 #  define isatty(fd) 0
 #  undef _get_osfhandle
 #  define _get_osfhandle(fd) (fd)
+#  undef _getch
+#  define _getch() 0
 #endif
 
 #ifndef HAVE_FTRUNCATE
