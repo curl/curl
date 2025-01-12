@@ -198,5 +198,6 @@ if(WINCE)  # Windows CE exceptions
   set(HAVE_SETLOCALE 0)
   set(HAVE_SETMODE 0)
   set(HAVE__SETMODE 0)
+  set(HAVE_SOCKADDR_IN6_SIN6_SCOPE_ID 0)
   set(HAVE_SIGNAL 0)
 endif()
