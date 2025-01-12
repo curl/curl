@@ -94,7 +94,7 @@ char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 #define DONE
 #endif /* __VMS */
 
-#if defined(_WIN32) && !defined(UNDER_CE)
+#ifdef _WIN32
 
 char *getpass_r(const char *prompt, char *buffer, size_t buflen)
 {
