@@ -473,9 +473,6 @@ Vista
 #endif
 #endif
 
-/* Name of package */
-#define PACKAGE "curl"
-
 /* If you want to build curl with the built-in manual */
 #define USE_MANUAL 1
 
