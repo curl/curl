@@ -172,11 +172,7 @@
 #define in_addr_t unsigned long
 
 /* Define if ssize_t is not an available 'typedefed' type. */
-#if defined(_WIN64)
-#define ssize_t __int64
-#else
 #define ssize_t int
-#endif
 
 /* ---------------------------------------------------------------- */
 /*                            TYPE SIZES                            */
@@ -192,11 +188,7 @@
 #define SIZEOF_LONG 4
 
 /* Define to the size of `size_t', as computed by sizeof. */
-#if defined(_WIN64)
-#  define SIZEOF_SIZE_T 8
-#else
-#  define SIZEOF_SIZE_T 4
-#endif
+#define SIZEOF_SIZE_T 4
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
