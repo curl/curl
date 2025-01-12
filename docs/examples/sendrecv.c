@@ -53,7 +53,8 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
  * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
  * may change the sign of the result [-Wsign-conversion]
  */
-#if defined(__GNUC__)
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wsign-conversion"
 #if defined(__DJGPP__)
@@ -71,7 +72,8 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   else {
     FD_SET(sockfd, &outfd);
   }
-#if defined(__GNUC__)
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
 #pragma GCC diagnostic pop
 #elif defined(_MSC_VER)
 #pragma warning(pop)
