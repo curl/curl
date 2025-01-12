@@ -492,6 +492,12 @@ dnl **********************************************************************
 
 CURL_CHECK_COMPILER
 CURL_CHECK_NATIVE_WINDOWS
+
+curl_cv_wince='no'
+case $host_os in
+  mingw32ce*) curl_cv_wince='yes';;
+esac
+
 CURL_SET_COMPILER_BASIC_OPTS
 CURL_SET_COMPILER_DEBUG_OPTS
 CURL_SET_COMPILER_OPTIMIZE_OPTS
