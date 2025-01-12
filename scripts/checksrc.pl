@@ -188,7 +188,7 @@ sub readlocalfile {
             undef $banfunc{$1};
         }
         else {
-            die "Invalid format in $dir/.checksrc on line $i\n";
+            die "Invalid format in $dir/.checksrc on line $i: $_\n";
         }
     }
     close($rcfile);
@@ -768,6 +768,12 @@ sub scanfile {
                 checkwarn("RETURNNOSPACE", $line, length($1)+6, $file, $l,
                           "return without space before paren");
             }
+        }
+
+        # check for "return" with parentheses around just a value/name
+        if($l =~ /^(.*\W)return \(\w*\);/) {
+            checkwarn("RETURNPAREN", $line, length($1)+7, $file, $l,
+                      "return with paren");
         }
 
         # check for "sizeof" without parenthesis
