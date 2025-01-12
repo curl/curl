@@ -2379,7 +2379,7 @@ if(NOT CURL_DISABLE_INSTALL)
   install(FILES ${_version_config} ${_project_config}
     DESTINATION ${_install_cmake_dir})
 
-  # Workaround for MSVS10 to avoid the Dialog Hell
+  # Workaround for VS2010 to avoid the Dialog Hell
   # FIXME: This could be removed with future version of CMake.
   if(MSVC_VERSION EQUAL 1600)
     set(_curl_sln_filename "${CMAKE_CURRENT_BINARY_DIR}/CURL.sln")
