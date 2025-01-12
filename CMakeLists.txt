@@ -260,6 +260,7 @@ if(DOS OR AMIGA)
 endif()
 if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR MINGW32CE)
   if(MINGW32CE)
+    # FIXME: CMake does not create a DLL implib
     set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
     set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
