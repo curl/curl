@@ -1708,7 +1708,6 @@ check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # wi
 check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # winsock2.h net/if.h
 check_function_exists("getrlimit"       HAVE_GETRLIMIT)
 check_function_exists("setlocale"       HAVE_SETLOCALE)
-check_function_exists("setmode"         HAVE_SETMODE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
 if(NOT WIN32)
@@ -1717,8 +1716,11 @@ if(NOT WIN32)
   check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 endif()
 
-if(WIN32 OR CYGWIN)
-  check_function_exists("_setmode" HAVE__SETMODE)
+if(NOT WINCE)  # Avoid false detections for Windows CE
+  check_function_exists("setmode" HAVE_SETMODE)
+  if(WIN32 OR CYGWIN)
+    check_function_exists("_setmode" HAVE__SETMODE)
+  endif()
 endif()
 
 if(AMIGA)
