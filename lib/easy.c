@@ -48,7 +48,6 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
-#include "vtls/vtls_scache.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
@@ -765,9 +764,9 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   if(data->multi_easy)
     multi = data->multi_easy;
   else {
-    /* this multi handle will only ever have a single easy handled attached
-       to it, so make it use minimal hashes */
-    multi = Curl_multi_handle(1, 3, 7);
+    /* this multi handle will only ever have a single easy handle attached to
+       it, so make it use minimal hash sizes */
+    multi = Curl_multi_handle(1, 3, 7, 3);
     if(!multi)
       return CURLE_OUT_OF_MEMORY;
   }

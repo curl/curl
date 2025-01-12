@@ -526,12 +526,6 @@ CURLcode Curl_ssl_get_channel_binding(struct Curl_easy *data, int sockindex,
 
 void Curl_ssl_close_all(struct Curl_easy *data)
 {
-  /* kill the session ID cache if not shared */
-  if(data->state.ssl_scache && !CURL_SHARE_ssl_scache(data)) {
-    Curl_ssl_scache_destroy(data->state.ssl_scache);
-    data->state.ssl_scache = NULL;
-  }
-
   if(Curl_ssl->close_all)
     Curl_ssl->close_all(data);
 }

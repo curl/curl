@@ -46,6 +46,7 @@
 #include "multihandle.h"
 #include "sigpipe.h"
 #include "vtls/vtls.h"
+#include "vtls/vtls_scache.h"
 #include "http_proxy.h"
 #include "http2.h"
 #include "socketpair.h"
@@ -71,6 +72,10 @@
 
 #ifndef CURL_DNS_HASH_SIZE
 #define CURL_DNS_HASH_SIZE 71
+#endif
+
+#ifndef CURL_TLS_SESSION_SIZE
+#define CURL_TLS_SESSION_SIZE 25
 #endif
 
 #define CURL_MULTI_HANDLE 0x000bab1e
@@ -395,9 +400,10 @@ static void multi_addmsg(struct Curl_multi *multi, struct Curl_message *msg)
   Curl_llist_append(&multi->msglist, msg, &msg->list);
 }
 
-struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
+struct Curl_multi *Curl_multi_handle(size_t hashsize,  /* socket hash */
                                      size_t chashsize, /* connection hash */
-                                     size_t dnssize) /* dns hash */
+                                     size_t dnssize,   /* dns hash */
+                                     size_t sesssize)  /* TLS session cache */
 {
   struct Curl_multi *multi = calloc(1, sizeof(struct Curl_multi));
 
@@ -414,7 +420,10 @@ struct Curl_multi *Curl_multi_handle(size_t hashsize, /* socket hash */
                  Curl_hash_str, Curl_str_key_compare, ph_freeentry);
 
   if(Curl_cpool_init(&multi->cpool, Curl_on_disconnect,
-                         multi, NULL, chashsize))
+                     multi, NULL, chashsize))
+    goto error;
+
+  if(Curl_ssl_scache_create(sesssize, 2, &multi->ssl_scache))
     goto error;
 
   Curl_llist_init(&multi->msglist, NULL);
@@ -447,6 +456,7 @@ error:
   Curl_hash_destroy(&multi->proto_hash);
   Curl_hash_destroy(&multi->hostcache);
   Curl_cpool_destroy(&multi->cpool);
+  Curl_ssl_scache_destroy(multi->ssl_scache);
   free(multi);
   return NULL;
 }
@@ -455,7 +465,8 @@ CURLM *curl_multi_init(void)
 {
   return Curl_multi_handle(CURL_SOCKET_HASH_TABLE_SIZE,
                            CURL_CONNECTION_HASH_SIZE,
-                           CURL_DNS_HASH_SIZE);
+                           CURL_DNS_HASH_SIZE,
+                           CURL_TLS_SESSION_SIZE);
 }
 
 #if defined(DEBUGBUILD) && !defined(CURL_DISABLE_VERBOSE_STRINGS)
@@ -3136,6 +3147,7 @@ CURLMcode curl_multi_cleanup(CURLM *m)
     Curl_hash_destroy(&multi->proto_hash);
     Curl_hash_destroy(&multi->hostcache);
     Curl_psl_destroy(&multi->psl);
+    Curl_ssl_scache_destroy(multi->ssl_scache);
 
 #ifdef USE_WINSOCK
     WSACloseEvent(multi->wsa_event);

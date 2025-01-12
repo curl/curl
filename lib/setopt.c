@@ -1583,7 +1583,7 @@ static CURLcode setopt_pointers(struct Curl_easy *data, CURLoption option,
 #endif
 #ifdef USE_SSL
       if(data->share->ssl_scache == data->state.ssl_scache)
-        data->state.ssl_scache = NULL;
+        data->state.ssl_scache = data->multi ? data->multi->ssl_scache : NULL;
 #endif
 #ifdef USE_LIBPSL
       if(data->psl == &data->share->psl)
