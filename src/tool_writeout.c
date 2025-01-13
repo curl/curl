@@ -564,12 +564,7 @@ void ourWriteOut(struct OperationConfig *config, struct per_transfer *per,
         size_t vlen;
         if('{' == ptr[1]) {
           struct writeoutvar *wv = NULL;
-#ifdef __MINGW32CE__
-          struct writeoutvar find;
-          memset(&find, 0, sizeof(find));
-#else
           struct writeoutvar find = { 0 };
-#endif
           end = strchr(ptr, '}');
           ptr += 2; /* pass the % and the { */
           if(!end) {
