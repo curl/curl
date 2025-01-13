@@ -94,7 +94,11 @@ again:
 
       if(nread) {
         /* send received stuff to stdout */
+#ifdef UNDER_CE
+        if((size_t)fwrite(buf, sizeof(buf[0]), nread, stdout) != nread) {
+#else
         if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
+#endif
           fprintf(stderr, "write() failed: errno %d (%s)\n",
                   errno, strerror(errno));
           res = TEST_ERR_FAILURE;
