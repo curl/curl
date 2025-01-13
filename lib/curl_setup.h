@@ -137,7 +137,7 @@
 
 #else /* HAVE_CONFIG_H */
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
 #  include "config-win32ce.h"
 #elif defined(_WIN32)
 #  include "config-win32.h"
@@ -501,7 +501,7 @@
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifndef _WIN32_WCE
+#  ifndef UNDER_CE
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
