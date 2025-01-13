@@ -40,9 +40,6 @@
 #include <inet.h>
 #endif
 
-#include <setjmp.h>
-#include <signal.h>
-
 #include "urldata.h"
 #include "connect.h"
 #include "cfilters.h"
