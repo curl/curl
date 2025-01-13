@@ -137,7 +137,7 @@
 #    define CURL_TYPEOF_CURL_SOCKLEN_T unsigned int
 #  endif
 
-#elif defined(_WIN32_WCE)
+#elif defined(UNDER_CE)
 #  if defined(__MINGW32CE__)
 #    define CURL_TYPEOF_CURL_OFF_T     long long
 #    define CURL_FORMAT_CURL_OFF_T     "lld"
