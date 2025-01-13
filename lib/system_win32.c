@@ -156,7 +156,7 @@ typedef HMODULE (APIENTRY *LOADLIBRARYEX_FN)(LPCTSTR, HANDLE, DWORD);
 
 /* See function definitions in winbase.h */
 #ifdef UNICODE
-#  ifdef _WIN32_WCE
+#  ifdef UNDER_CE
 #    define LOADLIBARYEX  L"LoadLibraryExW"
 #  else
 #    define LOADLIBARYEX  "LoadLibraryExW"
