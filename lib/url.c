@@ -837,8 +837,8 @@ CURLcode Curl_conn_upkeep(struct Curl_easy *data,
 static bool ssh_config_matches(struct connectdata *one,
                                struct connectdata *two)
 {
-  return (Curl_safecmp(one->proto.sshc.rsa, two->proto.sshc.rsa) &&
-          Curl_safecmp(one->proto.sshc.rsa_pub, two->proto.sshc.rsa_pub));
+  return Curl_safecmp(one->proto.sshc.rsa, two->proto.sshc.rsa) &&
+         Curl_safecmp(one->proto.sshc.rsa_pub, two->proto.sshc.rsa_pub);
 }
 #else
 #define ssh_config_matches(x,y) FALSE

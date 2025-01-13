@@ -1234,8 +1234,8 @@ static bool use_http_1_1plus(const struct Curl_easy *data,
   if((data->state.httpwant == CURL_HTTP_VERSION_1_0) &&
      (conn->httpversion <= 10))
     return FALSE;
-  return ((data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
-          (data->state.httpwant >= CURL_HTTP_VERSION_1_1));
+  return (data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
+         (data->state.httpwant >= CURL_HTTP_VERSION_1_1);
 }
 
 static const char *get_http_string(const struct Curl_easy *data,
