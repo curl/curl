@@ -1077,7 +1077,7 @@ static CURLcode ossl_seed(struct Curl_easy *data)
 
   infof(data, "libcurl is now using a weak random seed");
   return rand_enough() ? CURLE_OK :
-         CURLE_SSL_CONNECT_ERROR /* confusing error code */;
+         CURLE_SSL_CONNECT_ERROR; /* confusing error code */
 #endif
 }
 
