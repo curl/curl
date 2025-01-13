@@ -3290,7 +3290,7 @@ static CURLcode ftp_done(struct Curl_easy *data, CURLcode status,
 
   /* shut down the socket to inform the server we are done */
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
   shutdown(conn->sock[SECONDARYSOCKET], 2);  /* SD_BOTH */
 #endif
 

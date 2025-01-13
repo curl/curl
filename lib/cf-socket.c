@@ -843,7 +843,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
    *    Someone got to verify this on Win-NT 4.0, 2000."
    */
 
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
   Sleep(0);
 #else
   SleepEx(0, FALSE);
@@ -853,7 +853,7 @@ static bool verifyconnect(curl_socket_t sockfd, int *error)
 
   if(0 != getsockopt(sockfd, SOL_SOCKET, SO_ERROR, (void *)&err, &errSize))
     err = SOCKERRNO;
-#ifdef _WIN32_WCE
+#ifdef UNDER_CE
   /* Old Windows CE versions do not support SO_ERROR */
   if(WSAENOPROTOOPT == err) {
     SET_SOCKERRNO(0);

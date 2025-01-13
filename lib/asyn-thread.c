@@ -259,7 +259,7 @@ static CURLcode getaddrinfo_complete(struct Curl_easy *data)
  * and wait on it.
  */
 static
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(UNDER_CE) || defined(CURL_WINDOWS_UWP)
 DWORD
 #else
 unsigned int
@@ -318,7 +318,7 @@ CURL_STDCALL getaddrinfo_thread(void *arg)
  * gethostbyname_thread() resolves a name and then exits.
  */
 static
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(UNDER_CE) || defined(CURL_WINDOWS_UWP)
 DWORD
 #else
 unsigned int

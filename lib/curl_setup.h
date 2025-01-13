@@ -499,7 +499,7 @@
 #  include <io.h>
 #  include <sys/types.h>
 #  include <sys/stat.h>
-#  ifndef _WIN32_WCE
+#  ifndef UNDER_CE
 #    undef  lseek
 #    define lseek(fdes,offset,whence)  _lseek(fdes, (long)offset, whence)
 #    define fstat(fdes,stp)            _fstat(fdes, stp)
