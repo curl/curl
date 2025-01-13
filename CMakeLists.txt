@@ -1937,10 +1937,7 @@ add_definitions("-DHAVE_CONFIG_H")
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 
-  # _fseeki64() requires VS2005
-  if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))
-    set(USE_WIN32_LARGE_FILES ON)
-  endif()
+  set(USE_WIN32_LARGE_FILES ON)
 
   # Use the manifest embedded in the Windows Resource
   string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
