@@ -226,8 +226,7 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#define USE_WIN32_LDAP 1
-#undef HAVE_LDAP_URL_PARSE
+/* Windows CE does not support LDAP */
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
