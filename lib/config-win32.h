@@ -283,7 +283,7 @@
 /* #undef HAVE_GMTIME_R */
 
 /* Define if the compiler supports the 'long long' data type. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1310)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define HAVE_LONGLONG 1
 #endif
 
