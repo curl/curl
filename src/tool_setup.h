@@ -99,6 +99,14 @@ int tool_ftruncate64(int fd, curl_off_t where);
 #define HAVE_FTRUNCATE 1
 #define USE_TOOL_FTRUNCATE 1
 
+#ifdef _WIN32_WCE
+/* 64-bit lseek-like function unavailable */
+#  undef _lseeki64
+#  define _lseeki64(hnd,ofs,whence) lseek(hnd,ofs,whence)
+#  undef _get_osfhandle
+#  define _get_osfhandle(fd) (fd)
+#endif
+
 #endif /* _WIN32 && ! HAVE_FTRUNCATE */
 
 
