@@ -682,6 +682,9 @@ ${SIZEOF_TIME_T_CODE}
 /* if Secure Transport is enabled */
 #cmakedefine USE_SECTRANSP 1
 
+/* if SSL session export support is available */
+#cmakedefine USE_SSLS_EXPORT 1
+
 /* if mbedTLS is enabled */
 #cmakedefine USE_MBEDTLS 1
 
