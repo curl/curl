@@ -389,8 +389,7 @@ Vista
 
 #ifndef UNDER_CE
 
-/* _fseeki64() requires VS2005 */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
 #  ifdef __MINGW32__
