@@ -9,7 +9,7 @@ See-also:
   - curl_share_setopt (3)
   - curl_easy_ssls_import (3)
 Protocol:
-  - All
+  - TLS
 TLS-backend:
   - GnuTLS
   - OpenSSL

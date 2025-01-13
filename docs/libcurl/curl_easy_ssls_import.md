@@ -9,7 +9,13 @@ See-also:
   - curl_share_setopt (3)
   - curl_easy_ssls_export (3)
 Protocol:
-  - All
+  - TLS
+TLS-backend:
+  - GnuTLS
+  - OpenSSL
+  - BearSSL
+  - wolfSSL
+  - mbedTLS
 Added-in: 8.12.0
 ---
 
