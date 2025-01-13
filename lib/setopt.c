@@ -2103,7 +2103,6 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
      * The URL to fetch.
      */
     if(data->state.url_alloc) {
-      /* the already set URL is allocated, free it first! */
       Curl_safefree(data->state.url);
       data->state.url_alloc = FALSE;
     }
@@ -2191,6 +2190,13 @@ static CURLcode setopt_cptr(struct Curl_easy *data, CURLoption option,
     /*
      * pass CURLU to set URL
      */
+    if(data->state.url_alloc) {
+      Curl_safefree(data->state.url);
+      data->state.url_alloc = FALSE;
+    }
+    else
+      data->state.url = NULL;
+    Curl_safefree(data->set.str[STRING_SET_URL]);
     data->set.uh = (CURLU *)ptr;
     break;
   case CURLOPT_SSLCERT:

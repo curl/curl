@@ -1,0 +1,62 @@
+<testcase>
+<info>
+<keywords>
+CURLOPT_CURLU
+CURLINFO_EFFECTIVE_URL
+</keywords>
+</info>
+
+# Server-side
+<reply>
+<data nocheck="yes">
+HTTP/1.1 200 OK
+Date: Tue, 09 Nov 2010 14:49:00 GMT
+Server: test-server/fake
+Content-Type: text/html
+Funny-head: yesyes swsclose
+
+</data>
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+<name>
+CURLOPT_CURLU and CURLINFO_EFFECTIVE_URL
+</name>
+<tool>
+lib%TESTNUMBER
+</tool>
+
+# The test does three transfers to check how CURLINFO_EFFECTIVE_URL is reported
+# when CURLOPT_CURLU changes between transfers. (Bug #15984)
+<command>
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<stdout>
+effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo
+effective URL: http://%HOSTIP:%HTTPPORT/%TESTNUMBER?foo&bar
+</stdout>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER?foo HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+GET /%TESTNUMBER?foo&bar HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
