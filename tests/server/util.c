@@ -141,9 +141,11 @@ void logmsg(const char *msg, ...)
 /* use instead of strerror() on generic Windows */
 static const char *win32_strerror(int err, char *buf, size_t buflen)
 {
+#ifndef UNDER_CE
   if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
                       FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
                      LANG_NEUTRAL, buf, (DWORD)buflen, NULL))
+#endif
     msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   return buf;
 }
