@@ -933,7 +933,7 @@ CURLMcode curl_multi_remove_handle(CURLM *m, CURL *d)
 /* Return TRUE if the application asked for multiplexing */
 bool Curl_multiplex_wanted(const struct Curl_multi *multi)
 {
-  return (multi && (multi->multiplexing));
+  return multi && multi->multiplexing;
 }
 
 /*
@@ -4150,7 +4150,7 @@ void Curl_set_in_callback(struct Curl_easy *data, bool value)
 
 bool Curl_is_in_callback(struct Curl_easy *data)
 {
-  return (data && data->multi && data->multi->in_callback);
+  return data && data->multi && data->multi->in_callback;
 }
 
 unsigned int Curl_multi_max_concurrent_streams(struct Curl_multi *multi)

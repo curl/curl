@@ -469,7 +469,7 @@ static bool invalid_octets(const char *p)
   size_t len;
   /* scan for all the octets that are *not* in cookie-octet */
   len = strcspn(p, badoctets);
-  return (p[len] != '\0');
+  return p[len] != '\0';
 }
 
 #define CERR_OK            0
@@ -1335,14 +1335,14 @@ static int cookie_sort(const void *p1, const void *p2)
   l2 = c2->path ? strlen(c2->path) : 0;
 
   if(l1 != l2)
-    return (l2 > l1) ? 1 : -1 ; /* avoid size_t <=> int conversions */
+    return (l2 > l1) ? 1 : -1; /* avoid size_t <=> int conversions */
 
   /* 2 - compare cookie domain lengths */
   l1 = c1->domain ? strlen(c1->domain) : 0;
   l2 = c2->domain ? strlen(c2->domain) : 0;
 
   if(l1 != l2)
-    return (l2 > l1) ? 1 : -1 ;  /* avoid size_t <=> int conversions */
+    return (l2 > l1) ? 1 : -1; /* avoid size_t <=> int conversions */
 
   /* 3 - compare cookie name lengths */
   l1 = c1->name ? strlen(c1->name) : 0;

@@ -1234,8 +1234,8 @@ static bool use_http_1_1plus(const struct Curl_easy *data,
   if((data->state.httpwant == CURL_HTTP_VERSION_1_0) &&
      (conn->httpversion <= 10))
     return FALSE;
-  return ((data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
-          (data->state.httpwant >= CURL_HTTP_VERSION_1_1));
+  return (data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
+         (data->state.httpwant >= CURL_HTTP_VERSION_1_1);
 }
 
 static const char *get_http_string(const struct Curl_easy *data,
@@ -4379,7 +4379,7 @@ static bool http_exp100_is_waiting(struct Curl_easy *data)
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
   if(r) {
     struct cr_exp100_ctx *ctx = r->ctx;
-    return (ctx->state == EXP100_AWAITING_CONTINUE);
+    return ctx->state == EXP100_AWAITING_CONTINUE;
   }
   return FALSE;
 }

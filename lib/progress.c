@@ -312,7 +312,7 @@ timediff_t Curl_pgrsLimitWaitTime(struct pgrs_dir *d,
   if(actual < minimum) {
     /* if it downloaded the data faster than the limit, make it wait the
        difference */
-    return (minimum - actual);
+    return minimum - actual;
   }
 
   return 0;

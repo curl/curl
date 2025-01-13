@@ -1459,7 +1459,7 @@ static bool cf_socket_data_pending(struct Curl_cfilter *cf,
 
   (void)data;
   readable = SOCKET_READABLE(ctx->sock, 0);
-  return (readable > 0 && (readable & CURL_CSELECT_IN));
+  return readable > 0 && (readable & CURL_CSELECT_IN);
 }
 
 #ifdef USE_WINSOCK

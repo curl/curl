@@ -708,8 +708,8 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
 #elif defined(USE_MSH3)
   return Curl_conn_is_msh3(data, conn, sockindex);
 #else
-  return ((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-          (conn->httpversion == 30));
+  return (conn->handler->protocol & PROTO_FAMILY_HTTP) &&
+         (conn->httpversion == 30);
 #endif
 }
 

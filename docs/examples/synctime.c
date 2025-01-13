@@ -119,7 +119,7 @@ static size_t SyncTime_CURL_WriteOutput(void *ptr, size_t size, size_t nmemb,
                                         void *stream)
 {
   fwrite(ptr, size, nmemb, stream);
-  return (nmemb*size);
+  return nmemb * size;
 }
 
 static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
@@ -171,7 +171,7 @@ static size_t SyncTime_CURL_WriteHeader(void *ptr, size_t size, size_t nmemb,
             " Server Date is no longer valid.\n");
     AutoSyncTime = 0;
   }
-  return (nmemb*size);
+  return nmemb * size;
 }
 
 static void SyncTime_CURL_Init(CURL *curl, const char *proxy_port,

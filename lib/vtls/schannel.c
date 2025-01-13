@@ -2273,11 +2273,11 @@ static bool schannel_data_pending(struct Curl_cfilter *cf,
   DEBUGASSERT(backend);
 
   if(backend->ctxt) /* SSL/TLS is in use */
-    return (backend->decdata_offset > 0 ||
-            (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
-            backend->recv_connection_closed ||
-            backend->recv_sspi_close_notify ||
-            backend->recv_unrecoverable_err);
+    return backend->decdata_offset > 0 ||
+           (backend->encdata_offset > 0 && !backend->encdata_is_incomplete) ||
+           backend->recv_connection_closed ||
+           backend->recv_sspi_close_notify ||
+           backend->recv_unrecoverable_err;
   else
     return FALSE;
 }
@@ -2467,7 +2467,7 @@ static void schannel_close(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 static int schannel_init(void)
 {
-  return (Curl_sspi_global_init() == CURLE_OK ? 1 : 0);
+  return Curl_sspi_global_init() == CURLE_OK ? 1 : 0;
 }
 
 static void schannel_cleanup(void)

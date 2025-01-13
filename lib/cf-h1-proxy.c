@@ -203,7 +203,7 @@ static void tunnel_free(struct Curl_cfilter *cf,
 
 static bool tunnel_want_send(struct h1_tunnel_state *ts)
 {
-  return (ts->tunnel_state == H1_TUNNEL_CONNECT);
+  return ts->tunnel_state == H1_TUNNEL_CONNECT;
 }
 
 static CURLcode start_CONNECT(struct Curl_cfilter *cf,

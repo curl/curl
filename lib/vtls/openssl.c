@@ -746,7 +746,7 @@ static long ossl_bio_cf_ctrl(BIO *bio, int cmd, long num, void *ptr)
 #ifdef BIO_CTRL_EOF
   case BIO_CTRL_EOF:
     /* EOF has been reached on input? */
-    return (!cf->next || !cf->next->connected);
+    return !cf->next || !cf->next->connected;
 #endif
   default:
     ret = 0;
@@ -1020,7 +1020,7 @@ static int passwd_callback(char *buf, int num, int encrypting,
  */
 static bool rand_enough(void)
 {
-  return (0 != RAND_status());
+  return 0 != RAND_status();
 }
 
 static CURLcode ossl_seed(struct Curl_easy *data)
@@ -1076,8 +1076,8 @@ static CURLcode ossl_seed(struct Curl_easy *data)
   }
 
   infof(data, "libcurl is now using a weak random seed");
-  return (rand_enough() ? CURLE_OK :
-          CURLE_SSL_CONNECT_ERROR /* confusing error code */);
+  return rand_enough() ? CURLE_OK :
+         CURLE_SSL_CONNECT_ERROR; /* confusing error code */
 #endif
 }
 
@@ -1155,7 +1155,7 @@ static int ssl_ui_writer(UI *ui, UI_STRING *uis)
  */
 static bool is_pkcs11_uri(const char *string)
 {
-  return (string && strncasecompare(string, "pkcs11:", 7));
+  return string && strncasecompare(string, "pkcs11:", 7);
 }
 
 #endif
@@ -5454,7 +5454,7 @@ static CURLcode ossl_random(struct Curl_easy *data,
   }
   /* RAND_bytes() returns 1 on success, 0 otherwise.  */
   rc = RAND_bytes(entropy, (ossl_valsize_t)curlx_uztosi(length));
-  return (rc == 1 ? CURLE_OK : CURLE_FAILED_INIT);
+  return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
 #if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)

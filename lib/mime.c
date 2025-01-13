@@ -2179,7 +2179,7 @@ static bool cr_mime_is_paused(struct Curl_easy *data,
 {
   struct cr_mime_ctx *ctx = reader->ctx;
   (void)data;
-  return (ctx->part && ctx->part->lastreadstatus == CURL_READFUNC_PAUSE);
+  return ctx->part && ctx->part->lastreadstatus == CURL_READFUNC_PAUSE;
 }
 
 static const struct Curl_crtype cr_mime = {

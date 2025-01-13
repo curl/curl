@@ -973,9 +973,9 @@ bool Curl_xfer_is_blocked(struct Curl_easy *data)
   bool want_send = ((data)->req.keepon & KEEP_SEND);
   bool want_recv = ((data)->req.keepon & KEEP_RECV);
   if(!want_send)
-    return (want_recv && Curl_cwriter_is_paused(data));
+    return want_recv && Curl_cwriter_is_paused(data);
   else if(!want_recv)
-    return (want_send && Curl_creader_is_paused(data));
+    return want_send && Curl_creader_is_paused(data);
   else
     return Curl_creader_is_paused(data) && Curl_cwriter_is_paused(data);
 }

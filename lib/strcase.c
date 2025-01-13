@@ -113,7 +113,7 @@ int curl_strequal(const char *first, const char *second)
     return casecompare(first, second);
 
   /* if both pointers are NULL then treat them as equal */
-  return (NULL == first && NULL == second);
+  return NULL == first && NULL == second;
 }
 
 static int ncasecompare(const char *first, const char *second, size_t max)
@@ -139,7 +139,7 @@ int curl_strnequal(const char *first, const char *second, size_t max)
     return ncasecompare(first, second, max);
 
   /* if both pointers are NULL then treat them as equal if max is non-zero */
-  return (NULL == first && NULL == second && max);
+  return NULL == first && NULL == second && max;
 }
 /* Copy an upper case version of the string from src to dest. The
  * strings may overlap. No more than n characters of the string are copied

@@ -295,7 +295,7 @@ static long wolfssl_bio_cf_ctrl(WOLFSSL_BIO *bio, int cmd, long num, void *ptr)
 #ifdef WOLFSSL_BIO_CTRL_EOF
   case WOLFSSL_BIO_CTRL_EOF:
     /* EOF has been reached on input? */
-    return (!cf->next || !cf->next->connected);
+    return !cf->next || !cf->next->connected;
 #endif
   default:
     ret = 0;

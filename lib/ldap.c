@@ -805,7 +805,7 @@ static int str2scope(const char *p)
     return LDAP_SCOPE_SUBTREE;
   if(strcasecompare(p, "subtree"))
     return LDAP_SCOPE_SUBTREE;
-  return (-1);
+  return -1;
 }
 
 /*
