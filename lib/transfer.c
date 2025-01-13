@@ -528,20 +528,15 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
 {
   CURLcode result = CURLE_OK;
 
-  if(!data->state.url && !data->set.uh) {
+  if(!data->set.str[STRING_SET_URL] && !data->set.uh) {
     /* we cannot do anything without URL */
     failf(data, "No URL set");
     return CURLE_URL_MALFORMAT;
   }
 
-  /* since the URL may have been redirected in a previous use of this handle */
-  if(data->state.url_alloc) {
-    /* the already set URL is allocated, free it first! */
-    Curl_safefree(data->state.url);
-    data->state.url_alloc = FALSE;
-  }
-
-  if(!data->state.url && data->set.uh) {
+  /* CURLOPT_CURLU overrides CURLOPT_URL and the contents of the CURLU handle
+     is allowed to be changed by the user between transfers */
+  if(data->set.uh) {
     CURLUcode uc;
     free(data->set.str[STRING_SET_URL]);
     uc = curl_url_get(data->set.uh,
@@ -551,6 +546,14 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
       return CURLE_URL_MALFORMAT;
     }
   }
+
+  /* since the URL may have been redirected in a previous use of this handle */
+  if(data->state.url_alloc) {
+    Curl_safefree(data->state.url);
+    data->state.url_alloc = FALSE;
+  }
+
+  data->state.url = data->set.str[STRING_SET_URL];
 
   if(data->set.postfields && data->set.set_resume_from) {
     /* we cannot */
@@ -563,7 +566,6 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.list_only = data->set.list_only;
 #endif
   data->state.httpreq = data->set.method;
-  data->state.url = data->set.str[STRING_SET_URL];
 
 #ifdef USE_SSL
   if(!data->state.ssl_scache)
