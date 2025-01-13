@@ -243,9 +243,11 @@ if(PICKY_COMPILER)
       list(APPEND _picky "-Wno-unreachable-code")
     endif()
 
-    # Old GCC versions do not support #pragma to suppress these warnings locally. Disable them globally instead.
-    if(CMAKE_COMPILER_IS_GNUCC AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
-      list(APPEND _picky "-Wno-overlength-strings")
+    # Old GCC versions do not support #pragma to suppress warnings locally. Disable globally instead.
+    if(CMAKE_COMPILER_IS_GNUCC)
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.2 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.6)
+        list(APPEND _picky "-Wno-overlength-strings")
+      endif()
     endif()
   endif()
 endif()
