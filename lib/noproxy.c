@@ -71,7 +71,7 @@ UNITTEST bool Curl_cidr4_match(const char *ipv4,    /* 1.2.3.4 address */
       return FALSE;
     return TRUE;
   }
-  return (address == check);
+  return address == check;
 }
 
 UNITTEST bool Curl_cidr6_match(const char *ipv6,

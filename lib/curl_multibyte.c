@@ -237,7 +237,7 @@ cleanup:
   free(ibuf);
   free(obuf);
 #endif
-  return (*out ? true : false);
+  return *out ? true : false;
 }
 
 int curlx_win32_open(const char *filename, int oflag, ...)

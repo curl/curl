@@ -69,7 +69,7 @@ bool Curl_auth_is_digest_supported(void)
     Curl_pSecFn->FreeContextBuffer(SecurityPackage);
   }
 
-  return (status == SEC_E_OK);
+  return status == SEC_E_OK;
 }
 
 /*

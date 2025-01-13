@@ -418,7 +418,7 @@ static SANITIZEcode msdosify(char **const sanitized, const char *file_name,
   }
 
   *sanitized = strdup(dos_name);
-  return (*sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY);
+  return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 #endif /* MSDOS */
 
@@ -547,7 +547,7 @@ static SANITIZEcode rename_if_reserved_dos(char **const sanitized,
 #endif
 
   *sanitized = strdup(fname);
-  return (*sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY);
+  return *sanitized ? SANITIZE_ERR_OK : SANITIZE_ERR_OUT_OF_MEMORY;
 }
 
 #ifdef __DJGPP__

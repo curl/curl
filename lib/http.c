@@ -4379,7 +4379,7 @@ static bool http_exp100_is_waiting(struct Curl_easy *data)
   struct Curl_creader *r = Curl_creader_get_by_type(data, &cr_exp100);
   if(r) {
     struct cr_exp100_ctx *ctx = r->ctx;
-    return (ctx->state == EXP100_AWAITING_CONTINUE);
+    return ctx->state == EXP100_AWAITING_CONTINUE;
   }
   return FALSE;
 }

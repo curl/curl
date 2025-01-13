@@ -2955,7 +2955,7 @@ bool Curl_h2_http_1_1_error(struct Curl_easy *data)
 {
   if(Curl_conn_is_http2(data, data->conn, FIRSTSOCKET)) {
     int err = Curl_conn_get_stream_error(data, data->conn, FIRSTSOCKET);
-    return (err == NGHTTP2_HTTP_1_1_REQUIRED);
+    return err == NGHTTP2_HTTP_1_1_REQUIRED;
   }
   return FALSE;
 }

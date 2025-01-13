@@ -632,7 +632,7 @@ bool Curl_ipv6works(struct Curl_easy *data)
       ipv6_works = 1;
       sclose(s);
     }
-    return (ipv6_works > 0);
+    return ipv6_works > 0;
   }
 }
 #endif /* USE_IPV6 */
