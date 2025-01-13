@@ -1,2 +1,3 @@
-enable STRERROR
-enable STRNCPY
+banfunc strerror
+banfunc strncpy
+banfunc sscanf
