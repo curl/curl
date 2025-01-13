@@ -77,7 +77,9 @@ static int upload(CURL *curlhandle, const char *remotepath,
 
   f = fopen(localpath, "rb");
   if(!f) {
+#ifndef UNDER_CE
     perror(NULL);
+#endif
     return 0;
   }
 
