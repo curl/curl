@@ -211,12 +211,6 @@ if(WIN32)
   if(WINDOWS_STORE OR WINCE)
     set(ENABLE_UNICODE ON)
   endif()
-  if(MINGW32CE)
-    # CMake's Modules/Compiler/GNU.cmake (as of v3.30.3) sets this to '-fPIC'.
-    # This confuses the toolchain and breaks building executables. Zap this
-    # option as a workaround.
-    set(CMAKE_C_COMPILE_OPTIONS_PIC "")
-  endif()
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
     if(MINGW)
@@ -260,6 +254,10 @@ if(DOS OR AMIGA)
 endif()
 if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR MINGW32CE)
   if(MINGW32CE)
+    # CMake's Modules/Compiler/GNU.cmake (as of v3.30.3) sets this to '-fPIC'.
+    # This confuses the toolchain and breaks building executables. Zap this
+    # option as a workaround.
+    set(CMAKE_C_COMPILE_OPTIONS_PIC "")
     # FIXME: CMake does not create a DLL implib
     set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
