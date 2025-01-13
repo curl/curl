@@ -678,12 +678,12 @@ static int formatf(
 
   struct outsegment output[MAX_SEGMENTS];
   struct va_input input[MAX_PARAMETERS];
-  char work[BUFFSIZE];
+  char work[BUFFSIZE + 2];
 
   /* 'workend' points to the final buffer byte position, but with an extra
      byte as margin to avoid the (FALSE?) warning Coverity gives us
      otherwise */
-  char *workend = &work[sizeof(work) - 2];
+  char *workend = &work[BUFFSIZE - 2];
 
   /* Parse the format string */
   if(parsefmt(format, output, input, &ocount, &icount, ap_save))
@@ -966,8 +966,8 @@ number:
 
       if(width >= 0) {
         size_t dlen;
-        if(width >= (int)sizeof(work))
-          width = sizeof(work)-1;
+        if(width >= BUFFSIZE)
+          width = BUFFSIZE - 1;
         /* RECURSIVE USAGE */
         dlen = (size_t)curl_msnprintf(fptr, left, "%d", width);
         fptr += dlen;
@@ -976,17 +976,19 @@ number:
       if(prec >= 0) {
         /* for each digit in the integer part, we can have one less
            precision */
-        size_t maxprec = sizeof(work) - 2;
+        int maxprec = BUFFSIZE - 1;
         double val = iptr->val.dnum;
+        if(prec > maxprec)
+          prec = maxprec - 1;
         if(width > 0 && prec <= width)
-          maxprec -= (size_t)width;
+          maxprec -= width;
         while(val >= 10.0) {
           val /= 10;
           maxprec--;
         }
 
-        if(prec > (int)maxprec)
-          prec = (int)maxprec-1;
+        if(prec > maxprec)
+          prec = maxprec - 1;
         if(prec < 0)
           prec = 0;
         /* RECURSIVE USAGE */
@@ -1012,14 +1014,19 @@ number:
       /* NOTE NOTE NOTE!! Not all sprintf implementations return number of
          output characters */
 #ifdef HAVE_SNPRINTF
-      (snprintf)(work, sizeof(work), formatbuf, iptr->val.dnum); /* NOLINT */
+      (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum); /* NOLINT */
 #else
       (sprintf)(work, formatbuf, iptr->val.dnum);
 #endif
 #ifdef __clang__
 #pragma clang diagnostic pop
 #endif
-      DEBUGASSERT(strlen(work) <= sizeof(work));
+      DEBUGASSERT(strlen(work) < BUFFSIZE);
+#ifdef __MINGW32__
+      /* Work-around for a nasty bug seen with old-mingw and gcc 7.3.0 when it
+         writes one byte more than permitted. */
+      work[BUFFSIZE - 1] = 0;
+#endif
       for(fptr = work; *fptr; fptr++)
         OUTCHAR(*fptr);
       break;

@@ -1207,6 +1207,46 @@ static int test_pos_arguments(void)
   return errors;
 }
 
+static int test_width_precision(void)
+{
+  /* 325 is max precision (and width) for a double */
+  char larger[1024];
+#define SPACE60 "                                                            "
+#define SPACE300 SPACE60 SPACE60 SPACE60 SPACE60 SPACE60
+#define OK325 SPACE300 "                        0"
+
+  int rc;
+  int errors = 0;
+  rc = curl_msnprintf(larger, sizeof(larger), "%325.325f", 0.1);
+  if(rc != 325)
+    errors++;
+  errors += string_check(larger, OK325);
+
+  rc = curl_msnprintf(larger, sizeof(larger), "%326.326f", 0.1);
+  if(rc != 325)
+    errors++;
+  errors += string_check(larger, OK325);
+
+  rc = curl_msnprintf(larger, sizeof(larger), "%1000.1000f", 0.1);
+  if(rc != 325)
+    errors++;
+  errors += string_check(larger, OK325);
+
+  rc = curl_msnprintf(larger, sizeof(larger), "%324.324f", 0.1);
+  if(rc != 324)
+    errors++;
+  rc = curl_msnprintf(larger, sizeof(larger), "%324.0f", 0.1);
+  if(rc != 324)
+    errors++;
+  rc = curl_msnprintf(larger, sizeof(larger), "%0.324f", 0.1);
+  if(rc != 325)
+    errors++;
+
+  return errors;
+}
+
+
+
 static int test_weird_arguments(void)
 {
   int errors = 0;
@@ -1319,6 +1359,8 @@ static int test_weird_arguments(void)
   }
 
   errors += string_check(buf, "");
+
+  errors += test_width_precision();
 
   if(errors)
     printf("Some curl_mprintf() weird arguments tests failed!\n");
