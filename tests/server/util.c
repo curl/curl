@@ -244,7 +244,7 @@ int wait_ms(int timeout_ms)
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    errno = EINVAL;
+    CURL_SETERRNO(EINVAL);
     return -1;
   }
 #if defined(MSDOS)
@@ -542,7 +542,7 @@ static void exit_signal_handler(int signum)
 #endif
   }
   (void)signal(signum, exit_signal_handler);
-  errno = old_errno;
+  CURL_SETERRNO(old_errno);
 }
 
 #ifdef _WIN32
