@@ -48,6 +48,7 @@
 #include <curl/curl.h>
 #include "transfer.h"
 #include "vtls/vtls.h"
+#include "vtls/vtls_scache.h"
 #include "url.h"
 #include "getinfo.h"
 #include "hostip.h"
