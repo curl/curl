@@ -505,12 +505,8 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-#ifdef _WIN32_WCE
-static DWORD thread_main_id = 0;
-#else
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 static unsigned int thread_main_id = 0;
-#endif
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
@@ -597,7 +593,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -629,12 +625,8 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 }
 /* Window message queue loop for hidden main window, details see above.
  */
-#ifdef _WIN32_WCE
-static DWORD WINAPI main_window_loop(LPVOID lpParameter)
-#else
 #include <process.h>
 static unsigned int WINAPI main_window_loop(void *lpParameter)
-#endif
 {
   WNDCLASS wc;
   BOOL ret;
@@ -768,21 +760,12 @@ void install_signal_handlers(bool keep_sigalrm)
     logmsg("cannot install CTRL event handler");
 #endif
 
-#ifndef CURL_WINDOWS_UWP
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   {
-#ifdef _WIN32_WCE
-    typedef HANDLE curl_win_thread_handle_t;
-#else
     typedef uintptr_t curl_win_thread_handle_t;
-#endif
     curl_win_thread_handle_t thread;
-#ifdef _WIN32_WCE
-    thread = CreateThread(NULL, 0, &main_window_loop,
-                          (LPVOID)GetModuleHandle(NULL), 0, &thread_main_id);
-#else
     thread = _beginthreadex(NULL, 0, &main_window_loop,
                             (void *)GetModuleHandle(NULL), 0, &thread_main_id);
-#endif
     thread_main_window = (HANDLE)thread;
     if(!thread_main_window || !thread_main_id)
       logmsg("cannot start main window loop");
