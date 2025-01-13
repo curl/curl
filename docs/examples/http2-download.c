@@ -28,7 +28,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifdef UNDER_CE
+#define strerror(e) "?"
+#else
 #include <errno.h>
+#endif
 
 /* curl stuff */
 #include <curl/curl.h>

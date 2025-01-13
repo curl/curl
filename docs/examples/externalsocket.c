@@ -46,7 +46,11 @@
 #include <unistd.h>           /*  misc. Unix functions      */
 #endif
 
+#ifdef UNDER_CE
+#define strerror(e) "?"
+#else
 #include <errno.h>
+#endif
 
 /* The IP address and port number to connect to */
 #define IPADDR "127.0.0.1"
