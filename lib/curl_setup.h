@@ -321,6 +321,12 @@
 
 #include <curl/system.h>
 
+/* Does GCC support '#pragma GCC diagnostic push'? */
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
+#define CURL_GCC_PUSHDIAG 1
+#endif
+
 /* Helper macro to expand and concatenate two macros.
  * Direct macros concatenation does not work because macros
  * are not expanded before direct concatenation.
