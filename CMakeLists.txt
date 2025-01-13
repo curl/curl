@@ -1955,10 +1955,7 @@ if(MSVC)
   # Disable default manifest added by CMake
   string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
 
-  # Use multithreaded compilation on VS2008+
-  if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1500)
-    string(APPEND CMAKE_C_FLAGS " -MP")
-  endif()
+  string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 
 if(CURL_WERROR)
