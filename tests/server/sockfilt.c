@@ -85,7 +85,9 @@
  * it!
  */
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -151,7 +153,7 @@ enum sockmode {
   ACTIVE_DISCONNECT  /* as a client, disconnected from server */
 };
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 /*
  * read-wrapper to support reading from stdin on Windows.
  */
@@ -428,7 +430,7 @@ static bool read_data_block(unsigned char *buffer, ssize_t maxlen,
 }
 
 
-#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP)
+#if defined(USE_WINSOCK) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 /*
  * Winsock select() does not support standard file descriptors,
  * it can only check SOCKETs. The following function is an attempt
@@ -446,12 +448,8 @@ struct select_ws_wait_data {
   HANDLE signal; /* internal event to signal handle trigger */
   HANDLE abort;  /* internal event to abort waiting threads */
 };
-#ifdef _WIN32_WCE
-static DWORD WINAPI select_ws_wait_thread(LPVOID lpParameter)
-#else
 #include <process.h>
 static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
-#endif
 {
   struct select_ws_wait_data *data;
   HANDLE signal, handle, handles[2];
@@ -594,11 +592,7 @@ static unsigned int WINAPI select_ws_wait_thread(void *lpParameter)
 }
 static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
 {
-#ifdef _WIN32_WCE
-  typedef HANDLE curl_win_thread_handle_t;
-#else
   typedef uintptr_t curl_win_thread_handle_t;
-#endif
   struct select_ws_wait_data *data;
   curl_win_thread_handle_t thread;
 
@@ -610,11 +604,7 @@ static HANDLE select_ws_wait(HANDLE handle, HANDLE signal, HANDLE abort)
     data->abort = abort;
 
     /* launch waiting thread */
-#ifdef _WIN32_WCE
-    thread = CreateThread(NULL, 0,  &select_ws_wait_thread, data, 0, NULL);
-#else
     thread = _beginthreadex(NULL, 0, &select_ws_wait_thread, data, 0, NULL);
-#endif
 
     /* free data if thread failed to launch */
     if(!thread) {

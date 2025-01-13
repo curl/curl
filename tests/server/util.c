@@ -23,7 +23,9 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -529,6 +531,7 @@ HANDLE exit_event = NULL;
  * The first time this is called it will set got_exit_signal to one and
  * store in exit_signal the signal that triggered its execution.
  */
+#ifndef UNDER_CE
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
@@ -544,8 +547,9 @@ static void exit_signal_handler(int signum)
   (void)signal(signum, exit_signal_handler);
   CURL_SETERRNO(old_errno);
 }
+#endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -678,6 +682,7 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
+#ifndef UNDER_CE
 static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
                                bool restartable)
 {
@@ -707,6 +712,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   return oldhdlr;
 #endif
 }
+#endif
 
 void install_signal_handlers(bool keep_sigalrm)
 {
@@ -757,8 +763,10 @@ void install_signal_handlers(bool keep_sigalrm)
     logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
 #endif
 #ifdef _WIN32
+#ifndef UNDER_CE
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
+#endif
 
 #ifndef CURL_WINDOWS_UWP
   {
@@ -814,8 +822,10 @@ void restore_signal_handlers(bool keep_sigalrm)
     (void) set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32
+#ifndef UNDER_CE
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#ifndef CURL_WINDOWS_UWP
+#endif
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {

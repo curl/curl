@@ -829,9 +829,11 @@
 #include "curl_setup_once.h"
 #endif
 
-/* Windows CE does not support getenv() */
 #ifdef UNDER_CE
+/* Windows CE does not support getenv() */
 #define getenv curl_getenv
+
+#define raise(s) ((void)(s))
 
 /* Terrible workaround to make Windows CE compile */
 #define errno  0
