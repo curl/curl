@@ -87,7 +87,11 @@ CURLcode test(char *URL)
 
       if(nread) {
         /* send received stuff to stdout */
+#ifdef UNDER_CE
+        if(!fwrite(buf, sizeof(buf[0]), nread, stdout))
+#else
         if(!write(STDOUT_FILENO, buf, nread))
+#endif
           break;
       }
 
