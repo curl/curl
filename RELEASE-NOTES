@@ -26,12 +26,14 @@ This release includes the following bugfixes:
  o build: delete `-Wsign-conversion` related FIXMEs [137]
  o build: drop `-Winline` picky warning [53]
  o build: drop unused feature macros, update exception list [51]
+ o build: fix `-Wtrampolines` picky warning for gcc 4.x versions [156]
  o build: fix the tidy targets for autotools [52]
  o build: fix unsigned `time_t` detection for cmake, MS-DOS, AmigaOS [104]
  o build: replace configure check with PP condition (Android <21) [97]
  o cd2nroff: support "none" as a TLS backend [29]
  o cf-socket: error if address can't be copied [72]
  o checksrc: ban use of sscanf() [7]
+ o checksrc: check for return with parens around a value/name [130]
  o checksrc: fix the return() checker [35]
  o checksrc: introduce 'banfunc' to ban specific functions [117]
  o cmake/FindLDAP: avoid empty 'Requires' item when omitting `pkg-config` module [90]
@@ -45,10 +47,12 @@ This release includes the following bugfixes:
  o cmake: allow `CURL_LTO` regardless of `CURL_BUILD_TYPE`, enable in CI [88]
  o cmake: clang-cl improvements [42]
  o cmake: delete accidental debug message
+ o cmake: deprecate winbuild, add migration guide from legacy build methods [157]
  o cmake: drop duplicate Windows cache value [81]
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
  o cmake: drop redundant opening/closing `.*` from `MATCH` expressions [64]
  o cmake: drop unused `HAVE_SYS_XATTR_H` detection [79]
+ o cmake: drop VS2010 "Dialog Hell" workaround added in 2013 [136]
  o cmake: extend zlib's `AUTO` option to brotli, zstd and enable if found [36]
  o cmake: fix `net/in.h` detection for MS-DOS [103]
  o cmake: improve `curl_dumpvars()` and move to `Utilities.cmake` [50]
@@ -58,6 +62,7 @@ This release includes the following bugfixes:
  o cmake: move GSS init before feature detections [93]
  o cmake: namespace functions and macros [41]
  o cmake: optimize out 4 picky warning option detections with gcc [78]
+ o cmake: pick a better IPv6 feature flag when assembling the feature list [132]
  o cmake: pre-fill `HAVE_STDINT_H` on Windows [149]
  o cmake: publish/check supported protocols/features via `CURLConfig.cmake` [100]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
@@ -66,15 +71,19 @@ This release includes the following bugfixes:
  o cmake: use `STREQUAL` to detect Linux [68]
  o completion.pl: add completion for paths after @ for fish [82]
  o config-mac: drop `MACOS_SSL_SUPPORT` macro [63]
+ o config: drop unused code and variables [135]
  o configure: drop unused detections and macros [105]
+ o configure: streamline Windows large file feature check [138]
  o conncache: count shutdowns against host and max limits [154]
  o conncache: result_cb comment removed from function docs [1]
  o content_encoding: namespace GZIP flag constants [147]
  o cookie: cap expire times to 400 days [111]
  o cookie: fix crash in netscape cookie parsing [84]
  o cookie: parse only the exact expire date [3]
+ o curl-functions.m4: fix indentation in `CURL_SIZEOF()` [131]
  o curl: return error if etag options are used with multiple URLs [5]
  o curl_multibyte: support Windows paths longer than MAX_PATH [76]
+ o curl_setup: fix missing `ADDRESS_FAMILY` type in rare build cases [144]
  o curl_sha512_256: rename symbols to the curl namespace [124]
  o curl_url_set.md: adjust the added-in to 7.62.0 [94]
  o curl_ws_recv.md: fix typo
@@ -93,6 +102,7 @@ This release includes the following bugfixes:
  o examples/complicated: fix warnings, bump deprecated callback, tidy up [59]
  o examples/synctime.c: remove references to dead URLs and functionality [62]
  o examples: make them compile with compatibility functions disabled (Windows) [58]
+ o examples: use return according to code style
  o file: drop `OPEN_NEEDS_ARG3` option [91]
  o file: fix Android compiler warning [85]
  o GnuTLS: fix 'time_appconnect' for early data [127]
@@ -111,10 +121,14 @@ This release includes the following bugfixes:
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o mbedtls: fix handling of blocked sends [116]
  o mime: explicitly rewind subparts at attachment time. [80]
+ o msvc: assume `_INTEGRAL_MAX_BITS >= 64` [158]
  o msvc: drop checks for ancient versions [133]
  o msvc: fix building with `HAVE_INET_NTOP` and MSVC <=1900 [151]
+ o msvc: require VS2005 for large file support [143]
+ o msvc: tidy up `_CRT_*_NO_DEPRECATE` definitions [148]
  o multi: fix curl_multi_waitfds reporting of fd_count [73]
  o multi: fix return code for an already-removed easy handle [106]
+ o multihandle: add an ssl_scache here [129]
  o multissl: auto-enable `OPENSSL_COEXIST` for wolfSSL + OpenSSL [92]
  o multissl: make openssl + wolfssl builds work [34]
  o netrc: 'default' with no credentials is not a match [108]
@@ -131,11 +145,17 @@ This release includes the following bugfixes:
  o smb: fix compiler warning [112]
  o src: add `CURL_STRICMP()` macro, use `_stricmp()` on Windows [54]
  o src: drop support for `CURL_TESTDIR` debug env [121]
+ o ssl session cache: change cache dimensions [159]
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
+ o system.h: drop compilers lacking 64-bit integer type (Windows/MS-DOS) [155]
+ o system.h: drop duplicate and no-op code [153]
+ o system.h: fix indentation [142]
  o test483: require cookie support [98]
  o tests/http/clients: use proper sleep() call on NonStop [10]
  o TheArtOfHttpScripting.md: rewrite double 'that' [115]
+ o tidy-up: `curl_setup.h`, `curl_setup_once.h`, `config-win32ce.h` [146]
+ o tidy-up: drop parenthesis around `return` values [134]
  o tool_formparse.c: make curlx_uztoso a static in here [39]
  o tool_formparse: accept digits in --form type= strings [33]
  o tool_getparam: fix "Ignored Return Value" [21]
@@ -152,6 +172,7 @@ This release includes the following bugfixes:
  o vtls: remove unusued 'check_cxn' from TLS handler struct [26]
  o vtls: replace "none"-functions with NULL pointers [27]
  o VULN-DISCLOSURE-POLICY.md: mention the not setting CVSS [23]
+ o windows: drop redundant `USE_WIN32_SMALL_FILES` macro [145]
  o ws-docs: remove the outdated texts saying ws support is experimental [15]
 
 This release includes the following known bugs:
@@ -173,7 +194,7 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Andy Pan, Asger Hautop Drewsen, baranyaib90 on github, Ben Zanin,
-  Christian Heusel, Christian Schmitz, Christopher Dannemiller,
+  Christian Heusel, Christian Schmitz, Christopher Dannemiller, Dan Fandrich,
   Daniel Stenberg, Darren Banfi, dependabot[bot], Derek Huang, dwickr,
   Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
   Jeroen Ooms, Jiri Stary, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
@@ -182,7 +203,7 @@ advice from friends like these:
   Ray Satiro, renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
   Stephen Farrell, Tal Regev, Tamás Bálint Misius, Tamir Duberstein,
   Viktor Szakats, Yedaya Katsman, Yihang Zhou
-  (42 contributors)
+  (43 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -314,12 +335,32 @@ References to bug reports and discussions on issues:
  [126] = https://curl.se/bug/?i=15889
  [127] = https://curl.se/bug/?i=15954
  [128] = https://curl.se/bug/?i=15881
+ [129] = https://curl.se/bug/?i=15982
+ [130] = https://curl.se/bug/?i=15983
+ [131] = https://curl.se/bug/?i=15981
+ [132] = https://curl.se/bug/?i=15980
  [133] = https://curl.se/bug/?i=15946
+ [134] = https://curl.se/bug/?i=15979
+ [135] = https://curl.se/bug/?i=15978
+ [136] = https://curl.se/bug/?i=15973
  [137] = https://curl.se/bug/?i=15939
+ [138] = https://curl.se/bug/?i=15971
  [139] = https://curl.se/bug/?i=15909
  [140] = https://curl.se/bug/?i=15941
  [141] = https://curl.se/bug/?i=15924
+ [142] = https://curl.se/bug/?i=15974
+ [143] = https://curl.se/bug/?i=15958
+ [144] = https://curl.se/bug/?i=15969
+ [145] = https://curl.se/bug/?i=15968
+ [146] = https://curl.se/bug/?i=15967
  [147] = https://curl.se/bug/?i=15929
+ [148] = https://curl.se/bug/?i=15960
  [149] = https://curl.se/bug/?i=15925
  [151] = https://curl.se/bug/?i=15923
+ [153] = https://curl.se/bug/?i=15966
  [154] = https://curl.se/bug/?i=15857
+ [155] = https://curl.se/bug/?i=15957
+ [156] = https://curl.se/bug/?i=15962
+ [157] = https://curl.se/bug/?i=15920
+ [158] = https://curl.se/bug/?i=15955
+ [159] = https://curl.se/bug/?i=15953
