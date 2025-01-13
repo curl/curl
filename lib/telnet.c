@@ -695,7 +695,10 @@ static void printsub(struct Curl_easy *data,
           infof(data, ", not IAC SE) ");
         }
       }
-      length -= 2;
+      if(length >= 2)
+        length -= 2;
+      else /* bad input */
+        return;
     }
     if(length < 1) {
       infof(data, "(Empty suboption?)");
