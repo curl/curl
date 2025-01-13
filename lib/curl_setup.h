@@ -681,16 +681,6 @@
 /* ---------------------------------------------------------------- */
 
 /*
- * MSVC threads support requires a multi-threaded runtime library.
- * _beginthreadex() is not available in single-threaded ones.
- * Single-threaded option was last available in VS2005: _MSC_VER <= 1400
- */
-#if defined(_MSC_VER) && !defined(_MT)  /* available in _MSC_VER <= 1400 */
-#  undef USE_THREADS_POSIX
-#  undef USE_THREADS_WIN32
-#endif
-
-/*
  * Mutually exclusive CURLRES_* definitions.
  */
 
