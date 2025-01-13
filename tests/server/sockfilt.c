@@ -178,7 +178,7 @@ static ssize_t read_wincon(int fd, void *buf, size_t count)
     return rcount;
   }
 
-  errno = (int)GetLastError();
+  CURL_SETERRNO((int)GetLastError());
   return -1;
 }
 #undef  read
@@ -213,7 +213,7 @@ static ssize_t write_wincon(int fd, const void *buf, size_t count)
     return wcount;
   }
 
-  errno = (int)GetLastError();
+  CURL_SETERRNO((int)GetLastError());
   return -1;
 }
 #undef  write
@@ -646,7 +646,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
 
   /* check if the input value is valid */
   if(nfds < 0) {
-    errno = EINVAL;
+    CURL_SETERRNO(EINVAL);
     return -1;
   }
 
@@ -667,7 +667,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   /* create internal event to abort waiting threads */
   abort = CreateEvent(NULL, TRUE, FALSE, NULL);
   if(!abort) {
-    errno = ENOMEM;
+    CURL_SETERRNO(ENOMEM);
     return -1;
   }
 
@@ -675,7 +675,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   data = calloc(nfds, sizeof(struct select_ws_data));
   if(!data) {
     CloseHandle(abort);
-    errno = ENOMEM;
+    CURL_SETERRNO(ENOMEM);
     return -1;
   }
 
@@ -684,7 +684,7 @@ static int select_ws(int nfds, fd_set *readfds, fd_set *writefds,
   if(!handles) {
     CloseHandle(abort);
     free(data);
-    errno = ENOMEM;
+    CURL_SETERRNO(ENOMEM);
     return -1;
   }
 
