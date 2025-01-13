@@ -1492,7 +1492,7 @@ if(USE_LIBRTMP)
 endif()
 
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
-if(ENABLE_UNIX_SOCKETS)
+if(ENABLE_UNIX_SOCKETS AND NOT WINCE)
   if(WIN32 OR DOS)
     set(USE_UNIX_SOCKETS ON)
   else()
