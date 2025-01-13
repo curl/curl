@@ -138,14 +138,49 @@ void logmsg(const char *msg, ...)
 }
 
 #ifdef _WIN32
+/* FIXME: duplicate of lib/strerror.c function */
+static const char *
+get_winapi_error(int err, char *buf, size_t buflen)
+{
+  char *p;
+  wchar_t wbuf[256];
+
+  if(!buflen)
+    return NULL;
+
+  *buf = '\0';
+  *wbuf = L'\0';
+
+  /* We return the local codepage version of the error string because if it is
+     output to the user's terminal it will likely be with functions which
+     expect the local codepage (eg fprintf, failf, infof).
+     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
+  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
+                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+    size_t written = wcstombs(buf, wbuf, buflen - 1);
+    if(written != (size_t)-1)
+      buf[written] = '\0';
+    else
+      *buf = '\0';
+  }
+
+  /* Truncate multiple lines */
+  p = strchr(buf, '\n');
+  if(p) {
+    if(p > buf && *(p-1) == '\r')
+      *(p-1) = '\0';
+    else
+      *p = '\0';
+  }
+
+  return *buf ? buf : NULL;
+}
+
 /* use instead of strerror() on generic Windows */
 static const char *win32_strerror(int err, char *buf, size_t buflen)
 {
-#ifndef UNDER_CE
-  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
-                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL))
-#endif
+  if(!get_winapi_error(err, buf, buflen))
     msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   return buf;
 }
@@ -197,7 +232,7 @@ void win32_cleanup(void)
   _flushall();
 }
 
-/* socket-safe strerror (works on Winsock errors, too */
+/* socket-safe strerror (works on Winsock errors, too) */
 const char *sstrerror(int err)
 {
   static char buf[512];
