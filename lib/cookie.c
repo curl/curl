@@ -1342,7 +1342,7 @@ static int cookie_sort(const void *p1, const void *p2)
   l2 = c2->domain ? strlen(c2->domain) : 0;
 
   if(l1 != l2)
-    return (l2 > l1) ? 1 : -1;  /* avoid size_t <=> int conversions */
+    return (l2 > l1) ? 1 : -1; /* avoid size_t <=> int conversions */
 
   /* 3 - compare cookie name lengths */
   l1 = c1->name ? strlen(c1->name) : 0;
