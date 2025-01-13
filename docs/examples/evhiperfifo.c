@@ -424,7 +424,7 @@ static int init_fifo(GlobalInfo *g)
   fprintf(MSG_OUT, "Now, pipe some URL's into > %s\n", fifo);
   ev_io_init(&g->fifo_event, fifo_cb, sockfd, EV_READ);
   ev_io_start(g->loop, &g->fifo_event);
-  return (0);
+  return 0;
 }
 
 int main(int argc, char **argv)

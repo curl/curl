@@ -422,7 +422,7 @@ static int init_fifo(GlobalInfo *g)
   event_assign(&g->fifo_event, g->evbase, sockfd, EV_READ|EV_PERSIST,
                fifo_cb, g);
   event_add(&g->fifo_event, NULL);
-  return (0);
+  return 0;
 }
 
 static void clean_fifo(GlobalInfo *g)
