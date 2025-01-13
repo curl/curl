@@ -231,7 +231,7 @@ jobs:
               LDFLAGS="-Wl,-rpath,$HOME/quictls/build/lib"
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug --disable-ntlm
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-openssl=$HOME/quictls/build
+              --with-openssl=$HOME/quictls/build --enable-ssls-export
 
           - name: gnutls
             PKG_CONFIG_PATH: '$HOME/gnutls/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig'
@@ -239,7 +239,7 @@ jobs:
               LDFLAGS="-Wl,-rpath,$HOME/gnutls/build/lib"
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
-              --with-gnutls=$HOME/gnutls/build
+              --with-gnutls=$HOME/gnutls/build --enable-ssls-export
 
           - name: wolfssl
             PKG_CONFIG_PATH: '$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig'
@@ -248,7 +248,7 @@ jobs:
               --with-ngtcp2=$HOME/ngtcp2/build --enable-warnings --enable-werror --enable-debug
               --with-test-nghttpx="$HOME/nghttp2/build/bin/nghttpx"
               --with-wolfssl=$HOME/wolfssl/build
-              --enable-ech
+              --enable-ech --enable-ssls-export
 
           - name: wolfssl
             PKG_CONFIG_PATH: '$HOME/wolfssl/build/lib/pkgconfig:$HOME/nghttp3/build/lib/pkgconfig:$HOME/ngtcp2/build/lib/pkgconfig:$HOME/nghttp2/build/lib/pkgconfig'
