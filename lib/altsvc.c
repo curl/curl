@@ -108,19 +108,20 @@ static struct altsvc *altsvc_createid(const char *srchost,
     return NULL;
   DEBUGASSERT(hlen);
   DEBUGASSERT(dlen);
-  if(!hlen || !dlen) {
+  if(!hlen || !dlen)
     /* bad input */
-    free(as);
-    return NULL;
-  }
+    goto error;
   if((hlen > 2) && srchost[0] == '[') {
     /* IPv6 address, strip off brackets */
     srchost++;
     hlen -= 2;
   }
-  else if(srchost[hlen - 1] == '.')
+  else if(srchost[hlen - 1] == '.') {
     /* strip off trailing dot */
     hlen--;
+    if(!hlen)
+      goto error;
+  }
   if((dlen > 2) && dsthost[0] == '[') {
     /* IPv6 address, strip off brackets */
     dsthost++;
