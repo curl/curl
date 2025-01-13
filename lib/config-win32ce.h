@@ -235,7 +235,11 @@
 
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
+#ifdef _M_ARM
+#define CURL_OS "arm-pc-win32ce"
+#else
 #define CURL_OS "i386-pc-win32ce"
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
