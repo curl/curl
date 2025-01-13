@@ -330,7 +330,7 @@
 #endif
 
 /* VS2008 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_MSC_VER <= 1600)
+#if defined(_MSC_VER) && (_MSC_VER <= 1600)
 #  ifndef _WIN32_WINNT
 #  define _WIN32_WINNT VS2008_DEF_TARGET
 #  endif
