@@ -1932,10 +1932,7 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS "HAVE_CONFIG_H")
 if(WIN32)
   list(APPEND CURL_LIBS "ws2_32" "bcrypt")
 
-  # _fseeki64() requires VS2005
-  if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))
-    set(USE_WIN32_LARGE_FILES ON)
-  endif()
+  set(USE_WIN32_LARGE_FILES ON)
 
   # Use the manifest embedded in the Windows Resource
   string(APPEND CMAKE_RC_FLAGS " -DCURL_EMBED_MANIFEST")
@@ -1955,10 +1952,7 @@ if(MSVC)
   # Disable default manifest added by CMake
   string(APPEND CMAKE_EXE_LINKER_FLAGS " -MANIFEST:NO")
 
-  # Use multithreaded compilation on VS2008+
-  if(CMAKE_C_COMPILER_ID STREQUAL "MSVC" AND MSVC_VERSION GREATER_EQUAL 1500)
-    string(APPEND CMAKE_C_FLAGS " -MP")
-  endif()
+  string(APPEND CMAKE_C_FLAGS " -MP")  # Parallel compilation
 endif()
 
 if(CURL_WERROR)

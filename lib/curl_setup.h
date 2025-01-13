@@ -78,6 +78,12 @@
 #endif
 #endif
 
+/* Visual Studio 2008 is the minimum Visual Studio version we support.
+   Workarounds for older versions of Visual Studio have been removed. */
+#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#error "Ancient versions of Visual Studio are no longer supported due to bugs."
+#endif
+
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
@@ -679,16 +685,6 @@
 /*             resolver specialty compile-time defines              */
 /*         CURLRES_* defines to use in the host*.c sources          */
 /* ---------------------------------------------------------------- */
-
-/*
- * MSVC threads support requires a multi-threaded runtime library.
- * _beginthreadex() is not available in single-threaded ones.
- * Single-threaded option was last available in VS2005: _MSC_VER <= 1400
- */
-#if defined(_MSC_VER) && !defined(_MT)  /* available in _MSC_VER <= 1400 */
-#  undef USE_THREADS_POSIX
-#  undef USE_THREADS_WIN32
-#endif
 
 /*
  * Mutually exclusive CURLRES_* definitions.
