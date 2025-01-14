@@ -386,9 +386,13 @@ static CURLcode cf_ssl_peer_key_add_path(struct dynbuf *buf,
      * when a path does not exist, this does not work. Then, we add
      * the path as is. */
 #ifdef _WIN32
+#ifdef UNDER_CE
+    return Curl_dyn_addf(buf, ":%s-%s", name, path);
+#else
     char abspath[_MAX_PATH];
     if(_fullpath(abspath, path, _MAX_PATH))
       return Curl_dyn_addf(buf, ":%s-%s", name, abspath);
+#endif
     *is_local = TRUE;
 #elif defined(HAVE_REALPATH)
     if(path[0] != '/') {
