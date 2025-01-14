@@ -253,19 +253,27 @@ if(DOS OR AMIGA)
   set(BUILD_STATIC_LIBS ON)
 endif()
 if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR MINGW32CE)
+  # CMake (as of 3.30.3) does not recognize DJGPP and Windows CE for GCC
+  # accurately. Touch up the configuration manually as a workaround.
   if(MINGW32CE)
-    # CMake's Modules/Compiler/GNU.cmake (as of v3.30.3) sets this to '-fPIC'.
-    # This confuses the toolchain and breaks building executables. Zap this
-    # option as a workaround.
+    # Necessary to create the implib for libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
+    set(_str "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS>")
+    set(_str "${_str} <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET>")
+    set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+    set(CMAKE_C_CREATE_SHARED_LIBRARY "${_str}")
+    unset(_str)
+
+    # CMake sets it to '-fPIC'. This confuses the toolchain and breaks
+    # building executables. Zap it.
     set(CMAKE_C_COMPILE_OPTIONS_PIC "")
-    # FIXME: CMake does not create a DLL implib
+
     set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
     set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
     set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
     set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
     set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
-  else()
+  else()  # DJGPP
     set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
     set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
   endif()
