@@ -27,7 +27,7 @@ endif()
 
 set(HAVE_LOCALE_H 1)
 
-if(MINGW OR MINGW32CE)
+if(MINGW)
   set(HAVE_SNPRINTF 1)
   set(HAVE_UNISTD_H 1)
   set(HAVE_LIBGEN_H 1)
