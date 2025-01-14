@@ -591,7 +591,7 @@ jobs:
           fi
 
   wince:
-    name: "mingw32ce, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} arm !ssl"
+    name: "mingw32ce, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} arm schannel"
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
@@ -638,7 +638,7 @@ jobs:
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
-              -DCURL_USE_OPENSSL=OFF \
+              -DCURL_USE_SCHANNEL=ON \
               -DCURL_USE_LIBPSL=OFF \
               -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
               -DMINGW32CE_LIBRARY_DIR="${MINGW32CE_ROOT}/arm-mingw32ce/lib"
@@ -651,7 +651,7 @@ jobs:
               RANLIB="${MINGW32CE_ROOT}/bin/arm-mingw32ce-ranlib" \
               RC="${MINGW32CE_ROOT}/bin/arm-mingw32ce-windres" \
               --host=arm-wince-mingw32ce \
-              --without-ssl \
+              --with-schannel \
               --without-libpsl \
               --disable-shared
           fi
