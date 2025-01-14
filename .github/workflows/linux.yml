@@ -671,6 +671,7 @@ jobs:
         env:
           TFLAGS: "${{ matrix.build.tflags }}"
           CURL_CI: github
+          PYTEST_ADDOPTS: "--color=yes"
         run: |
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
