@@ -44,6 +44,14 @@
 
 #include "curl_printf.h"
 
+/* Does GCC support '#pragma GCC diagnostic push'? */
+#if (defined(__GNUC__) && \
+  ((__GNUC__ > 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ >= 6))))
+#define CURL_GCC_PUSHDIAG 1
+#else
+#define CURL_GCC_PUSHDIAG 0
+#endif
+
 #ifdef _WIN32
 #define sleep(sec) Sleep((sec)*1000)
 #endif
