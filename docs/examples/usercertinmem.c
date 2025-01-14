@@ -56,7 +56,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   int ret;
 
 #if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
@@ -123,10 +122,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"\
     "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX\n"\
     "-----END RSA PRIVATE KEY-----\n";
-
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
   (void)curl; /* avoid warnings */
   (void)parm; /* avoid warnings */
