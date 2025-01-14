@@ -635,13 +635,13 @@ jobs:
               -DCMAKE_SYSTEM_PROCESSOR=arm \
               -DCMAKE_C_COMPILER_TARGET=arm-wince-mingw32ce \
               -DCMAKE_C_COMPILER="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
+              -DMINGW32CE_LIBRARY_DIR="${MINGW32CE_ROOT}/arm-mingw32ce/lib" \
+              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON \
-              -DCURL_USE_LIBPSL=OFF \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
-              -DMINGW32CE_LIBRARY_DIR="${MINGW32CE_ROOT}/arm-mingw32ce/lib"
+              -DCURL_USE_LIBPSL=OFF
           else
             autoreconf -fi
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
