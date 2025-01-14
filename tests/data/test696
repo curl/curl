@@ -1,0 +1,52 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+HTTP GET
+</keywords>
+</info>
+
+<reply>
+<data>
+HTTP/1.1 200 OK swsclose
+Server: test-server/fake
+Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
+Content-Length: 6
+Connection: close
+
+-foo-
+</data>
+</reply>
+
+#
+# Client-side
+<client>
+<server>
+http
+</server>
+<tool>
+lib%TESTNUMBER
+</tool>
+<name>
+CONNECT_ONLY and doing a second curl_easy_perform
+</name>
+<command>
+http://%HOSTIP:%HTTPPORT
+</command>
+</client>
+
+#
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /556 HTTP/1.1
+Host: ninja
+
+</protocol>
+
+# 43 == CURLE_BAD_FUNCTION_ARGUMENT
+<errorcode>
+43
+</errorcode>
+</verify>
+</testcase>

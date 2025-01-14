@@ -49,6 +49,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib643        lib645 lib650 lib651 lib652 lib653 lib654 lib655 lib658   \
  lib659 lib661 lib666 lib667 lib668 \
  lib670 lib671 lib672 lib673 lib674 lib676 lib677 lib678 lib694 lib695   \
+ lib696 \
  lib1156 \
  lib1301 \
  lib1485 \
@@ -341,6 +342,9 @@ lib678_LDADD = $(TESTUTIL_LIBS)
 lib694_SOURCES = lib694.c $(SUPPORTFILES)
 
 lib695_SOURCES = lib695.c $(SUPPORTFILES)
+
+lib696_SOURCES = lib556.c $(SUPPORTFILES)
+lib696_CPPFLAGS = $(AM_CPPFLAGS) -DLIB696
 
 lib1301_SOURCES = lib1301.c $(SUPPORTFILES) $(TESTUTIL)
 lib1301_LDADD = $(TESTUTIL_LIBS)

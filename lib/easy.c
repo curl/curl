@@ -751,6 +751,11 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  if(data->conn) {
+    failf(data, "cannot use again while associated with a connection");
+    return CURLE_BAD_FUNCTION_ARGUMENT;
+  }
+
   if(data->set.errorbuffer)
     /* clear this as early as possible */
     data->set.errorbuffer[0] = 0;
