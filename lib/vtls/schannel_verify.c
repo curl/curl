@@ -333,6 +333,7 @@ cleanup:
 
 #endif /* HAS_MANUAL_VERIFY_API */
 
+#ifndef __MINGW32CE__
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -511,14 +512,19 @@ static bool get_alt_name_info(struct Curl_easy *data,
 #endif
   return result;
 }
+#endif /* !__MINGW32CE__ */
 
 /* Verify the server's hostname */
 CURLcode Curl_verify_host(struct Curl_cfilter *cf,
                           struct Curl_easy *data)
 {
+  CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
+#ifdef __MINGW32CE__
+  (void)cf;
+  (void)data;
+#else
   struct ssl_connect_data *connssl = cf->ctx;
   SECURITY_STATUS sspi_status;
-  CURLcode result = CURLE_PEER_FAILED_VERIFICATION;
   CERT_CONTEXT *pCertContextServer = NULL;
   TCHAR *cert_hostname_buff = NULL;
   size_t cert_hostname_buff_index = 0;
@@ -664,6 +670,7 @@ cleanup:
 
   if(pCertContextServer)
     CertFreeCertificateContext(pCertContextServer);
+#endif /* __MINGW32CE__ */
 
   return result;
 }
