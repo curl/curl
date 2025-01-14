@@ -357,7 +357,7 @@ jobs:
           fi
 
   mingw-w64-standalone-downloads:
-    name: 'mingw-dl, CM ${{ matrix.env }} ${{ matrix.name }}'
+    name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
