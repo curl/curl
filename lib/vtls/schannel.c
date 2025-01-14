@@ -149,7 +149,7 @@
  */
 
 #ifndef CALG_SHA_256
-#  define CALG_SHA_256 0x0000800c
+#define CALG_SHA_256 0x0000800c
 #endif
 
 #ifndef PKCS12_NO_PERSIST_KEY
