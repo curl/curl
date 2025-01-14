@@ -97,6 +97,15 @@ CURLcode test(char *URL)
       res = TEST_ERR_FAILURE;
   }
 
+#ifdef LIB696
+  /* attempt to use the handle again */
+  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
+  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+  res = curl_easy_perform(curl);
+#endif
+
 test_cleanup:
 
   curl_easy_cleanup(curl);
