@@ -926,7 +926,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
    * do it following a more manual process. */
   backend->use_manual_cred_validation = TRUE;
 #else
-  /* compiler too old to support Windows CE requisite manual cert verify */
+#error "compiler too old to support Windows CE requisite manual cert verify"
 #endif
 #else
 #ifdef HAS_MANUAL_VERIFY_API
