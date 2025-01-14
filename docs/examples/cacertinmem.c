@@ -42,7 +42,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
   CURLcode rv = CURLE_ABORTED_BY_CALLBACK;
 
 #if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
 
@@ -89,10 +88,6 @@ static CURLcode sslctx_function(CURL *curl, void *sslctx, void *parm)
     "r0CodaxWkHS4oJyleW/c6RrIaQXpuvoDs3zk4E7Czp3otkYNbn5XOmeUwssfnHdK\n"
     "Z05phkOTOPu220+DkdRgfks+KzgHVZhepA==\n"
     "-----END CERTIFICATE-----\n";
-
-#if defined(__GNUC__) || defined(__clang__)
-#pragma GCC diagnostic pop
-#endif
 
   BIO *cbio = BIO_new_mem_buf(mypem, sizeof(mypem));
   X509_STORE  *cts = SSL_CTX_get_cert_store((SSL_CTX *)sslctx);
