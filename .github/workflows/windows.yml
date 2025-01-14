@@ -628,7 +628,6 @@ jobs:
         run: |
           MINGW32CE_ROOT="${HOME}/opt/mingw32ce"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            export PKG_CONFIG_LIBDIR=
             cmake -B bld \
               -DCMAKE_SYSTEM_NAME=WindowsCE \
               -DCMAKE_SYSTEM_VERSION=8.0 \
