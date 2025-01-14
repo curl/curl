@@ -263,6 +263,8 @@ if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR MINGW32CE)
     set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
     set(CMAKE_C_CREATE_SHARED_LIBRARY "${_str}")
     unset(_str)
+    set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+    enable_language(RC)
 
     # CMake sets it to '-fPIC'. This confuses the toolchain and breaks
     # building executables. Zap it.
