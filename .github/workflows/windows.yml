@@ -636,7 +636,7 @@ jobs:
               -DCMAKE_C_COMPILER_TARGET=arm-wince-mingw32ce \
               -DCMAKE_C_COMPILER="${MINGW32CE_ROOT}/bin/arm-mingw32ce-gcc" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-              -DBUILD_SHARED_LIBS=OFF -DBUILD_STATIC_LIBS=ON \
+              -DBUILD_SHARED_LIBS=ON -DBUILD_STATIC_LIBS=ON -DBUILD_STATIC_CURL=OFF \
               -DCURL_WERROR=ON \
               -DCURL_USE_OPENSSL=OFF \
               -DCURL_USE_LIBPSL=OFF \
