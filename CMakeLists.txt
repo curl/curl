@@ -86,6 +86,44 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
+# CMake (as of 3.30.3) does not recognize DJGPP and Windows CE for GCC
+# accurately. Touch up the configuration manually as a workaround.
+if(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # Manually detect mingw32ce builds
+  if(NOT MINGW32CE_LIBRARY_DIR)
+    message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
+  endif()
+
+  set(MINGW 1)
+  set(MINGW32CE 1)
+
+  # Build implib with libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
+  set(_str "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS>")
+  set(_str "${_str} <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET>")
+  set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+  set(CMAKE_C_CREATE_SHARED_LIBRARY "${_str}")
+  unset(_str)
+
+  # Build resources. Copied from CMake's 'Modules/Platform/Windows-windres.cmake'.
+  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+  enable_language(RC)
+
+  set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
+
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+  set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
+  set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
+  set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
+elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif()
+
 set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
@@ -172,14 +210,6 @@ option(ENABLE_ARES "Enable c-ares support" OFF)
 option(CURL_DISABLE_INSTALL "Disable installation targets" OFF)
 
 if(WIN32)
-  # Manually detect mingw32ce builds
-  if(WINCE AND CMAKE_COMPILER_IS_GNUCC)
-    if(NOT MINGW32CE_LIBRARY_DIR)
-      message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
-    endif()
-    set(MINGW32CE 1)
-  endif()
-
   option(CURL_STATIC_CRT "Build libcurl with static CRT with MSVC (/MT)" OFF)
   if(CURL_STATIC_CRT AND MSVC)
     set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
@@ -221,36 +251,6 @@ endif()
 if(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_STATIC_LIBS ON)
-endif()
-if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR MINGW32CE)
-  # CMake (as of 3.30.3) does not recognize DJGPP and Windows CE for GCC
-  # accurately. Touch up the configuration manually as a workaround.
-  if(MINGW32CE)
-    # Workaround to create the implib for libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
-    set(_str "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS>")
-    set(_str "${_str} <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET>")
-    set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
-    set(CMAKE_C_CREATE_SHARED_LIBRARY "${_str}")
-    unset(_str)
-    set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
-    enable_language(RC)
-
-    # CMake sets it to '-fPIC'. This confuses the toolchain and breaks
-    # building executables. Zap it.
-    set(CMAKE_C_COMPILE_OPTIONS_PIC "")
-
-    set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
-    set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
-    set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
-    set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
-    set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
-  else()  # DJGPP
-    set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  endif()
-  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
 endif()
 
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
