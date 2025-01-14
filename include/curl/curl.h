@@ -74,7 +74,7 @@
 #include <sys/types.h>
 #include <time.h>
 
-#if defined(_WIN32) && !defined(UNDER_CE) && !defined(__CYGWIN__)
+#if defined(_WIN32) && !defined(_WIN32_WCE) && !defined(__CYGWIN__)
 #if !(defined(_WINSOCKAPI_) || defined(_WINSOCK_H) || \
       defined(__LWIP_OPT_H__) || defined(LWIP_HDR_OPT_H))
 /* The check above prevents the winsock2.h inclusion if winsock.h already was
