@@ -56,7 +56,7 @@ CURLcode test(char *URL)
 
   /* get the file size of the local file */
 #ifdef UNDER_CE
-  hd = _stat(libtest_arg2, &file_info);
+  hd = stat(libtest_arg2, &file_info);
 #else
   hd = fstat(fileno(hd_src), &file_info);
 #endif
