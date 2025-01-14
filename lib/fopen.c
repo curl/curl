@@ -107,7 +107,7 @@ CURLcode Curl_fopen(struct Curl_easy *data, const char *filename,
     goto fail;
   if(
 #ifdef UNDER_CE
-     stat(filename, &sb) == -1
+     _stat(filename, &sb) == -1
 #else
      fstat(fileno(*fh), &sb) == -1
 #endif
