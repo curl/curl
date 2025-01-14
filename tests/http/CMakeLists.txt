@@ -40,12 +40,6 @@ if(NOT HTTPD)
 endif()
 mark_as_advanced(HTTPD)
 
-find_program(APACHECTL "apache2ctl")  # /usr/sbin/apache2ctl
-if(NOT APACHECTL)
-  set(APACHECTL "")
-endif()
-mark_as_advanced(APACHECTL)
-
 find_program(APXS "apxs")
 if(NOT APXS)
   set(APXS "")
@@ -58,5 +52,5 @@ if(NOT HTTPD_NGHTTPX)
 endif()
 mark_as_advanced(HTTPD_NGHTTPX)
 
-# Consumed variables: APACHECTL, APXS, CADDY, HTTPD, HTTPD_NGHTTPX, VSFTPD
+# Consumed variables: APXS, CADDY, HTTPD, HTTPD_NGHTTPX, VSFTPD
 configure_file("config.ini.in" "${CMAKE_CURRENT_BINARY_DIR}/config.ini" @ONLY)

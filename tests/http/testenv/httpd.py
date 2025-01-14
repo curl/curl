@@ -63,7 +63,6 @@ class Httpd:
 
     def __init__(self, env: Env, proxy_auth: bool = False):
         self.env = env
-        self._cmd = env.apachectl
         self._apache_dir = os.path.join(env.gen_dir, 'apache')
         self._run_dir = os.path.join(self._apache_dir, 'run')
         self._lock_dir = os.path.join(self._apache_dir, 'locks')
@@ -102,7 +101,7 @@ class Httpd:
         self._rmf(self._error_log)
 
     def exists(self):
-        return os.path.exists(self._cmd)
+        return os.path.exists(self.env.httpd)
 
     def set_extra_config(self, domain: str, lines: Optional[Union[str, List[str]]]):
         if lines is None:
@@ -132,8 +131,8 @@ class Httpd:
                           stderr=p.stderr.decode().splitlines(),
                           duration=datetime.now() - start)
 
-    def _apachectl(self, cmd: str):
-        args = [self.env.apachectl,
+    def _cmd_httpd(self, cmd: str):
+        args = [self.env.httpd,
                 "-d", self._apache_dir,
                 "-f", self._conf_file,
                 "-k", cmd]
@@ -147,7 +146,7 @@ class Httpd:
             fd.write('start of server\n')
         with open(os.path.join(self._apache_dir, 'xxx'), 'a') as fd:
             fd.write('start of server\n')
-        r = self._apachectl('start')
+        r = self._cmd_httpd('start')
         if r.exit_code != 0:
             log.error(f'failed to start httpd: {r}')
             return False
@@ -155,7 +154,7 @@ class Httpd:
         return self.wait_live(timeout=timedelta(seconds=5))
 
     def stop(self):
-        r = self._apachectl('stop')
+        r = self._cmd_httpd('stop')
         self._loaded_extra_configs = None
         if r.exit_code == 0:
             return self.wait_dead(timeout=timedelta(seconds=5))
@@ -168,7 +167,7 @@ class Httpd:
 
     def reload(self):
         self._write_config()
-        r = self._apachectl("graceful")
+        r = self._cmd_httpd("graceful")
         self._loaded_extra_configs = None
         if r.exit_code != 0:
             log.error(f'failed to reload httpd: {r}')
