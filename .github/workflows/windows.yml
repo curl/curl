@@ -357,7 +357,7 @@ jobs:
           fi
 
   old-mingw-w64:
-    name: 'old-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
+    name: 'old-mingw64, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
