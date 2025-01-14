@@ -21,6 +21,16 @@ Displays information about curl and the libcurl version it uses.
 The first line includes the full version of curl, libcurl and other 3rd party
 libraries linked with the executable.
 
+This line may contain one or more TLS libraries. curl can be built to support
+more than one TLS library which then makes curl - at start-up - select which
+particular backend to use for this invocation.
+
+If curl supports more than one TLS library like this, the ones that are *not*
+selected by default are listed within parentheses. Thus, if you do not specify
+which backend to use (with the `CURL_SSL_BACKEND` environment variable) the
+one listed without parentheses is used. Such builds also has `MultiSSL` set as
+a feature.
+
 The second line (starts with `Release-Date:`) shows the release date.
 
 The third line (starts with `Protocols:`) shows all protocols that libcurl
@@ -104,6 +114,9 @@ SPNEGO authentication is supported.
 ## `SSL`
 SSL versions of various protocols are supported, such as HTTPS, FTPS, POP3S
 and so on.
+
+## `SSLS-EXPORT`
+This build supports TLS session export/import, like with the --ssl-sessions.
 
 ## `SSPI`
 SSPI is supported.
