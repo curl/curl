@@ -127,7 +127,6 @@ class EnvConfig:
             'ws': socket.SOCK_STREAM,
         })
         self.httpd = self.config['httpd']['httpd']
-        self.apachectl = self.config['httpd']['apachectl']
         self.apxs = self.config['httpd']['apxs']
         if len(self.apxs) == 0:
             self.apxs = None
@@ -257,7 +256,6 @@ class EnvConfig:
 
     def is_complete(self) -> bool:
         return os.path.isfile(self.httpd) and \
-               os.path.isfile(self.apachectl) and \
                self.apxs is not None and \
                os.path.isfile(self.apxs)
 
@@ -266,8 +264,6 @@ class EnvConfig:
             return 'httpd not configured, see `--with-test-httpd=<path>`'
         if not os.path.isfile(self.httpd):
             return f'httpd ({self.httpd}) not found'
-        if not os.path.isfile(self.apachectl):
-            return f'apachectl ({self.apachectl}) not found'
         if self.apxs is None:
             return "command apxs not found (commonly provided in apache2-dev)"
         if not os.path.isfile(self.apxs):
@@ -577,10 +573,6 @@ class Env:
     @property
     def httpd(self) -> str:
         return self.CONFIG.httpd
-
-    @property
-    def apachectl(self) -> str:
-        return self.CONFIG.apachectl
 
     @property
     def apxs(self) -> str:

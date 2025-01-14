@@ -368,7 +368,6 @@ Details via CMake
 
 ## Test tools
 
-- `APACHECTL`:                              Default: `apache2ctl`
 - `APXS`:                                   Default: `apxs`
 - `CADDY`:                                  Default: `caddy`
 - `HTTPD_NGHTTPX`:                          Default: `nghttpx`

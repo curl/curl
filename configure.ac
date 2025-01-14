@@ -324,17 +324,16 @@ AS_HELP_STRING([--with-test-vsftpd=PATH],[where to find vsftpd for testing]),
 )
 AC_SUBST(VSFTPD)
 
-dnl we'd like a httpd+apachectl as test server
+dnl we'd like a httpd as test server
 dnl
 HTTPD_ENABLED="maybe"
 AC_ARG_WITH(test-httpd, [AS_HELP_STRING([--with-test-httpd=PATH],
                          [where to find httpd/apache2 for testing])],
   [request_httpd=$withval], [request_httpd=check])
 if test x"$request_httpd" = "xcheck" -o x"$request_httpd" = "xyes"; then
-  if test -x "/usr/sbin/apache2" -a -x "/usr/sbin/apache2ctl"; then
+  if test -x "/usr/sbin/apache2"; then
     # common location on distros (debian/ubuntu)
     HTTPD="/usr/sbin/apache2"
-    APACHECTL="/usr/sbin/apache2ctl"
     AC_PATH_PROG([APXS], [apxs])
     if test "x$APXS" = "x"; then
       AC_MSG_NOTICE([apache2-dev not installed, httpd tests disabled])
@@ -345,9 +344,8 @@ if test x"$request_httpd" = "xcheck" -o x"$request_httpd" = "xyes"; then
     if test "x$HTTPD" = "x"; then
       AC_PATH_PROG([HTTPD], [apache2])
     fi
-    AC_PATH_PROG([APACHECTL], [apachectl])
     AC_PATH_PROG([APXS], [apxs])
-    if test "x$HTTPD" = "x" -o "x$APACHECTL" = "x"; then
+    if test "x$HTTPD" = "x"; then
       AC_MSG_NOTICE([httpd/apache2 not in PATH, http tests disabled])
       HTTPD_ENABLED="no"
     fi
@@ -358,13 +356,9 @@ if test x"$request_httpd" = "xcheck" -o x"$request_httpd" = "xyes"; then
   fi
 elif test x"$request_httpd" != "xno"; then
   HTTPD="${request_httpd}/bin/httpd"
-  APACHECTL="${request_httpd}/bin/apachectl"
   APXS="${request_httpd}/bin/apxs"
   if test ! -x "${HTTPD}"; then
     AC_MSG_NOTICE([httpd not found as ${HTTPD}, http tests disabled])
-    HTTPD_ENABLED="no"
-  elif test ! -x "${APACHECTL}"; then
-    AC_MSG_NOTICE([apachectl not found as ${APACHECTL}, http tests disabled])
     HTTPD_ENABLED="no"
   elif test ! -x "${APXS}"; then
     AC_MSG_NOTICE([apxs not found as ${APXS}, http tests disabled])
@@ -375,11 +369,9 @@ elif test x"$request_httpd" != "xno"; then
 fi
 if test x"$HTTPD_ENABLED" = "xno"; then
   HTTPD=""
-  APACHECTL=""
   APXS=""
 fi
 AC_SUBST(HTTPD)
-AC_SUBST(APACHECTL)
 AC_SUBST(APXS)
 
 dnl the nghttpx we might use in httpd testing
