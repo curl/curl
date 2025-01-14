@@ -1015,6 +1015,11 @@ number:
          output characters */
 #ifdef HAVE_SNPRINTF
       (snprintf)(work, BUFFSIZE, formatbuf, iptr->val.dnum); /* NOLINT */
+#ifdef _WIN32
+      /* Old versions of the Windows CRT do not terminate the snprintf output
+         buffer if it reaches the max size so we do that here. */
+      work[BUFFSIZE - 1] = 0;
+#endif
 #else
       (sprintf)(work, formatbuf, iptr->val.dnum);
 #endif
@@ -1022,11 +1027,6 @@ number:
 #pragma clang diagnostic pop
 #endif
       DEBUGASSERT(strlen(work) < BUFFSIZE);
-#ifdef __MINGW32__
-      /* Work-around for a nasty bug seen with old-mingw and gcc 7.3.0 when it
-         writes one byte more than permitted. */
-      work[BUFFSIZE - 1] = 0;
-#endif
       for(fptr = work; *fptr; fptr++)
         OUTCHAR(*fptr);
       break;
