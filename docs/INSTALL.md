@@ -180,8 +180,10 @@ library check.
 
 Building for Windows XP is required as a minimum.
 
-You can build curl with Microsoft Visual Studio 2008 (v9.0, `_MSC_VER = 1500`)
-and later, and with the MinGW-w64 toolchain.
+You can build curl with:
+
+- Microsoft Visual Studio 2008 (v9.0, `_MSC_VER = 1500`) or later
+- MinGW-w64
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
 
