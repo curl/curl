@@ -830,13 +830,10 @@
 #endif
 
 #ifdef UNDER_CE
-/* Windows CE does not support getenv() */
-#define getenv curl_getenv
-
+#define getenv curl_getenv  /* Windows CE does not support getenv() */
 #define raise(s) ((void)(s))
-
-/* Terrible workaround to make Windows CE compile */
-#define errno  0
+/* Terrible workarounds to make Windows CE compile */
+#define errno 0
 #define CURL_SETERRNO(x) ((void)(x))
 #define EAGAIN 11
 #define ENOMEM 12
