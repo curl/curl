@@ -257,7 +257,7 @@ if((DOS AND CMAKE_COMPILER_IS_GNUCC) OR MINGW32CE)
   # CMake (as of 3.30.3) does not recognize DJGPP and Windows CE for GCC
   # accurately. Touch up the configuration manually as a workaround.
   if(MINGW32CE)
-    # Necessary to create the implib for libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
+    # Workaround to create the implib for libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
     set(_str "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS>")
     set(_str "${_str} <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET>")
     set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
