@@ -356,8 +356,8 @@ jobs:
             make -C bld -j5 V=1 examples
           fi
 
-  old-mingw-w64:
-    name: 'old-mingw64, CM ${{ matrix.env }} ${{ matrix.name }}'
+  mingw-w64-standalone:
+    name: 'mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
     runs-on: windows-latest
     timeout-minutes: 20
     defaults:
