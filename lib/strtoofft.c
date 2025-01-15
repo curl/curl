@@ -35,16 +35,14 @@
  * https://www.opengroup.org/onlinepubs/009695399/functions/strtoimax.html
  */
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-#  ifdef HAVE_STRTOLL
-#    define strtooff strtoll
-#  elif defined(_MSC_VER)
-#    define strtooff _strtoi64
-#  else
-#    define PRIVATE_STRTOOFF 1
-#  endif
-#else
+#if SIZEOF_CURL_OFF_T <= SIZEOF_LONG
 #  define strtooff strtol
+#elif defined(HAVE_STRTOLL)
+#  define strtooff strtoll
+#elif defined(_MSC_VER)
+#  define strtooff _strtoi64
+#else
+#  define PRIVATE_STRTOOFF 1
 #endif
 
 #ifdef PRIVATE_STRTOOFF
