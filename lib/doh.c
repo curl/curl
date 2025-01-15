@@ -1105,7 +1105,7 @@ static CURLcode doh_decode_rdata_alpn(unsigned char *cp, size_t len,
     if(id != ALPN_none) {
       if(idnum == MAX_HTTPSRR_ALPNS)
         break;
-      alpns[idnum++] = id;
+      alpns[idnum++] = (unsigned char)id;
     }
     Curl_dyn_reset(&dval);
   }
