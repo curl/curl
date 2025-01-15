@@ -773,6 +773,9 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
         else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
           failf(data, "schannel: CertGetCertificateChain trust error"
                 " CERT_TRUST_IS_NOT_TIME_VALID");
+        else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
+          failf(data, "schannel: CertGetCertificateChain trust error"
+                " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
         else
           failf(data, "schannel: CertGetCertificateChain error mask: 0x%08lx",
                 dwTrustErrorMask);
