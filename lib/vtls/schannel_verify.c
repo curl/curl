@@ -544,9 +544,9 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
   DWORD len;
 
   /* TODO: Fix this for certificates with multiple alternative names.
-   * Right now we're only asking for the first preferred alternative name.
-   * Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG (If
-   * Windows CE supports that?) and run this section in a loop for each.
+   * Right now we are only asking for the first preferred alternative name.
+   * Instead we would need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
+   * (If Windows CE supports that?) and run this section in a loop for each.
    * https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
    * curl: (51) schannel: CertGetNameString() certificate hostname
    * (.google.com) did not match connection (google.com)
