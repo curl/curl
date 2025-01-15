@@ -1539,6 +1539,10 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   if test "$curl_cv_winuwp" = 'yes'; then
     curl_pflags="${curl_pflags} UWP"
   fi
+  case $host in
+    *-*-android*)
+      curl_pflags="${curl_pflags} ANDROID";;
+  esac
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi
