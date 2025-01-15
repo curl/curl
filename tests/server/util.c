@@ -46,6 +46,10 @@
 #include <dos.h>  /* delay() */
 #endif
 
+#ifdef _WIN32
+#include "strerror.h"
+#endif
+
 #include "curlx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
@@ -138,59 +142,12 @@ void logmsg(const char *msg, ...)
 }
 
 #ifdef _WIN32
-/* FIXME: duplicate of lib/strerror.c function */
-static const char *
-get_winapi_error(int err, char *buf, size_t buflen)
-{
-  char *p;
-  wchar_t wbuf[256];
-
-  if(!buflen)
-    return NULL;
-
-  *buf = '\0';
-  *wbuf = L'\0';
-
-  /* We return the local codepage version of the error string because if it is
-     output to the user's terminal it will likely be with functions which
-     expect the local codepage (eg fprintf, failf, infof).
-     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
-  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
-                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
-                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
-    size_t written = wcstombs(buf, wbuf, buflen - 1);
-    if(written != (size_t)-1)
-      buf[written] = '\0';
-    else
-      *buf = '\0';
-  }
-
-  /* Truncate multiple lines */
-  p = strchr(buf, '\n');
-  if(p) {
-    if(p > buf && *(p-1) == '\r')
-      *(p-1) = '\0';
-    else
-      *p = '\0';
-  }
-
-  return *buf ? buf : NULL;
-}
-
-/* use instead of strerror() on generic Windows */
-static const char *win32_strerror(int err, char *buf, size_t buflen)
-{
-  if(!get_winapi_error(err, buf, buflen))
-    msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
-  return buf;
-}
-
 /* use instead of perror() on generic Windows */
 void win32_perror(const char *msg)
 {
   char buf[512];
   int err = SOCKERRNO;
-  win32_strerror(err, buf, sizeof(buf));
+  Curl_winapi_strerror(err, buf, sizeof(buf));
   if(msg)
     fprintf(stderr, "%s: ", msg);
   fprintf(stderr, "%s\n", buf);
@@ -236,7 +193,7 @@ void win32_cleanup(void)
 const char *sstrerror(int err)
 {
   static char buf[512];
-  return win32_strerror(err, buf, sizeof(buf));
+  return Curl_winapi_strerror(err, buf, sizeof(buf));
 }
 #endif  /* _WIN32 */
 
