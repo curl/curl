@@ -238,10 +238,12 @@ CURLcode Curl_close(struct Curl_easy **datap)
      the case for example with CONNECT_ONLY + recv/send (test 556) */
   Curl_detach_connection(data);
   if(!data->state.internal) {
-    if(data->multi)
+    if(data->multi) {
       /* This handle is still part of a multi handle, take care of this first
          and detach this handle from there. */
+      DEBUGASSERT(!data->multi_easy);
       curl_multi_remove_handle(data->multi, data);
+    }
 
     if(data->multi_easy) {
       /* when curl_easy_perform() is used, it creates its own multi handle to

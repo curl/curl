@@ -751,9 +751,17 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  /* if the handle has a connection still attached (it is/was a connect-only
+     handle) then disconnect before performing */
   if(data->conn) {
-    failf(data, "cannot use again while associated with a connection");
-    return CURLE_BAD_FUNCTION_ARGUMENT;
+    struct connectdata *c;
+    curl_socket_t s;
+    Curl_detach_connection(data);
+    s = Curl_getconnectinfo(data, &c);
+    if((s != CURL_SOCKET_BAD) && c) {
+      Curl_cpool_disconnect(data, c, TRUE);
+    }
+    DEBUGASSERT(!data->conn);
   }
 
   if(data->set.errorbuffer)
