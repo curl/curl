@@ -705,8 +705,8 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
   const CERT_CHAIN_CONTEXT *pChainContext = NULL;
-#ifndef UNDER_CE
   HCERTCHAINENGINE cert_chain_engine = NULL;
+#ifndef UNDER_CE
   HCERTSTORE trust_store = NULL;
   HCERTSTORE own_trust_store = NULL;
 
@@ -731,7 +731,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     memset(&ChainPara, 0, sizeof(ChainPara));
     ChainPara.cbSize = sizeof(ChainPara);
 
-    if(!CertGetCertificateChain(NULL,
+    if(!CertGetCertificateChain(cert_chain_engine,
                                 pCertContextServer,
                                 NULL,
                                 pCertContextServer->hCertStore,
