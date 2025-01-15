@@ -456,17 +456,8 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 #endif
 
 #ifdef USE_HTTPSRR
-  /*
-   * TODO: Figure out the conditions under which we want to make a request for
-   * an HTTPS RR when we are not doing ECH. For now, making this request
-   * breaks a bunch of DoH tests, e.g. test2100, where the additional request
-   * does not match the pre-cooked data files, so there is a bit of work
-   * attached to making the request in a non-ECH use-case. For the present, we
-   * will only make the request when ECH is enabled in the build and is being
-   * used for the curl operation.
-   */
-# ifdef USE_ECH
-  if(data->set.tls_ech & (CURLECH_ENABLE|CURLECH_HARD)) {
+  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    /* Only use HTTPS RR for HTTP(S) transfers */
     char *qname = NULL;
     if(port != PORT_HTTPS) {
       qname = aprintf("_%d._https.%s", port, hostname);
@@ -482,7 +473,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
       goto error;
     dohp->pending++;
   }
-# endif
 #endif
   *waitp = TRUE; /* this never returns synchronously */
   return NULL;
