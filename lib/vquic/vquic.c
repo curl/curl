@@ -53,12 +53,6 @@
 
 #ifdef USE_HTTP3
 
-#ifdef O_BINARY
-#define QLOGMODE O_WRONLY|O_CREAT|O_BINARY
-#else
-#define QLOGMODE O_WRONLY|O_CREAT
-#endif
-
 #define NW_CHUNK_SIZE     (64 * 1024)
 #define NW_SEND_CHUNKS    2
 
@@ -657,7 +651,7 @@ CURLcode Curl_qlogdir(struct Curl_easy *data,
       result = Curl_dyn_add(&fname, ".sqlog");
 
     if(!result) {
-      int qlogfd = open(Curl_dyn_ptr(&fname), QLOGMODE,
+      int qlogfd = open(Curl_dyn_ptr(&fname), O_WRONLY|O_CREAT|CURL_O_BINARY,
                         data->set.new_file_perms);
       if(qlogfd != -1)
         *qlogfdp = qlogfd;

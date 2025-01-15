@@ -886,6 +886,14 @@
 #define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
 #endif
 
+/* Since O_BINARY is used in bitmasks, setting it to zero makes it usable in
+   source code but yet it does not ruin anything */
+#ifdef O_BINARY
+#define CURL_O_BINARY O_BINARY
+#else
+#define CURL_O_BINARY 0
+#endif
+
 /* In Windows the default file mode is text but an application can override it.
 Therefore we specify it explicitly. https://github.com/curl/curl/pull/258
 */

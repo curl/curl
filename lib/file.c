@@ -203,7 +203,7 @@ static CURLcode file_connect(struct Curl_easy *data, bool *done)
       return CURLE_URL_MALFORMAT;
     }
 
-  fd = open(actual_path, O_RDONLY|O_BINARY);
+  fd = open(actual_path, O_RDONLY|CURL_O_BINARY);
   file->path = actual_path;
 #else
   if(memchr(real_path, 0, real_path_len)) {
@@ -312,16 +312,11 @@ static CURLcode file_upload(struct Curl_easy *data)
   if(!dir[1])
     return CURLE_FILE_COULDNT_READ_FILE; /* fix: better error code */
 
-#ifdef O_BINARY
-#define MODE_DEFAULT O_WRONLY|O_CREAT|O_BINARY
-#else
-#define MODE_DEFAULT O_WRONLY|O_CREAT
-#endif
-
+  mode = O_WRONLY|O_CREAT|CURL_O_BINARY;
   if(data->state.resume_from)
-    mode = MODE_DEFAULT|O_APPEND;
+    mode |= O_APPEND;
   else
-    mode = MODE_DEFAULT|O_TRUNC;
+    mode |= O_TRUNC;
 
 #if (defined(ANDROID) || defined(__ANDROID__)) && \
     (defined(__i386__) || defined(__arm__))
