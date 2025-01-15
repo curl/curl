@@ -1833,6 +1833,12 @@ struct UserDefined {
 #ifndef CURL_DISABLE_WEBSOCKETS
   BIT(ws_raw_mode);
 #endif
+<<<<<<< HEAD
+=======
+#ifdef USE_ECH
+  int tls_ech;      /* TLS ECH configuration  */
+#endif
+>>>>>>> 3794c0065 (imap: Fix build errors, refactor IMAP append logic)
 };
 
 #ifndef CURL_DISABLE_MIME
