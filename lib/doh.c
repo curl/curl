@@ -410,12 +410,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   struct doh_probes *dohp;
   struct connectdata *conn = data->conn;
   size_t i;
-#ifdef USE_HTTPSRR
-  /* for now, this is only used when ECH is enabled */
-# ifdef USE_ECH
-  char *qname = NULL;
-# endif
-#endif
   *waitp = FALSE;
   (void)hostname;
   (void)port;
@@ -463,28 +457,27 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 
 #ifdef USE_HTTPSRR
   /*
-   * TODO: Figure out the conditions under which we want to make
-   * a request for an HTTPS RR when we are not doing ECH. For now,
-   * making this request breaks a bunch of DoH tests, e.g. test2100,
-   * where the additional request does not match the pre-cooked data
-   * files, so there is a bit of work attached to making the request
-   * in a non-ECH use-case. For the present, we will only make the
-   * request when ECH is enabled in the build and is being used for
-   * the curl operation.
+   * TODO: Figure out the conditions under which we want to make a request for
+   * an HTTPS RR when we are not doing ECH. For now, making this request
+   * breaks a bunch of DoH tests, e.g. test2100, where the additional request
+   * does not match the pre-cooked data files, so there is a bit of work
+   * attached to making the request in a non-ECH use-case. For the present, we
+   * will only make the request when ECH is enabled in the build and is being
+   * used for the curl operation.
    */
 # ifdef USE_ECH
-  if(data->set.tls_ech & CURLECH_ENABLE
-     || data->set.tls_ech & CURLECH_HARD) {
-    if(port == 443)
-      qname = strdup(hostname);
-    else
+  if(data->set.tls_ech & (CURLECH_ENABLE|CURLECH_HARD)) {
+    char *qname = NULL;
+    if(port != PORT_HTTPS) {
       qname = aprintf("_%d._https.%s", port, hostname);
-    if(!qname)
-      goto error;
+      if(!qname)
+        goto error;
+    }
     result = doh_run_probe(data, &dohp->probe[DOH_SLOT_HTTPS_RR],
-                           DNS_TYPE_HTTPS, qname, data->set.str[STRING_DOH],
+                           DNS_TYPE_HTTPS,
+                           qname ? qname : hostname, data->set.str[STRING_DOH],
                            data->multi, dohp->req_hds);
-    Curl_safefree(qname);
+    free(qname);
     if(result)
       goto error;
     dohp->pending++;
@@ -1175,6 +1168,8 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *rrval, size_t len,
   if(doh_test_alpn_escapes() != CURLE_OK)
     return CURLE_OUT_OF_MEMORY;
 #endif
+  if(remaining <= 2)
+    return CURLE_BAD_FUNCTION_ARGUMENT;
   lhrr = calloc(1, sizeof(struct Curl_https_rrinfo));
   if(!lhrr)
     return CURLE_OUT_OF_MEMORY;
@@ -1182,49 +1177,55 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *rrval, size_t len,
   if(!lhrr->val)
     goto err;
   lhrr->len = len;
-  if(remaining <= 2)
-    goto err;
-  lhrr->priority = (uint16_t)((cp[0] << 8) + cp[1]);
+  lhrr->priority = doh_get16bit(cp, 0);
   cp += 2;
-  remaining -= (uint16_t)2;
+  remaining -= 2;
   if(doh_decode_rdata_name(&cp, &remaining, &dnsname) != CURLE_OK)
     goto err;
   lhrr->target = dnsname;
+  lhrr->port = -1; /* until set */
   while(remaining >= 4) {
-    pcode = (uint16_t)((*cp << 8) + (*(cp + 1)));
-    cp += 2;
-    plen = (uint16_t)((*cp << 8) + (*(cp + 1)));
-    cp += 2;
+    pcode = doh_get16bit(cp, 0);
+    plen = doh_get16bit(cp, 2);
+    cp += 4;
     remaining -= 4;
-    if(pcode == HTTPS_RR_CODE_ALPN) {
+    switch(pcode) {
+    case HTTPS_RR_CODE_ALPN:
       if(doh_decode_rdata_alpn(cp, plen, &lhrr->alpns) != CURLE_OK)
         goto err;
-    }
-    if(pcode == HTTPS_RR_CODE_NO_DEF_ALPN)
+      break;
+    case HTTPS_RR_CODE_NO_DEF_ALPN:
       lhrr->no_def_alpn = TRUE;
-    else if(pcode == HTTPS_RR_CODE_IPV4) {
+      break;
+    case HTTPS_RR_CODE_IPV4:
       if(!plen)
         goto err;
       lhrr->ipv4hints = Curl_memdup(cp, plen);
       if(!lhrr->ipv4hints)
         goto err;
       lhrr->ipv4hints_len = (size_t)plen;
-    }
-    else if(pcode == HTTPS_RR_CODE_ECH) {
+      break;
+    case HTTPS_RR_CODE_ECH:
       if(!plen)
         goto err;
       lhrr->echconfiglist = Curl_memdup(cp, plen);
       if(!lhrr->echconfiglist)
         goto err;
       lhrr->echconfiglist_len = (size_t)plen;
-    }
-    else if(pcode == HTTPS_RR_CODE_IPV6) {
+      break;
+    case HTTPS_RR_CODE_IPV6:
       if(!plen)
         goto err;
       lhrr->ipv6hints = Curl_memdup(cp, plen);
       if(!lhrr->ipv6hints)
         goto err;
       lhrr->ipv6hints_len = (size_t)plen;
+      break;
+    case HTTPS_RR_CODE_PORT:
+      lhrr->port = doh_get16bit(cp, 0);
+      break;
+    default:
+      break;
     }
     if(plen > 0 && plen <= remaining) {
       cp += plen;
@@ -1235,13 +1236,11 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *rrval, size_t len,
   *hrr = lhrr;
   return CURLE_OK;
 err:
-  if(lhrr) {
-    Curl_safefree(lhrr->target);
-    Curl_safefree(lhrr->echconfiglist);
-    Curl_safefree(lhrr->val);
-    Curl_safefree(lhrr->alpns);
-    Curl_safefree(lhrr);
-  }
+  Curl_safefree(lhrr->target);
+  Curl_safefree(lhrr->echconfiglist);
+  Curl_safefree(lhrr->val);
+  Curl_safefree(lhrr->alpns);
+  Curl_safefree(lhrr);
   return CURLE_OUT_OF_MEMORY;
 }
 
