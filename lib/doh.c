@@ -471,17 +471,16 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 # ifdef USE_ECH
   if(data->set.tls_ech & (CURLECH_ENABLE|CURLECH_HARD)) {
     char *qname = NULL;
-    if(port == PORT_HTTPS)
-      /* for the default port number only */
-      qname = strdup(hostname);
-    else
+    if(port != PORT_HTTPS) {
       qname = aprintf("_%d._https.%s", port, hostname);
-    if(!qname)
-      goto error;
+      if(!qname)
+        goto error;
+    }
     result = doh_run_probe(data, &dohp->probe[DOH_SLOT_HTTPS_RR],
-                           DNS_TYPE_HTTPS, qname, data->set.str[STRING_DOH],
+                           DNS_TYPE_HTTPS,
+                           qname ? qname : hostname, data->set.str[STRING_DOH],
                            data->multi, dohp->req_hds);
-    Curl_safefree(qname);
+    free(qname);
     if(result)
       goto error;
     dohp->pending++;
