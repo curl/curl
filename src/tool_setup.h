@@ -100,7 +100,7 @@ extern bool tool_term_has_bold;
 #  undef isatty
 #  define isatty(fd) 0
 #  undef _get_osfhandle
-#  define _get_osfhandle(fd) (fd)
+#  define _get_osfhandle(fd) (fd)  /* FIXME */
 #  undef _getch
 #  define _getch() 0
 #  undef STDIN_FILENO
