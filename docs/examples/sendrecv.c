@@ -36,7 +36,7 @@
  */
 #ifdef __GNUC__
 #pragma GCC diagnostic ignored "-Wsign-conversion"
-#if defined(__DJGPP__)
+#ifdef __DJGPP__
 #pragma GCC diagnostic ignored "-Warith-conversion"
 #endif
 #elif defined(_MSC_VER)
