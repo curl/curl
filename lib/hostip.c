@@ -1079,18 +1079,11 @@ static void hostcache_unlink_entry(void *entry)
     Curl_freeaddrinfo(dns->addr);
 #ifdef USE_HTTPSRR
     if(dns->hinfo) {
-      if(dns->hinfo->target)
-        free(dns->hinfo->target);
-      if(dns->hinfo->alpns)
-        free(dns->hinfo->alpns);
-      if(dns->hinfo->ipv4hints)
-        free(dns->hinfo->ipv4hints);
-      if(dns->hinfo->echconfiglist)
-        free(dns->hinfo->echconfiglist);
-      if(dns->hinfo->ipv6hints)
-        free(dns->hinfo->ipv6hints);
-      if(dns->hinfo->val)
-        free(dns->hinfo->val);
+      free(dns->hinfo->target);
+      free(dns->hinfo->alpns);
+      free(dns->hinfo->ipv4hints);
+      free(dns->hinfo->echconfiglist);
+      free(dns->hinfo->ipv6hints);
       free(dns->hinfo);
     }
 #endif
