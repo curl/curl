@@ -41,6 +41,9 @@ CURLcode test(char *URL)
 {
   CURLcode res;
   CURL *curl;
+#ifdef LIB696
+  int transfers = 0;
+#endif
 
   if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
     fprintf(stderr, "curl_global_init() failed\n");
@@ -57,6 +60,10 @@ CURLcode test(char *URL)
   test_setopt(curl, CURLOPT_URL, URL);
   test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
   test_setopt(curl, CURLOPT_VERBOSE, 1L);
+
+#ifdef LIB696
+again:
+#endif
 
   res = curl_easy_perform(curl);
 
@@ -87,8 +94,12 @@ CURLcode test(char *URL)
 
       if(nread) {
         /* send received stuff to stdout */
-        if(!write(STDOUT_FILENO, buf, nread))
+        if((size_t)write(STDOUT_FILENO, buf, nread) != nread) {
+          fprintf(stderr, "write() failed: errno %d (%s)\n",
+                  errno, strerror(errno));
+          res = TEST_ERR_FAILURE;
           break;
+        }
       }
 
     } while((res == CURLE_OK && nread) || (res == CURLE_AGAIN));
@@ -98,12 +109,10 @@ CURLcode test(char *URL)
   }
 
 #ifdef LIB696
-  /* attempt to use the handle again */
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-
-  res = curl_easy_perform(curl);
+  ++transfers;
+  /* perform the transfer a second time */
+  if(!res && transfers == 1)
+    goto again;
 #endif
 
 test_cleanup:
