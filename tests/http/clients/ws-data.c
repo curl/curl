@@ -26,14 +26,18 @@
  * </DESC>
  */
 /* curl stuff */
-#include "curl_setup.h"
 #include <curl/curl.h>
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#ifndef CURL_DISABLE_WEBSOCKETS
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
+
+#ifndef _MSC_VER
+/* somewhat Unix-specific */
+#include <unistd.h>  /* getopt() */
+#endif
 
 #ifdef _WIN32
 #ifndef WIN32_LEAN_AND_MEAN
@@ -43,6 +47,7 @@
 #else
 #include <sys/time.h>
 #endif
+
 
 static
 void dump(const char *text, unsigned char *ptr, size_t size,
@@ -93,86 +98,45 @@ void dump(const char *text, unsigned char *ptr, size_t size,
   }
 }
 
-static CURLcode send_binary(CURL *curl, char *buf, size_t buflen)
+static CURLcode check_recv(const struct curl_ws_frame *frame,
+                           size_t r_offset, size_t nread, size_t exp_len)
 {
-  size_t nwritten;
-  CURLcode result =
-    curl_ws_send(curl, buf, buflen, &nwritten, 0, CURLWS_BINARY);
-  fprintf(stderr, "ws: send_binary(len=%ld) -> %d, %ld\n",
-          (long)buflen, result, (long)nwritten);
-  return result;
+  if(!frame)
+    return CURLE_OK;
+
+  if(frame->flags & CURLWS_CLOSE) {
+    fprintf(stderr, "recv_data: unexpected CLOSE frame from server, "
+            "got %ld bytes, offset=%ld, rflags %x\n",
+            (long)nread, (long)r_offset, frame->flags);
+    return CURLE_RECV_ERROR;
+  }
+  if(!r_offset && !(frame->flags & CURLWS_BINARY)) {
+    fprintf(stderr, "recv_data: wrong frame, got %ld bytes, offset=%ld, "
+            "rflags %x\n",
+            (long)nread, (long)r_offset, frame->flags);
+    return CURLE_RECV_ERROR;
+  }
+  if(frame->offset != (curl_off_t)r_offset) {
+    fprintf(stderr, "recv_data: frame offset, expected %ld, got %ld\n",
+            (long)r_offset, (long)frame->offset);
+    return CURLE_RECV_ERROR;
+  }
+  if(frame->bytesleft != (curl_off_t)(exp_len - r_offset - nread)) {
+    fprintf(stderr, "recv_data: frame bytesleft, expected %ld, got %ld\n",
+            (long)(exp_len - r_offset - nread), (long)frame->bytesleft);
+    return CURLE_RECV_ERROR;
+  }
+  if(r_offset + nread > exp_len) {
+    fprintf(stderr, "recv_data: data length, expected %ld, now at %ld\n",
+            (long)exp_len, (long)(r_offset + nread));
+    return CURLE_RECV_ERROR;
+  }
+  return CURLE_OK;
 }
 
 #if defined(__TANDEM)
 # include <cextdecs.h(PROCESS_DELAY_)>
 #endif
-static CURLcode recv_binary(CURL *curl, char *exp_data, size_t exp_len)
-{
-  const struct curl_ws_frame *frame;
-  char recvbuf[256];
-  size_t r_offset, nread;
-  CURLcode result;
-
-  fprintf(stderr, "recv_binary: expected payload %ld bytes\n", (long)exp_len);
-  r_offset = 0;
-  while(1) {
-    result = curl_ws_recv(curl, recvbuf, sizeof(recvbuf), &nread, &frame);
-    if(result == CURLE_AGAIN) {
-      fprintf(stderr, "EAGAIN, sleep, try again\n");
-#ifdef _WIN32
-      Sleep(100);
-#elif defined(__TANDEM)
-      /* NonStop only defines usleep when building for a threading model */
-# if defined(_PUT_MODEL_) || defined(_KLT_MODEL_)
-      usleep(100*1000);
-# else
-      PROCESS_DELAY_(100*1000);
-# endif
-#else
-      usleep(100*1000);
-#endif
-      continue;
-    }
-    fprintf(stderr, "ws: curl_ws_recv(offset=%ld, len=%ld) -> %d, %ld\n",
-            (long)r_offset, (long)sizeof(recvbuf), result, (long)nread);
-    if(result) {
-      return result;
-    }
-    if(!(frame->flags & CURLWS_BINARY)) {
-      fprintf(stderr, "recv_data: wrong frame, got %ld bytes rflags %x\n",
-              (long)nread, frame->flags);
-      return CURLE_RECV_ERROR;
-    }
-    if(frame->offset != (curl_off_t)r_offset) {
-      fprintf(stderr, "recv_data: frame offset, expected %ld, got %ld\n",
-              (long)r_offset, (long)frame->offset);
-      return CURLE_RECV_ERROR;
-    }
-    if(frame->bytesleft != (curl_off_t)(exp_len - r_offset - nread)) {
-      fprintf(stderr, "recv_data: frame bytesleft, expected %ld, got %ld\n",
-              (long)(exp_len - r_offset - nread), (long)frame->bytesleft);
-      return CURLE_RECV_ERROR;
-    }
-    if(r_offset + nread > exp_len) {
-      fprintf(stderr, "recv_data: data length, expected %ld, now at %ld\n",
-              (long)exp_len, (long)(r_offset + nread));
-      return CURLE_RECV_ERROR;
-    }
-    if(memcmp(exp_data + r_offset, recvbuf, nread)) {
-      fprintf(stderr, "recv_data: data differs, offset=%ld, len=%ld\n",
-              (long)r_offset, (long)nread);
-      dump("expected:", (unsigned char *)exp_data + r_offset, nread, 0);
-      dump("received:", (unsigned char *)recvbuf, nread, 0);
-      return CURLE_RECV_ERROR;
-    }
-    r_offset += nread;
-    if(r_offset >= exp_len) {
-      fprintf(stderr, "recv_data: frame complete\n");
-      break;
-    }
-  }
-  return CURLE_OK;
-}
 
 /* just close the connection */
 static void websocket_close(CURL *curl)
@@ -184,72 +148,174 @@ static void websocket_close(CURL *curl)
           "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
 }
 
-static CURLcode data_echo(CURL *curl, size_t plen_min, size_t plen_max)
+static CURLcode data_echo(CURL *curl, size_t count,
+                          size_t plen_min, size_t plen_max)
 {
-  CURLcode res = CURLE_OK;
+  CURLcode r = CURLE_OK;
+  const struct curl_ws_frame *frame;
   size_t len;
-  char *send_buf;
-  size_t i;
+  char *send_buf = NULL, *recv_buf = NULL;
+  size_t i, scount = count, rcount = count;
+  int rblock, sblock;
 
-  send_buf = calloc(1, plen_max);
-  if(!send_buf)
-    return CURLE_OUT_OF_MEMORY;
+  send_buf = calloc(1, plen_max + 1);
+  recv_buf = calloc(1, plen_max + 1);
+  if(!send_buf || !recv_buf) {
+    r = CURLE_OUT_OF_MEMORY;
+    goto out;
+  }
+
   for(i = 0; i < plen_max; ++i) {
     send_buf[i] = (char)('0' + ((int)i % 10));
   }
 
   for(len = plen_min; len <= plen_max; ++len) {
-    res = send_binary(curl, send_buf, len);
-    if(res)
-      goto out;
-    res = recv_binary(curl, send_buf, len);
-    if(res) {
-      fprintf(stderr, "recv_data(len=%ld) -> %d\n", (long)len, res);
+    size_t nwritten, nread, slen = len, rlen = len;
+    char *sbuf = send_buf, *rbuf = recv_buf;
+
+    memset(recv_buf, 0, plen_max);
+    while(slen || rlen || scount || rcount) {
+      sblock = rblock = 1;
+      if(slen) {
+        r = curl_ws_send(curl, sbuf, slen, &nwritten, 0, CURLWS_BINARY);
+        sblock = (r == CURLE_AGAIN);
+        if(!r || (r == CURLE_AGAIN)) {
+          fprintf(stderr, "curl_ws_send(len=%ld) -> %d, %ld (%ld/%ld)\n",
+                  (long)slen, r, (long)nwritten,
+                  (long)(len - slen), (long)len);
+          sbuf += nwritten;
+          slen -= nwritten;
+        }
+        else
+          goto out;
+      }
+      if(!slen && scount) { /* go again? */
+        scount--;
+        sbuf = send_buf;
+        slen = len;
+      }
+
+      if(rlen) {
+        size_t max_recv = (64 * 1024);
+        r = curl_ws_recv(curl, rbuf, (rlen > max_recv) ? max_recv : rlen,
+                         &nread, &frame);
+        if(!r || (r == CURLE_AGAIN)) {
+          rblock = (r == CURLE_AGAIN);
+          fprintf(stderr, "curl_ws_recv(len=%ld) -> %d, %ld (%ld/%ld) \n",
+                  (long)rlen, r, (long)nread, (long)(len - rlen), (long)len);
+          if(!r) {
+            r = check_recv(frame, len - rlen, nread, len);
+            if(r)
+              goto out;
+          }
+          rbuf += nread;
+          rlen -= nread;
+        }
+        else
+          goto out;
+      }
+      if(!rlen && rcount) { /* go again? */
+        rcount--;
+        rbuf = recv_buf;
+        rlen = len;
+      }
+
+      if(rblock && sblock) {
+        fprintf(stderr, "EAGAIN, sleep, try again\n");
+  #ifdef _WIN32
+        Sleep(100);
+  #elif defined(__TANDEM)
+        /* NonStop only defines usleep when building for a threading model */
+  # if defined(_PUT_MODEL_) || defined(_KLT_MODEL_)
+        usleep(100*1000);
+  # else
+        PROCESS_DELAY_(100*1000);
+  # endif
+  #else
+        usleep(100*1000);
+  #endif
+      }
+    }
+
+    if(memcmp(send_buf, recv_buf, len)) {
+      fprintf(stderr, "recv_data: data differs\n");
+      dump("expected:", (unsigned char *)send_buf, len, 0);
+      dump("received:", (unsigned char *)recv_buf, len, 0);
+      r = CURLE_RECV_ERROR;
       goto out;
     }
   }
 
 out:
-  if(!res)
+  if(!r)
     websocket_close(curl);
   free(send_buf);
-  return res;
+  free(recv_buf);
+  return r;
+}
+
+static void usage(const char *msg)
+{
+  if(msg)
+    fprintf(stderr, "%s\n", msg);
+  fprintf(stderr,
+    "usage: [options] url\n"
+    "  -m number  minimum frame size\n"
+    "  -M number  maximum frame size\n"
+  );
 }
 
 #endif
 
 int main(int argc, char *argv[])
 {
-#ifndef CURL_DISABLE_WEBSOCKETS
+#if !defined(CURL_DISABLE_WEBSOCKETS) && !defined(_MSC_VER)
   CURL *curl;
   CURLcode res = CURLE_OK;
   const char *url;
-  long l1, l2;
-  size_t plen_min, plen_max;
+  size_t plen_min = 0, plen_max = 0, count = 1;
+  int ch;
 
+  while((ch = getopt(argc, argv, "c:hm:M:")) != -1) {
+    switch(ch) {
+    case 'h':
+      usage(NULL);
+      res = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto cleanup;
+    case 'c':
+      count = (size_t)strtol(optarg, NULL, 10);
+      break;
+    case 'm':
+      plen_min = (size_t)strtol(optarg, NULL, 10);
+      break;
+    case 'M':
+      plen_max = (size_t)strtol(optarg, NULL, 10);
+      break;
+    default:
+      usage("invalid option");
+      res = CURLE_BAD_FUNCTION_ARGUMENT;
+      goto cleanup;
+    }
+  }
+  argc -= optind;
+  argv += optind;
 
-  if(argc != 4) {
-    fprintf(stderr, "usage: ws-data url minlen maxlen\n");
-    return 2;
-  }
-  url = argv[1];
-  l1 = strtol(argv[2], NULL, 10);
-  if(l1 < 0) {
-    fprintf(stderr, "minlen must be >= 0, got %ld\n", l1);
-    return 2;
-  }
-  l2 = strtol(argv[3], NULL, 10);
-  if(l2 < 0) {
-    fprintf(stderr, "maxlen must be >= 0, got %ld\n", l2);
-    return 2;
-  }
-  plen_min = l1;
-  plen_max = l2;
+  if(!plen_max)
+    plen_max = plen_min;
+
   if(plen_max < plen_min) {
     fprintf(stderr, "maxlen must be >= minlen, got %ld-%ld\n",
             (long)plen_min, (long)plen_max);
-    return 2;
+    res = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto cleanup;
   }
+
+  if(argc != 1) {
+    usage(NULL);
+    res = CURLE_BAD_FUNCTION_ARGUMENT;
+    goto cleanup;
+  }
+  url = argv[0];
 
   curl_global_init(CURL_GLOBAL_ALL);
 
@@ -264,11 +330,13 @@ int main(int argc, char *argv[])
     res = curl_easy_perform(curl);
     fprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
     if(res == CURLE_OK)
-      res = data_echo(curl, plen_min, plen_max);
+      res = data_echo(curl, count, plen_min, plen_max);
 
     /* always cleanup */
     curl_easy_cleanup(curl);
   }
+
+cleanup:
   curl_global_cleanup();
   return (int)res;
 

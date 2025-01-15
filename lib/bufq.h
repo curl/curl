@@ -151,14 +151,6 @@ void Curl_bufq_free(struct bufq *q);
 size_t Curl_bufq_len(const struct bufq *q);
 
 /**
- * Return the total amount of free space in the queue.
- * The returned length is the number of bytes that can
- * be expected to be written successfully to the bufq,
- * providing no memory allocations fail.
- */
-size_t Curl_bufq_space(const struct bufq *q);
-
-/**
  * Returns TRUE iff there is no data in the buffer queue.
  */
 bool Curl_bufq_is_empty(const struct bufq *q);
