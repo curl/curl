@@ -351,7 +351,7 @@ cleanup:
 
 #endif /* HAS_MANUAL_VERIFY_API */
 
-#ifndef __MINGW32CE__
+#ifndef UNDER_CE
 /*
  * Returns the number of characters necessary to populate all the host_names.
  * If host_names is not NULL, populate it with all the hostnames. Each string
@@ -530,7 +530,7 @@ static bool get_alt_name_info(struct Curl_easy *data,
 #endif
   return result;
 }
-#endif /* !__MINGW32CE__ */
+#endif /* !UNDER_CE */
 
 /* Verify the server's hostname */
 CURLcode Curl_verify_host(struct Curl_cfilter *cf,
