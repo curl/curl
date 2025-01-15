@@ -1132,13 +1132,11 @@ static ParameterError parse_ech(struct GlobalConfig *global,
     err = PARAM_LIBCURL_DOESNT_SUPPORT;
   else if(strlen(nextarg) > 4 && strncasecompare("pn:", nextarg, 3)) {
     /* a public_name */
-    nextarg += 3;
     err = getstr(&config->ech_public, nextarg, DENY_BLANK);
   }
   else if(strlen(nextarg) > 5 && strncasecompare("ecl:", nextarg, 4)) {
     /* an ECHConfigList */
-    nextarg += 4;
-    if('@' != *nextarg) {
+    if('@' != *(nextarg + 4)) {
       err = getstr(&config->ech_config, nextarg, DENY_BLANK);
     }
     else {
@@ -1146,7 +1144,7 @@ static ParameterError parse_ech(struct GlobalConfig *global,
       char *tmpcfg = NULL;
       FILE *file;
 
-      nextarg++;        /* skip over '@' */
+      nextarg += 5;        /* skip over 'ecl:@' */
       if(!strcmp("-", nextarg)) {
         file = stdin;
       }
