@@ -412,9 +412,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   size_t i;
 #ifdef USE_HTTPSRR
   /* for now, this is only used when ECH is enabled */
-# ifdef USE_ECH
-  char *qname = NULL;
-# endif
 #endif
   *waitp = FALSE;
   (void)hostname;
@@ -473,6 +470,7 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
    */
 # ifdef USE_ECH
   if(data->set.tls_ech & (CURLECH_ENABLE|CURLECH_HARD)) {
+    char *qname = NULL;
     if(port == PORT_HTTPS)
       /* for the default port number only */
       qname = strdup(hostname);
