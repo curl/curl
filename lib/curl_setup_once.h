@@ -33,7 +33,9 @@
 #include <string.h>
 #include <stdarg.h>
 #include <time.h>
+#ifndef UNDER_CE
 #include <errno.h>
+#endif
 
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
@@ -390,7 +392,7 @@ typedef unsigned int bit;
 
 #ifdef __VMS
 #define argv_item_t  __char_ptr32
-#elif defined(_UNICODE)
+#elif defined(_UNICODE) && !defined(UNDER_CE)
 #define argv_item_t  wchar_t *
 #else
 #define argv_item_t  char *

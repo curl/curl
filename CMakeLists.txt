@@ -86,6 +86,44 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
+# CMake (as of 3.30.3) does not recognize DJGPP and Windows CE for GCC
+# accurately. Touch up the configuration manually as a workaround.
+if(WIN32 AND WINCE AND CMAKE_COMPILER_IS_GNUCC)  # Manually detect mingw32ce builds
+  if(NOT MINGW32CE_LIBRARY_DIR)
+    message(FATAL_ERROR "Set MINGW32CE_LIBRARY_DIR variable to the mingw32ce platform library directory.")
+  endif()
+
+  set(MINGW 1)
+  set(MINGW32CE 1)
+
+  # Build implib with libcurl DLL. Copied from CMake's 'Modules/Platform/Windows-GNU.cmake'.
+  set(_str "<CMAKE_C_COMPILER> <CMAKE_SHARED_LIBRARY_C_FLAGS> <LANGUAGE_COMPILE_FLAGS>")
+  set(_str "${_str} <LINK_FLAGS> <CMAKE_SHARED_LIBRARY_CREATE_C_FLAGS> -o <TARGET>")
+  set(_str "${_str} -Wl,--out-implib,<TARGET_IMPLIB> ${CMAKE_GNULD_IMAGE_VERSION} <OBJECTS> <LINK_LIBRARIES>")
+  set(CMAKE_C_CREATE_SHARED_LIBRARY "${_str}")
+  unset(_str)
+
+  # Build resources. Copied from CMake's 'Modules/Platform/Windows-windres.cmake'.
+  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+  enable_language(RC)
+
+  set(CMAKE_C_COMPILE_OPTIONS_PIC "")  # CMake sets it to '-fPIC', confusing the toolchain and breaking builds. Zap it.
+
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_SHARED_LIBRARY_PREFIX "lib")
+  set(CMAKE_SHARED_LIBRARY_SUFFIX ".dll")
+  set(CMAKE_IMPORT_LIBRARY_PREFIX "lib")
+  set(CMAKE_IMPORT_LIBRARY_SUFFIX ".dll.a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib" "")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".a" ".lib")
+elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
+  set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
+  set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
+  set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
+  set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+endif()
+
 set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
@@ -98,6 +136,9 @@ if(BSD)
 endif()
 if(WIN32)
   set(_target_flags "${_target_flags} WIN32")
+endif()
+if(WINCE)
+  set(_target_flags "${_target_flags} WINCE")
 endif()
 if(WINDOWS_STORE)
   set(_target_flags "${_target_flags} UWP")
@@ -178,12 +219,12 @@ if(WIN32)
   endif()
 
   option(ENABLE_UNICODE "Use the Unicode version of the Windows API functions" OFF)
-  if(WINDOWS_STORE)
+  if(WINDOWS_STORE OR WINCE)
     set(ENABLE_UNICODE ON)
   endif()
   if(ENABLE_UNICODE)
     add_definitions("-DUNICODE" "-D_UNICODE")
-    if(MINGW)
+    if(MINGW AND NOT MINGW32CE)
       add_compile_options("-municode")
     endif()
   endif()
@@ -207,16 +248,12 @@ if(WIN32)
   endif()
   # Avoid storing HAVE_WIN32_WINNT in CMake cache
   unset(HAVE_WIN32_WINNT CACHE)
-elseif(DOS OR AMIGA)
+endif()
+if(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
   set(BUILD_STATIC_LIBS ON)
-  if(DOS AND CMAKE_COMPILER_IS_GNUCC)
-    set(CMAKE_STATIC_LIBRARY_PREFIX "lib")
-    set(CMAKE_STATIC_LIBRARY_SUFFIX ".a")
-    set(CMAKE_FIND_LIBRARY_PREFIXES "lib")
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
-  endif()
 endif()
+
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
 cmake_dependent_option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup"
@@ -448,7 +485,7 @@ if(HTTP_ONLY)
   set(CURL_DISABLE_TFTP ON)
 endif()
 
-if(WINDOWS_STORE)
+if(WINDOWS_STORE OR WINCE)
   set(CURL_DISABLE_TELNET ON)  # telnet code needs fixing to compile for UWP.
 endif()
 
@@ -477,7 +514,7 @@ if(ENABLE_IPV6 AND NOT WIN32)
     list(APPEND CURL_LIBS "-framework SystemConfiguration")
   endif()
 endif()
-if(ENABLE_IPV6)
+if(ENABLE_IPV6 AND NOT WINCE)
   set(USE_IPV6 ON)
 endif()
 
@@ -580,7 +617,22 @@ elseif(NOT WIN32 AND NOT APPLE)
 endif()
 
 if(WIN32)
-  list(APPEND CURL_LIBS "ws2_32" "bcrypt")
+  if(WINCE)
+    set(_win32_winsock "ws2")
+  else()
+    set(_win32_winsock "ws2_32")
+  endif()
+  set(_win32_crypt32 "crypt32")
+
+  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
+    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
+    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
+  endif()
+
+  list(APPEND CURL_LIBS "${_win32_winsock}")
+  if(NOT WINCE)
+    list(APPEND CURL_LIBS "bcrypt")
+  endif()
 endif()
 
 # Check SSL libraries
@@ -896,8 +948,8 @@ macro(curl_openssl_check_symbol_exists _symbol _files _variable)
     if(HAVE_LIBZ)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
     endif()
-    if(WIN32)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+    if(WIN32 AND NOT WINCE)
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
       list(APPEND CMAKE_REQUIRED_LIBRARIES "bcrypt")  # for OpenSSL/LibreSSL
     endif()
   endif()
@@ -910,7 +962,7 @@ macro(curl_openssl_check_symbol_exists _symbol _files _variable)
       list(APPEND CMAKE_REQUIRED_LIBRARIES "${ZLIB_LIBRARIES}")
     endif()
     if(WIN32)
-      list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32" "crypt32")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}" "${_win32_crypt32}")
     endif()
     list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DHAVE_UINTPTR_T")  # to pull in stdint.h (as of wolfSSL v5.5.4)
   endif()
@@ -1114,7 +1166,7 @@ if(NOT CURL_DISABLE_SRP AND (HAVE_GNUTLS_SRP OR HAVE_OPENSSL_SRP))
 endif()
 
 if(NOT CURL_DISABLE_LDAP)
-  if(WIN32 AND NOT WINDOWS_STORE)
+  if(WIN32 AND NOT WINDOWS_STORE AND NOT WINCE)
     option(USE_WIN32_LDAP "Use Windows LDAP implementation" ON)
     if(USE_WIN32_LDAP)
       list(APPEND CURL_LIBS "wldap32")
@@ -1401,7 +1453,7 @@ if(USE_LIBRTMP)
 endif()
 
 option(ENABLE_UNIX_SOCKETS "Enable Unix domain sockets support" ON)
-if(ENABLE_UNIX_SOCKETS)
+if(ENABLE_UNIX_SOCKETS AND NOT WINCE)
   if(WIN32 OR DOS)
     set(USE_UNIX_SOCKETS ON)
   else()
@@ -1512,13 +1564,13 @@ if(WIN32)
   list(APPEND CURL_INCLUDES "ws2tcpip.h")
 
   if(HAVE_WIN32_WINNT)
-    if(HAVE_WIN32_WINNT LESS 0x0501)
+    if(HAVE_WIN32_WINNT LESS 0x0501 AND NOT WINCE)
       # Windows XP is required for freeaddrinfo, getaddrinfo
       message(FATAL_ERROR "Building for Windows XP or newer is required.")
     endif()
 
     # Pre-fill detection results based on target OS version
-    if(MINGW OR MSVC)
+    if(MINGW OR MSVC OR WINCE)
       if(HAVE_WIN32_WINNT LESS 0x0600)
         set(HAVE_INET_NTOP 0)
         set(HAVE_INET_PTON 0)
@@ -1626,7 +1678,7 @@ endif()
 
 # Apply to all feature checks
 if(WIN32)
-  list(APPEND CMAKE_REQUIRED_LIBRARIES "ws2_32")
+  list(APPEND CMAKE_REQUIRED_LIBRARIES "${_win32_winsock}")
 elseif(HAVE_LIBSOCKET)
   list(APPEND CMAKE_REQUIRED_LIBRARIES "socket")
 elseif(DOS)
@@ -1682,7 +1734,6 @@ check_symbol_exists("getsockname"     "${CURL_INCLUDES}" HAVE_GETSOCKNAME)  # wi
 check_function_exists("if_nametoindex"  HAVE_IF_NAMETOINDEX)  # winsock2.h net/if.h
 check_function_exists("getrlimit"       HAVE_GETRLIMIT)
 check_function_exists("setlocale"       HAVE_SETLOCALE)
-check_function_exists("setmode"         HAVE_SETMODE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
 if(NOT WIN32)
@@ -1691,8 +1742,11 @@ if(NOT WIN32)
   check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 endif()
 
-if(WIN32 OR CYGWIN)
-  check_function_exists("_setmode" HAVE__SETMODE)
+if(NOT MINGW32CE)  # Avoid false detections
+  check_function_exists("setmode" HAVE_SETMODE)
+  if(WIN32 OR CYGWIN)
+    check_function_exists("_setmode" HAVE__SETMODE)
+  endif()
 endif()
 
 if(AMIGA)
@@ -1872,7 +1926,7 @@ add_definitions("-DHAVE_CONFIG_H")
 
 if(WIN32)
   # _fseeki64() requires VS2005
-  if(NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400))
+  if((NOT MSVC OR (MSVC_VERSION GREATER_EQUAL 1400)) AND NOT WINCE)
     set(USE_WIN32_LARGE_FILES ON)
   endif()
 
@@ -1886,7 +1940,10 @@ if(WIN32)
 
   # Link required libraries for USE_WIN32_CRYPTO or USE_SCHANNEL
   if(USE_WIN32_CRYPTO OR USE_SCHANNEL)
-    list(APPEND CURL_LIBS "advapi32" "crypt32")
+    if(NOT WINCE)
+      list(APPEND CURL_LIBS "advapi32")
+    endif()
+    list(APPEND CURL_LIBS "${_win32_crypt32}")
   endif()
 endif()
 

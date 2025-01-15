@@ -180,11 +180,11 @@ static int progress_callback(void *clientp,
   return 0;
 }
 
-static int err(void)
-{
-  fprintf(stderr, "something unexpected went wrong - bailing out!\n");
-  exit(2);
-}
+#define ERR()                                                             \
+  do {                                                                    \
+    fprintf(stderr, "something unexpected went wrong - bailing out!\n");  \
+    exit(2);                                                              \
+  } while(0)
 
 static void usage(const char *msg)
 {
@@ -294,7 +294,7 @@ int main(int argc, char *argv[])
      curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, debug_cb)
      != CURLE_OK ||
      curl_easy_setopt(curl, CURLOPT_RESOLVE, resolve) != CURLE_OK)
-    err();
+    ERR();
 
   curl_easy_setopt(curl, CURLOPT_URL, url);
   curl_easy_setopt(curl, CURLOPT_HTTP_VERSION, http_version);

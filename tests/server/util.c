@@ -23,7 +23,9 @@
  ***************************************************************************/
 #include "server_setup.h"
 
+#ifndef UNDER_CE
 #include <signal.h>
+#endif
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
 #endif
@@ -136,12 +138,49 @@ void logmsg(const char *msg, ...)
 }
 
 #ifdef _WIN32
+/* FIXME: duplicate of lib/strerror.c function */
+static const char *
+get_winapi_error(int err, char *buf, size_t buflen)
+{
+  char *p;
+  wchar_t wbuf[256];
+
+  if(!buflen)
+    return NULL;
+
+  *buf = '\0';
+  *wbuf = L'\0';
+
+  /* We return the local codepage version of the error string because if it is
+     output to the user's terminal it will likely be with functions which
+     expect the local codepage (eg fprintf, failf, infof).
+     FormatMessageW -> wcstombs is used for Windows CE compatibility. */
+  if(FormatMessageW((FORMAT_MESSAGE_FROM_SYSTEM |
+                     FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
+                    LANG_NEUTRAL, wbuf, sizeof(wbuf)/sizeof(wchar_t), NULL)) {
+    size_t written = wcstombs(buf, wbuf, buflen - 1);
+    if(written != (size_t)-1)
+      buf[written] = '\0';
+    else
+      *buf = '\0';
+  }
+
+  /* Truncate multiple lines */
+  p = strchr(buf, '\n');
+  if(p) {
+    if(p > buf && *(p-1) == '\r')
+      *(p-1) = '\0';
+    else
+      *p = '\0';
+  }
+
+  return *buf ? buf : NULL;
+}
+
 /* use instead of strerror() on generic Windows */
 static const char *win32_strerror(int err, char *buf, size_t buflen)
 {
-  if(!FormatMessageA((FORMAT_MESSAGE_FROM_SYSTEM |
-                      FORMAT_MESSAGE_IGNORE_INSERTS), NULL, (DWORD)err,
-                     LANG_NEUTRAL, buf, (DWORD)buflen, NULL))
+  if(!get_winapi_error(err, buf, buflen))
     msnprintf(buf, buflen, "Unknown error %d (%#x)", err, err);
   return buf;
 }
@@ -193,7 +232,7 @@ void win32_cleanup(void)
   _flushall();
 }
 
-/* socket-safe strerror (works on Winsock errors, too */
+/* socket-safe strerror (works on Winsock errors, too) */
 const char *sstrerror(int err)
 {
   static char buf[512];
@@ -244,7 +283,7 @@ int wait_ms(int timeout_ms)
   if(!timeout_ms)
     return 0;
   if(timeout_ms < 0) {
-    errno = EINVAL;
+    CURL_SETERRNO(EINVAL);
     return -1;
   }
 #if defined(MSDOS)
@@ -501,12 +540,8 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
-#ifdef _WIN32_WCE
-static DWORD thread_main_id = 0;
-#else
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 static unsigned int thread_main_id = 0;
-#endif
 static HANDLE thread_main_window = NULL;
 static HWND hidden_main_window = NULL;
 #endif
@@ -527,6 +562,7 @@ HANDLE exit_event = NULL;
  * The first time this is called it will set got_exit_signal to one and
  * store in exit_signal the signal that triggered its execution.
  */
+#ifndef UNDER_CE
 static void exit_signal_handler(int signum)
 {
   int old_errno = errno;
@@ -540,10 +576,11 @@ static void exit_signal_handler(int signum)
 #endif
   }
   (void)signal(signum, exit_signal_handler);
-  errno = old_errno;
+  CURL_SETERRNO(old_errno);
 }
+#endif
 
-#ifdef _WIN32
+#if defined(_WIN32) && !defined(UNDER_CE)
 /* CTRL event handler for Windows Console applications to simulate
  * SIGINT, SIGTERM and SIGBREAK on CTRL events and trigger signal handler.
  *
@@ -591,7 +628,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -623,12 +660,8 @@ static LRESULT CALLBACK main_window_proc(HWND hwnd, UINT uMsg,
 }
 /* Window message queue loop for hidden main window, details see above.
  */
-#ifdef _WIN32_WCE
-static DWORD WINAPI main_window_loop(LPVOID lpParameter)
-#else
 #include <process.h>
 static unsigned int WINAPI main_window_loop(void *lpParameter)
-#endif
 {
   WNDCLASS wc;
   BOOL ret;
@@ -676,6 +709,7 @@ static unsigned int WINAPI main_window_loop(void *lpParameter)
 }
 #endif
 
+#ifndef UNDER_CE
 static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
                                bool restartable)
 {
@@ -705,6 +739,7 @@ static SIGHANDLER_T set_signal(int signum, SIGHANDLER_T handler,
   return oldhdlr;
 #endif
 }
+#endif
 
 void install_signal_handlers(bool keep_sigalrm)
 {
@@ -755,24 +790,17 @@ void install_signal_handlers(bool keep_sigalrm)
     logmsg("cannot install SIGBREAK handler: %s", strerror(errno));
 #endif
 #ifdef _WIN32
+#ifndef UNDER_CE
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
-
-#ifndef CURL_WINDOWS_UWP
-  {
-#ifdef _WIN32_WCE
-    typedef HANDLE curl_win_thread_handle_t;
-#else
-    typedef uintptr_t curl_win_thread_handle_t;
 #endif
+
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
+  {
+    typedef uintptr_t curl_win_thread_handle_t;
     curl_win_thread_handle_t thread;
-#ifdef _WIN32_WCE
-    thread = CreateThread(NULL, 0, &main_window_loop,
-                          (LPVOID)GetModuleHandle(NULL), 0, &thread_main_id);
-#else
     thread = _beginthreadex(NULL, 0, &main_window_loop,
                             (void *)GetModuleHandle(NULL), 0, &thread_main_id);
-#endif
     thread_main_window = (HANDLE)thread;
     if(!thread_main_window || !thread_main_id)
       logmsg("cannot start main window loop");
@@ -812,8 +840,10 @@ void restore_signal_handlers(bool keep_sigalrm)
     (void) set_signal(SIGBREAK, old_sigbreak_handler, FALSE);
 #endif
 #ifdef _WIN32
+#ifndef UNDER_CE
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#ifndef CURL_WINDOWS_UWP
+#endif
+#if !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {

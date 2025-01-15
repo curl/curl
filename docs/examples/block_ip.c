@@ -29,9 +29,9 @@
  * filter IP addresses.
  */
 
-#ifdef __AMIGA__
+#if defined(__AMIGA__) || defined(UNDER_CE)
 #include <stdio.h>
-int main(void) { printf("AmigaOS is not supported.\n"); return 1; }
+int main(void) { printf("Platform not supported.\n"); return 1; }
 #else
 
 #ifdef _WIN32

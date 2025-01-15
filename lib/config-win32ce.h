@@ -226,8 +226,7 @@
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#define USE_WIN32_LDAP 1
-#undef HAVE_LDAP_URL_PARSE
+/* Windows CE does not support LDAP */
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
@@ -235,7 +234,11 @@
 
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
+#ifdef _M_ARM
+#define CURL_OS "arm-pc-win32ce"
+#else
 #define CURL_OS "i386-pc-win32ce"
+#endif
 #endif
 
 /* ---------------------------------------------------------------- */
@@ -253,10 +256,6 @@
 #define CURL_DISABLE_FILE 1
 #define CURL_DISABLE_TELNET 1
 #define CURL_DISABLE_LDAP 1
-
-#define ENOSPC 1
-#define ENOMEM 2
-#define EAGAIN 3
 
 extern int stat(const char *path, struct stat *buffer);
 

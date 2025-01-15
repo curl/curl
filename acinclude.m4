@@ -1380,14 +1380,13 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   if test "$curl_cv_native_windows" = 'yes'; then
     AC_MSG_CHECKING([whether build target supports Win32 large files])
-    case $host_os in
-      mingw32ce*|cegcc*)
-        curl_win32_has_largefile='no'  dnl Windows CE does not support large files
-        ;;
-      *)
-        curl_win32_has_largefile='yes'  dnl All mingw-w64 versions support large files
-        ;;
-    esac
+    if test "$curl_cv_wince" = 'yes'; then
+      dnl Windows CE does not support large files
+      curl_win32_has_largefile='no'
+    else
+      dnl All mingw-w64 versions support large files
+      curl_win32_has_largefile='yes'
+    fi
     case "$curl_win32_has_largefile" in
       yes)
         if test x"$enable_largefile" = 'xno'; then
@@ -1526,16 +1525,18 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   esac
   if test "$curl_cv_native_windows" = 'yes'; then
     curl_pflags="${curl_pflags} WIN32"
-  else
-    case $host in
-      *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
-        curl_pflags="${curl_pflags} UNIX";;
-    esac
-    case $host in
-      *-*-*bsd*)
-        curl_pflags="${curl_pflags} BSD";;
-    esac
   fi
+  if test "$curl_cv_wince" = 'yes'; then
+    curl_pflags="${curl_pflags} WINCE"
+  fi
+  case $host in
+    *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
+      curl_pflags="${curl_pflags} UNIX";;
+  esac
+  case $host in
+    *-*-*bsd*)
+      curl_pflags="${curl_pflags} BSD";;
+  esac
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi

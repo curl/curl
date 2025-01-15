@@ -74,7 +74,7 @@ static size_t write_memory_callback(char *contents, size_t size,
 
 static
 #if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#if defined(_WIN32_WCE) || defined(CURL_WINDOWS_UWP)
+#if defined(CURL_WINDOWS_UWP) || defined(UNDER_CE)
 DWORD
 #else
 unsigned int
