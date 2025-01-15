@@ -41,60 +41,24 @@
 #  define strtooff strtoll
 #elif defined(_MSC_VER)
 #  define strtooff _strtoi64
-#else /* private strtooff */
+#else
+#  define PRIVATE_STRTOOFF 1
+#endif
 
-/**
- * Returns the value of c in the given base, or -1 if c cannot
- * be interpreted properly in that base (i.e., is out of range,
- * is a null, etc.).
- *
- * @param c     the character to interpret according to base
- * @param base  the base in which to interpret c
- *
- * @return  the value of c in base, or -1 if c is not in range
- */
-static int get_char(char c, int base)
-{
+#ifdef PRIVATE_STRTOOFF
+
 /* Range tests can be used for alphanum decoding if characters are consecutive,
    like in ASCII. Else an array is scanned. Determine this condition now. */
 
 #if ('9' - '0') != 9 || ('Z' - 'A') != 25 || ('z' - 'a') != 25
 
-  static const char valchars[] =
-    "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+#define NO_RANGE_TEST
 
-  const char *cp;
-  int value;
-
-  cp = memchr(valchars, c, 10 + 26 + 26);
-
-  if(!cp)
-    return -1;
-
-  value = cp - valchars;
-
-  if(value >= 10 + 26)
-    value -= 26;                /* Lowercase. */
-#else
-  int value = -1;
-  if(c <= '9' && c >= '0') {
-    value = c - '0';
-  }
-  else if(c <= 'Z' && c >= 'A') {
-    value = c - 'A' + 10;
-  }
-  else if(c <= 'z' && c >= 'a') {
-    value = c - 'a' + 10;
-  }
+static const char valchars[] =
+            "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 #endif
 
-  if(value >= base) {
-    value = -1;
-  }
-
-  return value;
-}
-#endif  /* Only present if we need strtoll, but do not have it. */
+static int get_char(char c, int base);
 
 /**
  * Custom version of the strtooff function. This extracts a curl_off_t
@@ -184,6 +148,52 @@ static curl_off_t strtooff(const char *nptr, char **endptr, int base)
   return value;
 }
 
+/**
+ * Returns the value of c in the given base, or -1 if c cannot
+ * be interpreted properly in that base (i.e., is out of range,
+ * is a null, etc.).
+ *
+ * @param c     the character to interpret according to base
+ * @param base  the base in which to interpret c
+ *
+ * @return  the value of c in base, or -1 if c is not in range
+ */
+static int get_char(char c, int base)
+{
+#ifndef NO_RANGE_TEST
+  int value = -1;
+  if(c <= '9' && c >= '0') {
+    value = c - '0';
+  }
+  else if(c <= 'Z' && c >= 'A') {
+    value = c - 'A' + 10;
+  }
+  else if(c <= 'z' && c >= 'a') {
+    value = c - 'a' + 10;
+  }
+#else
+  const char *cp;
+  int value;
+
+  cp = memchr(valchars, c, 10 + 26 + 26);
+
+  if(!cp)
+    return -1;
+
+  value = cp - valchars;
+
+  if(value >= 10 + 26)
+    value -= 26;                /* Lowercase. */
+#endif
+
+  if(value >= base) {
+    value = -1;
+  }
+
+  return value;
+}
+#endif  /* Only present if we need strtoll, but do not have it. */
+
 /*
  * Parse a *positive* up to 64-bit number written in ASCII.
  */
@@ -216,5 +226,3 @@ CURLofft curlx_strtoofft(const char *str, char **endp, int base,
   *num = number;
   return CURL_OFFT_OK;
 }
-
-#endif
