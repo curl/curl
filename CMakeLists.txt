@@ -1796,7 +1796,7 @@ if(NOT WIN32)
   check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
 endif()
 
-if(NOT WINCE)  # Avoid false detections for Windows CE
+if(NOT MINGW32CE)  # Avoid false detections
   check_function_exists("setmode" HAVE_SETMODE)
   if(WIN32 OR CYGWIN)
     check_function_exists("_setmode" HAVE__SETMODE)
