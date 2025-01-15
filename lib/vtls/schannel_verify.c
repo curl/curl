@@ -709,7 +709,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 #ifndef UNDER_CE
   HCERTSTORE trust_store = NULL;
   HCERTSTORE own_trust_store = NULL;
-#endif
+#endif /* !UNDER_CE */
 
   DEBUGASSERT(BACKEND);
 
@@ -810,7 +810,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       }
     }
   }
-#endif
+#endif /* !UNDER_CE */
 
   if(result == CURLE_OK) {
     CERT_CHAIN_PARA ChainPara;
