@@ -126,7 +126,7 @@ static struct tool_mime *tool_mime_new_filedata(struct tool_mime *parent,
   }
   else {        /* Standard input. */
 #ifdef UNDER_CE
-    int fd = 0;
+    int fd = STDIN_FILENO;
 #else
     int fd = fileno(stdin);
 #endif
