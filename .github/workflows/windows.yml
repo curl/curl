@@ -242,17 +242,11 @@ jobs:
                 gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
                 cflags+=" -specs=$(cygpath -w "${specs}")"
               fi
-              # CMake (as of v3.31.0) gets confused and applies the MSVC rc.exe command-line
-              # template to windres. Reset it to the windres template manually:
-              rcopts='<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>'
-            else
-              rcopts=''
             fi
             [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
             [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
             cmake -B bld -G Ninja ${options} \
               "-DCMAKE_C_FLAGS=${{ matrix.cflags }} ${cflags}" \
-              "-DCMAKE_RC_COMPILE_OBJECT=${rcopts}" \
               '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
