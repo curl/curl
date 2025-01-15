@@ -725,123 +725,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     result = CURLE_PEER_FAILED_VERIFICATION;
   }
 
-#ifdef UNDER_CE
-  if(result == CURLE_OK) {
-    CERT_CHAIN_PARA ChainPara;
-
-    memset(&ChainPara, 0, sizeof(ChainPara));
-    ChainPara.cbSize = sizeof(ChainPara);
-
-    if(!CertGetCertificateChain(cert_chain_engine,
-                                pCertContextServer,
-                                NULL,
-                                pCertContextServer->hCertStore,
-                                &ChainPara,
-                                (ssl_config->no_revoke ? 0 :
-                                 CERT_CHAIN_REVOCATION_CHECK_CHAIN),
-                                NULL,
-                                &pChainContext)) {
-      char buffer[STRERROR_LEN];
-      failf(data, "schannel: CertGetCertificateChain failed: %s",
-            Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
-      pChainContext = NULL;
-      result = CURLE_PEER_FAILED_VERIFICATION;
-    }
-
-    if(result == CURLE_OK) {
-      CERT_SIMPLE_CHAIN *pSimpleChain = pChainContext->rgpChain[0];
-      DWORD dwTrustErrorMask = ~(DWORD)(CERT_TRUST_IS_NOT_TIME_NESTED);
-      dwTrustErrorMask &= pSimpleChain->TrustStatus.dwErrorStatus;
-
-      if(data->set.ssl.revoke_best_effort) {
-        /* Ignore errors when root certificates are missing the revocation
-         * list URL, or when the list could not be downloaded because the
-         * server is currently unreachable. */
-        dwTrustErrorMask &= ~(DWORD)(CERT_TRUST_REVOCATION_STATUS_UNKNOWN |
-          CERT_TRUST_IS_OFFLINE_REVOCATION);
-      }
-
-      if(dwTrustErrorMask) {
-        if(dwTrustErrorMask & CERT_TRUST_IS_REVOKED)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_REVOKED");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_PARTIAL_CHAIN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_PARTIAL_CHAIN");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_UNTRUSTED_ROOT)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_UNTRUSTED_ROOT");
-        else if(dwTrustErrorMask & CERT_TRUST_IS_NOT_TIME_VALID)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_IS_NOT_TIME_VALID");
-        else if(dwTrustErrorMask & CERT_TRUST_REVOCATION_STATUS_UNKNOWN)
-          failf(data, "schannel: CertGetCertificateChain trust error"
-                " CERT_TRUST_REVOCATION_STATUS_UNKNOWN");
-        else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08lx",
-                dwTrustErrorMask);
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-    }
-  }
-
-  if(result == CURLE_OK) {
-    if(conn_config->verifyhost) {
-      TCHAR cert_hostname_buff[256];
-      DWORD len;
-
-      /* TODO: Fix this for certificates with multiple alternative names.
-       * Right now we're only asking for the first preferred alternative name.
-       * Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG (If
-       * Windows CE supports that?) and run this section in a loop for each.
-       * https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
-       * curl: (51) schannel: CertGetNameString() certificate hostname
-       * (.google.com) did not match connection (google.com)
-       */
-      len = CertGetNameString(pCertContextServer,
-                              CERT_NAME_DNS_TYPE,
-                              CERT_NAME_DISABLE_IE4_UTF8_FLAG,
-                              NULL,
-                              cert_hostname_buff,
-                              256);
-      if(len > 0) {
-        /* Comparing the cert name and the connection hostname encoded as UTF-8
-         * is acceptable since both values are assumed to use ASCII
-         * (or some equivalent) encoding
-         */
-        char *cert_hostname = curlx_convert_tchar_to_UTF8(cert_hostname_buff);
-        if(!cert_hostname) {
-          result = CURLE_OUT_OF_MEMORY;
-        }
-        else{
-          const char *conn_hostname = connssl->peer.hostname;
-          if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
-                                 conn_hostname, strlen(conn_hostname))) {
-            infof(data,
-                  "schannel: connection hostname (%s) validated "
-                  "against certificate name (%s)\n",
-                  conn_hostname, cert_hostname);
-            result = CURLE_OK;
-          }
-          else{
-            failf(data,
-                  "schannel: connection hostname (%s) "
-                  "does not match certificate name (%s)",
-                  conn_hostname, cert_hostname);
-            result = CURLE_PEER_FAILED_VERIFICATION;
-          }
-          free(cert_hostname);
-        }
-      }
-      else {
-        failf(data,
-              "schannel: CertGetNameString did not provide any "
-              "certificate name information");
-        result = CURLE_PEER_FAILED_VERIFICATION;
-      }
-    }
-  }
-#else
+#ifndef UNDER_CE
   if(result == CURLE_OK &&
       (conn_config->CAfile || conn_config->ca_info_blob) &&
       BACKEND->use_manual_cred_validation) {
@@ -926,6 +810,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       }
     }
   }
+#endif
 
   if(result == CURLE_OK) {
     CERT_CHAIN_PARA ChainPara;
@@ -986,6 +871,64 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
   }
 
+#ifdef UNDER_CE
+  if(result == CURLE_OK) {
+    if(conn_config->verifyhost) {
+      TCHAR cert_hostname_buff[256];
+      DWORD len;
+
+      /* TODO: Fix this for certificates with multiple alternative names.
+       * Right now we're only asking for the first preferred alternative name.
+       * Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG (If
+       * Windows CE supports that?) and run this section in a loop for each.
+       * https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
+       * curl: (51) schannel: CertGetNameString() certificate hostname
+       * (.google.com) did not match connection (google.com)
+       */
+      len = CertGetNameString(pCertContextServer,
+                              CERT_NAME_DNS_TYPE,
+                              CERT_NAME_DISABLE_IE4_UTF8_FLAG,
+                              NULL,
+                              cert_hostname_buff,
+                              256);
+      if(len > 0) {
+        /* Comparing the cert name and the connection hostname encoded as UTF-8
+         * is acceptable since both values are assumed to use ASCII
+         * (or some equivalent) encoding
+         */
+        char *cert_hostname = curlx_convert_tchar_to_UTF8(cert_hostname_buff);
+        if(!cert_hostname) {
+          result = CURLE_OUT_OF_MEMORY;
+        }
+        else{
+          const char *conn_hostname = connssl->peer.hostname;
+          if(Curl_cert_hostcheck(cert_hostname, strlen(cert_hostname),
+                                 conn_hostname, strlen(conn_hostname))) {
+            infof(data,
+                  "schannel: connection hostname (%s) validated "
+                  "against certificate name (%s)\n",
+                  conn_hostname, cert_hostname);
+            result = CURLE_OK;
+          }
+          else{
+            failf(data,
+                  "schannel: connection hostname (%s) "
+                  "does not match certificate name (%s)",
+                  conn_hostname, cert_hostname);
+            result = CURLE_PEER_FAILED_VERIFICATION;
+          }
+          free(cert_hostname);
+        }
+      }
+      else {
+        failf(data,
+              "schannel: CertGetNameString did not provide any "
+              "certificate name information");
+        result = CURLE_PEER_FAILED_VERIFICATION;
+      }
+    }
+  }
+#else
   if(result == CURLE_OK) {
     if(conn_config->verifyhost) {
       result = Curl_verify_host(cf, data);
