@@ -709,9 +709,9 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 #ifndef UNDER_CE
   HCERTSTORE trust_store = NULL;
   HCERTSTORE own_trust_store = NULL;
+#endif
 
   DEBUGASSERT(BACKEND);
-#endif
 
   sspi_status =
     Curl_pSecFn->QueryContextAttributes(&BACKEND->ctxt->ctxt_handle,
