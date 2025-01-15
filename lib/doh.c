@@ -410,9 +410,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
   struct doh_probes *dohp;
   struct connectdata *conn = data->conn;
   size_t i;
-#ifdef USE_HTTPSRR
-  /* for now, this is only used when ECH is enabled */
-#endif
   *waitp = FALSE;
   (void)hostname;
   (void)port;
