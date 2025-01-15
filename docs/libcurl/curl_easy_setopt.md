@@ -1273,6 +1273,10 @@ Upload data. See CURLOPT_UPLOAD(3)
 
 Set upload buffer size. See CURLOPT_UPLOAD_BUFFERSIZE(3)
 
+## CURLOPT_UPLOAD_FLAGS
+
+Set upload flags. See CURLOPT_UPLOAD_FLAGS(3)
+
 ## CURLOPT_URL
 
 URL to work on. See CURLOPT_URL(3)
