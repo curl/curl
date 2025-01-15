@@ -728,6 +728,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 #ifdef UNDER_CE
   if(result == CURLE_OK) {
     CERT_CHAIN_PARA ChainPara;
+
     memset(&ChainPara, 0, sizeof(ChainPara));
     ChainPara.cbSize = sizeof(ChainPara);
 
