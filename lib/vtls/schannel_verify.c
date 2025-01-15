@@ -766,7 +766,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
           failf(data, "schannel: CertGetCertificateChain trust error"
                 " CERT_TRUST_IS_NOT_TIME_VALID");
         else
-          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08x",
+          failf(data, "schannel: CertGetCertificateChain error mask: 0x%08lx",
                 dwTrustErrorMask);
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
