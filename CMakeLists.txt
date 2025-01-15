@@ -98,6 +98,11 @@ elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif()
 
+# Fill platform level variable when using CMake's built-in Android configuration
+if(ANDROID AND NOT DEFINED ANDROID_PLATFORM_LEVEL AND NOT CMAKE_SYSTEM_VERSION EQUAL 1)
+  set(ANDROID_PLATFORM_LEVEL "${CMAKE_SYSTEM_VERSION}")
+endif()
+
 set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
@@ -107,6 +112,9 @@ if(UNIX)
 endif()
 if(BSD)
   set(_target_flags "${_target_flags} BSD")
+endif()
+if(ANDROID)
+  set(_target_flags "${_target_flags} ANDROID-${ANDROID_PLATFORM_LEVEL}")
 endif()
 if(WIN32)
   set(_target_flags "${_target_flags} WIN32")
@@ -304,7 +312,8 @@ else()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-if(UNIX OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))  # Keep in sync with CMake/curl-config.cmake.in
+# Keep condition in sync with CMake/curl-config.cmake.in
+if((UNIX AND NOT ANDROID) OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))
   set(_curl_use_pkgconfig_default ON)
 else()
   set(_curl_use_pkgconfig_default OFF)

@@ -224,6 +224,80 @@ jobs:
             time gmake -j3 examples
             echo '::endgroup::'
 
+  android:
+    name: "Android ${{ matrix.platform }} (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, arm64)"
+    runs-on: 'ubuntu-24.04'
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        platform: ['21', '35']
+        build: [autotools, cmake]
+      fail-fast: false
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+
+      - name: 'configure'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake -B bld \
+              -DANDROID_ABI=arm64-v8a \
+              -DANDROID_PLATFORM=android-${{ matrix.platform }} \
+              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" \
+              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
+              -DCURL_ENABLE_SSL=OFF \
+              -DCURL_USE_LIBPSL=OFF
+          else
+            autoreconf -fi
+            TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
+            mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              CC="$TOOLCHAIN/bin/aarch64-linux-android${{ matrix.platform }}-clang" \
+              AR="$TOOLCHAIN/bin/llvm-ar" \
+              RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
+              --host=aarch64-linux-android${{ matrix.platform }} \
+              --without-ssl \
+              --without-libpsl
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMake*.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld
+          else
+            make -j5 -C bld
+          fi
+
+      - name: 'curl info'
+        run: |
+          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file '{}' \;
+
+      - name: 'build tests'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target testdeps
+          else
+            make -j5 -C bld -C tests
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
+        run: |
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            cmake --build bld --target curl-examples
+          else
+            make -j5 -C bld examples
+          fi
+
   amiga:
     name: "AmigaOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, AmiSSL, gcc, m68k)"
     runs-on: 'ubuntu-24.04'
