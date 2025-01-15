@@ -182,7 +182,7 @@ Building for Windows XP is required as a minimum.
 
 You can build curl with:
 
-- Microsoft Visual Studio 2008 (v9.0, `_MSC_VER = 1500`) or later
+- Microsoft Visual Studio 2008 v9.0 or later (`_MSC_VER >= 1500`)
 - MinGW-w64
 
 ## Building Windows DLLs and C runtime (CRT) linkage issues
