@@ -779,13 +779,13 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
       DWORD len;
 
       /* TODO: Fix this for certificates with multiple alternative names.
-      Right now we're only asking for the first preferred alternative name.
-      Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG
-      (if WinCE supports that?) and run this section in a loop for each.
-      https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
-      curl: (51) schannel: CertGetNameString() certificate hostname
-      (.google.com) did not match connection (google.com)
-      */
+       * Right now we're only asking for the first preferred alternative name.
+       * Instead we'd need to do all via CERT_NAME_SEARCH_ALL_NAMES_FLAG (If
+       * Windows CE supports that?) and run this section in a loop for each.
+       * https://msdn.microsoft.com/en-us/library/windows/desktop/aa376086.aspx
+       * curl: (51) schannel: CertGetNameString() certificate hostname
+       * (.google.com) did not match connection (google.com)
+       */
       len = CertGetNameString(pCertContextServer,
                               CERT_NAME_DNS_TYPE,
                               CERT_NAME_DISABLE_IE4_UTF8_FLAG,
@@ -808,16 +808,14 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
             infof(data,
                   "schannel: connection hostname (%s) validated "
                   "against certificate name (%s)\n",
-                  conn_hostname,
-                  cert_hostname);
+                  conn_hostname, cert_hostname);
             result = CURLE_OK;
           }
           else{
             failf(data,
                   "schannel: connection hostname (%s) "
                   "does not match certificate name (%s)",
-                  conn_hostname,
-                  cert_hostname);
+                  conn_hostname, cert_hostname);
             result = CURLE_PEER_FAILED_VERIFICATION;
           }
           free(cert_hostname);
