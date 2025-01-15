@@ -206,9 +206,8 @@
 /* Undef keyword 'const' if it does not work. */
 /* #undef const */
 
-/* VS2005 and later default size for time_t is 64-bit, unless */
-/* _USE_32BIT_TIME_T has been defined to get a 32-bit time_t. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1400)
+/* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
+#if defined(_MSC_VER)
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else

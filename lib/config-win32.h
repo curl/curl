@@ -289,13 +289,12 @@
 /* #undef HAVE_GMTIME_R */
 
 /* Define if the compiler supports the 'long long' data type. */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1310)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #define HAVE_LONGLONG 1
 #endif
 
-/* mingw-w64 and visual studio >= 2005 (MSVCR80)
-   all default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
+/* Default to 64-bit time_t unless _USE_32BIT_TIME_T is defined */
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #  ifndef _USE_32BIT_TIME_T
 #    define SIZEOF_TIME_T 8
 #  else
@@ -335,7 +334,7 @@
 #endif
 
 /* VS2008 default target settings and minimum build target check. */
-#if defined(_MSC_VER) && (_MSC_VER >= 1500) && (_MSC_VER <= 1600)
+#if defined(_MSC_VER) && (_MSC_VER <= 1600)
 #  ifndef _WIN32_WINNT
 #  define _WIN32_WINNT VS2008_DEF_TARGET
 #  endif
@@ -387,8 +386,7 @@ Vista
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
 
-/* _fseeki64() requires VS2005 */
-#if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
+#if defined(_MSC_VER) || defined(__MINGW32__)
 #  define USE_WIN32_LARGE_FILES
 /* Number of bits in a file offset, on hosts where this is settable. */
 #  ifdef __MINGW32__
