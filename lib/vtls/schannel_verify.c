@@ -871,9 +871,9 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
     }
   }
 
-#ifdef UNDER_CE
   if(result == CURLE_OK) {
     if(conn_config->verifyhost) {
+#ifdef UNDER_CE
       TCHAR cert_hostname_buff[256];
       DWORD len;
 
@@ -926,15 +926,13 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
               "certificate name information");
         result = CURLE_PEER_FAILED_VERIFICATION;
       }
-    }
-  }
 #else
-  if(result == CURLE_OK) {
-    if(conn_config->verifyhost) {
       result = Curl_verify_host(cf, data);
+#endif /* !UNDER_CE */
     }
   }
 
+#ifndef UNDER_CE
   if(cert_chain_engine) {
     CertFreeCertificateChainEngine(cert_chain_engine);
   }
