@@ -78,6 +78,12 @@
 #endif
 #endif
 
+/* Visual Studio 2008 is the minimum Visual Studio version we support.
+   Workarounds for older versions of Visual Studio have been removed. */
+#if defined(_MSC_VER) && (_MSC_VER < 1500)
+#error "Ancient versions of Visual Studio are no longer supported due to bugs."
+#endif
+
 #ifdef _MSC_VER
 /* Disable Visual Studio warnings: 4127 "conditional expression is constant" */
 #pragma warning(disable:4127)
