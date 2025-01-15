@@ -30,6 +30,19 @@
 #include <string.h>
 #include <curl/curl.h>
 
+/* Avoid warning in FD_SET() with pre-2020 Cygwin/MSYS releases:
+ * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
+ * may change the sign of the result [-Wsign-conversion]
+ */
+#ifdef __GNUC__
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#if defined(__DJGPP__)
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+#elif defined(_MSC_VER)
+#pragma warning(disable:4127)  /* conditional expression is constant */
+#endif
+
 /* Auxiliary function that waits on the socket. */
 static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
 {
@@ -49,18 +62,6 @@ static int wait_on_socket(curl_socket_t sockfd, int for_recv, long timeout_ms)
   FD_ZERO(&outfd);
   FD_ZERO(&errfd);
 
-/* Avoid this warning with pre-2020 Cygwin/MSYS releases:
- * warning: conversion to 'long unsigned int' from 'curl_socket_t' {aka 'int'}
- * may change the sign of the result [-Wsign-conversion]
- */
-#ifdef __GNUC__
-#pragma GCC diagnostic ignored "-Wsign-conversion"
-#if defined(__DJGPP__)
-#pragma GCC diagnostic ignored "-Warith-conversion"
-#endif
-#elif defined(_MSC_VER)
-#pragma warning(disable:4127)  /* conditional expression is constant */
-#endif
   FD_SET(sockfd, &errfd); /* always check for error */
 
   if(for_recv) {
