@@ -116,6 +116,9 @@ static const char *disabled[]={
   "win32-ca-search-safe",
 #endif
 #endif
+#ifndef USE_HTTPSRR
+  "HTTPSRR",
+#endif
   NULL
 };
 

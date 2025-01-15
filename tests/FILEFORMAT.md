@@ -451,6 +451,7 @@ Features testable here are:
 - `http/2`
 - `http/3`
 - `HTTPS-proxy`
+- `HTTPSRR`
 - `IDN`
 - `IPv6`
 - `Kerberos`
