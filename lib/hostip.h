@@ -67,28 +67,21 @@ struct Curl_hash *Curl_global_host_cache_init(void);
 #define CURL_MAXLEN_host_name 253
 
 struct Curl_https_rrinfo {
-  size_t len; /* raw encoded length */
-  unsigned char *val; /* raw encoded octets */
   /*
-   * fields from HTTPS RR, with the mandatory fields
-   * first (priority, target), then the others in the
-   * order of the keytag numbers defined at
-   * https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
+   * Fields from HTTPS RR. The only mandatory fields are priority and target.
+   * See https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
    */
-  uint16_t priority;
   char *target;
   char *alpns; /* keytag = 1 */
-  bool no_def_alpn; /* keytag = 2 */
-  /*
-   * we do not support ports (keytag = 3) as we do not support
-   * port-switching yet
-   */
   unsigned char *ipv4hints; /* keytag = 4 */
   size_t ipv4hints_len;
   unsigned char *echconfiglist; /* keytag = 5 */
   size_t echconfiglist_len;
   unsigned char *ipv6hints; /* keytag = 6 */
   size_t ipv6hints_len;
+  int port; /* -1 means not set */
+  uint16_t priority;
+  bool no_def_alpn; /* keytag = 2 */
 };
 #endif
 
