@@ -743,7 +743,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 &pChainContext)) {
       char buffer[STRERROR_LEN];
       failf(data, "schannel: CertGetCertificateChain failed: %s",
-            Curl_sspi_strerror(GetLastError(), buffer, sizeof(buffer)));
+            Curl_winapi_strerror(GetLastError(), buffer, sizeof(buffer)));
       pChainContext = NULL;
       result = CURLE_PEER_FAILED_VERIFICATION;
     }
