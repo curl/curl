@@ -39,7 +39,7 @@ jobs:
   netbsd:
     name: 'NetBSD (CM, openssl, clang)'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     strategy:
       matrix:
         arch: ['x86_64']
@@ -79,7 +79,7 @@ jobs:
   openbsd:
     name: 'OpenBSD (CM, libressl, clang)'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 10
     strategy:
       matrix:
         arch: ['x86_64']
@@ -119,7 +119,7 @@ jobs:
   freebsd:
     name: "FreeBSD (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})"
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 20
     strategy:
       matrix:
         include:
@@ -195,7 +195,7 @@ jobs:
   omnios:
     name: 'OmniOS (AM, openssl, gcc, amd64)'
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -227,7 +227,7 @@ jobs:
   amiga:
     name: "AmigaOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, AmiSSL, gcc, m68k)"
     runs-on: 'ubuntu-24.04'
-    timeout-minutes: 30
+    timeout-minutes: 5
     env:
       amissl-version: 5.18
     strategy:
@@ -324,7 +324,7 @@ jobs:
   msdos:
     name: "MS-DOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, djgpp, i586)"
     runs-on: 'ubuntu-24.04'
-    timeout-minutes: 30
+    timeout-minutes: 5
     env:
       toolchain-version: '3.4'
     strategy:
