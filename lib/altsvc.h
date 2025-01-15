@@ -29,13 +29,6 @@
 #include <curl/curl.h>
 #include "llist.h"
 
-enum alpnid {
-  ALPN_none = 0,
-  ALPN_h1 = CURLALTSVC_H1,
-  ALPN_h2 = CURLALTSVC_H2,
-  ALPN_h3 = CURLALTSVC_H3
-};
-
 struct althost {
   char *host;
   unsigned short port;

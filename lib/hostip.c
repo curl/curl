@@ -1080,7 +1080,6 @@ static void hostcache_unlink_entry(void *entry)
 #ifdef USE_HTTPSRR
     if(dns->hinfo) {
       free(dns->hinfo->target);
-      free(dns->hinfo->alpns);
       free(dns->hinfo->ipv4hints);
       free(dns->hinfo->echconfiglist);
       free(dns->hinfo->ipv6hints);
