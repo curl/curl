@@ -456,17 +456,8 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
 #endif
 
 #ifdef USE_HTTPSRR
-  /*
-   * TODO: Figure out the conditions under which we want to make a request for
-   * an HTTPS RR when we are not doing ECH. For now, making this request
-   * breaks a bunch of DoH tests, e.g. test2100, where the additional request
-   * does not match the pre-cooked data files, so there is a bit of work
-   * attached to making the request in a non-ECH use-case. For the present, we
-   * will only make the request when ECH is enabled in the build and is being
-   * used for the curl operation.
-   */
-# ifdef USE_ECH
-  if(data->set.tls_ech & (CURLECH_ENABLE|CURLECH_HARD)) {
+  if(conn->handler->protocol & PROTO_FAMILY_HTTP) {
+    /* Only use HTTPS RR for HTTP(S) transfers */
     char *qname = NULL;
     if(port != PORT_HTTPS) {
       qname = aprintf("_%d._https.%s", port, hostname);
@@ -482,7 +473,6 @@ struct Curl_addrinfo *Curl_doh(struct Curl_easy *data,
       goto error;
     dohp->pending++;
   }
-# endif
 #endif
   *waitp = TRUE; /* this never returns synchronously */
   return NULL;
@@ -1075,7 +1065,7 @@ static CURLcode doh_decode_rdata_name(unsigned char **buf, size_t *remaining,
 }
 
 static CURLcode doh_decode_rdata_alpn(unsigned char *cp, size_t len,
-                                      char **alpns)
+                                      unsigned char *alpns)
 {
   /*
    * spec here is as per RFC 9460, section-7.1.1
@@ -1088,19 +1078,14 @@ static CURLcode doh_decode_rdata_alpn(unsigned char *cp, size_t len,
    * backslash - same goes for a backslash character, and of course
    * we need to use two backslashes in strings when we mean one;-)
    */
-  char *oval;
   struct dynbuf dval;
+  int idnum = 0;
 
-  if(!alpns)
-    return CURLE_OUT_OF_MEMORY;
   Curl_dyn_init(&dval, DYN_DOH_RESPONSE);
   while(len > 0) {
     size_t tlen = (size_t) *cp++;
     size_t i;
-
-    /* if not 1st time, add comma */
-    if(Curl_dyn_len(&dval) && Curl_dyn_addn(&dval, ",", 1))
-      goto err;
+    enum alpnid id;
     len--;
     if(tlen > len)
       goto err;
@@ -1114,12 +1099,18 @@ static CURLcode doh_decode_rdata_alpn(unsigned char *cp, size_t len,
         goto err;
     }
     len -= tlen;
+
+    /* we only store ALPN ids we know about */
+    id = Curl_alpn2alpnid(Curl_dyn_ptr(&dval), Curl_dyn_len(&dval));
+    if(id != ALPN_none) {
+      if(idnum == MAX_HTTPSRR_ALPNS)
+        break;
+      alpns[idnum++] = id;
+    }
+    Curl_dyn_reset(&dval);
   }
-  /* this string is always null terminated */
-  oval = Curl_dyn_ptr(&dval);
-  if(!oval)
-    goto err;
-  *alpns = oval;
+  if(idnum < MAX_HTTPSRR_ALPNS)
+    alpns[idnum] = ALPN_none; /* terminate the list */
   return CURLE_OK;
 err:
   Curl_dyn_free(&dval);
@@ -1137,14 +1128,12 @@ static CURLcode doh_test_alpn_escapes(void)
     0x68, 0x32                                      /* value "h2" */
   };
   size_t example_len = sizeof(example);
-  char *aval = NULL;
-  static const char *expected = "f\\\\oo\\,bar,h2";
+  unsigned char aval[MAX_HTTPSRR_ALPNS] = { 0 };
+  static const char expected[2] = { ALPN_h2, ALPN_none };
 
-  if(doh_decode_rdata_alpn(example, example_len, &aval) != CURLE_OK)
+  if(doh_decode_rdata_alpn(example, example_len, aval) != CURLE_OK)
     return CURLE_BAD_CONTENT_ENCODING;
-  if(strlen(aval) != strlen(expected))
-    return CURLE_BAD_CONTENT_ENCODING;
-  if(memcmp(aval, expected, strlen(aval)))
+  if(memcmp(aval, expected, sizeof(expected)))
     return CURLE_BAD_CONTENT_ENCODING;
   return CURLE_OK;
 }
@@ -1181,7 +1170,7 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
     len -= 4;
     switch(pcode) {
     case HTTPS_RR_CODE_ALPN:
-      if(doh_decode_rdata_alpn(cp, plen, &lhrr->alpns) != CURLE_OK)
+      if(doh_decode_rdata_alpn(cp, plen, lhrr->alpns) != CURLE_OK)
         goto err;
       break;
     case HTTPS_RR_CODE_NO_DEF_ALPN:
@@ -1228,7 +1217,6 @@ static CURLcode doh_resp_decode_httpsrr(unsigned char *cp, size_t len,
 err:
   Curl_safefree(lhrr->target);
   Curl_safefree(lhrr->echconfiglist);
-  Curl_safefree(lhrr->alpns);
   Curl_safefree(lhrr);
   return CURLE_OUT_OF_MEMORY;
 }
@@ -1240,8 +1228,9 @@ static void doh_print_httpsrr(struct Curl_easy *data,
   DEBUGASSERT(hrr);
   infof(data, "HTTPS RR: priority %d, target: %s",
         hrr->priority, hrr->target);
-  if(hrr->alpns)
-    infof(data, "HTTPS RR: alpns %s", hrr->alpns);
+  if(hrr->alpns[0] != ALPN_none)
+    infof(data, "HTTPS RR: alpns %u %u %u %u",
+          hrr->alpns[0], hrr->alpns[1], hrr->alpns[2], hrr->alpns[3]);
   else
     infof(data, "HTTPS RR: no alpns");
   if(hrr->no_def_alpn)

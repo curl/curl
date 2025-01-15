@@ -53,6 +53,13 @@ struct hostent;
 struct Curl_easy;
 struct connectdata;
 
+enum alpnid {
+  ALPN_none = 0,
+  ALPN_h1 = CURLALTSVC_H1,
+  ALPN_h2 = CURLALTSVC_H2,
+  ALPN_h3 = CURLALTSVC_H3
+};
+
 /*
  * Curl_global_host_cache_init() initializes and sets up a global DNS cache.
  * Global DNS cache is general badness. Do not use. This will be removed in
@@ -65,6 +72,7 @@ struct Curl_hash *Curl_global_host_cache_init(void);
 #ifdef USE_HTTPSRR
 
 #define CURL_MAXLEN_host_name 253
+#define MAX_HTTPSRR_ALPNS 4
 
 struct Curl_https_rrinfo {
   /*
@@ -72,13 +80,14 @@ struct Curl_https_rrinfo {
    * See https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
    */
   char *target;
-  char *alpns; /* keytag = 1 */
   unsigned char *ipv4hints; /* keytag = 4 */
   size_t ipv4hints_len;
   unsigned char *echconfiglist; /* keytag = 5 */
   size_t echconfiglist_len;
   unsigned char *ipv6hints; /* keytag = 6 */
   size_t ipv6hints_len;
+  unsigned char alpns[MAX_HTTPSRR_ALPNS]; /* keytag = 1 */
+  /* store parsed alpnid entries in the array, end with ALPN_none */
   int port; /* -1 means not set */
   uint16_t priority;
   bool no_def_alpn; /* keytag = 2 */

@@ -41,6 +41,7 @@
 #include "strdup.h"
 #include "inet_pton.h"
 #include "strparse.h"
+#include "connect.h"
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
@@ -53,23 +54,6 @@
 #define MAX_ALTSVC_ALPNLEN 10
 
 #define H3VERSION "h3"
-
-static enum alpnid alpn2alpnid(char *name, size_t len)
-{
-  if(len == 2) {
-    if(strncasecompare(name, "h1", 2))
-      return ALPN_h1;
-    if(strncasecompare(name, "h2", 2))
-      return ALPN_h2;
-    if(strncasecompare(name, "h3", 2))
-      return ALPN_h3;
-  }
-  else if(len == 8) {
-    if(strncasecompare(name, "http/1.1", 8))
-      return ALPN_h1;
-  }
-  return ALPN_none; /* unknown, probably rubbish input */
-}
 
 /* Given the ALPN ID, return the name */
 const char *Curl_alpnid2str(enum alpnid id)
@@ -154,8 +138,8 @@ static struct altsvc *altsvc_create(struct Curl_str *srchost,
                                     size_t srcport,
                                     size_t dstport)
 {
-  enum alpnid dstalpnid = alpn2alpnid(dstalpn->str, dstalpn->len);
-  enum alpnid srcalpnid = alpn2alpnid(srcalpn->str, srcalpn->len);
+  enum alpnid dstalpnid = Curl_alpn2alpnid(dstalpn->str, dstalpn->len);
+  enum alpnid srcalpnid = Curl_alpn2alpnid(srcalpn->str, srcalpn->len);
   if(!srcalpnid || !dstalpnid)
     return NULL;
   return altsvc_createid(srchost->str, srchost->len,
@@ -537,7 +521,7 @@ CURLcode Curl_altsvc_parse(struct Curl_easy *data,
   do {
     if(*p == '=') {
       /* [protocol]="[host][:port]" */
-      enum alpnid dstalpnid = alpn2alpnid(alpnbuf, alpnlen);
+      enum alpnid dstalpnid = Curl_alpn2alpnid(alpnbuf, alpnlen);
       p++;
       if(*p == '\"') {
         const char *dsthost = "";
