@@ -699,9 +699,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
 {
   struct ssl_connect_data *connssl = cf->ctx;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
-#ifndef UNDER_CE
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
-#endif
   SECURITY_STATUS sspi_status;
   CURLcode result = CURLE_OK;
   CERT_CONTEXT *pCertContextServer = NULL;
@@ -737,7 +735,7 @@ CURLcode Curl_verify_certificate(struct Curl_cfilter *cf,
                                 NULL,
                                 pCertContextServer->hCertStore,
                                 &ChainPara,
-                                (data->set.ssl.no_revoke ? 0 :
+                                (ssl_config->no_revoke ? 0 :
                                  CERT_CHAIN_REVOCATION_CHECK_CHAIN),
                                 NULL,
                                 &pChainContext)) {
