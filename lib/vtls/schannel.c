@@ -922,7 +922,7 @@ schannel_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
 
 #ifdef UNDER_CE
 #ifdef HAS_MANUAL_VERIFY_API
-  /* certificate validation on CE does not seem to work right; we will
+  /* certificate validation on Windows CE does not seem to work right; we will
    * do it following a more manual process. */
   backend->use_manual_cred_validation = TRUE;
 #else
