@@ -90,7 +90,7 @@ extern bool tool_term_has_bold;
 
 #ifdef UNDER_CE
 #  undef isatty
-#  define isatty(fd) 0
+#  define isatty(fd) 0  /* fd is void*, expects int */
 #  undef _get_osfhandle
 #  define _get_osfhandle(fd) (fd)
 #  undef _getch
