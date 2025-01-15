@@ -582,7 +582,7 @@ CURLcode Curl_verify_host(struct Curl_cfilter *cf,
               "does not match certificate name (%s)",
               conn_hostname, cert_hostname);
       }
-      free(cert_hostname);
+      Curl_safefree(cert_hostname);
     }
   }
   else {
