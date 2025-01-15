@@ -617,16 +617,16 @@ elseif(NOT WIN32 AND NOT APPLE)
 endif()
 
 if(WIN32)
-  if(MINGW32CE)
-    # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
-    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/libws2.a")
-    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/libcrypt32.a")
-  elseif(WINCE)
+  if(WINCE)
     set(_win32_winsock "ws2")
-    set(_win32_crypt32 "crypt32")
   else()
     set(_win32_winsock "ws2_32")
-    set(_win32_crypt32 "crypt32")
+  endif()
+  set(_win32_crypt32 "crypt32")
+
+  if(MINGW32CE)  # FIXME upstream: must specify the full path to avoid CMake converting "ws2" to "ws2.lib"
+    set(_win32_winsock "${MINGW32CE_LIBRARY_DIR}/lib${_win32_winsock}.a")
+    set(_win32_crypt32 "${MINGW32CE_LIBRARY_DIR}/lib${_win32_crypt32}.a")
   endif()
 
   list(APPEND CURL_LIBS "${_win32_winsock}")
