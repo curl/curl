@@ -44,7 +44,6 @@ if [ "${BUILD_SYSTEM}" = 'CMake' ]; then
   [ "${PRJ_CFG}" = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
   [ "${PRJ_CFG}" = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
   [[ "${PRJ_GEN}" = *'Visual Studio'* ]] && options+=' -DCMAKE_VS_GLOBALS=TrackFileAccess=false'
-  [ "${PRJ_GEN}" = 'Visual Studio 9 2008' ] && SKIP_RUN='Missing shared CRT and crash with debug/shared'
   # shellcheck disable=SC2086
   cmake -B _bld "-G${PRJ_GEN}" ${TARGET:-} ${options} \
     "-DCURL_USE_OPENSSL=${OPENSSL}" \
