@@ -21,7 +21,7 @@ for ssh test
 sftp
 </server>
 <name>
-SFTP retrieval
+SFTP retrieval (compressed)
 </name>
 <command>
 --key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: --compressed-ssh sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/file%TESTNUMBER.txt --insecure
