@@ -228,9 +228,7 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          if [ '${{ matrix.test }}' = 'uwp' ]; then
-            cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
-          fi
+          [ '${{ matrix.test }}' = 'uwp' ] && cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             if [[ '${{ matrix.env }}' = 'clang'* ]]; then
               options='-DCMAKE_C_COMPILER=clang'
