@@ -395,7 +395,7 @@ int main(void)
 }
 #endif
 
-#ifdef HAVE_MINGW64_VERSION
+#ifdef MINGW_VERSION
 #ifdef __MINGW32__
 #  include <_mingw.h>
 #endif
