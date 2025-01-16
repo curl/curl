@@ -126,8 +126,8 @@ jobs:
       matrix:
         include:
           - { build: 'autotools', image: 'ubuntu-latest', arch: 'x86_64', compiler: 'clang' }
-          - { build: 'autotools', image: 'ubuntu-latest', arch: 'arm64', compiler: 'clang' }
-          - { build: 'cmake'    , image: 'ubuntu-latest', arch: 'arm64', compiler: 'clang' }
+          - { build: 'autotools', image: 'ubuntu-24.04-arm', arch: 'arm64', compiler: 'clang' }
+          - { build: 'cmake'    , image: 'ubuntu-24.04-arm', arch: 'arm64', compiler: 'clang' }
       fail-fast: false
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
