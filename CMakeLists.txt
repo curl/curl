@@ -98,6 +98,7 @@ elseif(DOS AND CMAKE_COMPILER_IS_GNUCC)  # DJGPP
   set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 endif()
 
+# Fill platform level variable when using CMake's built-in Android configuration
 if(ANDROID AND NOT DEFINED ANDROID_PLATFORM_LEVEL AND NOT CMAKE_SYSTEM_VERSION EQUAL 1)
   set(ANDROID_PLATFORM_LEVEL "${CMAKE_SYSTEM_VERSION}")
 endif()
