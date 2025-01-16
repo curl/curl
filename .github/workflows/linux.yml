@@ -670,6 +670,9 @@ jobs:
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
+            if [[ '${{ matrix.build.install_packages }}' = *'wolfssh'* ]]; then
+              TFLAGS+=' ~SFTP'
+            fi
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
             fi
