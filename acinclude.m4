@@ -1536,6 +1536,9 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
         curl_pflags="${curl_pflags} BSD";;
     esac
   fi
+  if test "$curl_cv_winuwp" = 'yes'; then
+    curl_pflags="${curl_pflags} UWP"
+  fi
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi
