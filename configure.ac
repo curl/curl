@@ -492,6 +492,12 @@ dnl **********************************************************************
 
 CURL_CHECK_COMPILER
 CURL_CHECK_NATIVE_WINDOWS
+
+curl_cv_winuwp='no'
+case $CPPFLAGS in
+  *-DWINSTORECOMPAT*) curl_cv_winuwp='yes';;
+esac
+
 CURL_SET_COMPILER_BASIC_OPTS
 CURL_SET_COMPILER_DEBUG_OPTS
 CURL_SET_COMPILER_OPTIMIZE_OPTS
@@ -873,6 +879,11 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
     AC_MSG_RESULT(yes)
 )
 
+if test "$curl_cv_winuwp" = 'yes'; then
+  AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
+  CURL_DISABLE_TELNET=1
+fi
+
 AC_MSG_CHECKING([whether to support tftp])
 AC_ARG_ENABLE(tftp,
 AS_HELP_STRING([--enable-tftp],[Enable TFTP support])
@@ -1146,7 +1157,9 @@ if test "$HAVE_GETHOSTBYNAME" != "1"; then
   ])
 fi
 
-if test "$HAVE_GETHOSTBYNAME" != "1"; then
+# In UWP mode gethostbyname gets detected via the core libs, but some
+# code (in6addr_any) still need ws2_32, so let us detect and add it.
+if test "$HAVE_GETHOSTBYNAME" != "1" -o "$curl_cv_winuwp" = "yes"; then
   dnl This is for Winsock systems
   if test "$curl_cv_native_windows" = "yes"; then
     winsock_LIB="-lws2_32"
@@ -1590,7 +1603,7 @@ if test x$CURL_DISABLE_LDAP != x1; then
   CURL_CHECK_HEADER_LDAP_SSL
 
   if test -z "$LDAPLIBNAME"; then
-    if test "$curl_cv_native_windows" = "yes"; then
+    if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
       dnl Windows uses a single and unique LDAP library name
       LDAPLIBNAME="wldap32"
       LBERLIBNAME="no"
@@ -2595,22 +2608,29 @@ dnl ----------------------------
 
 want_winuni="no"
 if test "$curl_cv_native_windows" = "yes"; then
-  AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
-  AC_ARG_ENABLE(windows-unicode,
+  if test "$curl_cv_winuwp" = 'yes'; then
+    want_winuni="yes"
+  else
+    AC_MSG_CHECKING([whether to enable Windows Unicode (Windows native builds only)])
+    AC_ARG_ENABLE(windows-unicode,
 AS_HELP_STRING([--enable-windows-unicode],[Enable Windows Unicode])
 AS_HELP_STRING([--disable-windows-unicode],[Disable Windows Unicode (default)]),
-  [ case "$enableval" in
-    yes)
-      CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
-      want_winuni="yes"
-      AC_MSG_RESULT([yes])
-      ;;
-    *)
-      AC_MSG_RESULT([no])
-      ;;
-    esac ],
-      AC_MSG_RESULT([no])
-  )
+    [ case "$enableval" in
+      yes)
+        want_winuni="yes"
+        AC_MSG_RESULT([yes])
+        ;;
+      *)
+        AC_MSG_RESULT([no])
+        ;;
+      esac ],
+        AC_MSG_RESULT([no])
+    )
+  fi
+
+  if test "$want_winuni" = "yes"; then
+    CPPFLAGS="${CPPFLAGS} -DUNICODE -D_UNICODE"
+  fi
 fi
 
 AM_CONDITIONAL([USE_UNICODE], [test "$want_winuni" = "yes"])

@@ -1413,7 +1413,7 @@ AC_DEFUN([CURL_CHECK_WIN32_CRYPTO], [
   AC_REQUIRE([CURL_CHECK_NATIVE_WINDOWS])dnl
   AC_MSG_CHECKING([whether build target supports Win32 crypto API])
   curl_win32_crypto_api="no"
-  if test "$curl_cv_native_windows" = "yes"; then
+  if test "$curl_cv_native_windows" = "yes" -a "$curl_cv_winuwp" != "yes"; then
     AC_COMPILE_IFELSE([
       AC_LANG_PROGRAM([[
         #undef inline
@@ -1535,6 +1535,9 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
       *-*-*bsd*)
         curl_pflags="${curl_pflags} BSD";;
     esac
+  fi
+  if test "$curl_cv_winuwp" = 'yes'; then
+    curl_pflags="${curl_pflags} UWP"
   fi
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
