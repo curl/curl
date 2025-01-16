@@ -37,13 +37,12 @@ permissions: {}
 
 jobs:
   netbsd:
-    name: 'NetBSD (CM, openssl, clang, ${{ matrix.arch }})'
-    runs-on: ${{ matrix.image }}
+    name: 'NetBSD (CM, openssl, clang)'
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       matrix:
-        include:
-          - { image: 'ubuntu-latest', arch: 'x86_64' }
+        arch: ['x86_64']
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -78,13 +77,12 @@ jobs:
             echo '::endgroup::'
 
   openbsd:
-    name: 'OpenBSD (CM, libressl, clang, ${{ matrix.arch }})'
-    runs-on: ${{ matrix.image }}
+    name: 'OpenBSD (CM, libressl, clang)'
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       matrix:
-        include:
-          - { image: 'ubuntu-latest', arch: 'x86_64' }
+        arch: ['x86_64']
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
@@ -120,14 +118,14 @@ jobs:
 
   freebsd:
     name: "FreeBSD (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }})"
-    runs-on: ${{ matrix.image }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
       matrix:
         include:
-          - { build: 'autotools', image: 'ubuntu-latest', arch: 'x86_64', compiler: 'clang' }
-          - { build: 'autotools', image: 'ubuntu-latest', arch: 'arm64', compiler: 'clang' }
-          - { build: 'cmake'    , image: 'ubuntu-latest', arch: 'arm64', compiler: 'clang' }
+          - { build: 'autotools', arch: 'x86_64', compiler: 'clang' }
+          - { build: 'autotools', arch: 'arm64', compiler: 'clang' }
+          - { build: 'cmake'    , arch: 'arm64', compiler: 'clang' }
       fail-fast: false
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
