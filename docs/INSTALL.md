@@ -401,14 +401,27 @@ In all above, the built libraries and executables can be found in the
 
 # Android
 
-When building curl for Android it is recommended to use a Linux/macOS
-environment since using curl's `configure` script is the easiest way to build
-curl for Android. Before you can build curl for Android, you need to install
-the Android NDK first. This can be done using the SDK Manager that is part of
-Android Studio. Once you have installed the Android NDK, you need to figure
-out where it has been installed and then set up some environment variables
-before launching `configure`. On macOS, those variables could look like this
-to compile for `aarch64` and API level 29:
+When building curl for Android you can you CMake or curl's `configure` script.
+
+Before you can build curl for Android, you need to install the Android NDK
+first. This can be done using the SDK Manager that is part of Android Studio.
+Once you have installed the Android NDK, you need to figure out where it has
+been installed and then set up some environment variables before launching
+the build.
+
+On macOS, those variables could look like this to compile for `aarch64` and
+API level 29:
+
+with CMake, where `ANDROID_NDK_HOME` points into your NDK:
+
+    cmake . \
+      -DANDROID_ABI=arm64-v8a \
+      -DANDROID_PLATFORM=android-29 \
+      -DCMAKE_TOOLCHAIN_FILE="$ANDROID_NDK_HOME/build/cmake/android.toolchain.cmake" \
+      -DCURL_ENABLE_SSL=OFF \
+      -DCURL_USE_LIBPSL=OFF
+
+with `configure`:
 
 ```bash
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
