@@ -66,7 +66,7 @@ build:
               **/*.m4,\
               **/*.mk,\
               *.m4,\
-              docs/INSTALL.cmake,\
+              docs/INSTALL-CMAKE.md,\
               lib/curl_config.h.cmake,\
               lib/libcurl*.in,\
               CMake/**,\
@@ -99,7 +99,7 @@ cmake:
           - any-glob-to-all-files: "{\
               **/CMakeLists.txt,\
               CMake/**,\
-              docs/INSTALL.cmake,\
+              docs/INSTALL-CMAKE.md,\
               lib/curl_config.h.cmake\
               }"
 
