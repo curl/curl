@@ -445,7 +445,7 @@ jobs:
           tar -xzf v${{ env.wolfssh-version }}-stable.tar.gz
           cd wolfssh-${{ env.wolfssh-version }}-stable
           ./autogen.sh
-          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-all --enable-scp --enable-sftp \
+          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-all --enable-sftp --disable-scp --disable-term \
             --disable-examples --prefix=$HOME/wolfssh
           make install
 
