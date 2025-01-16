@@ -402,7 +402,9 @@ int main(void)
 
 #define enquote(x) #x
 #define expand(x) enquote(x)
-#pragma message("MINGW64_VERSION=" expand(__MINGW64_VERSION_MAJOR) "." expand(__MINGW64_VERSION_MINOR))
+#pragma message("MINGW64_VERSION=" \
+  expand(__MINGW64_VERSION_MAJOR) "." \
+  expand(__MINGW64_VERSION_MINOR))
 
 int main(void)
 {
