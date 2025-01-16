@@ -75,3 +75,16 @@ Graduation requirements:
 - the implementation is considered safe
 
 - feedback from users saying that session export works for their use cases
+
+## HTTPS RR
+
+HTTPS records support is a requirement for ECH but is provided as a
+stand-alone feature that is itself considered EXPERIMENTAL.
+
+Graduation requirements:
+
+- HTTPS records work for DoH, c-ares and the threaded resolver
+
+- HTTPS records can control ALPN and port number, at least
+
+- There are options to control HTTPS use
