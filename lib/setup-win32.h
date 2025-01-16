@@ -77,17 +77,6 @@
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    error "_UNICODE is defined but UNICODE is not defined"
 #  endif
-/*
- * Do not include unneeded stuff in Windows headers to avoid compiler
- * warnings and macro clashes.
- * Make sure to define this macro before including any Windows headers.
- */
-#  ifndef WIN32_LEAN_AND_MEAN
-#    define WIN32_LEAN_AND_MEAN
-#  endif
-#  ifndef NOGDI
-#    define NOGDI
-#  endif
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
 #  include <windows.h>

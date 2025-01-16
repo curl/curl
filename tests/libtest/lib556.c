@@ -28,13 +28,13 @@
 
 /* For Windows, mainly (may be moved in a config file?) */
 #ifndef STDIN_FILENO
-  #define STDIN_FILENO 0
+#define STDIN_FILENO 0
 #endif
 #ifndef STDOUT_FILENO
-  #define STDOUT_FILENO 1
+#define STDOUT_FILENO 1
 #endif
 #ifndef STDERR_FILENO
-  #define STDERR_FILENO 2
+#define STDERR_FILENO 2
 #endif
 
 CURLcode test(char *URL)
