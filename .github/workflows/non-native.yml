@@ -254,7 +254,7 @@ jobs:
               CC="$TOOLCHAIN/bin/aarch64-linux-android${{ matrix.platform }}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
-              --host=aarch64-linux-android \
+              --host=aarch64-linux-android${{ matrix.platform }} \
               --without-ssl \
               --without-libpsl
           fi
