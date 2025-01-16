@@ -44,6 +44,8 @@ env:
   libressl-version: 4.0.0
   # renovate: datasource=github-tags depName=wolfSSL/wolfssl versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
   wolfssl-version: 5.7.6
+  # renovate: datasource=github-tags depName=wolfSSL/wolfssh versioning=semver extractVersion=^v?(?<version>.+)-stable$ registryUrl=https://github.com
+  wolfssh-version: 1.4.19
   # renovate: datasource=github-tags depName=Mbed-TLS/mbedtls versioning=semver registryUrl=https://github.com
   mbedtls-version: 3.6.2
   # renovate: datasource=github-tags depName=nibanks/msh3 versioning=semver registryUrl=https://github.com
@@ -94,8 +96,8 @@ jobs:
 
           - name: wolfssl-all
             install_packages: zlib1g-dev
-            install_steps: wolfssl-all
-            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --enable-ech --enable-debug
+            install_steps: wolfssl-all wolfssh
+            configure: LDFLAGS="-Wl,-rpath,$HOME/wolfssl-all/lib" --with-wolfssl=$HOME/wolfssl-all --with-wolfssh=$HOME/wolfssh --enable-ech --enable-debug
 
           - name: wolfssl-opensslextra valgrind
             install_packages: zlib1g-dev valgrind
@@ -425,6 +427,28 @@ jobs:
             --disable-benchmark --disable-crypttests --disable-examples --prefix=$HOME/wolfssl-opensslextra
           make install
 
+      - name: 'cache wolfssh'
+        if: contains(matrix.build.install_steps, 'wolfssl')
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-wolfssh
+        env:
+          cache-name: cache-wolfssh
+        with:
+          path: /home/runner/wolfssh
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}-${{ env.wolfssh-version }}
+
+      - name: 'build wolfssh'
+        if: contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true'
+        run: |
+          curl -LOsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/wolfSSL/wolfssh/archive/v${{ env.wolfssh-version }}-stable.tar.gz
+          tar -xzf v${{ env.wolfssh-version }}-stable.tar.gz
+          cd wolfssh-${{ env.wolfssh-version }}-stable
+          ./autogen.sh
+          ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wolfssl-all --enable-scp --enable-sftp --disable-term \
+            --disable-examples --prefix=$HOME/wolfssh
+          make install
+
       - name: 'cache mbedtls'
         if: contains(matrix.build.install_steps, 'mbedtls')
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
@@ -646,6 +670,9 @@ jobs:
         run: |
           export TFLAGS='${{ matrix.build.tflags }}'
           if [ -z '${{ matrix.build.torture }}' ]; then
+            if [[ '${{ matrix.build.install_steps }}' = *'wolfssh'* ]]; then
+              TFLAGS+=' ~SFTP'
+            fi
             if [[ '${{ matrix.build.install_packages }}' = *'valgrind'* ]]; then
               TFLAGS+=' -j6'
             fi

@@ -72,7 +72,7 @@ commands:
             tar -xzf v$WOLFSSH_VER-stable.tar.gz
             cd wolfssh-$WOLFSSH_VER-stable
             ./autogen.sh
-            ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-examples
+            ./configure --disable-dependency-tracking --with-wolfssl=$HOME/wssl --prefix=$HOME/wssh --enable-scp --enable-sftp --disable-term --disable-examples
             make install
 
   configure:
