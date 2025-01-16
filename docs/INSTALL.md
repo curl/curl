@@ -409,8 +409,7 @@ Once you have installed the Android NDK, you need to figure out where it has
 been installed and then set up some environment variables before launching
 the build.
 
-On macOS, those variables could look like this to compile for `aarch64` and
-API level 29:
+Examples to compile for `aarch64` and API level 29:
 
 with CMake, where `ANDROID_NDK_HOME` points into your NDK:
 
@@ -421,7 +420,7 @@ with CMake, where `ANDROID_NDK_HOME` points into your NDK:
       -DCURL_ENABLE_SSL=OFF \
       -DCURL_USE_LIBPSL=OFF
 
-with `configure`:
+with `configure`, on macOS:
 
 ```bash
 export ANDROID_NDK_HOME=~/Library/Android/sdk/ndk/25.1.8937393 # Point into your NDK.
