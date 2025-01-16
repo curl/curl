@@ -4,7 +4,7 @@ curl and libcurl 8.12.0
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3320
+ Contributors:                 3322
 
 This release includes the following changes:
 
@@ -20,6 +20,7 @@ This release includes the following changes:
 This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
+ o altsvc: return error on dot-only name [178]
  o async-thread: avoid closing eventfd twice [9]
  o autotools: silence gcc warnings in libtool code [96]
  o binmode: convert to macro and use it from tests [44]
@@ -31,6 +32,7 @@ This release includes the following bugfixes:
  o build: fix unsigned `time_t` detection for cmake, MS-DOS, AmigaOS [104]
  o build: replace configure check with PP condition (Android <21) [97]
  o cd2nroff: support "none" as a TLS backend [29]
+ o cf-https-connect: look into httpsrr alpns when available [152]
  o cf-socket: error if address can't be copied [72]
  o checksrc: ban use of sscanf() [7]
  o checksrc: check for return with parens around a value/name [130]
@@ -69,6 +71,7 @@ This release includes the following bugfixes:
  o cmake: sync OpenSSL QUIC fork detection with autotools [102]
  o cmake: use `CMAKE_REQUIRED_LINK_DIRECTORIES` [48]
  o cmake: use `STREQUAL` to detect Linux [68]
+ o cmdline-opts/version.md: describe multissl, mention SSLS-EXPORT [170]
  o completion.pl: add completion for paths after @ for fish [82]
  o config-mac: drop `MACOS_SSL_SUPPORT` macro [63]
  o config: drop unused code and variables [135]
@@ -87,6 +90,7 @@ This release includes the following bugfixes:
  o curl_sha512_256: rename symbols to the curl namespace [124]
  o curl_url_set.md: adjust the added-in to 7.62.0 [94]
  o curl_ws_recv.md: fix typo
+ o CURLOPT_CONNECT_ONLY.md: an easy handle with this option set cannot be reused [164]
  o CURLOPT_PROXY.md: clarify the crendential support in proxy URLs [66]
  o CURLOPT_RESOLVE.md: fix wording [30]
  o CURLOPT_SEEKFUNCTION.md: used for FTP, HTTP and SFTP (only) [109]
@@ -96,6 +100,9 @@ This release includes the following bugfixes:
  o docs/libcurl/opts: clarify the return values [114]
  o docs/libcurl: return value overhall [120]
  o docs: use lowercase curl and libcurl [113]
+ o doh: cleanups and extended HTTPS RR code [161]
+ o doh: send HTTPS RR requests for all HTTP(S) transfers [160]
+ o easy: make curl_easy_perform() return error if connection still there [163]
  o ECH: update APIs to those agreed with OpenSSL maintainers [101]
  o examples/block-ip: drop redundant `memory.h` include
  o examples/block-ip: show how to block IP addresses [74]
@@ -113,6 +120,7 @@ This release includes the following bugfixes:
  o http: ignore invalid Retry-After times [107]
  o http_aws_sigv4: Fix invalid compare function handling zero-length pairs [24]
  o INFRASTRUCTURE.md: project infra [99]
+ o INSTALL.md: document VS2008 and mingw-w64 [165]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
  o lib: remove `__EMX__` guards [83]
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
@@ -121,6 +129,8 @@ This release includes the following bugfixes:
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o mbedtls: fix handling of blocked sends [116]
  o mime: explicitly rewind subparts at attachment time. [80]
+ o mprintf: fix integer handling in float precision [173]
+ o mprintf: terminate snprintf output on windows [172]
  o msvc: assume `_INTEGRAL_MAX_BITS >= 64` [158]
  o msvc: drop checks for ancient versions [133]
  o msvc: fix building with `HAVE_INET_NTOP` and MSVC <=1900 [151]
@@ -138,6 +148,7 @@ This release includes the following bugfixes:
  o openssl: fix ECH logic [67]
  o osslq: use SSL_poll to determine writeability of QUIC streams [139]
  o projects/Windows: remove wolfSSL from legacy projects [75]
+ o pytest: use httpd/apache2 directly, no apachectl [169]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
  o scripts/mdlinkcheck: markdown link checker [19]
  o sectransp: free certificate on error [12]
@@ -151,17 +162,21 @@ This release includes the following bugfixes:
  o system.h: drop compilers lacking 64-bit integer type (Windows/MS-DOS) [155]
  o system.h: drop duplicate and no-op code [153]
  o system.h: fix indentation [142]
+ o telnet: handle single-byte input option [177]
  o test483: require cookie support [98]
  o tests/http/clients: use proper sleep() call on NonStop [10]
  o TheArtOfHttpScripting.md: rewrite double 'that' [115]
  o tidy-up: `curl_setup.h`, `curl_setup_once.h`, `config-win32ce.h` [146]
+ o tidy-up: drop parenthesis around `return` expression [167]
  o tidy-up: drop parenthesis around `return` values [134]
  o tool_formparse.c: make curlx_uztoso a static in here [39]
  o tool_formparse: accept digits in --form type= strings [33]
+ o tool_getparam: ECH param parsing refix [150]
  o tool_getparam: fix "Ignored Return Value" [21]
  o tool_getparam: fix memory leak on error in parse_ech [14]
  o tool_getparam: fix the ECH parser [20]
  o tool_operate: make --etag-compare always accept a non-existing file [22]
+ o transfer: fix CURLOPT_CURLU override logic [171]
  o urlapi: fix redirect to a new fragment or query (only) [118]
  o variable.md: mention --expand-variable for variables to variables [13]
  o variable.md: show function use with examples [18]
@@ -193,17 +208,18 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Andy Pan, Asger Hautop Drewsen, baranyaib90 on github, Ben Zanin,
-  Christian Heusel, Christian Schmitz, Christopher Dannemiller, Dan Fandrich,
-  Daniel Stenberg, Darren Banfi, dependabot[bot], Derek Huang, dwickr,
-  Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
+  Aleksander Mazur, Andy Pan, Asger Hautop Drewsen, baranyaib90 on github,
+  Ben Zanin, Christian Heusel, Christian Schmitz, Christopher Dannemiller,
+  Dan Fandrich, Daniel Stenberg, Darren Banfi, dependabot[bot], Derek Huang,
+  dwickr, Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
   Jeroen Ooms, Jiri Stary, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
-  Manuel Einfalt, Marcel Raad, Mohammed Sadiq, Neil Horman, Patrick Monnerat,
-  prpr19xx on github, Qriist on github, Ralph Sennhauser, Randall S. Becker,
-  Ray Satiro, renovate[bot], Rudi Heitbaum, Samuel Henrique, Stefan Eissing,
-  Stephen Farrell, Tal Regev, Tamás Bálint Misius, Tamir Duberstein,
-  Viktor Szakats, Yedaya Katsman, Yihang Zhou
-  (43 contributors)
+  Manuel Einfalt, Marcel Raad, Milon Renatus, Mohammed Sadiq, Neil Horman,
+  Nicolás San Martín, Patrick Monnerat, prpr19xx on github, Qriist on github,
+  Ralph Sennhauser, Randall S. Becker, Ray Satiro, renovate[bot],
+  Rudi Heitbaum, Samuel Henrique, Stefan Eissing, Stephen Farrell, Tal Regev,
+  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats, Yedaya Katsman,
+  Yihang Zhou
+  (46 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -356,7 +372,9 @@ References to bug reports and discussions on issues:
  [147] = https://curl.se/bug/?i=15929
  [148] = https://curl.se/bug/?i=15960
  [149] = https://curl.se/bug/?i=15925
+ [150] = https://curl.se/bug/?i=16006
  [151] = https://curl.se/bug/?i=15923
+ [152] = https://curl.se/bug/?i=16012
  [153] = https://curl.se/bug/?i=15966
  [154] = https://curl.se/bug/?i=15857
  [155] = https://curl.se/bug/?i=15957
@@ -364,3 +382,16 @@ References to bug reports and discussions on issues:
  [157] = https://curl.se/bug/?i=15920
  [158] = https://curl.se/bug/?i=15955
  [159] = https://curl.se/bug/?i=15953
+ [160] = https://curl.se/bug/?i=16007
+ [161] = https://curl.se/bug/?i=16007
+ [163] = https://curl.se/bug/?i=16003
+ [164] = https://curl.se/bug/?i=16002
+ [165] = https://curl.se/bug/?i=15992
+ [167] = https://curl.se/bug/?i=15990
+ [169] = https://curl.se/bug/?i=16000
+ [170] = https://curl.se/bug/?i=15996
+ [171] = https://curl.se/bug/?i=15984
+ [172] = https://curl.se/bug/?i=15997
+ [173] = https://curl.se/bug/?i=15988
+ [177] = https://curl.se/bug/?i=15987
+ [178] = https://curl.se/bug/?i=15986
