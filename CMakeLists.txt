@@ -86,8 +86,7 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
-# CMake (as of 3.31.2) does not recognize some targets accurately.
-# Touch up the configuration manually as a workaround.
+# CMake does not recognize some targets accurately. Touch up configuration manually as a workaround.
 if(WINDOWS_STORE AND MINGW)  # mingw UWP build
   # CMake (as of v3.31.2) gets confused and applies the MSVC rc.exe command-line
   # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
