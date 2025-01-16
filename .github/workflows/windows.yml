@@ -253,7 +253,7 @@ jobs:
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
-            export CPPFLAGS CFLAGS
+            export CFLAGS CPPFLAGS
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
