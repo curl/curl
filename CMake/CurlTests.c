@@ -395,14 +395,14 @@ int main(void)
 }
 #endif
 
-#ifdef HAVE_MINGW64_VERSION_MAJOR
+#ifdef HAVE_MINGW64_VERSION
 #ifdef __MINGW32__
 #  include <_mingw.h>
 #endif
 
 #define enquote(x) #x
 #define expand(x) enquote(x)
-#pragma message("__MINGW64_VERSION_MAJOR=" expand(__MINGW64_VERSION_MAJOR))
+#pragma message("MINGW64_VERSION=" expand(__MINGW64_VERSION_MAJOR) "." expand(__MINGW64_VERSION_MINOR))
 
 int main(void)
 {
