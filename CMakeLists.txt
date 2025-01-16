@@ -86,6 +86,16 @@ project(CURL
   VERSION "${_curl_version_sem}"
   LANGUAGES C)
 
+# CMake (as of 3.30.3) does not recognize some targets accurately.
+# Touch up the configuration manually as a workaround.
+if(WINDOWS_STORE AND MINGW)  # mingw UWP build
+  add_definitions("-DWINSTORECOMPAT" "-DWINAPI_FAMILY=WINAPI_FAMILY_APP")
+  list(APPEND CMAKE_REQUIRED_DEFINITIONS "-DWINSTORECOMPAT" "-DWINAPI_FAMILY=WINAPI_FAMILY_APP")  # Apply to all feature checks
+  # CMake (as of v3.31.0) gets confused and applies the MSVC rc.exe command-line
+  # template to windres. Reset it to the windres template via 'Modules/Platform/Windows-windres.cmake':
+  set(CMAKE_RC_COMPILE_OBJECT "<CMAKE_RC_COMPILER> -O coff <DEFINES> <INCLUDES> <FLAGS> <SOURCE> <OBJECT>")
+endif()
+
 set(_target_flags "")
 if(APPLE)
   set(_target_flags "${_target_flags} APPLE")
