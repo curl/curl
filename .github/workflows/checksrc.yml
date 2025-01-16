@@ -55,6 +55,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          echo "|$HOME|"
           echo "|$PATH|"
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
@@ -78,6 +79,7 @@ jobs:
         env:
           DEBIAN_FRONTEND: noninteractive
         run: |
+          echo "|$HOME|"
           echo "|$PATH|"
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
