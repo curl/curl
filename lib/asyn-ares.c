@@ -838,14 +838,26 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   CURLcode result = CURLE_NOT_BUILT_IN;
   int ares_result;
 
-  /* If server is NULL or empty, this would purge all DNS servers
-   * from ares library, which will cause any and all queries to fail.
-   * So, just return OK if none are configured and do not actually make
-   * any changes to c-ares. This lets c-ares use its defaults, which
-   * it gets from the OS (for instance from /etc/resolv.conf on Linux).
+  /* If server is NULL, this purges all DNS servers from c-ares. Reset it to
+   * default.
    */
-  if(!(servers && servers[0]))
-    return CURLE_OK;
+  if(!servers) {
+    Curl_resolver_cleanup(data->state.async.resolver);
+    result = Curl_resolver_init(data, &data->state.async.resolver);
+    if(!result) {
+      /* this now needs to restore the other options set to c-ares */
+      if(data->set.str[STRING_DNS_INTERFACE])
+        (void)Curl_set_dns_interface(data,
+                                     data->set.str[STRING_DNS_INTERFACE]);
+      if(data->set.str[STRING_DNS_LOCAL_IP4])
+        (void)Curl_set_dns_local_ip4(data,
+                                     data->set.str[STRING_DNS_LOCAL_IP4]);
+      if(data->set.str[STRING_DNS_LOCAL_IP6])
+        (void)Curl_set_dns_local_ip6(data,
+                                     data->set.str[STRING_DNS_LOCAL_IP6]);
+    }
+    return result;
+  }
 
 #ifdef HAVE_CARES_SERVERS_CSV
 #ifdef HAVE_CARES_PORTS_CSV
