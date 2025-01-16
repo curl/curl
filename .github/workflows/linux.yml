@@ -62,7 +62,7 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: 'ubuntu-24.04'
+    runs-on: ${{ matrix.build.image || 'ubuntu-24.04' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 45
     strategy:
@@ -163,6 +163,12 @@ jobs:
             install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+
+          - name: openssl arm
+            install_packages: zlib1g-dev
+            install_steps: pytest
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+            image: 'ubuntu-24.04-arm'
 
           - name: openssl -O3 valgrind
             install_packages: zlib1g-dev valgrind
@@ -700,6 +706,8 @@ jobs:
           CURL_CI: github
           PYTEST_ADDOPTS: "--color=yes"
         run: |
+          echo "CANARY:|${HOME}|${PATH}|"
+          PATH="${PATH//\/home\/runneradmin/${HOME}}"  # workaround for PATH issue on ubuntu-24.04-arm
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci

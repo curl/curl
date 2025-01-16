@@ -37,7 +37,7 @@ permissions: {}
 
 jobs:
   netbsd:
-    name: 'NetBSD (CM, openssl, clang)'
+    name: 'NetBSD (CM, openssl, clang, ${{ matrix.arch }})'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -77,7 +77,7 @@ jobs:
             echo '::endgroup::'
 
   openbsd:
-    name: 'OpenBSD (CM, libressl, clang)'
+    name: 'OpenBSD (CM, libressl, clang, ${{ matrix.arch }})'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
