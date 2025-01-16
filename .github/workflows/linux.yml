@@ -62,7 +62,7 @@ env:
 jobs:
   linux:
     name: ${{ matrix.build.generate && 'CM' || 'AM' }} ${{ matrix.build.name }}
-    runs-on: 'ubuntu-24.04'
+    runs-on: ${{ matrix.build.image || 'ubuntu-24.04' }}
     container: ${{ matrix.build.container }}
     timeout-minutes: 45
     strategy:
@@ -163,6 +163,12 @@ jobs:
             install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+
+          - name: openssl
+            install_packages: zlib1g-dev
+            install_steps: pytest
+            configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
+            image: 'ubuntu-24.04-arm'
 
           - name: openssl -O3 valgrind
             install_packages: zlib1g-dev valgrind
