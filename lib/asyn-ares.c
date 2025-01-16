@@ -841,7 +841,7 @@ CURLcode Curl_set_dns_servers(struct Curl_easy *data,
   /* If server is NULL, this purges all DNS servers from c-ares. Reset it to
    * default.
    */
-  if(!result && !servers) {
+  if(!servers) {
     Curl_resolver_cleanup(data->state.async.resolver);
     result = Curl_resolver_init(data, &data->state.async.resolver);
     if(!result) {
