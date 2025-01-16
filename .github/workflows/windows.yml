@@ -228,7 +228,6 @@ jobs:
       - name: 'configure'
         timeout-minutes: 5
         run: |
-          [ '${{ matrix.test }}' = 'uwp' ] && cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             if [[ '${{ matrix.env }}' = 'clang'* ]]; then
               options='-DCMAKE_C_COMPILER=clang'
@@ -237,6 +236,7 @@ jobs:
             fi
             if [ '${{ matrix.test }}' = 'uwp' ]; then
               options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
+              cflags='-DWINSTORECOMPAT -DWINAPI_FAMILY=WINAPI_FAMILY_APP'
               if [[ '${{ matrix.env }}' != 'clang'* ]]; then
                 specs="$(realpath gcc-specs-uwp)"
                 gcc -dumpspecs | sed -e 's/-lmingwex/-lwindowsapp -lmingwex -lwindowsapp/' -e 's/-lmsvcrt/-lucrtapp/' > "${specs}"
@@ -252,7 +252,6 @@ jobs:
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
           else
-            export CPPFLAGS="${cflags}"
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               --prefix="${HOME}"/install \
               --with-openssl \
