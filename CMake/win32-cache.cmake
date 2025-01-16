@@ -45,6 +45,8 @@ if(MINGW)
   set(HAVE_UTIME_H 1)  # wrapper to sys/utime.h
   set(HAVE_DIRENT_H 1)
   set(HAVE_OPENDIR 1)
+# set(HAVE_STDATOMIC_H 0)  # gcc 4.9.0 and newer has it
+# set(HAVE_ATOMIC 0)  # gcc 4.9.0 and newer has it
 else()
   set(HAVE_LIBGEN_H 0)
   set(HAVE_FTRUNCATE 0)
