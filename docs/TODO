@@ -182,6 +182,7 @@
  20.2 nicer lacking perl message
  20.3 more protocols supported
  20.4 more platforms supported
+ 20.5 write an SMB test server to replace impacket
  20.6 Use the RFC 6265 test suite
  20.8 Run web-platform-tests URL tests
 
@@ -1317,6 +1318,13 @@
 
  Make the test suite work on more platforms. OpenBSD and macOS. Remove
  fork()s and it should become even more portable.
+
+20.5 write an SMB test server to replace impacket
+
+ This would allow us to run SMB tests on more platforms and do better and more
+ covering tests.
+
+ See https://github.com/curl/curl/issues/15697
 
 20.6 Use the RFC 6265 test suite
 
