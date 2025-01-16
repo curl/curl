@@ -43,7 +43,7 @@ jobs:
       - name: check
         run: git ls-files -z "*.[ch]" | xargs -0 -n1 ./scripts/checksrc.pl
 
-  codespell-cmakelint-pytype-ruff:
+  codespell-cmakelint-pytype-ruff-intel:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
