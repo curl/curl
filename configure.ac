@@ -879,6 +879,11 @@ AS_HELP_STRING([--disable-telnet],[Disable TELNET support]),
     AC_MSG_RESULT(yes)
 )
 
+if test "$curl_cv_winuwp" = 'yes'; then
+  AC_DEFINE(CURL_DISABLE_TELNET, 1, [to disable TELNET])
+  CURL_DISABLE_TELNET=1
+fi
+
 AC_MSG_CHECKING([whether to support tftp])
 AC_ARG_ENABLE(tftp,
 AS_HELP_STRING([--enable-tftp],[Enable TFTP support])
