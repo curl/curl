@@ -164,7 +164,7 @@ jobs:
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
 
-          - name: openssl
+          - name: openssl arm
             install_packages: zlib1g-dev
             install_steps: pytest
             configure: CFLAGS=-std=gnu89 --with-openssl --enable-debug
