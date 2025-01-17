@@ -490,7 +490,7 @@ Vista
 #    define CURL_OS "x86_64-pc-win32"
 #    elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
 #    define CURL_OS "ia64-pc-win32"
-#    elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT) */
+#    elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 */
 #    define CURL_OS "thumbv7a-pc-win32"
 #    elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
 #    define CURL_OS "aarch64-pc-win32"
