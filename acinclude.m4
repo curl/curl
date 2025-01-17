@@ -1524,21 +1524,14 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
   case $host in
     *-apple-*) curl_pflags="${curl_pflags} APPLE";;
   esac
-  if test "$curl_cv_native_windows" = 'yes'; then
-    curl_pflags="${curl_pflags} WIN32"
-  else
-    case $host in
-      *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
-        curl_pflags="${curl_pflags} UNIX";;
-    esac
-    case $host in
-      *-*-*bsd*)
-        curl_pflags="${curl_pflags} BSD";;
-    esac
-  fi
-  if test "$curl_cv_winuwp" = 'yes'; then
-    curl_pflags="${curl_pflags} UWP"
-  fi
+  case $host in
+    *-*-*bsd*|*-*-aix*|*-*-hpux*|*-*-interix*|*-*-irix*|*-*-linux*|*-*-solaris*|*-*-sunos*|*-apple-*|*-*-cygwin*|*-*-msys*)
+      curl_pflags="${curl_pflags} UNIX";;
+  esac
+  case $host in
+    *-*-*bsd*)
+      curl_pflags="${curl_pflags} BSD";;
+  esac
   case $host in
     *-*-android*)
       curl_pflags="${curl_pflags} ANDROID"
@@ -1548,6 +1541,12 @@ AC_DEFUN([CURL_PREPARE_BUILDINFO], [
       fi
       ;;
   esac
+  if test "$curl_cv_native_windows" = 'yes'; then
+    curl_pflags="${curl_pflags} WIN32"
+  fi
+  if test "$curl_cv_winuwp" = 'yes'; then
+    curl_pflags="${curl_pflags} UWP"
+  fi
   if test "$curl_cv_cygwin" = 'yes'; then
     curl_pflags="${curl_pflags} CYGWIN"
   fi
