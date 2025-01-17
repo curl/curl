@@ -64,7 +64,7 @@
 #if ( (defined(__GNUC__) && !defined(__clang__)) &&     \
       (defined(__i386__) || defined(__x86_64__))) ||    \
   __has_builtin(__builtin_ia32_pause)
-#define HAVE_BUILTIN_IA32_PAUSE
+//#define HAVE_BUILTIN_IA32_PAUSE
 #endif
 
 #endif
