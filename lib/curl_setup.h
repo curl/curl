@@ -137,9 +137,7 @@
 
 #else /* HAVE_CONFIG_H */
 
-#ifdef _WIN32_WCE
-#  include "config-win32ce.h"
-#elif defined(_WIN32)
+#ifdef _WIN32
 #  include "config-win32.h"
 #endif
 

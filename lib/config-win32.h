@@ -42,7 +42,9 @@
 #define HAVE_IO_H 1
 
 /* Define if you have the <locale.h> header file. */
+#ifndef UNDER_CE
 #define HAVE_LOCALE_H 1
+#endif
 
 /* Define if you have the <netdb.h> header file. */
 /* #define HAVE_NETDB_H 1 */
@@ -146,6 +148,7 @@
 /* Define if you have the select function. */
 #define HAVE_SELECT 1
 
+#ifndef UNDER_CE
 /* Define if you have the setlocale function. */
 #define HAVE_SETLOCALE 1
 
@@ -154,6 +157,7 @@
 
 /* Define if you have the _setmode function. */
 #define HAVE__SETMODE 1
+#endif
 
 /* Define if you have the socket function. */
 #define HAVE_SOCKET 1
@@ -213,7 +217,8 @@
 #define HAVE_SNPRINTF 1
 #endif
 
-#if defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600  /* Vista */
+#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600) && \  /* Vista */
+  !defined(UNDER_CE)
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 #define HAVE_INET_NTOP 1
 /* Define to 1 if you have a IPv6 capable working inet_pton function. */
@@ -226,12 +231,14 @@
 #endif
 
 /* Define to 1 if you have the strtok_r function. */
-#if defined(__MINGW32__)
+#if defined(__MINGW32__) && !defined(__MINGW32CE__)
 #define HAVE_STRTOK_R 1
 #endif
 
 /* Define to 1 if you have the signal function. */
+#ifndef UNDER_CE
 #define HAVE_SIGNAL 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                       TYPEDEF REPLACEMENTS                       */
@@ -303,6 +310,8 @@
 #  endif
 #endif
 
+#ifndef UNDER_CE
+
 /* Define some minimum and default build targets for Visual Studio */
 #if defined(_MSC_VER)
    /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
@@ -365,10 +374,14 @@ Vista
 #  endif
 #endif
 
+#endif /* UNDER_CE */
+
 /* Windows XP is required for freeaddrinfo, getaddrinfo */
+#ifndef UNDER_CE
 #define HAVE_FREEADDRINFO           1
 #define HAVE_GETADDRINFO            1
 #define HAVE_GETADDRINFO_THREADSAFE 1
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                          STRUCT RELATED                          */
@@ -386,6 +399,8 @@ Vista
 /* ---------------------------------------------------------------- */
 /*                        LARGE FILE SUPPORT                        */
 /* ---------------------------------------------------------------- */
+
+#ifndef UNDER_CE
 
 /* _fseeki64() requires VS2005 */
 #if (defined(_MSC_VER) && (_MSC_VER >= 1400)) || defined(__MINGW32__)
@@ -405,6 +420,8 @@ Vista
 #else
 #  define SIZEOF_OFF_T 4
 #endif
+
+#endif /* UNDER_CE */
 
 /* ---------------------------------------------------------------- */
 /*                       DNS RESOLVER SPECIALTY                     */
@@ -438,19 +455,21 @@ Vista
 #elif defined(CURL_HAS_OPENLDAP_LDAPSDK)
 #undef USE_WIN32_LDAP
 #define HAVE_LDAP_URL_PARSE 1
-#else
+#elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 #undef HAVE_LDAP_URL_PARSE
-#define HAVE_LDAP_SSL 1
 #define USE_WIN32_LDAP 1
+#define HAVE_LDAP_SSL 1
 #endif
 
 /* Define to use the Windows crypto library. */
-#if !defined(CURL_WINDOWS_UWP)
+#ifndef CURL_WINDOWS_UWP
 #define USE_WIN32_CRYPTO
 #endif
 
 /* Define to use Unix sockets. */
+#ifndef UNDER_CE
 #define USE_UNIX_SOCKETS
+#endif
 
 /* ---------------------------------------------------------------- */
 /*                       ADDITIONAL DEFINITIONS                     */
@@ -458,22 +477,58 @@ Vista
 
 /* Define cpu-machine-OS */
 #ifndef CURL_OS
-#if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
-#define CURL_OS "i386-pc-win32"
-#elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
-#define CURL_OS "x86_64-pc-win32"
-#elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
-#define CURL_OS "ia64-pc-win32"
-#elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT) */
-#define CURL_OS "thumbv7a-pc-win32"
-#elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
-#define CURL_OS "aarch64-pc-win32"
-#else
-#define CURL_OS "unknown-pc-win32"
-#endif
-#endif
+#  ifdef UNDER_CE
+#    ifdef _M_ARM
+#    define CURL_OS "arm-pc-win32ce"
+#    else
+#    define CURL_OS "i386-pc-win32ce"
+#    endif
+#  else /* !UNDER_CE */
+#    if defined(_M_IX86) || defined(__i386__) /* x86 (MSVC or gcc) */
+#    define CURL_OS "i386-pc-win32"
+#    elif defined(_M_X64) || defined(__x86_64__) /* x86_64 (VS2005+ or gcc) */
+#    define CURL_OS "x86_64-pc-win32"
+#    elif defined(_M_IA64) || defined(__ia64__) /* Itanium */
+#    define CURL_OS "ia64-pc-win32"
+#    elif defined(_M_ARM_NT) || defined(__arm__) /* ARMv7-Thumb2 (Windows RT) */
+#    define CURL_OS "thumbv7a-pc-win32"
+#    elif defined(_M_ARM64) || defined(__aarch64__) /* ARM64 (Windows 10) */
+#    define CURL_OS "aarch64-pc-win32"
+#    else
+#    define CURL_OS "unknown-pc-win32"
+#    endif
+#  endif /* UNDER_CE */
+#endif /* !CURL_OS */
 
 /* If you want to build curl with the built-in manual */
+#ifndef UNDER_CE
 #define USE_MANUAL 1
+#endif
+
+/* ---------------------------------------------------------------- */
+/*                            Windows CE                            */
+/* ---------------------------------------------------------------- */
+
+#ifdef UNDER_CE
+
+#ifndef UNICODE
+#define UNICODE
+#endif
+
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+
+#define CURL_DISABLE_FILE 1
+#define CURL_DISABLE_TELNET 1
+#define CURL_DISABLE_LDAP 1
+
+#define ENOSPC 1
+#define ENOMEM 2
+#define EAGAIN 3
+
+extern int stat(const char *path, struct stat *buffer);
+
+#endif /* UNDER_CE */
 
 #endif /* HEADER_CURL_CONFIG_WIN32_H */
