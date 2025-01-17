@@ -226,7 +226,7 @@ jobs:
 
   android:
     name: "Android ${{ matrix.platform }} (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, arm64)"
-    runs-on: 'ubuntu-24.04'
+    runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     strategy:
       matrix:
@@ -300,7 +300,7 @@ jobs:
 
   amiga:
     name: "AmigaOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, AmiSSL, gcc, m68k)"
-    runs-on: 'ubuntu-24.04'
+    runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
       amissl-version: 5.18
@@ -397,7 +397,7 @@ jobs:
 
   msdos:
     name: "MS-DOS (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, djgpp, i586)"
-    runs-on: 'ubuntu-24.04'
+    runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
       toolchain-version: '3.4'
