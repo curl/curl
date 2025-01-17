@@ -1699,9 +1699,8 @@ check_function_exists("setlocale"       HAVE_SETLOCALE)
 check_function_exists("setmode"         HAVE_SETMODE)
 check_function_exists("setrlimit"       HAVE_SETRLIMIT)
 
-  check_function_exists("sched_yield"   HAVE_SCHED_YIELD)
-
 if(NOT WIN32)
+  check_function_exists("sched_yield"   HAVE_SCHED_YIELD)
   check_symbol_exists("strcasecmp"      "string.h" HAVE_STRCASECMP)
   check_symbol_exists("stricmp"         "string.h" HAVE_STRICMP)
   check_symbol_exists("strcmpi"         "string.h" HAVE_STRCMPI)
