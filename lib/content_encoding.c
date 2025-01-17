@@ -742,6 +742,20 @@ struct zstd_writer {
   void *decomp;
 };
 
+#ifdef ZSTD_STATIC_LINKING_ONLY
+static void *Curl_zstd_alloc(void *opaque, size_t size)
+{
+  (void)opaque;
+  return Curl_cmalloc(size);
+}
+
+static void Curl_zstd_free(void *opaque, void *address)
+{
+  (void)opaque;
+  Curl_cfree(address);
+}
+#endif
+
 static CURLcode zstd_do_init(struct Curl_easy *data,
                                  struct Curl_cwriter *writer)
 {
@@ -749,7 +763,16 @@ static CURLcode zstd_do_init(struct Curl_easy *data,
 
   (void)data;
 
+#ifdef ZSTD_STATIC_LINKING_ONLY
+  zp->zds = ZSTD_createDStream_advanced((ZSTD_customMem) {
+    .customAlloc = Curl_zstd_alloc,
+    .customFree  = Curl_zstd_free,
+    .opaque      = NULL
+  });
+#else
   zp->zds = ZSTD_createDStream();
+#endif
+
   zp->decomp = NULL;
   return zp->zds ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
