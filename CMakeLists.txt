@@ -225,16 +225,17 @@ if(WIN32)
     string(TOLOWER "${CURL_TEST_OUTPUT}" HAVE_WIN32_WINNT)
     message(STATUS "Found _WIN32_WINNT=${HAVE_WIN32_WINNT}")
   endif()
-  # Avoid storing HAVE_WIN32_WINNT in CMake cache
-  unset(HAVE_WIN32_WINNT CACHE)
+  unset(HAVE_WIN32_WINNT CACHE)  # Avoid storing in CMake cache
 
   if(MINGW)
+    # Detect __MINGW64_VERSION_MAJOR, __MINGW64_VERSION_MINOR and store as MINGW64_VERSION
     curl_internal_test(MINGW64_VERSION)
     if(MINGW64_VERSION)
       string(REGEX MATCH "MINGW64_VERSION=[0-9]+\.[0-9]+" CURL_TEST_OUTPUT "${CURL_TEST_OUTPUT}")
       string(REGEX REPLACE "MINGW64_VERSION=" "" MINGW64_VERSION "${CURL_TEST_OUTPUT}")
       message(STATUS "Found MINGW64_VERSION=${MINGW64_VERSION}")
     endif()
+    unset(MINGW64_VERSION CACHE)  # Avoid storing in CMake cache
   endif()
 elseif(DOS OR AMIGA)
   set(BUILD_SHARED_LIBS OFF)
