@@ -817,10 +817,7 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
   /* Generate flags string and send the APPEND command */
   Curl_dyn_init(&flags, 100);
   if(data->set.upload_flags) {
-<<<<<<< HEAD
     int i;
-=======
->>>>>>> 3794c0065 (imap: Fix build errors, refactor IMAP append logic)
     struct ulbits ulflag[] = {
       {CURLULFLAG_ANSWERED, "Answered"},
       {CURLULFLAG_DELETED, "Deleted"},
@@ -835,21 +832,11 @@ static CURLcode imap_perform_append(struct Curl_easy *data)
       goto cleanup;
     }
 
-<<<<<<< HEAD
     for(i = 0; ulflag[i].bit; i++) {
       if(data->set.upload_flags & ulflag[i].bit) {
         if((Curl_dyn_len(&flags) > 2 && Curl_dyn_add(&flags, " ")) ||
            Curl_dyn_add(&flags, "\\") || Curl_dyn_add(&flags, ulflag[i].flag))
-=======
-    for(int i = 0; ulflag[i].bit; i++) {
-      if(data->set.upload_flags & ulflag[i].bit) {
-        if(Curl_dyn_len(&flags)) {
-          if(Curl_dyn_len(&flags) > 2 && Curl_dyn_add(&flags, " "))
             goto cleanup;
-        }
-        if(Curl_dyn_add(&flags, "\\") || Curl_dyn_add(&flags, ulflag[i].flag))
->>>>>>> 3794c0065 (imap: Fix build errors, refactor IMAP append logic)
-          goto cleanup;
       }
     }
 
