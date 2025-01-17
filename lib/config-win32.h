@@ -58,7 +58,7 @@
 #endif
 
 /* Define if you have the <sys/param.h> header file. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_SYS_PARAM_H 1
 #endif
 
@@ -75,7 +75,7 @@
 #define HAVE_SYS_STAT_H 1
 
 /* Define if you have the <sys/time.h> header file. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_SYS_TIME_H 1
 #endif
 
@@ -92,12 +92,12 @@
 /* #define HAVE_TERMIOS_H 1 */
 
 /* Define if you have the <unistd.h> header file. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_UNISTD_H 1
 #endif
 
 /* Define to 1 if you have the <libgen.h> header file. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_LIBGEN_H 1
 #endif
 
@@ -121,7 +121,7 @@
 #define HAVE_CLOSESOCKET 1
 
 /* Define if you have the ftruncate function. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_FTRUNCATE 1
 #endif
 
@@ -135,7 +135,7 @@
 #define HAVE_GETHOSTNAME 1
 
 /* Define if you have the gettimeofday function. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_GETTIMEOFDAY 1
 #endif
 
@@ -217,8 +217,8 @@
 #define HAVE_SNPRINTF 1
 #endif
 
-#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600) && \  /* Vista */
-  !defined(UNDER_CE)
+/* Vista */
+#if (defined(_WIN32_WINNT) && _WIN32_WINNT >= 0x600) && !defined(UNDER_CE)
 /* Define to 1 if you have a IPv6 capable working inet_ntop function. */
 #define HAVE_INET_NTOP 1
 /* Define to 1 if you have a IPv6 capable working inet_pton function. */
@@ -226,7 +226,7 @@
 #endif
 
 /* Define to 1 if you have the `basename' function. */
-#if defined(__MINGW32__)
+#ifdef __MINGW32__
 #define HAVE_BASENAME 1
 #endif
 
@@ -249,7 +249,7 @@
 
 /* Define if ssize_t is not an available 'typedefed' type. */
 #ifndef _SSIZE_T_DEFINED
-#  if defined(__MINGW32__)
+#  ifdef __MINGW32__
 #  elif defined(_WIN64)
 #    define _SSIZE_T_DEFINED
 #    define ssize_t __int64
@@ -273,7 +273,7 @@
 #define SIZEOF_LONG 4
 
 /* Define to the size of `size_t', as computed by sizeof. */
-#if defined(_WIN64)
+#ifdef _WIN64
 #  define SIZEOF_SIZE_T 8
 #else
 #  define SIZEOF_SIZE_T 4
@@ -313,7 +313,7 @@
 #ifndef UNDER_CE
 
 /* Define some minimum and default build targets for Visual Studio */
-#if defined(_MSC_VER)
+#ifdef _MSC_VER
    /* Officially, Microsoft's Windows SDK versions 6.X does not support Windows
       2000 as a supported build target. VS2008 default installations provides
       an embedded Windows SDK v6.0A along with the claim that Windows 2000 is a
@@ -324,7 +324,7 @@
 
    /* The minimum build target for VS2012 is Vista unless Update 1 is installed
       and the v110_xp toolset is chosen. */
-#  if defined(_USING_V110_SDK71_)
+#  ifdef _USING_V110_SDK71_
 #    define VS2012_MIN_TARGET 0x0501
 #  else
 #    define VS2012_MIN_TARGET 0x0600
@@ -336,7 +336,7 @@
 
    /* VS2012 default build target is Windows Vista unless Update 1 is installed
       and the v110_xp toolset is chosen. */
-#  if defined(_USING_V110_SDK71_)
+#  ifdef _USING_V110_SDK71_
 #    define VS2012_DEF_TARGET 0x0501
 #  else
 #    define VS2012_DEF_TARGET 0x0600
@@ -365,7 +365,7 @@
 #  define WINVER VS2012_DEF_TARGET
 #  endif
 #  if (_WIN32_WINNT < VS2012_MIN_TARGET) || (WINVER < VS2012_MIN_TARGET)
-#    if defined(_USING_V110_SDK71_)
+#    ifdef _USING_V110_SDK71_
 #      error VS2012 does not support Windows build targets prior to Windows XP
 #    else
 #      error VS2012 does not support Windows build targets prior to Windows \
@@ -448,7 +448,7 @@ Vista
 /*                           LDAP SUPPORT                           */
 /* ---------------------------------------------------------------- */
 
-#if defined(CURL_HAS_NOVELL_LDAPSDK)
+#ifdef CURL_HAS_NOVELL_LDAPSDK
 #undef USE_WIN32_LDAP
 #define HAVE_LDAP_SSL_H 1
 #define HAVE_LDAP_URL_PARSE 1
