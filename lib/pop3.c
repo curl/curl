@@ -1110,7 +1110,7 @@ static CURLcode pop3_multi_statemach(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct pop3_conn *pop3c = &conn->proto.pop3c;
 
-  if((conn->handler->flags & PROTOPT_SSL) && !pop3c->ssldone) {
+  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !pop3c->ssldone) {
     bool ssldone = FALSE;
     result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
     pop3c->ssldone = ssldone;
