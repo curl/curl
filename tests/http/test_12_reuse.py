@@ -40,8 +40,7 @@ class TestReuse:
 
     # check if HTTP/1.1 handles 'Connection: close' correctly
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_12_01_h1_conn_close(self, env: Env,
-                                 httpd, nghttpx, repeat, proto):
+    def test_12_01_h1_conn_close(self, env: Env, httpd, nghttpx, proto):
         httpd.clear_extra_configs()
         httpd.set_extra_config('base', [
             'MaxKeepAliveRequests 1',
@@ -60,8 +59,7 @@ class TestReuse:
     @pytest.mark.skipif(condition=Env.httpd_is_at_least('2.5.0'),
                         reason="httpd 2.5+ handles KeepAlives different")
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_12_02_h1_conn_timeout(self, env: Env,
-                                   httpd, nghttpx, repeat, proto):
+    def test_12_02_h1_conn_timeout(self, env: Env, httpd, nghttpx, proto):
         httpd.clear_extra_configs()
         httpd.set_extra_config('base', [
             'KeepAliveTimeout 1',

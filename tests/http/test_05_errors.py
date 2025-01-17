@@ -46,8 +46,7 @@ class TestErrors:
 
     # download 1 file, check that we get CURLE_PARTIAL_FILE
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_05_01_partial_1(self, env: Env, httpd, nghttpx, repeat,
-                              proto):
+    def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -69,8 +68,7 @@ class TestErrors:
 
     # download files, check that we get CURLE_PARTIAL_FILE for all
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_05_02_partial_20(self, env: Env, httpd, nghttpx, repeat,
-                              proto):
+    def test_05_02_partial_20(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -92,7 +90,7 @@ class TestErrors:
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
     # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
-    def test_05_03_required(self, env: Env, httpd, nghttpx, repeat):
+    def test_05_03_required(self, env: Env, httpd, nghttpx):
         curl = CurlClient(env=env)
         proto = 'http/1.1'
         urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/1_1'
@@ -117,7 +115,7 @@ class TestErrors:
     # - h2 to work since it will signal the end of the response before
     #   and not see the "unclean" close either
     @pytest.mark.parametrize("proto", ['http/1.0', 'http/1.1', 'h2'])
-    def test_05_04_unclean_tls_shutdown(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_05_04_unclean_tls_shutdown(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 10 if proto == 'h2' else 1

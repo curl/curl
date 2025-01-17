@@ -50,7 +50,7 @@ class TestSSLUse:
         if 'httpd' not in request.node._fixtureinfo.argnames:
             httpd.reload_if_config_changed()
 
-    def test_17_01_sslinfo_plain(self, env: Env, nghttpx, repeat):
+    def test_17_01_sslinfo_plain(self, env: Env, nghttpx):
         proto = 'http/1.1'
         curl = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/curltest/sslinfo'

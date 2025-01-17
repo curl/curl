@@ -283,8 +283,10 @@ static void usage(const char *msg)
   fprintf(stderr,
     "  -A number  abort transfer after `number` response bytes\n"
     "  -F number  fail writing response after `number` response bytes\n"
+    "  -M number  max concurrent connections to a host\n"
     "  -P number  pause transfer after `number` response bytes\n"
     "  -r <host>:<port>:<addr>  resolve information\n"
+    "  -T number  max concurrent connections total\n"
     "  -V http_version (http/1.1, h2, h3) http version to use\n"
   );
 }

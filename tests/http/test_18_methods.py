@@ -48,7 +48,7 @@ class TestMethods:
 
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_18_01_delete(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_18_01_delete(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
@@ -61,7 +61,7 @@ class TestMethods:
     # - HEADER frame with 204 and eos=0
     # - 10ms later DATA frame length=0 and eos=1
     # should be accepted
-    def test_18_02_delete_h2_special(self, env: Env, httpd, nghttpx, repeat):
+    def test_18_02_delete_h2_special(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         count = 1
         curl = CurlClient(env=env)
