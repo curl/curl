@@ -1382,10 +1382,12 @@ AC_DEFUN([CURL_CHECK_WIN32_LARGEFILE], [
     AC_MSG_CHECKING([whether build target supports Win32 large files])
     case $host_os in
       mingw32ce*|cegcc*)
-        curl_win32_has_largefile='no'  dnl Windows CE does not support large files
+        dnl Windows CE does not support large files
+        curl_win32_has_largefile='no'
         ;;
       *)
-        curl_win32_has_largefile='yes'  dnl All mingw-w64 versions support large files
+        dnl All mingw-w64 versions support large files
+        curl_win32_has_largefile='yes'
         ;;
     esac
     case "$curl_win32_has_largefile" in
