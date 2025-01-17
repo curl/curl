@@ -161,7 +161,6 @@ set(HAVE_TERMIOS_H 0)
 set(HAVE_TERMIO_H 0)
 set(HAVE_LINUX_TCP_H 0)
 
-set(HAVE_FSEEKO 0)  # mingw-w64 2.0.0 and newer has it
 set(HAVE_SOCKET 1)
 set(HAVE_SELECT 1)
 set(HAVE_STRDUP 1)
