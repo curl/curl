@@ -1286,7 +1286,7 @@ static CURLcode smtp_multi_statemach(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct smtp_conn *smtpc = &conn->proto.smtpc;
 
-  if((conn->handler->flags & PROTOPT_SSL) && !smtpc->ssldone) {
+  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !smtpc->ssldone) {
     bool ssldone = FALSE;
     result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
     smtpc->ssldone = ssldone;

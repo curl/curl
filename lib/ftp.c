@@ -3163,7 +3163,7 @@ static CURLcode ftp_connect(struct Curl_easy *data,
 
   PINGPONG_SETUP(pp, ftp_statemachine, ftp_endofresp);
 
-  if(conn->handler->flags & PROTOPT_SSL) {
+  if(Curl_conn_is_ssl(conn, FIRSTSOCKET)) {
     /* BLOCKING */
     result = Curl_conn_connect(data, FIRSTSOCKET, TRUE, done);
     if(result)

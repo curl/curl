@@ -956,12 +956,12 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 #endif
 
-  if((needle->handler->flags&PROTOPT_SSL) !=
-     (conn->handler->flags&PROTOPT_SSL))
-    /* do not do mixed SSL and non-SSL connections */
-    if(get_protocol_family(conn->handler) !=
-       needle->handler->protocol || !conn->bits.tls_upgraded)
-      /* except protocols that have been upgraded via TLS */
+  if((!(needle->handler->flags&PROTOPT_SSL) !=
+      !Curl_conn_is_ssl(conn, FIRSTSOCKET)) &&
+     !(get_protocol_family(conn->handler) == needle->handler->protocol &&
+       conn->bits.tls_upgraded))
+    /* Deny `conn` if it is not fit for `needle`'s SSL needs,
+     * UNLESS `conn` is the same protocol family and was upgraded to SSL. */
       return FALSE;
 
 #ifndef CURL_DISABLE_PROXY

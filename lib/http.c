@@ -2526,7 +2526,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
   }
 
-  if(!(conn->handler->flags&PROTOPT_SSL) &&
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET) &&
      conn->httpversion < 20 &&
      (data->state.httpwant == CURL_HTTP_VERSION_2)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
@@ -2670,7 +2670,7 @@ static CURLcode http_header(struct Curl_easy *data,
   case 'A':
 #ifndef CURL_DISABLE_ALTSVC
     v = (data->asi &&
-         ((data->conn->handler->flags & PROTOPT_SSL) ||
+         (Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ||
 #ifdef DEBUGBUILD
           /* allow debug builds to circumvent the HTTPS restriction */
           getenv("CURL_ALTSVC_HTTP")
@@ -2944,7 +2944,7 @@ static CURLcode http_header(struct Curl_easy *data,
 #ifndef CURL_DISABLE_HSTS
     /* If enabled, the header is incoming and this is over HTTPS */
     v = (data->hsts &&
-         ((conn->handler->flags & PROTOPT_SSL) ||
+         (Curl_conn_is_ssl(conn, FIRSTSOCKET) ||
 #ifdef DEBUGBUILD
            /* allow debug builds to circumvent the HTTPS restriction */
            getenv("CURL_HSTS_HTTP")
@@ -4168,7 +4168,7 @@ CURLcode Curl_http_req_to_h2(struct dynhds *h2_headers,
       infof(data, "set pseudo header %s to %s", HTTP_PSEUDO_SCHEME, scheme);
     }
     else {
-      scheme = (data->conn && data->conn->handler->flags & PROTOPT_SSL) ?
+      scheme = Curl_conn_is_ssl(data->conn, FIRSTSOCKET) ?
         "https" : "http";
     }
   }

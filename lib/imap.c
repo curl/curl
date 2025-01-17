@@ -1390,7 +1390,7 @@ static CURLcode imap_multi_statemach(struct Curl_easy *data, bool *done)
   struct connectdata *conn = data->conn;
   struct imap_conn *imapc = &conn->proto.imapc;
 
-  if((conn->handler->flags & PROTOPT_SSL) && !imapc->ssldone) {
+  if(Curl_conn_is_ssl(conn, FIRSTSOCKET) && !imapc->ssldone) {
     bool ssldone = FALSE;
     result = Curl_conn_connect(data, FIRSTSOCKET, FALSE, &ssldone);
     imapc->ssldone = ssldone;
