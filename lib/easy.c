@@ -751,6 +751,17 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
   if(!data)
     return CURLE_BAD_FUNCTION_ARGUMENT;
 
+  if(data->set.errorbuffer)
+    /* clear this as early as possible */
+    data->set.errorbuffer[0] = 0;
+
+  data->state.os_errno = 0;
+
+  if(data->multi) {
+    failf(data, "easy handle already used in multi handle");
+    return CURLE_FAILED_INIT;
+  }
+
   /* if the handle has a connection still attached (it is/was a connect-only
      handle) then disconnect before performing */
   if(data->conn) {
@@ -762,17 +773,6 @@ static CURLcode easy_perform(struct Curl_easy *data, bool events)
       Curl_cpool_disconnect(data, c, TRUE);
     }
     DEBUGASSERT(!data->conn);
-  }
-
-  if(data->set.errorbuffer)
-    /* clear this as early as possible */
-    data->set.errorbuffer[0] = 0;
-
-  data->state.os_errno = 0;
-
-  if(data->multi) {
-    failf(data, "easy handle already used in multi handle");
-    return CURLE_FAILED_INIT;
   }
 
   if(data->multi_easy)
