@@ -55,7 +55,7 @@ class TestUpload:
 
     # upload small data, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_01_upload_1_small(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_01_upload_1_small(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -70,7 +70,7 @@ class TestUpload:
 
     # upload large data, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_02_upload_1_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_02_upload_1_large(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -86,7 +86,7 @@ class TestUpload:
 
     # upload data sequentially, check that they were echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_10_upload_sequential(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_10_upload_sequential(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -103,7 +103,7 @@ class TestUpload:
 
     # upload data parallel, check that they were echoed
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_07_11_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_11_upload_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -122,7 +122,7 @@ class TestUpload:
 
     # upload large data sequentially, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_12_upload_seq_large(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -141,7 +141,7 @@ class TestUpload:
 
     # upload very large data sequentially, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_13_upload_seq_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_13_upload_seq_large(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -226,7 +226,7 @@ class TestUpload:
 
     # upload data parallel, check that they were echoed
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_07_20_upload_parallel(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_20_upload_parallel(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -245,7 +245,7 @@ class TestUpload:
 
     # upload large data parallel, check that this is what was echoed
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_07_21_upload_parallel_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_21_upload_parallel_large(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -262,7 +262,7 @@ class TestUpload:
 
     # upload large data parallel to a URL that denies uploads
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_07_22_upload_parallel_fail(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_22_upload_parallel_fail(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -279,7 +279,7 @@ class TestUpload:
 
     # PUT 100k
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_30_put_100k(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_30_put_100k(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -299,7 +299,7 @@ class TestUpload:
 
     # PUT 10m
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_31_put_10m(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_31_put_10m(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -319,7 +319,7 @@ class TestUpload:
 
     # issue #10591
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_32_issue_10591(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_32_issue_10591(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -333,7 +333,7 @@ class TestUpload:
 
     # issue #11157, upload that is 404'ed by server, needs to terminate
     # correctly and not time out on sending
-    def test_07_33_issue_11157a(self, env: Env, httpd, nghttpx, repeat):
+    def test_07_33_issue_11157a(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         fdata = os.path.join(env.gen_dir, 'data-10m')
         # send a POST to our PUT handler which will send immediately a 404 back
@@ -354,7 +354,7 @@ class TestUpload:
         r.check_stats(1, 404)
 
     # issue #11157, send upload that is slowly read in
-    def test_07_33_issue_11157b(self, env: Env, httpd, nghttpx, repeat):
+    def test_07_33_issue_11157b(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         fdata = os.path.join(env.gen_dir, 'data-10m')
         # tell our test PUT handler to read the upload more slowly, so
@@ -376,7 +376,7 @@ class TestUpload:
         assert r.exit_code == 0, r.dump_logs()
         r.check_stats(1, 200)
 
-    def test_07_34_issue_11194(self, env: Env, httpd, nghttpx, repeat):
+    def test_07_34_issue_11194(self, env: Env, httpd, nghttpx):
         proto = 'h2'
         # tell our test PUT handler to read the upload more slowly, so
         # that the send buffering and transfer loop needs to wait
@@ -396,7 +396,7 @@ class TestUpload:
         r.check_stats(1, 200)
 
     # upload large data on a h1 to h2 upgrade
-    def test_07_35_h1_h2_upgrade_upload(self, env: Env, httpd, nghttpx, repeat):
+    def test_07_35_h1_h2_upgrade_upload(self, env: Env, httpd, nghttpx):
         fdata = os.path.join(env.gen_dir, 'data-100k')
         curl = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/curltest/echo?id=[0-0]'
@@ -413,7 +413,7 @@ class TestUpload:
     # upload to a 301,302,303 response
     @pytest.mark.parametrize("redir", ['301', '302', '303'])
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_36_upload_30x(self, env: Env, httpd, nghttpx, repeat, redir, proto):
+    def test_07_36_upload_30x(self, env: Env, httpd, nghttpx, redir, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -430,7 +430,7 @@ class TestUpload:
 
     # upload to a 307 response
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_37_upload_307(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_37_upload_307(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -447,7 +447,7 @@ class TestUpload:
 
     # POST form data, yet another code path in transfer
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_38_form_small(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_38_form_small(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -461,7 +461,7 @@ class TestUpload:
 
     # POST data urlencoded, small enough to be sent with request headers
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_39_post_urlenc_small(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_39_post_urlenc_small(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -479,7 +479,7 @@ class TestUpload:
 
     # POST data urlencoded, large enough to be sent separate from request headers
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_40_post_urlenc_large(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_40_post_urlenc_large(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -501,7 +501,7 @@ class TestUpload:
     # Unfixed, this will fail when run with CURL_DBG_SOCK_WBLOCK=80 most
     # of the time
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_41_post_urlenc_small(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_41_post_urlenc_small(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -536,7 +536,7 @@ class TestUpload:
     # upload data, pause, let connection die with an incomplete response
     # issues #11769 #13260
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_42a_upload_disconnect(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_42a_upload_disconnect(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -557,7 +557,7 @@ class TestUpload:
 
     # upload data, pause, let connection die without any response at all
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_42b_upload_disconnect(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_42b_upload_disconnect(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -574,7 +574,7 @@ class TestUpload:
 
     # upload data, pause, let connection die after 100 continue
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_42c_upload_disconnect(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_42c_upload_disconnect(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -590,7 +590,7 @@ class TestUpload:
         r.check_exit_code(exp_code)  # GOT_NOTHING
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_43_upload_denied(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_43_upload_denied(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if proto == 'h3' and env.curl_uses_lib('msh3'):
@@ -607,7 +607,7 @@ class TestUpload:
 
     # speed limited on put handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_50_put_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
+    def test_07_50_put_speed_limit(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
@@ -627,7 +627,7 @@ class TestUpload:
 
     # speed limited on echo handler
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_07_51_echo_speed_limit(self, env: Env, httpd, nghttpx, proto, repeat):
+    def test_07_51_echo_speed_limit(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
@@ -645,7 +645,7 @@ class TestUpload:
 
     # upload larger data, triggering "Expect: 100-continue" code paths
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_07_60_upload_exp100(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_60_upload_exp100(self, env: Env, httpd, nghttpx, proto):
         fdata = os.path.join(env.gen_dir, 'data-1m+')
         read_delay = 1
         curl = CurlClient(env=env)
@@ -658,7 +658,7 @@ class TestUpload:
 
     # upload larger data, triggering "Expect: 100-continue" code paths
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_07_61_upload_exp100_timeout(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_07_61_upload_exp100_timeout(self, env: Env, httpd, nghttpx, proto):
         fdata = os.path.join(env.gen_dir, 'data-1m+')
         read_delay = 2
         curl = CurlClient(env=env)

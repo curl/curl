@@ -88,7 +88,7 @@ class TestBasic:
     # simple download, check connect/handshake timings
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
-    def test_01_06_timings(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_01_06_timings(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)
@@ -103,7 +103,7 @@ class TestBasic:
     # simple https: HEAD
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     @pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
-    def test_01_07_head(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_01_07_head(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         curl = CurlClient(env=env)

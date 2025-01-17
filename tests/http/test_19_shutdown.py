@@ -53,7 +53,7 @@ class TestShutdown:
     # check with `tcpdump` that we see curl TCP RST packets
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_19_01_check_tcp_rst(self, env: Env, httpd, repeat, proto):
+    def test_19_01_check_tcp_rst(self, env: Env, httpd, proto):
         if env.ci_run:
             pytest.skip("seems not to work in CI")
         curl = CurlClient(env=env)
@@ -68,7 +68,7 @@ class TestShutdown:
     # check with `tcpdump` that we do NOT see TCP RST when CURL_GRACEFUL_SHUTDOWN set
     @pytest.mark.skipif(condition=not Env.tcpdump(), reason="tcpdump not available")
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2'])
-    def test_19_02_check_shutdown(self, env: Env, httpd, repeat, proto):
+    def test_19_02_check_shutdown(self, env: Env, httpd, proto):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         curl = CurlClient(env=env, run_env={
@@ -85,7 +85,7 @@ class TestShutdown:
 
     # run downloads where the server closes the connection after each request
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_19_03_shutdown_by_server(self, env: Env, httpd, repeat, proto):
+    def test_19_03_shutdown_by_server(self, env: Env, httpd, proto):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         count = 10
@@ -104,7 +104,7 @@ class TestShutdown:
     # run downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
     # the connection after each request
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_19_04_shutdown_by_curl(self, env: Env, httpd, proto, repeat):
+    def test_19_04_shutdown_by_curl(self, env: Env, httpd, proto):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         count = 10
@@ -127,7 +127,7 @@ class TestShutdown:
     # run event-based downloads with CURLOPT_FORBID_REUSE set, meaning *we* close
     # the connection after each request
     @pytest.mark.parametrize("proto", ['http/1.1'])
-    def test_19_05_event_shutdown_by_server(self, env: Env, httpd, proto, repeat):
+    def test_19_05_event_shutdown_by_server(self, env: Env, httpd, proto):
         if not env.curl_is_debug():
             pytest.skip('only works for curl debug builds')
         count = 10
@@ -155,7 +155,7 @@ class TestShutdown:
 
     # check graceful shutdown on multiplexed http
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
-    def test_19_06_check_shutdown(self, env: Env, httpd, nghttpx, repeat, proto):
+    def test_19_06_check_shutdown(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         if not env.curl_is_debug():

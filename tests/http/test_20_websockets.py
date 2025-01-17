@@ -78,13 +78,13 @@ class TestWebsockets:
             yield
             p.terminate()
 
-    def test_20_01_basic(self, env: Env, ws_echo, repeat):
+    def test_20_01_basic(self, env: Env, ws_echo):
         curl = CurlClient(env=env)
         url = f'http://localhost:{env.ws_port}/'
         r = curl.http_download(urls=[url])
         r.check_response(http_status=426)
 
-    def test_20_02_pingpong_small(self, env: Env, ws_echo, repeat):
+    def test_20_02_pingpong_small(self, env: Env, ws_echo):
         payload = 125 * "x"
         client = LocalClient(env=env, name='ws-pingpong')
         if not client.exists():
@@ -94,7 +94,7 @@ class TestWebsockets:
         r.check_exit_code(0)
 
     # the python websocket server does not like 'large' control frames
-    def test_20_03_pingpong_too_large(self, env: Env, ws_echo, repeat):
+    def test_20_03_pingpong_too_large(self, env: Env, ws_echo):
         payload = 127 * "x"
         client = LocalClient(env=env, name='ws-pingpong')
         if not client.exists():
@@ -103,7 +103,7 @@ class TestWebsockets:
         r = client.run(args=[url, payload])
         r.check_exit_code(56)
 
-    def test_20_04_data_small(self, env: Env, ws_echo, repeat):
+    def test_20_04_data_small(self, env: Env, ws_echo):
         client = LocalClient(env=env, name='ws-data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -111,7 +111,7 @@ class TestWebsockets:
         r = client.run(args=['-m', str(0), '-M', str(10), url])
         r.check_exit_code(0)
 
-    def test_20_05_data_med(self, env: Env, ws_echo, repeat):
+    def test_20_05_data_med(self, env: Env, ws_echo):
         client = LocalClient(env=env, name='ws-data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -119,7 +119,7 @@ class TestWebsockets:
         r = client.run(args=['-m', str(120), '-M', str(130), url])
         r.check_exit_code(0)
 
-    def test_20_06_data_large(self, env: Env, ws_echo, repeat):
+    def test_20_06_data_large(self, env: Env, ws_echo):
         client = LocalClient(env=env, name='ws-data')
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -127,7 +127,7 @@ class TestWebsockets:
         r = client.run(args=['-m', str(65535 - 5), '-M', str(65535 + 5), url])
         r.check_exit_code(0)
 
-    def test_20_07_data_large_small_recv(self, env: Env, ws_echo, repeat):
+    def test_20_07_data_large_small_recv(self, env: Env, ws_echo):
         run_env = os.environ.copy()
         run_env['CURL_WS_CHUNK_SIZE'] = '1024'
         client = LocalClient(env=env, name='ws-data', run_env=run_env)
@@ -139,7 +139,7 @@ class TestWebsockets:
 
     # Send large frames and simulate send blocking on 8192 bytes chunks
     # Simlates error reported in #15865
-    def test_20_08_data_very_large(self, env: Env, ws_echo, repeat):
+    def test_20_08_data_very_large(self, env: Env, ws_echo):
         run_env = os.environ.copy()
         run_env['CURL_WS_CHUNK_EAGAIN'] = '8192'
         client = LocalClient(env=env, name='ws-data', run_env=run_env)
