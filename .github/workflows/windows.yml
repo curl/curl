@@ -38,7 +38,7 @@ permissions: {}
 jobs:
   cygwin:
     name: "cygwin, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.platform }} ${{ matrix.name }}"
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 25
     defaults:
       run:
@@ -161,7 +161,7 @@ jobs:
 
   msys2:  # both msys and mingw-w64
     name: "${{ matrix.sys == 'msys' && 'msys2' || 'mingw' }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.env }} ${{ matrix.name }} ${{ matrix.test }}"
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 20
     defaults:
       run:
@@ -354,7 +354,7 @@ jobs:
 
   mingw-w64-standalone-downloads:
     name: 'dl-mingw, CM ${{ matrix.env }} ${{ matrix.name }}'
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 20
     defaults:
       run:
@@ -561,7 +561,7 @@ jobs:
 
   msvc:
     name: 'msvc, CM ${{ matrix.arch }}-${{ matrix.plat }} ${{ matrix.name }}'
-    runs-on: windows-latest
+    runs-on: windows-2025
     timeout-minutes: 55
     defaults:
       run:
