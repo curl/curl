@@ -225,28 +225,66 @@ jobs:
             echo '::endgroup::'
 
   android:
-    name: "Android ${{ matrix.platform }} (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, arm64)"
+    name: "Android ${{ matrix.platform }} (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, ${{ matrix.name }}, ${{ matrix.arch }})"
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 5
+    timeout-minutes: 55
+    env:
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_DISABLE_METRICS: '1'
     strategy:
       matrix:
         platform: ['21', '35']
         build: [autotools, cmake]
+        arch: ['arm64']
+        include:
+          - name: 'openssl'
+            install: 'brotli zlib zstd libpsl nghttp2 openssl libssh2'
+            plat: 'android'
+            type: 'Debug'
+            tflags: ''
+            config: >-
+              -DCURL_USE_LIBSSH2=ON
+              -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
+              -DCURL_USE_LIBPSL=ON
       fail-fast: false
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
+      - name: 'install packages'
+        run: sudo apt-get update && sudo apt-get install -y nasm
+
+      - name: 'vcpkg cache setup'
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: 'vcpkg versions'
+        timeout-minutes: 1
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          vcpkg version
+
+      - name: 'vcpkg build'
+        timeout-minutes: 35
+        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
+
       - name: 'configure'
         run: |
+          export TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
+          export CC="$TOOLCHAIN/bin/aarch64-linux-android${{ matrix.platform }}-clang"
+          export AR="$TOOLCHAIN/bin/llvm-ar"
+          export RANLIB="$TOOLCHAIN/bin/llvm-ranlib"
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld \
-              -DANDROID_ABI=arm64-v8a \
-              -DANDROID_PLATFORM=android-${{ matrix.platform }} \
-              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" \
-              -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
-              -DCURL_WERROR=ON \
-              -DCURL_ENABLE_SSL=OFF \
-              -DCURL_USE_LIBPSL=OFF
+            '-DCMAKE_SYSTEM_VERSION=android-${{ matrix.platform }}' \
+            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
+            '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
+            -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
+            -DCURL_WERROR=ON \
+            ${{ matrix.config }}
           else
             autoreconf -fi
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
