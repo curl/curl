@@ -780,9 +780,12 @@ static void cpool_discard_conn(struct cpool *cpool,
 
   if(data->multi && data->multi->socket_cb) {
     DEBUGASSERT(cpool == &data->multi->cpool);
-    /* Start with an empty shutdown pollset, so out internal closure handle
-     * is added to the sockets. */
+    /* Start with an empty shutdown pollset, move any sockets from
+     * `data->last_poll` into it (they are registered for events). */
     memset(&conn->shutdown_poll, 0, sizeof(conn->shutdown_poll));
+    Curl_pollset_merge(data, &conn->shutdown_poll, &data->last_poll);
+    memset(&data->last_poll, 0, sizeof(data->last_poll));
+
     if(cpool_update_shutdown_ev(data->multi, cpool->idata, conn)) {
       DEBUGF(infof(data, "[CCACHE] update events for shutdown failed, "
                    "discarding #%" FMT_OFF_T,
@@ -1032,6 +1035,33 @@ void Curl_cpool_multi_perform(struct Curl_multi *multi)
   CPOOL_UNLOCK(&multi->cpool);
 }
 
+static void cpool_conn_close_ev(struct cpool *cpool,
+                                struct Curl_multi *multi,
+                                struct Curl_easy *data)
+{
+  struct easy_pollset ps;
+
+  DEBUGASSERT(data);
+  DEBUGASSERT(data->conn);
+  DEBUGASSERT(multi);
+  DEBUGASSERT(multi->socket_cb);
+
+  /* We are closing `data->conn` and kill all sockets. Any still registered
+   * at event handling, need CURL_POLL_REMOVE callback invokes. */
+  memset(&ps, 0, sizeof(ps));
+  if(cpool && data != cpool->idata) {
+    /* Closing on the original transfer handle, merge any pollset
+     * sockets (registered for event handling) into the shutdown set. */
+    Curl_pollset_merge(data, &data->conn->shutdown_poll, &data->last_poll);
+    memset(&data->last_poll, 0, sizeof(data->last_poll));
+  }
+  /* All event registered socket from this connection should now be in
+   * `conn->shutdown_poll`. Trigger CURL_POLL_REMOVE and clear. */
+  if(data->conn->shutdown_poll.num) {
+    Curl_multi_pollset_ev(multi, data, &ps, &data->conn->shutdown_poll);
+    memset(&data->conn->shutdown_poll, 0, sizeof(data->conn->shutdown_poll));
+  }
+}
 
 /*
  * Close and destroy the connection. Run the shutdown sequence once,
@@ -1071,6 +1101,10 @@ static void cpool_close_and_destroy(struct cpool *cpool,
   else
     DEBUGF(infof(data, "closing connection #%" FMT_OFF_T,
                  conn->connection_id));
+
+  if(data->multi && data->multi->socket_cb)
+    cpool_conn_close_ev(cpool, data->multi, data);
+
   Curl_conn_close(data, SECONDARYSOCKET);
   Curl_conn_close(data, FIRSTSOCKET);
   Curl_detach_connection(data);

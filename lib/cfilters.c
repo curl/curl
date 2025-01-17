@@ -957,6 +957,17 @@ void Curl_pollset_change(struct Curl_easy *data,
   }
 }
 
+void Curl_pollset_merge(struct Curl_easy *data,
+                        struct easy_pollset *dest,
+                        struct easy_pollset *src)
+{
+  unsigned int i;
+
+  for(i = 0; i < src->num; ++i) {
+    Curl_pollset_change(data, dest, src->sockets[i], src->actions[i], 0);
+  }
+}
+
 void Curl_pollset_set(struct Curl_easy *data,
                       struct easy_pollset *ps, curl_socket_t sock,
                       bool do_in, bool do_out)

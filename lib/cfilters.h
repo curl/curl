@@ -594,6 +594,10 @@ void Curl_pollset_change(struct Curl_easy *data,
                          struct easy_pollset *ps, curl_socket_t sock,
                          int add_flags, int remove_flags);
 
+void Curl_pollset_merge(struct Curl_easy *data,
+                        struct easy_pollset *dest,
+                        struct easy_pollset *src);
+
 void Curl_pollset_set(struct Curl_easy *data,
                       struct easy_pollset *ps, curl_socket_t sock,
                       bool do_in, bool do_out);
