@@ -941,7 +941,7 @@ endings either CRLF or LF so 't' is appropriate.
    as their argument */
 #define STRCONST(x) x,sizeof(x)-1
 
-/* Some versions of the Android SDK is missing the declaration */
+/* Some versions of the Android NDK is missing the declaration */
 #if defined(HAVE_GETPWUID_R) && \
   defined(__ANDROID_API__) && (__ANDROID_API__ < 21)
 struct passwd;
