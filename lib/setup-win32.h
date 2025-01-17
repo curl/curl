@@ -77,11 +77,6 @@
 #  if defined(_UNICODE) && !defined(UNICODE)
 #    error "_UNICODE is defined but UNICODE is not defined"
 #  endif
-/*
- * Do not include unneeded stuff in Windows headers to avoid compiler
- * warnings and macro clashes.
- * Make sure to define this macro before including any Windows headers.
- */
 #  include <winsock2.h>
 #  include <ws2tcpip.h>
 #  include <windows.h>
