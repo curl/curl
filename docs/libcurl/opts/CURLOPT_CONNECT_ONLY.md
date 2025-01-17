@@ -34,8 +34,8 @@ and then return.
 
 The option can be used to simply test a connection to a server, but is more
 useful when used with the CURLINFO_ACTIVESOCKET(3) option to
-curl_easy_getinfo(3) as the library can set up the connection and then the
-application can obtain the most recently used socket for special data
+curl_easy_getinfo(3) as the library can set up the connection and then
+the application can obtain the most recently used socket for special data
 transfers.
 
 Since 7.86.0, this option can be set to '2' and if HTTP or WebSocket are used,
@@ -43,16 +43,13 @@ libcurl performs the request and reads all response headers before handing
 over control to the application.
 
 Transfers marked connect only do not reuse any existing connections and
-connections marked connect only are not allowed to get reused. For this
-reason, an easy handle cannot be reused for a second transfer when
-CURLOPT_CONNECT_ONLY(3) is set, it must be closed with curl_easy_cleanup(3)
-once the application is done with it.
+connections marked connect only are not allowed to get reused.
 
 If the connect only transfer is done using the multi interface, the particular
 easy handle must remain added to the multi handle for as long as the
 application wants to use it. Once it has been removed with
-curl_multi_remove_handle(3), curl_easy_send(3) and curl_easy_recv(3) do not
-function.
+curl_multi_remove_handle(3), curl_easy_send(3) and
+curl_easy_recv(3) do not function.
 
 # DEFAULT
 
