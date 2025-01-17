@@ -457,8 +457,8 @@ Vista
 #define HAVE_LDAP_URL_PARSE 1
 #elif !defined(CURL_WINDOWS_UWP) && !defined(UNDER_CE)
 #undef HAVE_LDAP_URL_PARSE
-#define USE_WIN32_LDAP 1
 #define HAVE_LDAP_SSL 1
+#define USE_WIN32_LDAP 1
 #endif
 
 /* Define to use the Windows crypto library. */
