@@ -764,7 +764,7 @@ static CURLcode zstd_do_init(struct Curl_easy *data,
   (void)data;
 
 #ifdef ZSTD_STATIC_LINKING_ONLY
-  zp->zds = ZSTD_createDStream_advanced((ZSTD_customMem){
+  zp->zds = ZSTD_createDStream_advanced((ZSTD_customMem) {
     .customAlloc = Curl_zstd_alloc,
     .customFree  = Curl_zstd_free,
     .opaque      = NULL
