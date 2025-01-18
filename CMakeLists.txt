@@ -323,7 +323,9 @@ endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
 # Keep condition in sync with CMake/curl-config.cmake.in
-if((UNIX AND NOT ANDROID) OR VCPKG_TOOLCHAIN OR (MINGW AND NOT CMAKE_CROSSCOMPILING))
+if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
+   VCPKG_TOOLCHAIN OR
+   (MINGW AND NOT CMAKE_CROSSCOMPILING))
   set(_curl_use_pkgconfig_default ON)
 else()
   set(_curl_use_pkgconfig_default OFF)
@@ -740,6 +742,13 @@ if(CURL_USE_OPENSSL)
     check_symbol_exists("LIBRESSL_VERSION_NUMBER" "openssl/opensslv.h" HAVE_LIBRESSL)
   endif()
   cmake_pop_check_state()
+
+  if(HAVE_BORINGSSL OR HAVE_AWSLC)
+    if(OPENSSL_USE_STATIC_LIBS AND CMAKE_C_COMPILER_ID MATCHES "Clang")
+      list(APPEND CURL_LIBS "stdc++")
+      list(APPEND CMAKE_REQUIRED_LIBRARIES "stdc++")
+    endif()
+  endif()
 
   if(HAVE_BORINGSSL)
     set(_openssl "BoringSSL")

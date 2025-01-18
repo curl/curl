@@ -280,7 +280,7 @@ Details via CMake
 - `CURL_USE_LIBUV`:                         Use libuv for event-based tests. Default: `OFF`
 - `CURL_USE_MBEDTLS`:                       Enable mbedTLS for SSL/TLS. Default: `OFF`
 - `CURL_USE_OPENSSL`:                       Enable OpenSSL for SSL/TLS. Default: `ON` if no other TLS backend was enabled.
-- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android), vcpkg, MinGW if not cross-compiling.
+- `CURL_USE_PKGCONFIG`:                     Enable `pkg-config` to detect dependencies. Default: `ON` for Unix (except Android, Apple devices), vcpkg, MinGW if not cross-compiling.
 - `CURL_USE_RUSTLS`:                        Enable Rustls for SSL/TLS. Default: `OFF`
 - `CURL_USE_SCHANNEL`:                      Enable Windows native SSL/TLS (Schannel). Default: `OFF`
 - `CURL_USE_SECTRANSP`:                     Enable Apple OS native SSL/TLS (Secure Transport). Default: `OFF`
@@ -302,6 +302,7 @@ Details via CMake
 ## Dependency options (via CMake)
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
+- `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
 
