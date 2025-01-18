@@ -539,8 +539,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+        run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools

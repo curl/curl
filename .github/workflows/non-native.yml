@@ -277,8 +277,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file '{}' \;
+        run: find . -type f \( -name curl -o -name '*.so' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
@@ -374,8 +373,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . -type f \( -name curl -o -name '*.a' \) -exec file '{}' \;
+        run: find . -type f \( -name curl -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
@@ -481,8 +479,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . \( -name '*.exe' -o -name '*.a' \) -exec file '{}' \;
+        run: find . \( -name '*.exe' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # skip for autotools to save time
