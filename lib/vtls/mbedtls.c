@@ -108,9 +108,9 @@ struct mbed_ssl_backend_data {
 };
 
 /* apply threading? */
-#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) || \
-    defined(_WIN32)
-#define THREADING_SUPPORT
+#if (defined(USE_THREADS_POSIX) && defined(HAVE_PTHREAD_H)) ||  \
+  defined(_WIN32)
+#define HAS_THREADING_SUPPORT
 #endif
 
 #ifndef MBEDTLS_ERROR_C
@@ -118,14 +118,14 @@ struct mbed_ssl_backend_data {
 #endif
 
 #if defined(MBEDTLS_SSL_PROTO_TLS1_3) && MBEDTLS_VERSION_NUMBER >= 0x03060000
-#define TLS13_SUPPORT
+#define HAS_TLS13_SUPPORT
 #endif
 
-#if defined(TLS13_SUPPORT) && defined(MBEDTLS_SSL_SESSION_TICKETS)
+#if defined(HAS_TLS13_SUPPORT) && defined(MBEDTLS_SSL_SESSION_TICKETS)
 #define HAS_SESSION_TICKETS
 #endif
 
-#ifdef THREADING_SUPPORT
+#ifdef HAS_THREADING_SUPPORT
 static mbedtls_entropy_context ts_entropy;
 
 static int entropy_init_initialized = 0;
@@ -163,7 +163,7 @@ static int entropy_func_mutex(void *data, unsigned char *output, size_t len)
   return ret;
 }
 
-#endif /* THREADING_SUPPORT */
+#endif /* HAS_THREADING_SUPPORT */
 
 #ifdef MBEDTLS_DEBUG
 static void mbed_debug(void *context, int level, const char *f_name,
@@ -293,7 +293,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
     /* ver_min = MBEDTLS_SSL_VERSION_TLS1_2; */
     break;
   case CURL_SSLVERSION_TLSv1_3:
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
     ver_min = MBEDTLS_SSL_VERSION_TLS1_3;
     break;
 #endif
@@ -307,7 +307,7 @@ mbed_set_ssl_version_min_max(struct Curl_easy *data,
   case CURL_SSLVERSION_MAX_DEFAULT:
   case CURL_SSLVERSION_MAX_NONE:
   case CURL_SSLVERSION_MAX_TLSv1_3:
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
     ver_max = MBEDTLS_SSL_VERSION_TLS1_3;
     break;
 #endif
@@ -398,7 +398,7 @@ mbed_set_selected_ciphers(struct Curl_easy *data,
   if(!selected)
     return CURLE_OUT_OF_MEMORY;
 
-#ifndef TLS13_SUPPORT
+#ifndef HAS_TLS13_SUPPORT
   (void) ciphers13, (void) j;
 #else
   if(!ciphers13) {
@@ -446,7 +446,7 @@ add_ciphers:
     selected[count++] = id;
   }
 
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
   if(ciphers == ciphers13 && ciphers12) {
     ciphers = ciphers12;
     goto add_ciphers;
@@ -588,7 +588,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_NOT_BUILT_IN;
   }
 
-#ifdef THREADING_SUPPORT
+#ifdef HAS_THREADING_SUPPORT
   mbedtls_ctr_drbg_init(&backend->ctr_drbg);
 
   ret = mbedtls_ctr_drbg_seed(&backend->ctr_drbg, entropy_func_mutex,
@@ -611,7 +611,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
           -ret, errorbuf);
     return CURLE_FAILED_INIT;
   }
-#endif /* THREADING_SUPPORT */
+#endif /* HAS_THREADING_SUPPORT */
 
   /* Load the trusted CA */
   mbedtls_x509_crt_init(&backend->cacert);
@@ -844,7 +844,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
                       mbedtls_bio_cf_read,
                       NULL /*  rev_timeout() */);
 
-#ifndef TLS13_SUPPORT
+#ifndef HAS_TLS13_SUPPORT
   if(conn_config->cipher_list) {
     CURLcode result = mbed_set_selected_ciphers(data, backend,
                                                 conn_config->cipher_list,
@@ -1215,7 +1215,7 @@ static ssize_t mbed_send(struct Curl_cfilter *cf, struct Curl_easy *data,
     CURL_TRC_CF(data, cf, "mbedtls_ssl_write(len=%zu) -> -0x%04X",
                 len, -ret);
     *curlcode = ((ret == MBEDTLS_ERR_SSL_WANT_WRITE)
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
       || (ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
 #endif
       ) ? CURLE_AGAIN : CURLE_SEND_ERROR;
@@ -1288,7 +1288,7 @@ static CURLcode mbedtls_shutdown(struct Curl_cfilter *cf,
      * WANT_READ, but has not encountered an EAGAIN. */
     if(ret == MBEDTLS_ERR_SSL_WANT_READ)
       ret = mbedtls_ssl_read(&backend->ssl, buf, sizeof(buf));
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
     if(ret == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET)
       continue;
 #endif
@@ -1342,9 +1342,9 @@ static void mbedtls_close(struct Curl_cfilter *cf, struct Curl_easy *data)
     mbedtls_ssl_config_free(&backend->config);
     mbedtls_ssl_free(&backend->ssl);
     mbedtls_ctr_drbg_free(&backend->ctr_drbg);
-#ifndef THREADING_SUPPORT
+#ifndef HAS_THREADING_SUPPORT
     mbedtls_entropy_free(&backend->entropy);
-#endif /* THREADING_SUPPORT */
+#endif /* HAS_THREADING_SUPPORT */
     backend->initialized = FALSE;
   }
 }
@@ -1586,29 +1586,29 @@ static int mbedtls_init(void)
 {
   if(!Curl_mbedtlsthreadlock_thread_setup())
     return 0;
-#ifdef THREADING_SUPPORT
+#ifdef HAS_THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
   {
     int ret;
-#ifdef THREADING_SUPPORT
+#ifdef HAS_THREADING_SUPPORT
     Curl_mbedtlsthreadlock_lock_function(0);
 #endif
     ret = psa_crypto_init();
-#ifdef THREADING_SUPPORT
+#ifdef HAS_THREADING_SUPPORT
     Curl_mbedtlsthreadlock_unlock_function(0);
 #endif
     if(ret != PSA_SUCCESS)
       return 0;
   }
-#endif /* TLS13_SUPPORT */
+#endif /* HAS_TLS13_SUPPORT */
   return 1;
 }
 
 static void mbedtls_cleanup(void)
 {
-#ifdef THREADING_SUPPORT
+#ifdef HAS_THREADING_SUPPORT
   entropy_cleanup_mutex(&ts_entropy);
 #endif
   (void)Curl_mbedtlsthreadlock_thread_cleanup();
@@ -1665,7 +1665,7 @@ const struct Curl_ssl Curl_ssl_mbedtls = {
   SSLSUPP_CERTINFO |
   SSLSUPP_PINNEDPUBKEY |
   SSLSUPP_SSL_CTX |
-#ifdef TLS13_SUPPORT
+#ifdef HAS_TLS13_SUPPORT
   SSLSUPP_TLS13_CIPHERSUITES |
 #endif
   SSLSUPP_HTTPS_PROXY |
