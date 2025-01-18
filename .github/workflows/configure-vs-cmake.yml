@@ -87,7 +87,7 @@ jobs:
       - name: run cmake
         run: |
           cmake -B bld-cm -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON \
-            "-DCMAKE_C_COMPILER_TARGET=$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+            -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
             -DCURL_BROTLI=OFF \
             -DCURL_USE_LIBSSH2=OFF
 
@@ -122,14 +122,14 @@ jobs:
         run: |
           autoreconf -fi
           export PKG_CONFIG_DEBUG_SPEW=1
-          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-schannel --without-libpsl --host=${TRIPLET}
+          mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-schannel --without-libpsl --host="${TRIPLET}"
 
       - name: run cmake
         run: |
           cmake -B bld-cm -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
             -DCMAKE_SYSTEM_NAME=Windows \
-            -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
-            -DCMAKE_C_COMPILER=${TRIPLET}-gcc
+            -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
+            -DCMAKE_C_COMPILER="${TRIPLET}-gcc"
 
       - name: 'configure log'
         run: cat bld-am/config.log 2>/dev/null || true
