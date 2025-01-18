@@ -117,6 +117,11 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
+/* PSA can be used independently of TLS 1.3 */
+#if defined(MBEDTLS_USE_PSA_CRYPTO) && MBEDTLS_VERSION_NUMBER >= 0x03060000
+#define HAS_PSA_SUPPORT
+#endif
+
 #if defined(MBEDTLS_SSL_PROTO_TLS1_3) && MBEDTLS_VERSION_NUMBER >= 0x03060000
 #define HAS_TLS13_SUPPORT
 #endif
@@ -1589,7 +1594,7 @@ static int mbedtls_init(void)
 #ifdef HAS_THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
-#ifdef HAS_TLS13_SUPPORT
+#ifdef HAS_PSA_SUPPORT
   {
     int ret;
 #ifdef HAS_THREADING_SUPPORT
@@ -1602,7 +1607,7 @@ static int mbedtls_init(void)
     if(ret != PSA_SUCCESS)
       return 0;
   }
-#endif /* HAS_TLS13_SUPPORT */
+#endif /* HAS_PSA_SUPPORT */
   return 1;
 }
 
