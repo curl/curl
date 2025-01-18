@@ -805,7 +805,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED
+#ifdef HAS_SESSION_TICKETS
   /* New in mbedTLS 3.6.1, need to enable, default is now disabled */
   mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets(&backend->config,
     MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED);
