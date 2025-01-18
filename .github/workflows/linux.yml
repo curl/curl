@@ -702,9 +702,9 @@ jobs:
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+          TFLAGS: '${{ matrix.build.tflags }}'
           CURL_CI: github
-          PYTEST_ADDOPTS: "--color=yes"
+          PYTEST_ADDOPTS: '--color=yes'
         run: |
           echo "CANARY:|${HOME}|${PATH}|"
           PATH="${PATH//\/home\/runneradmin/${HOME}}"  # workaround for PATH issue on ubuntu-24.04-arm
