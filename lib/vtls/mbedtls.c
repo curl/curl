@@ -117,6 +117,11 @@ struct mbed_ssl_backend_data {
 #define mbedtls_strerror(a,b,c) b[0] = 0
 #endif
 
+/* PSA can be used independently of TLS 1.3 */
+#if defined(MBEDTLS_USE_PSA_CRYPTO) && MBEDTLS_VERSION_NUMBER >= 0x03060000
+#define HAS_PSA_SUPPORT
+#endif
+
 #if defined(MBEDTLS_SSL_PROTO_TLS1_3) && MBEDTLS_VERSION_NUMBER >= 0x03060000
 #define HAS_TLS13_SUPPORT
 #endif
@@ -805,7 +810,7 @@ mbed_connect_step1(struct Curl_cfilter *cf, struct Curl_easy *data)
     return CURLE_SSL_CONNECT_ERROR;
   }
 
-#ifdef MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED
+#if defined(HAS_SESSION_TICKETS) && MBEDTLS_VERSION_NUMBER >= 0x03060100
   /* New in mbedTLS 3.6.1, need to enable, default is now disabled */
   mbedtls_ssl_conf_tls13_enable_signal_new_session_tickets(&backend->config,
     MBEDTLS_SSL_TLS1_3_SIGNAL_NEW_SESSION_TICKETS_ENABLED);
@@ -1589,7 +1594,7 @@ static int mbedtls_init(void)
 #ifdef HAS_THREADING_SUPPORT
   entropy_init_mutex(&ts_entropy);
 #endif
-#ifdef HAS_TLS13_SUPPORT
+#ifdef HAS_PSA_SUPPORT
   {
     int ret;
 #ifdef HAS_THREADING_SUPPORT
@@ -1602,7 +1607,7 @@ static int mbedtls_init(void)
     if(ret != PSA_SUCCESS)
       return 0;
   }
-#endif /* HAS_TLS13_SUPPORT */
+#endif /* HAS_PSA_SUPPORT */
   return 1;
 }
 
