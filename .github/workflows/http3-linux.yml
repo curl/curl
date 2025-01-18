@@ -476,7 +476,7 @@ jobs:
 
       - name: 'run tests'
         env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+          TFLAGS: '${{ matrix.build.tflags }}'
         run: |
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
@@ -492,9 +492,9 @@ jobs:
 
       - name: 'run pytest'
         env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+          TFLAGS: '${{ matrix.build.tflags }}'
           CURL_CI: github
-          PYTEST_ADDOPTS: "--color=yes"
+          PYTEST_ADDOPTS: '--color=yes'
         run: |
           source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then

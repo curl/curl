@@ -335,10 +335,6 @@ jobs:
             perl-time-hires openssh stunnel sudo git
         name: 'install dependencies'
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
-
       - name: 'Fix kernel mmap rnd bits'
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
         # high-entropy ASLR in much newer kernels that GitHub runners are
@@ -593,6 +589,10 @@ jobs:
           printenv >> $GITHUB_ENV
         name: 'install Intel compilers'
 
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
       - run: autoreconf -fi
         if: ${{ matrix.build.configure }}
         name: 'autoreconf'
@@ -702,12 +702,10 @@ jobs:
       - name: 'run pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         env:
-          TFLAGS: "${{ matrix.build.tflags }}"
+          TFLAGS: '${{ matrix.build.tflags }}'
           CURL_CI: github
-          PYTEST_ADDOPTS: "--color=yes"
+          PYTEST_ADDOPTS: '--color=yes'
         run: |
-          echo "CANARY:|${HOME}|${PATH}|"
-          PATH="${PATH//\/home\/runneradmin/${HOME}}"  # workaround for PATH issue on ubuntu-24.04-arm
           [ -x "$HOME/venv/bin/activate" ] && source $HOME/venv/bin/activate
           if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build . --verbose --target curl-pytest-ci

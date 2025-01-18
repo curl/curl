@@ -54,9 +54,7 @@ jobs:
     steps:
       - run: git config --global core.autocrlf input
         shell: pwsh
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
+
       - uses: cygwin/cygwin-install-action@f61179d72284ceddc397ed07ddb444d82bf9e559 # v5
         with:
           platform: ${{ matrix.platform }}
@@ -72,6 +70,10 @@ jobs:
             zlib-devel
             libbrotli-devel
             libnghttp2-devel
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'autoreconf'
         if: ${{ matrix.build == 'automake' }}
@@ -188,10 +190,6 @@ jobs:
       - run: git config --global core.autocrlf input
         shell: pwsh
 
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
-
       - uses: msys2/setup-msys2@d44ca8e88d8b43d56cf5670f91747359d5537f97 # v2
         if: ${{ matrix.sys == 'msys' }}
         with:
@@ -221,6 +219,10 @@ jobs:
             mingw-w64-${{ matrix.env }}-libpsl
             mingw-w64-${{ matrix.env }}-c-ares
 
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
       - name: 'autoreconf'
         if: ${{ matrix.build == 'autotools' }}
         timeout-minutes: 2
@@ -248,8 +250,8 @@ jobs:
             [ '${{ matrix.type }}' = 'Debug' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG='
             [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
             cmake -B bld -G Ninja ${options} \
-              "-DCMAKE_C_FLAGS=${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
-              '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+              -DCMAKE_C_FLAGS="${{ matrix.cflags }} ${CFLAGS_CMAKE} ${CPPFLAGS}" \
+              -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               ${{ matrix.config }}
@@ -406,6 +408,7 @@ jobs:
           ls -l
 
       - run: git config --global core.autocrlf input
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
@@ -418,7 +421,7 @@ jobs:
           [ '${{ matrix.type }}' = 'Release' ] && options+=' -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE='
           cmake -B bld -G 'MSYS Makefiles' ${options} \
             -DCMAKE_C_COMPILER=gcc \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+            -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DCURL_USE_LIBPSL=OFF \
@@ -507,15 +510,15 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             cmake -B bld -G Ninja \
               -DCMAKE_SYSTEM_NAME=Windows \
-              -DCMAKE_C_COMPILER_TARGET=${TRIPLET} \
-              -DCMAKE_C_COMPILER=${TRIPLET}-gcc \
+              -DCMAKE_C_COMPILER_TARGET="${TRIPLET}" \
+              -DCMAKE_C_COMPILER="${TRIPLET}-gcc" \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
               -DCURL_USE_SCHANNEL=ON -DUSE_WIN32_IDN=ON \
               -DCURL_USE_LIBPSL=OFF
           else
             mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --host=${TRIPLET} \
+              --host="${TRIPLET}" \
               --with-schannel --with-winidn \
               --without-libpsl \
               --disable-dependency-tracking
@@ -539,8 +542,7 @@ jobs:
           fi
 
       - name: 'curl info'
-        run: |
-          find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
+        run: find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
         if: ${{ matrix.build == 'cmake' }}  # Save time by skipping this for autotools
@@ -656,10 +658,6 @@ jobs:
 
       fail-fast: false
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
-        with:
-          persist-credentials: false
-
       - name: 'vcpkg cache setup'
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
         with:
@@ -677,6 +675,10 @@ jobs:
         timeout-minutes: 35
         run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=${{ matrix.arch }}-${{ matrix.plat }}'
 
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
       - name: 'configure'
         timeout-minutes: 5
         run: |
@@ -688,14 +690,14 @@ jobs:
             vsglobals=';AppxPackage=false;WindowsAppContainer=false'
           fi
           cmake -B bld ${options} \
-            "-DCMAKE_TOOLCHAIN_FILE=$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
-            "-DVCPKG_INSTALLED_DIR=$VCPKG_INSTALLATION_ROOT/installed" \
-            '-DVCPKG_TARGET_TRIPLET=${{ matrix.arch }}-${{ matrix.plat }}' \
-            "-DCMAKE_C_FLAGS=${cflags}" \
-            "-DCMAKE_EXE_LINKER_FLAGS=/INCREMENTAL:NO ${ldflags}" \
-            "-DCMAKE_SHARED_LINKER_FLAGS=/INCREMENTAL:NO ${ldflags}" \
-            "-DCMAKE_VS_GLOBALS=TrackFileAccess=false${vsglobals}" \
-            '-DCMAKE_BUILD_TYPE=${{ matrix.type }}' \
+            -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+            -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
+            -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
+            -DCMAKE_C_FLAGS="${cflags}" \
+            -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO ${ldflags}" \
+            -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO ${ldflags}" \
+            -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
+            -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
             -DCURL_WERROR=ON \
             -DBUILD_SHARED_LIBS=OFF \
