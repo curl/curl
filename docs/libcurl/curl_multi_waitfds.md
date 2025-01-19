@@ -83,11 +83,8 @@ int main(void)
     if(!fd_count)
       continue; /* no descriptors yet */
 
-    /* Allocate storage for our descriptors.
-    * Note that a better approach can be used to minimize allocations and
-    * deallocations, if needed, like pre-allocated or grow-only array.
-    */
-    ufds = (struct curl_waitfd*)malloc(fd_count * sizeof(struct curl_waitfd));
+    /* allocate storage for our descriptors */
+    ufds = malloc(fd_count * sizeof(struct curl_waitfd));
 
     /* get wait descriptors from the transfers and put them into array. */
     mc = curl_multi_waitfds(multi, ufds, fd_count, &fd_count);
