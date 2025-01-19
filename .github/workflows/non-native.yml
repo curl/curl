@@ -224,6 +224,152 @@ jobs:
             time gmake -j3 examples
             echo '::endgroup::'
 
+  ios:
+    name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}}, ${{ matrix.build.name }}, arm64"
+    runs-on: 'macos-latest'
+    timeout-minutes: 10
+    env:
+      DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
+      CC: ${{ matrix.build.compiler || 'clang' }}
+      MAKEFLAGS: -j 4
+      # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
+      libressl-version: 4.0.0
+    strategy:
+      fail-fast: false
+      matrix:
+        build:
+          - name: 'libressl +examples'
+            install_steps: libressl
+            # FIXME: Could not make OPENSSL_ROOT_DIR work. It seems to be appended to sysroot by CMake.
+            generate: >-
+              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
+              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
+              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
+
+          - name: 'libressl'
+            install_steps: libressl
+            generator: Xcode
+            generate: >-
+              -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
+              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
+              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
+              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
+
+          - name: 'libressl +examples'
+            install_steps: libressl
+            configure: --with-openssl="$HOME/libressl"
+
+    steps:
+      - name: 'brew install'
+        if: ${{ matrix.build.configure }}
+        run: |
+          echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
+          while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
+
+      - name: 'toolchain versions'
+        run: |
+          which "${CC}"; "${CC}" --version || true
+          xcodebuild -version || true
+          xcodebuild -sdk -version | grep '^Path:' || true
+          xcrun --sdk iphoneos --show-sdk-path 2>/dev/null || true
+          xcrun --sdk iphoneos --show-sdk-version || true
+          echo '::group::macros predefined'; "${CC}" -dM -E - < /dev/null | sort || true; echo '::endgroup::'
+          echo '::group::brew packages installed'; ls -l "$(brew --prefix)/opt"; echo '::endgroup::'
+
+      - name: 'cache libressl'
+        if: contains(matrix.build.install_steps, 'libressl')
+        uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
+        id: cache-libressl
+        env:
+          cache-name: cache-libressl
+        with:
+          path: ~/libressl
+          key: ${{ runner.os }}-ios-${{ env.cache-name }}-${{ env.libressl-version }}
+
+      - name: 'build libressl'
+        if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
+        run: |
+          curl -LsSf --retry 6 --retry-connrefused --max-time 999 \
+            https://github.com/libressl/portable/releases/download/v${{ env.libressl-version }}/libressl-${{ env.libressl-version }}.tar.gz | tar -x
+          cd libressl-${{ env.libressl-version }}
+          # FIXME: on the 4.0.1 release, delete '-DHAVE_ENDIAN_H=0'
+          cmake . \
+            -DHAVE_ENDIAN_H=0 \
+            -DCMAKE_INSTALL_PREFIX="$HOME/libressl" \
+            -DCMAKE_SYSTEM_NAME=iOS \
+            -DCMAKE_SYSTEM_PROCESSOR=aarch64 \
+            -DBUILD_SHARED_LIBS=OFF \
+            -DLIBRESSL_APPS=OFF \
+            -DLIBRESSL_TESTS=OFF
+          cmake --build .
+          cmake --install . --verbose
+
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        if: ${{ matrix.build.configure }}
+        run: autoreconf -fi
+
+      - name: 'configure'
+        run: |
+          if [ -n '${{ matrix.build.configure }}' ]; then
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --disable-dependency-tracking \
+              CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
+              --host=aarch64-apple-darwin \
+              --without-libpsl --with-apple-idn \
+              ${{ matrix.build.configure }}
+          else
+            export OPENSSL_DIR=/
+            # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
+            [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
+            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCURL_USE_PKGCONFIG=OFF \
+              -DCMAKE_SYSTEM_NAME=iOS \
+              -DCURL_USE_LIBPSL=OFF -DUSE_APPLE_IDN=ON \
+              ${{ matrix.build.generate }} ${options}
+          fi
+
+      - name: 'configure log'
+        if: ${{ !cancelled() }}
+        run: cat bld/config.log bld/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
+
+      - name: 'curl_config.h'
+        run: |
+          echo '::group::raw'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
+          grep -F '#define' bld/lib/curl_config.h | sort || true
+
+      - name: 'build'
+        run: |
+          if [ -n '${{ matrix.build.configure }}' ]; then
+            make -C bld V=1
+          else
+            cmake --build bld --verbose
+          fi
+
+      - name: 'curl info'
+        run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file '{}' \;
+
+      - name: 'build tests'
+        if: ${{ matrix.build.generator != 'Xcode' }}
+        run: |
+          if [ -n '${{ matrix.build.configure }}' ]; then
+            make -C bld V=1 -C tests
+          else
+            cmake --build bld --target testdeps --verbose
+          fi
+
+      - name: 'build examples'
+        if: ${{ matrix.build.generator != 'Xcode' && contains(matrix.build.name, '+examples') }}
+        run: |
+          if [ -n '${{ matrix.build.configure }}' ]; then
+            make -C bld examples V=1
+          else
+            cmake --build bld --target curl-examples --verbose
+          fi
+
   android:
     name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, ${{ matrix.name }}, arm64"
     runs-on: 'ubuntu-latest'
