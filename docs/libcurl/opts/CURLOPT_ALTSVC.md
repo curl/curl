@@ -41,6 +41,12 @@ option.
 Using this option multiple times makes the last set string override the
 previous ones. Set it to NULL to disable its use again.
 
+# SECURITY CONCERNS
+
+libcurl cannot fully protect against attacks where an attacker has write
+access to the same directory where it is directed to save files. This is
+particularly sensitive if you save files using elevated privileges.
+
 # DEFAULT
 
 NULL. The alt-svc cache is not read nor written to file.

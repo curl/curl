@@ -55,7 +55,7 @@ If you use this option multiple times, you add more files to read cookies
 from. Setting this option to NULL disables the cookie engine and clears the
 list of files to read cookies from.
 
-# SECURITY
+# SECURITY CONCERNS
 
 This document previously mentioned how specifying a non-existing file can also
 enable the cookie engine. While true, we strongly advise against using that
