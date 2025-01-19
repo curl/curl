@@ -4,7 +4,7 @@ curl and libcurl 8.12.0
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3322
+ Contributors:                 3324
 
 This release includes the following changes:
 
@@ -21,7 +21,11 @@ This release includes the following bugfixes:
 
  o altsvc: avoid integer overflow in expire calculation [16]
  o altsvc: return error on dot-only name [178]
+ o android: add CI jobs, buildinfo, cmake docs, disable `CURL_USE_PKGCONFIG` by default [185]
+ o asyn-ares: acknowledge CURLOPT_DNS_SERVERS set to NULL [190]
+ o asyn-ares: initial HTTPS resolve support [166]
  o async-thread: avoid closing eventfd twice [9]
+ o autotools: add support for mingw UWP builds [192]
  o autotools: silence gcc warnings in libtool code [96]
  o binmode: convert to macro and use it from tests [44]
  o build: delete `-Wsign-conversion` related FIXMEs [137]
@@ -31,9 +35,11 @@ This release includes the following bugfixes:
  o build: fix the tidy targets for autotools [52]
  o build: fix unsigned `time_t` detection for cmake, MS-DOS, AmigaOS [104]
  o build: replace configure check with PP condition (Android <21) [97]
+ o build: stop detecting `sched_yield()` on Windows [176]
  o cd2nroff: support "none" as a TLS backend [29]
  o cf-https-connect: look into httpsrr alpns when available [152]
  o cf-socket: error if address can't be copied [72]
+ o checksrc.bat: remove explicit SNPRINTF bypass [174]
  o checksrc: ban use of sscanf() [7]
  o checksrc: check for return with parens around a value/name [130]
  o checksrc: fix the return() checker [35]
@@ -50,6 +56,8 @@ This release includes the following bugfixes:
  o cmake: clang-cl improvements [42]
  o cmake: delete accidental debug message
  o cmake: deprecate winbuild, add migration guide from legacy build methods [157]
+ o cmake: detect mingw-w64 version, pre-fill `HAVE_STRTOK_R` [179]
+ o cmake: do not store `MINGW64_VERSION` in cache [175]
  o cmake: drop duplicate Windows cache value [81]
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
  o cmake: drop redundant opening/closing `.*` from `MATCH` expressions [64]
@@ -62,9 +70,11 @@ This release includes the following bugfixes:
  o cmake: make system libraries `dl`, `m`, `pthread` customizable [123]
  o cmake: move `pkg-config` names to Find modules [87]
  o cmake: move GSS init before feature detections [93]
+ o cmake: move mingw UWP workaround from GHA to `CMakeLists.txt` [194]
  o cmake: namespace functions and macros [41]
  o cmake: optimize out 4 picky warning option detections with gcc [78]
  o cmake: pick a better IPv6 feature flag when assembling the feature list [132]
+ o cmake: pre-fill `HAVE_STDATOMIC_H`, `HAVE_ATOMIC` for mingw-w64 [180]
  o cmake: pre-fill `HAVE_STDINT_H` on Windows [149]
  o cmake: publish/check supported protocols/features via `CURLConfig.cmake` [100]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
@@ -75,8 +85,10 @@ This release includes the following bugfixes:
  o completion.pl: add completion for paths after @ for fish [82]
  o config-mac: drop `MACOS_SSL_SUPPORT` macro [63]
  o config: drop unused code and variables [135]
+ o configure: do not inline 'dnl' comments
  o configure: drop unused detections and macros [105]
  o configure: streamline Windows large file feature check [138]
+ o configure: UWP and Android follow-up fixes [184]
  o conncache: count shutdowns against host and max limits [154]
  o conncache: result_cb comment removed from function docs [1]
  o content_encoding: namespace GZIP flag constants [147]
@@ -85,6 +97,7 @@ This release includes the following bugfixes:
  o cookie: parse only the exact expire date [3]
  o curl-functions.m4: fix indentation in `CURL_SIZEOF()` [131]
  o curl: return error if etag options are used with multiple URLs [5]
+ o curl_multi_waitfds.md: tidy up the example [162]
  o curl_multibyte: support Windows paths longer than MAX_PATH [76]
  o curl_setup: fix missing `ADDRESS_FAMILY` type in rare build cases [144]
  o curl_sha512_256: rename symbols to the curl namespace [124]
@@ -148,6 +161,7 @@ This release includes the following bugfixes:
  o openssl: fix ECH logic [67]
  o osslq: use SSL_poll to determine writeability of QUIC streams [139]
  o projects/Windows: remove wolfSSL from legacy projects [75]
+ o pytest: remove 'repeat' parameter [182]
  o pytest: use httpd/apache2 directly, no apachectl [169]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
  o scripts/mdlinkcheck: markdown link checker [19]
@@ -169,6 +183,8 @@ This release includes the following bugfixes:
  o tidy-up: `curl_setup.h`, `curl_setup_once.h`, `config-win32ce.h` [146]
  o tidy-up: drop parenthesis around `return` expression [167]
  o tidy-up: drop parenthesis around `return` values [134]
+ o tidy-up: extend `CURL_O_BINARY` to lib and tests [195]
+ o TLS: check connection for SSL use, not handler [181]
  o tool_formparse.c: make curlx_uztoso a static in here [39]
  o tool_formparse: accept digits in --form type= strings [33]
  o tool_getparam: ECH param parsing refix [150]
@@ -187,6 +203,8 @@ This release includes the following bugfixes:
  o vtls: remove unusued 'check_cxn' from TLS handler struct [26]
  o vtls: replace "none"-functions with NULL pointers [27]
  o VULN-DISCLOSURE-POLICY.md: mention the not setting CVSS [23]
+ o websocket: fix message send corruption [188]
+ o windows: drop dupe macros, detect `CURL_OS` for WinCE ARM, indentation [183]
  o windows: drop redundant `USE_WIN32_SMALL_FILES` macro [145]
  o ws-docs: remove the outdated texts saying ws support is experimental [15]
 
@@ -209,17 +227,18 @@ This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
   Aleksander Mazur, Andy Pan, Asger Hautop Drewsen, baranyaib90 on github,
-  Ben Zanin, Christian Heusel, Christian Schmitz, Christopher Dannemiller,
-  Dan Fandrich, Daniel Stenberg, Darren Banfi, dependabot[bot], Derek Huang,
-  dwickr, Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
-  Jeroen Ooms, Jiri Stary, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
-  Manuel Einfalt, Marcel Raad, Milon Renatus, Mohammed Sadiq, Neil Horman,
+  Ben Zanin, Brad House, Christian Heusel, Christian Schmitz,
+  Christopher Dannemiller, Dan Fandrich, Daniel Stenberg, Darren Banfi,
+  Deniz Sökmen, dependabot[bot], Derek Huang, dwickr, Ganesh Viswanathan,
+  Hermes Zhang, IcedCoffeee on github, Jakub Jelen, Jeroen Ooms, Jiri Stary,
+  Kai Pastor, Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt, Marcel Raad,
+  Milon Renatus, Mohammed Sadiq, na-trium-144 on github, Neil Horman,
   Nicolás San Martín, Patrick Monnerat, prpr19xx on github, Qriist on github,
   Ralph Sennhauser, Randall S. Becker, Ray Satiro, renovate[bot],
   Rudi Heitbaum, Samuel Henrique, Stefan Eissing, Stephen Farrell, Tal Regev,
   Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats, Yedaya Katsman,
   Yihang Zhou
-  (46 contributors)
+  (49 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -384,14 +403,31 @@ References to bug reports and discussions on issues:
  [159] = https://curl.se/bug/?i=15953
  [160] = https://curl.se/bug/?i=16007
  [161] = https://curl.se/bug/?i=16007
+ [162] = https://curl.se/bug/?i=16050
  [163] = https://curl.se/bug/?i=16003
  [164] = https://curl.se/bug/?i=16002
  [165] = https://curl.se/bug/?i=15992
+ [166] = https://curl.se/bug/?i=16039
  [167] = https://curl.se/bug/?i=15990
  [169] = https://curl.se/bug/?i=16000
  [170] = https://curl.se/bug/?i=15996
  [171] = https://curl.se/bug/?i=15984
  [172] = https://curl.se/bug/?i=15997
  [173] = https://curl.se/bug/?i=15988
+ [174] = https://curl.se/bug/?i=16032
+ [175] = https://curl.se/bug/?i=16040
+ [176] = https://curl.se/bug/?i=16037
  [177] = https://curl.se/bug/?i=15987
  [178] = https://curl.se/bug/?i=15986
+ [179] = https://curl.se/bug/?i=16022
+ [180] = https://curl.se/bug/?i=16036
+ [181] = https://curl.se/bug/?i=16034
+ [182] = https://curl.se/bug/?i=16033
+ [183] = https://curl.se/bug/?i=16029
+ [184] = https://curl.se/bug/?i=16027
+ [185] = https://curl.se/bug/?i=16014
+ [188] = https://curl.se/bug/?i=15865
+ [190] = https://curl.se/bug/?i=16015
+ [192] = https://curl.se/bug/?i=16020
+ [194] = https://curl.se/bug/?i=16019
+ [195] = https://curl.se/bug/?i=16009
