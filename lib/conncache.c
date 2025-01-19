@@ -953,8 +953,9 @@ CURLcode Curl_cpool_add_pollfds(struct cpool *cpool,
   return result;
 }
 
+/* return information about the shutdown connections */
 unsigned int Curl_cpool_add_waitfds(struct cpool *cpool,
-                                    struct curl_waitfds *cwfds)
+                                    struct Curl_waitfds *cwfds)
 {
   unsigned int need = 0;
 

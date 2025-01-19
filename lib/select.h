@@ -130,17 +130,17 @@ CURLcode Curl_pollfds_add_ps(struct curl_pollfds *cpfds,
 CURLcode Curl_pollfds_add_sock(struct curl_pollfds *cpfds,
                                curl_socket_t sock, short events);
 
-struct curl_waitfds {
+struct Curl_waitfds {
   struct curl_waitfd *wfds;
   unsigned int n;
   unsigned int count;
 };
 
-void Curl_waitfds_init(struct curl_waitfds *cwfds,
+void Curl_waitfds_init(struct Curl_waitfds *cwfds,
                        struct curl_waitfd *static_wfds,
                        unsigned int static_count);
 
-unsigned int Curl_waitfds_add_ps(struct curl_waitfds *cwfds,
+unsigned int Curl_waitfds_add_ps(struct Curl_waitfds *cwfds,
                                  struct easy_pollset *ps);
 
 #endif /* HEADER_CURL_SELECT_H */
