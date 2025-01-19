@@ -953,8 +953,9 @@ CURLcode Curl_cpool_add_pollfds(struct cpool *cpool,
   return result;
 }
 
+/* return information about the shutdown connections */
 unsigned int Curl_cpool_add_waitfds(struct cpool *cpool,
-                                    struct curl_waitfds *cwfds)
+                                    struct Curl_waitfds *cwfds)
 {
   unsigned int need = 0;
 
@@ -977,6 +978,46 @@ unsigned int Curl_cpool_add_waitfds(struct cpool *cpool,
   }
   CPOOL_UNLOCK(cpool);
   return need;
+}
+
+/* return fd_set info about the shutdown connections */
+void Curl_cpool_setfds(struct cpool *cpool,
+                       fd_set *read_fd_set, fd_set *write_fd_set,
+                       int *maxfd)
+{
+  CPOOL_LOCK(cpool);
+  if(Curl_llist_head(&cpool->shutdowns)) {
+    struct Curl_llist_node *e;
+
+    for(e = Curl_llist_head(&cpool->shutdowns); e;
+        e = Curl_node_next(e)) {
+      struct easy_pollset ps;
+      unsigned int i;
+      struct connectdata *conn = Curl_node_elem(e);
+      memset(&ps, 0, sizeof(ps));
+      Curl_attach_connection(cpool->idata, conn);
+      Curl_conn_adjust_pollset(cpool->idata, &ps);
+      Curl_detach_connection(cpool->idata);
+
+      for(i = 0; i < ps.num; i++) {
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
+        if(ps.actions[i] & CURL_POLL_IN)
+          FD_SET(ps.sockets[i], read_fd_set);
+        if(ps.actions[i] & CURL_POLL_OUT)
+          FD_SET(ps.sockets[i], write_fd_set);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
+        if((ps.actions[i] & (CURL_POLL_OUT | CURL_POLL_IN)) &&
+           ((int)ps.sockets[i] > *maxfd))
+          *maxfd = (int)ps.sockets[i];
+      }
+    }
+  }
+  CPOOL_UNLOCK(cpool);
 }
 
 static void cpool_perform(struct cpool *cpool)

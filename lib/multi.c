@@ -1168,6 +1168,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
   int this_max_fd = -1;
   struct Curl_llist_node *e;
   struct Curl_multi *multi = m;
+  unsigned int i;
   (void)exc_fd_set; /* not used */
 
   if(!GOOD_MULTI_HANDLE(multi))
@@ -1178,7 +1179,6 @@ CURLMcode curl_multi_fdset(CURLM *m,
 
   for(e = Curl_llist_head(&multi->process); e; e = Curl_node_next(e)) {
     struct Curl_easy *data = Curl_node_elem(e);
-    unsigned int i;
 
     multi_getsock(data, &data->last_poll);
 
@@ -1202,6 +1202,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
     }
   }
 
+  Curl_cpool_setfds(&multi->cpool, read_fd_set, write_fd_set, &this_max_fd);
+
   *max_fd = this_max_fd;
 
   return CURLM_OK;
@@ -1212,7 +1214,7 @@ CURLMcode curl_multi_waitfds(CURLM *m,
                              unsigned int size,
                              unsigned int *fd_count)
 {
-  struct curl_waitfds cwfds;
+  struct Curl_waitfds cwfds;
   CURLMcode result = CURLM_OK;
   struct Curl_llist_node *e;
   struct Curl_multi *multi = m;
