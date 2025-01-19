@@ -225,28 +225,70 @@ jobs:
             echo '::endgroup::'
 
   android:
-    name: "Android ${{ matrix.platform }} (${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, arm64)"
+    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, ${{ matrix.name }}, arm64"
     runs-on: 'ubuntu-latest'
-    timeout-minutes: 5
+    timeout-minutes: 25
+    env:
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_DISABLE_METRICS: '1'
+      MAKEFLAGS: -j 5
     strategy:
       matrix:
-        platform: ['21', '35']
-        build: [autotools, cmake]
+        include:
+          - { build: 'autotools', platform: '21', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2', options: '--with-openssl' }
+          - { build: 'cmake'    , platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2', options: '-DCURL_USE_OPENSSL=ON' }
+          - { build: 'autotools', platform: '35', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2', options: '--with-openssl' }
+          - { build: 'cmake'    , platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2', options: '-DCURL_USE_OPENSSL=ON' }
+          # FIXME: zstd must be disabled explicitly, otherwise cmake/pkg-config finds it in /usr/include
+          #        and the build fails. I had found no option to disable this behavior. Other default
+          #        dependencies not offered via vcpkg may also need this.
+          - { build: 'cmake'    , platform: '35', name: "boringssl !zstd", install: '            libpsl         boringssl'        , options: '-DCURL_USE_OPENSSL=ON -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ -DCMAKE_SHARED_LINKER_FLAGS=-lstdc++ -DCURL_ZSTD=OFF' }
       fail-fast: false
     steps:
+      - name: 'vcpkg cache setup'
+        if: ${{ matrix.install }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: 'vcpkg versions'
+        if: ${{ matrix.install }}
+        timeout-minutes: 1
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          vcpkg version
+
+      - name: 'install prereqs for vcpkg'
+        if: contains(matrix.install, 'boringssl')
+        timeout-minutes: 5
+        run: |
+          sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-suggests --no-install-recommends nasm
+
+      - name: 'vcpkg build'
+        if: ${{ matrix.install }}
+        timeout-minutes: 20
+        run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=arm64-android'
+
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
 
       - name: 'configure'
         run: |
-          if [ '${{ matrix.build }}' = 'cmake' ]; then
+          export PKG_CONFIG_PATH="$VCPKG_INSTALLATION_ROOT/installed/arm64-android/lib/pkgconfig"
+          if [ '${{ matrix.build }}' = 'cmake' ]; then  # https://developer.android.com/ndk/guides/cmake
             cmake -B bld \
               -DANDROID_ABI=arm64-v8a \
               -DANDROID_PLATFORM='android-${{ matrix.platform }}' \
-              -DCMAKE_TOOLCHAIN_FILE="${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake" -DCMAKE_WARN_DEPRECATED=OFF \
+              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+              -DVCPKG_CHAINLOAD_TOOLCHAIN_FILE=${ANDROID_NDK_HOME}/build/cmake/android.toolchain.cmake -DCMAKE_WARN_DEPRECATED=OFF \
+              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
+              -DVCPKG_TARGET_TRIPLET=arm64-android \
               -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
               -DCURL_WERROR=ON \
-              -DCURL_ENABLE_SSL=OFF \
-              -DCURL_USE_LIBPSL=OFF
+              ${{ matrix.options }}
           else
             autoreconf -fi
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
@@ -254,9 +296,8 @@ jobs:
               CC="$TOOLCHAIN/bin/aarch64-linux-android${{ matrix.platform }}-clang" \
               AR="$TOOLCHAIN/bin/llvm-ar" \
               RANLIB="$TOOLCHAIN/bin/llvm-ranlib" \
-              --host='aarch64-linux-android${{ matrix.platform }}' \
-              --without-ssl \
-              --without-libpsl
+              --host=aarch64-linux-android${{ matrix.platform }} \
+              ${{ matrix.options }}
           fi
 
       - name: 'configure log'
@@ -271,9 +312,9 @@ jobs:
       - name: 'build'
         run: |
           if [ '${{ matrix.build }}' = 'cmake' ]; then
-            cmake --build bld
+            cmake --build bld --verbose
           else
-            make -j5 -C bld
+            make -j5 -C bld V=1
           fi
 
       - name: 'curl info'
