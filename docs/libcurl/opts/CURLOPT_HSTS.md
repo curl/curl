@@ -61,6 +61,12 @@ currently no length or size limit.
 
 NULL, no filename
 
+# SECURITY CONCERNS
+
+libcurl cannot fully protect against attacks where an attacker has write
+access to the same directory where it is directed to save files. This is
+particularly sensitive if you save files using elevated privileges.
+
 # %PROTOCOLS%
 
 # EXAMPLE
