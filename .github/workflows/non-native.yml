@@ -381,14 +381,24 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', platform: '21', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2', options: '--with-openssl' }
-          - { build: 'cmake'    , platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2', options: '-DCURL_USE_OPENSSL=ON' }
-          - { build: 'autotools', platform: '35', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2', options: '--with-openssl' }
-          - { build: 'cmake'    , platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2', options: '-DCURL_USE_OPENSSL=ON' }
+          - { build: 'autotools', platform: '21', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2',
+              options: '--with-openssl' }
+
+          - { build: 'cmake'    , platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
+              options: '-DCURL_USE_OPENSSL=ON' }
+
+          - { build: 'autotools', platform: '35', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2',
+              options: '--with-openssl' }
+
+          - { build: 'cmake'    , platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
+              options: '-DCURL_USE_OPENSSL=ON' }
+
           # FIXME: zstd must be disabled explicitly, otherwise cmake/pkg-config finds it in /usr/include
           #        and the build fails. I had found no option to disable this behavior. Other default
           #        dependencies not offered via vcpkg may also need this.
-          - { build: 'cmake'    , platform: '35', name: "boringssl !zstd", install: '            libpsl         boringssl'        , options: '-DCURL_USE_OPENSSL=ON -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ -DCMAKE_SHARED_LINKER_FLAGS=-lstdc++ -DCURL_ZSTD=OFF' }
+          - { build: 'cmake'    , platform: '35', name: "boringssl !zstd", install: '            libpsl         boringssl',
+              options: '-DCURL_USE_OPENSSL=ON -DCMAKE_EXE_LINKER_FLAGS=-lstdc++ -DCMAKE_SHARED_LINKER_FLAGS=-lstdc++ -DCURL_ZSTD=OFF' }
+
       fail-fast: false
     steps:
       - name: 'vcpkg cache setup'
