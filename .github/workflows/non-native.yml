@@ -284,7 +284,7 @@ jobs:
           cache-name: cache-libressl
         with:
           path: ~/libressl
-          key: ${{ runner.os }}-ios-${{ env.cache-name }}-${{ env.libressl-version }}
+          key: iOS-${{ env.cache-name }}-${{ env.libressl-version }}
 
       - name: 'build libressl'
         if: contains(matrix.build.install_steps, 'libressl') && steps.cache-libressl.outputs.cache-hit != 'true'
