@@ -24,6 +24,10 @@ When --next is used, it resets the parser state and you start again with a
 clean option state, except for the options that are global. Global options
 retain their values and meaning even after --next.
 
+The first argument that is exactly two dashes (`--`), marks the end of
+options; any argument after the end of options is interpreted as a URL
+argument even if it starts with a dash.
+
 The following options are global: `%GLOBALS`.
 
 # ALL OPTIONS
