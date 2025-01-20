@@ -254,8 +254,8 @@ jobs:
             install_steps: libressl
             generator: Xcode
             generate: >-
-              -DCMAKE_BUILD_TYPE=Release
-              -DCMAKE_CONFIGURATION_TYPES=Release
+              -DCMAKE_BUILD_TYPE=Debug
+              -DCMAKE_CONFIGURATION_TYPES=Debug
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
               -DCMAKE_MACOSX_BUNDLE=OFF
@@ -333,6 +333,9 @@ jobs:
               -DCMAKE_SYSTEM_NAME=iOS \
               -DCURL_USE_LIBPSL=OFF -DUSE_APPLE_IDN=ON \
               ${{ matrix.build.generate }} ${options}
+            echo '-----------------------'
+            find bld
+            echo '-----------------------'
           fi
 
       - name: 'configure log'
