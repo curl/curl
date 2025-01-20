@@ -326,7 +326,6 @@ jobs:
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCURL_USE_PKGCONFIG=OFF \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DCURL_USE_LIBPSL=OFF -DUSE_APPLE_IDN=ON \
               ${{ matrix.build.generate }} ${options}
