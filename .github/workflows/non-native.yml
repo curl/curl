@@ -331,7 +331,6 @@ jobs:
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
-              -DCURL_CA_EMBED=$PWD/CMakeLists.txt \
               ${{ matrix.build.generate }} ${options}
           fi
 
