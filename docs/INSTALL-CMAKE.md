@@ -302,6 +302,7 @@ Details via CMake
 ## Dependency options (via CMake)
 
 - `OPENSSL_ROOT_DIR`:                       Set this variable to the root installation of OpenSSL (and forks).
+- `OPENSSL_USE_STATIC_LIBS`:                Look for static OpenSSL libraries.
 - `ZLIB_INCLUDE_DIR`:                       The zlib include directory.
 - `ZLIB_LIBRARY`:                           Path to `zlib` library.
 
