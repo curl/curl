@@ -240,6 +240,10 @@ jobs:
         build:
           - name: 'libressl +examples'
             install_steps: libressl
+            configure: --with-openssl="$HOME/libressl"
+
+          - name: 'libressl +examples'
+            install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. It seems to be appended to sysroot by CMake.
             generate: >-
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
@@ -254,10 +258,6 @@ jobs:
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
-
-          - name: 'libressl +examples'
-            install_steps: libressl
-            configure: --with-openssl="$HOME/libressl"
 
     steps:
       - name: 'brew install'
