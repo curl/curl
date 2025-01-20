@@ -240,7 +240,7 @@ jobs:
         build:
           - name: 'libressl'
             install_steps: libressl
-            configure: --with-openssl="$HOME/libressl"
+            configure: --with-openssl="$HOME/libressl" --without-libpsl
 
           - name: 'libressl'
             install_steps: libressl
@@ -249,6 +249,7 @@ jobs:
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
+              -DCURL_USE_LIBPSL=OFF
 
           - name: 'libressl'
             install_steps: libressl
@@ -259,6 +260,7 @@ jobs:
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
+              -DCURL_USE_LIBPSL=OFF
 
     steps:
       - name: 'brew install'
@@ -320,7 +322,7 @@ jobs:
               --disable-dependency-tracking \
               CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
               --host=aarch64-apple-darwin \
-              --without-libpsl --with-apple-idn \
+              --with-apple-idn \
               ${{ matrix.build.configure }}
           else
             export OPENSSL_DIR=/
@@ -328,7 +330,7 @@ jobs:
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
-              -DCURL_USE_LIBPSL=OFF -DUSE_APPLE_IDN=ON \
+              -DUSE_APPLE_IDN=ON \
               ${{ matrix.build.generate }} ${options}
           fi
 
