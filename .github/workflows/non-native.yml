@@ -430,6 +430,12 @@ jobs:
         run: vcpkg x-set-installed ${{ matrix.install }} '--triplet=arm64-android'
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+
+      - name: 'autoreconf'
+        if: ${{ matrix.build == 'autotools' }}
+        run: autoreconf -fi
 
       - name: 'configure'
         run: |
@@ -446,7 +452,6 @@ jobs:
               -DCURL_WERROR=ON \
               ${{ matrix.options }}
           else
-            autoreconf -fi
             TOOLCHAIN="${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/linux-x86_64"
             mkdir bld && cd bld && ../configure --disable-dependency-tracking --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
               CC="$TOOLCHAIN/bin/aarch64-linux-android${{ matrix.platform }}-clang" \
@@ -519,6 +524,8 @@ jobs:
           mv "$HOME/opt/appveyor" /opt
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'configure'
         run: |
@@ -626,6 +633,8 @@ jobs:
           done
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
 
       - name: 'configure'
         run: |
