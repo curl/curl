@@ -37,7 +37,7 @@ permissions: {}
 
 jobs:
   netbsd:
-    name: 'NetBSD, CM, openssl, clang, ${{ matrix.arch }}'
+    name: 'NetBSD, CM clang openssl ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -77,7 +77,7 @@ jobs:
             echo '::endgroup::'
 
   openbsd:
-    name: 'OpenBSD, CM, libressl, clang, ${{ matrix.arch }}'
+    name: 'OpenBSD, CM clang libressl ${{ matrix.arch }}'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
@@ -117,7 +117,7 @@ jobs:
             echo '::endgroup::'
 
   freebsd:
-    name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, ${{ matrix.compiler }}, ${{ matrix.arch }}"
+    name: "FreeBSD, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.compiler }} openssl ${{ matrix.arch }}"
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -193,7 +193,7 @@ jobs:
             echo '::endgroup::'
 
   omnios:
-    name: 'OmniOS, AM, openssl, gcc, amd64'
+    name: 'OmniOS, AM gcc openssl amd64'
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -225,7 +225,7 @@ jobs:
             echo '::endgroup::'
 
   ios:
-    name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}}, ${{ matrix.build.name }}, arm64"
+    name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
@@ -370,7 +370,7 @@ jobs:
           fi
 
   android:
-    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, ${{ matrix.name }}, arm64"
+    name: "Android ${{ matrix.platform }}, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} ${{ matrix.name }} arm64"
     runs-on: 'ubuntu-latest'
     timeout-minutes: 25
     env:
@@ -499,7 +499,7 @@ jobs:
           fi
 
   amiga:
-    name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, AmiSSL, gcc, m68k"
+    name: "AmigaOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} gcc AmiSSL m68k"
     runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
@@ -597,7 +597,7 @@ jobs:
           fi
 
   msdos:
-    name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }}, openssl, djgpp, i586"
+    name: "MS-DOS, ${{ matrix.build == 'cmake' && 'CM' || 'AM' }} djgpp openssl i586"
     runs-on: 'ubuntu-latest'
     timeout-minutes: 5
     env:
