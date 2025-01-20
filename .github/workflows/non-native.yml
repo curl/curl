@@ -256,6 +256,7 @@ jobs:
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
+              -DCMAKE_MACOSX_BUNDLE=OFF
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
