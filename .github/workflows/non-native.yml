@@ -226,12 +226,14 @@ jobs:
 
   ios:
     name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
-    runs-on: 'macos-latest'
-    timeout-minutes: 10
+    runs-on: 'macos-13'
+    timeout-minutes: 25
     env:
       DEVELOPER_DIR: "/Applications/Xcode${{ matrix.build.xcode && format('_{0}', matrix.build.xcode) || '' }}.app/Contents/Developer"
       CC: ${{ matrix.build.compiler || 'clang' }}
       MAKEFLAGS: -j 4
+      VCPKG_BINARY_SOURCES: 'clear;x-gha,readwrite'
+      VCPKG_DISABLE_METRICS: '1'
       # renovate: datasource=github-tags depName=libressl-portable/portable versioning=semver registryUrl=https://github.com
       libressl-version: 4.0.0
     strategy:
@@ -242,29 +244,22 @@ jobs:
             install_steps: libressl
             configure: --with-openssl="$HOME/libressl" --without-libpsl
 
-          - name: 'libressl'
-            install_steps: libressl
+          - name: 'openssl'
+            install: 'brotli zstd nghttp2 openssl libssh2'
             # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
-              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
-              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
               -DCURL_USE_LIBPSL=OFF
 
-          - name: 'libressl'
-            install_steps: libressl
+          - name: 'openssl'
+            install: 'brotli zstd nghttp2 openssl libssh2'
             generator: Xcode
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
-              -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
-              -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
-              -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
               -DCURL_USE_LIBPSL=OFF
 
     steps:
       - name: 'brew install'
-        if: ${{ matrix.build.configure }}
         run: |
           echo automake libtool | xargs -Ix -n1 echo brew '"x"' > /tmp/Brewfile
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew bundle install --no-lock --file /tmp/Brewfile && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
@@ -311,6 +306,26 @@ jobs:
         with:
           persist-credentials: false
 
+      - name: 'vcpkg cache setup'
+        if: ${{ matrix.build.install }}
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea # v7
+        with:
+          script: |
+            core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+            core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
+
+      - name: 'vcpkg versions'
+        if: ${{ matrix.build.install }}
+        timeout-minutes: 1
+        run: |
+          git -C "$VCPKG_INSTALLATION_ROOT" show --no-patch --format='%H %ai'
+          vcpkg version
+
+      - name: 'vcpkg build'
+        if: ${{ matrix.build.install }}
+        timeout-minutes: 20
+        run: vcpkg x-set-installed ${{ matrix.build.install }} '--triplet=arm64-ios'
+
       - name: 'autoreconf'
         if: ${{ matrix.build.configure }}
         run: autoreconf -fi
@@ -328,7 +343,14 @@ jobs:
             export OPENSSL_DIR=/
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
-            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+            cmake -B bld \
+              -DCMAKE_TOOLCHAIN_FILE="$VCPKG_INSTALLATION_ROOT/scripts/buildsystems/vcpkg.cmake" \
+              -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
+              -DVCPKG_TARGET_TRIPLET=arm64-ios \
+              -DCMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH=OFF \
+              -DCMAKE_UNITY_BUILD=ON \
+              -DCURL_TEST_BUNDLES=ON \
+              -DCURL_WERROR=ON \
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
               ${{ matrix.build.generate }} ${options}
