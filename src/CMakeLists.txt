@@ -94,16 +94,16 @@ add_executable(
   ALIAS ${EXE_NAME}
 )
 
-set(_curltool_files "${CURL_CFILES}" "${CURL_HFILES}")
+set(_curl_files "${CURL_CFILES}" "${CURL_HFILES}")
 if(CMAKE_GENERATOR STREQUAL "Xcode")
   # Workaround for 'The custom command generating tool_hugehelp.c is attached to multiple targets [...] curl curltool'
-  list(REMOVE_ITEM _curltool_files "tool_hugehelp.c" "tool_hugehelp.h")
+  list(REMOVE_ITEM _curl_files "tool_hugehelp.c" "tool_hugehelp.h")
 endif()
 add_library(
   curltool  # special libcurltool library just for unittests
   STATIC
   EXCLUDE_FROM_ALL
-  ${_curltool_files} ${CURLTOOL_LIBCURL_CFILES}
+  ${_curl_files} ${CURLTOOL_LIBCURL_CFILES}
 )
 target_compile_definitions(curltool PUBLIC "UNITTESTS" "CURL_STATICLIB")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
