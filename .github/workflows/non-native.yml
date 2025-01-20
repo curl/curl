@@ -238,11 +238,11 @@ jobs:
       fail-fast: false
       matrix:
         build:
-          - name: 'libressl +examples'
+          - name: 'libressl'
             install_steps: libressl
             configure: --with-openssl="$HOME/libressl"
 
-          - name: 'libressl +examples'
+          - name: 'libressl'
             install_steps: libressl
             # FIXME: Could not make OPENSSL_ROOT_DIR work. It seems to be appended to sysroot by CMake.
             generate: >-
@@ -250,7 +250,7 @@ jobs:
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
 
-          - name: 'libressl +examples'
+          - name: 'libressl'
             install_steps: libressl
             generator: Xcode
             generate: >-
@@ -361,7 +361,6 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld examples V=1
