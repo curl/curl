@@ -250,11 +250,12 @@ jobs:
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
 
-          - name: 'libressl'
+          - name: 'libressl +examples'
             install_steps: libressl
             generator: Xcode
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
+              -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
               -DOPENSSL_CRYPTO_LIBRARY="$HOME/libressl/lib/libcrypto.a"
@@ -352,7 +353,6 @@ jobs:
         run: find . -type f \( -name curl -o -name '*.dylib' -o -name '*.a' \) -exec file '{}' \;
 
       - name: 'build tests'
-        if: ${{ matrix.build.generator != 'Xcode' }}
         run: |
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld V=1 -C tests
@@ -361,7 +361,7 @@ jobs:
           fi
 
       - name: 'build examples'
-        if: ${{ matrix.build.generator != 'Xcode' && contains(matrix.build.name, '+examples') }}
+        if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
           if [ -n '${{ matrix.build.configure }}' ]; then
             make -C bld examples V=1
