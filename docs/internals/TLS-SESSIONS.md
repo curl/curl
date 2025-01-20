@@ -59,7 +59,7 @@ One important thing: peer keys do not contain confidential information. If you
 configure a client certificate or SRP authentication with username/password,
 these are not part of the peer key.
 
-However, peer keys carry the hostnames you use curl for. The *do*
+However, peer keys carry the hostnames you use curl for. They *do*
 leak the privacy of your communication. We recommend to *not* persist
 peer keys for this reason.
 
