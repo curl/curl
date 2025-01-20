@@ -225,7 +225,7 @@ jobs:
             echo '::endgroup::'
 
   ios:
-    name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} ${{ matrix.build.name }} arm64"
+    name: "iOS, ${{ (matrix.build.generator && format('CM-{0}', matrix.build.generator)) || (matrix.build.generate && 'CM' || 'AM' )}} clang ${{ matrix.build.name }} arm64"
     runs-on: 'macos-latest'
     timeout-minutes: 10
     env:
