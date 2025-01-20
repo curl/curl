@@ -244,7 +244,7 @@ jobs:
 
           - name: 'libressl'
             install_steps: libressl
-            # FIXME: Could not make OPENSSL_ROOT_DIR work. It seems to be appended to sysroot by CMake.
+            # FIXME: Could not make OPENSSL_ROOT_DIR work. CMake seems to prepend sysroot to it.
             generate: >-
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
@@ -393,7 +393,7 @@ jobs:
           - { build: 'cmake'    , platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
               options: '-DCURL_USE_OPENSSL=ON' }
 
-          # FIXME: zstd must be disabled explicitly, otherwise cmake/pkg-config finds it in /usr/include
+          # FIXME: Must disable zstd explicitly, otherwise cmake/pkg-config finds it in /usr/include
           #        and the build fails. I had found no option to disable this behavior. Other default
           #        dependencies not offered via vcpkg may also need this.
           - { build: 'cmake'    , platform: '35', name: "boringssl !zstd", install: '            libpsl         boringssl',
