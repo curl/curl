@@ -96,7 +96,8 @@ add_executable(
 
 set(_curltool_files "${CURL_CFILES}" "${CURL_HFILES}")
 if(CMAKE_GENERATOR STREQUAL "Xcode")
-  list(REMOVE_ITEM _curltool_files "tool_hugehelp.c" "tool_hugehelp.h")  # Workaround for Xcode generator
+  # Workaround for 'The custom command generating tool_hugehelp.c is attached to multiple targets [...] curl curltool'
+  list(REMOVE_ITEM _curltool_files "tool_hugehelp.c" "tool_hugehelp.h")
 endif()
 add_library(
   curltool  # special libcurltool library just for unittests
