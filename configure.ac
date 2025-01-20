@@ -1426,24 +1426,14 @@ if test X"$OPT_BROTLI" != Xno; then
   case "$OPT_BROTLI" in
     yes)
       dnl --with-brotli (without path) used
-      CURL_CHECK_PKGCONFIG(libbrotlicommon)
-
-      if test "$PKGCONFIG" != "no"; then
-        LIB_BROTLICOMMON=`$PKGCONFIG --libs-only-l libbrotlicommon`
-        LD_BROTLICOMMON=`$PKGCONFIG --libs-only-L libbrotlicommon`
-        CPP_BROTLICOMMON=`$PKGCONFIG --cflags-only-I libbrotlicommon`
-        version=`$PKGCONFIG --modversion libbrotlicommon`
-        DIR_BROTLICOMMON=`echo $LD_BROTLICOMMON | $SED -e 's/^-L//'`
-      fi
-
       CURL_CHECK_PKGCONFIG(libbrotlidec)
 
       if test "$PKGCONFIG" != "no"; then
-        LIB_BROTLIDEC=`$PKGCONFIG --libs-only-l libbrotlidec`
-        LD_BROTLIDEC=`$PKGCONFIG --libs-only-L libbrotlidec`
-        CPP_BROTLIDEC=`$PKGCONFIG --cflags-only-I libbrotlidec`
+        LIB_BROTLI=`$PKGCONFIG --libs-only-l libbrotlidec`
+        LD_BROTLI=`$PKGCONFIG --libs-only-L libbrotlidec`
+        CPP_BROTLI=`$PKGCONFIG --cflags-only-I libbrotlidec`
         version=`$PKGCONFIG --modversion libbrotlidec`
-        DIR_BROTLIDEC=`echo $LD_BROTLIDEC | $SED -e 's/^-L//'`
+        DIR_BROTLI=`echo $LD_BROTLI | $SED -e 's/^-L//'`
       fi
 
       ;;
@@ -1458,21 +1448,16 @@ if test X"$OPT_BROTLI" != Xno; then
 
   dnl if given with a prefix, we set -L and -I based on that
   if test -n "$PREFIX_BROTLI"; then
-    LIB_BROTLIDEC="-lbrotlidec"
-    LD_BROTLIDEC=-L${PREFIX_BROTLI}/lib$libsuff
-    CPP_BROTLIDEC=-I${PREFIX_BROTLI}/include
-    DIR_BROTLIDEC=${PREFIX_BROTLI}/lib$libsuff
-
-    LIB_BROTLICOMMON="-lbrotlicommon"
-    LD_BROTLICOMMON=-L${PREFIX_BROTLI}/lib$libsuff
-    CPP_BROTLICOMMON=-I${PREFIX_BROTLI}/include
-    DIR_BROTLICOMMON=${PREFIX_BROTLI}/lib$libsuff
+    LIB_BROTLI="-lbrotlidec"
+    LD_BROTLI=-L${PREFIX_BROTLI}/lib$libsuff
+    CPP_BROTLI=-I${PREFIX_BROTLI}/include
+    DIR_BROTLI=${PREFIX_BROTLI}/lib$libsuff
   fi
 
-  LDFLAGS="$LDFLAGS $LD_BROTLIDEC $LD_BROTLICOMMON"
-  LDFLAGSPC="$LDFLAGSPC $LD_BROTLIDEC $LD_BROTLICOMMON"
-  CPPFLAGS="$CPPFLAGS $CPP_BROTLIDEC $CPP_BROTLICOMMON"
-  LIBS="$LIB_BROTLIDEC $LIB_BROTLICOMMON $LIBS"
+  LDFLAGS="$LDFLAGS $LD_BROTLI"
+  LDFLAGSPC="$LDFLAGSPC $LD_BROTLI"
+  CPPFLAGS="$CPPFLAGS $CPP_BROTLI"
+  LIBS="$LIB_BROTLI $LIBS"
 
   AC_CHECK_LIB(brotlidec, BrotliDecoderDecompress)
 
