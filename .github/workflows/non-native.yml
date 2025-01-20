@@ -380,13 +380,13 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', platform: '21', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2',
+          - { build: 'autotools', platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
               options: '--with-openssl' }
 
           - { build: 'cmake'    , platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
               options: '-DCURL_USE_OPENSSL=ON' }
 
-          - { build: 'autotools', platform: '35', name: "libressl"       , install: '       zstd libpsl nghttp2 openssl   libssh2',
+          - { build: 'autotools', platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
               options: '--with-openssl' }
 
           - { build: 'cmake'    , platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
