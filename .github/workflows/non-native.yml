@@ -255,6 +255,7 @@ jobs:
             generator: Xcode
             generate: >-
               -DCMAKE_BUILD_TYPE=Release
+              -DCMAKE_CONFIGURATION_TYPES=Release
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
               -DCMAKE_MACOSX_BUNDLE=OFF
