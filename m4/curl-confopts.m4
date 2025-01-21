@@ -29,7 +29,7 @@ dnl CURL_CHECK_OPTION_THREADED_RESOLVER
 dnl -------------------------------------------------
 dnl Verify if configure has been invoked with option
 dnl --enable-threaded-resolver or --disable-threaded-resolver, and
-dnl set shell variable want_thres as appropriate.
+dnl set shell variable want_threaded_resolver as appropriate.
 
 AC_DEFUN([CURL_CHECK_OPTION_THREADED_RESOLVER], [
   AC_MSG_CHECKING([whether to enable the threaded resolver])
@@ -41,25 +41,29 @@ AS_HELP_STRING([--disable-threaded-resolver],[Disable threaded resolver]),
   case "$OPT_THRES" in
     no)
       dnl --disable-threaded-resolver option used
-      want_thres="no"
+      want_threaded_resolver="no"
       ;;
     yes)
       dnl --enable-threaded-resolver option used
-      want_thres="yes"
+      want_threaded_resolver="yes"
       ;;
     *)
       dnl configure option not specified
       case $host_os in
         msdos* | amiga*)
-          want_thres="no"
+          want_threaded_resolver="no"
           ;;
         *)
-          want_thres="yes"
+          if test "$want_ares" = "yes"; then
+            want_threaded_resolver="no"
+          else
+            want_threaded_resolver="yes"
+          fi
           ;;
       esac
       ;;
   esac
-  AC_MSG_RESULT([$want_thres])
+  AC_MSG_RESULT([$want_threaded_resolver])
 ])
 
 dnl CURL_CHECK_OPTION_ARES
@@ -280,53 +284,6 @@ AS_HELP_STRING([--disable-symbol-hiding],[Disable hiding of library internal sym
   esac
 ])
 
-
-dnl CURL_CHECK_OPTION_THREADS
-dnl -------------------------------------------------
-dnl Verify if configure has been invoked with option
-dnl --enable-threads or --disable-threads, and
-dnl set shell variable want_threads as appropriate.
-
-dnl AC_DEFUN([CURL_CHECK_OPTION_THREADS], [
-dnl   AC_BEFORE([$0],[CURL_CHECK_LIB_THREADS])dnl
-dnl   AC_MSG_CHECKING([whether to enable threads for DNS lookups])
-dnl   OPT_THREADS="default"
-dnl   AC_ARG_ENABLE(threads,
-dnl AS_HELP_STRING([--enable-threads@<:@=PATH@:>@],[Enable threads for DNS lookups])
-dnl AS_HELP_STRING([--disable-threads],[Disable threads for DNS lookups]),
-dnl   OPT_THREADS=$enableval)
-dnl   case "$OPT_THREADS" in
-dnl     no)
-dnl       dnl --disable-threads option used
-dnl       want_threads="no"
-dnl       AC_MSG_RESULT([no])
-dnl       ;;
-dnl     default)
-dnl       dnl configure option not specified
-dnl       want_threads="no"
-dnl       AC_MSG_RESULT([(assumed) no])
-dnl       ;;
-dnl     *)
-dnl       dnl --enable-threads option used
-dnl       want_threads="yes"
-dnl       want_threads_path="$enableval"
-dnl       AC_MSG_RESULT([yes])
-dnl       ;;
-dnl   esac
-dnl   #
-dnl   if test "$want_ares" = "assume_yes"; then
-dnl     if test "$want_threads" = "yes"; then
-dnl       AC_MSG_CHECKING([whether to ignore c-ares enabling assumed setting])
-dnl       AC_MSG_RESULT([yes])
-dnl       want_ares="no"
-dnl     else
-dnl       want_ares="yes"
-dnl     fi
-dnl   fi
-dnl   if test "$want_threads" = "yes" && test "$want_ares" = "yes"; then
-dnl     AC_MSG_ERROR([options --enable-ares and --enable-threads are mutually exclusive, at most one may be enabled.])
-dnl   fi
-dnl ])
 
 dnl CURL_CHECK_OPTION_RT
 dnl -------------------------------------------------
@@ -612,7 +569,7 @@ AS_HELP_STRING([--disable-httpsrr],[Disable HTTPSRR support]),
     *)
       dnl --enable-httpsrr option used
       want_httpsrr="yes"
-      curl_httpsrr_msg="enabled (--disable-httpsrr)"
+      curl_httpsrr_msg="enabled"
       AC_MSG_RESULT([yes])
       ;;
   esac

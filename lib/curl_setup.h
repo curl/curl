@@ -282,14 +282,6 @@
 #  define CURL_DISABLE_HTTP_AUTH 1
 #endif
 
-/*
- * ECH requires HTTPSRR.
- */
-
-#if defined(USE_ECH) && !defined(USE_HTTPSRR)
-#  define USE_HTTPSRR
-#endif
-
 /* ================================================================ */
 /* No system header file shall be included in this file before this */
 /* point.                                                           */
@@ -710,15 +702,15 @@
 #  define CURLRES_IPV4
 #endif
 
-#ifdef USE_ARES
+#if defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
+#  define CURLRES_ASYNCH
+#  define CURLRES_THREADED
+#elif defined(USE_ARES)
 #  define CURLRES_ASYNCH
 #  define CURLRES_ARES
 /* now undef the stock libc functions just to avoid them being used */
 #  undef HAVE_GETADDRINFO
 #  undef HAVE_FREEADDRINFO
-#elif defined(USE_THREADS_POSIX) || defined(USE_THREADS_WIN32)
-#  define CURLRES_ASYNCH
-#  define CURLRES_THREADED
 #else
 #  define CURLRES_SYNCH
 #endif

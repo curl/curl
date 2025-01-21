@@ -698,6 +698,8 @@ sub checksystemfeatures {
             $feature{"Unicode"} = $feat =~ /Unicode/i;
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
+            $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
+            $feature{"c-ares-rr"} = $feat =~ /c-ares-rr/;
         }
         #
         # Test harness currently uses a non-stunnel server in order to
@@ -822,7 +824,6 @@ sub checksystemfeatures {
     $feature{"large-time"} = 1;
     $feature{"large-size"} = 1;
     $feature{"sha512-256"} = 1;
-    $feature{"HTTPSRR"} = 1;
     $feature{"local-http"} = servers::localhttp();
     $feature{"codeset-utf8"} = lc(langinfo(CODESET())) eq "utf-8";
 

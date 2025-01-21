@@ -434,7 +434,8 @@ Features testable here are:
 - `AppleIDN`
 - `bearssl`
 - `brotli`
-- `c-ares`
+- `c-ares` - c-ares is used for (all) name resolves
+- `c-ares-rr` - c-ares is used for additional records only
 - `CharConv`
 - `codeset-utf8`. If the running codeset is UTF-8 capable.
 - `cookies`

@@ -346,6 +346,7 @@ httpget
 HttpGet
 HTTPS
 https
+HTTPSRR
 hyper's
 Högskolan
 IANA
@@ -779,10 +780,10 @@ src
 SRP
 SRWLOCK
 SSL
-SSLS
 ssl
 SSLeay
 SSLKEYLOGFILE
+SSLS
 sslv
 SSLv
 SSLVERSION

@@ -30,6 +30,12 @@
 #include "curl_addrinfo.h"
 #include "httpsrr.h"
 #include "connect.h"
+#include "sendf.h"
+
+/* The last 3 #include files should be in this order */
+#include "curl_printf.h"
+#include "curl_memory.h"
+#include "memdebug.h"
 
 CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
                                   unsigned char *alpns)
@@ -85,4 +91,77 @@ err:
   return CURLE_BAD_CONTENT_ENCODING;
 }
 
+#ifdef USE_ARES
+
+static void httpsrr_opt(struct Curl_easy *data,
+                        const ares_dns_rr_t *rr,
+                        ares_dns_rr_key_t key, size_t idx)
+{
+  size_t len = 0;
+  const unsigned char *val = NULL;
+  unsigned short code;
+  struct thread_data *res = data->state.async.tdata;
+  struct Curl_https_rrinfo *hi = &res->hinfo;
+  code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
+
+  switch(code) {
+  case HTTPS_RR_CODE_ALPN: /* str_list */
+    Curl_httpsrr_decode_alpn(val, len, hi->alpns);
+    infof(data, "HTTPS RR ALPN: %u %u %u %u",
+          hi->alpns[0], hi->alpns[1], hi->alpns[2], hi->alpns[3]);
+    break;
+  case HTTPS_RR_CODE_NO_DEF_ALPN:
+    infof(data, "HTTPS RR no-def-alpn");
+    break;
+  case HTTPS_RR_CODE_IPV4: /* addr4 list */
+    infof(data, "HTTPS RR IPv4");
+    break;
+  case HTTPS_RR_CODE_ECH:
+    infof(data, "HTTPS RR ECH");
+    break;
+  case HTTPS_RR_CODE_IPV6: /* addr6 list */
+    infof(data, "HTTPS RR IPv6");
+    break;
+  case HTTPS_RR_CODE_PORT:
+    infof(data, "HTTPS RR port");
+    break;
+  default:
+    infof(data, "HTTPS RR unknown code");
+    break;
+  }
+}
+
+void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
+                         size_t timeouts,
+                         const ares_dns_record_t *dnsrec)
+{
+  struct Curl_easy *data = arg;
+  size_t i;
+#ifdef CURLRES_ARES
+  struct thread_data *res = data->state.async.tdata;
+
+  res->num_pending--;
 #endif
+  (void)timeouts;
+  if((ARES_SUCCESS != status) || !dnsrec)
+    return;
+
+  for(i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++) {
+    size_t opt;
+    const ares_dns_rr_t *rr =
+      ares_dns_record_rr_get_const(dnsrec, ARES_SECTION_ANSWER, i);
+    if(ares_dns_rr_get_type(rr) != ARES_REC_TYPE_HTTPS)
+      continue;
+    /* When SvcPriority is 0, the SVCB record is in AliasMode. Otherwise, it
+       is in ServiceMode */
+    infof(data, "HTTPS RR priority: %u",
+          ares_dns_rr_get_u16(rr, ARES_RR_HTTPS_PRIORITY));
+    for(opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
+        opt++)
+      httpsrr_opt(data, rr, ARES_RR_HTTPS_PARAMS, opt);
+  }
+}
+
+#endif /* USE_ARES */
+
+#endif /* USE_HTTPSRR */
