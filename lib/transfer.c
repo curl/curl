@@ -577,7 +577,38 @@ CURLcode Curl_pretransfer(struct Curl_easy *data)
   data->state.followlocation = 0; /* reset the location-follow counter */
   data->state.this_is_a_follow = FALSE; /* reset this */
   data->state.errorbuf = FALSE; /* no error has occurred */
-  data->state.httpwant = data->set.httpwant;
+  data->state.http09_allowed = data->set.http09_allowed;
+  data->state.h2_prior_knowledge = FALSE;
+  data->state.h2_upgrade = FALSE;
+  switch(data->set.httpwant) {
+  case CURL_HTTP_VERSION_1_0:
+    data->state.httpv_mask = CURL_HTTPV_10;
+    break;
+  case CURL_HTTP_VERSION_1_1:
+    data->state.httpv_mask = CURL_HTTPV_11;
+    break;
+  case CURL_HTTP_VERSION_2_0:
+    data->state.httpv_mask = (CURL_HTTPV_2x|CURL_HTTPV_1x);
+    data->state.h2_upgrade = TRUE;
+    break;
+  case CURL_HTTP_VERSION_2TLS:
+    data->state.httpv_mask = (CURL_HTTPV_2x|CURL_HTTPV_1x);
+    break;
+  case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
+    data->state.h2_prior_knowledge = TRUE;
+    data->state.httpv_mask = CURL_HTTPV_2x;
+    break;
+  case CURL_HTTP_VERSION_3:
+    data->state.httpv_mask = (CURL_HTTPV_3x|CURL_HTTPV_2x|CURL_HTTPV_1x);
+    break;
+  case CURL_HTTP_VERSION_3ONLY:
+    data->state.httpv_mask = CURL_HTTPV_3x;
+    break;
+  case CURL_HTTP_VERSION_NONE:
+  default:
+    data->state.httpv_mask = CURL_HTTPV_DEFAULT;
+    break;
+  }
   data->state.httpversion = 0;
   data->state.authproblem = FALSE;
   data->state.authhost.want = data->set.httpauth;

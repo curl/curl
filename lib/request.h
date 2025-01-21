@@ -30,6 +30,35 @@
 
 #include "bufq.h"
 
+#define CURL_HTTPV_09   (1 << 0)
+#define CURL_HTTPV_10   (1 << 1)
+#define CURL_HTTPV_11   (1 << 2)
+#define CURL_HTTPV_20   (1 << 3)
+#define CURL_HTTPV_30   (1 << 4)
+
+#define CURL_HTTPV_0x   (CURL_HTTPV_09)
+#define CURL_HTTPV_1x   (CURL_HTTPV_10|CURL_HTTPV_11)
+#define CURL_HTTPV_2x   (CURL_HTTPV_20)
+#define CURL_HTTPV_3x   (CURL_HTTPV_30)
+
+#define CURL_HTTPV_ALL  (CURL_HTTPV_0x|CURL_HTTPV_1x| \
+                         CURL_HTTPV_2x|CURL_HTTPV_3x)
+
+#if defined(USE_HTTP3) && defined(USE_HTTP2)
+#define CURL_HTTPV_DEFAULT  (CURL_HTTPV_1x|CURL_HTTPV_2x|CURL_HTTPV_3x)
+#elif defined(USE_HTTP3)
+#define CURL_HTTPV_DEFAULT  (CURL_HTTPV_1x|CURL_HTTPV_3x)
+#elif defined(USE_HTTP2)
+#define CURL_HTTPV_DEFAULT  (CURL_HTTPV_1x|CURL_HTTPV_2x)
+#else
+#define CURL_HTTPV_DEFAULT  (CURL_HTTPV_1x)
+#endif
+
+/* check if version mask (x) only has versions (y) set */
+#define CURL_HTTPV_ONLY(x,y) (((x) & (y)) && !((x) & ~(y)))
+/* check if version mask contains multiplex versions */
+#define CURL_HTTPV_MAY_MULTIPLEX(x)   ((x) & (CURL_HTTPV_2x|CURL_HTTPV_3x))
+
 /* forward declarations */
 struct UserDefined;
 #ifndef CURL_DISABLE_DOH

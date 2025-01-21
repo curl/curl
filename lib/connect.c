@@ -1437,6 +1437,7 @@ static CURLcode cf_setup_create(struct Curl_cfilter **pcf,
   if(result)
     goto out;
   ctx = NULL;
+  CURL_TRC_CF(data, cf, "created, transport=%d", transport);
 
 out:
   *pcf = result ? NULL : cf;

@@ -1290,7 +1290,7 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   /* WebSockets is 1.1 only (for now) */
-  data->state.httpwant = CURL_HTTP_VERSION_1_1;
+  data->state.httpv_mask = CURL_HTTPV_11;
   return Curl_http_setup_conn(data, conn);
 }
 

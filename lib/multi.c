@@ -2203,7 +2203,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     if(!ret) {
       infof(data, "Downgrades to HTTP/1.1");
       streamclose(data->conn, "Disconnect HTTP/2 for HTTP/1");
-      data->state.httpwant = CURL_HTTP_VERSION_1_1;
+      data->state.httpv_mask = CURL_HTTPV_11;
       /* clear the error message bit too as we ignore the one we got */
       data->state.errorbuf = FALSE;
       if(!newurl)

@@ -191,8 +191,12 @@ CURLcode Curl_http_setup_conn(struct Curl_easy *data,
      during this request */
   connkeep(conn, "HTTP default");
 
-  if(data->state.httpwant == CURL_HTTP_VERSION_3ONLY) {
+  DEBUGF(infof(data, "Curl_http_setup_conn(), httpv=0x%x, h3only=%d",
+         data->state.httpv_mask,
+         CURL_HTTPV_ONLY(data->state.httpv_mask, CURL_HTTPV_3x)));
+  if(CURL_HTTPV_ONLY(data->state.httpv_mask, CURL_HTTPV_3x)) {
     CURLcode result = Curl_conn_may_http3(data, conn);
+    DEBUGF(infof(data, "Curl_http_setup_conn(), may h3 -> %d", result));
     if(result)
       return result;
   }
@@ -536,7 +540,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
        conn->httpversion > 11) {
       infof(data, "Forcing HTTP/1.1 for NTLM");
       connclose(conn, "Force HTTP/1.1 connection");
-      data->state.httpwant = CURL_HTTP_VERSION_1_1;
+      data->state.httpv_mask = CURL_HTTPV_11;
     }
   }
 #ifndef CURL_DISABLE_PROXY
@@ -1231,11 +1235,11 @@ static bool use_http_1_1plus(const struct Curl_easy *data,
 {
   if((data->state.httpversion == 10) || (conn->httpversion == 10))
     return FALSE;
-  if((data->state.httpwant == CURL_HTTP_VERSION_1_0) &&
-     (conn->httpversion <= 10))
+  if((data->state.httpv_mask & CURL_HTTPV_10) &&
+     conn->httpversion && (conn->httpversion <= 10))
     return FALSE;
-  return (data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
-         (data->state.httpwant >= CURL_HTTP_VERSION_1_1);
+  return (data->state.httpv_mask &
+          (CURL_HTTPV_11|CURL_HTTPV_2x|CURL_HTTPV_3x));
 }
 
 static const char *get_http_string(const struct Curl_easy *data,
@@ -2526,11 +2530,16 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
   }
 
+  DEBUGF(infof(data, "httpv=0x%x, h2_upgrade=%d, conn=%d, is_ssl=%d",
+         data->state.httpv_mask, data->state.h2_upgrade,
+         conn->httpversion, Curl_conn_is_ssl(conn, FIRSTSOCKET)));
   if(!Curl_conn_is_ssl(conn, FIRSTSOCKET) &&
-     conn->httpversion < 20 &&
-     (data->state.httpwant == CURL_HTTP_VERSION_2)) {
+     (conn->httpversion < 20) &&
+     (data->state.httpv_mask & CURL_HTTPV_2x) &&
+     data->state.h2_upgrade) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
        over SSL */
+    DEBUGF(infof(data, "add HTTP/2 Upgrade header"));
     result = Curl_http2_request_upgrade(&req, data);
     if(result) {
       Curl_dyn_free(&req);
@@ -3730,7 +3739,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
             failf(data, "Invalid status line");
             return CURLE_WEIRD_SERVER_REPLY;
           }
-          if(!data->set.http09_allowed) {
+          if(!data->state.http09_allowed) {
             failf(data, "Received HTTP/0.9 when not allowed");
             return CURLE_UNSUPPORTED_PROTOCOL;
           }
@@ -3766,7 +3775,7 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
           failf(data, "Invalid status line");
           return CURLE_WEIRD_SERVER_REPLY;
         }
-        if(!data->set.http09_allowed) {
+        if(!data->state.http09_allowed) {
           failf(data, "Received HTTP/0.9 when not allowed");
           return CURLE_UNSUPPORTED_PROTOCOL;
         }

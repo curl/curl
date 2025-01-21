@@ -1306,8 +1306,7 @@ struct UrlState {
     char *proxypasswd;
 #endif
   } aptr;
-  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
-                             to be used in the library's request(s) */
+  unsigned char httpv_mask; /* bitmask of wanted CURL_HTTPV_* versions */
   unsigned char httpversion; /* the lowest HTTP version*10 reported by any
                                 server involved in this request */
   unsigned char httpreq; /* Curl_HttpReq; what kind of HTTP request (if any)
@@ -1354,6 +1353,9 @@ struct UrlState {
   BIT(internal); /* internal: true if this easy handle was created for
                     internal use and the user does not have ownership of the
                     handle. */
+  BIT(http09_allowed); /* if HTTP/0.9 responses are allowed */
+  BIT(h2_prior_knowledge); /* if HTTP/2 shall be used without upgrade */
+  BIT(h2_upgrade); /* upgrade HTTP/1.1 connections to HTTP/2 */
 };
 
 /*

@@ -154,21 +154,23 @@ static const struct alpn_spec ALPN_SPEC_H2_H11 = {
 };
 #endif
 
-static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
+static const struct alpn_spec *alpn_get_spec(int httpv_mask, bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
-  if(httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
-    return &ALPN_SPEC_H2;
-  if(httpwant >= CURL_HTTP_VERSION_2)
+  if(httpv_mask & CURL_HTTPV_20) {
+    if(!(httpv_mask & CURL_HTTPV_1x))
+      return &ALPN_SPEC_H2;
     return &ALPN_SPEC_H2_H11;
-#else
-  (void)httpwant;
+  }
 #endif
-  /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
-     Avoid "http/1.0" because some servers do not support it. */
-  return &ALPN_SPEC_H11;
+  if(httpv_mask & CURL_HTTPV_1x) {
+    /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
+       Avoid "http/1.0" because some servers do not support it. */
+    return &ALPN_SPEC_H11;
+  }
+  return NULL;
 }
 #endif /* USE_SSL */
 
@@ -1568,7 +1570,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(data->conn);
 
-  ctx = cf_ctx_new(data, alpn_get_spec(data->state.httpwant,
+  ctx = cf_ctx_new(data, alpn_get_spec(data->state.httpv_mask,
                                        conn->bits.tls_enable_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1619,16 +1621,16 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   bool use_alpn = conn->bits.tls_enable_alpn;
-  int httpwant = CURL_HTTP_VERSION_1_1;
+  int httpv_mask = CURL_HTTPV_11;
 
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    httpwant = CURL_HTTP_VERSION_2;
+    httpv_mask = CURL_HTTPV_20;
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(httpwant, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(httpv_mask, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

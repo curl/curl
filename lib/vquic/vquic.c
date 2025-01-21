@@ -710,6 +710,7 @@ bool Curl_conn_is_http3(const struct Curl_easy *data,
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn)
 {
+  DEBUGF(infof(data, "Curl_conn_may_http3(), transport=%d", conn->transport));
   if(conn->transport == TRNSPRT_UNIX) {
     /* cannot do QUIC over a Unix domain socket */
     return CURLE_QUIC_CONNECT_ERROR;

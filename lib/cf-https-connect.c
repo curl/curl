@@ -632,68 +632,56 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   (void)remotehost;
 
   if(conn->bits.tls_enable_alpn) {
-    switch(data->state.httpwant) {
-    case CURL_HTTP_VERSION_NONE:
-      /* No preferences by transfer setup. Choose best defaults */
 #ifdef USE_HTTPSRR
-      if(conn->dns_entry && conn->dns_entry->hinfo &&
-         !conn->dns_entry->hinfo->no_def_alpn) {
-        size_t i, j;
-        for(i = 0; i < ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
-                   alpn_count < ARRAYSIZE(alpn_ids); ++i) {
-          bool present = FALSE;
-          enum alpnid alpn = conn->dns_entry->hinfo->alpns[i];
-          for(j = 0; j < alpn_count; ++j) {
-            if(alpn == alpn_ids[j]) {
-              present = TRUE;
-              break;
-            }
+    if(conn->dns_entry && conn->dns_entry->hinfo &&
+       !conn->dns_entry->hinfo->no_def_alpn) {
+      size_t i, j;
+      for(i = 0; i < ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
+                 alpn_count < ARRAYSIZE(alpn_ids); ++i) {
+        bool present = FALSE;
+        enum alpnid alpn = conn->dns_entry->hinfo->alpns[i];
+        for(j = 0; j < alpn_count; ++j) {
+          if(alpn == alpn_ids[j]) {
+            present = TRUE;
+            break;
           }
-          if(!present) {
-            switch(alpn) {
-            case ALPN_h3:
-              if(Curl_conn_may_http3(data, conn))
-                break;  /* not possible */
-              FALLTHROUGH();
-            case ALPN_h2:
-            case ALPN_h1:
+        }
+        if(!present) {
+          switch(alpn) {
+          case ALPN_h3:
+            if(Curl_conn_may_http3(data, conn))
+              break;  /* not possible */
+            if(data->state.httpv_mask & CURL_HTTPV_3x)
               alpn_ids[alpn_count++] = alpn;
-              break;
-            default: /* ignore */
-              break;
-            }
+            break;
+          case ALPN_h2:
+            if(data->state.httpv_mask & CURL_HTTPV_2x)
+              alpn_ids[alpn_count++] = alpn;
+            break;
+          case ALPN_h1:
+            if(data->state.httpv_mask & CURL_HTTPV_1x)
+              alpn_ids[alpn_count++] = alpn;
+            break;
+          default: /* ignore */
+            break;
           }
         }
       }
+    }
 #endif
-      if(!alpn_count)
+
+    if(!alpn_count) {
+      if(data->state.httpv_mask & CURL_HTTPV_3x) {
+        result = Curl_conn_may_http3(data, conn);
+        if(!result)
+          alpn_ids[alpn_count++] = ALPN_h3;
+        else if(CURL_HTTPV_ONLY(data->state.httpv_mask, CURL_HTTPV_3x))
+          goto out; /* only h3 allowed, not possible, error out */
+      }
+      if(data->state.httpv_mask & CURL_HTTPV_2x)
         alpn_ids[alpn_count++] = ALPN_h2;
-      break;
-    case CURL_HTTP_VERSION_3ONLY:
-      result = Curl_conn_may_http3(data, conn);
-      if(result) /* cannot do it */
-        goto out;
-      alpn_ids[alpn_count++] = ALPN_h3;
-      break;
-    case CURL_HTTP_VERSION_3:
-      /* We assume that silently not even trying H3 is ok here */
-      /* TODO: should we fail instead? */
-      if(Curl_conn_may_http3(data, conn) == CURLE_OK)
-        alpn_ids[alpn_count++] = ALPN_h3;
-      alpn_ids[alpn_count++] = ALPN_h2;
-      break;
-    case CURL_HTTP_VERSION_2_0:
-    case CURL_HTTP_VERSION_2TLS:
-    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
-      alpn_ids[alpn_count++] = ALPN_h2;
-      break;
-    case CURL_HTTP_VERSION_1_0:
-    case CURL_HTTP_VERSION_1_1:
-      alpn_ids[alpn_count++] = ALPN_h1;
-      break;
-    default:
-      alpn_ids[alpn_count++] = ALPN_h2;
-      break;
+      else if(data->state.httpv_mask & CURL_HTTPV_1x)
+        alpn_ids[alpn_count++] = ALPN_h1;
     }
   }
 
