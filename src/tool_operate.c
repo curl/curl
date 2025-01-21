@@ -94,7 +94,9 @@
 #include "tool_xattr.h"
 #include "tool_vms.h"
 #include "tool_help.h"
+#ifndef UNITTESTS
 #include "tool_hugehelp.h"
+#endif
 #include "tool_progress.h"
 #include "tool_ipfs.h"
 #include "dynbuf.h"
@@ -104,6 +106,10 @@ CURL_EXTERN CURLcode curl_easy_perform_ev(CURL *easy);
 #endif
 
 #include "memdebug.h" /* keep this as LAST include */
+
+#ifdef UNITTESTS
+#undef CURL_CA_EMBED
+#endif
 
 #ifdef CURL_CA_EMBED
 #ifndef CURL_DECLARED_CURL_CA_EMBED
@@ -3184,8 +3190,11 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
       if(res == PARAM_HELP_REQUESTED)
         tool_help(global->help_category);
       /* Check if we were asked for the manual */
-      else if(res == PARAM_MANUAL_REQUESTED)
+      else if(res == PARAM_MANUAL_REQUESTED) {
+#ifndef UNITTESTS
         hugehelp();
+#endif
+      }
       /* Check if we were asked for the version information */
       else if(res == PARAM_VERSION_INFO_REQUESTED)
         tool_version_info();

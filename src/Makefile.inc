@@ -82,7 +82,6 @@ CURL_CFILES = \
   tool_getpass.c \
   tool_help.c \
   tool_helpers.c \
-  tool_hugehelp.c \
   tool_ipfs.c \
   tool_libinfo.c \
   tool_listhelp.c \
@@ -129,7 +128,6 @@ CURL_HFILES = \
   tool_getpass.h \
   tool_help.h \
   tool_helpers.h \
-  tool_hugehelp.h \
   tool_ipfs.h \
   tool_libinfo.h \
   tool_main.h \

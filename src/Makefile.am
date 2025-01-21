@@ -60,6 +60,8 @@ endif
 
 include Makefile.inc
 
+curl_cfiles_gen =
+curl_hfiles_gen =
 CLEANFILES =
 
 if USE_UNITY
@@ -74,15 +76,15 @@ curl_CURLX = $(CURLTOOL_LIBCURL_CFILES)
 else
 curl_CURLX = $(CURLX_CFILES)
 endif
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
-	@PERL@  $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES = $(curl_EXCLUDE)
 CLEANFILES += curltool_unity.c
 else
 # CURL_FILES comes from Makefile.inc
-curl_SOURCES = $(CURL_FILES)
+curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen) $(curl_hfiles_gen)
 endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
@@ -157,10 +159,12 @@ $(HUGE):
 	echo '#include "tool_hugehelp.h"' >> $(HUGE)
 endif
 
+curl_cfiles_gen += $(HUGE)
+curl_hfiles_gen += tool_hugehelp.h
 CLEANFILES += $(HUGE)
 
 CA_EMBED_CSOURCE = tool_ca_embed.c
-CURL_CFILES += $(CA_EMBED_CSOURCE)
+curl_cfiles_gen += $(CA_EMBED_CSOURCE)
 CLEANFILES += $(CA_EMBED_CSOURCE)
 if CURL_CA_EMBED_SET
 AM_CPPFLAGS += -DCURL_CA_EMBED
@@ -198,7 +202,7 @@ endif
 TIDY := clang-tidy
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
-	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CURL_CFILES) $(curl_cfiles_gen) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
