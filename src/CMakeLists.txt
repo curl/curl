@@ -24,6 +24,10 @@
 set(EXE_NAME curl)
 add_definitions("-DBUILDING_CURL")
 
+# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES', 'CURLTOOL_LIBCURL_CFILES' variables
+curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
+
 if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
   add_definitions("-DUSE_MANUAL")
   add_custom_command(
@@ -40,6 +44,8 @@ if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
       "${CURL_ASCIIPAGE}"
     VERBATIM)
+    list(APPEND CURL_CFILES "tool_hugehelp.c")
+    list(APPEND CURL_HFILES "tool_hugehelp.h")
 else()
   add_custom_command(
     OUTPUT "tool_hugehelp.c"
@@ -48,10 +54,6 @@ else()
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
     VERBATIM)
 endif()
-
-# Get 'CURL_CFILES', 'CURLX_CFILES', 'CURL_HFILES', 'CURLTOOL_LIBCURL_CFILES' variables
-curl_transform_makefile_inc("Makefile.inc" "${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
-include("${CMAKE_CURRENT_BINARY_DIR}/Makefile.inc.cmake")
 
 if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
@@ -94,16 +96,11 @@ add_executable(
   ALIAS ${EXE_NAME}
 )
 
-set(_curl_files "${CURL_CFILES}" "${CURL_HFILES}")
-# Avoid 'The custom command generating tool_hugehelp.c is attached to multiple targets [...] curl curltool'
-# by excluding the generated sources from curltool library. The UNITTESTS macro disables them in source.
-list(REMOVE_ITEM _curl_files "tool_hugehelp.c" "tool_hugehelp.h" "tool_ca_embed.c")
-
 add_library(
   curltool  # special libcurltool library just for unittests
   STATIC
   EXCLUDE_FROM_ALL
-  ${_curl_files} ${CURLTOOL_LIBCURL_CFILES}
+  ${CURL_CFILES} ${CURLTOOL_LIBCURL_CFILES} ${CURL_HFILES}
 )
 target_compile_definitions(curltool PUBLIC "UNITTESTS" "CURL_STATICLIB")
 target_link_libraries(curltool PRIVATE ${CURL_LIBS})
