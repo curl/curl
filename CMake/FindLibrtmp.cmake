@@ -75,7 +75,7 @@ else()
       unset(_version_str2)
     endif()
     if(NOT EXISTS "${LIBRTMP_INCLUDE_DIR}")
-      message(WARNING "LIBRTMP_INCLUDE_DIR directory not found: ${LIBRTMP_INCLUDE_DIR}")
+      message(WARNING "LIBRTMP_INCLUDE_DIR include directory not found: ${LIBRTMP_INCLUDE_DIR}")
     endif()
   endif()
 

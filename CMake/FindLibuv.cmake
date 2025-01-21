@@ -75,7 +75,7 @@ else()
       unset(_version_str3)
     endif()
     if(NOT EXISTS "${LIBUV_INCLUDE_DIR}")
-      message(WARNING "LIBUV_INCLUDE_DIR directory not found: ${LIBUV_INCLUDE_DIR}")
+      message(WARNING "LIBUV_INCLUDE_DIR include directory not found: ${LIBUV_INCLUDE_DIR}")
     endif()
   endif()
 

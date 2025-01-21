@@ -58,7 +58,7 @@ else()
 
   if(MSH3_INCLUDE_DIR)
     if(NOT EXISTS "${MSH3_INCLUDE_DIR}")
-      message(WARNING "MSH3_INCLUDE_DIR directory not found: ${MSH3_INCLUDE_DIR}")
+      message(WARNING "MSH3_INCLUDE_DIR include directory not found: ${MSH3_INCLUDE_DIR}")
     endif()
   endif()
 

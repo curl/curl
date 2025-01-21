@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${LIBGSASL_INCLUDE_DIR}")
-      message(WARNING "LIBGSASL_INCLUDE_DIR directory not found: ${LIBGSASL_INCLUDE_DIR}")
+      message(WARNING "LIBGSASL_INCLUDE_DIR include directory not found: ${LIBGSASL_INCLUDE_DIR}")
     endif()
   endif()
 

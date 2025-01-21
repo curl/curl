@@ -84,7 +84,7 @@ else()
       unset(_version_str3)
     endif()
     if(NOT EXISTS "${ZSTD_INCLUDE_DIR}")
-      message(WARNING "ZSTD_INCLUDE_DIR directory not found: ${ZSTD_INCLUDE_DIR}")
+      message(WARNING "ZSTD_INCLUDE_DIR include directory not found: ${ZSTD_INCLUDE_DIR}")
     endif()
   endif()
 

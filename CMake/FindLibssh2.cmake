@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${LIBSSH2_INCLUDE_DIR}")
-      message(WARNING "LIBSSH2_INCLUDE_DIR directory not found: ${LIBSSH2_INCLUDE_DIR}")
+      message(WARNING "LIBSSH2_INCLUDE_DIR include directory not found: ${LIBSSH2_INCLUDE_DIR}")
     endif()
   endif()
 

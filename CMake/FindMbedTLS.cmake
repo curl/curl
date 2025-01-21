@@ -93,7 +93,7 @@ else()
       unset(_version_header)
     endif()
     if(NOT EXISTS "${MBEDTLS_INCLUDE_DIR}")
-      message(WARNING "MBEDTLS_INCLUDE_DIR directory not found: ${MBEDTLS_INCLUDE_DIR}")
+      message(WARNING "MBEDTLS_INCLUDE_DIR include directory not found: ${MBEDTLS_INCLUDE_DIR}")
     endif()
   endif()
 

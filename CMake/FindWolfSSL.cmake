@@ -74,7 +74,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${WOLFSSL_INCLUDE_DIR}")
-      message(WARNING "WOLFSSL_INCLUDE_DIR directory not found: ${WOLFSSL_INCLUDE_DIR}")
+      message(WARNING "WOLFSSL_INCLUDE_DIR include directory not found: ${WOLFSSL_INCLUDE_DIR}")
     endif()
   endif()
 

@@ -56,7 +56,7 @@ else()
 
   if(QUICHE_INCLUDE_DIR)
     if(NOT EXISTS "${QUICHE_INCLUDE_DIR}")
-      message(WARNING "QUICHE_INCLUDE_DIR directory not found: ${QUICHE_INCLUDE_DIR}")
+      message(WARNING "QUICHE_INCLUDE_DIR include directory not found: ${QUICHE_INCLUDE_DIR}")
     endif()
   endif()
 
