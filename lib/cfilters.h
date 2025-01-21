@@ -132,8 +132,6 @@ typedef CURLcode Curl_cft_conn_keep_alive(struct Curl_cfilter *cf,
  *           to all filters in the chain. Overall result is always CURLE_OK.
  */
 /*      data event                          arg1       arg2     return */
-#define CF_CTRL_DATA_ATTACH           1  /* 0          NULL     ignored */
-#define CF_CTRL_DATA_DETACH           2  /* 0          NULL     ignored */
 #define CF_CTRL_DATA_SETUP            4  /* 0          NULL     first fail */
 #define CF_CTRL_DATA_IDLE             5  /* 0          NULL     first fail */
 #define CF_CTRL_DATA_PAUSE            6  /* on/off     NULL     first fail */
@@ -475,24 +473,6 @@ ssize_t Curl_cf_recv(struct Curl_easy *data, int sockindex, char *buf,
  */
 ssize_t Curl_cf_send(struct Curl_easy *data, int sockindex,
                      const void *buf, size_t len, bool eos, CURLcode *code);
-
-/**
- * The easy handle `data` is being attached to `conn`. This does
- * not mean that data will actually do a transfer. Attachment is
- * also used for temporary actions on the connection.
- */
-void Curl_conn_ev_data_attach(struct connectdata *conn,
-                              struct Curl_easy *data);
-
-/**
- * The easy handle `data` is being detached (no longer served)
- * by connection `conn`. All filters are informed to release any resources
- * related to `data`.
- * Note: there may be several `data` attached to a connection at the same
- * time.
- */
-void Curl_conn_ev_data_detach(struct connectdata *conn,
-                              struct Curl_easy *data);
 
 /**
  * Notify connection filters that they need to setup data for

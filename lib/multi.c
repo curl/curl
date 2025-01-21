@@ -946,7 +946,6 @@ void Curl_detach_connection(struct Curl_easy *data)
 {
   struct connectdata *conn = data->conn;
   if(conn) {
-    Curl_conn_ev_data_detach(conn, data);
     Curl_node_remove(&data->conn_queue);
   }
   data->conn = NULL;
@@ -967,7 +966,6 @@ void Curl_attach_connection(struct Curl_easy *data,
   Curl_llist_append(&conn->easyq, data, &data->conn_queue);
   if(conn->handler && conn->handler->attach)
     conn->handler->attach(data, conn);
-  Curl_conn_ev_data_attach(conn, data);
 }
 
 static int connecting_getsock(struct Curl_easy *data, curl_socket_t *socks)

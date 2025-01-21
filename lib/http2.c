@@ -2636,9 +2636,6 @@ static CURLcode cf_h2_cntrl(struct Curl_cfilter *cf,
   case CF_CTRL_FLUSH:
     result = cf_h2_flush(cf, data);
     break;
-  case CF_CTRL_DATA_DETACH:
-    http2_data_done(cf, data);
-    break;
   case CF_CTRL_DATA_DONE:
     http2_data_done(cf, data);
     break;

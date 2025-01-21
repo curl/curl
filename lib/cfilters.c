@@ -711,18 +711,6 @@ static CURLcode cf_cntrl_all(struct connectdata *conn,
   return result;
 }
 
-void Curl_conn_ev_data_attach(struct connectdata *conn,
-                              struct Curl_easy *data)
-{
-  cf_cntrl_all(conn, data, TRUE, CF_CTRL_DATA_ATTACH, 0, NULL);
-}
-
-void Curl_conn_ev_data_detach(struct connectdata *conn,
-                              struct Curl_easy *data)
-{
-  cf_cntrl_all(conn, data, TRUE, CF_CTRL_DATA_DETACH, 0, NULL);
-}
-
 CURLcode Curl_conn_ev_data_setup(struct Curl_easy *data)
 {
   return cf_cntrl_all(data->conn, data, FALSE,
