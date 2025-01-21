@@ -686,7 +686,7 @@ jobs:
           if [ '${{ matrix.plat }}' = 'uwp' ]; then
             options+=' -DCMAKE_SYSTEM_NAME=WindowsStore -DCMAKE_SYSTEM_VERSION=10.0'
             cflags='-DWINAPI_FAMILY=WINAPI_FAMILY_PC_APP'
-            ldflags='/OPT:NOREF /OPT:NOICF /APPCONTAINER:NO'
+            ldflags='-OPT:NOREF -OPT:NOICF -APPCONTAINER:NO'
             vsglobals=';AppxPackage=false;WindowsAppContainer=false'
           fi
           cmake -B bld ${options} \
@@ -694,8 +694,8 @@ jobs:
             -DVCPKG_INSTALLED_DIR="$VCPKG_INSTALLATION_ROOT/installed" \
             -DVCPKG_TARGET_TRIPLET='${{ matrix.arch }}-${{ matrix.plat }}' \
             -DCMAKE_C_FLAGS="${cflags}" \
-            -DCMAKE_EXE_LINKER_FLAGS="/INCREMENTAL:NO ${ldflags}" \
-            -DCMAKE_SHARED_LINKER_FLAGS="/INCREMENTAL:NO ${ldflags}" \
+            -DCMAKE_EXE_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
+            -DCMAKE_SHARED_LINKER_FLAGS="-INCREMENTAL:NO ${ldflags}" \
             -DCMAKE_VS_GLOBALS="TrackFileAccess=false${vsglobals}" \
             -DCMAKE_BUILD_TYPE='${{ matrix.type }}' \
             -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON \
