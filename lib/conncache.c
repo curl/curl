@@ -1001,10 +1001,17 @@ void Curl_cpool_setfds(struct cpool *cpool,
       Curl_detach_connection(cpool->idata);
 
       for(i = 0; i < ps.num; i++) {
+#if defined(__DJGPP__)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Warith-conversion"
+#endif
         if(ps.actions[i] & CURL_POLL_IN)
           FD_SET(ps.sockets[i], read_fd_set);
         if(ps.actions[i] & CURL_POLL_OUT)
           FD_SET(ps.sockets[i], write_fd_set);
+#if defined(__DJGPP__)
+#pragma GCC diagnostic pop
+#endif
         if((int)ps.sockets[i] > *maxfd)
           *maxfd = (int)ps.sockets[i];
       }
