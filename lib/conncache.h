@@ -186,6 +186,10 @@ CURLcode Curl_cpool_add_pollfds(struct cpool *connc,
 unsigned int Curl_cpool_add_waitfds(struct cpool *connc,
                                     struct Curl_waitfds *cwfds);
 
+void Curl_cpool_setfds(struct cpool *cpool,
+                       fd_set *read_fd_set, fd_set *write_fd_set,
+                       curl_socket_t *maxfd);
+
 /**
  * Perform maintenance on connections in the pool. Specifically,
  * progress the shutdown of connections in the queue.

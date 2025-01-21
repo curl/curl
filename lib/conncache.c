@@ -980,6 +980,38 @@ unsigned int Curl_cpool_add_waitfds(struct cpool *cpool,
   return need;
 }
 
+/* return fd_set info about the shutdown connections */
+void Curl_cpool_setfds(struct cpool *cpool,
+                       fd_set *read_fd_set, fd_set *write_fd_set,
+                       int *maxfd)
+{
+  CPOOL_LOCK(cpool);
+  if(Curl_llist_head(&cpool->shutdowns)) {
+    struct Curl_llist_node *e;
+    struct easy_pollset ps;
+    struct connectdata *conn;
+
+    for(e = Curl_llist_head(&cpool->shutdowns); e;
+        e = Curl_node_next(e)) {
+      unsigned int i;
+      conn = Curl_node_elem(e);
+      memset(&ps, 0, sizeof(ps));
+      Curl_attach_connection(cpool->idata, conn);
+      Curl_conn_adjust_pollset(cpool->idata, &ps);
+      Curl_detach_connection(cpool->idata);
+
+      for(i = 0; i < ps.num; i++) {
+        if(ps.actions[i] & CURL_POLL_IN)
+          FD_SET(ps.sockets[i], read_fd_set);
+        if(ps.actions[i] & CURL_POLL_OUT)
+          FD_SET(ps.sockets[i], write_fd_set);
+        if((int)ps.sockets[i] > *maxfd)
+          *maxfd = (int)ps.sockets[i];
+      }
+    }
+  }
+}
+
 static void cpool_perform(struct cpool *cpool)
 {
   struct Curl_easy *data = cpool->idata;
