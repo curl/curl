@@ -188,7 +188,7 @@ unsigned int Curl_cpool_add_waitfds(struct cpool *connc,
 
 void Curl_cpool_setfds(struct cpool *cpool,
                        fd_set *read_fd_set, fd_set *write_fd_set,
-                       curl_socket_t *maxfd);
+                       int *maxfd);
 
 /**
  * Perform maintenance on connections in the pool. Specifically,
