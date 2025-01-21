@@ -69,14 +69,7 @@ static const char * const errors[]={
 
 static const char *doh_strerror(DOHcode code)
 {
-#if defined(__GNUC__) && \
-  ((__GNUC__ < 4) || ((__GNUC__ == 4) && (__GNUC_MINOR__ < 8)))
-  /* Workaround for:
-     warning: comparison of unsigned expression >= 0 is always true */
-  if(code <= DOH_DNS_NAME_TOO_LONG)
-#else
   if((code >= DOH_OK) && (code <= DOH_DNS_NAME_TOO_LONG))
-#endif
     return errors[code];
   return "bad error code";
 }

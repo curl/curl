@@ -239,7 +239,7 @@ if(PICKY_COMPILER)
 
     if(CMAKE_COMPILER_IS_GNUCC)
       if(CMAKE_C_COMPILER_VERSION VERSION_LESS 4.5)
-        # Avoid false-positives
+        # Avoid false positives
         list(APPEND _picky "-Wno-shadow")
         list(APPEND _picky "-Wno-unreachable-code")
       endif()
@@ -249,6 +249,9 @@ if(PICKY_COMPILER)
       endif()
       if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.0 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.7)
         list(APPEND _picky "-Wno-missing-field-initializers")  # https://gcc.gnu.org/bugzilla/show_bug.cgi?id=36750
+      endif()
+      if(NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 4.3 AND CMAKE_C_COMPILER_VERSION VERSION_LESS 4.8)
+        list(APPEND _picky "-Wno-type-limits")  # Avoid false positives
       endif()
     endif()
   endif()
