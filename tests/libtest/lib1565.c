@@ -205,6 +205,6 @@ test_cleanup:
 CURLcode test(char *URL)
 {
   (void)URL;
-  return 0;
+  return CURLE_OK;
 }
 #endif

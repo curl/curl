@@ -4134,74 +4134,26 @@ dnl set variable for use in automakefile(s)
 AM_CONDITIONAL(USE_MANUAL, test x"$USE_MANUAL" = x1)
 
 CURL_CHECK_LIB_ARES
+CURL_CHECK_OPTION_THREADED_RESOLVER
 
-if test "x$want_ares" != xyes; then
-  CURL_CHECK_OPTION_THREADED_RESOLVER
-
-  if test "$ipv6" = yes; then
-    CURL_DARWIN_SYSTEMCONFIGURATION
-  fi
+if test "$ipv6" = yes; then
+  CURL_DARWIN_SYSTEMCONFIGURATION
 fi
-
-dnl ************************************************************
-dnl disable POSIX threads
-dnl
-AC_MSG_CHECKING([whether to use POSIX threads for threaded resolver])
-AC_ARG_ENABLE(pthreads,
-AS_HELP_STRING([--enable-pthreads],
-  [Enable POSIX threads (default for threaded resolver)])
-AS_HELP_STRING([--disable-pthreads],[Disable POSIX threads]),
-[ case "$enableval" in
-  no)
-    AC_MSG_RESULT(no)
-    want_pthreads=no
-    ;;
-  *)
-    AC_MSG_RESULT(yes)
-    want_pthreads=yes
-    ;;
-  esac ], [
-    default_pthreads=1
-    if test "$curl_cv_native_windows" = "yes"; then
-      default_pthreads=0
-    else
-      case $host_os in
-        msdos*)
-          default_pthreads=0
-          ;;
-      esac
-    fi
-    if test "$default_pthreads" = '0'; then
-      AC_MSG_RESULT(no)
-      want_pthreads=no
-    else
-      AC_MSG_RESULT(auto)
-      want_pthreads=auto
-    fi
-  ]
-)
 
 dnl turn off pthreads if rt is disabled
-if test "$want_pthreads" != "no"; then
-  if test "$want_pthreads" = "yes" && test "$dontwant_rt" = "yes"; then
-    AC_MSG_ERROR([options --enable-pthreads and --disable-rt are mutually exclusive])
-  fi
-  if test "$dontwant_rt" != "no"; then
-    dnl if --enable-pthreads was explicit then warn it's being ignored
-    if test "$want_pthreads" = "yes"; then
-      AC_MSG_WARN([--enable-pthreads Ignored since librt is disabled.])
-    fi
-    want_pthreads=no
-  fi
+if test "$want_threaded_resolver" = "yes" && test "$dontwant_rt" = "yes"; then
+  AC_MSG_ERROR([options --enable-pthreads and --disable-rt are mutually exclusive])
 fi
 
-dnl turn off pthreads if no threaded resolver
-if test "$want_pthreads" != "no" && test "$want_thres" != "yes"; then
-  want_pthreads=no
+dnl Windows threaded resolver check
+if test "$want_threaded_resolver" = "yes" && test "$curl_cv_native_windows" = "yes"; then
+  USE_THREADS_WIN32=1
+  AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
+  curl_res_msg="Win32 threaded"
 fi
 
 dnl detect pthreads
-if test "$want_pthreads" != "no"; then
+if test "$want_threaded_resolver" = "yes" && test "$USE_THREADS_WIN32" != "1"; then
   AC_CHECK_HEADER(pthread.h,
     [ AC_DEFINE(HAVE_PTHREAD_H, 1, [if you have <pthread.h>])
       save_CFLAGS="$CFLAGS"
@@ -4262,19 +4214,9 @@ if test "$want_pthreads" != "no"; then
   ])
 fi
 
-dnl threaded resolver check
-if test "$want_thres" = "yes" && test "x$USE_THREADS_POSIX" != "x1"; then
-  if test "$want_pthreads" = "yes"; then
-    AC_MSG_ERROR([--enable-pthreads but pthreads was not found])
-  fi
-  dnl If native Windows fallback on Win32 threads since no POSIX threads
-  if test "$curl_cv_native_windows" = "yes"; then
-    USE_THREADS_WIN32=1
-    AC_DEFINE(USE_THREADS_WIN32, 1, [if you want Win32 threaded DNS lookup])
-    curl_res_msg="Win32 threaded"
-  else
-    AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
-  fi
+dnl Did we find a threading option?
+if test "$want_threaded_resolver" != "no" -a "x$USE_THREADS_POSIX" != "x1" -a "x$USE_THREADS_WIN32" != "x1"; then
+  AC_MSG_ERROR([Threaded resolver enabled but no thread library found])
 fi
 
 AC_CHECK_HEADER(dirent.h,
@@ -4874,15 +4816,6 @@ fi
 
 
 dnl *************************************************************
-dnl check whether HTTPSRR support if desired
-dnl
-if test "x$want_httpsrr" != "xno"; then
-  AC_MSG_RESULT([HTTPSRR support is available])
-  AC_DEFINE(USE_HTTPSRR, 1, [enable HTTPS RR support])
-  experimental="$experimental HTTPSRR"
-fi
-
-dnl *************************************************************
 dnl check whether ECH support, if desired, is actually available
 dnl
 if test "x$want_ech" != "xno"; then
@@ -4909,10 +4842,23 @@ if test "x$want_ech" != "xno"; then
     AC_DEFINE(USE_ECH, 1, [if ECH support is available])
     AC_MSG_RESULT($ECH_SUPPORT)
     experimental="$experimental ECH"
+    dnl ECH wants HTTPSRR
+    want_httpsrr="yes"
   else
     AC_MSG_ERROR([--enable-ech ignored: No ECH support found])
   fi
 fi
+
+dnl *************************************************************
+dnl check whether HTTPSRR support if desired
+dnl
+if test "x$want_httpsrr" != "xno"; then
+  AC_MSG_RESULT([HTTPSRR support is enabled])
+  AC_DEFINE(USE_HTTPSRR, 1, [enable HTTPS RR support])
+  experimental="$experimental HTTPSRR"
+  curl_httpsrr_msg="enabled (--disable-httpsrr)"
+fi
+
 
 dnl *************************************************************
 dnl check whether OpenSSL (lookalikes) have SSL_set0_wbio
@@ -5071,6 +5017,9 @@ if test "x$USE_ARES" = "x1" -o "x$USE_THREADS_POSIX" = "x1" \
                             -o "x$USE_THREADS_WIN32" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES AsynchDNS"
 fi
+if test "x$USE_ARES" = "x1" -a "$want_threaded_resolver" = "yes"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES c-ares-rr"
+fi
 if test "x$IDN_ENABLED" = "x1"; then
   SUPPORT_FEATURES="$SUPPORT_FEATURES IDN"
 fi
@@ -5175,6 +5124,10 @@ if test "x$OPENSSL_ENABLED" = "x1" -o -n "$SSL_ENABLED"; then
   if test "x$ECH_ENABLED" = "x1"; then
     SUPPORT_FEATURES="$SUPPORT_FEATURES ECH"
   fi
+fi
+
+if test "x$want_httpsrr" != "xno"; then
+  SUPPORT_FEATURES="$SUPPORT_FEATURES HTTPSRR"
 fi
 
 if test "x$SSLS_EXPORT_ENABLED" = "x1"; then
@@ -5446,6 +5399,7 @@ AC_MSG_NOTICE([Configured to build curl/libcurl:
   HTTP2:            ${curl_h2_msg}
   HTTP3:            ${curl_h3_msg}
   ECH:              ${curl_ech_msg}
+  HTTPS RR:         ${curl_httpsrr_msg}
   SSLS-EXPORT:      ${curl_ssls_export_msg}
   Protocols:        ${SUPPORT_PROTOCOLS_LOWER}
   Features:         ${SUPPORT_FEATURES}

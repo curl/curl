@@ -24,13 +24,13 @@
 
 #include "curl_setup.h"
 
+#ifdef USE_ARES
+
 /***********************************************************************
  * Only for ares-enabled builds
  * And only for functions that fulfill the asynch resolver backend API
  * as defined in asyn.h, nothing else belongs in this file!
  **********************************************************************/
-
-#ifdef CURLRES_ARES
 
 #include <limits.h>
 #ifdef HAVE_NETINET_IN_H
@@ -70,6 +70,94 @@
 #include <ares_version.h> /* really old c-ares did not include this by
                              itself */
 
+/*
+ * Curl_ares_getsock() is called when the outside world (using
+ * curl_multi_fdset()) wants to get our fd_set setup and we are talking with
+ * ares. The caller must make sure that this function is only called when we
+ * have a working ares channel.
+ *
+ * Returns: sockets-in-use-bitmap
+ */
+
+int Curl_ares_getsock(struct Curl_easy *data,
+                      ares_channel channel,
+                      curl_socket_t *socks)
+{
+  struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
+  struct timeval timebuf;
+  int max = ares_getsock(channel,
+                         (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
+  struct timeval *timeout = ares_timeout(channel, &maxtime, &timebuf);
+  timediff_t milli = curlx_tvtoms(timeout);
+  Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
+  return max;
+}
+
+/*
+ * Curl_ares_perform()
+ *
+ * 1) Ask ares what sockets it currently plays with, then
+ * 2) wait for the timeout period to check for action on ares' sockets.
+ * 3) tell ares to act on all the sockets marked as "with action"
+ *
+ * return number of sockets it worked on, or -1 on error
+ */
+
+int Curl_ares_perform(ares_channel channel,
+                      timediff_t timeout_ms)
+{
+  int nfds;
+  int bitmask;
+  ares_socket_t socks[ARES_GETSOCK_MAXNUM];
+  struct pollfd pfd[ARES_GETSOCK_MAXNUM];
+  int i;
+  int num = 0;
+
+  bitmask = ares_getsock(channel, socks, ARES_GETSOCK_MAXNUM);
+
+  for(i = 0; i < ARES_GETSOCK_MAXNUM; i++) {
+    pfd[i].events = 0;
+    pfd[i].revents = 0;
+    if(ARES_GETSOCK_READABLE(bitmask, i)) {
+      pfd[i].fd = socks[i];
+      pfd[i].events |= POLLRDNORM|POLLIN;
+    }
+    if(ARES_GETSOCK_WRITABLE(bitmask, i)) {
+      pfd[i].fd = socks[i];
+      pfd[i].events |= POLLWRNORM|POLLOUT;
+    }
+    if(pfd[i].events)
+      num++;
+    else
+      break;
+  }
+
+  if(num) {
+    nfds = Curl_poll(pfd, (unsigned int)num, timeout_ms);
+    if(nfds < 0)
+      return -1;
+  }
+  else
+    nfds = 0;
+
+  if(!nfds)
+    /* Call ares_process() unconditionally here, even if we simply timed out
+       above, as otherwise the ares name resolve will not timeout! */
+    ares_process_fd(channel, ARES_SOCKET_BAD, ARES_SOCKET_BAD);
+  else {
+    /* move through the descriptors and ask for processing on them */
+    for(i = 0; i < num; i++)
+      ares_process_fd(channel,
+                      (pfd[i].revents & (POLLRDNORM|POLLIN)) ?
+                      pfd[i].fd : ARES_SOCKET_BAD,
+                      (pfd[i].revents & (POLLWRNORM|POLLOUT)) ?
+                      pfd[i].fd : ARES_SOCKET_BAD);
+  }
+  return nfds;
+}
+
+#ifdef CURLRES_ARES
+
 #if ARES_VERSION >= 0x010500
 /* c-ares 1.5.0 or later, the callback proto is modified */
 #define HAVE_CARES_CALLBACK_TIMEOUTS 1
@@ -98,28 +186,15 @@
 #if ARES_VERSION >= 0x011c00
 /* 1.28.0 and later have ares_query_dnsrec */
 #define HAVE_ARES_QUERY_DNSREC 1
-#else
-#undef USE_HTTPSRR
+#ifdef USE_HTTPSRR
+#define USE_HTTPSRR_ARES 1
+#endif
 #endif
 
 /* The last 3 #include files should be in this order */
 #include "curl_printf.h"
 #include "curl_memory.h"
 #include "memdebug.h"
-
-struct thread_data {
-  int num_pending; /* number of outstanding c-ares requests */
-  struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
-                                    parts */
-  int last_status;
-#ifndef HAVE_CARES_GETADDRINFO
-  struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
-#endif
-#ifdef USE_HTTPSRR
-  struct Curl_https_rrinfo hinfo;
-#endif
-  char hostname[1];
-};
 
 /* How long we are willing to wait for additional parallel responses after
    obtaining a "definitive" one. For old c-ares without getaddrinfo.
@@ -292,89 +367,13 @@ static void destroy_async_data(struct Curl_async *async)
 
 /*
  * Curl_resolver_getsock() is called when someone from the outside world
- * (using curl_multi_fdset()) wants to get our fd_set setup and we are talking
- * with ares. The caller must make sure that this function is only called when
- * we have a working ares channel.
- *
- * Returns: sockets-in-use-bitmap
+ * (using curl_multi_fdset()) wants to get our fd_set setup.
  */
 
-int Curl_resolver_getsock(struct Curl_easy *data,
-                          curl_socket_t *socks)
+int Curl_resolver_getsock(struct Curl_easy *data, curl_socket_t *socks)
 {
-  struct timeval maxtime = { CURL_TIMEOUT_RESOLVE, 0 };
-  struct timeval timebuf;
-  int max = ares_getsock((ares_channel)data->state.async.resolver,
-                         (ares_socket_t *)socks, MAX_SOCKSPEREASYHANDLE);
-  struct timeval *timeout =
-    ares_timeout((ares_channel)data->state.async.resolver, &maxtime, &timebuf);
-  timediff_t milli = curlx_tvtoms(timeout);
-  Curl_expire(data, milli, EXPIRE_ASYNC_NAME);
-  return max;
-}
-
-/*
- * waitperform()
- *
- * 1) Ask ares what sockets it currently plays with, then
- * 2) wait for the timeout period to check for action on ares' sockets.
- * 3) tell ares to act on all the sockets marked as "with action"
- *
- * return number of sockets it worked on, or -1 on error
- */
-
-static int waitperform(struct Curl_easy *data, timediff_t timeout_ms)
-{
-  int nfds;
-  int bitmask;
-  ares_socket_t socks[ARES_GETSOCK_MAXNUM];
-  struct pollfd pfd[ARES_GETSOCK_MAXNUM];
-  int i;
-  int num = 0;
-
-  bitmask = ares_getsock((ares_channel)data->state.async.resolver, socks,
-                         ARES_GETSOCK_MAXNUM);
-
-  for(i = 0; i < ARES_GETSOCK_MAXNUM; i++) {
-    pfd[i].events = 0;
-    pfd[i].revents = 0;
-    if(ARES_GETSOCK_READABLE(bitmask, i)) {
-      pfd[i].fd = socks[i];
-      pfd[i].events |= POLLRDNORM|POLLIN;
-    }
-    if(ARES_GETSOCK_WRITABLE(bitmask, i)) {
-      pfd[i].fd = socks[i];
-      pfd[i].events |= POLLWRNORM|POLLOUT;
-    }
-    if(pfd[i].events)
-      num++;
-    else
-      break;
-  }
-
-  if(num) {
-    nfds = Curl_poll(pfd, (unsigned int)num, timeout_ms);
-    if(nfds < 0)
-      return -1;
-  }
-  else
-    nfds = 0;
-
-  if(!nfds)
-    /* Call ares_process() unconditionally here, even if we simply timed out
-       above, as otherwise the ares name resolve will not timeout! */
-    ares_process_fd((ares_channel)data->state.async.resolver, ARES_SOCKET_BAD,
-                    ARES_SOCKET_BAD);
-  else {
-    /* move through the descriptors and ask for processing on them */
-    for(i = 0; i < num; i++)
-      ares_process_fd((ares_channel)data->state.async.resolver,
-                      (pfd[i].revents & (POLLRDNORM|POLLIN)) ?
-                      pfd[i].fd : ARES_SOCKET_BAD,
-                      (pfd[i].revents & (POLLWRNORM|POLLOUT)) ?
-                      pfd[i].fd : ARES_SOCKET_BAD);
-  }
-  return nfds;
+  return Curl_ares_getsock(data, (ares_channel)data->state.async.resolver,
+                           socks);
 }
 
 /*
@@ -393,7 +392,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
   DEBUGASSERT(dns);
   *dns = NULL;
 
-  if(waitperform(data, 0) < 0)
+  if(Curl_ares_perform((ares_channel)data->state.async.resolver, 0) < 0)
     return CURLE_UNRECOVERABLE_POLL;
 
 #ifndef HAVE_CARES_GETADDRINFO
@@ -431,7 +430,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
       result = Curl_resolver_error(data);
     else {
       *dns = data->state.async.dns;
-#ifdef USE_HTTPSRR
+#ifdef USE_HTTPSRR_ARES
       {
         struct Curl_https_rrinfo *lhrr =
           Curl_memdup(&res->hinfo, sizeof(struct Curl_https_rrinfo));
@@ -503,7 +502,8 @@ CURLcode Curl_resolver_wait_resolv(struct Curl_easy *data,
     else
       timeout_ms = 1000;
 
-    if(waitperform(data, timeout_ms) < 0)
+    if(Curl_ares_perform((ares_channel)data->state.async.resolver,
+                         timeout_ms) < 0)
       return CURLE_UNRECOVERABLE_POLL;
     result = Curl_resolver_is_resolved(data, entry);
 
@@ -768,72 +768,6 @@ static void addrinfo_cb(void *arg, int status, int timeouts,
 
 #endif
 
-#ifdef USE_HTTPSRR
-static void httpsrr_opt(struct Curl_easy *data,
-                        const ares_dns_rr_t *rr,
-                        ares_dns_rr_key_t key, size_t idx)
-{
-  size_t len = 0;
-  const unsigned char *val = NULL;
-  unsigned short code;
-  struct thread_data *res = data->state.async.tdata;
-
-  code  = ares_dns_rr_get_opt(rr, key, idx, &val, &len);
-
-  switch(code) {
-  case HTTPS_RR_CODE_ALPN: /* str_list */
-    Curl_httpsrr_decode_alpn(val, len, res->hinfo.alpns);
-    infof(data, "HTTPS RR ALPN: %u %u %u %u",
-          res->hinfo.alpns[0], res->hinfo.alpns[1], res->hinfo.alpns[2],
-          res->hinfo.alpns[3]);
-    break;
-  case HTTPS_RR_CODE_NO_DEF_ALPN:
-    infof(data, "HTTPS RR no-def-alpn");
-    break;
-  case HTTPS_RR_CODE_IPV4: /* addr4 list */
-    infof(data, "HTTPS RR IPv4");
-    break;
-  case HTTPS_RR_CODE_ECH:
-    infof(data, "HTTPS RR ECH");
-    break;
-  case HTTPS_RR_CODE_IPV6: /* addr6 list */
-    infof(data, "HTTPS RR IPv6");
-    break;
-  case HTTPS_RR_CODE_PORT:
-    infof(data, "HTTPS RR port");
-    break;
-  default:
-    infof(data, "HTTPS RR unknown code");
-    break;
-  }
-}
-
-static void dnsrec_done_cb(void *arg, ares_status_t status,
-                           size_t timeouts,
-                           const ares_dns_record_t *dnsrec)
-{
-  struct Curl_easy *data = arg;
-  size_t i;
-  struct thread_data *res = data->state.async.tdata;
-  (void)timeouts;
-
-  res->num_pending--;
-  if((ARES_SUCCESS != status) || !dnsrec)
-    return;
-
-  for(i = 0; i < ares_dns_record_rr_cnt(dnsrec, ARES_SECTION_ANSWER); i++) {
-    size_t opt;
-    const ares_dns_rr_t *rr =
-      ares_dns_record_rr_get_const(dnsrec, ARES_SECTION_ANSWER, i);
-    if(ares_dns_rr_get_type(rr) != ARES_REC_TYPE_HTTPS)
-      continue;
-    for(opt = 0; opt < ares_dns_rr_get_opt_cnt(rr, ARES_RR_HTTPS_PARAMS);
-        opt++)
-      httpsrr_opt(data, rr, ARES_RR_HTTPS_PARAMS, opt);
-  }
-}
-#endif
-
 /*
  * Curl_resolver_getaddrinfo() - when using ares
  *
@@ -916,14 +850,14 @@ struct Curl_addrinfo *Curl_resolver_getaddrinfo(struct Curl_easy *data,
                          query_completed_cb, data);
     }
 #endif
-#ifdef USE_HTTPSRR
+#ifdef USE_HTTPSRR_ARES
     {
       res->num_pending++; /* one more */
       memset(&res->hinfo, 0, sizeof(struct Curl_https_rrinfo));
       ares_query_dnsrec((ares_channel)data->state.async.resolver,
                         hostname, ARES_CLASS_IN,
                         ARES_REC_TYPE_HTTPS,
-                        dnsrec_done_cb, data, NULL);
+                        Curl_dnsrec_done_cb, data, NULL);
     }
 #endif
     *waitp = 1; /* expect asynchronous response */
@@ -1058,3 +992,5 @@ CURLcode Curl_set_dns_local_ip6(struct Curl_easy *data,
 #endif
 }
 #endif /* CURLRES_ARES */
+
+#endif /* USE_ARES */

@@ -243,9 +243,15 @@ elseif(DOS OR AMIGA)
 endif()
 option(CURL_LTO "Enable compiler Link Time Optimizations" OFF)
 
-cmake_dependent_option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup"
-  ON "NOT ENABLE_ARES;NOT DOS;NOT AMIGA"
-  OFF)
+if(NOT DOS AND NOT AMIGA)
+  # if c-ares is used, default the threaded resolver to OFF
+  if(ENABLE_ARES)
+    set(_enable_threaded_resolver_default OFF)
+  else()
+    set(_enable_threaded_resolver_default ON)
+  endif()
+  option(ENABLE_THREADED_RESOLVER "Enable threaded DNS lookup" ${_enable_threaded_resolver_default})
+endif()
 
 include(PickyWarnings)
 
@@ -1003,7 +1009,10 @@ if(USE_ECH)
     if(NOT HAVE_ECH)
       message(FATAL_ERROR "ECH support missing in OpenSSL/BoringSSL/AWS-LC/wolfSSL")
     else()
-      message(STATUS "ECH enabled.")
+      message(STATUS "ECH enabled")
+      # ECH wants HTTPSRR
+      set(USE_HTTPSRR ON)
+      message(STATUS "HTTPSRR enabled")
     endif()
   else()
     message(FATAL_ERROR "ECH requires ECH-enablded OpenSSL, BoringSSL, AWS-LC or wolfSSL")
@@ -2098,6 +2107,7 @@ curl_add_if("brotli"        HAVE_BROTLI)
 curl_add_if("gsasl"         USE_GSASL)
 curl_add_if("zstd"          HAVE_ZSTD)
 curl_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
+curl_add_if("c-ares-rr"     USE_ARES AND ENABLE_THREADED_RESOLVER)
 curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
                             USE_WIN32_IDN OR
                             USE_APPLE_IDN)
@@ -2128,6 +2138,7 @@ curl_add_if("threadsafe"    HAVE_ATOMIC OR
 curl_add_if("Debug"         ENABLE_DEBUG)
 curl_add_if("TrackMemory"   ENABLE_CURLDEBUG)
 curl_add_if("ECH"           _ssl_enabled AND HAVE_ECH)
+curl_add_if("HTTPSRR"       _ssl_enabled AND USE_HTTPSRR)
 curl_add_if("PSL"           USE_LIBPSL)
 curl_add_if("CAcert"        CURL_CA_EMBED_SET)
 curl_add_if("SSLS-EXPORT"   _ssl_enabled AND USE_SSLS_EXPORT)

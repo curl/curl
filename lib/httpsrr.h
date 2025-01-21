@@ -24,6 +24,36 @@
  *
  ***************************************************************************/
 
+#include "curl_setup.h"
+
+#ifdef USE_ARES
+#include <ares.h>
+#endif
+
+#ifdef USE_HTTPSRR
+
+#define CURL_MAXLEN_host_name 253
+#define MAX_HTTPSRR_ALPNS 4
+
+struct Curl_https_rrinfo {
+  /*
+   * Fields from HTTPS RR. The only mandatory fields are priority and target.
+   * See https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
+   */
+  char *target;
+  unsigned char *ipv4hints; /* keytag = 4 */
+  size_t ipv4hints_len;
+  unsigned char *echconfiglist; /* keytag = 5 */
+  size_t echconfiglist_len;
+  unsigned char *ipv6hints; /* keytag = 6 */
+  size_t ipv6hints_len;
+  unsigned char alpns[MAX_HTTPSRR_ALPNS]; /* keytag = 1 */
+  /* store parsed alpnid entries in the array, end with ALPN_none */
+  int port; /* -1 means not set */
+  uint16_t priority;
+  bool no_def_alpn; /* keytag = 2 */
+};
+#endif
 
 /*
  * Code points for DNS wire format SvcParams as per RFC 9460
@@ -38,4 +68,9 @@
 CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
                                   unsigned char *alpns);
 
+#if defined(USE_ARES) && defined(USE_HTTPSRR)
+void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
+                         size_t timeouts,
+                         const ares_dns_record_t *dnsrec);
+#endif
 #endif /* HEADER_CURL_HTTPSRR_H */

@@ -29,6 +29,7 @@
 #include "curl_addrinfo.h"
 #include "timeval.h" /* for timediff_t */
 #include "asyn.h"
+#include "httpsrr.h"
 
 #include <setjmp.h>
 
@@ -68,31 +69,6 @@ enum alpnid {
  * Returns a struct Curl_hash pointer on success, NULL on failure.
  */
 struct Curl_hash *Curl_global_host_cache_init(void);
-
-#ifdef USE_HTTPSRR
-
-#define CURL_MAXLEN_host_name 253
-#define MAX_HTTPSRR_ALPNS 4
-
-struct Curl_https_rrinfo {
-  /*
-   * Fields from HTTPS RR. The only mandatory fields are priority and target.
-   * See https://datatracker.ietf.org/doc/html/rfc9460#section-14.3.2
-   */
-  char *target;
-  unsigned char *ipv4hints; /* keytag = 4 */
-  size_t ipv4hints_len;
-  unsigned char *echconfiglist; /* keytag = 5 */
-  size_t echconfiglist_len;
-  unsigned char *ipv6hints; /* keytag = 6 */
-  size_t ipv6hints_len;
-  unsigned char alpns[MAX_HTTPSRR_ALPNS]; /* keytag = 1 */
-  /* store parsed alpnid entries in the array, end with ALPN_none */
-  int port; /* -1 means not set */
-  uint16_t priority;
-  bool no_def_alpn; /* keytag = 2 */
-};
-#endif
 
 struct Curl_dns_entry {
   struct Curl_addrinfo *addr;

@@ -467,11 +467,18 @@ static const struct feat features_table[] = {
 #ifdef HAVE_BROTLI
   FEATURE("brotli",      NULL,                CURL_VERSION_BROTLI),
 #endif
+#if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
+  FEATURE("c-ares-rr", NULL,             0),
+#endif
 #ifdef DEBUGBUILD
   FEATURE("Debug",       NULL,                CURL_VERSION_DEBUG),
 #endif
 #if defined(USE_SSL) && defined(USE_ECH)
   FEATURE("ECH",         ech_present,         0),
+
+#ifndef USE_HTTPSRR
+#error "ECH enabled but not HTTPSRR, must be a config error"
+#endif
 #endif
 #ifdef USE_GSASL
   FEATURE("gsasl",       NULL,                CURL_VERSION_GSASL),
@@ -491,6 +498,9 @@ static const struct feat features_table[] = {
 #if defined(USE_SSL) && !defined(CURL_DISABLE_PROXY) && \
   !defined(CURL_DISABLE_HTTP)
   FEATURE("HTTPS-proxy", https_proxy_present, CURL_VERSION_HTTPS_PROXY),
+#endif
+#if defined(USE_HTTPSRR)
+  FEATURE("HTTPSRR",     NULL,                0),
 #endif
 #if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
   FEATURE("IDN",         idn_present,         CURL_VERSION_IDN),
