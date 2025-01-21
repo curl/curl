@@ -58,7 +58,7 @@ else()
 
   if(RUSTLS_INCLUDE_DIR)
     if(NOT EXISTS "${RUSTLS_INCLUDE_DIR}")
-      message(WARNING "RUSTLS_INCLUDE_DIR directory not found: ${RUSTLS_INCLUDE_DIR}")
+      message(WARNING "RUSTLS_INCLUDE_DIR include directory not found: ${RUSTLS_INCLUDE_DIR}")
     endif()
   endif()
 

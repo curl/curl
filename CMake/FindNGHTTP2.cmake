@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${NGHTTP2_INCLUDE_DIR}")
-      message(WARNING "NGHTTP2_INCLUDE_DIR directory not found: ${NGHTTP2_INCLUDE_DIR}")
+      message(WARNING "NGHTTP2_INCLUDE_DIR include directory not found: ${NGHTTP2_INCLUDE_DIR}")
     endif()
   endif()
 

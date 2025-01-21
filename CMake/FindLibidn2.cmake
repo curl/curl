@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${LIBIDN2_INCLUDE_DIR}")
-      message(WARNING "LIBIDN2_INCLUDE_DIR directory not found: ${LIBIDN2_INCLUDE_DIR}")
+      message(WARNING "LIBIDN2_INCLUDE_DIR include directory not found: ${LIBIDN2_INCLUDE_DIR}")
     endif()
   endif()
 

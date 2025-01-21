@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${LIBPSL_INCLUDE_DIR}")
-      message(WARNING "LIBPSL_INCLUDE_DIR directory not found: ${LIBPSL_INCLUDE_DIR}")
+      message(WARNING "LIBPSL_INCLUDE_DIR include directory not found: ${LIBPSL_INCLUDE_DIR}")
     endif()
   endif()
 

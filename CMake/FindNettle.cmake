@@ -70,7 +70,7 @@ else()
       unset(_version_str2)
     endif()
     if(NOT EXISTS "${NETTLE_INCLUDE_DIR}")
-      message(WARNING "NETTLE_INCLUDE_DIR directory not found: ${NETTLE_INCLUDE_DIR}")
+      message(WARNING "NETTLE_INCLUDE_DIR include directory not found: ${NETTLE_INCLUDE_DIR}")
     endif()
   endif()
 

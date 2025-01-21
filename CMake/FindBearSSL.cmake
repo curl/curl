@@ -45,7 +45,7 @@ find_library(BEARSSL_LIBRARY NAMES "bearssl")
 
 if(BEARSSL_INCLUDE_DIR)
   if(NOT EXISTS "${BEARSSL_INCLUDE_DIR}")
-    message(WARNING "BEARSSL_INCLUDE_DIR directory not found: ${BEARSSL_INCLUDE_DIR}")
+    message(WARNING "BEARSSL_INCLUDE_DIR include directory not found: ${BEARSSL_INCLUDE_DIR}")
   endif()
 endif()
 

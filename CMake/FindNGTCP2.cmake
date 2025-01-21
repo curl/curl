@@ -112,7 +112,7 @@ else()
       set(NGTCP2_CRYPTO_LIBRARY ${${_crypto_library_upper}_LIBRARY})
     endif()
     if(NOT EXISTS "${NGTCP2_INCLUDE_DIR}")
-      message(WARNING "NGTCP2_INCLUDE_DIR directory not found: ${NGTCP2_INCLUDE_DIR}")
+      message(WARNING "NGTCP2_INCLUDE_DIR include directory not found: ${NGTCP2_INCLUDE_DIR}")
     endif()
   endif()
 

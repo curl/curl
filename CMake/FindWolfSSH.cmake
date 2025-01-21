@@ -49,7 +49,7 @@ if(WOLFSSH_INCLUDE_DIR)
     unset(_version_str)
   endif()
   if(NOT EXISTS "${WOLFSSH_INCLUDE_DIR}")
-    message(WARNING "WOLFSSH_INCLUDE_DIR directory not found: ${WOLFSSH_INCLUDE_DIR}")
+    message(WARNING "WOLFSSH_INCLUDE_DIR include directory not found: ${WOLFSSH_INCLUDE_DIR}")
   endif()
 endif()
 

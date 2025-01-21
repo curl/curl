@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${NGHTTP3_INCLUDE_DIR}")
-      message(WARNING "NGHTTP3_INCLUDE_DIR directory not found: ${NGHTTP3_INCLUDE_DIR}")
+      message(WARNING "NGHTTP3_INCLUDE_DIR include directory not found: ${NGHTTP3_INCLUDE_DIR}")
     endif()
   endif()
 
