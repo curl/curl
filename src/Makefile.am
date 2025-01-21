@@ -61,7 +61,6 @@ endif
 include Makefile.inc
 
 curl_cfiles_gen =
-curl_hfiles_gen =
 CLEANFILES =
 
 if USE_UNITY
@@ -160,7 +159,6 @@ $(HUGE):
 endif
 
 curl_cfiles_gen += $(HUGE)
-curl_hfiles_gen += tool_hugehelp.h
 CLEANFILES += $(HUGE)
 
 CA_EMBED_CSOURCE = tool_ca_embed.c
