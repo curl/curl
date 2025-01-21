@@ -1010,6 +1010,7 @@ void Curl_cpool_setfds(struct cpool *cpool,
       }
     }
   }
+  CPOOL_UNLOCK(cpool);
 }
 
 static void cpool_perform(struct cpool *cpool)
