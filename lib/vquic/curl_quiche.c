@@ -1228,9 +1228,6 @@ static CURLcode cf_quiche_data_event(struct Curl_cfilter *cf,
   case CF_CTRL_DATA_PAUSE:
     result = h3_data_pause(cf, data, (arg1 != 0));
     break;
-  case CF_CTRL_DATA_DETACH:
-    h3_data_done(cf, data);
-    break;
   case CF_CTRL_DATA_DONE:
     h3_data_done(cf, data);
     break;
