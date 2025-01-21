@@ -76,8 +76,8 @@ curl_CURLX = $(CURLTOOL_LIBCURL_CFILES)
 else
 curl_CURLX = $(CURLX_CFILES)
 endif
-curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_CURLX)
-	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
+curltool_unity.c: $(top_srcdir)/scripts/mk-unity.pl $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX)
+	@PERL@ $(top_srcdir)/scripts/mk-unity.pl $(srcdir) $(CURL_CFILES) $(curl_cfiles_gen) $(curl_CURLX) --exclude $(curl_EXCLUDE) > curltool_unity.c
 
 nodist_curl_SOURCES = curltool_unity.c
 curl_SOURCES = $(curl_EXCLUDE)
@@ -202,7 +202,7 @@ endif
 TIDY := clang-tidy
 
 tidy: $(HUGE) $(CA_EMBED_CSOURCE)
-	$(TIDY) $(CURL_CFILES) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
+	$(TIDY) $(CURL_CFILES) $(curl_cfiles_gen) $(TIDYFLAGS) $(CURL_CLANG_TIDYFLAGS) -- $(curl_CPPFLAGS) $(CPPFLAGS) $(AM_CPPFLAGS) -DHAVE_CONFIG_H
 
 listhelp:
 	(cd $(top_srcdir)/docs/cmdline-opts && make listhelp)
