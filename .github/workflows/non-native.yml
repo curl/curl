@@ -381,22 +381,22 @@ jobs:
     strategy:
       matrix:
         include:
-          - { build: 'autotools', platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
+          - { build: 'autotools', platform: '21', name: "openssl", install: 'brotli zstd libpsl nghttp2 openssl libssh2',
               options: '--with-openssl --with-brotli' }
 
-          - { build: 'cmake'    , platform: '21', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
+          - { build: 'cmake'    , platform: '21', name: "openssl", install: 'brotli zstd libpsl nghttp2 openssl libssh2',
               options: '-DCURL_USE_OPENSSL=ON' }
 
-          - { build: 'autotools', platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
+          - { build: 'autotools', platform: '35', name: "openssl", install: 'brotli zstd libpsl nghttp2 openssl libssh2',
               options: '--with-openssl --with-brotli' }
 
-          - { build: 'cmake'    , platform: '35', name: "libressl"       , install: 'brotli zstd libpsl nghttp2 openssl   libssh2',
+          - { build: 'cmake'    , platform: '35', name: "openssl", install: 'brotli zstd libpsl nghttp2 openssl libssh2',
               options: '-DCURL_USE_OPENSSL=ON' }
 
           # FIXME: Must disable zstd explicitly, otherwise cmake/pkg-config finds it in /usr/include
           #        and the build fails. I had found no option to disable this behavior. Other default
           #        dependencies not offered via vcpkg may also need this.
-          - { build: 'cmake'    , platform: '35', name: "boringssl !zstd", install: '            libpsl         boringssl',
+          - { build: 'cmake'    , platform: '35', name: "boringssl !zstd", install: 'libpsl boringssl',
               options: '-DCURL_USE_OPENSSL=ON -DOPENSSL_USE_STATIC_LIBS=ON -DCURL_ZSTD=OFF' }
 
       fail-fast: false
