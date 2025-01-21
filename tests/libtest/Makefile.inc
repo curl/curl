@@ -72,7 +72,7 @@ LIBTESTPROGS = libauthretry libntlmconnect libprereq                     \
  lib1945 lib1946 lib1947 lib1948 lib1955 lib1956 lib1957 lib1958 lib1959 \
  lib1960 lib1964 \
  lib1970 lib1971 lib1972 lib1973 lib1974 lib1975 lib1977 \
- lib2301 lib2302 lib2304 lib2305 lib2306         lib2308 lib2309 \
+ lib2301 lib2302 lib2304 lib2305 lib2306         lib2308 lib2309 lib2310 \
  lib2402 lib2404 lib2405 \
  lib2502 \
  lib3010 lib3025 lib3026 lib3027 \
@@ -690,6 +690,9 @@ lib2308_LDADD = $(TESTUTIL_LIBS)
 
 lib2309_SOURCES = lib2309.c $(SUPPORTFILES)
 lib2309_LDADD = $(TESTUTIL_LIBS)
+
+lib2310_SOURCES = lib2310.c $(SUPPORTFILES) $(TESTUTIL) $(TSTTRACE) $(MULTIBYTE)
+lib2310_LDADD = $(TESTUTIL_LIBS)
 
 lib2402_SOURCES = lib2402.c $(SUPPORTFILES) $(TESTUTIL) $(WARNLESS)
 lib2402_LDADD = $(TESTUTIL_LIBS)

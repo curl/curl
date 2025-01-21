@@ -47,6 +47,10 @@
 
 
 #define WSBIT_FIN 0x80
+#define WSBIT_RSV1 0x40
+#define WSBIT_RSV2 0x20
+#define WSBIT_RSV3 0x10
+#define WSBIT_RSV_MASK (WSBIT_RSV1 | WSBIT_RSV2 | WSBIT_RSV3)
 #define WSBIT_OPCODE_CONT  0
 #define WSBIT_OPCODE_TEXT  (1)
 #define WSBIT_OPCODE_BIN   (2)
@@ -106,6 +110,13 @@ static unsigned char ws_frame_flags2op(int flags)
       return (unsigned char)WS_FRAMES[i].proto_opcode;
   }
   return 0;
+}
+
+/* No extensions are supported. If any of the RSV bits are set, we must fail */
+static bool ws_frame_rsv_supported(int flags)
+{
+  unsigned char reserved_bits = flags & WSBIT_RSV_MASK;
+  return reserved_bits == 0;
 }
 
 static void ws_dec_info(struct ws_decoder *dec, struct Curl_easy *data,
@@ -175,9 +186,17 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
+      if(!ws_frame_rsv_supported(dec->head[0])) {
+        failf(data, "WS: unknown reserved bit in frame header: %x",
+              dec->head[0] & WSBIT_RSV_MASK);
+        ws_dec_reset(dec);
+        return CURLE_RECV_ERROR;
+      }
+
       dec->frame_flags = ws_frame_op2flags(dec->head[0]);
       if(!dec->frame_flags) {
-        failf(data, "WS: unknown opcode: %x", dec->head[0]);
+        failf(data, "WS: unknown opcode: %x",
+              dec->head[0] & WSBIT_OPCODE_MASK);
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
