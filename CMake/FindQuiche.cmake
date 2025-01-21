@@ -54,6 +54,12 @@ else()
   find_path(QUICHE_INCLUDE_DIR NAMES "quiche.h")
   find_library(QUICHE_LIBRARY NAMES "quiche")
 
+  if(QUICHE_INCLUDE_DIR)
+    if(NOT EXISTS "${QUICHE_INCLUDE_DIR}")
+      message(WARNING "QUICHE_INCLUDE_DIR directory not found: ${QUICHE_INCLUDE_DIR}")
+    endif()
+  endif()
+
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Quiche
     REQUIRED_VARS
