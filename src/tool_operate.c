@@ -3190,10 +3190,11 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
       if(res == PARAM_HELP_REQUESTED)
         tool_help(global->help_category);
       /* Check if we were asked for the manual */
-      else if(res == PARAM_MANUAL_REQUESTED)
+      else if(res == PARAM_MANUAL_REQUESTED) {
 #ifndef UNITTESTS
         hugehelp();
 #endif
+      }
       /* Check if we were asked for the version information */
       else if(res == PARAM_VERSION_INFO_REQUESTED)
         tool_version_info();
