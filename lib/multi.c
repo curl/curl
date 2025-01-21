@@ -1158,6 +1158,8 @@ static void multi_getsock(struct Curl_easy *data,
   }
 }
 
+#define NUM_STACK_FDS 5
+
 CURLMcode curl_multi_fdset(CURLM *m,
                            fd_set *read_fd_set, fd_set *write_fd_set,
                            fd_set *exc_fd_set, int *max_fd)
@@ -1169,6 +1171,8 @@ CURLMcode curl_multi_fdset(CURLM *m,
   struct Curl_llist_node *e;
   struct Curl_multi *multi = m;
   struct Curl_waitfds cwfds = { 0 };
+  struct curl_waitfd ufd[NUM_STACK_FDS];
+  struct curl_waitfd *ufda = NULL;
   unsigned int i;
   (void)exc_fd_set; /* not used */
 
@@ -1203,7 +1207,18 @@ CURLMcode curl_multi_fdset(CURLM *m,
     }
   }
 
-  (void)Curl_cpool_add_waitfds(&multi->cpool, &cwfds);
+  /* initial attempt without allocating anything, just stack based */
+  Curl_waitfds_init(&cwfds, ufd, NUM_STACK_FDS);
+
+  i = Curl_cpool_add_waitfds(&multi->cpool, &cwfds);
+  if(i > NUM_STACK_FDS) {
+    /* needs more than the stack can hold */
+    ufda = malloc(i * sizeof(struct curl_waitfd));
+    if(!ufda)
+      return CURLM_OUT_OF_MEMORY;
+    Curl_waitfds_init(&cwfds, ufda, i);
+    (void)Curl_cpool_add_waitfds(&multi->cpool, &cwfds);
+  }
   for(i = 0; i < cwfds.n; i++) {
     if(cwfds.wfds[i].events & CURL_WAIT_POLLIN)
       FD_SET(cwfds.wfds[i].fd, read_fd_set);
@@ -1215,6 +1230,7 @@ CURLMcode curl_multi_fdset(CURLM *m,
 
   *max_fd = this_max_fd;
 
+  free(ufda);
   return CURLM_OK;
 }
 
