@@ -1011,7 +1011,8 @@ void Curl_cpool_setfds(struct cpool *cpool,
 #if defined(__DJGPP__)
 #pragma GCC diagnostic pop
 #endif
-        if((int)ps.sockets[i] > *maxfd)
+        if((ps.actions[i] & (CURL_POLL_OUT | CURL_POLL_IN)) &&
+           ((int)ps.sockets[i] > *maxfd))
           *maxfd = (int)ps.sockets[i];
       }
     }
