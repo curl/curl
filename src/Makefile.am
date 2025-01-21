@@ -83,7 +83,7 @@ curl_SOURCES = $(curl_EXCLUDE)
 CLEANFILES += curltool_unity.c
 else
 # CURL_FILES comes from Makefile.inc
-curl_SOURCES = $(CURL_FILES)
+curl_SOURCES = $(CURL_FILES) $(curl_cfiles_gen)
 endif
 if HAVE_WINDRES
 curl_SOURCES += $(CURL_RCFILES)
