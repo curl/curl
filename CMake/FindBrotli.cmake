@@ -63,6 +63,12 @@ else()
   find_library(BROTLICOMMON_LIBRARY NAMES "brotlicommon")
   find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
 
+  if(BROTLI_INCLUDE_DIR)
+    if(NOT EXISTS "${BROTLI_INCLUDE_DIR}")
+      message(WARNING "BROTLI_INCLUDE_DIR directory not found: ${BROTLI_INCLUDE_DIR}")
+    endif()
+  endif()
+
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Brotli
     REQUIRED_VARS

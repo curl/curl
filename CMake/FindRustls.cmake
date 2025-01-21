@@ -56,6 +56,12 @@ else()
   find_path(RUSTLS_INCLUDE_DIR NAMES "rustls.h")
   find_library(RUSTLS_LIBRARY NAMES "rustls")
 
+  if(RUSTLS_INCLUDE_DIR)
+    if(NOT EXISTS "${RUSTLS_INCLUDE_DIR}")
+      message(WARNING "RUSTLS_INCLUDE_DIR directory not found: ${RUSTLS_INCLUDE_DIR}")
+    endif()
+  endif()
+
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(Rustls
     REQUIRED_VARS

@@ -56,6 +56,12 @@ else()
   find_path(MSH3_INCLUDE_DIR NAMES "msh3.h")
   find_library(MSH3_LIBRARY NAMES "msh3")
 
+  if(MSH3_INCLUDE_DIR)
+    if(NOT EXISTS "${MSH3_INCLUDE_DIR}")
+      message(WARNING "MSH3_INCLUDE_DIR directory not found: ${MSH3_INCLUDE_DIR}")
+    endif()
+  endif()
+
   include(FindPackageHandleStandardArgs)
   find_package_handle_standard_args(MSH3
     REQUIRED_VARS

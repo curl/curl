@@ -43,6 +43,12 @@ endif()
 find_path(BEARSSL_INCLUDE_DIR NAMES "bearssl.h")
 find_library(BEARSSL_LIBRARY NAMES "bearssl")
 
+if(BEARSSL_INCLUDE_DIR)
+  if(NOT EXISTS "${BEARSSL_INCLUDE_DIR}")
+    message(WARNING "BEARSSL_INCLUDE_DIR directory not found: ${BEARSSL_INCLUDE_DIR}")
+  endif()
+endif()
+
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(BearSSL
   REQUIRED_VARS
