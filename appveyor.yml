@@ -43,7 +43,7 @@ environment:
 
     # generated CMake-based Visual Studio builds
 
-    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.3, Shared, Build-tests'
+    - job_name: 'CMake, VS2022, Release, x64, OpenSSL 3.4, Shared, Build-tests'
       APPVEYOR_BUILD_WORKER_IMAGE: 'Visual Studio 2022'
       BUILD_SYSTEM: CMake
       PRJ_GEN: 'Visual Studio 17 2022'
