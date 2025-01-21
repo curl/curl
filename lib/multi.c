@@ -1158,8 +1158,6 @@ static void multi_getsock(struct Curl_easy *data,
   }
 }
 
-#define NUM_STACK_FDS 5
-
 CURLMcode curl_multi_fdset(CURLM *m,
                            fd_set *read_fd_set, fd_set *write_fd_set,
                            fd_set *exc_fd_set, int *max_fd)
