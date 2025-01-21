@@ -988,13 +988,12 @@ void Curl_cpool_setfds(struct cpool *cpool,
   CPOOL_LOCK(cpool);
   if(Curl_llist_head(&cpool->shutdowns)) {
     struct Curl_llist_node *e;
-    struct easy_pollset ps;
-    struct connectdata *conn;
 
     for(e = Curl_llist_head(&cpool->shutdowns); e;
         e = Curl_node_next(e)) {
+      struct easy_pollset ps;
       unsigned int i;
-      conn = Curl_node_elem(e);
+      struct connectdata *conn = Curl_node_elem(e);
       memset(&ps, 0, sizeof(ps));
       Curl_attach_connection(cpool->idata, conn);
       Curl_conn_adjust_pollset(cpool->idata, &ps);
