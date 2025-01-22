@@ -98,6 +98,7 @@ class TestReuse:
         for s in r.stats:
             assert s['http_version'] == '3', f'{s}'
 
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_04_alt_svc_h3h2(self, env: Env, httpd, nghttpx):
         httpd.clear_extra_configs()
         httpd.reload()
@@ -120,6 +121,7 @@ class TestReuse:
         for s in r.stats:
             assert s['http_version'] == '2', f'{s}'
 
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_05_alt_svc_h3h1(self, env: Env, httpd, nghttpx):
         httpd.clear_extra_configs()
         httpd.reload()
