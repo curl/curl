@@ -76,7 +76,7 @@ char *Curl_checkProxyheaders(struct Curl_easy *data,
 
 CURLcode Curl_add_timecondition(struct Curl_easy *data, struct dynbuf *req);
 CURLcode Curl_add_custom_headers(struct Curl_easy *data, bool is_connect,
-                                 struct dynbuf *req);
+                                 int httpversion, struct dynbuf *req);
 CURLcode Curl_dynhds_add_custom(struct Curl_easy *data, bool is_connect,
                                 struct dynhds *hds);
 

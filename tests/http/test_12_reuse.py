@@ -115,7 +115,7 @@ class TestReuse:
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)
-        # We expect the connection to be reused
+        # We expect the connection to be reused and use HTTP/2
         assert r.total_connects == 1
         for s in r.stats:
             assert s['http_version'] == '2', f'{s}'
@@ -137,9 +137,7 @@ class TestReuse:
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)
-        # We expect the connection to be reused
+        # We expect the connection to be reused and use HTTP/1.1
         assert r.total_connects == 1
-        # When using http/1.1 from alt-svc, we ALPN-negotiate 'h2,http/1.1' anyway
-        # which means our server gives us h2
         for s in r.stats:
-            assert s['http_version'] == '2', f'{s}'
+            assert s['http_version'] == '1.1', f'{s}'

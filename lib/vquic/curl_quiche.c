@@ -1372,7 +1372,6 @@ static CURLcode cf_quiche_verify_peer(struct Curl_cfilter *cf,
   struct cf_quiche_ctx *ctx = cf->ctx;
 
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
-  cf->conn->httpversion = 30;
 
   return Curl_vquic_tls_verify_peer(&ctx->tls, cf, data, &ctx->peer);
 }

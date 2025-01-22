@@ -68,7 +68,7 @@ Accept: */*
 </protocol>
 # curl: (1) Version mismatch (from HTTP/1 to HTTP/2)
 <errorcode>
-1
+8
 </errorcode>
 </verify>
 </testcase>

@@ -176,6 +176,7 @@ typedef CURLcode Curl_cft_cntrl(struct Curl_cfilter *cf,
 #define CF_QUERY_STREAM_ERROR       6  /* error code - */
 #define CF_QUERY_NEED_FLUSH         7  /* TRUE/FALSE - */
 #define CF_QUERY_IP_INFO            8  /* TRUE/FALSE struct ip_quadruple */
+#define CF_QUERY_HTTP_VERSION       9  /* number (10/11/20/30)   -  */
 
 /**
  * Query the cfilter for properties. Filters ignorant of a query will
@@ -195,11 +196,13 @@ typedef CURLcode Curl_cft_query(struct Curl_cfilter *cf,
  * CF_TYPE_SSL:        provide SSL/TLS
  * CF_TYPE_MULTIPLEX:  provides multiplexing of easy handles
  * CF_TYPE_PROXY       provides proxying
+ * CF_TYPE_HTTP        implement a version of the HTTP protocol
  */
 #define CF_TYPE_IP_CONNECT  (1 << 0)
 #define CF_TYPE_SSL         (1 << 1)
 #define CF_TYPE_MULTIPLEX   (1 << 2)
 #define CF_TYPE_PROXY       (1 << 3)
+#define CF_TYPE_HTTP        (1 << 4)
 
 /* A connection filter type, e.g. specific implementation. */
 struct Curl_cftype {
@@ -391,6 +394,12 @@ bool Curl_conn_is_ssl(struct connectdata *conn, int sockindex);
  * Connection provides multiplexing of easy handles at `socketindex`.
  */
 bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
+
+/**
+ * Return the HTTP version used on the FIRSTSOCKET connection filters
+ * or 0 if unknown. Value otherwise is 09, 10, 11, etc.
+ */
+unsigned char Curl_conn_http_version(struct Curl_easy *data);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.
