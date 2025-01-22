@@ -28,7 +28,6 @@
 
 #ifndef CURL_DISABLE_WEBSOCKETS
 
-
 static size_t writecb(char *b, size_t size, size_t nitems, void *p)
 {
   (void)b;
