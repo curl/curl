@@ -155,3 +155,4 @@ s/Smackd0wn\z/Smackd0wn on github/
 s/Testclutch//
 s/edmcln\z/edmcln on github/
 s/andrewkirillov-ibm/Andrew Kirillov/
+s/\(.*\) via #[0-9]*//

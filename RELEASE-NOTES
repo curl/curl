@@ -4,7 +4,7 @@ curl and libcurl 8.12.0
  Command line options:         267
  curl_easy_setopt() options:   306
  Public functions in libcurl:  96
- Contributors:                 3324
+ Contributors:                 3327
 
 This release includes the following changes:
 
@@ -58,6 +58,7 @@ This release includes the following bugfixes:
  o cmake: deprecate winbuild, add migration guide from legacy build methods [157]
  o cmake: detect mingw-w64 version, pre-fill `HAVE_STRTOK_R` [179]
  o cmake: do not store `MINGW64_VERSION` in cache [175]
+ o cmake: drop `fseeko()` pre-fill and check for Windows [201]
  o cmake: drop duplicate Windows cache value [81]
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
  o cmake: drop redundant opening/closing `.*` from `MATCH` expressions [64]
@@ -92,11 +93,13 @@ This release includes the following bugfixes:
  o conncache: count shutdowns against host and max limits [154]
  o conncache: result_cb comment removed from function docs [1]
  o content_encoding: namespace GZIP flag constants [147]
+ o content_encoding: support use of custom libzstd memory functions [186]
  o cookie: cap expire times to 400 days [111]
  o cookie: fix crash in netscape cookie parsing [84]
  o cookie: parse only the exact expire date [3]
  o curl-functions.m4: fix indentation in `CURL_SIZEOF()` [131]
  o curl: return error if etag options are used with multiple URLs [5]
+ o curl_multi_fdset: include the shutdown connections in the set [168]
  o curl_multi_waitfds.md: tidy up the example [162]
  o curl_multibyte: support Windows paths longer than MAX_PATH [76]
  o curl_setup: fix missing `ADDRESS_FAMILY` type in rare build cases [144]
@@ -112,10 +115,13 @@ This release includes the following bugfixes:
  o docs/HTTP-COOKIES.md: link to more information [125]
  o docs/libcurl/opts: clarify the return values [114]
  o docs/libcurl: return value overhall [120]
+ o docs/TLS-SESSIONS: fix typo, the->they [189]
+ o docs: document the behavior of -- in the curl command line [198]
  o docs: use lowercase curl and libcurl [113]
  o doh: cleanups and extended HTTPS RR code [161]
  o doh: send HTTPS RR requests for all HTTP(S) transfers [160]
  o easy: make curl_easy_perform() return error if connection still there [163]
+ o easy_lock: use Sleep(1) for thread yield on old Windows [191]
  o ECH: update APIs to those agreed with OpenSSL maintainers [101]
  o examples/block-ip: drop redundant `memory.h` include
  o examples/block-ip: show how to block IP addresses [74]
@@ -139,6 +145,7 @@ This release includes the following bugfixes:
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
  o lib: supress deprecation warnings in apple builds [32]
  o lib: TLS session ticket caching reworked [60]
+ o libcurl/opts: do not save files in dirs where attackers have access [199]
  o Makefile.mk: drop in favour of autotools and cmake (MS-DOS, AmigaOS3) [38]
  o mbedtls: fix handling of blocked sends [116]
  o mime: explicitly rewind subparts at attachment time. [80]
@@ -206,6 +213,7 @@ This release includes the following bugfixes:
  o websocket: fix message send corruption [188]
  o windows: drop dupe macros, detect `CURL_OS` for WinCE ARM, indentation [183]
  o windows: drop redundant `USE_WIN32_SMALL_FILES` macro [145]
+ o windows: merge `config-win32ce.h` into `config-win32.h` [196]
  o ws-docs: remove the outdated texts saying ws support is experimental [15]
 
 This release includes the following known bugs:
@@ -226,19 +234,19 @@ Planned upcoming removals include:
 This release would not have looked like this without help, code, reports and
 advice from friends like these:
 
-  Aleksander Mazur, Andy Pan, Asger Hautop Drewsen, baranyaib90 on github,
-  Ben Zanin, Brad House, Christian Heusel, Christian Schmitz,
-  Christopher Dannemiller, Dan Fandrich, Daniel Stenberg, Darren Banfi,
-  Deniz Sökmen, dependabot[bot], Derek Huang, dwickr, Ganesh Viswanathan,
-  Hermes Zhang, IcedCoffeee on github, Jakub Jelen, Jeroen Ooms, Jiri Stary,
-  Kai Pastor, Kevin Sun, Kuan-Wei Chiu, Manuel Einfalt, Marcel Raad,
-  Milon Renatus, Mohammed Sadiq, na-trium-144 on github, Neil Horman,
-  Nicolás San Martín, Patrick Monnerat, prpr19xx on github, Qriist on github,
-  Ralph Sennhauser, Randall S. Becker, Ray Satiro, renovate[bot],
-  Rudi Heitbaum, Samuel Henrique, Stefan Eissing, Stephen Farrell, Tal Regev,
-  Tamás Bálint Misius, Tamir Duberstein, Viktor Szakats, Yedaya Katsman,
-  Yihang Zhou
-  (49 contributors)
+  9cel, Aleksander Mazur, Andy Pan, Asger Hautop Drewsen,
+  baranyaib90 on github, Ben Zanin, Brad House, Christian Heusel,
+  Christian Schmitz, Christopher Dannemiller, Dan Fandrich, Daniel Stenberg,
+  Darren Banfi, Deniz Sökmen, dependabot[bot], Derek Huang, Donguk Kim, dwickr,
+  Ganesh Viswanathan, Hermes Zhang, IcedCoffeee on github, Jakub Jelen,
+  Jeroen Ooms, Jiri Stary, Kai Pastor, Kevin Sun, Kuan-Wei Chiu,
+  Manuel Einfalt, Marcel Raad, Milon Renatus, Mohammed Sadiq,
+  na-trium-144 on github, Neil Horman, Neil Johari, Nicolás San Martín,
+  Patrick Monnerat, prpr19xx on github, Qriist on github, Ralph Sennhauser,
+  Randall S. Becker, Ray Satiro, renovate[bot], Rudi Heitbaum, Samuel Henrique,
+  Stefan Eissing, Stephen Farrell, Tal Regev, Tamás Bálint Misius,
+  Tamir Duberstein, Viktor Szakats, Yedaya Katsman, Yihang Zhou
+  (52 contributors)
 
 References to bug reports and discussions on issues:
 
@@ -409,6 +417,7 @@ References to bug reports and discussions on issues:
  [165] = https://curl.se/bug/?i=15992
  [166] = https://curl.se/bug/?i=16039
  [167] = https://curl.se/bug/?i=15990
+ [168] = https://curl.se/bug/?i=15156
  [169] = https://curl.se/bug/?i=16000
  [170] = https://curl.se/bug/?i=15996
  [171] = https://curl.se/bug/?i=15984
@@ -426,8 +435,15 @@ References to bug reports and discussions on issues:
  [183] = https://curl.se/bug/?i=16029
  [184] = https://curl.se/bug/?i=16027
  [185] = https://curl.se/bug/?i=16014
+ [186] = https://curl.se/bug/?i=16028
  [188] = https://curl.se/bug/?i=15865
+ [189] = https://curl.se/bug/?i=16057
  [190] = https://curl.se/bug/?i=16015
+ [191] = https://curl.se/bug/?i=16048
  [192] = https://curl.se/bug/?i=16020
  [194] = https://curl.se/bug/?i=16019
  [195] = https://curl.se/bug/?i=16009
+ [196] = https://curl.se/bug/?i=16038
+ [198] = https://curl.se/bug/?i=16053
+ [199] = https://curl.se/bug/?i=16051
+ [201] = https://curl.se/bug/?i=16041
