@@ -950,7 +950,9 @@ struct connectdata {
 #endif
   unsigned char transport; /* one of the TRNSPRT_* defines */
   unsigned char ip_version; /* copied from the Curl_easy at creation time */
-  unsigned char httpversion; /* the HTTP version*10 reported by the server */
+  /* HTTP version last responded with by the server.
+   * 0 at start, then one of 09, 10, 11, etc. */
+  unsigned char httpversion_seen;
   unsigned char connect_only;
   unsigned char gssapi_delegation; /* inherited from set.gssapi_delegation */
 };

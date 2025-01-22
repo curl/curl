@@ -66,7 +66,8 @@ CURLcode Curl_req_soft_reset(struct SingleRequest *req,
   req->headerbytecount = 0;
   req->allheadercount =  0;
   req->deductheadercount = 0;
-
+  req->httpversion_sent = 0;
+  req->httpversion = 0;
   result = Curl_client_start(data);
   if(result)
     return result;
@@ -373,7 +374,8 @@ static CURLcode req_send_buffer_add(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req)
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req,
+                       unsigned char httpversion)
 {
   CURLcode result;
   const char *buf;
@@ -382,6 +384,7 @@ CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *req)
   if(!data || !data->conn)
     return CURLE_FAILED_INIT;
 
+  data->req.httpversion_sent = httpversion;
   buf = Curl_dyn_ptr(req);
   blen = Curl_dyn_len(req);
   if(!Curl_creader_total_length(data)) {

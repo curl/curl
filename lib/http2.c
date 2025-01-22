@@ -2723,6 +2723,9 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
     }
     break;
   }
+  case CF_QUERY_HTTP_VERSION:
+    *pres1 = 20;
+    return CURLE_OK;
   default:
     break;
   }
@@ -2733,7 +2736,7 @@ static CURLcode cf_h2_query(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_nghttp2 = {
   "HTTP/2",
-  CF_TYPE_MULTIPLEX,
+  CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
   CURL_LOG_LVL_NONE,
   cf_h2_destroy,
   cf_h2_connect,
@@ -2807,35 +2810,12 @@ out:
   return result;
 }
 
-static bool cf_is_http2(struct Curl_cfilter *cf,
-                        const struct Curl_easy *data)
+bool Curl_http2_may_switch(struct Curl_easy *data)
 {
-  (void)data;
-  for(; cf; cf = cf->next) {
-    if(cf->cft == &Curl_cft_nghttp2)
-      return TRUE;
-    if(cf->cft->flags & CF_TYPE_IP_CONNECT)
-      return FALSE;
-  }
-  return FALSE;
-}
-
-bool Curl_conn_is_http2(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex)
-{
-  return conn ? cf_is_http2(conn->cfilter[sockindex], data) : FALSE;
-}
-
-bool Curl_http2_may_switch(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex)
-{
-  (void)sockindex;
-  if(!Curl_conn_is_http2(data, conn, sockindex) &&
+  if(Curl_conn_http_version(data) < 20 &&
      data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
 #ifndef CURL_DISABLE_PROXY
-    if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+    if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
       /* We do not support HTTP/2 proxies yet. Also it is debatable
          whether or not this setting should apply to HTTP/2 proxies. */
       infof(data, "Ignoring HTTP/2 prior knowledge due to proxy");
@@ -2847,21 +2827,19 @@ bool Curl_http2_may_switch(struct Curl_easy *data,
   return FALSE;
 }
 
-CURLcode Curl_http2_switch(struct Curl_easy *data,
-                           struct connectdata *conn, int sockindex)
+CURLcode Curl_http2_switch(struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
+  DEBUGASSERT(Curl_conn_http_version(data) < 20);
 
-  result = http2_cfilter_add(&cf, data, conn, sockindex, FALSE);
+  result = http2_cfilter_add(&cf, data, data->conn, FIRSTSOCKET, FALSE);
   if(result)
     return result;
   CURL_TRC_CF(data, cf, "switching connection to HTTP/2");
 
-  conn->httpversion = 20; /* we know we are on HTTP/2 now */
-  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  data->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   Curl_multi_connchanged(data->multi);
 
   if(cf->next) {
@@ -2876,14 +2854,13 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct Curl_cfilter *cf_h2;
   CURLcode result;
 
-  DEBUGASSERT(!cf_is_http2(cf, data));
+  DEBUGASSERT(Curl_conn_http_version(data) < 20);
 
   result = http2_cfilter_insert_after(cf, data, FALSE);
   if(result)
     return result;
 
   cf_h2 = cf->next;
-  cf->conn->httpversion = 20; /* we know we are on HTTP/2 now */
   cf->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   Curl_multi_connchanged(data->multi);
 
@@ -2902,7 +2879,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   struct cf_h2_ctx *ctx;
   CURLcode result;
 
-  DEBUGASSERT(!Curl_conn_is_http2(data, conn, sockindex));
+  DEBUGASSERT(Curl_conn_http_version(data) <  20);
   DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
@@ -2935,7 +2912,6 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
           " after upgrade: len=%zu", nread);
   }
 
-  conn->httpversion = 20; /* we know we are on HTTP/2 now */
   conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   Curl_multi_connchanged(data->multi);
 
@@ -2950,7 +2926,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
    CURLE_HTTP2_STREAM error! */
 bool Curl_h2_http_1_1_error(struct Curl_easy *data)
 {
-  if(Curl_conn_is_http2(data, data->conn, FIRSTSOCKET)) {
+  if(Curl_conn_http_version(data) == 20) {
     int err = Curl_conn_get_stream_error(data, data->conn, FIRSTSOCKET);
     return err == NGHTTP2_HTTP_1_1_REQUIRED;
   }

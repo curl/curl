@@ -230,6 +230,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_RtspReq rtspreq = data->set.rtspreq;
   struct RTSP *rtsp = data->req.p.rtsp;
   struct dynbuf req_buffer;
+  unsigned char httpversion = 11; /* RTSP is close to HTTP/1.1, sort of... */
 
   const char *p_request = NULL;
   const char *p_session_id = NULL;
@@ -499,7 +500,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
       goto out;
   }
 
-  result = Curl_add_custom_headers(data, FALSE, &req_buffer);
+  result = Curl_add_custom_headers(data, FALSE, httpversion, &req_buffer);
   if(result)
     goto out;
 
@@ -585,7 +586,7 @@ static CURLcode rtsp_do(struct Curl_easy *data, bool *done)
   Curl_xfer_setup1(data, CURL_XFER_SENDRECV, -1, TRUE);
 
   /* issue the request */
-  result = Curl_req_send(data, &req_buffer);
+  result = Curl_req_send(data, &req_buffer, httpversion);
   if(result) {
     failf(data, "Failed sending RTSP request");
     goto out;

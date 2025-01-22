@@ -46,15 +46,7 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
                              const struct Curl_addrinfo *ai,
                              int transport);
 
-bool Curl_conn_is_http3(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex);
-
 extern struct Curl_cftype Curl_cft_http3;
-
-#else /* USE_HTTP3 */
-
-#define Curl_conn_is_http3(a,b,c)   FALSE
 
 #endif /* !USE_HTTP3 */
 

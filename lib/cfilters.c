@@ -494,11 +494,33 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_MULTIPLEX)
       return TRUE;
-    if(cf->cft->flags & CF_TYPE_IP_CONNECT
-       || cf->cft->flags & CF_TYPE_SSL)
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
       return FALSE;
   }
   return FALSE;
+}
+
+unsigned char Curl_conn_http_version(struct Curl_easy *data)
+{
+  struct Curl_cfilter *cf;
+  CURLcode result = CURLE_UNKNOWN_OPTION;
+  unsigned char v = 0;
+
+  cf = data->conn ? data->conn->cfilter[FIRSTSOCKET] : NULL;
+  for(; cf; cf = cf->next) {
+    if(cf->cft->flags & CF_TYPE_HTTP) {
+      int value = 0;
+      result = cf->cft->query(cf, data, CF_QUERY_HTTP_VERSION, &value, NULL);
+      if(!result && ((value < 0) || (value > 255)))
+        result = CURLE_FAILED_INIT;
+      else
+        v = (unsigned char)value;
+      break;
+    }
+    if(cf->cft->flags & (CF_TYPE_IP_CONNECT|CF_TYPE_SSL))
+      break;
+  }
+  return result ? 0 : v;
 }
 
 bool Curl_conn_data_pending(struct Curl_easy *data, int sockindex)

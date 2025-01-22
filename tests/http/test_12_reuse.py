@@ -98,6 +98,7 @@ class TestReuse:
         for s in r.stats:
             assert s['http_version'] == '3', f'{s}'
 
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_04_alt_svc_h3h2(self, env: Env, httpd, nghttpx):
         httpd.clear_extra_configs()
         httpd.reload()
@@ -115,11 +116,12 @@ class TestReuse:
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)
-        # We expect the connection to be reused
+        # We expect the connection to be reused and use HTTP/2
         assert r.total_connects == 1
         for s in r.stats:
             assert s['http_version'] == '2', f'{s}'
 
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_12_05_alt_svc_h3h1(self, env: Env, httpd, nghttpx):
         httpd.clear_extra_configs()
         httpd.reload()
@@ -137,9 +139,7 @@ class TestReuse:
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)
-        # We expect the connection to be reused
+        # We expect the connection to be reused and use HTTP/1.1
         assert r.total_connects == 1
-        # When using http/1.1 from alt-svc, we ALPN-negotiate 'h2,http/1.1' anyway
-        # which means our server gives us h2
         for s in r.stats:
-            assert s['http_version'] == '2', f'{s}'
+            assert s['http_version'] == '1.1', f'{s}'

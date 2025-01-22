@@ -689,24 +689,6 @@ CURLcode Curl_cf_quic_create(struct Curl_cfilter **pcf,
 #endif
 }
 
-bool Curl_conn_is_http3(const struct Curl_easy *data,
-                        const struct connectdata *conn,
-                        int sockindex)
-{
-#if defined(USE_NGTCP2) && defined(USE_NGHTTP3)
-  return Curl_conn_is_ngtcp2(data, conn, sockindex);
-#elif defined(USE_OPENSSL_QUIC) && defined(USE_NGHTTP3)
-  return Curl_conn_is_osslq(data, conn, sockindex);
-#elif defined(USE_QUICHE)
-  return Curl_conn_is_quiche(data, conn, sockindex);
-#elif defined(USE_MSH3)
-  return Curl_conn_is_msh3(data, conn, sockindex);
-#else
-  return (conn->handler->protocol & PROTO_FAMILY_HTTP) &&
-         (conn->httpversion == 30);
-#endif
-}
-
 CURLcode Curl_conn_may_http3(struct Curl_easy *data,
                              const struct connectdata *conn)
 {

@@ -81,10 +81,11 @@ struct SingleRequest {
                                    first one */
   curl_off_t offset;            /* possible resume offset read from the
                                    Content-Range: header */
-  int httpversion;              /* Version in response (09, 10, 11, etc.) */
   int httpcode;                 /* error code from the 'HTTP/1.? XXX' or
                                    'RTSP/1.? XXX' line */
   int keepon;
+  unsigned char httpversion_sent; /* Version in request (09, 10, 11, etc.) */
+  unsigned char httpversion;    /* Version in response (09, 10, 11, etc.) */
   enum upgrade101 upgr101;      /* 101 upgrade state */
 
   /* Client Writer stack, handles transfer- and content-encodings, protocol
@@ -199,9 +200,11 @@ void Curl_req_hard_reset(struct SingleRequest *req, struct Curl_easy *data);
  * bytes are really send.
  * @param data      the transfer making the request
  * @param buf       the complete header bytes, no body
+ * @param httpversion version used in request (09, 10, 11, etc.)
  * @return CURLE_OK (on blocking with *pnwritten == 0) or error.
  */
-CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf);
+CURLcode Curl_req_send(struct Curl_easy *data, struct dynbuf *buf,
+                       unsigned char httpversion);
 
 /**
  * TRUE iff the request has sent all request headers and data.

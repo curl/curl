@@ -108,9 +108,10 @@ static CURLcode http_host(struct Curl_easy *data, struct connectdata *conn);
 static CURLcode http_range(struct Curl_easy *data,
                            Curl_HttpReq httpreq);
 static CURLcode http_req_complete(struct Curl_easy *data,
-                                  struct dynbuf *r, Curl_HttpReq httpreq);
+                                  struct dynbuf *r, int httpversion,
+                                  Curl_HttpReq httpreq);
 static CURLcode http_req_set_reader(struct Curl_easy *data,
-                                    Curl_HttpReq httpreq,
+                                    Curl_HttpReq httpreq, int httpversion,
                                     const char **tep);
 static CURLcode http_size(struct Curl_easy *data);
 static CURLcode http_statusline(struct Curl_easy *data,
@@ -121,8 +122,6 @@ static CURLcode http_useragent(struct Curl_easy *data);
 #ifdef HAVE_LIBZ
 static CURLcode http_transferencode(struct Curl_easy *data);
 #endif
-static bool use_http_1_1plus(const struct Curl_easy *data,
-                             const struct connectdata *conn);
 
 
 /*
@@ -533,7 +532,7 @@ CURLcode Curl_http_auth_act(struct Curl_easy *data)
     else
       data->info.httpauthpicked = data->state.authhost.picked;
     if(data->state.authhost.picked == CURLAUTH_NTLM &&
-       conn->httpversion > 11) {
+       (data->req.httpversion_sent > 11)) {
       infof(data, "Forcing HTTP/1.1 for NTLM");
       connclose(conn, "Force HTTP/1.1 connection");
       data->state.httpwant = CURL_HTTP_VERSION_1_1;
@@ -1217,45 +1216,55 @@ CURLcode Curl_http_done(struct Curl_easy *data,
   return CURLE_OK;
 }
 
-/*
- * Determine if we should use HTTP 1.1 (OR BETTER) for this request. Reasons
- * to avoid it include:
- *
- * - if the user specifically requested HTTP 1.0
- * - if the server we are connected to only supports 1.0
- * - if any server previously contacted to handle this request only supports
- * 1.0.
- */
-static bool use_http_1_1plus(const struct Curl_easy *data,
-                             const struct connectdata *conn)
+/* Determine if we may use HTTP 1.1 for this request. */
+static bool http_may_use_1_1(const struct Curl_easy *data)
 {
-  if((data->state.httpversion == 10) || (conn->httpversion == 10))
+  const struct connectdata *conn = data->conn;
+  /* We have seen a previous response for *this* transfer with 1.0,
+   * on another connection or the same one. */
+  if(data->state.httpversion == 10)
     return FALSE;
+  /* We have seen a previous response on *this* connection with 1.0. */
+  if(conn->httpversion_seen == 10)
+    return FALSE;
+  /* We want 1.0 and have seen no previous response on *this* connection
+     with a higher version (maybe no response at all yet). */
   if((data->state.httpwant == CURL_HTTP_VERSION_1_0) &&
-     (conn->httpversion <= 10))
+     (conn->httpversion_seen <= 10))
     return FALSE;
+  /* We want something newer than 1.0 or have no preferences. */
   return (data->state.httpwant == CURL_HTTP_VERSION_NONE) ||
          (data->state.httpwant >= CURL_HTTP_VERSION_1_1);
 }
 
-static const char *get_http_string(const struct Curl_easy *data,
-                                   const struct connectdata *conn)
+static unsigned char http_request_version(struct Curl_easy *data)
 {
-  if(Curl_conn_is_http3(data, conn, FIRSTSOCKET))
-    return "3";
-  if(Curl_conn_is_http2(data, conn, FIRSTSOCKET))
-    return "2";
-  if(use_http_1_1plus(data, conn))
-    return "1.1";
+  unsigned char httpversion = Curl_conn_http_version(data);
+  if(!httpversion) {
+    /* No specific HTTP connection filter installed. */
+    httpversion = http_may_use_1_1(data) ? 11 : 10;
+  }
+  return httpversion;
+}
 
-  return "1.0";
+static const char *get_http_string(int httpversion)
+{
+  switch(httpversion) {
+    case 30:
+      return "3";
+    case 20:
+      return "2";
+    case 11:
+      return "1.1";
+    default:
+      return "1.0";
+  }
 }
 
 CURLcode Curl_add_custom_headers(struct Curl_easy *data,
-                                 bool is_connect,
+                                 bool is_connect, int httpversion,
                                  struct dynbuf *req)
 {
-  struct connectdata *conn = data->conn;
   char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
@@ -1268,7 +1277,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
   if(is_connect)
     proxy = HEADER_CONNECT;
   else
-    proxy = conn->bits.httpproxy && !conn->bits.tunnel_proxy ?
+    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy ?
       HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
@@ -1368,7 +1377,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                      Connection: */
                   checkprefix("Connection:", compare))
             ;
-          else if((conn->httpversion >= 20) &&
+          else if((httpversion >= 20) &&
                   checkprefix("Transfer-Encoding:", compare))
             /* HTTP/2 does not support chunked requests */
             ;
@@ -1900,7 +1909,7 @@ static CURLcode http_resume(struct Curl_easy *data, Curl_HttpReq httpreq)
 }
 
 static CURLcode http_req_set_reader(struct Curl_easy *data,
-                                    Curl_HttpReq httpreq,
+                                    Curl_HttpReq httpreq, int httpversion,
                                     const char **tep)
 {
   CURLcode result = CURLE_OK;
@@ -1920,12 +1929,10 @@ static CURLcode http_req_set_reader(struct Curl_easy *data,
     data->req.upload_chunky =
       Curl_compareheader(ptr,
                          STRCONST("Transfer-Encoding:"), STRCONST("chunked"));
-    if(data->req.upload_chunky &&
-       use_http_1_1plus(data, data->conn) &&
-       (data->conn->httpversion >= 20)) {
-       infof(data, "suppressing chunked transfer encoding on connection "
-             "using HTTP version 2 or higher");
-       data->req.upload_chunky = FALSE;
+    if(data->req.upload_chunky && (httpversion >= 20)) {
+      infof(data, "suppressing chunked transfer encoding on connection "
+            "using HTTP version 2 or higher");
+      data->req.upload_chunky = FALSE;
     }
   }
   else {
@@ -1933,10 +1940,10 @@ static CURLcode http_req_set_reader(struct Curl_easy *data,
 
     if(req_clen < 0) {
       /* indeterminate request content length */
-      if(use_http_1_1plus(data, data->conn)) {
+      if(httpversion > 10) {
         /* On HTTP/1.1, enable chunked, on HTTP/2 and later we do not
          * need it */
-        data->req.upload_chunky = (data->conn->httpversion < 20);
+        data->req.upload_chunky = (httpversion < 20);
       }
       else {
         failf(data, "Chunky upload is not supported by HTTP 1.0");
@@ -1955,7 +1962,7 @@ static CURLcode http_req_set_reader(struct Curl_easy *data,
 }
 
 static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
-                          bool *announced_exp100)
+                          int httpversion, bool *announced_exp100)
 {
   CURLcode result;
   char *ptr;
@@ -1974,9 +1981,7 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
     *announced_exp100 =
       Curl_compareheader(ptr, STRCONST("Expect:"), STRCONST("100-continue"));
   }
-  else if(!data->state.disableexpect &&
-          use_http_1_1plus(data, data->conn) &&
-          (data->conn->httpversion < 20)) {
+  else if(!data->state.disableexpect && (httpversion == 11)) {
     /* if not doing HTTP 1.0 or version 2, or disabled explicitly, we add an
        Expect: 100-continue to the headers which actually speeds up post
        operations (as there is one packet coming back from the web server) */
@@ -1992,7 +1997,8 @@ static CURLcode addexpect(struct Curl_easy *data, struct dynbuf *r,
 }
 
 static CURLcode http_req_complete(struct Curl_easy *data,
-                                  struct dynbuf *r, Curl_HttpReq httpreq)
+                                  struct dynbuf *r, int httpversion,
+                                  Curl_HttpReq httpreq)
 {
   CURLcode result = CURLE_OK;
   curl_off_t req_clen;
@@ -2052,7 +2058,7 @@ static CURLcode http_req_complete(struct Curl_easy *data,
           goto out;
       }
     }
-    result = addexpect(data, r, &announced_exp100);
+    result = addexpect(data, r, httpversion, &announced_exp100);
     if(result)
       goto out;
     break;
@@ -2326,6 +2332,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   struct dynbuf req;
   char *altused = NULL;
   const char *p_accept;      /* Accept: string */
+  unsigned char httpversion;
 
   /* Always consider the DO phase done after this function call, even if there
      may be parts of the request that are not yet sent, since we can deal with
@@ -2334,29 +2341,29 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
 
   switch(conn->alpn) {
   case CURL_HTTP_VERSION_3:
-    DEBUGASSERT(Curl_conn_is_http3(data, conn, FIRSTSOCKET));
+    DEBUGASSERT(Curl_conn_http_version(data) == 30);
     break;
   case CURL_HTTP_VERSION_2:
 #ifndef CURL_DISABLE_PROXY
-    if(!Curl_conn_is_http2(data, conn, FIRSTSOCKET) &&
+    if((Curl_conn_http_version(data) != 20) &&
        conn->bits.proxy && !conn->bits.tunnel_proxy
       ) {
-      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
+      result = Curl_http2_switch(data);
       if(result)
         goto fail;
     }
     else
 #endif
-      DEBUGASSERT(Curl_conn_is_http2(data, conn, FIRSTSOCKET));
+      DEBUGASSERT(Curl_conn_http_version(data) == 20);
     break;
   case CURL_HTTP_VERSION_1_1:
     /* continue with HTTP/1.x when explicitly requested */
     break;
   default:
     /* Check if user wants to use HTTP/2 with clear TCP */
-    if(Curl_http2_may_switch(data, conn, FIRSTSOCKET)) {
+    if(Curl_http2_may_switch(data)) {
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
+      result = Curl_http2_switch(data);
       if(result)
         goto fail;
     }
@@ -2420,7 +2427,10 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
 #endif
 
-  result = http_req_set_reader(data, httpreq, &te);
+  httpversion = http_request_version(data);
+  httpstring = get_http_string(httpversion);
+
+  result = http_req_set_reader(data, httpreq, httpversion, &te);
   if(result)
     goto fail;
 
@@ -2430,8 +2440,6 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   result = http_range(data, httpreq);
   if(result)
     goto fail;
-
-  httpstring = get_http_string(data, conn);
 
   /* initialize a dynamic send-buffer */
   Curl_dyn_init(&req, DYN_HTTP_REQUEST);
@@ -2526,8 +2534,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     goto fail;
   }
 
-  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET) &&
-     conn->httpversion < 20 &&
+  if(!Curl_conn_is_ssl(conn, FIRSTSOCKET) && (httpversion < 20) &&
      (data->state.httpwant == CURL_HTTP_VERSION_2)) {
     /* append HTTP2 upgrade magic stuff to the HTTP request if it is not done
        over SSL */
@@ -2546,19 +2553,19 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
   if(!result)
     result = Curl_add_timecondition(data, &req);
   if(!result)
-    result = Curl_add_custom_headers(data, FALSE, &req);
+    result = Curl_add_custom_headers(data, FALSE, httpversion, &req);
 
   if(!result) {
     /* req_send takes ownership of the 'req' memory on success */
-    result = http_req_complete(data, &req, httpreq);
+    result = http_req_complete(data, &req, httpversion, httpreq);
     if(!result)
-      result = Curl_req_send(data, &req);
+      result = Curl_req_send(data, &req, httpversion);
   }
   Curl_dyn_free(&req);
   if(result)
     goto fail;
 
-  if((conn->httpversion >= 20) && data->req.upload_chunky)
+  if((httpversion >= 20) && data->req.upload_chunky)
     /* upload_chunky was set above to set up the request in a chunky fashion,
        but is disabled here again to avoid that the chunked encoded version is
        actually used when sending the request body over h2 */
@@ -2680,8 +2687,8 @@ static CURLcode http_header(struct Curl_easy *data,
         )) ? HD_VAL(hd, hdlen, "Alt-Svc:") : NULL;
     if(v) {
       /* the ALPN of the current request */
-      enum alpnid id = (conn->httpversion == 30) ? ALPN_h3 :
-                         (conn->httpversion == 20) ? ALPN_h2 : ALPN_h1;
+      enum alpnid id = (k->httpversion == 30) ? ALPN_h3 :
+                         (k->httpversion == 20) ? ALPN_h2 : ALPN_h1;
       return Curl_altsvc_parse(data, data->asi, v, id, conn->host.name,
                                curlx_uitous((unsigned int)conn->remote_port));
     }
@@ -2753,7 +2760,7 @@ static CURLcode http_header(struct Curl_easy *data,
       streamclose(conn, "Connection: close used");
       return CURLE_OK;
     }
-    if((conn->httpversion == 10) &&
+    if((k->httpversion == 10) &&
        HD_IS_AND_SAYS(hd, hdlen, "Connection:", "keep-alive")) {
       /*
        * An HTTP/1.0 reply with the 'Connection: keep-alive' line
@@ -2843,7 +2850,7 @@ static CURLcode http_header(struct Curl_easy *data,
 #ifndef CURL_DISABLE_PROXY
     v = HD_VAL(hd, hdlen, "Proxy-Connection:");
     if(v) {
-      if((conn->httpversion == 10) && conn->bits.httpproxy &&
+      if((k->httpversion == 10) && conn->bits.httpproxy &&
          HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "keep-alive")) {
         /*
          * When an HTTP/1.0 reply comes when using a proxy, the
@@ -2854,7 +2861,7 @@ static CURLcode http_header(struct Curl_easy *data,
         connkeep(conn, "Proxy-Connection keep-alive"); /* do not close */
         infof(data, "HTTP/1.0 proxy connection set to keep alive");
       }
-      else if((conn->httpversion == 11) && conn->bits.httpproxy &&
+      else if((k->httpversion == 11) && conn->bits.httpproxy &&
               HD_IS_AND_SAYS(hd, hdlen, "Proxy-Connection:", "close")) {
         /*
          * We get an HTTP/1.1 response from a proxy and it says it will
@@ -3043,11 +3050,11 @@ static CURLcode http_statusline(struct Curl_easy *data,
   case 30:
 #endif
     /* no major version switch mid-connection */
-    if(conn->httpversion &&
-       (k->httpversion/10 != conn->httpversion/10)) {
+    if(k->httpversion_sent &&
+       (k->httpversion/10 != k->httpversion_sent/10)) {
       failf(data, "Version mismatch (from HTTP/%u to HTTP/%u)",
-            conn->httpversion/10, k->httpversion/10);
-      return CURLE_UNSUPPORTED_PROTOCOL;
+            k->httpversion_sent/10, k->httpversion/10);
+      return CURLE_WEIRD_SERVER_REPLY;
     }
     break;
   default:
@@ -3058,7 +3065,7 @@ static CURLcode http_statusline(struct Curl_easy *data,
 
   data->info.httpcode = k->httpcode;
   data->info.httpversion = k->httpversion;
-  conn->httpversion = (unsigned char)k->httpversion;
+  conn->httpversion_seen = (unsigned char)k->httpversion;
 
   if(!data->state.httpversion || data->state.httpversion > k->httpversion)
     /* store the lowest server version we encounter */
@@ -3238,7 +3245,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
 
   if(k->upgr101 == UPGR101_RECEIVED) {
     /* supposedly upgraded to http2 now */
-    if(conn->httpversion != 20)
+    if(data->req.httpversion != 20)
       infof(data, "Lying server, not serving HTTP/2");
   }
 
@@ -3274,8 +3281,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
       break;
     case 101:
       /* Switching Protocols only allowed from HTTP/1.1 */
-
-      if(conn->httpversion != 11) {
+      if(k->httpversion_sent != 11) {
         /* invalid for other HTTP versions */
         failf(data, "unexpected 101 response code");
         result = CURLE_WEIRD_SERVER_REPLY;
@@ -3289,6 +3295,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
         /* We expect more response from HTTP/2 later */
         k->header = TRUE;
         k->headerline = 0; /* restart the header line counter */
+        k->httpversion_sent = 20; /* It's a HTTP/2 request now */
         /* Any remaining `buf` bytes are already HTTP/2 and passed to
          * be processed. */
         result = Curl_http2_upgrade(data, conn, FIRSTSOCKET, buf, blen);
@@ -3337,7 +3344,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
   }
 
   if((k->size == -1) && !k->chunk && !conn->bits.close &&
-     (conn->httpversion == 11) &&
+     (k->httpversion == 11) &&
      !(conn->handler->protocol & CURLPROTO_RTSP) &&
      data->state.httpreq != HTTPREQ_HEAD) {
     /* On HTTP 1.1, when connection is not to get closed, but no
@@ -3486,9 +3493,7 @@ static CURLcode http_on_response(struct Curl_easy *data,
      like to call http2_handle_stream_close to properly close a
      stream. In order to do this, we keep reading until we
      close the stream. */
-  if(0 == k->maxdownload
-     && !Curl_conn_is_http2(data, conn, FIRSTSOCKET)
-     && !Curl_conn_is_http3(data, conn, FIRSTSOCKET))
+  if((0 == k->maxdownload) && (k->httpversion_sent < 20))
     k->download_done = TRUE;
 
   /* final response without error, prepare to receive the body */
@@ -3573,7 +3578,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
           p++;
           if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
             if(ISBLANK(p[2])) {
-              k->httpversion = 10 + (p[1] - '0');
+              k->httpversion = (unsigned char)(10 + (p[1] - '0'));
               p += 3;
               if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
@@ -3593,7 +3598,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
         case '3':
           if(!ISBLANK(p[1]))
             break;
-          k->httpversion = (*p - '0') * 10;
+          k->httpversion = (unsigned char)((*p - '0') * 10);
           p += 2;
           if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
             k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
@@ -3723,10 +3728,11 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
                            Curl_dyn_len(&data->state.headerb));
 
         if(st == STATUS_BAD) {
-          /* this is not the beginning of a protocol first header line */
+          /* this is not the beginning of a protocol first header line.
+           * Cannot be 0.9 if version was detected or connection was reused. */
           k->header = FALSE;
           streamclose(conn, "bad HTTP: No end-of-message indicator");
-          if(conn->httpversion >= 10) {
+          if((k->httpversion >= 10) || conn->bits.reuse) {
             failf(data, "Invalid status line");
             return CURLE_WEIRD_SERVER_REPLY;
           }
@@ -3761,8 +3767,9 @@ static CURLcode http_parse_headers(struct Curl_easy *data,
                                        Curl_dyn_len(&data->state.headerb));
       if(st == STATUS_BAD) {
         streamclose(conn, "bad HTTP: No end-of-message indicator");
-        /* this is not the beginning of a protocol first header line */
-        if(conn->httpversion >= 10) {
+        /* this is not the beginning of a protocol first header line.
+         * Cannot be 0.9 if version was detected or connection was reused. */
+        if((k->httpversion >= 10) || conn->bits.reuse) {
           failf(data, "Invalid status line");
           return CURLE_WEIRD_SERVER_REPLY;
         }

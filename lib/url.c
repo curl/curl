@@ -1002,7 +1002,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
   if(match->may_multiplex &&
      (data->state.httpwant == CURL_HTTP_VERSION_2_0) &&
      (needle->handler->protocol & CURLPROTO_HTTP) &&
-     !conn->httpversion) {
+     !conn->httpversion_seen) {
     if(data->set.pipewait) {
       infof(data, "Server upgrade does not support multiplex yet, wait");
       match->found = NULL;
@@ -1036,17 +1036,18 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
    * so we take any existing connection. */
   if((needle->handler->protocol & PROTO_FAMILY_HTTP) &&
      (data->state.httpwant != CURL_HTTP_VERSION_2TLS)) {
-    if((conn->httpversion >= 20) &&
+    unsigned char httpversion = Curl_conn_http_version(data);
+    if((httpversion >= 20) &&
        (data->state.httpwant < CURL_HTTP_VERSION_2_0)) {
       DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
              " with httpversion=%d, we want a version less than h2",
-             conn->connection_id, conn->httpversion));
+             conn->connection_id, httpversion));
     }
-    if((conn->httpversion >= 30) &&
+    if((httpversion >= 30) &&
        (data->state.httpwant < CURL_HTTP_VERSION_3)) {
       DEBUGF(infof(data, "nor reusing conn #%" CURL_FORMAT_CURL_OFF_T
              " with httpversion=%d, we want a version less than h3",
-             conn->connection_id, conn->httpversion));
+             conn->connection_id, httpversion));
       return FALSE;
     }
   }
@@ -3135,14 +3136,14 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
         /* protocol version switch */
         switch(as->dst.alpnid) {
         case ALPN_h1:
-          conn->httpversion = 11;
+          data->state.httpwant = CURL_HTTP_VERSION_1_1;
           break;
         case ALPN_h2:
-          conn->httpversion = 20;
+          data->state.httpwant = CURL_HTTP_VERSION_2_0;
           break;
         case ALPN_h3:
           conn->transport = TRNSPRT_QUIC;
-          conn->httpversion = 30;
+          data->state.httpwant = CURL_HTTP_VERSION_3;
           break;
         default: /* should not be possible */
           break;
