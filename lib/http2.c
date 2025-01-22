@@ -2810,15 +2810,12 @@ out:
   return result;
 }
 
-bool Curl_http2_may_switch(struct Curl_easy *data,
-                           struct connectdata *conn,
-                           int sockindex)
+bool Curl_http2_may_switch(struct Curl_easy *data)
 {
-  (void)sockindex;
   if(Curl_conn_http_version(data) < 20 &&
      data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
 #ifndef CURL_DISABLE_PROXY
-    if(conn->bits.httpproxy && !conn->bits.tunnel_proxy) {
+    if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
       /* We do not support HTTP/2 proxies yet. Also it is debatable
          whether or not this setting should apply to HTTP/2 proxies. */
       infof(data, "Ignoring HTTP/2 prior knowledge due to proxy");
@@ -2830,20 +2827,19 @@ bool Curl_http2_may_switch(struct Curl_easy *data,
   return FALSE;
 }
 
-CURLcode Curl_http2_switch(struct Curl_easy *data,
-                           struct connectdata *conn, int sockindex)
+CURLcode Curl_http2_switch(struct Curl_easy *data)
 {
   struct Curl_cfilter *cf;
   CURLcode result;
 
   DEBUGASSERT(Curl_conn_http_version(data) < 20);
 
-  result = http2_cfilter_add(&cf, data, conn, sockindex, FALSE);
+  result = http2_cfilter_add(&cf, data, data->conn, FIRSTSOCKET, FALSE);
   if(result)
     return result;
   CURL_TRC_CF(data, cf, "switching connection to HTTP/2");
 
-  conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
+  data->conn->bits.multiplex = TRUE; /* at least potentially multiplexed */
   Curl_multi_connchanged(data->multi);
 
   if(cf->next) {

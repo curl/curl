@@ -1265,7 +1265,6 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
                                  bool is_connect, int httpversion,
                                  struct dynbuf *req)
 {
-  struct connectdata *conn = data->conn;
   char *ptr;
   struct curl_slist *h[2];
   struct curl_slist *headers;
@@ -1278,7 +1277,7 @@ CURLcode Curl_add_custom_headers(struct Curl_easy *data,
   if(is_connect)
     proxy = HEADER_CONNECT;
   else
-    proxy = conn->bits.httpproxy && !conn->bits.tunnel_proxy ?
+    proxy = data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy ?
       HEADER_PROXY : HEADER_SERVER;
 
   switch(proxy) {
@@ -2349,7 +2348,7 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     if((Curl_conn_http_version(data) != 20) &&
        conn->bits.proxy && !conn->bits.tunnel_proxy
       ) {
-      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
+      result = Curl_http2_switch(data);
       if(result)
         goto fail;
     }
@@ -2362,9 +2361,9 @@ CURLcode Curl_http(struct Curl_easy *data, bool *done)
     break;
   default:
     /* Check if user wants to use HTTP/2 with clear TCP */
-    if(Curl_http2_may_switch(data, conn, FIRSTSOCKET)) {
+    if(Curl_http2_may_switch(data)) {
       DEBUGF(infof(data, "HTTP/2 over clean TCP"));
-      result = Curl_http2_switch(data, conn, FIRSTSOCKET);
+      result = Curl_http2_switch(data);
       if(result)
         goto fail;
     }
