@@ -1615,7 +1615,7 @@ static bool cf_quiche_conn_is_alive(struct Curl_cfilter *cf,
 
 struct Curl_cftype Curl_cft_http3 = {
   "HTTP/3",
-  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX,
+  CF_TYPE_IP_CONNECT | CF_TYPE_SSL | CF_TYPE_MULTIPLEX | CF_TYPE_HTTP,
   0,
   cf_quiche_destroy,
   cf_quiche_connect,
