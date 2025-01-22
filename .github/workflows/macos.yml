@@ -134,8 +134,8 @@ jobs:
             install: gsasl rtmpdump
             generate: -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON
           - name: 'MultiSSL AppleIDN clang-tidy +examples'
-            install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump
-            generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy
+            install: llvm brotli zstd gnutls nettle mbedtls gsasl rtmpdump fish
+            generate: -DCURL_USE_OPENSSL=ON -DOPENSSL_ROOT_DIR=$(brew --prefix openssl) -DCURL_DEFAULT_SSL_BACKEND=openssl -DCURL_USE_GNUTLS=ON -DCURL_USE_MBEDTLS=ON -DENABLE_ARES=ON -DCURL_USE_GSASL=ON -DUSE_LIBRTMP=ON -DUSE_APPLE_IDN=ON -DUSE_SSLS_EXPORT=ON -DCURL_CLANG_TIDY=ON -DCLANG_TIDY=$(brew --prefix llvm)/bin/clang-tidy -DCURL_COMPLETION_FISH=ON -DCURL_COMPLETION_ZSH=ON
             clang-tidy: true
             chkprefill: _chkprefill
           - name: 'quictls +static libssh +examples'
@@ -239,6 +239,7 @@ jobs:
               [[ '${{ matrix.build.install_steps }}' = *'pytest'* ]] && options+=' -DTEST_NGHTTPX= -DHTTPD_NGHTTPX='
               [ "${_chkprefill}" = '_chkprefill' ] && options+=' -D_CURL_PREFILL=OFF'
               cmake -B "bld${_chkprefill}" -G Ninja -D_CURL_PREFILL=ON \
+                -DCMAKE_INSTALL_PREFIX="$HOME/curl" \
                 -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
                 -DCMAKE_OSX_SYSROOT="${sysroot}" \
                 -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -287,6 +288,10 @@ jobs:
 
       - name: 'curl version'
         run: bld/src/curl --disable --version
+
+      - name: 'cmake install'
+        if: ${{ matrix.build.generate }}
+        run: cmake --install bld --strip
 
       - name: 'build tests'
         run: |

@@ -229,6 +229,10 @@ target_link_libraries(my_target PRIVATE CURL::libcurl)
 - `BUILD_TESTING`:                          Build tests. Default: `ON`
 - `CURL_CLANG_TIDY`:                        Run the build through `clang-tidy`. Default: `OFF`
 - `CURL_CLANG_TIDYFLAGS`:                   Custom options to pass to `clang-tidy`. Default: (empty)
+- `CURL_COMPLETION_FISH`:                   Install fish completions. Default: `OFF`
+- `CURL_COMPLETION_FISH_DIR`:               Custom fish completion install directory.
+- `CURL_COMPLETION_ZSH`:                    Install zsh completions. Default: `OFF`
+- `CURL_COMPLETION_ZSH_DIR`:                Custom zsh completion install directory.
 - `CURL_DEFAULT_SSL_BACKEND`:               Override default TLS backend in MultiSSL builds.
                                             Accepted values in order of default priority:
                                             `wolfssl`, `gnutls`, `mbedtls`, `openssl`, `secure-transport`, `schannel`, `bearssl`, `rustls`

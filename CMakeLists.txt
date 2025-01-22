@@ -2051,6 +2051,8 @@ if(HAVE_MANUAL_TOOLS)
   add_subdirectory(docs)
 endif()
 
+add_subdirectory(scripts)  # for shell completions
+
 list(REMOVE_DUPLICATES CURL_LIBDIRS)
 
 add_subdirectory(lib)
