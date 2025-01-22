@@ -7,7 +7,7 @@ HTTP GET
 </info>
 
 <reply>
-<data>
+<data nocheck="yes">
 HTTP/1.1 200 OK swsclose
 Server: test-server/fake
 Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
@@ -16,22 +16,6 @@ Connection: close
 
 -foo-
 </data>
-<datacheck>
-HTTP/1.1 200 OK swsclose
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-Content-Length: 6
-Connection: close
-
--foo-
-HTTP/1.1 200 OK swsclose
-Server: test-server/fake
-Last-Modified: Tue, 13 Jun 2000 12:10:00 GMT
-Content-Length: 6
-Connection: close
-
--foo-
-</datacheck>
 </reply>
 
 #
