@@ -3579,7 +3579,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
           p++;
           if((p[0] == '.') && (p[1] == '0' || p[1] == '1')) {
             if(ISBLANK(p[2])) {
-              k->httpversion = 10 + (p[1] - '0');
+              k->httpversion = (unsigned char)(10 + (p[1] - '0'));
               p += 3;
               if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
                 k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
@@ -3599,7 +3599,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
         case '3':
           if(!ISBLANK(p[1]))
             break;
-          k->httpversion = (*p - '0') * 10;
+          k->httpversion = (unsigned char)((*p - '0') * 10);
           p += 2;
           if(ISDIGIT(p[0]) && ISDIGIT(p[1]) && ISDIGIT(p[2])) {
             k->httpcode = (p[0] - '0') * 100 + (p[1] - '0') * 10 +
