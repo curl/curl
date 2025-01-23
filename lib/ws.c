@@ -1334,6 +1334,7 @@ const struct Curl_handler Curl_handler_ws = {
   Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
   PORT_HTTP,                            /* defport */
   CURLPROTO_WS,                         /* protocol */
   CURLPROTO_HTTP,                       /* family */
@@ -1360,6 +1361,7 @@ const struct Curl_handler Curl_handler_wss = {
   Curl_http_write_resp_hd,              /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  Curl_http_follow,                     /* follow */
   PORT_HTTPS,                           /* defport */
   CURLPROTO_WSS,                        /* protocol */
   CURLPROTO_HTTP,                       /* family */
