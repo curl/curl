@@ -676,6 +676,12 @@ struct Curl_handler {
   /* attach() attaches this transfer to this connection */
   void (*attach)(struct Curl_easy *data, struct connectdata *conn);
 
+  /* return CURLE_OK if a redirect to `newurl` should be followed,
+     CURLE_TOO_MANY_REDIRECTS otherwise. May alter `data` to change
+     the way the follow request is performed. */
+  CURLcode (*follow)(struct Curl_easy *data, const char *newurl,
+                     followtype type);
+
   int defport;            /* Default port. */
   curl_prot_t protocol;  /* See CURLPROTO_* - this needs to be the single
                             specific protocol bit */

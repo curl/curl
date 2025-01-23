@@ -42,6 +42,18 @@ typedef enum {
   HTTPREQ_HEAD
 } Curl_HttpReq;
 
+
+/* When redirecting transfers. */
+typedef enum {
+  FOLLOW_NONE,  /* not used within the function, just a placeholder to
+                   allow initing to this */
+  FOLLOW_FAKE,  /* only records stuff, not actually following */
+  FOLLOW_RETRY, /* set if this is a request retry as opposed to a real
+                   redirect following */
+  FOLLOW_REDIR /* a full true redirect */
+} followtype;
+
+
 #ifndef CURL_DISABLE_HTTP
 
 #if defined(USE_HTTP3)
@@ -102,6 +114,10 @@ CURLcode Curl_http_write_resp_hd(struct Curl_easy *data,
 CURLcode Curl_http_input_auth(struct Curl_easy *data, bool proxy,
                               const char *auth);
 CURLcode Curl_http_auth_act(struct Curl_easy *data);
+
+/* follow a redirect or not */
+CURLcode Curl_http_follow(struct Curl_easy *data, const char *newurl,
+                          followtype type);
 
 /* If only the PICKNONE bit is set, there has been a round-trip and we
    selected to use no auth at all. Ie, we actively select no auth, as opposed

@@ -120,6 +120,7 @@ const struct Curl_handler Curl_handler_file = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   0,                                    /* defport */
   CURLPROTO_FILE,                       /* protocol */
   CURLPROTO_FILE,                       /* family */

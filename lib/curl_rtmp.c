@@ -85,6 +85,7 @@ const struct Curl_handler Curl_handler_rtmp = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   PORT_RTMP,                            /* defport */
   CURLPROTO_RTMP,                       /* protocol */
   CURLPROTO_RTMP,                       /* family */
@@ -109,6 +110,7 @@ const struct Curl_handler Curl_handler_rtmpt = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   PORT_RTMPT,                           /* defport */
   CURLPROTO_RTMPT,                      /* protocol */
   CURLPROTO_RTMPT,                      /* family */
@@ -133,6 +135,7 @@ const struct Curl_handler Curl_handler_rtmpe = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   PORT_RTMP,                            /* defport */
   CURLPROTO_RTMPE,                      /* protocol */
   CURLPROTO_RTMPE,                      /* family */
@@ -157,6 +160,7 @@ const struct Curl_handler Curl_handler_rtmpte = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   PORT_RTMPT,                           /* defport */
   CURLPROTO_RTMPTE,                     /* protocol */
   CURLPROTO_RTMPTE,                     /* family */
@@ -181,6 +185,7 @@ const struct Curl_handler Curl_handler_rtmps = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   PORT_RTMPS,                           /* defport */
   CURLPROTO_RTMPS,                      /* protocol */
   CURLPROTO_RTMP,                       /* family */
@@ -205,6 +210,7 @@ const struct Curl_handler Curl_handler_rtmpts = {
   ZERO_NULL,                            /* write_resp_hd */
   ZERO_NULL,                            /* connection_check */
   ZERO_NULL,                            /* attach connection */
+  ZERO_NULL,                            /* follow */
   PORT_RTMPS,                           /* defport */
   CURLPROTO_RTMPTS,                     /* protocol */
   CURLPROTO_RTMPT,                      /* family */
