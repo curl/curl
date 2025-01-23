@@ -75,7 +75,7 @@ else()
       unset(_version_str3)
     endif()
     if(NOT EXISTS "${LIBSSH_INCLUDE_DIR}/libssh/libssh.h")
-      message(WARNING "Header not found in LIBSSH_INCLUDE_DIR: ${LIBSSH_INCLUDE_DIR}")
+      message(WARNING "Headers not found in LIBSSH_INCLUDE_DIR: ${LIBSSH_INCLUDE_DIR}")
     endif()
   endif()
 

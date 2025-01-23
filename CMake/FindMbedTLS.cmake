@@ -93,7 +93,7 @@ else()
       unset(_version_header)
     endif()
     if(NOT EXISTS "${MBEDTLS_INCLUDE_DIR}/mbedtls/ssl.h")
-      message(WARNING "Header not found in MBEDTLS_INCLUDE_DIR: ${MBEDTLS_INCLUDE_DIR}")
+      message(WARNING "Headers not found in MBEDTLS_INCLUDE_DIR: ${MBEDTLS_INCLUDE_DIR}")
     endif()
   endif()
 

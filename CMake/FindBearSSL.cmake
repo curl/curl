@@ -45,7 +45,7 @@ find_library(BEARSSL_LIBRARY NAMES "bearssl")
 
 if(BEARSSL_INCLUDE_DIR)
   if(NOT EXISTS "${BEARSSL_INCLUDE_DIR}/bearssl.h")
-    message(WARNING "Header not found in BEARSSL_INCLUDE_DIR: ${BEARSSL_INCLUDE_DIR}")
+    message(WARNING "Headers not found in BEARSSL_INCLUDE_DIR: ${BEARSSL_INCLUDE_DIR}")
   endif()
 endif()
 

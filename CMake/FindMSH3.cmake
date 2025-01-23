@@ -58,7 +58,7 @@ else()
 
   if(MSH3_INCLUDE_DIR)
     if(NOT EXISTS "${MSH3_INCLUDE_DIR}/msh3.h")
-      message(WARNING "Header not found in MSH3_INCLUDE_DIR: ${MSH3_INCLUDE_DIR}")
+      message(WARNING "Headers not found in MSH3_INCLUDE_DIR: ${MSH3_INCLUDE_DIR}")
     endif()
   endif()
 

@@ -102,7 +102,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${NGTCP2_INCLUDE_DIR}/ngtcp2/ngtcp2.h")
-      message(WARNING "Header not found in NGTCP2_INCLUDE_DIR: ${NGTCP2_INCLUDE_DIR}")
+      message(WARNING "Headers not found in NGTCP2_INCLUDE_DIR: ${NGTCP2_INCLUDE_DIR}")
     endif()
   endif()
 

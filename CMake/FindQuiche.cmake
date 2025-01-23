@@ -56,7 +56,7 @@ else()
 
   if(QUICHE_INCLUDE_DIR)
     if(NOT EXISTS "${QUICHE_INCLUDE_DIR}/quiche.h")
-      message(WARNING "Header not found in QUICHE_INCLUDE_DIR: ${QUICHE_INCLUDE_DIR}")
+      message(WARNING "Headers not found in QUICHE_INCLUDE_DIR: ${QUICHE_INCLUDE_DIR}")
     endif()
   endif()
 

@@ -49,7 +49,7 @@ if(WOLFSSH_INCLUDE_DIR)
     unset(_version_str)
   endif()
   if(NOT EXISTS "${WOLFSSH_INCLUDE_DIR}/wolfssh/ssh.h")
-    message(WARNING "Header not found in WOLFSSH_INCLUDE_DIR: ${WOLFSSH_INCLUDE_DIR}")
+    message(WARNING "Headers not found in WOLFSSH_INCLUDE_DIR: ${WOLFSSH_INCLUDE_DIR}")
   endif()
 endif()
 

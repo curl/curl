@@ -65,7 +65,7 @@ else()
 
   if(BROTLI_INCLUDE_DIR)
     if(NOT EXISTS "${BROTLI_INCLUDE_DIR}/brotli/decode.h")
-      message(WARNING "Header not found in BROTLI_INCLUDE_DIR: ${BROTLI_INCLUDE_DIR}")
+      message(WARNING "Headers not found in BROTLI_INCLUDE_DIR: ${BROTLI_INCLUDE_DIR}")
     endif()
   endif()
 

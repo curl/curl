@@ -75,7 +75,7 @@ else()
       unset(_version_str3)
     endif()
     if(NOT EXISTS "${LIBUV_INCLUDE_DIR}/uv.h")
-      message(WARNING "Header not found in LIBUV_INCLUDE_DIR: ${LIBUV_INCLUDE_DIR}")
+      message(WARNING "Headers not found in LIBUV_INCLUDE_DIR: ${LIBUV_INCLUDE_DIR}")
     endif()
   endif()
 
