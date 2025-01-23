@@ -57,7 +57,7 @@ else()
   find_library(RUSTLS_LIBRARY NAMES "rustls")
 
   if(RUSTLS_INCLUDE_DIR)
-    if(NOT EXISTS "${RUSTLS_INCLUDE_DIR}")
+    if(NOT EXISTS "${RUSTLS_INCLUDE_DIR}/rustls.h")
       message(WARNING "RUSTLS_INCLUDE_DIR include directory not found: ${RUSTLS_INCLUDE_DIR}")
     endif()
   endif()

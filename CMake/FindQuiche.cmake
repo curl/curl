@@ -55,7 +55,7 @@ else()
   find_library(QUICHE_LIBRARY NAMES "quiche")
 
   if(QUICHE_INCLUDE_DIR)
-    if(NOT EXISTS "${QUICHE_INCLUDE_DIR}")
+    if(NOT EXISTS "${QUICHE_INCLUDE_DIR}/quiche.h")
       message(WARNING "QUICHE_INCLUDE_DIR include directory not found: ${QUICHE_INCLUDE_DIR}")
     endif()
   endif()

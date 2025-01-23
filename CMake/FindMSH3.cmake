@@ -57,7 +57,7 @@ else()
   find_library(MSH3_LIBRARY NAMES "msh3")
 
   if(MSH3_INCLUDE_DIR)
-    if(NOT EXISTS "${MSH3_INCLUDE_DIR}")
+    if(NOT EXISTS "${MSH3_INCLUDE_DIR}/msh3.h")
       message(WARNING "MSH3_INCLUDE_DIR include directory not found: ${MSH3_INCLUDE_DIR}")
     endif()
   endif()

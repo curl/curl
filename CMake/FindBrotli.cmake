@@ -64,7 +64,7 @@ else()
   find_library(BROTLIDEC_LIBRARY NAMES "brotlidec")
 
   if(BROTLI_INCLUDE_DIR)
-    if(NOT EXISTS "${BROTLI_INCLUDE_DIR}")
+    if(NOT EXISTS "${BROTLI_INCLUDE_DIR}/brotli/decode.h")
       message(WARNING "BROTLI_INCLUDE_DIR include directory not found: ${BROTLI_INCLUDE_DIR}")
     endif()
   endif()
