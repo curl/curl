@@ -64,7 +64,7 @@ else()
       unset(_version_regex)
       unset(_version_str)
     else()
-      message(WARNING "LIBPSL_INCLUDE_DIR include directory not found: ${LIBPSL_INCLUDE_DIR}")
+      message(WARNING "Header not found in LIBPSL_INCLUDE_DIR: ${LIBPSL_INCLUDE_DIR}")
     endif()
   endif()
 

@@ -65,7 +65,7 @@ else()
       unset(_version_str)
     endif()
     if(NOT EXISTS "${NGHTTP2_INCLUDE_DIR}/nghttp2/nghttp2.h")
-      message(WARNING "NGHTTP2_INCLUDE_DIR include directory not found: ${NGHTTP2_INCLUDE_DIR}")
+      message(WARNING "Header not found in NGHTTP2_INCLUDE_DIR: ${NGHTTP2_INCLUDE_DIR}")
     endif()
   endif()
 

@@ -74,7 +74,7 @@ else()
       unset(_version_str1)
       unset(_version_str2)
     else()
-      message(WARNING "LIBRTMP_INCLUDE_DIR include directory not found: ${LIBRTMP_INCLUDE_DIR}")
+      message(WARNING "Header not found in LIBRTMP_INCLUDE_DIR: ${LIBRTMP_INCLUDE_DIR}")
     endif()
   endif()
 

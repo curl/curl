@@ -83,7 +83,7 @@ else()
       unset(_version_str2)
       unset(_version_str3)
     else()
-      message(WARNING "ZSTD_INCLUDE_DIR include directory not found: ${ZSTD_INCLUDE_DIR}")
+      message(WARNING "Header not found in ZSTD_INCLUDE_DIR: ${ZSTD_INCLUDE_DIR}")
     endif()
   endif()
 

@@ -64,7 +64,7 @@ else()
       unset(_version_regex)
       unset(_version_str)
     else()
-      message(WARNING "LIBSSH2_INCLUDE_DIR include directory not found: ${LIBSSH2_INCLUDE_DIR}")
+      message(WARNING "Header not found in LIBSSH2_INCLUDE_DIR: ${LIBSSH2_INCLUDE_DIR}")
     endif()
   endif()
 

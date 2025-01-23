@@ -93,7 +93,7 @@ else()
       unset(_version_str3)
     endif()
     if(NOT EXISTS "${LDAP_INCLUDE_DIR}/ldap.h")
-      message(WARNING "LDAP_INCLUDE_DIR include directory not found: ${LDAP_INCLUDE_DIR}")
+      message(WARNING "Header not found in LDAP_INCLUDE_DIR: ${LDAP_INCLUDE_DIR}")
     endif()
   endif()
 

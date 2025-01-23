@@ -58,7 +58,7 @@ else()
 
   if(RUSTLS_INCLUDE_DIR)
     if(NOT EXISTS "${RUSTLS_INCLUDE_DIR}/rustls.h")
-      message(WARNING "RUSTLS_INCLUDE_DIR include directory not found: ${RUSTLS_INCLUDE_DIR}")
+      message(WARNING "Header not found in RUSTLS_INCLUDE_DIR: ${RUSTLS_INCLUDE_DIR}")
     endif()
   endif()
 

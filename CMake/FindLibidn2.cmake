@@ -64,7 +64,7 @@ else()
       unset(_version_regex)
       unset(_version_str)
     else()
-      message(WARNING "LIBIDN2_INCLUDE_DIR include directory not found: ${LIBIDN2_INCLUDE_DIR}")
+      message(WARNING "Header not found in LIBIDN2_INCLUDE_DIR: ${LIBIDN2_INCLUDE_DIR}")
     endif()
   endif()
 

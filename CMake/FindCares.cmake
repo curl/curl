@@ -75,7 +75,7 @@ else()
       unset(_version_str3)
     endif()
     if(NOT EXISTS "${CARES_INCLUDE_DIR}/ares.h")
-      message(WARNING "CARES_INCLUDE_DIR include directory not found: ${CARES_INCLUDE_DIR}")
+      message(WARNING "Header not found in CARES_INCLUDE_DIR: ${CARES_INCLUDE_DIR}")
     endif()
   endif()
 
