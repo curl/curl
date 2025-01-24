@@ -83,7 +83,7 @@ PLAN9_DIST = plan9/include/mkfile \
 
 EXTRA_DIST = CHANGES.md COPYING Makefile.dist             \
  RELEASE-NOTES $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
- $(PLAN9_DIST) buildconf.bat Dockerfile
+ $(PLAN9_DIST) Dockerfile
 
 DISTCLEANFILES = buildinfo.txt
 

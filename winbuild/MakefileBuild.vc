@@ -99,6 +99,11 @@ CURL_RESFLAGS = /i../include
 LIBCURL_SRC_DIR = ..\lib
 CURL_SRC_DIR = ..\src
 
+!IF EXISTS($(CURL_SRC_DIR)\tool_hugehelp.c)
+USE_MANUAL   = true
+CFLAGS       = $(CFLAGS) /DUSE_MANUAL
+!ENDIF
+
 !IFNDEF WITH_DEVEL
 WITH_DEVEL   = ../../deps
 !ENDIF
@@ -684,7 +689,7 @@ CURL_LIBCURL_LIBNAME=$(LIB_NAME_IMP)
 !ENDIF
 !ENDIF
 
-CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
+CURL_FROM_LIBCURL=\
  $(CURL_DIROBJ)\nonblock.obj \
  $(CURL_DIROBJ)\strtoofft.obj \
  $(CURL_DIROBJ)\warnless.obj \
@@ -694,6 +699,10 @@ CURL_FROM_LIBCURL=$(CURL_DIROBJ)\tool_hugehelp.obj \
  $(CURL_DIROBJ)\dynbuf.obj \
  $(CURL_DIROBJ)\base64.obj
 
+!IFDEF USE_MANUAL
+CURL_FROM_LIBCURL = $(CURL_FROM_LIBCURL) $(CURL_DIROBJ)\tool_hugehelp.obj
+!ENDIF
+
 $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(CURL_LINK) $(CURL_LFLAGS) $(CURL_LIBCURL_LIBNAME) $(WIN_LIBS) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 	$(MANIFESTTOOL)
@@ -701,8 +710,10 @@ $(PROGRAM_NAME): $(CURL_DIROBJ) $(CURL_FROM_LIBCURL) $(EXE_OBJS)
 {$(CURL_SRC_DIR)\}.c{$(CURL_DIROBJ)\}.obj::
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$(CURL_DIROBJ)\\"  $<
 
+!IFDEF USE_MANUAL
 $(CURL_DIROBJ)\tool_hugehelp.obj: $(CURL_SRC_DIR)\tool_hugehelp.c
 	$(CURL_CC) $(CURL_CFLAGS) /Zm200 /Fo"$@" $(CURL_SRC_DIR)\tool_hugehelp.c
+!ENDIF
 $(CURL_DIROBJ)\nonblock.obj: ../lib/nonblock.c
 	$(CURL_CC) $(CURL_CFLAGS) /Fo"$@" ../lib/nonblock.c
 $(CURL_DIROBJ)\strtoofft.obj: ../lib/strtoofft.c

@@ -566,7 +566,6 @@ if ($configurebuild) {
   logit "copying files to build dir ...";
   if ($^O eq 'MSWin32') {
     system("xcopy /s /q \"$CURLDIR\" .");
-    system("buildconf.bat");
   }
   elsif ($^O eq 'linux') {
     system("cp -afr $CURLDIR/* .");

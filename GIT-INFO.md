@@ -21,10 +21,6 @@ Daniel uses a configure line similar to this for easier development:
 
     ./configure --disable-shared --enable-debug --enable-maintainer-mode
 
-In environments that do not support configure (i.e. Windows), do this:
-
-    buildconf.bat
-
 ## REQUIREMENTS
 
 See [docs/INTERNALS.md][0] for requirement details.

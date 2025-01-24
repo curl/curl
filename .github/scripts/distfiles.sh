@@ -29,7 +29,6 @@ gitonly=".git*
 ^scripts/installcheck.sh
 ^scripts/release-notes.pl
 ^scripts/singleuse.pl
-^src/tool_hugehelp.c.cvs
 ^tests/CI.md"
 
 tarfiles="$(mktemp)"

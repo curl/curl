@@ -30,28 +30,13 @@ ssl:
 	./configure --with-openssl
 	make
 
-vc:
-	cd winbuild
-	nmake /f Makefile.vc MACHINE=x86
-
-vc-x64:
-	cd winbuild
-	nmake /f Makefile.vc MACHINE=x64
-
-cygwin:
-	./configure
-	make
-
-cygwin-ssl:
-	./configure --with-openssl
-	make
+cygwin: all
+cygwin-ssl: ssl
 
 unix: all
-
 unix-ssl: ssl
 
 linux: all
-
 linux-ssl: ssl
 
 ca-bundle: scripts/mk-ca-bundle.pl

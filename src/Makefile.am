@@ -129,9 +129,11 @@ HUGEIT_0 = @echo "  HUGE    " $@;
 HUGEIT_1 =
 HUGEIT_ = $(HUGEIT_0)
 
+curl_CPPFLAGS = $(AM_CPPFLAGS)
+
 if USE_MANUAL
 # Here are the stuff to create a built-in manual
-AM_CPPFLAGS += -DUSE_MANUAL
+curl_CPPFLAGS += -DUSE_MANUAL
 
 $(ASCIIPAGE):
 	cd $(top_builddir)/docs && $(MAKE)
@@ -167,7 +169,7 @@ CA_EMBED_CSOURCE = tool_ca_embed.c
 curl_cfiles_gen += $(CA_EMBED_CSOURCE)
 CLEANFILES += $(CA_EMBED_CSOURCE)
 if CURL_CA_EMBED_SET
-AM_CPPFLAGS += -DCURL_CA_EMBED
+curl_CPPFLAGS += -DCURL_CA_EMBED
 MK_FILE_EMBED = $(top_srcdir)/src/mk-file-embed.pl
 $(CA_EMBED_CSOURCE): $(MK_FILE_EMBED) $(CURL_CA_EMBED)
 	$(PERL) $(MK_FILE_EMBED) --var curl_ca_embed < $(CURL_CA_EMBED) > $(CA_EMBED_CSOURCE)
