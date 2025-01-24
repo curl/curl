@@ -25,8 +25,9 @@ rem ***************************************************************************
 
 rem NOTES
 rem
-rem This batch file must be used to set up a git tree to build on systems where
-rem there is no autotools support (i.e. DOS and Windows).
+rem This batch file must be used to set up a git tree to build with the winbuild
+rem build system. The curl `--manual` option is not supported. To integrate
+rem the manual build with configure or cmake.
 rem
 
 :begin
