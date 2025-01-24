@@ -58,7 +58,7 @@ jobs:
           export CW_CONFIG='-main-werror-linux-a64-x64'
           export CW_REVISION='${{ github.sha }}'
           DOCKER_IMAGE='debian:bookworm-slim'
-          DOCKER_CONTENT_TRUST=1
+          export DOCKER_CONTENT_TRUST=1
           export CW_CCSUFFIX='-15'
           export CW_GCCSUFFIX='-12'
           docker trust inspect --pretty "${DOCKER_IMAGE}"
