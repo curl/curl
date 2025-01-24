@@ -26,9 +26,10 @@ add_definitions("-DBUILDING_CURL")
 
 set(_curl_cfiles_gen "")
 set(_curl_hfiles_gen "")
+set(_curl_definitions "")
 
 if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
-  add_definitions("-DUSE_MANUAL")
+  list(APPEND _curl_definitions "USE_MANUAL")
   add_custom_command(
     OUTPUT "tool_hugehelp.c"
     COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_setup.h\"" > "tool_hugehelp.c"
@@ -49,7 +50,7 @@ endif()
 
 if(CURL_CA_EMBED_SET)
   if(PERL_FOUND)
-    add_definitions("-DCURL_CA_EMBED")
+    list(APPEND _curl_definitions "CURL_CA_EMBED")
     add_custom_command(
       OUTPUT "tool_ca_embed.c"
       COMMAND "${PERL_EXECUTABLE}" "${CMAKE_CURRENT_SOURCE_DIR}/mk-file-embed.pl" --var curl_ca_embed
@@ -86,6 +87,7 @@ add_executable(
   ${EXE_NAME}
   ${CURL_CFILES} ${_curl_cfiles_gen} ${CURLX_CFILES} ${CURL_HFILES} ${_curl_hfiles_gen}
 )
+target_compile_definitions(${EXE_NAME} PRIVATE ${_curl_definitions})
 
 add_executable(
   ${PROJECT_NAME}::${EXE_NAME}
