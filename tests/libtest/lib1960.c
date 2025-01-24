@@ -121,9 +121,9 @@ CURLcode test(char *URL)
   res = curl_easy_perform(curl);
 
 test_cleanup:
+  curl_easy_cleanup(curl);
   if(client_fd != CURL_SOCKET_BAD)
     sclose(client_fd);
-  curl_easy_cleanup(curl);
   curl_global_cleanup();
 
   return res;
