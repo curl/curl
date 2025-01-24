@@ -166,6 +166,12 @@ rem
   echo #include "tool_setup.h"> src\tool_hugehelp.c
   echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
   echo.>> src\tool_hugehelp.c
+  echo void showhelp(const char *trigger, const char *arg, const char *endarg^)>> src\tool_hugehelp.c
+  echo {>> src\tool_hugehelp.c
+  echo   (void^)trigger;>> src\tool_hugehelp.c
+  echo   (void^)arg;>> src\tool_hugehelp.c
+  echo   (void^)endarg;>> src\tool_hugehelp.c
+  echo }>> src\tool_hugehelp.c
   echo void hugehelp(void^)>> src\tool_hugehelp.c
   echo {>> src\tool_hugehelp.c
   echo   fputs("Built-in manual not included\n", stdout^);>> src\tool_hugehelp.c
