@@ -171,7 +171,7 @@ static CURLcode dynhds_add_custom(struct Curl_easy *data,
         ;
       else if((httpversion >= 20) &&
               hd_name_eq(name, namelen, STRCONST("Transfer-Encoding:")))
-        /* HTTP/2 does not support chunked requests */
+        /* HTTP/2 and HTTP/3 do not support chunked requests */
         ;
       else if((hd_name_eq(name, namelen, STRCONST("Authorization:")) ||
                hd_name_eq(name, namelen, STRCONST("Cookie:"))) &&
