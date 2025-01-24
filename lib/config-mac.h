@@ -39,9 +39,6 @@
 #define HAVE_LONGLONG           1
 #endif
 
-/* Define if you want the built-in manual */
-#define USE_MANUAL              1
-
 #define HAVE_NETINET_IN_H       1
 #define HAVE_SYS_SOCKET_H       1
 #define HAVE_NETDB_H            1

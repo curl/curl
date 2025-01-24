@@ -33,9 +33,6 @@
 #define CURL_OS "ARM-RISC OS"
 #endif
 
-/* Define if you want the built-in manual */
-#define USE_MANUAL
-
 /* Define if you have the gethostbyname_r() function with 3 arguments */
 #undef HAVE_GETHOSTBYNAME_R_3
 
