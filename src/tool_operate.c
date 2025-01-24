@@ -3192,7 +3192,11 @@ CURLcode operate(struct GlobalConfig *global, int argc, argv_item_t argv[])
       /* Check if we were asked for the manual */
       else if(res == PARAM_MANUAL_REQUESTED) {
 #ifndef UNITTESTS
+#ifdef USE_MANUAL
         hugehelp();
+#else
+        puts("built-in manual was disabled at build-time");
+#endif
 #endif
       }
       /* Check if we were asked for the version information */

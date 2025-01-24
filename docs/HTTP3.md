@@ -303,10 +303,6 @@ prompt](../winbuild/README.md#open-a-command-prompt)):
      % cd curl/winbuild
      % nmake /f Makefile.vc mode=dll WITH_MSH3=dll MSH3_PATH="C:/Program Files/msh3" MACHINE=x64
 
-**Note** - If you encounter a build error with `tool_hugehelp.c` being
-missing, rename `tool_hugehelp.c.cvs` in the same directory to
-`tool_hugehelp.c` and then run `nmake` again.
-
 Run in the `C:/Program Files/msh3/lib` directory, copy `curl.exe` to that
 directory, or copy `msquic.dll` and `msh3.dll` from that directory to the
 `curl.exe` directory. For example:

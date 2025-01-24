@@ -43,7 +43,6 @@ print <<HEAD
 /*
  * NEVER EVER edit this manually, fix the mkhelp.pl script instead!
  */
-#ifdef USE_MANUAL
 #include "tool_hugehelp.h"
 #include "tool_help.h"
 
@@ -248,7 +247,6 @@ foot();
 
 sub foot {
     print <<FOOT
-#endif /* USE_MANUAL */
 FOOT
   ;
 }

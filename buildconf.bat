@@ -163,19 +163,13 @@ rem
   set LC_ALL=C
   set BASIC=1
 
-  if exist src\tool_hugehelp.c.cvs (
-    copy /Y src\tool_hugehelp.c.cvs src\tool_hugehelp.c 1>NUL 2>&1
-  ) else (
-    echo #include "tool_setup.h"> src\tool_hugehelp.c
-    echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
-    echo.>> src\tool_hugehelp.c
-    echo void hugehelp(void^)>> src\tool_hugehelp.c
-    echo {>> src\tool_hugehelp.c
-    echo #ifdef USE_MANUAL>> src\tool_hugehelp.c
-    echo   fputs("Built-in manual not included\n", stdout^);>> src\tool_hugehelp.c
-    echo #endif>> src\tool_hugehelp.c
-    echo }>> src\tool_hugehelp.c
-  )
+  echo #include "tool_setup.h"> src\tool_hugehelp.c
+  echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
+  echo.>> src\tool_hugehelp.c
+  echo void hugehelp(void^)>> src\tool_hugehelp.c
+  echo {>> src\tool_hugehelp.c
+  echo   fputs("Built-in manual not included\n", stdout^);>> src\tool_hugehelp.c
+  echo }>> src\tool_hugehelp.c
 
   findstr "/C:void hugehelp(void)" src\tool_hugehelp.c 1>NUL 2>&1
   if errorlevel 1 (

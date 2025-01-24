@@ -287,11 +287,13 @@ void tool_help(char *category)
       else
         msnprintf(cmdbuf, sizeof(cmdbuf), "\n    %s", category);
 #ifndef UNITTESTS
+#ifdef USE_MANUAL
       if(a->cmd == C_XATTR)
         /* this is the last option, which then ends when FILES starts */
         showhelp("\nALL OPTIONS\n", cmdbuf, "\nFILES");
       else
         showhelp("\nALL OPTIONS\n", cmdbuf, "\n    -");
+#endif
 #endif
     }
 #else

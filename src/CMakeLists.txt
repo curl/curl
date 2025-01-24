@@ -45,13 +45,6 @@ if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
     VERBATIM)
     list(APPEND _curl_cfiles_gen "tool_hugehelp.c")
     list(APPEND _curl_hfiles_gen "tool_hugehelp.h")
-else()
-  add_custom_command(
-    OUTPUT "tool_hugehelp.c"
-    COMMAND ${CMAKE_COMMAND} -E echo "#include \"tool_hugehelp.h\"" > "tool_hugehelp.c"
-    DEPENDS
-      "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
-    VERBATIM)
 endif()
 
 if(CURL_CA_EMBED_SET)
