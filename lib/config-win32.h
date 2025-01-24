@@ -500,11 +500,6 @@ Vista
 #  endif /* UNDER_CE */
 #endif /* !CURL_OS */
 
-/* If you want to build curl with the built-in manual */
-#ifndef UNDER_CE
-#define USE_MANUAL 1
-#endif
-
 /* ---------------------------------------------------------------- */
 /*                            Windows CE                            */
 /* ---------------------------------------------------------------- */

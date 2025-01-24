@@ -63,7 +63,6 @@ rem
     echo Generating prerequisite files
 
     call :generate
-    if errorlevel 3 goto nogenhugehelp
     if errorlevel 2 goto nogenmakefile
     if errorlevel 1 goto warning
 
@@ -72,7 +71,6 @@ rem
     echo Removing prerequisite files
 
     call :clean
-    if errorlevel 2 goto nocleanhugehelp
     if errorlevel 1 goto nocleanmakefile
   )
 
@@ -83,13 +81,10 @@ rem
 rem Returns:
 rem
 rem 0 - success
-rem 1 - success with simplified tool_hugehelp.c
 rem 2 - failed to generate Makefile
-rem 3 - failed to generate tool_hugehelp.c
 rem
 :generate
   if "%OS%" == "Windows_NT" setlocal
-  set BASIC_HUGEHELP=0
 
   rem Create Makefile
   echo * %CD%\Makefile
@@ -100,23 +95,7 @@ rem
       exit /B 2
     )
   )
-
-  rem Create tool_hugehelp.c
-  echo * %CD%\src\tool_hugehelp.c
-  call :genHugeHelp
-  if errorlevel 2 (
-    if "%OS%" == "Windows_NT" endlocal
-    exit /B 3
-  )
-  if errorlevel 1 (
-    set BASIC_HUGEHELP=1
-  )
   cmd /c exit 0
-
-  if "%BASIC_HUGEHELP%" == "1" (
-    if "%OS%" == "Windows_NT" endlocal
-    exit /B 1
-  )
 
   if "%OS%" == "Windows_NT" endlocal
   exit /B 0
@@ -127,7 +106,6 @@ rem Returns:
 rem
 rem 0 - success
 rem 1 - failed to clean Makefile
-rem 2 - failed to clean tool_hugehelp.c
 rem
 :clean
   rem Remove Makefile
@@ -139,67 +117,13 @@ rem
     )
   )
 
-  rem Remove tool_hugehelp.c
-  echo * %CD%\src\tool_hugehelp.c
-  if exist src\tool_hugehelp.c (
-    del src\tool_hugehelp.c 2>NUL
-    if exist src\tool_hugehelp.c (
-      exit /B 2
-    )
-  )
-
   exit /B
-
-rem Function to generate src\tool_hugehelp.c
-rem
-rem Returns:
-rem
-rem 0 - full tool_hugehelp.c generated
-rem 1 - simplified tool_hugehelp.c
-rem 2 - failure
-rem
-:genHugeHelp
-  if "%OS%" == "Windows_NT" setlocal
-  set LC_ALL=C
-  set BASIC=1
-
-  echo #include "tool_setup.h"> src\tool_hugehelp.c
-  echo #include "tool_hugehelp.h">> src\tool_hugehelp.c
-  echo.>> src\tool_hugehelp.c
-  echo void showhelp(const char *trigger, const char *arg, const char *endarg^)>> src\tool_hugehelp.c
-  echo {>> src\tool_hugehelp.c
-  echo   (void^)trigger;>> src\tool_hugehelp.c
-  echo   (void^)arg;>> src\tool_hugehelp.c
-  echo   (void^)endarg;>> src\tool_hugehelp.c
-  echo }>> src\tool_hugehelp.c
-  echo void hugehelp(void^)>> src\tool_hugehelp.c
-  echo {>> src\tool_hugehelp.c
-  echo   fputs("Built-in manual not included\n", stdout^);>> src\tool_hugehelp.c
-  echo }>> src\tool_hugehelp.c
-
-  findstr "/C:void hugehelp(void)" src\tool_hugehelp.c 1>NUL 2>&1
-  if errorlevel 1 (
-    if "%OS%" == "Windows_NT" endlocal
-    exit /B 2
-  )
-
-  if "%BASIC%" == "1" (
-    if "%OS%" == "Windows_NT" endlocal
-    exit /B 1
-  )
-
-  if "%OS%" == "Windows_NT" endlocal
-  exit /B 0
 
 rem Function to clean-up local variables under DOS, Windows 3.x and
 rem Windows 9x as setlocal isn't available until Windows NT
 rem
 :dosCleanup
   set MODE=
-  set BASIC_HUGEHELP=
-  set LC_ALL
-  set BASIC=
-
   exit /B
 
 :syntax
@@ -225,28 +149,10 @@ rem
   echo Error: Unable to generate Makefile
   goto error
 
-:nogenhugehelp
-  echo.
-  echo Error: Unable to generate src\tool_hugehelp.c
-  goto error
-
 :nocleanmakefile
   echo.
   echo Error: Unable to clean Makefile
   goto error
-
-:nocleanhugehelp
-  echo.
-  echo Error: Unable to clean src\tool_hugehelp.c
-  goto error
-
-:warning
-  echo.
-  echo Warning: The curl manual could not be integrated in the source. This means when
-  echo you build curl the manual will not be available (curl --manual^). Integration of
-  echo the manual is not required and a summary of the options will still be available
-  echo (curl --help^). To integrate the manual build with configure or cmake.
-  goto success
 
 :error
   if "%OS%" == "Windows_NT" (
