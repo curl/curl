@@ -65,8 +65,7 @@
 
 /* allow no more than 5 "chained" compression steps */
 #define MAX_ENCODE_STACK 5
-
-#define DSIZ CURL_MAX_WRITE_SIZE /* buffer size for decompressed data */
+#define DECOMPRESS_BUFFER_SIZE 16384 /* buffer size for decompressed data */
 
 #ifdef HAVE_LIBZ
 
@@ -82,6 +81,7 @@ typedef enum {
 struct zlib_writer {
   struct Curl_cwriter super;
   zlibInitState zlib_init;   /* zlib init state */
+  char buffer[DECOMPRESS_BUFFER_SIZE]; /* Put the decompressed data here. */
   uInt trailerlen;           /* Remaining trailer byte count. */
   z_stream z;                /* State structure for zlib. */
 };
@@ -162,19 +162,12 @@ static CURLcode inflate_stream(struct Curl_easy *data,
   Bytef *orig_in = z->next_in;
   bool done = FALSE;
   CURLcode result = CURLE_OK;   /* Curl_client_write status */
-  char *decomp;                 /* Put the decompressed data here. */
 
   /* Check state. */
   if(zp->zlib_init != ZLIB_INIT &&
      zp->zlib_init != ZLIB_INFLATING &&
      zp->zlib_init != ZLIB_INIT_GZIP)
     return exit_zlib(data, z, &zp->zlib_init, CURLE_WRITE_ERROR);
-
-  /* Dynamically allocate a buffer for decompression because it is uncommonly
-     large to hold on the stack */
-  decomp = malloc(DSIZ);
-  if(!decomp)
-    return exit_zlib(data, z, &zp->zlib_init, CURLE_OUT_OF_MEMORY);
 
   /* because the buffer size is fixed, iteratively decompress and transfer to
      the client via next_write function. */
@@ -183,8 +176,8 @@ static CURLcode inflate_stream(struct Curl_easy *data,
     done = TRUE;
 
     /* (re)set buffer for decompressed output for every iteration */
-    z->next_out = (Bytef *) decomp;
-    z->avail_out = DSIZ;
+    z->next_out = (Bytef *) zp->buffer;
+    z->avail_out = DECOMPRESS_BUFFER_SIZE;
 
 #ifdef Z_BLOCK
     /* Z_BLOCK is only available in zlib ver. >= 1.2.0.5 */
@@ -195,11 +188,11 @@ static CURLcode inflate_stream(struct Curl_easy *data,
 #endif
 
     /* Flush output data if some. */
-    if(z->avail_out != DSIZ) {
+    if(z->avail_out != DECOMPRESS_BUFFER_SIZE) {
       if(status == Z_OK || status == Z_STREAM_END) {
         zp->zlib_init = started;      /* Data started. */
-        result = Curl_cwriter_write(data, writer->next, type, decomp,
-                                     DSIZ - z->avail_out);
+        result = Curl_cwriter_write(data, writer->next, type, zp->buffer,
+                                    DECOMPRESS_BUFFER_SIZE - z->avail_out);
         if(result) {
           exit_zlib(data, z, &zp->zlib_init, result);
           break;
@@ -242,7 +235,6 @@ static CURLcode inflate_stream(struct Curl_easy *data,
       break;
     }
   }
-  free(decomp);
 
   /* We are about to leave this call so the `nread' data bytes will not be seen
      again. If we are in a state that would wrongly allow restart in raw mode
@@ -384,6 +376,7 @@ static const struct Curl_cwtype gzip_encoding = {
 /* Brotli writer. */
 struct brotli_writer {
   struct Curl_cwriter super;
+  char buffer[DECOMPRESS_BUFFER_SIZE];
   BrotliDecoderState *br;    /* State structure for brotli. */
 };
 
@@ -441,7 +434,6 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
 {
   struct brotli_writer *bp = (struct brotli_writer *) writer;
   const uint8_t *src = (const uint8_t *) buf;
-  char *decomp;
   uint8_t *dst;
   size_t dstleft;
   CURLcode result = CURLE_OK;
@@ -453,18 +445,14 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
   if(!bp->br)
     return CURLE_WRITE_ERROR;  /* Stream already ended. */
 
-  decomp = malloc(DSIZ);
-  if(!decomp)
-    return CURLE_OUT_OF_MEMORY;
-
   while((nbytes || r == BROTLI_DECODER_RESULT_NEEDS_MORE_OUTPUT) &&
         result == CURLE_OK) {
-    dst = (uint8_t *) decomp;
-    dstleft = DSIZ;
+    dst = (uint8_t *) bp->buffer;
+    dstleft = DECOMPRESS_BUFFER_SIZE;
     r = BrotliDecoderDecompressStream(bp->br,
                                       &nbytes, &src, &dstleft, &dst, NULL);
     result = Curl_cwriter_write(data, writer->next, type,
-                                 decomp, DSIZ - dstleft);
+                                bp->buffer, DECOMPRESS_BUFFER_SIZE - dstleft);
     if(result)
       break;
     switch(r) {
@@ -482,7 +470,6 @@ static CURLcode brotli_do_write(struct Curl_easy *data,
       break;
     }
   }
-  free(decomp);
   return result;
 }
 
@@ -490,7 +477,6 @@ static void brotli_do_close(struct Curl_easy *data,
                                 struct Curl_cwriter *writer)
 {
   struct brotli_writer *bp = (struct brotli_writer *) writer;
-
   (void) data;
 
   if(bp->br) {
@@ -514,7 +500,7 @@ static const struct Curl_cwtype brotli_encoding = {
 struct zstd_writer {
   struct Curl_cwriter super;
   ZSTD_DStream *zds;    /* State structure for zstd. */
-  void *decomp;
+  char buffer[DECOMPRESS_BUFFER_SIZE];
 };
 
 #ifdef ZSTD_STATIC_LINKING_ONLY
@@ -548,7 +534,6 @@ static CURLcode zstd_do_init(struct Curl_easy *data,
   zp->zds = ZSTD_createDStream();
 #endif
 
-  zp->decomp = NULL;
   return zp->zds ? CURLE_OK : CURLE_OUT_OF_MEMORY;
 }
 
@@ -565,19 +550,14 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
   if(!(type & CLIENTWRITE_BODY) || !nbytes)
     return Curl_cwriter_write(data, writer->next, type, buf, nbytes);
 
-  if(!zp->decomp) {
-    zp->decomp = malloc(DSIZ);
-    if(!zp->decomp)
-      return CURLE_OUT_OF_MEMORY;
-  }
   in.pos = 0;
   in.src = buf;
   in.size = nbytes;
 
   for(;;) {
     out.pos = 0;
-    out.dst = zp->decomp;
-    out.size = DSIZ;
+    out.dst = zp->buffer;
+    out.size = DECOMPRESS_BUFFER_SIZE;
 
     errorCode = ZSTD_decompressStream(zp->zds, &out, &in);
     if(ZSTD_isError(errorCode)) {
@@ -585,7 +565,7 @@ static CURLcode zstd_do_write(struct Curl_easy *data,
     }
     if(out.pos > 0) {
       result = Curl_cwriter_write(data, writer->next, type,
-                                  zp->decomp, out.pos);
+                                  zp->buffer, out.pos);
       if(result)
         break;
     }
@@ -600,13 +580,8 @@ static void zstd_do_close(struct Curl_easy *data,
                               struct Curl_cwriter *writer)
 {
   struct zstd_writer *zp = (struct zstd_writer *) writer;
-
   (void)data;
 
-  if(zp->decomp) {
-    free(zp->decomp);
-    zp->decomp = NULL;
-  }
   if(zp->zds) {
     ZSTD_freeDStream(zp->zds);
     zp->zds = NULL;
