@@ -325,8 +325,8 @@ security issues.
 
 ## Legacy dependencies
 
-Problems that only trigger using *legacy* dependencies are not considered
-security problems.
+Problems that can be triggered only by the use of a *legacy dependency* are
+not considered security problems.
 
 A *legacy dependency* is here defined as:
 
