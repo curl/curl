@@ -322,3 +322,18 @@ that being the end of the world.
 
 There need to be more and special circumstances to treat such problems as
 security issues.
+
+## Legacy dependencies
+
+Problems that only trigger using *legacy* dependencies are not considered
+security problems.
+
+A *legacy dependency* is here defined as:
+
+- the legacy version was released over ten years ago
+
+- the legacy version is not shipped by any existing supported operating system
+  or distribution
+
+- there are modern versions of equivalent or better functionality offered and
+  in common use
