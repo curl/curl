@@ -19,7 +19,7 @@ Server: Microsoft-IIS/5.0
 Date: Sun, 03 Apr 2005 14:57:45 GMT
 X-Powered-By: ASP.NET
 
-HTTP/1.1 401 authentication please swsbounce
+HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144"
 Content-Type: text/html; charset=iso-8859-1
@@ -41,7 +41,7 @@ Server: Microsoft-IIS/5.0
 Date: Sun, 03 Apr 2005 14:57:45 GMT
 X-Powered-By: ASP.NET
 
-HTTP/1.1 401 authentication please swsbounce
+HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144"
 Content-Type: text/html; charset=iso-8859-1

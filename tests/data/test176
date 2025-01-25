@@ -11,7 +11,7 @@ HTTP NTLM auth
 <reply>
 # the first request has NTLM type-1 included, and then the 1001 is returned
 <data1001>
-HTTP/1.1 200 beng swsclose swsbounce
+HTTP/1.1 200 beng swsclose
 Server: Microsoft-IIS/6.0
 Authentication-Info: Passport1.4 tname=MSPAuth,tname=MSPProf,tname=MSPConsent,tname=MSPSecAuth
 Content-Type: text/html; charset=iso-8859-1
@@ -29,7 +29,7 @@ content for you
 </data>
 
 <datacheck>
-HTTP/1.1 200 beng swsclose swsbounce
+HTTP/1.1 200 beng swsclose
 Server: Microsoft-IIS/6.0
 Authentication-Info: Passport1.4 tname=MSPAuth,tname=MSPProf,tname=MSPConsent,tname=MSPSecAuth
 Content-Type: text/html; charset=iso-8859-1

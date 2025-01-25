@@ -41,7 +41,7 @@ daniel
 
 # then this is returned when we get proxy-auth
 <connect1000>
-HTTP/1.1 200 OK swsbounce
+HTTP/1.1 200 OK
 Server: no
 
 </connect1000>
@@ -51,7 +51,7 @@ HTTP/1.1 407 Authorization Required to proxy me my dear
 Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Content-Length: 33
 
-HTTP/1.1 200 OK swsbounce
+HTTP/1.1 200 OK
 Server: no
 
 HTTP/1.1 200 OK

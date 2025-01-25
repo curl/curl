@@ -72,9 +72,9 @@ static int serverlogslocked = 0;
 
 static long prevtestno = -1;    /* previous test number we served */
 static long prevpartno = -1;    /* previous part number we served */
-static bool prevbounce = FALSE; /* instructs the server to increase the part
-                                   number for a test in case the identical
-                                   testno+partno request shows up again */
+static bool prevbounce = FALSE; /* instructs the server to override the
+                                   requested part number to prevpartno + 1 when
+                                   prevtestno and current test are the same */
 
 #define RCMD_NORMALREQ 0 /* default request, use the tests file normally */
 #define RCMD_IDLE      1 /* told to sit idle */
@@ -1319,9 +1319,8 @@ int main(int argc, char *argv[])
 
       if(prevbounce) {
         /* bounce treatment requested */
-        if((req.testno == prevtestno) &&
-           (req.partno == prevpartno)) {
-          req.partno++;
+        if(req.testno == prevtestno) {
+          req.partno = prevpartno + 1;
           logmsg("BOUNCE part number to %ld", req.partno);
         }
         else {

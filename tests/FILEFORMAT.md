@@ -237,10 +237,14 @@ If the data contains `swsclose` anywhere within the start and end tag, and
 this is an HTTP test, then the connection is closed by the server after this
 response is sent. If not, the connection is kept persistent.
 
-If the data contains `swsbounce` anywhere within the start and end tag, the
-HTTP server detects if this is a second request using the same test and part
-number and then increases the part number with one. This is useful for auth
-tests and similar.
+If the data contains `swsbounce` anywhere within the start and end tag, then
+the HTTP server overrides the part number response returned for a subsequent
+request made by the same test to `previous part number + 1`. For example, if a
+test makes a request which causes the server to return `<data>` that contains
+keyword `swsbounce` then for the next response it ignores the requested part
+number and instead returns `<data1>`. And if `<data1>` contains keyword
+`swsbounce` then the next response is `<data2>` and so on. This is useful for
+auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server "sends" the data even if the size
 is zero bytes. Used to verify curl's behavior on zero bytes transfers.
