@@ -322,7 +322,6 @@ else()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-# Keep condition in sync with CMake/curl-config.cmake.in
 if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
    VCPKG_TOOLCHAIN OR
    (MINGW AND NOT CMAKE_CROSSCOMPILING))
@@ -2397,8 +2396,8 @@ if(NOT CURL_DISABLE_INSTALL)
   #   CURLVERSION
   #   LIB_SELECTED
   #   TARGETS_EXPORT_NAME
-  #   USE_OPENSSL
-  #   HAVE_LIBZ
+  #   USE_OPENSSL OPENSSL_VERSION_MAJOR
+  #   HAVE_LIBZ ZLIB_VERSION_MAJOR
   #   CURL_SUPPORTED_FEATURES_LIST
   #   CURL_SUPPORTED_PROTOCOLS_LIST
   configure_package_config_file("CMake/curl-config.cmake.in"
