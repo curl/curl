@@ -23,16 +23,6 @@
 ###########################################################################
 @PACKAGE_INIT@
 
-# Keep condition in sync with CMake/curl-config.cmake.in
-if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
-   VCPKG_TOOLCHAIN OR
-   (MINGW AND NOT CMAKE_CROSSCOMPILING))
-  set(_curl_use_pkgconfig_default ON)
-else()
-  set(_curl_use_pkgconfig_default OFF)
-endif()
-option(CURL_USE_PKGCONFIG "Enable pkg-config to detect @PROJECT_NAME@ dependencies" ${_curl_use_pkgconfig_default})
-
 include(CMakeFindDependencyMacro)
 if("@USE_OPENSSL@")
   find_dependency(OpenSSL "@OPENSSL_VERSION_MAJOR@")
