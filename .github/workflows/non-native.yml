@@ -51,7 +51,7 @@ jobs:
         uses: cross-platform-actions/action@fe0167d8082ac584754ef3ffb567fded22642c7d # v0.27.0
         with:
           operating_system: 'netbsd'
-          version: '10.0'
+          version: '10.1'
           architecture: ${{ matrix.arch }}
           run: |
             # https://pkgsrc.se/
