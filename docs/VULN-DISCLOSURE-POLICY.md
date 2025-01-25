@@ -330,10 +330,10 @@ security problems.
 
 A *legacy dependency* is here defined as:
 
-- the legacy version was released over ten years ago
+- the legacy version was released over ten years ago AND
 
 - the legacy version is not shipped by any existing supported operating system
-  or distribution
+  or distribution AND
 
 - there are modern versions of equivalent or better functionality offered and
   in common use
