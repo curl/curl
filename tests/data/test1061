@@ -841,7 +841,7 @@ daniel
 
 # then this is returned when we get proxy-auth
 <connect1000>
-HTTP/1.1 200 OK swsbounce
+HTTP/1.1 200 OK
 Server: no
 
 </connect1000>
@@ -852,7 +852,7 @@ Proxy-Authenticate: Digest realm="weirdorealm", nonce="12345"
 Transfer-Encoding: chunked
 X-tra-long-header: %repeat[16080 x a]%
 
-HTTP/1.1 200 OK swsbounce
+HTTP/1.1 200 OK
 Server: no
 
 HTTP/1.1 200 OK

@@ -10,7 +10,7 @@ HTTP Digest auth
 # Server-side
 <reply>
 <data>
-HTTP/1.1 401 authentication please swsbounce
+HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-256"
 Content-Type: text/html; charset=iso-8859-1
@@ -27,7 +27,7 @@ ok
 </data1000>
 
 <datacheck>
-HTTP/1.1 401 authentication please swsbounce
+HTTP/1.1 401 authentication please
 Server: Microsoft-IIS/6.0
 WWW-Authenticate: Digest realm="testrealm", nonce="1053604144", algorithm="SHA-256"
 Content-Type: text/html; charset=iso-8859-1

@@ -1,0 +1,112 @@
+<testcase>
+<info>
+<keywords>
+HTTP
+--location
+</keywords>
+</info>
+
+# Server-side
+<reply>
+
+<data>
+HTTP/1.1 301 redirect swsbounce
+Content-Length: 0
+Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+Part: data
+
+</data>
+
+<data1>
+HTTP/1.1 301 redirect swsbounce
+Content-Length: 0
+Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+Part: data1
+
+</data1>
+
+<data2>
+HTTP/1.1 301 redirect swsbounce
+Content-Length: 0
+Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+Part: data2
+
+</data2>
+
+<data3>
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 30
+Part: data3
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+</data3>
+
+<datacheck>
+HTTP/1.1 301 redirect swsbounce
+Content-Length: 0
+Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+Part: data
+
+HTTP/1.1 301 redirect swsbounce
+Content-Length: 0
+Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+Part: data1
+
+HTTP/1.1 301 redirect swsbounce
+Content-Length: 0
+Location: http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+Part: data2
+
+HTTP/1.1 200 OK
+Content-Type: text/html
+Content-Length: 30
+Part: data3
+
+XXXXXXXXXXXXXXXXXXXXXXXXXXXXX
+</datacheck>
+
+</reply>
+
+# Client-side
+<client>
+<server>
+http
+</server>
+# This is a test of the swsbounce keyword which is used during tests to
+# override the data response number for the next request to the previous
+# data response number + 1. eg data, data1, data2 etc.
+<name>
+HTTP redirect loop 3x swsbounce test
+</name>
+<command>
+--location http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+</command>
+</client>
+
+# Verify data after the test has been "shot"
+<verify>
+<protocol>
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+GET /%TESTNUMBER HTTP/1.1
+Host: %HOSTIP:%HTTPPORT
+User-Agent: curl/%VERSION
+Accept: */*
+
+</protocol>
+</verify>
+</testcase>
