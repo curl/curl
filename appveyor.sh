@@ -75,7 +75,6 @@ elif [ "${BUILD_SYSTEM}" = 'VisualStudioSolution' ]; then
   )
   curl="build/Win32/${VC_VERSION}/${PRJ_CFG}/curld.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2015' ]; then
-  ./buildconf.bat
   (
     cd winbuild
     cat << EOF > _make.bat
@@ -88,7 +87,6 @@ EOF
   )
   curl="builds/libcurl-vc14-x64-${PATHPART}-dll-ssl-dll-ipv6-sspi/bin/curl.exe"
 elif [ "${BUILD_SYSTEM}" = 'winbuild_vs2017' ]; then
-  ./buildconf.bat
   (
     cd winbuild
     cat << EOF > _make.bat
