@@ -61,7 +61,6 @@ CFGSET=true
 LIBCURL_OBJS=$(CSOURCES:.c=.obj)
 
 !INCLUDE "../src/Makefile.inc"
-
 CURL_OBJS=$(CURL_CFILES:.c=.obj)
 
 
