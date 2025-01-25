@@ -322,7 +322,6 @@ else()
 endif()
 
 # Override to force-disable or force-enable the use of pkg-config.
-# Keep condition in sync with CMake/curl-config.cmake.in
 if((UNIX AND NOT ANDROID AND (NOT APPLE OR CMAKE_SYSTEM_NAME MATCHES "Darwin")) OR
    VCPKG_TOOLCHAIN OR
    (MINGW AND NOT CMAKE_CROSSCOMPILING))
