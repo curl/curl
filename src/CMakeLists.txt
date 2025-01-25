@@ -44,8 +44,8 @@ if(ENABLE_CURL_MANUAL AND HAVE_MANUAL_TOOLS)
       "${CMAKE_CURRENT_SOURCE_DIR}/tool_hugehelp.h"
       "${CURL_ASCIIPAGE}"
     VERBATIM)
-    list(APPEND _curl_cfiles_gen "tool_hugehelp.c")
-    list(APPEND _curl_hfiles_gen "tool_hugehelp.h")
+  list(APPEND _curl_cfiles_gen "tool_hugehelp.c")
+  list(APPEND _curl_hfiles_gen "tool_hugehelp.h")
 endif()
 
 if(CURL_CA_EMBED_SET)
