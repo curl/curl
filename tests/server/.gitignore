@@ -2,12 +2,4 @@
 #
 # SPDX-License-Identifier: curl
 
-getpart
-resolve
-rtspd
-sockfilt
-sws
-tftpd
-socksd
-disabled
-mqttd
+[0-9a-z_-]+

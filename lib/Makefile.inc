@@ -349,7 +349,9 @@ LIB_HFILES =         \
   select.h           \
   sendf.h            \
   setopt.h           \
+  setup-os400.h      \
   setup-vms.h        \
+  setup-win32.h      \
   share.h            \
   sigpipe.h          \
   slist.h            \

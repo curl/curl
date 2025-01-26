@@ -2,12 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 
-*.a
-*.orig
-*.rej
-*.res
-TAGS
 curl_config.h
 curl_config.h.in
 libcurl.vers
-stamp-h1

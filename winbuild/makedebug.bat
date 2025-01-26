@@ -28,6 +28,6 @@ where.exe nmake.exe >nul 2>&1
 if %ERRORLEVEL% EQU 1 (
   echo Error: Cannot find nmake.exe - be sure to run this script from within a Developer Command-Prompt
 ) else (
-  nmake.exe /f Makefile.vc mode=static DEBUG=yes GEN_PDB=yes
+  nmake.exe /f Makefile.vc MODE=static DEBUG=yes GEN_PDB=yes
   if %ERRORLEVEL% NEQ 0 echo Error: Build Failed
 )

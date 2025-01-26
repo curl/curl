@@ -318,7 +318,6 @@ jobs:
       - name: 'configure'
         run: |
           if [ -n '${{ matrix.build.generate }}' ]; then
-            export OPENSSL_DIR=/
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
             cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \

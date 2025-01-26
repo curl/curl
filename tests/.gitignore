@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: curl
 
 *pid
-*.1.dist
 configurehelp.pm
 curl_client_key
 curl_client_key.pub
@@ -18,12 +17,7 @@ curl_ssh_config
 curl_sshd_config
 ftps_stunnel.conf
 https_stunnel.conf
-log
 log*
-runtests.html
-runtests.pdf
-testcurl.html
-testcurl.pdf
 *.port
 config
 second-hsts.txt

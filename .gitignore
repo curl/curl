@@ -8,11 +8,15 @@
 *.exp
 *.la
 *.lib
+*.a
+*.res
 *.lo
 *.o
 *.obj
 *.pdb
 *.pyc
+*.orig
+*.rej
 *~
 .*.sw?
 .cproject
@@ -60,6 +64,7 @@ missing
 mkinstalldirs
 tags
 test-driver
+stamp-h*
 scripts/_curl
 scripts/curl.fish
 curl_fuzzer

@@ -1,7 +1,0 @@
-# Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-#
-# SPDX-License-Identifier: curl
-
-curlver.h.dist
-stamp-h2
-stamp-h3
