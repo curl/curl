@@ -304,7 +304,7 @@ rem
   echo Only legacy Visual Studio project files can be generated.
   echo.
   echo To generate recent versions of Visual Studio project files use cmake.
-  echo Refer to INSTALL-CMAKE in the docs directory.
+  echo Refer to INSTALL-CMAKE.md in the docs directory.
   echo.
   echo -clean    - Removes the project files
   goto error

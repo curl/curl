@@ -14,7 +14,7 @@ You need to generate the project files before using them. Please run "generate
 -help" for usage details.
 
 To generate project files for recent versions of Visual Studio instead, use
-cmake. Refer to INSTALL-CMAKE in the docs directory.
+cmake. Refer to INSTALL-CMAKE.md in the docs directory.
 
 Another way to build curl using Visual Studio is without project files. Refer
 to README in the winbuild directory.
