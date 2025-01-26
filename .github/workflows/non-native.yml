@@ -317,14 +317,7 @@ jobs:
 
       - name: 'configure'
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
-              --disable-dependency-tracking \
-              CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
-              --host=aarch64-apple-darwin \
-              --with-apple-idn \
-              ${{ matrix.build.configure }}
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             export OPENSSL_DIR=/
             # https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html#cross-compiling-for-ios-tvos-visionos-or-watchos
             [ -n '${{ matrix.build.generator }}' ] && options='-G ${{ matrix.build.generator }}'
@@ -332,6 +325,13 @@ jobs:
               -DCMAKE_SYSTEM_NAME=iOS \
               -DUSE_APPLE_IDN=ON \
               ${{ matrix.build.generate }} ${options}
+          else
+            mkdir bld && cd bld && ../configure --enable-unity --enable-test-bundles --enable-warnings --enable-werror \
+              --disable-dependency-tracking \
+              CFLAGS="-isysroot $(xcrun --sdk iphoneos --show-sdk-path 2>/dev/null)" \
+              --host=aarch64-apple-darwin \
+              --with-apple-idn \
+              ${{ matrix.build.configure }}
           fi
 
       - name: 'configure log'
@@ -345,10 +345,10 @@ jobs:
 
       - name: 'build'
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld V=1
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --verbose
+          else
+            make -C bld V=1
           fi
 
       - name: 'curl info'
@@ -356,18 +356,18 @@ jobs:
 
       - name: 'build tests'
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld V=1 -C tests
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --target testdeps --verbose
+          else
+            make -C bld V=1 -C tests
           fi
 
       - name: 'build examples'
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld examples V=1
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --target curl-examples --verbose
+          else
+            make -C bld examples V=1
           fi
 
   android:

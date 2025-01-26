@@ -227,7 +227,13 @@ jobs:
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
-          if [ -n '${{ matrix.build.configure }}' ]; then
+          if [ -n '${{ matrix.build.generate }}' ]; then
+            [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
+            cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCMAKE_OSX_SYSROOT="${sysroot}" \
+              -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+              ${{ matrix.build.generate }} ${options}
+          else
             export CFLAGS
             if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
@@ -241,12 +247,6 @@ jobs:
               --disable-dependency-tracking \
               --with-libpsl=$(brew --prefix libpsl) \
               ${{ matrix.build.configure }} ${options}
-          else
-            [ -n '${{ matrix.build.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.build.macos-version-min }}'
-            cmake -B bld -G Ninja -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCMAKE_OSX_SYSROOT="${sysroot}" \
-              -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-              ${{ matrix.build.generate }} ${options}
           fi
 
       - name: 'configure log'
@@ -261,20 +261,20 @@ jobs:
       - name: 'build-cert'
         if: contains(matrix.build.generate, '-DCURL_USE_SECTRANSP=ON') || contains(matrix.build.configure, '--with-secure-transport')
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld/tests/certs clean-certs
-            make -C bld/tests/certs build-certs -j1
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --target clean-certs
             cmake --build bld --target build-certs --parallel 1
+          else
+            make -C bld/tests/certs clean-certs
+            make -C bld/tests/certs build-certs -j1
           fi
 
       - name: 'build'
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld V=1
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --verbose
+          else
+            make -C bld V=1
           fi
 
       - name: 'curl version'
@@ -282,10 +282,10 @@ jobs:
 
       - name: 'build tests'
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld V=1 -C tests
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --target testdeps
+          else
+            make -C bld V=1 -C tests
           fi
 
       - name: 'install test prereqs'
@@ -324,19 +324,19 @@ jobs:
           fi
           source $HOME/venv/bin/activate
           rm -f $HOME/.curlrc
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --target ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
+          else
+            make -C bld V=1 ${{ matrix.build.torture && 'test-torture' || 'test-ci' }}
           fi
 
       - name: 'build examples'
         if: ${{ contains(matrix.build.name, '+examples') }}
         run: |
-          if [ -n '${{ matrix.build.configure }}' ]; then
-            make -C bld examples V=1
-          else
+          if [ -n '${{ matrix.build.generate }}' ]; then
             cmake --build bld --target curl-examples --verbose
+          else
+            make -C bld examples V=1
           fi
 
   combinations:  # Test buildability with host OS, Xcode / SDK, compiler, target-OS, Secure Transport/not, built tool, combinations
@@ -438,7 +438,20 @@ jobs:
             CC+=" --target=$(uname -m)-apple-darwin"
           fi
 
-          if [ '${{ matrix.build }}' = 'autotools' ]; then
+          if [ '${{ matrix.build }}' = 'cmake' ]; then
+            [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
+            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
+            [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
+            # would pick up nghttp2, libidn2, and libssh2
+            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
+              -DCMAKE_OSX_SYSROOT="${sysroot}" \
+              -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
+              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
+              -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
+              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
+              -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
+              ${options}
+          else
             export CFLAGS
             if [[ '${{ matrix.compiler }}' = 'llvm'* ]]; then
               options+=" --target=$(uname -m)-apple-darwin"
@@ -456,19 +469,6 @@ jobs:
               --disable-docs --disable-manual \
               --without-nghttp2 --without-libidn2 \
               --without-libpsl \
-              ${options}
-          else
-            [ '${{ matrix.config }}' = 'OpenSSL' ]         && options+=' -DCURL_USE_OPENSSL=ON'
-            [ '${{ matrix.config }}' = 'SecureTransport' ] && options+=' -DCURL_USE_SECTRANSP=ON'
-            [ -n '${{ matrix.macos-version-min }}' ] && options+=' -DCMAKE_OSX_DEPLOYMENT_TARGET=${{ matrix.macos-version-min }}'
-            # would pick up nghttp2, libidn2, and libssh2
-            cmake -B bld -DCMAKE_UNITY_BUILD=ON -DCURL_TEST_BUNDLES=ON -DCURL_WERROR=ON \
-              -DCMAKE_OSX_SYSROOT="${sysroot}" \
-              -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
-              -DCMAKE_IGNORE_PREFIX_PATH="$(brew --prefix)" \
-              -DBUILD_LIBCURL_DOCS=OFF -DBUILD_MISC_DOCS=OFF -DENABLE_CURL_MANUAL=OFF \
-              -DUSE_NGHTTP2=OFF -DUSE_LIBIDN2=OFF \
-              -DCURL_USE_LIBPSL=OFF -DCURL_USE_LIBSSH2=OFF \
               ${options}
           fi
 
