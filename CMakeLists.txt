@@ -516,13 +516,13 @@ endif()
 find_package(Perl)
 
 if(PERL_EXECUTABLE)
-  add_custom_target(ca-bundle
+  add_custom_target(curl-ca-bundle
     COMMENT "Generating a fresh ca-bundle.crt"
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl" -b -l -u "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/mk-ca-bundle.pl"
     VERBATIM USES_TERMINAL)
 
-  add_custom_target(ca-firefox
+  add_custom_target(curl-ca-firefox
     COMMENT "generating a fresh ca-bundle.crt"
     COMMAND "${PERL_EXECUTABLE}" "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh" "lib/ca-bundle.crt"
     DEPENDS "${PROJECT_SOURCE_DIR}/scripts/firefox-db2pem.sh"
