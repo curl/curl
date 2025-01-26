@@ -64,6 +64,7 @@ missing
 mkinstalldirs
 tags
 test-driver
+stamp-h*
 scripts/_curl
 scripts/curl.fish
 curl_fuzzer

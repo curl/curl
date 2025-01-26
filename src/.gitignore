@@ -3,6 +3,5 @@
 # SPDX-License-Identifier: curl
 
 curl
-stamp-h2
 tool_ca_embed.c
 tool_hugehelp.c
