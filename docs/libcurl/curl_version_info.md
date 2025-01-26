@@ -171,7 +171,7 @@ interface. (added in 7.10.7)
 
 supports HTTP Brotli content encoding using libbrotlidec (Added in 7.57.0)
 
-## `c-ares-rr`
+## `asyn-rr`
 
 *features* mask bit: non-existent
 
