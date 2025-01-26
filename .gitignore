@@ -8,6 +8,8 @@
 *.exp
 *.la
 *.lib
+*.a
+*.res
 *.lo
 *.o
 *.obj
