@@ -2107,7 +2107,7 @@ curl_add_if("brotli"        HAVE_BROTLI)
 curl_add_if("gsasl"         USE_GSASL)
 curl_add_if("zstd"          HAVE_ZSTD)
 curl_add_if("AsynchDNS"     USE_ARES OR USE_THREADS_POSIX OR USE_THREADS_WIN32)
-curl_add_if("c-ares-rr"     USE_ARES AND ENABLE_THREADED_RESOLVER)
+curl_add_if("asyn-rr"       USE_ARES AND ENABLE_THREADED_RESOLVER)
 curl_add_if("IDN"           (HAVE_LIBIDN2 AND HAVE_IDN2_H) OR
                             USE_WIN32_IDN OR
                             USE_APPLE_IDN)

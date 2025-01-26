@@ -699,7 +699,7 @@ sub checksystemfeatures {
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
-            $feature{"c-ares-rr"} = $feat =~ /c-ares-rr/;
+            $feature{"asyn-rr"} = $feat =~ /asyn-rr/;
         }
         #
         # Test harness currently uses a non-stunnel server in order to

@@ -25,9 +25,9 @@ curl features **experimental** support for HTTPS RR.
 HTTPS RR support. If c-ares is not included in the build, the HTTPS RR support
 is limited to DoH.
 
-`c-ares-rr` is listed as a feature in the `curl -V` output if c-ares is used
-for additional resolves in addition to a "normal" resolve done with the
-threaded resolver.
+`asyn-rr` is listed as a feature in the `curl -V` output if c-ares is used for
+additional resolves in addition to a "normal" resolve done with the threaded
+resolver.
 
 The data extracted from the HTTPS RR is stored in the in-memory DNS cache to
 be reused on subsequent uses of the same hostnames.

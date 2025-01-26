@@ -461,14 +461,14 @@ static const struct feat features_table[] = {
 #ifndef CURL_DISABLE_ALTSVC
   FEATURE("alt-svc",     NULL,                CURL_VERSION_ALTSVC),
 #endif
+#if defined(USE_ARES) && defined(CURLRES_THREADED) && defined(USE_HTTPSRR)
+  FEATURE("asyn-rr", NULL,             0),
+#endif
 #ifdef CURLRES_ASYNCH
   FEATURE("AsynchDNS",   NULL,                CURL_VERSION_ASYNCHDNS),
 #endif
 #ifdef HAVE_BROTLI
   FEATURE("brotli",      NULL,                CURL_VERSION_BROTLI),
-#endif
-#if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
-  FEATURE("c-ares-rr", NULL,             0),
 #endif
 #ifdef DEBUGBUILD
   FEATURE("Debug",       NULL,                CURL_VERSION_DEBUG),
