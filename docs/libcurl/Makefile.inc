@@ -41,8 +41,8 @@ man_MANS = \
  curl_easy_reset.3 \
  curl_easy_send.3 \
  curl_easy_setopt.3 \
- curl_easy_ssls_import.3 \
  curl_easy_ssls_export.3 \
+ curl_easy_ssls_import.3 \
  curl_easy_strerror.3 \
  curl_easy_unescape.3 \
  curl_easy_upkeep.3 \
@@ -56,8 +56,8 @@ man_MANS = \
  curl_global_cleanup.3 \
  curl_global_init.3 \
  curl_global_init_mem.3 \
- curl_global_trace.3 \
  curl_global_sslset.3 \
+ curl_global_trace.3 \
  curl_mime_addpart.3 \
  curl_mime_data.3 \
  curl_mime_data_cb.3 \
@@ -87,11 +87,11 @@ man_MANS = \
  curl_multi_socket_all.3 \
  curl_multi_strerror.3 \
  curl_multi_timeout.3 \
- curl_multi_wakeup.3 \
  curl_multi_wait.3 \
  curl_multi_waitfds.3 \
- curl_pushheader_bynum.3 \
+ curl_multi_wakeup.3 \
  curl_pushheader_byname.3 \
+ curl_pushheader_bynum.3 \
  curl_share_cleanup.3 \
  curl_share_init.3 \
  curl_share_setopt.3 \
@@ -113,8 +113,8 @@ man_MANS = \
  curl_ws_recv.3 \
  curl_ws_send.3 \
  libcurl-easy.3 \
- libcurl-env.3 \
  libcurl-env-dbg.3 \
+ libcurl-env.3 \
  libcurl-errors.3 \
  libcurl-multi.3 \
  libcurl-security.3 \
