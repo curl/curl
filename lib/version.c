@@ -467,7 +467,7 @@ static const struct feat features_table[] = {
 #ifdef HAVE_BROTLI
   FEATURE("brotli",      NULL,                CURL_VERSION_BROTLI),
 #endif
-#if defined(CURLRES_ARES) && defined(CURLRES_THREADED)
+#if defined(USE_ARES) && defined(CURLRES_THREADED)
   FEATURE("c-ares-rr", NULL,             0),
 #endif
 #ifdef DEBUGBUILD
