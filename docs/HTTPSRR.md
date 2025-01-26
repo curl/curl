@@ -75,7 +75,7 @@ call.
 
 This is done by specifying both c-ares and threaded resolver to configure:
 
-    ./configure --enble-ares=... --enable-threaded-resolver
+    ./configure --enable-ares=... --enable-threaded-resolver
 
 or to cmake:
 
