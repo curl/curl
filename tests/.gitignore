@@ -17,7 +17,6 @@ curl_ssh_config
 curl_sshd_config
 ftps_stunnel.conf
 https_stunnel.conf
-log
 log*
 *.port
 config
