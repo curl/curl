@@ -81,7 +81,7 @@ PLAN9_DIST = plan9/include/mkfile \
  plan9/src/mkfile.inc             \
  plan9/src/mkfile
 
-EXTRA_DIST = CHANGES.md COPYING Makefile.dist             \
+EXTRA_DIST = CHANGES.md COPYING                           \
  RELEASE-NOTES $(CMAKE_DIST) $(VC_DIST) $(WINBUILD_DIST)  \
  $(PLAN9_DIST) Dockerfile
 
@@ -97,7 +97,7 @@ pkgconfig_DATA = libcurl.pc
 
 dist-hook:
 	rm -rf $(top_builddir)/tests/log
-	find $(distdir) -name "*.dist" -a \! -name Makefile.dist -exec rm {} \;
+	find $(distdir) -name "*.dist" -exec rm {} \;
 	(distit=`find $(srcdir) -name "*.dist" | grep -v Makefile`; \
 	for file in $$distit; do \
 	  strip=`echo $$file | sed -e s/^$(srcdir)// -e s/\.dist//`; \

@@ -68,10 +68,9 @@ fi
 
 #
 # As a precaution, remove all *.dist files that may be lying around, to reduce
-# the risk of old leftovers getting shipped. The root 'Makefile.dist' is the
-# exception.
+# the risk of old leftovers getting shipped.
 echo "removing all old *.dist files"
-find . -name "*.dist" -a ! -name Makefile.dist -exec rm {} \;
+find . -name "*.dist" -exec rm {} \;
 
 numeric="$(printf "%02x%02x%02x\n" "$major" "$minor" "$patch")"
 

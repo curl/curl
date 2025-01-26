@@ -569,7 +569,6 @@ if ($configurebuild) {
   }
   elsif ($^O eq 'linux') {
     system("cp -afr $CURLDIR/* .");
-    system("cp -af $CURLDIR/Makefile.dist Makefile");
     system("$make -i -C lib -f Makefile.$targetos prebuild");
     system("$make -i -C src -f Makefile.$targetos prebuild");
     if (-d "$CURLDIR/ares") {
