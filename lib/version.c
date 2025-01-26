@@ -420,6 +420,7 @@ static const char * const supported_protocols[] = {
 static int idn_present(curl_version_info_data *info)
 {
 #if defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
+  (void)info;
   return TRUE;
 #else
   return info->libidn != NULL;
