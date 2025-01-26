@@ -38,13 +38,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: run configure --with-openssl
+      - name: 'run configure --with-openssl'
         run: |
           autoreconf -fi
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --without-brotli
 
-      - name: run cmake
+      - name: 'run cmake'
         run: |
           cmake -B bld-cm -DCURL_USE_LIBPSL=OFF -DCURL_BROTLI=OFF
 
@@ -54,19 +54,19 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: compare generated curl_config.h files
+      - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
 
-      - name: compare generated libcurl.pc files
+      - name: 'compare generated libcurl.pc files'
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
 
-      - name: compare generated curl-config files
+      - name: 'compare generated curl-config files'
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
 
   check-macos:
     runs-on: macos-latest
     steps:
-      - name: install packages
+      - name: 'install packages'
         run: |
           while [[ $? == 0 ]]; do for i in 1 2 3; do brew update && brew install libtool autoconf automake && break 2 || { echo Error: wait to try again; sleep 10; } done; false Too many retries; done
 
@@ -78,13 +78,13 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: run configure --with-openssl
+      - name: 'run configure --with-openssl'
         run: |
           autoreconf -fi
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-openssl --without-libpsl --disable-ldap --with-zstd
 
-      - name: run cmake
+      - name: 'run cmake'
         run: |
           cmake -B bld-cm -DCURL_USE_LIBPSL=OFF -DCURL_DISABLE_LDAP=ON \
             -DCMAKE_C_COMPILER_TARGET="$(uname -m | sed 's/arm64/aarch64/')-apple-darwin$(uname -r)" \
@@ -97,13 +97,13 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: compare generated curl_config.h files
+      - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
 
-      - name: compare generated libcurl.pc files
+      - name: 'compare generated libcurl.pc files'
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
 
-      - name: compare generated curl-config files
+      - name: 'compare generated curl-config files'
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
 
   check-windows:
@@ -111,20 +111,20 @@ jobs:
     env:
       TRIPLET: 'x86_64-w64-mingw32'
     steps:
-      - name: install packages
+      - name: 'install packages'
         run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install mingw-w64
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
           persist-credentials: false
 
-      - name: run configure --with-schannel
+      - name: 'run configure --with-schannel'
         run: |
           autoreconf -fi
           export PKG_CONFIG_DEBUG_SPEW=1
           mkdir bld-am && cd bld-am && ../configure --enable-static=no --with-schannel --without-libpsl --host="${TRIPLET}"
 
-      - name: run cmake
+      - name: 'run cmake'
         run: |
           cmake -B bld-cm -DCURL_USE_SCHANNEL=ON -DCURL_USE_LIBPSL=OFF \
             -DCMAKE_SYSTEM_NAME=Windows \
@@ -137,11 +137,11 @@ jobs:
       - name: 'cmake log'
         run: cat bld-cm/CMakeFiles/CMakeConfigureLog.yaml 2>/dev/null || true
 
-      - name: compare generated curl_config.h files
+      - name: 'compare generated curl_config.h files'
         run: ./.github/scripts/cmp-config.pl bld-am/lib/curl_config.h bld-cm/lib/curl_config.h
 
-      - name: compare generated libcurl.pc files
+      - name: 'compare generated libcurl.pc files'
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/libcurl.pc bld-cm/libcurl.pc
 
-      - name: compare generated curl-config files
+      - name: 'compare generated curl-config files'
         run: ./.github/scripts/cmp-pkg-config.sh bld-am/curl-config bld-cm/curl-config
