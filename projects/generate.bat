@@ -71,15 +71,6 @@ rem ***************************************************************************
   shift & goto parseArgs
 
 :start
-  if exist ..\buildconf.bat (
-    if "%MODE%" == "GENERATE" (
-      call ..\buildconf
-    ) else if "%VERSION%" == "PRE" (
-      call ..\buildconf -clean
-    ) else if "%VERSION%" == "ALL" (
-      call ..\buildconf -clean
-    )
-  )
   if "%VERSION%" == "PRE" goto success
   if "%VERSION%" == "VC10" goto vc10
   if "%VERSION%" == "VC11" goto vc11

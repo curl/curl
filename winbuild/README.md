@@ -35,12 +35,6 @@ SPDX-License-Identifier: curl
  It is also possible to create the `deps` directory in some other random places
  and tell the `Makefile` its location using the `WITH_DEVEL` option.
 
-## Building straight from git
-
- When you check out code git and build it, as opposed from a released source
- code archive, you need to first run the `buildconf.bat` batch file (present
- in the source code root directory) to set things up.
-
 ## Open a command prompt
 
 Open a Visual Studio Command prompt:
