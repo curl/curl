@@ -13,6 +13,8 @@
 *.obj
 *.pdb
 *.pyc
+*.orig
+*.rej
 *~
 .*.sw?
 .cproject
