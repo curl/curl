@@ -416,10 +416,15 @@ static const char * const supported_protocols[] = {
  * curl_global_init() and curl_global_cleanup() calls.
  */
 
-#if defined(USE_LIBIDN2)
+#if defined(USE_LIBIDN2) || defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
 static int idn_present(curl_version_info_data *info)
 {
+#if defined(USE_WIN32_IDN) || defined(USE_APPLE_IDN)
+  (void)info;
+  return TRUE;
+#else
   return info->libidn != NULL;
+#endif
 }
 #else
 #define idn_present     NULL
