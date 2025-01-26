@@ -90,7 +90,7 @@ else()
   mark_as_advanced(WOLFSSL_INCLUDE_DIR WOLFSSL_LIBRARY)
 endif()
 
-if(NOT WIN32)
+if(WOLFSSL_FOUND AND NOT WIN32)
   find_library(MATH_LIBRARY NAMES "m")
   if(MATH_LIBRARY)
     list(APPEND WOLFSSL_LIBRARIES ${MATH_LIBRARY})  # for log and pow
