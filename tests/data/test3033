@@ -29,8 +29,8 @@ abcde
 <data1 nocheck="yes" nonewline="yes">
 HTTP/1.1 206 Partial Content swsbounce swsclose
 Content-Type: text/html
-Content-Length: 9
-Content-Range: bytes 5-13/26
+Content-Length: 21
+Content-Range: bytes 5-25/26
 
 fghijk
 </data1>
