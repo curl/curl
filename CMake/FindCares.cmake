@@ -90,3 +90,7 @@ else()
 
   mark_as_advanced(CARES_INCLUDE_DIR CARES_LIBRARY)
 endif()
+
+if(CARES_FOUND AND WIN32)
+  list(APPEND CARES_LIBRARIES "iphlpapi")  # for if_indextoname and others
+endif()
