@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
+server_bundle.c
 testpart
 resolve
 rtspd
