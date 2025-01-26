@@ -97,6 +97,6 @@ else()
   endif()
 endif()
 
-if(WIN32)
+if(LIBRTMP_FOUND AND WIN32)
   list(APPEND LIBRTMP_LIBRARIES "winmm")
 endif()
