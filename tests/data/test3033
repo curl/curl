@@ -79,7 +79,7 @@ http
 HTTP retry failed download with keep data and auto-resume
 </name>
 <command option="no-output,no-include">
---continue-at - --retry 5 --retry-delay 1 --retry-all-errors -o %LOGDIR/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
+--continue-at - --retry 4 --retry-delay 1 --retry-all-errors -o %LOGDIR/outfile%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
 </client>
 
