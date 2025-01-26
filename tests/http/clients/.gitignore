@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: curl
 
+h2-pausing
 h2-serverpush
+h2-upgrade-extreme
 hx-download
 hx-upload
+tls-session-reuse
+upload-pausing
 ws-data
 ws-pingpong
-h2-upgrade-extreme
-tls-session-reuse
-h2-pausing
-upload-pausing
