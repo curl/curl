@@ -567,16 +567,6 @@ if ($configurebuild) {
   if ($^O eq 'MSWin32') {
     system("xcopy /s /q \"$CURLDIR\" .");
   }
-  elsif ($^O eq 'linux') {
-    system("cp -afr $CURLDIR/* .");
-    system("cp -af $CURLDIR/Makefile.dist Makefile");
-    system("$make -i -C lib -f Makefile.$targetos prebuild");
-    system("$make -i -C src -f Makefile.$targetos prebuild");
-    if (-d "$CURLDIR/ares") {
-      system("cp -af $CURLDIR/ares/ares_build.h.dist ./ares/ares_build.h");
-      system("$make -i -C ares -f Makefile.$targetos prebuild");
-    }
-  }
 }
 
 if(-f "./libcurl.pc") {
