@@ -256,6 +256,7 @@ jobs:
             generator: Xcode
             generate: >-
               -DCMAKE_XCODE_ATTRIBUTE_CODE_SIGNING_ALLOWED=OFF
+              -DCMAKE_XCODE_ATTRIBUTE_ONLY_ACTIVE_ARCH=ON
               -DMACOSX_BUNDLE_GUI_IDENTIFIER=se.curl
               -DOPENSSL_INCLUDE_DIR="$HOME/libressl/include"
               -DOPENSSL_SSL_LIBRARY="$HOME/libressl/lib/libssl.a"
