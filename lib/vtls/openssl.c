@@ -133,7 +133,6 @@
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
     !(defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER < 0x20700000L)
-#define SSLEAY_VERSION_NUMBER OPENSSL_VERSION_NUMBER
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
@@ -5330,25 +5329,19 @@ size_t Curl_ossl_version(char *buffer, size_t size)
   sub[2]='\0';
   sub[1]='\0';
   ssleay_value = OpenSSL_version_num();
-  if(ssleay_value < 0x906000) {
-    ssleay_value = SSLEAY_VERSION_NUMBER;
-    sub[0]='\0';
-  }
-  else {
-    if(ssleay_value&0xff0) {
-      int minor_ver = (ssleay_value >> 4) & 0xff;
-      if(minor_ver > 26) {
-        /* handle extended version introduced for 0.9.8za */
-        sub[1] = (char) ((minor_ver - 1) % 26 + 'a' + 1);
-        sub[0] = 'z';
-      }
-      else {
-        sub[0] = (char) (minor_ver + 'a' - 1);
-      }
+  if(ssleay_value&0xff0) {
+    int minor_ver = (ssleay_value >> 4) & 0xff;
+    if(minor_ver > 26) {
+      /* handle extended version introduced for 0.9.8za */
+      sub[1] = (char) ((minor_ver - 1) % 26 + 'a' + 1);
+      sub[0] = 'z';
     }
-    else
-      sub[0]='\0';
+    else {
+      sub[0] = (char) (minor_ver + 'a' - 1);
+    }
   }
+  else
+    sub[0]='\0';
 
   return msnprintf(buffer, size, "%s/%lx.%lx.%lx%s"
 #ifdef OPENSSL_FIPS
