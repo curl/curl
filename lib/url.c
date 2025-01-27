@@ -652,6 +652,7 @@ bool Curl_on_disconnect(struct Curl_easy *data,
 static bool xfer_may_multiplex(const struct Curl_easy *data,
                                const struct connectdata *conn)
 {
+#ifndef CURL_DISABLE_HTTP
   /* If an HTTP protocol and multiplexing is enabled */
   if((conn->handler->protocol & PROTO_FAMILY_HTTP) &&
      (!conn->bits.protoconnstart || !conn->bits.close)) {
@@ -661,6 +662,10 @@ static bool xfer_may_multiplex(const struct Curl_easy *data,
       /* allows HTTP/2 or newer */
       return TRUE;
   }
+#else
+  (void)data;
+  (void)conn;
+#endif
   return FALSE;
 }
 
