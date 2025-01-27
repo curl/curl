@@ -196,18 +196,6 @@
   #endif
 #endif
 
-/*
- * Whether SSL_CTX_set1_curves_list is available.
- * OpenSSL: supported since 1.0.2, see
- *   https://docs.openssl.org/master/man3/SSL_CTX_set1_curves/
- * BoringSSL: supported since 5fd1807d95f7 (committed 2016-09-30)
- * LibreSSL: since 2.5.3 (April 12, 2017)
- */
-#if (OPENSSL_VERSION_NUMBER >= 0x10002000L) ||  \
-  defined(OPENSSL_IS_BORINGSSL)
-#define HAVE_SSL_CTX_SET_EC_CURVES
-#endif
-
 #if defined(LIBRESSL_VERSION_NUMBER)
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
@@ -3799,7 +3787,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
   SSL_CTX_set_post_handshake_auth(octx->ssl_ctx, 1);
 #endif
 
-#ifdef HAVE_SSL_CTX_SET_EC_CURVES
   {
     const char *curves = conn_config->curves;
     if(curves) {
@@ -3809,7 +3796,6 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
       }
     }
   }
-#endif
 
 #ifdef USE_OPENSSL_SRP
   if(ssl_config->primary.username && Curl_auth_allowed_to_host(data)) {
