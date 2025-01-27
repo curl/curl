@@ -1025,10 +1025,12 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     }
   }
 
+#ifdef HAVE_GSSAPI
   /* GSS delegation differences do not actually affect every connection
      and auth method, but this check takes precaution before efficiency */
   if(needle->gssapi_delegation != conn->gssapi_delegation)
     return FALSE;
+#endif
 
   /* If looking for HTTP and the HTTP version we want is less
    * than the HTTP version of conn, continue looking.
@@ -1389,8 +1391,9 @@ static struct connectdata *allocate_conn(struct Curl_easy *data)
   conn->fclosesocket = data->set.fclosesocket;
   conn->closesocket_client = data->set.closesocket_client;
   conn->lastused = conn->created;
+#ifdef HAVE_GSSAPI
   conn->gssapi_delegation = data->set.gssapi_delegation;
-
+#endif
   return conn;
 error:
 

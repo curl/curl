@@ -1536,23 +1536,15 @@ struct UserDefined {
   void *out;         /* CURLOPT_WRITEDATA */
   void *in_set;      /* CURLOPT_READDATA */
   void *writeheader; /* write the header to this if non-NULL */
-  unsigned short use_port; /* which port to use (when not using default) */
   unsigned long httpauth;  /* kind of HTTP authentication to use (bitmask) */
   unsigned long proxyauth; /* kind of proxy authentication to use (bitmask) */
   long maxredirs;    /* maximum no. of http(s) redirects to follow, set to -1
                         for infinity */
-
   void *postfields;  /* if POST, set the fields' values here */
   curl_seek_callback seek_func;      /* function that seeks the input */
   curl_off_t postfieldsize; /* if POST, this might have a size to use instead
                                of strlen(), and then the data *may* be binary
                                (contain zero bytes) */
-#ifndef CURL_DISABLE_BINDLOCAL
-  unsigned short localport; /* local port number to bind to */
-  unsigned short localportrange; /* number of additional port numbers to test
-                                    in case the 'localport' one cannot be
-                                    bind()ed */
-#endif
   curl_write_callback fwrite_func;   /* function that stores the output */
   curl_write_callback fwrite_header; /* function that stores headers */
   curl_write_callback fwrite_rtp;    /* function that stores interleaved RTP */
@@ -1582,11 +1574,6 @@ struct UserDefined {
 #endif
   void *progress_client; /* pointer to pass to the progress callback */
   void *ioctl_client;   /* pointer to pass to the ioctl callback */
-  unsigned int timeout;        /* ms, 0 means no timeout */
-  unsigned int connecttimeout; /* ms, 0 means default timeout */
-  unsigned int happy_eyeballs_timeout; /* ms, 0 is a valid value */
-  unsigned int server_response_timeout; /* ms, 0 means no timeout */
-  unsigned int shutdowntimeout; /* ms, 0 means default timeout */
   long maxage_conn;     /* in seconds, max idle time to allow a connection that
                            is to be reused */
   long maxlifetime_conn; /* in seconds, max time since creation to allow a
@@ -1614,10 +1601,6 @@ struct UserDefined {
   struct curl_slist *connect_to; /* list of host:port mappings to override
                                     the hostname and port to connect to */
   time_t timevalue;       /* what time to compare with */
-  unsigned char timecondition; /* kind of time comparison: curl_TimeCond */
-  unsigned char method;   /* what kind of HTTP request: Curl_HttpReq */
-  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
-                             to be used in the library's request(s) */
   struct ssl_config_data ssl;  /* user defined SSL stuff */
 #ifndef CURL_DISABLE_PROXY
   struct ssl_config_data proxy_ssl;  /* user defined SSL stuff for proxy */
@@ -1637,24 +1620,17 @@ struct UserDefined {
 #ifndef CURL_DISABLE_HTTP
   struct curl_slist *http200aliases; /* linked list of aliases for http200 */
 #endif
-  unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
-                          file 0 - whatever, 1 - v2, 2 - v6 */
   curl_off_t max_filesize; /* Maximum file size to download */
 #ifndef CURL_DISABLE_FTP
+  unsigned int accepttimeout;   /* in milliseconds, 0 means no timeout */
   unsigned char ftp_filemethod; /* how to get to a file: curl_ftpfile  */
   unsigned char ftpsslauth; /* what AUTH XXX to try: curl_ftpauth */
   unsigned char ftp_ccc;   /* FTP CCC options: curl_ftpccc */
-  unsigned int accepttimeout;   /* in milliseconds, 0 means no timeout */
 #endif
 #if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
   struct curl_slist *quote;     /* after connection is established */
   struct curl_slist *postquote; /* after the transfer */
   struct curl_slist *prequote; /* before the transfer, after type */
-  /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
-     1 - create directories that do not exist
-     2 - the same but also allow MKD to fail once
-  */
-  unsigned char ftp_create_missing_dirs;
 #endif
 #ifdef USE_LIBSSH2
   curl_sshhostkeycallback ssh_hostkeyfunc; /* hostkey check callback */
@@ -1665,9 +1641,6 @@ struct UserDefined {
   void *ssh_keyfunc_userp;         /* custom pointer to callback */
   int ssh_auth_types;    /* allowed SSH auth types */
   unsigned int new_directory_perms; /* when creating remote dirs */
-#endif
-#ifndef CURL_DISABLE_NETRC
-  unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
 #endif
   unsigned int new_file_perms;      /* when creating remote files */
   char *str[STRING_LAST]; /* array of strings, pointing to allocated memory */
@@ -1692,10 +1665,12 @@ struct UserDefined {
   void *fnmatch_data;
   void *wildcardptr;
 #endif
- /* GSS-API credential delegation, see the documentation of
-    CURLOPT_GSSAPI_DELEGATION */
-  unsigned char gssapi_delegation;
 
+  unsigned int timeout;        /* ms, 0 means no timeout */
+  unsigned int connecttimeout; /* ms, 0 means default timeout */
+  unsigned int happy_eyeballs_timeout; /* ms, 0 is a valid value */
+  unsigned int server_response_timeout; /* ms, 0 means no timeout */
+  unsigned int shutdowntimeout; /* ms, 0 means default timeout */
   int tcp_keepidle;     /* seconds in idle before sending keepalive probe */
   int tcp_keepintvl;    /* seconds between TCP keepalive probes */
   int tcp_keepcnt;      /* maximum number of keepalive probes */
@@ -1717,18 +1692,49 @@ struct UserDefined {
   void *trailer_data; /* pointer to pass to trailer data callback */
   curl_trailer_callback trailer_callback; /* trailing data callback */
 #endif
-  char keep_post;     /* keep POSTs as POSTs after a 30x request; each
-                         bit represents a request, from 301 to 303 */
 #ifndef CURL_DISABLE_SMTP
   struct curl_slist *mail_rcpt; /* linked list of mail recipients */
+#endif
+  unsigned int maxconnects; /* Max idle connections in the connection cache */
+  unsigned short use_port; /* which port to use (when not using default) */
+#ifndef CURL_DISABLE_BINDLOCAL
+  unsigned short localport; /* local port number to bind to */
+  unsigned short localportrange; /* number of additional port numbers to test
+                                    in case the 'localport' one cannot be
+                                    bind()ed */
+#endif
+#ifndef CURL_DISABLE_NETRC
+  unsigned char use_netrc;        /* enum CURL_NETRC_OPTION values  */
+#endif
+#if !defined(CURL_DISABLE_FTP) || defined(USE_SSH)
+  /* Despite the name, ftp_create_missing_dirs is for FTP(S) and SFTP
+     1 - create directories that do not exist
+     2 - the same but also allow MKD to fail once
+  */
+  unsigned char ftp_create_missing_dirs;
+#endif
+  unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
+                              IMAP or POP3 or others! (type: curl_usessl)*/
+  char keep_post;     /* keep POSTs as POSTs after a 30x request; each
+                         bit represents a request, from 301 to 303 */
+  unsigned char timecondition; /* kind of time comparison: curl_TimeCond */
+  unsigned char method;   /* what kind of HTTP request: Curl_HttpReq */
+  unsigned char httpwant; /* when non-zero, a specific HTTP version requested
+                             to be used in the library's request(s) */
+  unsigned char ipver; /* the CURL_IPRESOLVE_* defines in the public header
+                          file 0 - whatever, 1 - v2, 2 - v6 */
+#ifdef HAVE_GSSAPI
+  /* GSS-API credential delegation, see the documentation of
+     CURLOPT_GSSAPI_DELEGATION */
+  unsigned char gssapi_delegation;
+#endif
+  BIT(connect_only); /* make connection/request, then let application use the
+                        socket */
+  BIT(connect_only_ws); /* special websocket connect-only level */
+#ifndef CURL_DISABLE_SMTP
   BIT(mail_rcpt_allowfails); /* allow RCPT TO command to fail for some
                                 recipients */
 #endif
-  unsigned int maxconnects; /* Max idle connections in the connection cache */
-  unsigned char use_ssl;   /* if AUTH TLS is to be attempted etc, for FTP or
-                              IMAP or POP3 or others! (type: curl_usessl)*/
-  unsigned char connect_only; /* make connection/request, then let
-                                 application use the socket */
 #ifndef CURL_DISABLE_MIME
   BIT(mime_formescape);
 #endif
