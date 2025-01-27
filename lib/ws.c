@@ -113,10 +113,9 @@ static unsigned char ws_frame_flags2op(int flags)
 }
 
 /* No extensions are supported. If any of the RSV bits are set, we must fail */
-static bool ws_frame_rsv_supported(struct ws_decoder *dec, int flags)
+static bool ws_frame_rsv_supported(int flags)
 {
   unsigned char reserved_bits = flags & WSBIT_RSV_MASK;
-  (void)dec;
   return reserved_bits == 0;
 }
 
@@ -187,8 +186,9 @@ static CURLcode ws_dec_read_head(struct ws_decoder *dec,
       dec->head[0] = *inbuf;
       Curl_bufq_skip(inraw, 1);
 
-      if(!ws_frame_rsv_supported(dec, dec->head[0])) {
-        failf(data, "WS: unknown rsv: %x", dec->head[0] & WSBIT_RSV_MASK);
+      if(!ws_frame_rsv_supported(dec->head[0])) {
+        failf(data, "WS: unknown reserved bit in frame header: %x",
+              dec->head[0] & WSBIT_RSV_MASK);
         ws_dec_reset(dec);
         return CURLE_RECV_ERROR;
       }
