@@ -198,7 +198,6 @@ static CURLcode h2_progress_egress(struct Curl_cfilter *cf,
  * All about the H2 internals of a stream
  */
 struct h2_stream_ctx {
-  struct bufq recvbuf; /* response buffer */
   struct bufq sendbuf; /* request buffer */
   struct h1_req_parser h1; /* parsing the request */
   struct dynhds resp_trailers; /* response trailer fields */
@@ -240,7 +239,6 @@ static struct h2_stream_ctx *h2_stream_ctx_create(struct cf_h2_ctx *ctx)
                   H2_STREAM_SEND_CHUNKS, BUFQ_OPT_NONE);
   Curl_h1_req_parse_init(&stream->h1, H1_PARSE_DEFAULT_MAX_LINE_LEN);
   Curl_dynhds_init(&stream->resp_trailers, 0, DYN_HTTP_REQUEST);
-  stream->resp_hds_len = 0;
   stream->bodystarted = FALSE;
   stream->status_code = -1;
   stream->closed = FALSE;
@@ -2057,23 +2055,10 @@ static ssize_t cf_h2_recv(struct Curl_cfilter *cf, struct Curl_easy *data,
   }
 
   if(nread > 0) {
-    size_t data_consumed = (size_t)nread;
     /* Now that we transferred this to the upper layer, we report
      * the actual amount of DATA consumed to the H2 session, so
      * that it adjusts stream flow control */
-    if(stream->resp_hds_len >= data_consumed) {
-      stream->resp_hds_len -= data_consumed;  /* no DATA */
-    }
-    else {
-      if(stream->resp_hds_len) {
-        data_consumed -= stream->resp_hds_len;
-        stream->resp_hds_len = 0;
-      }
-      if(data_consumed) {
-        nghttp2_session_consume(ctx->h2, stream->id, data_consumed);
-      }
-    }
-
+    nghttp2_session_consume(ctx->h2, stream->id, (size_t)nread);
     if(stream->closed) {
       CURL_TRC_CF(data, cf, "[%d] DRAIN closed stream", stream->id);
       drain_stream(cf, data, stream);
@@ -2650,10 +2635,8 @@ static bool cf_h2_data_pending(struct Curl_cfilter *cf,
                                const struct Curl_easy *data)
 {
   struct cf_h2_ctx *ctx = cf->ctx;
-  struct h2_stream_ctx *stream = H2_STREAM_CTX(ctx, data);
 
-  if(ctx && (!Curl_bufq_is_empty(&ctx->inbufq)
-            || (stream && !Curl_bufq_is_empty(&stream->sendbuf))))
+  if(ctx && !Curl_bufq_is_empty(&ctx->inbufq))
     return TRUE;
   return cf->next ? cf->next->cft->has_data_pending(cf->next, data) : FALSE;
 }
