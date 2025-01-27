@@ -11,6 +11,7 @@ set -eu
 gitonly=".git*
 ^.*
 ^appveyor.*
+^buildconf
 ^GIT-INFO.md
 ^README.md
 ^renovate.json
