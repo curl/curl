@@ -158,8 +158,7 @@
 #endif
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* 1.0.2 or later */ \
-    !(defined(LIBRESSL_VERSION_NUMBER) && \
+#if !(defined(LIBRESSL_VERSION_NUMBER) && \
       LIBRESSL_VERSION_NUMBER < 0x20700000L)
 #define HAVE_X509_GET0_SIGNATURE 1
 #endif
@@ -168,11 +167,6 @@
   OPENSSL_VERSION_NUMBER <= 0x10002FFFL && \
   !defined(OPENSSL_NO_COMP)
 #define HAVE_SSL_COMP_FREE_COMPRESSION_METHODS 1
-#endif
-
-#if (OPENSSL_VERSION_NUMBER < 0x0090808fL)
-/* not present in older OpenSSL */
-#define OPENSSL_load_builtin_modules(x)
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x30000000L)
@@ -1203,10 +1197,8 @@ static int
 use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
                            const char *key_passwd)
 {
-/* SSL_CTX_add1_chain_cert introduced in OpenSSL 1.0.2 */
-#if (OPENSSL_VERSION_NUMBER >= 0x1000200fL) && /* OpenSSL 1.0.2 or later */ \
-  !(defined(LIBRESSL_VERSION_NUMBER) &&                                     \
-    (LIBRESSL_VERSION_NUMBER < 0x2090100fL)) /* LibreSSL 2.9.1 or later */
+#if !(defined(LIBRESSL_VERSION_NUMBER) && \
+  (LIBRESSL_VERSION_NUMBER < 0x2090100fL)) /* LibreSSL 2.9.1 or later */
   int ret = 0;
   X509 *x = NULL;
   void *passwd_callback_userdata = (void *)key_passwd;
@@ -1926,18 +1918,7 @@ static void ossl_cleanup(void)
 static CURLcode ossl_set_engine(struct Curl_easy *data, const char *engine)
 {
 #ifdef USE_OPENSSL_ENGINE
-  ENGINE *e;
-
-#if OPENSSL_VERSION_NUMBER >= 0x00909000L
-  e = ENGINE_by_id(engine);
-#else
-  /* avoid memory leak */
-  for(e = ENGINE_get_first(); e; e = ENGINE_get_next(e)) {
-    const char *e_id = ENGINE_get_id(e);
-    if(!strcmp(engine, e_id))
-      break;
-  }
-#endif
+  ENGINE *e = ENGINE_by_id(engine);
 
   if(!e) {
     failf(data, "SSL Engine '%s' not found", engine);
@@ -2454,8 +2435,7 @@ static CURLcode ossl_verifyhost(struct Curl_easy *data,
   return result;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-  !defined(OPENSSL_NO_OCSP)
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
 static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct Curl_easy *data,
                              struct ossl_ctx *octx)
@@ -2520,9 +2500,8 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   }
   st = SSL_CTX_get_cert_store(octx->ssl_ctx);
 
-#if ((OPENSSL_VERSION_NUMBER <= 0x1000201fL) /* Fixed after 1.0.2a */ || \
-     (defined(LIBRESSL_VERSION_NUMBER) &&                               \
-      LIBRESSL_VERSION_NUMBER <= 0x2040200fL))
+#if (defined(LIBRESSL_VERSION_NUMBER) && \
+     LIBRESSL_VERSION_NUMBER <= 0x2040200fL))
   /* The authorized responder cert in the OCSP response MUST be signed by the
      peer cert's issuer (see RFC6960 section 4.2.2.2). If that is a root cert,
      no problem, but if it is an intermediate cert OpenSSL has a bug where it
@@ -2847,9 +2826,8 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
 #ifdef USE_OPENSSL
 /* ====================================================== */
 
-/* Check for OpenSSL 1.0.2 which has ALPN support. */
-#if OPENSSL_VERSION_NUMBER >= 0x10002000L       \
-  && !defined(OPENSSL_NO_TLSEXT)
+/* Check for ALPN support. */
+#ifndef OPENSSL_NO_TLSEXT
 #  define HAS_ALPN_OPENSSL
 #endif
 
@@ -2982,20 +2960,10 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 #endif
   FALLTHROUGH();
   case CURL_SSLVERSION_TLSv1_2:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_1;
-#else
-    failf(data, OSSL_PACKAGE " was built without TLS 1.2 support");
-    return CURLE_NOT_BUILT_IN;
-#endif
     FALLTHROUGH();
   case CURL_SSLVERSION_TLSv1_1:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1;
-#else
-    failf(data, OSSL_PACKAGE " was built without TLS 1.1 support");
-    return CURLE_NOT_BUILT_IN;
-#endif
     FALLTHROUGH();
   case CURL_SSLVERSION_TLSv1_0:
   case CURL_SSLVERSION_TLSv1:
@@ -3004,14 +2972,10 @@ ossl_set_ssl_version_min_max_legacy(ctx_option_t *ctx_options,
 
   switch(ssl_version_max) {
   case CURL_SSLVERSION_MAX_TLSv1_0:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_1;
-#endif
     FALLTHROUGH();
   case CURL_SSLVERSION_MAX_TLSv1_1:
-#if OPENSSL_VERSION_NUMBER >= 0x1000100FL
     *ctx_options |= SSL_OP_NO_TLSv1_2;
-#endif
     FALLTHROUGH();
   case CURL_SSLVERSION_MAX_TLSv1_2:
 #ifdef TLS1_3_VERSION
@@ -3976,8 +3940,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 
   SSL_set_app_data(octx->ssl, ssl_user_data);
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-  !defined(OPENSSL_NO_OCSP)
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus)
     SSL_set_tlsext_status_type(octx->ssl, TLSEXT_STATUSTYPE_ocsp);
 #endif
@@ -4848,8 +4811,7 @@ CURLcode Curl_oss_check_peer_cert(struct Curl_cfilter *cf,
   }
   infof_certstack(data, octx->ssl);
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-  !defined(OPENSSL_NO_OCSP)
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   if(conn_config->verifystatus && !octx->reused_session) {
     /* do not do this after Session ID reuse */
     result = verifystatus(cf, data, octx);
@@ -5419,7 +5381,7 @@ static CURLcode ossl_random(struct Curl_easy *data,
   return rc == 1 ? CURLE_OK : CURLE_FAILED_INIT;
 }
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
+#ifndef OPENSSL_NO_SHA256
 static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
                                size_t tmplen,
                                unsigned char *sha256sum /* output */,
@@ -5445,8 +5407,7 @@ static CURLcode ossl_sha256sum(const unsigned char *tmp, /* input */
 
 static bool ossl_cert_status_request(void)
 {
-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_TLSEXT) && \
-  !defined(OPENSSL_NO_OCSP)
+#if !defined(OPENSSL_NO_TLSEXT) && !defined(OPENSSL_NO_OCSP)
   return TRUE;
 #else
   return FALSE;
@@ -5500,7 +5461,7 @@ const struct Curl_ssl Curl_ssl_openssl = {
   ossl_set_engine_default,  /* set_engine_default */
   ossl_engines_list,        /* engines_list */
   NULL,                     /* false_start */
-#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL) && !defined(OPENSSL_NO_SHA256)
+#ifndef OPENSSL_NO_SHA256
   ossl_sha256sum,           /* sha256sum */
 #else
   NULL,                     /* sha256sum */
