@@ -71,8 +71,7 @@
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#  if (defined(OPENSSL_VERSION_NUMBER) && \
-       (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
+#  ifndef USE_WOLFSSL
 #    define DES_key_schedule des_key_schedule
 #    define DES_cblock des_cblock
 #    define DES_set_odd_parity des_set_odd_parity
