@@ -497,13 +497,14 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex)
   return FALSE;
 }
 
-unsigned char Curl_conn_http_version(struct Curl_easy *data)
+unsigned char Curl_conn_http_version(struct Curl_easy *data,
+                                     struct connectdata *conn)
 {
   struct Curl_cfilter *cf;
   CURLcode result = CURLE_UNKNOWN_OPTION;
   unsigned char v = 0;
 
-  cf = data->conn ? data->conn->cfilter[FIRSTSOCKET] : NULL;
+  cf = conn->cfilter[FIRSTSOCKET];
   for(; cf; cf = cf->next) {
     if(cf->cft->flags & CF_TYPE_HTTP) {
       int value = 0;

@@ -154,17 +154,19 @@ static const struct alpn_spec ALPN_SPEC_H2_H11 = {
 };
 #endif
 
-static const struct alpn_spec *alpn_get_spec(int httpwant, bool use_alpn)
+static const struct alpn_spec *
+alpn_get_spec(http_majors allowed, bool use_alpn)
 {
   if(!use_alpn)
     return NULL;
 #ifdef USE_HTTP2
-  if(httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE)
+  if(allowed & CURL_HTTP_V2x) {
+    if(allowed & CURL_HTTP_V1x)
+      return &ALPN_SPEC_H2_H11;
     return &ALPN_SPEC_H2;
-  if(httpwant >= CURL_HTTP_VERSION_2)
-    return &ALPN_SPEC_H2_H11;
+  }
 #else
-  (void)httpwant;
+  (void)allowed;
 #endif
   /* Use the ALPN protocol "http/1.1" for HTTP/1.x.
      Avoid "http/1.0" because some servers do not support it. */
@@ -1576,7 +1578,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(data->conn);
 
-  ctx = cf_ctx_new(data, alpn_get_spec(data->state.httpwant,
+  ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.allowed,
                                        conn->bits.tls_enable_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
@@ -1627,16 +1629,16 @@ static CURLcode cf_ssl_proxy_create(struct Curl_cfilter **pcf,
   struct ssl_connect_data *ctx;
   CURLcode result;
   bool use_alpn = conn->bits.tls_enable_alpn;
-  int httpwant = CURL_HTTP_VERSION_1_1;
+  http_majors allowed = CURL_HTTP_V1x;
 
 #ifdef USE_HTTP2
   if(conn->http_proxy.proxytype == CURLPROXY_HTTPS2) {
     use_alpn = TRUE;
-    httpwant = CURL_HTTP_VERSION_2;
+    allowed = (CURL_HTTP_V1x|CURL_HTTP_V2x);
   }
 #endif
 
-  ctx = cf_ctx_new(data, alpn_get_spec(httpwant, use_alpn));
+  ctx = cf_ctx_new(data, alpn_get_spec(allowed, use_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;
     goto out;

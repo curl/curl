@@ -651,67 +651,56 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   (void)remotehost;
 
   if(conn->bits.tls_enable_alpn) {
-    switch(data->state.httpwant) {
-    case CURL_HTTP_VERSION_NONE:
-      /* No preferences by transfer setup. Choose best defaults */
 #ifdef USE_HTTPSRR
-      if(conn->dns_entry && conn->dns_entry->hinfo &&
-         !conn->dns_entry->hinfo->no_def_alpn) {
-        size_t i, j;
-        for(i = 0; i < CURL_ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
-                   alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
-          bool present = FALSE;
-          enum alpnid alpn = conn->dns_entry->hinfo->alpns[i];
-          for(j = 0; j < alpn_count; ++j) {
-            if(alpn == alpn_ids[j]) {
-              present = TRUE;
-              break;
-            }
-          }
-          if(!present) {
-            switch(alpn) {
-            case ALPN_h3:
-              if(Curl_conn_may_http3(data, conn))
-                break;  /* not possible */
-              FALLTHROUGH();
-            case ALPN_h2:
-            case ALPN_h1:
-              alpn_ids[alpn_count++] = alpn;
-              break;
-            default: /* ignore */
-              break;
-            }
+    if(conn->dns_entry && conn->dns_entry->hinfo &&
+       !conn->dns_entry->hinfo->no_def_alpn) {
+      size_t i, j;
+      for(i = 0; i < CURL_ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
+                 alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
+        bool present = FALSE;
+        enum alpnid alpn = conn->dns_entry->hinfo->alpns[i];
+        for(j = 0; j < alpn_count; ++j) {
+          if(alpn == alpn_ids[j]) {
+            present = TRUE;
+            break;
           }
         }
+        if(present)
+          continue;
+        switch(alpn) {
+        case ALPN_h3:
+          if(Curl_conn_may_http3(data, conn))
+            break;  /* not possible */
+          if(data->state.http_neg.allowed & CURL_HTTP_V3x)
+            alpn_ids[alpn_count++] = alpn;
+          break;
+        case ALPN_h2:
+          if(data->state.http_neg.allowed & CURL_HTTP_V2x)
+            alpn_ids[alpn_count++] = alpn;
+          break;
+        case ALPN_h1:
+          if(data->state.http_neg.allowed & CURL_HTTP_V1x)
+            alpn_ids[alpn_count++] = alpn;
+          break;
+        default: /* ignore */
+          break;
+        }
       }
+    }
 #endif
-      if(!alpn_count)
+
+    if(!alpn_count) {
+      if(data->state.http_neg.allowed & CURL_HTTP_V3x) {
+        result = Curl_conn_may_http3(data, conn);
+        if(!result)
+          alpn_ids[alpn_count++] = ALPN_h3;
+        else if(data->state.http_neg.allowed == CURL_HTTP_V3x)
+          goto out; /* only h3 allowed, not possible, error out */
+      }
+      if(data->state.http_neg.allowed & CURL_HTTP_V2x)
         alpn_ids[alpn_count++] = ALPN_h2;
-      break;
-    case CURL_HTTP_VERSION_3ONLY:
-      result = Curl_conn_may_http3(data, conn);
-      if(result) /* cannot do it */
-        goto out;
-      alpn_ids[alpn_count++] = ALPN_h3;
-      break;
-    case CURL_HTTP_VERSION_3:
-      /* We assume that silently not even trying H3 is ok here */
-      if(Curl_conn_may_http3(data, conn) == CURLE_OK)
-        alpn_ids[alpn_count++] = ALPN_h3;
-      alpn_ids[alpn_count++] = ALPN_h2;
-      break;
-    case CURL_HTTP_VERSION_2_0:
-    case CURL_HTTP_VERSION_2TLS:
-    case CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE:
-      alpn_ids[alpn_count++] = ALPN_h2;
-      break;
-    case CURL_HTTP_VERSION_1_0:
-    case CURL_HTTP_VERSION_1_1:
-      alpn_ids[alpn_count++] = ALPN_h1;
-      break;
-    default:
-      alpn_ids[alpn_count++] = ALPN_h2;
-      break;
+      else if(data->state.http_neg.allowed & CURL_HTTP_V1x)
+        alpn_ids[alpn_count++] = ALPN_h1;
     }
   }
 

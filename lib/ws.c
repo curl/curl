@@ -1308,7 +1308,9 @@ static CURLcode ws_setup_conn(struct Curl_easy *data,
                               struct connectdata *conn)
 {
   /* WebSockets is 1.1 only (for now) */
-  data->state.httpwant = CURL_HTTP_VERSION_1_1;
+  data->state.http_neg.accept_09 = FALSE;
+  data->state.http_neg.only_10 = FALSE;
+  data->state.http_neg.allowed = CURL_HTTP_V1x;
   return Curl_http_setup_conn(data, conn);
 }
 
