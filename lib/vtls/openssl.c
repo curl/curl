@@ -2499,33 +2499,6 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
   }
   st = SSL_CTX_get_cert_store(octx->ssl_ctx);
 
-#if (defined(LIBRESSL_VERSION_NUMBER) && \
-     LIBRESSL_VERSION_NUMBER <= 0x2040200fL))
-  /* The authorized responder cert in the OCSP response MUST be signed by the
-     peer cert's issuer (see RFC6960 section 4.2.2.2). If that is a root cert,
-     no problem, but if it is an intermediate cert OpenSSL has a bug where it
-     expects this issuer to be present in the chain embedded in the OCSP
-     response. So we add it if necessary. */
-
-  /* First make sure the peer cert chain includes both a peer and an issuer,
-     and the OCSP response contains a responder cert. */
-  if(sk_X509_num(ch) >= 2 && sk_X509_num(br->certs) >= 1) {
-    X509 *responder = sk_X509_value(br->certs, sk_X509_num(br->certs) - 1);
-
-    /* Find issuer of responder cert and add it to the OCSP response chain */
-    for(i = 0; i < sk_X509_num(ch); i++) {
-      X509 *issuer = sk_X509_value(ch, i);
-      if(X509_check_issued(issuer, responder) == X509_V_OK) {
-        if(!OCSP_basic_add1_cert(br, issuer)) {
-          failf(data, "Could not add issuer cert to OCSP response");
-          result = CURLE_SSL_INVALIDCERTSTATUS;
-          goto end;
-        }
-      }
-    }
-  }
-#endif
-
   if(OCSP_basic_verify(br, ch, st, 0) <= 0) {
     failf(data, "OCSP response verification failed");
     result = CURLE_SSL_INVALIDCERTSTATUS;
