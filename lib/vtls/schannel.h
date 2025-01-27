@@ -30,7 +30,7 @@
 
 #ifdef _MSC_VER
 #pragma warning(push)
-#pragma warning(disable: 4201)
+#pragma warning(disable:4201)
 #endif
 #include <subauth.h>
 #ifdef _MSC_VER

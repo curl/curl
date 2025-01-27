@@ -126,8 +126,8 @@ int curlx_uztosi(size_t uznum)
 unsigned long curlx_uztoul(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
-# pragma warning(push)
-# pragma warning(disable:810) /* conversion may lose significant bits */
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
 #if ULONG_MAX < SIZE_T_MAX
@@ -136,7 +136,7 @@ unsigned long curlx_uztoul(size_t uznum)
   return (unsigned long)(uznum & (size_t) CURL_MASK_ULONG);
 
 #ifdef __INTEL_COMPILER
-# pragma warning(pop)
+#  pragma warning(pop)
 #endif
 }
 
@@ -147,8 +147,8 @@ unsigned long curlx_uztoul(size_t uznum)
 unsigned int curlx_uztoui(size_t uznum)
 {
 #ifdef __INTEL_COMPILER
-# pragma warning(push)
-# pragma warning(disable:810) /* conversion may lose significant bits */
+#  pragma warning(push)
+#  pragma warning(disable:810) /* conversion may lose significant bits */
 #endif
 
 #if UINT_MAX < SIZE_T_MAX
@@ -157,7 +157,7 @@ unsigned int curlx_uztoui(size_t uznum)
   return (unsigned int)(uznum & (size_t) CURL_MASK_UINT);
 
 #ifdef __INTEL_COMPILER
-# pragma warning(pop)
+#  pragma warning(pop)
 #endif
 }
 

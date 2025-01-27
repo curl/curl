@@ -27,8 +27,8 @@
 #include "memdebug.h"
 
 #ifdef _MSC_VER
-/* warning C4706: assignment within conditional expression */
-#pragma warning(disable:4706)
+#pragma warning(push)
+#pragma warning(disable:4706) /* assignment within conditional expression */
 #endif
 static void showem(CURL *easy, unsigned int type)
 {
@@ -41,6 +41,9 @@ static void showem(CURL *easy, unsigned int type)
     prev = header;
   }
 }
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 static size_t write_cb(char *data, size_t n, size_t l, void *userp)
 {

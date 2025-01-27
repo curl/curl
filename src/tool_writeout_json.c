@@ -119,8 +119,8 @@ void ourWriteOutJSON(FILE *stream, const struct writeoutvar mappings[],
 }
 
 #ifdef _MSC_VER
-/* warning C4706: assignment within conditional expression */
-#pragma warning(disable:4706)
+#pragma warning(push)
+#pragma warning(disable:4706) /* assignment within conditional expression */
 #endif
 
 void headerJSON(FILE *stream, struct per_transfer *per)
@@ -169,3 +169,7 @@ void headerJSON(FILE *stream, struct per_transfer *per)
   }
   fputs("\n}", stream);
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif

@@ -4108,8 +4108,8 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
 }
 
 #ifdef _MSC_VER
-/* warning C4706: assignment within conditional expression */
-#pragma warning(disable:4706)
+#pragma warning(push)
+#pragma warning(disable:4706) /* assignment within conditional expression */
 #endif
 
 /***********************************************************************
@@ -4265,6 +4265,10 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
   free(rawPath);
   return CURLE_OK;
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 /* call this when the DO phase has completed */
 static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
