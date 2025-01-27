@@ -399,7 +399,8 @@ bool Curl_conn_is_multiplex(struct connectdata *conn, int sockindex);
  * Return the HTTP version used on the FIRSTSOCKET connection filters
  * or 0 if unknown. Value otherwise is 09, 10, 11, etc.
  */
-unsigned char Curl_conn_http_version(struct Curl_easy *data);
+unsigned char Curl_conn_http_version(struct Curl_easy *data,
+                                     struct connectdata *conn);
 
 /**
  * Close the filter chain at `sockindex` for connection `data->conn`.

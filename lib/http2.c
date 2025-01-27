@@ -2794,8 +2794,9 @@ out:
 
 bool Curl_http2_may_switch(struct Curl_easy *data)
 {
-  if(Curl_conn_http_version(data) < 20 &&
-     data->state.httpwant == CURL_HTTP_VERSION_2_PRIOR_KNOWLEDGE) {
+  if(Curl_conn_http_version(data, data->conn) < 20 &&
+     (data->state.http_neg.allowed & CURL_HTTP_V2x) &&
+     data->state.http_neg.h2_prior_knowledge) {
 #ifndef CURL_DISABLE_PROXY
     if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
       /* We do not support HTTP/2 proxies yet. Also it is debatable
@@ -2814,7 +2815,7 @@ CURLcode Curl_http2_switch(struct Curl_easy *data)
   struct Curl_cfilter *cf;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data) < 20);
+  DEBUGASSERT(Curl_conn_http_version(data, data->conn) < 20);
 
   result = http2_cfilter_add(&cf, data, data->conn, FIRSTSOCKET, FALSE);
   if(result)
@@ -2836,7 +2837,7 @@ CURLcode Curl_http2_switch_at(struct Curl_cfilter *cf, struct Curl_easy *data)
   struct Curl_cfilter *cf_h2;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data) < 20);
+  DEBUGASSERT(Curl_conn_http_version(data, data->conn) < 20);
 
   result = http2_cfilter_insert_after(cf, data, FALSE);
   if(result)
@@ -2861,7 +2862,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
   struct cf_h2_ctx *ctx;
   CURLcode result;
 
-  DEBUGASSERT(Curl_conn_http_version(data) <  20);
+  DEBUGASSERT(Curl_conn_http_version(data, conn) <  20);
   DEBUGASSERT(data->req.upgr101 == UPGR101_RECEIVED);
 
   result = http2_cfilter_add(&cf, data, conn, sockindex, TRUE);
@@ -2908,7 +2909,7 @@ CURLcode Curl_http2_upgrade(struct Curl_easy *data,
    CURLE_HTTP2_STREAM error! */
 bool Curl_h2_http_1_1_error(struct Curl_easy *data)
 {
-  if(Curl_conn_http_version(data) == 20) {
+  if(Curl_conn_http_version(data, data->conn) == 20) {
     int err = Curl_conn_get_stream_error(data, data->conn, FIRSTSOCKET);
     return err == NGHTTP2_HTTP_1_1_REQUIRED;
   }

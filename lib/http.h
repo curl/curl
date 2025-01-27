@@ -53,6 +53,12 @@ typedef enum {
   FOLLOW_REDIR /* a full true redirect */
 } followtype;
 
+#define CURL_HTTP_V1x   (1 << 0)
+#define CURL_HTTP_V2x   (1 << 1)
+#define CURL_HTTP_V3x   (1 << 2)
+/* bitmask of CURL_HTTP_V* values */
+typedef unsigned char http_majors;
+
 
 #ifndef CURL_DISABLE_HTTP
 
@@ -67,6 +73,17 @@ extern const struct Curl_handler Curl_handler_https;
 #endif
 
 struct dynhds;
+
+struct http_negotiation {
+  unsigned char rcvd_min; /* minimum version seen in responses, 09, 10, 11 */
+  http_majors allowed; /* allowed major versions when talking to server */
+  BIT(h2_upgrade);  /* Do HTTP Upgrade from 1.1 to 2 */
+  BIT(h2_prior_knowledge); /* Directly do HTTP/2 without ALPN/SSL */
+  BIT(accept_09); /* Accept an HTTP/0.9 response */
+  BIT(only_10); /* When using major version 1x, use only 1.0 */
+};
+
+void Curl_http_neg_init(struct Curl_easy *data, struct http_negotiation *neg);
 
 CURLcode Curl_bump_headersize(struct Curl_easy *data,
                               size_t delta,

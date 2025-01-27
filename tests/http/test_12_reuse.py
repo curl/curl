@@ -90,7 +90,7 @@ class TestReuse:
         curl = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
-            '--alt-svc', f'{asfile}',
+            '--alt-svc', f'{asfile}', '--http3',
         ])
         r.check_response(count=count, http_status=200)
         # We expect the connection to be reused
@@ -111,9 +111,9 @@ class TestReuse:
             fd.write(f'h3 {env.domain1} {env.https_port} h2 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
-            '--alt-svc', f'{asfile}',
+            '--alt-svc', f'{asfile}', '--http3'
         ])
         r.check_response(count=count, http_status=200)
         # We expect the connection to be reused and use HTTP/2
@@ -134,12 +134,35 @@ class TestReuse:
             fd.write(f'h3 {env.domain1} {env.https_port} http/1.1 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
         curl = CurlClient(env=env)
-        urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
         r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
-            '--alt-svc', f'{asfile}',
+            '--alt-svc', f'{asfile}', '--http3'
         ])
         r.check_response(count=count, http_status=200)
         # We expect the connection to be reused and use HTTP/1.1
         assert r.total_connects == 1
         for s in r.stats:
             assert s['http_version'] == '1.1', f'{s}'
+
+    @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
+    def test_12_06_alt_svc_h3h1_h3only(self, env: Env, httpd, nghttpx):
+        httpd.clear_extra_configs()
+        httpd.reload()
+        count = 2
+        # write a alt-svc file the advises h1 instead of h3
+        asfile = os.path.join(env.gen_dir, 'alt-svc-12_05.txt')
+        ts = datetime.now() + timedelta(hours=24)
+        expires = f'{ts.year:04}{ts.month:02}{ts.day:02} {ts.hour:02}:{ts.minute:02}:{ts.second:02}'
+        with open(asfile, 'w') as fd:
+            fd.write(f'h3 {env.domain1} {env.https_port} http/1.1 {env.domain1} {env.https_port} "{expires}" 0 0')
+        log.info(f'altscv: {open(asfile).readlines()}')
+        curl = CurlClient(env=env)
+        urln = f'https://{env.authority_for(env.domain1, "h3")}/data.json?[0-{count-1}]'
+        r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
+            '--alt-svc', f'{asfile}', '--http3-only'
+        ])
+        r.check_response(count=count, http_status=200)
+        # We expect the connection to be stay on h3, since we used --http3-only
+        assert r.total_connects == 1
+        for s in r.stats:
+            assert s['http_version'] == '3', f'{s}'
