@@ -3072,7 +3072,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
       allowed_versions |= ALPN_h2;
     if(data->state.http_neg.allowed & CURL_HTTP_V1x)
       allowed_versions |= ALPN_h1;
-    allowed_versions &= data->asi->flags;
+    allowed_versions &= (int)data->asi->flags;
 
     host = conn->host.rawalloc;
     DEBUGF(infof(data, "check Alt-Svc for host %s", host));
