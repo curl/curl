@@ -102,6 +102,14 @@
 #include <openssl/engine.h>
 #endif
 
+#if defined(LIBRESSL_VERSION_NUMBER)
+# if (LIBRESSL_VERSION_NUMBER < 0x20503000L)
+#  error "LibreSSL 2.5.3 or later required"
+# endif
+#elif OPENSSL_VERSION_NUMBER < 0x1000200fL
+# error "OpenSSL 1.0.2 or later required"
+#endif
+
 #if OPENSSL_VERSION_NUMBER >= 0x03000000fL && !defined(OPENSSL_NO_UI_CONSOLE)
 #include <openssl/provider.h>
 #include <openssl/store.h>
