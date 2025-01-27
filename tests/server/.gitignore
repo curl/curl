@@ -2,7 +2,8 @@
 #
 # SPDX-License-Identifier: curl
 
-getpart
+server_bundle.c
+testpart
 resolve
 rtspd
 sockfilt
