@@ -102,7 +102,7 @@
 #include <openssl/engine.h>
 #endif
 
-#if defined(LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 # if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
 #  error "LibreSSL 2.9.1 or later required"
 # endif
