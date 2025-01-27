@@ -32,10 +32,6 @@
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
-#ifdef USE_OPENSSL
-#define USE_OPENSSL_SHA256
-#endif /* USE_OPENSSL */
-
 #ifdef USE_MBEDTLS
 #include <mbedtls/version.h>
 
@@ -45,7 +41,7 @@
 #endif
 #endif /* USE_MBEDTLS */
 
-#if defined(USE_OPENSSL_SHA256)
+#ifdef USE_OPENSSL
 
 /* When OpenSSL or wolfSSL is available we use their SHA256-functions. */
 #if defined(USE_OPENSSL)
@@ -83,7 +79,7 @@
  * file even if multiple backends are enabled at the same time.
  */
 
-#if defined(USE_OPENSSL_SHA256)
+#ifdef USE_OPENSSL
 
 struct ossl_sha256_ctx {
   EVP_MD_CTX *openssl_ctx;
