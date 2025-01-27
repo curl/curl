@@ -42,12 +42,7 @@
 #endif /* USE_MBEDTLS */
 
 #ifdef USE_OPENSSL
-
-/* When OpenSSL or wolfSSL is available we use their SHA256-functions. */
-#if defined(USE_OPENSSL)
 #include <openssl/evp.h>
-#endif
-
 #elif defined(USE_GNUTLS)
 #include <nettle/sha.h>
 #elif defined(USE_MBEDTLS)
