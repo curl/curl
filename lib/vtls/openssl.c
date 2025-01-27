@@ -103,8 +103,8 @@
 #endif
 
 #if defined(LIBRESSL_VERSION_NUMBER)
-# if (LIBRESSL_VERSION_NUMBER < 0x2070100fL)
-#  error "LibreSSL 2.7.1 or later required"
+# if (LIBRESSL_VERSION_NUMBER < 0x2090100fL)
+#  error "LibreSSL 2.9.1 or later required"
 # endif
 #elif OPENSSL_VERSION_NUMBER < 0x1000200fL
 # error "OpenSSL 1.0.2 or later required"
@@ -1187,8 +1187,6 @@ static int
 use_certificate_chain_blob(SSL_CTX *ctx, const struct curl_blob *blob,
                            const char *key_passwd)
 {
-#if !(defined(LIBRESSL_VERSION_NUMBER) && \
-  (LIBRESSL_VERSION_NUMBER < 0x2090100fL)) /* LibreSSL 2.9.1 or later */
   int ret = 0;
   X509 *x = NULL;
   void *passwd_callback_userdata = (void *)key_passwd;
@@ -1240,12 +1238,6 @@ end:
   X509_free(x);
   BIO_free(in);
   return ret;
-#else
-  (void)ctx; /* unused */
-  (void)blob; /* unused */
-  (void)key_passwd; /* unused */
-  return 0;
-#endif
 }
 
 static
