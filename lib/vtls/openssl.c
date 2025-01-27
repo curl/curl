@@ -93,12 +93,11 @@
 # endif
 #endif /* USE_ECH_OPENSSL */
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090808fL) && !defined(OPENSSL_NO_OCSP)
+#ifndef OPENSSL_NO_OCSP
 #include <openssl/ocsp.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x0090700fL) && /* 0.9.7 or later */     \
-  !defined(OPENSSL_NO_ENGINE) && !defined(OPENSSL_NO_UI_CONSOLE)
+#if !defined(OPENSSL_NO_ENGINE) && !defined(OPENSSL_NO_UI_CONSOLE)
 #define USE_OPENSSL_ENGINE
 #include <openssl/engine.h>
 #endif
@@ -129,16 +128,6 @@
 
 #if defined(USE_OPENSSL_ENGINE) || defined(OPENSSL_HAS_PROVIDERS)
 #include <openssl/ui.h>
-#endif
-
-#if OPENSSL_VERSION_NUMBER >= 0x00909000L
-#define SSL_METHOD_QUAL const
-#else
-#define SSL_METHOD_QUAL
-#endif
-
-#if (OPENSSL_VERSION_NUMBER >= 0x10000000L)
-#define HAVE_ERR_REMOVE_THREAD_STATE 1
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
@@ -1919,11 +1908,7 @@ static void ossl_cleanup(void)
   ERR_free_strings();
 
   /* Free thread local error state, destroying hash upon zero refcount */
-#ifdef HAVE_ERR_REMOVE_THREAD_STATE
   ERR_remove_thread_state(NULL);
-#else
-  ERR_remove_state(0);
-#endif
 
   /* Free all memory allocated by all configuration modules */
   CONF_modules_free();
@@ -2211,8 +2196,7 @@ static void ossl_close_all(struct Curl_easy *data)
 #else
   (void)data;
 #endif
-#if !defined(HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED) &&        \
-  defined(HAVE_ERR_REMOVE_THREAD_STATE)
+#if !defined(HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED)
   /* OpenSSL 1.0.1 and 1.0.2 build an error queue that is stored per-thread
      so we need to clean it here in case the thread will be killed. All OpenSSL
      code should extract the error in association with the error so clearing
@@ -3659,7 +3643,7 @@ CURLcode Curl_ossl_ctx_init(struct ossl_ctx *octx,
 {
   CURLcode result = CURLE_OK;
   const char *ciphers;
-  SSL_METHOD_QUAL SSL_METHOD *req_method = NULL;
+  const SSL_METHOD *req_method = NULL;
   ctx_option_t ctx_options = 0;
   struct ssl_primary_config *conn_config = Curl_ssl_cf_get_primary_config(cf);
   struct ssl_config_data *ssl_config = Curl_ssl_cf_get_config(cf, data);
