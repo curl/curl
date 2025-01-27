@@ -31,10 +31,23 @@
  * This header should only be needed to get included by vtls.c, openssl.c
  * and ngtcp2.c
  */
+#include <openssl/opensslv.h>
 #include <openssl/ossl_typ.h>
 #include <openssl/ssl.h>
 
 #include "urldata.h"
+
+/*
+ * Whether SSL_CTX_set_keylog_callback is available.
+ * OpenSSL: supported since 1.1.1 https://github.com/openssl/openssl/pull/2287
+ * BoringSSL: supported since d28f59c27bac (committed 2015-11-19)
+ * LibreSSL: not supported. 3.5.0+ has a stub function that does nothing.
+ */
+#if (OPENSSL_VERSION_NUMBER >= 0x10101000L && \
+     !defined(LIBRESSL_VERSION_NUMBER)) || \
+    defined(OPENSSL_IS_BORINGSSL)
+#define HAVE_KEYLOG_CALLBACK
+#endif
 
 struct ssl_peer;
 
