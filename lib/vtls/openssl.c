@@ -103,10 +103,10 @@
 #endif
 
 #if defined(LIBRESSL_VERSION_NUMBER)
-# if (LIBRESSL_VERSION_NUMBER < 0x2090100fL)
+# if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
 #  error "LibreSSL 2.9.1 or later required"
 # endif
-#elif OPENSSL_VERSION_NUMBER < 0x1000200fL
+#elif OPENSSL_VERSION_NUMBER < 0x1000200fL /* 2015-01-22 */
 # error "OpenSSL 1.0.2 or later required"
 #endif
 
