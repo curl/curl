@@ -30,7 +30,7 @@ versions of libs and build tools.
  - libssh2      1.0
  - c-ares       1.16.0
  - libidn2      2.0.0
- - wolfSSL      2.0.0
+ - wolfSSL      3.4.6
  - OpenLDAP     2.0
  - MIT Kerberos 1.2.4
  - Heimdal      ?
