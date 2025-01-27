@@ -103,8 +103,8 @@
 #endif
 
 #if defined(LIBRESSL_VERSION_NUMBER)
-# if (LIBRESSL_VERSION_NUMBER < 0x20503000L)
-#  error "LibreSSL 2.5.3 or later required"
+# if (LIBRESSL_VERSION_NUMBER < 0x2070100fL)
+#  error "LibreSSL 2.7.1 or later required"
 # endif
 #elif OPENSSL_VERSION_NUMBER < 0x1000200fL
 # error "OpenSSL 1.0.2 or later required"
@@ -138,9 +138,7 @@
 #include <openssl/ui.h>
 #endif
 
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && /* OpenSSL 1.1.0+ */ \
-    !(defined(LIBRESSL_VERSION_NUMBER) && \
-      LIBRESSL_VERSION_NUMBER < 0x20700000L)
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) /* OpenSSL 1.1.0+ and LibreSSL */
 #define HAVE_X509_GET0_EXTENSIONS 1 /* added in 1.1.0 -pre1 */
 #define HAVE_OPAQUE_EVP_PKEY 1 /* since 1.1.0 -pre3 */
 #define HAVE_OPAQUE_RSA_DSA_DH 1 /* since 1.1.0 -pre5 */
@@ -160,14 +158,7 @@
 #define X509_get0_notBefore(x) X509_get_notBefore(x)
 #define X509_get0_notAfter(x) X509_get_notAfter(x)
 #define CONST_EXTS /* nope */
-#ifndef LIBRESSL_VERSION_NUMBER
 #define OpenSSL_version_num() SSLeay()
-#endif
-#endif
-
-#if !(defined(LIBRESSL_VERSION_NUMBER) && \
-      LIBRESSL_VERSION_NUMBER < 0x20700000L)
-#define HAVE_X509_GET0_SIGNATURE 1
 #endif
 
 #if OPENSSL_VERSION_NUMBER >= 0x10002003L && \
@@ -262,8 +253,6 @@ typedef int numcert_t;
 #endif
 
 #if (OPENSSL_VERSION_NUMBER >= 0x10100000L) && \
-    !(defined(LIBRESSL_VERSION_NUMBER) && \
-      LIBRESSL_VERSION_NUMBER < 0x2070100fL) && \
     !defined(OPENSSL_IS_BORINGSSL) && \
     !defined(OPENSSL_IS_AWSLC)
 #define HAVE_OPENSSL_VERSION
@@ -285,9 +274,7 @@ typedef unsigned long sslerr_t;
 #endif
 
 /* What API version do we use? */
-#if defined(LIBRESSL_VERSION_NUMBER)
-#define USE_PRE_1_1_API (LIBRESSL_VERSION_NUMBER < 0x2070000f)
-#else /* !LIBRESSL_VERSION_NUMBER */
+#ifndef LIBRESSL_VERSION_NUMBER
 #define USE_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #endif /* !LIBRESSL_VERSION_NUMBER */
 
@@ -446,7 +433,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
     if(result)
       break;
 
-#if defined(HAVE_X509_GET0_SIGNATURE) && defined(HAVE_X509_GET0_EXTENSIONS)
+#ifdef HAVE_X509_GET0_EXTENSIONS
     {
       const X509_ALGOR *sigalg = NULL;
       X509_PUBKEY *xpubkey = NULL;
@@ -664,11 +651,9 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 #ifdef USE_OPENSSL
 
 #if USE_PRE_1_1_API
-#if !defined(LIBRESSL_VERSION_NUMBER) || LIBRESSL_VERSION_NUMBER < 0x2070000fL
 #define BIO_set_init(x,v)          ((x)->init=(v))
 #define BIO_get_data(x)            ((x)->ptr)
 #define BIO_set_data(x,v)          ((x)->ptr=(v))
-#endif
 #define BIO_get_shutdown(x)        ((x)->shutdown)
 #define BIO_set_shutdown(x,v)      ((x)->shutdown=(v))
 #endif /* USE_PRE_1_1_API */
@@ -871,9 +856,7 @@ ossl_log_tls12_secret(const SSL *ssl, bool *keylog_done)
   if(!session || *keylog_done)
     return;
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L &&    \
-  !(defined(LIBRESSL_VERSION_NUMBER) &&         \
-    LIBRESSL_VERSION_NUMBER < 0x20700000L)
+#if OPENSSL_VERSION_NUMBER >= 0x10100000L
   /* ssl->s3 is not checked in OpenSSL 1.1.0-pre6, but let's assume that
    * we have a valid SSL context if we have a non-NULL session. */
   SSL_get_client_random(ssl, client_random, SSL3_RANDOM_SIZE);
@@ -1839,8 +1822,7 @@ static CURLcode x509_name_oneline(X509_NAME *a, struct dynbuf *d)
  */
 static int ossl_init(void)
 {
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
-  (!defined(LIBRESSL_VERSION_NUMBER) || LIBRESSL_VERSION_NUMBER >= 0x2070000fL)
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
   const uint64_t flags =
 #ifdef OPENSSL_INIT_ENGINE_ALL_BUILTIN
     /* not present in BoringSSL */
@@ -1890,8 +1872,7 @@ static int ossl_init(void)
 /* Global cleanup */
 static void ossl_cleanup(void)
 {
-#if (OPENSSL_VERSION_NUMBER >= 0x10100000L) &&  \
-  (!defined(LIBRESSL_VERSION_NUMBER) || LIBRESSL_VERSION_NUMBER >= 0x2070000fL)
+#if (OPENSSL_VERSION_NUMBER >= 0x10100000L)
   /* OpenSSL 1.1 deprecates all these cleanup functions and
      turns them into no-ops in OpenSSL 1.0 compatibility mode */
 #else
