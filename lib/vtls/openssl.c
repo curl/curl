@@ -262,7 +262,9 @@ typedef unsigned long sslerr_t;
 #endif
 
 /* What API version do we use? */
-#ifndef LIBRESSL_VERSION_NUMBER
+#ifdef LIBRESSL_VERSION_NUMBER
+#define USE_PRE_1_1_API 0
+#else
 #define USE_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
 #endif /* !LIBRESSL_VERSION_NUMBER */
 
