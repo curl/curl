@@ -50,8 +50,6 @@
 /* When OpenSSL or wolfSSL is available we use their SHA256-functions. */
 #if defined(USE_OPENSSL)
 #include <openssl/evp.h>
-#elif defined(USE_WOLFSSL)
-#include <wolfssl/openssl/evp.h>
 #endif
 
 #elif defined(USE_GNUTLS)
