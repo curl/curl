@@ -32,20 +32,16 @@
 #include "curl_sha256.h"
 #include "curl_hmac.h"
 
-#ifdef USE_MBEDTLS
-#include <mbedtls/version.h>
-
-#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
-   (MBEDTLS_VERSION_NUMBER < 0x03000000)
-  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
-#endif
-#endif /* USE_MBEDTLS */
-
 #ifdef USE_OPENSSL
 #include <openssl/evp.h>
 #elif defined(USE_GNUTLS)
 #include <nettle/sha.h>
 #elif defined(USE_MBEDTLS)
+#include <mbedtls/version.h>
+#if(MBEDTLS_VERSION_NUMBER >= 0x02070000) && \
+   (MBEDTLS_VERSION_NUMBER < 0x03000000)
+  #define HAS_MBEDTLS_RESULT_CODE_BASED_FUNCTIONS
+#endif
 #include <mbedtls/sha256.h>
 #elif (defined(__MAC_OS_X_VERSION_MAX_ALLOWED) && \
               (__MAC_OS_X_VERSION_MAX_ALLOWED >= 1040)) || \
@@ -511,6 +507,5 @@ const struct HMAC_params Curl_HMAC_SHA256 = {
   64,                    /* Maximum key length. */
   32                     /* Result size. */
 };
-
 
 #endif /* AWS, DIGEST, or libssh2 */
