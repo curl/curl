@@ -327,7 +327,7 @@ jobs:
         run: |
           export TFLAGS='-j8 ${{ matrix.tflags }} ~SCP'
           if [ '${{ matrix.sys }}' != 'msys' ]; then
-            TFLAGS+=' ~2301 ~2302'  # WebSockets'
+            TFLAGS+=' ~2301 ~2302 ~2310'  # WebSockets'
             TFLAGS+=' ~612 ~613 ~616 ~618'  # SFTP
           else
             TFLAGS+=' ~SFTP'
@@ -370,14 +370,14 @@ jobs:
             url: 'https://github.com/brechtsanders/winlibs_mingw/releases/download/9.5.0-10.0.0-msvcrt-r1/winlibs-x86_64-posix-seh-gcc-9.5.0-mingw-w64msvcrt-10.0.0-r1.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=OFF'
             type: 'Release'
-            tflags: '~2301 ~2302 ~3027'
+            tflags: '~2301 ~2302 ~2310 ~3027'
           - name: 'schannel U'
             env: '7.3.0-x86_64'
             dir: 'mingw64'
             url: 'https://downloads.sourceforge.net/mingw-w64/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/7.3.0/threads-win32/seh/x86_64-7.3.0-release-win32-seh-rt_v5-rev0.7z'
             config: '-DENABLE_DEBUG=ON -DBUILD_SHARED_LIBS=OFF -DCURL_USE_SCHANNEL=ON -DENABLE_UNICODE=ON'
             type: 'Release'
-            tflags: '~2301 ~2302 ~3027 ~3023 ~3024 ~1451'
+            tflags: '~2301 ~2302 ~2310 ~3027 ~3023 ~3024 ~1451'
           - name: 'schannel !unity'
             env: '6.4.0-i686'
             dir: 'mingw32'
@@ -579,7 +579,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=ON  -DCURL_USE_OPENSSL=ON -DCURL_USE_MBEDTLS=ON -DCURL_USE_WOLFSSL=ON -DCURL_DEFAULT_SSL_BACKEND=schannel
@@ -590,7 +590,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_OPENSSL_QUIC=ON
@@ -612,7 +612,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON -DUSE_NGTCP2=ON
@@ -623,7 +623,7 @@ jobs:
             arch: 'x64'
             plat: 'windows'
             type: 'Debug'
-            tflags: '~1516 ~2301 ~2302 ~2303 ~2307'
+            tflags: '~1516 ~2301 ~2302 ~2303 ~2307 ~2310'
             config: >-
               -DCURL_USE_LIBSSH2=ON
               -DCURL_USE_SCHANNEL=OFF -DCURL_USE_OPENSSL=ON
