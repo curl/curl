@@ -5,3 +5,5 @@
 curl
 tool_ca_embed.c
 tool_hugehelp.c
+curltool_unity.c
+libcurltool_unity.c
