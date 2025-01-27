@@ -188,6 +188,8 @@ checksrc:
 	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir) \
 	  -W$(srcdir)/$(HUGE) \
 	  -W$(srcdir)/$(CA_EMBED_CSOURCE) \
+	  -W$(srcdir)/curltool_unity.c \
+	  -W$(srcdir)/libcurltool_unity.c \
 	  $(srcdir)/*.[ch])
 
 if DEBUGBUILD
