@@ -71,16 +71,7 @@
 #  include <openssl/md5.h>
 #  include <openssl/ssl.h>
 #  include <openssl/rand.h>
-#  if (defined(OPENSSL_VERSION_NUMBER) && \
-       (OPENSSL_VERSION_NUMBER < 0x00907001L)) && !defined(USE_WOLFSSL)
-#    define DES_key_schedule des_key_schedule
-#    define DES_cblock des_cblock
-#    define DES_set_odd_parity des_set_odd_parity
-#    define DES_set_key des_set_key
-#    define DES_ecb_encrypt des_ecb_encrypt
-#    define DESKEY(x) x
-#    define DESKEYARG(x) x
-#  elif defined(OPENSSL_IS_AWSLC)
+#  if defined(OPENSSL_IS_AWSLC)
 #    define DES_set_key_unchecked (void)DES_set_key
 #    define DESKEYARG(x) *x
 #    define DESKEY(x) &x
