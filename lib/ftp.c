@@ -4107,6 +4107,11 @@ static CURLcode ftp_disconnect(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable:4706) /* assignment within conditional expression */
+#endif
+
 /***********************************************************************
  *
  * ftp_parse_url_path()
@@ -4196,10 +4201,6 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
           return CURLE_OUT_OF_MEMORY;
         }
 
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable:4706) /* assignment within conditional expression */
-#endif
         /* parse the URL path into separate path components */
         while((slashPos = strchr(curPos, '/'))) {
           size_t compLen = slashPos - curPos;
@@ -4221,9 +4222,6 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
           }
           curPos = slashPos + 1;
         }
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
       }
       DEBUGASSERT((size_t)ftpc->dirdepth <= dirAlloc);
       fileName = curPos; /* the rest is the filename (or empty) */
@@ -4267,6 +4265,10 @@ CURLcode ftp_parse_url_path(struct Curl_easy *data)
   free(rawPath);
   return CURLE_OK;
 }
+
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 /* call this when the DO phase has completed */
 static CURLcode ftp_dophase_done(struct Curl_easy *data, bool connected)
