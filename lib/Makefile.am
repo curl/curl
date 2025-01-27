@@ -143,9 +143,10 @@ CS_1 =
 CS_ = $(CS_0)
 
 checksrc:
-	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir)    \
-	-W$(srcdir)/curl_config.h $(srcdir)/*.[ch] $(srcdir)/vauth/*.[ch]   \
-	$(srcdir)/vtls/*.[ch] $(srcdir)/vquic/*.[ch] $(srcdir)/vssh/*.[ch])
+	$(CHECKSRC)(@PERL@ $(top_srcdir)/scripts/checksrc.pl -D$(srcdir)         \
+	  -W$(srcdir)/libcurl_unity.c -W$(srcdir)/curl_config.h $(srcdir)/*.[ch] \
+	  $(srcdir)/vauth/*.[ch] $(srcdir)/vtls/*.[ch] $(srcdir)/vquic/*.[ch]    \
+	  $(srcdir)/vssh/*.[ch])
 
 if DEBUGBUILD
 # for debug builds, we scan the sources on all regular make invokes
