@@ -24,14 +24,17 @@ This release includes the following bugfixes:
  o android: add CI jobs, buildinfo, cmake docs, disable `CURL_USE_PKGCONFIG` by default [185]
  o asyn-ares: acknowledge CURLOPT_DNS_SERVERS set to NULL [190]
  o asyn-ares: initial HTTPS resolve support [166]
+ o asyn-thread: use c-ares to resolve HTTPS RR [205]
  o async-thread: avoid closing eventfd twice [9]
  o autotools: add support for mingw UWP builds [192]
  o autotools: silence gcc warnings in libtool code [96]
  o binmode: convert to macro and use it from tests [44]
  o build: delete `-Wsign-conversion` related FIXMEs [137]
  o build: drop `-Winline` picky warning [53]
+ o build: drop `tool_hugehelp.c.cvs`, tidy up macros, drop `buildconf.bat` [200]
  o build: drop unused feature macros, update exception list [51]
  o build: fix `-Wtrampolines` picky warning for gcc 4.x versions [156]
+ o build: fix compiling with GCC 4.x versions [214]
  o build: fix the tidy targets for autotools [52]
  o build: fix unsigned `time_t` detection for cmake, MS-DOS, AmigaOS [104]
  o build: replace configure check with PP condition (Android <21) [97]
@@ -39,11 +42,13 @@ This release includes the following bugfixes:
  o cd2nroff: support "none" as a TLS backend [29]
  o cf-https-connect: look into httpsrr alpns when available [152]
  o cf-socket: error if address can't be copied [72]
+ o cfilters: kill connection filter events attach+detach [217]
  o checksrc.bat: remove explicit SNPRINTF bypass [174]
  o checksrc: ban use of sscanf() [7]
  o checksrc: check for return with parens around a value/name [130]
  o checksrc: fix the return() checker [35]
  o checksrc: introduce 'banfunc' to ban specific functions [117]
+ o cmake/Find: add `iphlpapi` for c-ares, omit syslibs if dep not found [203]
  o cmake/FindLDAP: avoid empty 'Requires' item when omitting `pkg-config` module [90]
  o cmake/FindLDAP: avoid framework locations for libs too (Apple) [122]
  o cmake/FindLibpsl: protect against `pkg-config` "half-detection" [89]
@@ -58,6 +63,7 @@ This release includes the following bugfixes:
  o cmake: deprecate winbuild, add migration guide from legacy build methods [157]
  o cmake: detect mingw-w64 version, pre-fill `HAVE_STRTOK_R` [179]
  o cmake: do not store `MINGW64_VERSION` in cache [175]
+ o cmake: drop `CURL_USE_PKGCONFIG` from `curl-config.cmake.in` [208]
  o cmake: drop `fseeko()` pre-fill and check for Windows [201]
  o cmake: drop duplicate Windows cache value [81]
  o cmake: drop redundant FOUND checks (libgsasl, libssh, libuv) [49]
@@ -77,6 +83,7 @@ This release includes the following bugfixes:
  o cmake: pick a better IPv6 feature flag when assembling the feature list [132]
  o cmake: pre-fill `HAVE_STDATOMIC_H`, `HAVE_ATOMIC` for mingw-w64 [180]
  o cmake: pre-fill `HAVE_STDINT_H` on Windows [149]
+ o cmake: prefer dash-style MSVC options [216]
  o cmake: publish/check supported protocols/features via `CURLConfig.cmake` [100]
  o cmake: replace `unset(VAR)` with `set(VAR "")` for init [43]
  o cmake: sync OpenSSL QUIC fork detection with autotools [102]
@@ -92,7 +99,9 @@ This release includes the following bugfixes:
  o configure: UWP and Android follow-up fixes [184]
  o conncache: count shutdowns against host and max limits [154]
  o conncache: result_cb comment removed from function docs [1]
+ o content_encoding: drop support for zlib before 1.2.0.4 [211]
  o content_encoding: namespace GZIP flag constants [147]
+ o content_encoding: put the decomp buffers into the writer structs [210]
  o content_encoding: support use of custom libzstd memory functions [186]
  o cookie: cap expire times to 400 days [111]
  o cookie: fix crash in netscape cookie parsing [84]
@@ -113,6 +122,7 @@ This release includes the following bugfixes:
  o docs/BUGS.md: remove leading space from a link
  o docs/cmdline-opts/_ENVIRONMENT.md: minor language fix [119]
  o docs/HTTP-COOKIES.md: link to more information [125]
+ o docs/HTTPSRR.md: initial HTTPS RR documentation [204]
  o docs/libcurl/opts: clarify the return values [114]
  o docs/libcurl: return value overhall [120]
  o docs/TLS-SESSIONS: fix typo, the->they [189]
@@ -141,6 +151,8 @@ This release includes the following bugfixes:
  o INFRASTRUCTURE.md: project infra [99]
  o INSTALL.md: document VS2008 and mingw-w64 [165]
  o lib517: extend the getdate test with quotes and leading "junk" [4]
+ o lib: clarify 'conn->httpversion' [213]
+ o lib: redirect handling by protocol handler [212]
  o lib: remove `__EMX__` guards [83]
  o lib: replace `inline` redefine with `CURL_INLINE` macro [47]
  o lib: supress deprecation warnings in apple builds [32]
@@ -168,6 +180,7 @@ This release includes the following bugfixes:
  o openssl: fix ECH logic [67]
  o osslq: use SSL_poll to determine writeability of QUIC streams [139]
  o projects/Windows: remove wolfSSL from legacy projects [75]
+ o projects: fix `INSTALL-CMAKE.md` references
  o pytest: remove 'repeat' parameter [182]
  o pytest: use httpd/apache2 directly, no apachectl [169]
  o RELEASE-PROCEDURE.md: mention how to publish security advisories [2]
@@ -177,6 +190,7 @@ This release includes the following bugfixes:
  o smb: fix compiler warning [112]
  o src: add `CURL_STRICMP()` macro, use `_stricmp()` on Windows [54]
  o src: drop support for `CURL_TESTDIR` debug env [121]
+ o src: omit hugehelp and ca-embed from libcurltool [215]
  o ssl session cache: change cache dimensions [159]
  o strparse: string parsing helper functions [8]
  o system.h: add 64-bit curl_off_t definitions for NonStop [11]
@@ -186,6 +200,7 @@ This release includes the following bugfixes:
  o telnet: handle single-byte input option [177]
  o test483: require cookie support [98]
  o tests/http/clients: use proper sleep() call on NonStop [10]
+ o tests: change the behavior of swsbounce [202]
  o TheArtOfHttpScripting.md: rewrite double 'that' [115]
  o tidy-up: `curl_setup.h`, `curl_setup_once.h`, `config-win32ce.h` [146]
  o tidy-up: drop parenthesis around `return` expression [167]
@@ -203,6 +218,7 @@ This release includes the following bugfixes:
  o urlapi: fix redirect to a new fragment or query (only) [118]
  o variable.md: mention --expand-variable for variables to variables [13]
  o variable.md: show function use with examples [18]
+ o version: fix the IDN feature for winidn and appleidn [187]
  o vquic: fix 4th function call argument is an uninitialized value [70]
  o vquic: make vquic_send_packets not return without setting psent [69]
  o vtls: only remember the expiry timestamp in session cache [110]
@@ -213,6 +229,7 @@ This release includes the following bugfixes:
  o websocket: fix message send corruption [188]
  o windows: drop dupe macros, detect `CURL_OS` for WinCE ARM, indentation [183]
  o windows: drop redundant `USE_WIN32_SMALL_FILES` macro [145]
+ o windows: drop two missed `buildconf.bat` references
  o windows: merge `config-win32ce.h` into `config-win32.h` [196]
  o ws-docs: remove the outdated texts saying ws support is experimental [15]
 
@@ -436,6 +453,7 @@ References to bug reports and discussions on issues:
  [184] = https://curl.se/bug/?i=16027
  [185] = https://curl.se/bug/?i=16014
  [186] = https://curl.se/bug/?i=16028
+ [187] = https://curl.se/bug/?i=16091
  [188] = https://curl.se/bug/?i=15865
  [189] = https://curl.se/bug/?i=16057
  [190] = https://curl.se/bug/?i=16015
@@ -446,4 +464,18 @@ References to bug reports and discussions on issues:
  [196] = https://curl.se/bug/?i=16038
  [198] = https://curl.se/bug/?i=16053
  [199] = https://curl.se/bug/?i=16051
+ [200] = https://curl.se/bug/?i=16081
  [201] = https://curl.se/bug/?i=16041
+ [202] = https://curl.se/bug/?i=16074
+ [203] = https://curl.se/bug/?i=16089
+ [204] = https://curl.se/bug/?i=16052
+ [205] = https://curl.se/bug/?i=16054
+ [208] = https://curl.se/bug/?i=16087
+ [210] = https://curl.se/bug/?i=16079
+ [211] = https://curl.se/bug/?i=16079
+ [212] = https://curl.se/bug/?i=16075
+ [213] = https://curl.se/bug/?i=16073
+ [214] = https://curl.se/bug/?i=16062
+ [215] = https://curl.se/bug/?i=16068
+ [216] = https://curl.se/bug/?i=16063
+ [217] = https://curl.se/bug/?i=16067
