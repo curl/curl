@@ -1910,6 +1910,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
       data->req.done = TRUE;
     }
   }
+#ifndef CURL_DISABLE_HTTP
   else if((CURLE_HTTP2_STREAM == result) &&
           Curl_h2_http_1_1_error(data)) {
     CURLcode ret = Curl_retry_request(data, &newurl);
@@ -1932,6 +1933,7 @@ static CURLMcode state_performing(struct Curl_easy *data,
     else
       result = ret;
   }
+#endif
 
   if(result) {
     /*
