@@ -36,14 +36,8 @@
 #include <wolfssl/options.h>
 #endif
 
-#if defined(USE_OPENSSL)
-
-#include <openssl/opensslv.h>
-
-#if (OPENSSL_VERSION_NUMBER >= 0x0090800fL)
+#ifdef USE_OPENSSL
 #define USE_OPENSSL_SHA256
-#endif
-
 #endif /* USE_OPENSSL */
 
 #ifdef USE_MBEDTLS
