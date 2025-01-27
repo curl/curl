@@ -1032,6 +1032,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
     return FALSE;
 #endif
 
+#ifndef CURL_DISABLE_HTTP
   /* If looking for HTTP and the HTTP versions allowed do not include
    * the HTTP version of conn, continue looking.
    * CURL_HTTP_VERSION_2TLS is default which indicates no preference,
@@ -1061,6 +1062,8 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
       break;
     }
   }
+#endif
+
 #ifdef USE_SSH
   else if(get_protocol_family(needle->handler) & PROTO_FAMILY_SSH) {
     if(!ssh_config_matches(needle, conn))
