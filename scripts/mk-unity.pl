@@ -52,7 +52,6 @@ foreach my $src (@ARGV) {
 }
 
 print <<HEADER
-/* !checksrc! disable COPYRIGHT all */
 HEADER
     ;
 

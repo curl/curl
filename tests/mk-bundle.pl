@@ -37,9 +37,6 @@ my $src_dir = @ARGV ? $ARGV[0] : ".";
 open my $fh, "<", "$src_dir/Makefile.inc" or die "Cannot open '$src_dir/Makefile.inc': $!";
 
 print <<HEADER
-/* !checksrc! disable COPYRIGHT all */
-/* !checksrc! disable INCLUDEDUP all */
-
 #define CURLTESTS_BUNDLED
 #define CURLTESTS_BUNDLED_TEST_H
 #include "first.h"
