@@ -23,7 +23,6 @@
  ***************************************************************************/
 #include "test.h"
 
-#include "testtrace.h"
 #include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
@@ -62,12 +61,6 @@ CURLcode test(char *URL)
   easy_setopt(http_handle, CURLOPT_SSL_VERIFYPEER, 0L);
   easy_setopt(http_handle, CURLOPT_SSL_VERIFYHOST, 0L);
 
-  libtest_debug_config.nohex = 1;
-  libtest_debug_config.tracetime = 1;
-  easy_setopt(http_handle, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(http_handle, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(http_handle, CURLOPT_VERBOSE, 1L);
-
   /* init a multi stack */
   multi_init(multi_handle);
 
@@ -81,7 +74,6 @@ CURLcode test(char *URL)
 
   while(still_running) {
     struct timeval timeout;
-    long timeout_ms;
 
     fd_set fdread;
     fd_set fdwrite;
@@ -92,18 +84,12 @@ CURLcode test(char *URL)
     FD_ZERO(&fdwrite);
     FD_ZERO(&fdexcep);
 
+    /* set a suitable timeout to play around with */
+    timeout.tv_sec = 1;
+    timeout.tv_usec = 0;
+
     /* get file descriptors from the transfers */
     multi_fdset(multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
-    multi_timeout(multi_handle, &timeout_ms);
-    if(timeout_ms > 0) {
-      timeout.tv_sec = (timeout_ms / 1000);
-      timeout.tv_usec = (int)((timeout_ms % 1000) * 1000);
-    }
-    else {
-      /* set a suitable timeout to play around with */
-      timeout.tv_sec = 0;
-      timeout.tv_usec = 100;
-    }
 
     /* At this point, maxfd is guaranteed to be greater or equal than -1. */
 
