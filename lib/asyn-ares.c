@@ -435,8 +435,9 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
         struct Curl_https_rrinfo *lhrr =
           Curl_memdup(&res->hinfo, sizeof(struct Curl_https_rrinfo));
         if(!lhrr)
-          return CURLE_OUT_OF_MEMORY;
-        (*dns)->hinfo = lhrr;
+          result = CURLE_OUT_OF_MEMORY;
+        else
+          (*dns)->hinfo = lhrr;
       }
 #endif
     }
