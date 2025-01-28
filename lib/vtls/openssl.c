@@ -262,11 +262,9 @@ typedef unsigned long sslerr_t;
 #endif
 
 /* What API version do we use? */
-#ifdef LIBRESSL_VERSION_NUMBER
-#define USE_PRE_1_1_API 0
-#else
-#define USE_PRE_1_1_API (OPENSSL_VERSION_NUMBER < 0x10100000L)
-#endif /* !LIBRESSL_VERSION_NUMBER */
+#if OPENSSL_VERSION_NUMBER < 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#define HAVE_PRE_1_1_API
+#endif
 
 static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
@@ -640,19 +638,19 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
 #ifdef USE_OPENSSL
 
-#if USE_PRE_1_1_API
+#ifdef HAVE_PRE_1_1_API
 #define BIO_set_init(x,v)          ((x)->init=(v))
 #define BIO_get_data(x)            ((x)->ptr)
 #define BIO_set_data(x,v)          ((x)->ptr=(v))
 #define BIO_get_shutdown(x)        ((x)->shutdown)
 #define BIO_set_shutdown(x,v)      ((x)->shutdown=(v))
-#endif /* USE_PRE_1_1_API */
+#endif /* HAVE_PRE_1_1_API */
 
 static int ossl_bio_cf_create(BIO *bio)
 {
   BIO_set_shutdown(bio, 1);
   BIO_set_init(bio, 1);
-#if USE_PRE_1_1_API
+#ifdef HAVE_PRE_1_1_API
   bio->num = -1;
 #endif
   BIO_set_data(bio, NULL);
@@ -769,7 +767,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   return (int)nread;
 }
 
-#if USE_PRE_1_1_API
+#ifdef HAVE_PRE_1_1_API
 
 static BIO_METHOD ossl_bio_cf_meth_1_0 = {
   BIO_TYPE_MEM,
