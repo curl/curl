@@ -64,6 +64,7 @@
 #include "inet_ntop.h"
 #include "curl_threads.h"
 #include "connect.h"
+#include "strdup.h"
 
 #ifdef USE_ARES
 #include <ares.h>
@@ -619,6 +620,17 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
       destroy_async_data(&data->state.async);
       return result;
     }
+#ifdef USE_HTTPSRR_ARES
+    {
+      struct Curl_https_rrinfo *lhrr =
+        Curl_memdup(&td->hinfo, sizeof(struct Curl_https_rrinfo));
+      if(!lhrr) {
+        destroy_async_data(&data->state.async);
+        return CURLE_OUT_OF_MEMORY;
+      }
+      data->state.async.dns->hinfo = lhrr;
+    }
+#endif
     destroy_async_data(&data->state.async);
     *entry = data->state.async.dns;
   }
