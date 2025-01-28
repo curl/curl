@@ -1541,7 +1541,7 @@ static CURLcode cf_ssl_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(data->conn);
 
-  ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.allowed,
+  ctx = cf_ctx_new(data, alpn_get_spec(data->state.http_neg.wanted,
                                        conn->bits.tls_enable_alpn));
   if(!ctx) {
     result = CURLE_OUT_OF_MEMORY;

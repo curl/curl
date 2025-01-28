@@ -689,16 +689,16 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 #endif
 
     if(!alpn_count) {
-      if(data->state.http_neg.allowed & CURL_HTTP_V3x) {
+      if(data->state.http_neg.wanted & CURL_HTTP_V3x) {
         result = Curl_conn_may_http3(data, conn);
         if(!result)
           alpn_ids[alpn_count++] = ALPN_h3;
-        else if(data->state.http_neg.allowed == CURL_HTTP_V3x)
+        else if(data->state.http_neg.wanted == CURL_HTTP_V3x)
           goto out; /* only h3 allowed, not possible, error out */
       }
-      if(data->state.http_neg.allowed & CURL_HTTP_V2x)
+      if(data->state.http_neg.wanted & CURL_HTTP_V2x)
         alpn_ids[alpn_count++] = ALPN_h2;
-      else if(data->state.http_neg.allowed & CURL_HTTP_V1x)
+      else if(data->state.http_neg.wanted & CURL_HTTP_V1x)
         alpn_ids[alpn_count++] = ALPN_h1;
     }
   }
