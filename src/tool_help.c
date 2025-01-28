@@ -36,10 +36,6 @@
 
 #include "memdebug.h" /* keep this as LAST include */
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 struct category_descriptors {
   const char *opt;
   const char *desc;

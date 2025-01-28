@@ -85,10 +85,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #if !defined(CURL_DISABLE_ALTSVC) || defined(USE_HTTPSRR)
 
 enum alpnid Curl_alpn2alpnid(char *name, size_t len)

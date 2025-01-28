@@ -42,11 +42,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 typedef enum {
   CF_HC_INIT,
   CF_HC_CONNECT,

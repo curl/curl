@@ -125,10 +125,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #ifdef USE_NGHTTP2
 static void data_priority_cleanup(struct Curl_easy *data);
 #else

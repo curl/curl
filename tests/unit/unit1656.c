@@ -38,10 +38,6 @@ static void unit_stop(void)
 #if defined(USE_GNUTLS) || defined(USE_SCHANNEL) || defined(USE_SECTRANSP) || \
   defined(USE_MBEDTLS)
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 struct test_spec {
   const char *input;
   const char *exp_output;
