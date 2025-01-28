@@ -97,7 +97,7 @@ CURLcode test(char *URL)
     multi_timeout(multi_handle, &timeout_ms);
     if(timeout_ms > 0) {
       timeout.tv_sec = (timeout_ms / 1000);
-      timeout.tv_usec = ((timeout_ms % 1000) * 1000);
+      timeout.tv_usec = (int)((timeout_ms % 1000) * 1000);
     }
     else {
       /* set a suitable timeout to play around with */
