@@ -399,14 +399,6 @@ static struct passwd *vms_getpwuid(uid_t uid)
 #       define OpenSSL_add_all_algorithms OPENSSL_ADD_ALL_ALGORITHMS
         void OPENSSL_ADD_ALL_ALGORITHMS(void);
 #   endif
-
-/* Need this to stop a macro redefinition error */
-#if OPENSSL_VERSION_NUMBER < 0x00907000L
-#   ifdef X509_STORE_set_flags
-#       undef X509_STORE_set_flags
-#       define X509_STORE_set_flags(x,y) Curl_nop_stmt
-#   endif
-#endif
 #endif
 
 #endif /* HEADER_CURL_SETUP_VMS_H */
