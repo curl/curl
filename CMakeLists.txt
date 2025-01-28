@@ -806,7 +806,7 @@ if(CURL_USE_MBEDTLS)
   set(_curl_ca_bundle_supported TRUE)
 
   if(MBEDTLS_VERSION AND MBEDTLS_VERSION VERSION_LESS 3.6.0)
-    message(WARNING "mbedTLS ${MBEDTLS_VERSION} does not support TLS 1.3.")
+    message(STATUS "mbedTLS ${MBEDTLS_VERSION} does not support TLS 1.3.")
   endif()
 endif()
 
