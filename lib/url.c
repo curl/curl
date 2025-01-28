@@ -473,11 +473,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxage_conn = 118;
   set->maxlifetime_conn = 0;
   set->http09_allowed = FALSE;
-#ifdef USE_HTTP2
-  set->httpwant = CURL_HTTP_VERSION_2TLS
-#else
-  set->httpwant = CURL_HTTP_VERSION_1_1
-#endif
+  set->httpwant = CURL_HTTP_VERSION_NONE
     ;
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   memset(&set->priority, 0, sizeof(set->priority));
@@ -1034,9 +1030,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
 #ifndef CURL_DISABLE_HTTP
   /* If looking for HTTP and the HTTP versions allowed do not include
-   * the HTTP version of conn, continue looking.
-   * CURL_HTTP_VERSION_2TLS is default which indicates no preference,
-   * so we take any existing connection. */
+   * the HTTP version of conn, continue looking. */
   if((needle->handler->protocol & PROTO_FAMILY_HTTP)) {
     switch(Curl_conn_http_version(data, conn)) {
     case 30:
