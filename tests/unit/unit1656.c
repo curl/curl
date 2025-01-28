@@ -107,7 +107,7 @@ UNITTEST_START
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < ARRAYSIZE(test_specs); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(test_specs); ++i) {
     if(!do_test(&test_specs[i], i, &dbuf))
       all_ok = FALSE;
   }

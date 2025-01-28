@@ -562,7 +562,7 @@ void Curl_conn_free(struct Curl_easy *data, struct connectdata *conn)
 
   DEBUGASSERT(conn);
 
-  for(i = 0; i < ARRAYSIZE(conn->cfilter); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(conn->cfilter); ++i) {
     Curl_conn_cf_discard_all(data, conn, (int)i);
   }
 
@@ -3102,7 +3102,7 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     DEBUGF(infof(data, "check Alt-Svc for host %s", host));
     if(srcalpnid == ALPN_none) {
       /* scan all alt-svc protocol ids in order or relevance */
-      for(i = 0; !hit && (i < ARRAYSIZE(alpn_ids)); ++i) {
+      for(i = 0; !hit && (i < CURL_ARRAYSIZE(alpn_ids)); ++i) {
         srcalpnid = alpn_ids[i];
         hit = Curl_altsvc_lookup(data->asi,
                                  srcalpnid, host, conn->remote_port, /* from */

@@ -1219,7 +1219,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     size_t i, alen = alpn_len;
     unsigned char *salpn = (unsigned char *)alpn;
     unsigned char slen;
-    for(i = 0; (i < ARRAYSIZE(gtls_alpns)) && alen; ++i) {
+    for(i = 0; (i < CURL_ARRAYSIZE(gtls_alpns)) && alen; ++i) {
       slen = salpn[0];
       if(slen >= alen)
         return CURLE_FAILED_INIT;

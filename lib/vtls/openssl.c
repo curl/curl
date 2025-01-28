@@ -3355,7 +3355,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
         "CA"      /* Intermediate Certification Authorities */
       };
       size_t i;
-      for(i = 0; i < ARRAYSIZE(storeNames); ++i) {
+      for(i = 0; i < CURL_ARRAYSIZE(storeNames); ++i) {
         bool imported = FALSE;
         result = import_windows_cert_store(data, storeNames[i], store,
                                            &imported);
