@@ -2,12 +2,12 @@
 #
 # SPDX-License-Identifier: curl
 
+disabled
 getpart
+mqttd
 resolve
 rtspd
 sockfilt
+socksd
 sws
 tftpd
-socksd
-disabled
-mqttd
