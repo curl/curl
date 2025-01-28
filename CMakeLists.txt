@@ -776,12 +776,12 @@ if(CURL_USE_OPENSSL)
     set(_openssl "AWS-LC")
   elseif(HAVE_LIBRESSL)
     set(_openssl "LibreSSL")
-    # Version required for TLS 1.3 support: 3.1.0
+    # Version required for TLS 1.3 support: 3.1.0 2020-04-08
   elseif(USE_AMISSL)
     set(_openssl "AmiSSL")
   else()
     set(_openssl "OpenSSL")
-    if(OPENSSL_VERSION VERSION_LESS 1.1.1)
+    if(OPENSSL_VERSION VERSION_LESS 1.1.1)  # 2018-09-11
       message(WARNING "OpenSSL ${OPENSSL_VERSION} does not support TLS 1.3.")
     endif()
   endif()
@@ -805,7 +805,7 @@ if(CURL_USE_MBEDTLS)
   endif()
   set(_curl_ca_bundle_supported TRUE)
 
-  if(MBEDTLS_VERSION AND MBEDTLS_VERSION VERSION_LESS 3.6.0)
+  if(MBEDTLS_VERSION AND MBEDTLS_VERSION VERSION_LESS 3.6.0)  # 2024-03-27
     message(STATUS "mbedTLS ${MBEDTLS_VERSION} does not support TLS 1.3.")
   endif()
 endif()
@@ -843,7 +843,7 @@ if(CURL_USE_WOLFSSL)
   endif()
   set(_curl_ca_bundle_supported TRUE)
 
-  if(WOLFSSL_VERSION AND WOLFSSL_VERSION VERSION_LESS 3.12.0)
+  if(WOLFSSL_VERSION AND WOLFSSL_VERSION VERSION_LESS 3.12.0)  # 2017-08-04
     message(WARNING "wolfSSL ${WOLFSSL_VERSION} does not support TLS 1.3.")
   endif()
 endif()
@@ -880,7 +880,7 @@ if(CURL_USE_GNUTLS)
   endif()
   set(_curl_ca_bundle_supported TRUE)
 
-  if(GNUTLS_VERSION VERSION_LESS 3.6.4)
+  if(GNUTLS_VERSION VERSION_LESS 3.6.4)  # 2018-09-24
     message(WARNING "GnuTLS ${GNUTLS_VERSION} does not support TLS 1.3.")
   endif()
 
