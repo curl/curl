@@ -2,6 +2,7 @@
 #
 # SPDX-License-Identifier: curl
 
+Makefile.soname.cmake
 curl_config.h
 curl_config.h.in
 libcurl.vers
