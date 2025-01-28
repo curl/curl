@@ -127,6 +127,26 @@ struct cf_hc_ctx {
   unsigned int hard_eyeballs_timeout_ms;
 };
 
+static void cf_hc_baller_assign(struct cf_hc_baller *b,
+                                enum alpnid alpn_id)
+{
+  b->alpn_id = alpn_id;
+  switch(b->alpn_id) {
+  case ALPN_h3:
+    b->name = "h3";
+    break;
+  case ALPN_h2:
+    b->name = "h2";
+    break;
+  case ALPN_h1:
+    b->name = "h1";
+    break;
+  default:
+    b->result = CURLE_FAILED_INIT;
+    break;
+  }
+}
+
 static void cf_hc_baller_init(struct cf_hc_baller *b,
                               struct Curl_cfilter *cf,
                               struct Curl_easy *data,
@@ -139,17 +159,9 @@ static void cf_hc_baller_init(struct cf_hc_baller *b,
   b->started = Curl_now();
   switch(b->alpn_id) {
   case ALPN_h3:
-    b->name = "h3";
     transport = TRNSPRT_QUIC;
     break;
-  case ALPN_h2:
-    b->name = "h2";
-    break;
-  case ALPN_h1:
-    b->name = "h1";
-    break;
   default:
-    b->result = CURLE_FAILED_INIT;
     break;
   }
 
@@ -245,12 +257,21 @@ static bool time_to_start_next(struct Curl_cfilter *cf,
 {
   struct cf_hc_ctx *ctx = cf->ctx;
   timediff_t elapsed_ms;
+  size_t i;
 
   if(idx >= ctx->baller_count)
     return FALSE;
   if(cf_hc_baller_has_started(&ctx->ballers[idx]))
     return FALSE;
-
+  for(i = 0; i < idx; i++) {
+    if(!ctx->ballers[i].result)
+      break;
+  }
+  if(i == idx) {
+    CURL_TRC_CF(data, cf, "all previous ballers have failed, time to start "
+                "baller %zu [%s]", idx, ctx->ballers[idx].name);
+    return TRUE;
+  }
   elapsed_ms = Curl_timediff(now, ctx->started);
   if(elapsed_ms >= ctx->hard_eyeballs_timeout_ms) {
     CURL_TRC_CF(data, cf, "hard timeout of %dms reached, starting %s",
@@ -298,8 +319,11 @@ static CURLcode cf_hc_connect(struct Curl_cfilter *cf,
     CURL_TRC_CF(data, cf, "connect, init");
     ctx->started = now;
     cf_hc_baller_init(&ctx->ballers[0], cf, data, cf->conn->transport);
-    if(ctx->baller_count > 1)
+    if(ctx->baller_count > 1) {
       Curl_expire(data, ctx->soft_eyeballs_timeout_ms, EXPIRE_ALPN_EYEBALLS);
+      CURL_TRC_CF(data, cf, "set expire for starting next baller in %ums",
+                  ctx->soft_eyeballs_timeout_ms);
+    }
     ctx->state = CF_HC_CONNECT;
     FALLTHROUGH();
 
@@ -582,7 +606,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
   }
   ctx->remotehost = remotehost;
   for(i = 0; i < alpn_count; ++i)
-    ctx->ballers[i].alpn_id = alpnids[i];
+    cf_hc_baller_assign(&ctx->ballers[i], alpnids[i]);
   for(; i < ARRAYSIZE(ctx->ballers); ++i)
     ctx->ballers[i].alpn_id = ALPN_none;
   ctx->baller_count = alpn_count;
