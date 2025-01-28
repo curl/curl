@@ -103,6 +103,7 @@
 #endif
 
 #ifdef LIBRESSL_VERSION_NUMBER
+# /* As of LibreSSL 2.0.0-4.0.0: OPENSSL_VERSION_NUMBER == 0x20000000L */
 # if LIBRESSL_VERSION_NUMBER < 0x2090100fL /* 2019-04-13 */
 #  error "LibreSSL 2.9.1 or later required"
 # endif
@@ -262,7 +263,7 @@ typedef unsigned long sslerr_t;
 #endif
 
 /* What API version do we use? */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define HAVE_PRE_1_1_API
 #endif
 
