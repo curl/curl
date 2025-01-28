@@ -83,10 +83,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 /* Local API functions */
 static CURLcode pop3_regular_transfer(struct Curl_easy *data, bool *done);
 static CURLcode pop3_do(struct Curl_easy *data, bool *done);
@@ -226,7 +222,7 @@ static const struct pop3_cmd pop3cmds[] = {
 static bool pop3_is_multiline(const char *cmdline)
 {
   size_t i;
-  for(i = 0; i < ARRAYSIZE(pop3cmds); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(pop3cmds); ++i) {
     if(strncasecompare(pop3cmds[i].name, cmdline, pop3cmds[i].nlen)) {
       if(!cmdline[pop3cmds[i].nlen])
         return pop3cmds[i].multiline;

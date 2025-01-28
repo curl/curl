@@ -63,10 +63,6 @@
 /* The last #include file should be: */
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 #define QUIC_PRIORITY \
   "NORMAL:-VERS-ALL:+VERS-TLS1.3:-CIPHER-ALL:+AES-128-GCM:+AES-256-GCM:" \
   "+CHACHA20-POLY1305:+AES-128-CCM:-GROUP-ALL:+GROUP-SECP256R1:" \
@@ -1223,7 +1219,7 @@ CURLcode Curl_gtls_ctx_init(struct gtls_ctx *gctx,
     size_t i, alen = alpn_len;
     unsigned char *salpn = (unsigned char *)alpn;
     unsigned char slen;
-    for(i = 0; (i < ARRAYSIZE(gtls_alpns)) && alen; ++i) {
+    for(i = 0; (i < CURL_ARRAYSIZE(gtls_alpns)) && alen; ++i) {
       slen = salpn[0];
       if(slen >= alen)
         return CURLE_FAILED_INIT;

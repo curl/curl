@@ -42,11 +42,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 typedef enum {
   CF_HC_INIT,
   CF_HC_CONNECT,
@@ -592,8 +587,8 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
 
   DEBUGASSERT(alpnids);
   DEBUGASSERT(alpn_count);
-  DEBUGASSERT(alpn_count <= ARRAYSIZE(ctx->ballers));
-  if(!alpn_count || (alpn_count > ARRAYSIZE(ctx->ballers))) {
+  DEBUGASSERT(alpn_count <= CURL_ARRAYSIZE(ctx->ballers));
+  if(!alpn_count || (alpn_count > CURL_ARRAYSIZE(ctx->ballers))) {
     failf(data, "https-connect filter create with unsupported %zu ALPN ids",
           alpn_count);
     return CURLE_FAILED_INIT;
@@ -607,7 +602,7 @@ static CURLcode cf_hc_create(struct Curl_cfilter **pcf,
   ctx->remotehost = remotehost;
   for(i = 0; i < alpn_count; ++i)
     cf_hc_baller_assign(&ctx->ballers[i], alpnids[i]);
-  for(; i < ARRAYSIZE(ctx->ballers); ++i)
+  for(; i < CURL_ARRAYSIZE(ctx->ballers); ++i)
     ctx->ballers[i].alpn_id = ALPN_none;
   ctx->baller_count = alpn_count;
 
@@ -663,8 +658,8 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
       if(conn->dns_entry && conn->dns_entry->hinfo &&
          !conn->dns_entry->hinfo->no_def_alpn) {
         size_t i, j;
-        for(i = 0; i < ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
-                   alpn_count < ARRAYSIZE(alpn_ids); ++i) {
+        for(i = 0; i < CURL_ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
+                   alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
           bool present = FALSE;
           enum alpnid alpn = conn->dns_entry->hinfo->alpns[i];
           for(j = 0; j < alpn_count; ++j) {

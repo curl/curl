@@ -53,10 +53,6 @@
 #include "curl_memory.h"
 #include "memdebug.h"
 
-#ifndef ARRAYSIZE
-#define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
-#endif
-
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
                 char *ptr, size_t size)
 {
@@ -349,13 +345,13 @@ static void trc_apply_level_by_name(const char * const token, int lvl)
 {
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
     if(strcasecompare(token, trc_cfts[i].cft->name)) {
       trc_cfts[i].cft->log_level = lvl;
       break;
     }
   }
-  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
     if(strcasecompare(token, trc_feats[i].feat->name)) {
       trc_feats[i].feat->log_level = lvl;
       break;
@@ -367,11 +363,11 @@ static void trc_apply_level_by_category(int category, int lvl)
 {
   size_t i;
 
-  for(i = 0; i < ARRAYSIZE(trc_cfts); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_cfts); ++i) {
     if(!category || (trc_cfts[i].category & category))
       trc_cfts[i].cft->log_level = lvl;
   }
-  for(i = 0; i < ARRAYSIZE(trc_feats); ++i) {
+  for(i = 0; i < CURL_ARRAYSIZE(trc_feats); ++i) {
     if(!category || (trc_feats[i].category & category))
       trc_feats[i].feat->log_level = lvl;
   }
