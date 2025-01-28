@@ -76,6 +76,7 @@ struct dynhds;
 
 struct http_negotiation {
   unsigned char rcvd_min; /* minimum version seen in responses, 09, 10, 11 */
+  http_majors wanted;  /* wanted major versions when talking to server */
   http_majors allowed; /* allowed major versions when talking to server */
   BIT(h2_upgrade);  /* Do HTTP Upgrade from 1.1 to 2 */
   BIT(h2_prior_knowledge); /* Directly do HTTP/2 without ALPN/SSL */

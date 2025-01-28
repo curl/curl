@@ -600,11 +600,6 @@ static CURLcode setopt_long(struct Curl_easy *data, CURLoption option,
      */
     switch(arg) {
     case CURL_HTTP_VERSION_NONE:
-#ifdef USE_HTTP2
-      /* This seems an undesirable quirk to force a behaviour on lower
-       * implementations that they should recognize independently? */
-      arg = CURL_HTTP_VERSION_2TLS;
-#endif
       /* accepted */
       break;
     case CURL_HTTP_VERSION_1_0:

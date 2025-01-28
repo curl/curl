@@ -473,11 +473,7 @@ CURLcode Curl_init_userdefined(struct Curl_easy *data)
   set->maxage_conn = 118;
   set->maxlifetime_conn = 0;
   set->http09_allowed = FALSE;
-#ifdef USE_HTTP2
-  set->httpwant = CURL_HTTP_VERSION_2TLS
-#else
-  set->httpwant = CURL_HTTP_VERSION_1_1
-#endif
+  set->httpwant = CURL_HTTP_VERSION_NONE
     ;
 #if defined(USE_HTTP2) || defined(USE_HTTP3)
   memset(&set->priority, 0, sizeof(set->priority));
@@ -1034,9 +1030,7 @@ static bool url_match_conn(struct connectdata *conn, void *userdata)
 
 #ifndef CURL_DISABLE_HTTP
   /* If looking for HTTP and the HTTP versions allowed do not include
-   * the HTTP version of conn, continue looking.
-   * CURL_HTTP_VERSION_2TLS is default which indicates no preference,
-   * so we take any existing connection. */
+   * the HTTP version of conn, continue looking. */
   if((needle->handler->protocol & PROTO_FAMILY_HTTP)) {
     switch(Curl_conn_http_version(data, conn)) {
     case 30:
@@ -3074,44 +3068,47 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
     enum alpnid srcalpnid = ALPN_none;
     bool hit = FALSE;
     struct altsvc *as = NULL;
-    int allowed_versions = ALPN_none;
+    int allowed_alpns = ALPN_none;
+    struct http_negotiation *neg = &data->state.http_neg;
 
-    if(data->state.http_neg.allowed & CURL_HTTP_V3x)
-      allowed_versions |= ALPN_h3;
-    if(data->state.http_neg.allowed & CURL_HTTP_V2x)
-      allowed_versions |= ALPN_h2;
-    if(data->state.http_neg.allowed & CURL_HTTP_V1x)
-      allowed_versions |= ALPN_h1;
-    allowed_versions &= (int)data->asi->flags;
+    DEBUGF(infof(data, "Alt-svc check wanted=%x, allowed=%x",
+                 neg->wanted, neg->allowed));
+    if(neg->allowed & CURL_HTTP_V3x)
+      allowed_alpns |= ALPN_h3;
+    if(neg->allowed & CURL_HTTP_V2x)
+      allowed_alpns |= ALPN_h2;
+    if(neg->allowed & CURL_HTTP_V1x)
+      allowed_alpns |= ALPN_h1;
+    allowed_alpns &= (int)data->asi->flags;
 
     host = conn->host.rawalloc;
     DEBUGF(infof(data, "check Alt-Svc for host %s", host));
 #ifdef USE_HTTP3
-    if(!hit && (allowed_versions & ALPN_h3)) {
+    if(!hit && (neg->wanted & CURL_HTTP_V3x)) {
       srcalpnid = ALPN_h3;
       hit = Curl_altsvc_lookup(data->asi,
                                ALPN_h3, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_versions);
+                               allowed_alpns);
     }
  #endif
  #ifdef USE_HTTP2
-    if(!hit && (allowed_versions & ALPN_h2) &&
-       !data->state.http_neg.h2_prior_knowledge) {
+    if(!hit && (neg->wanted & CURL_HTTP_V2x) &&
+       !neg->h2_prior_knowledge) {
       srcalpnid = ALPN_h2;
       hit = Curl_altsvc_lookup(data->asi,
                                ALPN_h2, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_versions);
+                               allowed_alpns);
     }
  #endif
-    if(!hit && (allowed_versions & ALPN_h1) &&
-       !data->state.http_neg.only_10) {
+    if(!hit && (neg->wanted & CURL_HTTP_V1x) &&
+       !neg->only_10) {
       srcalpnid = ALPN_h1;
       hit = Curl_altsvc_lookup(data->asi,
                                ALPN_h1, host, conn->remote_port, /* from */
                                &as /* to */,
-                               allowed_versions);
+                               allowed_alpns);
     }
 
     if(hit) {
@@ -3131,15 +3128,15 @@ static CURLcode parse_connect_to_slist(struct Curl_easy *data,
         /* protocol version switch */
         switch(as->dst.alpnid) {
         case ALPN_h1:
-          data->state.http_neg.allowed = CURL_HTTP_V1x;
-          data->state.http_neg.only_10 = FALSE;
+          neg->wanted = neg->allowed = CURL_HTTP_V1x;
+          neg->only_10 = FALSE;
           break;
         case ALPN_h2:
-          data->state.http_neg.allowed = CURL_HTTP_V2x;
+          neg->wanted = neg->allowed = CURL_HTTP_V2x;
           break;
         case ALPN_h3:
           conn->transport = TRNSPRT_QUIC;
-          data->state.http_neg.allowed = CURL_HTTP_V3x;
+          neg->wanted = neg->allowed = CURL_HTTP_V3x;
           break;
         default: /* should not be possible */
           break;

@@ -1087,8 +1087,6 @@ static CURLcode config2setopts(struct GlobalConfig *global,
 
     if(config->httpversion)
       my_setopt_enum(curl, CURLOPT_HTTP_VERSION, config->httpversion);
-    else if(feature_http2)
-      my_setopt_enum(curl, CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2TLS);
 
     /* curl 7.19.1 (the 301 version existed in 7.18.2),
        303 was added in 7.26.0 */

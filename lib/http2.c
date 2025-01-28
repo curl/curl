@@ -2795,7 +2795,7 @@ out:
 bool Curl_http2_may_switch(struct Curl_easy *data)
 {
   if(Curl_conn_http_version(data, data->conn) < 20 &&
-     (data->state.http_neg.allowed & CURL_HTTP_V2x) &&
+     (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
      data->state.http_neg.h2_prior_knowledge) {
 #ifndef CURL_DISABLE_PROXY
     if(data->conn->bits.httpproxy && !data->conn->bits.tunnel_proxy) {
