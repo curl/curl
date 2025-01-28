@@ -419,7 +419,12 @@ sub single {
         # *italics*
         $d =~ s/\*(\S.*?)\*/\\fI$1\\fP/g;
 
-        if($d =~ /[^\\][\<\>]/) {
+        my $back = $d;
+
+        # remove all backticked pieces
+        $back =~ s/\`(.*?)\`//g;
+
+        if($back =~ /[^\\][\<\>]/) {
             print STDERR "$f:$line:1:ERROR: un-escaped < or > used\n";
             $errors++;
         }
