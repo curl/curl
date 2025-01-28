@@ -77,6 +77,7 @@ bool feature_http2 = FALSE;
 bool feature_http3 = FALSE;
 bool feature_httpsproxy = FALSE;
 bool feature_libz = FALSE;
+bool feature_libssh2 = FALSE;
 bool feature_ntlm = FALSE;
 bool feature_ntlm_wb = FALSE;
 bool feature_spnego = FALSE;
@@ -190,6 +191,8 @@ CURLcode get_libcurl_info(void)
     ++feature_count;
   }
 
+  feature_libssh2 = curlinfo->libssh_version &&
+    !strncmp("libssh2", curlinfo->libssh_version, 7);
   return CURLE_OK;
 }
 

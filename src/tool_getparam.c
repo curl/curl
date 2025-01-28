@@ -2406,7 +2406,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       }
       break;
     case C_HOSTPUBSHA256: /* --hostpubsha256 */
-      err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
+      if(!feature_libssh2)
+        err = PARAM_LIBCURL_DOESNT_SUPPORT;
+      else
+        err = getstr(&config->hostpubsha256, nextarg, DENY_BLANK);
       break;
     case C_CRLFILE: /* --crlfile */
       err = getstr(&config->crlfile, nextarg, DENY_BLANK);
