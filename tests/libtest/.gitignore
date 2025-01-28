@@ -2,6 +2,6 @@
 #
 # SPDX-License-Identifier: curl
 
-/lib[0-9a-z_-]+
+/lib[0-9a-z_-]*
 lib1521.c
 libtest_bundle.c
