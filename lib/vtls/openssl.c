@@ -34,7 +34,7 @@
 #include <limits.h>
 
 /* Wincrypt must be included before anything that could include OpenSSL. */
-#if defined(USE_WIN32_CRYPTO)
+#ifdef USE_WIN32_CRYPTO
 #include <wincrypt.h>
 /* Undefine wincrypt conflicting symbols for BoringSSL. */
 #undef X509_NAME
@@ -83,7 +83,7 @@
 #include <openssl/tls1.h>
 #include <openssl/evp.h>
 
-#if defined(HAVE_SSL_SET1_ECH_CONFIG_LIST)
+#ifdef HAVE_SSL_SET1_ECH_CONFIG_LIST
 #define USE_ECH_OPENSSL
 #endif
 
@@ -191,12 +191,12 @@
       LIBRESSL_VERSION_NUMBER >= 0x3040100fL)) && \
     !defined(OPENSSL_IS_BORINGSSL)
   #define HAVE_SSL_CTX_SET_CIPHERSUITES
-  #if !defined(OPENSSL_IS_AWSLC)
+  #ifndef OPENSSL_IS_AWSLC
     #define HAVE_SSL_CTX_SET_POST_HANDSHAKE_AUTH
   #endif
 #endif
 
-#if defined(LIBRESSL_VERSION_NUMBER)
+#ifdef LIBRESSL_VERSION_NUMBER
 #define OSSL_PACKAGE "LibreSSL"
 #elif defined(OPENSSL_IS_BORINGSSL)
 #define OSSL_PACKAGE "BoringSSL"
@@ -891,15 +891,15 @@ static const char *SSL_ERROR_to_str(int err)
     return "SSL_ERROR_WANT_CONNECT";
   case SSL_ERROR_WANT_ACCEPT:
     return "SSL_ERROR_WANT_ACCEPT";
-#if defined(SSL_ERROR_WANT_ASYNC)
+#ifdef SSL_ERROR_WANT_ASYNC
   case SSL_ERROR_WANT_ASYNC:
     return "SSL_ERROR_WANT_ASYNC";
 #endif
-#if defined(SSL_ERROR_WANT_ASYNC_JOB)
+#ifdef SSL_ERROR_WANT_ASYNC_JOB
   case SSL_ERROR_WANT_ASYNC_JOB:
     return "SSL_ERROR_WANT_ASYNC_JOB";
 #endif
-#if defined(SSL_ERROR_WANT_EARLY)
+#ifdef SSL_ERROR_WANT_EARLY
   case SSL_ERROR_WANT_EARLY:
     return "SSL_ERROR_WANT_EARLY";
 #endif
@@ -2145,7 +2145,7 @@ static void ossl_close_all(struct Curl_easy *data)
 #else
   (void)data;
 #endif
-#if !defined(HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED)
+#ifndef HAVE_ERR_REMOVE_THREAD_STATE_DEPRECATED
   /* OpenSSL 1.0.1 and 1.0.2 build an error queue that is stored per-thread
      so we need to clean it here in case the thread will be killed. All OpenSSL
      code should extract the error in association with the error so clearing
@@ -2409,7 +2409,7 @@ static CURLcode verifystatus(struct Curl_cfilter *cf,
                              struct ossl_ctx *octx)
 {
   int i, ocsp_status;
-#if defined(OPENSSL_IS_AWSLC)
+#ifdef OPENSSL_IS_AWSLC
   const uint8_t *status;
 #else
   unsigned char *status;
@@ -3061,7 +3061,7 @@ static CURLcode load_cacert_from_memory(X509_STORE *store,
   return (count > 0) ? CURLE_OK : CURLE_SSL_CACERT_BADFILE;
 }
 
-#if defined(USE_WIN32_CRYPTO)
+#ifdef USE_WIN32_CRYPTO
 static CURLcode import_windows_cert_store(struct Curl_easy *data,
                                           const char *name,
                                           X509_STORE *store,
@@ -3229,7 +3229,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
     return CURLE_OUT_OF_MEMORY;
 
   if(verifypeer) {
-#if defined(USE_WIN32_CRYPTO)
+#ifdef USE_WIN32_CRYPTO
     /* Import certificates from the Windows root certificate store if
        requested.
        https://stackoverflow.com/questions/9507184/
@@ -3347,7 +3347,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
        https://web.archive.org/web/20190422050538/
        rt.openssl.org/Ticket/Display.html?id=3621
     */
-#if defined(X509_V_FLAG_TRUSTED_FIRST)
+#ifdef X509_V_FLAG_TRUSTED_FIRST
     X509_STORE_set_flags(store, X509_V_FLAG_TRUSTED_FIRST);
 #endif
 #ifdef X509_V_FLAG_PARTIAL_CHAIN
@@ -3368,7 +3368,7 @@ static CURLcode ossl_populate_x509_store(struct Curl_cfilter *cf,
   return result;
 }
 
-#if defined(HAVE_SSL_X509_STORE_SHARE)
+#ifdef HAVE_SSL_X509_STORE_SHARE
 
 /* key to use at `multi->proto_hash` */
 #define MPROTO_OSSL_X509_KEY   "tls:ossl:x509:share"
@@ -4281,7 +4281,7 @@ static CURLcode ossl_connect_step2(struct Curl_cfilter *cf,
         else
           failf(data, "%s", "SSL certificate verification failed");
       }
-#if defined(SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED)
+#ifdef SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED
       /* SSL_R_TLSV13_ALERT_CERTIFICATE_REQUIRED is only available on
          OpenSSL version above v1.1.1, not LibreSSL, BoringSSL, or AWS-LC */
       else if((lib == ERR_LIB_SSL) &&
