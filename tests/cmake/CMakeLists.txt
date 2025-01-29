@@ -32,7 +32,7 @@ option(TEST_INTEGRATION_MODE "Integration mode" "find_package")
 message(STATUS "TEST_INTEGRATION_MODE: ${TEST_INTEGRATION_MODE}")
 
 if(TEST_INTEGRATION_MODE STREQUAL "FetchContent" AND CMAKE_VERSION VERSION_LESS 3.14)
-  message(FATAL_ERROR "CMake 3.14 or upper is required for this test")
+  message(FATAL_ERROR "This test requires CMake 3.14 or upper")
 endif()
 
 if(TEST_INTEGRATION_MODE STREQUAL "find_package")
