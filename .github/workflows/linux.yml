@@ -583,7 +583,7 @@ jobs:
         if: contains(matrix.build.install_steps, 'intel')
         run: |
           cd /tmp
-          curl -sSf --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo apt-key add -
+          curl -sSf --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
           sudo apt-get install -y --no-install-suggests --no-install-recommends \
             intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
