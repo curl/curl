@@ -28,21 +28,20 @@ jobs:
         with:
           persist-credentials: false
 
-      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
-        name: 'remove preinstalled curl libcurl4{-doc}'
+      - name: 'remove preinstalled curl libcurl4{-doc}'
+        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
-      - run: autoreconf -fi
-        name: 'autoreconf'
+      - name: 'autoreconf'
+        run: autoreconf -fi
 
-      - run: ./configure --without-ssl --without-libpsl
-        name: 'configure'
+      - name: 'configure'
+        run: ./configure --without-ssl --without-libpsl
 
-      - run: make V=1
-        name: 'make'
+      - name: 'make'
+        run: make V=1
 
       - name: 'maketgz'
-        run: |
-          SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
+        run: SOURCE_DATE_EPOCH=1711526400 ./scripts/maketgz 99.98.97
 
       - uses: actions/upload-artifact@65c4c4a1ddee5b72f698fdd19549f0f0fb45cf08 # v4
         with:
@@ -50,7 +49,8 @@ jobs:
           path: 'curl-99.98.97.tar.gz'
           retention-days: 1
 
-      - run: |
+      - name: 'verify in-tree configure build including install'
+        run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
@@ -62,7 +62,6 @@ jobs:
           # basic check of the installed files
           bash scripts/installcheck.sh $HOME/temp
           rm -rf curl-99.98.97
-        name: 'verify in-tree configure build including install'
 
   verify-out-of-tree-docs:
     runs-on: ubuntu-latest
@@ -73,7 +72,8 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - run: |
+      - name: 'verify out-of-tree configure build including docs'
+        run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           touch curl-99.98.97/docs/{cmdline-opts,libcurl}/Makefile.inc
@@ -85,7 +85,6 @@ jobs:
           popd
           rm -rf build
           rm -rf curl-99.98.97
-        name: 'verify out-of-tree configure build including docs'
 
   verify-out-of-tree-autotools-debug:
     runs-on: ubuntu-latest
@@ -96,7 +95,8 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - run: |
+      - name: 'verify out-of-tree autotools debug build'
+        run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
@@ -106,7 +106,6 @@ jobs:
           make -j5
           make -j5 test-ci
           make -j5 install
-        name: 'verify out-of-tree autotools debug build'
 
   verify-out-of-tree-cmake:
     runs-on: ubuntu-latest
@@ -117,13 +116,13 @@ jobs:
         with:
           name: 'release-tgz'
 
-      - run: |
+      - name: 'verify out-of-tree cmake build'
+        run: |
           echo "::stop-commands::$(uuidgen)"
           tar xvf curl-99.98.97.tar.gz
           pushd curl-99.98.97
           cmake -B build -DCURL_WERROR=ON -DCURL_USE_LIBPSL=OFF
           make -C build -j5
-        name: 'verify out-of-tree cmake build'
 
   missing-files:
     runs-on: ubuntu-latest
@@ -148,11 +147,11 @@ jobs:
         with:
           persist-credentials: false
 
-      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
-        name: 'remove preinstalled curl libcurl4{-doc}'
+      - name: 'remove preinstalled curl libcurl4{-doc}'
+        run: sudo apt-get -o Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
-      - run: ./scripts/dmaketgz 9.10.11
-        name: 'generate release tarballs'
+      - name: 'generate release tarballs'
+        run: ./scripts/dmaketgz 9.10.11
 
       - name: 'verify release tarballs'
         run: |

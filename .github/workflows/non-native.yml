@@ -420,8 +420,8 @@ jobs:
         timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update -y
-          sudo apt-get install -y --no-install-suggests --no-install-recommends nasm
+          sudo apt-get -o Dpkg::Use-Pty=0 update
+          sudo apt-get -o Dpkg::Use-Pty=0 install nasm
 
       - name: 'vcpkg build'
         if: ${{ matrix.install }}
@@ -606,7 +606,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
+        run: sudo apt-get -o Dpkg::Use-Pty=0 install libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4

@@ -60,14 +60,14 @@ jobs:
         # Remember, this shell is dash, not bash
         run: |
           sed -E -i -e s@[a-z]+\.debian\.org/@archive.debian.org/debian-archive/@ -e '/ stretch-updates /d' /etc/apt/sources.list
-          apt-get update
+          apt-get -o Dpkg::Use-Pty=0 update
           # See comment above if this fails after 2025-05-20
-          apt-get install -y --no-install-suggests --no-install-recommends httrack
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends httrack
           httrack --get https://deb.freexian.com/extended-lts/pool/main/f/freexian-archive-keyring/freexian-archive-keyring_2022.06.08_all.deb
           dpkg -i freexian-archive-keyring_2022.06.08_all.deb
           echo 'deb http://deb.freexian.com/extended-lts stretch-lts main contrib non-free' | tee /etc/apt/sources.list.d/extended-lts.list
-          apt-get update
-          apt-get install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev librtmp-dev stunnel4 groff
+          apt-get -o Dpkg::Use-Pty=0 update
+          apt-get -o Dpkg::Use-Pty=0 install -y --no-install-suggests --no-install-recommends cmake make automake autoconf libtool gcc pkg-config libpsl-dev libzstd-dev zlib1g-dev libssl1.0-dev libssh-dev libssh2-1-dev libc-ares-dev heimdal-dev libldap2-dev librtmp-dev stunnel4 groff
           # GitHub's actions/checkout needs a newer glibc. This one is the
           # latest available for buster, the next stable release after stretch.
           httrack --get https://security.debian.org/debian-security/pool/updates/main/g/glibc/libc6_2.28-10+deb10u4_amd64.deb
