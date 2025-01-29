@@ -51,7 +51,7 @@ elseif(TEST_INTEGRATION_MODE STREQUAL "FetchContent")
     GIT_REPOSITORY "${FROM_GIT_REPO}"
     GIT_TAG "${FROM_GIT_TAG}"
     GIT_SHALLOW)
-  FetchContent_MakeAvailable(curl)
+  FetchContent_MakeAvailable(curl)  # Requires CMake 3.14
 endif()
 
 # Alias for either shared or static library
