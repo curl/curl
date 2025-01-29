@@ -61,7 +61,10 @@ CMAKE_DIST =                                    \
  CMake/PickyWarnings.cmake                      \
  CMake/Utilities.cmake                          \
  CMake/win32-cache.cmake                        \
- CMakeLists.txt
+ CMakeLists.txt                                 \
+ tests/cmake/CMakeLists.txt                     \
+ tests/cmake/test.c                             \
+ tests/cmake/test.sh
 
 VC_DIST = projects/README.md                           \
  projects/build-openssl.bat                            \
