@@ -7,7 +7,7 @@ set -eu
 
 cd "$(dirname "$0")"
 
-export CMAKE_GENERATOR=Ninja
+#export CMAKE_GENERATOR=Ninja
 
 rm -rf bld-fetchcontent; cmake -B bld-fetchcontent \
   -DTEST_INTEGRATION_MODE=FetchContent \
