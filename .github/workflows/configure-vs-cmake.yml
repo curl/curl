@@ -13,6 +13,7 @@ name: configure-vs-cmake
       - '**/CMakeLists.txt'
       - 'CMake/**'
       - 'lib/curl_config.h.cmake'
+      - 'tests/cmake/**'
       - '.github/scripts/cmp-config.pl'
       - '.github/workflows/configure-vs-cmake.yml'
 
@@ -25,6 +26,7 @@ name: configure-vs-cmake
       - '**/CMakeLists.txt'
       - 'CMake/**'
       - 'lib/curl_config.h.cmake'
+      - 'tests/cmake/**'
       - '.github/scripts/cmp-config.pl'
       - '.github/workflows/configure-vs-cmake.yml'
 
