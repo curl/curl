@@ -161,7 +161,6 @@ jobs:
           ../scripts/verify-release curl-9.10.11.tar.gz
 
   cmake-integration:
-    name: 'cmake integration'
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
