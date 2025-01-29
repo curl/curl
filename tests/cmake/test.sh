@@ -34,6 +34,6 @@ if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
   rm -rf bld-find_package
   cmake -B bld-find_package \
     -DTEST_INTEGRATION_MODE=find_package \
-    -DCMAKE_PREFIX_PATH="${PWD}/bld-curl/_pkg/lib/cmake/curl"
+    -DCMAKE_PREFIX_PATH="${PWD}/bld-curl/_pkg/lib/cmake/CURL"
   cmake --build bld-find_package
 fi
