@@ -437,7 +437,7 @@ jobs:
           cache-name: cache-wolfssh
         with:
           path: ~/wolfssh
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssl-version }}-${{ env.wolfssh-version }}
+          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ env.wolfssh-version }}-${{ env.wolfssl-version }}
 
       - name: 'build wolfssh'
         if: contains(matrix.build.install_steps, 'wolfssh') && steps.cache-wolfssh.outputs.cache-hit != 'true'
