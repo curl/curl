@@ -653,12 +653,14 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
   enum alpnid alpn_ids[2];
   size_t alpn_count = 0;
   CURLcode result = CURLE_OK;
-  struct Curl_cfilter fake;
+  struct Curl_cfilter cf_fake, *cf = NULL;
 
   (void)sockindex;
   (void)remotehost;
-  memset(&fake, 0, sizeof(fake));
-  fake.cft = &Curl_cft_http_connect;
+  /* we want to log for the filter before we create it, fake it. */
+  memset(&cf_fake, 0, sizeof(cf_fake));
+  cf_fake.cft = &Curl_cft_http_connect;
+  cf = &cf_fake;
 
   if(conn->bits.tls_enable_alpn) {
 #ifdef USE_HTTPSRR
@@ -675,19 +677,19 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
           if(Curl_conn_may_http3(data, conn))
             break;  /* not possible */
           if(data->state.http_neg.allowed & CURL_HTTP_V3x) {
-            CURL_TRC_CF(data, &fake, "adding h3 via HTTPS-RR");
+            CURL_TRC_CF(data, cf, "adding h3 via HTTPS-RR");
             alpn_ids[alpn_count++] = alpn;
           }
           break;
         case ALPN_h2:
           if(data->state.http_neg.allowed & CURL_HTTP_V2x) {
-            CURL_TRC_CF(data, &fake, "adding h2 via HTTPS-RR");
+            CURL_TRC_CF(data, cf, "adding h2 via HTTPS-RR");
             alpn_ids[alpn_count++] = alpn;
           }
           break;
         case ALPN_h1:
           if(data->state.http_neg.allowed & CURL_HTTP_V1x) {
-            CURL_TRC_CF(data, &fake, "adding h1 via HTTPS-RR");
+            CURL_TRC_CF(data, cf, "adding h1 via HTTPS-RR");
             alpn_ids[alpn_count++] = alpn;
           }
           break;
@@ -703,7 +705,7 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
        !cf_https_alpns_contain(ALPN_h3, alpn_ids, alpn_count)) {
       result = Curl_conn_may_http3(data, conn);
       if(!result) {
-        CURL_TRC_CF(data, &fake, "adding wanted h3");
+        CURL_TRC_CF(data, cf, "adding wanted h3");
         alpn_ids[alpn_count++] = ALPN_h3;
       }
       else if(data->state.http_neg.wanted == CURL_HTTP_V3x)
@@ -712,13 +714,13 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
     if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
        (data->state.http_neg.wanted & CURL_HTTP_V2x) &&
        !cf_https_alpns_contain(ALPN_h2, alpn_ids, alpn_count)) {
-      CURL_TRC_CF(data, &fake, "adding wanted h2");
+      CURL_TRC_CF(data, cf, "adding wanted h2");
       alpn_ids[alpn_count++] = ALPN_h2;
     }
     else if((alpn_count < CURL_ARRAYSIZE(alpn_ids)) &&
             (data->state.http_neg.wanted & CURL_HTTP_V1x) &&
             !cf_https_alpns_contain(ALPN_h1, alpn_ids, alpn_count)) {
-      CURL_TRC_CF(data, &fake, "adding wanted h1");
+      CURL_TRC_CF(data, cf, "adding wanted h1");
       alpn_ids[alpn_count++] = ALPN_h1;
     }
   }
