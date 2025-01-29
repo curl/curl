@@ -31,6 +31,10 @@ option(TEST_INTEGRATION_MODE "Integration mode" "find_package")
 
 message(STATUS "TEST_INTEGRATION_MODE: ${TEST_INTEGRATION_MODE}")
 
+if(TEST_INTEGRATION_MODE STREQUAL "FetchContent" AND CMAKE_VERSION VERSION_LESS 3.14)
+  message(FATAL_ERROR "CMake 3.14 or upper is required for this test")
+endif()
+
 if(TEST_INTEGRATION_MODE STREQUAL "find_package")
   find_package(CURL REQUIRED CONFIG)
   find_package(CURL REQUIRED CONFIG)  # test for double-inclusion
