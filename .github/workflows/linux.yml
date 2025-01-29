@@ -584,8 +584,7 @@ jobs:
         run: |
           curl -sSf --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
-          sudo apt-get install -y --no-install-suggests --no-install-recommends \
-            intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get install -y --no-install-suggests --no-install-recommends intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
           printenv >> $GITHUB_ENV
 

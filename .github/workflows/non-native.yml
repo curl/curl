@@ -606,9 +606,7 @@ jobs:
       fail-fast: false
     steps:
       - name: 'install packages'
-        run: |
-          sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install --no-install-suggests --no-install-recommends \
-            libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
+        run: sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install --no-install-suggests --no-install-recommends libfl2 ${{ matrix.build == 'cmake' && 'ninja-build' || '' }}
 
       - name: 'cache compiler (djgpp)'
         uses: actions/cache@1bd1e32a3bdc45362d1e726936510720a7c30a57 # v4
