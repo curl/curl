@@ -159,3 +159,20 @@ jobs:
           mv curl-9.10.11.tar.gz _verify
           cd _verify
           ../scripts/verify-release curl-9.10.11.tar.gz
+
+  cmake-integration:
+    name: 'cmake integration'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CC: clang
+      MAKEFLAGS: -j5
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+        with:
+          persist-credentials: false
+      - name: 'cmake'
+        run: |
+          sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install --no-install-suggests --no-install-recommends \
+            libssl-dev
+          ./tests/cmake/test.sh
