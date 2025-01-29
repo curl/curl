@@ -174,5 +174,5 @@ jobs:
       - name: 'cmake'
         run: |
           sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install --no-install-suggests --no-install-recommends \
-            libssl-dev
+            ninja-build libpsl-devel libssl-dev
           ./tests/cmake/test.sh
