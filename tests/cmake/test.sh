@@ -7,23 +7,29 @@ set -eu
 
 cd "$(dirname "$0")"
 
-export CMAKE_GENERATOR=Ninja
+mode="${1:-all}"
 
-rm -rf bld-fetchcontent; cmake -B bld-fetchcontent \
-  -DTEST_INTEGRATION_MODE=FetchContent \
-  -DFROM_GIT_REPO="${PWD}/../.." \
-  -DFROM_GIT_TAG="$(git rev-parse HEAD)"
-cmake --build bld-fetchcontent
+if [ "${mode}" = 'all' ] || [ "${mode}" = 'FetchContent' ]; then
+  rm -rf bld-fetchcontent; cmake -B bld-fetchcontent \
+    -DTEST_INTEGRATION_MODE=FetchContent \
+    -DFROM_GIT_REPO="${PWD}/../.." \
+    -DFROM_GIT_TAG="$(git rev-parse HEAD)"
+  cmake --build bld-fetchcontent
+fi
 
-rm -rf curl; ln -s ../.. curl
-rm -rf bld-add_subdirectory; cmake -B bld-add_subdirectory \
-  -DTEST_INTEGRATION_MODE=add_subdirectory
-cmake --build bld-add_subdirectory
+if [ "${mode}" = 'all' ] || [ "${mode}" = 'add_subdirectory' ]; then
+  rm -rf curl; ln -s ../.. curl
+  rm -rf bld-add_subdirectory; cmake -B bld-add_subdirectory \
+    -DTEST_INTEGRATION_MODE=add_subdirectory
+  cmake --build bld-add_subdirectory
+fi
 
-rm -rf bld-curl; cmake ../.. -B bld-curl
-cmake --build bld-curl
-cmake --install bld-curl --prefix bld-curl/_pkg
-rm -rf bld-find_package; cmake -B bld-find_package \
-  -DTEST_INTEGRATION_MODE=find_package \
-  -DCMAKE_PREFIX_PATH="${PWD}/bld-curl/_pkg/lib/cmake/curl"
-cmake --build bld-find_package
+if [ "${mode}" = 'all' ] || [ "${mode}" = 'find_package' ]; then
+  rm -rf bld-curl; cmake ../.. -B bld-curl
+  cmake --build bld-curl
+  cmake --install bld-curl --prefix bld-curl/_pkg
+  rm -rf bld-find_package; cmake -B bld-find_package \
+    -DTEST_INTEGRATION_MODE=find_package \
+    -DCMAKE_PREFIX_PATH="${PWD}/bld-curl/_pkg/lib/cmake/curl"
+  cmake --build bld-find_package
+fi
