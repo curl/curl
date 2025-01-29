@@ -38,7 +38,13 @@ endif()
 if(TEST_INTEGRATION_MODE STREQUAL "find_package")
   find_package(CURL REQUIRED CONFIG)
   find_package(CURL REQUIRED CONFIG)  # test for double-inclusion
-  foreach(result_var IN ITEMS CURL_FOUND CURL_VERSION CURL_VERSION_STRING)
+  foreach(result_var IN ITEMS
+      CURL_FOUND
+      CURL_VERSION
+      CURL_VERSION_STRING
+      CURL_SUPPORTS_HTTPS
+      CURL_SUPPORTS_Largefile
+    )
     if(${result_var})
       message(STATUS "${result_var}: |${${result_var}}|")
     else()
