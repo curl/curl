@@ -62,10 +62,6 @@
 #include "httpsrr.h"
 #include "strdup.h"
 
-#if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) &&   \
-  defined(_WIN32)
-#  define CARES_STATICLIB
-#endif
 #include <ares.h>
 #include <ares_version.h> /* really old c-ares did not include this by
                              itself */

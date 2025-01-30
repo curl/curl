@@ -377,6 +377,12 @@
 #  endif
 #endif
 
+#ifdef USE_ARES
+#  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && defined(_WIN32)
+#    define CARES_STATICLIB  /* define it before including ares.h */
+#  endif
+#endif
+
 #ifdef USE_LWIPSOCK
 #  include <lwip/init.h>
 #  include <lwip/sockets.h>
