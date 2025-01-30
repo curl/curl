@@ -160,6 +160,9 @@
 /* disables TFTP */
 #cmakedefine CURL_DISABLE_TFTP 1
 
+/* disables type checks */
+#cmakedefine CURL_DISABLE_TYPECHECK 1
+
 /* disables verbose strings */
 #cmakedefine CURL_DISABLE_VERBOSE_STRINGS 1
 
