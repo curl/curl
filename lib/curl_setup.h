@@ -378,6 +378,9 @@
 #endif
 
 #ifdef USE_ARES
+#  ifndef CARES_NO_DEPRECATED
+#  define CARES_NO_DEPRECATED  /* for ares_getsock() */
+#  endif
 #  if defined(CURL_STATICLIB) && !defined(CARES_STATICLIB) && defined(_WIN32)
 #    define CARES_STATICLIB  /* define it before including ares.h */
 #  endif
