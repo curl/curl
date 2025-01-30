@@ -97,9 +97,13 @@ In order to find out all components involved in a transfer, run it with "all"
 configured. You can then see all names involved in your libcurl version in the
 trace.
 
+## `dns`
+
+Tracing of DNS operations to resolve hostnames and HTTPS records.
+
 ## `doh`
 
-Tracing of DNS-over-HTTP operations to resolve hostnames.
+Former name for DNS-over-HTTP operations. Now an alias for `dns`.
 
 ## `read`
 

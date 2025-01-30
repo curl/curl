@@ -585,6 +585,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
   Curl_mutex_release(&td->tsd.mutx);
 
   if(done) {
+    CURLcode result = td->result;
     getaddrinfo_complete(data);
 
     if(!data->state.async.dns) {
@@ -594,8 +595,7 @@ CURLcode Curl_resolver_is_resolved(struct Curl_easy *data,
     }
 #ifdef USE_HTTPSRR_ARES
     {
-      struct Curl_https_rrinfo *lhrr =
-        Curl_memdup(&td->hinfo, sizeof(struct Curl_https_rrinfo));
+      struct Curl_https_rrinfo *lhrr = Curl_httpsrr_dup_move(&td->hinfo);
       if(!lhrr) {
         destroy_async_data(data);
         return CURLE_OUT_OF_MEMORY;
