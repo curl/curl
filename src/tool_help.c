@@ -34,6 +34,10 @@
 #include "tool_getparam.h"
 #include "terminal.h"
 
+#include "multihandle.h" /* for ENABLE_WAKEUP */
+#include "tool_xattr.h" /* for USE_XATTR */
+#include "curl_sha512_256.h" /* for CURL_HAVE_SHA512_256 */
+
 #include "memdebug.h" /* keep this as LAST include */
 
 struct category_descriptors {
@@ -310,7 +314,89 @@ static bool is_debug(void)
   return FALSE;
 }
 
-void tool_version_info(void)
+static const char *disabled[]={
+#ifdef CURL_DISABLE_BINDLOCAL
+  "bindlocal",
+#endif
+#ifdef CURL_DISABLE_COOKIES
+  "cookies",
+#endif
+#ifdef CURL_DISABLE_BASIC_AUTH
+  "basic-auth",
+#endif
+#ifdef CURL_DISABLE_BEARER_AUTH
+  "bearer-auth",
+#endif
+#ifdef CURL_DISABLE_DIGEST_AUTH
+  "digest-auth",
+#endif
+#ifdef CURL_DISABLE_NEGOTIATE_AUTH
+  "negotiate-auth",
+#endif
+#ifdef CURL_DISABLE_AWS
+  "aws",
+#endif
+#ifdef CURL_DISABLE_DOH
+  "DoH",
+#endif
+#ifdef CURL_DISABLE_HTTP_AUTH
+  "HTTP-auth",
+#endif
+#ifdef CURL_DISABLE_MIME
+  "Mime",
+#endif
+#ifdef CURL_DISABLE_NETRC
+  "netrc",
+#endif
+#ifdef CURL_DISABLE_PARSEDATE
+  "parsedate",
+#endif
+#ifdef CURL_DISABLE_PROXY
+  "proxy",
+#endif
+#ifdef CURL_DISABLE_SHUFFLE_DNS
+  "shuffle-dns",
+#endif
+#ifdef CURL_DISABLE_TYPECHECK
+  "typecheck",
+#endif
+#ifdef CURL_DISABLE_VERBOSE_STRINGS
+  "verbose-strings",
+#endif
+#ifndef ENABLE_WAKEUP
+  "wakeup",
+#endif
+#ifdef CURL_DISABLE_HEADERS_API
+  "headers-api",
+#endif
+#ifndef USE_XATTR
+  "xattr",
+#endif
+#ifdef CURL_DISABLE_FORM_API
+  "form-api",
+#endif
+#if (SIZEOF_TIME_T < 5)
+  "large-time",
+#endif
+#if (SIZEOF_SIZE_T < 5)
+  "large-size",
+#endif
+#ifndef CURL_HAVE_SHA512_256
+  "sha512-256",
+#endif
+#ifdef _WIN32
+#if defined(CURL_WINDOWS_UWP) || \
+  defined(CURL_DISABLE_CA_SEARCH) || defined(CURL_CA_SEARCH_SAFE)
+  "win32-ca-searchpath",
+#endif
+#ifndef CURL_CA_SEARCH_SAFE
+  "win32-ca-search-safe",
+#endif
+#endif
+  NULL
+};
+
+void tool_version_info(bool show_disabled)
 {
   const char *const *builtin;
   if(is_debug())
@@ -379,6 +465,13 @@ void tool_version_info(void)
       puts(""); /* newline */
       free((void *)feat_ext);
     }
+  }
+  if(show_disabled && disabled[0]) {
+    printf("Disabled:");
+    for(builtin = disabled; *builtin; ++builtin) {
+      printf(" %s", *builtin);
+    }
+    puts(""); /* newline */
   }
   if(strcmp(CURL_VERSION, curlinfo->version)) {
     printf("WARNING: curl and libcurl versions do not match. "
