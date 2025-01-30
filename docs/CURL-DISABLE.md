@@ -182,6 +182,10 @@ Disable the TELNET protocol
 
 Disable the TFTP protocol
 
+## `CURL_DISABLE_TYPECHECK`
+
+Disable type checks
+
 ## `CURL_DISABLE_VERBOSE_STRINGS`
 
 Disable verbose strings and error messages.
