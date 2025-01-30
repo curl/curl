@@ -28,7 +28,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
+      - run: sudo apt-get purge curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
 
       - run: autoreconf -fi
@@ -148,7 +148,7 @@ jobs:
         with:
           persist-credentials: false
 
-      - run: sudo apt-get purge -y curl libcurl4 libcurl4-doc
+      - run: sudo apt-get purge curl libcurl4 libcurl4-doc
         name: 'remove preinstalled curl libcurl4{-doc}'
 
       - run: ./scripts/dmaketgz 9.10.11
