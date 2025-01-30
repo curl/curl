@@ -55,6 +55,11 @@ struct Curl_https_rrinfo {
   uint16_t priority;
   bool no_def_alpn; /* keytag = 2 */
 };
+
+CURLcode Curl_httpsrr_set(struct Curl_easy *data,
+                          struct Curl_https_rrinfo *hi,
+                          uint16_t rrkey, const uint8_t *val, size_t vlen);
+
 #endif
 
 /*
@@ -69,10 +74,6 @@ struct Curl_https_rrinfo {
 
 CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
                                   unsigned char *alpns);
-
-CURLcode Curl_httpsrr_set(struct Curl_easy *data,
-                          struct Curl_https_rrinfo *hi,
-                          uint16_t rrkey, const uint8_t *val, size_t vlen);
 
 #if defined(USE_ARES) && defined(USE_HTTPSRR)
 void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
