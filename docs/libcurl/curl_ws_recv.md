@@ -63,31 +63,37 @@ reassembling fragmented messages. See curl_ws_meta(3) for more details on
 ~~~c
 int main(void)
 {
-  size_t recv;
-  size_t recv_total = 0;
-  const struct curl_ws_frame *meta;
   char buffer[256];
-  CURLcode res;
+  size_t offset = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = curl_easy_init();
 
   curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com/");
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L);
+  /* start HTTPS connection and upgrade to WSS, then return control */
   curl_easy_perform(curl);
 
   /* Note: This example neglects fragmented messages. (CURLWS_CONT bit)
            A real application must handle them appropriately. */
 
-  do {
-    res = curl_ws_recv(curl, buffer + recv_total, sizeof(buffer) - recv_total,
-                       &recv, &meta);
-    recv_total += recv;
-    if(meta->bytesleft > sizeof(buffer) - recv_total)
-      res = CURLE_TOO_LARGE;
-    if(res == CURLE_AGAIN) {
-      /* .. wait for socket here ... */
-      res = CURLE_OK;
+  while(!res) {
+    size_t recv;
+    const struct curl_ws_frame *meta;
+    res = curl_ws_recv(curl, buffer + offset, sizeof(buffer) - offset, &recv,
+                       &meta);
+    offset += recv;
+
+    if(res == CURLE_OK) {
+      if(meta->bytesleft == 0)
+        break; /* finished receiving */
+      if(meta->bytesleft > sizeof(buffer) - offset)
+        res = CURLE_TOO_LARGE;
     }
-  } while(res && meta->bytesleft > 0);
+
+    if(res == CURLE_AGAIN)
+      /* in real application: wait for socket here, e.g. using select() */
+      res = CURLE_OK;
+  }
 
   curl_easy_cleanup(curl);
   return (int)res;

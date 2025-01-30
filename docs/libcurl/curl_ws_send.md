@@ -80,27 +80,32 @@ calls.
 ~~~c
 #include <string.h> /* for strlen */
 
-const char *buffer = "magic";
-
 int main(void)
 {
-  size_t sent;
-  size_t sent_total = 0;
-  CURLcode res;
+  const char *buffer = "PAYLOAD";
+  size_t offset = 0;
+  CURLcode res = CURLE_OK;
   CURL *curl = curl_easy_init();
 
   curl_easy_setopt(curl, CURLOPT_URL, "wss://example.com/");
   curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L);
+  /* start HTTPS connection and upgrade to WSS, then return control */
   curl_easy_perform(curl);
 
-  while (res && buflen > 0) {
-    res = curl_ws_send(curl, buffer + sent_total, strlen(buffer) - sent_total,
-                       &sent, 0, CURLWS_PING);
-    sent_total += sent;
-    if(res == CURLE_AGAIN) {
-      /* .. wait for socket here ... */
-      res = CURLE_OK;
+  while(!res) {
+    size_t sent;
+    res = curl_ws_send(curl, buffer + offset, strlen(buffer) - offset, &sent,
+                       0, CURLWS_TEXT);
+    offset += sent;
+
+    if(res == CURLE_OK) {
+      if(offset == strlen(buffer))
+        break; /* finished sending */
     }
+
+    if(res == CURLE_AGAIN)
+      /* in real application: wait for socket here, e.g. using select() */
+      res = CURLE_OK;
   }
 
   curl_easy_cleanup(curl);
