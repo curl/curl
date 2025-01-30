@@ -239,7 +239,6 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_SOCKETPAIR`:                Disable use of socketpair for curl_multi_poll. Default: `OFF`
 - `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
 - `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
-- `CURL_DISABLE_TESTS`:                     Disable building tests. Default: `OFF`
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`

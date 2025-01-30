@@ -2019,7 +2019,7 @@ set(_project_config "${_generated_dir}/${PROJECT_NAME}Config.cmake")
 set(_version_config "${_generated_dir}/${PROJECT_NAME}ConfigVersion.cmake")
 
 option(BUILD_TESTING "Build tests" ON)
-option(CURL_DISABLE_TESTS "Disable building tests" OFF)
+option(CURL_DISABLE_TESTS "Disable building tests (deprecated)" OFF)
 if(BUILD_TESTING AND PERL_FOUND AND NOT CURL_DISABLE_TESTS)
   set(CURL_BUILD_TESTING ON)
 else()
