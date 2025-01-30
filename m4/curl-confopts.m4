@@ -532,7 +532,6 @@ AC_DEFUN([CURL_CHECK_LIB_ARES], [
     if test "$want_ares" = "yes"; then
       dnl finally c-ares will be used
       AC_DEFINE(USE_ARES, 1, [Define to enable c-ares support])
-      AC_DEFINE(CARES_NO_DEPRECATED, 1, [Ignore c-ares deprecation warnings])
       USE_ARES=1
       LIBCURL_PC_REQUIRES_PRIVATE="$LIBCURL_PC_REQUIRES_PRIVATE libcares"
       curl_res_msg="c-ares"
