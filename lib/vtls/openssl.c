@@ -260,11 +260,6 @@ typedef unsigned long sslerr_t;
 #define HAVE_SSL_X509_STORE_SHARE
 #endif
 
-/* What API version do we use? */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-#define HAVE_PRE_1_1_API
-#endif
-
 static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl);
 
 static CURLcode push_certinfo(struct Curl_easy *data,
@@ -637,7 +632,7 @@ static CURLcode ossl_certchain(struct Curl_easy *data, SSL *ssl)
 
 #ifdef USE_OPENSSL
 
-#ifdef HAVE_PRE_1_1_API
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 #define BIO_set_init(x,v)          ((x)->init=(v))
 #define BIO_get_data(x)            ((x)->ptr)
 #define BIO_set_data(x,v)          ((x)->ptr=(v))
@@ -649,7 +644,7 @@ static int ossl_bio_cf_create(BIO *bio)
 {
   BIO_set_shutdown(bio, 1);
   BIO_set_init(bio, 1);
-#ifdef HAVE_PRE_1_1_API
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
   bio->num = -1;
 #endif
   BIO_set_data(bio, NULL);
@@ -766,7 +761,7 @@ static int ossl_bio_cf_in_read(BIO *bio, char *buf, int blen)
   return (int)nread;
 }
 
-#ifdef HAVE_PRE_1_1_API
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
 
 static BIO_METHOD ossl_bio_cf_meth_1_0 = {
   BIO_TYPE_MEM,
