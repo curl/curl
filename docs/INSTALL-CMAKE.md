@@ -240,6 +240,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_SRP`:                       Disable TLS-SRP support. Default: `OFF`
 - `CURL_DISABLE_TELNET`:                    Disable Telnet. Default: `OFF`
 - `CURL_DISABLE_TFTP`:                      Disable TFTP. Default: `OFF`
+- `CURL_DISABLE_TYPECHECK`:                 Disable type checks. Default: `OFF`
 - `CURL_DISABLE_VERBOSE_STRINGS`:           Disable verbose strings. Default: `OFF`
 - `CURL_DISABLE_WEBSOCKETS`:                Disable WebSocket. Default: `OFF`
 - `HTTP_ONLY`:                              Disable all protocols except HTTP (This overrides all `CURL_DISABLE_*` options). Default: `OFF`
