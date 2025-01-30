@@ -494,7 +494,7 @@ sub checksystemfeatures {
 
     my $curlverout="$LOGDIR/curlverout.log";
     my $curlvererr="$LOGDIR/curlvererr.log";
-    my $versioncmd=shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
+    my $versioncmd=shell_quote($CURL) . " --version-all 1>$curlverout 2>$curlvererr";
 
     unlink($curlverout);
     unlink($curlvererr);
