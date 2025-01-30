@@ -85,7 +85,7 @@ sub githubactions {
                 $m = 0;
                 $j = 0;
             }
-            elsif($_ =~ /^    - run: .* apt-get install (.*)/) {
+            elsif($_ =~ /^    - run: .* apt-get .* install (.*)/) {
                 $job{'install'} = $1;
             }
             elsif($m >= 0) {
