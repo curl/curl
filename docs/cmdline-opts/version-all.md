@@ -3,7 +3,7 @@ c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 SPDX-License-Identifier: curl
 Long: version-all
 Help: Show version number, disabled features, and quit
-Category: important curl
+Category: curl
 Added: 8.13.0
 Multi: custom
 See-also:
