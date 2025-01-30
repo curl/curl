@@ -834,7 +834,7 @@ const struct helptxt helptext[] = {
    CURLHELP_IMPORTANT | CURLHELP_CURL},
   {"    --version-all",
    "Show version number, disabled features, and quit",
-   CURLHELP_IMPORTANT | CURLHELP_CURL},
+   CURLHELP_CURL},
   {"    --vlan-priority <priority>",
    "Set VLAN priority",
    CURLHELP_CONNECTION},
