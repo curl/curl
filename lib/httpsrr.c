@@ -146,6 +146,24 @@ CURLcode Curl_httpsrr_set(struct Curl_easy *data,
   return CURLE_OK;
 }
 
+struct Curl_https_rrinfo *
+Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo)
+{
+  struct Curl_https_rrinfo *dup = Curl_memdup(rrinfo, sizeof(*rrinfo));
+  if(dup)
+    memset(rrinfo, 0, sizeof(*rrinfo));
+  return dup;
+}
+
+void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
+{
+  Curl_safefree(rrinfo->target);
+  Curl_safefree(rrinfo->echconfiglist);
+  Curl_safefree(rrinfo->ipv4hints);
+  Curl_safefree(rrinfo->ipv6hints);
+}
+
+
 #ifdef USE_ARES
 
 static CURLcode httpsrr_opt(struct Curl_easy *data,
@@ -207,23 +225,6 @@ void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
   }
 out:
   res->result = result;
-}
-
-struct Curl_https_rrinfo *
-Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo)
-{
-  struct Curl_https_rrinfo *dup = Curl_memdup(rrinfo, sizeof(*rrinfo));
-  if(dup)
-    memset(rrinfo, 0, sizeof(*rrinfo));
-  return dup;
-}
-
-void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo)
-{
-  Curl_safefree(rrinfo->target);
-  Curl_safefree(rrinfo->echconfiglist);
-  Curl_safefree(rrinfo->ipv4hints);
-  Curl_safefree(rrinfo->ipv6hints);
 }
 
 #endif /* USE_ARES */
