@@ -86,6 +86,8 @@ void Curl_trc_write(struct Curl_easy *data,
                     const char *fmt, ...) CURL_PRINTF(2, 3);
 void Curl_trc_read(struct Curl_easy *data,
                    const char *fmt, ...) CURL_PRINTF(2, 3);
+void Curl_trc_dns(struct Curl_easy *data,
+                  const char *fmt, ...) CURL_PRINTF(2, 3);
 
 #ifndef CURL_DISABLE_FTP
 extern struct curl_trc_feat Curl_trc_feat_ftp;
@@ -121,6 +123,9 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_READ(data, ...) \
   do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_read)) \
          Curl_trc_read(data, __VA_ARGS__); } while(0)
+#define CURL_TRC_DNS(data, ...) \
+  do { if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) \
+         Curl_trc_dns(data, __VA_ARGS__); } while(0)
 
 #ifndef CURL_DISABLE_FTP
 #define CURL_TRC_FTP(data, ...) \
@@ -149,6 +154,7 @@ void Curl_trc_ws(struct Curl_easy *data,
 #define CURL_TRC_CF Curl_trc_cf_infof
 #define CURL_TRC_WRITE Curl_trc_write
 #define CURL_TRC_READ  Curl_trc_read
+#define CURL_TRC_DNS   Curl_trc_dns
 
 #ifndef CURL_DISABLE_FTP
 #define CURL_TRC_FTP   Curl_trc_ftp
@@ -174,6 +180,7 @@ struct curl_trc_feat {
 };
 extern struct curl_trc_feat Curl_trc_feat_read;
 extern struct curl_trc_feat Curl_trc_feat_write;
+extern struct curl_trc_feat Curl_trc_feat_dns;
 
 #define Curl_trc_is_verbose(data) \
             ((data) && (data)->set.verbose && \

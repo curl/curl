@@ -35,6 +35,8 @@
 #define CURL_MAXLEN_host_name 253
 #define MAX_HTTPSRR_ALPNS 4
 
+struct Curl_easy;
+
 struct Curl_https_rrinfo {
   /*
    * Fields from HTTPS RR. The only mandatory fields are priority and target.
@@ -68,9 +70,19 @@ struct Curl_https_rrinfo {
 CURLcode Curl_httpsrr_decode_alpn(const unsigned char *cp, size_t len,
                                   unsigned char *alpns);
 
+CURLcode Curl_httpsrr_set(struct Curl_easy *data,
+                          struct Curl_https_rrinfo *hi,
+                          uint16_t rrkey, const uint8_t *val, size_t vlen);
+
 #if defined(USE_ARES) && defined(USE_HTTPSRR)
 void Curl_dnsrec_done_cb(void *arg, ares_status_t status,
                          size_t timeouts,
                          const ares_dns_record_t *dnsrec);
+
+struct Curl_https_rrinfo *
+Curl_httpsrr_dup_move(struct Curl_https_rrinfo *rrinfo);
+
+void Curl_httpsrr_cleanup(struct Curl_https_rrinfo *rrinfo);
+
 #endif
 #endif /* HEADER_CURL_HTTPSRR_H */
