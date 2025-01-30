@@ -1672,7 +1672,7 @@ sub singletest_check {
             my %cmdhash = getpartattr("client", "command");
             my $cmdtype = $cmdhash{'type'} || "default";
             logmsg "\n** ALERT! memory tracking with no output file?\n"
-                if(!$cmdtype eq "perl");
+                if($cmdtype ne "perl");
             $ok .= "-"; # problem with memory checking
         }
         else {
