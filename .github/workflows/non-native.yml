@@ -66,7 +66,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld --config Debug
-            bld/src/curl --disable --version
+            bld/src/curl --disable --version-all
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --config Debug --target testdeps
               export TFLAGS='-j4'
@@ -106,7 +106,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld --config Debug
-            bld/src/curl --disable --version
+            bld/src/curl --disable --version-all
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --config Debug --target testdeps
               export TFLAGS='-j8 ~3017 ~TFTP ~FTP'  # FIXME: TFTP requests executed twice? Related: `curl: (69) TFTP: Access Violation`?
@@ -155,7 +155,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             time make -j3 install
-            src/curl --disable --version
+            src/curl --disable --version-all
             desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time make -j3 -C tests
@@ -192,7 +192,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat bld/lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' bld/lib/curl_config.h | sort || true; echo '::endgroup::'
             time cmake --build bld --config Debug
-            bld/src/curl --disable --version
+            bld/src/curl --disable --version-all
             desc='${{ matrix.desc }}'
             if [ '${{ matrix.arch }}' = 'x86_64' ]; then  # Slow on emulated CPU
               time cmake --build bld --config Debug --target testdeps
@@ -232,7 +232,7 @@ jobs:
             echo '::group::curl_config.h (raw)'; cat lib/curl_config.h || true; echo '::endgroup::'
             echo '::group::curl_config.h'; grep -F '#define' lib/curl_config.h | sort || true; echo '::endgroup::'
             time gmake -j3 install
-            src/curl --disable --version
+            src/curl --disable --version-all
             time gmake -j3 -C tests
             time gmake test-ci V=1
             echo '::group::build examples'
