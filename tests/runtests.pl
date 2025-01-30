@@ -510,15 +510,6 @@ sub checksystemfeatures {
     @version = <$versout>;
     close($versout);
 
-    open(my $disabledh, "-|", "server/disabled".exe_ext('TOOL'));
-    @disabled = <$disabledh>;
-    close($disabledh);
-
-    if($disabled[0]) {
-        s/[\r\n]//g for @disabled;
-        $dis = join(", ", @disabled);
-    }
-
     $resolver="stock";
     for(@version) {
         chomp;
@@ -723,6 +714,10 @@ sub checksystemfeatures {
                 push @protocols, 'httptls';
                 push @protocols, 'httptls-ipv6';
             }
+        }
+        elsif($_ =~ /^Disabled: (.*)/i) {
+            $dis = $1;
+            @disabled = split(' ', $dis);
         }
     }
 
