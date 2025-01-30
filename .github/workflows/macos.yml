@@ -278,7 +278,7 @@ jobs:
           fi
 
       - name: 'curl version'
-        run: bld/src/curl --disable --version
+        run: bld/src/curl --disable --version-all
 
       - name: 'build tests'
         run: |
@@ -485,4 +485,4 @@ jobs:
         run: make -C bld V=1 VERBOSE=1
 
       - name: 'curl version'
-        run: bld/src/curl --disable --version
+        run: bld/src/curl --disable --version-all

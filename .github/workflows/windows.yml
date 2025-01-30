@@ -124,7 +124,7 @@ jobs:
           if [ '${{ matrix.build }}' = 'cmake' ]; then
             PATH="$PWD/bld/lib:$PATH"
           fi
-          bld/src/curl.exe --disable --version
+          bld/src/curl.exe --disable --version-all
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
@@ -294,7 +294,7 @@ jobs:
           fi
           find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           if [ '${{ matrix.test }}' != 'uwp' ]; then  # curl: error initializing curl library
-            bld/src/curl.exe --disable --version
+            bld/src/curl.exe --disable --version-all
           fi
 
       - name: 'build tests'
@@ -447,7 +447,7 @@ jobs:
         run: |
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.a' \) -exec file '{}' \;
           PATH="$PWD/bld/lib:$PATH"
-          bld/src/curl.exe --disable --version
+          bld/src/curl.exe --disable --version-all
 
       - name: 'build tests'
         if: ${{ matrix.tflags != 'skipall' }}
@@ -727,7 +727,7 @@ jobs:
           PATH=/usr/bin find . \( -name '*.exe' -o -name '*.dll' -o -name '*.lib' \) -exec file '{}' \;
           if [ '${{ matrix.plat }}' != 'uwp' ]; then  # Missing: ucrtbased.dll, VCRUNTIME140D.dll, VCRUNTIME140D_APP.dll
             PATH="$PWD/bld/lib:$PATH"
-            bld/src/curl.exe --disable --version
+            bld/src/curl.exe --disable --version-all
           fi
 
       - name: 'build tests'
