@@ -168,9 +168,7 @@ jobs:
       CMAKE_GENERATOR: Ninja
     steps:
       - name: 'install prereqs'
-        run: |
-          sudo apt-get --quiet 2 --option Dpkg::Use-Pty=0 install --no-install-suggests --no-install-recommends \
-            ninja-build libpsl-dev libssl-dev
+        run: sudo apt-get -o Dpkg::Use-Pty=0 install ninja-build libpsl-dev libssl-dev
 
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
         with:
