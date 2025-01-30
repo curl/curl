@@ -352,7 +352,6 @@ if(ENABLE_ARES)
   if(CARES_CFLAGS)
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${CARES_CFLAGS}")
   endif()
-  add_definitions("-DCARES_NO_DEPRECATED")  # Ignore c-ares deprecation warnings
 endif()
 
 include(CurlSymbolHiding)
