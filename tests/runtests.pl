@@ -692,6 +692,10 @@ sub checksystemfeatures {
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
             $feature{"asyn-rr"} = $feat =~ /asyn-rr/;
         }
+        elsif($_ =~ /^Disabled: (.*)/i) {
+            $dis = $1;
+            @disabled = split(' ', $dis);
+        }
         #
         # Test harness currently uses a non-stunnel server in order to
         # run HTTP TLS-SRP tests required when curl is built with https
@@ -712,10 +716,6 @@ sub checksystemfeatures {
                 push @protocols, 'httptls';
                 push @protocols, 'httptls-ipv6';
             }
-        }
-        elsif($_ =~ /^Disabled: (.*)/i) {
-            $dis = $1;
-            @disabled = split(' ', $dis);
         }
     }
 
