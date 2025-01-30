@@ -164,7 +164,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_TARGET_WINDOWS_VERSION`:            Minimum target Windows version as hex string.
 - `CURL_TEST_BUNDLES`:                      Bundle `libtest` and `unittest` tests into single binaries. Default: `OFF`
 - `CURL_WERROR`:                            Turn compiler warnings into errors. Default: `OFF`
-- `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature: Default: =`ENABLE_DEBUG`
+- `ENABLE_CURLDEBUG`:                       Enable TrackMemory debug feature. Default: =`ENABLE_DEBUG`
 - `ENABLE_CURL_MANUAL`:                     Build the man page for curl and enable its `-M`/`--manual` option. Default: `ON`
 - `ENABLE_DEBUG`:                           Enable curl debug features (for developing curl itself). Default: `OFF`
 - `IMPORT_LIB_SUFFIX`:                      Import library suffix. Default: `_imp`
@@ -206,7 +206,7 @@ assumes that CMake generates `Makefile`:
 - `CURL_DISABLE_DIGEST_AUTH`:               Disable Digest authentication. Default: `OFF`
 - `CURL_DISABLE_DOH`:                       Disable DNS-over-HTTPS. Default: `OFF`
 - `CURL_DISABLE_FILE`:                      Disable FILE. Default: `OFF`
-- `CURL_DISABLE_FORM_API`:                  Disable **form-api**: Default: =`CURL_DISABLE_MIME`
+- `CURL_DISABLE_FORM_API`:                  Disable **form-api**. Default: =`CURL_DISABLE_MIME`
 - `CURL_DISABLE_FTP`:                       Disable FTP. Default: `OFF`
 - `CURL_DISABLE_GETOPTIONS`:                Disable `curl_easy_options` API for existing options to `curl_easy_setopt`. Default: `OFF`
 - `CURL_DISABLE_GOPHER`:                    Disable Gopher. Default: `OFF`
