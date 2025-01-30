@@ -302,7 +302,7 @@ jobs:
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+          sudo apt-get install -y \
             libtool autoconf automake pkgconf ninja-build \
             ${{ matrix.build.install_steps != 'skipall' && matrix.build.install_steps != 'skiprun' && 'stunnel4' || '' }} \
             libpsl-dev libbrotli-dev libzstd-dev \
@@ -315,7 +315,7 @@ jobs:
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
           sudo dpkg --add-architecture i386
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+          sudo apt-get install -y \
             libtool autoconf automake pkgconf stunnel4 \
             libpsl-dev:i386 libbrotli-dev:i386 libzstd-dev:i386 \
             ${{ matrix.build.install_packages }}
@@ -324,7 +324,7 @@ jobs:
       - name: 'install prereqs for pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          sudo apt-get install -y --no-install-suggests --no-install-recommends \
+          sudo apt-get install -y \
             apache2 apache2-dev libnghttp2-dev vsftpd
 
       - name: 'install dependencies'
@@ -584,7 +584,7 @@ jobs:
         run: |
           curl -sSf --compressed https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS.PUB | sudo tee /etc/apt/trusted.gpg.d/intel-sw.asc >/dev/null
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
-          sudo apt-get install -y --no-install-suggests --no-install-recommends intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
+          sudo apt-get install -y intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic
           source /opt/intel/oneapi/setvars.sh
           printenv >> $GITHUB_ENV
 
