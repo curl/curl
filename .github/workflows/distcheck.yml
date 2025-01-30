@@ -29,7 +29,7 @@ jobs:
           persist-credentials: false
 
       - name: 'remove preinstalled curl libcurl4{-doc}'
-        run: sudo apt-get purge curl libcurl4 libcurl4-doc
+        run: sudo apt-get --option Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
       - name: 'autoreconf'
         run: autoreconf -fi
@@ -148,7 +148,7 @@ jobs:
           persist-credentials: false
 
       - name: 'remove preinstalled curl libcurl4{-doc}'
-        run: sudo apt-get purge curl libcurl4 libcurl4-doc
+        run: sudo apt-get --option Dpkg::Use-Pty=0 purge curl libcurl4 libcurl4-doc
 
       - name: 'generate release tarballs'
         run: ./scripts/dmaketgz 9.10.11

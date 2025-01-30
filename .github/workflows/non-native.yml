@@ -420,8 +420,8 @@ jobs:
         timeout-minutes: 5
         run: |
           sudo rm -f /etc/apt/sources.list.d/microsoft-prod.list
-          sudo apt-get update
-          sudo apt-get install nasm
+          sudo apt-get --option Dpkg::Use-Pty=0 update
+          sudo apt-get --option Dpkg::Use-Pty=0 install nasm
 
       - name: 'vcpkg build'
         if: ${{ matrix.install }}
