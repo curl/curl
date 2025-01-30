@@ -37,7 +37,7 @@ endif()
 
 if(TEST_INTEGRATION_MODE STREQUAL "find_package")
   find_package(CURL REQUIRED CONFIG)
-  find_package(CURL REQUIRED CONFIG)  # test for double-inclusion
+  find_package(CURL REQUIRED CONFIG)  # Double-inclusion test
   foreach(result_var IN ITEMS
       CURL_FOUND
       CURL_SUPPORTS_HTTPS
