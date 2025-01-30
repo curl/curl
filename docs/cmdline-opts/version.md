@@ -10,6 +10,7 @@ Multi: custom
 See-also:
   - help
   - manual
+  - version-all
 Example:
   - --version
 ---
