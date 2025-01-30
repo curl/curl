@@ -466,7 +466,7 @@ void tool_version_info(bool show_disabled)
       free((void *)feat_ext);
     }
   }
-  if(show_disabled && disabled[0]) {
+  if(show_disabled) {
     printf("Disabled:");
     for(builtin = disabled; *builtin; ++builtin) {
       printf(" %s", *builtin);
