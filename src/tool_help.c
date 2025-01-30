@@ -400,7 +400,7 @@ static const char *disabled[]={
   NULL
 };
 
-void tool_version_info(bool show_disabled)
+void tool_version_info(bool show_all)
 {
   const char *const *builtin;
   if(is_debug())
@@ -470,7 +470,7 @@ void tool_version_info(bool show_disabled)
       free((void *)feat_ext);
     }
   }
-  if(show_disabled) {
+  if(show_all) {
     printf("Disabled:");
     for(builtin = disabled; *builtin; ++builtin) {
       printf(" %s", *builtin);
