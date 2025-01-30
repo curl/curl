@@ -315,11 +315,8 @@ static bool is_debug(void)
 }
 
 static const char *disabled[]={
-#ifdef CURL_DISABLE_BINDLOCAL
-  "bindlocal",
-#endif
-#ifdef CURL_DISABLE_COOKIES
-  "cookies",
+#ifdef CURL_DISABLE_AWS
+  "aws",
 #endif
 #ifdef CURL_DISABLE_BASIC_AUTH
   "basic-auth",
@@ -327,23 +324,38 @@ static const char *disabled[]={
 #ifdef CURL_DISABLE_BEARER_AUTH
   "bearer-auth",
 #endif
-#ifdef CURL_DISABLE_DIGEST_AUTH
-  "digest-auth",
+#ifdef CURL_DISABLE_BINDLOCAL
+  "bindlocal",
 #endif
-#ifdef CURL_DISABLE_NEGOTIATE_AUTH
-  "negotiate-auth",
-#endif
-#ifdef CURL_DISABLE_AWS
-  "aws",
+#ifdef CURL_DISABLE_COOKIES
+  "cookies",
 #endif
 #ifdef CURL_DISABLE_DOH
   "DoH",
 #endif
+#ifdef CURL_DISABLE_DIGEST_AUTH
+  "digest-auth",
+#endif
+#ifdef CURL_DISABLE_FORM_API
+  "form-api",
+#endif
 #ifdef CURL_DISABLE_HTTP_AUTH
   "HTTP-auth",
 #endif
+#ifdef CURL_DISABLE_HEADERS_API
+  "headers-api",
+#endif
+#if (SIZEOF_SIZE_T < 5)
+  "large-size",
+#endif
+#if (SIZEOF_TIME_T < 5)
+  "large-time",
+#endif
 #ifdef CURL_DISABLE_MIME
   "Mime",
+#endif
+#ifdef CURL_DISABLE_NEGOTIATE_AUTH
+  "negotiate-auth",
 #endif
 #ifdef CURL_DISABLE_NETRC
   "netrc",
@@ -353,6 +365,9 @@ static const char *disabled[]={
 #endif
 #ifdef CURL_DISABLE_PROXY
   "proxy",
+#endif
+#ifndef CURL_HAVE_SHA512_256
+  "sha512-256",
 #endif
 #ifdef CURL_DISABLE_SHUFFLE_DNS
   "shuffle-dns",
@@ -366,32 +381,17 @@ static const char *disabled[]={
 #ifndef ENABLE_WAKEUP
   "wakeup",
 #endif
-#ifdef CURL_DISABLE_HEADERS_API
-  "headers-api",
-#endif
-#ifndef USE_XATTR
-  "xattr",
-#endif
-#ifdef CURL_DISABLE_FORM_API
-  "form-api",
-#endif
-#if (SIZEOF_TIME_T < 5)
-  "large-time",
-#endif
-#if (SIZEOF_SIZE_T < 5)
-  "large-size",
-#endif
-#ifndef CURL_HAVE_SHA512_256
-  "sha512-256",
-#endif
 #ifdef _WIN32
+#ifndef CURL_CA_SEARCH_SAFE
+  "win32-ca-search-safe",
+#endif
 #if defined(CURL_WINDOWS_UWP) || \
   defined(CURL_DISABLE_CA_SEARCH) || defined(CURL_CA_SEARCH_SAFE)
   "win32-ca-searchpath",
 #endif
-#ifndef CURL_CA_SEARCH_SAFE
-  "win32-ca-search-safe",
 #endif
+#ifndef USE_XATTR
+  "xattr",
 #endif
   NULL
 };
