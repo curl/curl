@@ -631,9 +631,9 @@ jobs:
           fi
           ./scripts/singleuse.pl --unit ${libcurla}
 
-      - name: 'check curl -V output'
+      - name: 'curl version'
         if: ${{ matrix.build.make-custom-target != 'tidy' }}
-        run: ./src/curl -V
+        run: src/curl --version-all
 
       - name: 'cmake install'
         if: ${{ matrix.build.generate }}

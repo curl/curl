@@ -458,8 +458,8 @@ jobs:
             make V=1
           fi
 
-      - name: 'check curl -V output'
-        run: ./src/curl -V
+      - name: 'curl version'
+        run: src/curl --version-all
 
       - name: 'build tests'
         run: |
