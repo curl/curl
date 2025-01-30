@@ -324,8 +324,7 @@ jobs:
       - name: 'install prereqs for pytest'
         if: contains(matrix.build.install_steps, 'pytest')
         run: |
-          sudo apt-get --option Dpkg::Use-Pty=0 install \
-            apache2 apache2-dev libnghttp2-dev vsftpd
+          sudo apt-get --option Dpkg::Use-Pty=0 install apache2 apache2-dev libnghttp2-dev vsftpd
 
       - name: 'install dependencies'
         if: startsWith(matrix.build.container, 'alpine')
