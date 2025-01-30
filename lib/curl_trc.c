@@ -176,6 +176,11 @@ struct curl_trc_feat Curl_trc_feat_write = {
   "WRITE",
   CURL_LOG_LVL_NONE,
 };
+struct curl_trc_feat Curl_trc_feat_dns = {
+  "DNS",
+  CURL_LOG_LVL_NONE,
+};
+
 
 void Curl_trc_read(struct Curl_easy *data, const char *fmt, ...)
 {
@@ -195,6 +200,17 @@ void Curl_trc_write(struct Curl_easy *data, const char *fmt, ...)
     va_list ap;
     va_start(ap, fmt);
     trc_infof(data, &Curl_trc_feat_write, fmt, ap);
+    va_end(ap);
+  }
+}
+
+void Curl_trc_dns(struct Curl_easy *data, const char *fmt, ...)
+{
+  DEBUGASSERT(!strchr(fmt, '\n'));
+  if(Curl_trc_ft_is_verbose(data, &Curl_trc_feat_dns)) {
+    va_list ap;
+    va_start(ap, fmt);
+    trc_infof(data, &Curl_trc_feat_dns, fmt, ap);
     va_end(ap);
   }
 }
@@ -284,11 +300,11 @@ struct trc_feat_def {
 static struct trc_feat_def trc_feats[] = {
   { &Curl_trc_feat_read,      TRC_CT_NONE },
   { &Curl_trc_feat_write,     TRC_CT_NONE },
+  { &Curl_trc_feat_dns,       TRC_CT_NETWORK },
 #ifndef CURL_DISABLE_FTP
   { &Curl_trc_feat_ftp,       TRC_CT_PROTOCOL },
 #endif
 #ifndef CURL_DISABLE_DOH
-  { &Curl_doh_trc,            TRC_CT_NETWORK },
 #endif
 #ifndef CURL_DISABLE_SMTP
   { &Curl_trc_feat_smtp,      TRC_CT_PROTOCOL },
@@ -395,6 +411,10 @@ static CURLcode trc_opt(const char *config)
       trc_apply_level_by_category(TRC_CT_NETWORK, lvl);
     else if(Curl_str_casecompare(&out, "proxy"))
       trc_apply_level_by_category(TRC_CT_PROXY, lvl);
+    else if(Curl_str_casecompare(&out, "doh")) {
+      struct Curl_str dns = { "dns", 3 };
+      trc_apply_level_by_name(&dns, lvl);
+    }
     else
       trc_apply_level_by_name(&out, lvl);
 

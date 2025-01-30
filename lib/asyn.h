@@ -60,6 +60,7 @@ struct thread_data {
   timediff_t interval_end;
   struct curltime start;
   struct thread_sync_data tsd;
+  CURLcode result; /* CURLE_OK or error handling response */
 #if defined(USE_HTTPSRR) && defined(USE_ARES)
   struct Curl_https_rrinfo hinfo;
   ares_channel channel;
@@ -74,6 +75,7 @@ struct thread_data {
   struct Curl_addrinfo *temp_ai; /* intermediary result while fetching c-ares
                                     parts */
   int last_status;
+  CURLcode result; /* CURLE_OK or error handling response */
 #ifndef HAVE_CARES_GETADDRINFO
   struct curltime happy_eyeballs_dns_time; /* when this timer started, or 0 */
 #endif
