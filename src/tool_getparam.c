@@ -347,6 +347,7 @@ static const struct LongShort aliases[]= {
   {"variable",                   ARG_STRG, ' ', C_VARIABLE},
   {"verbose",                    ARG_BOOL, 'v', C_VERBOSE},
   {"version",                    ARG_BOOL, 'V', C_VERSION},
+  {"version-all",                ARG_BOOL, ' ', C_VERSION_ALL},
   {"vlan-priority",              ARG_STRG, ' ', C_VLAN_PRIORITY},
 #ifdef USE_WATT32
   {"wdebug",                     ARG_BOOL, ' ', C_WDEBUG},
@@ -2791,6 +2792,10 @@ ParameterError getparameter(const char *flag, /* f or -long-flag */
       if(toggle)    /* --no-version yields no output! */
         err = PARAM_VERSION_INFO_REQUESTED;
       break;
+    case C_VERSION_ALL: /* --version-all */
+      if(toggle)        /* --no-version-all yields no output! */
+        err = PARAM_VERSION_ALL_INFO_REQUESTED;
+      break;
     case C_WRITE_OUT: /* --write-out */
       err = parse_writeout(global, config, nextarg);
       break;
@@ -2947,6 +2952,7 @@ ParameterError parse_args(struct GlobalConfig *global, int argc,
   if(result && result != PARAM_HELP_REQUESTED &&
      result != PARAM_MANUAL_REQUESTED &&
      result != PARAM_VERSION_INFO_REQUESTED &&
+     result != PARAM_VERSION_ALL_INFO_REQUESTED &&
      result != PARAM_ENGINES_REQUESTED &&
      result != PARAM_CA_EMBED_REQUESTED) {
     const char *reason = param2text(result);
