@@ -400,7 +400,7 @@ static void MSH3_CALL msh3_header_received(MSH3_REQUEST *Request,
   msh3_lock_acquire(&stream->recv_lock);
 
   if((hd->NameLength == 7) &&
-     !strncmp(HTTP_PSEUDO_STATUS, (char *)hd->Name, 7)) {
+     !strncmp(HTTP_PSEUDO_STATUS, (const char *)hd->Name, 7)) {
     char line[14]; /* status line is always 13 characters long */
     size_t ncopy;
 
@@ -754,12 +754,13 @@ static bool cf_msh3_data_pending(struct Curl_cfilter *cf,
   (void)cf;
   if(stream && stream->req) {
     msh3_lock_acquire(&stream->recv_lock);
-    CURL_TRC_CF((struct Curl_easy *)data, cf, "data pending = %zu",
+    CURL_TRC_CF((struct Curl_easy *)CURL_UNCONST(data), cf,
+                "data pending = %zu",
                 Curl_bufq_len(&stream->recvbuf));
     pending = !Curl_bufq_is_empty(&stream->recvbuf);
     msh3_lock_release(&stream->recv_lock);
     if(pending)
-      h3_drain_stream(cf, (struct Curl_easy *)data);
+      h3_drain_stream(cf, (struct Curl_easy *)CURL_UNCONST(data));
   }
 
   CF_DATA_RESTORE(cf, save);

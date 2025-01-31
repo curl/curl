@@ -866,7 +866,7 @@ CURLcode Curl_ws_accept(struct Curl_easy *data,
   else { /* !connect_only */
     /* And pass any additional data to the writers */
     if(nread) {
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)mem, nread);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, mem, nread);
     }
   }
   k->upgr101 = UPGR101_RECEIVED;
@@ -1062,7 +1062,7 @@ static CURLcode ws_flush(struct Curl_easy *data, struct websocket *ws,
       }
 #endif
       if(blocking) {
-        result = ws_send_raw_blocking(data, ws, (char *)out, outlen);
+        result = ws_send_raw_blocking(data, ws, (const char *)out, outlen);
         n = result ? 0 : outlen;
       }
       else if(data->set.connect_only || Curl_is_in_callback(data))

@@ -175,6 +175,12 @@
 /* system header files in our config files, avoid this at any cost. */
 /* ================================================================ */
 
+#ifdef HAVE_LIBZ
+#  ifndef ZLIB_CONST
+#  define ZLIB_CONST  /* Use z_const. Supported by v1.2.5.2 and upper. */
+#  endif
+#endif
+
 /*
  * AIX 4.3 and newer needs _THREAD_SAFE defined to build
  * proper reentrant code. Others may also need it.

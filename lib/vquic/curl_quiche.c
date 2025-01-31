@@ -662,7 +662,8 @@ static CURLcode recv_pkt(const unsigned char *pkt, size_t pktlen,
   recv_info.from = (struct sockaddr *)remote_addr;
   recv_info.from_len = remote_addrlen;
 
-  nread = quiche_conn_recv(ctx->qconn, (unsigned char *)pkt, pktlen,
+  nread = quiche_conn_recv(ctx->qconn,
+                           (unsigned char *)CURL_UNCONST(pkt), pktlen,
                            &recv_info);
   if(nread < 0) {
     if(QUICHE_ERR_DONE == nread) {
@@ -960,7 +961,7 @@ static ssize_t cf_quiche_send_body(struct Curl_cfilter *cf,
   ssize_t nwritten;
 
   nwritten = quiche_h3_send_body(ctx->h3c, ctx->qconn, stream->id,
-                                 (uint8_t *)buf, len, eos);
+                                 (uint8_t *)CURL_UNCONST(buf), len, eos);
   if(nwritten == QUICHE_H3_ERR_DONE || (nwritten == 0 && len > 0)) {
     /* Blocked on flow control and should HOLD sending. But when do we open
      * again? */
@@ -1337,8 +1338,7 @@ static const struct alpn_spec ALPN_SPEC_H3 = {
     10 * QUIC_MAX_STREAMS * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_max_stream_window(ctx->cfg, 10 * H3_STREAM_WINDOW_SIZE);
   quiche_config_set_application_protos(ctx->cfg,
-                                       (uint8_t *)
-                                       QUICHE_H3_APPLICATION_PROTOCOL,
+                       (uint8_t *)CURL_UNCONST(QUICHE_H3_APPLICATION_PROTOCOL),
                                        sizeof(QUICHE_H3_APPLICATION_PROTOCOL)
                                        - 1);
 

@@ -134,7 +134,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
     if(cw_next)
       result = Curl_cwriter_write(data, cw_next, CLIENTWRITE_BODY, buf, blen);
     else
-      result = Curl_client_write(data, CLIENTWRITE_BODY, (char *)buf, blen);
+      result = Curl_client_write(data, CLIENTWRITE_BODY, buf, blen);
     if(result) {
       ch->state = CHUNK_FAILED;
       ch->last_code = CHUNKE_PASSTHRU_ERROR;
@@ -213,8 +213,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
           result = Curl_cwriter_write(data, cw_next, CLIENTWRITE_BODY,
                                       buf, piece);
         else
-          result = Curl_client_write(data, CLIENTWRITE_BODY,
-                                    (char *)buf, piece);
+          result = Curl_client_write(data, CLIENTWRITE_BODY, buf, piece);
         if(result) {
           ch->state = CHUNK_FAILED;
           ch->last_code = CHUNKE_PASSTHRU_ERROR;
@@ -258,7 +257,7 @@ static CURLcode httpchunk_readwrite(struct Curl_easy *data,
 
         if(tr) {
           size_t trlen;
-          result = Curl_dyn_addn(&ch->trailer, (char *)STRCONST("\x0d\x0a"));
+          result = Curl_dyn_addn(&ch->trailer, STRCONST("\x0d\x0a"));
           if(result) {
             ch->state = CHUNK_FAILED;
             ch->last_code = CHUNKE_OUT_OF_MEMORY;

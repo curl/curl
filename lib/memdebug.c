@@ -229,7 +229,7 @@ ALLOC_FUNC wchar_t *curl_dbg_wcsdup(const wchar_t *str,
 
   if(source)
     curl_dbg_log("MEM %s:%d wcsdup(%p) (%zu) = %p\n",
-                source, line, (void *)str, bsiz, (void *)mem);
+                source, line, (const void *)str, bsiz, (void *)mem);
 
   return mem;
 }

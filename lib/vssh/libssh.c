@@ -2687,7 +2687,7 @@ static void sftp_quote(struct Curl_easy *data)
       sshc->nextstate = SSH_NO_STATE;
       return;
     }
-    Curl_debug(data, CURLINFO_HEADER_OUT, (char *) "PWD\n", 4);
+    Curl_debug(data, CURLINFO_HEADER_OUT, "PWD\n", 4);
     Curl_debug(data, CURLINFO_HEADER_IN, tmp, strlen(tmp));
 
     /* this sends an FTP-like "header" to the header callback so that the

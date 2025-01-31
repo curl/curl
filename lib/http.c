@@ -3541,7 +3541,7 @@ static CURLcode http_write_header(struct Curl_easy *data,
 
   /* now, only output this if the header AND body are requested:
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   writetype = CLIENTWRITE_HEADER |
     ((data->req.httpcode/100 == 1) ? CLIENTWRITE_1XX : 0);
@@ -3997,7 +3997,7 @@ static CURLcode http_rw_hd(struct Curl_easy *data,
   /*
    * Taken in one (more) header. Write it to the client.
    */
-  Curl_debug(data, CURLINFO_HEADER_IN, (char *)hd, hdlen);
+  Curl_debug(data, CURLINFO_HEADER_IN, hd, hdlen);
 
   if(k->httpcode/100 == 1)
     writetype |= CLIENTWRITE_1XX;
@@ -4198,7 +4198,7 @@ CURLcode Curl_http_write_resp(struct Curl_easy *data,
     flags = CLIENTWRITE_BODY;
     if(is_eos)
       flags |= CLIENTWRITE_EOS;
-    result = Curl_client_write(data, flags, (char *)buf, blen);
+    result = Curl_client_write(data, flags, buf, blen);
   }
 out:
   return result;

@@ -212,16 +212,8 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
     if(!word || (*word == (char)0)) {
       infof(data, "lookup word is missing");
-      word = (char *)"default";
     }
-    if(!database || (*database == (char)0)) {
-      database = (char *)"!";
-    }
-    if(!strategy || (*strategy == (char)0)) {
-      strategy = (char *)".";
-    }
-
-    eword = unescape_word(word);
+    eword = unescape_word((!word || (*word == (char)0)) ? "default" : word);
     if(!eword) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -234,8 +226,8 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
                    "%s "    /* strategy */
                    "%s\r\n" /* word */
                    "QUIT\r\n",
-                   database,
-                   strategy,
+                   (!database || (*database == (char)0)) ? "!" : database,
+                   (!strategy || (*strategy == (char)0)) ? "." : strategy,
                    eword);
 
     if(result) {
@@ -263,13 +255,8 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
 
     if(!word || (*word == (char)0)) {
       infof(data, "lookup word is missing");
-      word = (char *)"default";
     }
-    if(!database || (*database == (char)0)) {
-      database = (char *)"!";
-    }
-
-    eword = unescape_word(word);
+    eword = unescape_word((!word || (*word == (char)0)) ? "default" : word);
     if(!eword) {
       result = CURLE_OUT_OF_MEMORY;
       goto error;
@@ -281,7 +268,7 @@ static CURLcode dict_do(struct Curl_easy *data, bool *done)
                    "%s "     /* database */
                    "%s\r\n"  /* word */
                    "QUIT\r\n",
-                   database,
+                   (!database || (*database == (char)0)) ? "!" : database,
                    eword);
 
     if(result) {

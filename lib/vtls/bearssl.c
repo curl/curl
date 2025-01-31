@@ -153,7 +153,7 @@ static CURLcode load_cafile(struct cafile_source *source,
     }
     else if(source->type == CAFILE_SOURCE_BLOB) {
       n = source->len;
-      p = (unsigned char *) source->data;
+      p = (const unsigned char *) source->data;
     }
     while(n) {
       pushed = br_pem_decoder_push(&pc, p, n);
@@ -338,7 +338,7 @@ static unsigned x509_end_chain(const br_x509_class **ctx)
 static const br_x509_pkey *x509_get_pkey(const br_x509_class *const *ctx,
                                          unsigned *usages)
 {
-  struct x509_context *x509 = (struct x509_context *)ctx;
+  struct x509_context *x509 = (struct x509_context *)CURL_UNCONST(ctx);
 
   if(!x509->verifypeer) {
     /* Nothing in the chain is verified, just return the public key of the
@@ -611,12 +611,12 @@ static CURLcode bearssl_connect_step1(struct Curl_cfilter *cf,
 
   if(ssl_config->primary.cache_session) {
     struct Curl_ssl_session *sc_session = NULL;
-    const br_ssl_session_parameters *session;
 
     ret = Curl_ssl_scache_take(cf, data, connssl->peer.scache_key,
                                &sc_session);
     if(!ret && sc_session && sc_session->sdata && sc_session->sdata_len) {
-      session = (br_ssl_session_parameters *)(void *)sc_session->sdata;
+      const br_ssl_session_parameters *session;
+      session = (const br_ssl_session_parameters *)sc_session->sdata;
       br_ssl_engine_set_session_parameters(&backend->ctx.eng, session);
       session_set = 1;
       infof(data, "BearSSL: reusing session ID");
@@ -729,7 +729,7 @@ static CURLcode bearssl_run_until(struct Curl_cfilter *cf,
       return CURLE_OK;
     if(state & BR_SSL_SENDREC) {
       buf = br_ssl_engine_sendrec_buf(&backend->ctx.eng, &len);
-      ret = Curl_conn_cf_send(cf->next, data, (char *)buf, len, FALSE,
+      ret = Curl_conn_cf_send(cf->next, data, (const char *)buf, len, FALSE,
                               &result);
       CURL_TRC_CF(data, cf, "ssl_send(len=%zu) -> %zd, %d", len, ret, result);
       if(ret <= 0) {

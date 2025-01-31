@@ -2101,7 +2101,7 @@ static char *detect_proxy(struct Curl_easy *data,
    * checked if the lowercase versions do not exist.
    */
   char proxy_env[20];
-  char *envp = proxy_env;
+  const char *envp = proxy_env;
 #ifdef CURL_DISABLE_VERBOSE_STRINGS
   (void)data;
 #endif
@@ -2142,10 +2142,10 @@ static char *detect_proxy(struct Curl_easy *data,
     }
     if(!proxy) {
 #endif
-      envp = (char *)"all_proxy";
+      envp = "all_proxy";
       proxy = curl_getenv(envp); /* default proxy to use */
       if(!proxy) {
-        envp = (char *)"ALL_PROXY";
+        envp = "ALL_PROXY";
         proxy = curl_getenv(envp);
       }
 #ifndef CURL_DISABLE_WEBSOCKETS

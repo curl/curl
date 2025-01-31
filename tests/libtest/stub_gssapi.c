@@ -218,7 +218,7 @@ OM_uint32 gss_init_sec_context(OM_uint32 *min,
   /* Note: this is using the *real* snprintf() and not the curl provided
      one */
   used = (size_t) snprintf(token, length, "%s:%s:%d:", creds,
-                           (char *) target_name, ctx->sent);
+                           (const char *)target_name, ctx->sent);
 
   if(used >= length) {
     free(token);

@@ -173,7 +173,7 @@ void inithelpscan(struct scan_ctx *ctx,
   memset(ctx->rbuf, 0, sizeof(ctx->rbuf));
 }
 
-bool helpscan(unsigned char *buf, size_t len, struct scan_ctx *ctx)
+bool helpscan(const unsigned char *buf, size_t len, struct scan_ctx *ctx)
 {
   size_t i;
   for(i = 0; i < len; i++) {

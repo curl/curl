@@ -324,7 +324,7 @@ static struct tftphdr *r_init(void)
 /* Have emptied current buffer by sending to net and getting ack.
    Free it and return next buffer filled with data.
  */
-static int readit(struct testcase *test, struct tftphdr **dpp,
+static int readit(struct testcase *test, struct tftphdr * volatile *dpp,
                   int convert /* if true, convert to ASCII */)
 {
   struct bf *b;
@@ -1163,7 +1163,7 @@ static void sendtftp(struct testcase *test, const struct formats *pf)
   mysignal(SIGALRM, timer);
 #endif
   do {
-    size = readit(test, (struct tftphdr **)&sdp, pf->f_convert);
+    size = readit(test, (struct tftphdr * volatile *)&sdp, pf->f_convert);
     if(size < 0) {
       nak(errno + 100);
       return;

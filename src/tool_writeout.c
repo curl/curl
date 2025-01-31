@@ -427,7 +427,7 @@ static int writeString(FILE *stream, const struct writeoutvar *wovar,
     if(use_json)
       fprintf(stream, "\"%s\":null", wovar->name);
   }
-  curl_free((char *)freestr);
+  curl_free((char *)CURL_UNCONST(freestr));
 
   curlx_dyn_free(&buf);
   return 1; /* return 1 if anything was written */

@@ -1066,15 +1066,15 @@ CURLcode telrcv(struct Curl_easy *data,
   int startwrite = -1;
   struct TELNET *tn = data->req.p.telnet;
 
-#define startskipping()                                       \
-  if(startwrite >= 0) {                                       \
-    result = Curl_client_write(data,                          \
-                               CLIENTWRITE_BODY,              \
-                               (char *)&inbuf[startwrite],    \
-                               in-startwrite);                \
-    if(result)                                                \
-      return result;                                          \
-  }                                                           \
+#define startskipping()                                          \
+  if(startwrite >= 0) {                                          \
+    result = Curl_client_write(data,                             \
+                               CLIENTWRITE_BODY,                 \
+                               (const char *)&inbuf[startwrite], \
+                               in-startwrite);                   \
+    if(result)                                                   \
+      return result;                                             \
+  }                                                              \
   startwrite = -1
 
 #define writebyte() \

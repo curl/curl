@@ -286,7 +286,7 @@ struct Curl_addrinfo *Curl_ipv4_resolve_r(const char *hostname,
    * getaddrinfo() nor gethostbyname_r() function or for which
    * gethostbyname() is the preferred one.
    */
-  h = gethostbyname((void *)hostname);
+  h = gethostbyname(CURL_UNCONST(hostname));
 #endif /* (HAVE_GETADDRINFO && HAVE_GETADDRINFO_THREADSAFE) ||
            HAVE_GETHOSTBYNAME_R */
 

@@ -43,7 +43,7 @@ int getfiletime(const char *filename, struct GlobalConfig *global,
    access to a 64-bit type we can bypass stat and get the times directly. */
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
   HANDLE hfile;
-  TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar((char *)filename);
+  TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar(filename);
 
   hfile = CreateFile(tchar_filename, FILE_READ_ATTRIBUTES,
                       (FILE_SHARE_READ | FILE_SHARE_WRITE |
@@ -97,7 +97,7 @@ void setfiletime(curl_off_t filetime, const char *filename,
    access to a 64-bit type we can bypass utime and set the times directly. */
 #if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
     HANDLE hfile;
-    TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar((char *)filename);
+    TCHAR *tchar_filename = curlx_convert_UTF8_to_tchar(filename);
 
     /* 910670515199 is the maximum Unix filetime that can be used as a
        Windows FILETIME without overflow: 30827-12-31T23:59:59. */

@@ -923,7 +923,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     }
 
     /* path has been allocated large enough to hold this */
-    path = (char *)&url[5];
+    path = &url[5];
     pathlen = urllen - 5;
 
     u->scheme = strdup("file");
@@ -1221,7 +1221,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     if(!(flags & CURLU_PATH_AS_IS)) {
       /* remove ../ and ./ sequences according to RFC3986 */
       char *dedot;
-      int err = dedotdotify((char *)path, pathlen, &dedot);
+      int err = dedotdotify(path, pathlen, &dedot);
       if(err) {
         result = CURLUE_OUT_OF_MEMORY;
         goto fail;
@@ -1399,7 +1399,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
     break;
   case CURLUPART_URL: {
     char *url;
-    char *scheme;
+    const char *scheme;
     char *options = u->options;
     char *port = u->port;
     char *allochost = NULL;
@@ -1426,7 +1426,7 @@ CURLUcode curl_url_get(const CURLU *u, CURLUPart what,
       if(u->scheme)
         scheme = u->scheme;
       else if(flags & CURLU_DEFAULT_SCHEME)
-        scheme = (char *) DEFAULT_SCHEME;
+        scheme = DEFAULT_SCHEME;
       else
         return CURLUE_NO_SCHEME;
 
@@ -1887,7 +1887,7 @@ nomem:
             bad = TRUE;
           free(decoded);
         }
-        else if(hostname_check(u, (char *)newp, n))
+        else if(hostname_check(u, (char *)CURL_UNCONST(newp), n))
           bad = TRUE;
         if(bad) {
           Curl_dyn_free(&enc);
@@ -1897,7 +1897,7 @@ nomem:
     }
 
     free(*storep);
-    *storep = (char *)newp;
+    *storep = (char *)CURL_UNCONST(newp);
   }
   return CURLUE_OK;
 }

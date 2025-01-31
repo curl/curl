@@ -65,8 +65,18 @@
 #include <unistd.h>
 #endif
 
-#ifdef USE_WOLFSSL
+#if defined(HAVE_STDINT_H) || defined(USE_WOLFSSL)
 #include <stdint.h>
+#endif
+
+/* Macro to strip 'const' without triggering a compiler warning.
+   Use it for APIs that do not or cannot support the const qualifier. */
+#ifdef HAVE_STDINT_H
+#  define CURL_UNCONST(p) ((void *)(uintptr_t)(const void *)(p))
+#elif defined(_WIN32)  /* for VS2008 */
+#  define CURL_UNCONST(p) ((void *)(ULONG_PTR)(const void *)(p))
+#else
+#  define CURL_UNCONST(p) ((void *)(p))  /* Fall back to simple cast */
 #endif
 
 #ifdef USE_SCHANNEL
@@ -168,11 +178,11 @@ struct timeval {
 #ifdef __minix
 /* Minix does not support send on TCP sockets */
 #define swrite(x,y,z) (ssize_t)write((SEND_TYPE_ARG1)(x), \
-                                     (SEND_TYPE_ARG2)(y), \
+                                     (SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                      (SEND_TYPE_ARG3)(z))
 #elif defined(HAVE_SEND)
 #define swrite(x,y,z) (ssize_t)send((SEND_TYPE_ARG1)(x), \
-                                    (SEND_QUAL_ARG2 SEND_TYPE_ARG2)(y), \
+                              (SEND_QUAL_ARG2 SEND_TYPE_ARG2)CURL_UNCONST(y), \
                                     (SEND_TYPE_ARG3)(z), \
                                     (SEND_TYPE_ARG4)(SEND_4TH_ARG))
 #else /* HAVE_SEND */

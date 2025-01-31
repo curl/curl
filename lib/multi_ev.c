@@ -548,7 +548,8 @@ void Curl_multi_ev_expire_xfers(struct Curl_multi *multi,
      asked to get removed, so thus we better survive stray socket actions
      and just move on. */
   if(entry) {
-    Curl_hash_offt_visit(&entry->xfers, mev_xfer_expire_cb, (void *)nowp);
+    Curl_hash_offt_visit(&entry->xfers, mev_xfer_expire_cb,
+                         CURL_UNCONST(nowp));
 
     if(Curl_hash_offt_count(&entry->conns))
       *run_cpool = TRUE;

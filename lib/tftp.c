@@ -520,9 +520,14 @@ static CURLcode tftp_send_first(struct tftp_state_data *state,
 
     /* the typecase for the 3rd argument is mostly for systems that do
        not have a size_t argument, like older unixes that want an 'int' */
+#ifdef __AMIGA__
+#define CURL_SENDTO_ARG5(x) CURL_UNCONST(x)
+#else
+#define CURL_SENDTO_ARG5(x) (x)
+#endif
     senddata = sendto(state->sockfd, (void *)state->spacket.data,
                       (SEND_TYPE_ARG3)sbytes, 0,
-                     (struct sockaddr *)&data->conn->remote_addr->curl_sa_addr,
+                      CURL_SENDTO_ARG5(&data->conn->remote_addr->curl_sa_addr),
                       (curl_socklen_t)data->conn->remote_addr->addrlen);
     if(senddata != (ssize_t)sbytes) {
       char buffer[STRERROR_LEN];
