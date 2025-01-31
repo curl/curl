@@ -247,6 +247,12 @@ static const char *getASN1Element_(struct Curl_asn1Element *elem,
   return elem->end;
 }
 
+static const char *getASN1Element(struct Curl_asn1Element *elem,
+                                  const char *beg, const char *end)
+{
+  return getASN1Element_(elem, beg, end, 0);
+}
+
 #ifdef WANT_EXTRACT_CERTINFO
 
 /*
@@ -261,12 +267,6 @@ static const struct Curl_OID *searchOID(const char *oid)
       return op;
 
   return NULL;
-}
-
-static const char *getASN1Element(struct Curl_asn1Element *elem,
-                                  const char *beg, const char *end)
-{
-  return getASN1Element_(elem, beg, end, 0);
 }
 
 #ifdef UNITTESTS
