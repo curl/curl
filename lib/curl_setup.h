@@ -28,6 +28,13 @@
 #define CURL_NO_OLDIES
 #endif
 
+/* Allow a way to disable these picky warnings. We appreciate reports of
+   issues that may need disabling them. */
+#if defined(CURL_NO_WARN_CAST_QUAL) && \
+  (defined(__GNUC__) || defined(__clang__))
+#pragma GCC diagnostic ignored "-Wcast-qual"
+#endif
+
 /* Tell "curl/curl.h" not to include "curl/mprintf.h" */
 #define CURL_SKIP_INCLUDE_MPRINTF
 
