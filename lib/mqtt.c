@@ -722,10 +722,10 @@ end:
 
 static CURLcode mqtt_do(struct Curl_easy *data, bool *done)
 {
+  struct MQTT *mq = data->req.p.mqtt;
   CURLcode result = CURLE_OK;
   *done = FALSE; /* unconditionally */
 
-  struct MQTT *mq = data->req.p.mqtt;
   mq->lastTime = Curl_now();
   mq->pingsent = 0;
 
