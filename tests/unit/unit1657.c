@@ -42,13 +42,13 @@ static void unit_stop(void)
 #define ARRAYSIZE(A) (sizeof(A)/sizeof((A)[0]))
 #endif
 
-struct test_spec {
-  void (*setbuf)(struct test_spec *spec, struct dynbuf *buf);
+struct test1657_spec {
+  void (*setbuf)(struct test1657_spec *spec, struct dynbuf *buf);
   size_t n;
   CURLcode exp_result;
 };
 
-static void make_nested(struct test_spec *spec, struct dynbuf *buf)
+static void make_nested(struct test1657_spec *spec, struct dynbuf *buf)
 {
   size_t i;
   char open_undef[] = { 0x32,  0x80 };
@@ -62,14 +62,14 @@ static void make_nested(struct test_spec *spec, struct dynbuf *buf)
   }
 }
 
-static struct test_spec test_specs[] = {
+static struct test1657_spec test1657_specs[] = {
   { make_nested, 3, CURLE_OK },
   { make_nested, 16, CURLE_OK },
   { make_nested, 17, CURLE_BAD_FUNCTION_ARGUMENT },
   { make_nested, 1024, CURLE_BAD_FUNCTION_ARGUMENT },
 };
 
-static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *buf)
+static bool do_test(struct test1657_spec *spec, size_t i, struct dynbuf *buf)
 {
   CURLcode result;
   struct Curl_asn1Element elem;
@@ -101,8 +101,8 @@ UNITTEST_START
     return TEST_ERR_MAJOR_BAD;
   }
 
-  for(i = 0; i < ARRAYSIZE(test_specs); ++i) {
-    if(!do_test(&test_specs[i], i, &dbuf))
+  for(i = 0; i < ARRAYSIZE(test1657_specs); ++i) {
+    if(!do_test(&test1657_specs[i], i, &dbuf))
       all_ok = FALSE;
   }
   fail_unless(all_ok, "some tests of Curl_x509_getASN1Element() fails");
