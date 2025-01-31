@@ -43,23 +43,29 @@ static void unit_stop(void)
 #endif
 
 struct test1657_spec {
-  void (*setbuf)(struct test1657_spec *spec, struct dynbuf *buf);
+  CURLcode (*setbuf)(struct test1657_spec *spec, struct dynbuf *buf);
   size_t n;
   CURLcode exp_result;
 };
 
-static void make1657_nested(struct test1657_spec *spec, struct dynbuf *buf)
+static CURLcode make1657_nested(struct test1657_spec *spec, struct dynbuf *buf)
 {
+  CURLcode r;
   size_t i;
-  char open_undef[] = { 0x32,  0x80 };
-  char close_undef[] = { 0x00,  0x00 };
+  unsigned char open_undef[] = { 0x32,  0x80 };
+  unsigned char close_undef[] = { 0x00,  0x00 };
 
   for(i = 0; i < spec->n; ++i) {
-    (void)Curl_dyn_addn(buf, open_undef, sizeof(open_undef));
+    r = Curl_dyn_addn(buf, open_undef, sizeof(open_undef));
+    if(r)
+      return r;
   }
   for(i = 0; i < spec->n; ++i) {
-    (void)Curl_dyn_addn(buf, close_undef, sizeof(close_undef));
+    r = Curl_dyn_addn(buf, close_undef, sizeof(close_undef));
+    if(r)
+      return r;
   }
+  return CURLE_OK;
 }
 
 static struct test1657_spec test1657_specs[] = {
@@ -78,7 +84,11 @@ static bool do_test1657(struct test1657_spec *spec, size_t i,
 
   memset(&elem, 0, sizeof(elem));
   Curl_dyn_reset(buf);
-  spec->setbuf(spec, buf);
+  result = spec->setbuf(spec, buf);
+  if(result) {
+    fprintf(stderr, "test %zu: error setting buf %d\n", i, result);
+    return FALSE;
+  }
   in = Curl_dyn_ptr(buf);
   result = Curl_x509_getASN1Element(&elem, in, in + Curl_dyn_len(buf));
   if(result != spec->exp_result) {
