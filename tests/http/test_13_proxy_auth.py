@@ -163,4 +163,3 @@ class TestProxyAuth:
             '--negotiate', '--proxy-user', 'proxy:proxy'
         ])
         r1.check_response(count=1, http_status=200)
-
