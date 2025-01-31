@@ -664,8 +664,18 @@ CURLcode Curl_cf_https_setup(struct Curl_easy *data,
 
   if(conn->bits.tls_enable_alpn) {
 #ifdef USE_HTTPSRR
+    /* Is there a HTTPSRR and if so, do its ALPNs it apply here?
+     * We are here after having selected a connection to a host+port and
+     * can no longer change that. Any HTTPSRR advice for other hosts and ports
+     * we need to ignore. */
     if(conn->dns_entry && conn->dns_entry->hinfo &&
-       !conn->dns_entry->hinfo->no_def_alpn) {
+       !conn->dns_entry->hinfo->no_def_alpn &&  /* ALPNs are defaults */
+       (!conn->dns_entry->hinfo->target ||      /* for same host */
+        !conn->dns_entry->hinfo->target[0] ||
+        (conn->dns_entry->hinfo->target[0] == '.' &&
+         !conn->dns_entry->hinfo->target[0])) &&
+       (conn->dns_entry->hinfo->port < 0 ||    /* for same port */
+        conn->dns_entry->hinfo->port == conn->remote_port)) {
       size_t i;
       for(i = 0; i < CURL_ARRAYSIZE(conn->dns_entry->hinfo->alpns) &&
                  alpn_count < CURL_ARRAYSIZE(alpn_ids); ++i) {
