@@ -145,15 +145,15 @@ CURLcode Curl_output_digest(struct Curl_easy *data,
   */
 
   if(authp->iestyle) {
-    tmp = strchr((char *)uripath, '?');
+    tmp = strchr((const char *)uripath, '?');
     if(tmp) {
-      size_t urilen = tmp - (char *)uripath;
+      size_t urilen = tmp - (const char *)uripath;
       /* typecast is fine here since the value is always less than 32 bits */
       path = (unsigned char *) aprintf("%.*s", (int)urilen, uripath);
     }
   }
   if(!tmp)
-    path = (unsigned char *) strdup((char *) uripath);
+    path = (unsigned char *) strdup((const char *) uripath);
 
   if(!path)
     return CURLE_OUT_OF_MEMORY;

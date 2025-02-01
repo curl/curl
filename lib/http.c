@@ -4198,7 +4198,7 @@ CURLcode Curl_http_write_resp(struct Curl_easy *data,
     flags = CLIENTWRITE_BODY;
     if(is_eos)
       flags |= CLIENTWRITE_EOS;
-    result = Curl_client_write(data, flags, (char *)buf, blen);
+    result = Curl_client_write(data, flags, buf, blen);
   }
 out:
   return result;
