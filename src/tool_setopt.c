@@ -252,7 +252,7 @@ static char *c_escape(const char *str, curl_off_t len)
                                 /* Octal escape to avoid >2 digit hex. */
                                 (len > 1 && ISXDIGIT(s[1])) ?
                                   "\\%03o" : "\\x%02x",
-                                (unsigned int) *(unsigned char *) s);
+                                (unsigned int) *(const unsigned char *) s);
       }
     }
   }
