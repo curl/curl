@@ -924,7 +924,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     }
 
     /* path has been allocated large enough to hold this */
-    path = (char *)&url[5];
+    path = &url[5];
     pathlen = urllen - 5;
 
     u->scheme = strdup("file");
