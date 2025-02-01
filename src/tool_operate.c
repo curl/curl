@@ -680,14 +680,16 @@ static CURLcode post_per_transfer(struct GlobalConfig *global,
          !config->use_ascii && !per->uploadfile &&
          result != CURLE_WRITE_ERROR && result != CURLE_RANGE_ERROR &&
          outs->bytes > 0 && outs->filename && outs->stream) {
-        const char *scheme;
         long response = 0;
+        const char *method = NULL, *scheme = NULL;
 
+        curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_METHOD, &method);
         curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &response);
         curl_easy_getinfo(curl, CURLINFO_SCHEME, &scheme);
         scheme = proto_token(scheme);
 
         if((scheme == proto_http || scheme == proto_https) &&
+           method && !strcmp(method, "GET") &&
            response == (config->resume_from ? 206 : 200)) {
           notef(config->global,
                 "Keeping %" CURL_FORMAT_CURL_OFF_T " bytes",
