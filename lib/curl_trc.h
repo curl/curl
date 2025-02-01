@@ -52,7 +52,7 @@ CURLcode Curl_trc_opt(const char *config);
 
 /* the function used to output verbose information */
 void Curl_debug(struct Curl_easy *data, curl_infotype type,
-                char *ptr, size_t size);
+                const char *ptr, size_t size);
 
 /**
  * Output a failure message on registered callbacks for transfer.

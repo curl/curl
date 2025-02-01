@@ -2747,7 +2747,7 @@ static void ossl_trace(int direction, int ssl_ver, int content_type,
   }
 
   Curl_debug(data, (direction == 1) ? CURLINFO_SSL_DATA_OUT :
-             CURLINFO_SSL_DATA_IN, (char *)buf, len);
+             CURLINFO_SSL_DATA_IN, (const char *)buf, len);
   (void) ssl;
 }
 #endif
