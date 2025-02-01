@@ -250,7 +250,7 @@ size_t tool_header_cb(char *ptr, size_t size, size_t nmemb, void *userdata)
          hdrcbdata->config->show_headers) {
         /* still awaiting the Content-Disposition header, store the header in
            memory. Since it is not zero terminated, we need an extra dance. */
-        char *clone = aprintf("%.*s", (int)cb, (char *)str);
+        char *clone = aprintf("%.*s", (int)cb, str);
         if(clone) {
           struct curl_slist *old = hdrcbdata->headlist;
           hdrcbdata->headlist = curl_slist_append(old, clone);
