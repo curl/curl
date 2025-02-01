@@ -147,9 +147,9 @@ jobs:
           - name: 'wolfSSL !ldap brotli zstd'
             install: brotli wolfssl zstd
             generate: -DCURL_USE_WOLFSSL=ON -DCURL_DISABLE_LDAP=ON -DUSE_ECH=ON
-          - name: 'mbedTLS !ldap brotli zstd'
-            install: brotli mbedtls zstd
-            generate: -DCURL_USE_MBEDTLS=ON -DCURL_DISABLE_LDAP=ON
+          - name: 'mbedTLS openldap brotli zstd'
+            install: brotli mbedtls zstd openldap
+            generate: -DCURL_USE_MBEDTLS=ON -DLDAP_INCLUDE_DIR="$(brew --prefix openldap)/include" -DLDAP_LIBRARY="$(brew --prefix openldap)/lib/libldap.dylib" -DLDAP_LBER_LIBRARY="$(brew --prefix openldap)/lib/liblber.dylib"
           - name: 'GnuTLS !ldap krb5'
             install: gnutls nettle krb5
             generate: -DCURL_USE_GNUTLS=ON -DCURL_USE_OPENSSL=OFF -DCURL_USE_GSSAPI=ON -DGSS_ROOT_DIR=$(brew --prefix krb5) -DCURL_DISABLE_LDAP=ON -DUSE_SSLS_EXPORT=ON
