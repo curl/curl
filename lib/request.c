@@ -228,11 +228,11 @@ static CURLcode xfer_send(struct Curl_easy *data,
       data->req.eos_sent = TRUE;
     if(*pnwritten) {
       if(hds_len)
-        Curl_debug(data, CURLINFO_HEADER_OUT, (char *)buf,
+        Curl_debug(data, CURLINFO_HEADER_OUT, buf,
                    CURLMIN(hds_len, *pnwritten));
       if(*pnwritten > hds_len) {
         size_t body_len = *pnwritten - hds_len;
-        Curl_debug(data, CURLINFO_DATA_OUT, (char *)buf + hds_len, body_len);
+        Curl_debug(data, CURLINFO_DATA_OUT, buf + hds_len, body_len);
         data->req.writebytecount += body_len;
         Curl_pgrsSetUploadCounter(data, data->req.writebytecount);
       }
