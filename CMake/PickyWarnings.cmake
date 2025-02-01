@@ -274,6 +274,6 @@ endif()
 
 if(_picky)
   string(REPLACE ";" " " _picky "${_picky}")
-  set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${_picky}")
+  string(APPEND CMAKE_C_FLAGS " ${_picky}")
   message(STATUS "Picky compiler options: ${_picky}")
 endif()

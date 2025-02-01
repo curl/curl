@@ -670,15 +670,11 @@ sub checksystemfeatures {
             $feature{"alt-svc"} = $feat =~ /alt-svc/i;
             # HSTS support
             $feature{"HSTS"} = $feat =~ /HSTS/i;
-            $feature{"asyn-rr"} = $feat =~ /asyn-rr/;
             if($feat =~ /AsynchDNS/i) {
-                if(!$feature{"c-ares"} || $feature{"asyn-rr"}) {
+                if(!$feature{"c-ares"}) {
                     # this means threaded resolver
                     $feature{"threaded-resolver"} = 1;
                     $resolver="threaded";
-
-                    # does not count as "real" c-ares
-                    $feature{"c-ares"} = 0;
                 }
             }
             # http2 enabled
@@ -702,6 +698,7 @@ sub checksystemfeatures {
             # Thread-safe init
             $feature{"threadsafe"} = $feat =~ /threadsafe/i;
             $feature{"HTTPSRR"} = $feat =~ /HTTPSRR/;
+            $feature{"asyn-rr"} = $feat =~ /asyn-rr/;
         }
         #
         # Test harness currently uses a non-stunnel server in order to
