@@ -216,7 +216,7 @@ static void my_sha256_update(void *in,
                              unsigned int length)
 {
   my_sha256_ctx *ctx = (my_sha256_ctx *)in;
-  CryptHashData(ctx->hHash, (unsigned char *) data, length, 0);
+  CryptHashData(ctx->hHash, (const BYTE *) data, length, 0);
 }
 
 static void my_sha256_final(unsigned char *digest, void *in)

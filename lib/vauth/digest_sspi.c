@@ -271,7 +271,7 @@ CURLcode Curl_override_sspi_http_realm(const char *chlg,
         if(strcasecompare(value, "realm")) {
 
           /* Setup identity's domain and length */
-          domain.tchar_ptr = curlx_convert_UTF8_to_tchar((char *) content);
+          domain.tchar_ptr = curlx_convert_UTF8_to_tchar(content);
           if(!domain.tchar_ptr)
             return CURLE_OUT_OF_MEMORY;
 
@@ -567,7 +567,7 @@ CURLcode Curl_auth_create_digest_http_message(struct Curl_easy *data,
     resp_buf.pvBuffer   = output_token;
     resp_buf.cbBuffer   = curlx_uztoul(token_max);
 
-    spn = curlx_convert_UTF8_to_tchar((char *) uripath);
+    spn = curlx_convert_UTF8_to_tchar((const char *) uripath);
     if(!spn) {
       Curl_pSecFn->FreeCredentialsHandle(&credentials);
 

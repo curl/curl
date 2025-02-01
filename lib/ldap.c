@@ -285,8 +285,8 @@ static int ldap_win_bind(struct Curl_easy *data, LDAP *server,
   PTCHAR inpass = NULL;
 
   if(user && passwd && (data->set.httpauth & CURLAUTH_BASIC)) {
-    inuser = curlx_convert_UTF8_to_tchar((char *) user);
-    inpass = curlx_convert_UTF8_to_tchar((char *) passwd);
+    inuser = curlx_convert_UTF8_to_tchar(user);
+    inpass = curlx_convert_UTF8_to_tchar(passwd);
 
     rc = (int)ldap_simple_bind_s(server, inuser, inpass);
 

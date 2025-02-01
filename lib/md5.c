@@ -252,7 +252,7 @@ static void my_md5_update(void *in,
                           unsigned int inputLen)
 {
   my_md5_ctx *ctx = in;
-  CryptHashData(ctx->hHash, (unsigned char *)input, inputLen, 0);
+  CryptHashData(ctx->hHash, (const BYTE *)input, inputLen, 0);
 }
 
 static void my_md5_final(unsigned char *digest, void *in)

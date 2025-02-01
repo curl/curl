@@ -191,7 +191,7 @@ static CURLcode base64_encode(const char *table64,
 {
   char *output;
   char *base64data;
-  const unsigned char *in = (unsigned char *)inputbuff;
+  const unsigned char *in = (const unsigned char *)inputbuff;
   const char *padstr = &table64[64];    /* Point to padding string. */
 
   *outptr = NULL;
