@@ -42,7 +42,7 @@ specifies two separate 100-byte ranges(*) (HTTP)
 ##
 
 (*) = NOTE that if specifying multiple ranges and the server supports it then
-it will reply with a multiple part response that curl returns as-is. It
+it replies with a multiple part response that curl returns as-is. It
 contains meta information in addition to the requested bytes. Parsing or
 otherwise transforming this response is the responsibility of the caller.
 
