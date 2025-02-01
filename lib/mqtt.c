@@ -770,7 +770,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = CURLE_RECV_ERROR;
       break;
     }
-    Curl_debug(data, CURLINFO_HEADER_IN, (char *)&mq->firstbyte, 1);
+    Curl_debug(data, CURLINFO_HEADER_IN, (const char *)&mq->firstbyte, 1);
     /* remember the first byte */
     mq->npacket = 0;
     mqstate(data, MQTT_REMAINING_LENGTH, MQTT_NOSTATE);
@@ -780,7 +780,7 @@ static CURLcode mqtt_doing(struct Curl_easy *data, bool *done)
       result = Curl_xfer_recv(data, (char *)&recvbyte, 1, &nread);
       if(result || !nread)
         break;
-      Curl_debug(data, CURLINFO_HEADER_IN, (char *)&recvbyte, 1);
+      Curl_debug(data, CURLINFO_HEADER_IN, (const char *)&recvbyte, 1);
       mq->pkt_hd[mq->npacket++] = recvbyte;
     } while((recvbyte & 0x80) && (mq->npacket < 4));
     if(!result && nread && (recvbyte & 0x80))

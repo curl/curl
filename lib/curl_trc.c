@@ -54,13 +54,14 @@
 #include "memdebug.h"
 
 static void trc_write(struct Curl_easy *data, curl_infotype type,
-                      char *ptr, size_t size)
+                      const char *ptr, size_t size)
 {
   if(data->set.verbose) {
     if(data->set.fdebug) {
       bool inCallback = Curl_is_in_callback(data);
       Curl_set_in_callback(data, TRUE);
-      (void)(*data->set.fdebug)(data, type, ptr, size, data->set.debugdata);
+      (void)(*data->set.fdebug)(data, type, (char *)ptr, size,
+                                data->set.debugdata);
       Curl_set_in_callback(data, inCallback);
     }
     else {
