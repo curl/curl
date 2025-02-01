@@ -1330,6 +1330,7 @@ static ParameterError parse_range(struct GlobalConfig *global,
                                   const char *nextarg)
 {
   ParameterError err = PARAM_OK;
+  const char *tmp_range;
 
   if(config->use_resume) {
     errorf(global, "--continue-at is mutually exclusive with --range");
@@ -1339,7 +1340,9 @@ static ParameterError parse_range(struct GlobalConfig *global,
      (and will not actually be range by definition). The manpage
      previously claimed that to be a good way, why this code is added to
      work-around it. */
-  if(ISDIGIT(*nextarg) && !strchr(nextarg, '-')) {
+  for(tmp_range = nextarg; ISDIGIT(*tmp_range); ++tmp_range)
+    ;
+  if(!*tmp_range) {
     char buffer[32];
     curl_off_t value;
     if(curlx_strtoofft(nextarg, NULL, 10, &value)) {
@@ -1360,16 +1363,24 @@ static ParameterError parse_range(struct GlobalConfig *global,
   }
   else {
     /* byte range requested */
-    const char *tmp_range = nextarg;
-    while(*tmp_range) {
-      if(!ISDIGIT(*tmp_range) && *tmp_range != '-' && *tmp_range != ',') {
-        warnf(global, "Invalid character is found in given range. "
-              "A specified range MUST have only digits in "
-              "\'start\'-\'stop\'. The server's response to this "
-              "request is uncertain.");
-        break;
-      }
-      tmp_range++;
+    bool comma = false;
+    bool invalid = false;
+    for(tmp_range = nextarg; *tmp_range; ++tmp_range) {
+      if(*tmp_range == ',')
+        comma = true;
+      else if(!ISDIGIT(*tmp_range) && *tmp_range != '-')
+        invalid = true;
+    }
+    if(comma) {
+      warnf(global, "Range value contains a comma separator, which indicates "
+            "a request for multiple byte ranges. curl does not support "
+            "decoding a server response containing multiple byte ranges.");
+    }
+    if(invalid) {
+      warnf(global, "Invalid character is found in given range. "
+            "A specified range MUST have only digits in "
+            "\'start\'-\'stop\'. The server's response to this "
+            "request is uncertain.");
     }
     err = getstr(&config->range, nextarg, DENY_BLANK);
   }
