@@ -159,7 +159,7 @@ static CURLUcode urlencode_str(struct dynbuf *o, const char *url,
   if(!relative)
     host_sep = (const unsigned char *) find_host_sep(url);
 
-  for(iptr = (unsigned char *)url;    /* read from here */
+  for(iptr = (const unsigned char *)url;    /* read from here */
       len; iptr++, len--) {
 
     if(iptr < host_sep) {
@@ -964,7 +964,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     }
 
     /* path has been allocated large enough to hold this */
-    path = (char *)&url[5];
+    path = &url[5];
     pathlen = urllen - 5;
 
     u->scheme = strdup("file");
