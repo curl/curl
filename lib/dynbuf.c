@@ -183,7 +183,7 @@ CURLcode Curl_dyn_add(struct dynbuf *s, const char *str)
   DEBUGASSERT(s->init == DYNINIT);
   DEBUGASSERT(!s->leng || s->bufr);
   n = strlen(str);
-  return dyn_nappend(s, (unsigned char *)str, n);
+  return dyn_nappend(s, (const unsigned char *)str, n);
 }
 
 /*
@@ -209,7 +209,7 @@ CURLcode Curl_dyn_vaddf(struct dynbuf *s, const char *fmt, va_list ap)
   str = vaprintf(fmt, ap); /* this allocs a new string to append */
 
   if(str) {
-    CURLcode result = dyn_nappend(s, (unsigned char *)str, strlen(str));
+    CURLcode result = dyn_nappend(s, (const unsigned char *)str, strlen(str));
     free(str);
     return result;
   }
