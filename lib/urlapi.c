@@ -1222,7 +1222,7 @@ static CURLUcode parseurl(const char *url, CURLU *u, unsigned int flags)
     if(!(flags & CURLU_PATH_AS_IS)) {
       /* remove ../ and ./ sequences according to RFC3986 */
       char *dedot;
-      int err = dedotdotify((char *)path, pathlen, &dedot);
+      int err = dedotdotify(path, pathlen, &dedot);
       if(err) {
         result = CURLUE_OUT_OF_MEMORY;
         goto fail;
