@@ -26,8 +26,8 @@ Example subscribe:
 This sends an MQTT SUBSCRIBE packet for the topic `bedroom/temp` and listen in
 for incoming PUBLISH packets.
 
-You can set CURLOPT_TCP_KEEPALIVE option to value 1 to have curl send ping requests to
-the server every 30 seconds to keep the connection permanently. You need to use the
+You can set keep alive option to value 1 to have curl send ping requests to the
+server every 30 seconds to keep the connection permanently. You need to use the
 progress callback to cancel the operation.
 
 ### Publishing
