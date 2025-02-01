@@ -38,6 +38,10 @@
  * OpenLDAP library versions, USE_OPENLDAP shall not be defined.
  */
 
+#ifndef LDAP_DEPRECATED
+#define LDAP_DEPRECATED 0
+#endif
+
 #include <ldap.h>
 
 #include "urldata.h"
