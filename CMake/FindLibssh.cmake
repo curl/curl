@@ -48,6 +48,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBSSH_FOUND)
+  set(Libssh_FOUND TRUE)
   string(REPLACE ";" " " LIBSSH_CFLAGS "${LIBSSH_CFLAGS}")
   message(STATUS "Found Libssh (via pkg-config): ${LIBSSH_INCLUDE_DIRS} (found version \"${LIBSSH_VERSION}\")")
 else()

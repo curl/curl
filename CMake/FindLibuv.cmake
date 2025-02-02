@@ -48,6 +48,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBUV_FOUND)
+  set(Libuv_FOUND TRUE)
   string(REPLACE ";" " " LIBUV_CFLAGS "${LIBUV_CFLAGS}")
   message(STATUS "Found Libuv (via pkg-config): ${LIBUV_INCLUDE_DIRS} (found version \"${LIBUV_VERSION}\")")
 else()

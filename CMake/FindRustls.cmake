@@ -48,6 +48,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(RUSTLS_FOUND)
+  set(Rustls_FOUND TRUE)
   string(REPLACE ";" " " RUSTLS_CFLAGS "${RUSTLS_CFLAGS}")
   message(STATUS "Found Rustls (via pkg-config): ${RUSTLS_INCLUDE_DIRS} (found version \"${RUSTLS_VERSION}\")")
 else()
