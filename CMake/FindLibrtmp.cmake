@@ -48,6 +48,7 @@ if(CURL_USE_PKGCONFIG AND
 endif()
 
 if(LIBRTMP_FOUND AND LIBRTMP_INCLUDE_DIRS)
+  set(Librtmp_FOUND TRUE)
   string(REPLACE ";" " " LIBRTMP_CFLAGS "${LIBRTMP_CFLAGS}")
   message(STATUS "Found Librtmp (via pkg-config): ${LIBRTMP_INCLUDE_DIRS} (found version \"${LIBRTMP_VERSION}\")")
 else()
