@@ -12,10 +12,10 @@ HTTP Basic auth
 <reply>
 # The test server provides no way to respond differently to a subsequent
 # Basic authenticated request (we really want to respond with 200 for
-# the second), so just respond with 401 for both and let curl deal with it.
+# the second), so just respond with 401 for both and let fetch deal with it.
 <data>
 HTTP/1.1 401 Authorization Required
-Server: testcurl
+Server: testfetch
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: X-bogus-auth realm="gimme all yer s3cr3ts"
@@ -25,7 +25,7 @@ Content-Length: 0
 </data>
 <datacheck>
 HTTP/1.1 401 Authorization Required
-Server: testcurl
+Server: testfetch
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: X-bogus-auth realm="gimme all yer s3cr3ts"
@@ -33,7 +33,7 @@ Content-Type: text/plain
 Content-Length: 0
 
 HTTP/1.1 401 Authorization Required
-Server: testcurl
+Server: testfetch
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: X-bogus-auth realm="gimme all yer s3cr3ts"
@@ -67,7 +67,7 @@ four is the number of lines
 <protocol>
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 85
 
@@ -78,7 +78,7 @@ four is the number of lines
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dGVzdHVzZXI6dGVzdHBhc3M=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 85
 

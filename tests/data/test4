@@ -40,7 +40,7 @@ Replaced internal and added custom HTTP headers
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 extra-header: here
 Accept: replaced
 X-Custom-Header:
@@ -49,7 +49,7 @@ X-Test2: foo;
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 extra-header: here
 Accept: replaced
 X-Custom-Header:

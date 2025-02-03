@@ -9,7 +9,7 @@ HTTP PUT
 <reply>
 <data nocheck="yes">
 HTTP/1.1 200 A OK
-Server: curl test
+Server: fetch test
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 3
 
@@ -17,7 +17,7 @@ ok
 </data>
 <data2 nocheck="yes">
 HTTP/1.1 200 A OK
-Server: curl test
+Server: fetch test
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 9
 
@@ -47,14 +47,14 @@ test
 <protocol>
 PUT /%TESTNUMBER.upload1 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 5
 
 test
 PUT /%TESTNUMBER0002.upload2 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 5
 
@@ -62,13 +62,13 @@ test
 </protocol>
 <stdout>
 HTTP/1.1 200 A OK
-Server: curl test
+Server: fetch test
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 3
 
 ok
 HTTP/1.1 200 A OK
-Server: curl test
+Server: fetch test
 Content-Type: text/html; charset=iso-8859-1
 Content-Length: 9
 

@@ -59,14 +59,14 @@ http://%HOSTIP:%HTTPPORT/blah/%TESTNUMBER -L -d "moo"
 <protocol>
 POST /blah/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded
 
 mooGET /blah/moo.html&testcase=/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

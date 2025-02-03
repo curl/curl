@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/[a-a][1-1][b-b:1][2-2:1]/%TESTNUMBER -o "%LOGDIR/outfil
 <protocol>
 GET /a1b2/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

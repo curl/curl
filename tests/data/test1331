@@ -1,7 +1,7 @@
 <testcase>
 # Test case inspired by this question on stackoverflow:
 #
-# https://stackoverflow.com/questions/10017165/use-libcurl-with-bluecoat-cookie-proxy
+# https://stackoverflow.com/questions/10017165/use-libfetch-with-bluecoat-cookie-proxy
 #
 <info>
 <keywords>
@@ -75,14 +75,14 @@ proxy
 <protocol>
 GET http://z.x.com/%TESTNUMBER HTTP/1.1
 Host: z.x.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://z.x.com/%TESTNUMBER HTTP/1.1
 Host: z.x.com
 Proxy-Authorization: Basic bXluYW1lOm15cGFzc3dvcmQ=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: proxycookie=weirdo

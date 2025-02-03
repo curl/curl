@@ -60,7 +60,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -z "dec 12 11:00:00 1999 GMT" -o %LOGDIR/ou
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 If-Modified-Since: Sun, 12 Dec 1999 11:00:00 GMT
 

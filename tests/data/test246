@@ -76,7 +76,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u auser:apasswd --digest -d "junkelijunk"
 <protocol nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 0
 Content-Type: application/x-www-form-urlencoded
@@ -84,7 +84,7 @@ Content-Type: application/x-www-form-urlencoded
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="761e6fc9a760c39d587092e8d840e740"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 11
 Content-Type: application/x-www-form-urlencoded

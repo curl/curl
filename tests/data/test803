@@ -31,7 +31,7 @@ IMAP SELECT UIDVALIDITY Failure
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_REMOTE_FILE_NOT_FOUND - UIDVALIDITY mismatch
+# FETCHE_REMOTE_FILE_NOT_FOUND - UIDVALIDITY mismatch
 <errorcode>
 78
 </errorcode>

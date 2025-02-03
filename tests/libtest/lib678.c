@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -63,60 +63,60 @@ static int loadfile(const char *filename, void **filedata, size_t *filesize)
   return data ? 1 : 0;
 }
 
-static CURLcode test_cert_blob(const char *url, const char *cafile)
+static FETCHcode test_cert_blob(const char *url, const char *cafile)
 {
-  CURLcode code = CURLE_OUT_OF_MEMORY;
-  CURL *curl;
-  struct curl_blob blob;
+  FETCHcode code = FETCHE_OUT_OF_MEMORY;
+  FETCH *fetch;
+  struct fetch_blob blob;
   size_t certsize;
   void *certdata;
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    return CURLE_FAILED_INIT;
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    return FETCHE_FAILED_INIT;
   }
 
   if(loadfile(cafile, &certdata, &certsize)) {
-    curl_easy_setopt(curl, CURLOPT_VERBOSE,     1L);
-    curl_easy_setopt(curl, CURLOPT_HEADER,      1L);
-    curl_easy_setopt(curl, CURLOPT_URL,         url);
-    curl_easy_setopt(curl, CURLOPT_USERAGENT,   "CURLOPT_CAINFO_BLOB");
-    curl_easy_setopt(curl, CURLOPT_SSL_OPTIONS,
-                     CURLSSLOPT_REVOKE_BEST_EFFORT);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE,     1L);
+    fetch_easy_setopt(fetch, FETCHOPT_HEADER,      1L);
+    fetch_easy_setopt(fetch, FETCHOPT_URL,         url);
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT,   "FETCHOPT_CAINFO_BLOB");
+    fetch_easy_setopt(fetch, FETCHOPT_SSL_OPTIONS,
+                     FETCHSSLOPT_REVOKE_BEST_EFFORT);
 
     blob.data = certdata;
     blob.len = certsize;
-    blob.flags = CURL_BLOB_COPY;
-    curl_easy_setopt(curl, CURLOPT_CAINFO_BLOB, &blob);
+    blob.flags = FETCH_BLOB_COPY;
+    fetch_easy_setopt(fetch, FETCHOPT_CAINFO_BLOB, &blob);
     free(certdata);
-    code = curl_easy_perform(curl);
+    code = fetch_easy_perform(fetch);
   }
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
   return code;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  FETCHcode res = FETCHE_OK;
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
   if(!strcmp("check", URL)) {
-    CURL *e;
-    CURLcode w = CURLE_OK;
-    struct curl_blob blob = {0};
-    e = curl_easy_init();
+    FETCH *e;
+    FETCHcode w = FETCHE_OK;
+    struct fetch_blob blob = {0};
+    e = fetch_easy_init();
     if(e) {
-      w = curl_easy_setopt(e, CURLOPT_CAINFO_BLOB, &blob);
+      w = fetch_easy_setopt(e, FETCHOPT_CAINFO_BLOB, &blob);
       if(w)
-        printf("CURLOPT_CAINFO_BLOB is not supported\n");
-      curl_easy_cleanup(e);
+        printf("FETCHOPT_CAINFO_BLOB is not supported\n");
+      fetch_easy_cleanup(e);
     }
     res = w;
   }
   else
     res = test_cert_blob(URL, libtest_arg2);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return res;
 }

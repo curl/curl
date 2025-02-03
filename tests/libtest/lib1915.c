@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -52,7 +52,7 @@ struct state {
 };
 
 /* "read" is from the point of the library, it wants data from us */
-static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
+static FETCHSTScode hstsread(FETCH *easy, struct fetch_hstsentry *e,
                             void *userp)
 {
   const char *host;
@@ -69,82 +69,82 @@ static CURLSTScode hstsread(CURL *easy, struct curl_hstsentry *e,
     fprintf(stderr, "add '%s'\n", host);
   }
   else
-    return CURLSTS_DONE;
-  return CURLSTS_OK;
+    return FETCHSTS_DONE;
+  return FETCHSTS_OK;
 }
 
 /* verify error from callback */
-static CURLSTScode hstsreadfail(CURL *easy, struct curl_hstsentry *e,
+static FETCHSTScode hstsreadfail(FETCH *easy, struct fetch_hstsentry *e,
                                 void *userp)
 {
   (void)easy;
   (void)e;
   (void)userp;
-  return CURLSTS_FAIL;
+  return FETCHSTS_FAIL;
 }
 
 /* check that we get the hosts back in the save */
-static CURLSTScode hstswrite(CURL *easy, struct curl_hstsentry *e,
-                             struct curl_index *i, void *userp)
+static FETCHSTScode hstswrite(FETCH *easy, struct fetch_hstsentry *e,
+                             struct fetch_index *i, void *userp)
 {
   (void)easy;
   (void)userp;
   printf("[%zu/%zu] %s %s\n", i->index, i->total, e->name, e->expire);
-  return CURLSTS_OK;
+  return FETCHSTS_OK;
 }
 
 /*
  * Read/write HSTS cache entries via callback.
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *hnd;
+  FETCHcode res = FETCHE_OK;
+  FETCH *hnd;
   struct state st = {0};
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   libtest_debug_config.nohex = 1;
   libtest_debug_config.tracetime = 1;
 
   easy_init(hnd);
-  easy_setopt(hnd, CURLOPT_URL, URL);
-  easy_setopt(hnd, CURLOPT_CONNECTTIMEOUT, 1L);
-  easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsread);
-  easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
-  easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
-  easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
-  easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-  easy_setopt(hnd, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(hnd);
-  curl_easy_cleanup(hnd);
+  easy_setopt(hnd, FETCHOPT_URL, URL);
+  easy_setopt(hnd, FETCHOPT_CONNECTTIMEOUT, 1L);
+  easy_setopt(hnd, FETCHOPT_HSTSREADFUNCTION, hstsread);
+  easy_setopt(hnd, FETCHOPT_HSTSREADDATA, &st);
+  easy_setopt(hnd, FETCHOPT_HSTSWRITEFUNCTION, hstswrite);
+  easy_setopt(hnd, FETCHOPT_HSTSWRITEDATA, &st);
+  easy_setopt(hnd, FETCHOPT_HSTS_CTRL, FETCHHSTS_ENABLE);
+  easy_setopt(hnd, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(hnd, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(hnd, FETCHOPT_VERBOSE, 1L);
+  res = fetch_easy_perform(hnd);
+  fetch_easy_cleanup(hnd);
   hnd = NULL;
-  if(res == CURLE_OPERATION_TIMEDOUT) /* we expect that on Windows */
-    res = CURLE_COULDNT_CONNECT;
+  if(res == FETCHE_OPERATION_TIMEDOUT) /* we expect that on Windows */
+    res = FETCHE_COULDNT_CONNECT;
   printf("First request returned %d\n", res);
-  res = CURLE_OK;
+  res = FETCHE_OK;
 
   easy_init(hnd);
-  easy_setopt(hnd, CURLOPT_URL, URL);
-  easy_setopt(hnd, CURLOPT_CONNECTTIMEOUT, 1L);
-  easy_setopt(hnd, CURLOPT_HSTSREADFUNCTION, hstsreadfail);
-  easy_setopt(hnd, CURLOPT_HSTSREADDATA, &st);
-  easy_setopt(hnd, CURLOPT_HSTSWRITEFUNCTION, hstswrite);
-  easy_setopt(hnd, CURLOPT_HSTSWRITEDATA, &st);
-  easy_setopt(hnd, CURLOPT_HSTS_CTRL, CURLHSTS_ENABLE);
-  easy_setopt(hnd, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(hnd, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(hnd, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(hnd);
-  curl_easy_cleanup(hnd);
+  easy_setopt(hnd, FETCHOPT_URL, URL);
+  easy_setopt(hnd, FETCHOPT_CONNECTTIMEOUT, 1L);
+  easy_setopt(hnd, FETCHOPT_HSTSREADFUNCTION, hstsreadfail);
+  easy_setopt(hnd, FETCHOPT_HSTSREADDATA, &st);
+  easy_setopt(hnd, FETCHOPT_HSTSWRITEFUNCTION, hstswrite);
+  easy_setopt(hnd, FETCHOPT_HSTSWRITEDATA, &st);
+  easy_setopt(hnd, FETCHOPT_HSTS_CTRL, FETCHHSTS_ENABLE);
+  easy_setopt(hnd, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(hnd, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(hnd, FETCHOPT_VERBOSE, 1L);
+  res = fetch_easy_perform(hnd);
+  fetch_easy_cleanup(hnd);
   hnd = NULL;
   printf("Second request returned %d\n", res);
 
 test_cleanup:
-  curl_easy_cleanup(hnd);
-  curl_global_cleanup();
+  fetch_easy_cleanup(hnd);
+  fetch_global_cleanup();
   return res;
 }

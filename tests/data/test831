@@ -42,7 +42,7 @@ IMAP NTLM graceful cancellation
 #
 # Verify data after the test has been "shot"
 <verify>
-# 67 - CURLE_LOGIN_DENIED
+# 67 - FETCHE_LOGIN_DENIED
 <errorcode>
 67
 </errorcode>

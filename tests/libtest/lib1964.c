@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://fetch.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,51 +18,51 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *connect_to = NULL;
-  struct curl_slist *list = NULL, *tmp;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  struct fetch_slist *connect_to = NULL;
+  struct fetch_slist *list = NULL, *tmp;
 
-  global_init(CURL_GLOBAL_ALL);
-  easy_init(curl);
+  global_init(FETCH_GLOBAL_ALL);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_AWS_SIGV4, "xxx");
-  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_AWS_SIGV4, "xxx");
+  easy_setopt(fetch, FETCHOPT_URL, URL);
   if(libtest_arg2) {
-    connect_to = curl_slist_append(connect_to, libtest_arg2);
+    connect_to = fetch_slist_append(connect_to, libtest_arg2);
     if(!connect_to) {
-      res = CURLE_FAILED_INIT;
+      res = FETCHE_FAILED_INIT;
       goto test_cleanup;
     }
   }
-  easy_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
-  list = curl_slist_append(list, "Content-Type: application/json");
-  tmp = curl_slist_append(list, "X-Xxx-Date: 19700101T000000Z");
+  easy_setopt(fetch, FETCHOPT_CONNECT_TO, connect_to);
+  list = fetch_slist_append(list, "Content-Type: application/json");
+  tmp = fetch_slist_append(list, "X-Xxx-Date: 19700101T000000Z");
   if(!list || !tmp) {
-    res = CURLE_FAILED_INIT;
+    res = FETCHE_FAILED_INIT;
     goto test_cleanup;
   }
   list = tmp;
-  easy_setopt(curl, CURLOPT_HTTPHEADER, list);
+  easy_setopt(fetch, FETCHOPT_HTTPHEADER, list);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_slist_free_all(connect_to);
-  curl_slist_free_all(list);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_slist_free_all(connect_to);
+  fetch_slist_free_all(list);
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

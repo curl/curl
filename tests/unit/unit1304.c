@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,23 +18,23 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 #include "netrc.h"
 #include "memdebug.h" /* LAST include file */
 
-#ifndef CURL_DISABLE_NETRC
+#ifndef FETCH_DISABLE_NETRC
 
 static char *s_login;
 static char *s_password;
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
   s_password = NULL;
   s_login = NULL;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
@@ -150,7 +150,7 @@ UNITTEST_START
   s_login = NULL;
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
-                           "curl.example.com", &s_login, &s_password, arg);
+                           "fetch.example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password != NULL, "returned NULL!");
   fail_unless(strncmp(s_password, "none", 4) == 0,
@@ -169,7 +169,7 @@ UNITTEST_START
   s_login = NULL;
   Curl_netrc_init(&store);
   result = Curl_parsenetrc(&store,
-                           "curl.example.com", &s_login, &s_password, arg);
+                           "fetch.example.com", &s_login, &s_password, arg);
   fail_unless(result == 0, "Host should have been found");
   abort_unless(s_password != NULL, "returned NULL!");
   fail_unless(strncmp(s_password, "none", 4) == 0,
@@ -182,9 +182,9 @@ UNITTEST_START
 UNITTEST_STOP
 
 #else
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 static void unit_stop(void)
 {

@@ -1,16 +1,16 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# The curl Test Suite
+# The fetch Test Suite
 
 # Running
 
   See the "Requires to run" section for prerequisites.
 
-  In the root of the curl repository:
+  In the root of the fetch repository:
 
     ./configure && make && make test
 
@@ -72,18 +72,18 @@ SPDX-License-Identifier: curl
 
 ## Event-based
 
-  If curl is built with `Debug` enabled (see below), then the `runtests.pl`
+  If fetch is built with `Debug` enabled (see below), then the `runtests.pl`
   script offers a `-e` option that makes it perform *event-based*. Such tests
-  invokes the curl tool with `--test-event`, a debug-only option made for this
+  invokes the fetch tool with `--test-event`, a debug-only option made for this
   purpose.
 
-  Performing event-based means that the curl tool uses the
-  `curl_multi_socket_action()` API call to drive the transfer(s), instead of
+  Performing event-based means that the fetch tool uses the
+  `fetch_multi_socket_action()` API call to drive the transfer(s), instead of
   the otherwise "normal" functions it would use. This allows us to test drive
   the socket_action API. Transfers done this way should work exactly the same
   as with the non-event based API.
 
-  To be able to use `--test-event` together with `--parallel`, curl requires
+  To be able to use `--test-event` together with `--parallel`, fetch requires
   *libuv* to be present and enabled in the build: `configure --enable-libuv`
 
 ### Port numbers used by test servers
@@ -131,8 +131,8 @@ SPDX-License-Identifier: curl
 
 ### Memory test
 
-  The test script checks that all allocated memory is freed properly IF curl
-  has been built with the `CURLDEBUG` define set. The script automatically
+  The test script checks that all allocated memory is freed properly IF fetch
+  has been built with the `FETCHDEBUG` define set. The script automatically
   detects if that is the case, and it uses the `memanalyze.pl` script to
   analyze the memory debugging output.
 
@@ -144,8 +144,8 @@ SPDX-License-Identifier: curl
   test many times and makes each different memory allocation fail on each
   successive run. This tests the out of memory error handling code to ensure
   that memory leaks do not occur even in those situations. It can help to
-  compile curl with `CPPFLAGS=-DMEMDEBUG_LOG_SYNC` when using this option, to
-  ensure that the memory log file is properly written even if curl crashes.
+  compile fetch with `CPPFLAGS=-DMEMDEBUG_LOG_SYNC` when using this option, to
+  ensure that the memory log file is properly written even if fetch crashes.
 
 ### Debug
 
@@ -161,9 +161,9 @@ SPDX-License-Identifier: curl
 
 ### Log Verbosity
 
-  A curl build with `--enable-debug` offers more verbose output in the logs.
+  A fetch build with `--enable-debug` offers more verbose output in the logs.
   This applies not only for test cases, but also when running it standalone
-  with `curl -v`. While a curl debug built is
+  with `fetch -v`. While a fetch debug built is
   ***not suitable for production***, it is often helpful in tracking down
   problems.
 
@@ -171,13 +171,13 @@ SPDX-License-Identifier: curl
   to drown in output. The newly introduced *connection filters* allows one to
   dynamically increase log verbosity for a particular *filter type*. Example:
 
-    CURL_DEBUG=ssl curl -v https://curl.se
+    FETCH_DEBUG=ssl fetch -v https://fetch.se
 
   makes the `ssl` connection filter log more details. One may do that for
   every filter type and also use a combination of names, separated by `,` or
   space.
 
-    CURL_DEBUG=ssl,http/2 curl -v https://curl.se
+    FETCH_DEBUG=ssl,http/2 fetch -v https://fetch.se
 
    The order of filter type names is not relevant. Names used here are
    case insensitive. Note that these names are implementation internals and
@@ -199,7 +199,7 @@ SPDX-License-Identifier: curl
 ### Code coverage
 
   gcc provides a tool that can determine the code coverage figures for the
-  test suite. To use it, configure curl with `CFLAGS='-fprofile-arcs
+  test suite. To use it, configure fetch with `CFLAGS='-fprofile-arcs
   -ftest-coverage -g -O0'`. Make sure you run the normal and torture tests to
   get more full coverage, i.e. do:
 
@@ -216,9 +216,9 @@ SPDX-License-Identifier: curl
 
 ### Remote testing
 
-  The runtests.pl script provides some hooks to allow curl to be tested on a
+  The runtests.pl script provides some hooks to allow fetch to be tested on a
   machine where perl can not be run. The test framework in this case runs on
-  a workstation where perl is available, while curl itself is run on a remote
+  a workstation where perl is available, while fetch itself is run on a remote
   system using ssh or some other remote execution method. See the comments at
   the beginning of runtests.pl for details.
 
@@ -233,8 +233,8 @@ SPDX-License-Identifier: curl
 ## Write tests
 
   Here's a quick description on writing test cases. We basically have three
-  kinds of tests: the ones that test the curl tool, the ones that build small
-  applications and test libcurl directly and the unit tests that test
+  kinds of tests: the ones that test the fetch tool, the ones that build small
+  applications and test libfetch directly and the unit tests that test
   individual (possibly internal) functions.
 
 ### test data
@@ -247,18 +247,18 @@ SPDX-License-Identifier: curl
   identifier described above, and the XML-like file format of them is
   described in the separate [`FILEFORMAT`](FILEFORMAT.md) document.
 
-### curl tests
+### fetch tests
 
-  A test case that runs the curl tool and verifies that it gets the correct
+  A test case that runs the fetch tool and verifies that it gets the correct
   data, it sends the correct data, it uses the correct protocol primitives
   etc.
 
-### libcurl tests
+### libfetch tests
 
-  The libcurl tests are identical to the curl ones, except that they use a
-  specific and dedicated custom-built program to run instead of "curl". This
+  The libfetch tests are identical to the fetch ones, except that they use a
+  specific and dedicated custom-built program to run instead of "fetch". This
   tool is built from source code placed in `tests/libtest` and if you want to
-  make a new libcurl test that is where you add your code.
+  make a new libfetch test that is where you add your code.
 
 ### unit tests
 
@@ -266,4 +266,4 @@ SPDX-License-Identifier: curl
   describing the specific set of checks and macros that may be used when
   writing tests that verify behaviors of specific individual functions.
 
-  The unit tests depend on curl being built with debug enabled.
+  The unit tests depend on fetch being built with debug enabled.

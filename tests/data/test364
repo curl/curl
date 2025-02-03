@@ -40,7 +40,7 @@ HTTPS PUT of small file
 <protocol>
 PUT /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1201
 

@@ -40,7 +40,7 @@ http
 </server>
 
 <name>
-CURLOPT_POST after CURLOPT_UPLOAD reusing handle
+FETCHOPT_POST after FETCHOPT_UPLOAD reusing handle
 </name>
 <tool>
 lib%TESTNUMBER

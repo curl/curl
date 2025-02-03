@@ -48,7 +48,7 @@ http://foo%40bar:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --netrc-optional
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic Zm9vQGJhcjpzZWNyZXQ=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

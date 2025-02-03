@@ -26,7 +26,7 @@ Verify usernames are not allowed in url
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_LOGIN_DENIED is code 67
+# FETCHE_LOGIN_DENIED is code 67
 <errorcode>
 67
 </errorcode>

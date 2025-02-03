@@ -24,7 +24,7 @@ sftp
 SFTP with --remote-time
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/rofile.txt --insecure --remote-time
+--key %LOGDIR/server/fetch_client_key --pubkey %LOGDIR/server/fetch_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/rofile.txt --insecure --remote-time
 </command>
 </client>
 
@@ -33,7 +33,7 @@ SFTP with --remote-time
 <verify>
 <postcheck>
 %PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
-%PERL -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 978264000)'
+%PERL -e 'exit((stat("%LOGDIR/fetch%TESTNUMBER.out"))[9] != 978264000)'
 </postcheck>
 </verify>
 </testcase>

@@ -91,7 +91,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --proxy-us
 <protocol nonewline="yes">
 POST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 6
@@ -100,7 +100,7 @@ Content-Type: application/x-www-form-urlencoded
 postitPOST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
@@ -109,7 +109,7 @@ Content-Type: application/x-www-form-urlencoded
 POST http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Proxy-Authorization: NTLM TlRMTVNTUAADAAAAGAAYAEAAAAAYABgAWAAAAAAAAABwAAAACAAIAHAAAAALAAsAeAAAAAAAAAAAAAAAhoIBAFpkQwKRCZFMhjj0tw47wEjKHRHlvzfxQamFcheMuv8v+xeqphEO5V41xRd7R9deOXRlc3R1c2VyV09SS1NUQVRJT04=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 6

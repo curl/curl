@@ -23,7 +23,7 @@ ftp
 lib%TESTNUMBER
 </tool>
 <name>
-FTP a type=A URL and CURLOPT_PORT set
+FTP a type=A URL and FETCHOPT_PORT set
 </name>
 
 # note that we need quotes around the URL below to make sure the shell doesn't

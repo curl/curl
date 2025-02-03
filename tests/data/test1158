@@ -51,7 +51,7 @@ foo
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1006
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32

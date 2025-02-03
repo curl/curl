@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
-# This is a server designed for the curl test suite.
+# This is a server designed for the fetch test suite.
 #
 # In December 2009 we started remaking the server to support more protocols
 # that are similar in spirit. Like POP3, IMAP and SMTP in addition to the FTP
@@ -33,7 +33,7 @@
 # protocol per invoke. You need to start multiple servers to support multiple
 # protocols simultaneously.
 #
-# It is meant to exercise curl, it is not meant to be a fully working
+# It is meant to exercise fetch, it is not meant to be a fully working
 # or even very standard compliant server.
 #
 # You may optionally specify port on the command line, otherwise it'll
@@ -198,7 +198,7 @@ my $exit_signal;         # first signal handled in exit_signal_handler
 # Mail related definitions
 #
 my $TEXT_PASSWORD = "secret";
-my $POP3_TIMESTAMP = "<1972.987654321\@curl>";
+my $POP3_TIMESTAMP = "<1972.987654321\@fetch>";
 
 #**********************************************************************
 # exit_signal_handler will be triggered to indicate that the program
@@ -609,7 +609,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ {| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '+OK curl POP3 server ready to serve '."\r\n")
+            '+OK fetch POP3 server ready to serve '."\r\n")
         );
     }
     elsif($proto eq 'imap') {
@@ -644,7 +644,7 @@ sub protocolsetup {
             '   / __| | | | |_) | |    '."\r\n",
             '  | (__| |_| |  _ {| |___ '."\r\n",
             '   \___|\___/|_| \_\_____|'."\r\n",
-            '* OK curl IMAP server ready to serve'."\r\n")
+            '* OK fetch IMAP server ready to serve'."\r\n")
         );
     }
     elsif($proto eq 'smtp') {
@@ -1043,7 +1043,7 @@ sub HELP_smtp {
 
     if($smtp_client eq "verifiedserver") {
         # This is the secret command that verifies that this actually is
-        # the curl test server
+        # the fetch test server
         sendcontrol "214 WE ROOLZ: $$\r\n";
 
         if($verbose) {
@@ -1129,7 +1129,7 @@ sub EXPN_smtp {
 }
 
 sub QUIT_smtp {
-    sendcontrol "221 curl $smtp_type server signing off\r\n";
+    sendcontrol "221 fetch $smtp_type server signing off\r\n";
 
     return 0;
 }
@@ -1242,7 +1242,7 @@ sub FETCH_imap {
 
         if($selected eq "verifiedserver") {
             # this is the secret command that verifies that this actually is
-            # the curl test server
+            # the fetch test server
             my $response = "WE ROOLZ: $$\r\n";
             if($verbose) {
                 print STDERR "FTPD: We returned proof we are the test server\n";
@@ -1391,7 +1391,7 @@ sub LIST_imap {
     }
     elsif ($reference eq "verifiedserver") {
         # this is the secret command that verifies that this actually is
-        # the curl test server
+        # the fetch test server
         sendcontrol "* LIST () \"/\" \"WE ROOLZ: $$\"\r\n";
         sendcontrol "$cmdid OK LIST Completed\r\n";
 
@@ -1689,7 +1689,7 @@ sub NOOP_imap {
 }
 
 sub LOGOUT_imap {
-    sendcontrol "* BYE curl IMAP server signing off\r\n";
+    sendcontrol "* BYE fetch IMAP server signing off\r\n";
     sendcontrol "$cmdid OK LOGOUT completed\r\n";
 
     return 0;
@@ -1835,7 +1835,7 @@ sub RETR_pop3 {
 
     if($msgid =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
-        # the curl test server
+        # the fetch test server
         my $response = "WE ROOLZ: $$\r\n";
         if($verbose) {
             print STDERR "FTPD: We returned proof we are the test server\n";
@@ -2015,7 +2015,7 @@ sub QUIT_pop3 {
         @deleted = ();
     }
 
-    sendcontrol "+OK curl POP3 server signing off\r\n";
+    sendcontrol "+OK fetch POP3 server signing off\r\n";
 
     return 0;
 }
@@ -2301,7 +2301,7 @@ sub RETR_ftp {
 
     if($testno =~ /^verifiedserver$/) {
         # this is the secret command that verifies that this actually is
-        # the curl test server
+        # the fetch test server
         my $response = "WE ROOLZ: $$\r\n";
         my $len = length($response);
         sendcontrol "150 Binary junk ($len bytes).\r\n";
@@ -2804,7 +2804,7 @@ sub nodataconn_str {
 }
 
 #**********************************************************************
-# customize configures test server operation for each curl test, reading
+# customize configures test server operation for each fetch test, reading
 # configuration commands/parameters from server commands file each time
 # a new client control connection is established with the test server.
 # On success returns 1, otherwise zero.

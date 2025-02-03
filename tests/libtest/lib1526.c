@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -35,7 +35,7 @@ static char testdata[] = "Hello Cloud!\n";
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
+  size_t  amount = nmemb * size; /* Total bytes fetch wants */
   if(amount < strlen(testdata)) {
     return strlen(testdata);
   }
@@ -44,62 +44,62 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return strlen(testdata);
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl = NULL;
-  CURLcode res = CURLE_FAILED_INIT;
+  FETCH *fetch = NULL;
+  FETCHcode res = FETCHE_FAILED_INIT;
   /* http and proxy header list */
-  struct curl_slist *hhl = NULL, *phl = NULL, *tmp = NULL;
+  struct fetch_slist *hhl = NULL, *phl = NULL, *tmp = NULL;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  hhl = curl_slist_append(hhl, "User-Agent: Http Agent");
-  phl = curl_slist_append(phl, "User-Agent: Proxy Agent");
+  hhl = fetch_slist_append(hhl, "User-Agent: Http Agent");
+  phl = fetch_slist_append(phl, "User-Agent: Proxy Agent");
   if(!hhl || !phl) {
     goto test_cleanup;
   }
-  tmp = curl_slist_append(phl, "Expect:");
+  tmp = fetch_slist_append(phl, "Expect:");
   if(!tmp) {
     goto test_cleanup;
   }
   phl = tmp;
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
-  test_setopt(curl, CURLOPT_HTTPHEADER, hhl);
-  test_setopt(curl, CURLOPT_PROXYHEADER, phl);
-  test_setopt(curl, CURLOPT_HEADEROPT, CURLHEADER_SEPARATE);
-  test_setopt(curl, CURLOPT_POST, 0L);
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_PROXYTYPE, CURLPROXY_HTTP);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, fwrite);
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-  test_setopt(curl, CURLOPT_HTTPPROXYTUNNEL, 1L);
-  test_setopt(curl, CURLOPT_INFILESIZE, (long)strlen(testdata));
+  test_setopt(fetch, FETCHOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
+  test_setopt(fetch, FETCHOPT_HTTPHEADER, hhl);
+  test_setopt(fetch, FETCHOPT_PROXYHEADER, phl);
+  test_setopt(fetch, FETCHOPT_HEADEROPT, FETCHHEADER_SEPARATE);
+  test_setopt(fetch, FETCHOPT_POST, 0L);
+  test_setopt(fetch, FETCHOPT_UPLOAD, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_PROXYTYPE, FETCHPROXY_HTTP);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_WRITEFUNCTION, fwrite);
+  test_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
+  test_setopt(fetch, FETCHOPT_HTTPPROXYTUNNEL, 1L);
+  test_setopt(fetch, FETCHOPT_INFILESIZE, (long)strlen(testdata));
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
-  curl_slist_free_all(hhl);
+  fetch_slist_free_all(hhl);
 
-  curl_slist_free_all(phl);
+  fetch_slist_free_all(phl);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

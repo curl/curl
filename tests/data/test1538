@@ -21,7 +21,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-libcurl strerror API call tests
+libfetch strerror API call tests
 </name>
 <command>
 nothing
@@ -36,7 +36,7 @@ e0: No error
 e1: Unsupported protocol
 e2: Failed initialization
 e3: URL using bad/illegal format or missing URL
-e4: A requested feature, protocol or option was not found built-in in this libcurl due to a build-time decision.
+e4: A requested feature, protocol or option was not found built-in in this libfetch due to a build-time decision.
 e5: Could not resolve proxy name
 e6: Could not resolve hostname
 e7: Could not connect to server
@@ -75,12 +75,12 @@ e39: LDAP: search failed
 e40: Unknown error
 e41: Unknown error
 e42: Operation was aborted by an application callback
-e43: A libcurl function was given a bad argument
+e43: A libfetch function was given a bad argument
 e44: Unknown error
 e45: Failed binding local connection end
 e46: Unknown error
 e47: Number of redirects hit maximum amount
-e48: An unknown option was passed in to libcurl
+e48: An unknown option was passed in to libfetch
 e49: Malformed option provided in a setopt
 e50: Unknown error
 e51: Unknown error
@@ -135,7 +135,7 @@ e99: Unrecoverable error in select/poll
 e100: A value or data field grew larger than allowed
 e101: ECH attempted but failed
 e102: Unknown error
-m-1: Please call curl_multi_perform() soon
+m-1: Please call fetch_multi_perform() soon
 m0: No error
 m1: Invalid multi handle
 m2: Invalid easy handle
@@ -146,7 +146,7 @@ m6: Unknown option
 m7: The easy handle is already added to a multi handle
 m8: API function called from within callback
 m9: Wakeup is unavailable or failed
-m10: A libcurl function was given a bad argument
+m10: A libfetch function was given a bad argument
 m11: Operation was aborted by an application callback
 m12: Unrecoverable error in select/poll
 m13: Unknown error
@@ -156,9 +156,9 @@ s2: Share currently in use
 s3: Invalid share handle
 s4: Out of memory
 s5: Feature not enabled in this library
-s6: CURLSHcode unknown
+s6: FETCHSHcode unknown
 u0: No error
-u1: An invalid CURLU pointer was passed as argument
+u1: An invalid FETCHU pointer was passed as argument
 u2: An invalid 'part' argument was passed as argument
 u3: Malformed input to a URL function
 u4: Port number was not a decimal number between 0 and 65535
@@ -187,9 +187,9 @@ u26: Bad query
 u27: Bad scheme
 u28: Unsupported number of slashes following scheme
 u29: Bad user
-u30: libcurl lacks IDN support
+u30: libfetch lacks IDN support
 u31: A value or data field is larger than allowed
-u32: CURLUcode unknown
+u32: FETCHUcode unknown
 </stdout>
 </verify>
 

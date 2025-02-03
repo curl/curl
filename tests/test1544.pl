@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #
 ###########################################################################
@@ -33,7 +33,7 @@ use strict;
 use warnings;
 
 my $root=$ARGV[0] || ".";
-my $incdir = "$root/include/curl";
+my $incdir = "$root/include/fetch";
 my $os400dir = "$root/packages/OS400";
 my $errcount = 0;
 
@@ -84,7 +84,7 @@ sub scan_header {
         next;
       }
       # Keep string options only.
-      if($_ =~ /CURLOPT(?:DEPRECATED)?\s*\(\s*([^, \t]+)\s*,\s*CURLOPTTYPE_STRINGPOINT/) {
+      if($_ =~ /FETCHOPT(?:DEPRECATED)?\s*\(\s*([^, \t]+)\s*,\s*FETCHOPTTYPE_STRINGPOINT/) {
         push(@stringopts, $1);
       }
     }
@@ -92,7 +92,7 @@ sub scan_header {
     return @stringopts;
 }
 
-# Scan packages/OS400/ccsidcurl.c for translatable string option cases.
+# Scan packages/OS400/ccsidfetch.c for translatable string option cases.
 sub scan_wrapper_for_strings {
     my ($f)=@_;
     my $inarmor = 0;
@@ -112,10 +112,10 @@ sub scan_wrapper_for_strings {
 }
 
 # Get translatable string options from header file.
-my @stringdefs = scan_header("$incdir/curl.h");
+my @stringdefs = scan_header("$incdir/fetch.h");
 
 # Get translated string options.
-my @stringrefs = scan_wrapper_for_strings("$os400dir/ccsidcurl.c");
+my @stringrefs = scan_wrapper_for_strings("$os400dir/ccsidfetch.c");
 
 # Lists should be equal: check differences.
 my %diff;

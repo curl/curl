@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
-/* disable the curlx_get_line redefinitions for this unit test */
-#define BUILDING_LIBCURL
-#include "curl_get_line.h"
+#include "fetchcheck.h"
+/* disable the fetchx_get_line redefinitions for this unit test */
+#define BUILDING_LIBFETCH
+#include "fetch_get_line.h"
 #include "memdebug.h"
 
-#if !defined(CURL_DISABLE_COOKIES) || !defined(CURL_DISABLE_ALTSVC) ||  \
-  !defined(CURL_DISABLE_HSTS) || !defined(CURL_DISABLE_NETRC)
+#if !defined(FETCH_DISABLE_COOKIES) || !defined(FETCH_DISABLE_ALTSVC) ||  \
+  !defined(FETCH_DISABLE_HSTS) || !defined(FETCH_DISABLE_NETRC)
 
 /* The test XML does not supply a way to write files without newlines
  * so we write our own
@@ -39,17 +39,17 @@
 #define C1024 C256 C256 C256 C256
 #define C4096 C1024 C1024 C1024 C1024
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-static CURLcode unit_stop(void)
+static FETCHcode unit_stop(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
@@ -80,7 +80,7 @@ static const char *filecontents[] = {
   "LINE1\x1aTEST"
 };
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic warning "-Woverlength-strings"
 #endif
 
@@ -172,17 +172,17 @@ UNITTEST_START
     fclose(fp);
     fprintf(stderr, "OK\n");
   }
-  return (CURLcode)rc;
+  return (FETCHcode)rc;
 UNITTEST_STOP
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 
 #else
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 static void unit_stop(void)
 {

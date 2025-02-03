@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,49 +18,49 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURLSH *share;
-  CURL *curl;
+  FETCHcode res = FETCHE_OK;
+  FETCHSH *share;
+  FETCH *fetch;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  share = curl_share_init();
-  curl_share_setopt(share, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  share = fetch_share_init();
+  fetch_share_setopt(share, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
 
-  curl = curl_easy_init();
-  test_setopt(curl, CURLOPT_SHARE, share);
+  fetch = fetch_easy_init();
+  test_setopt(fetch, FETCHOPT_SHARE, share);
 
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_PROXY, URL);
-  test_setopt(curl, CURLOPT_URL, "http://localhost/");
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_PROXY, URL);
+  test_setopt(fetch, FETCHOPT_URL, "http://localhost/");
 
-  test_setopt(curl, CURLOPT_COOKIEFILE, "");
+  test_setopt(fetch, FETCHOPT_COOKIEFILE, "");
 
   /* Set a cookie without Max-age or Expires */
-  test_setopt(curl, CURLOPT_COOKIELIST, "Set-Cookie: c1=v1; domain=localhost");
+  test_setopt(fetch, FETCHOPT_COOKIELIST, "Set-Cookie: c1=v1; domain=localhost");
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
   if(res) {
-    fprintf(stderr, "curl_easy_perform() failed: %s\n",
-            curl_easy_strerror(res));
+    fprintf(stderr, "fetch_easy_perform() failed: %s\n",
+            fetch_easy_strerror(res));
   }
 
 test_cleanup:
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
-  curl_share_cleanup(share);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_share_cleanup(share);
+  fetch_global_cleanup();
 
   return res;
 }

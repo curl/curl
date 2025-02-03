@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,25 +18,25 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                        0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7};
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
   char *ptr = NULL;
   int asize;
 
   (void)URL; /* we don't use this */
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -44,11 +44,11 @@ CURLcode test(char *URL)
   Curl_safefree(ptr);
 
   asize = (int)sizeof(a);
-  ptr = curl_easy_escape(NULL, (char *)a, asize);
+  ptr = fetch_easy_escape(NULL, (char *)a, asize);
   if(ptr)
-    curl_free(ptr);
+    fetch_free(ptr);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

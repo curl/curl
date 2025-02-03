@@ -29,7 +29,7 @@ http
 Multipart formposting with backslash-escaping of name= and filename=
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape -F name=daniel -F tool=curl --form-string "str1=@literal" --form-string "str2=<verbatim;type=xxx/yyy" -F "file=@%LOGDIR/test%TESTNUMBER.txt;type=moo/foobar;filename=fakerfile" -F file2=@%LOGDIR/test%TESTNUMBER.txt -F "file3=@\"%LOGDIR/test%TESTNUMBER.txt\";type=mo/foo;filename=\"f\\\\\\\\ak\\\\\\er,\\\\an\\d;.t\\\"xt\"" -F 'file4=@"%LOGDIR/test%TESTNUMBER.txt"; filename="A\\AA\"\"\\\"ZZZ"'
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER --form-escape -F name=daniel -F tool=fetch --form-string "str1=@literal" --form-string "str2=<verbatim;type=xxx/yyy" -F "file=@%LOGDIR/test%TESTNUMBER.txt;type=moo/foobar;filename=fakerfile" -F file2=@%LOGDIR/test%TESTNUMBER.txt -F "file3=@\"%LOGDIR/test%TESTNUMBER.txt\";type=mo/foo;filename=\"f\\\\\\\\ak\\\\\\er,\\\\an\\d;.t\\\"xt\"" -F 'file4=@"%LOGDIR/test%TESTNUMBER.txt"; filename="A\\AA\"\"\\\"ZZZ"'
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER.txt">
@@ -48,7 +48,7 @@ foo
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1240
 Content-Type: multipart/form-data; boundary=----------------------------24e78000bd32
@@ -60,7 +60,7 @@ daniel
 ------------------------------24e78000bd32
 Content-Disposition: form-data; name="tool"
 
-curl
+fetch
 ------------------------------24e78000bd32
 Content-Disposition: form-data; name="str1"
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -35,21 +35,21 @@
    to allow old and slow machines to run this test too */
 #define MAX_BLOCKED_TIME_MS 500
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *handle = NULL;
-  CURLM *mhandle = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *handle = NULL;
+  FETCHM *mhandle = NULL;
+  FETCHcode res = FETCHE_OK;
   int still_running = 0;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(handle);
 
-  easy_setopt(handle, CURLOPT_URL, URL);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
+  easy_setopt(handle, FETCHOPT_URL, URL);
+  easy_setopt(handle, FETCHOPT_VERBOSE, 1L);
 
   multi_init(mhandle);
 
@@ -96,7 +96,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "pong = %ld\n", e);
 
     if(e > MAX_BLOCKED_TIME_MS) {
-      res = (CURLcode) 100;
+      res = (FETCHcode) 100;
       break;
     }
   }
@@ -105,9 +105,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(mhandle);
-  curl_easy_cleanup(handle);
-  curl_global_cleanup();
+  fetch_multi_cleanup(mhandle);
+  fetch_easy_cleanup(handle);
+  fetch_global_cleanup();
 
   return res;
 }

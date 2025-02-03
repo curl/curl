@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl-config
+fetch-config
 </keywords>
 </info>
 
@@ -17,7 +17,7 @@ curl-config
 none
 </server>
 <name>
-Compare curl --version with curl-config --version
+Compare fetch --version with fetch-config --version
 </name>
 <command>
 --version
@@ -28,7 +28,7 @@ Compare curl --version with curl-config --version
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%SRCDIR/libtest/test%TESTNUMBER.pl ../curl-config %LOGDIR/stdout%TESTNUMBER version
+%SRCDIR/libtest/test%TESTNUMBER.pl ../fetch-config %LOGDIR/stdout%TESTNUMBER version
 </postcheck>
 <errorcode>
 0

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -92,66 +92,66 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *slist = NULL;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  struct fetch_slist *slist = NULL;
   struct WriteThis pooh;
   pooh.counter = 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  slist = curl_slist_append(slist, "Transfer-Encoding: chunked");
+  slist = fetch_slist_append(slist, "Transfer-Encoding: chunked");
   if(!slist) {
-    fprintf(stderr, "curl_slist_append() failed\n");
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_slist_append() failed\n");
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* Now specify we want to POST data */
-  test_setopt(curl, CURLOPT_POST, 1L);
+  test_setopt(fetch, FETCHOPT_POST, 1L);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
   /* pointer to pass to our read function */
-  test_setopt(curl, CURLOPT_READDATA, &pooh);
+  test_setopt(fetch, FETCHOPT_READDATA, &pooh);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
 
   /* enforce chunked transfer by setting the header */
-  test_setopt(curl, CURLOPT_HTTPHEADER, slist);
+  test_setopt(fetch, FETCHOPT_HTTPHEADER, slist);
 
-  test_setopt(curl, CURLOPT_HTTPAUTH, (long)CURLAUTH_DIGEST);
-  test_setopt(curl, CURLOPT_USERPWD, "foo:bar");
+  test_setopt(fetch, FETCHOPT_HTTPAUTH, (long)FETCHAUTH_DIGEST);
+  test_setopt(fetch, FETCHOPT_USERPWD, "foo:bar");
 
   /* we want to use our own progress function */
-  test_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+  test_setopt(fetch, FETCHOPT_NOPROGRESS, 0L);
+  FETCH_IGNORE_DEPRECATION(
+    test_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progress_callback);
   )
 
   /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
   progress_final_report();
 
@@ -159,11 +159,11 @@ test_cleanup:
 
   /* clean up the headers list */
   if(slist)
-    curl_slist_free_all(slist);
+    fetch_slist_free_all(slist);
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

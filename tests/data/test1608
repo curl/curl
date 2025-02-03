@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-curlopt_dns_shuffle_addresses
+fetchopt_dns_shuffle_addresses
 </keywords>
 </info>
 

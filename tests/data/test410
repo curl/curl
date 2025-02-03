@@ -46,7 +46,7 @@ Long: %repeat[3500 x header content]%
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Long: %repeat[3500 x header content]%
 

@@ -4,7 +4,7 @@
 <info>
 <keywords>
 HTTP
-CURLOPT_URL
+FETCHOPT_URL
 </keywords>
 </info>
 
@@ -37,7 +37,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER?q=foobar#fragment
 <protocol>
 GET /%TESTNUMBER?q=foobar HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

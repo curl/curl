@@ -93,30 +93,30 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -u testuser:testpass --digest http://%H
 <protocol>
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER0001", response="ea598bbfdb5c54b7352c977e3885e44d"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER0002", response="921a8e6db782d6359db1f40d9ed7e6a6"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="999999", uri="/%TESTNUMBER0002", cnonce="MTA4MzIy", nc="00000001", qop="auth", response="25291c357671604a16c0242f56721c07", algorithm=MD5
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

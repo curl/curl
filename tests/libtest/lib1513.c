@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,14 +18,14 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /*
  * Test case converted from bug report #1318 by Petr Novak.
  *
- * Before the fix, this test program returned 52 (CURLE_GOT_NOTHING) instead
- * of 42 (CURLE_ABORTED_BY_CALLBACK).
+ * Before the fix, this test program returned 52 (FETCHE_GOT_NOTHING) instead
+ * of 42 (FETCHE_ABORTED_BY_CALLBACK).
  */
 
 #include "test.h"
@@ -47,32 +47,32 @@ static int progressKiller(void *arg,
   return 1;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  easy_init(curl);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_TIMEOUT, (long)7);
-  easy_setopt(curl, CURLOPT_NOSIGNAL, (long)1);
-  CURL_IGNORE_DEPRECATION(
-    easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progressKiller);
-    easy_setopt(curl, CURLOPT_PROGRESSDATA, NULL);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_TIMEOUT, (long)7);
+  easy_setopt(fetch, FETCHOPT_NOSIGNAL, (long)1);
+  FETCH_IGNORE_DEPRECATION(
+    easy_setopt(fetch, FETCHOPT_PROGRESSFUNCTION, progressKiller);
+    easy_setopt(fetch, FETCHOPT_PROGRESSDATA, NULL);
   )
-  easy_setopt(curl, CURLOPT_NOPROGRESS, (long)0);
+  easy_setopt(fetch, FETCHOPT_NOPROGRESS, (long)0);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

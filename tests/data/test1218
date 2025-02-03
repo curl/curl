@@ -43,20 +43,20 @@ proxy
 <protocol>
 GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://example.fake/c/%TESTNUMBER HTTP/1.1
 Host: example.fake
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: bug=fixed
 
 GET http://bexample.fake/c/%TESTNUMBER HTTP/1.1
 Host: bexample.fake
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

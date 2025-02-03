@@ -42,7 +42,7 @@ http
 </server>
 <setenv>
 FUNVALUE=contents
-VALUE2=curl
+VALUE2=fetch
 BLANK=
 </setenv>
 <name>
@@ -52,8 +52,8 @@ Expand environment variables within config file
 --variable %FUNVALUE
 --variable %VALUE2
 --variable %BLANK
---variable %curl_NOT_SET=default
---expand-data 1{{FUNVALUE}}2{{VALUE2}}3{{curl_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
+--variable %fetch_NOT_SET=default
+--expand-data 1{{FUNVALUE}}2{{VALUE2}}3{{fetch_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
@@ -66,12 +66,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 54
 Content-Type: application/x-www-form-urlencoded
 
-1contents2curl3default45{{verbatim}}6{{not.good}}7{{}}
+1contents2fetch3default45{{verbatim}}6{{not.good}}7{{}}
 </protocol>
 </verify>
 </testcase>

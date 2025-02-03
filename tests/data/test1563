@@ -26,7 +26,7 @@ nomnom
 http
 </server>
 <name>
-Make sure redirects to CURLPROTO_GOPHER are forbidden by default
+Make sure redirects to FETCHPROTO_GOPHER are forbidden by default
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -L -H "Host: www.example.com"
@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER0001 -L -H "Host: www.example.com"
 <protocol>
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

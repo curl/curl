@@ -21,7 +21,7 @@ hello
 # Client-side
 <client>
 
-# require HTTP too as otherwise CURLOPT_POST doesn't exist
+# require HTTP too as otherwise FETCHOPT_POST doesn't exist
 <features>
 mqtt
 http
@@ -30,7 +30,7 @@ http
 mqtt
 </server>
 <name>
-MQTT PUBLISH with CURLOPT_POST set (no payload)
+MQTT PUBLISH with FETCHOPT_POST set (no payload)
 </name>
 <tool>
 lib%TESTNUMBER

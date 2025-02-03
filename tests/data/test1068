@@ -41,7 +41,7 @@ more than one byte
 <protocol>
 PUT /bzz/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Transfer-Encoding: chunked
 Expect: 100-continue

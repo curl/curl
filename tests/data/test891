@@ -39,7 +39,7 @@ CAPA
 AUTH CRAM-MD5
 dXNlciA1YzhkYjAzZjA0Y2VjMGY0M2JjYjA2MDAyMzkxNDE5MA==
 </protocol>
-# CURLE_LOGIN_DENIED
+# FETCHE_LOGIN_DENIED
 <errorcode>
 67
 </errorcode>

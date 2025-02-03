@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,12 +21,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
 # This script grew out of help from Przemyslaw Iskra and Balint Szilakszi
-# a late evening in the #curl IRC channel.
+# a late evening in the #fetch IRC channel.
 #
 
 use strict;
@@ -63,7 +63,7 @@ my $root=$ARGV[0] || ".";
 # need an include directory when building out-of-tree
 my $i = ($ARGV[1]) ? "-I$ARGV[1] " : '';
 
-my $incdir = "$root/include/curl";
+my $incdir = "$root/include/fetch";
 
 my $summary=0;
 my $misses=0;
@@ -76,7 +76,7 @@ sub scanenums {
     my ($file)=@_;
     my $skipit = 0;
 
-    open H_IN, "-|", "$Cpreprocessor -DCURL_DISABLE_DEPRECATION $i$file" ||
+    open H_IN, "-|", "$Cpreprocessor -DFETCH_DISABLE_DEPRECATION $i$file" ||
         die "Cannot preprocess $file";
     while ( <H_IN> ) {
         my ($line, $linenum) = ($_, $.);
@@ -149,7 +149,7 @@ for(@hfiles) {
 
 my $errors = 0;
 for my $s (@syms) {
-    if($s !~ /^(lib|)curl/i) {
+    if($s !~ /^(lib|)fetch/i) {
         print "Bad symbols in public header files:\n" if(!$errors);
         $errors++;
         print "  $s\n";

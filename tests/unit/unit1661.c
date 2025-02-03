@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 #include "bufref.h"
 #include "memdebug.h"
 
@@ -36,10 +36,10 @@ static void test_free(void *p)
   free(p);
 }
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
   Curl_bufref_init(&bufref);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
@@ -50,7 +50,7 @@ static void unit_stop(void)
 UNITTEST_START
 {
   char *buffer = NULL;
-  CURLcode result = CURLE_OK;
+  FETCHcode result = FETCHE_OK;
 
   /**
    * testing Curl_bufref_init.
@@ -94,7 +94,7 @@ UNITTEST_START
    */
 
   result = Curl_bufref_memdup(&bufref, "1661", 3);
-  abort_unless(result == CURLE_OK, curl_easy_strerror(result));
+  abort_unless(result == FETCHE_OK, fetch_easy_strerror(result));
   fail_unless(freecount == 1, "Destructor not called");
   fail_unless((char *) bufref.ptr != buffer, "Returned pointer not set");
   buffer = (char *) Curl_bufref_ptr(&bufref);

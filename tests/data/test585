@@ -4,8 +4,8 @@
 HTTP
 HTTP GET
 multi
-CURLOPT_OPENSOCKETFUNCTION
-CURLOPT_CLOSESOCKETFUNCTION
+FETCHOPT_OPENSOCKETFUNCTION
+FETCHOPT_CLOSESOCKETFUNCTION
 </keywords>
 </info>
 
@@ -41,7 +41,7 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>

@@ -21,7 +21,7 @@ none
 </server>
 
 <name>
-HSTS curl_easy_duphandle
+HSTS fetch_easy_duphandle
 </name>
 <tool>
 lib%TESTNUMBER

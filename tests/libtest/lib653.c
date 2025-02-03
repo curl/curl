@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,38 +28,38 @@
 #include "memdebug.h"
 
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curls = NULL;
-  CURLcode res = CURLE_OK;
-  curl_mimepart *field = NULL;
-  curl_mime *mime = NULL;
+  FETCH *fetchs = NULL;
+  FETCHcode res = FETCHE_OK;
+  fetch_mimepart *field = NULL;
+  fetch_mime *mime = NULL;
 
-  global_init(CURL_GLOBAL_ALL);
-  easy_init(curls);
+  global_init(FETCH_GLOBAL_ALL);
+  easy_init(fetchs);
 
-  mime = curl_mime_init(curls);
-  field = curl_mime_addpart(mime);
-  curl_mime_name(field, "name");
-  curl_mime_data(field, "short value", CURL_ZERO_TERMINATED);
+  mime = fetch_mime_init(fetchs);
+  field = fetch_mime_addpart(mime);
+  fetch_mime_name(field, "name");
+  fetch_mime_data(field, "short value", FETCH_ZERO_TERMINATED);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_HEADER, 1L);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curls, CURLOPT_MIMEPOST, mime);
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
+  easy_setopt(fetchs, FETCHOPT_URL, URL);
+  easy_setopt(fetchs, FETCHOPT_HEADER, 1L);
+  easy_setopt(fetchs, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetchs, FETCHOPT_MIMEPOST, mime);
+  easy_setopt(fetchs, FETCHOPT_NOPROGRESS, 1L);
 
-  res = curl_easy_perform(curls);
+  res = fetch_easy_perform(fetchs);
   if(res)
     goto test_cleanup;
 
   /* Alter form and resubmit. */
-  curl_mime_data(field, "long value for length change", CURL_ZERO_TERMINATED);
-  res = curl_easy_perform(curls);
+  fetch_mime_data(field, "long value for length change", FETCH_ZERO_TERMINATED);
+  res = fetch_easy_perform(fetchs);
 
 test_cleanup:
-  curl_mime_free(mime);
-  curl_easy_cleanup(curls);
-  curl_global_cleanup();
+  fetch_mime_free(mime);
+  fetch_easy_cleanup(fetchs);
+  fetch_global_cleanup();
   return res; /* return the final return code */
 }

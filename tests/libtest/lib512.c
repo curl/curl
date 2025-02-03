@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,28 +28,28 @@
 /* Test case code based on source in a bug report filed by James Bursa on
    28 Apr 2004 */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode code;
+  FETCHcode code;
   int rc = 99;
 
-  code = curl_global_init(CURL_GLOBAL_ALL);
-  if(code == CURLE_OK) {
-    CURL *curl = curl_easy_init();
-    if(curl) {
-      CURL *curl2;
+  code = fetch_global_init(FETCH_GLOBAL_ALL);
+  if(code == FETCHE_OK) {
+    FETCH *fetch = fetch_easy_init();
+    if(fetch) {
+      FETCH *fetch2;
 
-      curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-      curl_easy_setopt(curl, CURLOPT_HEADER, 1L);
+      fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+      fetch_easy_setopt(fetch, FETCHOPT_HEADER, 1L);
 
-      curl2 = curl_easy_duphandle(curl);
-      if(curl2) {
+      fetch2 = fetch_easy_duphandle(fetch);
+      if(fetch2) {
 
-        code = curl_easy_setopt(curl2, CURLOPT_URL, URL);
-        if(code == CURLE_OK) {
+        code = fetch_easy_setopt(fetch2, FETCHOPT_URL, URL);
+        if(code == FETCHE_OK) {
 
-          code = curl_easy_perform(curl2);
-          if(code == CURLE_OK)
+          code = fetch_easy_perform(fetch2);
+          if(code == FETCHE_OK)
             rc = 0;
           else
             rc = 1;
@@ -57,20 +57,20 @@ CURLcode test(char *URL)
         else
           rc = 2;
 
-        curl_easy_cleanup(curl2);
+        fetch_easy_cleanup(fetch2);
       }
       else
         rc = 3;
 
-      curl_easy_cleanup(curl);
+      fetch_easy_cleanup(fetch);
     }
     else
       rc = 4;
 
-    curl_global_cleanup();
+    fetch_global_cleanup();
   }
   else
     rc = 5;
 
-  return (CURLcode)rc;
+  return (FETCHcode)rc;
 }

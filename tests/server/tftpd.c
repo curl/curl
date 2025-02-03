@@ -11,7 +11,7 @@
  * This code includes many modifications by Jim Guyton <guyton@rand-unix>
  *
  * This source file was started based on netkit-tftpd 0.17
- * Heavily modified for curl's test suite
+ * Heavily modified for fetch's test suite
  */
 
 /*
@@ -81,7 +81,7 @@
 
 #include <ctype.h>
 
-#include "curlx.h" /* from the private lib dir */
+#include "fetchx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
 #include "server_sockaddr.h"
@@ -191,9 +191,9 @@ static tftphdr_storage_t buf;
 static tftphdr_storage_t ackbuf;
 
 static srvr_sockaddr_union_t from;
-static curl_socklen_t fromlen;
+static fetch_socklen_t fromlen;
 
-static curl_socket_t peer = CURL_SOCKET_BAD;
+static fetch_socket_t peer = FETCH_SOCKET_BAD;
 
 static unsigned int timeout;
 static unsigned int maxtimeout = 5 * TIMEOUT;
@@ -234,7 +234,7 @@ static void read_ahead(struct testcase *test, int convert);
 
 static ssize_t write_behind(struct testcase *test, int convert);
 
-static int synchnet(curl_socket_t);
+static int synchnet(fetch_socket_t);
 
 static int do_tftp(struct testcase *test, struct tftphdr *tp, ssize_t size);
 
@@ -275,7 +275,7 @@ static void mysignal(int sig, void (*handler)(int))
 }
 
 #ifdef HAVE_SIGSETJMP
-CURL_NORETURN
+FETCH_NORETURN
 #endif
 static void timer(int signum)
 {
@@ -454,7 +454,7 @@ static ssize_t write_behind(struct testcase *test, int convert)
   if(!test->ofile) {
     char outfile[256];
     msnprintf(outfile, sizeof(outfile), "%s/upload.%ld", logdir, test->testno);
-    test->ofile = open(outfile, O_CREAT|O_RDWR|CURL_O_BINARY, 0777);
+    test->ofile = open(outfile, O_CREAT|O_RDWR|FETCH_O_BINARY, 0777);
     if(test->ofile == -1) {
       logmsg("Couldn't create and/or open file %s for upload!", outfile);
       return -1; /* failure! */
@@ -509,12 +509,12 @@ skipit:
  * is active).
  */
 
-static int synchnet(curl_socket_t f /* socket to flush */)
+static int synchnet(fetch_socket_t f /* socket to flush */)
 {
   int j = 0;
   char rbuf[PKTSIZE];
   srvr_sockaddr_union_t fromaddr;
-  curl_socklen_t fromaddrlen;
+  fetch_socklen_t fromaddrlen;
 
   for(;;) {
 #if defined(HAVE_IOCTLSOCKET_CAMEL_FIONBIO)
@@ -553,7 +553,7 @@ int main(int argc, char **argv)
   ssize_t n = 0;
   int arg = 1;
   unsigned short port = DEFAULT_PORT;
-  curl_socket_t sock = CURL_SOCKET_BAD;
+  fetch_socket_t sock = FETCH_SOCKET_BAD;
   int flag;
   int rc;
   int error;
@@ -612,7 +612,7 @@ int main(int argc, char **argv)
       if(argc > arg) {
         char *endptr;
         unsigned long ulnum = strtoul(argv[arg], &endptr, 10);
-        port = curlx_ultous(ulnum);
+        port = fetchx_ultous(ulnum);
         arg++;
       }
     }
@@ -657,7 +657,7 @@ int main(int argc, char **argv)
     sock = socket(AF_INET6, SOCK_DGRAM, 0);
 #endif
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(FETCH_SOCKET_BAD == sock) {
     error = SOCKERRNO;
     logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
     result = 1;
@@ -703,7 +703,7 @@ int main(int argc, char **argv)
   if(!port) {
     /* The system was supposed to choose a port number, figure out which
        port we actually got and update the listener port value with it. */
-    curl_socklen_t la_size;
+    fetch_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
 #ifdef USE_IPV6
     if(!use_ipv6)
@@ -788,7 +788,7 @@ int main(int argc, char **argv)
 #endif
       from.sa4.sin_family = AF_INET;
       peer = socket(AF_INET, SOCK_DGRAM, 0);
-      if(CURL_SOCKET_BAD == peer) {
+      if(FETCH_SOCKET_BAD == peer) {
         logmsg("socket");
         result = 2;
         break;
@@ -803,7 +803,7 @@ int main(int argc, char **argv)
     else {
       from.sa6.sin6_family = AF_INET6;
       peer = socket(AF_INET6, SOCK_DGRAM, 0);
-      if(CURL_SOCKET_BAD == peer) {
+      if(FETCH_SOCKET_BAD == peer) {
         logmsg("socket");
         result = 2;
         break;
@@ -827,7 +827,7 @@ int main(int argc, char **argv)
       free(test.buffer);
     }
     sclose(peer);
-    peer = CURL_SOCKET_BAD;
+    peer = FETCH_SOCKET_BAD;
 
     if(got_exit_signal)
       break;
@@ -846,10 +846,10 @@ tftpd_cleanup:
   if(test.ofile > 0)
     close(test.ofile);
 
-  if((peer != sock) && (peer != CURL_SOCKET_BAD))
+  if((peer != sock) && (peer != FETCH_SOCKET_BAD))
     sclose(peer);
 
-  if(sock != CURL_SOCKET_BAD)
+  if(sock != FETCH_SOCKET_BAD)
     sclose(sock);
 
   if(got_exit_signal)
@@ -1078,7 +1078,7 @@ static int validate_access(struct testcase *test,
   if(!strncmp("verifiedserver", filename, 14)) {
     char weare[128];
     size_t count = msnprintf(weare, sizeof(weare), "WE ROOLZ: %"
-                             CURL_FORMAT_CURL_OFF_T "\r\n", our_getpid());
+                             FETCH_FORMAT_FETCH_OFF_T "\r\n", our_getpid());
 
     logmsg("Are-we-friendly question received");
     test->buffer = strdup(weare);

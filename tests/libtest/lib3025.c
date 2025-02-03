@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,44 +18,44 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res;
-  CURL *curl;
-  struct curl_slist *icy = NULL;
+  FETCHcode res;
+  FETCH *fetch;
+  struct fetch_slist *icy = NULL;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  icy = curl_slist_append(icy, "ICY 200 OK");
-  test_setopt(curl, CURLOPT_HTTP200ALIASES, icy);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_URL, URL);
+  icy = fetch_slist_append(icy, "ICY 200 OK");
+  test_setopt(fetch, FETCHOPT_HTTP200ALIASES, icy);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_easy_cleanup(curl);
-  curl_slist_free_all(icy);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_slist_free_all(icy);
+  fetch_global_cleanup();
 
   return res;
 }

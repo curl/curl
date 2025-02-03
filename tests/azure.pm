@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -55,9 +55,9 @@ sub azure_check_environment {
 }
 
 sub azure_create_test_run {
-    my ($curl)=@_;
+    my ($fetch)=@_;
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_run=`$curl --silent --noproxy "*" \\
+    my $azure_run=`$fetch --silent --noproxy "*" \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data "
@@ -75,13 +75,13 @@ sub azure_create_test_run {
 }
 
 sub azure_create_test_result {
-    my ($curl, $azure_run_id, $testnum, $testname)=@_;
+    my ($fetch, $azure_run_id, $testnum, $testname)=@_;
     $testname =~ s/\\/\\\\/g;
     $testname =~ s/\"/\\\"/g;
     $testname =~ s/\'/'"'"'/g;
     my $title_testnum=sprintf("%04d", $testnum);
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_result=`$curl --silent --noproxy '*' \\
+    my $azure_result=`$fetch --silent --noproxy '*' \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header 'Content-Type: application/json' \\
     --data '
@@ -91,7 +91,7 @@ sub azure_create_test_result {
                 "testCase": {"id": $testnum},
                 "testCaseTitle": "$title_testnum: $testname",
                 "testCaseRevision": 2,
-                "automatedTestName": "curl.tests.$testnum",
+                "automatedTestName": "fetch.tests.$testnum",
                 "outcome": "InProgress"
             }
         ]
@@ -104,7 +104,7 @@ sub azure_create_test_result {
 }
 
 sub azure_update_test_result {
-    my ($curl, $azure_run_id, $azure_result_id, $testnum, $error, $start, $stop)=@_;
+    my ($fetch, $azure_run_id, $azure_result_id, $testnum, $error, $start, $stop)=@_;
     if(!defined $stop) {
         $stop = $start;
     }
@@ -125,7 +125,7 @@ sub azure_update_test_result {
         $azure_outcome = 'Failed';
     }
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_result=`$curl --silent --noproxy '*' --request PATCH \\
+    my $azure_result=`$fetch --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header "Content-Type: application/json" \\
     --data '
@@ -147,9 +147,9 @@ sub azure_update_test_result {
 }
 
 sub azure_update_test_run {
-    my ($curl, $azure_run_id)=@_;
+    my ($fetch, $azure_run_id)=@_;
     my $azure_baseurl="$ENV{'SYSTEM_TEAMFOUNDATIONCOLLECTIONURI'}$ENV{'SYSTEM_TEAMPROJECTID'}";
-    my $azure_run=`$curl --silent --noproxy '*' --request PATCH \\
+    my $azure_run=`$fetch --silent --noproxy '*' --request PATCH \\
     --header "Authorization: Bearer $ENV{'AZURE_ACCESS_TOKEN'}" \\
     --header 'Content-Type: application/json' \\
     --data '

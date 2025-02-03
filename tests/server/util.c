@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "server_setup.h"
@@ -44,7 +44,7 @@
 #include <dos.h>  /* delay() */
 #endif
 
-#include "curlx.h" /* from the private lib dir */
+#include "fetchx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "util.h"
 #include "timeval.h"
@@ -278,11 +278,11 @@ int wait_ms(int timeout_ms)
   return r;
 }
 
-curl_off_t our_getpid(void)
+fetch_off_t our_getpid(void)
 {
-  curl_off_t pid;
+  fetch_off_t pid;
 
-  pid = (curl_off_t)Curl_getpid();
+  pid = (fetch_off_t)Curl_getpid();
 #if defined(_WIN32)
   /* store pid + 65536 to avoid conflict with Cygwin/msys PIDs, see also:
    * - https://cygwin.com/git/?p=newlib-cygwin.git;a=commit; ↵
@@ -298,7 +298,7 @@ curl_off_t our_getpid(void)
 int write_pidfile(const char *filename)
 {
   FILE *pidfile;
-  curl_off_t pid;
+  fetch_off_t pid;
 
   pid = our_getpid();
   pidfile = fopen(filename, "wb");
@@ -306,9 +306,9 @@ int write_pidfile(const char *filename)
     logmsg("Couldn't write pid file: %s %s", filename, strerror(errno));
     return 0; /* fail */
   }
-  fprintf(pidfile, "%" CURL_FORMAT_CURL_OFF_T "\n", pid);
+  fprintf(pidfile, "%" FETCH_FORMAT_FETCH_OFF_T "\n", pid);
   fclose(pidfile);
-  logmsg("Wrote pid %" CURL_FORMAT_CURL_OFF_T " to %s", pid, filename);
+  logmsg("Wrote pid %" FETCH_FORMAT_FETCH_OFF_T " to %s", pid, filename);
   return 1; /* success */
 }
 
@@ -501,7 +501,7 @@ static SIGHANDLER_T old_sigterm_handler = SIG_ERR;
 static SIGHANDLER_T old_sigbreak_handler = SIG_ERR;
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#if defined(_WIN32) && !defined(FETCH_WINDOWS_UWP)
 #ifdef _WIN32_WCE
 static DWORD thread_main_id = 0;
 #else
@@ -591,7 +591,7 @@ static BOOL WINAPI ctrl_event_handler(DWORD dwCtrlType)
 }
 #endif
 
-#if defined(_WIN32) && !defined(CURL_WINDOWS_UWP)
+#if defined(_WIN32) && !defined(FETCH_WINDOWS_UWP)
 /* Window message handler for Windows applications to add support
  * for graceful process termination via taskkill (without /f) which
  * sends WM_CLOSE to all Windows of a process (even hidden ones).
@@ -758,14 +758,14 @@ void install_signal_handlers(bool keep_sigalrm)
   if(!SetConsoleCtrlHandler(ctrl_event_handler, TRUE))
     logmsg("cannot install CTRL event handler");
 
-#ifndef CURL_WINDOWS_UWP
+#ifndef FETCH_WINDOWS_UWP
   {
 #ifdef _WIN32_WCE
-    typedef HANDLE curl_win_thread_handle_t;
+    typedef HANDLE fetch_win_thread_handle_t;
 #else
-    typedef uintptr_t curl_win_thread_handle_t;
+    typedef uintptr_t fetch_win_thread_handle_t;
 #endif
-    curl_win_thread_handle_t thread;
+    fetch_win_thread_handle_t thread;
 #ifdef _WIN32_WCE
     thread = CreateThread(NULL, 0, &main_window_loop,
                           (LPVOID)GetModuleHandle(NULL), 0, &thread_main_id);
@@ -813,7 +813,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 #endif
 #ifdef _WIN32
   (void)SetConsoleCtrlHandler(ctrl_event_handler, FALSE);
-#ifndef CURL_WINDOWS_UWP
+#ifndef FETCH_WINDOWS_UWP
   if(thread_main_window && thread_main_id) {
     if(PostThreadMessage(thread_main_id, WM_APP, 0, 0)) {
       if(WaitForSingleObjectEx(thread_main_window, INFINITE, TRUE)) {
@@ -835,7 +835,7 @@ void restore_signal_handlers(bool keep_sigalrm)
 
 #ifdef USE_UNIX_SOCKETS
 
-int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+int bind_unix_socket(fetch_socket_t sock, const char *unix_socket,
                      struct sockaddr_un *sau)
 {
   int error;
@@ -853,8 +853,8 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
   if(0 != rc && SOCKERRNO == EADDRINUSE) {
     struct_stat statbuf;
     /* socket already exists. Perhaps it is stale? */
-    curl_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
-    if(CURL_SOCKET_BAD == unixfd) {
+    fetch_socket_t unixfd = socket(AF_UNIX, SOCK_STREAM, 0);
+    if(FETCH_SOCKET_BAD == unixfd) {
       logmsg("Failed to create socket at %s: (%d) %s",
              unix_socket, SOCKERRNO, sstrerror(SOCKERRNO));
       return -1;
@@ -871,7 +871,7 @@ int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
     /* socket server is not alive, now check if it was actually a socket. */
 #ifdef _WIN32
     /* Windows does not have lstat function. */
-    rc = curlx_win32_stat(unix_socket, &statbuf);
+    rc = fetchx_win32_stat(unix_socket, &statbuf);
 #else
     rc = lstat(unix_socket, &statbuf);
 #endif

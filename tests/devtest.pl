@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -32,8 +32,8 @@
 # An example command-line that starts a test http server for test 11 and waits
 # for the user before stopping it:
 #   ./devtest.pl --verbose serverfortest https echo "Started https" protoport https preprocess 11 pause echo Stopping stopservers echo Done
-# curl can connect to the server while it's running like this:
-#   curl -vkL https://localhost:<protoport>/11
+# fetch can connect to the server while it's running like this:
+#   fetch -vkL https://localhost:<protoport>/11
 
 use strict;
 use warnings;
@@ -86,7 +86,7 @@ sub logmsg {
 }
 
 #######################################################################
-# Parse and store the protocols in curl's Protocols: line
+# Parse and store the protocols in fetch's Protocols: line
 # This is copied from runtests.pl
 #
 sub parseprotocols {
@@ -109,10 +109,10 @@ sub parseprotocols {
 
 
 #######################################################################
-# Initialize @protocols from the curl binary under test
+# Initialize @protocols from the fetch binary under test
 #
 sub init_protocols {
-    for (`$CURL -V 2>$dev_null`) {
+    for (`$FETCH -V 2>$dev_null`) {
         if(m/^Protocols: (.*)$/) {
             parseprotocols($1);
         }

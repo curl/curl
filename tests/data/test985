@@ -43,7 +43,7 @@ pop3://%HOSTIP:%POP3PORT/%TESTNUMBER -u user:secret --ssl-reqd
 #
 # Verify data after the test has been "shot"
 <verify>
-# 64 is CURLE_USE_SSL_FAILED
+# 64 is FETCHE_USE_SSL_FAILED
 <errorcode>
 64
 </errorcode>

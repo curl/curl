@@ -38,7 +38,7 @@ PASS ftp@example.com
 PWD
 </protocol>
 
-# 3 is CURLE_URL_MALFORMAT
+# 3 is FETCHE_URL_MALFORMAT
 <errorcode>
 3
 </errorcode>

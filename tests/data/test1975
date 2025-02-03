@@ -2,7 +2,7 @@
 <info>
 <keywords>
 HTTP
-CURLOPT_AWS_SIGV4
+FETCHOPT_AWS_SIGV4
 </keywords>
 </info>
 
@@ -32,7 +32,7 @@ Debug
 crypto
 </features>
 <setenv>
-CURL_FORCEHOST=1
+FETCH_FORCEHOST=1
 </setenv>
 
 <name>

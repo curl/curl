@@ -37,7 +37,7 @@ simple HTTPS GET with base64-sha256 public key pinning (Schannel variant)
 </name>
  <setenv>
 # This test is pointless if we are not using the Schannel backend
-CURL_SSL_BACKEND=schannel
+FETCH_SSL_BACKEND=schannel
  </setenv>
 <command>
 -4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --pinnedpubkey sha256//%sha256b64file[%SRCDIR/certs/Server-localhost-sv.pub.der]sha256b64file% --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
@@ -50,7 +50,7 @@ CURL_SSL_BACKEND=schannel
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

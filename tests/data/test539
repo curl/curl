@@ -27,13 +27,13 @@ contents for file number two
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-Two FTP fetches using different CURLOPT_FTP_FILEMETHOD
+Two FTP fetches using different FETCHOPT_FTP_FILEMETHOD
 </name>
 <command>
 ftp://%HOSTIP:%FTPPORT/path/to/the/file/%TESTNUMBER ftp://%HOSTIP:%FTPPORT/path/to/the/file/%TESTNUMBER0001

@@ -47,12 +47,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
 
-# 56 = CURLE_RECV_ERROR
+# 56 = FETCHE_RECV_ERROR
 <errorcode>
 56
 </errorcode>

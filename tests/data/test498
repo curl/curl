@@ -42,7 +42,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-redirs 400 --location
 #
 # Verify data after the test has been "shot"
 <verify>
-# curl: (56) Too large response headers: 6144086 > 6144000
+# fetch: (56) Too large response headers: 6144086 > 6144000
 <errorcode>
 56
 </errorcode>

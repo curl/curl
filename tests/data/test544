@@ -24,13 +24,13 @@ OK
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-HTTP POST text data using CURLOPT_COPYPOSTFIELDS
+HTTP POST text data using FETCHOPT_COPYPOSTFIELDS
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

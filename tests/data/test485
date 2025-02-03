@@ -32,12 +32,12 @@ http://example.com/%TESTNUMBER http://example.net/fooo --etag-save %LOGDIR/etag%
 2
 </errorcode>
 <stderr mode="text">
-curl: The etag options only work on a single URL
-curl: option --etag-save: is badly used here
+fetch: The etag options only work on a single URL
+fetch: option --etag-save: is badly used here
 %if manual
-curl: try 'curl --help' or 'curl --manual' for more information
+fetch: try 'fetch --help' or 'fetch --manual' for more information
 %else
-curl: try 'curl --help' for more information
+fetch: try 'fetch --help' for more information
 %endif
 </stderr>
 </verify>

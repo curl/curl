@@ -26,7 +26,7 @@ smb
 Basic SMB request
 </name>
 <command>
--u 'curltest:curltest' smb://%HOSTIP:%SMBPORT/TESTS/%TESTNUMBER
+-u 'fetchtest:fetchtest' smb://%HOSTIP:%SMBPORT/TESTS/%TESTNUMBER
 </command>
 </client>
 

@@ -52,7 +52,7 @@ http://[2200::33]:%HTTPPORT/%TESTNUMBER --proxy socks5h://%HOSTIP:%SOCKSPORT
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: [2200::33]:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

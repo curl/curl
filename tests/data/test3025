@@ -24,7 +24,7 @@ MooMoo
 http
 </server>
 <name>
-CURLOPT_HTTP200ALIASES
+FETCHOPT_HTTP200ALIASES
 </name>
 <tool>
 lib%TESTNUMBER

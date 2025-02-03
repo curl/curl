@@ -96,24 +96,24 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --anyauth http://%HOST
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/%TESTNUMBER", response="986238b7e0077754944c966f56d9bc77"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="loonie", nonce="314156592", uri="/%TESTNUMBER0003", response="1c6390a67bac3283a9b023402f3b3540"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 [DISCONNECT]

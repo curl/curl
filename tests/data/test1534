@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLINFO_FILETIME
+FETCHINFO_FILETIME
 </keywords>
 </info>
 
@@ -23,12 +23,12 @@ Content-Length: 0
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 <name>
-CURLINFO_FILETIME init and reset
+FETCHINFO_FILETIME init and reset
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

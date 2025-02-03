@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://fetch.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -46,12 +46,12 @@ static const char *testdata[]={
 #define HEADER_REQUEST -1
 #endif
 
-static void showem(CURL *easy, unsigned int type)
+static void showem(FETCH *easy, unsigned int type)
 {
   int i;
-  struct curl_header *header;
+  struct fetch_header *header;
   for(i = 0; testdata[i]; i++) {
-    if(CURLHE_OK == curl_easy_header(easy, testdata[i], 0, type,
+    if(FETCHHE_OK == fetch_easy_header(easy, testdata[i], 0, type,
                                      HEADER_REQUEST, &header)) {
       if(header->amount > 1) {
         /* more than one, iterate over them */
@@ -63,7 +63,7 @@ static void showem(CURL *easy, unsigned int type)
 
           if(++index == amount)
             break;
-          if(CURLHE_OK != curl_easy_header(easy, testdata[i], index, type,
+          if(FETCHHE_OK != fetch_easy_header(easy, testdata[i], index, type,
                                            HEADER_REQUEST, &header))
             break;
         } while(1);
@@ -83,38 +83,38 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   (void)userp;
   return n*l;
 }
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *easy = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *easy = NULL;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_DEFAULT);
+  global_init(FETCH_GLOBAL_DEFAULT);
   easy_init(easy);
-  easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-  easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
+  easy_setopt(easy, FETCHOPT_URL, URL);
+  easy_setopt(easy, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(easy, FETCHOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
+  easy_setopt(easy, FETCHOPT_WRITEFUNCTION, write_cb);
 
   /* if there's a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
-    easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
-    easy_setopt(easy, CURLOPT_HTTPPROXYTUNNEL, 1L);
+    easy_setopt(easy, FETCHOPT_PROXY, libtest_arg2);
+    easy_setopt(easy, FETCHOPT_HTTPPROXYTUNNEL, 1L);
   }
-  res = curl_easy_perform(easy);
+  res = fetch_easy_perform(easy);
   if(res)
     goto test_cleanup;
 
-  showem(easy, CURLH_HEADER);
+  showem(easy, FETCHH_HEADER);
   if(libtest_arg2 && *libtest_arg2) {
     /* now show connect headers only */
-    showem(easy, CURLH_CONNECT);
+    showem(easy, FETCHH_CONNECT);
   }
-  showem(easy, CURLH_1XX);
-  showem(easy, CURLH_TRAILER);
+  showem(easy, FETCHH_1XX);
+  showem(easy, FETCHH_TRAILER);
 
 test_cleanup:
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
   return res;
 }

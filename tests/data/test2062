@@ -69,13 +69,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:testpass --digest
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1053604145", uri="/%TESTNUMBER", response="9d3256ee6526ec40dd48743bb48e51ee9baba587c78f15c3a86166242150af98", algorithm=SHA-512-256
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

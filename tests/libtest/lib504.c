@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -34,28 +34,28 @@
  * Christopher R. Palmer.
  *
  * Use multi interface to get document over proxy with bad port number.
- * This caused the interface to "hang" in libcurl 7.10.2.
+ * This caused the interface to "hang" in libfetch 7.10.2.
  */
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *c = NULL;
-  CURLcode res = CURLE_OK;
-  CURLM *m = NULL;
+  FETCH *c = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCHM *m = NULL;
   fd_set rd, wr, exc;
   int running;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(c);
 
   /* The point here is that there must not be anything running on the given
      proxy port */
   if(libtest_arg2)
-    easy_setopt(c, CURLOPT_PROXY, libtest_arg2);
-  easy_setopt(c, CURLOPT_URL, URL);
-  easy_setopt(c, CURLOPT_VERBOSE, 1L);
+    easy_setopt(c, FETCHOPT_PROXY, libtest_arg2);
+  easy_setopt(c, FETCHOPT_URL, URL);
+  easy_setopt(c, FETCHOPT_VERBOSE, 1L);
 
   multi_init(m);
 
@@ -68,16 +68,16 @@ CURLcode test(char *URL)
     interval.tv_sec = 1;
     interval.tv_usec = 0;
 
-    fprintf(stderr, "curl_multi_perform()\n");
+    fprintf(stderr, "fetch_multi_perform()\n");
 
     multi_perform(m, &running);
 
     while(running) {
-      CURLMcode mres;
+      FETCHMcode mres;
       int num;
-      mres = curl_multi_wait(m, NULL, 0, TEST_HANG_TIMEOUT, &num);
-      if(mres != CURLM_OK) {
-        printf("curl_multi_wait() returned %d\n", mres);
+      mres = fetch_multi_wait(m, NULL, 0, TEST_HANG_TIMEOUT, &num);
+      if(mres != FETCHM_OK) {
+        printf("fetch_multi_wait() returned %d\n", mres);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
       }
@@ -92,7 +92,7 @@ CURLcode test(char *URL)
     if(!running) {
       /* This is where this code is expected to reach */
       int numleft;
-      CURLMsg *msg = curl_multi_info_read(m, &numleft);
+      FETCHMsg *msg = fetch_multi_info_read(m, &numleft);
       fprintf(stderr, "Expected: not running\n");
       if(msg && !numleft)
         res = TEST_ERR_SUCCESS; /* this is where we should be */
@@ -106,7 +106,7 @@ CURLcode test(char *URL)
     FD_ZERO(&wr);
     FD_ZERO(&exc);
 
-    fprintf(stderr, "curl_multi_fdset()\n");
+    fprintf(stderr, "fetch_multi_fdset()\n");
 
     multi_fdset(m, &rd, &wr, &exc, &maxfd);
 
@@ -121,10 +121,10 @@ test_cleanup:
 
   /* proper cleanup sequence - type PA */
 
-  curl_multi_remove_handle(m, c);
-  curl_multi_cleanup(m);
-  curl_easy_cleanup(c);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, c);
+  fetch_multi_cleanup(m);
+  fetch_easy_cleanup(c);
+  fetch_global_cleanup();
 
   return res;
 }

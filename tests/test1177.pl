@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
-# Verify that curl_version_info.3 documents all the CURL_VERSION_ bits
+# Verify that fetch_version_info.3 documents all the FETCH_VERSION_ bits
 # from the header.
 #
 
@@ -43,7 +43,7 @@ my $error=0;
 
 open(my $m, "<", "$manpage");
 while(<$m>) {
-    if($_ =~ / mask bit: (CURL_VERSION_[A-Z0-9_]+)/i) {
+    if($_ =~ / mask bit: (FETCH_VERSION_[A-Z0-9_]+)/i) {
         $manversion{$1}++;
     }
     if($_ =~ /^\.ip (.*)/i) {
@@ -54,7 +54,7 @@ close($m);
 
 open(my $h, "<", "$header");
 while(<$h>) {
-    if($_ =~ /^\#define (CURL_VERSION_[A-Z0-9_]+)/i) {
+    if($_ =~ /^\#define (FETCH_VERSION_[A-Z0-9_]+)/i) {
         $headerversion{$1}++;
     }
 }

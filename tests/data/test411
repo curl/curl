@@ -28,12 +28,12 @@ none
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
-curl: cannot read config from '%LOGDIR/missing'
-curl: option -K: error encountered when reading a file
+fetch: cannot read config from '%LOGDIR/missing'
+fetch: option -K: error encountered when reading a file
 %if manual
-curl: try 'curl --help' or 'curl --manual' for more information
+fetch: try 'fetch --help' or 'fetch --manual' for more information
 %else
-curl: try 'curl --help' for more information
+fetch: try 'fetch --help' for more information
 %endif
 </stderr>
 <errorcode>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://fetch.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -35,49 +35,49 @@ static size_t read_callback(char *buffer, size_t size, size_t nitems,
   return 0;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
-  struct curl_slist *list = NULL;
-  struct curl_slist *connect_to = NULL;
+  FETCH *fetch;
+  FETCHcode res = TEST_ERR_MAJOR_BAD;
+  struct fetch_slist *list = NULL;
+  struct fetch_slist *connect_to = NULL;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_AWS_SIGV4, "aws:amz:us-east-1:s3");
-  test_setopt(curl, CURLOPT_USERPWD, "xxx");
-  test_setopt(curl, CURLOPT_HEADER, 0L);
-  test_setopt(curl, CURLOPT_URL, URL);
-  list = curl_slist_append(list, "Content-Type: application/json");
+  test_setopt(fetch, FETCHOPT_UPLOAD, 1L);
+  test_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_AWS_SIGV4, "aws:amz:us-east-1:s3");
+  test_setopt(fetch, FETCHOPT_USERPWD, "xxx");
+  test_setopt(fetch, FETCHOPT_HEADER, 0L);
+  test_setopt(fetch, FETCHOPT_URL, URL);
+  list = fetch_slist_append(list, "Content-Type: application/json");
   if(!list)
     goto test_cleanup;
-  test_setopt(curl, CURLOPT_HTTPHEADER, list);
+  test_setopt(fetch, FETCHOPT_HTTPHEADER, list);
   if(libtest_arg2) {
-    connect_to = curl_slist_append(connect_to, libtest_arg2);
+    connect_to = fetch_slist_append(connect_to, libtest_arg2);
   }
-  test_setopt(curl, CURLOPT_CONNECT_TO, connect_to);
+  test_setopt(fetch, FETCHOPT_CONNECT_TO, connect_to);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_slist_free_all(connect_to);
-  curl_slist_free_all(list);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_slist_free_all(connect_to);
+  fetch_slist_free_all(list);
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

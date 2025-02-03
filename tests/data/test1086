@@ -94,7 +94,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER -m 5
 
 # Verify data after the test has been "shot"
 <verify>
-# 28 is CURLE_OPERATION_TIMEDOUT
+# 28 is FETCHE_OPERATION_TIMEDOUT
 <errorcode>
 28
 </errorcode>

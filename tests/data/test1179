@@ -36,8 +36,8 @@ error when using unknown command line option
 2
 </errorcode>
 <stderr mode="text">
-curl: option --never-implemented: is unknown
-curl: try 'curl --help' or 'curl --manual' for more information
+fetch: option --never-implemented: is unknown
+fetch: try 'fetch --help' or 'fetch --manual' for more information
 </stderr>
 </verify>
 </testcase>

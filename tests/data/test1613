@@ -43,7 +43,7 @@ proxy
 <protocol>
 OPTIONS * HTTP/1.1
 Host: www.example.org
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Testno: %TESTNUMBER

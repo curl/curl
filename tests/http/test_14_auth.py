@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -51,9 +51,9 @@ class TestAuth:
     def test_14_01_digest_get_noauth(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
-        r = curl.http_download(urls=[url], alpn_proto=proto)
+        r = fetch.http_download(urls=[url], alpn_proto=proto)
         r.check_response(http_status=401)
 
     # download 1 file, authenticated
@@ -61,9 +61,9 @@ class TestAuth:
     def test_14_02_digest_get_auth(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
-        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+        r = fetch.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--digest', '--user', 'test:test'
         ])
         r.check_response(http_status=200)
@@ -74,9 +74,9 @@ class TestAuth:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         data='0123456789'
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
-        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+        r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
             '--digest', '--user', 'test:test'
         ])
         r.check_response(http_status=200)
@@ -88,9 +88,9 @@ class TestAuth:
             pytest.skip("h3 not supported")
         data='0123456789'
         password = 'x' * 65535
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
-        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
+        r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto, extra_args=[
             '--digest', '--user', f'test:{password}',
             '--trace-config', 'http/2,http/3'
         ])
@@ -103,15 +103,15 @@ class TestAuth:
     def test_14_05_basic_large_pw(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and not env.curl_uses_lib('ngtcp2'):
+        if proto == 'h3' and not env.fetch_uses_lib('ngtcp2'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
             pytest.skip("quiche/openssl-quic have problems with large requests")
         # just large enough that nghttp2 will submit
         password = 'x' * (47 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
-        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+        r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--basic', '--user', f'test:{password}',
             '--trace-config', 'http/2,http/3'
         ])
@@ -123,14 +123,14 @@ class TestAuth:
     def test_14_06_basic_very_large_pw(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('quiche'):
+        if proto == 'h3' and env.fetch_uses_lib('quiche'):
             # See <https://github.com/cloudflare/quiche/issues/1573>
             pytest.skip("quiche has problems with large requests")
         password = 'x' * (64 * 1024)
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/restricted/digest/data.json'
-        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
+        r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto, extra_args=[
             '--basic', '--user', f'test:{password}'
         ])
         # Depending on protocol, we might have an error sending or

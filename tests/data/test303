@@ -46,7 +46,7 @@ HTTPS with 8 secs timeout
 <protocol>
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

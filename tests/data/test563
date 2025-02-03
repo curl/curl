@@ -2,7 +2,7 @@
 <info>
 <keywords>
 FTP
-CURLOPT_PORT
+FETCHOPT_PORT
 HTTP proxy
 </keywords>
 </info>
@@ -30,7 +30,7 @@ ftp
 lib562
 </tool>
 <name>
-FTP type=A URL and CURLOPT_PORT set and proxy
+FTP type=A URL and FETCHOPT_PORT set and proxy
 </name>
 <features>
 proxy

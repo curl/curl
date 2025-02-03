@@ -6,7 +6,7 @@ HTTP PUT
 HTTP CONNECT
 HTTP proxy
 proxytunnel
-CURLOPT_PROXYHEADER
+FETCHOPT_PROXYHEADER
 </keywords>
 </info>
 
@@ -48,7 +48,7 @@ http-proxy
 lib%TESTNUMBER
 </tool>
 <name>
-CURLOPT_PROXYHEADER: separate host/proxy headers
+FETCHOPT_PROXYHEADER: separate host/proxy headers
 </name>
 <command>
  http://the.old.moo.%TESTNUMBER:%HTTPPORT/%TESTNUMBER %HOSTIP:%PROXYPORT

@@ -40,13 +40,13 @@ proxy
 <protocol>
 GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1
 Host: deathstar.another.galaxy
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://a.galaxy.far.far.away/%TESTNUMBER HTTP/1.1
 Host: a.galaxy.far.far.away
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

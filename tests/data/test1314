@@ -66,13 +66,13 @@ proxy
 <protocol>
 GET http://firstplace.example.com/want/%TESTNUMBER HTTP/1.1
 Host: firstplace.example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://somewhere.example.com/reply/%TESTNUMBER HTTP/1.1
 Host: somewhere.example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

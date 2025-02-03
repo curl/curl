@@ -41,7 +41,7 @@ blksize = 512
 filename = /invalid-file
 </protocol>
 <stderr mode="text">
-curl: (69) TFTP: Access Violation
+fetch: (69) TFTP: Access Violation
 </stderr>
 </verify>
 </testcase>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "server_setup.h"
@@ -54,7 +54,7 @@
 #include <netdb.h>
 #endif
 
-#include "curlx.h" /* from the private lib dir */
+#include "fetchx.h" /* from the private lib dir */
 #include "getpart.h"
 #include "inet_pton.h"
 #include "server_sockaddr.h"
@@ -96,7 +96,7 @@
 
 #define MQTT_CONNACK_LEN 4
 #define MQTT_SUBACK_LEN 5
-#define MQTT_CLIENTID_LEN 12 /* "curl0123abcd" */
+#define MQTT_CLIENTID_LEN 12 /* "fetch0123abcd" */
 
 struct configurable {
   unsigned char version; /* initial version byte in the request must match
@@ -232,7 +232,7 @@ static void logprotocol(mqttdir dir,
 
 
 /* return 0 on success */
-static int connack(FILE *dump, curl_socket_t fd)
+static int connack(FILE *dump, fetch_socket_t fd)
 {
   unsigned char packet[]={
     MQTT_MSG_CONNACK, 0x02,
@@ -255,7 +255,7 @@ static int connack(FILE *dump, curl_socket_t fd)
 }
 
 /* return 0 on success */
-static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
+static int suback(FILE *dump, fetch_socket_t fd, unsigned short packetid)
 {
   unsigned char packet[]={
     MQTT_MSG_SUBACK, 0x03,
@@ -278,7 +278,7 @@ static int suback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 
 #ifdef QOS
 /* return 0 on success */
-static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
+static int puback(FILE *dump, fetch_socket_t fd, unsigned short packetid)
 {
   unsigned char packet[]={
     MQTT_MSG_PUBACK, 0x00,
@@ -301,7 +301,7 @@ static int puback(FILE *dump, curl_socket_t fd, unsigned short packetid)
 #endif
 
 /* return 0 on success */
-static int disconnect(FILE *dump, curl_socket_t fd)
+static int disconnect(FILE *dump, fetch_socket_t fd)
 {
   unsigned char packet[]={
     MQTT_MSG_DISCONNECT, 0x00,
@@ -388,7 +388,7 @@ static size_t decode_length(unsigned char *buf,
 
 /* return 0 on success */
 static int publish(FILE *dump,
-                   curl_socket_t fd, unsigned short packetid,
+                   fetch_socket_t fd, unsigned short packetid,
                    char *topic, char *payload, size_t payloadlen)
 {
   size_t topiclen = strlen(topic);
@@ -452,7 +452,7 @@ static int publish(FILE *dump,
 
 static char topic[MAX_TOPIC_LENGTH + 1];
 
-static int fixedheader(curl_socket_t fd,
+static int fixedheader(fetch_socket_t fd,
                        unsigned char *bytep,
                        size_t *remaining_lengthp,
                        size_t *remaining_length_bytesp)
@@ -487,7 +487,7 @@ static int fixedheader(curl_socket_t fd,
   return 0;
 }
 
-static curl_socket_t mqttit(curl_socket_t fd)
+static fetch_socket_t mqttit(fetch_socket_t fd)
 {
   size_t buff_size = 10*1024;
   unsigned char *buffer = NULL;
@@ -712,16 +712,16 @@ end:
     fclose(dump);
   if(stream)
     fclose(stream);
-  return CURL_SOCKET_BAD;
+  return FETCH_SOCKET_BAD;
 }
 
 /*
-  sockfdp is a pointer to an established stream or CURL_SOCKET_BAD
+  sockfdp is a pointer to an established stream or FETCH_SOCKET_BAD
 
-  if sockfd is CURL_SOCKET_BAD, listendfd is a listening socket we must
+  if sockfd is FETCH_SOCKET_BAD, listendfd is a listening socket we must
   accept()
 */
-static bool incoming(curl_socket_t listenfd)
+static bool incoming(fetch_socket_t listenfd)
 {
   fd_set fds_read;
   fd_set fds_write;
@@ -744,7 +744,7 @@ static bool incoming(curl_socket_t listenfd)
   do {
     ssize_t rc;
     int error = 0;
-    curl_socket_t sockfd = listenfd;
+    fetch_socket_t sockfd = listenfd;
     int maxfd = (int)sockfd;
 
     FD_ZERO(&fds_read);
@@ -777,8 +777,8 @@ static bool incoming(curl_socket_t listenfd)
     }
 
     if(FD_ISSET(sockfd, &fds_read)) {
-      curl_socket_t newfd = accept(sockfd, NULL, NULL);
-      if(CURL_SOCKET_BAD == newfd) {
+      fetch_socket_t newfd = accept(sockfd, NULL, NULL);
+      if(FETCH_SOCKET_BAD == newfd) {
         error = SOCKERRNO;
         logmsg("accept(%" FMT_SOCKET_T ", NULL, NULL) "
                "failed with error: (%d) %s", sockfd, error, sstrerror(error));
@@ -799,7 +799,7 @@ static bool incoming(curl_socket_t listenfd)
   return TRUE;
 }
 
-static curl_socket_t sockdaemon(curl_socket_t sock,
+static fetch_socket_t sockdaemon(fetch_socket_t sock,
                                 unsigned short *listenport)
 {
   /* passive daemon style */
@@ -827,12 +827,12 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
           /* should not happen */
           logmsg("wait_ms() failed with error: %d", rc);
           sclose(sock);
-          return CURL_SOCKET_BAD;
+          return FETCH_SOCKET_BAD;
         }
         if(got_exit_signal) {
           logmsg("signalled to die, exiting...");
           sclose(sock);
-          return CURL_SOCKET_BAD;
+          return FETCH_SOCKET_BAD;
         }
         totdelay += delay;
         delay *= 2; /* double the sleep for next attempt */
@@ -872,13 +872,13 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     logmsg("Error binding socket on port %hu: (%d) %s",
            *listenport, error, sstrerror(error));
     sclose(sock);
-    return CURL_SOCKET_BAD;
+    return FETCH_SOCKET_BAD;
   }
 
   if(!*listenport) {
     /* The system was supposed to choose a port number, figure out which
        port we actually got and update the listener port value with it. */
-    curl_socklen_t la_size;
+    fetch_socklen_t la_size;
     srvr_sockaddr_union_t localaddr;
 #ifdef USE_IPV6
     if(!use_ipv6)
@@ -894,7 +894,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       logmsg("getsockname() failed with error: (%d) %s",
              error, sstrerror(error));
       sclose(sock);
-      return CURL_SOCKET_BAD;
+      return FETCH_SOCKET_BAD;
     }
     switch(localaddr.sa.sa_family) {
     case AF_INET:
@@ -915,7 +915,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
       logmsg("proper network library linkage. This might not be the only");
       logmsg("reason, but double check it before anything else.");
       sclose(sock);
-      return CURL_SOCKET_BAD;
+      return FETCH_SOCKET_BAD;
     }
   }
 
@@ -926,7 +926,7 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
     logmsg("listen(%" FMT_SOCKET_T ", 5) failed with error: (%d) %s",
            sock, error, sstrerror(error));
     sclose(sock);
-    return CURL_SOCKET_BAD;
+    return FETCH_SOCKET_BAD;
   }
 
   return sock;
@@ -935,8 +935,8 @@ static curl_socket_t sockdaemon(curl_socket_t sock,
 
 int main(int argc, char *argv[])
 {
-  curl_socket_t sock = CURL_SOCKET_BAD;
-  curl_socket_t msgsock = CURL_SOCKET_BAD;
+  fetch_socket_t sock = FETCH_SOCKET_BAD;
+  fetch_socket_t msgsock = FETCH_SOCKET_BAD;
   int wrotepidfile = 0;
   int wroteportfile = 0;
   const char *pidname = ".mqttd.pid";
@@ -1007,7 +1007,7 @@ int main(int argc, char *argv[])
                   argv[arg]);
           return 0;
         }
-        port = curlx_ultous(ulnum);
+        port = fetchx_ultous(ulnum);
         arg++;
       }
     }
@@ -1034,9 +1034,9 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-  CURL_SET_BINMODE(stdin);
-  CURL_SET_BINMODE(stdout);
-  CURL_SET_BINMODE(stderr);
+  FETCH_SET_BINMODE(stdin);
+  FETCH_SET_BINMODE(stdout);
+  FETCH_SET_BINMODE(stderr);
 
   install_signal_handlers(FALSE);
 
@@ -1049,7 +1049,7 @@ int main(int argc, char *argv[])
     sock = socket(AF_INET6, SOCK_STREAM, 0);
 #endif
 
-  if(CURL_SOCKET_BAD == sock) {
+  if(FETCH_SOCKET_BAD == sock) {
     error = SOCKERRNO;
     logmsg("Error creating socket: (%d) %s", error, sstrerror(error));
     goto mqttd_cleanup;
@@ -1058,10 +1058,10 @@ int main(int argc, char *argv[])
   {
     /* passive daemon style */
     sock = sockdaemon(sock, &port);
-    if(CURL_SOCKET_BAD == sock) {
+    if(FETCH_SOCKET_BAD == sock) {
       goto mqttd_cleanup;
     }
-    msgsock = CURL_SOCKET_BAD; /* no stream socket yet */
+    msgsock = FETCH_SOCKET_BAD; /* no stream socket yet */
   }
 
   logmsg("Running %s version", ipv_inuse);
@@ -1083,10 +1083,10 @@ int main(int argc, char *argv[])
 
 mqttd_cleanup:
 
-  if((msgsock != sock) && (msgsock != CURL_SOCKET_BAD))
+  if((msgsock != sock) && (msgsock != FETCH_SOCKET_BAD))
     sclose(msgsock);
 
-  if(sock != CURL_SOCKET_BAD)
+  if(sock != FETCH_SOCKET_BAD)
     sclose(sock);
 
   if(wrotepidfile)

@@ -7,10 +7,10 @@
    fun:readwrite_data
    fun:Curl_sendrecv
    fun:multi_runsingle
-   fun:curl_multi_perform
+   fun:fetch_multi_perform
    fun:easy_transfer
    fun:easy_perform
-   fun:curl_easy_perform
+   fun:fetch_easy_perform
    fun:serial_transfers
    fun:run_all_transfers
    fun:operate
@@ -24,8 +24,8 @@
    fun:zstd_unencode_write
    fun:Curl_sendrecv
    fun:multi_runsingle
-   fun:curl_multi_perform
-   fun:curl_easy_perform
+   fun:fetch_multi_perform
+   fun:fetch_easy_perform
    fun:operate
    fun:main
 }
@@ -41,10 +41,10 @@
    fun:create_conn
    fun:Curl_connect
    fun:multi_runsingle
-   fun:curl_multi_perform
+   fun:fetch_multi_perform
    fun:easy_transfer
    fun:easy_perform
-   fun:curl_easy_perform
+   fun:fetch_easy_perform
    fun:operate_do
    fun:operate
    fun:main
@@ -62,11 +62,11 @@
    fun:Curl_connect
    fun:multi_runsingle
    fun:multi_socket
-   fun:curl_multi_socket_action
+   fun:fetch_multi_socket_action
    fun:wait_or_timeout
    fun:easy_events
    fun:easy_perform
-   fun:curl_easy_perform_ev
+   fun:fetch_easy_perform_ev
    fun:operate_do
    fun:operate
    fun:main
@@ -81,7 +81,7 @@
    fun:fix_hostname
    fun:Curl_connect
    fun:multi_runsingle
-   fun:curl_multi_perform
+   fun:fetch_multi_perform
    fun:easy_perform.part.4
    fun:operate_do
    fun:operate
@@ -97,7 +97,7 @@
    fun:fix_hostname
    fun:Curl_connect
    fun:multi_runsingle
-   fun:curl_multi_perform
+   fun:fetch_multi_perform
    fun:easy_perform
    fun:operate_do.isra.0
    fun:operate
@@ -113,7 +113,7 @@
    fun:fix_hostname
    fun:Curl_connect
    fun:multi_runsingle
-   fun:curl_multi_perform
+   fun:fetch_multi_perform
    fun:easy_perform
    fun:operate_do
    fun:operate

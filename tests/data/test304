@@ -31,7 +31,7 @@ https
 HTTPS multipart formpost
 </name>
 <command>
--k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt
+-k https://%HOSTIP:%HTTPSPORT/we/want/%TESTNUMBER -F name=daniel -F tool=fetch -F file=@%LOGDIR/test%TESTNUMBER.txt
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER.txt">
@@ -47,7 +47,7 @@ aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1410
 Content-Type: multipart/form-data; boundary=----------------------------qrstuvwxyz0123456789AB
@@ -59,7 +59,7 @@ daniel
 ------------------------------qrstuvwxyz0123456789AB
 Content-Disposition: form-data; name="tool"
 
-curl
+fetch
 ------------------------------qrstuvwxyz0123456789AB
 Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain

@@ -29,12 +29,12 @@ use --next with missing URL before it
 # Verify data after the test has been "shot"
 <verify>
 <stderr mode="text">
-curl: missing URL before --next
-curl: option --next: is badly used here
+fetch: missing URL before --next
+fetch: option --next: is badly used here
 %if manual
-curl: try 'curl --help' or 'curl --manual' for more information
+fetch: try 'fetch --help' or 'fetch --manual' for more information
 %else
-curl: try 'curl --help' for more information
+fetch: try 'fetch --help' for more information
 %endif
 </stderr>
 <errorcode>

@@ -15,7 +15,7 @@ none
 unittest
 </features>
 <name>
-Test negative data lengths as input to libcurl functions
+Test negative data lengths as input to libfetch functions
 </name>
 </client>
 </testcase>

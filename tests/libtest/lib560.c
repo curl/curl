@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -39,27 +39,27 @@
  * fast/different compared to the real/distant servers we saw the bug happen
  * with.
  */
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *http_handle = NULL;
-  CURLM *multi_handle = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *http_handle = NULL;
+  FETCHM *multi_handle = NULL;
+  FETCHcode res = FETCHE_OK;
 
   int still_running; /* keep number of running handles */
 
   start_test_timing();
 
   /*
-  ** curl_global_init called indirectly from curl_easy_init.
+  ** fetch_global_init called indirectly from fetch_easy_init.
   */
 
   easy_init(http_handle);
 
   /* set options */
-  easy_setopt(http_handle, CURLOPT_URL, URL);
-  easy_setopt(http_handle, CURLOPT_HEADER, 1L);
-  easy_setopt(http_handle, CURLOPT_SSL_VERIFYPEER, 0L);
-  easy_setopt(http_handle, CURLOPT_SSL_VERIFYHOST, 0L);
+  easy_setopt(http_handle, FETCHOPT_URL, URL);
+  easy_setopt(http_handle, FETCHOPT_HEADER, 1L);
+  easy_setopt(http_handle, FETCHOPT_SSL_VERIFYPEER, 0L);
+  easy_setopt(http_handle, FETCHOPT_SSL_VERIFYHOST, 0L);
 
   /* init a multi stack */
   multi_init(multi_handle);
@@ -107,9 +107,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(multi_handle);
-  curl_easy_cleanup(http_handle);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi_handle);
+  fetch_easy_cleanup(http_handle);
+  fetch_global_cleanup();
 
   return res;
 }

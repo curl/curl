@@ -48,7 +48,7 @@ dummy data
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 845
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763

@@ -2,7 +2,7 @@
 <info>
 <keywords>
 FTP
-CURLE_PARTIAL_FILE
+FETCHE_PARTIAL_FILE
 RETR
 PASV
 </keywords>
@@ -43,7 +43,7 @@ TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
 </protocol>
-# CURLE_PARTIAL_FILE = 18
+# FETCHE_PARTIAL_FILE = 18
 <errorcode>
 18
 </errorcode>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,31 +18,31 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-#include <curl/multi.h>
+#include <fetch/multi.h>
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLM *handle;
-  CURLcode res = CURLE_OK;
+  FETCHM *handle;
+  FETCHcode res = FETCHE_OK;
   static const char * const bl_servers[] =
      {"Microsoft-IIS/6.0", "nginx/0.8.54", NULL};
   static const char * const bl_sites[] =
-     {"curl.se:443", "example.com:80", NULL};
+     {"fetch.se:443", "example.com:80", NULL};
 
-  global_init(CURL_GLOBAL_ALL);
-  handle = curl_multi_init();
+  global_init(FETCH_GLOBAL_ALL);
+  handle = fetch_multi_init();
   (void)URL; /* unused */
 
-  curl_multi_setopt(handle, CURLMOPT_PIPELINING_SERVER_BL, bl_servers);
-  curl_multi_setopt(handle, CURLMOPT_PIPELINING_SITE_BL, bl_sites);
-  curl_multi_cleanup(handle);
-  curl_global_cleanup();
-  return CURLE_OK;
+  fetch_multi_setopt(handle, FETCHMOPT_PIPELINING_SERVER_BL, bl_servers);
+  fetch_multi_setopt(handle, FETCHMOPT_PIPELINING_SITE_BL, bl_sites);
+  fetch_multi_cleanup(handle);
+  fetch_global_cleanup();
+  return FETCHE_OK;
 }

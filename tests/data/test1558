@@ -1,8 +1,8 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_getinfo
-CURLINFO_PROTOCOL
+fetch_easy_getinfo
+FETCHINFO_PROTOCOL
 </keywords>
 </info>
 
@@ -21,7 +21,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-CURLINFO_PROTOCOL for file:// transfer
+FETCHINFO_PROTOCOL for file:// transfer
 </name>
 <command>
 file://%FILE_PWD/%LOGDIR/data%TESTNUMBER

@@ -42,13 +42,13 @@ proxy
 <protocol>
 GET http://test.remote.example.com.%TESTNUMBER:150/path HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:150
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.example.com.%TESTNUMBER:1234/path/ HTTP/1.1
 Host: test.remote.example.com.%TESTNUMBER:1234
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

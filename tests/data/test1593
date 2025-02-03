@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 HTTP replaced headers
-CURLOPT_TIMECONDITION
+FETCHOPT_TIMECONDITION
 If-Modified-Since
 </keywords>
 </info>
@@ -24,7 +24,7 @@ Server: test-server/swsclose
 http
 </server>
 <name>
-HTTP custom header overrides CURLOPT_TIMECONDITION
+HTTP custom header overrides FETCHOPT_TIMECONDITION
 </name>
 <tool>
 lib%TESTNUMBER

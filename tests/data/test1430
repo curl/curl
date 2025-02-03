@@ -43,11 +43,11 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-# 1 - CURLE_UNSUPPORTED_PROTOCOL
+# 1 - FETCHE_UNSUPPORTED_PROTOCOL
 # Due to invalid HTTP response code
 <errorcode>
 1

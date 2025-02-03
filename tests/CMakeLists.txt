@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,10 +20,10 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
-option(CURL_TEST_BUNDLES "Bundle libtest and unittest tests into single binaries" OFF)
+option(FETCH_TEST_BUNDLES "Bundle libtest and unittest tests into single binaries" OFF)
 
 find_program(TEST_NGHTTPX "nghttpx")
 if(NOT TEST_NGHTTPX)
@@ -41,11 +41,11 @@ add_subdirectory(libtest)
 add_subdirectory(unit)
 add_subdirectory(certs EXCLUDE_FROM_ALL)
 
-function(curl_add_runtests _targetname _test_flags)
-  if(CURL_TEST_BUNDLES)
+function(fetch_add_runtests _targetname _test_flags)
+  if(FETCH_TEST_BUNDLES)
     set(_test_flags "${_test_flags} -bundle")
   endif()
-  if(NOT BUILD_LIBCURL_DOCS)
+  if(NOT BUILD_LIBFETCH_DOCS)
     set(_test_flags "${_test_flags} !documentation")
   endif()
   # Skip walking through dependent targets before running tests in CI.
@@ -70,7 +70,7 @@ function(curl_add_runtests _targetname _test_flags)
   )
 endfunction()
 
-function(curl_add_pytests _targetname _test_flags)
+function(fetch_add_pytests _targetname _test_flags)
   set(_depends "")
   if(NOT _targetname STREQUAL "pytest-ci")
     set(_depends "test-http-clients")
@@ -85,33 +85,33 @@ endfunction()
 
 # Create configurehelp.pm, used by tests needing to run the C preprocessor.
 if(MSVC OR CMAKE_COMPILER_IS_GNUCC OR CMAKE_C_COMPILER_ID MATCHES "Clang")
-  set(CURL_CPP "\"${CMAKE_C_COMPILER}\" -E")
+  set(FETCH_CPP "\"${CMAKE_C_COMPILER}\" -E")
   if(APPLE AND CMAKE_OSX_SYSROOT)
-    set(CURL_CPP "${CURL_CPP} -isysroot ${CMAKE_OSX_SYSROOT}")
+    set(FETCH_CPP "${FETCH_CPP} -isysroot ${CMAKE_OSX_SYSROOT}")
   endif()
   # Add header directories, like autotools builds do.
   get_property(_include_dirs TARGET ${LIB_SELECTED} PROPERTY INCLUDE_DIRECTORIES)
   foreach(_include_dir IN LISTS _include_dirs)
-    set(CURL_CPP "${CURL_CPP} -I${_include_dir}")
+    set(FETCH_CPP "${FETCH_CPP} -I${_include_dir}")
   endforeach()
 else()
-  set(CURL_CPP "cpp")
+  set(FETCH_CPP "cpp")
 endif()
 # Generate version script for the linker, for versioned symbols.
 # Consumed variable:
-#   CURL_CPP
+#   FETCH_CPP
 configure_file(
   "${CMAKE_CURRENT_SOURCE_DIR}/configurehelp.pm.in"
   "${CMAKE_CURRENT_BINARY_DIR}/configurehelp.pm" @ONLY)
 
-curl_add_runtests(test-quiet     "-a -s")
-curl_add_runtests(test-am        "-a -am")
-curl_add_runtests(test-full      "-a -p -r")
+fetch_add_runtests(test-quiet     "-a -s")
+fetch_add_runtests(test-am        "-a -am")
+fetch_add_runtests(test-full      "-a -p -r")
 # ~flaky means that it ignores results of tests using the flaky keyword
-curl_add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
-curl_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j20")
-curl_add_runtests(test-torture   "-a -t -j20")
-curl_add_runtests(test-event     "-a -e")
+fetch_add_runtests(test-nonflaky  "-a -p ~flaky ~timing-dependent")
+fetch_add_runtests(test-ci        "-a -p ~flaky ~timing-dependent -r -rm -j20")
+fetch_add_runtests(test-torture   "-a -t -j20")
+fetch_add_runtests(test-event     "-a -e")
 
-curl_add_pytests(curl-pytest      "")
-curl_add_pytests(curl-pytest-ci   "-v")
+fetch_add_pytests(fetch-pytest      "")
+fetch_add_pytests(fetch-pytest-ci   "-v")

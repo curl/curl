@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -33,20 +33,20 @@
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *c = NULL;
-  CURLM *m = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *c = NULL;
+  FETCHM *m = NULL;
+  FETCHcode res = FETCHE_OK;
   int running;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(c);
 
-  easy_setopt(c, CURLOPT_URL, URL);
+  easy_setopt(c, FETCHOPT_URL, URL);
 
   multi_init(m);
 
@@ -84,10 +84,10 @@ test_cleanup:
 
   /* proper cleanup sequence - type PA */
 
-  curl_multi_remove_handle(m, c);
-  curl_multi_cleanup(m);
-  curl_easy_cleanup(c);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, c);
+  fetch_multi_cleanup(m);
+  fetch_easy_cleanup(c);
+  fetch_global_cleanup();
 
   return res;
 }

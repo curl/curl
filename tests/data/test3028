@@ -55,7 +55,7 @@ s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %PROXYPORT/proxy-line/
 <proxy>
 CONNECT %HOSTIP:%HTTPPORT HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
@@ -64,7 +64,7 @@ Proxy-Connection: Keep-Alive
 proxy-line
 GET /page HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

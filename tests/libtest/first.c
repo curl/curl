@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,7 +28,7 @@
 #  include <locale.h> /* for setlocale() */
 #endif
 
-#ifdef CURLDEBUG
+#ifdef FETCHDEBUG
 #  define MEMDEBUG_NODEFINES
 #  include "memdebug.h"
 #endif
@@ -51,7 +51,7 @@ int select_wrapper(int nfds, fd_set *rd, fd_set *wr, fd_set *exc,
    * select() can not be used to sleep without a single fd_set.
    */
   if(!nfds) {
-    Sleep((DWORD)curlx_tvtoms(tv));
+    Sleep((DWORD)fetchx_tvtoms(tv));
     return 0;
   }
 #endif
@@ -67,7 +67,7 @@ void wait_ms(int ms)
 #else
   {
     struct timeval t;
-    curlx_mstotv(&t, ms);
+    fetchx_mstotv(&t, ms);
     select_wrapper(0, NULL, NULL, NULL, &t);
   }
 #endif
@@ -82,32 +82,32 @@ struct timeval tv_test_start; /* for test timing */
 
 int unitfail; /* for unittests */
 
-#ifdef CURLDEBUG
+#ifdef FETCHDEBUG
 static void memory_tracking_init(void)
 {
   char *env;
-  /* if CURL_MEMDEBUG is set, this starts memory tracking message logging */
-  env = curl_getenv("CURL_MEMDEBUG");
+  /* if FETCH_MEMDEBUG is set, this starts memory tracking message logging */
+  env = fetch_getenv("FETCH_MEMDEBUG");
   if(env) {
     /* use the value as file name */
-    char fname[CURL_MT_LOGFNAME_BUFSIZE];
-    if(strlen(env) >= CURL_MT_LOGFNAME_BUFSIZE)
-      env[CURL_MT_LOGFNAME_BUFSIZE-1] = '\0';
+    char fname[FETCH_MT_LOGFNAME_BUFSIZE];
+    if(strlen(env) >= FETCH_MT_LOGFNAME_BUFSIZE)
+      env[FETCH_MT_LOGFNAME_BUFSIZE-1] = '\0';
     strcpy(fname, env);
-    curl_free(env);
-    curl_dbg_memdebug(fname);
-    /* this weird stuff here is to make curl_free() get called before
-       curl_dbg_memdebug() as otherwise memory tracking will log a free()
+    fetch_free(env);
+    fetch_dbg_memdebug(fname);
+    /* this weird stuff here is to make fetch_free() get called before
+       fetch_dbg_memdebug() as otherwise memory tracking will log a free()
        without an alloc! */
   }
-  /* if CURL_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
-  env = curl_getenv("CURL_MEMLIMIT");
+  /* if FETCH_MEMLIMIT is set, this enables fail-on-alloc-number-N feature */
+  env = fetch_getenv("FETCH_MEMLIMIT");
   if(env) {
     char *endptr;
     long num = strtol(env, &endptr, 10);
     if((endptr != env) && (endptr == env + strlen(env)) && (num > 0))
-      curl_dbg_memlimit(num);
-    curl_free(env);
+      fetch_dbg_memlimit(num);
+    fetch_free(env);
   }
 }
 #else
@@ -131,18 +131,18 @@ char *hexdump(const unsigned char *buf, size_t len)
 int main(int argc, char **argv)
 {
   char *URL;
-  CURLcode result;
+  FETCHcode result;
   int basearg;
   test_func_t test_func;
 
-  CURL_SET_BINMODE(stdout);
+  FETCH_SET_BINMODE(stdout);
 
   memory_tracking_init();
 
   /*
    * Setup proper locale from environment. This is needed to enable locale-
    * specific behavior by the C library in order to test for undesired side
-   * effects that could cause in libcurl.
+   * effects that could cause in libfetch.
    */
 #ifdef HAVE_SETLOCALE
   setlocale(LC_ALL, "");
@@ -151,7 +151,7 @@ int main(int argc, char **argv)
   test_argc = argc;
   test_argv = argv;
 
-#ifdef CURLTESTS_BUNDLED
+#ifdef FETCHTESTS_BUNDLED
   {
     char *test_name;
 

@@ -55,7 +55,7 @@ client SUBSCRIBE 9 000100043131393500
 server PUBLISH c 300c00043131393568656c6c
 </protocol>
 
-# 18 is CURLE_PARTIAL_FILE
+# 18 is FETCHE_PARTIAL_FILE
 <errorcode>
 18
 </errorcode>

@@ -25,7 +25,7 @@ FTPS operation to FTP port
 
 # Verify data after the test has been "shot"
 <verify>
-# error code 35 is CURLE_SSL_CONNECT_ERROR
+# error code 35 is FETCHE_SSL_CONNECT_ERROR
 # GnuTLS seems to not fail on its handshake but instead times out which gives
 # error 28
 <errorcode>

@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -166,8 +166,8 @@ sub subnewlines {
     if(($$thing =~ /^HTTP\/(1.1|1.0|2|3) [1-5][^\x0d]*\z/) ||
        ($$thing =~ /^(GET|POST|PUT|DELETE) \S+ HTTP\/\d+(\.\d+)?/) ||
        (($$thing =~ /^[a-z0-9_-]+: [^\x0d]*\z/i) &&
-        # skip curl error messages
-        ($$thing !~ /^curl: \(\d+\) /))) {
+        # skip fetch error messages
+        ($$thing !~ /^fetch: \(\d+\) /))) {
         # enforce CRLF newline
         $$thing =~ s/\x0d*\x0a/\x0d\x0a/;
         $prevupdate = 1;
@@ -191,7 +191,7 @@ sub runclient {
     print "CMD ($ret): $cmd\n" if($verbose && !$torture);
     return $ret;
 
-# This is one way to test curl on a remote machine
+# This is one way to test fetch on a remote machine
 #    my $out = system("ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'");
 #    sleep 2;    # time to allow the NFS server to be updated
 #    return $out;
@@ -204,7 +204,7 @@ sub runclientoutput {
     my ($cmd)=@_;
     return `$cmd 2>$dev_null`;
 
-# This is one way to test curl on a remote machine
+# This is one way to test fetch on a remote machine
 #    my @out = `ssh $CLIENTIP cd \'$pwd\' \\; \'$cmd\'`;
 #    sleep 2;    # time to allow the NFS server to be updated
 #    return @out;

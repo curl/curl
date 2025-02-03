@@ -50,13 +50,13 @@ http://first:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER -L
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic Zmlyc3Q6c2VjcmV0
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /basic-auth/user/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpwYXNz
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

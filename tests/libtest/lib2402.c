@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -31,16 +31,16 @@
 
 #define NUM_HANDLES 4
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES] = {0};
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch[NUM_HANDLES] = {0};
   int running;
-  CURLM *m = NULL;
+  FETCHM *m = NULL;
   int i;
   char target_url[256];
   char dnsentry[256];
-  struct curl_slist *slist = NULL;
+  struct fetch_slist *slist = NULL;
   char *port = libtest_arg3;
   char *address = libtest_arg2;
 
@@ -49,50 +49,50 @@ CURLcode test(char *URL)
   msnprintf(dnsentry, sizeof(dnsentry), "localhost:%s:%s",
             port, address);
   printf("%s\n", dnsentry);
-  slist = curl_slist_append(slist, dnsentry);
+  slist = fetch_slist_append(slist, dnsentry);
   if(!slist) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    fprintf(stderr, "fetch_slist_append() failed\n");
     goto test_cleanup;
   }
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   multi_init(m);
 
-  multi_setopt(m, CURLMOPT_MAXCONNECTS, 1L);
+  multi_setopt(m, FETCHMOPT_MAXCONNECTS, 1L);
 
   /* get NUM_HANDLES easy handles */
   for(i = 0; i < NUM_HANDLES; i++) {
     /* get an easy handle */
-    easy_init(curl[i]);
+    easy_init(fetch[i]);
     /* specify target */
     msnprintf(target_url, sizeof(target_url),
               "https://localhost:%s/path/2402%04i",
               port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
-    easy_setopt(curl[i], CURLOPT_URL, target_url);
+    easy_setopt(fetch[i], FETCHOPT_URL, target_url);
     /* go http2 */
-    easy_setopt(curl[i], CURLOPT_HTTP_VERSION, CURL_HTTP_VERSION_2_0);
+    easy_setopt(fetch[i], FETCHOPT_HTTP_VERSION, FETCH_HTTP_VERSION_2_0);
     /* no peer verify */
-    easy_setopt(curl[i], CURLOPT_SSL_VERIFYPEER, 0L);
-    easy_setopt(curl[i], CURLOPT_SSL_VERIFYHOST, 0L);
+    easy_setopt(fetch[i], FETCHOPT_SSL_VERIFYPEER, 0L);
+    easy_setopt(fetch[i], FETCHOPT_SSL_VERIFYHOST, 0L);
     /* wait for first connection established to see if we can share it */
-    easy_setopt(curl[i], CURLOPT_PIPEWAIT, 1L);
+    easy_setopt(fetch[i], FETCHOPT_PIPEWAIT, 1L);
     /* go verbose */
-    easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
+    easy_setopt(fetch[i], FETCHOPT_VERBOSE, 1L);
     /* include headers */
-    easy_setopt(curl[i], CURLOPT_HEADER, 1L);
+    easy_setopt(fetch[i], FETCHOPT_HEADER, 1L);
 
-    easy_setopt(curl[i], CURLOPT_RESOLVE, slist);
+    easy_setopt(fetch[i], FETCHOPT_RESOLVE, slist);
   }
 
   fprintf(stderr, "Start at URL 0\n");
 
   for(i = 0; i < NUM_HANDLES; i++) {
     /* add handle to multi */
-    multi_add_handle(m, curl[i]);
+    multi_add_handle(m, fetch[i]);
 
     for(;;) {
       struct timeval interval;
@@ -129,14 +129,14 @@ test_cleanup:
   /* proper cleanup sequence - type PB */
 
   for(i = 0; i < NUM_HANDLES; i++) {
-    curl_multi_remove_handle(m, curl[i]);
-    curl_easy_cleanup(curl[i]);
+    fetch_multi_remove_handle(m, fetch[i]);
+    fetch_easy_cleanup(fetch[i]);
   }
 
-  curl_slist_free_all(slist);
+  fetch_slist_free_all(slist);
 
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 
   return res;
 }

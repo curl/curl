@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
-#include "vssh/curl_path.h"
+#include "fetchcheck.h"
+#include "vssh/fetch_path.h"
 #include "memdebug.h"
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
@@ -40,13 +40,13 @@ struct set {
   const char *expect; /* the returned content */
   const char *next;   /* what cp points to after the call */
   const char *home;
-  CURLcode result;
+  FETCHcode result;
 };
 
 UNITTEST_START
 #ifdef USE_SSH
 {
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Woverlength-strings"
 #endif
@@ -58,27 +58,27 @@ UNITTEST_START
   int i;
   size_t too_long = 90720;
   struct set list[] = {
-    { "-too-long-", "", "", "", CURLE_TOO_LARGE},
-    { SA540 " c", SA540, "c", "/", CURLE_OK},
-    { "\" " SA540 "\" c", " " SA540, "c", "/", CURLE_OK},
-    { "a a", "a", "a", "/home/", CURLE_OK},
-    { "b a", "b", "a", "/", CURLE_OK},
-    { "a", "a", "", "/home/", CURLE_OK},
-    { "b", "b", "", "/", CURLE_OK},
-    { "\"foo bar\"\tb", "foo bar", "b", "/", CURLE_OK},
-    { "/~/hej", "/home/user/hej", "", "/home/user", CURLE_OK},
-    { "\"foo bar", "", "", "/", CURLE_QUOTE_ERROR},
-    { "\"foo\\\"bar\" a", "foo\"bar", "a", "/", CURLE_OK},
-    { "\"foo\\\'bar\" b", "foo\'bar", "b", "/", CURLE_OK},
-    { "\"foo\\\\bar\" c", "foo\\bar", "c", "/", CURLE_OK},
-    { "\"foo\\pbar\" c", "foo\\bar", "", "/", CURLE_QUOTE_ERROR},
-    { "\"\" c", "", "", "", CURLE_QUOTE_ERROR},
-    { "foo\"", "foo\"", "", "/", CURLE_OK},
-    { "foo \"", "foo", "\"", "/", CURLE_OK},
-    { NULL, NULL, NULL, NULL, CURLE_OK }
+    { "-too-long-", "", "", "", FETCHE_TOO_LARGE},
+    { SA540 " c", SA540, "c", "/", FETCHE_OK},
+    { "\" " SA540 "\" c", " " SA540, "c", "/", FETCHE_OK},
+    { "a a", "a", "a", "/home/", FETCHE_OK},
+    { "b a", "b", "a", "/", FETCHE_OK},
+    { "a", "a", "", "/home/", FETCHE_OK},
+    { "b", "b", "", "/", FETCHE_OK},
+    { "\"foo bar\"\tb", "foo bar", "b", "/", FETCHE_OK},
+    { "/~/hej", "/home/user/hej", "", "/home/user", FETCHE_OK},
+    { "\"foo bar", "", "", "/", FETCHE_QUOTE_ERROR},
+    { "\"foo\\\"bar\" a", "foo\"bar", "a", "/", FETCHE_OK},
+    { "\"foo\\\'bar\" b", "foo\'bar", "b", "/", FETCHE_OK},
+    { "\"foo\\\\bar\" c", "foo\\bar", "c", "/", FETCHE_OK},
+    { "\"foo\\pbar\" c", "foo\\bar", "", "/", FETCHE_QUOTE_ERROR},
+    { "\"\" c", "", "", "", FETCHE_QUOTE_ERROR},
+    { "foo\"", "foo\"", "", "/", FETCHE_OK},
+    { "foo \"", "foo", "\"", "/", FETCHE_OK},
+    { NULL, NULL, NULL, NULL, FETCHE_OK }
   };
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic warning "-Woverlength-strings"
 #endif
 
@@ -89,7 +89,7 @@ UNITTEST_START
   for(i = 0; list[i].home; i++) {
     char *path;
     const char *cp = list[i].cp;
-    CURLcode result = Curl_get_pathname(&cp, &path, list[i].home);
+    FETCHcode result = Curl_get_pathname(&cp, &path, list[i].home);
     printf("%u - Curl_get_pathname(\"%s\", ... \"%s\") == %u\n", i,
            list[i].cp, list[i].home, list[i].result);
     if(result != list[i].result) {
@@ -107,14 +107,14 @@ UNITTEST_START
                path, list[i].expect);
         unitfail++;
       }
-      curl_free(path);
+      fetch_free(path);
 
     }
   }
 
   free((void *)list[0].cp);
 }
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

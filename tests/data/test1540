@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLPAUSE_RECV
+FETCHPAUSE_RECV
 chunked Transfer-Encoding
 Trailer:
 DELAY

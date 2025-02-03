@@ -32,7 +32,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-get curlinfo on last header in callback
+get fetchinfo on last header in callback
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -51,7 +51,7 @@ class ScoreCard:
                  server_descr: str,
                  server_port: int,
                  verbose: int,
-                 curl_verbose: int,
+                 fetch_verbose: int,
                  download_parallel: int = 0,
                  server_addr: Optional[str] = None):
         self.verbose = verbose
@@ -60,7 +60,7 @@ class ScoreCard:
         self.server_descr = server_descr
         self.server_addr = server_addr
         self.server_port = server_port
-        self._silent_curl = not curl_verbose
+        self._silent_fetch = not fetch_verbose
         self._download_parallel = download_parallel
 
     def info(self, msg):
@@ -73,7 +73,7 @@ class ScoreCard:
         sample_size = 5
         self.info('TLS Handshake\n')
         for authority in [
-            'curl.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
+            'fetch.se', 'google.com', 'cloudflare.com', 'nghttp2.org'
         ]:
             self.info(f'  {authority}...')
             props[authority] = {}
@@ -83,13 +83,13 @@ class ScoreCard:
                 hs_samples = []
                 errors = []
                 for _ in range(sample_size):
-                    curl = CurlClient(env=self.env, silent=self._silent_curl,
+                    fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                                       server_addr=self.server_addr)
                     args = [
                         '--http3-only' if self.protocol == 'h3' else '--http2',
                         f'--{ipv}', f'https://{authority}/'
                     ]
-                    r = curl.run_direct(args=args, with_stats=True)
+                    r = fetch.run_direct(args=args, with_stats=True)
                     if r.exit_code == 0 and len(r.stats) == 1:
                         c_samples.append(r.stats[0]['time_connect'])
                         hs_samples.append(r.stats[0]['time_appconnect'])
@@ -142,9 +142,9 @@ class ScoreCard:
         profiles = []
         self.info('single...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol,
+            r = fetch.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True, with_headers=False,
                                    with_profile=True)
             err = self._check_downloads(r, count)
@@ -171,9 +171,9 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info('serial...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol,
+            r = fetch.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
                                    with_headers=False, with_profile=True)
             err = self._check_downloads(r, count)
@@ -201,9 +201,9 @@ class ScoreCard:
         url = f'{url}?[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol,
+            r = fetch.http_download(urls=[url], alpn_proto=self.protocol,
                                    no_save=True,
                                    with_headers=False,
                                    with_profile=True,
@@ -268,9 +268,9 @@ class ScoreCard:
         profiles = []
         self.info('single...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
+            r = fetch.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True)
             err = self._check_uploads(r, count)
             if err:
@@ -296,9 +296,9 @@ class ScoreCard:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('serial...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
+            r = fetch.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True)
             err = self._check_uploads(r, count)
             if err:
@@ -325,9 +325,9 @@ class ScoreCard:
         url = f'{url}?id=[0-{count - 1}]'
         self.info('parallel...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
+            r = fetch.http_put(urls=[url], fdata=fpath, alpn_proto=self.protocol,
                               with_headers=False, with_profile=True,
                               extra_args=[
                                    '--parallel',
@@ -362,7 +362,7 @@ class ScoreCard:
 
     def uploads(self, count: int, fsizes: List[int]) -> Dict[str, Any]:
         scores = {}
-        url = f'https://{self.env.domain2}:{self.server_port}/curltest/put'
+        url = f'https://{self.env.domain2}:{self.server_port}/fetchtest/put'
         fpaths = {}
         for fsize in fsizes:
             label = self.fmt_size(fsize)
@@ -390,9 +390,9 @@ class ScoreCard:
             ])
         self.info(f'{max_parallel}...')
         for _ in range(sample_size):
-            curl = CurlClient(env=self.env, silent=self._silent_curl,
+            fetch = CurlClient(env=self.env, silent=self._silent_fetch,
                               server_addr=self.server_addr)
-            r = curl.http_download(urls=[url], alpn_proto=self.protocol, no_save=True,
+            r = fetch.http_download(urls=[url], alpn_proto=self.protocol, no_save=True,
                                    with_headers=False, with_profile=True,
                                    with_stats=False, extra_args=extra_args)
             if r.exit_code != 0:
@@ -417,7 +417,7 @@ class ScoreCard:
     def requests_url(self, url: str, count: int):
         self.info(f'  {url}: ')
         props = {}
-        # 300 is max in curl, see tool_main.h
+        # 300 is max in fetch, see tool_main.h
         for m in [1, 6, 25, 50, 100, 300]:
             props[str(m)] = self.do_requests(url=url, count=count, max_parallel=m)
         self.info('ok.\n')
@@ -442,18 +442,18 @@ class ScoreCard:
         p = {}
         if self.protocol == 'h3':
             p['name'] = 'h3'
-            if not self.env.have_h3_curl():
-                raise ScoreCardError('curl does not support HTTP/3')
+            if not self.env.have_h3_fetch():
+                raise ScoreCardError('fetch does not support HTTP/3')
             for lib in ['ngtcp2', 'quiche', 'msh3', 'nghttp3']:
-                if self.env.curl_uses_lib(lib):
+                if self.env.fetch_uses_lib(lib):
                     p['implementation'] = lib
                     break
         elif self.protocol == 'h2':
             p['name'] = 'h2'
-            if not self.env.have_h2_curl():
-                raise ScoreCardError('curl does not support HTTP/2')
+            if not self.env.have_h2_fetch():
+                raise ScoreCardError('fetch does not support HTTP/2')
             for lib in ['nghttp2']:
-                if self.env.curl_uses_lib(lib):
+                if self.env.fetch_uses_lib(lib):
                     p['implementation'] = lib
                     break
         elif self.protocol == 'h1' or self.protocol == 'http/1.1':
@@ -465,11 +465,11 @@ class ScoreCard:
 
         if 'implementation' not in p:
             raise ScoreCardError(f'did not recognized {p} lib')
-        p['version'] = Env.curl_lib_version(p['implementation'])
+        p['version'] = Env.fetch_lib_version(p['implementation'])
 
         score = {
-            'curl': self.env.curl_fullname(),
-            'os': self.env.curl_os(),
+            'fetch': self.env.fetch_fullname(),
+            'os': self.env.fetch_os(),
             'protocol': p,
             'server': self.server_descr,
         }
@@ -506,7 +506,7 @@ class ScoreCard:
         return f'{val:0.000f} r/s' if val >= 0 else '--'
 
     def print_score(self, score):
-        print(f'{score["protocol"]["name"].upper()} in {score["curl"]}')
+        print(f'{score["protocol"]["name"].upper()} in {score["fetch"]}')
         if 'handshakes' in score:
             print(f'{"Handshakes":<24} {"ipv4":25} {"ipv6":28}')
             print(f'  {"Host":<17} {"Connect":>12} {"Handshake":>12} '
@@ -669,7 +669,7 @@ def parse_size(s):
 def main():
     parser = argparse.ArgumentParser(prog='scorecard', description="""
         Run a range of tests to give a scorecard for a HTTP protocol
-        'h3' or 'h2' implementation in curl.
+        'h3' or 'h2' implementation in fetch.
         """)
     parser.add_argument("-v", "--verbose", action='count', default=1,
                         help="log more output on stderr")
@@ -699,8 +699,8 @@ def main():
                         help="evaluate httpd server only")
     parser.add_argument("--caddy", action='store_true', default=False,
                         help="evaluate caddy server only")
-    parser.add_argument("--curl-verbose", action='store_true',
-                        default=False, help="run curl with `-v`")
+    parser.add_argument("--fetch-verbose", action='store_true',
+                        default=False, help="run fetch with `-v`")
     parser.add_argument("protocol", default='h2', nargs='?',
                         help="Name of protocol to score")
     parser.add_argument("--start-only", action='store_true', default=False,
@@ -767,7 +767,7 @@ def main():
                              server_descr=f'Server at {args.remote}',
                              server_addr=remote_addr,
                              server_port=remote_port,
-                             verbose=args.verbose, curl_verbose=args.curl_verbose,
+                             verbose=args.verbose, fetch_verbose=args.fetch_verbose,
                              download_parallel=args.download_parallel)
             cards.append(card)
 
@@ -791,7 +791,7 @@ def main():
                              protocol=protocol,
                              server_descr=server_descr,
                              server_port=server_port,
-                             verbose=args.verbose, curl_verbose=args.curl_verbose,
+                             verbose=args.verbose, fetch_verbose=args.fetch_verbose,
                              download_parallel=args.download_parallel)
             card.setup_resources(server_docs, downloads)
             cards.append(card)
@@ -815,7 +815,7 @@ def main():
                              protocol=protocol,
                              server_descr=server_descr,
                              server_port=server_port,
-                             verbose=args.verbose, curl_verbose=args.curl_verbose,
+                             verbose=args.verbose, fetch_verbose=args.fetch_verbose,
                              download_parallel=args.download_parallel)
             card.setup_resources(server_docs, downloads)
             cards.append(card)

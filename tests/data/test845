@@ -38,7 +38,7 @@ IMAP OAuth 2.0 (OAUTHBEARER) failure as continuation with initial response
 #
 # Verify data after the test has been "shot"
 <verify>
-# 67 - CURLE_LOGIN_DENIED
+# 67 - FETCHE_LOGIN_DENIED
 <errorcode>
 67
 </errorcode>

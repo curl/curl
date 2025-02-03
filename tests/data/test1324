@@ -46,7 +46,7 @@ HTTP with --resolve and [ipv6address]
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: example.com:%HTTP6PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

@@ -52,17 +52,17 @@ Content-Length: 1056
     <project_id>1612</project_id>
     <date_added>1998-08-21 04:01:29</date_added>
     <date_updated>2004-10-18 02:22:23</date_updated>
-    <projectname_short>curl</projectname_short>
-    <projectname_full>curl and libcurl</projectname_full>
+    <projectname_short>fetch</projectname_short>
+    <projectname_full>fetch and libfetch</projectname_full>
     <desc_short>Command line tool and library for client-side URL transfers.</desc_short>
-    <desc_full>curl and libcurl is a tool for transferring files
+    <desc_full>fetch and libfetch is a tool for transferring files
 using URL syntax. It supports HTTP, HTTPS, FTP,
 FTPS, DICT, TELNET, LDAP, FILE, and GOPHER, as
 well as HTTP-post, HTTP-put, cookies, FTP upload,
 resumed transfers, passwords, portnumbers, SSL
 certificates, Kerberos, and proxies. It is powered
-by libcurl, the client-side URL transfer library.
-There are bindings to libcurl for over 20
+by libfetch, the client-side URL transfer library.
+There are bindings to libfetch for over 20
 languages and environments.
 </desc_full>
     <vitality_score>5784.57</vitality_score>
@@ -76,20 +76,20 @@ languages and environments.
     <rating_rank>183</rating_rank>
     <subscriptions>323</subscriptions>
     <branch_name>Default</branch_name>
-    <url_project_page>http://freshmeat.net/projects/curl/</url_project_page>
-    <url_homepage>http://freshmeat.net/redir/curl/1612/url_homepage/</url_homepage>
-    <url_tgz>http://freshmeat.net/redir/curl/1612/url_tgz/</url_tgz>
-    <url_bz2>http://freshmeat.net/redir/curl/1612/url_bz2/</url_bz2>
-    <url_zip>http://freshmeat.net/redir/curl/1612/url_zip/</url_zip>
-    <url_changelog>http://freshmeat.net/redir/curl/1612/url_changelog/</url_changelog>
-    <url_rpm>http://freshmeat.net/redir/curl/1612/url_rpm/</url_rpm>
-    <url_deb>http://freshmeat.net/redir/curl/1612/url_deb/</url_deb>
-    <url_osx>http://freshmeat.net/redir/curl/1612/url_osx/</url_osx>
-    <url_bsdport>http://freshmeat.net/redir/curl/1612/url_bsdport/</url_bsdport>
+    <url_project_page>http://freshmeat.net/projects/fetch/</url_project_page>
+    <url_homepage>http://freshmeat.net/redir/fetch/1612/url_homepage/</url_homepage>
+    <url_tgz>http://freshmeat.net/redir/fetch/1612/url_tgz/</url_tgz>
+    <url_bz2>http://freshmeat.net/redir/fetch/1612/url_bz2/</url_bz2>
+    <url_zip>http://freshmeat.net/redir/fetch/1612/url_zip/</url_zip>
+    <url_changelog>http://freshmeat.net/redir/fetch/1612/url_changelog/</url_changelog>
+    <url_rpm>http://freshmeat.net/redir/fetch/1612/url_rpm/</url_rpm>
+    <url_deb>http://freshmeat.net/redir/fetch/1612/url_deb/</url_deb>
+    <url_osx>http://freshmeat.net/redir/fetch/1612/url_osx/</url_osx>
+    <url_bsdport>http://freshmeat.net/redir/fetch/1612/url_bsdport/</url_bsdport>
     <url_purchase></url_purchase>
-    <url_cvs>http://freshmeat.net/redir/curl/1612/url_cvs/</url_cvs>
-    <url_list>http://freshmeat.net/redir/curl/1612/url_list/</url_list>
-    <url_mirror>http://freshmeat.net/redir/curl/1612/url_mirror/</url_mirror>
+    <url_cvs>http://freshmeat.net/redir/fetch/1612/url_cvs/</url_cvs>
+    <url_list>http://freshmeat.net/redir/fetch/1612/url_list/</url_list>
+    <url_mirror>http://freshmeat.net/redir/fetch/1612/url_mirror/</url_mirror>
     <url_demo></url_demo>
     <license>MIT/X Consortium License</license>
     <latest_release>
@@ -187,7 +187,7 @@ s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Accept-Encoding: xxx
 

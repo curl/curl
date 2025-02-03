@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -55,7 +55,7 @@ def init_config_from(conf_path):
 TESTS_HTTPD_PATH = os.path.dirname(os.path.dirname(__file__))
 TOP_PATH = os.path.join(os.getcwd(), os.path.pardir)
 DEF_CONFIG = init_config_from(os.path.join(TOP_PATH, 'tests', 'http', 'config.ini'))
-CURL = os.path.join(TOP_PATH, 'src', 'curl')
+FETCH = os.path.join(TOP_PATH, 'src', 'fetch')
 
 
 class EnvConfig:
@@ -67,10 +67,10 @@ class EnvConfig:
         self.build_dir = TOP_PATH
         self.config = DEF_CONFIG
         # check cur and its features
-        self.curl = CURL
-        if 'CURL' in os.environ:
-            self.curl = os.environ['CURL']
-        self.curl_props = {
+        self.fetch = FETCH
+        if 'FETCH' in os.environ:
+            self.fetch = os.environ['FETCH']
+        self.fetch_props = {
             'version_string': '',
             'version': '',
             'os': '',
@@ -82,36 +82,36 @@ class EnvConfig:
             'libs': set(),
             'lib_versions': set(),
         }
-        self.curl_is_debug = False
-        self.curl_protos = []
-        p = subprocess.run(args=[self.curl, '-V'],
+        self.fetch_is_debug = False
+        self.fetch_protos = []
+        p = subprocess.run(args=[self.fetch, '-V'],
                            capture_output=True, text=True)
         if p.returncode != 0:
-            raise RuntimeError(f'{self.curl} -V failed with exit code: {p.returncode}')
+            raise RuntimeError(f'{self.fetch} -V failed with exit code: {p.returncode}')
         if p.stderr.startswith('WARNING:'):
-            self.curl_is_debug = True
+            self.fetch_is_debug = True
         for line in p.stdout.splitlines(keepends=False):
-            if line.startswith('curl '):
-                self.curl_props['version_string'] = line
-                m = re.match(r'^curl (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', line)
+            if line.startswith('fetch '):
+                self.fetch_props['version_string'] = line
+                m = re.match(r'^fetch (?P<version>\S+) (?P<os>\S+) (?P<libs>.*)$', line)
                 if m:
-                    self.curl_props['fullname'] = m.group(0)
-                    self.curl_props['version'] = m.group('version')
-                    self.curl_props['os'] = m.group('os')
-                    self.curl_props['lib_versions'] = {
+                    self.fetch_props['fullname'] = m.group(0)
+                    self.fetch_props['version'] = m.group('version')
+                    self.fetch_props['os'] = m.group('os')
+                    self.fetch_props['lib_versions'] = {
                         lib.lower() for lib in m.group('libs').split(' ')
                     }
-                    self.curl_props['libs'] = {
-                        re.sub(r'/[a-z0-9.-]*', '', lib) for lib in self.curl_props['lib_versions']
+                    self.fetch_props['libs'] = {
+                        re.sub(r'/[a-z0-9.-]*', '', lib) for lib in self.fetch_props['lib_versions']
                     }
             if line.startswith('Features: '):
-                self.curl_props['features_string'] = line[10:]
-                self.curl_props['features'] = {
+                self.fetch_props['features_string'] = line[10:]
+                self.fetch_props['features'] = {
                     feat.lower() for feat in line[10:].split(' ')
                 }
             if line.startswith('Protocols: '):
-                self.curl_props['protocols_string'] = line[11:]
-                self.curl_props['protocols'] = {
+                self.fetch_props['protocols_string'] = line[11:]
+                self.fetch_props['protocols'] = {
                     prot.lower() for prot in line[11:].split(' ')
                 }
 
@@ -139,7 +139,7 @@ class EnvConfig:
             'cert': 'xxx',
         }
         self.htdocs_dir = os.path.join(self.gen_dir, 'htdocs')
-        self.tld = 'http.curl.se'
+        self.tld = 'http.fetch.se'
         self.domain1 = f"one.{self.tld}"
         self.domain1brotli = f"brotli.one.{self.tld}"
         self.domain2 = f"two.{self.tld}"
@@ -310,82 +310,82 @@ class Env:
         return Env.CONFIG.nghttpx_with_h3
 
     @staticmethod
-    def have_ssl_curl() -> bool:
-        return Env.curl_has_feature('ssl') or Env.curl_has_feature('multissl')
+    def have_ssl_fetch() -> bool:
+        return Env.fetch_has_feature('ssl') or Env.fetch_has_feature('multissl')
 
     @staticmethod
-    def have_h2_curl() -> bool:
-        return 'http2' in Env.CONFIG.curl_props['features']
+    def have_h2_fetch() -> bool:
+        return 'http2' in Env.CONFIG.fetch_props['features']
 
     @staticmethod
-    def have_h3_curl() -> bool:
-        return 'http3' in Env.CONFIG.curl_props['features']
+    def have_h3_fetch() -> bool:
+        return 'http3' in Env.CONFIG.fetch_props['features']
 
     @staticmethod
-    def curl_uses_lib(libname: str) -> bool:
-        return libname.lower() in Env.CONFIG.curl_props['libs']
+    def fetch_uses_lib(libname: str) -> bool:
+        return libname.lower() in Env.CONFIG.fetch_props['libs']
 
     @staticmethod
-    def curl_uses_ossl_quic() -> bool:
-        if Env.have_h3_curl():
-            return not Env.curl_uses_lib('ngtcp2') and Env.curl_uses_lib('nghttp3')
+    def fetch_uses_ossl_quic() -> bool:
+        if Env.have_h3_fetch():
+            return not Env.fetch_uses_lib('ngtcp2') and Env.fetch_uses_lib('nghttp3')
         return False
 
     @staticmethod
-    def curl_version_string() -> str:
-        return Env.CONFIG.curl_props['version_string']
+    def fetch_version_string() -> str:
+        return Env.CONFIG.fetch_props['version_string']
 
     @staticmethod
-    def curl_features_string() -> str:
-        return Env.CONFIG.curl_props['features_string']
+    def fetch_features_string() -> str:
+        return Env.CONFIG.fetch_props['features_string']
 
     @staticmethod
-    def curl_has_feature(feature: str) -> bool:
-        return feature.lower() in Env.CONFIG.curl_props['features']
+    def fetch_has_feature(feature: str) -> bool:
+        return feature.lower() in Env.CONFIG.fetch_props['features']
 
     @staticmethod
-    def curl_protocols_string() -> str:
-        return Env.CONFIG.curl_props['protocols_string']
+    def fetch_protocols_string() -> str:
+        return Env.CONFIG.fetch_props['protocols_string']
 
     @staticmethod
-    def curl_has_protocol(protocol: str) -> bool:
-        return protocol.lower() in Env.CONFIG.curl_props['protocols']
+    def fetch_has_protocol(protocol: str) -> bool:
+        return protocol.lower() in Env.CONFIG.fetch_props['protocols']
 
     @staticmethod
-    def curl_lib_version(libname: str) -> str:
+    def fetch_lib_version(libname: str) -> str:
         prefix = f'{libname.lower()}/'
-        for lversion in Env.CONFIG.curl_props['lib_versions']:
+        for lversion in Env.CONFIG.fetch_props['lib_versions']:
             if lversion.startswith(prefix):
                 return lversion[len(prefix):]
         return 'unknown'
 
     @staticmethod
-    def curl_lib_version_at_least(libname: str, min_version) -> bool:
-        lversion = Env.curl_lib_version(libname)
+    def fetch_lib_version_at_least(libname: str, min_version) -> bool:
+        lversion = Env.fetch_lib_version(libname)
         if lversion != 'unknown':
             return Env.CONFIG.versiontuple(min_version) <= \
                    Env.CONFIG.versiontuple(lversion)
         return False
 
     @staticmethod
-    def curl_os() -> str:
-        return Env.CONFIG.curl_props['os']
+    def fetch_os() -> str:
+        return Env.CONFIG.fetch_props['os']
 
     @staticmethod
-    def curl_fullname() -> str:
-        return Env.CONFIG.curl_props['fullname']
+    def fetch_fullname() -> str:
+        return Env.CONFIG.fetch_props['fullname']
 
     @staticmethod
-    def curl_version() -> str:
-        return Env.CONFIG.curl_props['version']
+    def fetch_version() -> str:
+        return Env.CONFIG.fetch_props['version']
 
     @staticmethod
-    def curl_is_debug() -> bool:
-        return Env.CONFIG.curl_is_debug
+    def fetch_is_debug() -> bool:
+        return Env.CONFIG.fetch_is_debug
 
     @staticmethod
     def have_h3() -> bool:
-        return Env.have_h3_curl() and Env.have_h3_server()
+        return Env.have_h3_fetch() and Env.have_h3_server()
 
     @staticmethod
     def httpd_version() -> str:
@@ -569,8 +569,8 @@ class Env:
         return self.CONFIG.ports['ws']
 
     @property
-    def curl(self) -> str:
-        return self.CONFIG.curl
+    def fetch(self) -> str:
+        return self.CONFIG.fetch
 
     @property
     def httpd(self) -> str:
@@ -586,12 +586,12 @@ class Env:
 
     @property
     def slow_network(self) -> bool:
-        return "CURL_DBG_SOCK_WBLOCK" in os.environ or \
-               "CURL_DBG_SOCK_WPARTIAL" in os.environ
+        return "FETCH_DBG_SOCK_WBLOCK" in os.environ or \
+               "FETCH_DBG_SOCK_WPARTIAL" in os.environ
 
     @property
     def ci_run(self) -> bool:
-        return "CURL_CI" in os.environ
+        return "FETCH_CI" in os.environ
 
     def port_for(self, alpn_proto: Optional[str] = None):
         if alpn_proto is None or \

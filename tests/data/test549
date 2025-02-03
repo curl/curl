@@ -2,8 +2,8 @@
 <info>
 <keywords>
 FTP
-CURLOPT_PROXY_TRANSFER_MODE
-CURLOPT_PROXY
+FETCHOPT_PROXY_TRANSFER_MODE
+FETCHOPT_PROXY
 HTTP proxy
 </keywords>
 </info>
@@ -38,7 +38,7 @@ proxy
 lib%TESTNUMBER
 </tool>
 <name>
-FTP RETR over proxy with CURLOPT_PROXY_TRANSFER_MODE
+FTP RETR over proxy with FETCHOPT_PROXY_TRANSFER_MODE
 </name>
 # first URL then proxy
 <command>

@@ -2,8 +2,8 @@
 <info>
 <keywords>
 unittest
-curl_easy_escape
-curl_easy_unescape
+fetch_easy_escape
+fetch_easy_unescape
 </keywords>
 </info>
 
@@ -17,7 +17,7 @@ none
 unittest
 </features>
 <name>
-curl_easy_escape and curl_easy_unescape
+fetch_easy_escape and fetch_easy_unescape
 </name>
 </client>
 

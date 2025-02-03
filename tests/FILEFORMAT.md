@@ -1,12 +1,12 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# curl test suite file format
+# fetch test suite file format
 
-The curl test suite's file format is simple and extendable, closely resembling
+The fetch test suite's file format is simple and extendable, closely resembling
 XML. All data for a single test case resides in a single ASCII file. Labels
 mark the beginning and the end of all sections, and each label must be written
 in its own line. Comments are either XML-style (enclosed with `<!--` and
@@ -128,10 +128,10 @@ replaced by their content at that time.
 
 Available substitute variables include:
 
-- `%CLIENT6IP` - IPv6 address of the client running curl (including brackets)
-- `%CLIENT6IP-NB` - IPv6 address of the client running curl (no brackets)
-- `%CLIENTIP` - IPv4 address of the client running curl
-- `%CURL` - Path to the curl executable
+- `%CLIENT6IP` - IPv6 address of the client running fetch (including brackets)
+- `%CLIENT6IP-NB` - IPv6 address of the client running fetch (no brackets)
+- `%CLIENTIP` - IPv4 address of the client running fetch
+- `%FETCH` - Path to the fetch executable
 - `%DATE` - current YYYY-MM-DD date
 - `%DEV_NULL` - Null device (e.g. /dev/null)
 - `%FILE_PWD` - Current directory, on Windows prefixed with a slash
@@ -181,8 +181,8 @@ Available substitute variables include:
 - `%TFTP6PORT` - IPv6 port number of the TFTP server
 - `%TFTPPORT` - Port number of the TFTP server
 - `%USER` - Login ID of the user running the test
-- `%VERNUM` - the version number of the tested curl (without -DEV)
-- `%VERSION` - the full version number of the tested curl
+- `%VERNUM` - the version number of the tested fetch (without -DEV)
+- `%VERSION` - the full version number of the tested fetch
 
 # `<testcase>`
 
@@ -193,7 +193,7 @@ case is split up in four main sections: `info`, `reply`, `client` and
 - **info** provides information about the test case
 
 - **reply** is used for the server to know what to send as a reply for the
-requests curl sends
+requests fetch sends
 
 - **client** defines how the client should behave
 
@@ -247,7 +247,7 @@ number and instead returns `<data1>`. And if `<data1>` contains keyword
 auth tests and similar.
 
 `sendzero=yes` means that the (FTP) server "sends" the data even if the size
-is zero bytes. Used to verify curl's behavior on zero bytes transfers.
+is zero bytes. Used to verify fetch's behavior on zero bytes transfers.
 
 `base64=yes` means that the data provided in the test-file is a chunk of data
 encoded with base64. It is the only way a test case can contain binary
@@ -507,7 +507,7 @@ Features testable here are:
 - `xattr`
 - `zstd`
 
-as well as each protocol that curl supports. A protocol only needs to be
+as well as each protocol that fetch supports. A protocol only needs to be
 specified if it is different from the server (useful when the server is
 `none`).
 
@@ -524,7 +524,7 @@ is skipped and the (single-line) output is displayed as reason for not running
 the test.
 
 ### `<tool>`
-Name of tool to invoke instead of "curl". This tool must be built and exist
+Name of tool to invoke instead of "fetch". This tool must be built and exist
 either in the `libtest/` directory (if the tool name starts with `lib`) or in
 the `unit/` directory (if the tool name starts with `unit`).
 
@@ -575,7 +575,7 @@ otherwise written to verify stdout.
 Set `option="no-include"` to prevent the test script to slap on the
 `--include` argument.
 
-Set `option="no-q"` avoid using `-q` as the first argument in the curl command
+Set `option="no-q"` avoid using `-q` as the first argument in the fetch command
 line.
 
 Set `option="binary-trace"` to use `--trace` instead of `--trace-ascii` for
@@ -624,7 +624,7 @@ If `test-duphandle` is a listed item here, this is not run when
 
 ## `<verify>`
 ### `<errorcode>`
-numerical error code curl is supposed to return. Specify a list of accepted
+numerical error code fetch is supposed to return. Specify a list of accepted
 error codes by separating multiple numbers with comma. See test 237 for an
 example.
 
@@ -647,7 +647,7 @@ and that must not exist. A listed entry existing causes the test to fail.
 
 ### `<protocol [nonewline="yes"][crlf="yes"]>`
 
-the protocol dump curl should transmit, if `nonewline` is set, we cut off the
+the protocol dump fetch should transmit, if `nonewline` is set, we cut off the
 trailing newline of this given data before comparing with the one actually
 sent by the client The `<strip>` and `<strippart>` rules are applied before
 comparisons are made.
@@ -657,7 +657,7 @@ test.
 
 ### `<proxy [nonewline="yes"][crlf="yes"]>`
 
-The protocol dump curl should transmit to an HTTP proxy (when the http-proxy
+The protocol dump fetch should transmit to an HTTP proxy (when the http-proxy
 server is used), if `nonewline` is set, we cut off the trailing newline of
 this given data before comparing with the one actually sent by the client The
 `<strip>` and `<strippart>` rules are applied before comparisons are made.
@@ -718,7 +718,7 @@ content
 ### `<stripfile4>`
 
 ### `<upload [crlf="yes"] [nonewline="yes"]>`
-the contents of the upload data curl should have sent
+the contents of the upload data fetch should have sent
 
 `crlf=yes` forces *upload* newlines to become CRLF even if not written so in
 the source file.

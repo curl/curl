@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -34,40 +34,40 @@
 #define MAX_EASY_HANDLES 3
 
 static int ntlm_counter[MAX_EASY_HANDLES];
-static CURL *ntlm_easy[MAX_EASY_HANDLES];
-static curl_socket_t ntlm_sockets[MAX_EASY_HANDLES];
-static CURLcode ntlmcb_res = CURLE_OK;
+static FETCH *ntlm_easy[MAX_EASY_HANDLES];
+static fetch_socket_t ntlm_sockets[MAX_EASY_HANDLES];
+static FETCHcode ntlmcb_res = FETCHE_OK;
 
 static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
 {
-  ssize_t idx = ((CURL **) data) - ntlm_easy;
-  curl_socket_t sock;
+  ssize_t idx = ((FETCH **) data) - ntlm_easy;
+  fetch_socket_t sock;
   long longdata;
-  CURLcode code;
+  FETCHcode code;
   const size_t failure = (size && nmemb) ? 0 : 1;
   (void)ptr;
 
   ntlm_counter[idx] += (int)(size * nmemb);
 
-  /* Get socket being used for this easy handle, otherwise CURL_SOCKET_BAD */
-  CURL_IGNORE_DEPRECATION(
-    code = curl_easy_getinfo(ntlm_easy[idx], CURLINFO_LASTSOCKET, &longdata);
+  /* Get socket being used for this easy handle, otherwise FETCH_SOCKET_BAD */
+  FETCH_IGNORE_DEPRECATION(
+    code = fetch_easy_getinfo(ntlm_easy[idx], FETCHINFO_LASTSOCKET, &longdata);
   )
-  if(CURLE_OK != code) {
-    fprintf(stderr, "%s:%d curl_easy_getinfo() failed, "
+  if(FETCHE_OK != code) {
+    fprintf(stderr, "%s:%d fetch_easy_getinfo() failed, "
             "with code %d (%s)\n",
-            __FILE__, __LINE__, (int)code, curl_easy_strerror(code));
+            __FILE__, __LINE__, (int)code, fetch_easy_strerror(code));
     ntlmcb_res = TEST_ERR_MAJOR_BAD;
     return failure;
   }
   if(longdata == -1L)
-    sock = CURL_SOCKET_BAD;
+    sock = FETCH_SOCKET_BAD;
   else
-    sock = (curl_socket_t)longdata;
+    sock = (fetch_socket_t)longdata;
 
-  if(sock != CURL_SOCKET_BAD) {
+  if(sock != FETCH_SOCKET_BAD) {
     /* Track relationship between this easy handle and the socket. */
-    if(ntlm_sockets[idx] == CURL_SOCKET_BAD) {
+    if(ntlm_sockets[idx] == FETCH_SOCKET_BAD) {
       /* An easy handle without previous socket, record the socket. */
       ntlm_sockets[idx] = sock;
     }
@@ -75,7 +75,7 @@ static size_t callback(char *ptr, size_t size, size_t nmemb, void *data)
       /* An easy handle with a socket different to previously
          tracked one, log and fail right away. Known bug #37. */
       fprintf(stderr, "Handle %d started on socket %d and moved to %d\n",
-              curlx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
+              fetchx_sztosi(idx), (int)ntlm_sockets[idx], (int)sock);
       ntlmcb_res = TEST_ERR_MAJOR_BAD;
       return failure;
     }
@@ -89,10 +89,10 @@ enum HandleState {
   NoMoreHandles
 };
 
-CURLcode test(char *url)
+FETCHcode test(char *url)
 {
-  CURLcode res = CURLE_OK;
-  CURLM *multi = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCHM *multi = NULL;
   int running;
   int i;
   int num_handles = 0;
@@ -109,10 +109,10 @@ CURLcode test(char *url)
 
   for(i = 0; i < MAX_EASY_HANDLES; ++i) {
     ntlm_easy[i] = NULL;
-    ntlm_sockets[i] = CURL_SOCKET_BAD;
+    ntlm_sockets[i] = FETCH_SOCKET_BAD;
   }
 
-  res_global_init(CURL_GLOBAL_ALL);
+  res_global_init(FETCH_GLOBAL_ALL);
   if(res) {
     free(full_url);
     return res;
@@ -135,22 +135,22 @@ CURLcode test(char *url)
 
       if(num_handles % 3 == 2) {
         msnprintf(full_url, urllen, "%s0200", url);
-        easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_NTLM);
+        easy_setopt(ntlm_easy[num_handles], FETCHOPT_HTTPAUTH, FETCHAUTH_NTLM);
       }
       else {
         msnprintf(full_url, urllen, "%s0100", url);
-        easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
+        easy_setopt(ntlm_easy[num_handles], FETCHOPT_HTTPAUTH, FETCHAUTH_BASIC);
       }
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_FRESH_CONNECT, 1L);
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_URL, full_url);
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_VERBOSE, 1L);
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_HTTPGET, 1L);
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_USERPWD,
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_FRESH_CONNECT, 1L);
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_URL, full_url);
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_VERBOSE, 1L);
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_HTTPGET, 1L);
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_USERPWD,
                   "testuser:testpass");
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEFUNCTION, callback);
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_WRITEDATA,
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_WRITEFUNCTION, callback);
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_WRITEDATA,
                   ntlm_easy + num_handles);
-      easy_setopt(ntlm_easy[num_handles], CURLOPT_HEADER, 1L);
+      easy_setopt(ntlm_easy[num_handles], FETCHOPT_HEADER, 1L);
 
       multi_add_handle(multi, ntlm_easy[num_handles]);
       num_handles += 1;
@@ -228,12 +228,12 @@ test_cleanup:
 
   for(i = 0; i < MAX_EASY_HANDLES; i++) {
     printf("Data connection %d: %d\n", i, ntlm_counter[i]);
-    curl_multi_remove_handle(multi, ntlm_easy[i]);
-    curl_easy_cleanup(ntlm_easy[i]);
+    fetch_multi_remove_handle(multi, ntlm_easy[i]);
+    fetch_easy_cleanup(ntlm_easy[i]);
   }
 
-  curl_multi_cleanup(multi);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi);
+  fetch_global_cleanup();
 
   free(full_url);
 

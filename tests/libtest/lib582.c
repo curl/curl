@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -32,7 +32,7 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 struct Sockets {
-  curl_socket_t *sockets;
+  fetch_socket_t *sockets;
   int count;      /* number of sockets actually stored in array */
   int max_count;  /* max number of sockets that fit in allocated array */
 };
@@ -44,7 +44,7 @@ struct ReadWriteSockets {
 /**
  * Remove a file descriptor from a sockets array.
  */
-static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
+static void removeFd(struct Sockets *sockets, fetch_socket_t fd, int mention)
 {
   int i;
 
@@ -55,7 +55,7 @@ static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
     if(sockets->sockets[i] == fd) {
       if(i < sockets->count - 1)
         memmove(&sockets->sockets[i], &sockets->sockets[i + 1],
-              sizeof(curl_socket_t) * (sockets->count - (i + 1)));
+              sizeof(fetch_socket_t) * (sockets->count - (i + 1)));
       --sockets->count;
     }
   }
@@ -64,7 +64,7 @@ static void removeFd(struct Sockets *sockets, curl_socket_t fd, int mention)
 /**
  * Add a file descriptor to a sockets array.
  */
-static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
+static void addFd(struct Sockets *sockets, fetch_socket_t fd, const char *what)
 {
   /**
    * To ensure we only have each file descriptor once, we remove it then add
@@ -76,7 +76,7 @@ static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
    * Allocate array storage when required.
    */
   if(!sockets->sockets) {
-    sockets->sockets = malloc(sizeof(curl_socket_t) * 20U);
+    sockets->sockets = malloc(sizeof(fetch_socket_t) * 20U);
     if(!sockets->sockets)
       return;
     sockets->max_count = 20;
@@ -94,9 +94,9 @@ static void addFd(struct Sockets *sockets, curl_socket_t fd, const char *what)
 }
 
 /**
- * Callback invoked by curl to poll reading / writing of a socket.
+ * Callback invoked by fetch to poll reading / writing of a socket.
  */
-static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
+static int fetchSocketCallback(FETCH *easy, fetch_socket_t s, int action,
                               void *userp, void *socketp)
 {
   struct ReadWriteSockets *sockets = userp;
@@ -104,13 +104,13 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
   (void)easy; /* unused */
   (void)socketp; /* unused */
 
-  if(action == CURL_POLL_IN || action == CURL_POLL_INOUT)
+  if(action == FETCH_POLL_IN || action == FETCH_POLL_INOUT)
     addFd(&sockets->read, s, "read");
 
-  if(action == CURL_POLL_OUT || action == CURL_POLL_INOUT)
+  if(action == FETCH_POLL_OUT || action == FETCH_POLL_INOUT)
     addFd(&sockets->write, s, "write");
 
-  if(action == CURL_POLL_REMOVE) {
+  if(action == FETCH_POLL_REMOVE) {
     removeFd(&sockets->read, s, 1);
     removeFd(&sockets->write, s, 0);
   }
@@ -119,9 +119,9 @@ static int curlSocketCallback(CURL *easy, curl_socket_t s, int action,
 }
 
 /**
- * Callback invoked by curl to set a timeout.
+ * Callback invoked by fetch to set a timeout.
  */
-static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
+static int fetchTimerCallback(FETCHM *multi, long timeout_ms, void *userp)
 {
   struct timeval *timeout = userp;
 
@@ -137,26 +137,26 @@ static int curlTimerCallback(CURLM *multi, long timeout_ms, void *userp)
 }
 
 /**
- * Check for curl completion.
+ * Check for fetch completion.
  */
-static int checkForCompletion(CURLM *curl, int *success)
+static int checkForCompletion(FETCHM *fetch, int *success)
 {
   int result = 0;
   *success = 0;
   while(1) {
     int numMessages;
-    CURLMsg *message = curl_multi_info_read(curl, &numMessages);
+    FETCHMsg *message = fetch_multi_info_read(fetch, &numMessages);
     if(!message)
       break;
-    if(message->msg == CURLMSG_DONE) {
+    if(message->msg == FETCHMSG_DONE) {
       result = 1;
-      if(message->data.result == CURLE_OK)
+      if(message->data.result == FETCHE_OK)
         *success = 1;
       else
         *success = 0;
     }
     else {
-      fprintf(stderr, "Got an unexpected message from curl: %i\n",
+      fprintf(stderr, "Got an unexpected message from fetch: %i\n",
               (int)message->msg);
       result = 1;
       *success = 0;
@@ -175,14 +175,14 @@ static int getMicroSecondTimeout(struct timeval *timeout)
   if(result < 0)
     result = 0;
 
-  return curlx_sztosi(result);
+  return fetchx_sztosi(result);
 }
 
 /**
  * Update a fd_set with all of the sockets in use.
  */
 static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
-                        curl_socket_t *maxFd)
+                        fetch_socket_t *maxFd)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
@@ -200,39 +200,39 @@ static void updateFdSet(struct Sockets *sockets, fd_set* fdset,
   }
 }
 
-static void notifyCurl(CURLM *curl, curl_socket_t s, int evBitmask,
+static void notifyCurl(FETCHM *fetch, fetch_socket_t s, int evBitmask,
                        const char *info)
 {
   int numhandles = 0;
-  CURLMcode result = curl_multi_socket_action(curl, s, evBitmask, &numhandles);
-  if(result != CURLM_OK) {
+  FETCHMcode result = fetch_multi_socket_action(fetch, s, evBitmask, &numhandles);
+  if(result != FETCHM_OK) {
     fprintf(stderr, "Curl error on %s: %i (%s)\n",
-            info, result, curl_multi_strerror(result));
+            info, result, fetch_multi_strerror(result));
   }
 }
 
 /**
- * Invoke curl when a file descriptor is set.
+ * Invoke fetch when a file descriptor is set.
  */
-static void checkFdSet(CURLM *curl, struct Sockets *sockets, fd_set *fdset,
+static void checkFdSet(FETCHM *fetch, struct Sockets *sockets, fd_set *fdset,
                        int evBitmask, const char *name)
 {
   int i;
   for(i = 0; i < sockets->count; ++i) {
     if(FD_ISSET(sockets->sockets[i], fdset)) {
-      notifyCurl(curl, sockets->sockets[i], evBitmask, name);
+      notifyCurl(fetch, sockets->sockets[i], evBitmask, name);
     }
   }
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch = NULL;
   FILE *hd_src = NULL;
   int hd;
   struct_stat file_info;
-  CURLM *m = NULL;
+  FETCHM *m = NULL;
   struct ReadWriteSockets sockets = {{NULL, 0, 0}, {NULL, 0, 0}};
   int success = 0;
   struct timeval timeout = {0};
@@ -267,46 +267,46 @@ CURLcode test(char *URL)
   }
   fprintf(stderr, "Set to upload %d bytes\n", (int)file_info.st_size);
 
-  res_global_init(CURL_GLOBAL_ALL);
+  res_global_init(FETCH_GLOBAL_ALL);
   if(res) {
     fclose(hd_src);
     return res;
   }
 
-  easy_init(curl);
+  easy_init(fetch);
 
   /* enable uploading */
-  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
   /* specify target */
-  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
 
   /* go verbose */
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* now specify which file to upload */
-  easy_setopt(curl, CURLOPT_READDATA, hd_src);
+  easy_setopt(fetch, FETCHOPT_READDATA, hd_src);
 
-  easy_setopt(curl, CURLOPT_USERPWD, libtest_arg3);
-  easy_setopt(curl, CURLOPT_SSH_PUBLIC_KEYFILE, test_argv[4]);
-  easy_setopt(curl, CURLOPT_SSH_PRIVATE_KEYFILE, test_argv[5]);
-  easy_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  easy_setopt(fetch, FETCHOPT_USERPWD, libtest_arg3);
+  easy_setopt(fetch, FETCHOPT_SSH_PUBLIC_KEYFILE, test_argv[4]);
+  easy_setopt(fetch, FETCHOPT_SSH_PRIVATE_KEYFILE, test_argv[5]);
+  easy_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 
-  easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
+  easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t)file_info.st_size);
 
   multi_init(m);
 
-  multi_setopt(m, CURLMOPT_SOCKETFUNCTION, curlSocketCallback);
-  multi_setopt(m, CURLMOPT_SOCKETDATA, &sockets);
+  multi_setopt(m, FETCHMOPT_SOCKETFUNCTION, fetchSocketCallback);
+  multi_setopt(m, FETCHMOPT_SOCKETDATA, &sockets);
 
-  multi_setopt(m, CURLMOPT_TIMERFUNCTION, curlTimerCallback);
-  multi_setopt(m, CURLMOPT_TIMERDATA, &timeout);
+  multi_setopt(m, FETCHMOPT_TIMERFUNCTION, fetchTimerCallback);
+  multi_setopt(m, FETCHMOPT_TIMERDATA, &timeout);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(m, fetch);
 
   while(!checkForCompletion(m, &success)) {
     fd_set readSet, writeSet;
-    curl_socket_t maxFd = 0;
+    fetch_socket_t maxFd = 0;
     struct timeval tv = {0};
     tv.tv_sec = 10;
 
@@ -328,12 +328,12 @@ CURLcode test(char *URL)
     select_test((int)maxFd, &readSet, &writeSet, NULL, &tv);
 
     /* Check the sockets for reading / writing */
-    checkFdSet(m, &sockets.read, &readSet, CURL_CSELECT_IN, "read");
-    checkFdSet(m, &sockets.write, &writeSet, CURL_CSELECT_OUT, "write");
+    checkFdSet(m, &sockets.read, &readSet, FETCH_CSELECT_IN, "read");
+    checkFdSet(m, &sockets.write, &writeSet, FETCH_CSELECT_OUT, "write");
 
     if(timeout.tv_sec != (time_t)-1 && getMicroSecondTimeout(&timeout) == 0) {
       /* Curl's timer has elapsed. */
-      notifyCurl(m, CURL_SOCKET_TIMEOUT, 0, "timeout");
+      notifyCurl(m, FETCH_SOCKET_TIMEOUT, 0, "timeout");
     }
 
     abort_on_test_timeout();
@@ -348,10 +348,10 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  curl_multi_remove_handle(m, curl);
-  curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, fetch);
+  fetch_easy_cleanup(fetch);
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 
   /* close the local file */
   fclose(hd_src);

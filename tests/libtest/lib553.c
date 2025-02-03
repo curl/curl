@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -57,22 +57,22 @@ static size_t myreadfunc(char *ptr, size_t size, size_t nmemb, void *stream)
 
 static char testbuf[SIZE_HEADERS + 100];
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_FAILED_INIT;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_FAILED_INIT;
   int i;
-  struct curl_slist *headerlist = NULL, *hl;
+  struct fetch_slist *headerlist = NULL, *hl;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -80,34 +80,34 @@ CURLcode test(char *URL)
     int len = msnprintf(testbuf, sizeof(testbuf), "Header%d: ", i);
     memset(&testbuf[len], 'A', SIZE_HEADERS);
     testbuf[len + SIZE_HEADERS] = 0; /* null-terminate */
-    hl = curl_slist_append(headerlist, testbuf);
+    hl = fetch_slist_append(headerlist, testbuf);
     if(!hl)
       goto test_cleanup;
     headerlist = hl;
   }
 
-  hl = curl_slist_append(headerlist, "Expect: ");
+  hl = fetch_slist_append(headerlist, "Expect: ");
   if(!hl)
     goto test_cleanup;
   headerlist = hl;
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HTTPHEADER, headerlist);
-  test_setopt(curl, CURLOPT_POST, 1L);
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)POSTLEN);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
-  test_setopt(curl, CURLOPT_READFUNCTION, myreadfunc);
+  test_setopt(fetch, FETCHOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_HTTPHEADER, headerlist);
+  test_setopt(fetch, FETCHOPT_POST, 1L);
+  test_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long)POSTLEN);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_READFUNCTION, myreadfunc);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
-  curl_slist_free_all(headerlist);
+  fetch_slist_free_all(headerlist);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

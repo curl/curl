@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --http2
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Connection: Upgrade, HTTP2-Settings
 Upgrade: h2c
@@ -58,7 +58,7 @@ HTTP2-Settings: AAMAAABkAAQAAQAAAAIAAAAA
 
 </protocol>
 
-# CURLE_WEIRD_SERVER_REPLY (8)
+# FETCHE_WEIRD_SERVER_REPLY (8)
 <errorcode>
 8
 </errorcode>

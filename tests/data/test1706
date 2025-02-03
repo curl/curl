@@ -26,21 +26,21 @@ _footer.md
 
 <file1 name="%LOGDIR/_header.md">
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # DESCRIPTION
 
-**curl** is a tool for transferring data from or to a server using URLs. It
+**fetch** is a tool for transferring data from or to a server using URLs. It
 supports these protocols: DICT, FILE, FTP, FTPS, GOPHER, GOPHERS, HTTP, HTTPS,
 IMAP, IMAPS, LDAP, LDAPS, MQTT, POP3, POP3S, RTMP, RTMPS, RTSP, SCP, SFTP,
 SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
-curl is powered by libcurl for all transfer-related features. See
-*libcurl(3)* for details.
+fetch is powered by libfetch for all transfer-related features. See
+*libfetch(3)* for details.
 </file1>
 <file2 name="%LOGDIR/option1.md">
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Short: v
 Long: fakeitreal
 Mutexed: trace trace-ascii
@@ -60,10 +60,10 @@ Example:
 
 # `--verbose`
 
-Makes curl verbose during the operation. Useful for debugging and seeing
+Makes fetch verbose during the operation. Useful for debugging and seeing
 what's going on under the hood. A line starting with \> means header data sent
-by curl, \< means header data received by curl that is hidden in normal cases,
-and a line starting with * means additional info provided by curl.
+by fetch, \< means header data received by fetch that is hidden in normal cases,
+and a line starting with * means additional info provided by fetch.
 
 If you only want HTTP headers in the output, --include or --dump-header might
 be more suitable options.
@@ -71,19 +71,19 @@ be more suitable options.
 If you think this option still does not give you enough details, consider using
 --trace or --trace-ascii instead.
 
-Note that verbose output of curl activities and network traffic might contain
+Note that verbose output of fetch activities and network traffic might contain
 sensitive data, including usernames, credentials or secret data content. Be
 aware and be careful when sharing trace logs with others.
 </file2>
 <file3 name="%LOGDIR/option2.md">
 ---
 c: Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Long: proto
 Arg: <protocols>
 Help: Enable/disable PROTOCOLS
 Added: 7.20.2
-Category: connection curl
+Category: connection fetch
 Multi: single
 See-also:
   - fakeitreal
@@ -120,14 +120,14 @@ For example: --proto -ftps uses the default protocols, but disables ftps
 
 Unknown and disabled protocols produce a warning. This allows scripts to
 safely rely on being able to disable potentially dangerous protocols, without
-relying upon support for that protocol being built into curl to avoid an error.
+relying upon support for that protocol being built into fetch to avoid an error.
 
 This option can be used multiple times, in which case the effect is the same
 as concatenating the protocols into one instance of the option.
 </file3>
 <file4 name="%LOGDIR/_footer.md">
 <!-- Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al. -->
-<!-- SPDX-License-Identifier: curl -->
+<!-- SPDX-License-Identifier: fetch -->
 # PROXY PROTOCOL PREFIXES
 The proxy string may be specified with a protocol:// prefix to specify
 alternative proxy protocols. (Added in 7.21.7)
@@ -168,20 +168,20 @@ option2.md:15:1:WARN: see-also a non-existing option: proto-default
 <stdout>
 DESCRIPTION
 
-    curl is a tool  for transferring data  from or to a  server using URLs.  It
+    fetch is a tool  for transferring data  from or to a  server using URLs.  It
     supports these protocols:  DICT, FILE,  FTP, FTPS,  GOPHER, GOPHERS,  HTTP,
     HTTPS, IMAP,  IMAPS, LDAP,  LDAPS, MQTT,  POP3, POP3S,  RTMP, RTMPS,  RTSP,
     SCP, SFTP, SMB, SMBS, SMTP, SMTPS, TELNET, TFTP, WS and WSS.
 
-    curl  is  powered  by  libcurl  for  all  transfer-related  features.   See
-    libcurl(3) for details.
+    fetch  is  powered  by  libfetch  for  all  transfer-related  features.   See
+    libfetch(3) for details.
 
     -v, --fakeitreal
-	    Makes curl verbose during the  operation. Useful for debugging  and
+	    Makes fetch verbose during the  operation. Useful for debugging  and
 	    seeing what's  going on  under the  hood. A  line  starting with  >
-	    means header data  sent by curl,  < means  header data received  by
-	    curl that is  hidden in normal  cases, and a  line starting with  *
-	    means additional info provided by curl.
+	    means header data  sent by fetch,  < means  header data received  by
+	    fetch that is  hidden in normal  cases, and a  line starting with  *
+	    means additional info provided by fetch.
 
 	    If  you  only  want  HTTP  headers  in  the  output,  --include  or
 	    --dump-header might be more suitable options.
@@ -189,7 +189,7 @@ DESCRIPTION
 	    If you think this  option still does  not give you enough  details,
 	    consider using --trace or --trace-ascii instead.
 
-	    Note that verbose  output of  curl activities  and network  traffic
+	    Note that verbose  output of  fetch activities  and network  traffic
 	    might contain sensitive data,  including usernames, credentials  or
 	    secret data content.  Be aware  and be careful  when sharing  trace
 	    logs with others.
@@ -199,7 +199,7 @@ DESCRIPTION
 	    effect. Disable it again with --no-fakeitreal.
 
 	    Example:
-	     curl --verbose https://example.com
+	     fetch --verbose https://example.com
 
 	    This option is mutually  exclusive with --trace and  --trace-ascii.
 	    See also --include, --silent, --trace and --trace-ascii.
@@ -234,7 +234,7 @@ DESCRIPTION
 		Unknown and disabled protocols  produce a warning. This  allows
 		scripts to safely  rely on  being able  to disable  potentially
 		dangerous protocols,  without  relying upon  support  for  that
-		protocol being built into curl to avoid an error.
+		protocol being built into fetch to avoid an error.
 
 		This option  can be  used  multiple times,  in which  case  the
 		effect is  the same  as concatenating  the protocols  into  one
@@ -243,7 +243,7 @@ DESCRIPTION
 	    If --proto is provided several times, the last set value is used.
 
 	    Example:
-	     curl --proto =http,https,sftp https://example.com
+	     fetch --proto =http,https,sftp https://example.com
 
 	    See also --fakeitreal and --proto-default.
 

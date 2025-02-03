@@ -51,7 +51,7 @@ second %TESTNUMBER contents
 <protocol>
 PUT /one/first%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 19
@@ -59,7 +59,7 @@ Content-Length: 19
 first %TESTNUMBER contents
 PUT /two/first%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 19
@@ -67,7 +67,7 @@ Content-Length: 19
 first %TESTNUMBER contents
 PUT /one/second%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 20
@@ -75,7 +75,7 @@ Content-Length: 20
 second %TESTNUMBER contents
 PUT /two/second%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 Content-Length: 20

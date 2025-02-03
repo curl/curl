@@ -51,18 +51,18 @@ Expire secure cookies over HTTPS
 <protocol>
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0002 HTTP/1.1
 Host: www.example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: foo=123
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: www.example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

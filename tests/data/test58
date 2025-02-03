@@ -38,7 +38,7 @@ a few bytes
 <protocol>
 PUT /we/want/%TESTNUMBERte%5b%5dst.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 12
 

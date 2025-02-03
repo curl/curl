@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,20 +21,20 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
 # For documentation, run `man ./runtests.1` and see README.md.
 
 # Experimental hooks are available to run tests remotely on machines that
-# are able to run curl but are unable to run the test harness.
+# are able to run fetch but are unable to run the test harness.
 # The following sections need to be modified:
 #
 #  $HOSTIP, $HOST6IP - Set to the address of the host running the test suite
-#  $CLIENTIP, $CLIENT6IP - Set to the address of the host running curl
+#  $CLIENTIP, $CLIENT6IP - Set to the address of the host running fetch
 #  runclient, runclientoutput - Modify to copy all the files in the log/
-#    directory to the system running curl, run the given command remotely
+#    directory to the system running fetch, run the given command remotely
 #    and save the return code or returned stdout (respectively), then
 #    copy all the files from the remote system's log/ directory back to
 #    the host running the test suite.  This can be done a few ways, such
@@ -44,7 +44,7 @@
 # 'make && make test' needs to be done on both machines before making the
 # above changes and running runtests.pl manually.  In the shared NFS case,
 # the contents of the tests/server/ directory must be from the host
-# running the test suite, while the rest must be from the host running curl.
+# running the test suite, while the rest must be from the host running fetch.
 #
 # Note that even with these changes a number of tests will still fail (mainly
 # to do with cookies, those that set environment variables, or those that
@@ -54,7 +54,7 @@
 #
 # Finally, to properly support -g and -n, checktestcmd needs to change
 # to check the remote system's PATH, and the places in the code where
-# the curl binary is read directly to determine its type also need to be
+# the fetch binary is read directly to determine its type also need to be
 # fixed. As long as the -g option is never given, and the -n is always
 # given, this won't be a problem.
 
@@ -106,9 +106,9 @@ use testutil;
 
 my %custom_skip_reasons;
 
-my $ACURL=$VCURL;  # what curl binary to use to talk to APIs (relevant for CI)
-                   # ACURL is handy to set to the system one for reliability
-my $CURLCONFIG="../curl-config"; # curl-config from current build
+my $AFETCH=$VFETCH;  # what fetch binary to use to talk to APIs (relevant for CI)
+                   # AFETCH is handy to set to the system one for reliability
+my $FETCHCONFIG="../fetch-config"; # fetch-config from current build
 
 # Normally, all test cases should be run, but at times it is handy to
 # simply run a particular one:
@@ -300,7 +300,7 @@ foreach my $protocol (('ftp', 'http', 'ftps', 'https', 'no', 'all')) {
 
 delete $ENV{'SSL_CERT_DIR'} if($ENV{'SSL_CERT_DIR'});
 delete $ENV{'SSL_CERT_PATH'} if($ENV{'SSL_CERT_PATH'});
-delete $ENV{'CURL_CA_BUNDLE'} if($ENV{'CURL_CA_BUNDLE'});
+delete $ENV{'FETCH_CA_BUNDLE'} if($ENV{'FETCH_CA_BUNDLE'});
 
 # provide defaults from our config file for ENV vars not explicitly
 # set by the caller
@@ -460,7 +460,7 @@ sub numsortwords {
 }
 
 #######################################################################
-# Parse and store the protocols in curl's Protocols: line
+# Parse and store the protocols in fetch's Protocols: line
 sub parseprotocols {
     my ($line)=@_;
 
@@ -481,26 +481,26 @@ sub parseprotocols {
 
 
 #######################################################################
-# Check & display information about curl and the host the test suite runs on.
+# Check & display information about fetch and the host the test suite runs on.
 # Information to do with servers is displayed in displayserverfeatures, after
 # the server initialization is performed.
 sub checksystemfeatures {
     my $proto;
     my $feat;
-    my $curl;
-    my $libcurl;
+    my $fetch;
+    my $libfetch;
     my $versretval;
     my $versnoexec;
     my @version=();
     my @disabled;
     my $dis = "";
 
-    my $curlverout="$LOGDIR/curlverout.log";
-    my $curlvererr="$LOGDIR/curlvererr.log";
-    my $versioncmd=shell_quote($CURL) . " --version 1>$curlverout 2>$curlvererr";
+    my $fetchverout="$LOGDIR/fetchverout.log";
+    my $fetchvererr="$LOGDIR/fetchvererr.log";
+    my $versioncmd=shell_quote($FETCH) . " --version 1>$fetchverout 2>$fetchvererr";
 
-    unlink($curlverout);
-    unlink($curlvererr);
+    unlink($fetchverout);
+    unlink($fetchvererr);
 
     $versretval = runclient($versioncmd);
     $versnoexec = $!;
@@ -509,7 +509,7 @@ sub checksystemfeatures {
     $ENV{'SOURCE_DATE_EPOCH'} = $current_time;
     $DATE = strftime "%Y-%m-%d", gmtime($current_time);
 
-    open(my $versout, "<", "$curlverout");
+    open(my $versout, "<", "$fetchverout");
     @version = <$versout>;
     close($versout);
 
@@ -526,90 +526,90 @@ sub checksystemfeatures {
     for(@version) {
         chomp;
 
-        if($_ =~ /^curl ([^ ]*)/) {
-            $curl = $_;
-            $CURLVERSION = $1;
-            $CURLVERNUM = $CURLVERSION;
-            $CURLVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading dots and numbers
-            $curl =~ s/^(.*)(libcurl.*)/$1/g || die "Failure determining curl binary version";
+        if($_ =~ /^fetch ([^ ]*)/) {
+            $fetch = $_;
+            $FETCHVERSION = $1;
+            $FETCHVERNUM = $FETCHVERSION;
+            $FETCHVERNUM =~ s/^([0-9.]+)(.*)/$1/; # leading dots and numbers
+            $fetch =~ s/^(.*)(libfetch.*)/$1/g || die "Failure determining fetch binary version";
 
-            $libcurl = $2;
-            if($curl =~ /linux|bsd|solaris/) {
+            $libfetch = $2;
+            if($fetch =~ /linux|bsd|solaris/) {
                 # system support LD_PRELOAD; may be disabled later
                 $feature{"ld_preload"} = 1;
             }
-            if($curl =~ /win32|Windows|mingw(32|64)/) {
+            if($fetch =~ /win32|Windows|mingw(32|64)/) {
                 # This is a Windows MinGW build or native build, we need to use
                 # Windows-style path.
                 $pwd = sys_native_current_path();
                 $feature{"win32"} = 1;
             }
-            if ($libcurl =~ /\s(winssl|schannel)\b/i) {
+            if ($libfetch =~ /\s(winssl|schannel)\b/i) {
                 $feature{"Schannel"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sopenssl\b/i) {
+            elsif ($libfetch =~ /\sopenssl\b/i) {
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sgnutls\b/i) {
+            elsif ($libfetch =~ /\sgnutls\b/i) {
                 $feature{"GnuTLS"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\srustls-ffi\b/i) {
+            elsif ($libfetch =~ /\srustls-ffi\b/i) {
                 $feature{"rustls"} = 1;
             }
-            elsif ($libcurl =~ /\swolfssl\b/i) {
+            elsif ($libfetch =~ /\swolfssl\b/i) {
                 $feature{"wolfssl"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sbearssl\b/i) {
+            elsif ($libfetch =~ /\sbearssl\b/i) {
                 $feature{"bearssl"} = 1;
             }
-            elsif ($libcurl =~ /\ssecuretransport\b/i) {
+            elsif ($libfetch =~ /\ssecuretransport\b/i) {
                 $feature{"sectransp"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\sBoringSSL\b/i) {
+            elsif ($libfetch =~ /\sBoringSSL\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\slibressl\b/i) {
+            elsif ($libfetch =~ /\slibressl\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\squictls\b/i) {
+            elsif ($libfetch =~ /\squictls\b/i) {
                 # OpenSSL compatible API
                 $feature{"OpenSSL"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            elsif ($libcurl =~ /\smbedTLS\b/i) {
+            elsif ($libfetch =~ /\smbedTLS\b/i) {
                 $feature{"mbedtls"} = 1;
                 $feature{"SSLpinning"} = 1;
             }
-            if ($libcurl =~ /ares/i) {
+            if ($libfetch =~ /ares/i) {
                 $feature{"c-ares"} = 1;
                 $resolver="c-ares";
             }
-            if ($libcurl =~ /nghttp2/i) {
+            if ($libfetch =~ /nghttp2/i) {
                 # nghttp2 supports h2c
                 $feature{"h2c"} = 1;
             }
-            if ($libcurl =~ /AppleIDN/) {
+            if ($libfetch =~ /AppleIDN/) {
                 $feature{"AppleIDN"} = 1;
             }
-            if ($libcurl =~ /WinIDN/) {
+            if ($libfetch =~ /WinIDN/) {
                 $feature{"WinIDN"} = 1;
             }
-            if ($libcurl =~ /libidn2/) {
+            if ($libfetch =~ /libidn2/) {
                 $feature{"libidn2"} = 1;
             }
-            if ($libcurl =~ /libssh2/i) {
+            if ($libfetch =~ /libssh2/i) {
                 $feature{"libssh2"} = 1;
             }
-            if ($libcurl =~ /libssh\/([0-9.]*)\//i) {
+            if ($libfetch =~ /libssh\/([0-9.]*)\//i) {
                 $feature{"libssh"} = 1;
                 if($1 =~ /(\d+)\.(\d+).(\d+)/) {
                     my $v = $1 * 100 + $2 * 10 + $3;
@@ -619,21 +619,21 @@ sub checksystemfeatures {
                     }
                 }
             }
-            if ($libcurl =~ /wolfssh/i) {
+            if ($libfetch =~ /wolfssh/i) {
                 $feature{"wolfssh"} = 1;
             }
         }
         elsif($_ =~ /^Protocols: (.*)/i) {
             $proto = $1;
-            # these are the protocols compiled in to this libcurl
+            # these are the protocols compiled in to this libfetch
             parseprotocols($proto);
         }
         elsif($_ =~ /^Features: (.*)/i) {
             $feat = $1;
 
-            # built with memory tracking support (--enable-curldebug); may be disabled later
+            # built with memory tracking support (--enable-fetchdebug); may be disabled later
             $feature{"TrackMemory"} = $feat =~ /TrackMemory/i;
-            # curl was built with --enable-debug
+            # fetch was built with --enable-debug
             $feature{"Debug"} = $feat =~ /Debug/i;
             # ssl enabled
             $feature{"SSL"} = $feat =~ /SSL/i;
@@ -705,7 +705,7 @@ sub checksystemfeatures {
         }
         #
         # Test harness currently uses a non-stunnel server in order to
-        # run HTTP TLS-SRP tests required when curl is built with https
+        # run HTTP TLS-SRP tests required when fetch is built with https
         # protocol support and TLS-SRP feature enabled. For convenience
         # 'httptls' may be included in the test harness protocols array
         # to differentiate this from classic stunnel based 'https' test
@@ -726,8 +726,8 @@ sub checksystemfeatures {
         }
     }
 
-    if(!$curl) {
-        logmsg "unable to get curl's version, further details are:\n";
+    if(!$fetch) {
+        logmsg "unable to get fetch's version, further details are:\n";
         logmsg "issued command: \n";
         logmsg "$versioncmd \n";
         if ($versretval == -1) {
@@ -741,15 +741,15 @@ sub checksystemfeatures {
         else {
             logmsg sprintf("command exited with value %d \n", $versretval >> 8);
         }
-        logmsg "contents of $curlverout: \n";
-        displaylogcontent("$curlverout");
-        logmsg "contents of $curlvererr: \n";
-        displaylogcontent("$curlvererr");
-        die "couldn't get curl's version";
+        logmsg "contents of $fetchverout: \n";
+        displaylogcontent("$fetchverout");
+        logmsg "contents of $fetchvererr: \n";
+        displaylogcontent("$fetchvererr");
+        die "couldn't get fetch's version";
     }
 
-    if(-r "../lib/curl_config.h") {
-        open(my $conf, "<", "../lib/curl_config.h");
+    if(-r "../lib/fetch_config.h") {
+        open(my $conf, "<", "../lib/fetch_config.h");
         while(<$conf>) {
             if($_ =~ /^\#define HAVE_GETRLIMIT/) {
                 # set if system has getrlimit()
@@ -789,7 +789,7 @@ sub checksystemfeatures {
         $http_unix = 1 if($sws[0] =~ /unix/);
     }
 
-    open(my $manh, "-|", shell_quote($CURL) . " -M 2>&1");
+    open(my $manh, "-|", shell_quote($FETCH) . " -M 2>&1");
     while(my $s = <$manh>) {
         if($s =~ /built-in manual was disabled at build-time/) {
             $feature{"manual"} = 0;
@@ -835,13 +835,13 @@ sub checksystemfeatures {
     }
     # 'socks' was once here but is now removed
 
-    $has_shared = `sh $CURLCONFIG --built-shared`;
+    $has_shared = `sh $FETCHCONFIG --built-shared`;
     chomp $has_shared;
     $has_shared = $has_shared eq "yes";
 
     if(!$feature{"TrackMemory"} && $torture) {
-        die "can't run torture tests since curl was built without ".
-            "TrackMemory feature (--enable-curldebug)";
+        die "can't run torture tests since fetch was built without ".
+            "TrackMemory feature (--enable-fetchdebug)";
     }
 
     my $hostname=join(' ', runclientoutput("hostname"));
@@ -850,10 +850,10 @@ sub checksystemfeatures {
     chomp $hosttype;
     my $hostos=$^O;
 
-    # display summary information about curl and the test host
+    # display summary information about fetch and the test host
     logmsg ("********* System characteristics ******** \n",
-            "* $curl\n",
-            "* $libcurl\n",
+            "* $fetch\n",
+            "* $libfetch\n",
             "* Protocols: $proto\n",
             "* Features: $feat\n",
             "* Disabled: $dis\n",
@@ -955,7 +955,7 @@ sub timestampskippedevents {
 # Setup CI Test Run
 sub citest_starttestrun {
     if(azure_check_environment()) {
-        $AZURE_RUN_ID = azure_create_test_run($ACURL);
+        $AZURE_RUN_ID = azure_create_test_run($AFETCH);
         logmsg "Azure Run ID: $AZURE_RUN_ID\n" if ($verbose);
     }
     # Appveyor doesn't require anything here
@@ -972,10 +972,10 @@ sub citest_starttest {
 
     # create test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID) {
-        $AZURE_RESULT_ID = azure_create_test_result($ACURL, $AZURE_RUN_ID, $testnum, $testname);
+        $AZURE_RESULT_ID = azure_create_test_result($AFETCH, $AZURE_RUN_ID, $testnum, $testname);
     }
     elsif(appveyor_check_environment()) {
-        appveyor_create_test_result($ACURL, $testnum, $testname);
+        appveyor_create_test_result($AFETCH, $testnum, $testname);
     }
 }
 
@@ -985,18 +985,18 @@ sub citest_finishtest {
     my ($testnum, $error) = @_;
     # update test result in CI services
     if(azure_check_environment() && $AZURE_RUN_ID && $AZURE_RESULT_ID) {
-        $AZURE_RESULT_ID = azure_update_test_result($ACURL, $AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
+        $AZURE_RESULT_ID = azure_update_test_result($AFETCH, $AZURE_RUN_ID, $AZURE_RESULT_ID, $testnum, $error,
                                                     $timeprepini{$testnum}, $timevrfyend{$testnum});
     }
     elsif(appveyor_check_environment()) {
-        appveyor_update_test_result($ACURL, $testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
+        appveyor_update_test_result($AFETCH, $testnum, $error, $timeprepini{$testnum}, $timevrfyend{$testnum});
     }
 }
 
 # Complete CI test run
 sub citest_finishtestrun {
     if(azure_check_environment() && $AZURE_RUN_ID) {
-        $AZURE_RUN_ID = azure_update_test_run($ACURL, $AZURE_RUN_ID);
+        $AZURE_RUN_ID = azure_update_test_run($AFETCH, $AZURE_RUN_ID);
     }
     # Appveyor doesn't require anything here
 }
@@ -1096,7 +1096,7 @@ sub singletest_shouldrun {
                 next;
             }
 
-            $why = "curl lacks $1 support";
+            $why = "fetch lacks $1 support";
             last;
         }
     }
@@ -1116,7 +1116,7 @@ sub singletest_shouldrun {
                 next;
             }
 
-            $why = "curl has $1 support";
+            $why = "fetch has $1 support";
             last;
         }
     }
@@ -1222,7 +1222,7 @@ sub normalize_text {
 #######################################################################
 # Verify test succeeded
 sub singletest_check {
-    my ($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind)=@_;
+    my ($runnerid, $testnum, $cmdres, $FETCHOUT, $tool, $usedvalgrind)=@_;
 
     # Skip all the verification on torture tests
     if ($torture) {
@@ -1350,13 +1350,13 @@ sub singletest_check {
         $ok .= "-"; # stderr not checked
     }
 
-    # what to cut off from the live protocol sent by curl
+    # what to cut off from the live protocol sent by fetch
     my @strip = getpart("verify", "strip");
 
     # what parts to cut off from the protocol & upload
     my @strippart = getpart("verify", "strippart");
 
-    # this is the valid protocol blurb curl should generate
+    # this is the valid protocol blurb fetch should generate
     my @protocol= getpart("verify", "protocol");
     if(@protocol) {
         # Verify the sent request
@@ -1392,7 +1392,7 @@ sub singletest_check {
         if((!$out[0] || ($out[0] eq "")) && $protocol[0]) {
             logmsg "\n $testnum: protocol FAILED!\n".
                 " There was no content at all in the file $logdir/$SERVERIN.\n".
-                " Server glitch? Total curl failure? Returned: $cmdres\n";
+                " Server glitch? Total fetch failure? Returned: $cmdres\n";
             # timestamp test result verification end
             $timevrfyend{$testnum} = Time::HiRes::time();
             return -1;
@@ -1455,7 +1455,7 @@ sub singletest_check {
 
     if(!$replyattr{'nocheck'} && (@reply || $replyattr{'sendzero'})) {
         # verify the received data
-        my @out = loadarray($CURLOUT);
+        my @out = loadarray($FETCHOUT);
 
         # get the mode attribute
         my $filemode=$replyattr{'mode'};
@@ -1513,7 +1513,7 @@ sub singletest_check {
         $ok .= "-"; # upload not checked
     }
 
-    # this is the valid protocol blurb curl should generate to a proxy
+    # this is the valid protocol blurb fetch should generate to a proxy
     my @proxyprot = getpart("verify", "proxy");
     if(@proxyprot) {
         # Verify the sent proxy request
@@ -1662,7 +1662,7 @@ sub singletest_check {
     else {
         if(!$short) {
             logmsg sprintf("\n%s returned $cmdres, when expecting %s\n",
-                           (!$tool)?"curl":$tool, $errorcode);
+                           (!$tool)?"fetch":$tool, $errorcode);
         }
         logmsg " $testnum: exit FAILED\n";
         # timestamp test result verification end
@@ -1927,7 +1927,7 @@ sub singletest {
         #######################################################################
         # Execute this test number
         my $cmdres;
-        my $CURLOUT;
+        my $FETCHOUT;
         my $tool;
         my $usedvalgrind;
         if(runnerac_test_run($runnerid, $testnum)) {
@@ -1938,7 +1938,7 @@ sub singletest {
         $singletest_state{$runnerid} = ST_RUN;
 
     } elsif($singletest_state{$runnerid} == ST_RUN) {
-        my ($rid, $error, $logs, $testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind) = runnerar($runnerid);
+        my ($rid, $error, $logs, $testtimings, $cmdres, $FETCHOUT, $tool, $usedvalgrind) = runnerar($runnerid);
         if(!$rid) {
             logmsg "ERROR: runner $runnerid seems to have died\n";
             $singletest_state{$runnerid} = ST_INIT;
@@ -1984,7 +1984,7 @@ sub singletest {
         loadtest("${logdir}/test${testnum}");
         readtestkeywords();
 
-        $error = singletest_check($runnerid, $testnum, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+        $error = singletest_check($runnerid, $testnum, $cmdres, $FETCHOUT, $tool, $usedvalgrind);
         if($error == -1) {
             my $err = ignoreresultcode($testnum);
             # Submit the test case result with the CI environment
@@ -2231,23 +2231,23 @@ while(@ARGV) {
         $verbose=1;
     }
     elsif ($ARGV[0] eq "-c") {
-        # use this path to curl instead of default
-        $DBGCURL=$CURL=$ARGV[1];
+        # use this path to fetch instead of default
+        $DBGFETCH=$FETCH=$ARGV[1];
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-vc") {
-        # use this path to a curl used to verify servers
+        # use this path to a fetch used to verify servers
 
         # Particularly useful when you introduce a crashing bug somewhere in
         # the development version as then it won't be able to run any tests
         # since it can't verify the servers!
 
-        $VCURL=shell_quote($ARGV[1]);
+        $VFETCH=shell_quote($ARGV[1]);
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-ac") {
-        # use this curl only to talk to APIs (currently only CI test APIs)
-        $ACURL=shell_quote($ARGV[1]);
+        # use this fetch only to talk to APIs (currently only CI test APIs)
+        $AFETCH=shell_quote($ARGV[1]);
         shift @ARGV;
     }
     elsif ($ARGV[0] eq "-bundle") {
@@ -2433,10 +2433,10 @@ while(@ARGV) {
         print <<"EOHELP"
 Usage: runtests.pl [options] [test selection(s)]
   -a       continue even if a test fails
-  -ac path use this curl only to talk to APIs (currently only CI test APIs)
+  -ac path use this fetch only to talk to APIs (currently only CI test APIs)
   -am      automake style output PASS/FAIL: [number] [name]
   -bundle  use test bundles
-  -c path  use this curl executable
+  -c path  use this fetch executable
   -d       display server debug info
   -e, --test-event  event-based execution
   --test-duphandle  duplicate handles before use
@@ -2465,7 +2465,7 @@ Usage: runtests.pl [options] [test selection(s)]
   -t[N]    torture (simulate function failures); N means fail Nth function
   -u       error instead of warning on server unexpectedly alive
   -v       verbose output
-  -vc path use this curl only to verify the existing servers
+  -vc path use this fetch only to verify the existing servers
   [num]    like "5 6 9" or " 5 to 22 " to run those tests only
   [!num]   like "!5 !6 !9" to disable those tests
   [~num]   like "~5 ~6 ~9" to ignore the result of those tests
@@ -2522,11 +2522,11 @@ if(!$randseed) {
         localtime(time);
     # seed of the month. December 2019 becomes 201912
     $randseed = ($year+1900)*100 + $mon+1;
-    print "Using curl: $CURL\n";
-    open(my $curlvh, "-|", shell_quote($CURL) . " --version 2>$dev_null") ||
-        die "could not get curl version!";
-    my @c = <$curlvh>;
-    close($curlvh) || die "could not get curl version!";
+    print "Using fetch: $FETCH\n";
+    open(my $fetchvh, "-|", shell_quote($FETCH) . " --version 2>$dev_null") ||
+        die "could not get fetch version!";
+    my @c = <$fetchvh>;
+    close($fetchvh) || die "could not get fetch version!";
     # use the first line of output and get the md5 out of it
     my $str = md5($c[0]);
     $randseed += unpack('S', $str);  # unsigned 16 bit value
@@ -2556,13 +2556,13 @@ if($valgrind) {
         if (($? >> 8)) {
             $valgrind_tool="";
         }
-        open(my $curlh, "<", "$CURL");
-        my $l = <$curlh>;
+        open(my $fetchh, "<", "$FETCH");
+        my $l = <$fetchh>;
         if($l =~ /^\#\!/) {
             # A shell script. This is typically when built with libtool,
             $valgrind="../libtool --mode=execute $valgrind";
         }
-        close($curlh);
+        close($fetchh);
 
         # valgrind 3 renamed the --logfile option to --log-file!!!
         # (this happened in 2005, so we could probably don't need to care about
@@ -2581,8 +2581,8 @@ if($valgrind) {
 }
 
 if ($gdbthis) {
-    # open the executable curl and read the first 4 bytes of it
-    open(my $check, "<", "$CURL");
+    # open the executable fetch and read the first 4 bytes of it
+    open(my $check, "<", "$FETCH");
     my $c;
     sysread $check, $c, 4;
     close($check);
@@ -2614,7 +2614,7 @@ if(!$jobs) {
 }
 
 #######################################################################
-# Output curl version and host info being tested
+# Output fetch version and host info being tested
 #
 
 if(!$listonly) {
@@ -2622,7 +2622,7 @@ if(!$listonly) {
 }
 
 #######################################################################
-# Output information about the curl build
+# Output information about the fetch build
 #
 if(!$listonly) {
     if(open(my $fd, "<", "../buildinfo.txt")) {
@@ -2831,8 +2831,8 @@ sub displaylogs {
         if(($log =~ /^upload\d+/) && ($log !~ /^upload$testnum/)) {
             next; # skip uploadNnn of other tests
         }
-        if(($log =~ /^curl\d+\.out/) && ($log !~ /^curl$testnum\.out/)) {
-            next; # skip curlNnn.out of other tests
+        if(($log =~ /^fetch\d+\.out/) && ($log !~ /^fetch$testnum\.out/)) {
+            next; # skip fetchNnn.out of other tests
         }
         if(($log =~ /^test\d+\.txt/) && ($log !~ /^test$testnum\.txt/)) {
             next; # skip testNnn.txt of other tests

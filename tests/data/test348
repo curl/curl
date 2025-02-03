@@ -56,7 +56,7 @@ TYPE I
 STOR %TESTNUMBER
 QUIT
 </protocol>
-# 70 - CURLE_REMOTE_DISK_FULL
+# 70 - FETCHE_REMOTE_DISK_FULL
 <errorcode>
 70
 </errorcode>

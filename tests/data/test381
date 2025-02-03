@@ -32,7 +32,7 @@ dr-xr-xr-x   5 0        1            512 Oct  1  1997 usr
 ftp
 </server>
 
-# When CURL_NETRC_REQUIRED is set, the password in the URL is ignored and
+# When FETCH_NETRC_REQUIRED is set, the password in the URL is ignored and
 # using the netrc is mandatory.
 #
 <name>
@@ -43,7 +43,7 @@ netrc-optional lets URL creds override netrc
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://mary:drfrank@%HOSTIP:%FTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >
-# the following two lines were created while testing curl
+# the following two lines were created while testing fetch
 machine %HOSTIP login frankenstein password wrongone
 machine %HOSTIP login mary password yram
 </file>

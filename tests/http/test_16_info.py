@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -58,9 +58,9 @@ class TestInfo:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
+        r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True)
         r.check_stats(count=count, http_status=200, exitcode=0,
                       remote_port=env.port_for(alpn_proto=proto),
                       remote_ip='127.0.0.1')
@@ -73,9 +73,9 @@ class TestInfo:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 2
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}/data.json.302?[0-{count-1}]'
-        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True, extra_args=[
+        r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True, extra_args=[
             '--location'
         ])
         r.check_stats(count=count, http_status=200, exitcode=0,
@@ -91,9 +91,9 @@ class TestInfo:
         count = 2
         fdata = os.path.join(env.gen_dir, 'data-100k')
         fsize = 100 * 1024
-        curl = CurlClient(env=env)
-        url = f'https://{env.authority_for(env.domain1, proto)}/curltest/echo?id=[0-{count-1}]'
-        r = curl.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
+        fetch = CurlClient(env=env)
+        url = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/echo?id=[0-{count-1}]'
+        r = fetch.http_upload(urls=[url], data=f'@{fdata}', alpn_proto=proto,
                              with_headers=True, extra_args=[
                                 '--trace-config', 'http/2,http/3'
                              ])
@@ -108,9 +108,9 @@ class TestInfo:
     @pytest.mark.parametrize("proto", ['http/1.1'])
     def test_16_04_info_http_download(self, env: Env, httpd, nghttpx, proto):
         count = 2
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[url], alpn_proto=proto, with_stats=True)
+        r = fetch.http_download(urls=[url], alpn_proto=proto, with_stats=True)
         r.check_stats(count=count, http_status=200, exitcode=0,
                       remote_port=env.http_port, remote_ip='127.0.0.1')
         for idx, s in enumerate(r.stats):

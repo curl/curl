@@ -3,7 +3,7 @@
 <keywords>
 FTP
 PASV
-CURLOPT_PORT
+FETCHOPT_PORT
 </keywords>
 </info>
 #

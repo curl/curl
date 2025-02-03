@@ -90,13 +90,13 @@ default
 GET http://a.com/ HTTP/1.1
 Host: a.com
 Authorization: Basic %b64[alice:alicespassword]b64%
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://b.com/%TESTNUMBER0002 HTTP/1.1
 Host: b.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-/* This is the 'proxyauth.c' test app posted by Shmulik Regev on the libcurl
+/* This is the 'proxyauth.c' test app posted by Shmulik Regev on the libfetch
  * mailing list on 10 Jul 2007, converted to a test case.
  *
  * argv1 = URL
@@ -46,42 +46,42 @@
 
 #define NUM_HANDLES 2
 
-static CURL *testeh[NUM_HANDLES];
+static FETCH *testeh[NUM_HANDLES];
 
-static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
-                     struct curl_slist *headers)
+static FETCHcode init(int num, FETCHM *cm, const char *url, const char *userpwd,
+                     struct fetch_slist *headers)
 {
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
   res_easy_init(testeh[num]);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_URL, url);
+  res_easy_setopt(testeh[num], FETCHOPT_URL, url);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_PROXY, PROXY);
+  res_easy_setopt(testeh[num], FETCHOPT_PROXY, PROXY);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_PROXYUSERPWD, userpwd);
+  res_easy_setopt(testeh[num], FETCHOPT_PROXYUSERPWD, userpwd);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+  res_easy_setopt(testeh[num], FETCHOPT_PROXYAUTH, (long)FETCHAUTH_ANY);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_VERBOSE, 1L);
+  res_easy_setopt(testeh[num], FETCHOPT_VERBOSE, 1L);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_HEADER, 1L);
+  res_easy_setopt(testeh[num], FETCHOPT_HEADER, 1L);
   if(res)
     goto init_failed;
 
-  res_easy_setopt(testeh[num], CURLOPT_HTTPHEADER, headers); /* custom Host: */
+  res_easy_setopt(testeh[num], FETCHOPT_HTTPHEADER, headers); /* custom Host: */
   if(res)
     goto init_failed;
 
@@ -89,25 +89,25 @@ static CURLcode init(int num, CURLM *cm, const char *url, const char *userpwd,
   if(res)
     goto init_failed;
 
-  return CURLE_OK; /* success */
+  return FETCHE_OK; /* success */
 
 init_failed:
 
-  curl_easy_cleanup(testeh[num]);
+  fetch_easy_cleanup(testeh[num]);
   testeh[num] = NULL;
 
   return res; /* failure */
 }
 
-static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
-                     struct curl_slist *headers)
+static FETCHcode loop(int num, FETCHM *cm, const char *url, const char *userpwd,
+                     struct fetch_slist *headers)
 {
-  CURLMsg *msg;
+  FETCHMsg *msg;
   long L;
   int Q, U = -1;
   fd_set R, W, E;
   struct timeval T;
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
   res = init(num, cm, url, userpwd, headers);
   if(res)
@@ -163,16 +163,16 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
     }
 
     while(1) {
-      msg = curl_multi_info_read(cm, &Q);
+      msg = fetch_multi_info_read(cm, &Q);
       if(!msg)
         break;
-      if(msg->msg == CURLMSG_DONE) {
+      if(msg->msg == FETCHMSG_DONE) {
         int i;
-        CURL *e = msg->easy_handle;
+        FETCH *e = msg->easy_handle;
         fprintf(stderr, "R: %d - %s\n", (int)msg->data.result,
-                curl_easy_strerror(msg->data.result));
-        curl_multi_remove_handle(cm, e);
-        curl_easy_cleanup(e);
+                fetch_easy_strerror(msg->data.result));
+        fetch_multi_remove_handle(cm, e);
+        fetch_easy_cleanup(e);
         for(i = 0; i < NUM_HANDLES; i++) {
           if(testeh[i] == e) {
             testeh[i] = NULL;
@@ -181,7 +181,7 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
         }
       }
       else
-        fprintf(stderr, "E: CURLMsg (%d)\n", (int)msg->msg);
+        fprintf(stderr, "E: FETCHMsg (%d)\n", (int)msg->msg);
     }
 
     res_test_timedout();
@@ -189,15 +189,15 @@ static CURLcode loop(int num, CURLM *cm, const char *url, const char *userpwd,
       return res;
   }
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLM *cm = NULL;
-  struct curl_slist *headers = NULL;
+  FETCHM *cm = NULL;
+  struct fetch_slist *headers = NULL;
   char buffer[246]; /* naively fixed-size */
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
   int i;
 
   for(i = 0; i < NUM_HANDLES; i++)
@@ -206,27 +206,27 @@ CURLcode test(char *URL)
   start_test_timing();
 
   if(test_argc < 4)
-    return (CURLcode)99;
+    return (FETCHcode)99;
 
   msnprintf(buffer, sizeof(buffer), "Host: %s", HOST);
 
   /* now add a custom Host: header */
-  headers = curl_slist_append(headers, buffer);
+  headers = fetch_slist_append(headers, buffer);
   if(!headers) {
-    fprintf(stderr, "curl_slist_append() failed\n");
+    fprintf(stderr, "fetch_slist_append() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  res_global_init(CURL_GLOBAL_ALL);
+  res_global_init(FETCH_GLOBAL_ALL);
   if(res) {
-    curl_slist_free_all(headers);
+    fetch_slist_free_all(headers);
     return res;
   }
 
   res_multi_init(cm);
   if(res) {
-    curl_global_cleanup();
-    curl_slist_free_all(headers);
+    fetch_global_cleanup();
+    fetch_slist_free_all(headers);
     return res;
   }
 
@@ -243,14 +243,14 @@ test_cleanup:
   /* proper cleanup sequence - type PB */
 
   for(i = 0; i < NUM_HANDLES; i++) {
-    curl_multi_remove_handle(cm, testeh[i]);
-    curl_easy_cleanup(testeh[i]);
+    fetch_multi_remove_handle(cm, testeh[i]);
+    fetch_easy_cleanup(testeh[i]);
   }
 
-  curl_multi_cleanup(cm);
-  curl_global_cleanup();
+  fetch_multi_cleanup(cm);
+  fetch_global_cleanup();
 
-  curl_slist_free_all(headers);
+  fetch_slist_free_all(headers);
 
   return res;
 }

@@ -58,7 +58,7 @@ HTTP PUT --digest with user-specified Content-Length header
 </name>
 # This test is to ensure 'Content-Length: 0' is sent while negotiating auth
 # even when there is a user-specified Content-Length header.
-# https://github.com/curl/curl/pull/1242
+# https://github.com/fetch/fetch/pull/1242
 <command>
 -H "Content-Length: 85" -u auser:apasswd --digest -T %LOGDIR/put%TESTNUMBER http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
@@ -75,14 +75,14 @@ four is the number of lines
 <protocol>
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 0
 
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="auser", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="dc185587d5e8391b347eef194c2a3cd6"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 85
 

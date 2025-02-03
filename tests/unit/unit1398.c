@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #endif
 
-static CURLcode unit_setup(void) {return CURLE_OK;}
+static FETCHcode unit_setup(void) {return FETCHE_OK;}
 static void unit_stop(void) {}
 
 UNITTEST_START
@@ -39,65 +39,65 @@ const char *str = "bug";
 int width = 3;
 char output[130];
 
-/*#define curl_msnprintf snprintf */
+/*#define fetch_msnprintf snprintf */
 
 /* without a trailing zero */
-rc = curl_msnprintf(output, 4, "%.*s", width, buf);
+rc = fetch_msnprintf(output, 4, "%.*s", width, buf);
 fail_unless(rc == 3, "return code should be 3");
 fail_unless(!strcmp(output, "bug"), "wrong output");
 
 /* with a trailing zero */
-rc = curl_msnprintf(output, 4, "%.*s", width, str);
+rc = fetch_msnprintf(output, 4, "%.*s", width, str);
 fail_unless(rc == 3, "return code should be 3");
 fail_unless(!strcmp(output, "bug"), "wrong output");
 
 width = 2;
 /* one byte less */
-rc = curl_msnprintf(output, 4, "%.*s", width, buf);
+rc = fetch_msnprintf(output, 4, "%.*s", width, buf);
 fail_unless(rc == 2, "return code should be 2");
 fail_unless(!strcmp(output, "bu"), "wrong output");
 
 /* string with larger precision */
-rc = curl_msnprintf(output, 8, "%.8s", str);
+rc = fetch_msnprintf(output, 8, "%.8s", str);
 fail_unless(rc == 3, "return code should be 3");
 fail_unless(!strcmp(output, "bug"), "wrong output");
 
 /* longer string with precision */
-rc = curl_msnprintf(output, 8, "%.3s", "0123456789");
+rc = fetch_msnprintf(output, 8, "%.3s", "0123456789");
 fail_unless(rc == 3, "return code should be 3");
 fail_unless(!strcmp(output, "012"), "wrong output");
 
 /* negative width */
-rc = curl_msnprintf(output, 8, "%-8s", str);
+rc = fetch_msnprintf(output, 8, "%-8s", str);
 fail_unless(rc == 7, "return code should be 7");
 fail_unless(!strcmp(output, "bug    "), "wrong output");
 
 /* larger width that string length */
-rc = curl_msnprintf(output, 8, "%8s", str);
+rc = fetch_msnprintf(output, 8, "%8s", str);
 fail_unless(rc == 7, "return code should be 7");
 fail_unless(!strcmp(output, "     bu"), "wrong output");
 
 /* output a number in a limited output */
-rc = curl_msnprintf(output, 4, "%d", 10240);
+rc = fetch_msnprintf(output, 4, "%d", 10240);
 fail_unless(rc == 3, "return code should be 3");
 fail_unless(!strcmp(output, "102"), "wrong output");
 
 /* padded strings */
-rc = curl_msnprintf(output, 16, "%8s%8s", str, str);
+rc = fetch_msnprintf(output, 16, "%8s%8s", str, str);
 fail_unless(rc == 15, "return code should be 15");
 fail_unless(!strcmp(output, "     bug     bu"), "wrong output");
 
 /* padded numbers */
-rc = curl_msnprintf(output, 16, "%8d%8d", 1234, 5678);
+rc = fetch_msnprintf(output, 16, "%8d%8d", 1234, 5678);
 fail_unless(rc == 15, "return code should be 15");
 fail_unless(!strcmp(output, "    1234    567"), "wrong output");
 
 /* double precision */
-rc = curl_msnprintf(output, 24, "%2$.*1$.99d", 3, 5678);
+rc = fetch_msnprintf(output, 24, "%2$.*1$.99d", 3, 5678);
 fail_unless(rc == 0, "return code should be 0");
 
 /* 129 input % flags */
-rc = curl_msnprintf(output, 130,
+rc = fetch_msnprintf(output, 130,
                     "%s%s%s%s%s%s%s%s%s%s" /* 10 */
                     "%s%s%s%s%s%s%s%s%s%s" /* 20 */
                     "%s%s%s%s%s%s%s%s%s%s" /* 30 */
@@ -129,7 +129,7 @@ rc = curl_msnprintf(output, 130,
 fail_unless(rc == 0, "return code should be 0");
 
 /* 128 input % flags */
-rc = curl_msnprintf(output, 130,
+rc = fetch_msnprintf(output, 130,
                     "%s%s%s%s%s%s%s%s%s%s" /* 10 */
                     "%s%s%s%s%s%s%s%s%s%s" /* 20 */
                     "%s%s%s%s%s%s%s%s%s%s" /* 30 */
@@ -161,7 +161,7 @@ rc = curl_msnprintf(output, 130,
 fail_unless(rc == 13, "return code should be 13");
 
 /* 129 output segments */
-rc = curl_msnprintf(output, 130,
+rc = fetch_msnprintf(output, 130,
                     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 20 */
                     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 40 */
                     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 60 */
@@ -173,7 +173,7 @@ rc = curl_msnprintf(output, 130,
 fail_unless(rc == 0, "return code should be 0");
 
 /* 128 output segments */
-rc = curl_msnprintf(output, 129,
+rc = fetch_msnprintf(output, 129,
                     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 20 */
                     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 40 */
                     "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%" /* 60 */
@@ -186,6 +186,6 @@ fail_unless(rc == 128, "return code should be 128");
 
 UNITTEST_STOP
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif

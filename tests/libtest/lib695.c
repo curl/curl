@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -34,82 +34,82 @@ static size_t write_it(char *ptr, size_t size, size_t nmemb, void *userdata)
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl = NULL;
-  curl_mime *mime1 = NULL;
-  curl_mime *mime2 = NULL;
-  curl_mimepart *part;
-  CURLcode res = TEST_ERR_FAILURE;
+  FETCH *fetch = NULL;
+  fetch_mime *mime1 = NULL;
+  fetch_mime *mime2 = NULL;
+  fetch_mimepart *part;
+  FETCHcode res = TEST_ERR_FAILURE;
 
   /*
    * Check proper rewind when reusing a mime structure.
    */
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
+  fetch = fetch_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* Do not write anything. */
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_it);
+  fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_it);
 
   /* Build the first mime structure. */
-  mime1 = curl_mime_init(curl);
-  part = curl_mime_addpart(mime1);
-  curl_mime_data(part, "<title>hello</title>", CURL_ZERO_TERMINATED);
-  curl_mime_type(part, "text/html");
-  curl_mime_name(part, "data");
+  mime1 = fetch_mime_init(fetch);
+  part = fetch_mime_addpart(mime1);
+  fetch_mime_data(part, "<title>hello</title>", FETCH_ZERO_TERMINATED);
+  fetch_mime_type(part, "text/html");
+  fetch_mime_name(part, "data");
 
   /* Use first mime structure as top level MIME POST. */
-  curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime1);
+  fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, mime1);
 
   /* Perform the request, res gets the return code */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
   /* Check for errors */
-  if(res != CURLE_OK)
-    fprintf(stderr, "curl_easy_perform() 1 failed: %s\n",
-            curl_easy_strerror(res));
+  if(res != FETCHE_OK)
+    fprintf(stderr, "fetch_easy_perform() 1 failed: %s\n",
+            fetch_easy_strerror(res));
   else {
     /* phase two, create a mime struct using the mime1 handle */
-    mime2 = curl_mime_init(curl);
-    part = curl_mime_addpart(mime2);
+    mime2 = fetch_mime_init(fetch);
+    part = fetch_mime_addpart(mime2);
 
     /* use the new mime setup */
-    curl_easy_setopt(curl, CURLOPT_MIMEPOST, mime2);
+    fetch_easy_setopt(fetch, FETCHOPT_MIMEPOST, mime2);
 
     /* Reuse previous mime structure as a child. */
-    res = curl_mime_subparts(part, mime1);
+    res = fetch_mime_subparts(part, mime1);
 
-    if(res != CURLE_OK)
-      fprintf(stderr, "curl_mime_subparts() failed: %sn",
-              curl_easy_strerror(res));
+    if(res != FETCHE_OK)
+      fprintf(stderr, "fetch_mime_subparts() failed: %sn",
+              fetch_easy_strerror(res));
     else {
       mime1 = NULL;
 
       /* Perform the request, res gets the return code */
-      res = curl_easy_perform(curl);
+      res = fetch_easy_perform(fetch);
 
       /* Check for errors */
-      if(res != CURLE_OK)
-        fprintf(stderr, "curl_easy_perform() 2 failed: %s\n",
-                curl_easy_strerror(res));
+      if(res != FETCHE_OK)
+        fprintf(stderr, "fetch_easy_perform() 2 failed: %s\n",
+                fetch_easy_strerror(res));
     }
   }
 
 test_cleanup:
-  curl_easy_cleanup(curl);
-  curl_mime_free(mime1);
-  curl_mime_free(mime2);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_mime_free(mime1);
+  fetch_mime_free(mime2);
+  fetch_global_cleanup();
   return res;
 }

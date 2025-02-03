@@ -56,7 +56,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{stderr}%{header_json}\n' -s
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,10 +28,10 @@
 #include "memdebug.h"
 
 struct transfer_status {
-  CURL *easy;
-  curl_off_t out_len;
+  FETCH *easy;
+  fetch_off_t out_len;
   size_t hd_line;
-  CURLcode result;
+  FETCHcode result;
   int http_status;
 };
 
@@ -41,36 +41,36 @@ static size_t header_callback(char *ptr, size_t size, size_t nmemb,
   struct transfer_status *st = (struct transfer_status *)userp;
   const char *hd = ptr;
   size_t len = size * nmemb;
-  CURLcode result;
+  FETCHcode result;
 
   (void)fwrite(ptr, size, nmemb, stdout);
   ++st->hd_line;
   if(len == 2 && hd[0] == '\r' && hd[1] == '\n') {
-    curl_off_t clen;
+    fetch_off_t clen;
     long httpcode = 0;
     /* end of a response */
-    result = curl_easy_getinfo(st->easy, CURLINFO_RESPONSE_CODE, &httpcode);
+    result = fetch_easy_getinfo(st->easy, FETCHINFO_RESPONSE_CODE, &httpcode);
     fprintf(stderr, "header_callback, get status: %ld, %d\n",
             httpcode, result);
     if(httpcode < 100 || httpcode >= 1000) {
       fprintf(stderr, "header_callback, invalid status: %ld, %d\n",
               httpcode, result);
-      return CURLE_WRITE_ERROR;
+      return FETCHE_WRITE_ERROR;
     }
     st->http_status = (int)httpcode;
     if(st->http_status >= 200 && st->http_status < 300) {
-      result = curl_easy_getinfo(st->easy, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T,
+      result = fetch_easy_getinfo(st->easy, FETCHINFO_CONTENT_LENGTH_DOWNLOAD_T,
                                  &clen);
       fprintf(stderr, "header_callback, info Content-Length: %ld, %d\n",
               (long)clen, result);
       if(result) {
         st->result = result;
-        return CURLE_WRITE_ERROR;
+        return FETCHE_WRITE_ERROR;
       }
       if(clen < 0) {
         fprintf(stderr, "header_callback, expected known Content-Length, "
                 "got: %ld\n", (long)clen);
-        return CURLE_WRITE_ERROR;
+        return FETCHE_WRITE_ERROR;
       }
     }
   }
@@ -82,39 +82,39 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   struct transfer_status *st = (struct transfer_status *)userp;
   size_t len = size * nmemb;
   fwrite(ptr, size, nmemb, stdout);
-  st->out_len += (curl_off_t)len;
+  st->out_len += (fetch_off_t)len;
   return len;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curls = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *fetchs = NULL;
+  FETCHcode res = FETCHE_OK;
   struct transfer_status st;
 
   start_test_timing();
 
   memset(&st, 0, sizeof(st));
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  easy_init(curls);
-  st.easy = curls; /* to allow callbacks access */
+  easy_init(fetchs);
+  st.easy = fetchs; /* to allow callbacks access */
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, write_callback);
-  easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
-  easy_setopt(curls, CURLOPT_HEADERDATA, &st);
+  easy_setopt(fetchs, FETCHOPT_URL, URL);
+  easy_setopt(fetchs, FETCHOPT_WRITEFUNCTION, write_callback);
+  easy_setopt(fetchs, FETCHOPT_WRITEDATA, &st);
+  easy_setopt(fetchs, FETCHOPT_HEADERFUNCTION, header_callback);
+  easy_setopt(fetchs, FETCHOPT_HEADERDATA, &st);
 
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
+  easy_setopt(fetchs, FETCHOPT_NOPROGRESS, 1L);
 
-  res = curl_easy_perform(curls);
+  res = fetch_easy_perform(fetchs);
 
 test_cleanup:
 
-  curl_easy_cleanup(curls);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetchs);
+  fetch_global_cleanup();
 
   return res; /* return the final return code */
 }

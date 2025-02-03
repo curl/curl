@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLINFO_LOW_SPEED_LIMIT
+FETCHINFO_LOW_SPEED_LIMIT
 DELAY
 </keywords>
 </info>
@@ -32,7 +32,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-CURLINFO_LOW_SPEED_LIMIT
+FETCHINFO_LOW_SPEED_LIMIT
 </name>
 
 <command>

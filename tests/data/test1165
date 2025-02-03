@@ -2,7 +2,7 @@
 <info>
 <keywords>
 source analysis
-CURL_DISABLE
+FETCH_DISABLE
 </keywords>
 </info>
 
@@ -14,7 +14,7 @@ none
 </server>
 
 <name>
-Verify configure.ac and source code CURL_DISABLE_-sync
+Verify configure.ac and source code FETCH_DISABLE_-sync
 </name>
 
 <command type="perl">

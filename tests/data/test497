@@ -44,11 +44,11 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-# curl: (56) Too large response headers: 307215 > 307200
+# fetch: (56) Too large response headers: 307215 > 307200
 <errorcode>
 56
 </errorcode>

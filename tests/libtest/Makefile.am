@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 AUTOMAKE_OPTIONS = foreign nostdinc
@@ -30,9 +30,9 @@ AUTOMAKE_OPTIONS = foreign nostdinc
 # being currently built and tested are searched before the library which
 # might possibly already be installed in the system.
 #
-# $(top_srcdir)/include is for libcurl's external include files
-# $(top_builddir)/lib is for libcurl's generated lib/curl_config.h file
-# $(top_srcdir)/lib for libcurl's lib/curl_setup.h and other "borrowed" files
+# $(top_srcdir)/include is for libfetch's external include files
+# $(top_builddir)/lib is for libfetch's generated lib/fetch_config.h file
+# $(top_srcdir)/lib for libfetch's lib/fetch_setup.h and other "borrowed" files
 
 AM_CPPFLAGS = -I$(top_srcdir)/include        \
               -I$(top_builddir)/lib          \
@@ -43,17 +43,17 @@ AM_CPPFLAGS = -I$(top_srcdir)/include        \
 EXTRA_DIST = test307.pl test610.pl test613.pl test1013.pl test1022.pl   \
   CMakeLists.txt mk-lib1521.pl .checksrc
 
-CFLAG_CURL_SYMBOL_HIDING = @CFLAG_CURL_SYMBOL_HIDING@
+CFLAG_FETCH_SYMBOL_HIDING = @CFLAG_FETCH_SYMBOL_HIDING@
 
-CFLAGS += @CURL_CFLAG_EXTRAS@
+CFLAGS += @FETCH_CFLAG_EXTRAS@
 
 CLEANFILES = lib1521.c
 
 # Prevent LIBS from being used for all link targets
 LIBS = $(BLANK_AT_MAKETIME)
 
-SUPPORTFILES_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
-TESTUTIL_LIBS = $(top_builddir)/lib/libcurl.la @LIBCURL_PC_LIBS_PRIVATE@
+SUPPORTFILES_LIBS = $(top_builddir)/lib/libfetch.la @LIBFETCH_PC_LIBS_PRIVATE@
+TESTUTIL_LIBS = $(top_builddir)/lib/libfetch.la @LIBFETCH_PC_LIBS_PRIVATE@
 
 # Dependencies (may need to be overridden)
 LDADD = $(SUPPORTFILES_LIBS)
@@ -64,8 +64,8 @@ include Makefile.inc
 
 noinst_LTLIBRARIES =
 
-if USE_CPPFLAG_CURL_STATICLIB
-AM_CPPFLAGS += -DCURL_STATICLIB
+if USE_CPPFLAG_FETCH_STATICLIB
+AM_CPPFLAGS += -DFETCH_STATICLIB
 endif
 
 AM_LDFLAGS =
@@ -73,7 +73,7 @@ AM_CFLAGS =
 
 libstubgss_la_LDFLAGS_EXTRA =
 
-if CURL_LT_SHLIB_USE_NO_UNDEFINED
+if FETCH_LT_SHLIB_USE_NO_UNDEFINED
 libstubgss_la_LDFLAGS_EXTRA += -no-undefined
 endif
 
@@ -92,7 +92,7 @@ libstubgss_la_DEPENDENCIES =
 endif
 
 if USE_TEST_BUNDLES
-AM_CPPFLAGS += -DCURL_NO_GETADDRINFO_OVERRIDE
+AM_CPPFLAGS += -DFETCH_NO_GETADDRINFO_OVERRIDE
 
 libtest_bundle.c: $(top_srcdir)/tests/mk-bundle.pl lib1521.c
 	@PERL@ $(top_srcdir)/tests/mk-bundle.pl $(srcdir) > libtest_bundle.c
@@ -103,17 +103,17 @@ libtests_SOURCES = $(TESTUTIL) $(TSTTRACE)
 libtests_LDADD = $(TESTUTIL_LIBS)
 CLEANFILES += libtest_bundle.c
 
-if USE_CPPFLAG_CURL_STATICLIB
+if USE_CPPFLAG_FETCH_STATICLIB
 else
-# These are part of the libcurl static lib. Add them here when linking shared.
+# These are part of the libfetch static lib. Add them here when linking shared.
 libtests_SOURCES += $(WARNLESS) $(MULTIBYTE) $(INET_PTON) $(TIMEDIFF) $(THREADS)
 endif
 else
 noinst_PROGRAMS = $(LIBTESTPROGS)
 endif
 
-lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/curl/curl.h
-	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/curl/curl.h lib1521.c
+lib1521.c: $(top_srcdir)/tests/libtest/mk-lib1521.pl $(top_srcdir)/include/fetch/fetch.h
+	@PERL@ $(top_srcdir)/tests/libtest/mk-lib1521.pl < $(top_srcdir)/include/fetch/fetch.h lib1521.c
 
 CHECKSRC = $(CS_$(V))
 CS_0 = @echo "  RUN     " $@;

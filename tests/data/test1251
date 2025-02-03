@@ -44,7 +44,7 @@ http://user:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --max-time 5
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

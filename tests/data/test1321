@@ -69,7 +69,7 @@ A005 LOGOUT
 <proxy>
 CONNECT imap.%TESTNUMBER:%IMAPPORT HTTP/1.1
 Host: imap.%TESTNUMBER:%IMAPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>

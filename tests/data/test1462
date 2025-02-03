@@ -17,7 +17,7 @@
 none
 </server>
 <name>
-curl invalid category --help
+fetch invalid category --help
 </name>
 <command>
 --help sdfafdsfadsfsd
@@ -35,7 +35,7 @@ Unknown category provided, here is a list of all categories:
 
  auth        Authentication methods
  connection  Manage connections
- curl        The command line tool itself
+ fetch        The command line tool itself
  deprecated  Legacy
  dns         Names and resolving
  file        FILE protocol

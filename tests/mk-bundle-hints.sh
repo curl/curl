@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -53,7 +53,7 @@ grep -E '^ *(static|struct) +' $(find libtest unit -maxdepth 1 -name 'lib*.c' -o
   | grep -E '^(libtest|unit)/' \
   | grep -E '\.(c|pl):(static|struct)( +[a-zA-Z_* ]+)? +[a-zA-Z_][a-zA-Z0-9_]+ *' | sort -u \
   | grep -o -E '[a-zA-Z_][a-zA-Z0-9_]+ *[=;[({]' | tr -d '=;[({ ' \
-  | grep -v -E '^(NULL$|sizeof$|CURLE_)' \
+  | grep -v -E '^(NULL$|sizeof$|FETCHE_)' \
   | sort | uniq -c | sort -k 2 | grep -v -E '^ +1 ' \
   | awk '{print "    \"" $2 "\","}'
 

@@ -1,5 +1,5 @@
 <testcase>
-# Authorization is used to force curl to realize that the server is
+# Authorization is used to force fetch to realize that the server is
 # speaking HTTP 1.0. The request must be resent with the correct
 # authorization header, but using HTTP 1.0, not 1.1.
 <info>
@@ -16,7 +16,7 @@ HTTP/1.0
 <reply>
 <data>
 HTTP/1.0 401 Authorization Required swsclose
-Server: testcurl
+Server: testfetch
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Digest realm="gimme all yer s3cr3ts", nonce="11223344"
@@ -31,7 +31,7 @@ Try again on this HTTP 1.0 server!
 # Authorization: Digest line passed-in from the client
 <data1000>
 HTTP/1.0 200 OK swsclose
-Server: testcurl
+Server: testfetch
 Content-Type: text/plain
 Content-Length: 23
 Connection: close
@@ -41,7 +41,7 @@ This IS the real page!
 
 <datacheck>
 HTTP/1.0 401 Authorization Required swsclose
-Server: testcurl
+Server: testfetch
 WWW-Authenticate: Blackmagic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Basic realm="gimme all yer s3cr3ts"
 WWW-Authenticate: Digest realm="gimme all yer s3cr3ts", nonce="11223344"
@@ -50,7 +50,7 @@ Content-Length: 35
 Connection: close
 
 HTTP/1.0 200 OK swsclose
-Server: testcurl
+Server: testfetch
 Content-Type: text/plain
 Content-Length: 23
 Connection: close
@@ -88,7 +88,7 @@ four is the number of lines
 <protocol>
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 85
 
@@ -99,7 +99,7 @@ four is the number of lines
 PUT /%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="gimme all yer s3cr3ts", nonce="11223344", uri="/%TESTNUMBER", response="df4cef6b52a30e65d472dd848d2055a1"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 85
 

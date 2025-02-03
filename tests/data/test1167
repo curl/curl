@@ -13,7 +13,7 @@ none
 </server>
 
 <name>
-Verify curl prefix of public symbols in header files
+Verify fetch prefix of public symbols in header files
 </name>
 
 <command type="perl">

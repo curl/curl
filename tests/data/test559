@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLOPT_BUFFERSIZE
+FETCHOPT_BUFFERSIZE
 HTTP
 </keywords>
 </info>
@@ -30,13 +30,13 @@ ZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZZ
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-use tiny CURLOPT_BUFFERSIZE
+use tiny FETCHOPT_BUFFERSIZE
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

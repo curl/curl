@@ -55,9 +55,9 @@ CONNECT with short sends
 </name>
 <setenv>
 # make the first send cut off after this amount of data
-CURL_SMALLREQSEND=8
+FETCH_SMALLREQSEND=8
 # make repeated sends small too
-CURL_SMALLSENDS=8
+FETCH_SMALLSENDS=8
 </setenv>
 <command>
 http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%PROXYPORT -d "datatopost=ohthatsfunyesyes"
@@ -70,14 +70,14 @@ http://test.%TESTNUMBER:%HTTPPORT/we/want/that/page/%TESTNUMBER -p -x %HOSTIP:%P
 <proxy>
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol nonewline="yes">
 POST /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 27
 Content-Type: application/x-www-form-urlencoded

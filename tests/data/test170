@@ -38,13 +38,13 @@ http://a.galaxy.far.far.away/%TESTNUMBER --proxy http://%HOSTIP:%HTTPPORT --prox
 POST http://a.galaxy.far.far.away/%TESTNUMBER HTTP/1.1
 Host: a.galaxy.far.far.away
 Proxy-Authorization: NTLM TlRMTVNTUAABAAAABoIIAAAAAAAAAAAAAAAAAAAAAAA=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
 
 </protocol>
-# 52 is CURLE_GOT_NOTHING
+# 52 is FETCHE_GOT_NOTHING
 <errorcode>
 52
 </errorcode>

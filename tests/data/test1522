@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLINFO_SIZE_UPLOAD
+FETCHINFO_SIZE_UPLOAD
 </keywords>
 </info>
 
@@ -33,7 +33,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-CURLINFO_SIZE_UPLOAD with small SO_SNDBUF
+FETCHINFO_SIZE_UPLOAD with small SO_SNDBUF
 </name>
 
 <command>

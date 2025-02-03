@@ -46,7 +46,7 @@ ETag: "21025-dc7-39462498"
 http
 http-proxy
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>

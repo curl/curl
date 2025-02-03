@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -27,38 +27,38 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLM *curlm = NULL;
-  CURL *curl1 = NULL;
-  CURL *curl2 = NULL;
+  FETCHM *fetchm = NULL;
+  FETCH *fetch1 = NULL;
+  FETCH *fetch2 = NULL;
   int running_handles = 0;
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  multi_init(curlm);
-  multi_setopt(curlm, CURLMOPT_MAX_HOST_CONNECTIONS, 1);
+  multi_init(fetchm);
+  multi_setopt(fetchm, FETCHMOPT_MAX_HOST_CONNECTIONS, 1);
 
-  easy_init(curl1);
-  easy_setopt(curl1, CURLOPT_URL, URL);
-  multi_add_handle(curlm, curl1);
+  easy_init(fetch1);
+  easy_setopt(fetch1, FETCHOPT_URL, URL);
+  multi_add_handle(fetchm, fetch1);
 
-  easy_init(curl2);
-  easy_setopt(curl2, CURLOPT_URL, URL);
-  multi_add_handle(curlm, curl2);
+  easy_init(fetch2);
+  easy_setopt(fetch2, FETCHOPT_URL, URL);
+  multi_add_handle(fetchm, fetch2);
 
-  multi_perform(curlm, &running_handles);
+  multi_perform(fetchm, &running_handles);
 
-  multi_remove_handle(curlm, curl2);
+  multi_remove_handle(fetchm, fetch2);
 
-  /* If curl2 is still in the connect-pending list, this will crash */
-  multi_remove_handle(curlm, curl1);
+  /* If fetch2 is still in the connect-pending list, this will crash */
+  multi_remove_handle(fetchm, fetch1);
 
 test_cleanup:
-  curl_easy_cleanup(curl1);
-  curl_easy_cleanup(curl2);
-  curl_multi_cleanup(curlm);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch1);
+  fetch_easy_cleanup(fetch2);
+  fetch_multi_cleanup(fetchm);
+  fetch_global_cleanup();
   return res;
 }

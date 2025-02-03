@@ -61,12 +61,12 @@ http://åäö.se:%HTTPPORT/%TESTNUMBER --resolve xn--4cab6c.se:%HTTPPORT:%HOSTIP
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: xn--4cab6c.se:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

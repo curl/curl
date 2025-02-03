@@ -35,7 +35,7 @@ http
 ftp
 </server>
 <name>
-curl HTTP, FILE and FTP in parallel
+fetch HTTP, FILE and FTP in parallel
 </name>
 <command option="no-output">
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.txt ftp://%HOSTIP:%FTPPORT/%TESTNUMBER0002 --parallel -o %LOGDIR/%TESTNUMBER.a -o %LOGDIR/%TESTNUMBER.b -o %LOGDIR/%TESTNUMBER.c

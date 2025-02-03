@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* used for test case 533, 534 and 535 */
@@ -33,27 +33,27 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch = NULL;
   int running;
-  CURLM *m = NULL;
+  FETCHM *m = NULL;
   int current = 0;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  easy_init(curl);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_FAILONERROR, 1L);
 
   multi_init(m);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(m, fetch);
 
   fprintf(stderr, "Start at URL 0\n");
 
@@ -73,17 +73,17 @@ CURLcode test(char *URL)
       if(!current++) {
         fprintf(stderr, "Advancing to URL 1\n");
         /* remove the handle we use */
-        curl_multi_remove_handle(m, curl);
+        fetch_multi_remove_handle(m, fetch);
 
         /* make us reuse the same handle all the time, and try resetting
            the handle first too */
-        curl_easy_reset(curl);
-        easy_setopt(curl, CURLOPT_URL, libtest_arg2);
-        easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-        easy_setopt(curl, CURLOPT_FAILONERROR, 1L);
+        fetch_easy_reset(fetch);
+        easy_setopt(fetch, FETCHOPT_URL, libtest_arg2);
+        easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+        easy_setopt(fetch, FETCHOPT_FAILONERROR, 1L);
 
         /* re-add it */
-        multi_add_handle(m, curl);
+        multi_add_handle(m, fetch);
       }
       else
         break; /* done */
@@ -106,9 +106,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UB */
 
-  curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 
   return res;
 }

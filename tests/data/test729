@@ -33,7 +33,7 @@ http://fake --limit-rate 1 -x socks4a://aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_PROXY
+# FETCHE_PROXY
 <errorcode>
 97
 </errorcode>

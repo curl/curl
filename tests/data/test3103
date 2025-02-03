@@ -38,7 +38,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CURLOPT_COOKIELIST without expiry
+FETCHOPT_COOKIELIST without expiry
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

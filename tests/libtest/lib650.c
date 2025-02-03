@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -35,7 +35,7 @@ static const char testname[] = "fieldname";
  * used elsewhere.
  */
 
-/* curl_formget callback to count characters. */
+/* fetch_formget callback to count characters. */
 static size_t count_chars(void *userp, const char *buf, size_t len)
 {
   size_t *pcounter = (size_t *) userp;
@@ -46,181 +46,181 @@ static size_t count_chars(void *userp, const char *buf, size_t len)
 }
 
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl = NULL;
-  CURLcode res = TEST_ERR_MAJOR_BAD;
-  CURLFORMcode formrc;
-  struct curl_slist *headers, *headers2 = NULL;
-  struct curl_httppost *formpost = NULL;
-  struct curl_httppost *lastptr = NULL;
-  struct curl_forms formarray[3];
+  FETCH *fetch = NULL;
+  FETCHcode res = TEST_ERR_MAJOR_BAD;
+  FETCHFORMcode formrc;
+  struct fetch_slist *headers, *headers2 = NULL;
+  struct fetch_httppost *formpost = NULL;
+  struct fetch_httppost *lastptr = NULL;
+  struct fetch_forms formarray[3];
   size_t formlength = 0;
   char flbuf[32];
   long contentlength = 0;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* Check proper name and data copying, as well as headers. */
-  headers = curl_slist_append(NULL, "X-customheader-1: Header 1 data");
+  headers = fetch_slist_append(NULL, "X-customheader-1: Header 1 data");
   if(!headers) {
     goto test_cleanup;
   }
-  headers2 = curl_slist_append(headers, "X-customheader-2: Header 2 data");
+  headers2 = fetch_slist_append(headers, "X-customheader-2: Header 2 data");
   if(!headers2) {
     goto test_cleanup;
   }
   headers = headers2;
-  headers2 = curl_slist_append(headers, "Content-Type: text/plain");
+  headers2 = fetch_slist_append(headers, "Content-Type: text/plain");
   if(!headers2) {
     goto test_cleanup;
   }
   headers = headers2;
-  CURL_IGNORE_DEPRECATION(
-    formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, &testname,
-                          CURLFORM_COPYCONTENTS, &testdata,
-                          CURLFORM_CONTENTHEADER, headers,
-                          CURLFORM_END);
+  FETCH_IGNORE_DEPRECATION(
+    formrc = fetch_formadd(&formpost, &lastptr,
+                          FETCHFORM_COPYNAME, &testname,
+                          FETCHFORM_COPYCONTENTS, &testdata,
+                          FETCHFORM_CONTENTHEADER, headers,
+                          FETCHFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(1) = %d\n", (int) formrc);
+    printf("fetch_formadd(1) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
   contentlength = (long)(strlen(testdata) - 1);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Use a form array for the non-copy test. */
-    formarray[0].option = CURLFORM_PTRCONTENTS;
+    formarray[0].option = FETCHFORM_PTRCONTENTS;
     formarray[0].value = testdata;
-    formarray[1].option = CURLFORM_CONTENTSLENGTH;
+    formarray[1].option = FETCHFORM_CONTENTSLENGTH;
     formarray[1].value = (char *)(size_t)contentlength;
-    formarray[2].option = CURLFORM_END;
+    formarray[2].option = FETCHFORM_END;
     formarray[2].value = NULL;
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_PTRNAME, testname,
-                          CURLFORM_NAMELENGTH, strlen(testname) - 1,
-                          CURLFORM_ARRAY, formarray,
-                          CURLFORM_FILENAME, "remotefile.txt",
-                          CURLFORM_END);
+                          FETCHFORM_PTRNAME, testname,
+                          FETCHFORM_NAMELENGTH, strlen(testname) - 1,
+                          FETCHFORM_ARRAY, formarray,
+                          FETCHFORM_FILENAME, "remotefile.txt",
+                          FETCHFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(2) = %d\n", (int) formrc);
+    printf("fetch_formadd(2) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
-  /* Now change in-memory data to affect CURLOPT_PTRCONTENTS value.
+  /* Now change in-memory data to affect FETCHOPT_PTRCONTENTS value.
      Copied values (first field) must not be affected.
-     CURLOPT_PTRNAME actually copies the name thus we do not test this here. */
+     FETCHOPT_PTRNAME actually copies the name thus we do not test this here. */
   testdata[0]++;
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Check multi-files and content type propagation. */
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "multifile",
-                          CURLFORM_FILE, libtest_arg2,    /* Set in first.c. */
-                          CURLFORM_FILE, libtest_arg2,
-                          CURLFORM_CONTENTTYPE, "text/whatever",
-                          CURLFORM_FILE, libtest_arg2,
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "multifile",
+                          FETCHFORM_FILE, libtest_arg2,    /* Set in first.c. */
+                          FETCHFORM_FILE, libtest_arg2,
+                          FETCHFORM_CONTENTTYPE, "text/whatever",
+                          FETCHFORM_FILE, libtest_arg2,
+                          FETCHFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(3) = %d\n", (int) formrc);
+    printf("fetch_formadd(3) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Check data from file content. */
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "filecontents",
-                          CURLFORM_FILECONTENT, libtest_arg2,
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "filecontents",
+                          FETCHFORM_FILECONTENT, libtest_arg2,
+                          FETCHFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(4) = %d\n", (int) formrc);
+    printf("fetch_formadd(4) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Measure the current form length.
      * This is done before including stdin data because we want to reuse it
      * and stdin cannot be rewound.
      */
-    curl_formget(formpost, (void *) &formlength, count_chars);
+    fetch_formget(formpost, (void *) &formlength, count_chars);
   )
 
   /* Include length in data for external check. */
-  curl_msnprintf(flbuf, sizeof(flbuf), "%lu", (unsigned long) formlength);
-  CURL_IGNORE_DEPRECATION(
-    formrc = curl_formadd(&formpost,
+  fetch_msnprintf(flbuf, sizeof(flbuf), "%lu", (unsigned long) formlength);
+  FETCH_IGNORE_DEPRECATION(
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "formlength",
-                          CURLFORM_COPYCONTENTS, &flbuf,
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "formlength",
+                          FETCHFORM_COPYCONTENTS, &flbuf,
+                          FETCHFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(5) = %d\n", (int) formrc);
+    printf("fetch_formadd(5) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Check stdin (may be problematic on some platforms). */
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "standardinput",
-                          CURLFORM_FILE, "-",
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "standardinput",
+                          FETCHFORM_FILE, "-",
+                          FETCHFORM_END);
   )
   if(formrc) {
-    printf("curl_formadd(6) = %d\n", (int) formrc);
+    printf("fetch_formadd(6) = %d\n", (int) formrc);
     goto test_cleanup;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
     goto test_cleanup;
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* send a multi-part formpost */
-    test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    test_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
   )
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
-  test_setopt(curl, CURLOPT_POSTREDIR, (long)CURL_REDIR_POST_301);
+  test_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
+  test_setopt(fetch, FETCHOPT_POSTREDIR, (long)FETCH_REDIR_POST_301);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
 
   /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* now cleanup the formpost chain */
-    curl_formfree(formpost);
+    fetch_formfree(formpost);
   )
-  curl_slist_free_all(headers);
+  fetch_slist_free_all(headers);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

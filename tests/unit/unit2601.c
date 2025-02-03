@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,18 +18,18 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "urldata.h"
 #include "bufq.h"
-#include "curl_trc.h"
+#include "fetch_trc.h"
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
   return res;
 }
 
@@ -95,7 +95,7 @@ static void check_bufq(size_t pool_spares,
   struct bufq q;
   struct bufc_pool pool;
   size_t max_len = chunk_size * max_chunks;
-  CURLcode result;
+  FETCHcode result;
   ssize_t n, i;
   size_t nwritten, nread;
 
@@ -117,7 +117,7 @@ static void check_bufq(size_t pool_spares,
   n = Curl_bufq_write(&q, test_data, wsize, &result);
   fail_unless(n >= 0, "write: negative size returned");
   fail_unless((size_t)n <= wsize, "write: wrong size returned");
-  fail_unless(result == CURLE_OK, "write: wrong result returned");
+  fail_unless(result == FETCHE_OK, "write: wrong result returned");
 
   /* write empty bufq full */
   nwritten = 0;
@@ -127,8 +127,8 @@ static void check_bufq(size_t pool_spares,
     if(n >= 0) {
       nwritten += (size_t)n;
     }
-    else if(result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "write-loop: unexpected result");
+    else if(result != FETCHE_AGAIN) {
+      fail_unless(result == FETCHE_AGAIN, "write-loop: unexpected result");
       break;
     }
   }
@@ -146,8 +146,8 @@ static void check_bufq(size_t pool_spares,
     if(n >= 0) {
       nread += (size_t)n;
     }
-    else if(result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "read-loop: unexpected result");
+    else if(result != FETCHE_AGAIN) {
+      fail_unless(result == FETCHE_AGAIN, "read-loop: unexpected result");
       break;
     }
   }
@@ -164,13 +164,13 @@ static void check_bufq(size_t pool_spares,
 
   for(i = 0; i < 1000; ++i) {
     n = Curl_bufq_write(&q, test_data, wsize, &result);
-    if(n < 0 && result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "rw-loop: unexpected write result");
+    if(n < 0 && result != FETCHE_AGAIN) {
+      fail_unless(result == FETCHE_AGAIN, "rw-loop: unexpected write result");
       break;
     }
     n = Curl_bufq_read(&q, test_data, rsize, &result);
-    if(n < 0 && result != CURLE_AGAIN) {
-      fail_unless(result == CURLE_AGAIN, "rw-loop: unexpected read result");
+    if(n < 0 && result != FETCHE_AGAIN) {
+      fail_unless(result == FETCHE_AGAIN, "rw-loop: unexpected read result");
       break;
     }
   }
@@ -253,12 +253,12 @@ static void check_bufq(size_t pool_spares,
 UNITTEST_START
   struct bufq q;
   ssize_t n;
-  CURLcode result;
+  FETCHcode result;
   unsigned char buf[16*1024];
 
   Curl_bufq_init(&q, 8*1024, 12);
   n = Curl_bufq_read(&q, buf, 128, &result);
-  fail_unless(n < 0 && result == CURLE_AGAIN, "read empty fail");
+  fail_unless(n < 0 && result == FETCHE_AGAIN, "read empty fail");
   Curl_bufq_free(&q);
 
   check_bufq(0, 1024, 4, 128, 128, BUFQ_OPT_NONE);

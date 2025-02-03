@@ -2,8 +2,8 @@
 <info>
 <keywords>
 source analysis
-CURL_EXTERN
-libcurl.def
+FETCH_EXTERN
+libfetch.def
 </keywords>
 </info>
 
@@ -15,7 +15,7 @@ none
 </server>
 
 <name>
-Verify libcurl.def against CURL_EXTERN declarations
+Verify libfetch.def against FETCH_EXTERN declarations
 </name>
 
 <command type="perl">
@@ -24,7 +24,7 @@ Verify libcurl.def against CURL_EXTERN declarations
 </client>
 
 <verify>
-<stdout loadfile="%SRCDIR/../lib/libcurl.def">
+<stdout loadfile="%SRCDIR/../lib/libfetch.def">
 </stdout>
 </verify>
 

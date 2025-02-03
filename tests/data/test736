@@ -20,7 +20,7 @@ Connection: close
 Content-Type: text/plain
 Funny-head: yesyes
 
-Hello curl from IPFS
+Hello fetch from IPFS
 </data>
 </reply>
 
@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTPPORT
 <protocol crlf="yes">
 GET /ipfs/bafybeidecnvkrygux6uoukouzps5ofkeevoqland7kopseiod6pzqvjg7u HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

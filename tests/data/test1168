@@ -63,13 +63,13 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L -u "catmai#d:#DZaRJYrixKE*gFY"
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic Y2F0bWFpI2Q6I0RaYVJKWXJpeEtFKmdGWQ==
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /data/%TESTNUMBER0002.txt HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic Y2F0bWFpI2Q6I0RaYVJKWXJpeEtFKmdGWQ==
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

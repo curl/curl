@@ -33,7 +33,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -i --head
 <protocol>
 HEAD /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

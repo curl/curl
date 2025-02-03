@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #
 ###########################################################################
@@ -35,9 +35,9 @@ use warnings;
 use File::Basename;
 
 my $root=$ARGV[0] || ".";
-my $incdir = "$root/include/curl";
+my $incdir = "$root/include/fetch";
 my $docdir = "$root/docs";
-my $libdocdir = "$docdir/libcurl";
+my $libdocdir = "$docdir/libfetch";
 my $errcode = 0;
 
 # Symbol-indexed hashes.
@@ -94,18 +94,18 @@ sub scan_header {
         $line = $_;
         next;
       }
-      if($_ =~ /CURLOPTDEPRECATED\(/) {
-        # Handle deprecated CURLOPT_* option.
-        if($_ !~ /CURLOPTDEPRECATED\(\s*(\S+)\s*,(?:.*?,){2}\s*(.*?)\s*,.*"\)/) {
+      if($_ =~ /FETCHOPTDEPRECATED\(/) {
+        # Handle deprecated FETCHOPT_* option.
+        if($_ !~ /FETCHOPTDEPRECATED\(\s*(\S+)\s*,(?:.*?,){2}\s*(.*?)\s*,.*"\)/) {
           # Folded line.
           $line = $_;
           next;
         }
         $hdr{$1} = $2;
       }
-      elsif($_ =~ /CURLOPT\(/) {
-        # Handle non-deprecated CURLOPT_* option.
-        if($_ !~ /CURLOPT\(\s*(\S+)\s*(?:,.*?){2}\)/) {
+      elsif($_ =~ /FETCHOPT\(/) {
+        # Handle non-deprecated FETCHOPT_* option.
+        if($_ !~ /FETCHOPT\(\s*(\S+)\s*(?:,.*?){2}\)/) {
           # Folded line.
           $line = $_;
           next;
@@ -116,8 +116,8 @@ sub scan_header {
         my $version = "X";
 
         # Get other kind of deprecation from this line.
-        if($_ =~ /CURL_DEPRECATED\(/) {
-          if($_ !~ /^(.*)CURL_DEPRECATED\(\s*(\S+?)\s*,.*?"\)(.*)$/) {
+        if($_ =~ /FETCH_DEPRECATED\(/) {
+          if($_ !~ /^(.*)FETCH_DEPRECATED\(\s*(\S+?)\s*,.*?"\)(.*)$/) {
             # Folded line.
             $line = $_;
             next;
@@ -125,7 +125,7 @@ sub scan_header {
          $version = $2;
          $_ = "$1 $3";
         }
-        if($_ =~ /^CURL_EXTERN\s+.*\s+(\S+?)\s*\(/) {
+        if($_ =~ /^FETCH_EXTERN\s+.*\s+(\S+?)\s*\(/) {
           # Flag public function.
           $hdr{$1} = $version;
         }
@@ -168,7 +168,7 @@ sub scan_man_for_opts {
         if($o) {
           $funcman{$o} = "X";
           # Check if paragraph is mentioning deprecation.
-          while($_ =~ /(?:deprecated|obsoleted?)\b\s*(?:in\b|since\b)?\s*(?:version\b|curl\b|libcurl\b)?\s*(\d[0-9.]*\d)?\b\s*(.*)$/i) {
+          while($_ =~ /(?:deprecated|obsoleted?)\b\s*(?:in\b|since\b)?\s*(?:version\b|fetch\b|libfetch\b)?\s*(\d[0-9.]*\d)?\b\s*(.*)$/i) {
             $funcman{$o} = $1 || "?";
             $_ = $2;
           }
@@ -211,7 +211,7 @@ sub scan_man_page {
             s/\\f.//g;      # Remove font formatting.
             s/\s+/ /g;      # One line with single space only.
             if($sh =~ /DESCRIPTION|DEPRECATED/) {
-              while($_ =~ /(?:deprecated|obsoleted?)\b\s*(?:in\b|since\b)?\s*(?:version\b|curl\b|libcurl\b)?\s*(\d[0-9.]*\d)?\b\s*(.*)$/i) {
+              while($_ =~ /(?:deprecated|obsoleted?)\b\s*(?:in\b|since\b)?\s*(?:version\b|fetch\b|libfetch\b)?\s*(\d[0-9.]*\d)?\b\s*(.*)$/i) {
                 # Flag deprecation status.
                 if($version ne "X" && $version ne "?") {
                   if($1 && $1 ne $version) {
@@ -242,7 +242,7 @@ sub scan_man_page {
 open(my $fh, "<", "$libdocdir/symbols-in-versions") ||
   die "$libdocdir/symbols-in-versions";
 while(<$fh>) {
-  if($_ =~ /^((?:CURL|LIBCURL)\S+)\s+\S+\s*(\S*)\s*(\S*)$/) {
+  if($_ =~ /^((?:FETCH|LIBFETCH)\S+)\s+\S+\s*(\S*)\s*(\S*)$/) {
     if($3 eq "") {
       $syminver{$1} = "X";
       if($2 ne "" && $2 ne ".") {
@@ -265,18 +265,18 @@ for(@hfiles) {
 
 # Get function statuses from manpages.
 foreach my $sym (keys %hdr) {
-  if($sym =~/^(?:curl|curlx)_\w/) {
+  if($sym =~/^(?:fetch|fetchx)_\w/) {
     scan_man_page("$libdocdir/$sym.3", $sym, \%funcman);
   }
 }
 
 # Get options from function manpages.
-scan_man_for_opts("$libdocdir/curl_easy_setopt.3", "CURLOPT");
-scan_man_for_opts("$libdocdir/curl_easy_getinfo.3", "CURLINFO");
+scan_man_for_opts("$libdocdir/fetch_easy_setopt.3", "FETCHOPT");
+scan_man_for_opts("$libdocdir/fetch_easy_getinfo.3", "FETCHINFO");
 
 # Get deprecation status from option manpages.
 foreach my $sym (keys %syminver) {
-  if($sym =~ /^(?:CURLOPT|CURLINFO)_\w+$/) {
+  if($sym =~ /^(?:FETCHOPT|FETCHINFO)_\w+$/) {
     scan_man_page("$libdocdir/opts/$sym.3", $sym, \%optman);
   }
 }
@@ -295,7 +295,7 @@ Symbol                                 symbols-in  func man  opt man   .h
 HEADER
         ;
 foreach my $sym (sort {$a cmp $b} keys %keys) {
-  if($sym =~ /^(?:CURLOPT|CURLINFO|curl|curlx)_\w/) {
+  if($sym =~ /^(?:FETCHOPT|FETCHINFO|fetch|fetchx)_\w/) {
     my $s = exists($syminver{$sym})? $syminver{$sym}: " ";
     my $f = exists($funcman{$sym})? $funcman{$sym}: " ";
     my $o = exists($optman{$sym})? $optman{$sym}: " ";

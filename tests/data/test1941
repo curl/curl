@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_header
+fetch_easy_header
 CONNECT
 </keywords>
 </info>
@@ -41,7 +41,7 @@ http-proxy
 </server>
 
 <name>
-curl_easy_header with CONNECT
+fetch_easy_header with CONNECT
 </name>
 <tool>
 lib1940

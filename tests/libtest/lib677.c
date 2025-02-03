@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -30,66 +30,66 @@
 static const char testcmd[] = "A1 IDLE\r\n";
 static char testbuf[1024];
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLM *mcurl;
-  CURL *curl = NULL;
+  FETCHM *mfetch;
+  FETCH *fetch = NULL;
   int mrun;
-  curl_socket_t sock = CURL_SOCKET_BAD;
+  fetch_socket_t sock = FETCH_SOCKET_BAD;
   time_t start = time(NULL);
   int state = 0;
   ssize_t pos = 0;
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_DEFAULT);
-  multi_init(mcurl);
-  easy_init(curl);
+  global_init(FETCH_GLOBAL_DEFAULT);
+  multi_init(mfetch);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_CONNECT_ONLY, 1L);
-  if(curl_multi_add_handle(mcurl, curl))
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 1L);
+  if(fetch_multi_add_handle(mfetch, fetch))
     goto test_cleanup;
 
   while(time(NULL) - start < 5) {
-    struct curl_waitfd waitfd;
+    struct fetch_waitfd waitfd;
 
-    multi_perform(mcurl, &mrun);
+    multi_perform(mfetch, &mrun);
     for(;;) {
       int i;
-      struct CURLMsg *m = curl_multi_info_read(mcurl, &i);
+      struct FETCHMsg *m = fetch_multi_info_read(mfetch, &i);
 
       if(!m)
         break;
-      if(m->msg == CURLMSG_DONE && m->easy_handle == curl) {
-        curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sock);
-        if(sock == CURL_SOCKET_BAD)
+      if(m->msg == FETCHMSG_DONE && m->easy_handle == fetch) {
+        fetch_easy_getinfo(fetch, FETCHINFO_ACTIVESOCKET, &sock);
+        if(sock == FETCH_SOCKET_BAD)
           goto test_cleanup;
         printf("Connected fine, extracted socket. Moving on\n");
       }
     }
 
-    if(sock != CURL_SOCKET_BAD) {
-      waitfd.events = state ? CURL_WAIT_POLLIN : CURL_WAIT_POLLOUT;
+    if(sock != FETCH_SOCKET_BAD) {
+      waitfd.events = state ? FETCH_WAIT_POLLIN : FETCH_WAIT_POLLOUT;
       waitfd.revents = 0;
-      curl_easy_getinfo(curl, CURLINFO_ACTIVESOCKET, &sock);
+      fetch_easy_getinfo(fetch, FETCHINFO_ACTIVESOCKET, &sock);
       waitfd.fd = sock;
     }
-    curl_multi_wait(mcurl, &waitfd, sock == CURL_SOCKET_BAD ? 0 : 1, 50,
+    fetch_multi_wait(mfetch, &waitfd, sock == FETCH_SOCKET_BAD ? 0 : 1, 50,
                     &mrun);
-    if((sock != CURL_SOCKET_BAD) && (waitfd.revents & waitfd.events)) {
+    if((sock != FETCH_SOCKET_BAD) && (waitfd.revents & waitfd.events)) {
       size_t len = 0;
 
       if(!state) {
-        CURLcode ec;
-        ec = curl_easy_send(curl, testcmd + pos,
+        FETCHcode ec;
+        ec = fetch_easy_send(fetch, testcmd + pos,
                             sizeof(testcmd) - 1 - pos, &len);
-        if(ec == CURLE_AGAIN) {
+        if(ec == FETCHE_AGAIN) {
           continue;
         }
         else if(ec) {
-          fprintf(stderr, "curl_easy_send() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+          fprintf(stderr, "fetch_easy_send() failed, with code %d (%s)\n",
+                  (int)ec, fetch_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
@@ -103,14 +103,14 @@ CURLcode test(char *URL)
         }
       }
       else if(pos < (ssize_t)sizeof(testbuf)) {
-        CURLcode ec;
-        ec = curl_easy_recv(curl, testbuf + pos, sizeof(testbuf) - pos, &len);
-        if(ec == CURLE_AGAIN) {
+        FETCHcode ec;
+        ec = fetch_easy_recv(fetch, testbuf + pos, sizeof(testbuf) - pos, &len);
+        if(ec == FETCHE_AGAIN) {
           continue;
         }
         else if(ec) {
-          fprintf(stderr, "curl_easy_recv() failed, with code %d (%s)\n",
-                  (int)ec, curl_easy_strerror(ec));
+          fprintf(stderr, "fetch_easy_recv() failed, with code %d (%s)\n",
+                  (int)ec, fetch_easy_strerror(ec));
           res = ec;
           goto test_cleanup;
         }
@@ -118,7 +118,7 @@ CURLcode test(char *URL)
           pos += len;
       }
       if(len <= 0)
-        sock = CURL_SOCKET_BAD;
+        sock = FETCH_SOCKET_BAD;
     }
   }
 
@@ -127,11 +127,11 @@ CURLcode test(char *URL)
     putchar('\n');
   }
 
-  curl_multi_remove_handle(mcurl, curl);
+  fetch_multi_remove_handle(mfetch, fetch);
 test_cleanup:
-  curl_easy_cleanup(curl);
-  curl_multi_cleanup(mcurl);
+  fetch_easy_cleanup(fetch);
+  fetch_multi_cleanup(mfetch);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return res;
 }

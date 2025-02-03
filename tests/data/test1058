@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -r -101
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=-101
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

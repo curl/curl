@@ -59,12 +59,12 @@ HTTP receive cookies over IPV6
 <protocol>
 GET /path/%TESTNUMBER0001 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /path/%TESTNUMBER0002 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: time=1
 

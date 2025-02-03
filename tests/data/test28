@@ -61,12 +61,12 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER -L
 <protocol>
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /online/1,1795,Welcome,00.html/%TESTNUMBER0002.txt?logout=TRUE HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

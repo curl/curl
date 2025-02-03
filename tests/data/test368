@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -r 4
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=4-
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

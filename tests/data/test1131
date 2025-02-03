@@ -78,14 +78,14 @@ FAILURE2
 <protocol>
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Expect: 100-continue
 Content-Length: 100
 
 PUT /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Expect: 100-continue
 Content-Length: 100

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,42 +18,42 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURLcode easyret;
-  CURLMcode multiret;
-  CURLSHcode shareret;
-  CURLUcode urlret;
+  FETCHcode res = FETCHE_OK;
+  FETCHcode easyret;
+  FETCHMcode multiret;
+  FETCHSHcode shareret;
+  FETCHUcode urlret;
   (void)URL;
 
-  curl_easy_strerror((CURLcode)INT_MAX);
-  curl_multi_strerror((CURLMcode)INT_MAX);
-  curl_share_strerror((CURLSHcode)INT_MAX);
-  curl_url_strerror((CURLUcode)INT_MAX);
-  curl_easy_strerror((CURLcode)-INT_MAX);
-  curl_multi_strerror((CURLMcode)-INT_MAX);
-  curl_share_strerror((CURLSHcode)-INT_MAX);
-  curl_url_strerror((CURLUcode)-INT_MAX);
-  for(easyret = CURLE_OK; easyret <= CURL_LAST; easyret++) {
-    printf("e%d: %s\n", (int)easyret, curl_easy_strerror(easyret));
+  fetch_easy_strerror((FETCHcode)INT_MAX);
+  fetch_multi_strerror((FETCHMcode)INT_MAX);
+  fetch_share_strerror((FETCHSHcode)INT_MAX);
+  fetch_url_strerror((FETCHUcode)INT_MAX);
+  fetch_easy_strerror((FETCHcode)-INT_MAX);
+  fetch_multi_strerror((FETCHMcode)-INT_MAX);
+  fetch_share_strerror((FETCHSHcode)-INT_MAX);
+  fetch_url_strerror((FETCHUcode)-INT_MAX);
+  for(easyret = FETCHE_OK; easyret <= FETCH_LAST; easyret++) {
+    printf("e%d: %s\n", (int)easyret, fetch_easy_strerror(easyret));
   }
-  for(multiret = CURLM_CALL_MULTI_PERFORM; multiret <= CURLM_LAST;
+  for(multiret = FETCHM_CALL_MULTI_PERFORM; multiret <= FETCHM_LAST;
       multiret++) {
-    printf("m%d: %s\n", (int)multiret, curl_multi_strerror(multiret));
+    printf("m%d: %s\n", (int)multiret, fetch_multi_strerror(multiret));
   }
-  for(shareret = CURLSHE_OK; shareret <= CURLSHE_LAST; shareret++) {
-    printf("s%d: %s\n", (int)shareret, curl_share_strerror(shareret));
+  for(shareret = FETCHSHE_OK; shareret <= FETCHSHE_LAST; shareret++) {
+    printf("s%d: %s\n", (int)shareret, fetch_share_strerror(shareret));
   }
-  for(urlret = CURLUE_OK; urlret <= CURLUE_LAST; urlret++) {
-    printf("u%d: %s\n", (int)urlret, curl_url_strerror(urlret));
+  for(urlret = FETCHUE_OK; urlret <= FETCHUE_LAST; urlret++) {
+    printf("u%d: %s\n", (int)urlret, fetch_url_strerror(urlret));
   }
 
   return res;

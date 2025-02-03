@@ -58,7 +58,7 @@ http
 crypto
 </features>
 <name>
-HTTP with Digest authorization on custom CURLOPT_PORT
+HTTP with Digest authorization on custom FETCHOPT_PORT
 </name>
 <tool>
 lib%TESTNUMBER

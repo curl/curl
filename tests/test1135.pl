@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -54,7 +54,7 @@ if(!defined $root) {
     $root = ".";
 }
 
-$root = "$root/include/curl";
+$root = "$root/include/fetch";
 opendir(D, "$root") || die "Cannot open directory $root: $!\n";
 my @dir = readdir(D);
 closedir(D);
@@ -79,15 +79,15 @@ foreach my $f (@incs) {
     open H, "<$f" || die;
     my $first = "";
     while(<H>) {
-        s/CURL_DEPRECATED\(.*"\)//;
+        s/FETCH_DEPRECATED\(.*"\)//;
         s/  */ /g;
-        if (/^(^CURL_EXTERN .*?)\(/) {
+        if (/^(^FETCH_EXTERN .*?)\(/) {
             my $decl = $1;
             $decl =~ s/\r$//;
             $decl =~ /([a-z_]+)$/;
             push(@out, "$1");
         }
-        elsif (/^(^CURL_EXTERN .*)/) {
+        elsif (/^(^FETCH_EXTERN .*)/) {
             # handle two-line declarations
             my $decl = $1;
             $decl =~ s/\r$//;

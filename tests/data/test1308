@@ -2,8 +2,8 @@
 <info>
 <keywords>
 unittest
-curl_formadd
-curl_formget
+fetch_formadd
+fetch_formget
 FORM
 </keywords>
 </info>

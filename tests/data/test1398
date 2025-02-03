@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-curl_msnprintf
+fetch_msnprintf
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-curl_msnprintf unit tests
+fetch_msnprintf unit tests
 </name>
 </client>
 

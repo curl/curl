@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl
+fetch
 </keywords>
 </info>
 
@@ -16,11 +16,11 @@ none
 </server>
 
 <name>
-Verify curl -h -F
+Verify fetch -h -F
 </name>
 
 <command type="perl">
-%SRCDIR/test1707.pl %CURL -F %LOGDIR/help%TESTNUMBER ../docs/cmdline-opts/curl.txt
+%SRCDIR/test1707.pl %FETCH -F %LOGDIR/help%TESTNUMBER ../docs/cmdline-opts/fetch.txt
 </command>
 </client>
 

@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/path/to/here/ -O --output-dir %LOGDIR
 <protocol crlf="yes">
 GET /path/to/here/ HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

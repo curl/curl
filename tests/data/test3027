@@ -2,7 +2,7 @@
 <info>
 <keywords>
 FTP
-CURLOPT_FILETIME
+FETCHOPT_FILETIME
 MDTM fail
 </keywords>
 </info>

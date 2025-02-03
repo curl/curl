@@ -42,7 +42,7 @@ s/^EPRT \|1\|(.*)/EPRT \|1\|/
 </strippart>
 
 # This test doesn't send a QUIT because the main state machine in multi.c
-# triggers the timeout and sets the CURLE_OPERATION_TIMEDOUT error (28) for
+# triggers the timeout and sets the FETCHE_OPERATION_TIMEDOUT error (28) for
 # which the FTP disconnect code generically has to assume could mean the
 # control the connection and thus it cannot send any command.
 <protocol>
@@ -54,7 +54,7 @@ TYPE I
 SIZE %TESTNUMBER
 RETR %TESTNUMBER
 </protocol>
-# 28 is CURLE_OPERATION_TIMEDOUT
+# 28 is FETCHE_OPERATION_TIMEDOUT
 <errorcode>
 28
 </errorcode>

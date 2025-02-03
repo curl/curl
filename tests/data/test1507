@@ -23,7 +23,7 @@ lib%TESTNUMBER
 
 # based on bug report #1184
 <name>
-SMTP with multi interface and CURLE_ABORTED_BY_CALLBACK
+SMTP with multi interface and FETCHE_ABORTED_BY_CALLBACK
 </name>
 <stdin>
 From: different

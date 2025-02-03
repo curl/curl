@@ -8,7 +8,7 @@ RETR
 HTTP
 HTTP CONNECT
 proxytunnel
-CURLOPT_CONNECT_TO
+FETCHOPT_CONNECT_TO
 </keywords>
 </info>
 #

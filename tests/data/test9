@@ -30,7 +30,7 @@ http
 HTTP RFC1867-type formposting
 </name>
 <command>
-http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt
+http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F name=daniel -F tool=fetch -F file=@%LOGDIR/test%TESTNUMBER.txt
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER.txt">
@@ -48,7 +48,7 @@ bar
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 431
 Content-Type: multipart/form-data; boundary=----------------------------9ef8d6205763
@@ -60,7 +60,7 @@ daniel
 ------------------------------9ef8d6205763
 Content-Disposition: form-data; name="tool"
 
-curl
+fetch
 ------------------------------9ef8d6205763
 Content-Disposition: form-data; name="file"; filename="test9.txt"
 Content-Type: text/plain

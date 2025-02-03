@@ -22,12 +22,12 @@ Content-Length: 0
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 <name>
-Test CURLINFO_RESPONSE_CODE CURLINFO_PROTOCOL
+Test FETCHINFO_RESPONSE_CODE FETCHINFO_PROTOCOL
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

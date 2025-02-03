@@ -56,11 +56,11 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --max-filesize 143
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-# curl: (63) Exceeded the maximum allowed file size (143)
+# fetch: (63) Exceeded the maximum allowed file size (143)
 <errorcode>
 63
 </errorcode>

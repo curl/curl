@@ -63,7 +63,7 @@ proxy
 <proxy>
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 header-type: proxy
 
@@ -72,7 +72,7 @@ header-type: proxy
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
 Authorization: Basic aWFtOm15OjtzZWxm
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 header-type: server
 

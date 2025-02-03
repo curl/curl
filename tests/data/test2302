@@ -27,7 +27,7 @@ upgrade
 #
 # Client-side
 <client>
-# require debug for the forced CURL_ENTROPY
+# require debug for the forced FETCH_ENTROPY
 <features>
 Debug
 ws
@@ -36,7 +36,7 @@ ws
 http
 </server>
 <name>
-WebSockets via callback (frame mode) + curl_ws_send()
+WebSockets via callback (frame mode) + fetch_ws_send()
 </name>
 <tool>
 lib%TESTNUMBER

@@ -72,12 +72,12 @@ http://%HOSTIP:%HTTPPORT/we/are/all/twits/%TESTNUMBER -L
 <protocol>
 GET /we/are/all/twits/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /moo/%TESTNUMBER0002 HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

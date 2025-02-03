@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #ifdef HAVE_NETINET_IN_H
 #  include <netinet/in.h>
@@ -33,7 +33,7 @@
 #  include <arpa/inet.h>
 #endif
 
-#include "curlx.h"
+#include "fetchx.h"
 
 #include "hash.h"
 #include "hostip.h"
@@ -45,16 +45,16 @@ static struct Curl_hash hp;
 static char *data_key;
 static struct Curl_dns_entry *data_node;
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  testdata = curl_easy_init();
+  testdata = fetch_easy_init();
   if(!testdata) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
+    fetch_global_cleanup();
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   Curl_init_dnscache(&hp, 7);
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
@@ -66,8 +66,8 @@ static void unit_stop(void)
   free(data_key);
   Curl_hash_destroy(&hp);
 
-  curl_easy_cleanup(testdata);
-  curl_global_cleanup();
+  fetch_easy_cleanup(testdata);
+  fetch_global_cleanup();
 }
 
 static struct Curl_addrinfo *fake_ai(void)
@@ -92,21 +92,21 @@ static struct Curl_addrinfo *fake_ai(void)
   return ai;
 }
 
-static CURLcode create_node(void)
+static FETCHcode create_node(void)
 {
   data_key = aprintf("%s:%d", "dummy", 0);
   if(!data_key)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   data_node = calloc(1, sizeof(struct Curl_dns_entry));
   if(!data_node)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
   data_node->addr = fake_ai();
   if(!data_node->addr)
-    return CURLE_OUT_OF_MEMORY;
+    return FETCHE_OUT_OF_MEMORY;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 
@@ -117,8 +117,8 @@ UNITTEST_START
 
   /* Test 1305 exits without adding anything to the hash */
   if(strcmp(arg, "1305") != 0) {
-    CURLcode rc = create_node();
-    abort_unless(rc == CURLE_OK, "data node creation failed");
+    FETCHcode rc = create_node();
+    abort_unless(rc == FETCHE_OK, "data node creation failed");
     key_len = strlen(data_key);
 
     data_node->refcount = 1; /* hash will hold the reference */

@@ -5,8 +5,8 @@ HTTP
 HTTP GET
 HTTP set cookie
 cookies
-CURLOPT_REFERER
-curl_easy_reset
+FETCHOPT_REFERER
+fetch_easy_reset
 </keywords>
 </info>
 #
@@ -50,13 +50,13 @@ Content-Type: text/html
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-verify setting CURLOPT_COOKIEFILE to NULL again
+verify setting FETCHOPT_COOKIEFILE to NULL again
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER %LOGDIR/cookies676

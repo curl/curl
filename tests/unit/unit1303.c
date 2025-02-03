@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "urldata.h"
 #include "connect.h"
@@ -29,23 +29,23 @@
 
 static struct Curl_easy *testdata;
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
-  testdata = curl_easy_init();
+  global_init(FETCH_GLOBAL_ALL);
+  testdata = fetch_easy_init();
   if(!testdata) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
+    fetch_global_cleanup();
+    return FETCHE_OUT_OF_MEMORY;
   }
   return res;
 }
 
 static void unit_stop(void)
 {
-  curl_easy_cleanup(testdata);
-  curl_global_cleanup();
+  fetch_easy_cleanup(testdata);
+  fetch_global_cleanup();
 }
 
 /* BASE is just a define to make us fool around with decently large number so
@@ -79,7 +79,7 @@ struct timetest {
 
 UNITTEST_START
 {
-  struct curltime now;
+  struct fetchtime now;
   unsigned int i;
 
   const struct timetest run[] = {

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -29,36 +29,36 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curls = NULL;
-  CURLM *multi = NULL;
-  CURLcode i = CURLE_OK;
-  CURLcode res = CURLE_OK;
-  CURLMcode mc;
+  FETCH *fetchs = NULL;
+  FETCHM *multi = NULL;
+  FETCHcode i = FETCHE_OK;
+  FETCHcode res = FETCHE_OK;
+  FETCHMcode mc;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   multi_init(multi);
 
-  easy_init(curls);
+  easy_init(fetchs);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
+  easy_setopt(fetchs, FETCHOPT_URL, URL);
 
-  multi_add_handle(multi, curls);
+  multi_add_handle(multi, fetchs);
 
-  mc = curl_multi_remove_handle(multi, curls);
-  mc += curl_multi_remove_handle(multi, curls);
+  mc = fetch_multi_remove_handle(multi, fetchs);
+  mc += fetch_multi_remove_handle(multi, fetchs);
 
   if(mc) {
     fprintf(stderr, "%d was unexpected\n", (int)mc);
-    i = CURLE_FAILED_INIT;
+    i = FETCHE_FAILED_INIT;
   }
 
 test_cleanup:
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(curls);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi);
+  fetch_easy_cleanup(fetchs);
+  fetch_global_cleanup();
 
   if(res)
     i = res;

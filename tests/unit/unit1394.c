@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "tool_getparam.h"
 
@@ -31,9 +31,9 @@
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)

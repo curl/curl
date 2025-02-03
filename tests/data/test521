@@ -3,7 +3,7 @@
 <keywords>
 FTP
 PASV
-CURLOPT_PORT
+FETCHOPT_PORT
 </keywords>
 </info>
 #
@@ -34,7 +34,7 @@ ftp
 lib%TESTNUMBER
 </tool>
 <name>
-FTP dir list PASV with CURLOPT_PORT
+FTP dir list PASV with FETCHOPT_PORT
 </name>
 <command>
 ftp://%HOSTIP/%TESTNUMBER/ %FTPPORT

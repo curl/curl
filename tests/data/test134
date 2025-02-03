@@ -40,7 +40,7 @@ FTP (optional .netrc; programmatic user/passwd) dir list PASV
 --netrc-optional --netrc-file %LOGDIR/netrc%TESTNUMBER -u romulus:rhemus ftp://mary:mark@%HOSTIP:%FTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >
-# the following two lines were created while testing curl
+# the following two lines were created while testing fetch
 machine %HOSTIP login user1 password passwd1
 machine %HOSTIP login user2 password passwd2
 </file>

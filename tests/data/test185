@@ -60,13 +60,13 @@ proxy
 <protocol>
 GET http://deathstar.another.galaxy/%TESTNUMBER HTTP/1.1
 Host: another.visitor.stay.a.while.stay.foreeeeeever
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://deathstar.another.galaxy/go/west/%TESTNUMBER HTTP/1.1
 Host: another.visitor.stay.a.while.stay.foreeeeeever
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

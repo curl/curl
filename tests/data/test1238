@@ -57,7 +57,7 @@ tsize = 0
 blksize = 512
 filename = /%TESTNUMBER
 </protocol>
-# 28 = CURLE_OPERATION_TIMEDOUT
+# 28 = FETCHE_OPERATION_TIMEDOUT
 <errorcode>
 28
 </errorcode>

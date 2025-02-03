@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*
- * The purpose of this test is to minimally exercise libcurl's internal
- * curl_m*printf formatting capabilities and handling of some data types.
+ * The purpose of this test is to minimally exercise libfetch's internal
+ * fetch_m*printf formatting capabilities and handling of some data types.
  */
 
 #include "test.h"
@@ -37,7 +37,7 @@
 
 #include "memdebug.h"
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-extra-args"
@@ -46,20 +46,20 @@
 #endif
 #endif
 
-#if (SIZEOF_CURL_OFF_T > SIZEOF_LONG)
-#  define MPRNT_SUFFIX_CURL_OFF_T  LL
+#if (SIZEOF_FETCH_OFF_T > SIZEOF_LONG)
+#  define MPRNT_SUFFIX_FETCH_OFF_T  LL
 #else
-#  define MPRNT_SUFFIX_CURL_OFF_T  L
+#  define MPRNT_SUFFIX_FETCH_OFF_T  L
 #endif
 
 
-#ifdef CURL_ISOCPP
+#ifdef FETCH_ISOCPP
 #  define MPRNT_OFF_T_C_HELPER2(Val,Suffix) Val ## Suffix
 #else
 #  define MPRNT_OFF_T_C_HELPER2(Val,Suffix) Val/**/Suffix
 #endif
 #define MPRNT_OFF_T_C_HELPER1(Val,Suffix) MPRNT_OFF_T_C_HELPER2(Val,Suffix)
-#define MPRNT_OFF_T_C(Val)  MPRNT_OFF_T_C_HELPER1(Val,MPRNT_SUFFIX_CURL_OFF_T)
+#define MPRNT_OFF_T_C(Val)  MPRNT_OFF_T_C_HELPER1(Val,MPRNT_SUFFIX_FETCH_OFF_T)
 
 
 #define BUFSZ    256
@@ -114,8 +114,8 @@ struct siglong_st {
 };
 
 
-struct curloff_st {
-  curl_off_t num;       /* curl_off_t      */
+struct fetchoff_st {
+  fetch_off_t num;       /* fetch_off_t      */
   const char *expected; /* expected string */
   char result[BUFSZ];   /* result string   */
 };
@@ -127,7 +127,7 @@ static struct unsint_st   ui_test[UINT_TESTS_ARRSZ];
 static struct sigint_st   si_test[SINT_TESTS_ARRSZ];
 static struct unslong_st  ul_test[ULONG_TESTS_ARRSZ];
 static struct siglong_st  sl_test[SLONG_TESTS_ARRSZ];
-static struct curloff_st  co_test[COFFT_TESTS_ARRSZ];
+static struct fetchoff_st  co_test[COFFT_TESTS_ARRSZ];
 
 
 static int test_unsigned_short_formatting(void)
@@ -161,7 +161,7 @@ static int test_unsigned_short_formatting(void)
       us_test[i].result[j] = 'X';
     us_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(us_test[i].result, "%hu", us_test[i].num);
+    (void)fetch_msprintf(us_test[i].result, "%hu", us_test[i].num);
 
     if(memcmp(us_test[i].result,
                us_test[i].expected,
@@ -174,9 +174,9 @@ static int test_unsigned_short_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() unsigned short tests OK!\n");
+    printf("All fetch_mprintf() unsigned short tests OK!\n");
   else
-    printf("Some curl_mprintf() unsigned short tests Failed!\n");
+    printf("Some fetch_mprintf() unsigned short tests Failed!\n");
 
   return failed;
 }
@@ -235,7 +235,7 @@ static int test_signed_short_formatting(void)
       ss_test[i].result[j] = 'X';
     ss_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(ss_test[i].result, "%hd", ss_test[i].num);
+    (void)fetch_msprintf(ss_test[i].result, "%hd", ss_test[i].num);
 
     if(memcmp(ss_test[i].result,
               ss_test[i].expected,
@@ -248,9 +248,9 @@ static int test_signed_short_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() signed short tests OK!\n");
+    printf("All fetch_mprintf() signed short tests OK!\n");
   else
-    printf("Some curl_mprintf() signed short tests Failed!\n");
+    printf("Some fetch_mprintf() signed short tests Failed!\n");
 
   return failed;
 }
@@ -385,7 +385,7 @@ static int test_unsigned_int_formatting(void)
       ui_test[i].result[j] = 'X';
     ui_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(ui_test[i].result, "%u", ui_test[i].num);
+    (void)fetch_msprintf(ui_test[i].result, "%u", ui_test[i].num);
 
     if(memcmp(ui_test[i].result,
                ui_test[i].expected,
@@ -398,9 +398,9 @@ static int test_unsigned_int_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() unsigned int tests OK!\n");
+    printf("All fetch_mprintf() unsigned int tests OK!\n");
   else
-    printf("Some curl_mprintf() unsigned int tests Failed!\n");
+    printf("Some fetch_mprintf() unsigned int tests Failed!\n");
 
   return failed;
 }
@@ -613,7 +613,7 @@ static int test_signed_int_formatting(void)
       si_test[i].result[j] = 'X';
     si_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(si_test[i].result, "%d", si_test[i].num);
+    (void)fetch_msprintf(si_test[i].result, "%d", si_test[i].num);
 
     if(memcmp(si_test[i].result,
               si_test[i].expected,
@@ -626,9 +626,9 @@ static int test_signed_int_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() signed int tests OK!\n");
+    printf("All fetch_mprintf() signed int tests OK!\n");
   else
-    printf("Some curl_mprintf() signed int tests Failed!\n");
+    printf("Some fetch_mprintf() signed int tests Failed!\n");
 
   return failed;
 }
@@ -762,7 +762,7 @@ static int test_unsigned_long_formatting(void)
       ul_test[i].result[j] = 'X';
     ul_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(ul_test[i].result, "%lu", ul_test[i].num);
+    (void)fetch_msprintf(ul_test[i].result, "%lu", ul_test[i].num);
 
     if(memcmp(ul_test[i].result,
                ul_test[i].expected,
@@ -775,9 +775,9 @@ static int test_unsigned_long_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() unsigned long tests OK!\n");
+    printf("All fetch_mprintf() unsigned long tests OK!\n");
   else
-    printf("Some curl_mprintf() unsigned long tests Failed!\n");
+    printf("Some fetch_mprintf() unsigned long tests Failed!\n");
 
   return failed;
 }
@@ -990,7 +990,7 @@ static int test_signed_long_formatting(void)
       sl_test[i].result[j] = 'X';
     sl_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(sl_test[i].result, "%ld", sl_test[i].num);
+    (void)fetch_msprintf(sl_test[i].result, "%ld", sl_test[i].num);
 
     if(memcmp(sl_test[i].result,
               sl_test[i].expected,
@@ -1003,15 +1003,15 @@ static int test_signed_long_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() signed long tests OK!\n");
+    printf("All fetch_mprintf() signed long tests OK!\n");
   else
-    printf("Some curl_mprintf() signed long tests Failed!\n");
+    printf("Some fetch_mprintf() signed long tests Failed!\n");
 
   return failed;
 }
 
 
-static int test_curl_off_t_formatting(void)
+static int test_fetch_off_t_formatting(void)
 {
   int i, j;
   int num_cofft_tests = 0;
@@ -1104,13 +1104,13 @@ static int test_curl_off_t_formatting(void)
       co_test[i].result[j] = 'X';
     co_test[i].result[BUFSZ-1] = '\0';
 
-    (void)curl_msprintf(co_test[i].result, "%" CURL_FORMAT_CURL_OFF_T,
+    (void)fetch_msprintf(co_test[i].result, "%" FETCH_FORMAT_FETCH_OFF_T,
                         co_test[i].num);
 
     if(memcmp(co_test[i].result,
               co_test[i].expected,
               strlen(co_test[i].expected))) {
-      printf("curl_off_t test #%.2d: Failed (Expected: %s Got: %s)\n",
+      printf("fetch_off_t test #%.2d: Failed (Expected: %s Got: %s)\n",
              i, co_test[i].expected, co_test[i].result);
       failed++;
     }
@@ -1118,9 +1118,9 @@ static int test_curl_off_t_formatting(void)
   }
 
   if(!failed)
-    printf("All curl_mprintf() curl_off_t tests OK!\n");
+    printf("All fetch_mprintf() fetch_off_t tests OK!\n");
   else
-    printf("Some curl_mprintf() curl_off_t tests Failed!\n");
+    printf("Some fetch_mprintf() fetch_off_t tests Failed!\n");
 
   return failed;
 }
@@ -1159,31 +1159,31 @@ static int test_string_formatting(void)
 {
   int errors = 0;
   char buf[256];
-  curl_msnprintf(buf, sizeof(buf), "%0*d%s", 2, 9, "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%0*d%s", 2, 9, "foo");
   errors += string_check(buf, "09foo");
 
-  curl_msnprintf(buf, sizeof(buf), "%*.*s", 5, 2, "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%*.*s", 5, 2, "foo");
   errors += string_check(buf, "   fo");
 
-  curl_msnprintf(buf, sizeof(buf), "%*.*s", 2, 5, "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%*.*s", 2, 5, "foo");
   errors += string_check(buf, "foo");
 
-  curl_msnprintf(buf, sizeof(buf), "%*.*s", 0, 10, "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%*.*s", 0, 10, "foo");
   errors += string_check(buf, "foo");
 
-  curl_msnprintf(buf, sizeof(buf), "%-10s", "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%-10s", "foo");
   errors += string_check(buf, "foo       ");
 
-  curl_msnprintf(buf, sizeof(buf), "%10s", "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%10s", "foo");
   errors += string_check(buf, "       foo");
 
-  curl_msnprintf(buf, sizeof(buf), "%*.*s", -10, -10, "foo");
+  fetch_msnprintf(buf, sizeof(buf), "%*.*s", -10, -10, "foo");
   errors += string_check(buf, "foo       ");
 
   if(!errors)
-    printf("All curl_mprintf() strings tests OK!\n");
+    printf("All fetch_mprintf() strings tests OK!\n");
   else
-    printf("Some curl_mprintf() string tests Failed!\n");
+    printf("Some fetch_mprintf() string tests Failed!\n");
 
   return errors;
 }
@@ -1193,15 +1193,15 @@ static int test_pos_arguments(void)
   int errors = 0;
   char buf[256];
 
-  curl_msnprintf(buf, sizeof(buf), "%3$d %2$d %1$d", 500, 501, 502);
+  fetch_msnprintf(buf, sizeof(buf), "%3$d %2$d %1$d", 500, 501, 502);
   errors += string_check(buf, "502 501 500");
 
-  curl_msnprintf(buf, sizeof(buf), "%3$d %1$d %2$d", 500, 501, 502);
+  fetch_msnprintf(buf, sizeof(buf), "%3$d %1$d %2$d", 500, 501, 502);
   errors += string_check(buf, "502 500 501");
 
   /* this is in invalid sequence but the output does not match
      what glibc does */
-  curl_msnprintf(buf, sizeof(buf), "%3$d %d %2$d", 500, 501, 502);
+  fetch_msnprintf(buf, sizeof(buf), "%3$d %d %2$d", 500, 501, 502);
   errors += string_check(buf, "");
 
   return errors;
@@ -1217,28 +1217,28 @@ static int test_width_precision(void)
 
   int rc;
   int errors = 0;
-  rc = curl_msnprintf(larger, sizeof(larger), "%325.325f", 0.1);
+  rc = fetch_msnprintf(larger, sizeof(larger), "%325.325f", 0.1);
   if(rc != 325)
     errors++;
   errors += string_check(larger, OK325);
 
-  rc = curl_msnprintf(larger, sizeof(larger), "%326.326f", 0.1);
+  rc = fetch_msnprintf(larger, sizeof(larger), "%326.326f", 0.1);
   if(rc != 325)
     errors++;
   errors += string_check(larger, OK325);
 
-  rc = curl_msnprintf(larger, sizeof(larger), "%1000.1000f", 0.1);
+  rc = fetch_msnprintf(larger, sizeof(larger), "%1000.1000f", 0.1);
   if(rc != 325)
     errors++;
   errors += string_check(larger, OK325);
 
-  rc = curl_msnprintf(larger, sizeof(larger), "%324.324f", 0.1);
+  rc = fetch_msnprintf(larger, sizeof(larger), "%324.324f", 0.1);
   if(rc != 324)
     errors++;
-  rc = curl_msnprintf(larger, sizeof(larger), "%324.0f", 0.1);
+  rc = fetch_msnprintf(larger, sizeof(larger), "%324.0f", 0.1);
   if(rc != 324)
     errors++;
-  rc = curl_msnprintf(larger, sizeof(larger), "%0.324f", 0.1);
+  rc = fetch_msnprintf(larger, sizeof(larger), "%0.324f", 0.1);
   if(rc != 325)
     errors++;
 
@@ -1254,25 +1254,25 @@ static int test_weird_arguments(void)
   int rc;
 
   /* verify %% */
-  rc = curl_msnprintf(buf, sizeof(buf), "%-20d%% right? %%", 500);
+  rc = fetch_msnprintf(buf, sizeof(buf), "%-20d%% right? %%", 500);
   errors += string_check(buf, "500                 % right? %");
 
   /* 100 x % */
-  rc = curl_msnprintf(buf, sizeof(buf), "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
+  rc = fetch_msnprintf(buf, sizeof(buf), "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
                       "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
                       "%%%%%%%%%%%%%%%%%%%%%%");
   /* 50 x % */
   errors += string_check(buf, "%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%"
                          "%%%%%%%%%%%%%%%");
 
-  rc = curl_msnprintf(buf, sizeof(buf), "%2 AA %d %K", 500, 501, 502);
+  rc = fetch_msnprintf(buf, sizeof(buf), "%2 AA %d %K", 500, 501, 502);
   errors += string_check(buf, "%2 AA 500 %K");
 
-  rc = curl_msnprintf(buf, sizeof(buf), "%2 %d %K", 500, 501, 502);
+  rc = fetch_msnprintf(buf, sizeof(buf), "%2 %d %K", 500, 501, 502);
   errors += string_check(buf, "%2 500 %K");
 
   /* MAX_PARAMETERS is 128, try exact 128! */
-  rc = curl_msnprintf(buf, sizeof(buf),
+  rc = fetch_msnprintf(buf, sizeof(buf),
                       "%d%d%d%d%d%d%d%d%d%d" /* 10 */
                       "%d%d%d%d%d%d%d%d%d%d" /* 10 1 */
                       "%d%d%d%d%d%d%d%d%d%d" /* 10 2 */
@@ -1302,7 +1302,7 @@ static int test_weird_arguments(void)
                       0, 1, 2, 3, 4, 5, 6, 7); /* 8 */
 
   if(rc != 128) {
-    printf("curl_mprintf() returned %d and not 128!\n", rc);
+    printf("fetch_mprintf() returned %d and not 128!\n", rc);
     errors++;
   }
 
@@ -1324,7 +1324,7 @@ static int test_weird_arguments(void)
 
   /* MAX_PARAMETERS is 128, try more! */
   buf[0] = 0;
-  rc = curl_msnprintf(buf, sizeof(buf),
+  rc = fetch_msnprintf(buf, sizeof(buf),
                       "%d%d%d%d%d%d%d%d%d%d" /* 10 */
                       "%d%d%d%d%d%d%d%d%d%d" /* 10 1 */
                       "%d%d%d%d%d%d%d%d%d%d" /* 10 2 */
@@ -1354,7 +1354,7 @@ static int test_weird_arguments(void)
                       0, 1, 2, 3, 4, 5, 6, 7, 8);   /* 9 */
 
   if(rc) {
-    printf("curl_mprintf() returned %d and not 0\n", rc);
+    printf("fetch_mprintf() returned %d and not 0\n", rc);
     errors++;
   }
 
@@ -1363,7 +1363,7 @@ static int test_weird_arguments(void)
   errors += test_width_precision();
 
   if(errors)
-    printf("Some curl_mprintf() weird arguments tests failed!\n");
+    printf("Some fetch_mprintf() weird arguments tests failed!\n");
 
   return errors;
 }
@@ -1375,103 +1375,103 @@ static int test_float_formatting(void)
 {
   int errors = 0;
   char buf[512]; /* larger than max float size */
-  curl_msnprintf(buf, sizeof(buf), "%f", 9.0);
+  fetch_msnprintf(buf, sizeof(buf), "%f", 9.0);
   errors += string_check(buf, "9.000000");
 
-  curl_msnprintf(buf, sizeof(buf), "%.1f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%.1f", 9.1);
   errors += string_check(buf, "9.1");
 
-  curl_msnprintf(buf, sizeof(buf), "%.2f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%.2f", 9.1);
   errors += string_check(buf, "9.10");
 
-  curl_msnprintf(buf, sizeof(buf), "%.0f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%.0f", 9.1);
   errors += string_check(buf, "9");
 
-  curl_msnprintf(buf, sizeof(buf), "%0f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%0f", 9.1);
   errors += string_check(buf, "9.100000");
 
-  curl_msnprintf(buf, sizeof(buf), "%10f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%10f", 9.1);
   errors += string_check(buf, "  9.100000");
 
-  curl_msnprintf(buf, sizeof(buf), "%10.3f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%10.3f", 9.1);
   errors += string_check(buf, "     9.100");
 
-  curl_msnprintf(buf, sizeof(buf), "%-10.3f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%-10.3f", 9.1);
   errors += string_check(buf, "9.100     ");
 
-  curl_msnprintf(buf, sizeof(buf), "%-10.3f", 9.123456);
+  fetch_msnprintf(buf, sizeof(buf), "%-10.3f", 9.123456);
   errors += string_check(buf, "9.123     ");
 
-  curl_msnprintf(buf, sizeof(buf), "%.-2f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%.-2f", 9.1);
   errors += string_check(buf, "9.100000");
 
-  curl_msnprintf(buf, sizeof(buf), "%*f", 10, 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", 10, 9.1);
   errors += string_check(buf, "  9.100000");
 
-  curl_msnprintf(buf, sizeof(buf), "%*f", 3, 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", 3, 9.1);
   errors += string_check(buf, "9.100000");
 
-  curl_msnprintf(buf, sizeof(buf), "%*f", 6, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", 6, 9.2987654);
   errors += string_check(buf, "9.298765");
 
-  curl_msnprintf(buf, sizeof(buf), "%*f", 6, 9.298765);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", 6, 9.298765);
   errors += string_check(buf, "9.298765");
 
-  curl_msnprintf(buf, sizeof(buf), "%*f", 6, 9.29876);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", 6, 9.29876);
   errors += string_check(buf, "9.298760");
 
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 6, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 6, 9.2987654);
   errors += string_check(buf, "9.298765");
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 5, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 5, 9.2987654);
   errors += string_check(buf, "9.29877");
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 4, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 4, 9.2987654);
   errors += string_check(buf, "9.2988");
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 3, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 3, 9.2987654);
   errors += string_check(buf, "9.299");
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 2, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 2, 9.2987654);
   errors += string_check(buf, "9.30");
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 1, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 1, 9.2987654);
   errors += string_check(buf, "9.3");
-  curl_msnprintf(buf, sizeof(buf), "%.*f", 0, 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", 0, 9.2987654);
   errors += string_check(buf, "9");
 
   /* very large precisions easily turn into system specific outputs so we only
      check the output buffer length here as we know the internal limit */
 
-  curl_msnprintf(buf, sizeof(buf), "%.*f", (1 << 30), 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%.*f", (1 << 30), 9.2987654);
   errors += strlen_check(buf, 325);
 
-  curl_msnprintf(buf, sizeof(buf), "%10000.10000f", 9.2987654);
+  fetch_msnprintf(buf, sizeof(buf), "%10000.10000f", 9.2987654);
   errors += strlen_check(buf, 325);
 
-  curl_msnprintf(buf, sizeof(buf), "%240.10000f",
+  fetch_msnprintf(buf, sizeof(buf), "%240.10000f",
                  123456789123456789123456789.2987654);
   errors += strlen_check(buf, 325);
 
   /* check negative width argument when used signed, is treated as positive
      and maxes out the internal float width == 325 */
-  curl_msnprintf(buf, sizeof(buf), "%*f", INT_MIN, 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", INT_MIN, 9.1);
   errors += string_check(buf, "9.100000                                                                                                                                                                                                                                                                                                                             ");
 
-  /* curl_msnprintf() limits a single float output to 325 bytes maximum
+  /* fetch_msnprintf() limits a single float output to 325 bytes maximum
      width */
-  curl_msnprintf(buf, sizeof(buf), "%*f", (1 << 30), 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%*f", (1 << 30), 9.1);
   errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
-  curl_msnprintf(buf, sizeof(buf), "%100000f", 9.1);
+  fetch_msnprintf(buf, sizeof(buf), "%100000f", 9.1);
   errors += string_check(buf, "                                                                                                                                                                                                                                                                                                                             9.100000");
 
-  curl_msnprintf(buf, sizeof(buf), "%f", MAXIMIZE);
+  fetch_msnprintf(buf, sizeof(buf), "%f", MAXIMIZE);
   errors += strlen_check(buf, 317);
 
-  curl_msnprintf(buf, 2, "%f", MAXIMIZE);
+  fetch_msnprintf(buf, 2, "%f", MAXIMIZE);
   errors += strlen_check(buf, 1);
-  curl_msnprintf(buf, 3, "%f", MAXIMIZE);
+  fetch_msnprintf(buf, 3, "%f", MAXIMIZE);
   errors += strlen_check(buf, 2);
-  curl_msnprintf(buf, 4, "%f", MAXIMIZE);
+  fetch_msnprintf(buf, 4, "%f", MAXIMIZE);
   errors += strlen_check(buf, 3);
-  curl_msnprintf(buf, 5, "%f", MAXIMIZE);
+  fetch_msnprintf(buf, 5, "%f", MAXIMIZE);
   errors += strlen_check(buf, 4);
-  curl_msnprintf(buf, 6, "%f", MAXIMIZE);
+  fetch_msnprintf(buf, 6, "%f", MAXIMIZE);
   errors += strlen_check(buf, 5);
 
   if(!errors)
@@ -1487,39 +1487,39 @@ static int test_oct_hex_formatting(void)
   int errors = 0;
   char buf[256];
 
-  curl_msnprintf(buf, sizeof(buf), "%ho %hx %hX", 0xFA10U, 0xFA10U, 0xFA10U);
+  fetch_msnprintf(buf, sizeof(buf), "%ho %hx %hX", 0xFA10U, 0xFA10U, 0xFA10U);
   errors += string_check(buf, "175020 fa10 FA10");
 
 #if (SIZEOF_INT == 2)
-  curl_msnprintf(buf, sizeof(buf), "%o %x %X", 0xFA10U, 0xFA10U, 0xFA10U);
+  fetch_msnprintf(buf, sizeof(buf), "%o %x %X", 0xFA10U, 0xFA10U, 0xFA10U);
   errors += string_check(buf, "175020 fa10 FA10");
 #elif (SIZEOF_INT == 4)
-  curl_msnprintf(buf, sizeof(buf), "%o %x %X",
+  fetch_msnprintf(buf, sizeof(buf), "%o %x %X",
                  0xFABC1230U, 0xFABC1230U, 0xFABC1230U);
   errors += string_check(buf, "37257011060 fabc1230 FABC1230");
 #elif (SIZEOF_INT == 8)
-  curl_msnprintf(buf, sizeof(buf), "%o %x %X",
+  fetch_msnprintf(buf, sizeof(buf), "%o %x %X",
                  0xFABCDEF123456780U, 0xFABCDEF123456780U, 0xFABCDEF123456780U);
   errors += string_check(buf, "1752746757044321263600 fabcdef123456780 FABCDEF123456780");
 #endif
 
 #if (SIZEOF_LONG == 2)
-  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX", 0xFA10UL, 0xFA10UL, 0xFA10UL);
+  fetch_msnprintf(buf, sizeof(buf), "%lo %lx %lX", 0xFA10UL, 0xFA10UL, 0xFA10UL);
   errors += string_check(buf, "175020 fa10 FA10");
 #elif (SIZEOF_LONG == 4)
-  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
+  fetch_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
                  0xFABC1230UL, 0xFABC1230UL, 0xFABC1230UL);
   errors += string_check(buf, "37257011060 fabc1230 FABC1230");
 #elif (SIZEOF_LONG == 8)
-  curl_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
+  fetch_msnprintf(buf, sizeof(buf), "%lo %lx %lX",
                  0xFABCDEF123456780UL, 0xFABCDEF123456780UL, 0xFABCDEF123456780UL);
   errors += string_check(buf, "1752746757044321263600 fabcdef123456780 FABCDEF123456780");
 #endif
 
   if(!errors)
-    printf("All curl_mprintf() octal & hexadecimal tests OK!\n");
+    printf("All fetch_mprintf() octal & hexadecimal tests OK!\n");
   else
-    printf("Some curl_mprintf() octal & hexadecimal tests Failed!\n");
+    printf("Some fetch_mprintf() octal & hexadecimal tests Failed!\n");
 
   return errors;
 }
@@ -1530,33 +1530,33 @@ static int test_return_codes(void)
   char buf[128];
   int rc;
 
-  rc = curl_msnprintf(buf, 100, "%d", 9999);
+  rc = fetch_msnprintf(buf, 100, "%d", 9999);
   if(rc != 4)
     return 1;
 
-  rc = curl_msnprintf(buf, 100, "%d", 99999);
+  rc = fetch_msnprintf(buf, 100, "%d", 99999);
   if(rc != 5)
     return 1;
 
   /* returns the length excluding the nul byte */
-  rc = curl_msnprintf(buf, 5, "%d", 99999);
+  rc = fetch_msnprintf(buf, 5, "%d", 99999);
   if(rc != 4)
     return 1;
 
   /* returns the length excluding the nul byte */
-  rc = curl_msnprintf(buf, 5, "%s", "helloooooooo");
+  rc = fetch_msnprintf(buf, 5, "%s", "helloooooooo");
   if(rc != 4)
     return 1;
 
   /* returns the length excluding the nul byte */
-  rc = curl_msnprintf(buf, 6, "%s", "helloooooooo");
+  rc = fetch_msnprintf(buf, 6, "%s", "helloooooooo");
   if(rc != 5)
     return 1;
 
   return 0;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   int errors = 0;
   (void)URL; /* not used */
@@ -1585,7 +1585,7 @@ CURLcode test(char *URL)
 
   errors += test_signed_long_formatting();
 
-  errors += test_curl_off_t_formatting();
+  errors += test_fetch_off_t_formatting();
 
   errors += test_string_formatting();
 
@@ -1598,9 +1598,9 @@ CURLcode test(char *URL)
   if(errors)
     return TEST_ERR_MAJOR_BAD;
   else
-    return CURLE_OK;
+    return FETCHE_OK;
 }
 
-#if defined(CURL_GNUC_DIAG) || defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) || defined(__clang__)
 #pragma GCC diagnostic pop
 #endif

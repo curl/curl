@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,44 +18,44 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
-#include "curl_fnmatch.h"
+#include "fetch_fnmatch.h"
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
 {
 }
 
-#ifndef CURL_DISABLE_FTP
+#ifndef FETCH_DISABLE_FTP
 
 /*
-   CURL_FNMATCH_MATCH    0
-   CURL_FNMATCH_NOMATCH  1
-   CURL_FNMATCH_FAIL     2
+   FETCH_FNMATCH_MATCH    0
+   FETCH_FNMATCH_NOMATCH  1
+   FETCH_FNMATCH_FAIL     2
  */
 
-#define MATCH   CURL_FNMATCH_MATCH
-#define NOMATCH CURL_FNMATCH_NOMATCH
+#define MATCH   FETCH_FNMATCH_MATCH
+#define NOMATCH FETCH_FNMATCH_NOMATCH
 
 #define LINUX_DIFFER 0x80
 #define LINUX_SHIFT 8
-#define LINUX_MATCH ((CURL_FNMATCH_MATCH << LINUX_SHIFT) | LINUX_DIFFER)
-#define LINUX_NOMATCH ((CURL_FNMATCH_NOMATCH << LINUX_SHIFT) | LINUX_DIFFER)
-#define LINUX_FAIL ((CURL_FNMATCH_FAIL << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_MATCH ((FETCH_FNMATCH_MATCH << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_NOMATCH ((FETCH_FNMATCH_NOMATCH << LINUX_SHIFT) | LINUX_DIFFER)
+#define LINUX_FAIL ((FETCH_FNMATCH_FAIL << LINUX_SHIFT) | LINUX_DIFFER)
 
 #define MAC_DIFFER 0x40
 #define MAC_SHIFT 16
-#define MAC_MATCH ((CURL_FNMATCH_MATCH << MAC_SHIFT) | MAC_DIFFER)
-#define MAC_NOMATCH ((CURL_FNMATCH_NOMATCH << MAC_SHIFT) | MAC_DIFFER)
-#define MAC_FAIL ((CURL_FNMATCH_FAIL << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_MATCH ((FETCH_FNMATCH_MATCH << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_NOMATCH ((FETCH_FNMATCH_NOMATCH << MAC_SHIFT) | MAC_DIFFER)
+#define MAC_FAIL ((FETCH_FNMATCH_FAIL << MAC_SHIFT) | MAC_DIFFER)
 
 struct testcase {
   const char *pattern;
@@ -131,8 +131,8 @@ static const struct testcase tests[] = {
   { "[^a]",                     "a",                      NOMATCH },
   { "[^a-z0-9A-Z]",             "a",                      NOMATCH },
   { "[^a-z0-9A-Z]",             "-",                      MATCH },
-  { "curl[!a-z]lib",            "curl lib",               MATCH },
-  { "curl[! ]lib",              "curl lib",               NOMATCH },
+  { "fetch[!a-z]lib",            "fetch lib",               MATCH },
+  { "fetch[! ]lib",              "fetch lib",               NOMATCH },
   { "[! ][ ]",                  "  ",                     NOMATCH },
   { "[! ][ ]",                  "a ",                     MATCH },
   { "*[^a].t?t",                "a.txt",                  NOMATCH },
@@ -183,7 +183,7 @@ static const struct testcase tests[] = {
 
   /* common using */
   { "filename.dat",             "filename.dat",           MATCH },
-  { "*curl*",                   "lets use curl!!",        MATCH },
+  { "*fetch*",                   "lets use fetch!!",        MATCH },
   { "filename.txt",             "filename.dat",           NOMATCH },
   { "*.txt",                    "text.txt",               MATCH },
   { "*.txt",                    "a.txt",                  MATCH },
@@ -232,7 +232,7 @@ static const struct testcase tests[] = {
   { "[\\a\\b]c",                "bc",                     MATCH },
   { "[\\a\\b]d",                "bc",                     NOMATCH },
   { "[a-bA-B\\?]",              "?",                      MATCH },
-  { "cu[a-ab-b\\r]l",           "curl",                   MATCH },
+  { "cu[a-ab-b\\r]l",           "fetch",                   MATCH },
   { "[\\a-z]",                  "c",                      MATCH },
 
   { "?*?*?.*?*",                "abc.c",                  MATCH },

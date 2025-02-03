@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -F "name=daniel;type=moo/foo-.4" -F
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 341
 Content-Type: multipart/form-data; boundary=----------------------------212d9006ceb5

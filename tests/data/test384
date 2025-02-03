@@ -48,7 +48,7 @@ HTTP with --json from stdin
 <protocol>
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: foobar/*
 Content-Type: application/json
 Content-Length: 21

@@ -18,13 +18,13 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-use curl_formadd() data twice with unreadable file
+use fetch_formadd() data twice with unreadable file
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

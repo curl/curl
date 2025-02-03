@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -37,51 +37,51 @@ static size_t writecb(char *buffer, size_t size, size_t nitems,
   return 0;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  long curlResponseCode;
-  long curlRedirectCount;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  long fetchResponseCode;
+  long fetchRedirectCount;
   char *effectiveUrl = NULL;
   char *redirectUrl = NULL;
 #ifdef LIB1543
-  CURLU *urlu = NULL;
+  FETCHU *urlu = NULL;
 #endif
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 #ifdef LIB1543
-  /* set CURLOPT_URLU */
+  /* set FETCHOPT_URLU */
   {
-    CURLUcode rc = CURLUE_OK;
-    urlu = curl_url();
+    FETCHUcode rc = FETCHUE_OK;
+    urlu = fetch_url();
     if(urlu)
-      rc = curl_url_set(urlu, CURLUPART_URL, URL, CURLU_ALLOW_SPACE);
+      rc = fetch_url_set(urlu, FETCHUPART_URL, URL, FETCHU_ALLOW_SPACE);
     if(!urlu || rc) {
       goto test_cleanup;
     }
-    test_setopt(curl, CURLOPT_CURLU, urlu);
+    test_setopt(fetch, FETCHOPT_FETCHU, urlu);
   }
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L);
+  test_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 1L);
 #else
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
   /* just to make it explicit and visible in this test: */
-  test_setopt(curl, CURLOPT_FOLLOWLOCATION, 0L);
+  test_setopt(fetch, FETCHOPT_FOLLOWLOCATION, 0L);
 #endif
 
 
   /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
-  curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &curlResponseCode);
-  curl_easy_getinfo(curl, CURLINFO_REDIRECT_COUNT, &curlRedirectCount);
-  curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveUrl);
-  curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &redirectUrl);
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
+  fetch_easy_getinfo(fetch, FETCHINFO_RESPONSE_CODE, &fetchResponseCode);
+  fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_COUNT, &fetchRedirectCount);
+  fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &effectiveUrl);
+  fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_URL, &redirectUrl);
+  test_setopt(fetch, FETCHOPT_WRITEFUNCTION, writecb);
 
   printf("res %d\n"
          "status %ld\n"
@@ -89,18 +89,18 @@ CURLcode test(char *URL)
          "effectiveurl %s\n"
          "redirecturl %s\n",
          res,
-         curlResponseCode,
-         curlRedirectCount,
+         fetchResponseCode,
+         fetchRedirectCount,
          effectiveUrl,
          redirectUrl ? redirectUrl : "blank");
 
 test_cleanup:
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 #ifdef LIB1543
-  curl_url_cleanup(urlu);
+  fetch_url_cleanup(urlu);
 #endif
   return res;
 }

@@ -21,7 +21,7 @@ REPLY MDTM 213 20030405060708
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib520
 </tool>

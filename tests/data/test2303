@@ -20,7 +20,7 @@ hello
 #
 # Client-side
 <client>
-# require debug for the forced CURL_ENTROPY
+# require debug for the forced FETCH_ENTROPY
 <features>
 Debug
 ws
@@ -51,7 +51,7 @@ Sec-WebSocket-Version: 13
 Sec-WebSocket-Key: NDMyMTUzMjE2MzIxNzMyMQ==
 
 </protocol>
-# 22 == CURLE_HTTP_RETURNED_ERROR
+# 22 == FETCHE_HTTP_RETURNED_ERROR
 <errorcode>
 22
 </errorcode>

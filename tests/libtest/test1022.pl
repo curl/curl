@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,59 +21,59 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
-# Determine if curl-config --version matches the curl --version
+# Determine if fetch-config --version matches the fetch --version
 if ( $#ARGV != 2 )
 {
-    print "Usage: $0 curl-config-script curl-version-output-file version|vernum\n";
+    print "Usage: $0 fetch-config-script fetch-version-output-file version|vernum\n";
     exit 3;
 }
 
 my $what=$ARGV[2];
 
-# Read the output of curl --version
-open(CURL, "$ARGV[1]") || die "Can't open curl --version list in $ARGV[1]\n";
-$_ = <CURL>;
+# Read the output of fetch --version
+open(FETCH, "$ARGV[1]") || die "Can't open fetch --version list in $ARGV[1]\n";
+$_ = <FETCH>;
 chomp;
-/libcurl\/([\.\d]+((-DEV)|(-\d+))?)/;
+/libfetch\/([\.\d]+((-DEV)|(-\d+))?)/;
 my $version = $1;
-close CURL;
+close FETCH;
 
-my $curlconfigversion;
+my $fetchconfigversion;
 
-# Read the output of curl-config --version/--vernum
-open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config --$what list\n";
-$_ = <CURLCONFIG>;
+# Read the output of fetch-config --version/--vernum
+open(FETCHCONFIG, "sh $ARGV[0] --$what|") || die "Can't get fetch-config --$what list\n";
+$_ = <FETCHCONFIG>;
 chomp;
 my $filever=$_;
 if ( $what eq "version" ) {
-    if($filever =~ /^libcurl ([\.\d]+((-DEV)|(-\d+))?)$/) {
-        $curlconfigversion = $1;
+    if($filever =~ /^libfetch ([\.\d]+((-DEV)|(-\d+))?)$/) {
+        $fetchconfigversion = $1;
     }
     else {
-        $curlconfigversion = "illegal value";
+        $fetchconfigversion = "illegal value";
     }
 }
 else { # "vernum" case
     # Convert hex version to decimal for comparison's sake
     if($filever =~ /^(..)(..)(..)$/) {
-        $curlconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
+        $fetchconfigversion = hex($1) . "." . hex($2) . "." . hex($3);
     }
     else {
-        $curlconfigversion = "illegal value";
+        $fetchconfigversion = "illegal value";
     }
 
-    # Strip off the -DEV from the curl version if it's there
+    # Strip off the -DEV from the fetch version if it's there
     $version =~ s/-\w*$//;
 }
-close CURLCONFIG;
+close FETCHCONFIG;
 
-my $different = $version ne $curlconfigversion;
+my $different = $version ne $fetchconfigversion;
 if ($different || !$version) {
     print "Mismatch in --version:\n";
-    print "curl:        $version\n";
-    print "curl-config: $curlconfigversion\n";
+    print "fetch:        $version\n";
+    print "fetch-config: $fetchconfigversion\n";
     exit 1;
 }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -29,17 +29,17 @@
 #include "memdebug.h"
 
 struct transfer_status {
-  CURL *easy;
+  FETCH *easy;
   int halted;
   int counter; /* count write callback invokes */
   int please;  /* number of times xferinfo is called while halted */
 };
 
 static int please_continue(void *userp,
-                           curl_off_t dltotal,
-                           curl_off_t dlnow,
-                           curl_off_t ultotal,
-                           curl_off_t ulnow)
+                           fetch_off_t dltotal,
+                           fetch_off_t dlnow,
+                           fetch_off_t ultotal,
+                           fetch_off_t ulnow)
 {
   struct transfer_status *st = (struct transfer_status *)userp;
   (void)dltotal;
@@ -50,7 +50,7 @@ static int please_continue(void *userp,
     st->please++;
     if(st->please == 2) {
       /* waited enough, unpause! */
-      curl_easy_pause(st->easy, CURLPAUSE_CONT);
+      fetch_easy_pause(st->easy, FETCHPAUSE_CONT);
     }
   }
   fprintf(stderr, "xferinfo: paused %d\n", st->halted);
@@ -80,46 +80,46 @@ static size_t write_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   if(len)
     printf("Got bytes but pausing!\n");
   st->halted = 1;
-  return CURL_WRITEFUNC_PAUSE;
+  return FETCH_WRITEFUNC_PAUSE;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curls = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *fetchs = NULL;
+  FETCHcode res = FETCHE_OK;
   struct transfer_status st;
 
   start_test_timing();
 
   memset(&st, 0, sizeof(st));
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  easy_init(curls);
-  st.easy = curls; /* to allow callbacks access */
+  easy_init(fetchs);
+  st.easy = fetchs; /* to allow callbacks access */
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_WRITEFUNCTION, write_callback);
-  easy_setopt(curls, CURLOPT_WRITEDATA, &st);
-  easy_setopt(curls, CURLOPT_HEADERFUNCTION, header_callback);
-  easy_setopt(curls, CURLOPT_HEADERDATA, &st);
+  easy_setopt(fetchs, FETCHOPT_URL, URL);
+  easy_setopt(fetchs, FETCHOPT_WRITEFUNCTION, write_callback);
+  easy_setopt(fetchs, FETCHOPT_WRITEDATA, &st);
+  easy_setopt(fetchs, FETCHOPT_HEADERFUNCTION, header_callback);
+  easy_setopt(fetchs, FETCHOPT_HEADERDATA, &st);
 
-  easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, please_continue);
-  easy_setopt(curls, CURLOPT_XFERINFODATA, &st);
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 0L);
+  easy_setopt(fetchs, FETCHOPT_XFERINFOFUNCTION, please_continue);
+  easy_setopt(fetchs, FETCHOPT_XFERINFODATA, &st);
+  easy_setopt(fetchs, FETCHOPT_NOPROGRESS, 0L);
 
   libtest_debug_config.nohex = 1;
   libtest_debug_config.tracetime = 1;
-  test_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetchs, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(fetchs, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(fetchs, FETCHOPT_VERBOSE, 1L);
 
-  res = curl_easy_perform(curls);
+  res = fetch_easy_perform(fetchs);
 
 test_cleanup:
 
-  curl_easy_cleanup(curls);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetchs);
+  fetch_global_cleanup();
 
   return res; /* return the final return code */
 }

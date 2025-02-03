@@ -89,20 +89,20 @@ machine anotherone.com login user2 password passwd2
 GET http://supersite.com/want/%TESTNUMBER HTTP/1.1
 Host: supersite.com
 Authorization: Basic dXNlcjE6cGFzc3dkMQ==
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://anotherone.com/%TESTNUMBER0002 HTTP/1.1
 Host: anotherone.com
 Authorization: Basic dXNlcjI6cGFzc3dkMg==
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://athird.com/%TESTNUMBER0003 HTTP/1.1
 Host: athird.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

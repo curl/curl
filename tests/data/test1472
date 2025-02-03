@@ -36,7 +36,7 @@ tasty.onion.
 6
 </errorcode>
 <stderr mode="text">
-curl: (6) Not resolving .onion address (RFC 7686)
+fetch: (6) Not resolving .onion address (RFC 7686)
 </stderr>
 </verify>
 </testcase>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,47 +18,47 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "speedcheck.h"
 #include "urldata.h"
 
 static struct Curl_easy *easy;
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
+  global_init(FETCH_GLOBAL_ALL);
+  easy = fetch_easy_init();
   if(!easy) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
+    fetch_global_cleanup();
+    return FETCHE_OUT_OF_MEMORY;
   }
   return res;
 }
 
 static void unit_stop(void)
 {
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
 }
 
 static int runawhile(long time_limit,
                      long speed_limit,
-                     curl_off_t speed,
+                     fetch_off_t speed,
                      int dec)
 {
   int counter = 1;
-  struct curltime now = {1, 0};
-  CURLcode result;
+  struct fetchtime now = {1, 0};
+  FETCHcode result;
   int finaltime;
 
-  curl_easy_setopt(easy, CURLOPT_LOW_SPEED_LIMIT, speed_limit);
-  curl_easy_setopt(easy, CURLOPT_LOW_SPEED_TIME, time_limit);
+  fetch_easy_setopt(easy, FETCHOPT_LOW_SPEED_LIMIT, speed_limit);
+  fetch_easy_setopt(easy, FETCHOPT_LOW_SPEED_TIME, time_limit);
   Curl_speedinit(easy);
 
   do {

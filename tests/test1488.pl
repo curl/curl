@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,12 +21,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
 # This script grew out of help from Przemyslaw Iskra and Balint Szilakszi
-# a late evening in the #curl IRC channel.
+# a late evening in the #fetch IRC channel.
 #
 
 use strict;
@@ -99,10 +99,10 @@ sub scanman_md_dir {
     }
 }
 
-scanman_md_dir("$root/docs/libcurl");
-scanman_md_dir("$root/docs/libcurl/opts");
+scanman_md_dir("$root/docs/libfetch");
+scanman_md_dir("$root/docs/libfetch/opts");
 
-open my $s, "<", "$root/docs/libcurl/symbols-in-versions";
+open my $s, "<", "$root/docs/libfetch/symbols-in-versions";
 while(<$s>) {
     if(/(^[^ \n]+) +(.*)/) {
         my ($sym, $rest)=($1, $2);

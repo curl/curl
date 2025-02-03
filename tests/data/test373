@@ -67,7 +67,7 @@ http://%HOSTIP:%HTTPPORT/chunked-transfer-encoding/%TESTNUMBER
 <protocol>
 GET /chunked-transfer-encoding/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

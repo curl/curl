@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <verify>
 <protocol>
 </protocol>
-# 42 == CURLE_ABORTED_BY_CALLBACK
+# 42 == FETCHE_ABORTED_BY_CALLBACK
 <errorcode>
 42
 </errorcode>

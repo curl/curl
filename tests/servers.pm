@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -128,8 +128,8 @@ my $server_response_maxtime=13;
 my $httptlssrv = find_httptlssrv();
 my %run;          # running server
 my %runcert;      # cert file currently in use by an ssl running server
-my $CLIENTIP="127.0.0.1";  # address which curl uses for incoming connections
-my $CLIENT6IP="[::1]";     # address which curl uses for incoming connections
+my $CLIENTIP="127.0.0.1";  # address which fetch uses for incoming connections
+my $CLIENT6IP="[::1]";     # address which fetch uses for incoming connections
 my $posix_pwd = build_sys_abs_path($pwd);  # current working directory in POSIX format
 my $h2cver = "h2c"; # this version is decided by the nghttp2 lib being used
 my $portrange = 999;       # space from which to choose a random port
@@ -146,7 +146,7 @@ my $sshdid;                # for socks server, ssh daemon version id
 my $ftpchecktime=1;        # time it took to verify our test FTP server
 
 # Variables shared with runtests.pl
-our $SOCKSIN="socksd-request.log"; # what curl sent to the SOCKS proxy
+our $SOCKSIN="socksd-request.log"; # what fetch sent to the SOCKS proxy
 our $err_unexpected; # error instead of warning on server unexpectedly alive
 our $debugprotocol;  # nonzero for verbose server logs
 our $stunnel;        # path to stunnel command
@@ -196,10 +196,10 @@ use File::Temp qw/ tempfile/;
 #######################################################################
 # Initialize configuration variables
 sub initserverconfig {
-    my ($fh, $socks) = tempfile("curl-socksd-XXXXXXXX", TMPDIR => 1);
+    my ($fh, $socks) = tempfile("fetch-socksd-XXXXXXXX", TMPDIR => 1);
     close($fh);
     unlink($socks);
-    my ($f2, $http) = tempfile("curl-http-XXXXXXXX", TMPDIR => 1);
+    my ($f2, $http) = tempfile("fetch-http-XXXXXXXX", TMPDIR => 1);
     close($f2);
     unlink($http);
     $SOCKSUNIXPATH = $socks; # SOCKS Unix domain socket
@@ -357,10 +357,10 @@ sub serverfortest {
             if(! grep /^\Q$server\E$/, @protocols) {
                 if(substr($server,0,5) ne "socks") {
                     if($tlsext) {
-                        return ("curl lacks $tlsext support", 4);
+                        return ("fetch lacks $tlsext support", 4);
                     }
                     else {
-                        return ("curl lacks $server server support", 4);
+                        return ("fetch lacks $server server support", 4);
                     }
                 }
             }
@@ -548,7 +548,7 @@ sub stopserver {
 
 
 #######################################################################
-# Return flags to let curl use an external HTTP proxy
+# Return flags to let fetch use an external HTTP proxy
 #
 sub getexternalproxyflags {
     return " --proxy $proxy_address ";
@@ -594,7 +594,7 @@ sub verifyhttp {
     $flags .= "--http3-only " if($do_http3);
     $flags .= "\"$proto://$ip:$port/${bonus}verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = "$VFETCH $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -602,12 +602,12 @@ sub verifyhttp {
 
     $res >>= 8; # rotate the result
     if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
+        logmsg "RUN: fetch command died with a coredump\n";
         return -1;
     }
 
     if($res && $verbose) {
-        logmsg "RUN: curl command returned $res\n";
+        logmsg "RUN: fetch command returned $res\n";
         if(open(my $file, "<", "$verifylog")) {
             while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
@@ -630,7 +630,7 @@ sub verifyhttp {
         $pid = 0+$1;
     }
     elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
+        # fetch: (6) Couldn't resolve host '::1'
         logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
         return -1;
     }
@@ -671,7 +671,7 @@ sub verifyftp {
     }
     $flags .= "\"$proto://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = "$VFETCH $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -679,7 +679,7 @@ sub verifyftp {
 
     my $res = $? >> 8; # rotate the result
     if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
+        logmsg "RUN: fetch command died with a coredump\n";
         return -1;
     }
 
@@ -737,7 +737,7 @@ sub verifyrtsp {
     # currently verification is done using http
     $flags .= "\"http://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = "$VFETCH $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -745,12 +745,12 @@ sub verifyrtsp {
 
     $res >>= 8; # rotate the result
     if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
+        logmsg "RUN: fetch command died with a coredump\n";
         return -1;
     }
 
     if($res && $verbose) {
-        logmsg "RUN: curl command returned $res\n";
+        logmsg "RUN: fetch command returned $res\n";
         if(open(my $file, "<", "$verifylog")) {
             while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^[ \t]*$/);
@@ -773,7 +773,7 @@ sub verifyrtsp {
         $pid = 0+$1;
     }
     elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
+        # fetch: (6) Couldn't resolve host '::1'
         logmsg "RUN: failed to resolve host ($proto://$ip:$port/verifiedserver)\n";
         return -1;
     }
@@ -870,7 +870,7 @@ sub verifyhttptls {
     }
     $flags .= "\"https://$ip:$port/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = "$VFETCH $flags 2>$verifylog";
 
     # verify if our/any server is running on this port
     logmsg "RUN: $cmd\n" if($verbose);
@@ -878,12 +878,12 @@ sub verifyhttptls {
 
     $res >>= 8; # rotate the result
     if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
+        logmsg "RUN: fetch command died with a coredump\n";
         return -1;
     }
 
     if($res && $verbose) {
-        logmsg "RUN: curl command returned $res\n";
+        logmsg "RUN: fetch command returned $res\n";
         if(open(my $file, "<", "$verifylog")) {
             while(my $string = <$file>) {
                 logmsg "RUN: $string" if($string !~ /^([ \t]*)$/);
@@ -908,7 +908,7 @@ sub verifyhttptls {
         return $pid;
     }
     elsif($res == 6) {
-        # curl: (6) Couldn't resolve host '::1'
+        # fetch: (6) Couldn't resolve host '::1'
         logmsg "RUN: failed to resolve host (https://$ip:$port/verifiedserver)\n";
         return -1;
     }
@@ -967,11 +967,11 @@ sub verifysmb {
     $flags .= "--silent ";
     $flags .= "--verbose ";
     $flags .= "--globoff ";
-    $flags .= "-u 'curltest:curltest' ";
+    $flags .= "-u 'fetchtest:fetchtest' ";
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port/SERVER/verifiedserver\"";
 
-    my $cmd = "$VCURL $flags 2>$verifylog";
+    my $cmd = "$VFETCH $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -979,7 +979,7 @@ sub verifysmb {
 
     my $res = $? >> 8; # rotate the result
     if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
+        logmsg "RUN: fetch command died with a coredump\n";
         return -1;
     }
 
@@ -1031,7 +1031,7 @@ sub verifytelnet {
     $flags .= $extra;
     $flags .= "\"$proto://$ip:$port\"";
 
-    my $cmd = "echo 'verifiedserver' | $VCURL $flags 2>$verifylog";
+    my $cmd = "echo 'verifiedserver' | $VFETCH $flags 2>$verifylog";
 
     # check if this is our server running on this port:
     logmsg "RUN: $cmd\n" if($verbose);
@@ -1039,7 +1039,7 @@ sub verifytelnet {
 
     my $res = $? >> 8; # rotate the result
     if($res & 128) {
-        logmsg "RUN: curl command died with a coredump\n";
+        logmsg "RUN: fetch command died with a coredump\n";
         return -1;
     }
 
@@ -3107,17 +3107,17 @@ sub subvariables {
 
     # misc
     $$thing =~ s/${prefix}PERL/$perlcmd/g;
-    $$thing =~ s/${prefix}CURL/$CURL/g;
+    $$thing =~ s/${prefix}FETCH/$FETCH/g;
     $$thing =~ s/${prefix}LOGDIR/$LOGDIR/g;
     $$thing =~ s/${prefix}PWD/$pwd/g;
     $$thing =~ s/${prefix}POSIX_PWD/$posix_pwd/g;
-    $$thing =~ s/${prefix}VERSION/$CURLVERSION/g;
-    $$thing =~ s/${prefix}VERNUM/$CURLVERNUM/g;
+    $$thing =~ s/${prefix}VERSION/$FETCHVERSION/g;
+    $$thing =~ s/${prefix}VERNUM/$FETCHVERNUM/g;
     $$thing =~ s/${prefix}DATE/$DATE/g;
     $$thing =~ s/${prefix}TESTNUMBER/$testnum/g;
 
-    # POSIX/MSYS/Cygwin curl needs: file://localhost/d/path/to
-    # Windows native    curl needs: file://localhost/D:/path/to
+    # POSIX/MSYS/Cygwin fetch needs: file://localhost/d/path/to
+    # Windows native    fetch needs: file://localhost/D:/path/to
     my $file_pwd = $pwd;
     if($file_pwd !~ /^\//) {
         $file_pwd = "/$file_pwd";

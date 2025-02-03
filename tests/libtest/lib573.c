@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -34,11 +34,11 @@
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *c = NULL;
-  CURLM *m = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *c = NULL;
+  FETCHM *m = NULL;
+  FETCHcode res = FETCHE_OK;
   int running = 1;
   double connect_time = 0.0;
   double dbl_epsilon;
@@ -50,18 +50,18 @@ CURLcode test(char *URL)
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(c);
 
-  easy_setopt(c, CURLOPT_HEADER, 1L);
-  easy_setopt(c, CURLOPT_URL, URL);
+  easy_setopt(c, FETCHOPT_HEADER, 1L);
+  easy_setopt(c, FETCHOPT_URL, URL);
 
   libtest_debug_config.nohex = 1;
   libtest_debug_config.tracetime = 1;
-  easy_setopt(c, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(c, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(c, CURLOPT_VERBOSE, 1L);
+  easy_setopt(c, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(c, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(c, FETCHOPT_VERBOSE, 1L);
 
   multi_init(m);
 
@@ -95,7 +95,7 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
   }
 
-  curl_easy_getinfo(c, CURLINFO_CONNECT_TIME, &connect_time);
+  fetch_easy_getinfo(c, FETCHINFO_CONNECT_TIME, &connect_time);
   if(connect_time < dbl_epsilon) {
     fprintf(stderr, "connect time %e is < epsilon %e\n",
             connect_time, dbl_epsilon);
@@ -106,10 +106,10 @@ test_cleanup:
 
   /* proper cleanup sequence - type PA */
 
-  curl_multi_remove_handle(m, c);
-  curl_multi_cleanup(m);
-  curl_easy_cleanup(c);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, c);
+  fetch_multi_cleanup(m);
+  fetch_easy_cleanup(c);
+  fetch_global_cleanup();
 
   return res;
 }

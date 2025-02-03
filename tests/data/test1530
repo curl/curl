@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLOPT_OPENSOCKETFUNCTION
+FETCHOPT_OPENSOCKETFUNCTION
 </keywords>
 </info>
 
@@ -16,13 +16,13 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CURLOPT_OPENSOCKETFUNCTION returns bad socket
+FETCHOPT_OPENSOCKETFUNCTION returns bad socket
 </name>
 </client>
 
 # it should be detected and an error should be reported
 <verify>
-# 7 == CURLE_COULDNT_CONNECT
+# 7 == FETCHE_COULDNT_CONNECT
 <errorcode>
 7
 </errorcode>

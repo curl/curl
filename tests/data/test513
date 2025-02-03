@@ -16,13 +16,13 @@ HTTP POST
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-send HTTP POST using read callback that returns CURL_READFUNC_ABORT
+send HTTP POST using read callback that returns FETCH_READFUNC_ABORT
 </name>
 # the 1s post-command delay helps to prevent a spurious failure on s390
  <command delay="1">

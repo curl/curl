@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -205,7 +205,7 @@ static int test_rlimit(int keep_open)
   } /* (rl.rlim_cur != rl.rlim_max) */
 
   /*
-   * test 537 is all about testing libcurl functionality
+   * test 537 is all about testing libfetch functionality
    * when the system has nearly exhausted the number of
    * available file descriptors. Test 537 will try to run
    * with a very small number of file descriptors available.
@@ -383,9 +383,9 @@ static int test_rlimit(int keep_open)
 
   /*
    * when using select() instead of poll() we cannot test
-   * libcurl functionality with a socket number equal or
+   * libfetch functionality with a socket number equal or
    * greater than FD_SETSIZE. In any case, macro VERIFY_SOCK
-   * in lib/select.c enforces this check and protects libcurl
+   * in lib/select.c enforces this check and protects libfetch
    * from a possible crash. The effect of this protection
    * is that test 537 will always fail, since the actual
    * call to select() never takes place. We skip test 537
@@ -456,18 +456,18 @@ static int test_rlimit(int keep_open)
   return 0;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res;
-  CURL *curl;
+  FETCHcode res;
+  FETCH *fetch;
 
   if(!strcmp(URL, "check")) {
     /* used by the test script to ask if we can run this test or not */
     if(test_rlimit(FALSE)) {
       fprintf(stdout, "test_rlimit problem: %s\n", msgbuff);
-      return (CURLcode)1;
+      return (FETCHcode)1;
     }
-    return CURLE_OK; /* sure, run this! */
+    return FETCHE_OK; /* sure, run this! */
   }
 
   if(test_rlimit(TRUE)) {
@@ -478,41 +478,41 @@ CURLcode test(char *URL)
   /* run the test with the bunch of open file descriptors
      and close them all once the test is over */
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     close_file_descriptors();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
     close_file_descriptors();
-    curl_global_cleanup();
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
   close_file_descriptors();
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }
 
 #else /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   (void)URL;
   printf("system lacks necessary system function(s)");
-  return (CURLcode)1; /* skip test */
+  return (FETCHcode)1; /* skip test */
 }
 
 #endif /* defined(HAVE_GETRLIMIT) && defined(HAVE_SETRLIMIT) */

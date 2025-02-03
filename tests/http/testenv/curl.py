@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -431,7 +431,7 @@ class ExecResult:
 
     def dump_stat(self, x):
         lines = [
-            'json stat from curl:',
+            'json stat from fetch:',
             json.JSONEncoder(indent=2).encode(x),
         ]
         if 'xfer_id' in x:
@@ -468,12 +468,12 @@ class CurlClient:
                  server_addr: Optional[str] = None):
         self.env = env
         self._timeout = timeout if timeout else env.test_timeout
-        self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
-        self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, 'curl')
-        self._stdoutfile = f'{self._run_dir}/curl.stdout'
-        self._stderrfile = f'{self._run_dir}/curl.stderr'
-        self._headerfile = f'{self._run_dir}/curl.headers'
-        self._log_path = f'{self._run_dir}/curl.log'
+        self._fetch = os.environ['FETCH'] if 'FETCH' in os.environ else env.fetch
+        self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, 'fetch')
+        self._stdoutfile = f'{self._run_dir}/fetch.stdout'
+        self._stderrfile = f'{self._run_dir}/fetch.stderr'
+        self._headerfile = f'{self._run_dir}/fetch.headers'
+        self._log_path = f'{self._run_dir}/fetch.log'
         self._silent = silent
         self._run_env = run_env
         self._server_addr = server_addr if server_addr else '127.0.0.1'
@@ -747,7 +747,7 @@ class CurlClient:
         return os.path.join(self._run_dir, f'download_{idx}.data')
 
     def run_direct(self, args, with_stats: bool = False, with_profile: bool = False):
-        my_args = [self._curl]
+        my_args = [self._fetch]
         if with_stats:
             my_args.extend([
                 '-w', '%{json}\\n'
@@ -846,8 +846,8 @@ class CurlClient:
         if not isinstance(urls, list):
             urls = [urls]
 
-        args = [self._curl, "-s", "--path-as-is"]
-        if 'CURL_TEST_EVENT' in os.environ:
+        args = [self._fetch, "-s", "--path-as-is"]
+        if 'FETCH_TEST_EVENT' in os.environ:
             args.append('--test-event')
 
         if with_headers:

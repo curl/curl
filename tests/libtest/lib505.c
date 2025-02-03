@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -36,16 +36,16 @@
  * Example based on source code provided by Erick Nuwendam. Thanks!
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
   FILE *hd_src;
   int hd;
   struct_stat file_info;
-  struct curl_slist *hl;
+  struct fetch_slist *hl;
 
-  struct curl_slist *headerlist = NULL;
+  struct fetch_slist *headerlist = NULL;
   const char *buf_1 = "RNFR 505";
   const char *buf_2 = "RNTO 505-forreal";
 
@@ -79,74 +79,74 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  /* get a fetch handle */
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* build a list of commands to pass to libcurl */
+  /* build a list of commands to pass to libfetch */
 
-  hl = curl_slist_append(headerlist, buf_1);
+  hl = fetch_slist_append(headerlist, buf_1);
   if(!hl) {
-    fprintf(stderr, "curl_slist_append() failed\n");
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_slist_append() failed\n");
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
-  headerlist = curl_slist_append(hl, buf_2);
+  headerlist = fetch_slist_append(hl, buf_2);
   if(!headerlist) {
-    fprintf(stderr, "curl_slist_append() failed\n");
-    curl_slist_free_all(hl);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_slist_append() failed\n");
+    fetch_slist_free_all(hl);
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
   headerlist = hl;
 
   /* enable uploading */
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
+  test_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
   /* enable verbose */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* specify target */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* pass in that last of FTP commands to run after the transfer */
-  test_setopt(curl, CURLOPT_POSTQUOTE, headerlist);
+  test_setopt(fetch, FETCHOPT_POSTQUOTE, headerlist);
 
   /* now specify which file to upload */
-  test_setopt(curl, CURLOPT_READDATA, hd_src);
+  test_setopt(fetch, FETCHOPT_READDATA, hd_src);
 
   /* and give the size of the upload (optional) */
-  test_setopt(curl, CURLOPT_INFILESIZE_LARGE,
-                   (curl_off_t)file_info.st_size);
+  test_setopt(fetch, FETCHOPT_INFILESIZE_LARGE,
+                   (fetch_off_t)file_info.st_size);
 
   /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
   /* clean up the FTP commands list */
-  curl_slist_free_all(headerlist);
+  fetch_slist_free_all(headerlist);
 
   /* close the local file */
   fclose(hd_src);
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

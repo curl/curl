@@ -35,12 +35,12 @@ http
 <protocol>
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
@@ -48,7 +48,7 @@ Accept: */*
 0 says 22 The requested URL returned error: 404
 1 says 22 The requested URL returned error: 404
 </stderr>
-# 22 is CURLE_HTTP_RETURNED_ERROR
+# 22 is FETCHE_HTTP_RETURNED_ERROR
 <errorcode>
 22
 </errorcode>

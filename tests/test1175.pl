@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -34,12 +34,12 @@ use warnings;
 my $root=$ARGV[0] || ".";
 
 my %error; # from the include file
-my %docs; # from libcurl-errors.3
+my %docs; # from libfetch-errors.3
 
 sub getdocserrors {
-    open(my $f, "<", "$root/docs/libcurl/libcurl-errors.md");
+    open(my $f, "<", "$root/docs/libfetch/libfetch-errors.md");
     while(<$f>) {
-        if($_ =~ /^## (CURL[EM]_[^ ]*)/) {
+        if($_ =~ /^## (FETCH[EM]_[^ ]*)/) {
             my ($symbol) = ($1);
             if($symbol =~ /OBSOLETE/) {
                 ;
@@ -53,9 +53,9 @@ sub getdocserrors {
 }
 
 sub getincludeerrors {
-    open(my $f, "<", "$root/docs/libcurl/symbols-in-versions");
+    open(my $f, "<", "$root/docs/libfetch/symbols-in-versions");
     while(<$f>) {
-        if($_ =~ /^(CURL[EM]_[^ \t]*)[ \t]*([0-9.]+)[ \t]*(.*)/) {
+        if($_ =~ /^(FETCH[EM]_[^ \t]*)[ \t]*([0-9.]+)[ \t]*(.*)/) {
             my ($symbol, $added, $rest) = ($1,$2,$3);
             if($rest =~ /^([0-9.]+)/) {
                 # removed!
@@ -73,7 +73,7 @@ getdocserrors();
 
 for(sort keys %error) {
     if($error{$_} && !$docs{$_}) {
-        print "$_ is not in libcurl-errors.md\n";
+        print "$_ is not in libfetch-errors.md\n";
     }
 }
 

@@ -45,7 +45,7 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 #
 # Verify data after the test has been "shot"
 <verify>
-# 64 is CURLE_USE_SSL_FAILED
+# 64 is FETCHE_USE_SSL_FAILED
 <errorcode>
 64
 </errorcode>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -30,7 +30,7 @@ static char testdata[]=
 
 struct WriteThis {
   char *readptr;
-  curl_off_t sizeleft;
+  fetch_off_t sizeleft;
 };
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
@@ -56,203 +56,203 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-static CURLcode test_once(char *URL, bool oldstyle)
+static FETCHcode test_once(char *URL, bool oldstyle)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  curl_mime *mime = NULL;
-  curl_mimepart *part = NULL;
+  fetch_mime *mime = NULL;
+  fetch_mimepart *part = NULL;
   struct WriteThis pooh;
   struct WriteThis pooh2;
-  curl_off_t datasize = -1;
+  fetch_off_t datasize = -1;
 
   pooh.readptr = testdata;
 #ifndef LIB645
-  datasize = (curl_off_t)strlen(testdata);
+  datasize = (fetch_off_t)strlen(testdata);
 #endif
   pooh.sizeleft = datasize;
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  mime = curl_mime_init(curl);
+  mime = fetch_mime_init(fetch);
   if(!mime) {
-    fprintf(stderr, "curl_mime_init() failed\n");
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_mime_init() failed\n");
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  part = curl_mime_addpart(mime);
+  part = fetch_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(1) failed\n");
-    curl_mime_free(mime);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_mime_addpart(1) failed\n");
+    fetch_mime_free(mime);
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* Fill in the file upload part */
   if(oldstyle) {
-    res = curl_mime_name(part, "sendfile");
+    res = fetch_mime_name(part, "sendfile");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, read_callback,
+      res = fetch_mime_data_cb(part, datasize, read_callback,
                               NULL, NULL, &pooh);
     if(!res)
-      res = curl_mime_filename(part, "postit2.c");
+      res = fetch_mime_filename(part, "postit2.c");
   }
   else {
     /* new style */
-    res = curl_mime_name(part, "sendfile alternative");
+    res = fetch_mime_name(part, "sendfile alternative");
     if(!res)
-      res = curl_mime_data_cb(part, datasize, read_callback,
+      res = fetch_mime_data_cb(part, datasize, read_callback,
                               NULL, NULL, &pooh);
     if(!res)
-      res = curl_mime_filename(part, "file name 2");
+      res = fetch_mime_filename(part, "file name 2");
   }
 
   if(res)
-    printf("curl_mime_xxx(1) = %s\n", curl_easy_strerror(res));
+    printf("fetch_mime_xxx(1) = %s\n", fetch_easy_strerror(res));
 
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
 
   pooh2.readptr = testdata;
 #ifndef LIB645
-  datasize = (curl_off_t)strlen(testdata);
+  datasize = (fetch_off_t)strlen(testdata);
 #endif
   pooh2.sizeleft = datasize;
 
-  part = curl_mime_addpart(mime);
+  part = fetch_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(2) failed\n");
-    curl_mime_free(mime);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_mime_addpart(2) failed\n");
+    fetch_mime_free(mime);
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
   /* Fill in the file upload part */
-  res = curl_mime_name(part, "callbackdata");
+  res = fetch_mime_name(part, "callbackdata");
   if(!res)
-    res = curl_mime_data_cb(part, datasize, read_callback,
+    res = fetch_mime_data_cb(part, datasize, read_callback,
                             NULL, NULL, &pooh2);
 
   if(res)
-    printf("curl_mime_xxx(2) = %s\n", curl_easy_strerror(res));
+    printf("fetch_mime_xxx(2) = %s\n", fetch_easy_strerror(res));
 
-  part = curl_mime_addpart(mime);
+  part = fetch_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(3) failed\n");
-    curl_mime_free(mime);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_mime_addpart(3) failed\n");
+    fetch_mime_free(mime);
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* Fill in the filename field */
-  res = curl_mime_name(part, "filename");
+  res = fetch_mime_name(part, "filename");
   if(!res)
-    res = curl_mime_data(part, "postit2.c",
-                         CURL_ZERO_TERMINATED);
+    res = fetch_mime_data(part, "postit2.c",
+                         FETCH_ZERO_TERMINATED);
 
   if(res)
-    printf("curl_mime_xxx(3) = %s\n", curl_easy_strerror(res));
+    printf("fetch_mime_xxx(3) = %s\n", fetch_easy_strerror(res));
 
   /* Fill in a submit field too */
-  part = curl_mime_addpart(mime);
+  part = fetch_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(4) failed\n");
-    curl_mime_free(mime);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_mime_addpart(4) failed\n");
+    fetch_mime_free(mime);
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-  res = curl_mime_name(part, "submit");
+  res = fetch_mime_name(part, "submit");
   if(!res)
-    res = curl_mime_data(part, "send",
-                         CURL_ZERO_TERMINATED);
+    res = fetch_mime_data(part, "send",
+                         FETCH_ZERO_TERMINATED);
 
   if(res)
-    printf("curl_mime_xxx(4) = %s\n", curl_easy_strerror(res));
+    printf("fetch_mime_xxx(4) = %s\n", fetch_easy_strerror(res));
 
-  part = curl_mime_addpart(mime);
+  part = fetch_mime_addpart(mime);
   if(!part) {
-    fprintf(stderr, "curl_mime_addpart(5) failed\n");
-    curl_mime_free(mime);
-    curl_easy_cleanup(curl);
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_mime_addpart(5) failed\n");
+    fetch_mime_free(mime);
+    fetch_easy_cleanup(fetch);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
-  res = curl_mime_name(part, "somename");
+  res = fetch_mime_name(part, "somename");
   if(!res)
-    res = curl_mime_filename(part, "somefile.txt");
+    res = fetch_mime_filename(part, "somefile.txt");
   if(!res)
-    res = curl_mime_data(part, "blah blah", 9);
+    res = fetch_mime_data(part, "blah blah", 9);
 
   if(res)
-    printf("curl_mime_xxx(5) = %s\n", curl_easy_strerror(res));
+    printf("fetch_mime_xxx(5) = %s\n", fetch_easy_strerror(res));
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* send a multi-part mimepost */
-  test_setopt(curl, CURLOPT_MIMEPOST, mime);
+  test_setopt(fetch, FETCHOPT_MIMEPOST, mime);
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
 
   /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
   /* now cleanup the mimepost structure */
-  curl_mime_free(mime);
+  fetch_mime_free(mime);
 
   return res;
 }
 
-static CURLcode cyclic_add(void)
+static FETCHcode cyclic_add(void)
 {
-  CURL *easy = curl_easy_init();
-  curl_mime *mime = curl_mime_init(easy);
-  curl_mimepart *part = curl_mime_addpart(mime);
-  CURLcode a1 = curl_mime_subparts(part, mime);
+  FETCH *easy = fetch_easy_init();
+  fetch_mime *mime = fetch_mime_init(easy);
+  fetch_mimepart *part = fetch_mime_addpart(mime);
+  FETCHcode a1 = fetch_mime_subparts(part, mime);
 
-  if(a1 == CURLE_BAD_FUNCTION_ARGUMENT) {
-    curl_mime *submime = curl_mime_init(easy);
-    curl_mimepart *subpart = curl_mime_addpart(submime);
+  if(a1 == FETCHE_BAD_FUNCTION_ARGUMENT) {
+    fetch_mime *submime = fetch_mime_init(easy);
+    fetch_mimepart *subpart = fetch_mime_addpart(submime);
 
-    curl_mime_subparts(part, submime);
-    a1 = curl_mime_subparts(subpart, mime);
+    fetch_mime_subparts(part, submime);
+    a1 = fetch_mime_subparts(subpart, mime);
   }
 
-  curl_mime_free(mime);
-  curl_easy_cleanup(easy);
-  if(a1 != CURLE_BAD_FUNCTION_ARGUMENT)
+  fetch_mime_free(mime);
+  fetch_easy_cleanup(easy);
+  if(a1 != FETCHE_BAD_FUNCTION_ARGUMENT)
     /* that should have failed */
-    return (CURLcode)1;
+    return (FETCHcode)1;
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res;
+  FETCHcode res;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -263,7 +263,7 @@ CURLcode test(char *URL)
   if(!res)
     res = cyclic_add();
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

@@ -67,13 +67,13 @@ proxy
 <protocol>
 GET http://example.com/gimme/%TESTNUMBER?foobar HTTP/1.1
 Host: example.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://example.net/there/tes%20t%20case=/%TESTNUMBER0002?+yes+no HTTP/1.1
 Host: example.net
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

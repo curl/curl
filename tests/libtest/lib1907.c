@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -27,30 +27,30 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   char *url_after;
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  char error_buffer[CURL_ERROR_SIZE] = "";
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  char error_buffer[FETCH_ERROR_SIZE] = "";
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
-  curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
-  curl_easy_setopt(curl, CURLOPT_ERRORBUFFER, error_buffer);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  res = curl_easy_perform(curl);
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
+  fetch = fetch_easy_init();
+  fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
+  fetch_easy_setopt(fetch, FETCHOPT_ERRORBUFFER, error_buffer);
+  fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  res = fetch_easy_perform(fetch);
   if(!res)
     fprintf(stderr, "failure expected, "
-            "curl_easy_perform returned %ld: <%s>, <%s>\n",
-            (long) res, curl_easy_strerror(res), error_buffer);
+            "fetch_easy_perform returned %ld: <%s>, <%s>\n",
+            (long) res, fetch_easy_strerror(res), error_buffer);
 
   /* print the used url */
-  if(!curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &url_after))
+  if(!fetch_easy_getinfo(fetch, FETCHINFO_EFFECTIVE_URL, &url_after))
     printf("Effective URL: %s\n", url_after);
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

@@ -20,7 +20,7 @@ Connection: close
 Content-Type: text/plain
 Funny-head: yesyes
 
-Hello curl from IPFS
+Hello fetch from IPFS
 </data>
 </reply>
 
@@ -44,7 +44,7 @@ IPNS with path, query args and gateway with path
 <protocol crlf="yes">
 GET /some/path/ipns/fancy.tld/a/b?foo=bar&aaa=bbb HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

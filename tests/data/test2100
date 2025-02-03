@@ -91,7 +91,7 @@ Content-Length: 47
 
 %hex[%00%00%01%00%00%01%00%00%00%00%00%00%06_%HTTPPORT%06_https%03foo%07example%03com%00%00A%00%01]hex%GET /%TESTNUMBER HTTP/1.1
 Host: foo.example.com:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 %else
@@ -109,7 +109,7 @@ Content-Length: 33
 
 %hex[%00%00%01%00%00%01%00%00%00%00%00%00%03foo%07example%03com-00-00!%00%01]hex%GET /%TESTNUMBER HTTP/1.1
 Host: foo.example.com:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 %endif

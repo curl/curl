@@ -60,7 +60,7 @@ HTTP GET resume at exactly the existing file size is fine
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 100
 </command>
-<file name="%LOGDIR/curl%TESTNUMBER.out">
+<file name="%LOGDIR/fetch%TESTNUMBER.out">
 012345678
 012345678
 012345678
@@ -80,7 +80,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 100
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=100-
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

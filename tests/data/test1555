@@ -39,13 +39,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <verify>
 <protocol>
 </protocol>
-# 42 == CURLE_ABORTED_BY_CALLBACK
+# 42 == FETCHE_ABORTED_BY_CALLBACK
 <errorcode>
 42
 </errorcode>
 <stdout>
-curl_easy_recv returned 93
-curl_easy_send returned 93
+fetch_easy_recv returned 93
+fetch_easy_send returned 93
 </stdout>
 </verify>
 </testcase>

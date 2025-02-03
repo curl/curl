@@ -54,7 +54,7 @@ https://this.is.a.host.name:%HTTPSPORT/%TESTNUMBER -k --proxy socks5h://localhos
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: this.is.a.host.name:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

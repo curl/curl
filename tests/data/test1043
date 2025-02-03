@@ -60,7 +60,7 @@ HTTP GET with resume from end of file
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 </command>
-<file name="%LOGDIR/curl%TESTNUMBER.out">
+<file name="%LOGDIR/fetch%TESTNUMBER.out">
 012345678
 012345678
 012345678
@@ -74,7 +74,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C -
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=40-
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

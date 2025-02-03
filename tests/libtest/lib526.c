@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /*
@@ -52,34 +52,34 @@
 
 #define NUM_HANDLES 4
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl[NUM_HANDLES];
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch[NUM_HANDLES];
   int running;
-  CURLM *m = NULL;
+  FETCHM *m = NULL;
   int current = 0;
   int i;
 
   for(i = 0; i < NUM_HANDLES; i++)
-    curl[i] = NULL;
+    fetch[i] = NULL;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   /* get NUM_HANDLES easy handles */
   for(i = 0; i < NUM_HANDLES; i++) {
-    easy_init(curl[i]);
+    easy_init(fetch[i]);
     /* specify target */
-    easy_setopt(curl[i], CURLOPT_URL, URL);
+    easy_setopt(fetch[i], FETCHOPT_URL, URL);
     /* go verbose */
-    easy_setopt(curl[i], CURLOPT_VERBOSE, 1L);
+    easy_setopt(fetch[i], FETCHOPT_VERBOSE, 1L);
   }
 
   multi_init(m);
 
-  multi_add_handle(m, curl[current]);
+  multi_add_handle(m, fetch[current]);
 
   fprintf(stderr, "Start at URL 0\n");
 
@@ -100,26 +100,26 @@ CURLcode test(char *URL)
       /* NOTE: this code does not remove the handle from the multi handle
          here, which would be the nice, sane and documented way of working.
          This however tests that the API survives this abuse gracefully. */
-      curl_easy_cleanup(curl[current]);
-      curl[current] = NULL;
+      fetch_easy_cleanup(fetch[current]);
+      fetch[current] = NULL;
 #endif
       if(++current < NUM_HANDLES) {
         fprintf(stderr, "Advancing to URL %d\n", current);
 #ifdef LIB532
         /* first remove the only handle we use */
-        curl_multi_remove_handle(m, curl[0]);
+        fetch_multi_remove_handle(m, fetch[0]);
 
         /* make us reuse the same handle all the time, and try resetting
            the handle first too */
-        curl_easy_reset(curl[0]);
-        easy_setopt(curl[0], CURLOPT_URL, URL);
+        fetch_easy_reset(fetch[0]);
+        easy_setopt(fetch[0], FETCHOPT_URL, URL);
         /* go verbose */
-        easy_setopt(curl[0], CURLOPT_VERBOSE, 1L);
+        easy_setopt(fetch[0], FETCHOPT_VERBOSE, 1L);
 
         /* re-add it */
-        multi_add_handle(m, curl[0]);
+        multi_add_handle(m, fetch[0]);
 #else
-        multi_add_handle(m, curl[current]);
+        multi_add_handle(m, fetch[current]);
 #endif
       }
       else {
@@ -148,11 +148,11 @@ test_cleanup:
   /* proper cleanup sequence - type PB */
 
   for(i = 0; i < NUM_HANDLES; i++) {
-    curl_multi_remove_handle(m, curl[i]);
-    curl_easy_cleanup(curl[i]);
+    fetch_multi_remove_handle(m, fetch[i]);
+    fetch_easy_cleanup(fetch[i]);
   }
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 
 #elif defined(LIB527)
 
@@ -163,12 +163,12 @@ test_cleanup:
      cleanup'ed yet, in this case we have to cleanup them or otherwise these
      will be leaked, let's use undocumented cleanup sequence - type UB */
 
-  if(res != CURLE_OK)
+  if(res != FETCHE_OK)
     for(i = 0; i < NUM_HANDLES; i++)
-      curl_easy_cleanup(curl[i]);
+      fetch_easy_cleanup(fetch[i]);
 
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 
 #elif defined(LIB532)
 
@@ -176,9 +176,9 @@ test_cleanup:
   /* undocumented cleanup sequence - type UB */
 
   for(i = 0; i < NUM_HANDLES; i++)
-    curl_easy_cleanup(curl[i]);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+    fetch_easy_cleanup(fetch[i]);
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 
 #endif
 

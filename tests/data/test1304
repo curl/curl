@@ -24,7 +24,7 @@ netrc parsing unit tests
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER">
 machine example.com login admin password passwd
-machine curl.example.com login none password none
+machine fetch.example.com login none password none
 </file>
 </client>
 </testcase>

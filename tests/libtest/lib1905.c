@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,37 +28,37 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLSH *sh = NULL;
-  CURL *ch = NULL;
+  FETCHSH *sh = NULL;
+  FETCH *ch = NULL;
   int unfinished;
-  CURLM *cm;
+  FETCHM *cm;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  cm = curl_multi_init();
+  cm = fetch_multi_init();
   if(!cm) {
-    curl_global_cleanup();
-    return (CURLcode)1;
+    fetch_global_cleanup();
+    return (FETCHcode)1;
   }
-  sh = curl_share_init();
+  sh = fetch_share_init();
   if(!sh)
     goto cleanup;
 
-  curl_share_setopt(sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
-  curl_share_setopt(sh, CURLSHOPT_SHARE, CURL_LOCK_DATA_COOKIE);
+  fetch_share_setopt(sh, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
+  fetch_share_setopt(sh, FETCHSHOPT_SHARE, FETCH_LOCK_DATA_COOKIE);
 
-  ch = curl_easy_init();
+  ch = fetch_easy_init();
   if(!ch)
     goto cleanup;
 
-  curl_easy_setopt(ch, CURLOPT_SHARE, sh);
-  curl_easy_setopt(ch, CURLOPT_URL, URL);
-  curl_easy_setopt(ch, CURLOPT_COOKIEFILE, libtest_arg2);
-  curl_easy_setopt(ch, CURLOPT_COOKIEJAR, libtest_arg2);
+  fetch_easy_setopt(ch, FETCHOPT_SHARE, sh);
+  fetch_easy_setopt(ch, FETCHOPT_URL, URL);
+  fetch_easy_setopt(ch, FETCHOPT_COOKIEFILE, libtest_arg2);
+  fetch_easy_setopt(ch, FETCHOPT_COOKIEJAR, libtest_arg2);
 
-  curl_multi_add_handle(cm, ch);
+  fetch_multi_add_handle(cm, ch);
 
   unfinished = 1;
   while(unfinished) {
@@ -70,13 +70,13 @@ CURLcode test(char *URL)
     FD_ZERO(&R);
     FD_ZERO(&W);
     FD_ZERO(&E);
-    curl_multi_perform(cm, &unfinished);
+    fetch_multi_perform(cm, &unfinished);
 
-    curl_multi_fdset(cm, &R, &W, &E, &MAX);
-    curl_multi_timeout(cm, &max_tout);
+    fetch_multi_fdset(cm, &R, &W, &E, &MAX);
+    fetch_multi_timeout(cm, &max_tout);
 
     if(max_tout > 0) {
-      curlx_mstotv(&timeout, max_tout);
+      fetchx_mstotv(&timeout, max_tout);
     }
     else {
       timeout.tv_sec = 0;
@@ -86,15 +86,15 @@ CURLcode test(char *URL)
     select(MAX + 1, &R, &W, &E, &timeout);
   }
 
-  curl_easy_setopt(ch, CURLOPT_COOKIELIST, "FLUSH");
-  curl_easy_setopt(ch, CURLOPT_SHARE, NULL);
+  fetch_easy_setopt(ch, FETCHOPT_COOKIELIST, "FLUSH");
+  fetch_easy_setopt(ch, FETCHOPT_SHARE, NULL);
 
-  curl_multi_remove_handle(cm, ch);
+  fetch_multi_remove_handle(cm, ch);
 cleanup:
-  curl_easy_cleanup(ch);
-  curl_share_cleanup(sh);
-  curl_multi_cleanup(cm);
-  curl_global_cleanup();
+  fetch_easy_cleanup(ch);
+  fetch_share_cleanup(sh);
+  fetch_multi_cleanup(cm);
+  fetch_global_cleanup();
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }

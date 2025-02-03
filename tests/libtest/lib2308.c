@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,37 +18,37 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include "test.h"
 #include "testtrace.h"
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
-static size_t cb_curl(char *buffer, size_t size, size_t nmemb, void *userp)
+static size_t cb_fetch(char *buffer, size_t size, size_t nmemb, void *userp)
 {
   (void)buffer;
   (void)size;
   (void)nmemb;
   (void)userp;
-  return CURL_WRITEFUNC_ERROR;
+  return FETCH_WRITEFUNC_ERROR;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
-  curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, cb_curl);
-  curl_easy_setopt(curl, CURLOPT_URL, URL);
-  res = curl_easy_perform(curl);
-  printf("Returned %d, should be %d.\n", res, CURLE_WRITE_ERROR);
+  global_init(FETCH_GLOBAL_ALL);
+  fetch = fetch_easy_init();
+  fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, cb_fetch);
+  fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
+  res = fetch_easy_perform(fetch);
+  printf("Returned %d, should be %d.\n", res, FETCHE_WRITE_ERROR);
   fflush(stdout);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
-  return CURLE_OK;
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
+  return FETCHE_OK;
 }

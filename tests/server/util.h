@@ -1,5 +1,5 @@
-#ifndef HEADER_CURL_SERVER_UTIL_H
-#define HEADER_CURL_SERVER_UTIL_H
+#ifndef HEADER_FETCH_SERVER_UTIL_H
+#define HEADER_FETCH_SERVER_UTIL_H
 /***************************************************************************
  *                                  _   _ ____  _
  *  Project                     ___| | | |  _ \| |
@@ -11,7 +11,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "server_setup.h"
 
 char *data_to_hex(char *data, size_t len);
-void logmsg(const char *msg, ...) CURL_PRINTF(1, 2);
+void logmsg(const char *msg, ...) FETCH_PRINTF(1, 2);
 long timediff(struct timeval newer, struct timeval older);
 
 #define TEST_DATA_PATH "%s/data/test%ld"
@@ -63,7 +63,7 @@ const char *sstrerror(int err);
 FILE *test2fopen(long testno, const char *logdir);
 
 int wait_ms(int timeout_ms);
-curl_off_t our_getpid(void);
+fetch_off_t our_getpid(void);
 int write_pidfile(const char *filename);
 int write_portfile(const char *filename, int port);
 void set_advisor_read_lock(const char *filename);
@@ -85,14 +85,14 @@ void restore_signal_handlers(bool keep_sigalrm);
 
 #ifdef USE_UNIX_SOCKETS
 
-#include <curl/curl.h> /* for curl_socket_t */
+#include <fetch/fetch.h> /* for fetch_socket_t */
 
 #ifdef HAVE_SYS_UN_H
 #include <sys/un.h> /* for sockaddr_un */
 #endif /* HAVE_SYS_UN_H */
 
-int bind_unix_socket(curl_socket_t sock, const char *unix_socket,
+int bind_unix_socket(fetch_socket_t sock, const char *unix_socket,
         struct sockaddr_un *sau);
 #endif  /* USE_UNIX_SOCKETS */
 
-#endif  /* HEADER_CURL_SERVER_UTIL_H */
+#endif  /* HEADER_FETCH_SERVER_UTIL_H */

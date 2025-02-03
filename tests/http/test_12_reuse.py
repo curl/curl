@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -37,7 +37,7 @@ from testenv import Env, CurlClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
+@pytest.mark.skipif(condition=not Env.have_ssl_fetch(), reason="fetch without SSL")
 class TestReuse:
 
     # check if HTTP/1.1 handles 'Connection: close' correctly
@@ -49,9 +49,9 @@ class TestReuse:
         ])
         httpd.reload()
         count = 100
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200)
         # Server sends `Connection: close` on every 2nd request, requiring
         # a new connection
@@ -68,9 +68,9 @@ class TestReuse:
         ])
         httpd.reload()
         count = 5
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+        r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--rate', '30/m',
         ])
         r.check_response(count=count, http_status=200)
@@ -89,9 +89,9 @@ class TestReuse:
         with open(asfile, 'w') as fd:
             fd.write(f'h2 {env.domain1} {env.https_port} h3 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
+        r = fetch.http_download(urls=[urln], with_stats=True, extra_args=[
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)
@@ -112,9 +112,9 @@ class TestReuse:
         with open(asfile, 'w') as fd:
             fd.write(f'h3 {env.domain1} {env.https_port} h2 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
+        r = fetch.http_download(urls=[urln], with_stats=True, extra_args=[
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)
@@ -135,9 +135,9 @@ class TestReuse:
         with open(asfile, 'w') as fd:
             fd.write(f'h3 {env.domain1} {env.https_port} http/1.1 {env.domain1} {env.https_port} "{expires}" 0 0')
         log.info(f'altscv: {open(asfile).readlines()}')
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, "h2")}/data.json?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], with_stats=True, extra_args=[
+        r = fetch.http_download(urls=[urln], with_stats=True, extra_args=[
             '--alt-svc', f'{asfile}',
         ])
         r.check_response(count=count, http_status=200)

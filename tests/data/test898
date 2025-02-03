@@ -77,7 +77,7 @@ HTTP with custom auth and cookies redirected to HTTP on a diff port
 <protocol>
 GET http://firsthost.com/ HTTP/1.1
 Host: firsthost.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Authorization: Basic am9lOnNlY3JldA==
@@ -85,7 +85,7 @@ Cookie: userpwd=am9lOnNlY3JldA==
 
 GET http://firsthost.com:9999/a/path/%TESTNUMBER0002 HTTP/1.1
 Host: firsthost.com:9999
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

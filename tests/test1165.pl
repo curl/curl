@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -33,7 +33,7 @@ use warnings;
 my %disable;
 # the DISABLE options that can be set by CMakeLists.txt
 my %disable_cmake;
-# the DISABLE options propagated via curl_config.h.cmake
+# the DISABLE options propagated via fetch_config.h.cmake
 my %disable_cmake_config_h;
 # the DISABLE options that are used in C files
 my %file;
@@ -42,13 +42,13 @@ my %docs;
 
 # we may get the dir root pointed out
 my $root=$ARGV[0] || ".";
-my $DOCS="CURL-DISABLE.md";
+my $DOCS="FETCH-DISABLE.md";
 
 sub scanconf {
     my ($f)=@_;
     open S, "<$f";
     while(<S>) {
-        if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
+        if(/(FETCH_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
             $disable{$sym} = 1;
         }
@@ -71,9 +71,9 @@ sub scanconf_cmake {
     my ($hashr, $f)=@_;
     open S, "<$f";
     while(<S>) {
-        if(/(CURL_DISABLE_[A-Z0-9_]+)/g) {
+        if(/(FETCH_DISABLE_[A-Z0-9_]+)/g) {
             my ($sym)=($1);
-            if(not $sym =~ /^(CURL_DISABLE_INSTALL|CURL_DISABLE_TESTS|CURL_DISABLE_SRP)$/) {
+            if(not $sym =~ /^(FETCH_DISABLE_INSTALL|FETCH_DISABLE_TESTS|FETCH_DISABLE_SRP)$/) {
                 $hashr->{$sym} = 1;
             }
         }
@@ -86,14 +86,14 @@ sub scan_cmake {
 }
 
 sub scan_cmake_config_h {
-    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/curl_config.h.cmake");
+    scanconf_cmake(\%disable_cmake_config_h, "$root/lib/fetch_config.h.cmake");
 }
 
 sub scan_file {
     my ($source)=@_;
     open F, "<$source";
     while(<F>) {
-        while(s/(CURL_DISABLE_[A-Z0-9_]+)//) {
+        while(s/(FETCH_DISABLE_[A-Z0-9_]+)//) {
             my ($sym)=($1);
             $file{$sym} = $source;
         }
@@ -123,7 +123,7 @@ sub scan_docs {
     my $line = 0;
     while(<F>) {
         $line++;
-        if(/^## `(CURL_DISABLE_[A-Z0-9_]+)`/g) {
+        if(/^## `(FETCH_DISABLE_[A-Z0-9_]+)`/g) {
             my ($sym)=($1);
             $docs{$sym} = $line;
         }
@@ -163,10 +163,10 @@ for my $s (sort keys %disable_cmake) {
     }
 }
 
-# Check the CMakeLists.txt symbols for use in curl_config.h.cmake
+# Check the CMakeLists.txt symbols for use in fetch_config.h.cmake
 for my $s (sort keys %disable_cmake) {
     if(!$disable_cmake_config_h{$s}) {
-        printf "Present in CMakeLists.txt, not propagated via curl_config.h.cmake: %s\n", $s;
+        printf "Present in CMakeLists.txt, not propagated via fetch_config.h.cmake: %s\n", $s;
         $error++;
     }
 }

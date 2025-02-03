@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -31,8 +31,8 @@
 #define TEST_HANG_TIMEOUT 60 * 1000
 
 static int xferinfo(void *p,
-                    curl_off_t dltotal, curl_off_t dlnow,
-                    curl_off_t ultotal, curl_off_t ulnow)
+                    fetch_off_t dltotal, fetch_off_t dlnow,
+                    fetch_off_t ultotal, fetch_off_t ulnow)
 {
   (void)p;
   (void)dlnow;
@@ -43,56 +43,56 @@ static int xferinfo(void *p,
   return 1; /* fail as fast as we can */
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curls = NULL;
-  CURLM *multi = NULL;
+  FETCH *fetchs = NULL;
+  FETCHM *multi = NULL;
   int still_running;
-  CURLcode i = CURLE_OK;
-  CURLcode res = CURLE_OK;
-  curl_mimepart *field = NULL;
-  curl_mime *mime = NULL;
+  FETCHcode i = FETCHE_OK;
+  FETCHcode res = FETCHE_OK;
+  fetch_mimepart *field = NULL;
+  fetch_mime *mime = NULL;
   int counter = 1;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   multi_init(multi);
 
-  easy_init(curls);
+  easy_init(fetchs);
 
-  mime = curl_mime_init(curls);
-  field = curl_mime_addpart(mime);
-  curl_mime_name(field, "name");
-  curl_mime_data(field, "value", CURL_ZERO_TERMINATED);
+  mime = fetch_mime_init(fetchs);
+  field = fetch_mime_addpart(mime);
+  fetch_mime_name(field, "name");
+  fetch_mime_data(field, "value", FETCH_ZERO_TERMINATED);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_HEADER, 1L);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curls, CURLOPT_MIMEPOST, mime);
-  easy_setopt(curls, CURLOPT_USERPWD, "u:s");
-  easy_setopt(curls, CURLOPT_XFERINFOFUNCTION, xferinfo);
-  easy_setopt(curls, CURLOPT_NOPROGRESS, 1L);
+  easy_setopt(fetchs, FETCHOPT_URL, URL);
+  easy_setopt(fetchs, FETCHOPT_HEADER, 1L);
+  easy_setopt(fetchs, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetchs, FETCHOPT_MIMEPOST, mime);
+  easy_setopt(fetchs, FETCHOPT_USERPWD, "u:s");
+  easy_setopt(fetchs, FETCHOPT_XFERINFOFUNCTION, xferinfo);
+  easy_setopt(fetchs, FETCHOPT_NOPROGRESS, 1L);
 
   libtest_debug_config.nohex = 1;
   libtest_debug_config.tracetime = 1;
-  test_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetchs, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(fetchs, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(fetchs, FETCHOPT_VERBOSE, 1L);
 
-  multi_add_handle(multi, curls);
+  multi_add_handle(multi, fetchs);
 
   multi_perform(multi, &still_running);
 
   abort_on_test_timeout();
 
   while(still_running && counter--) {
-    CURLMcode mres;
+    FETCHMcode mres;
     int num;
-    mres = curl_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
-    if(mres != CURLM_OK) {
-      printf("curl_multi_wait() returned %d\n", mres);
+    mres = fetch_multi_wait(multi, NULL, 0, TEST_HANG_TIMEOUT, &num);
+    if(mres != FETCHM_OK) {
+      printf("fetch_multi_wait() returned %d\n", mres);
       res = TEST_ERR_MAJOR_BAD;
       goto test_cleanup;
     }
@@ -106,11 +106,11 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-  curl_mime_free(mime);
-  curl_multi_remove_handle(multi, curls);
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(curls);
-  curl_global_cleanup();
+  fetch_mime_free(mime);
+  fetch_multi_remove_handle(multi, fetchs);
+  fetch_multi_cleanup(multi);
+  fetch_easy_cleanup(fetchs);
+  fetch_global_cleanup();
 
   if(res)
     i = res;

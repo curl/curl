@@ -48,7 +48,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-CURLOPT_MIMEPOST first set then set to NULL
+FETCHOPT_MIMEPOST first set then set to NULL
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

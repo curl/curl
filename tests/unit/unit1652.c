@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "urldata.h"
 #include "sendf.h"
@@ -37,7 +37,7 @@ static struct Curl_easy *testdata;
 static char input[4096];
 static char output[4096];
 
-int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
+int debugf_cb(FETCH *handle, fetch_infotype type, char *buf, size_t size,
               void *userptr);
 
 /*
@@ -46,7 +46,7 @@ int debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
  * text we can afford the luxury of skipping the type check here.
  */
 int
-debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
+debugf_cb(FETCH *handle, fetch_infotype type, char *buf, size_t size,
                 void *userptr)
 {
   (void)handle;
@@ -58,27 +58,27 @@ debugf_cb(CURL *handle, curl_infotype type, char *buf, size_t size,
   return 0;
 }
 
-static CURLcode
+static FETCHcode
 unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
-  testdata = curl_easy_init();
+  global_init(FETCH_GLOBAL_ALL);
+  testdata = fetch_easy_init();
   if(!testdata) {
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
+    fetch_global_cleanup();
+    return FETCHE_OUT_OF_MEMORY;
   }
-  curl_easy_setopt(testdata, CURLOPT_DEBUGFUNCTION, debugf_cb);
-  curl_easy_setopt(testdata, CURLOPT_VERBOSE, 1L);
+  fetch_easy_setopt(testdata, FETCHOPT_DEBUGFUNCTION, debugf_cb);
+  fetch_easy_setopt(testdata, FETCHOPT_VERBOSE, 1L);
   return res;
 }
 
 static void
 unit_stop(void)
 {
-  curl_easy_cleanup(testdata);
-  curl_global_cleanup();
+  fetch_easy_cleanup(testdata);
+  fetch_global_cleanup();
 }
 
 static int verify(const char *info, const char *two)
@@ -92,7 +92,7 @@ static int verify(const char *info, const char *two)
 
 UNITTEST_START
 
-#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic push
 #pragma GCC diagnostic ignored "-Wformat"
 #pragma GCC diagnostic ignored "-Wformat-zero-length"
@@ -146,7 +146,7 @@ Curl_infof(testdata, "%s", input);
 fail_unless(strlen(output) == 2051, "Truncation of infof input 3");
 fail_unless(output[sizeof(output) - 1] == '\0', "Truncation of infof input 3");
 
-#if defined(CURL_GNUC_DIAG) && !defined(__clang__)
+#if defined(FETCH_GNUC_DIAG) && !defined(__clang__)
 #pragma GCC diagnostic pop
 #endif
 

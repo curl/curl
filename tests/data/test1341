@@ -32,7 +32,7 @@ http
 HTTP GET with -O -J and Content-Disposition, -D stdout
 </name>
 <command option="no-output,no-include">
-http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D - -w "curl saved to filename %{filename_effective}\n" --output-dir %LOGDIR
+http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D - -w "fetch saved to filename %{filename_effective}\n" --output-dir %LOGDIR
 </command>
 </client>
 
@@ -42,7 +42,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O -D - -w "curl saved to filename %{fil
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
@@ -60,7 +60,7 @@ Connection: close
 Content-Type: text/html
 Content-Disposition: filename=name%TESTNUMBER; charset=funny; option=strange
 
-curl saved to filename %LOGDIR/name%TESTNUMBER
+fetch saved to filename %LOGDIR/name%TESTNUMBER
 </file2>
 
 </verify>

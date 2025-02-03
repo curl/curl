@@ -47,7 +47,7 @@ the
 <protocol>
 PUT /we/want/%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 78
 

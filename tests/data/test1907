@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLINFO_EFFECTIVE_URL
+FETCHINFO_EFFECTIVE_URL
 </keywords>
 </info>
 
@@ -24,7 +24,7 @@ Content-Length: 0
 http
 </server>
 <name>
-CURLINFO_EFFECTIVE_URL with non-scheme URL
+FETCHINFO_EFFECTIVE_URL with non-scheme URL
 </name>
 <tool>
 lib%TESTNUMBER

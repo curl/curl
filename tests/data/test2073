@@ -50,7 +50,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -F 'name=a;filename=a.pdf' --next http://%H
 <protocol>
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 201
 
@@ -60,7 +60,7 @@ Content-Type: application/pdf
 a
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 196
 

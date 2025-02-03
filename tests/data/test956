@@ -41,7 +41,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt Stödmottagaren@example.com --m
 #
 # Verify data after the test has been "shot"
 <verify>
-# 55 - CURLE_SEND_ERROR
+# 55 - FETCHE_SEND_ERROR
 <errorcode>
 55
 </errorcode>

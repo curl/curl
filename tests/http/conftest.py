@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -40,11 +40,11 @@ def pytest_report_header(config):
     # Env inits its base properties only once, we can report them here
     env = Env()
     report = [
-        f'Testing curl {env.curl_version()}',
+        f'Testing fetch {env.fetch_version()}',
         f'  platform: {platform.platform()}',
-        f'  curl: Version: {env.curl_version_string()}',
-        f'  curl: Features: {env.curl_features_string()}',
-        f'  curl: Protocols: {env.curl_protocols_string()}',
+        f'  fetch: Version: {env.fetch_version_string()}',
+        f'  fetch: Features: {env.fetch_features_string()}',
+        f'  fetch: Protocols: {env.fetch_protocols_string()}',
         f'  httpd: {env.httpd_version()}, http:{env.http_port} https:{env.https_port}',
         f'  httpd-proxy: {env.httpd_version()}, http:{env.proxy_port} https:{env.proxys_port}'
     ]
@@ -79,10 +79,10 @@ def env(pytestconfig) -> Env:
     env = Env(pytestconfig=pytestconfig)
     level = logging.DEBUG if env.verbose > 0 else logging.INFO
     logging.getLogger('').setLevel(level=level)
-    if not env.curl_has_protocol('http'):
-        pytest.skip("curl built without HTTP support")
-    if not env.curl_has_protocol('https'):
-        pytest.skip("curl built without HTTPS support")
+    if not env.fetch_has_protocol('http'):
+        pytest.skip("fetch built without HTTP support")
+    if not env.fetch_has_protocol('https'):
+        pytest.skip("fetch built without HTTPS support")
     if env.setup_incomplete():
         pytest.skip(env.incomplete_reason())
 

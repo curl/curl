@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -26,22 +26,22 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-#ifndef CURL_DISABLE_WEBSOCKETS
+#ifndef FETCH_DISABLE_WEBSOCKETS
 
 /* just close the connection */
-static void websocket_close(CURL *curl)
+static void websocket_close(FETCH *fetch)
 {
   size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
+  FETCHcode result =
+    fetch_ws_send(fetch, "", 0, &sent, 0, FETCHWS_CLOSE);
   fprintf(stderr,
-          "ws: curl_ws_send returned %d, sent %d\n", result, (int)sent);
+          "ws: fetch_ws_send returned %d, sent %d\n", result, (int)sent);
 }
 
-static void websocket(CURL *curl)
+static void websocket(FETCH *fetch)
 {
   char buffer[256];
-  const struct curl_ws_frame *meta;
+  const struct fetch_ws_frame *meta;
   size_t nread;
   size_t i = 0;
   FILE *save = fopen(libtest_arg2, FOPEN_WRITETEXT);
@@ -50,19 +50,19 @@ static void websocket(CURL *curl)
 
   /* Three 4097-bytes frames are expected, 12291 bytes */
   while(i < 12291) {
-    CURLcode result =
-      curl_ws_recv(curl, buffer, sizeof(buffer), &nread, &meta);
+    FETCHcode result =
+      fetch_ws_recv(fetch, buffer, sizeof(buffer), &nread, &meta);
     if(result) {
-      if(result == CURLE_AGAIN)
+      if(result == FETCHE_AGAIN)
         /* crude busy-loop */
         continue;
       fclose(save);
-      printf("curl_ws_recv returned %d\n", result);
+      printf("fetch_ws_recv returned %d\n", result);
       return;
     }
     printf("%d: nread %zu Age %d Flags %x "
-           "Offset %" CURL_FORMAT_CURL_OFF_T " "
-           "Bytesleft %" CURL_FORMAT_CURL_OFF_T "\n",
+           "Offset %" FETCH_FORMAT_FETCH_OFF_T " "
+           "Bytesleft %" FETCH_FORMAT_FETCH_OFF_T "\n",
            (int)i,
            nread, meta->age, meta->flags, meta->offset, meta->bytesleft);
     i += meta->len;
@@ -70,37 +70,37 @@ static void websocket(CURL *curl)
   }
   fclose(save);
 
-  websocket_close(curl);
+  websocket_close(fetch);
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, URL);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
 
     /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "websocket/2304");
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, "websocket/2304");
     libtest_debug_config.nohex = 1;
     libtest_debug_config.tracetime = 1;
-    curl_easy_setopt(curl, CURLOPT_DEBUGDATA, &libtest_debug_config);
-    curl_easy_setopt(curl, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
-    res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %d\n", res);
-    if(res == CURLE_OK)
-      websocket(curl);
+    fetch_easy_setopt(fetch, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+    fetch_easy_setopt(fetch, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 2L); /* websocket style */
+    res = fetch_easy_perform(fetch);
+    fprintf(stderr, "fetch_easy_perform() returned %d\n", res);
+    if(res == FETCHE_OK)
+      websocket(fetch);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return res;
 }
 

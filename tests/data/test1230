@@ -65,12 +65,12 @@ http://[1234:1234:1234::4ce]:%HTTPPORT/wanted/page/%TESTNUMBER -p -x %HOSTIP:%HT
 <protocol>
 CONNECT [1234:1234:1234::4ce]:%HTTPPORT HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 GET /wanted/page/%TESTNUMBER HTTP/1.1
 Host: [1234:1234:1234::4ce]:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

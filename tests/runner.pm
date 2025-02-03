@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -58,7 +58,7 @@ BEGIN {
         runnerar_ready
         stderrfilename
         stdoutfilename
-        $DBGCURL
+        $DBGFETCH
         $gdb
         $gdbthis
         $gdbxwin
@@ -115,7 +115,7 @@ use valgrind;
 #######################################################################
 # Global variables set elsewhere but used only by this package
 # These may only be set *before* runner_init is called
-our $DBGCURL=$CURL; #"../src/.libs/curl";  # alternative for debugging
+our $DBGFETCH=$FETCH; #"../src/.libs/fetch";  # alternative for debugging
 our $valgrind_logfile="--log-file";  # the option name for valgrind >=3
 our $valgrind_tool="--tool=memcheck";
 our $gdb = checktestcmd("gdb");
@@ -129,7 +129,7 @@ our $tortalloc;
 # local variables
 my %oldenv;       # environment variables before test is started
 my $UNITDIR="./unit";
-my $CURLLOG="$LOGDIR/commands.log"; # all command lines run
+my $FETCHLOG="$LOGDIR/commands.log"; # all command lines run
 my $defserverlogslocktimeout = 5; # timeout to await server logs lock removal
 my $defpostcommanddelay = 0; # delay between command and postcheck sections
 my $multiprocess;   # nonzero with a separate test runner process
@@ -163,13 +163,13 @@ sub runner_init {
 
     $multiprocess = !!$jobs;
 
-    # enable memory debugging if curl is compiled with it
-    $ENV{'CURL_MEMDEBUG'} = "$logdir/$MEMDUMP";
-    $ENV{'CURL_ENTROPY'}="12345678";
-    $ENV{'CURL_FORCETIME'}=1; # for debug NTLM magic
-    $ENV{'CURL_GLOBAL_INIT'}=1; # debug curl_global_init/cleanup use
+    # enable memory debugging if fetch is compiled with it
+    $ENV{'FETCH_MEMDEBUG'} = "$logdir/$MEMDUMP";
+    $ENV{'FETCH_ENTROPY'}="12345678";
+    $ENV{'FETCH_FORCETIME'}=1; # for debug NTLM magic
+    $ENV{'FETCH_GLOBAL_INIT'}=1; # debug fetch_global_init/cleanup use
     $ENV{'HOME'}=$pwd;
-    $ENV{'CURL_HOME'}=$ENV{'HOME'};
+    $ENV{'FETCH_HOME'}=$ENV{'HOME'};
     $ENV{'XDG_CONFIG_HOME'}=$ENV{'HOME'};
     $ENV{'COLUMNS'}=79; # screen width!
 
@@ -261,7 +261,7 @@ sub event_loop {
 }
 
 #######################################################################
-# Check for a command in the PATH of the machine running curl.
+# Check for a command in the PATH of the machine running fetch.
 #
 sub checktestcmd {
     my ($cmd)=@_;
@@ -500,7 +500,7 @@ sub torture {
         }
 
         # make the memory allocation function number $limit return failure
-        $ENV{'CURL_MEMLIMIT'} = $limit;
+        $ENV{'FETCH_MEMLIMIT'} = $limit;
 
         # remove memdump first to be sure we get a new nice and clean one
         unlink("$LOGDIR/$MEMDUMP");
@@ -531,7 +531,7 @@ sub torture {
         #logmsg "$_ Returned " . ($ret >> 8) . "\n";
 
         # Now clear the variable again
-        delete $ENV{'CURL_MEMLIMIT'} if($ENV{'CURL_MEMLIMIT'});
+        delete $ENV{'FETCH_MEMLIMIT'} if($ENV{'FETCH_MEMLIMIT'});
 
         if(-r "core") {
             # there's core file present now!
@@ -834,7 +834,7 @@ sub singletest_run {
         $cmd="-";
     }
 
-    my $CURLOUT="$LOGDIR/curl$testnum.out"; # curl output if not stdout
+    my $FETCHOUT="$LOGDIR/fetch$testnum.out"; # fetch output if not stdout
 
     # if stdout section exists, we verify that the stdout contained this:
     my $out="";
@@ -843,7 +843,7 @@ sub singletest_run {
         #We may slap on --output!
         if (!partexists("verify", "stdout") ||
                 ($cmdhash{'option'} && $cmdhash{'option'} =~ /force-output/)) {
-            $out=" --output $CURLOUT ";
+            $out=" --output $FETCHOUT ";
         }
     }
 
@@ -876,7 +876,7 @@ sub singletest_run {
         $disablevalgrind=1;
     }
     elsif(!$tool && !$keywords{"unittest"}) {
-        # run curl, add suitable command line options
+        # run fetch, add suitable command line options
         my $inc="";
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-include/)) {
             $inc = " --include";
@@ -914,7 +914,7 @@ sub singletest_run {
     }
     else {
         $cmdargs = " $cmd"; # $cmd is the command line for the test file
-        $CURLOUT = stdoutfilename($LOGDIR, $testnum); # sends received data to stdout
+        $FETCHOUT = stdoutfilename($LOGDIR, $testnum); # sends received data to stdout
 
         # Default the tool to a unit test with the same name as the test spec
         if($keywords{"unittest"} && !$tool) {
@@ -948,7 +948,7 @@ sub singletest_run {
             $CMDLINE.=" $tool_name";
         }
 
-        $DBGCURL=$CMDLINE;
+        $DBGFETCH=$CMDLINE;
     }
 
     if($fail_due_event_based) {
@@ -980,7 +980,7 @@ sub singletest_run {
     }
 
     if(!$tool) {
-        $CMDLINE=shell_quote($CURL);
+        $CMDLINE=shell_quote($FETCH);
         if((!$cmdhash{'option'}) || ($cmdhash{'option'} !~ /no-q/)) {
             $CMDLINE .= " -q";
         }
@@ -1004,7 +1004,7 @@ sub singletest_run {
         logmsg "$CMDLINE\n";
     }
 
-    open(my $cmdlog, ">", $CURLLOG) || die "Failure writing log file";
+    open(my $cmdlog, ">", $FETCHLOG) || die "Failure writing log file";
     print $cmdlog "$CMDLINE\n";
     close($cmdlog) || die "Failure writing log file";
 
@@ -1037,18 +1037,18 @@ sub singletest_run {
     if ($torture) {
         $cmdres = torture($CMDLINE,
                           $testnum,
-                          "$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " -x $LOGDIR/gdbcmd");
+                          "$gdb --directory $LIBDIR " . shell_quote($DBGFETCH) . " -x $LOGDIR/gdbcmd");
     }
     elsif($gdbthis == 1) {
         # gdb
         my $GDBW = ($gdbxwin) ? "-w" : "";
-        runclient("$gdb --directory $LIBDIR " . shell_quote($DBGCURL) . " $GDBW -x $LOGDIR/gdbcmd");
+        runclient("$gdb --directory $LIBDIR " . shell_quote($DBGFETCH) . " $GDBW -x $LOGDIR/gdbcmd");
         $cmdres=0; # makes it always continue after a debugged run
     }
     elsif($gdbthis == 2) {
         # $gdb is "lldb"
-        print "runs lldb -- $CURL $cmdargs\n";
-        runclient("lldb -- $CURL $cmdargs");
+        print "runs lldb -- $FETCH $cmdargs\n";
+        runclient("lldb -- $FETCH $cmdargs");
         $cmdres=0; # makes it always continue after a debugged run
     }
     else {
@@ -1059,7 +1059,7 @@ sub singletest_run {
     # timestamp finishing of test command
     $$testtimings{"timetoolend"} = Time::HiRes::time();
 
-    return (0, $cmdres, $dumped_core, $CURLOUT, $tool, use_valgrind() && !$disablevalgrind);
+    return (0, $cmdres, $dumped_core, $FETCHOUT, $tool, use_valgrind() && !$disablevalgrind);
 }
 
 
@@ -1082,7 +1082,7 @@ sub singletest_clean {
             open(my $gdbcmd, ">", "$LOGDIR/gdbcmd2") || die "Failure writing gdb file";
             print $gdbcmd "bt\n";
             close($gdbcmd) || die "Failure writing gdb file";
-            runclient("$gdb --directory libtest -x $LOGDIR/gdbcmd2 -batch " . shell_quote($DBGCURL) . " core ");
+            runclient("$gdb --directory libtest -x $LOGDIR/gdbcmd2 -batch " . shell_quote($DBGFETCH) . " core ");
      #       unlink("$LOGDIR/gdbcmd2");
         }
     }
@@ -1249,10 +1249,10 @@ sub runner_test_run {
     my %testtimings;
     my $cmdres;
     my $dumped_core;
-    my $CURLOUT;
+    my $FETCHOUT;
     my $tool;
     my $usedvalgrind;
-    ($error, $cmdres, $dumped_core, $CURLOUT, $tool, $usedvalgrind) = singletest_run($testnum, \%testtimings);
+    ($error, $cmdres, $dumped_core, $FETCHOUT, $tool, $usedvalgrind) = singletest_run($testnum, \%testtimings);
     if($error) {
         return (-2, clearlogs(), \%testtimings);
     }
@@ -1275,7 +1275,7 @@ sub runner_test_run {
     # restore environment variables that were modified
     restore_test_env(0);
 
-    return (0, clearlogs(), \%testtimings, $cmdres, $CURLOUT, $tool, $usedvalgrind);
+    return (0, clearlogs(), \%testtimings, $cmdres, $FETCHOUT, $tool, $usedvalgrind);
 }
 
 # Async call runner_clearlocks

@@ -39,7 +39,7 @@ http
 HTTP PUT with growing file
 </name>
 <setenv>
-CURL_UPLOAD_SIZE=498
+FETCH_UPLOAD_SIZE=498
 </setenv>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER
@@ -55,7 +55,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -T %LOGDIR/upload%TESTNUMBER
 <protocol crlf="yes" nonewline="yes">
 PUT /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 498
 

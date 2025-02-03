@@ -4,7 +4,7 @@
 HTTP
 connection reuse
 persistent connection
-CURLOPT_MAXLIFETIME_CONN
+FETCHOPT_MAXLIFETIME_CONN
 verbose logs
 </keywords>
 </info>
@@ -27,7 +27,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-connection reuse with CURLOPT_MAXLIFETIME_CONN
+connection reuse with FETCHOPT_MAXLIFETIME_CONN
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

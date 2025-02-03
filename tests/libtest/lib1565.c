@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -36,17 +36,17 @@
 #define TIME_BETWEEN_START_SECS 2
 
 static pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-static CURL *pending_handles[CONN_NUM];
+static FETCH *pending_handles[CONN_NUM];
 static int pending_num = 0;
-static CURLcode test_failure = CURLE_OK;
+static FETCHcode test_failure = FETCHE_OK;
 
-static CURLM *testmulti = NULL;
+static FETCHM *testmulti = NULL;
 static const char *url;
 
 static void *run_thread(void *ptr)
 {
-  CURL *easy = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *easy = NULL;
+  FETCHcode res = FETCHE_OK;
   int i;
 
   (void)ptr;
@@ -56,8 +56,8 @@ static void *run_thread(void *ptr)
 
     easy_init(easy);
 
-    easy_setopt(easy, CURLOPT_URL, url);
-    easy_setopt(easy, CURLOPT_VERBOSE, 0L);
+    easy_setopt(easy, FETCHOPT_URL, url);
+    easy_setopt(easy, FETCHOPT_VERBOSE, 0L);
 
     pthread_mutex_lock(&lock);
 
@@ -77,7 +77,7 @@ static void *run_thread(void *ptr)
 
 test_cleanup:
 
-  curl_easy_cleanup(easy);
+  fetch_easy_cleanup(easy);
 
   pthread_mutex_lock(&lock);
 
@@ -89,23 +89,23 @@ test_cleanup:
   return NULL;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   int still_running;
   int num;
   int i;
   int result;
-  CURLcode res = CURLE_OK;
-  CURL *started_handles[CONN_NUM];
+  FETCHcode res = FETCHE_OK;
+  FETCH *started_handles[CONN_NUM];
   int started_num = 0;
   int finished_num = 0;
   pthread_t tid;
   bool tid_valid = false;
-  struct CURLMsg *message;
+  struct FETCHMsg *message;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   multi_init(testmulti);
 
@@ -125,8 +125,8 @@ CURLcode test(char *URL)
 
     abort_on_test_timeout();
 
-    while((message = curl_multi_info_read(testmulti, &num))) {
-      if(message->msg == CURLMSG_DONE) {
+    while((message = fetch_multi_info_read(testmulti, &num))) {
+      if(message->msg == FETCHMSG_DONE) {
         res = message->data.result;
         if(res)
           goto test_cleanup;
@@ -134,7 +134,7 @@ CURLcode test(char *URL)
         finished_num++;
       }
       else {
-        fprintf(stderr, "%s:%d Got an unexpected message from curl: %i\n",
+        fprintf(stderr, "%s:%d Got an unexpected message from fetch: %i\n",
               __FILE__, __LINE__, (int)message->msg);
         res = TEST_ERR_MAJOR_BAD;
         goto test_cleanup;
@@ -191,20 +191,20 @@ test_cleanup:
   if(tid_valid)
     pthread_join(tid, NULL);
 
-  curl_multi_cleanup(testmulti);
+  fetch_multi_cleanup(testmulti);
   for(i = 0; i < pending_num; i++)
-    curl_easy_cleanup(pending_handles[i]);
+    fetch_easy_cleanup(pending_handles[i]);
   for(i = 0; i < started_num; i++)
-    curl_easy_cleanup(started_handles[i]);
-  curl_global_cleanup();
+    fetch_easy_cleanup(started_handles[i]);
+  fetch_global_cleanup();
 
   return test_failure;
 }
 
 #else /* without pthread, this test doesn't work */
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   (void)URL;
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 #endif

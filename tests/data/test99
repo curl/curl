@@ -51,7 +51,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 #
 # Verify data after the test has been "shot"
 <verify>
-# 33 is CURLE_RANGE_ERROR
+# 33 is FETCHE_RANGE_ERROR
 <errorcode>
 33
 </errorcode>
@@ -59,7 +59,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 9999999999
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=9999999999-
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

@@ -15,13 +15,13 @@ unittest
 <server>
 none
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-curl_mprintf() testing
+fetch_mprintf() testing
 </name>
 <command>
 nothing
@@ -32,16 +32,16 @@ nothing
 # Verify data after the test has been "shot"
 <verify>
 <stdout>
-All curl_mprintf() unsigned short tests OK!
-All curl_mprintf() signed short tests OK!
-All curl_mprintf() unsigned int tests OK!
-All curl_mprintf() signed int tests OK!
-All curl_mprintf() unsigned long tests OK!
-All curl_mprintf() signed long tests OK!
-All curl_mprintf() curl_off_t tests OK!
-All curl_mprintf() strings tests OK!
+All fetch_mprintf() unsigned short tests OK!
+All fetch_mprintf() signed short tests OK!
+All fetch_mprintf() unsigned int tests OK!
+All fetch_mprintf() signed int tests OK!
+All fetch_mprintf() unsigned long tests OK!
+All fetch_mprintf() signed long tests OK!
+All fetch_mprintf() fetch_off_t tests OK!
+All fetch_mprintf() strings tests OK!
 All float strings tests OK!
-All curl_mprintf() octal & hexadecimal tests OK!
+All fetch_mprintf() octal & hexadecimal tests OK!
 </stdout>
 </verify>
 

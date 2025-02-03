@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -27,29 +27,29 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *hnd = NULL;
-  CURL *second = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCH *hnd = NULL;
+  FETCH *second = NULL;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(hnd);
-  easy_setopt(hnd, CURLOPT_URL, URL);
-  easy_setopt(hnd, CURLOPT_HSTS, "first-hsts.txt");
-  easy_setopt(hnd, CURLOPT_HSTS, "second-hsts.txt");
+  easy_setopt(hnd, FETCHOPT_URL, URL);
+  easy_setopt(hnd, FETCHOPT_HSTS, "first-hsts.txt");
+  easy_setopt(hnd, FETCHOPT_HSTS, "second-hsts.txt");
 
-  second = curl_easy_duphandle(hnd);
+  second = fetch_easy_duphandle(hnd);
 
-  curl_easy_cleanup(hnd);
-  curl_easy_cleanup(second);
-  curl_global_cleanup();
-  return CURLE_OK;
+  fetch_easy_cleanup(hnd);
+  fetch_easy_cleanup(second);
+  fetch_global_cleanup();
+  return FETCHE_OK;
 
 test_cleanup:
-  curl_easy_cleanup(hnd);
-  curl_easy_cleanup(second);
-  curl_global_cleanup();
+  fetch_easy_cleanup(hnd);
+  fetch_easy_cleanup(second);
+  fetch_global_cleanup();
   return res;
 }

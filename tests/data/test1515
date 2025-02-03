@@ -46,7 +46,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-caching of manual libcurl DNS entries after DNS cache timeout
+caching of manual libfetch DNS entries after DNS cache timeout
 </name>
 <command>
 path/%TESTNUMBER %HOSTIP %HTTPPORT

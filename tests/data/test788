@@ -48,7 +48,7 @@ On the first Monday of the month of April, 1625, the market town of Meung
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1
 Content-Type: application/x-www-form-urlencoded

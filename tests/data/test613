@@ -29,7 +29,7 @@ sftp
 SFTP directory retrieval
 </name>
 <command>
---key %LOGDIR/server/curl_client_key --pubkey %LOGDIR/server/curl_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
+--key %LOGDIR/server/fetch_client_key --pubkey %LOGDIR/server/fetch_client_key.pub -u %USER: sftp://%HOSTIP:%SSHPORT%SSH_PWD/%LOGDIR/test%TESTNUMBER.dir/ --insecure
 </command>
 </client>
 
@@ -37,7 +37,7 @@ SFTP directory retrieval
 # Verify data after the test has been "shot"
 <verify>
 <postcheck>
-%PERL %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/curl%TESTNUMBER.out
+%PERL %SRCDIR/libtest/test%TESTNUMBER.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir %PWD/%LOGDIR/fetch%TESTNUMBER.out
 </postcheck>
 </verify>
 </testcase>

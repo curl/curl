@@ -61,7 +61,7 @@ HTTP GET beyond end of entirely-downloaded file, no server resume
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 200
 </command>
-<file name="%LOGDIR/curl%TESTNUMBER.out">
+<file name="%LOGDIR/fetch%TESTNUMBER.out">
 012345678
 012345678
 012345678
@@ -84,7 +84,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -C 200
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Range: bytes=200-
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

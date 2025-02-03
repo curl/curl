@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -40,7 +40,7 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   (void)size;
   (void)nmemb;
   (void)userp;
-  return CURL_READFUNC_ABORT;
+  return FETCH_READFUNC_ABORT;
 #else
 
   struct WriteThis *pooh = (struct WriteThis *)userp;
@@ -59,14 +59,14 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
 #endif
 }
 
-static CURLcode test_once(char *URL, bool oldstyle)
+static FETCHcode test_once(char *URL, bool oldstyle)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  CURLFORMcode formrc;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  FETCHFORMcode formrc;
 
-  struct curl_httppost *formpost = NULL;
-  struct curl_httppost *lastptr = NULL;
+  struct fetch_httppost *formpost = NULL;
+  struct fetch_httppost *lastptr = NULL;
   struct WriteThis pooh;
   struct WriteThis pooh2;
 
@@ -75,31 +75,31 @@ static CURLcode test_once(char *URL, bool oldstyle)
 
   /* Fill in the file upload field */
   if(oldstyle) {
-    CURL_IGNORE_DEPRECATION(
-      formrc = curl_formadd(&formpost,
+    FETCH_IGNORE_DEPRECATION(
+      formrc = fetch_formadd(&formpost,
                             &lastptr,
-                            CURLFORM_COPYNAME, "sendfile",
-                            CURLFORM_STREAM, &pooh,
-                            CURLFORM_CONTENTSLENGTH, (long)pooh.sizeleft,
-                            CURLFORM_FILENAME, "postit2.c",
-                            CURLFORM_END);
+                            FETCHFORM_COPYNAME, "sendfile",
+                            FETCHFORM_STREAM, &pooh,
+                            FETCHFORM_CONTENTSLENGTH, (long)pooh.sizeleft,
+                            FETCHFORM_FILENAME, "postit2.c",
+                            FETCHFORM_END);
     )
   }
   else {
-    CURL_IGNORE_DEPRECATION(
+    FETCH_IGNORE_DEPRECATION(
       /* new style */
-      formrc = curl_formadd(&formpost,
+      formrc = fetch_formadd(&formpost,
                             &lastptr,
-                            CURLFORM_COPYNAME, "sendfile alternative",
-                            CURLFORM_STREAM, &pooh,
-                            CURLFORM_CONTENTLEN, (curl_off_t)pooh.sizeleft,
-                            CURLFORM_FILENAME, "file name 2",
-                            CURLFORM_END);
+                            FETCHFORM_COPYNAME, "sendfile alternative",
+                            FETCHFORM_STREAM, &pooh,
+                            FETCHFORM_CONTENTLEN, (fetch_off_t)pooh.sizeleft,
+                            FETCHFORM_FILENAME, "file name 2",
+                            FETCHFORM_END);
     )
   }
 
   if(formrc)
-    printf("curl_formadd(1) = %d\n", (int)formrc);
+    printf("fetch_formadd(1) = %d\n", (int)formrc);
 
   /* Now add the same data with another name and make it not look like
      a file upload but still using the callback */
@@ -107,109 +107,109 @@ static CURLcode test_once(char *URL, bool oldstyle)
   pooh2.readptr = testdata;
   pooh2.sizeleft = strlen(testdata);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Fill in the file upload field */
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "callbackdata",
-                          CURLFORM_STREAM, &pooh2,
-                          CURLFORM_CONTENTSLENGTH, (long)pooh2.sizeleft,
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "callbackdata",
+                          FETCHFORM_STREAM, &pooh2,
+                          FETCHFORM_CONTENTSLENGTH, (long)pooh2.sizeleft,
+                          FETCHFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(2) = %d\n", (int)formrc);
+    printf("fetch_formadd(2) = %d\n", (int)formrc);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Fill in the filename field */
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "filename",
-                          CURLFORM_COPYCONTENTS, "postit2.c",
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "filename",
+                          FETCHFORM_COPYCONTENTS, "postit2.c",
+                          FETCHFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(3) = %d\n", (int)formrc);
+    printf("fetch_formadd(3) = %d\n", (int)formrc);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* Fill in a submit field too */
-    formrc = curl_formadd(&formpost,
+    formrc = fetch_formadd(&formpost,
                           &lastptr,
-                          CURLFORM_COPYNAME, "submit",
-                          CURLFORM_COPYCONTENTS, "send",
-                          CURLFORM_CONTENTTYPE, "text/plain",
-                          CURLFORM_END);
+                          FETCHFORM_COPYNAME, "submit",
+                          FETCHFORM_COPYCONTENTS, "send",
+                          FETCHFORM_CONTENTTYPE, "text/plain",
+                          FETCHFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(4) = %d\n", (int)formrc);
+    printf("fetch_formadd(4) = %d\n", (int)formrc);
 
-  CURL_IGNORE_DEPRECATION(
-    formrc = curl_formadd(&formpost, &lastptr,
-                          CURLFORM_COPYNAME, "somename",
-                          CURLFORM_BUFFER, "somefile.txt",
-                          CURLFORM_BUFFERPTR, "blah blah",
-                          CURLFORM_BUFFERLENGTH, (long)9,
-                          CURLFORM_END);
+  FETCH_IGNORE_DEPRECATION(
+    formrc = fetch_formadd(&formpost, &lastptr,
+                          FETCHFORM_COPYNAME, "somename",
+                          FETCHFORM_BUFFER, "somefile.txt",
+                          FETCHFORM_BUFFERPTR, "blah blah",
+                          FETCHFORM_BUFFERLENGTH, (long)9,
+                          FETCHFORM_END);
   )
   if(formrc)
-    printf("curl_formadd(5) = %d\n", (int)formrc);
+    printf("fetch_formadd(5) = %d\n", (int)formrc);
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    CURL_IGNORE_DEPRECATION(
-      curl_formfree(formpost);
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    FETCH_IGNORE_DEPRECATION(
+      fetch_formfree(formpost);
     )
-    curl_global_cleanup();
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* Now specify we want to POST data */
-  test_setopt(curl, CURLOPT_POST, 1L);
+  test_setopt(fetch, FETCHOPT_POST, 1L);
 
   /* Set the expected POST size */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
+  test_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long)pooh.sizeleft);
 
   /* we want to use our own read function */
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* send a multi-part formpost */
-    test_setopt(curl, CURLOPT_HTTPPOST, formpost);
+    test_setopt(fetch, FETCHOPT_HTTPPOST, formpost);
   )
 
   /* get verbose debug output please */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
 
   /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   )
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
     /* now cleanup the formpost chain */
-    curl_formfree(formpost);
+    fetch_formfree(formpost);
   )
 
   return res;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res;
+  FETCHcode res;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -217,7 +217,7 @@ CURLcode test(char *URL)
   if(!res)
     res = test_once(URL, FALSE); /* new */
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

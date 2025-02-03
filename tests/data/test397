@@ -10,7 +10,7 @@ compressed
 # Server-side
 <reply>
 # Length of not-encoded content is 16512 what is greater than default value of
-# CURL_MAX_WRITE_SIZE (16384)
+# FETCH_MAX_WRITE_SIZE (16384)
 <data base64="yes">
 SFRUUC8xLjEgMjAwIE9LDQpEYXRlOiBNb24sIDI5IE5vdiAyMDA0IDIxOjU2OjUzIEdNVA0KU2Vy
 dmVyOiBBcGFjaGUvMS4zLjMxIChEZWJpYW4gR05VL0xpbnV4KSBtb2RfZ3ppcC8xLjMuMjYuMWEg
@@ -171,7 +171,7 @@ zstd
 http
 </server>
 <name>
-HTTP GET zstd compressed content of size more than CURL_MAX_WRITE_SIZE
+HTTP GET zstd compressed content of size more than FETCH_MAX_WRITE_SIZE
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER --compressed
@@ -187,7 +187,7 @@ s/^Accept-Encoding: [a-zA-Z, ]*/Accept-Encoding: xxx/
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Accept-Encoding: xxx
 

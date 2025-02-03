@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -26,7 +26,7 @@
 #include "testtrace.h"
 #include "memdebug.h"
 
-#ifndef CURL_DISABLE_WEBSOCKETS
+#ifndef FETCH_DISABLE_WEBSOCKETS
 
 static size_t writecb(char *b, size_t size, size_t nitems, void *p)
 {
@@ -37,30 +37,30 @@ static size_t writecb(char *b, size_t size, size_t nitems, void *p)
   return 0;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, URL);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
 
     /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "webbie-sox/3");
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, curl);
-    res = curl_easy_perform(curl);
-    printf("Returned %d, should be %d.\n", res, CURLE_RECV_ERROR);
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, "webbie-sox/3");
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, writecb);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, fetch);
+    res = fetch_easy_perform(fetch);
+    printf("Returned %d, should be %d.\n", res, FETCHE_RECV_ERROR);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
-  curl_global_cleanup();
-  return CURLE_OK;
+  fetch_global_cleanup();
+  return FETCHE_OK;
 }
 
 #else

@@ -55,7 +55,7 @@ test-duphandle
 <protocol>
 CONNECT this.hsts.example.:443 HTTP/1.1
 Host: this.hsts.example.:443
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>

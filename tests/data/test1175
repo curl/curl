@@ -14,7 +14,7 @@ none
 </server>
 
 <name>
-Verify that symbols-in-versions and libcurl-errors.3 are in sync
+Verify that symbols-in-versions and libfetch-errors.3 are in sync
 </name>
 
 <command type="perl">

@@ -12,14 +12,14 @@ RTSP Basic auth
 <reply>
 <data>
 RTSP/1.0 401 Unauthorized please swsbounce
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 CSeq: 1
 WWW-Authenticate: Basic realm="please-auth-me"
 
 </data>
 <data1>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 CSeq: 2
 Content-Base: rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 Content-Length: 80
@@ -28,16 +28,16 @@ Curl-private: swsclose
 v=0
 s=rtspd SDP
 i=A fake SDP reply
-u=http://www.curl.example.com/fakesdp.ps
+u=http://www.fetch.example.com/fakesdp.ps
 </data1>
 <datacheck>
 RTSP/1.0 401 Unauthorized please swsbounce
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 CSeq: 1
 WWW-Authenticate: Basic realm="please-auth-me"
 
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 CSeq: 2
 Content-Base: rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER
 Content-Length: 80
@@ -46,7 +46,7 @@ Curl-private: swsclose
 v=0
 s=rtspd SDP
 i=A fake SDP reply
-u=http://www.curl.example.com/fakesdp.ps
+u=http://www.fetch.example.com/fakesdp.ps
 </datacheck>
 </reply>
 

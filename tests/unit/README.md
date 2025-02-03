@@ -1,18 +1,18 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
 # Unit tests
 
-The goal is to add tests for *all* functions in libcurl. If functions are too
+The goal is to add tests for *all* functions in libfetch. If functions are too
 big and complicated, we should split them into smaller and testable ones.
 
 ## Build Unit Tests
 
 `./configure --enable-debug` is required for the unit tests to build. To
-enable unit tests, there is a separate static libcurl built that is used
+enable unit tests, there is a separate static libfetch built that is used
 exclusively for linking unit test programs. Just build everything as normal,
 and then you can run the unit test cases as well.
 
@@ -46,14 +46,14 @@ and the `tests/FILEFORMAT.md` documentation.
 For the actual C file, here's a simple example:
 ~~~c
 
-    #include "curlcheck.h"
+    #include "fetchcheck.h"
 
-    #include "a libcurl header.h" /* from the lib dir */
+    #include "a libfetch header.h" /* from the lib dir */
 
-    static CURLcode unit_setup( void )
+    static FETCHcode unit_setup( void )
     {
       /* whatever you want done first */
-      return CURLE_OK;
+      return FETCHE_OK;
     }
 
     static void unit_stop( void )

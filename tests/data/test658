@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLOPT_CURLU
+FETCHOPT_FETCHU
 </keywords>
 </info>
 <reply>
@@ -30,7 +30,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-Pass URL to libcurl with CURLOPT_CURLU
+Pass URL to libfetch with FETCHOPT_FETCHU
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

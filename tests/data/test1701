@@ -53,7 +53,7 @@ http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 -d "datatosend"
 <protocol nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 10
 Content-Type: application/x-www-form-urlencoded

@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLOPT_CURLU
+FETCHOPT_FETCHU
 proxy
 </keywords>
 </info>
@@ -31,7 +31,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CURLOPT_CURLU without the path set - over proxy
+FETCHOPT_FETCHU without the path set - over proxy
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT

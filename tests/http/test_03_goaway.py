@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -53,12 +53,12 @@ class TestGoAway:
         count = 3
         self.r = None
         def long_run():
-            curl = CurlClient(env=env)
+            fetch = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
+                   f'/fetchtest/tweak?id=[0-{count - 1}]'\
                    '&chunks=10&chunk_size=1024&chunk_delay=100ms'
-            self.r = curl.http_download(urls=[urln], alpn_proto=proto)
+            self.r = fetch.http_download(urls=[urln], alpn_proto=proto)
 
         t = Thread(target=long_run)
         t.start()
@@ -82,19 +82,19 @@ class TestGoAway:
     @pytest.mark.skipif(condition=not Env.have_h3(), reason="h3 not supported")
     def test_03_02_h3_goaway(self, env: Env, httpd, nghttpx):
         proto = 'h3'
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
-        if proto == 'h3' and env.curl_uses_ossl_quic():
+        if proto == 'h3' and env.fetch_uses_ossl_quic():
             pytest.skip('OpenSSL QUIC fails here')
         count = 3
         self.r = None
         def long_run():
-            curl = CurlClient(env=env)
+            fetch = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
+                   f'/fetchtest/tweak?id=[0-{count - 1}]'\
                    '&chunks=10&chunk_size=1024&chunk_delay=100ms'
-            self.r = curl.http_download(urls=[urln], alpn_proto=proto)
+            self.r = fetch.http_download(urls=[urln], alpn_proto=proto)
 
         t = Thread(target=long_run)
         t.start()
@@ -119,13 +119,13 @@ class TestGoAway:
         count = 3
         self.r = None
         def long_run():
-            curl = CurlClient(env=env)
+            fetch = CurlClient(env=env)
             #  send 10 chunks of 1024 bytes in a response body with 100ms delay in between
             # pause 2 seconds between requests
             urln = f'https://{env.authority_for(env.domain1, proto)}' \
-                   f'/curltest/tweak?id=[0-{count - 1}]'\
+                   f'/fetchtest/tweak?id=[0-{count - 1}]'\
                    '&chunks=10&chunk_size=1024&chunk_delay=100ms'
-            self.r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+            self.r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
                 '--rate', '30/m',
             ])
 

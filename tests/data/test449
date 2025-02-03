@@ -34,14 +34,14 @@ http
 </server>
 <setenv>
 FUNVALUE=contents
-VALUE2=curl
+VALUE2=fetch
 BLANK=
 </setenv>
 <name>
 Environment variables in config file w/o [expand]
 </name>
 <file name="%LOGDIR/cmd">
--d 1{{FUNVALUE}}2{{VALUE2}}3{{CURL_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
+-d 1{{FUNVALUE}}2{{VALUE2}}3{{FETCH_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
 </file>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
@@ -54,12 +54,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 83
 Content-Type: application/x-www-form-urlencoded
 
-1{{FUNVALUE}}2{{VALUE2}}3{{CURL_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
+1{{FUNVALUE}}2{{VALUE2}}3{{FETCH_NOT_SET}}4{{BLANK}}5\{{verbatim}}6{{not.good}}7{{}}
 </protocol>
 </verify>
 </testcase>

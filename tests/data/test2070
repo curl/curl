@@ -36,7 +36,7 @@ Ignore certificate revocation "best effort" strategy
 </name>
   <setenv>
 # This test is pointless if we are not using the Schannel backend
-CURL_SSL_BACKEND=schannel
+FETCH_SSL_BACKEND=schannel
  </setenv>
 <command>
 -4 --cacert %SRCDIR/certs/EdelCurlRoot-ca.crt --ssl-revoke-best-effort https://localhost:%HTTPSPORT/%TESTNUMBER
@@ -49,7 +49,7 @@ CURL_SSL_BACKEND=schannel
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

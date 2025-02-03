@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -46,19 +46,19 @@ class TestErrors:
         httpd.clear_extra_configs()
         httpd.reload()
 
-    # download 1 file, check that we get CURLE_PARTIAL_FILE
+    # download 1 file, check that we get FETCHE_PARTIAL_FILE
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_05_01_partial_1(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         count = 1
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
+               f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=3&chunk_size=16000&body_error=reset'
-        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+        r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0'
         ])
         r.check_exit_code(False)
@@ -68,19 +68,19 @@ class TestErrors:
                 invalid_stats.append(f'request {idx} exit with {s["exitcode"]}')
         assert len(invalid_stats) == 0, f'failed: {invalid_stats}'
 
-    # download files, check that we get CURLE_PARTIAL_FILE for all
+    # download files, check that we get FETCHE_PARTIAL_FILE for all
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_05_02_partial_20(self, env: Env, httpd, nghttpx, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         count = 20
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
+               f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=5&chunk_size=16000&body_error=reset'
-        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+        r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--retry', '0', '--parallel',
         ])
         r.check_exit_code(False)
@@ -93,15 +93,15 @@ class TestErrors:
 
     # access a resource that, on h2, RST the stream with HTTP_1_1_REQUIRED
     def test_05_03_required(self, env: Env, httpd, nghttpx):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         proto = 'http/1.1'
-        urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/1_1'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        urln = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/1_1'
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_exit_code(0)
         r.check_response(http_status=200, count=1)
         proto = 'h2'
-        urln = f'https://{env.authority_for(env.domain1, proto)}/curltest/1_1'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        urln = f'https://{env.authority_for(env.domain1, proto)}/fetchtest/1_1'
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_exit_code(0)
         r.check_response(http_status=200, count=1)
         # check that we did a downgrade
@@ -121,14 +121,14 @@ class TestErrors:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 10 if proto == 'h2' else 1
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.authority_for(env.domain1, proto)}'\
-                f'/curltest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
-        r = curl.http_download(urls=[url], alpn_proto=proto, extra_args=[
+                f'/fetchtest/shutdown_unclean?id=[0-{count-1}]&chunks=4'
+        r = fetch.http_download(urls=[url], alpn_proto=proto, extra_args=[
             '--parallel',
         ])
-        if proto == 'http/1.0' and not env.curl_uses_lib('wolfssl') and \
-                (env.curl_is_debug() or not env.curl_uses_lib('openssl')):
+        if proto == 'http/1.0' and not env.fetch_uses_lib('wolfssl') and \
+                (env.fetch_is_debug() or not env.fetch_uses_lib('openssl')):
             # we are inconsistent if we fail or not in missing TLS shutdown
             # openssl code ignore such errors intentionally in non-debug builds
             r.check_exit_code(56)

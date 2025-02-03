@@ -19,7 +19,7 @@ REPLY SIZE 550 bluah you f00l!
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
@@ -38,7 +38,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 <strip>
 QUIT
 </strip>
-# CURLE_REMOTE_FILE_NOT_FOUND
+# FETCHE_REMOTE_FILE_NOT_FOUND
 <errorcode>
 78
 </errorcode>

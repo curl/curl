@@ -42,7 +42,7 @@ content to _?!#$'|<>
 <protocol nonewline="yes">
 POST /%TESTNUMBER?my+name+is+moo%5b%5d&yes=s+i+r&v_alue=content+to+_%3f%21%23%24%27%7c%3c%3e%0a&content+to+_%3f%21%23%24%27%7c%3c%3e%0a&%3d%3d HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 24
 Content-Type: application/x-www-form-urlencoded

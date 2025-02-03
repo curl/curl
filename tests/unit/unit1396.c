@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,26 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
-static CURL *hnd;
+static FETCH *hnd;
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
   return res;
 }
 
 static void unit_stop(void)
 {
   if(hnd)
-    curl_easy_cleanup(hnd);
-  curl_global_cleanup();
+    fetch_easy_cleanup(hnd);
+  fetch_global_cleanup();
 }
 
 struct test {
@@ -81,11 +81,11 @@ UNITTEST_START
   };
   int i;
 
-  hnd = curl_easy_init();
+  hnd = fetch_easy_init();
   abort_unless(hnd != NULL, "returned NULL!");
   for(i = 0; list1[i].in; i++) {
     int outlen;
-    char *out = curl_easy_unescape(hnd,
+    char *out = fetch_easy_unescape(hnd,
                                    list1[i].in, list1[i].inlen,
                                    &outlen);
 
@@ -94,14 +94,14 @@ UNITTEST_START
     fail_unless(!memcmp(out, list1[i].out, list1[i].outlen),
                 "bad output data returned");
 
-    printf("curl_easy_unescape test %d DONE\n", i);
+    printf("fetch_easy_unescape test %d DONE\n", i);
 
-    curl_free(out);
+    fetch_free(out);
   }
 
   for(i = 0; list2[i].in; i++) {
     int outlen;
-    char *out = curl_easy_escape(hnd, list2[i].in, list2[i].inlen);
+    char *out = fetch_easy_escape(hnd, list2[i].in, list2[i].inlen);
     abort_unless(out != NULL, "returned NULL!");
 
     outlen = (int)strlen(out);
@@ -109,9 +109,9 @@ UNITTEST_START
     fail_unless(!memcmp(out, list2[i].out, list2[i].outlen),
                 "bad output data returned");
 
-    printf("curl_easy_escape test %d DONE (%s)\n", i, out);
+    printf("fetch_easy_escape test %d DONE (%s)\n", i, out);
 
-    curl_free(out);
+    fetch_free(out);
   }
 }
 UNITTEST_STOP

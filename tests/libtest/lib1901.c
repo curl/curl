@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -53,43 +53,43 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
   return 0;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
-  struct curl_slist *chunk = NULL;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
+  struct fetch_slist *chunk = NULL;
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
-    /* deliberately setting the size - to a wrong value to make sure libcurl
+  fetch = fetch_easy_init();
+  if(fetch) {
+    /* deliberately setting the size - to a wrong value to make sure libfetch
        ignores it */
-    easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 4L);
-    easy_setopt(curl, CURLOPT_POSTFIELDS, NULL);
-    easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-    easy_setopt(curl, CURLOPT_POST, 1L);
-    easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    easy_setopt(curl, CURLOPT_HTTP_VERSION, (long)CURL_HTTP_VERSION_1_1);
-    easy_setopt(curl, CURLOPT_URL, URL);
-    easy_setopt(curl, CURLOPT_READDATA, NULL);
+    easy_setopt(fetch, FETCHOPT_POSTFIELDSIZE, 4L);
+    easy_setopt(fetch, FETCHOPT_POSTFIELDS, NULL);
+    easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
+    easy_setopt(fetch, FETCHOPT_POST, 1L);
+    easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    easy_setopt(fetch, FETCHOPT_HTTP_VERSION, (long)FETCH_HTTP_VERSION_1_1);
+    easy_setopt(fetch, FETCHOPT_URL, URL);
+    easy_setopt(fetch, FETCHOPT_READDATA, NULL);
 
-    chunk = curl_slist_append(chunk, "Expect:");
+    chunk = fetch_slist_append(chunk, "Expect:");
     if(chunk) {
-      struct curl_slist *n =
-        curl_slist_append(chunk, "Transfer-Encoding: chunked");
+      struct fetch_slist *n =
+        fetch_slist_append(chunk, "Transfer-Encoding: chunked");
       if(n)
         chunk = n;
       if(n)
-        easy_setopt(curl, CURLOPT_HTTPHEADER, n);
+        easy_setopt(fetch, FETCHOPT_HTTPHEADER, n);
     }
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
   }
 test_cleanup:
-  curl_easy_cleanup(curl);
-  curl_slist_free_all(chunk);
+  fetch_easy_cleanup(fetch);
+  fetch_slist_free_all(chunk);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return res;
 }

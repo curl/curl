@@ -62,13 +62,13 @@ http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER --silent --location --referer "firston
 <protocol>
 GET /want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Referer: firstone.html
 
 GET /want/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Referer: http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER
 

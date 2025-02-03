@@ -16,7 +16,7 @@ RTP
 <reply>
 <data1>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: asdf
 CSeq: 1
 Transport: RTP/AVP/TCP;unicast;interleaved=0-1
@@ -25,7 +25,7 @@ Transport: RTP/AVP/TCP;unicast;interleaved=0-1
 
 <data2>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 CSeq: 2
 Session: asdf
 
@@ -33,7 +33,7 @@ Session: asdf
 
 <data3>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Cseq: 3
 Content-Length: 4
 Content-Type: fake/evil
@@ -43,7 +43,7 @@ $99
 
 <data4>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: asdf
 CSeq: 4
 

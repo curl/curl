@@ -39,7 +39,7 @@ fine content
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib533
 </tool>

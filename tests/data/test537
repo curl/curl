@@ -33,7 +33,7 @@ http
 <features>
 getrlimit
 </features>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>

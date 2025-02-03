@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*
- * Check for bugs #1303 and #1327: libcurl should never remove DNS entries
- * created via CURLOPT_RESOLVE, neither after DNS_CACHE_TIMEOUT elapses
+ * Check for bugs #1303 and #1327: libfetch should never remove DNS entries
+ * created via FETCHOPT_RESOLVE, neither after DNS_CACHE_TIMEOUT elapses
  * (test1515) nor a dead connection is detected (test1616).
  */
 
@@ -38,30 +38,30 @@
 
 #define DNS_TIMEOUT 1
 
-static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
+static FETCHcode do_one_request(FETCHM *m, char *URL, char *resolve)
 {
-  CURL *curls;
-  struct curl_slist *resolve_list = NULL;
+  FETCH *fetchs;
+  struct fetch_slist *resolve_list = NULL;
   int still_running;
-  CURLcode res = CURLE_OK;
-  CURLMsg *msg;
+  FETCHcode res = FETCHE_OK;
+  FETCHMsg *msg;
   int msgs_left;
 
-  resolve_list = curl_slist_append(resolve_list, resolve);
+  resolve_list = fetch_slist_append(resolve_list, resolve);
 
-  easy_init(curls);
+  easy_init(fetchs);
 
-  easy_setopt(curls, CURLOPT_URL, URL);
-  easy_setopt(curls, CURLOPT_RESOLVE, resolve_list);
-  easy_setopt(curls, CURLOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
+  easy_setopt(fetchs, FETCHOPT_URL, URL);
+  easy_setopt(fetchs, FETCHOPT_RESOLVE, resolve_list);
+  easy_setopt(fetchs, FETCHOPT_DNS_CACHE_TIMEOUT, DNS_TIMEOUT);
 
   libtest_debug_config.nohex = 1;
   libtest_debug_config.tracetime = 1;
-  easy_setopt(curls, CURLOPT_DEBUGDATA, &libtest_debug_config);
-  easy_setopt(curls, CURLOPT_DEBUGFUNCTION, libtest_debug_cb);
-  easy_setopt(curls, CURLOPT_VERBOSE, 1L);
+  easy_setopt(fetchs, FETCHOPT_DEBUGDATA, &libtest_debug_config);
+  easy_setopt(fetchs, FETCHOPT_DEBUGFUNCTION, libtest_debug_cb);
+  easy_setopt(fetchs, FETCHOPT_VERBOSE, 1L);
 
-  multi_add_handle(m, curls);
+  multi_add_handle(m, fetchs);
   multi_perform(m, &still_running);
 
   abort_on_test_timeout();
@@ -87,8 +87,8 @@ static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
   }
 
   do {
-    msg = curl_multi_info_read(m, &msgs_left);
-    if(msg && msg->msg == CURLMSG_DONE && msg->easy_handle == curls) {
+    msg = fetch_multi_info_read(m, &msgs_left);
+    if(msg && msg->msg == FETCHMSG_DONE && msg->easy_handle == fetchs) {
       res = msg->data.result;
       break;
     }
@@ -96,17 +96,17 @@ static CURLcode do_one_request(CURLM *m, char *URL, char *resolve)
 
 test_cleanup:
 
-  curl_multi_remove_handle(m, curls);
-  curl_easy_cleanup(curls);
-  curl_slist_free_all(resolve_list);
+  fetch_multi_remove_handle(m, fetchs);
+  fetch_easy_cleanup(fetchs);
+  fetch_slist_free_all(resolve_list);
 
   return res;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  FETCHM *multi = NULL;
+  FETCHcode res = FETCHE_OK;
   char *address = libtest_arg2;
   char *port = libtest_arg3;
   char *path = URL;
@@ -119,8 +119,8 @@ CURLcode test(char *URL)
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
-  curl_global_trace("all");
+  global_init(FETCH_GLOBAL_ALL);
+  fetch_global_trace("all");
   multi_init(multi);
 
   for(i = 1; i <= count; i++) {
@@ -130,7 +130,7 @@ CURLcode test(char *URL)
 
     /* second request must succeed like the first one */
     res = do_one_request(multi, target_url, dns_entry);
-    if(res != CURLE_OK) {
+    if(res != FETCHE_OK) {
       fprintf(stderr, "request %s failed with %d\n", target_url, res);
       goto test_cleanup;
     }
@@ -141,8 +141,8 @@ CURLcode test(char *URL)
 
 test_cleanup:
 
-  curl_multi_cleanup(multi);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi);
+  fetch_global_cleanup();
 
   return res;
 }

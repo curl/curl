@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLOPT_URL
+FETCHOPT_URL
 verbose logs
 </keywords>
 </info>
@@ -14,7 +14,7 @@ verbose logs
 none
 </server>
 
-# require HTTP so that CURLOPT_POSTFIELDS works as assumed
+# require HTTP so that FETCHOPT_POSTFIELDS works as assumed
 <features>
 http
 </features>
@@ -34,11 +34,11 @@ Set excessive URL lengths
 0
 </errorcode>
 <stdout>
-CURLOPT_URL 10000000 bytes URL == 43
-CURLOPT_POSTFIELDS 10000000 bytes data == 0
-CURLUPART_URL 10000000 bytes URL == 3 (Malformed input to a URL function)
-CURLUPART_SCHEME 10000000 bytes scheme == 3 (Malformed input to a URL function)
-CURLUPART_USER 10000000 bytes user == 3 (Malformed input to a URL function)
+FETCHOPT_URL 10000000 bytes URL == 43
+FETCHOPT_POSTFIELDS 10000000 bytes data == 0
+FETCHUPART_URL 10000000 bytes URL == 3 (Malformed input to a URL function)
+FETCHUPART_SCHEME 10000000 bytes scheme == 3 (Malformed input to a URL function)
+FETCHUPART_USER 10000000 bytes user == 3 (Malformed input to a URL function)
 </stdout>
 </verify>
 

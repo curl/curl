@@ -14,7 +14,7 @@ HTTP/1.0 401 BAD BOY
 Server: swsclose
 Content-Type: text/html
 
-This contains a response code >= 400, so curl shouldn't display this.  Even
+This contains a response code >= 400, so fetch shouldn't display this.  Even
 though it's a response code that triggers authentication, we're not using
 authentication so we should still fail.
 </data>
@@ -38,7 +38,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --fail
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

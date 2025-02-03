@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -31,8 +31,8 @@ my @m = `git ls-files -- $root`;
 
 my $errors;
 
-my %accepted=('curl' => 1,
-              'libcurl' => 1,
+my %accepted=('fetch' => 1,
+              'libfetch' => 1,
               'macOS' => 1,
               'wolfSSL' => 1,
               'mbedTLS' => 1,

@@ -5,15 +5,15 @@ Copyright (C) Daniel Stenberg,
 <daniel@haxx.se
   >, et al. # # This software is licensed as described in the file COPYING,
   which # you should have received as part of this distribution. The terms # are
-  also available at https://curl.se/docs/copyright.html. # # You may opt to use,
+  also available at https://fetch.se/docs/copyright.html. # # You may opt to use,
   copy, modify, merge, publish, distribute and/or sell # copies of the Software,
   and permit persons to whom the Software is # furnished to do so, under the
   terms of the COPYING file. # # This software is distributed on an "AS IS"
   basis, WITHOUT WARRANTY OF ANY # KIND, either express or implied. # #
-  SPDX-License-Identifier: curl #
+  SPDX-License-Identifier: fetch #
   ########################################################################### #
   these files are used in every single unit test program FIRSTFILES = \
-  ../libtest/first.c \ ../libtest/first.h UNITFILES = curlcheck.h $(FIRSTFILES)
+  ../libtest/first.c \ ../libtest/first.h UNITFILES = fetchcheck.h $(FIRSTFILES)
   # These are all unit test programs UNITPROGS = unit1300 unit1302 unit1303
   unit1304 unit1305 unit1307 \ unit1308 unit1309 unit1323 \ unit1330 unit1394
   unit1395 unit1396 unit1397 unit1398 \ unit1399 \ unit1600 unit1601 unit1602

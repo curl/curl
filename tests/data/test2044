@@ -25,7 +25,7 @@ Attempt to set a default protocol that does not exist
 #
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_UNSUPPORTED_PROTOCOL is error code 1
+# FETCHE_UNSUPPORTED_PROTOCOL is error code 1
 <errorcode>
 1
 </errorcode>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "doh.h"
 #include "dynbuf.h"
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
@@ -36,7 +36,7 @@ static void unit_stop(void)
 
 }
 
-#ifndef CURL_DISABLE_DOH
+#ifndef FETCH_DISABLE_DOH
 #define DNS_PREAMBLE "\x00\x00\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00"
 #define LABEL_TEST "\x04\x74\x65\x73\x74"
 #define LABEL_HOST "\x04\x68\x6f\x73\x74"
@@ -288,7 +288,7 @@ UNITTEST_START
 }
 UNITTEST_STOP
 
-#else /* CURL_DISABLE_DOH */
+#else /* FETCH_DISABLE_DOH */
 UNITTEST_START
 /* nothing to do, just succeed */
 UNITTEST_STOP

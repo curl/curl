@@ -25,7 +25,7 @@ upgrade
 #
 # Client-side
 <client>
-# for the forced CURL_ENTROPY
+# for the forced FETCH_ENTROPY
 <features>
 Debug
 ws
@@ -47,7 +47,7 @@ ws://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol nocheck="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Upgrade: websocket
 Connection: Upgrade

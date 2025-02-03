@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -62,58 +62,58 @@ static size_t readcallback(char  *ptr,
   fprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
-static curlioerr ioctlcallback(CURL *handle,
+static fetchioerr ioctlcallback(FETCH *handle,
                                int cmd,
                                void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
-  if(cmd == CURLIOCMD_RESTARTREAD) {
+  if(cmd == FETCHIOCMD_RESTARTREAD) {
     fprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
   }
-  return CURLIOE_OK;
+  return FETCHIOE_OK;
 }
 
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch = NULL;
   int counter = 0;
-  CURLM *m = NULL;
+  FETCHM *m = NULL;
   int running = 1;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  easy_init(curl);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_HEADER, 1L);
 
   /* read the POST data from a callback */
-  CURL_IGNORE_DEPRECATION(
-    easy_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
-    easy_setopt(curl, CURLOPT_IOCTLDATA, &counter);
+  FETCH_IGNORE_DEPRECATION(
+    easy_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctlcallback);
+    easy_setopt(fetch, FETCHOPT_IOCTLDATA, &counter);
   )
-  easy_setopt(curl, CURLOPT_READFUNCTION, readcallback);
-  easy_setopt(curl, CURLOPT_READDATA, &counter);
+  easy_setopt(fetch, FETCHOPT_READFUNCTION, readcallback);
+  easy_setopt(fetch, FETCHOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */
-  easy_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(uploadthis));
+  easy_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long)strlen(uploadthis));
 
-  easy_setopt(curl, CURLOPT_POST, 1L);
-  easy_setopt(curl, CURLOPT_PROXY, libtest_arg2);
-  easy_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
-  easy_setopt(curl, CURLOPT_PROXYAUTH,
-                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
+  easy_setopt(fetch, FETCHOPT_POST, 1L);
+  easy_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
+  easy_setopt(fetch, FETCHOPT_PROXYUSERPWD, libtest_arg3);
+  easy_setopt(fetch, FETCHOPT_PROXYAUTH,
+                   (long) (FETCHAUTH_NTLM | FETCHAUTH_DIGEST | FETCHAUTH_BASIC) );
 
   multi_init(m);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(m, fetch);
 
   while(running) {
     struct timeval timeout;
@@ -147,10 +147,10 @@ test_cleanup:
 
   /* proper cleanup sequence - type PA */
 
-  curl_multi_remove_handle(m, curl);
-  curl_multi_cleanup(m);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, fetch);
+  fetch_multi_cleanup(m);
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

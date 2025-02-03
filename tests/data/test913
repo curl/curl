@@ -37,7 +37,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient@example.com --mail-fr
 #
 # Verify data after the test has been "shot"
 <verify>
-# 55 - CURLE_SEND_ERROR
+# 55 - FETCHE_SEND_ERROR
 <errorcode>
 55
 </errorcode>

@@ -1,23 +1,23 @@
 <!--
 Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 -->
 
-# The curl HTTP Test Suite
+# The fetch HTTP Test Suite
 
-This is an additional test suite using a combination of Apache httpd and nghttpx servers to perform various tests beyond the capabilities of the standard curl test suite.
+This is an additional test suite using a combination of Apache httpd and nghttpx servers to perform various tests beyond the capabilities of the standard fetch test suite.
 
 # Usage
 
 The test cases and necessary files are in `tests/http`. You can invoke
-`pytest` from there or from the top level curl checkout and it finds all
+`pytest` from there or from the top level fetch checkout and it finds all
 tests.
 
 ```
-curl> pytest test/http
+fetch> pytest test/http
 platform darwin -- Python 3.9.15, pytest-6.2.0, py-1.10.0, pluggy-0.13.1
-rootdir: /Users/sei/projects/curl
+rootdir: /Users/sei/projects/fetch
 collected 5 items
 
 tests/http/test_01_basic.py .....
@@ -26,7 +26,7 @@ tests/http/test_01_basic.py .....
 Pytest takes arguments. `-v` increases its verbosity and can be used several times. `-k <expr>` can be used to run only matching test cases. The `expr` can be something resembling a python test or just a string that needs to match test cases in their names.
 
 ```
-curl/tests/http> pytest -vv -k test_01_02
+fetch/tests/http> pytest -vv -k test_01_02
 ```
 
 runs all test cases that have `test_01_02` in their name. This does not have to be the start of the name.
@@ -41,12 +41,12 @@ You need:
 
 1. a recent Python, the `cryptography` module and, of course, `pytest`
 2. an apache httpd development version. On Debian/Ubuntu, the package `apache2-dev` has this
-3. a local `curl` project build
+3. a local `fetch` project build
 3. optionally, a `nghttpx` with HTTP/3 enabled or h3 test cases are skipped
 
 ### Configuration
 
-Via curl's `configure` script you may specify:
+Via fetch's `configure` script you may specify:
 
   * `--with-test-nghttpx=<path-of-nghttpx>` if you have nghttpx to use somewhere outside your `$PATH`.
   * `--with-test-httpd=<httpd-install-path>` if you have an Apache httpd installed somewhere else. On Debian/Ubuntu it will otherwise look into `/usr/bin` and `/usr/sbin` to find those.
@@ -58,28 +58,28 @@ Via curl's `configure` script you may specify:
 Several test cases are parameterized, for example with the HTTP version to use. If you want to run a test with a particular protocol only, use a command line like:
 
 ```
-curl/tests/http> pytest -k "test_02_06 and h2"
+fetch/tests/http> pytest -k "test_02_06 and h2"
 ```
 
 Test cases can be repeated, with the `pytest-repeat` module (`pip install pytest-repeat`). Like in:
 
 ```
-curl/tests/http> pytest -k "test_02_06 and h2" --count=100
+fetch/tests/http> pytest -k "test_02_06 and h2" --count=100
 ```
 
 which then runs this test case a hundred times. In case of flaky tests, you can make pytest stop on the first one with:
 
 ```
-curl/tests/http> pytest -k "test_02_06 and h2" --count=100 --maxfail=1
+fetch/tests/http> pytest -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
-which allow you to inspect output and log files for the failed run. Speaking of log files, the verbosity of pytest is also used to collect curl trace output. If you specify `-v` three times, the `curl` command is started with `--trace`:
+which allow you to inspect output and log files for the failed run. Speaking of log files, the verbosity of pytest is also used to collect fetch trace output. If you specify `-v` three times, the `fetch` command is started with `--trace`:
 
 ```
-curl/tests/http> pytest -vvv -k "test_02_06 and h2" --count=100 --maxfail=1
+fetch/tests/http> pytest -vvv -k "test_02_06 and h2" --count=100 --maxfail=1
 ```
 
-all of curl's output and trace file are found in `tests/http/gen/curl`.
+all of fetch's output and trace file are found in `tests/http/gen/fetch`.
 
 ## Writing Tests
 
@@ -95,8 +95,8 @@ In `conftest.py` 3 "fixtures" are defined that are used by all test cases:
    those.
 2. `httpd`: the Apache httpd instance, configured and started, then stopped at
    the end of the test suite. It has sites configured for the domains from
-   `env`. It also loads a local module `mod_curltest?` and makes it available
-   in certain locations. (more on mod_curltest below).
+   `env`. It also loads a local module `mod_fetchtest?` and makes it available
+   in certain locations. (more on mod_fetchtest below).
 3. `nghttpx`: an instance of nghttpx that provides HTTP/3 support. `nghttpx`
    proxies those requests to the `httpd` server. In a direct mapping, so you
    may access all the resources under the same path as with HTTP/2. Only the
@@ -115,16 +115,16 @@ All test cases start with `test_` in their name. We use a double number scheme t
 
 Tests are grouped thematically in a file with a single Python test class. This is convenient if you need a special "fixture" for several tests. "fixtures" can have "class" scope.
 
-There is a curl helper class that knows how to invoke curl and interpret its output. Among other things, it does add the local CA to the command line, so that SSL connections to the test servers are verified. Nothing prevents anyone from running curl directly, for specific uses not covered by the `CurlClient` class.
+There is a fetch helper class that knows how to invoke fetch and interpret its output. Among other things, it does add the local CA to the command line, so that SSL connections to the test servers are verified. Nothing prevents anyone from running fetch directly, for specific uses not covered by the `CurlClient` class.
 
-### mod_curltest
+### mod_fetchtest
 
-The module source code is found in `testenv/mod_curltest`. It is compiled using the `apxs` command, commonly provided via the `apache2-dev` package. Compilation is quick and done once at the start of a test run.
+The module source code is found in `testenv/mod_fetchtest`. It is compiled using the `apxs` command, commonly provided via the `apache2-dev` package. Compilation is quick and done once at the start of a test run.
 
 The module adds 2 "handlers" to the Apache server (right now). Handler are pieces of code that receive HTTP requests and generate the response. Those handlers are:
 
-* `curltest-echo`: hooked up on the path `/curltest/echo`. This one echoes a request and copies all data from the request body to the response body. Useful for simulating upload and checking that the data arrived as intended.
-* `curltest-tweak`: hooked up on the path `/curltest/tweak`. This handler is more of a Swiss army knife. It interprets parameters from the URL query string to drive its behavior.
+* `fetchtest-echo`: hooked up on the path `/fetchtest/echo`. This one echoes a request and copies all data from the request body to the response body. Useful for simulating upload and checking that the data arrived as intended.
+* `fetchtest-tweak`: hooked up on the path `/fetchtest/tweak`. This handler is more of a Swiss army knife. It interprets parameters from the URL query string to drive its behavior.
   * `status=nnn`: generate a response with HTTP status code `nnn`.
   * `chunks=n`: generate `n` chunks of data in the response body, defaults to 3.
   * `chunk_size=nnn`: each chunk should contain `nnn` bytes of data. Maximum is 16KB right now.
@@ -141,7 +141,7 @@ The module adds 2 "handlers" to the Apache server (right now). Handler are piece
   * `s`: seconds (the default)
   * `ms`: milliseconds
 
-As you can see, `mod_curltest`'s tweak handler allow to simulate many kinds of
+As you can see, `mod_fetchtest`'s tweak handler allow to simulate many kinds of
 responses. An example of its use is `test_03_01` where responses are delayed
 using `chunk_delay`. This gives the response a defined duration and the test
 uses that to reload `httpd` in the middle of the first request. A graceful

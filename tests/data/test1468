@@ -53,7 +53,7 @@ http://this.is.a.host.name:%HTTPPORT/%TESTNUMBER --proxy socks5h://localhost%SOC
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: this.is.a.host.name:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

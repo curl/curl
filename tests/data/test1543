@@ -2,11 +2,11 @@
 <info>
 <keywords>
 HTTP
-CURLOPT_CURLU
+FETCHOPT_FETCHU
 </keywords>
 </info>
 #
-# Similar to 1518 but using CURLOPT_CURLU
+# Similar to 1518 but using FETCHOPT_FETCHU
 #
 # Server-side
 <reply>
@@ -36,13 +36,13 @@ Connection: close
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-CURLOPT_CURLU, URL with space and CURLINFO_EFFECTIVE_URL
+FETCHOPT_FETCHU, URL with space and FETCHINFO_EFFECTIVE_URL
 </name>
 <command>
 "http://%HOSTIP:%HTTPPORT/ /with/ space/ /file"

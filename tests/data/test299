@@ -3,7 +3,7 @@
 <keywords>
 FTP
 HTTP
-CURLOPT_USERPWD
+FETCHOPT_USERPWD
 HTTP proxy
 </keywords>
 </info>
@@ -43,7 +43,7 @@ FTP over HTTP proxy with user:pass not in url
 GET ftp://michal:aybabtu@host.com/we/want/%TESTNUMBER HTTP/1.1
 Host: host.com:21
 Authorization: Basic bWljaGFsOmF5YmFidHU=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

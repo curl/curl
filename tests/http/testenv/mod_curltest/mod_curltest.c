@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include <assert.h>
@@ -35,14 +35,14 @@
 #include <http_request.h>
 #include <http_log.h>
 
-static void curltest_hooks(apr_pool_t *pool);
-static int curltest_echo_handler(request_rec *r);
-static int curltest_put_handler(request_rec *r);
-static int curltest_tweak_handler(request_rec *r);
-static int curltest_1_1_required(request_rec *r);
-static int curltest_sslinfo_handler(request_rec *r);
+static void fetchtest_hooks(apr_pool_t *pool);
+static int fetchtest_echo_handler(request_rec *r);
+static int fetchtest_put_handler(request_rec *r);
+static int fetchtest_tweak_handler(request_rec *r);
+static int fetchtest_1_1_required(request_rec *r);
+static int fetchtest_sslinfo_handler(request_rec *r);
 
-AP_DECLARE_MODULE(curltest) =
+AP_DECLARE_MODULE(fetchtest) =
 {
   STANDARD20_MODULE_STUFF,
   NULL, /* func to create per dir config */
@@ -50,17 +50,17 @@ AP_DECLARE_MODULE(curltest) =
   NULL, /* func to create per server config */
   NULL,  /* func to merge per server config */
   NULL,              /* command handlers */
-  curltest_hooks,
+  fetchtest_hooks,
 #if defined(AP_MODULE_FLAG_NONE)
   AP_MODULE_FLAG_ALWAYS_MERGE
 #endif
 };
 
-static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
+static int fetchtest_post_config(apr_pool_t *p, apr_pool_t *plog,
                                 apr_pool_t *ptemp, server_rec *s)
 {
   void *data = NULL;
-  const char *key = "mod_curltest_init_counter";
+  const char *key = "mod_fetchtest_init_counter";
 
   (void)plog;(void)ptemp;
 
@@ -77,20 +77,20 @@ static int curltest_post_config(apr_pool_t *p, apr_pool_t *plog,
   return APR_SUCCESS;
 }
 
-static void curltest_hooks(apr_pool_t *pool)
+static void fetchtest_hooks(apr_pool_t *pool)
 {
   ap_log_perror(APLOG_MARK, APLOG_TRACE1, 0, pool, "installing hooks");
 
   /* Run once after configuration is set, but before mpm children initialize.
    */
-  ap_hook_post_config(curltest_post_config, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_post_config(fetchtest_post_config, NULL, NULL, APR_HOOK_MIDDLE);
 
-  /* curl test handlers */
-  ap_hook_handler(curltest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
-  ap_hook_handler(curltest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  /* fetch test handlers */
+  ap_hook_handler(fetchtest_echo_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(fetchtest_put_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(fetchtest_tweak_handler, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(fetchtest_1_1_required, NULL, NULL, APR_HOOK_MIDDLE);
+  ap_hook_handler(fetchtest_sslinfo_handler, NULL, NULL, APR_HOOK_MIDDLE);
 }
 
 #define SECS_PER_HOUR      (60*60)
@@ -179,7 +179,7 @@ static int status_from_str(const char *s, apr_status_t *pstatus)
   return 0;
 }
 
-static int curltest_echo_handler(request_rec *r)
+static int fetchtest_echo_handler(request_rec *r)
 {
   conn_rec *c = r->connection;
   apr_bucket_brigade *bb;
@@ -191,7 +191,7 @@ static int curltest_echo_handler(request_rec *r)
   int just_die = 0, die_after_100 = 0;
   long l;
 
-  if(strcmp(r->handler, "curltest-echo")) {
+  if(strcmp(r->handler, "fetchtest-echo")) {
     return DECLINED;
   }
   if(r->method_number != M_GET && r->method_number != M_POST) {
@@ -320,7 +320,7 @@ cleanup:
   return DECLINED;
 }
 
-static int curltest_tweak_handler(request_rec *r)
+static int fetchtest_tweak_handler(request_rec *r)
 {
   conn_rec *c = r->connection;
   apr_bucket_brigade *bb;
@@ -336,7 +336,7 @@ static int curltest_tweak_handler(request_rec *r)
   apr_status_t error = APR_SUCCESS, body_error = APR_SUCCESS;
   int close_conn = 0, with_cl = 0;
 
-  if(strcmp(r->handler, "curltest-tweak")) {
+  if(strcmp(r->handler, "fetchtest-tweak")) {
     return DECLINED;
   }
   if(r->method_number == M_DELETE) {
@@ -380,7 +380,7 @@ static int curltest_tweak_handler(request_rec *r)
           }
         }
         else if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's url globbing */
+          /* just an id for repeated requests with fetch's url globbing */
           request_id = val;
           continue;
         }
@@ -525,7 +525,7 @@ cleanup:
   return AP_FILTER_ERROR;
 }
 
-static int curltest_put_handler(request_rec *r)
+static int fetchtest_put_handler(request_rec *r)
 {
   conn_rec *c = r->connection;
   apr_bucket_brigade *bb;
@@ -542,7 +542,7 @@ static int curltest_put_handler(request_rec *r)
   long l;
   int i;
 
-  if(strcmp(r->handler, "curltest-put")) {
+  if(strcmp(r->handler, "fetchtest-put")) {
     return DECLINED;
   }
   if(r->method_number != M_PUT) {
@@ -558,7 +558,7 @@ static int curltest_put_handler(request_rec *r)
         *s = '\0';
         val = s + 1;
         if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's url globbing */
+          /* just an id for repeated requests with fetch's url globbing */
           request_id = val;
           continue;
         }
@@ -653,7 +653,7 @@ cleanup:
   return DECLINED;
 }
 
-static int curltest_1_1_required(request_rec *r)
+static int fetchtest_1_1_required(request_rec *r)
 {
   conn_rec *c = r->connection;
   apr_bucket_brigade *bb;
@@ -667,7 +667,7 @@ static int curltest_1_1_required(request_rec *r)
   long l;
   int i;
 
-  if(strcmp(r->handler, "curltest-1_1-required")) {
+  if(strcmp(r->handler, "fetchtest-1_1-required")) {
     return DECLINED;
   }
 
@@ -733,7 +733,7 @@ static int brigade_env_var(request_rec *r, apr_bucket_brigade *bb,
   return 0;
 }
 
-static int curltest_sslinfo_handler(request_rec *r)
+static int fetchtest_sslinfo_handler(request_rec *r)
 {
   conn_rec *c = r->connection;
   apr_bucket_brigade *bb;
@@ -745,7 +745,7 @@ static int curltest_sslinfo_handler(request_rec *r)
   long l;
   int i;
 
-  if(strcmp(r->handler, "curltest-sslinfo")) {
+  if(strcmp(r->handler, "fetchtest-sslinfo")) {
     return DECLINED;
   }
   if(r->method_number != M_GET) {
@@ -761,7 +761,7 @@ static int curltest_sslinfo_handler(request_rec *r)
         *s = '\0';
         val = s + 1;
         if(!strcmp("id", arg)) {
-          /* just an id for repeated requests with curl's url globbing */
+          /* just an id for repeated requests with fetch's url globbing */
           request_id = val;
           continue;
         }

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -35,14 +35,14 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *easy = NULL;
-  CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *easy = NULL;
+  FETCHM *multi = NULL;
+  FETCHcode res = FETCHE_OK;
   int running;
   int msgs_left;
-  CURLMsg *msg;
+  FETCHMsg *msg;
   FILE *upload = NULL;
 
   start_test_timing();
@@ -55,7 +55,7 @@ CURLcode test(char *URL)
     return TEST_ERR_FOPEN;
   }
 
-  res_global_init(CURL_GLOBAL_ALL);
+  res_global_init(FETCH_GLOBAL_ALL);
   if(res) {
     fclose(upload);
     return res;
@@ -64,22 +64,22 @@ CURLcode test(char *URL)
   easy_init(easy);
 
   /* go verbose */
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(easy, FETCHOPT_VERBOSE, 1L);
 
   /* specify target */
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(easy, FETCHOPT_URL, URL);
 
   /* enable uploading */
-  easy_setopt(easy, CURLOPT_UPLOAD, 1L);
+  easy_setopt(easy, FETCHOPT_UPLOAD, 1L);
 
   /* data pointer for the file read function */
-  easy_setopt(easy, CURLOPT_READDATA, upload);
+  easy_setopt(easy, FETCHOPT_READDATA, upload);
 
   /* use active mode FTP */
-  easy_setopt(easy, CURLOPT_FTPPORT, "-");
+  easy_setopt(easy, FETCHOPT_FTPPORT, "-");
 
   /* server connection timeout */
-  easy_setopt(easy, CURLOPT_ACCEPTTIMEOUT_MS,
+  easy_setopt(easy, FETCHOPT_ACCEPTTIMEOUT_MS,
               strtol(libtest_arg2, NULL, 10)*1000);
 
   multi_init(multi);
@@ -133,7 +133,7 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
   }
 
-  msg = curl_multi_info_read(multi, &msgs_left);
+  msg = fetch_multi_info_read(multi, &msgs_left);
   if(msg)
     res = msg->data.result;
 
@@ -141,9 +141,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi);
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
 
   /* close the local file */
   fclose(upload);

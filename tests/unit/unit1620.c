@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,26 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "urldata.h"
 #include "url.h"
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
-  global_init(CURL_GLOBAL_ALL);
+  FETCHcode res = FETCHE_OK;
+  global_init(FETCH_GLOBAL_ALL);
   return res;
 }
 
 static void unit_stop(void)
 {
-  curl_global_cleanup();
+  fetch_global_cleanup();
 }
 
 static void test_parse(
@@ -49,9 +49,9 @@ static void test_parse(
   char *userstr = NULL;
   char *passwdstr = NULL;
   char *options = NULL;
-  CURLcode rc = Curl_parse_login_details(input, strlen(input),
+  FETCHcode rc = Curl_parse_login_details(input, strlen(input),
                                 &userstr, &passwdstr, &options);
-  fail_unless(rc == CURLE_OK, "Curl_parse_login_details() failed");
+  fail_unless(rc == FETCHE_OK, "Curl_parse_login_details() failed");
 
   fail_unless(!!exp_username == !!userstr, "username expectation failed");
   fail_unless(!!exp_password == !!passwdstr, "password expectation failed");
@@ -73,7 +73,7 @@ static void test_parse(
 
 UNITTEST_START
 {
-  CURLcode rc;
+  FETCHcode rc;
   struct Curl_easy *empty;
   enum dupstring i;
 
@@ -83,25 +83,25 @@ UNITTEST_START
   rc = Curl_open(&empty);
   if(rc)
     goto unit_test_abort;
-  fail_unless(rc == CURLE_OK, "Curl_open() failed");
+  fail_unless(rc == FETCHE_OK, "Curl_open() failed");
 
   rc = Curl_connect(empty, &async, &protocol_connect);
-  fail_unless(rc == CURLE_URL_MALFORMAT,
-              "Curl_connect() failed to return CURLE_URL_MALFORMAT");
+  fail_unless(rc == FETCHE_URL_MALFORMAT,
+              "Curl_connect() failed to return FETCHE_URL_MALFORMAT");
 
-  fail_unless(empty->magic == CURLEASY_MAGIC_NUMBER,
-              "empty->magic should be equal to CURLEASY_MAGIC_NUMBER");
+  fail_unless(empty->magic == FETCHEASY_MAGIC_NUMBER,
+              "empty->magic should be equal to FETCHEASY_MAGIC_NUMBER");
 
   /* double invoke to ensure no dependency on internal state */
   rc = Curl_connect(empty, &async, &protocol_connect);
-  fail_unless(rc == CURLE_URL_MALFORMAT,
-              "Curl_connect() failed to return CURLE_URL_MALFORMAT");
+  fail_unless(rc == FETCHE_URL_MALFORMAT,
+              "Curl_connect() failed to return FETCHE_URL_MALFORMAT");
 
   rc = Curl_init_userdefined(empty);
-  fail_unless(rc == CURLE_OK, "Curl_userdefined() failed");
+  fail_unless(rc == FETCHE_OK, "Curl_userdefined() failed");
 
   rc = Curl_init_do(empty, empty->conn);
-  fail_unless(rc == CURLE_OK, "Curl_init_do() failed");
+  fail_unless(rc == FETCHE_OK, "Curl_init_do() failed");
 
   test_parse("hostname", "hostname", NULL, NULL);
   test_parse("user:password", "user", "password", NULL);
@@ -125,7 +125,7 @@ UNITTEST_START
   }
 
   rc = Curl_close(&empty);
-  fail_unless(rc == CURLE_OK, "Curl_close() failed");
+  fail_unless(rc == FETCHE_OK, "Curl_close() failed");
 
 }
 UNITTEST_STOP

@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl
+fetch
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 </server>
 
 <name>
-Verify curl -h --badone
+Verify fetch -h --badone
 </name>
 
 <command>
@@ -26,7 +26,7 @@ Verify curl -h --badone
 
 <verify>
 <stderr mode="text">
-Incorrect option name to show help for, see curl -h
+Incorrect option name to show help for, see fetch -h
 </stderr>
 </verify>
 </testcase>

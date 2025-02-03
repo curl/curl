@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* <DESC>
  * WebSockets pingpong
  * </DESC>
  */
-/* curl stuff */
-#include "curl_setup.h"
-#include <curl/curl.h>
+/* fetch stuff */
+#include "fetch_setup.h"
+#include <fetch/fetch.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -42,73 +42,73 @@
 #include <sys/time.h>
 #endif
 
-#ifndef CURL_DISABLE_WEBSOCKETS
+#ifndef FETCH_DISABLE_WEBSOCKETS
 
-static CURLcode ping(CURL *curl, const char *send_payload)
+static FETCHcode ping(FETCH *fetch, const char *send_payload)
 {
   size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, send_payload, strlen(send_payload), &sent, 0,
-                 CURLWS_PING);
+  FETCHcode result =
+    fetch_ws_send(fetch, send_payload, strlen(send_payload), &sent, 0,
+                 FETCHWS_PING);
   fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
+          "ws: fetch_ws_send returned %u, sent %u\n", (int)result, (int)sent);
 
   return result;
 }
 
-static CURLcode recv_pong(CURL *curl, const char *expected_payload)
+static FETCHcode recv_pong(FETCH *fetch, const char *expected_payload)
 {
   size_t rlen;
-  const struct curl_ws_frame *meta;
+  const struct fetch_ws_frame *meta;
   char buffer[256];
-  CURLcode result = curl_ws_recv(curl, buffer, sizeof(buffer), &rlen, &meta);
+  FETCHcode result = fetch_ws_recv(fetch, buffer, sizeof(buffer), &rlen, &meta);
   if(result) {
-    fprintf(stderr, "ws: curl_ws_recv returned %u, received %ld\n",
+    fprintf(stderr, "ws: fetch_ws_recv returned %u, received %ld\n",
             (int)result, (long)rlen);
     return result;
   }
 
-  if(!(meta->flags & CURLWS_PONG)) {
+  if(!(meta->flags & FETCHWS_PONG)) {
     fprintf(stderr, "recv_pong: wrong frame, got %d bytes rflags %x\n",
             (int)rlen, meta->flags);
-    return CURLE_RECV_ERROR;
+    return FETCHE_RECV_ERROR;
   }
 
   fprintf(stderr, "ws: got PONG back\n");
   if(rlen == strlen(expected_payload) &&
      !memcmp(expected_payload, buffer, rlen)) {
     fprintf(stderr, "ws: got the same payload back\n");
-    return CURLE_OK;
+    return FETCHE_OK;
   }
   fprintf(stderr, "ws: did NOT get the same payload back\n");
-  return CURLE_RECV_ERROR;
+  return FETCHE_RECV_ERROR;
 }
 
 /* just close the connection */
-static void websocket_close(CURL *curl)
+static void websocket_close(FETCH *fetch)
 {
   size_t sent;
-  CURLcode result =
-    curl_ws_send(curl, "", 0, &sent, 0, CURLWS_CLOSE);
+  FETCHcode result =
+    fetch_ws_send(fetch, "", 0, &sent, 0, FETCHWS_CLOSE);
   fprintf(stderr,
-          "ws: curl_ws_send returned %u, sent %u\n", (int)result, (int)sent);
+          "ws: fetch_ws_send returned %u, sent %u\n", (int)result, (int)sent);
 }
 
 #if defined(__TANDEM)
 # include <cextdecs.h(PROCESS_DELAY_)>
 #endif
-static CURLcode pingpong(CURL *curl, const char *payload)
+static FETCHcode pingpong(FETCH *fetch, const char *payload)
 {
-  CURLcode res;
+  FETCHcode res;
   int i;
 
-  res = ping(curl, payload);
+  res = ping(fetch, payload);
   if(res)
     return res;
   for(i = 0; i < 10; ++i) {
     fprintf(stderr, "Receive pong\n");
-    res = recv_pong(curl, payload);
-    if(res == CURLE_AGAIN) {
+    res = recv_pong(fetch, payload);
+    if(res == FETCHE_AGAIN) {
 #ifdef _WIN32
       Sleep(100);
 #elif defined(__TANDEM)
@@ -123,20 +123,20 @@ static CURLcode pingpong(CURL *curl, const char *payload)
 #endif
       continue;
     }
-    websocket_close(curl);
+    websocket_close(fetch);
     return res;
   }
-  websocket_close(curl);
-  return CURLE_RECV_ERROR;
+  websocket_close(fetch);
+  return FETCHE_RECV_ERROR;
 }
 
 #endif
 
 int main(int argc, char *argv[])
 {
-#ifndef CURL_DISABLE_WEBSOCKETS
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+#ifndef FETCH_DISABLE_WEBSOCKETS
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
   const char *url, *payload;
 
   if(argc != 3) {
@@ -146,31 +146,31 @@ int main(int argc, char *argv[])
   url = argv[1];
   payload = argv[2];
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, url);
+  fetch = fetch_easy_init();
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, url);
 
     /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "ws-pingpong");
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_CONNECT_ONLY, 2L); /* websocket style */
-    res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %u\n", (int)res);
-    if(res == CURLE_OK)
-      res = pingpong(curl, payload);
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, "ws-pingpong");
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_CONNECT_ONLY, 2L); /* websocket style */
+    res = fetch_easy_perform(fetch);
+    fprintf(stderr, "fetch_easy_perform() returned %u\n", (int)res);
+    if(res == FETCHE_OK)
+      res = pingpong(fetch, payload);
 
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
   }
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return (int)res;
 
-#else /* !CURL_DISABLE_WEBSOCKETS */
+#else /* !FETCH_DISABLE_WEBSOCKETS */
   (void)argc;
   (void)argv;
-  fprintf(stderr, "WebSockets not enabled in libcurl\n");
+  fprintf(stderr, "WebSockets not enabled in libfetch\n");
   return 1;
-#endif /* CURL_DISABLE_WEBSOCKETS */
+#endif /* FETCH_DISABLE_WEBSOCKETS */
 }

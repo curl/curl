@@ -4,9 +4,9 @@
 HTTP
 HTTP GET
 HTTP proxy
-CURLOPT_PROXY
-CURLOPT_NOBODY
-CURLINFO_USED_PROXY
+FETCHOPT_PROXY
+FETCHOPT_NOBODY
+FETCHINFO_USED_PROXY
 </keywords>
 </info>
 
@@ -36,13 +36,13 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CURLINFO_USED_PROXY
+FETCHINFO_USED_PROXY
 </name>
 
 # provides:
 # 0 - the proxy URL
 # 1 - the non-proxy using URL
-# 2 - the CURLOPT_RESOLVE string to change IP for the name
+# 2 - the FETCHOPT_RESOLVE string to change IP for the name
 #
 <command>
 http://%HOSTIP:%HTTPPORT goingdirect.com:%HTTPPORT goingdirect.com:%HTTPPORT:%HOSTIP

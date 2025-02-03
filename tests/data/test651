@@ -29,13 +29,13 @@ form-api
 <server>
 http
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-curl_formadd with huge COPYCONTENTS
+fetch_formadd with huge COPYCONTENTS
 </name>
 <stdin>
  Some data from stdin

@@ -49,7 +49,7 @@ proxy
 <protocol>
 GET http://supertrooper.fake/c/%TESTNUMBER HTTP/1.1
 Host: supertrooper.fake
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: moo2=indeed

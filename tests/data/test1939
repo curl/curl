@@ -2,7 +2,7 @@
 <info>
 <keywords>
 CONNECT
-curl_easy_cleanup
+fetch_easy_cleanup
 </keywords>
 </info>
 
@@ -38,7 +38,7 @@ http-proxy
 </server>
 
 <name>
-curl_easy_cleanup without curl_multi_remove_handle - in CONNECT
+fetch_easy_cleanup without fetch_multi_remove_handle - in CONNECT
 </name>
 <tool>
 lib%TESTNUMBER

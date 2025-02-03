@@ -30,7 +30,7 @@ IMAP with --login-options 'AUTH=dummy' (failing)
 #
 # Verify data after the test has been "shot"
 <verify>
-# 3 == CURLE_URL_MALFORMAT
+# 3 == FETCHE_URL_MALFORMAT
 <errorcode>
 3
 </errorcode>

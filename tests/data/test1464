@@ -21,7 +21,7 @@ none
 file
 </features>
 <name>
-curl file category --help with lower/upper mix
+fetch file category --help with lower/upper mix
 </name>
 <command>
 --help fIlE

@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-CURLOPT_PROTOCOLS_STR
+FETCHOPT_PROTOCOLS_STR
 </keywords>
 </info>
 
@@ -14,7 +14,7 @@ CURLOPT_PROTOCOLS_STR
 none
 </server>
 <name>
-CURLOPT_PROTOCOLS_STR
+FETCHOPT_PROTOCOLS_STR
 </name>
 <tool>
 lib%TESTNUMBER

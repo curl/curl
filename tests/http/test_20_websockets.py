@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -40,16 +40,16 @@ from testenv import Env, CurlClient, LocalClient
 log = logging.getLogger(__name__)
 
 
-@pytest.mark.skipif(condition=not Env.curl_has_protocol('ws'),
-                    reason='curl lacks ws protocol support')
+@pytest.mark.skipif(condition=not Env.fetch_has_protocol('ws'),
+                    reason='fetch lacks ws protocol support')
 class TestWebsockets:
 
     def check_alive(self, env, timeout=5):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://localhost:{env.ws_port}/'
         end = datetime.now() + timedelta(seconds=timeout)
         while datetime.now() < end:
-            r = curl.http_download(urls=[url])
+            r = fetch.http_download(urls=[url])
             if r.exit_code == 0:
                 return True
             time.sleep(.1)
@@ -81,9 +81,9 @@ class TestWebsockets:
             p.terminate()
 
     def test_20_01_basic(self, env: Env, ws_echo):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://localhost:{env.ws_port}/'
-        r = curl.http_download(urls=[url])
+        r = fetch.http_download(urls=[url])
         r.check_response(http_status=426)
 
     def test_20_02_pingpong_small(self, env: Env, ws_echo):
@@ -131,7 +131,7 @@ class TestWebsockets:
 
     def test_20_07_data_large_small_recv(self, env: Env, ws_echo):
         run_env = os.environ.copy()
-        run_env['CURL_WS_CHUNK_SIZE'] = '1024'
+        run_env['FETCH_WS_CHUNK_SIZE'] = '1024'
         client = LocalClient(env=env, name='ws-data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')
@@ -143,7 +143,7 @@ class TestWebsockets:
     # Simlates error reported in #15865
     def test_20_08_data_very_large(self, env: Env, ws_echo):
         run_env = os.environ.copy()
-        run_env['CURL_WS_CHUNK_EAGAIN'] = '8192'
+        run_env['FETCH_WS_CHUNK_EAGAIN'] = '8192'
         client = LocalClient(env=env, name='ws-data', run_env=run_env)
         if not client.exists():
             pytest.skip(f'example client not built: {client.name}')

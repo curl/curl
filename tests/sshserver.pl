@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-# Starts sshd for use in the SCP and SFTP curl test harness tests.
+# Starts sshd for use in the SCP and SFTP fetch test harness tests.
 # Also creates the ssh configuration files needed for these tests.
 
 use strict;
@@ -102,7 +102,7 @@ my $logdir = $path .'/log';   # directory for log files
 my $piddir;                   # directory for server config files
 my $username = $ENV{USER};    # default user
 my $pidfile;                  # ssh daemon pid file
-my $identity = 'curl_client_key'; # default identity file
+my $identity = 'fetch_client_key'; # default identity file
 
 my $error;
 my @cfgarr;
@@ -399,7 +399,7 @@ $sshconfig = pp($sshconfig);
 $sftpconfig = pp($sftpconfig);
 
 #***************************************************************************
-# Generate host and client key files for curl's tests
+# Generate host and client key files for fetch's tests
 #
 if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
    (! -e pp($hstpubkeyf)) || (! -s pp($hstpubkeyf)) ||
@@ -411,12 +411,12 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
     unlink(pp($hstprvkeyf), pp($hstpubkeyf), pp($hstpubmd5f),
            pp($hstpubsha256f), pp($cliprvkeyf), pp($clipubkeyf));
     logmsg "generating host keys...\n" if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'curl test server' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($hstprvkeyf) . " -C 'fetch test server' -N ''") {
         logmsg "Could not generate host key\n";
         exit 1;
     }
     logmsg "generating client keys...\n" if($verbose);
-    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'curl test client' -N ''") {
+    if(system "\"$sshkeygen\" -q -t rsa -f " . pp($cliprvkeyf) . " -C 'fetch test client' -N ''") {
         logmsg "Could not generate client key\n";
         exit 1;
     }
@@ -456,7 +456,7 @@ if((! -e pp($hstprvkeyf)) || (! -s pp($hstprvkeyf)) ||
 
 
 #***************************************************************************
-# Convert paths for curl's tests running on Windows with Cygwin/MSYS OpenSSH
+# Convert paths for fetch's tests running on Windows with Cygwin/MSYS OpenSSH
 #
 my $clipubkeyf_config;
 my $hstprvkeyf_config;
@@ -575,7 +575,7 @@ else {
 logmsg "generating ssh server config file...\n" if($verbose);
 @cfgarr = ();
 push @cfgarr, '# This is a generated file.  Do not edit.';
-push @cfgarr, "# $sshdverstr sshd configuration file for curl testing";
+push @cfgarr, "# $sshdverstr sshd configuration file for fetch testing";
 push @cfgarr, '#';
 
 # AllowUsers and DenyUsers options should use lowercase on Windows
@@ -645,7 +645,7 @@ push @cfgarr, '#';
 
 
 #***************************************************************************
-# Write out initial sshd configuration file for curl's tests
+# Write out initial sshd configuration file for fetch's tests
 #
 $error = dump_array($sshdconfig, @cfgarr);
 if($error) {
@@ -807,7 +807,7 @@ push @cfgarr, '#';
 
 
 #***************************************************************************
-# Write out resulting sshd configuration file for curl's tests
+# Write out resulting sshd configuration file for fetch's tests
 #
 $error = dump_array($sshdconfig, @cfgarr);
 if($error) {
@@ -828,7 +828,7 @@ if(system "\"$sshd\" -t -f $sshdconfig_abs > $sshdlog 2>&1") {
 
 
 #***************************************************************************
-# Generate ssh client host key database file for curl's tests
+# Generate ssh client host key database file for fetch's tests
 #
 if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
     logmsg "generating ssh client known hosts file...\n" if($verbose);
@@ -861,7 +861,7 @@ if((! -e pp($knownhosts)) || (! -s pp($knownhosts))) {
 
 
 #***************************************************************************
-# Convert paths for curl's tests running on Windows using Cygwin OpenSSH
+# Convert paths for fetch's tests running on Windows using Cygwin OpenSSH
 #
 my $identity_config;
 my $knownhosts_config;
@@ -964,7 +964,7 @@ else {
 logmsg "generating ssh client config file...\n" if($verbose);
 @cfgarr = ();
 push @cfgarr, '# This is a generated file.  Do not edit.';
-push @cfgarr, "# $sshverstr ssh client configuration file for curl testing";
+push @cfgarr, "# $sshverstr ssh client configuration file for fetch testing";
 push @cfgarr, '#';
 push @cfgarr, 'Host *';
 push @cfgarr, '#';
@@ -1115,7 +1115,7 @@ push @cfgarr, '#';
 
 
 #***************************************************************************
-# Write out resulting ssh client configuration file for curl's tests
+# Write out resulting ssh client configuration file for fetch's tests
 #
 $error = dump_array($sshconfig, @cfgarr);
 if($error) {
@@ -1128,7 +1128,7 @@ if($error) {
 # Initialize client sftp config with options actually supported.
 #
 logmsg "generating sftp client config file...\n" if($verbose);
-splice @cfgarr, 1, 1, "# $sshverstr sftp client configuration file for curl testing";
+splice @cfgarr, 1, 1, "# $sshverstr sftp client configuration file for fetch testing";
 #
 for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
     if($cfgarr[$i] =~ /^DynamicForward/) {
@@ -1143,7 +1143,7 @@ for(my $i = scalar(@cfgarr) - 1; $i > 0; $i--) {
 
 
 #***************************************************************************
-# Write out resulting sftp client configuration file for curl's tests
+# Write out resulting sftp client configuration file for fetch's tests
 #
 $error = dump_array($sftpconfig, @cfgarr);
 if($error) {

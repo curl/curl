@@ -42,7 +42,7 @@ http
 lib1515
 </tool>
 <name>
-caching of manual libcurl DNS entries after dead connection
+caching of manual libfetch DNS entries after dead connection
 </name>
 <command>
 /path/%TESTNUMBER %HOSTIP %HTTPPORT

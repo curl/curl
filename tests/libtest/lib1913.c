@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -27,24 +27,24 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode ret = CURLE_OK;
-  CURL *hnd;
+  FETCHcode ret = FETCHE_OK;
+  FETCH *hnd;
   start_test_timing();
 
-  curl_global_init(CURL_GLOBAL_ALL);
+  fetch_global_init(FETCH_GLOBAL_ALL);
 
-  hnd = curl_easy_init();
+  hnd = fetch_easy_init();
   if(hnd) {
-    curl_easy_setopt(hnd, CURLOPT_URL, URL);
-    curl_easy_setopt(hnd, CURLOPT_NOBODY, 1L);
+    fetch_easy_setopt(hnd, FETCHOPT_URL, URL);
+    fetch_easy_setopt(hnd, FETCHOPT_NOBODY, 1L);
     if(libtest_arg2)
       /* test1914 sets this extra arg */
-      curl_easy_setopt(hnd, CURLOPT_FILETIME, 1L);
-    ret = curl_easy_perform(hnd);
-    curl_easy_cleanup(hnd);
+      fetch_easy_setopt(hnd, FETCHOPT_FILETIME, 1L);
+    ret = fetch_easy_perform(hnd);
+    fetch_easy_cleanup(hnd);
   }
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return ret;
 }

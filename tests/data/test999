@@ -66,13 +66,13 @@ QUIT
 GET http://somwhere.example/%TESTNUMBER HTTP/1.1
 Host: somwhere.example
 Authorization: Basic YWxiZXJ0bzplaW5zdGVpbg==
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://somewhere.else.example/%TESTNUMBER HTTP/1.1
 Host: somewhere.else.example
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

@@ -49,7 +49,7 @@ HTTP-IPv6 GET with ip6-localhost --interface
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOST6IP:%HTTP6PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

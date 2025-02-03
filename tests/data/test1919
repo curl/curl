@@ -23,7 +23,7 @@ http
 
 # This created a memory leak in 7.83.1 and earlier
 <name>
-set CURLOPT_XOAUTH2_BEARER and do connection reuse
+set FETCHOPT_XOAUTH2_BEARER and do connection reuse
 </name>
 <tool>
 lib%TESTNUMBER

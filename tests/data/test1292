@@ -40,7 +40,7 @@ Replaced internal headers with a blank one
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host:
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept:
 
 </protocol>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -33,10 +33,10 @@
  * Two FTP uploads, the second with no content sent.
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
   FILE *hd_src;
   int hd;
   struct_stat file_info;
@@ -51,7 +51,7 @@ CURLcode test(char *URL)
     fprintf(stderr, "fopen failed with error: %d %s\n",
             errno, strerror(errno));
     fprintf(stderr, "Error opening file: %s\n", libtest_arg2);
-    return (CURLcode)-2; /* if this happens things are major weird */
+    return (FETCHcode)-2; /* if this happens things are major weird */
   }
 
   /* get the file size of the local file */
@@ -71,49 +71,49 @@ CURLcode test(char *URL)
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
-  /* get a curl handle */
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  /* get a fetch handle */
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     fclose(hd_src);
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* enable uploading */
-  test_setopt(curl, CURLOPT_UPLOAD, 1L);
+  test_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
   /* enable verbose */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* specify target */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* now specify which file to upload */
-  test_setopt(curl, CURLOPT_READDATA, hd_src);
+  test_setopt(fetch, FETCHOPT_READDATA, hd_src);
 
   /* Now run off and do what you've been told! */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
   if(res)
     goto test_cleanup;
 
   /* and now upload the exact same again, but without rewinding so it already
      is at end of file */
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
   /* close the local file */
   fclose(hd_src);
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

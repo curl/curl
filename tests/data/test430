@@ -1,5 +1,5 @@
 <testcase>
-# Derived from on https://github.com/curl/curl/issues/5120
+# Derived from on https://github.com/fetch/fetch/issues/5120
 <info>
 <keywords>
 --next
@@ -73,7 +73,7 @@ Three -K uses with --next and --data in each
 <protocol nonewline="yes">
 POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 a: a
 Content-Length: 1
@@ -81,7 +81,7 @@ Content-Type: application/x-www-form-urlencoded
 
 aPOST /%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 b: b
 Content-Length: 1
@@ -89,7 +89,7 @@ Content-Type: application/x-www-form-urlencoded
 
 bPOST /%TESTNUMBER0003 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 c: c
 Content-Length: 1

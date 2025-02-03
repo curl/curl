@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -31,16 +31,16 @@
  * Get a single URL without select().
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *handle = NULL;
-  CURLcode res = CURLE_OK;
-  CURLU *urlp = NULL;
+  FETCH *handle = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCHU *urlp = NULL;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
   easy_init(handle);
 
-  urlp = curl_url();
+  urlp = fetch_url();
 
   if(!urlp) {
     fprintf(stderr, "problem init URL api.");
@@ -48,30 +48,30 @@ CURLcode test(char *URL)
   }
 
   /* this doesn't set the PATH part */
-  if(curl_url_set(urlp, CURLUPART_HOST, "www.example.com", 0) ||
-     curl_url_set(urlp, CURLUPART_SCHEME, "http", 0) ||
-     curl_url_set(urlp, CURLUPART_PORT, "80", 0)) {
-    fprintf(stderr, "problem setting CURLUPART");
+  if(fetch_url_set(urlp, FETCHUPART_HOST, "www.example.com", 0) ||
+     fetch_url_set(urlp, FETCHUPART_SCHEME, "http", 0) ||
+     fetch_url_set(urlp, FETCHUPART_PORT, "80", 0)) {
+    fprintf(stderr, "problem setting FETCHUPART");
     goto test_cleanup;
   }
 
-  easy_setopt(handle, CURLOPT_CURLU, urlp);
-  easy_setopt(handle, CURLOPT_VERBOSE, 1L);
-  easy_setopt(handle, CURLOPT_PROXY, URL);
+  easy_setopt(handle, FETCHOPT_FETCHU, urlp);
+  easy_setopt(handle, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(handle, FETCHOPT_PROXY, URL);
 
-  res = curl_easy_perform(handle);
+  res = fetch_easy_perform(handle);
 
   if(res) {
-    fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-            __FILE__, __LINE__, res, curl_easy_strerror(res));
+    fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
+            __FILE__, __LINE__, res, fetch_easy_strerror(res));
     goto test_cleanup;
   }
 
 test_cleanup:
 
-  curl_url_cleanup(urlp);
-  curl_easy_cleanup(handle);
-  curl_global_cleanup();
+  fetch_url_cleanup(urlp);
+  fetch_easy_cleanup(handle);
+  fetch_global_cleanup();
 
   return res;
 }

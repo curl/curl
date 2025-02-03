@@ -85,7 +85,7 @@ test
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Content-Range: bytes 2-4/5
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 0
@@ -94,7 +94,7 @@ GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="fddc3bc7b753b73ab0848fd83cb20cbbca971258eb8d20c941dd5e0b010d66be", realm="testrealm", nonce="1053604144", uri="/%TESTNUMBER", response="22d200df1fd02a9d3a7269ef5bbb5bf8f16f184a74907df9b64a3755489c0b42", algorithm=SHA-256, userhash=true
 Content-Range: bytes 2-4/5
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 3

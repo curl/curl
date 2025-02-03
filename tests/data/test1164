@@ -39,7 +39,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%{size_download}\n' --http0.9
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

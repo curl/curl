@@ -29,13 +29,13 @@ http
 <features>
 http
 </features>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib%TESTNUMBER
 </tool>
 
 <name>
-curl_multi_wait
+fetch_multi_wait
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/%TESTNUMBER

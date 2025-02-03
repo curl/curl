@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,17 +18,17 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "server_setup.h"
 
 #include "getpart.h"
 
-#include "curlx.h" /* from the private lib dir */
+#include "fetchx.h" /* from the private lib dir */
 
-#include "curl_base64.h"
-#include "curl_memory.h"
+#include "fetch_base64.h"
+#include "fetch_memory.h"
 
 /* include memdebug.h last */
 #include "memdebug.h"
@@ -48,13 +48,13 @@
 #  pragma warning(disable:4232) /* MSVC extension, dllimport identity */
 #endif
 
-curl_malloc_callback Curl_cmalloc = (curl_malloc_callback)malloc;
-curl_free_callback Curl_cfree = (curl_free_callback)free;
-curl_realloc_callback Curl_crealloc = (curl_realloc_callback)realloc;
-curl_strdup_callback Curl_cstrdup = (curl_strdup_callback)strdup;
-curl_calloc_callback Curl_ccalloc = (curl_calloc_callback)calloc;
+fetch_malloc_callback Curl_cmalloc = (fetch_malloc_callback)malloc;
+fetch_free_callback Curl_cfree = (fetch_free_callback)free;
+fetch_realloc_callback Curl_crealloc = (fetch_realloc_callback)realloc;
+fetch_strdup_callback Curl_cstrdup = (fetch_strdup_callback)strdup;
+fetch_calloc_callback Curl_ccalloc = (fetch_calloc_callback)calloc;
 #if defined(_WIN32) && defined(UNICODE)
-curl_wcsdup_callback Curl_cwcsdup = (curl_wcsdup_callback)_wcsdup;
+fetch_wcsdup_callback Curl_cwcsdup = (fetch_wcsdup_callback)_wcsdup;
 #endif
 
 #if defined(_MSC_VER) && defined(_DLL)
@@ -121,7 +121,7 @@ static int readline(char **buffer, size_t *bufsize, size_t *length,
   }
 
   for(;;) {
-    int bytestoread = curlx_uztosi(*bufsize - offset);
+    int bytestoread = fetchx_uztosi(*bufsize - offset);
 
     if(!fgets(*buffer + offset, bytestoread, stream))
       return (offset != 0) ? GPE_OK : GPE_END_OF_FILE;
@@ -214,7 +214,7 @@ static int appenddata(char  **dst_buf,   /* dest buffer */
 static int decodedata(char  **buf,   /* dest buffer */
                       size_t *len)   /* dest buffer data length */
 {
-  CURLcode error = CURLE_OK;
+  FETCHcode error = FETCHE_OK;
   unsigned char *buf64 = NULL;
   size_t src_len = 0;
 

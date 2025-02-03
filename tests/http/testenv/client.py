@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -50,7 +50,7 @@ class LocalClient:
         self.env = env
         self._run_env = run_env
         self._timeout = timeout if timeout else env.test_timeout
-        self._curl = os.environ['CURL'] if 'CURL' in os.environ else env.curl
+        self._fetch = os.environ['FETCH'] if 'FETCH' in os.environ else env.fetch
         self._run_dir = run_dir if run_dir else os.path.join(env.gen_dir, name)
         self._stdoutfile = f'{self._run_dir}/stdout'
         self._stderrfile = f'{self._run_dir}/stderr'
@@ -93,7 +93,7 @@ class LocalClient:
         run_env = None
         if self._run_env:
             run_env = self._run_env.copy()
-            for key in ['CURL_DEBUG']:
+            for key in ['FETCH_DEBUG']:
                 if key in os.environ and key not in run_env:
                     run_env[key] = os.environ[key]
         try:

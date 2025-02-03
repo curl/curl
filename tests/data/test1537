@@ -20,7 +20,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-libcurl URL escape/unescape tests
+libfetch URL escape/unescape tests
 </name>
 <command>
 nothing

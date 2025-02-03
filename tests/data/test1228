@@ -42,13 +42,13 @@ proxy
 <protocol>
 GET http://example.fake/hoge/%TESTNUMBER HTTP/1.1
 Host: example.fake
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://example.fake/hogege/ HTTP/1.1
 Host: example.fake
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Cookie: path1=root

@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -29,17 +29,17 @@
 #  What is This Script?
 ###########################
 
-# testcurl.pl is the master script to use for automatic testing of curl
+# testfetch.pl is the master script to use for automatic testing of fetch
 # directly off its source repository.
 # This is written for the purpose of being run from a crontab job or similar
 # at a regular interval. The output is suitable to be mailed to
-# curl-autocompile@haxx.se to be dealt with automatically (make sure the
+# fetch-autocompile@haxx.se to be dealt with automatically (make sure the
 # subject includes the word "autobuild" as the mail gets silently discarded
 # otherwise).  The most current build status (with a reasonable backlog) will
-# be published on the curl site, at https://curl.se/auto/
+# be published on the fetch site, at https://fetch.se/auto/
 
 # USAGE:
-# testcurl.pl [options] [curl-daily-name] > output
+# testfetch.pl [options] [fetch-daily-name] > output
 
 # Options:
 #
@@ -59,7 +59,7 @@
 # --setup=[file name]      File name to read setup from (deprecated)
 # --target=[your os]       Specify your target environment.
 #
-# if [curl-daily-name] is omitted, a 'curl' git directory is assumed.
+# if [fetch-daily-name] is omitted, a 'fetch' git directory is assumed.
 #
 
 use strict;
@@ -70,7 +70,7 @@ use File::Spec;
 # Turn on warnings (equivalent to -w, which can't be used with /usr/bin/env)
 #BEGIN { $^W = 1; }
 
-use vars qw($version $fixed $infixed $CURLDIR $git $pwd $build $buildlog
+use vars qw($version $fixed $infixed $FETCHDIR $git $pwd $build $buildlog
             $buildlogname $configurebuild $targetos $confheader $binext
             $libext);
 
@@ -82,11 +82,11 @@ use vars qw($name $email $desc $confopts $runtestopts $setupfile $mktarball
 $version='2024-11-28';
 $fixed=0;
 
-# Determine if we're running from git or a canned copy of curl,
+# Determine if we're running from git or a canned copy of fetch,
 # or if we got a specific target option or setup file option.
-$CURLDIR="curl";
+$FETCHDIR="fetch";
 if (-f ".git/config") {
-  $CURLDIR = "./";
+  $FETCHDIR = "./";
 }
 
 $git=1;
@@ -141,15 +141,15 @@ while ($ARGV[0]) {
     $runtestopts = (split(/=/, shift @ARGV, 2))[1];
   }
   else {
-    $CURLDIR=shift @ARGV;
+    $FETCHDIR=shift @ARGV;
     $git=0; # a given dir, assume not using git
   }
 }
 
 # Do the platform-specific stuff here
-$confheader = 'curl_config.h';
+$confheader = 'fetch_config.h';
 $binext = '';
-$libext = '.la'; # .la since both libcurl and libcares are made with libtool
+$libext = '.la'; # .la since both libfetch and libcares are made with libtool
 if ($^O eq 'MSWin32' || $targetos) {
   if (!$targetos) {
     # If no target defined on Windows, let's assume vc
@@ -173,7 +173,7 @@ if (($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys') &&
 
   # Set these things only when building ON Windows and for Win32 platform.
   # FOR Windows since we might be cross-compiling on another system. Non-
-  # Windows builds still default to configure-style builds with curl_config.h.
+  # Windows builds still default to configure-style builds with fetch_config.h.
 
   $configurebuild = 0;
   $confheader = 'config-win32.h';
@@ -211,14 +211,14 @@ sub grepfile($$) {
 sub logit($) {
     my $text=$_[0];
     if ($text) {
-      print "testcurl: $text\n";
+      print "testfetch: $text\n";
     }
 }
 
 sub logit_spaced($) {
     my $text=$_[0];
     if ($text) {
-      print "\ntestcurl: $text\n\n";
+      print "\ntestfetch: $text\n\n";
     }
 }
 
@@ -243,11 +243,11 @@ sub mydie($){
 
 sub get_host_triplet {
   my $triplet;
-  my $configfile = "$pwd/$build/lib/curl_config.h";
+  my $configfile = "$pwd/$build/lib/fetch_config.h";
 
   if(-f $configfile && -s $configfile && open(my $libconfigh, "<", "$configfile")) {
     while(<$libconfigh>) {
-      if($_ =~ /^\#define\s+CURL_OS\s+"*([^"][^"]*)"*\s*/) {
+      if($_ =~ /^\#define\s+FETCH_OS\s+"*([^"][^"]*)"*\s*/) {
         $triplet = $1;
         last;
       }
@@ -329,7 +329,7 @@ if (($confopts !~ /--enable-debug/) &&
 my $str1066os = 'o' x 1066;
 
 # Set timestamp to the UTC this script is running. Its value might
-# be changed later in the script to the value present in curlver.h
+# be changed later in the script to the value present in fetchver.h
 $timestamp = scalar(gmtime)." UTC";
 
 logit "STARTING HERE"; # first line logged, for scripts to trigger on
@@ -366,25 +366,25 @@ $pwd = getcwd();
 
 my $have_embedded_ares = 0;
 
-if (-d $CURLDIR) {
-  if ($git && -d "$CURLDIR/.git") {
-    logit "$CURLDIR is verified to be a fine git source dir";
+if (-d $FETCHDIR) {
+  if ($git && -d "$FETCHDIR/.git") {
+    logit "$FETCHDIR is verified to be a fine git source dir";
     # remove the generated sources to force them to be re-generated each
     # time we run this test
-    unlink "$CURLDIR/src/tool_hugehelp.c";
-    # find out if curl source dir has an in-tree c-ares repo
-    $have_embedded_ares = 1 if (-f "$CURLDIR/ares/GIT-INFO");
-  } elsif (!$git && -f "$CURLDIR/tests/testcurl.pl") {
-    logit "$CURLDIR is verified to be a fine daily source dir";
-    # find out if curl source dir has an in-tree c-ares extracted tarball
-    $have_embedded_ares = 1 if (-f "$CURLDIR/ares/ares_build.h");
+    unlink "$FETCHDIR/src/tool_hugehelp.c";
+    # find out if fetch source dir has an in-tree c-ares repo
+    $have_embedded_ares = 1 if (-f "$FETCHDIR/ares/GIT-INFO");
+  } elsif (!$git && -f "$FETCHDIR/tests/testfetch.pl") {
+    logit "$FETCHDIR is verified to be a fine daily source dir";
+    # find out if fetch source dir has an in-tree c-ares extracted tarball
+    $have_embedded_ares = 1 if (-f "$FETCHDIR/ares/ares_build.h");
   } else {
-    mydie "$CURLDIR is not a daily source dir or checked out from git!"
+    mydie "$FETCHDIR is not a daily source dir or checked out from git!"
   }
 }
 
 # make the path absolute so we can use it everywhere
-$CURLDIR = File::Spec->rel2abs("$CURLDIR");
+$FETCHDIR = File::Spec->rel2abs("$FETCHDIR");
 
 $build="build-$$";
 $buildlogname="buildlog-$$";
@@ -395,7 +395,7 @@ rmtree "build-*";
 rmtree "buildlog-*";
 
 # this is to remove old build logs that ended up in the wrong dir
-foreach (glob("$CURLDIR/buildlog-*")) { unlink $_; }
+foreach (glob("$FETCHDIR/buildlog-*")) { unlink $_; }
 
 # create a dir to build in
 mkdir $build, 0777;
@@ -406,8 +406,8 @@ if (-d $build) {
   mydie "failed to create dir $build";
 }
 
-# get in the curl source tree root
-chdir $CURLDIR;
+# get in the fetch source tree root
+chdir $FETCHDIR;
 
 # Do the git thing, or not...
 if ($git) {
@@ -418,10 +418,10 @@ if ($git) {
   if($nogitpull) {
     logit "skipping git pull (--nogitpull)";
   } else {
-    logit "run git pull in curl";
+    logit "run git pull in fetch";
     system("git pull 2>&1");
     $gitstat += $?;
-    logit "failed to update from curl git ($?), continue anyway" if ($?);
+    logit "failed to update from fetch git ($?), continue anyway" if ($?);
 
     # Set timestamp to the UTC the git update took place.
     $timestamp = scalar(gmtime)." UTC" if (!$gitstat);
@@ -429,7 +429,7 @@ if ($git) {
 
   # get the last 5 commits for show (even if no pull was made)
   @commits=`git log --pretty=oneline --abbrev-commit -5`;
-  logit "The most recent curl git commits:";
+  logit "The most recent fetch git commits:";
   for (@commits) {
     chomp ($_);
     logit "  $_";
@@ -458,7 +458,7 @@ if ($git) {
       logit "  $_";
     }
 
-    chdir "$CURLDIR";
+    chdir "$FETCHDIR";
   }
 
   if($nobuildconf) {
@@ -492,18 +492,18 @@ if ($git) {
     if (open (my $f, '<', "docs/tarball-commit.txt")) {
       my $commit = <$f>;
       chomp $commit;
-      logit "The most recent curl git commits:";
+      logit "The most recent fetch git commits:";
       logit "  $commit";
       close($f);
     }
 }
 
-# Set timestamp to the one in curlver.h if this isn't a git test build.
-if ((-f "include/curl/curlver.h") &&
-    (open(my $f, "<", "include/curl/curlver.h"))) {
+# Set timestamp to the one in fetchver.h if this isn't a git test build.
+if ((-f "include/fetch/fetchver.h") &&
+    (open(my $f, "<", "include/fetch/fetchver.h"))) {
   while (<$f>) {
     chomp;
-    if ($_ =~ /^\#define\s+LIBCURL_TIMESTAMP\s+\"(.+)\".*$/) {
+    if ($_ =~ /^\#define\s+LIBFETCH_TIMESTAMP\s+\"(.+)\".*$/) {
       my $stampstring = $1;
       if ($stampstring !~ /DEV/) {
           $stampstring =~ s/\s+UTC//;
@@ -557,7 +557,7 @@ chdir "$pwd/$build";
 
 if ($configurebuild) {
   # run configure script
-  print `$CURLDIR/configure $confopts 2>&1`;
+  print `$FETCHDIR/configure $confopts 2>&1`;
 
   if (-f "lib/Makefile") {
     logit "configure seems to have finished fine";
@@ -567,13 +567,13 @@ if ($configurebuild) {
 } else {
   logit "copying files to build dir ...";
   if ($^O eq 'MSWin32') {
-    system("xcopy /s /q \"$CURLDIR\" .");
+    system("xcopy /s /q \"$FETCHDIR\" .");
   }
 }
 
-if(-f "./libcurl.pc") {
-  logit_spaced "display libcurl.pc";
-  if(open(my $f, "<", "libcurl.pc")) {
+if(-f "./libfetch.pc") {
+  logit_spaced "display libfetch.pc";
+  if(open(my $f, "<", "libfetch.pc")) {
     while(<$f>) {
       my $ll = $_;
       print $ll if(($ll !~ /^ *#/) && ($ll !~ /^ *$/));
@@ -619,7 +619,7 @@ if (($have_embedded_ares) &&
     mydie "no ares_build.h created/found";
   }
 
-  $confheader =~ s/curl/ares/;
+  $confheader =~ s/fetch/ares/;
   logit_spaced "display ares/$confheader";
   if(open($f, "<", "ares/$confheader")) {
       while (<$f>) {
@@ -652,7 +652,7 @@ if (($have_embedded_ares) &&
     mydie "ares build failed (libcares$libext)";
   }
 
-  # cd back to the curl build dir
+  # cd back to the fetch build dir
   chdir "$pwd/$build";
 }
 
@@ -665,23 +665,23 @@ while (<$f>) {
 }
 close($f);
 
-if (-f "lib/libcurl$libext") {
-  logit "libcurl was created fine (libcurl$libext)";
+if (-f "lib/libfetch$libext") {
+  logit "libfetch was created fine (libfetch$libext)";
 }
 else {
-  mydie "libcurl was not created (libcurl$libext)";
+  mydie "libfetch was not created (libfetch$libext)";
 }
 
-if (-f "src/curl$binext") {
-  logit "curl was created fine (curl$binext)";
+if (-f "src/fetch$binext") {
+  logit "fetch was created fine (fetch$binext)";
 }
 else {
-  mydie "curl was not created (curl$binext)";
+  mydie "fetch was not created (fetch$binext)";
 }
 
 if (!$crosscompile || (($extvercmd ne '') && (-x $extvercmd))) {
-  logit "display curl${binext} --version output";
-  my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/curl${binext} --version|";
+  logit "display fetch${binext} --version output";
+  my $cmd = ($extvercmd ne '' ? $extvercmd.' ' : '')."./src/fetch${binext} --version|";
   open($f, "<", $cmd);
   while(<$f>) {
     # strip CR from output on non-Windows platforms (WINE on Linux)

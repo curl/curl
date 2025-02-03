@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,39 +18,39 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *eh = NULL;
-  CURLcode res = CURLE_OK;
-  struct curl_httppost *lastptr = NULL;
-  struct curl_httppost *m_formpost = NULL;
+  FETCH *eh = NULL;
+  FETCHcode res = FETCHE_OK;
+  struct fetch_httppost *lastptr = NULL;
+  struct fetch_httppost *m_formpost = NULL;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(eh);
 
-  easy_setopt(eh, CURLOPT_URL, URL);
-  CURL_IGNORE_DEPRECATION(
-    curl_formadd(&m_formpost, &lastptr, CURLFORM_COPYNAME, "file",
-                 CURLFORM_FILE, "missing-file", CURLFORM_END);
-    curl_easy_setopt(eh, CURLOPT_HTTPPOST, m_formpost);
+  easy_setopt(eh, FETCHOPT_URL, URL);
+  FETCH_IGNORE_DEPRECATION(
+    fetch_formadd(&m_formpost, &lastptr, FETCHFORM_COPYNAME, "file",
+                 FETCHFORM_FILE, "missing-file", FETCHFORM_END);
+    fetch_easy_setopt(eh, FETCHOPT_HTTPPOST, m_formpost);
   )
 
-  (void)curl_easy_perform(eh);
-  (void)curl_easy_perform(eh);
+  (void)fetch_easy_perform(eh);
+  (void)fetch_easy_perform(eh);
 
 test_cleanup:
 
-  CURL_IGNORE_DEPRECATION(
-    curl_formfree(m_formpost);
+  FETCH_IGNORE_DEPRECATION(
+    fetch_formfree(m_formpost);
   )
-  curl_easy_cleanup(eh);
-  curl_global_cleanup();
+  fetch_easy_cleanup(eh);
+  fetch_global_cleanup();
 
   return res;
 }

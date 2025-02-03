@@ -48,12 +48,12 @@ local-http
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: foobar=name
 

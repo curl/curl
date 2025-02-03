@@ -30,7 +30,7 @@ SSL
 https Server-localhost-sv.pem
 </server>
 <name>
-HTTPS GET using CURLOPT_CAINFO_BLOB
+HTTPS GET using FETCHOPT_CAINFO_BLOB
 </name>
 <tool>
 lib%TESTNUMBER
@@ -51,7 +51,7 @@ https://localhost:%HTTPSPORT/%TESTNUMBER %SRCDIR/certs/EdelCurlRoot-ca.crt
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
-User-Agent: CURLOPT_CAINFO_BLOB
+User-Agent: FETCHOPT_CAINFO_BLOB
 Accept: */*
 
 </protocol>

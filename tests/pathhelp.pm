@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,11 +20,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
-# This Perl package helps with path transforming when running curl tests on
+# This Perl package helps with path transforming when running fetch tests on
 # native Windows and MSYS/Cygwin.
 # Following input formats are supported (via built-in Perl functions):
 #  (1) /some/path   - absolute path in POSIX-style
@@ -171,11 +171,11 @@ sub build_sys_abs_path {
 #
 sub exe_ext {
     my ($component, @arr) = @_;
-    if ($ENV{'CURL_TEST_EXE_EXT'}) {
-        return $ENV{'CURL_TEST_EXE_EXT'};
+    if ($ENV{'FETCH_TEST_EXE_EXT'}) {
+        return $ENV{'FETCH_TEST_EXE_EXT'};
     }
-    if ($ENV{'CURL_TEST_EXE_EXT_'.$component}) {
-        return $ENV{'CURL_TEST_EXE_EXT_'.$component};
+    if ($ENV{'FETCH_TEST_EXE_EXT_'.$component}) {
+        return $ENV{'FETCH_TEST_EXE_EXT_'.$component};
     }
     if ($^O eq 'MSWin32' || $^O eq 'cygwin' || $^O eq 'msys' ||
         $^O eq 'dos' || $^O eq 'os2') {

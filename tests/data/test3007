@@ -33,7 +33,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt-allowfails --mail-rcpt invalid.
 #
 # Verify data after the test has been "shot"
 <verify>
-# 55 - CURLE_SEND_ERROR
+# 55 - FETCHE_SEND_ERROR
 <errorcode>
 55
 </errorcode>

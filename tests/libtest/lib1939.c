@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://fetch.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -26,47 +26,47 @@
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLM *multi;
-  CURL *easy;
+  FETCHM *multi;
+  FETCH *easy;
   int running_handles;
 
-  curl_global_init(CURL_GLOBAL_DEFAULT);
+  fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
-  multi = curl_multi_init();
+  multi = fetch_multi_init();
   if(multi) {
-    easy = curl_easy_init();
+    easy = fetch_easy_init();
     if(easy) {
-      CURLcode c;
-      CURLMcode m;
+      FETCHcode c;
+      FETCHMcode m;
 
       /* Crash only happens when using HTTPS */
-      c = curl_easy_setopt(easy, CURLOPT_URL, URL);
+      c = fetch_easy_setopt(easy, FETCHOPT_URL, URL);
       if(!c)
         /* Any old HTTP tunneling proxy will do here */
-        c = curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
+        c = fetch_easy_setopt(easy, FETCHOPT_PROXY, libtest_arg2);
 
       if(!c) {
 
         /* We're going to drive the transfer using multi interface here,
            because we want to stop during the middle. */
-        m = curl_multi_add_handle(multi, easy);
+        m = fetch_multi_add_handle(multi, easy);
 
         if(!m)
           /* Run the multi handle once, just enough to start establishing an
              HTTPS connection. */
-          m = curl_multi_perform(multi, &running_handles);
+          m = fetch_multi_perform(multi, &running_handles);
 
         if(m)
-          fprintf(stderr, "curl_multi_perform failed\n");
+          fprintf(stderr, "fetch_multi_perform failed\n");
       }
       /* Close the easy handle *before* the multi handle. Doing it the other
          way around avoids the issue. */
-      curl_easy_cleanup(easy);
+      fetch_easy_cleanup(easy);
     }
-    curl_multi_cleanup(multi); /* double-free happens here */
+    fetch_multi_cleanup(multi); /* double-free happens here */
   }
-  curl_global_cleanup();
-  return CURLE_OK;
+  fetch_global_cleanup();
+  return FETCHE_OK;
 }

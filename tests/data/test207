@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLE_PARTIAL_FILE
+FETCHE_PARTIAL_FILE
 FAILURE
 chunked Transfer-Encoding
 </keywords>
@@ -51,13 +51,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
 
-# curl: (18) transfer closed with outstanding read data remaining
-# 18 == CURLE_PARTIAL_FILE
+# fetch: (18) transfer closed with outstanding read data remaining
+# 18 == FETCHE_PARTIAL_FILE
 <errorcode>
 18
 </errorcode>

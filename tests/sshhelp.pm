@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
@@ -84,20 +84,20 @@ our $sftpsrvexe      = 'sftp-server' .exe_ext('SSH'); # base name and ext of sft
 our $sftpexe         = 'sftp'        .exe_ext('SSH'); # base name and ext of sftp client
 our $sshkeygenexe    = 'ssh-keygen'  .exe_ext('SSH'); # base name and ext of ssh-keygen
 our $httptlssrvexe   = 'gnutls-serv' .exe_ext('SSH'); # base name and ext of gnutls-serv
-our $sshdconfig      = 'curl_sshd_config';       # ssh daemon config file
-our $sshconfig       = 'curl_ssh_config';        # ssh client config file
-our $sftpconfig      = 'curl_sftp_config';       # sftp client config file
+our $sshdconfig      = 'fetch_sshd_config';       # ssh daemon config file
+our $sshconfig       = 'fetch_ssh_config';        # ssh client config file
+our $sftpconfig      = 'fetch_sftp_config';       # sftp client config file
 our $sshdlog         = undef;                    # ssh daemon log file
 our $sshlog          = undef;                    # ssh client log file
 our $sftplog         = undef;                    # sftp client log file
-our $sftpcmds        = 'curl_sftp_cmds';         # sftp client commands batch file
-our $knownhosts      = 'curl_client_knownhosts'; # ssh knownhosts file
-our $hstprvkeyf      = 'curl_host_rsa_key';      # host private key file
-our $hstpubkeyf      = 'curl_host_rsa_key.pub';  # host public key file
-our $hstpubmd5f      = 'curl_host_rsa_key.pub_md5';  # md5 hash of host public key
-our $hstpubsha256f   = 'curl_host_rsa_key.pub_sha256';  # sha256 hash of host public key
-our $cliprvkeyf      = 'curl_client_key';        # client private key file
-our $clipubkeyf      = 'curl_client_key.pub';    # client public key file
+our $sftpcmds        = 'fetch_sftp_cmds';         # sftp client commands batch file
+our $knownhosts      = 'fetch_client_knownhosts'; # ssh knownhosts file
+our $hstprvkeyf      = 'fetch_host_rsa_key';      # host private key file
+our $hstpubkeyf      = 'fetch_host_rsa_key.pub';  # host public key file
+our $hstpubmd5f      = 'fetch_host_rsa_key.pub_md5';  # md5 hash of host public key
+our $hstpubsha256f   = 'fetch_host_rsa_key.pub_sha256';  # sha256 hash of host public key
+our $cliprvkeyf      = 'fetch_client_key';        # client private key file
+our $clipubkeyf      = 'fetch_client_key.pub';    # client public key file
 
 
 #***************************************************************************

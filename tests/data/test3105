@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_multi_remove_handle
+fetch_multi_remove_handle
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 lib%TESTNUMBER
 </tool>
 <name>
-curl_multi_remove_handle twice
+fetch_multi_remove_handle twice
 </name>
 <command>
 -

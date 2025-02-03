@@ -54,7 +54,7 @@ s/^PROXY TCP4 %CLIENTIP %HOSTIP (\d*) %HTTPPORT/proxy-line/
 proxy-line
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Testno: %TESTNUMBER
 

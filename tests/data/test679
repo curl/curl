@@ -48,7 +48,7 @@ machine %HOSTIP login user1 password "with spaces and \"\n\r\t\a"
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjE6d2l0aCBzcGFjZXMgYW5kICIKDQlh
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

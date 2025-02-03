@@ -52,11 +52,11 @@ HTTPS with attempted redirect to denied HTTP
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-# 1 - Protocol http not supported or disabled in libcurl
+# 1 - Protocol http not supported or disabled in libfetch
 <errorcode>
 1
 </errorcode>

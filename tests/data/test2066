@@ -68,13 +68,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u testuser:test2pass --digest
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="75af8a3500f771e58a52093a25e7905d6e428a511285c12ea1420c73078dfd61", realm="testrealm", nonce="2053604145", uri="/%TESTNUMBER", response="374a35326cc09e7d1ec3165aee9de01cae46daac33d8999aa1f483fa7882b86c", algorithm=SHA-256, userhash=true
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

@@ -41,7 +41,7 @@ http://%HOSTIP:%HTTPPORT/we/want/%TESTNUMBER -b none -D %LOGDIR/heads%TESTNUMBER
 <protocol>
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

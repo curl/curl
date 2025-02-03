@@ -46,7 +46,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -w '%output{%LOGDIR/output}%{http_code}\n'
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

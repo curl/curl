@@ -45,7 +45,7 @@ HTTPS GET to localhost, last subject alt name matches, CN does not match
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: localhost:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

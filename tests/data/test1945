@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_header
+fetch_easy_header
 CONNECT
 </keywords>
 </info>
@@ -41,7 +41,7 @@ http-proxy
 </server>
 
 <name>
-curl_easy_nextheader with server + CONNECT
+fetch_easy_nextheader with server + CONNECT
 </name>
 <tool>
 lib%TESTNUMBER

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -35,7 +35,7 @@ from typing import Optional
 from datetime import datetime, timedelta
 
 from .env import Env
-from .curl import CurlClient
+from .fetch import CurlClient
 
 
 log = logging.getLogger(__name__)
@@ -131,19 +131,19 @@ class Nghttpx:
         return False
 
     def wait_dead(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             if self._https_port > 0:
                 check_url = f'https://{self.env.domain1}:{self._https_port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
+                r = fetch.http_get(url=check_url, extra_args=[
+                    '--trace', 'fetch.trace', '--trace-time',
                     '--connect-timeout', '1'
                 ])
             else:
                 check_url = f'https://{self.env.domain1}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
+                r = fetch.http_get(url=check_url, extra_args=[
+                    '--trace', 'fetch.trace', '--trace-time',
                     '--http3-only', '--connect-timeout', '1'
                 ])
             if r.exit_code != 0:
@@ -154,19 +154,19 @@ class Nghttpx:
         return False
 
     def wait_live(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             if self._https_port > 0:
                 check_url = f'https://{self.env.domain1}:{self._https_port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--trace', 'curl.trace', '--trace-time',
+                r = fetch.http_get(url=check_url, extra_args=[
+                    '--trace', 'fetch.trace', '--trace-time',
                     '--connect-timeout', '1'
                 ])
             else:
                 check_url = f'https://{self.env.domain1}:{self._port}/'
-                r = curl.http_get(url=check_url, extra_args=[
-                    '--http3-only', '--trace', 'curl.trace', '--trace-time',
+                r = fetch.http_get(url=check_url, extra_args=[
+                    '--http3-only', '--trace', 'fetch.trace', '--trace-time',
                     '--connect-timeout', '1'
                 ])
             if r.exit_code == 0:
@@ -263,11 +263,11 @@ class NghttpxFwd(Nghttpx):
         return not wait_live or self.wait_live(timeout=timedelta(seconds=5))
 
     def wait_dead(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             check_url = f'https://{self.env.proxy_domain}:{self.env.h2proxys_port}/'
-            r = curl.http_get(url=check_url)
+            r = fetch.http_get(url=check_url)
             if r.exit_code != 0:
                 return True
             log.debug(f'waiting for nghttpx-fwd to stop responding: {r}')
@@ -276,12 +276,12 @@ class NghttpxFwd(Nghttpx):
         return False
 
     def wait_live(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
             check_url = f'https://{self.env.proxy_domain}:{self.env.h2proxys_port}/'
-            r = curl.http_get(url=check_url, extra_args=[
-                '--trace', 'curl.trace', '--trace-time'
+            r = fetch.http_get(url=check_url, extra_args=[
+                '--trace', 'fetch.trace', '--trace-time'
             ])
             if r.exit_code == 0:
                 return True

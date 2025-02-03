@@ -44,7 +44,7 @@ User-Agent: test567
 Test-Number: 567
 
 </protocol>
-# 85 == CURLE_RTSP_CSEQ_ERROR
+# 85 == FETCHE_RTSP_CSEQ_ERROR
 <errorcode>
 85
 </errorcode>

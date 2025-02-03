@@ -16,7 +16,7 @@ HTTP GET
 #
 # Client-side
 <client>
-# SSL with libraries supporting CURLOPT_CERTINFO
+# SSL with libraries supporting FETCHOPT_CERTINFO
 <features>
 SSL
 !bearssl

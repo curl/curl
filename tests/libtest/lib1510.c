@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -31,14 +31,14 @@
 
 #define NUM_URLS 4
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch = NULL;
   int i;
   char target_url[256];
   char dnsentry[256];
-  struct curl_slist *slist = NULL, *slist2;
+  struct fetch_slist *slist = NULL, *slist2;
   char *port = libtest_arg3;
   char *address = libtest_arg2;
 
@@ -49,9 +49,9 @@ CURLcode test(char *URL)
     msnprintf(dnsentry, sizeof(dnsentry), "server%d.example.com:%s:%s", i + 1,
               port, address);
     printf("%s\n", dnsentry);
-    slist2 = curl_slist_append(slist, dnsentry);
+    slist2 = fetch_slist_append(slist, dnsentry);
     if(!slist2) {
-      fprintf(stderr, "curl_slist_append() failed\n");
+      fprintf(stderr, "fetch_slist_append() failed\n");
       goto test_cleanup;
     }
     slist = slist2;
@@ -59,19 +59,19 @@ CURLcode test(char *URL)
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   /* get an easy handle */
-  easy_init(curl);
+  easy_init(fetch);
 
   /* go verbose */
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
   /* include headers */
-  easy_setopt(curl, CURLOPT_HEADER, 1L);
+  easy_setopt(fetch, FETCHOPT_HEADER, 1L);
 
-  easy_setopt(curl, CURLOPT_RESOLVE, slist);
+  easy_setopt(fetch, FETCHOPT_RESOLVE, slist);
 
-  easy_setopt(curl, CURLOPT_MAXCONNECTS, 3L);
+  easy_setopt(fetch, FETCHOPT_MAXCONNECTS, 3L);
 
   /* get NUM_HANDLES easy handles */
   for(i = 0; i < NUM_URLS; i++) {
@@ -80,9 +80,9 @@ CURLcode test(char *URL)
               "http://server%d.example.com:%s/path/1510%04i",
               i + 1, port, i + 1);
     target_url[sizeof(target_url) - 1] = '\0';
-    easy_setopt(curl, CURLOPT_URL, target_url);
+    easy_setopt(fetch, FETCHOPT_URL, target_url);
 
-    res = curl_easy_perform(curl);
+    res = fetch_easy_perform(fetch);
     if(res)
       goto test_cleanup;
 
@@ -93,11 +93,11 @@ test_cleanup:
 
   /* proper cleanup sequence - type PB */
 
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
-  curl_slist_free_all(slist);
+  fetch_slist_free_all(slist);
 
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

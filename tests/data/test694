@@ -93,7 +93,7 @@ NTLM
 !SSPI
 </features>
 <name>
-HTTP with NTLM twice, verify CURLINFO_HTTPAUTH_USED
+HTTP with NTLM twice, verify FETCHINFO_HTTPAUTH_USED
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/path/mine http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER0010

@@ -37,7 +37,7 @@ imap
 <name>
 IMAP cleanup before a connection was created
 </name>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib1553
 </tool>

@@ -62,12 +62,12 @@ http://%HOSTIP:%HTTP2PORT/%TESTNUMBER --http2 http://%HOSTIP:%HTTP2PORT/%TESTNUM
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTP2PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

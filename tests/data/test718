@@ -50,7 +50,7 @@ http://test.remote.haxx.se.%TESTNUMBER:8990/path/%TESTNUMBER0002 --proxy http://
 <protocol>
 CONNECT test.remote.haxx.se.%TESTNUMBER:8990 HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </protocol>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -27,24 +27,24 @@
 #include "warnless.h"
 #include "memdebug.h"
 
-/* The maximum string length limit (CURL_MAX_INPUT_LENGTH) is an internal
+/* The maximum string length limit (FETCH_MAX_INPUT_LENGTH) is an internal
    define not publicly exposed so we set our own */
 #define MAX_INPUT_LENGTH 8000000
 
 static char testbuf[MAX_INPUT_LENGTH + 2];
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  const struct curl_easyoption *o;
-  CURL *easy;
+  const struct fetch_easyoption *o;
+  FETCH *easy;
   int error = 0;
   (void)URL;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  easy = fetch_easy_init();
   if(!easy) {
-    curl_global_cleanup();
-    return (CURLcode)1;
+    fetch_global_cleanup();
+    return (FETCHcode)1;
   }
 
   /* make it a null-terminated C string with just As */
@@ -53,20 +53,20 @@ CURLcode test(char *URL)
 
   printf("string length: %d\n", (int)strlen(testbuf));
 
-  for(o = curl_easy_option_next(NULL);
+  for(o = fetch_easy_option_next(NULL);
       o;
-      o = curl_easy_option_next(o)) {
-    if(o->type == CURLOT_STRING) {
-      CURLcode result;
+      o = fetch_easy_option_next(o)) {
+    if(o->type == FETCHOT_STRING) {
+      FETCHcode result;
       /*
        * Whitelist string options that are safe for abuse
        */
-      CURL_IGNORE_DEPRECATION(
+      FETCH_IGNORE_DEPRECATION(
         switch(o->id) {
-        case CURLOPT_PROXY_TLSAUTH_TYPE:
-        case CURLOPT_TLSAUTH_TYPE:
-        case CURLOPT_RANDOM_FILE:
-        case CURLOPT_EGDSOCKET:
+        case FETCHOPT_PROXY_TLSAUTH_TYPE:
+        case FETCHOPT_TLSAUTH_TYPE:
+        case FETCHOPT_RANDOM_FILE:
+        case FETCHOPT_EGDSOCKET:
           continue;
         default:
           /* check this */
@@ -75,24 +75,24 @@ CURLcode test(char *URL)
       )
 
       /* This is a string. Make sure that passing in a string longer
-         CURL_MAX_INPUT_LENGTH returns an error */
-      result = curl_easy_setopt(easy, o->id, testbuf);
+         FETCH_MAX_INPUT_LENGTH returns an error */
+      result = fetch_easy_setopt(easy, o->id, testbuf);
       switch(result) {
-      case CURLE_BAD_FUNCTION_ARGUMENT: /* the most normal */
-      case CURLE_UNKNOWN_OPTION: /* left out from the build */
-      case CURLE_NOT_BUILT_IN: /* not supported */
-      case CURLE_UNSUPPORTED_PROTOCOL: /* detected by protocol2num() */
+      case FETCHE_BAD_FUNCTION_ARGUMENT: /* the most normal */
+      case FETCHE_UNKNOWN_OPTION: /* left out from the build */
+      case FETCHE_NOT_BUILT_IN: /* not supported */
+      case FETCHE_UNSUPPORTED_PROTOCOL: /* detected by protocol2num() */
         break;
       default:
         /* all other return codes are unexpected */
-        fprintf(stderr, "curl_easy_setopt(%s...) returned %d\n",
+        fprintf(stderr, "fetch_easy_setopt(%s...) returned %d\n",
                 o->name, result);
         error++;
         break;
       }
     }
   }
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
-  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
+  return error == 0 ? FETCHE_OK : TEST_ERR_FAILURE;
 }

@@ -3,7 +3,7 @@
 <keywords>
 FTP
 HTTP proxy
-CURLOPT_PROXY
+FETCHOPT_PROXY
 </keywords>
 </info>
 
@@ -46,13 +46,13 @@ ftp://ftp-site/moo/%TESTNUMBER ftp://ftp-site/moo/%TESTNUMBER --proxy http://%HO
 <protocol>
 GET ftp://ftp-site/moo/%TESTNUMBER HTTP/1.1
 Host: ftp-site:21
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET ftp://ftp-site/moo/%TESTNUMBER HTTP/1.1
 Host: ftp-site:21
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

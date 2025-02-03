@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,11 +18,11 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#ifndef CURL_NO_GETADDRINFO_OVERRIDE
-#define CURL_NO_GETADDRINFO_OVERRIDE
+#ifndef FETCH_NO_GETADDRINFO_OVERRIDE
+#define FETCH_NO_GETADDRINFO_OVERRIDE
 #endif
 
 #include "server_setup.h"
@@ -30,7 +30,7 @@
 /* Purpose
  *
  * Resolve the given name, using system name resolve functions (NOT any
- * function provided by libcurl). Used to see if the name exists and thus if
+ * function provided by libfetch). Used to see if the name exists and thus if
  * we can allow a test case to use it for testing.
  *
  * Like if 'localhost' actual exists etc.
@@ -49,7 +49,7 @@
 #include <netdb.h>
 #endif
 
-#include "curlx.h" /* from the private lib dir */
+#include "fetchx.h" /* from the private lib dir */
 #include "util.h"
 
 /* include memdebug.h last */
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
   while(argc > arg) {
     if(!strcmp("--version", argv[arg])) {
       printf("resolve IPv4%s\n",
-#if defined(CURLRES_IPV6)
+#if defined(FETCHRES_IPV6)
              "/IPv6"
 #else
              ""
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     puts("Usage: resolve [option] <host>\n"
          " --version\n"
          " --ipv4"
-#if defined(CURLRES_IPV6)
+#if defined(FETCHRES_IPV6)
          "\n --ipv6"
 #endif
          );
@@ -108,11 +108,11 @@ int main(int argc, char *argv[])
   atexit(win32_cleanup);
 #endif
 
-#if defined(CURLRES_IPV6)
+#if defined(FETCHRES_IPV6)
   if(use_ipv6) {
     /* Check that the system has IPv6 enabled before checking the resolver */
-    curl_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
-    if(s == CURL_SOCKET_BAD)
+    fetch_socket_t s = socket(PF_INET6, SOCK_DGRAM, 0);
+    if(s == FETCH_SOCKET_BAD)
       /* an IPv6 address was requested and we can't get/use one */
       rc = -1;
     else {

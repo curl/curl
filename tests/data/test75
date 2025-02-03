@@ -36,7 +36,7 @@ HTTP, urlglob retrieval with bad range
 3
 </errorcode>
 <stdout mode="text">
-curl: (3) bad range in URL position 47:
+fetch: (3) bad range in URL position 47:
 http://a-site-never-accessed.example.org/[2-1]
                                               ^
 </stdout>

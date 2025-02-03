@@ -13,7 +13,7 @@ none
 </server>
 
 <name>
-Verify that error codes in headers and libcurl-errors.3 are in sync
+Verify that error codes in headers and libfetch-errors.3 are in sync
 </name>
 
 <command type="perl">

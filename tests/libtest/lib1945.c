@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.haxx.se/docs/copyright.html.
+ * are also available at https://fetch.haxx.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -30,12 +30,12 @@
 #pragma warning(push)
 #pragma warning(disable:4706) /* assignment within conditional expression */
 #endif
-static void showem(CURL *easy, unsigned int type)
+static void showem(FETCH *easy, unsigned int type)
 {
-  struct curl_header *header = NULL;
-  struct curl_header *prev = NULL;
+  struct fetch_header *header = NULL;
+  struct fetch_header *prev = NULL;
 
-  while((header = curl_easy_nextheader(easy, type, 0, prev))) {
+  while((header = fetch_easy_nextheader(easy, type, 0, prev))) {
     printf(" %s == %s (%u/%u)\n", header->name, header->value,
            (int)header->index, (int)header->amount);
     prev = header;
@@ -52,33 +52,33 @@ static size_t write_cb(char *data, size_t n, size_t l, void *userp)
   (void)userp;
   return n*l;
 }
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *easy;
-  CURLcode res = CURLE_OK;
+  FETCH *easy;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_DEFAULT);
+  global_init(FETCH_GLOBAL_DEFAULT);
 
   easy_init(easy);
-  curl_easy_setopt(easy, CURLOPT_URL, URL);
-  curl_easy_setopt(easy, CURLOPT_VERBOSE, 1L);
-  curl_easy_setopt(easy, CURLOPT_FOLLOWLOCATION, 1L);
+  fetch_easy_setopt(easy, FETCHOPT_URL, URL);
+  fetch_easy_setopt(easy, FETCHOPT_VERBOSE, 1L);
+  fetch_easy_setopt(easy, FETCHOPT_FOLLOWLOCATION, 1L);
   /* ignores any content */
-  curl_easy_setopt(easy, CURLOPT_WRITEFUNCTION, write_cb);
+  fetch_easy_setopt(easy, FETCHOPT_WRITEFUNCTION, write_cb);
 
   /* if there's a proxy set, use it */
   if(libtest_arg2 && *libtest_arg2) {
-    curl_easy_setopt(easy, CURLOPT_PROXY, libtest_arg2);
-    curl_easy_setopt(easy, CURLOPT_HTTPPROXYTUNNEL, 1L);
+    fetch_easy_setopt(easy, FETCHOPT_PROXY, libtest_arg2);
+    fetch_easy_setopt(easy, FETCHOPT_HTTPPROXYTUNNEL, 1L);
   }
-  res = curl_easy_perform(easy);
+  res = fetch_easy_perform(easy);
   if(res) {
     printf("badness: %d\n", res);
   }
-  showem(easy, CURLH_CONNECT|CURLH_HEADER|CURLH_TRAILER|CURLH_1XX);
+  showem(easy, FETCHH_CONNECT|FETCHH_HEADER|FETCHH_TRAILER|FETCHH_1XX);
 
 test_cleanup:
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
   return res;
 }

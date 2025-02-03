@@ -51,7 +51,7 @@ A005 LOGOUT
    / __| | | | |_) | |    
   | (__| |_| |  _ {| |___ 
    \___|\___/|_| \_\_____|
-* OK curl IMAP server ready to serve
+* OK fetch IMAP server ready to serve
 A001 BAD Command
 A002 OK LOGIN completed
 * 172 EXISTS

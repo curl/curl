@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* argv1 = URL
@@ -55,73 +55,73 @@ static size_t readcallback(char  *ptr,
   fprintf(stderr, "READ NOT FINE!\n");
   return 0;
 }
-static curlioerr ioctlcallback(CURL *handle,
+static fetchioerr ioctlcallback(FETCH *handle,
                                int cmd,
                                void *clientp)
 {
   int *counter = (int *)clientp;
   (void)handle; /* unused */
-  if(cmd == CURLIOCMD_RESTARTREAD) {
+  if(cmd == FETCHIOCMD_RESTARTREAD) {
     fprintf(stderr, "REWIND!\n");
     *counter = 0; /* clear counter to make the read callback restart */
   }
-  return CURLIOE_OK;
+  return FETCHIOE_OK;
 }
 
 
 
 #endif
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res;
-  CURL *curl;
+  FETCHcode res;
+  FETCH *fetch;
 #ifndef LIB548
   int counter = 0;
 #endif
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_URL, URL);
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
-  test_setopt(curl, CURLOPT_HEADER, 1L);
+  test_setopt(fetch, FETCHOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_HEADER, 1L);
 #ifdef LIB548
   /* set the data to POST with a mere pointer to a null-terminated string */
-  test_setopt(curl, CURLOPT_POSTFIELDS, UPLOADTHIS);
+  test_setopt(fetch, FETCHOPT_POSTFIELDS, UPLOADTHIS);
 #else
   /* 547 style, which means reading the POST data from a callback */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctlcallback);
-    test_setopt(curl, CURLOPT_IOCTLDATA, &counter);
+  FETCH_IGNORE_DEPRECATION(
+    test_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctlcallback);
+    test_setopt(fetch, FETCHOPT_IOCTLDATA, &counter);
   )
-  test_setopt(curl, CURLOPT_READFUNCTION, readcallback);
-  test_setopt(curl, CURLOPT_READDATA, &counter);
+  test_setopt(fetch, FETCHOPT_READFUNCTION, readcallback);
+  test_setopt(fetch, FETCHOPT_READDATA, &counter);
   /* We CANNOT do the POST fine without setting the size (or choose
      chunked)! */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long)strlen(UPLOADTHIS));
+  test_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long)strlen(UPLOADTHIS));
 #endif
-  test_setopt(curl, CURLOPT_POST, 1L);
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
-  test_setopt(curl, CURLOPT_PROXYUSERPWD, libtest_arg3);
-  test_setopt(curl, CURLOPT_PROXYAUTH,
-                   (long) (CURLAUTH_NTLM | CURLAUTH_DIGEST | CURLAUTH_BASIC) );
+  test_setopt(fetch, FETCHOPT_POST, 1L);
+  test_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
+  test_setopt(fetch, FETCHOPT_PROXYUSERPWD, libtest_arg3);
+  test_setopt(fetch, FETCHOPT_PROXYAUTH,
+                   (long) (FETCHAUTH_NTLM | FETCHAUTH_DIGEST | FETCHAUTH_BASIC) );
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

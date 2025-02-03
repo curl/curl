@@ -33,12 +33,12 @@ http://non-existing-host.haxx.se. --remove-on-error -C 1 -o "%LOGDIR/%TESTNUMBER
 2
 </errorcode>
 <stderr mode="text">
-curl: --continue-at is mutually exclusive with --remove-on-error
-curl: option -C: is badly used here
+fetch: --continue-at is mutually exclusive with --remove-on-error
+fetch: option -C: is badly used here
 %if manual
-curl: try 'curl --help' or 'curl --manual' for more information
+fetch: try 'fetch --help' or 'fetch --manual' for more information
 %else
-curl: try 'curl --help' for more information
+fetch: try 'fetch --help' for more information
 %endif
 </stderr>
 </verify>

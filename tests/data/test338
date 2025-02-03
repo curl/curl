@@ -1,5 +1,5 @@
 <testcase>
-# See https://github.com/curl/curl/issues/4499
+# See https://github.com/fetch/fetch/issues/4499
 <info>
 <keywords>
 HTTP
@@ -48,12 +48,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --next http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 [DISCONNECT]

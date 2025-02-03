@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,35 +28,35 @@
     if(!(expr)) {                                          \
       fprintf(stderr, "%s:%d Assertion '%s' failed: %s\n", \
               __FILE__, __LINE__, #expr, msg);             \
-      return (CURLcode)1;                                  \
+      return (FETCHcode)1;                                  \
     }                                                      \
   } while(0)
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   int rc;
   (void)URL;
 
-  rc = curl_strequal("iii", "III");
+  rc = fetch_strequal("iii", "III");
   fail_unless(rc != 0, "return code should be non-zero");
 
-  rc = curl_strequal("iiia", "III");
+  rc = fetch_strequal("iiia", "III");
   fail_unless(rc == 0, "return code should be zero");
 
-  rc = curl_strequal("iii", "IIIa");
+  rc = fetch_strequal("iii", "IIIa");
   fail_unless(rc == 0, "return code should be zero");
 
-  rc = curl_strequal("iiiA", "IIIa");
+  rc = fetch_strequal("iiiA", "IIIa");
   fail_unless(rc != 0, "return code should be non-zero");
 
-  rc = curl_strnequal("iii", "III", 3);
+  rc = fetch_strnequal("iii", "III", 3);
   fail_unless(rc != 0, "return code should be non-zero");
 
-  rc = curl_strnequal("iiiABC", "IIIcba", 3);
+  rc = fetch_strnequal("iiiABC", "IIIcba", 3);
   fail_unless(rc != 0, "return code should be non-zero");
 
-  rc = curl_strnequal("ii", "II", 3);
+  rc = fetch_strnequal("ii", "II", 3);
   fail_unless(rc != 0, "return code should be non-zero");
 
-  return CURLE_OK;
+  return FETCHE_OK;
 }

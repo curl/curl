@@ -77,7 +77,7 @@ Content-Type: text/html
 <protocol>
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1053700
 Content-Type: application/x-www-form-urlencoded
@@ -85,7 +85,7 @@ Expect: 100-continue
 
 POST /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 1053700
 Content-Type: application/x-www-form-urlencoded

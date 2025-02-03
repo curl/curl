@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -28,31 +28,31 @@
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  struct curl_slist *header = NULL;
+  struct fetch_slist *header = NULL;
   long unmet;
-  CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch = NULL;
+  FETCHcode res = FETCHE_OK;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  easy_init(curl);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_URL, URL);
-  easy_setopt(curl, CURLOPT_TIMECONDITION, (long)CURL_TIMECOND_IFMODSINCE);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_TIMECONDITION, (long)FETCH_TIMECOND_IFMODSINCE);
   /* Some TIMEVALUE; it doesn't matter. */
-  easy_setopt(curl, CURLOPT_TIMEVALUE, 1566210680L);
+  easy_setopt(fetch, FETCHOPT_TIMEVALUE, 1566210680L);
 
-  header = curl_slist_append(NULL, "If-Modified-Since:");
+  header = fetch_slist_append(NULL, "If-Modified-Since:");
   if(!header) {
     res = TEST_ERR_MAJOR_BAD;
     goto test_cleanup;
   }
 
-  easy_setopt(curl, CURLOPT_HTTPHEADER, header);
+  easy_setopt(fetch, FETCHOPT_HTTPHEADER, header);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
   if(res)
     goto test_cleanup;
 
@@ -61,7 +61,7 @@ CURLcode test(char *URL)
    * The server returns 304, which means the condition is "unmet".
    */
 
-  res = curl_easy_getinfo(curl, CURLINFO_CONDITION_UNMET, &unmet);
+  res = fetch_easy_getinfo(fetch, FETCHINFO_CONDITION_UNMET, &unmet);
   if(res)
     goto test_cleanup;
 
@@ -73,9 +73,9 @@ CURLcode test(char *URL)
 test_cleanup:
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
-  curl_slist_free_all(header);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_slist_free_all(header);
+  fetch_global_cleanup();
 
   return res;
 }

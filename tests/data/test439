@@ -50,7 +50,7 @@ GET /439/?name=me%&noval&aim=b%aad&&&weirdo=*.//- HTTP/1.1
 Host: fake.fake.fake:8000
 Authorization: AWS4-HMAC-SHA256 Credential=user/19700101/us-east-2/es/aws4_request, SignedHeaders=host;x-amz-date, Signature=cbbf4a72764e27e396730f5e56cea046d4ce862a2d91db4856fb086b92f49270
 X-Amz-Date: 19700101T000000Z
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

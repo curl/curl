@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -44,45 +44,45 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   (void)size;
   (void)nmemb;
   (void)userp;
-  return CURL_READFUNC_ABORT;
+  return FETCH_READFUNC_ABORT;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-   CURLcode res = CURLE_OK;
-   CURL *curl = NULL;
-   CURLM *mcurl = NULL;
+   FETCHcode res = FETCHE_OK;
+   FETCH *fetch = NULL;
+   FETCHM *mfetch = NULL;
    int still_running = 1;
    struct timeval mp_start;
-   struct curl_slist *rcpt_list = NULL;
+   struct fetch_slist *rcpt_list = NULL;
 
-   curl_global_init(CURL_GLOBAL_DEFAULT);
+   fetch_global_init(FETCH_GLOBAL_DEFAULT);
 
-   easy_init(curl);
+   easy_init(fetch);
 
-   multi_init(mcurl);
+   multi_init(mfetch);
 
-   rcpt_list = curl_slist_append(rcpt_list, RECIPIENT);
+   rcpt_list = fetch_slist_append(rcpt_list, RECIPIENT);
    /* more addresses can be added here
-      rcpt_list = curl_slist_append(rcpt_list, "<others@example.com>");
+      rcpt_list = fetch_slist_append(rcpt_list, "<others@example.com>");
    */
 
-   curl_easy_setopt(curl, CURLOPT_URL, URL);
+   fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
 #if 0
-   curl_easy_setopt(curl, CURLOPT_USERNAME, USERNAME);
-   curl_easy_setopt(curl, CURLOPT_PASSWORD, PASSWORD);
+   fetch_easy_setopt(fetch, FETCHOPT_USERNAME, USERNAME);
+   fetch_easy_setopt(fetch, FETCHOPT_PASSWORD, PASSWORD);
 #endif
-   curl_easy_setopt(curl, CURLOPT_UPLOAD, 1L);
-   curl_easy_setopt(curl, CURLOPT_READFUNCTION, read_callback);
-   curl_easy_setopt(curl, CURLOPT_MAIL_FROM, MAILFROM);
-   curl_easy_setopt(curl, CURLOPT_MAIL_RCPT, rcpt_list);
-   curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-   multi_add_handle(mcurl, curl);
+   fetch_easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
+   fetch_easy_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
+   fetch_easy_setopt(fetch, FETCHOPT_MAIL_FROM, MAILFROM);
+   fetch_easy_setopt(fetch, FETCHOPT_MAIL_RCPT, rcpt_list);
+   fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+   multi_add_handle(mfetch, fetch);
 
    mp_start = tutil_tvnow();
 
   /* we start some action by calling perform right away */
-  curl_multi_perform(mcurl, &still_running);
+  fetch_multi_perform(mfetch, &still_running);
 
   while(still_running) {
     struct timeval timeout;
@@ -93,7 +93,7 @@ CURLcode test(char *URL)
     fd_set fdexcep;
     int maxfd = -1;
 
-    long curl_timeo = -1;
+    long fetch_timeo = -1;
 
     FD_ZERO(&fdread);
     FD_ZERO(&fdwrite);
@@ -103,9 +103,9 @@ CURLcode test(char *URL)
     timeout.tv_sec = 1;
     timeout.tv_usec = 0;
 
-    curl_multi_timeout(mcurl, &curl_timeo);
-    if(curl_timeo >= 0) {
-      curlx_mstotv(&timeout, curl_timeo);
+    fetch_multi_timeout(mfetch, &fetch_timeo);
+    if(fetch_timeo >= 0) {
+      fetchx_mstotv(&timeout, fetch_timeo);
       if(timeout.tv_sec > 1) {
         timeout.tv_sec = 1;
         timeout.tv_usec = 0;
@@ -113,7 +113,7 @@ CURLcode test(char *URL)
     }
 
     /* get file descriptors from the transfers */
-    curl_multi_fdset(mcurl, &fdread, &fdwrite, &fdexcep, &maxfd);
+    fetch_multi_fdset(mfetch, &fdread, &fdwrite, &fdexcep, &maxfd);
 
     /* In a real-world program you OF COURSE check the return code of the
        function calls.  On success, the value of maxfd is guaranteed to be
@@ -135,18 +135,18 @@ CURLcode test(char *URL)
       break;
     case 0: /* timeout */
     default: /* action */
-      curl_multi_perform(mcurl, &still_running);
+      fetch_multi_perform(mfetch, &still_running);
       break;
     }
   }
 
 test_cleanup:
 
-  curl_slist_free_all(rcpt_list);
-  curl_multi_remove_handle(mcurl, curl);
-  curl_multi_cleanup(mcurl);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_slist_free_all(rcpt_list);
+  fetch_multi_remove_handle(mfetch, fetch);
+  fetch_multi_cleanup(mfetch);
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

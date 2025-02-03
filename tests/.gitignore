@@ -1,20 +1,20 @@
 # Copyright (C) Daniel Stenberg, <daniel@haxx.se>, et al.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 
 *pid
 configurehelp.pm
-curl_client_key
-curl_client_key.pub
-curl_client_knownhosts
-curl_host_rsa_key
-curl_host_rsa_key.pub
-curl_host_rsa_key.pub_md5
-curl_host_rsa_key.pub_sha256
-curl_sftp_cmds
-curl_sftp_config
-curl_ssh_config
-curl_sshd_config
+fetch_client_key
+fetch_client_key.pub
+fetch_client_knownhosts
+fetch_host_rsa_key
+fetch_host_rsa_key.pub
+fetch_host_rsa_key.pub_md5
+fetch_host_rsa_key.pub_sha256
+fetch_sftp_cmds
+fetch_sftp_config
+fetch_ssh_config
+fetch_sshd_config
 ftps_stunnel.conf
 https_stunnel.conf
 log*
@@ -22,4 +22,4 @@ log*
 config
 second-hsts.txt
 runtests.1
-testcurl.1
+testfetch.1

@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -41,7 +41,7 @@ sub scanfile {
     my ($file) = @_;
     my $memfunc;
     my $memdebug;
-    my $curlmem;
+    my $fetchmem;
 
     print STDERR "checking $file...\n";
 
@@ -53,15 +53,15 @@ sub scanfile {
         elsif($_ =~ /^ *# *include \"memdebug.h\"/) {
             $memdebug++;
         }
-        elsif($_ =~ /^ *# *include \"curl_memory.h\"/) {
-            $curlmem++;
+        elsif($_ =~ /^ *# *include \"fetch_memory.h\"/) {
+            $fetchmem++;
         }
         elsif($_ =~ /mem-include-scan/) {
             # free pass
             close($f);
             return 0;
         }
-        if($memfunc && $memdebug && $curlmem) {
+        if($memfunc && $memdebug && $fetchmem) {
             last;
         }
     }
@@ -69,15 +69,15 @@ sub scanfile {
 
 
     if($memfunc) {
-        if($memdebug && $curlmem) {
+        if($memdebug && $fetchmem) {
             return 0;
         }
         else {
             if(!$memdebug) {
                 print STDERR "$file doesn't include \"memdebug.h\"!\n";
             }
-            if(!$curlmem) {
-                print STDERR "$file doesn't include \"curl_memory.h\"!\n";
+            if(!$fetchmem) {
+                print STDERR "$file doesn't include \"fetch_memory.h\"!\n";
             }
             return 1;
         }

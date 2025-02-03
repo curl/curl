@@ -22,7 +22,7 @@ Content-Length: 9
 contents
 </data>
 
-# The purpose of this test is to make sure curl ignores headers
+# The purpose of this test is to make sure fetch ignores headers
 # Content-Length and Transfer-Encoding in a successful CONNECT 2xx reply.
 <connect>
 HTTP/1.1 200 Mighty fine indeed
@@ -71,14 +71,14 @@ proxy
 <proxy>
 CONNECT test.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
 GET /we/want/that/page/%TESTNUMBER HTTP/1.1
 Host: test.%TESTNUMBER:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

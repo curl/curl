@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_option
+fetch_easy_option
 typecheck
 </keywords>
 </info>

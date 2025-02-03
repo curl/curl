@@ -28,7 +28,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-CONNECT_ONLY and doing a second curl_easy_perform
+CONNECT_ONLY and doing a second fetch_easy_perform
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT

@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,57 +21,57 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
 # Usage:
-#   perl mk-lib1521.pl < ../../include/curl/curl.h lib1521.c
+#   perl mk-lib1521.pl < ../../include/fetch/fetch.h lib1521.c
 
 # minimum and maximum long signed values
 my $minlong = "LONG_MIN";
 my $maxlong = "LONG_MAX";
-# maximum curl_off_t
-my $maxofft = "CURL_OFF_T_MAX";
+# maximum fetch_off_t
+my $maxofft = "FETCH_OFF_T_MAX";
 my $line = "";
 my $incomment = 0;
 
-# Options allowed to return CURLE_BAD_FUNCTION_ARGUMENT if given a string they
+# Options allowed to return FETCHE_BAD_FUNCTION_ARGUMENT if given a string they
 # do not recognize as valid
 my @bad_function_argument = (
-    'CURLOPT_DNS_LOCAL_IP4',
-    'CURLOPT_DNS_LOCAL_IP6',
-    'CURLOPT_DNS_SERVERS',
-    'CURLOPT_PROXY_TLSAUTH_TYPE',
-    'CURLOPT_SSLENGINE',
-    'CURLOPT_TLSAUTH_TYPE',
+    'FETCHOPT_DNS_LOCAL_IP4',
+    'FETCHOPT_DNS_LOCAL_IP6',
+    'FETCHOPT_DNS_SERVERS',
+    'FETCHOPT_PROXY_TLSAUTH_TYPE',
+    'FETCHOPT_SSLENGINE',
+    'FETCHOPT_TLSAUTH_TYPE',
 );
 
-# Options allowed to return CURLE_UNSUPPORTED_PROTOCOL if given a string they
+# Options allowed to return FETCHE_UNSUPPORTED_PROTOCOL if given a string they
 # do not recognize as valid
 my @unsupported_protocol = (
-    'CURLOPT_PROTOCOLS_STR',
-    'CURLOPT_REDIR_PROTOCOLS_STR',
+    'FETCHOPT_PROTOCOLS_STR',
+    'FETCHOPT_REDIR_PROTOCOLS_STR',
     );
 
-# Options allowed to return CURLE_SSL_ENGINE_NOTFOUND if given a string they
+# Options allowed to return FETCHE_SSL_ENGINE_NOTFOUND if given a string they
 # do not recognize as valid
 my @ssl_engine_notfound = (
-    'CURLOPT_SSLENGINE',
+    'FETCHOPT_SSLENGINE',
     );
 
-# Options allowed to return CURLE_UNSUPPORTED_PROTOCOL if given a bad
+# Options allowed to return FETCHE_UNSUPPORTED_PROTOCOL if given a bad
 # numerical input they do not recognize as valid
 my @unsupported_protocol_num = (
-    'CURLOPT_HTTP_VERSION',
+    'FETCHOPT_HTTP_VERSION',
     );
 
-# Options allowed to return CURLE_NOT_BUILT_IN if given a bad
+# Options allowed to return FETCHE_NOT_BUILT_IN if given a bad
 # numerical input they do not recognize as valid
 my @not_built_in_num = (
-    'CURLOPT_HTTPAUTH',
-    'CURLOPT_PROXYAUTH',
-    'CURLOPT_SOCKS5_AUTH',
+    'FETCHOPT_HTTPAUTH',
+    'FETCHOPT_PROXYAUTH',
+    'FETCHOPT_SOCKS5_AUTH',
     );
 
 
@@ -81,7 +81,7 @@ my @not_built_in_num = (
 
 my $allowedstringerrors = <<MOO
   switch(code) {
-  case CURLE_BAD_FUNCTION_ARGUMENT:
+  case FETCHE_BAD_FUNCTION_ARGUMENT:
 MOO
     ;
 
@@ -99,7 +99,7 @@ MOO
     ;
 
 $allowedstringerrors .= <<MOO
-  case CURLE_UNSUPPORTED_PROTOCOL:
+  case FETCHE_UNSUPPORTED_PROTOCOL:
 MOO
     ;
 for my $o (@unsupported_protocol) {
@@ -115,7 +115,7 @@ MOO
     ;
 
 $allowedstringerrors .= <<MOO
-  case CURLE_SSL_ENGINE_NOTFOUND:
+  case FETCHE_SSL_ENGINE_NOTFOUND:
 MOO
     ;
 for my $o (@ssl_engine_notfound) {
@@ -139,7 +139,7 @@ MOO
 
 my $allowednumerrors = <<MOO
   switch(code) {
-  case CURLE_UNSUPPORTED_PROTOCOL:
+  case FETCHE_UNSUPPORTED_PROTOCOL:
 MOO
     ;
 
@@ -153,7 +153,7 @@ MOO
 
 $allowednumerrors .= <<MOO
     break;
-  case CURLE_NOT_BUILT_IN:
+  case FETCHE_NOT_BUILT_IN:
 MOO
     ;
 
@@ -193,7 +193,7 @@ print $fh <<HEADER
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -202,7 +202,7 @@ print $fh <<HEADER
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -217,9 +217,9 @@ struct testdata {
 
 #define LO $minlong
 #define HI $maxlong
-#define OFF_LO (curl_off_t) LO
-#define OFF_HI (curl_off_t) $maxofft
-#define OFF_NO (curl_off_t) 0
+#define OFF_LO (fetch_off_t) LO
+#define OFF_HI (fetch_off_t) $maxofft
+#define OFF_NO (fetch_off_t) 0
 
 static size_t writecb(char *buffer, size_t size, size_t nitems,
                       void *outstream)
@@ -243,80 +243,80 @@ static size_t readcb(char *buffer,
   return 0;
 }
 
-static void errlongzero(const char *name, CURLcode code, int lineno)
+static void errlongzero(const char *name, FETCHcode code, int lineno)
 {
   printf("%s set to 0 returned %d, \\"%s\\" on line %d\\n",
-         name, code, curl_easy_strerror(code), lineno);
+         name, code, fetch_easy_strerror(code), lineno);
 }
 
-static void errlong(const char *name, CURLcode code, int lineno)
+static void errlong(const char *name, FETCHcode code, int lineno)
 {
 $allowednumerrors
   printf("%s set to non-zero returned %d, \\"%s\\" on line %d\\n",
-         name, code, curl_easy_strerror(code), lineno);
+         name, code, fetch_easy_strerror(code), lineno);
 }
 
-static void errstring(const char *name, CURLcode code, int lineno)
+static void errstring(const char *name, FETCHcode code, int lineno)
 {
-  /* allow this set of options to return CURLE_BAD_FUNCTION_ARGUMENT
+  /* allow this set of options to return FETCHE_BAD_FUNCTION_ARGUMENT
      when given a strange string input */
 $allowedstringerrors
   printf("%s set to a string returned %d, \\"%s\\" on line %d\\n",
-         name, code, curl_easy_strerror(code), lineno);
+         name, code, fetch_easy_strerror(code), lineno);
 }
 
-static void err(const char *name, CURLcode val, int lineno)
+static void err(const char *name, FETCHcode val, int lineno)
 {
   printf("%s returned %d, \\"%s\\" on line %d\\n",
-         name, val, curl_easy_strerror(val), lineno);
+         name, val, fetch_easy_strerror(val), lineno);
 }
 
-static void errnull(const char *name, CURLcode val, int lineno)
+static void errnull(const char *name, FETCHcode val, int lineno)
 {
   printf("%s set to NULL returned %d, \\"%s\\" on line %d\\n",
-         name, val, curl_easy_strerror(val), lineno);
+         name, val, fetch_easy_strerror(val), lineno);
 }
 
-static void geterr(const char *name, CURLcode val, int lineno)
+static void geterr(const char *name, FETCHcode val, int lineno)
 {
-  printf("CURLINFO_%s returned %d, \\"%s\\" on line %d\\n",
-         name, val, curl_easy_strerror(val), lineno);
+  printf("FETCHINFO_%s returned %d, \\"%s\\" on line %d\\n",
+         name, val, fetch_easy_strerror(val), lineno);
 }
 
-static curl_progress_callback progresscb;
-static curl_write_callback headercb;
-static curl_debug_callback debugcb;
-static curl_trailer_callback trailercb;
-static curl_ssl_ctx_callback ssl_ctx_cb;
-static curl_ioctl_callback ioctlcb;
-static curl_sockopt_callback sockoptcb;
-static curl_opensocket_callback opensocketcb;
-static curl_seek_callback seekcb;
-static curl_sshkeycallback ssh_keycb;
-static curl_sshhostkeycallback ssh_hostkeycb;
-static curl_chunk_bgn_callback chunk_bgn_cb;
-static curl_chunk_end_callback chunk_end_cb;
-static curl_fnmatch_callback fnmatch_cb;
-static curl_closesocket_callback closesocketcb;
-static curl_xferinfo_callback xferinfocb;
-static curl_hstsread_callback hstsreadcb;
-static curl_hstswrite_callback hstswritecb;
-static curl_resolver_start_callback resolver_start_cb;
-static curl_prereq_callback prereqcb;
+static fetch_progress_callback progresscb;
+static fetch_write_callback headercb;
+static fetch_debug_callback debugcb;
+static fetch_trailer_callback trailercb;
+static fetch_ssl_ctx_callback ssl_ctx_cb;
+static fetch_ioctl_callback ioctlcb;
+static fetch_sockopt_callback sockoptcb;
+static fetch_opensocket_callback opensocketcb;
+static fetch_seek_callback seekcb;
+static fetch_sshkeycallback ssh_keycb;
+static fetch_sshhostkeycallback ssh_hostkeycb;
+static fetch_chunk_bgn_callback chunk_bgn_cb;
+static fetch_chunk_end_callback chunk_end_cb;
+static fetch_fnmatch_callback fnmatch_cb;
+static fetch_closesocket_callback closesocketcb;
+static fetch_xferinfo_callback xferinfocb;
+static fetch_hstsread_callback hstsreadcb;
+static fetch_hstswrite_callback hstswritecb;
+static fetch_resolver_start_callback resolver_start_cb;
+static fetch_prereq_callback prereqcb;
 
 /* long options that are okay to return
-   CURLE_BAD_FUNCTION_ARGUMENT */
-static bool bad_long(CURLcode res, int check)
+   FETCHE_BAD_FUNCTION_ARGUMENT */
+static bool bad_long(FETCHcode res, int check)
 {
-  if(res != CURLE_BAD_FUNCTION_ARGUMENT)
+  if(res != FETCHE_BAD_FUNCTION_ARGUMENT)
     return 0; /* not okay */
 
-  if(check < CURLOPTTYPE_OBJECTPOINT) {
+  if(check < FETCHOPTTYPE_OBJECTPOINT) {
     /* LONG */
     return 1;
   }
-  else if((check >= CURLOPTTYPE_OFF_T) &&
-          (check < CURLOPTTYPE_BLOB)) {
+  else if((check >= FETCHOPTTYPE_OFF_T) &&
+          (check < FETCHOPTTYPE_BLOB)) {
     /* OFF_T */
     return 1;
   }
@@ -325,44 +325,44 @@ static bool bad_long(CURLcode res, int check)
 
 /* macro to check the first setopt of an option which then is allowed to get a
    non-existing function return code back */
-#define present(x) ((x != CURLE_NOT_BUILT_IN) && (x != CURLE_UNKNOWN_OPTION))
+#define present(x) ((x != FETCHE_NOT_BUILT_IN) && (x != FETCHE_UNKNOWN_OPTION))
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl = NULL;
-  CURL *dep = NULL;
-  CURLSH *share = NULL;
-  char errorbuffer[CURL_ERROR_SIZE];
+  FETCH *fetch = NULL;
+  FETCH *dep = NULL;
+  FETCHSH *share = NULL;
+  char errorbuffer[FETCH_ERROR_SIZE];
   void *conv_from_network_cb = NULL;
   void *conv_to_network_cb = NULL;
   void *conv_from_utf8_cb = NULL;
   void *interleavecb = NULL;
   char *stringpointerextra = (char *)"moooo";
-  struct curl_slist *slist = NULL;
-  struct curl_httppost *httppost = NULL;
-  curl_mime *mimepost = NULL;
+  struct fetch_slist *slist = NULL;
+  struct fetch_httppost *httppost = NULL;
+  fetch_mime *mimepost = NULL;
   FILE *stream = stderr;
   struct testdata object;
   char *charp;
   long val;
-  curl_off_t oval;
+  fetch_off_t oval;
   double dval;
-  curl_socket_t sockfd;
-  struct curl_certinfo *certinfo;
-  struct curl_tlssessioninfo *tlssession;
-  struct curl_blob blob = { (void *)"silly", 5, 0};
-  CURLcode res = CURLE_OK;
+  fetch_socket_t sockfd;
+  struct fetch_certinfo *certinfo;
+  struct fetch_tlssessioninfo *tlssession;
+  struct fetch_blob blob = { (void *)"silly", 5, 0};
+  FETCHcode res = FETCHE_OK;
   (void)URL; /* not used */
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
   easy_init(dep);
-  easy_init(curl);
-  share = curl_share_init();
+  easy_init(fetch);
+  share = fetch_share_init();
   if(!share) {
-    res = CURLE_OUT_OF_MEMORY;
+    res = FETCHE_OUT_OF_MEMORY;
     goto test_cleanup;
   }
 
-  CURL_IGNORE_DEPRECATION(
+  FETCH_IGNORE_DEPRECATION(
 HEADER
     ;
 
@@ -400,32 +400,32 @@ while(<STDIN>) {
         $line = $_;
         next;
     }
-    if($_ =~ / CURL_DEPRECATED\(/) {
+    if($_ =~ / FETCH_DEPRECATED\(/) {
         # Drop deprecation info.
-        if($_ !~ /^(.*?) CURL_DEPRECATED\(.*?"\)(.*)$/) {
+        if($_ !~ /^(.*?) FETCH_DEPRECATED\(.*?"\)(.*)$/) {
             # Needs unfolding.
             $line = $_;
             next;
         }
         $_ = $1 . $2;
     }
-    if($_ =~ /^CURLOPT(?:DEPRECATED)?\(/ && $_ !~ /\),$/) {
-        # Multi-line CURLOPTs need unfolding.
+    if($_ =~ /^FETCHOPT(?:DEPRECATED)?\(/ && $_ !~ /\),$/) {
+        # Multi-line FETCHOPTs need unfolding.
         $line = $_;
         next;
     }
-    if($_ =~ /^CURLOPT(?:DEPRECATED)?\(([^ ]*), ([^ ]*), (\d*)[,)]/) {
+    if($_ =~ /^FETCHOPT(?:DEPRECATED)?\(([^ ]*), ([^ ]*), (\d*)[,)]/) {
         my ($name, $type, $val)=($1, $2, $3);
         my $w="  ";
         my $w2="$w$w";
         my $w3="$w$w$w";
         my $opt = $name;
-        $opt =~ s/^CURLOPT_//;
+        $opt =~ s/^FETCHOPT_//;
         my $exists = "${w}{\n";
         # the first check for an option
-        my $fpref = "${exists}${w2}CURLcode first =\n${w3}curl_easy_setopt(curl, $name,";
+        my $fpref = "${exists}${w2}FETCHcode first =\n${w3}fetch_easy_setopt(fetch, $name,";
         my $ifpresent = "${w2}if(present(first)) {\n";
-        my $pref = "${w3}res = curl_easy_setopt(curl, $name,";
+        my $pref = "${w3}res = fetch_easy_setopt(fetch, $name,";
         my $i = ' ' x (length($w) + 25);
         my $fcheck = <<MOO
     if(first && present(first)) /* first setopt check only */
@@ -462,51 +462,51 @@ MOO
             ;
 
         print $fh "\n  /****** Verify $name ******/\n";
-        if($type eq "CURLOPTTYPE_STRINGPOINT") {
+        if($type eq "FETCHOPTTYPE_STRINGPOINT") {
             print $fh "${fpref} \"string\");\n$fstringcheck";
             print $fh "$ifpresent";
             print $fh "${pref} NULL);\n$nullcheck";
         }
-        elsif(($type eq "CURLOPTTYPE_LONG") ||
-              ($type eq "CURLOPTTYPE_VALUES")) {
+        elsif(($type eq "FETCHOPTTYPE_LONG") ||
+              ($type eq "FETCHOPTTYPE_VALUES")) {
             print $fh "${fpref} 0L);\n$flongcheckzero";
             print $fh "$ifpresent";
             print $fh "${pref} 22L);\n$longcheck";
             print $fh "${pref} LO);\n$longcheck";
             print $fh "${pref} HI);\n$longcheck";
         }
-        elsif($type eq "CURLOPTTYPE_OFF_T") {
+        elsif($type eq "FETCHOPTTYPE_OFF_T") {
             print $fh "${fpref} OFF_NO);\n$flongcheckzero";
             print $fh "$ifpresent";
             my $lvl = " " x 29;
-            print $fh "${pref}\n${lvl}(curl_off_t)22);\n$longcheck";
+            print $fh "${pref}\n${lvl}(fetch_off_t)22);\n$longcheck";
             print $fh "${pref} OFF_HI);\n$longcheck";
             print $fh "${pref} OFF_LO);\n$longcheck";
         }
-        elsif(($type eq "CURLOPTTYPE_OBJECTPOINT") ||
-              ($type eq "CURLOPTTYPE_CBPOINT")) {
+        elsif(($type eq "FETCHOPTTYPE_OBJECTPOINT") ||
+              ($type eq "FETCHOPTTYPE_CBPOINT")) {
             if($name =~ /DEPENDS/) {
               print $fh "${fpref} dep);\n$fcheck";
             }
             elsif($name =~ "SHARE") {
               print $fh "${fpref} share);\n$fcheck";
             }
-            elsif($name eq "CURLOPT_ERRORBUFFER") {
+            elsif($name eq "FETCHOPT_ERRORBUFFER") {
               print $fh "${fpref} errorbuffer);\n$fcheck";
             }
-            elsif(($name eq "CURLOPT_POSTFIELDS") ||
-                  ($name eq "CURLOPT_COPYPOSTFIELDS")) {
+            elsif(($name eq "FETCHOPT_POSTFIELDS") ||
+                  ($name eq "FETCHOPT_COPYPOSTFIELDS")) {
                 # set size to zero to avoid it being "illegal"
-                print $fh "  (void)curl_easy_setopt(curl, CURLOPT_POSTFIELDSIZE, 0);\n";
+                print $fh "  (void)fetch_easy_setopt(fetch, FETCHOPT_POSTFIELDSIZE, 0);\n";
                 print $fh "${fpref} stringpointerextra);\n$fcheck";
             }
-            elsif($name eq "CURLOPT_HTTPPOST") {
+            elsif($name eq "FETCHOPT_HTTPPOST") {
               print $fh "${fpref} httppost);\n$fcheck";
             }
-            elsif($name eq "CURLOPT_MIMEPOST") {
+            elsif($name eq "FETCHOPT_MIMEPOST") {
               print $fh "${fpref} mimepost);\n$fcheck";
             }
-            elsif($name eq "CURLOPT_STDERR") {
+            elsif($name eq "FETCHOPT_STDERR") {
               print $fh "${fpref} stream);\n$fcheck";
             }
             else {
@@ -515,15 +515,15 @@ MOO
             print $fh "$ifpresent";
             print $fh "${pref} NULL);\n$nullcheck";
         }
-        elsif($type eq "CURLOPTTYPE_SLISTPOINT") {
+        elsif($type eq "FETCHOPTTYPE_SLISTPOINT") {
             print $fh "${fpref} slist);\n$fcheck";
             print $fh "$ifpresent";
             print $fh "${pref} NULL);\n$nullcheck";
         }
-        elsif($type eq "CURLOPTTYPE_FUNCTIONPOINT") {
+        elsif($type eq "FETCHOPTTYPE_FUNCTIONPOINT") {
             if($name =~ /([^ ]*)FUNCTION/) {
                 my $l=lc($1);
-                $l =~ s/^curlopt_//;
+                $l =~ s/^fetchopt_//;
                 print $fh "${fpref}\n$i${l}cb);\n$fcheck";
             }
             else {
@@ -532,7 +532,7 @@ MOO
             print $fh "$ifpresent";
             print $fh "${pref} NULL);\n$nullcheck";
         }
-        elsif($type eq "CURLOPTTYPE_BLOB") {
+        elsif($type eq "FETCHOPTTYPE_BLOB") {
             print $fh "${fpref} &blob);\n$check";
             print $fh "$ifpresent";
             print $fh "${pref} NULL);\n$nullcheck";
@@ -548,13 +548,13 @@ MOO
 MOO
             ;
     }
-    elsif($_ =~ /^CURLINFO_NONE/) {
+    elsif($_ =~ /^FETCHINFO_NONE/) {
        $infomode = 1;
     }
     elsif($infomode &&
-          ($_ =~ /^CURLINFO_([^ ]*) *= *CURLINFO_([^ ]*)/)) {
+          ($_ =~ /^FETCHINFO_([^ ]*) *= *FETCHINFO_([^ ]*)/)) {
        my ($info, $type)=($1, $2);
-       my $c = "  res = curl_easy_getinfo(curl, CURLINFO_$info,";
+       my $c = "  res = fetch_easy_getinfo(fetch, FETCHINFO_$info,";
        my $check = "  if(res)\n    geterr(\"$info\", res, __LINE__);\n";
        if($type eq "STRING") {
          print $fh "$c &charp);\n$check";
@@ -570,7 +570,7 @@ MOO
        }
        elsif($type eq "SLIST") {
          print $fh "$c &slist);\n$check";
-         print $fh "  if(slist)\n    curl_slist_free_all(slist);\n";
+         print $fh "  if(slist)\n    fetch_slist_free_all(slist);\n";
        }
        elsif($type eq "SOCKET") {
          print $fh "$c &sockfd);\n$check";
@@ -596,13 +596,13 @@ MOO
 
 print $fh <<FOOTER
   )
-  curl_easy_setopt(curl, (CURLoption)1, 0);
-  res = CURLE_OK;
+  fetch_easy_setopt(fetch, (FETCHoption)1, 0);
+  res = FETCHE_OK;
 test_cleanup:
-  curl_easy_cleanup(curl);
-  curl_easy_cleanup(dep);
-  curl_share_cleanup(share);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_easy_cleanup(dep);
+  fetch_share_cleanup(share);
+  fetch_global_cleanup();
 
   if(!res)
     puts("ok");

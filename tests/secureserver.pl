@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,11 +21,11 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 #***************************************************************************
 
-# This is the HTTPS, FTPS, POP3S, IMAPS, SMTPS, server used for curl test
+# This is the HTTPS, FTPS, POP3S, IMAPS, SMTPS, server used for fetch test
 # harness. Actually just a layer that runs stunnel properly using the
 # non-secure test harness servers.
 
@@ -309,7 +309,7 @@ if($stunnel_version >= 400) {
             print $stunconf "foreground = yes\n";
         }
         print $stunconf "\n";
-        print $stunconf "[curltest]\n";
+        print $stunconf "[fetchtest]\n";
         print $stunconf "accept = $host_ip:$accept_port\n";
         print $stunconf "connect = $host_ip:$target_port\n";
         if(!close($stunconf)) {
@@ -337,7 +337,7 @@ if($stunnel_version >= 400) {
             print "foreground = yes\n";
         }
         print "\n";
-        print "[curltest]\n";
+        print "[fetchtest]\n";
         print "accept = $host_ip:$accept_port\n";
         print "connect = $host_ip:$target_port\n";
     }

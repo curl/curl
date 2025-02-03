@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,56 +21,56 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
-# Determine if curl-config --protocols/--features matches the
-# curl --version protocols/features
+# Determine if fetch-config --protocols/--features matches the
+# fetch --version protocols/features
 if ( $#ARGV != 2 )
 {
-    print "Usage: $0 curl-config-script curl-version-output-file features|protocols\n";
+    print "Usage: $0 fetch-config-script fetch-version-output-file features|protocols\n";
     exit 3;
 }
 
 my $what=$ARGV[2];
 
-# Read the output of curl --version
-my $curl_protocols="";
-open(CURL, "$ARGV[1]") || die "Can't get curl $what list\n";
-while( <CURL> )
+# Read the output of fetch --version
+my $fetch_protocols="";
+open(FETCH, "$ARGV[1]") || die "Can't get fetch $what list\n";
+while( <FETCH> )
 {
-    $curl_protocols = $_ if ( /$what:/i );
+    $fetch_protocols = $_ if ( /$what:/i );
 }
-close CURL;
+close FETCH;
 
-$curl_protocols =~ s/\r//;
-$curl_protocols =~ /\w+: (.*)$/;
-@curl = split / /,$1;
+$fetch_protocols =~ s/\r//;
+$fetch_protocols =~ /\w+: (.*)$/;
+@fetch = split / /,$1;
 
-# Read the output of curl-config
-my @curl_config;
-open(CURLCONFIG, "sh $ARGV[0] --$what|") || die "Can't get curl-config $what list\n";
-while( <CURLCONFIG> )
+# Read the output of fetch-config
+my @fetch_config;
+open(FETCHCONFIG, "sh $ARGV[0] --$what|") || die "Can't get fetch-config $what list\n";
+while( <FETCHCONFIG> )
 {
     chomp;
-    $_ = lc($_) if($what eq "protocols");  # accept uppercase protocols in curl-config
-    push @curl_config, $_;
+    $_ = lc($_) if($what eq "protocols");  # accept uppercase protocols in fetch-config
+    push @fetch_config, $_;
 }
-close CURLCONFIG;
+close FETCHCONFIG;
 
 # allow order mismatch to handle autotools builds with no 'sort -f' available
 if($what eq "features") {
-    @curl = sort @curl;
-    @curl_config = sort @curl_config;
+    @fetch = sort @fetch;
+    @fetch_config = sort @fetch_config;
 }
 
-my $curlproto = join ' ', @curl;
-my $curlconfigproto = join ' ', @curl_config;
+my $fetchproto = join ' ', @fetch;
+my $fetchconfigproto = join ' ', @fetch_config;
 
-my $different = $curlproto ne $curlconfigproto;
+my $different = $fetchproto ne $fetchconfigproto;
 if ($different) {
     print "Mismatch in $what lists:\n";
-    print "curl:        $curlproto\n";
-    print "curl-config: $curlconfigproto\n";
+    print "fetch:        $fetchproto\n";
+    print "fetch-config: $fetchconfigproto\n";
 }
 exit $different;

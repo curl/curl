@@ -43,7 +43,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --ignore-content-length
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

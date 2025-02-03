@@ -31,7 +31,7 @@ smtp://%HOSTIP:%SMTPPORT/%TESTNUMBER --mail-rcpt recipient
 #
 # Verify data after the test has been "shot"
 <verify>
-# 8 - CURLE_WEIRD_SERVER_REPLY
+# 8 - FETCHE_WEIRD_SERVER_REPLY
 <errorcode>
 8
 </errorcode>

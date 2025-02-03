@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
-CURLOPT_READFUNCTION
+FETCHOPT_READFUNCTION
 </keywords>
 </info>
 
@@ -25,7 +25,7 @@ http
 </server>
 
 <name>
-Chunked HTTP POST from callback with CURLOPT_POSTFIELDSIZE set
+Chunked HTTP POST from callback with FETCHOPT_POSTFIELDSIZE set
 </name>
 <tool>
 lib%TESTNUMBER

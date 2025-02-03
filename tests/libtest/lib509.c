@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -27,8 +27,8 @@
 
 /*
  * This test uses these funny custom memory callbacks for the only purpose
- * of verifying that curl_global_init_mem() functionality is present in
- * libcurl and that it works unconditionally no matter how libcurl is built,
+ * of verifying that fetch_global_init_mem() functionality is present in
+ * libfetch and that it works unconditionally no matter how libfetch is built,
  * nothing more.
  *
  * Do not include memdebug.h in this source file, and do not use directly
@@ -69,38 +69,38 @@ static void custom_free(void *ptr)
 }
 
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   unsigned char a[] = {0x2f, 0x3a, 0x3b, 0x3c, 0x3d, 0x3e, 0x3f,
                        0x91, 0xa2, 0xb3, 0xc4, 0xd5, 0xe6, 0xf7};
-  CURLcode res;
-  CURL *curl;
+  FETCHcode res;
+  FETCH *fetch;
   int asize;
   char *str = NULL;
   (void)URL;
 
-  res = curl_global_init_mem(CURL_GLOBAL_ALL,
+  res = fetch_global_init_mem(FETCH_GLOBAL_ALL,
                              custom_malloc,
                              custom_free,
                              custom_realloc,
                              custom_strdup,
                              custom_calloc);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_global_init_mem() failed\n");
+  if(res != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init_mem() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  test_setopt(curl, CURLOPT_USERAGENT, "test509"); /* uses strdup() */
+  test_setopt(fetch, FETCHOPT_USERAGENT, "test509"); /* uses strdup() */
 
   asize = (int)sizeof(a);
-  str = curl_easy_escape(curl, (char *)a, asize); /* uses realloc() */
+  str = fetch_easy_escape(fetch, (char *)a, asize); /* uses realloc() */
 
   if(seen)
     printf("Callbacks were invoked!\n");
@@ -108,10 +108,10 @@ CURLcode test(char *URL)
 test_cleanup:
 
   if(str)
-    curl_free(str);
+    fetch_free(str);
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

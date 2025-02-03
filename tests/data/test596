@@ -27,7 +27,7 @@ moo
 <server>
 ftp
 </server>
-# tool is what to use instead of 'curl'
+# tool is what to use instead of 'fetch'
 <tool>
 lib585
 </tool>

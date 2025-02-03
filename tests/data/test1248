@@ -42,7 +42,7 @@ http://user:secret@%HOSTIP:%HTTPPORT/%TESTNUMBER --proxy http://dummy:%NOLISTENP
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjpzZWNyZXQ=
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

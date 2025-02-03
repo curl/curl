@@ -2,7 +2,7 @@
 <info>
 <keywords>
 unittest
-CURLOPT_RESOLVE
+FETCHOPT_RESOLVE
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ none
 unittest
 </features>
 <name>
-CURLOPT_RESOLVE parsing
+FETCHOPT_RESOLVE parsing
 </name>
 </client>
 </testcase>

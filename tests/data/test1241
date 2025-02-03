@@ -51,13 +51,13 @@ proxy
 <protocol>
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER?stupid=me/../%TESTNUMBER HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://test.remote.haxx.se.%TESTNUMBER:8990/../../hej/but/who/../%TESTNUMBER0001 HTTP/1.1
 Host: test.remote.haxx.se.%TESTNUMBER:8990
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

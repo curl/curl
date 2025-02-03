@@ -51,7 +51,7 @@ TYPE A
 LIST
 QUIT
 </protocol>
-# 78 == CURLE_REMOTE_FILE_NOT_FOUND
+# 78 == FETCHE_REMOTE_FILE_NOT_FOUND
 <errorcode>
 78
 </errorcode>

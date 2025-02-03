@@ -44,7 +44,7 @@ Proxy-Connection: Keep-Alive
 User-Agent: looser/2007
 
 </protocol>
-# CURLE_RECV_ERROR
+# FETCHE_RECV_ERROR
 <errorcode>
 56
 </errorcode>

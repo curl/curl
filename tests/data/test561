@@ -3,8 +3,8 @@
 <keywords>
 FTP
 HTTP proxy
-CURLOPT_PROXY_TRANSFER_MODE
-CURLOPT_PROXY
+FETCHOPT_PROXY_TRANSFER_MODE
+FETCHOPT_PROXY
 type=
 </keywords>
 </info>
@@ -39,7 +39,7 @@ proxy
 lib549
 </tool>
 <name>
-FTP RETR with CURLOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
+FTP RETR with FETCHOPT_PROXY_TRANSFER_MODE, ASCII transfer and type=i
 </name>
 # first URL then proxy
 <command>

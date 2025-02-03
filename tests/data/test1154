@@ -43,11 +43,11 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-# 100 == CURLE_TOO_LARGE
+# 100 == FETCHE_TOO_LARGE
 <errorcode>
 100
 </errorcode>

@@ -70,14 +70,14 @@ the
 # Verify data after the test has been "shot"
 <verify>
 
-# The primary reason libcurl sends the data part twice in this test is that
+# The primary reason libfetch sends the data part twice in this test is that
 # the test HTTP server is blocking until it has read the entire request,
 # including the full request-body before it responds. So in this test the
 # server says 301 and 200 _after_ the entire PUT body has been sent.
 <protocol>
 PUT /want/%TESTNUMBER HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 78
 
@@ -92,7 +92,7 @@ the
       feature
 PUT /want/data/%TESTNUMBER0002.txt?coolsite=yes HTTP/1.0
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 78
 

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 #include "test.h"
 
-#ifndef CURL_DISABLE_WEBSOCKETS
+#ifndef FETCH_DISABLE_WEBSOCKETS
 
 struct ws_data {
-  CURL *easy;
+  FETCH *easy;
   char buf[1024*1024];
   size_t blen;
   size_t nwrites;
@@ -55,7 +55,7 @@ static void flush_data(struct ws_data *wd)
 }
 
 static size_t add_data(struct ws_data *wd, const char *buf, size_t blen,
-                       const struct curl_ws_frame *meta)
+                       const struct fetch_ws_frame *meta)
 {
   if((wd->nwrites == 0) ||
      (!!meta != !!wd->has_meta) ||
@@ -80,10 +80,10 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
 {
   struct ws_data *ws_data = p;
   size_t incoming = nitems;
-  const struct curl_ws_frame *meta;
+  const struct fetch_ws_frame *meta;
   (void)size;
 
-  meta = curl_ws_meta(ws_data->easy);
+  meta = fetch_ws_meta(ws_data->easy);
   incoming = add_data(ws_data, buffer, incoming, meta);
 
   if(nitems != incoming)
@@ -91,33 +91,33 @@ static size_t writecb(char *buffer, size_t size, size_t nitems, void *p)
   return nitems;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
   struct ws_data ws_data;
 
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
-  curl = curl_easy_init();
-  if(curl) {
+  fetch = fetch_easy_init();
+  if(fetch) {
     memset(&ws_data, 0, sizeof(ws_data));
-    ws_data.easy = curl;
+    ws_data.easy = fetch;
 
-    curl_easy_setopt(curl, CURLOPT_URL, URL);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
     /* use the callback style */
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "webbie-sox/3");
-    curl_easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-    curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, writecb);
-    curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ws_data);
-    res = curl_easy_perform(curl);
-    fprintf(stderr, "curl_easy_perform() returned %d\n", res);
+    fetch_easy_setopt(fetch, FETCHOPT_USERAGENT, "webbie-sox/3");
+    fetch_easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEFUNCTION, writecb);
+    fetch_easy_setopt(fetch, FETCHOPT_WRITEDATA, &ws_data);
+    res = fetch_easy_perform(fetch);
+    fprintf(stderr, "fetch_easy_perform() returned %d\n", res);
     /* always cleanup */
-    curl_easy_cleanup(curl);
+    fetch_easy_cleanup(fetch);
     flush_data(&ws_data);
   }
-  curl_global_cleanup();
+  fetch_global_cleanup();
   return res;
 }
 

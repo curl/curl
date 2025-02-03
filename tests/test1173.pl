@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -47,7 +47,7 @@ my @optorder = (
     'NAME',
     'SYNOPSIS',
     'DESCRIPTION',
-     #'DEFAULT', # CURLINFO_ has no default
+     #'DEFAULT', # FETCHINFO_ has no default
     'PROTOCOLS',
     'EXAMPLE',
     'AVAILABILITY',
@@ -67,18 +67,18 @@ my %shline; # section => line number
 
 my %symbol;
 
-# some CURLINFO_ symbols are not actual options for curl_easy_getinfo,
+# some FETCHINFO_ symbols are not actual options for fetch_easy_getinfo,
 # mark them as "deprecated" to hide them from link-warnings
 my %deprecated = (
-    CURLINFO_TEXT => 1,
-    CURLINFO_HEADER_IN => 1,
-    CURLINFO_HEADER_OUT => 1,
-    CURLINFO_DATA_IN => 1,
-    CURLINFO_DATA_OUT => 1,
-    CURLINFO_SSL_DATA_IN => 1,
-    CURLINFO_SSL_DATA_OUT => 1,
-    CURLOPT_EGDSOCKET => 1,
-    CURLOPT_RANDOM_FILE => 1,
+    FETCHINFO_TEXT => 1,
+    FETCHINFO_HEADER_IN => 1,
+    FETCHINFO_HEADER_OUT => 1,
+    FETCHINFO_DATA_IN => 1,
+    FETCHINFO_DATA_OUT => 1,
+    FETCHINFO_SSL_DATA_IN => 1,
+    FETCHINFO_SSL_DATA_OUT => 1,
+    FETCHOPT_EGDSOCKET => 1,
+    FETCHOPT_RANDOM_FILE => 1,
     );
 sub allsymbols {
     open(my $f, "<", "$symbolsinversions") ||
@@ -98,7 +98,7 @@ sub allsymbols {
 
 
 my %ref = (
-    'curl.1' => 1
+    'fetch.1' => 1
     );
 sub checkref {
     my ($f, $sec, $file, $line)=@_;
@@ -138,11 +138,11 @@ sub scanmanpage {
 
     open(my $m, "<", "$file") ||
         die "test1173.pl could not open $file";
-    if($file =~ /[\/\\](CURL|curl_)([^\/\\]*).3/) {
-        # This is a manpage for libcurl. It requires an example unless it's
+    if($file =~ /[\/\\](FETCH|fetch_)([^\/\\]*).3/) {
+        # This is a manpage for libfetch. It requires an example unless it's
         # considered deprecated.
-        $reqex = 1 unless defined $deprecated{'CURL'.$2};
-        if($1 eq "CURL") {
+        $reqex = 1 unless defined $deprecated{'FETCH'.$2};
+        if($1 eq "FETCH") {
             $optpage = 1;
         }
     }
@@ -155,7 +155,7 @@ sub scanmanpage {
             return;
         }
         if(($_ =~ /^\.SH SYNOPSIS/i) && ($reqex)) {
-            # this is for libcurl manpage SYNOPSIS checks
+            # this is for libfetch manpage SYNOPSIS checks
             $insynop = 1;
             $inex = 0;
         }
@@ -173,7 +173,7 @@ sub scanmanpage {
         elsif($inseealso) {
             if($_ =~ /^\.BR (.*)/i) {
                 my $f = $1;
-                if($f =~ /^(lib|)curl/i) {
+                if($f =~ /^(lib|)fetch/i) {
                     $f =~ s/[\n\r]//g;
                     if($f =~ s/([a-z_0-9-]*) \(([13])\)([, ]*)//i) {
                         push @separators, $3;
@@ -230,12 +230,12 @@ sub scanmanpage {
             }
         }
         my $c = $_;
-        while($c =~ s/\\f([BI])((lib|)curl[a-z_0-9-]*)\(([13])\)//i) {
+        while($c =~ s/\\f([BI])((lib|)fetch[a-z_0-9-]*)\(([13])\)//i) {
             checkref($2, $4, $file, $line);
         }
-        if(($_ =~ /\\f([BI])((libcurl|CURLOPT_|CURLSHOPT_|CURLINFO_|CURLMOPT_|curl_easy_|curl_multi_|curl_url|curl_mime|curl_global|curl_share)[a-zA-Z_0-9-]+)(.)/) &&
+        if(($_ =~ /\\f([BI])((libfetch|FETCHOPT_|FETCHSHOPT_|FETCHINFO_|FETCHMOPT_|fetch_easy_|fetch_multi_|fetch_url|fetch_mime|fetch_global|fetch_share)[a-zA-Z_0-9-]+)(.)/) &&
            ($4 ne "(")) {
-            print STDERR "$file:$line curl ref to $2 without section\n";
+            print STDERR "$file:$line fetch ref to $2 without section\n";
             $errors++;
         }
         if($_ =~ /(.*)\\f([^BIP])/) {
@@ -247,15 +247,15 @@ sub scanmanpage {
             }
         }
         if(($SH =~ /^(DESCRIPTION|RETURN VALUE|AVAILABILITY)/i) &&
-           ($_ =~ /(.*)((curl_multi|curl_easy|curl_url|curl_global|curl_url|curl_share)[a-zA-Z_0-9-]+)/) &&
+           ($_ =~ /(.*)((fetch_multi|fetch_easy|fetch_url|fetch_global|fetch_url|fetch_share)[a-zA-Z_0-9-]+)/) &&
            ($1 !~ /\\fI$/)) {
-            print STDERR "$file:$line unrefed curl call: $2\n";
+            print STDERR "$file:$line unrefed fetch call: $2\n";
             $errors++;
         }
 
 
         if($optpage && $SH && ($SH !~ /^(SYNOPSIS|EXAMPLE|NAME|SEE ALSO)/i) &&
-           ($_ =~ /(.*)(CURL(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {
+           ($_ =~ /(.*)(FETCH(OPT_|MOPT_|INFO_|SHOPT_)[A-Z0-9_]*)/)) {
             # an option with its own manpage, check that it is tagged
             # for linking
             my ($pref, $symbol) = ($1, $2);
@@ -296,7 +296,7 @@ sub scanmanpage {
     }
 
     if($reqex) {
-        # only for libcurl options man-pages
+        # only for libfetch options man-pages
 
         my $shcount = scalar(@sh); # before @sh gets shifted
         if($exsize < 2) {
@@ -358,7 +358,7 @@ sub scanmanpage {
 
 allsymbols();
 
-if(!$symbol{'CURLALTSVC_H1'}) {
+if(!$symbol{'FETCHALTSVC_H1'}) {
     print STDERR "didn't get the symbols-in-version!\n";
     exit;
 }

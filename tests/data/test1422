@@ -44,7 +44,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -J -O file://%FILE_PWD/%LOGDIR/name%TESTNUM
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

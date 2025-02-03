@@ -4,7 +4,7 @@
 HTTP
 HTTP GET
 multi
-CURLOPT_RESOLVE
+FETCHOPT_RESOLVE
 </keywords>
 </info>
 
@@ -35,7 +35,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-HTTP multi with CURLOPT_RESOLVE, cleanup sequence PB
+HTTP multi with FETCHOPT_RESOLVE, cleanup sequence PB
 </name>
 <command>
 http://google.com:%HTTPPORT/%TESTNUMBER %HTTPPORT %HOSTIP

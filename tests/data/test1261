@@ -39,11 +39,11 @@ http://%HOSTIP:%HTTPPORT/we/want/our/%TESTNUMBER -w '%{redirect_url}\n' --locati
 <protocol>
 GET /we/want/our/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-# CURLE_TOO_MANY_REDIRECTS
+# FETCHE_TOO_MANY_REDIRECTS
 <errorcode>
 47
 </errorcode>

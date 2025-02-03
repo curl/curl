@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
@@ -84,7 +84,7 @@ void libtest_debug_dump(const char *timebuf, const char *text, FILE *stream,
   fflush(stream);
 }
 
-int libtest_debug_cb(CURL *handle, curl_infotype type,
+int libtest_debug_cb(FETCH *handle, fetch_infotype type,
                      char *data, size_t size, void *userp)
 {
   struct libtest_trace_cfg *trace_cfg = userp;
@@ -113,25 +113,25 @@ int libtest_debug_cb(CURL *handle, curl_infotype type,
   }
 
   switch(type) {
-  case CURLINFO_TEXT:
+  case FETCHINFO_TEXT:
     fprintf(stderr, "%s== Info: %s", timestr, (char *)data);
     return 0;
-  case CURLINFO_HEADER_OUT:
+  case FETCHINFO_HEADER_OUT:
     text = "=> Send header";
     break;
-  case CURLINFO_DATA_OUT:
+  case FETCHINFO_DATA_OUT:
     text = "=> Send data";
     break;
-  case CURLINFO_SSL_DATA_OUT:
+  case FETCHINFO_SSL_DATA_OUT:
     text = "=> Send SSL data";
     break;
-  case CURLINFO_HEADER_IN:
+  case FETCHINFO_HEADER_IN:
     text = "<= Recv header";
     break;
-  case CURLINFO_DATA_IN:
+  case FETCHINFO_DATA_IN:
     text = "<= Recv data";
     break;
-  case CURLINFO_SSL_DATA_IN:
+  case FETCHINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
   default: /* in case a new one is introduced to shock us */

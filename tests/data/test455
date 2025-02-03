@@ -44,7 +44,7 @@ Variable using base64
 <protocol crlf="yes">
 GET /%b64[Call me Ishmael]b64%/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

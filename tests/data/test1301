@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_strequal
+fetch_strequal
 </keywords>
 </info>
 
@@ -15,7 +15,7 @@ none
 lib%TESTNUMBER
 </tool>
 <name>
-curl_strequal tests
+fetch_strequal tests
 </name>
 </client>
 </testcase>

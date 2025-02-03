@@ -47,7 +47,7 @@ Hello Joe, do you think we can meet at 3:30 tomorrow?
 #
 # Verify data after the test has been "shot"
 <verify>
-# 8 is CURLE_WEIRD_SERVER_REPLY
+# 8 is FETCHE_WEIRD_SERVER_REPLY
 <errorcode>
 8
 </errorcode>

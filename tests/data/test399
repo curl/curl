@@ -24,7 +24,7 @@ url = http://%repeat[65536 x a]%/399
 </client>
 
 <verify>
-# 3 == CURLE_URL_MALFORMAT
+# 3 == FETCHE_URL_MALFORMAT
 <errorcode>
 3
 </errorcode>

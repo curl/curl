@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_nextheader
+fetch_easy_nextheader
 </keywords>
 </info>
 
@@ -50,7 +50,7 @@ http
 </server>
 
 <name>
-curl_easy_nextheader on second request after first did redirects
+fetch_easy_nextheader on second request after first did redirects
 </name>
 <tool>
 lib%TESTNUMBER

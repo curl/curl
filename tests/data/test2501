@@ -57,7 +57,7 @@ via: 1.1 nghttpx
 <protocol nonewline="yes">
 POST https://%HOSTIP:%HTTP3PORT/2501 HTTP/1.1
 Host: %HOSTIP:%HTTP3PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 3
 Content-Type: application/x-www-form-urlencoded

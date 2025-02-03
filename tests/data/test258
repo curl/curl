@@ -65,7 +65,7 @@ proxy
 HTTP POST multipart without Expect: header using proxy anyauth (Digest)
 </name>
 <command>
--x http://%HOSTIP:%HTTPPORT http://remotehost:54321/we/want/%TESTNUMBER -F name=daniel -F tool=curl -F file=@%LOGDIR/test%TESTNUMBER.txt -H "Expect:" -U uuuser:pppassword --proxy-anyauth
+-x http://%HOSTIP:%HTTPPORT http://remotehost:54321/we/want/%TESTNUMBER -F name=daniel -F tool=fetch -F file=@%LOGDIR/test%TESTNUMBER.txt -H "Expect:" -U uuuser:pppassword --proxy-anyauth
 </command>
 # We create this file before the command is invoked!
 <file name="%LOGDIR/test%TESTNUMBER.txt">
@@ -83,7 +83,7 @@ bar
 <protocol>
 POST http://remotehost:54321/we/want/%TESTNUMBER HTTP/1.1
 Host: remotehost:54321
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 433
@@ -96,7 +96,7 @@ daniel
 ------------------------------7c633d5c27ce
 Content-Disposition: form-data; name="tool"
 
-curl
+fetch
 ------------------------------7c633d5c27ce
 Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain
@@ -109,7 +109,7 @@ bar
 POST http://remotehost:54321/we/want/%TESTNUMBER HTTP/1.1
 Host: remotehost:54321
 Proxy-Authorization: Digest username="uuuser", realm="many secrets", nonce="911", uri="/we/want/%TESTNUMBER", response="2501654ca391f0b5c8c12a1da77e34cd"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 Content-Length: 433
@@ -122,7 +122,7 @@ daniel
 ------------------------------7c633d5c27ce
 Content-Disposition: form-data; name="tool"
 
-curl
+fetch
 ------------------------------7c633d5c27ce
 Content-Disposition: form-data; name="file"; filename="test%TESTNUMBER.txt"
 Content-Type: text/plain

@@ -39,7 +39,7 @@ pick netrc password based on user name in URL
 --netrc --netrc-file %LOGDIR/netrc%TESTNUMBER ftp://mary@%HOSTIP:%FTPPORT/
 </command>
 <file name="%LOGDIR/netrc%TESTNUMBER" >
-# the following two lines were created while testing curl
+# the following two lines were created while testing fetch
 machine %HOSTIP login frankenstein password wrongone
 machine %HOSTIP login mary password yram
 </file>

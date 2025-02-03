@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -30,7 +30,7 @@ static char testdata[]=
 
 struct WriteThis {
   char *readptr;
-  curl_off_t sizeleft;
+  fetch_off_t sizeleft;
   int freecount;
 };
 
@@ -62,14 +62,14 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *userp)
   return 0;                         /* no more data left to deliver */
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *easy = NULL;
-  CURL *easy2 = NULL;
-  curl_mime *mime = NULL;
-  curl_mimepart *part;
-  struct curl_slist *hdrs = NULL;
-  CURLcode res = TEST_ERR_FAILURE;
+  FETCH *easy = NULL;
+  FETCH *easy2 = NULL;
+  fetch_mime *mime = NULL;
+  fetch_mimepart *part;
+  struct fetch_slist *hdrs = NULL;
+  FETCHcode res = TEST_ERR_FAILURE;
   struct WriteThis pooh;
 
   /*
@@ -77,77 +77,77 @@ CURLcode test(char *URL)
    * easy handle.
    */
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  easy = curl_easy_init();
+  easy = fetch_easy_init();
 
   /* First set the URL that is about to receive our POST. */
-  test_setopt(easy, CURLOPT_URL, URL);
+  test_setopt(easy, FETCHOPT_URL, URL);
 
   /* get verbose debug output please */
-  test_setopt(easy, CURLOPT_VERBOSE, 1L);
+  test_setopt(easy, FETCHOPT_VERBOSE, 1L);
 
   /* include headers in the output */
-  test_setopt(easy, CURLOPT_HEADER, 1L);
+  test_setopt(easy, FETCHOPT_HEADER, 1L);
 
   /* Prepare the callback structure. */
   pooh.readptr = testdata;
-  pooh.sizeleft = (curl_off_t) strlen(testdata);
+  pooh.sizeleft = (fetch_off_t) strlen(testdata);
   pooh.freecount = 0;
 
   /* Build the mime tree. */
-  mime = curl_mime_init(easy);
-  part = curl_mime_addpart(mime);
-  curl_mime_data(part, "hello", CURL_ZERO_TERMINATED);
-  curl_mime_name(part, "greeting");
-  curl_mime_type(part, "application/X-Greeting");
-  curl_mime_encoder(part, "base64");
-  hdrs = curl_slist_append(hdrs, "X-Test-Number: 654");
-  curl_mime_headers(part, hdrs, TRUE);
-  part = curl_mime_addpart(mime);
-  curl_mime_filedata(part, libtest_arg2);
-  part = curl_mime_addpart(mime);
-  curl_mime_data_cb(part, (curl_off_t) -1, read_callback, NULL, free_callback,
+  mime = fetch_mime_init(easy);
+  part = fetch_mime_addpart(mime);
+  fetch_mime_data(part, "hello", FETCH_ZERO_TERMINATED);
+  fetch_mime_name(part, "greeting");
+  fetch_mime_type(part, "application/X-Greeting");
+  fetch_mime_encoder(part, "base64");
+  hdrs = fetch_slist_append(hdrs, "X-Test-Number: 654");
+  fetch_mime_headers(part, hdrs, TRUE);
+  part = fetch_mime_addpart(mime);
+  fetch_mime_filedata(part, libtest_arg2);
+  part = fetch_mime_addpart(mime);
+  fetch_mime_data_cb(part, (fetch_off_t) -1, read_callback, NULL, free_callback,
                     &pooh);
 
   /* Bind mime data to its easy handle. */
-  test_setopt(easy, CURLOPT_MIMEPOST, mime);
+  test_setopt(easy, FETCHOPT_MIMEPOST, mime);
 
   /* Duplicate the handle. */
-  easy2 = curl_easy_duphandle(easy);
+  easy2 = fetch_easy_duphandle(easy);
   if(!easy2) {
-    fprintf(stderr, "curl_easy_duphandle() failed\n");
+    fprintf(stderr, "fetch_easy_duphandle() failed\n");
     res = TEST_ERR_FAILURE;
     goto test_cleanup;
   }
 
   /* Now free the mime structure: it should unbind it from the first
      easy handle. */
-  curl_mime_free(mime);
+  fetch_mime_free(mime);
   mime = NULL;  /* Already cleaned up. */
 
   /* Perform on the first handle: should not send any data. */
-  res = curl_easy_perform(easy);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform(original) failed\n");
+  res = fetch_easy_perform(easy);
+  if(res != FETCHE_OK) {
+    fprintf(stderr, "fetch_easy_perform(original) failed\n");
     goto test_cleanup;
   }
 
   /* Perform on the second handle: if the bound mime structure has not been
      duplicated properly, it should cause a valgrind error. */
-  res = curl_easy_perform(easy2);
-  if(res != CURLE_OK) {
-    fprintf(stderr, "curl_easy_perform(duplicated) failed\n");
+  res = fetch_easy_perform(easy2);
+  if(res != FETCHE_OK) {
+    fprintf(stderr, "fetch_easy_perform(duplicated) failed\n");
     goto test_cleanup;
   }
 
   /* Free the duplicated handle: it should call free_callback again.
      If the mime copy was bad or not automatically released, valgrind
      will signal it. */
-  curl_easy_cleanup(easy2);
+  fetch_easy_cleanup(easy2);
   easy2 = NULL;  /* Already cleaned up. */
 
   if(pooh.freecount != 2) {
@@ -158,9 +158,9 @@ CURLcode test(char *URL)
   }
 
 test_cleanup:
-  curl_easy_cleanup(easy);
-  curl_easy_cleanup(easy2);
-  curl_mime_free(mime);
-  curl_global_cleanup();
+  fetch_easy_cleanup(easy);
+  fetch_easy_cleanup(easy2);
+  fetch_mime_free(mime);
+  fetch_global_cleanup();
   return res;
 }

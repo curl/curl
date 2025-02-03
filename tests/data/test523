@@ -4,8 +4,8 @@
 HTTP
 HTTP GET
 HTTP proxy
-CURLOPT_PORT
-CURLOPT_PROXY
+FETCHOPT_PORT
+FETCHOPT_PROXY
 </keywords>
 </info>
 
@@ -35,7 +35,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-HTTP GET with proxy and CURLOPT_PORT
+HTTP GET with proxy and FETCHOPT_PORT
 </name>
 # first URL then proxy
 <command>

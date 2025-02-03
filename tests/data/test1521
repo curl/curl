@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_setopt
+fetch_easy_setopt
 </keywords>
 </info>
 
@@ -16,7 +16,7 @@ lib%TESTNUMBER
 </tool>
 
 <name>
-Test all curl_easy_setopt and curl_easy_getinfo options
+Test all fetch_easy_setopt and fetch_easy_getinfo options
 </name>
 <command>
 unused

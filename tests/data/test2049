@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLOPT_CONNECT_TO
+FETCHOPT_CONNECT_TO
 </keywords>
 </info>
 
@@ -41,22 +41,22 @@ http://www1.example.com:8081/%TESTNUMBER --connect-to ::%HOSTIP:%HTTPPORT --next
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: www1.example.com:8081
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: www2.example.com:8082
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: www3.example.com:8083
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: www4.example.com:8084
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

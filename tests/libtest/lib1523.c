@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,19 +18,19 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
-/* test case and code based on https://github.com/curl/curl/issues/3927 */
+/* test case and code based on https://github.com/fetch/fetch/issues/3927 */
 
 #include "testutil.h"
 #include "warnless.h"
 #include "memdebug.h"
 
-static int dload_progress_cb(void *a, curl_off_t b, curl_off_t c,
-                             curl_off_t d, curl_off_t e)
+static int dload_progress_cb(void *a, fetch_off_t b, fetch_off_t c,
+                             fetch_off_t d, fetch_off_t e)
 {
   (void)a;
   (void)b;
@@ -48,38 +48,38 @@ static size_t write_cb(char *d, size_t n, size_t l, void *p)
   return n*l;
 }
 
-static CURLcode run(CURL *hnd, long limit, long time)
+static FETCHcode run(FETCH *hnd, long limit, long time)
 {
-  curl_easy_setopt(hnd, CURLOPT_LOW_SPEED_LIMIT, limit);
-  curl_easy_setopt(hnd, CURLOPT_LOW_SPEED_TIME, time);
-  return curl_easy_perform(hnd);
+  fetch_easy_setopt(hnd, FETCHOPT_LOW_SPEED_LIMIT, limit);
+  fetch_easy_setopt(hnd, FETCHOPT_LOW_SPEED_TIME, time);
+  return fetch_easy_perform(hnd);
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode ret;
-  CURL *hnd;
-  char buffer[CURL_ERROR_SIZE];
-  curl_global_init(CURL_GLOBAL_ALL);
-  hnd = curl_easy_init();
-  curl_easy_setopt(hnd, CURLOPT_URL, URL);
-  curl_easy_setopt(hnd, CURLOPT_WRITEFUNCTION, write_cb);
-  curl_easy_setopt(hnd, CURLOPT_ERRORBUFFER, buffer);
-  curl_easy_setopt(hnd, CURLOPT_NOPROGRESS, 0L);
-  curl_easy_setopt(hnd, CURLOPT_XFERINFOFUNCTION, dload_progress_cb);
+  FETCHcode ret;
+  FETCH *hnd;
+  char buffer[FETCH_ERROR_SIZE];
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  hnd = fetch_easy_init();
+  fetch_easy_setopt(hnd, FETCHOPT_URL, URL);
+  fetch_easy_setopt(hnd, FETCHOPT_WRITEFUNCTION, write_cb);
+  fetch_easy_setopt(hnd, FETCHOPT_ERRORBUFFER, buffer);
+  fetch_easy_setopt(hnd, FETCHOPT_NOPROGRESS, 0L);
+  fetch_easy_setopt(hnd, FETCHOPT_XFERINFOFUNCTION, dload_progress_cb);
 
   ret = run(hnd, 1, 2);
   if(ret)
     fprintf(stderr, "error %d: %s\n", ret, buffer);
 
   ret = run(hnd, 12000, 1);
-  if(ret != CURLE_OPERATION_TIMEDOUT)
+  if(ret != FETCHE_OPERATION_TIMEDOUT)
     fprintf(stderr, "error %d: %s\n", ret, buffer);
   else
-    ret = CURLE_OK;
+    ret = FETCHE_OK;
 
-  curl_easy_cleanup(hnd);
-  curl_global_cleanup();
+  fetch_easy_cleanup(hnd);
+  fetch_global_cleanup();
 
   return ret;
 }

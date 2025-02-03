@@ -62,12 +62,12 @@ HTTP Location: following with multiple question marks in URLs
 <protocol>
 GET /want?uri=http://anything/%TESTNUMBER?secondq/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /data/%TESTNUMBER0002.txt?coolsite=http://anotherurl/?a_second/%TESTNUMBER0002 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

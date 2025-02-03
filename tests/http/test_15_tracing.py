@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -40,9 +40,9 @@ class TestTracing:
 
     # default verbose output
     def test_15_01_trace_defaults(self, env: Env, httpd):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
-        r = curl.http_get(url=url, def_tracing=False, extra_args=[
+        r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v'
         ])
         r.check_response(http_status=200)
@@ -51,9 +51,9 @@ class TestTracing:
 
     # trace ids
     def test_15_02_trace_ids(self, env: Env, httpd):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
-        r = curl.http_get(url=url, def_tracing=False, extra_args=[
+        r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'ids'
         ])
         r.check_response(http_status=200)
@@ -64,9 +64,9 @@ class TestTracing:
 
     # trace ids+time
     def test_15_03_trace_ids_time(self, env: Env, httpd):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
-        r = curl.http_get(url=url, def_tracing=False, extra_args=[
+        r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'ids,time'
         ])
         r.check_response(http_status=200)
@@ -77,9 +77,9 @@ class TestTracing:
 
     # trace all
     def test_15_04_trace_all(self, env: Env, httpd):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
-        r = curl.http_get(url=url, def_tracing=False, extra_args=[
+        r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'all'
         ])
         r.check_response(http_status=200)
@@ -96,9 +96,9 @@ class TestTracing:
 
     # trace all, no TCP, no time
     def test_15_05_trace_all(self, env: Env, httpd):
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'http://{env.domain1}:{env.http_port}/data.json'
-        r = curl.http_get(url=url, def_tracing=False, extra_args=[
+        r = fetch.http_get(url=url, def_tracing=False, extra_args=[
             '-v', '--trace-config', 'all,-tcp,-time'
         ])
         r.check_response(http_status=200)

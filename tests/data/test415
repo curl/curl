@@ -44,12 +44,12 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
 
-# built-in curl returns weird_server_reply
+# built-in fetch returns weird_server_reply
 <errorcode>
 8
 </errorcode>

@@ -20,7 +20,7 @@ manual
 none
 </server>
 <name>
-curl important --help
+fetch important --help
 </name>
 <command>
 --help
@@ -34,7 +34,7 @@ curl important --help
 0
 </errorcode>
 <stdout mode="text">
-Usage: curl [options...] <url>
+Usage: fetch [options...] <url>
  -d, --data <data>           HTTP POST data
  -f, --fail                  Fail fast with no output on HTTP errors
  -h, --help <subject>        Get help for commands
@@ -50,7 +50,7 @@ Usage: curl [options...] <url>
 
 This is not the full help; this menu is split into categories.
 Use "--help category" to get an overview of all categories, which are:
-auth, connection, curl, deprecated, dns, file, ftp, global, http, imap, ldap, 
+auth, connection, fetch, deprecated, dns, file, ftp, global, http, imap, ldap, 
 output, pop3, post, proxy, scp, sftp, smtp, ssh, telnet, tftp, timeout, tls, 
 upload, verbose.
 Use "--help all" to list all options

@@ -21,7 +21,7 @@ none
 file
 </features>
 <name>
-curl file category --help
+fetch file category --help
 </name>
 <command>
 --help file

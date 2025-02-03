@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -28,7 +28,7 @@
 
 /* struct containing data of a thread */
 struct Tdata {
-  CURLSH *share;
+  FETCHSH *share;
   char *url;
 };
 
@@ -38,8 +38,8 @@ struct userdata {
 };
 
 /* lock callback */
-static void test_lock(CURL *handle, curl_lock_data data,
-                      curl_lock_access laccess, void *useptr)
+static void test_lock(FETCH *handle, fetch_lock_data data,
+                      fetch_lock_access laccess, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
@@ -48,16 +48,16 @@ static void test_lock(CURL *handle, curl_lock_data data,
   (void)laccess;
 
   switch(data) {
-    case CURL_LOCK_DATA_SHARE:
+    case FETCH_LOCK_DATA_SHARE:
       what = "share";
       break;
-    case CURL_LOCK_DATA_DNS:
+    case FETCH_LOCK_DATA_DNS:
       what = "dns";
       break;
-    case CURL_LOCK_DATA_COOKIE:
+    case FETCH_LOCK_DATA_COOKIE:
       what = "cookie";
       break;
-    case CURL_LOCK_DATA_SSL_SESSION:
+    case FETCH_LOCK_DATA_SSL_SESSION:
       what = "ssl_session";
       break;
     default:
@@ -69,22 +69,22 @@ static void test_lock(CURL *handle, curl_lock_data data,
 }
 
 /* unlock callback */
-static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
+static void test_unlock(FETCH *handle, fetch_lock_data data, void *useptr)
 {
   const char *what;
   struct userdata *user = (struct userdata *)useptr;
   (void)handle;
   switch(data) {
-    case CURL_LOCK_DATA_SHARE:
+    case FETCH_LOCK_DATA_SHARE:
       what = "share";
       break;
-    case CURL_LOCK_DATA_DNS:
+    case FETCH_LOCK_DATA_DNS:
       what = "dns";
       break;
-    case CURL_LOCK_DATA_COOKIE:
+    case FETCH_LOCK_DATA_COOKIE:
       what = "cookie";
       break;
-    case CURL_LOCK_DATA_SSL_SESSION:
+    case FETCH_LOCK_DATA_SSL_SESSION:
       what = "ssl_session";
       break;
     default:
@@ -98,45 +98,45 @@ static void test_unlock(CURL *handle, curl_lock_data data, void *useptr)
 /* the dummy thread function */
 static void *test_fire(void *ptr)
 {
-  CURLcode code;
+  FETCHcode code;
   struct Tdata *tdata = (struct Tdata*)ptr;
-  CURL *curl;
+  FETCH *fetch;
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
     return NULL;
   }
 
-  curl_easy_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  curl_easy_setopt(curl, CURLOPT_VERBOSE,    1L);
-  curl_easy_setopt(curl, CURLOPT_URL,        tdata->url);
-  printf("CURLOPT_SHARE\n");
-  curl_easy_setopt(curl, CURLOPT_SHARE, tdata->share);
+  fetch_easy_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
+  fetch_easy_setopt(fetch, FETCHOPT_VERBOSE,    1L);
+  fetch_easy_setopt(fetch, FETCHOPT_URL,        tdata->url);
+  printf("FETCHOPT_SHARE\n");
+  fetch_easy_setopt(fetch, FETCHOPT_SHARE, tdata->share);
 
   printf("PERFORM\n");
-  code = curl_easy_perform(curl);
-  if(code != CURLE_OK) {
+  code = fetch_easy_perform(fetch);
+  if(code != FETCHE_OK) {
     int i = 0;
-    fprintf(stderr, "perform url '%s' repeat %d failed, curlcode %d\n",
+    fprintf(stderr, "perform url '%s' repeat %d failed, fetchcode %d\n",
             tdata->url, i, (int)code);
   }
 
   printf("CLEANUP\n");
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
   return NULL;
 }
 
 /* test function */
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURLSHcode scode = CURLSHE_OK;
+  FETCHcode res = FETCHE_OK;
+  FETCHSHcode scode = FETCHSHE_OK;
   char *url;
   struct Tdata tdata;
-  CURL *curl;
-  CURLSH *share;
+  FETCH *fetch;
+  FETCHSH *share;
   int i;
   struct userdata user;
 
@@ -144,42 +144,42 @@ CURLcode test(char *URL)
   user.counter = 0;
 
   printf("GLOBAL_INIT\n");
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* prepare share */
   printf("SHARE_INIT\n");
-  share = curl_share_init();
+  share = fetch_share_init();
   if(!share) {
-    fprintf(stderr, "curl_share_init() failed\n");
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_share_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
-  if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_LOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_LOCKFUNC, test_lock);
+  if(FETCHSHE_OK == scode) {
+    printf("FETCHSHOPT_LOCKFUNC\n");
+    scode = fetch_share_setopt(share, FETCHSHOPT_LOCKFUNC, test_lock);
   }
-  if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_UNLOCKFUNC\n");
-    scode = curl_share_setopt(share, CURLSHOPT_UNLOCKFUNC, test_unlock);
+  if(FETCHSHE_OK == scode) {
+    printf("FETCHSHOPT_UNLOCKFUNC\n");
+    scode = fetch_share_setopt(share, FETCHSHOPT_UNLOCKFUNC, test_unlock);
   }
-  if(CURLSHE_OK == scode) {
-    printf("CURLSHOPT_USERDATA\n");
-    scode = curl_share_setopt(share, CURLSHOPT_USERDATA, &user);
+  if(FETCHSHE_OK == scode) {
+    printf("FETCHSHOPT_USERDATA\n");
+    scode = fetch_share_setopt(share, FETCHSHOPT_USERDATA, &user);
   }
-  if(CURLSHE_OK == scode) {
-    printf("CURL_LOCK_DATA_SSL_SESSION\n");
-    scode = curl_share_setopt(share, CURLSHOPT_SHARE,
-                              CURL_LOCK_DATA_SSL_SESSION);
+  if(FETCHSHE_OK == scode) {
+    printf("FETCH_LOCK_DATA_SSL_SESSION\n");
+    scode = fetch_share_setopt(share, FETCHSHOPT_SHARE,
+                              FETCH_LOCK_DATA_SSL_SESSION);
   }
 
-  if(CURLSHE_OK != scode) {
-    fprintf(stderr, "curl_share_setopt() failed\n");
-    curl_share_cleanup(share);
-    curl_global_cleanup();
+  if(FETCHSHE_OK != scode) {
+    fprintf(stderr, "fetch_share_setopt() failed\n");
+    fetch_share_cleanup(share);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -199,27 +199,27 @@ CURLcode test(char *URL)
 
   /* fetch another one */
   printf("*** run %d\n", i);
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_share_cleanup(share);
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_share_cleanup(share);
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   url = URL;
-  test_setopt(curl, CURLOPT_URL, url);
-  printf("CURLOPT_SHARE\n");
-  test_setopt(curl, CURLOPT_SHARE, share);
+  test_setopt(fetch, FETCHOPT_URL, url);
+  printf("FETCHOPT_SHARE\n");
+  test_setopt(fetch, FETCHOPT_SHARE, share);
 
   printf("PERFORM\n");
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
   /* try to free share, expect to fail because share is in use */
   printf("try SHARE_CLEANUP...\n");
-  scode = curl_share_cleanup(share);
-  if(scode == CURLSHE_OK) {
-    fprintf(stderr, "curl_share_cleanup succeed but error expected\n");
+  scode = fetch_share_cleanup(share);
+  if(scode == FETCHSHE_OK) {
+    fprintf(stderr, "fetch_share_cleanup succeed but error expected\n");
     share = NULL;
   }
   else {
@@ -230,17 +230,17 @@ test_cleanup:
 
   /* clean up last handle */
   printf("CLEANUP\n");
-  curl_easy_cleanup(curl);
+  fetch_easy_cleanup(fetch);
 
   /* free share */
   printf("SHARE_CLEANUP\n");
-  scode = curl_share_cleanup(share);
-  if(scode != CURLSHE_OK)
-    fprintf(stderr, "curl_share_cleanup failed, code errno %d\n",
+  scode = fetch_share_cleanup(share);
+  if(scode != FETCHSHE_OK)
+    fprintf(stderr, "fetch_share_cleanup failed, code errno %d\n",
             (int)scode);
 
   printf("GLOBAL_CLEANUP\n");
-  curl_global_cleanup();
+  fetch_global_cleanup();
 
   return res;
 }

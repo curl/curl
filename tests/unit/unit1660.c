@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,27 +18,27 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "urldata.h"
 #include "hsts.h"
 
-static CURLcode
+static FETCHcode
 unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void
 unit_stop(void)
 {
-  curl_global_cleanup();
+  fetch_global_cleanup();
 }
 
-#if defined(CURL_DISABLE_HTTP) || defined(CURL_DISABLE_HSTS)
+#if defined(FETCH_DISABLE_HTTP) || defined(FETCH_DISABLE_HSTS)
 UNITTEST_START
 {
   puts("nothing to do when HTTP or HSTS are disabled");
@@ -50,60 +50,60 @@ struct testit {
   const char *host;
   const char *chost; /* if non-NULL, use to lookup with */
   const char *hdr; /* if NULL, just do the lookup */
-  const CURLcode result; /* parse result */
+  const FETCHcode result; /* parse result */
 };
 
 static const struct testit headers[] = {
   /* two entries read from disk cache, verify first */
-  { "-", "readfrom.example", NULL, CURLE_OK},
-  { "-", "old.example", NULL, CURLE_OK},
+  { "-", "readfrom.example", NULL, FETCHE_OK},
+  { "-", "old.example", NULL, FETCHE_OK},
   /* delete the remaining one read from disk */
-  { "readfrom.example", NULL, "max-age=\"0\"", CURLE_OK},
+  { "readfrom.example", NULL, "max-age=\"0\"", FETCHE_OK},
 
-  { "example.com", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
-  { "example.com", NULL, "max-age=\"21536000\"\r\n", CURLE_OK },
-  { "example.com", NULL, "max-age=\"21536000\"; \r\n", CURLE_OK },
+  { "example.com", NULL, "max-age=\"31536000\"\r\n", FETCHE_OK },
+  { "example.com", NULL, "max-age=\"21536000\"\r\n", FETCHE_OK },
+  { "example.com", NULL, "max-age=\"21536000\"; \r\n", FETCHE_OK },
   { "example.com", NULL, "max-age=\"21536000\"; includeSubDomains\r\n",
-    CURLE_OK },
-  { "example.org", NULL, "max-age=\"31536000\"\r\n", CURLE_OK },
-  { "this.example", NULL, "max=\"31536\";", CURLE_BAD_FUNCTION_ARGUMENT },
-  { "this.example", NULL, "max-age=\"31536", CURLE_BAD_FUNCTION_ARGUMENT },
-  { "this.example", NULL, "max-age=31536\"", CURLE_OK },
+    FETCHE_OK },
+  { "example.org", NULL, "max-age=\"31536000\"\r\n", FETCHE_OK },
+  { "this.example", NULL, "max=\"31536\";", FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "this.example", NULL, "max-age=\"31536", FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "this.example", NULL, "max-age=31536\"", FETCHE_OK },
   /* max-age=0 removes the entry */
-  { "this.example", NULL, "max-age=0", CURLE_OK },
+  { "this.example", NULL, "max-age=0", FETCHE_OK },
   { "another.example", NULL, "includeSubDomains; ",
-    CURLE_BAD_FUNCTION_ARGUMENT },
+    FETCHE_BAD_FUNCTION_ARGUMENT },
 
   /* Two max-age is illegal */
   { "example.com", NULL,
     "max-age=\"21536000\"; includeSubDomains; max-age=\"3\";",
-    CURLE_BAD_FUNCTION_ARGUMENT },
+    FETCHE_BAD_FUNCTION_ARGUMENT },
   /* Two includeSubDomains is illegal */
   { "2.example.com", NULL,
     "max-age=\"21536000\"; includeSubDomains; includeSubDomains;",
-    CURLE_BAD_FUNCTION_ARGUMENT },
+    FETCHE_BAD_FUNCTION_ARGUMENT },
   /* use a unknown directive "include" that should be ignored */
   { "3.example.com", NULL, "max-age=\"21536000\"; include; includeSubDomains;",
-    CURLE_OK },
+    FETCHE_OK },
   /* remove the "3.example.com" one, should still match the example.com */
   { "3.example.com", NULL, "max-age=\"0\"; includeSubDomains;",
-    CURLE_OK },
-  { "-", "foo.example.com", NULL, CURLE_OK},
-  { "-", "foo.xample.com", NULL, CURLE_OK},
+    FETCHE_OK },
+  { "-", "foo.example.com", NULL, FETCHE_OK},
+  { "-", "foo.xample.com", NULL, FETCHE_OK},
 
   /* should not match */
-  { "example.net", "forexample.net", "max-age=\"31536000\"\r\n", CURLE_OK },
+  { "example.net", "forexample.net", "max-age=\"31536000\"\r\n", FETCHE_OK },
 
   /* should not match either, since forexample.net is not in the example.net
      domain */
   { "example.net", "forexample.net",
-    "max-age=\"31536000\"; includeSubDomains\r\n", CURLE_OK },
+    "max-age=\"31536000\"; includeSubDomains\r\n", FETCHE_OK },
   /* remove example.net again */
-  { "example.net", NULL, "max-age=\"0\"; includeSubDomains\r\n", CURLE_OK },
+  { "example.net", NULL, "max-age=\"0\"; includeSubDomains\r\n", FETCHE_OK },
 
   /* make this live for 7 seconds */
-  { "expire.example", NULL, "max-age=\"7\"\r\n", CURLE_OK },
-  { NULL, NULL, NULL, CURLE_OK }
+  { "expire.example", NULL, "max-age=\"7\"\r\n", FETCHE_OK },
+  { NULL, NULL, NULL, FETCHE_OK }
 };
 
 static void showsts(struct stsentry *e, const char *chost)
@@ -111,7 +111,7 @@ static void showsts(struct stsentry *e, const char *chost)
   if(!e)
     printf("'%s' is not HSTS\n", chost);
   else {
-    printf("%s [%s]: %" CURL_FORMAT_CURL_OFF_T "%s\n",
+    printf("%s [%s]: %" FETCH_FORMAT_FETCH_OFF_T "%s\n",
            chost, e->host, e->expires,
            e->includeSubDomains ? " includeSubDomains" : "");
   }
@@ -119,22 +119,22 @@ static void showsts(struct stsentry *e, const char *chost)
 
 UNITTEST_START
 {
-  CURLcode result;
+  FETCHcode result;
   struct stsentry *e;
   struct hsts *h = Curl_hsts_init();
   int i;
   const char *chost;
-  CURL *easy;
+  FETCH *easy;
   char savename[256];
 
   abort_unless(h, "Curl_hsts_init()");
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  easy = curl_easy_init();
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  easy = fetch_easy_init();
   if(!easy) {
     Curl_hsts_cleanup(&h);
-    curl_global_cleanup();
-    abort_unless(easy, "curl_easy_init()");
+    fetch_global_cleanup();
+    abort_unless(easy, "fetch_easy_init()");
   }
 
   Curl_hsts_loadfile(easy, h, arg);
@@ -173,8 +173,8 @@ UNITTEST_START
   msnprintf(savename, sizeof(savename), "%s.save", arg);
   (void)Curl_hsts_save(easy, h, savename);
   Curl_hsts_cleanup(&h);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
 }
 UNITTEST_STOP
 #endif

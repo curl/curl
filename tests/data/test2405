@@ -35,7 +35,7 @@ http/2
 lib%TESTNUMBER
 </tool>
 <name>
-checking curl_multi_waitfds functionality
+checking fetch_multi_waitfds functionality
 </name>
 <command>
 http://%HOSTIP:%HTTP2PORT/%TESTNUMBER

@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -30,7 +30,7 @@
 # as well as some we know don't do ECH but have an HTTPS RR, and finally some
 # for which neither is the case.
 
-# TODO: Translate this into something that approximates a valid curl test:-)
+# TODO: Translate this into something that approximates a valid fetch test:-)
 # Should be useful though even before such translation and a pile less work
 # to do this than that.  The pile of work required would include making an
 # ECH-enabled server and a DoH server. For now, this is just run manually.
@@ -38,14 +38,14 @@
 
 # set -x
 
-# Exit with an error if there's an active ech stanza in ~/.curlrc
+# Exit with an error if there's an active ech stanza in ~/.fetchrc
 # as that'd likely skew some results (e.g. turning a fail into a
 # success or vice versa)
-: "${CURL_CFG_FILE=$HOME/.curlrc}"
-active_ech=$(grep ech "$CURL_CFG_FILE" | grep -v "#.*ech")
+: "${FETCH_CFG_FILE=$HOME/.fetchrc}"
+active_ech=$(grep ech "$FETCH_CFG_FILE" | grep -v "#.*ech")
 if [[ "$active_ech" != "" ]]
 then
-    echo "You seem to have an active ECH setting in $CURL_CFG_FILE"
+    echo "You seem to have an active ECH setting in $FETCH_CFG_FILE"
     echo "That might affect results so please remove that or comment"
     echo "it out - exiting."
     exit 1
@@ -92,7 +92,7 @@ declare -A neither_targets=(
 # Variables that can be over-ridden from environment
 #
 
-# Top of curl test tree, assume we're there
+# Top of fetch test tree, assume we're there
 : "${CTOP:=.}"
 
 # Place to put test log output
@@ -113,7 +113,7 @@ declare -A neither_targets=(
 # Where we find BoringSSL .so's
 : "${BSSL:=$HOME/code/boringssl/inst/lib}"
 
-# Where we send DoH queries when using kdig or curl
+# Where we send DoH queries when using kdig or fetch
 : "${DOHSERVER:=one.one.one.one}"
 : "${DOHPATH:=dns-query}"
 
@@ -156,9 +156,9 @@ function cli_test()
 {
     # 1st param is target URL
     turl=$1
-    # 2nd param is 0 if we expect curl to not work or 1 if we expect it
+    # 2nd param is 0 if we expect fetch to not work or 1 if we expect it
     # to have worked
-    curl_winorlose=$2
+    fetch_winorlose=$2
     # 3rd param is 0 if we expect ECH to not work or 1 if we expect it
     # to have worked
     ech_winorlose=$3
@@ -167,9 +167,9 @@ function cli_test()
     IFS=" " read -r -a echparms <<< "${@:4}"
 
     TMPF=$(mktemp)
-    cmd="timeout $tout $CURL ${CURL_PARAMS[*]} ${echparms[*]} $turl >$TMPF 2>&1"
+    cmd="timeout $tout $FETCH ${FETCH_PARAMS[*]} ${echparms[*]} $turl >$TMPF 2>&1"
     echo "cli_test: $cmd " >> "$logfile"
-    timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" "${echparms[@]}" "$turl" >"$TMPF" 2>&1
+    timeout "$tout" "$FETCH" "${FETCH_PARAMS[@]}" "${echparms[@]}" "$turl" >"$TMPF" 2>&1
     eres=$?
     if [[ "$eres" == "124" ]]
     then
@@ -178,12 +178,12 @@ function cli_test()
         cat "$TMPF" >> "$logfile"
         echo "cli_test: Timeout running $cmd" >> "$logfile"
     fi
-    if [[ "$eres" != "0" && "$curl_winorlose" == "1" ]]
+    if [[ "$eres" != "0" && "$fetch_winorlose" == "1" ]]
     then
         allgood="no"
-        echo "cli_test: curl failure running $cmd"
+        echo "cli_test: fetch failure running $cmd"
         cat "$TMPF" >> "$logfile"
-        echo "cli_test: curl failure running $cmd" >> "$logfile"
+        echo "cli_test: fetch failure running $cmd" >> "$logfile"
     fi
     ech_success=$(grep -c "ECH: result: status is succeeded" "$TMPF")
     if [[ "$ech_success" == "$ech_winorlose" ]]
@@ -214,7 +214,7 @@ have_bssl="no"
 using_ossl="no"
 using_wolf="no"
 using_bssl="no"
-have_curl="no"
+have_fetch="no"
 have_dig="no"
 have_kdig="no"
 have_presout="no"
@@ -251,34 +251,34 @@ if [ -f "$BSSL"/libssl.so ]
 then
     have_bssl="yes"
 fi
-CURL="$CTOP/src/curl"
-CURL_PARAMS=(-vvv --doh-url https://one.one.one.one/dns-query)
-if [ -f "$CTOP"/src/curl ]
+FETCH="$CTOP/src/fetch"
+FETCH_PARAMS=(-vvv --doh-url https://one.one.one.one/dns-query)
+if [ -f "$CTOP"/src/fetch ]
 then
-    have_curl="yes"
+    have_fetch="yes"
 fi
-ossl_cnt=$(LD_LIBRARY_PATH=$OSSL $CURL "${CURL_PARAMS[@]}" -V 2> /dev/null | grep -c OpenSSL)
+ossl_cnt=$(LD_LIBRARY_PATH=$OSSL $FETCH "${FETCH_PARAMS[@]}" -V 2> /dev/null | grep -c OpenSSL)
 if ((ossl_cnt == 1))
 then
     using_ossl="yes"
     # setup access to our .so
     export LD_LIBRARY_PATH=$OSSL
 fi
-bssl_cnt=$(LD_LIBRARY_PATH=$BSSL $CURL "${CURL_PARAMS[@]}" -V 2> /dev/null | grep -c BoringSSL)
+bssl_cnt=$(LD_LIBRARY_PATH=$BSSL $FETCH "${FETCH_PARAMS[@]}" -V 2> /dev/null | grep -c BoringSSL)
 if ((bssl_cnt == 1))
 then
     using_bssl="yes"
     # setup access to our .so
     export LD_LIBRARY_PATH=$BSSL
 fi
-wolf_cnt=$($CURL "${CURL_PARAMS[@]}" -V 2> /dev/null | grep -c wolfSSL)
+wolf_cnt=$($FETCH "${FETCH_PARAMS[@]}" -V 2> /dev/null | grep -c wolfSSL)
 if ((wolf_cnt == 1))
 then
     using_wolf="yes"
-    # for some reason curl+wolfSSL dislikes certs that are ok
+    # for some reason fetch+wolfSSL dislikes certs that are ok
     # for browsers, so we'll test using "insecure" mode (-k)
     # but that's ok here as we're only interested in ECH testing
-    CURL_PARAMS+=(-k)
+    FETCH_PARAMS+=(-k)
 fi
 # check if we have dig and it knows https or not
 digcmd="dig +short"
@@ -312,12 +312,12 @@ fi
 # sadly true sometimes;-)
 # echo "Checking if ports other than 443 are maybe blocked"
 not443testurl="https://draft-13.esni.defo.ie:9413/"
-timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" "$not443testurl" >/dev/null 2>&1
+timeout "$tout" "$FETCH" "${FETCH_PARAMS[@]}" "$not443testurl" >/dev/null 2>&1
 eres=$?
 if [[ "$eres" == "124" ]]
 then
-    echo "Timeout running curl for $not443testurl" >> "$logfile"
-    echo "Timeout running curl for $not443testurl"
+    echo "Timeout running fetch for $not443testurl" >> "$logfile"
+    echo "Timeout running fetch for $not443testurl"
     have_portsblocked="yes"
 fi
 
@@ -328,14 +328,14 @@ fi
     echo "using_ossl: $using_ossl"
     echo "using_wolf: $using_wolf"
     echo "using_bssl: $using_bssl"
-    echo "have_curl: $have_curl"
+    echo "have_fetch: $have_fetch"
     echo "have_dig: $have_dig"
     echo "have_kdig: $have_kdig"
     echo "have_presout: $have_presout"
     echo "have_portsblocked: $have_portsblocked"
 } >> "$logfile"
 
-echo "curl: have $have_curl, cURL command: |$CURL ${CURL_PARAMS[*]}|"
+echo "fetch: have $have_fetch, cURL command: |$FETCH ${FETCH_PARAMS[*]}|"
 echo "ossl: have: $have_ossl, using: $using_ossl"
 echo "wolf: have: $have_wolf, using: $using_wolf"
 echo "bssl: have: $have_bssl, using: $using_bssl"
@@ -343,9 +343,9 @@ echo "dig: $have_dig, kdig: $have_kdig, HTTPS pres format: $have_presout"
 echo "dig command: |$digcmd|"
 echo "ports != 443 blocked: $have_portsblocked"
 
-if [[ "$have_curl" == "no" ]]
+if [[ "$have_fetch" == "no" ]]
 then
-    echo "Can't proceed without curl - exiting"
+    echo "Can't proceed without fetch - exiting"
     exit 32
 fi
 
@@ -383,7 +383,7 @@ do
         echo ""
         echo "ECH check for $turl"
     } >> "$logfile"
-    timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" --ech hard "$turl" >> "$logfile" 2>&1
+    timeout "$tout" "$FETCH" "${FETCH_PARAMS[@]}" --ech hard "$turl" >> "$logfile" 2>&1
     eres=$?
     if [[ "$eres" == "124" ]]
     then
@@ -391,7 +391,7 @@ do
         {
             echo "Timeout for $turl"
             echo -e "\tTimeout for $turl"
-            echo "Timeout running curl for $host:$port/$path"
+            echo "Timeout running fetch for $host:$port/$path"
         } >> "$logfile"
     fi
     if [[ "$eres" != "0" ]]
@@ -427,7 +427,7 @@ then
             echo ""
             echo "PN override check for $turl"
         } >> "$logfile"
-        timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" --ech pn:override --ech hard "$turl" >> "$logfile" 2>&1
+        timeout "$tout" "$FETCH" "${FETCH_PARAMS[@]}" --ech pn:override --ech hard "$turl" >> "$logfile" 2>&1
         eres=$?
         if [[ "$eres" == "124" ]]
         then
@@ -435,7 +435,7 @@ then
             {
                 echo "Timeout for $turl"
                 echo -e "\tTimeout for $turl"
-                echo "Timeout running curl for $host:$port/$path"
+                echo "Timeout running fetch for $host:$port/$path"
             } >> "$logfile"
         fi
         if [[ "$eres" != "0" ]]
@@ -464,7 +464,7 @@ do
         echo ""
         echo "HTTPS RR but no ECHConfig check for $turl"
     } >> "$logfile"
-    timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" --ech true "$turl" >> "$logfile" 2>&1
+    timeout "$tout" "$FETCH" "${FETCH_PARAMS[@]}" --ech true "$turl" >> "$logfile" 2>&1
     eres=$?
     if [[ "$eres" == "124" ]]
     then
@@ -472,7 +472,7 @@ do
         {
             echo "Timeout for $turl"
             echo -e "\tTimeout for $turl"
-            echo "Timeout running curl for $host:$port/$path"
+            echo "Timeout running fetch for $host:$port/$path"
         } >> "$logfile"
     fi
     if [[ "$eres" != "0" ]]
@@ -500,7 +500,7 @@ do
         echo ""
         echo "Neither HTTPS nor ECHConfig check for $turl"
     } >> "$logfile"
-    timeout "$tout" "$CURL" "${CURL_PARAMS[@]}" --ech true "$turl" >> "$logfile" 2>&1
+    timeout "$tout" "$FETCH" "${FETCH_PARAMS[@]}" --ech true "$turl" >> "$logfile" 2>&1
     eres=$?
     if [[ "$eres" == "124" ]]
     then
@@ -508,7 +508,7 @@ do
         {
             echo "Timeout for $turl"
             echo -e "\tTimeout for $turl"
-            echo "Timeout running curl for $host:$port/$path"
+            echo "Timeout running fetch for $host:$port/$path"
         } >> "$logfile"
     fi
     if [[ "$eres" != "0" ]]

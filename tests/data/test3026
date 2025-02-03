@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_global_init
+fetch_global_init
 thread-safe
 slow
 </keywords>
@@ -25,7 +25,7 @@ threaded-resolver
 none
 </server>
 <name>
-curl_global_init thread-safety
+fetch_global_init thread-safety
 </name>
 <tool>
 lib%TESTNUMBER

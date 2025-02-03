@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,18 +20,18 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
 if BUILD_DOCS
 # if we disable man page building, ignore these
 RUNTESTS_DOCS = runtests.1
-TESTCURL_DOCS = testcurl.1
-MANFILES = $(RUNTESTS_DOCS) $(TESTCURL_DOCS)
+TESTFETCH_DOCS = testfetch.1
+MANFILES = $(RUNTESTS_DOCS) $(TESTFETCH_DOCS)
 endif
 
-CURLPAGES = runtests.md testcurl.md
+FETCHPAGES = runtests.md testfetch.md
 
 # scripts used in test cases
 TESTSCRIPTS = \
@@ -90,14 +90,14 @@ EXTRA_DIST =        \
  sshhelp.pm         \
  sshserver.pl       \
  stunnel.pem        \
- testcurl.pl        \
+ testfetch.pl        \
  testutil.pm        \
  tftpserver.pl      \
  util.py            \
  valgrind.pm        \
  valgrind.supp      \
  $(TESTSCRIPTS)     \
- $(CURLPAGES)
+ $(FETCHPAGES)
 
 # we have two variables here to make sure DIST_SUBDIRS won't get 'unit'
 # added twice as then targets such as 'distclean' misbehave and try to
@@ -117,7 +117,7 @@ PERLFLAGS = -I$(srcdir)
 
 CLEANFILES = .http.pid .https.pid .ftp.pid .ftps.pid $(MANDISTPAGES)
 
-curl:
+fetch:
 	@cd $(top_builddir) && $(MAKE)
 
 TEST_COMMON =

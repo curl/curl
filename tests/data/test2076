@@ -60,13 +60,13 @@ HTTP with digest auth and URI contains query
 <protocol>
 GET /%TESTNUMBER?query HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER?query HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest username="testuser", realm="testrealm", nonce="1", uri="/%TESTNUMBER?query", response="5758bd3bbde7f33236e6ccd278eb59af"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

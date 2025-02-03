@@ -69,7 +69,7 @@ crypto
 HTTP GET --digest increasing nonce-count
 </name>
 # This test is to ensure the nonce-count (nc) increases
-# https://github.com/curl/curl/pull/1251
+# https://github.com/fetch/fetch/pull/1251
 <command>
 -u auser:apasswd --location --digest http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </command>
@@ -91,19 +91,19 @@ if(s/^(Authorization: Digest )([^\r\n]+)(\r?\n)$//) { $_ = $1 . join(', ', map {
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest cnonce=REMOVED, nc=00000001, nonce="1053604144", qop=auth, realm="testrealm", response=REMOVED, uri="/%TESTNUMBER", username="auser"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Digest cnonce=REMOVED, nc=00000002, nonce="1053604144", qop=auth, realm="testrealm", response=REMOVED, uri="/%TESTNUMBER0001", username="auser"
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

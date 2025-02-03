@@ -30,7 +30,7 @@ http
 #
 # Verify data after the test has been "shot"
 <verify>
-# 4 == CURLE_NOT_BUILT_IN
+# 4 == FETCHE_NOT_BUILT_IN
 <errorcode>
 4
 </errorcode>

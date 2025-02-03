@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,10 +18,10 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #ifdef HAVE_NETINET_IN_H
 #include <netinet/in.h>
@@ -30,22 +30,22 @@
 #include <netinet/in6.h>
 #endif
 
-#include <curl/curl.h>
+#include <fetch/fetch.h>
 
 #include "strparse.h"
 
 #include "memdebug.h" /* LAST include file */
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  CURLcode res = CURLE_OK;
-  global_init(CURL_GLOBAL_ALL);
+  FETCHcode res = FETCHE_OK;
+  global_init(FETCH_GLOBAL_ALL);
   return res;
 }
 
 static void unit_stop(void)
 {
-  curl_global_cleanup();
+  fetch_global_cleanup();
 }
 
 UNITTEST_START

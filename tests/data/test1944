@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_header
+fetch_easy_header
 </keywords>
 </info>
 
@@ -41,7 +41,7 @@ http
 </server>
 
 <name>
-curl_easy_header with redirect
+fetch_easy_header with redirect
 </name>
 <tool>
 lib1940

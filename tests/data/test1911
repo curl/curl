@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_option
+fetch_easy_option
 </keywords>
 </info>
 
@@ -15,7 +15,7 @@ curl_easy_option
 none
 </server>
 <name>
-verify that curl_easy_setopt() rejects too long string inputs
+verify that fetch_easy_setopt() rejects too long string inputs
 </name>
 <tool>
 lib%TESTNUMBER

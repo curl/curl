@@ -37,7 +37,7 @@ HTTP multiple provided Host: headers
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: host1
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,26 +18,26 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "urldata.h"
 #include "http.h"
 #include "http1.h"
-#include "curl_trc.h"
+#include "fetch_trc.h"
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
 {
 }
 
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
 struct tcase {
   const char **input;
   const char *default_scheme;
@@ -72,7 +72,7 @@ static void parse_success(struct tcase *t)
   struct h1_req_parser p;
   const char *buf;
   size_t buflen, i, in_len, in_consumed;
-  CURLcode err;
+  FETCHcode err;
   ssize_t nread;
 
   Curl_h1_req_parse_init(&p, 1024);
@@ -120,7 +120,7 @@ static void parse_success(struct tcase *t)
 }
 
 static const char *T1_INPUT[] = {
-  "GET /path HTTP/1.1\r\nHost: test.curl.se\r\n\r\n",
+  "GET /path HTTP/1.1\r\nHost: test.fetch.se\r\n\r\n",
   NULL,
 };
 static struct tcase TEST1a = {
@@ -133,7 +133,7 @@ static struct tcase TEST1b = {
 static const char *T2_INPUT[] = {
   "GET /path HTT",
   "P/1.1\r\nHost: te",
-  "st.curl.se\r\n\r",
+  "st.fetch.se\r\n\r",
   "\n12345678",
   NULL,
 };
@@ -142,22 +142,22 @@ static struct tcase TEST2 = {
 };
 
 static const char *T3_INPUT[] = {
-  "GET ftp://ftp.curl.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
+  "GET ftp://ftp.fetch.se/xxx?a=2 HTTP/1.1\r\nContent-Length: 0\r",
   "\nUser-Agent: xxx\r\n\r\n",
   NULL,
 };
 static struct tcase TEST3a = {
-  T3_INPUT, NULL, "GET", "ftp", "ftp.curl.se", "/xxx?a=2", 2, 0
+  T3_INPUT, NULL, "GET", "ftp", "ftp.fetch.se", "/xxx?a=2", 2, 0
 };
 
 static const char *T4_INPUT[] = {
-  "CONNECT ftp.curl.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
+  "CONNECT ftp.fetch.se:123 HTTP/1.1\r\nContent-Length: 0\r\n",
   "User-Agent: xxx\r\n",
   "nothing:  \r\n\r\n\n\n",
   NULL,
 };
 static struct tcase TEST4a = {
-  T4_INPUT, NULL, "CONNECT", NULL, "ftp.curl.se:123", NULL, 3, 2
+  T4_INPUT, NULL, "CONNECT", NULL, "ftp.fetch.se:123", NULL, 3, 2
 };
 
 static const char *T5_INPUT[] = {
@@ -171,7 +171,7 @@ static struct tcase TEST5a = {
 };
 
 static const char *T6_INPUT[] = {
-  "PUT /path HTTP/1.1\nHost: test.curl.se\n\n123",
+  "PUT /path HTTP/1.1\nHost: test.fetch.se\n\n123",
   NULL,
 };
 static struct tcase TEST6a = {
@@ -181,7 +181,7 @@ static struct tcase TEST6a = {
 
 UNITTEST_START
 
-#ifndef CURL_DISABLE_HTTP
+#ifndef FETCH_DISABLE_HTTP
   parse_success(&TEST1a);
   parse_success(&TEST1b);
   parse_success(&TEST2);

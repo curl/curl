@@ -52,12 +52,12 @@ proxy
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 </protocol>
-# 3, CURLE_URL_MALFORMAT for the four slashes
+# 3, FETCHE_URL_MALFORMAT for the four slashes
 <errorcode>
 3
 </errorcode>

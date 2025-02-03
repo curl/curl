@@ -62,13 +62,13 @@ cookies
 <protocol>
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: host.foo.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: tester=yes; test=no
 
 GET /we/want/%TESTNUMBER0002 HTTP/1.1
 Host: host.foo.com
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: tester=yes
 

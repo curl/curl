@@ -2,7 +2,7 @@
 <info>
 <keywords>
 source analysis
-CURL_VERSION
+FETCH_VERSION
 documentation
 </keywords>
 </info>
@@ -15,11 +15,11 @@ none
 </server>
 
 <name>
-Verify that feature names and CURL_VERSION_* in lib and docs are in sync
+Verify that feature names and FETCH_VERSION_* in lib and docs are in sync
 </name>
 
 <command type="perl">
-%SRCDIR/test1177.pl %PWD/../docs/libcurl/curl_version_info.3 %SRCDIR/../include/curl/curl.h %SRCDIR/../lib/version.c
+%SRCDIR/test1177.pl %PWD/../docs/libfetch/fetch_version_info.3 %SRCDIR/../include/fetch/fetch.h %SRCDIR/../lib/version.c
 </command>
 </client>
 

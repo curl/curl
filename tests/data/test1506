@@ -52,7 +52,7 @@ http
 lib%TESTNUMBER
 </tool>
 <name>
-HTTP GET connection cache limit (CURLMOPT_MAXCONNECTS)
+HTTP GET connection cache limit (FETCHMOPT_MAXCONNECTS)
 </name>
 <command>
 http://%HOSTIP:%HTTPPORT/path/%TESTNUMBER %HOSTIP %HTTPPORT

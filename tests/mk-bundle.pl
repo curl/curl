@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -42,8 +42,8 @@ print <<HEADER
 /* !checksrc! disable COPYRIGHT all */
 /* !checksrc! disable INCLUDEDUP all */
 
-#define CURLTESTS_BUNDLED
-#define CURLTESTS_BUNDLED_TEST_H
+#define FETCHTESTS_BUNDLED
+#define FETCHTESTS_BUNDLED_TEST_H
 #include "first.h"
 HEADER
     ;
@@ -59,9 +59,9 @@ my @reused_symbols = (
     "checkFdSet",
     "checkForCompletion",
     "close_file_descriptors",
-    "curl",  # shadow
-    "curlSocketCallback",
-    "curlTimerCallback",
+    "fetch",  # shadow
+    "fetchSocketCallback",
+    "fetchTimerCallback",
     "cyclic_add",
     "easy",  # unit
     "fopen_works",
@@ -157,7 +157,7 @@ print <<FOOTER
 static const struct onetest s_tests[] = {
 $tlist};
 
-#undef CURLTESTS_BUNDLED_TEST_H
+#undef FETCHTESTS_BUNDLED_TEST_H
 
 #include "first.c"
 FOOTER

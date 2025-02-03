@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP GET
-CURLOPT_CONNECT_TO
+FETCHOPT_CONNECT_TO
 --resolve
 </keywords>
 </info>
@@ -42,12 +42,12 @@ http://www.example.com:%HTTPPORT/%TESTNUMBER --resolve www.example.com:%HTTPPORT
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

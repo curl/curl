@@ -30,7 +30,7 @@ write
 
 # Verify data after the test has been "shot"
 <verify>
-# 23 => CURLE_WRITE_ERROR
+# 23 => FETCHE_WRITE_ERROR
 <errorcode>
 23
 </errorcode>

@@ -14,7 +14,7 @@ none
 </server>
 
 <name>
-Verify memory #include files in libcurl's C source files
+Verify memory #include files in libfetch's C source files
 </name>
 
 <command type="perl">

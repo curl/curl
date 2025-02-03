@@ -34,7 +34,7 @@ xattr
 </features>
 # simulate the xattr operations
 <setenv>
-CURL_FAKE_XATTR=1
+FETCH_FAKE_XATTR=1
 </setenv>
 <name>
 basic --xattr with -O
@@ -50,12 +50,12 @@ basic --xattr with -O
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
 <stdout mode="text">
-user.creator => curl
+user.creator => fetch
 user.mime_type => fake/data
 user.xdg.origin.url => http://%HOSTIP:%HTTPPORT/%TESTNUMBER
 </stdout>

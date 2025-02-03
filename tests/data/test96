@@ -20,7 +20,7 @@ TrackMemory
 </features>
 
 <name>
-curl memory tracking operational
+fetch memory tracking operational
 </name>
 <command>
 --version

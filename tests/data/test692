@@ -45,11 +45,11 @@ http://%HOSTIP:%HTTPPORT/ -JO --output-dir %LOGDIR
 <protocol crlf="yes">
 GET / HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>
-<file crlf="yes" name="%LOGDIR/curl_response">
+<file crlf="yes" name="%LOGDIR/fetch_response">
 -foo-
 </file>
 </verify>

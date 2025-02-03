@@ -65,17 +65,17 @@ https://attack.invalid:%HTTPSPORT/a/b/%TESTNUMBER -k -c %LOGDIR/cookie%TESTNUMBE
 <protocol>
 GET /a/b/%TESTNUMBER HTTP/1.1
 Host: attack.invalid:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /a/b/%TESTNUMBER0002 HTTP/1.1
 Host: attack.invalid:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /a/b/%TESTNUMBER0003 HTTP/1.1
 Host: attack.invalid:%HTTPSPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: SESSIONID=originaltoken; second=originaltoken
 

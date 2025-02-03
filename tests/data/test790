@@ -45,7 +45,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER --variable "name[5-9]=0123456789abcdef" --e
 <protocol crlf="yes" nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 5
 Content-Type: application/x-www-form-urlencoded

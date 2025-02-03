@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,12 +21,12 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
 # This script grew out of help from Przemyslaw Iskra and Balint Szilakszi
-# a late evening in the #curl IRC channel.
+# a late evening in the #fetch IRC channel.
 #
 
 use strict;
@@ -64,7 +64,7 @@ my @syms;
 my %doc;
 my %rem;
 
-# scanenum runs the preprocessor on curl.h so it will process all enums
+# scanenum runs the preprocessor on fetch.h so it will process all enums
 # included by it, which *should* be all headers
 sub scanenum {
     my ($file) = @_;
@@ -72,7 +72,7 @@ sub scanenum {
     while ( <$h_in> ) {
         if ( /enum\s+(\S+\s+)?{/ .. /}/ ) {
             s/^\s+//;
-            next unless /^CURL/;
+            next unless /^FETCH/;
             chomp;
             s/[,\s].*//;
             push @syms, $_;
@@ -85,7 +85,7 @@ sub scanheader {
     my ($f)=@_;
     open my $h, "<", "$f";
     while(<$h>) {
-        if (/^#define ((LIB|)CURL[A-Za-z0-9_]*)/) {
+        if (/^#define ((LIB|)FETCH[A-Za-z0-9_]*)/) {
             push @syms, $1;
         }
     }
@@ -93,7 +93,7 @@ sub scanheader {
 }
 
 sub scanallheaders {
-    my $d = "$root/include/curl";
+    my $d = "$root/include/fetch";
     opendir(my $dh, $d) ||
         die "Can't opendir: $!";
     my @headers = grep { /.h\z/ } readdir($dh);
@@ -112,11 +112,11 @@ sub checkmanpage {
     while(<$mh>) {
         # strip off formatting
         $_ =~ s/(^|[^A-Z0-9])[*_]+/ /;
-        # detect global-looking 'CURL[BLABLA]_*' symbols
-        while(s/\W(CURL(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)//) {
+        # detect global-looking 'FETCH[BLABLA]_*' symbols
+        while(s/\W(FETCH(AUTH|E|H|MOPT|OPT|SHOPT|UE|M|SSH|SSLBACKEND|HEADER|FORM|FTP|PIPE|MIMEOPT|GSSAPI|ALTSVC|PROTO|PROXY|UPART|USESSL|_READFUNC|_WRITEFUNC|_CSELECT|_FORMADD|_IPRESOLVE|_REDIR|_RTSPREQ|_TIMECOND|_VERSION)_[a-zA-Z0-9_]+)//) {
             my $s = $1;
             # skip two "special" ones
-            if($s !~ /^(CURLE_OBSOLETE|CURLOPT_TEMPLATE)/) {
+            if($s !~ /^(FETCHE_OBSOLETE|FETCHOPT_TEMPLATE)/) {
                 push @manrefs, "$1:$m:$line";
             }
         }
@@ -138,10 +138,10 @@ sub scanman_md_dir {
 
 
 scanallheaders();
-scanman_md_dir("$root/docs/libcurl");
-scanman_md_dir("$root/docs/libcurl/opts");
+scanman_md_dir("$root/docs/libfetch");
+scanman_md_dir("$root/docs/libfetch/opts");
 
-open my $s, "<", "$root/docs/libcurl/symbols-in-versions";
+open my $s, "<", "$root/docs/libfetch/symbols-in-versions";
 while(<$s>) {
     if(/(^[^ \n]+) +(.*)/) {
         my ($sym, $rest)=($1, $2);
@@ -167,18 +167,18 @@ for my $e (sort @syms) {
     # previously had a name, that is now removed. The OBSOLETE names should
     # never be used for anything.
     #
-    # CURL_EXTERN - is a define used for libcurl functions that are external,
+    # FETCH_EXTERN - is a define used for libfetch functions that are external,
     # public. No app or other code should ever use it.
     #
-    # CURLINC_ - defines for header dual-include prevention, ignore those.
+    # FETCHINC_ - defines for header dual-include prevention, ignore those.
     #
-    # CURL_TEMP_ - are defined and *undefined* again within the file
+    # FETCH_TEMP_ - are defined and *undefined* again within the file
     #
     # *_LAST and *_LASTENTRY are just prefix for the placeholders used for the
     # last entry in many enum series.
     #
 
-    if($e =~ /(OBSOLETE|^CURL_EXTERN|^CURLINC_|_LAST\z|_LASTENTRY\z|^CURL_TEMP_)/) {
+    if($e =~ /(OBSOLETE|^FETCH_EXTERN|^FETCHINC_|_LAST\z|_LASTENTRY\z|^FETCH_TEMP_)/) {
         $ignored++;
         next;
     }

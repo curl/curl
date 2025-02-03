@@ -12,14 +12,14 @@ ANNOUNCE
 <reply>
 <data1>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Cseq: 1
 
 </data1>
 
 <data2>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Cseq: 2
 Content-Length: 70
 Content-Type: application/sdp
@@ -27,17 +27,17 @@ Content-Type: application/sdp
 v=0
 s=rtspd SDP
 i=A fake SDP reply
-u=http://www.curl.example.com/fakesdp.ps
+u=http://www.fetch.example.com/fakesdp.ps
 </data2>
 <data3>
 RTSP/1.0 200 Okie Dokie
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Cseq: 3
 
 </data3>
 <data4>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 CSeq: 4
 Curl-private: swsclose
 Informational: Empty Options Response
@@ -106,7 +106,7 @@ CSeq: 3
 Content-Type: posty goodness
 Content-Length: 35
 
-postyfield=postystuff&project=curl
+postyfield=postystuff&project=fetch
 OPTIONS rtsp://%HOSTIP:%RTSPPORT/%TESTNUMBER0004 RTSP/1.0
 CSeq: 4
 

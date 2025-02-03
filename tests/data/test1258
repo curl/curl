@@ -42,12 +42,12 @@ cookies
 <protocol>
 GET /we/want/%TESTNUMBER HTTP/1.1
 Host: localhost
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /we/want?hoge=fuga HTTP/1.1
 Host: localhost
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Cookie: I-am=here
 

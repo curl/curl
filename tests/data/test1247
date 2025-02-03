@@ -30,7 +30,7 @@ http
 #
 # Verify data after the test has been "shot"
 <verify>
-# Protocol "h1234" not supported or disabled in libcurl
+# Protocol "h1234" not supported or disabled in libfetch
 <errorcode>
 1
 </errorcode>

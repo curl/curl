@@ -29,7 +29,7 @@ file://localhost%FILE_PWD/%LOGDIR/test%TESTNUMBER.dir/plainfile.txt --remote-tim
 <verify>
 <postcheck>
 %PERL %SRCDIR/libtest/test613.pl postprocess %PWD/%LOGDIR/test%TESTNUMBER.dir && \
-%PERL -e 'exit((stat("%LOGDIR/curl%TESTNUMBER.out"))[9] != 946728000)'
+%PERL -e 'exit((stat("%LOGDIR/fetch%TESTNUMBER.out"))[9] != 946728000)'
 </postcheck>
 </verify>
 </testcase>

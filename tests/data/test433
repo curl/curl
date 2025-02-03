@@ -20,10 +20,10 @@ Content-Type: text/1
 #
 # Client-side
 <client>
-<file1 name="%LOGDIR/curlrc">
+<file1 name="%LOGDIR/fetchrc">
 --next
 header = "a: a"
-data = "curlrc read"
+data = "fetchrc read"
 </file1>
 <server>
 http
@@ -31,10 +31,10 @@ http
 <setenv>
 XDG_CONFIG_HOME=%PWD/%LOGDIR
 HOME=
-CURL_HOME=
+FETCH_HOME=
 </setenv>
 <name>
-Verify XDG_CONFIG_HOME use to find curlrc
+Verify XDG_CONFIG_HOME use to find fetchrc
 </name>
 <command option="no-q">
 %HOSTIP:%HTTPPORT/%TESTNUMBER
@@ -47,13 +47,13 @@ Verify XDG_CONFIG_HOME use to find curlrc
 <protocol nonewline="yes">
 POST /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 a: a
 Content-Length: 11
 Content-Type: application/x-www-form-urlencoded
 
-curlrc read
+fetchrc read
 </protocol>
 </verify>
 </testcase>

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /* argv1 = URL
@@ -85,7 +85,7 @@ void dump(const char *text,
 }
 
 static
-int my_trace(CURL *handle, curl_infotype type,
+int my_trace(FETCH *handle, fetch_infotype type,
              char *data, size_t size,
              void *userp)
 {
@@ -94,25 +94,25 @@ int my_trace(CURL *handle, curl_infotype type,
   (void)handle; /* prevent compiler warning */
 
   switch(type) {
-  case CURLINFO_TEXT:
+  case FETCHINFO_TEXT:
     fprintf(stderr, "== Info: %s", (char *)data);
     return 0;
-  case CURLINFO_HEADER_OUT:
+  case FETCHINFO_HEADER_OUT:
     text = "=> Send header";
     break;
-  case CURLINFO_DATA_OUT:
+  case FETCHINFO_DATA_OUT:
     text = "=> Send data";
     break;
-  case CURLINFO_SSL_DATA_OUT:
+  case FETCHINFO_SSL_DATA_OUT:
     text = "=> Send SSL data";
     break;
-  case CURLINFO_HEADER_IN:
+  case FETCHINFO_HEADER_IN:
     text = "<= Recv header";
     break;
-  case CURLINFO_DATA_IN:
+  case FETCHINFO_DATA_IN:
     text = "<= Recv data";
     break;
-  case CURLINFO_SSL_DATA_IN:
+  case FETCHINFO_SSL_DATA_IN:
     text = "<= Recv SSL data";
     break;
   default: /* in case a new one is introduced to shock us */
@@ -130,7 +130,7 @@ static char databuf[70000]; /* MUST be more than 64k OR
 
 static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 {
-  size_t  amount = nmemb * size; /* Total bytes curl wants */
+  size_t  amount = nmemb * size; /* Total bytes fetch wants */
   size_t  available = sizeof(databuf) - current_offset; /* What we have to
                                                            give */
   size_t  given = amount < available ? amount : available; /* What is given */
@@ -144,78 +144,78 @@ static size_t read_callback(char *ptr, size_t size, size_t nmemb, void *stream)
 static size_t write_callback(char *ptr, size_t size, size_t nmemb,
                              void *stream)
 {
-  int amount = curlx_uztosi(size * nmemb);
+  int amount = fetchx_uztosi(size * nmemb);
   printf("%.*s", amount, (char *)ptr);
   (void)stream;
   return size * nmemb;
 }
 
 
-static curlioerr ioctl_callback(CURL *handle, int cmd, void *clientp)
+static fetchioerr ioctl_callback(FETCH *handle, int cmd, void *clientp)
 {
   (void)clientp;
-  if(cmd == CURLIOCMD_RESTARTREAD) {
-    printf("APPLICATION received a CURLIOCMD_RESTARTREAD request\n");
+  if(cmd == FETCHIOCMD_RESTARTREAD) {
+    printf("APPLICATION received a FETCHIOCMD_RESTARTREAD request\n");
     printf("APPLICATION ** REWINDING! **\n");
     current_offset = 0;
-    return CURLIOE_OK;
+    return FETCHIOE_OK;
   }
   (void)handle;
-  return CURLIOE_UNKNOWNCMD;
+  return FETCHIOE_UNKNOWNCMD;
 }
 
 
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
   struct testdata config;
   size_t i;
   static const char fill[] = "test data";
 
   config.trace_ascii = 1; /* enable ASCII tracing */
 
-  global_init(CURL_GLOBAL_ALL);
-  easy_init(curl);
+  global_init(FETCH_GLOBAL_ALL);
+  easy_init(fetch);
 
-  test_setopt(curl, CURLOPT_DEBUGFUNCTION, my_trace);
-  test_setopt(curl, CURLOPT_DEBUGDATA, &config);
+  test_setopt(fetch, FETCHOPT_DEBUGFUNCTION, my_trace);
+  test_setopt(fetch, FETCHOPT_DEBUGDATA, &config);
   /* the DEBUGFUNCTION has no effect until we enable VERBOSE */
-  test_setopt(curl, CURLOPT_VERBOSE, 1L);
+  test_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* setup repeated data string */
   for(i = 0; i < sizeof(databuf); ++i)
     databuf[i] = fill[i % sizeof(fill)];
 
   /* Post */
-  test_setopt(curl, CURLOPT_POST, 1L);
+  test_setopt(fetch, FETCHOPT_POST, 1L);
 
   /* Setup read callback */
-  test_setopt(curl, CURLOPT_POSTFIELDSIZE, (long) sizeof(databuf));
-  test_setopt(curl, CURLOPT_READFUNCTION, read_callback);
+  test_setopt(fetch, FETCHOPT_POSTFIELDSIZE, (long) sizeof(databuf));
+  test_setopt(fetch, FETCHOPT_READFUNCTION, read_callback);
 
   /* Write callback */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, write_callback);
+  test_setopt(fetch, FETCHOPT_WRITEFUNCTION, write_callback);
 
   /* Ioctl function */
-  CURL_IGNORE_DEPRECATION(
-    test_setopt(curl, CURLOPT_IOCTLFUNCTION, ioctl_callback);
+  FETCH_IGNORE_DEPRECATION(
+    test_setopt(fetch, FETCHOPT_IOCTLFUNCTION, ioctl_callback);
   )
 
-  test_setopt(curl, CURLOPT_PROXY, libtest_arg2);
+  test_setopt(fetch, FETCHOPT_PROXY, libtest_arg2);
 
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* Accept any auth. But for this bug configure proxy with DIGEST, basic
      might work too, not NTLM */
-  test_setopt(curl, CURLOPT_PROXYAUTH, (long)CURLAUTH_ANY);
+  test_setopt(fetch, FETCHOPT_PROXYAUTH, (long)FETCHAUTH_ANY);
 
-  res = curl_easy_perform(curl);
+  res = fetch_easy_perform(fetch);
 
 test_cleanup:
 
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
   return res;
 }

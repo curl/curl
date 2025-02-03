@@ -46,7 +46,7 @@ data inside the file
 <protocol>
 POST /we/want/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Content-Length: 235
 Content-Type: multipart/form-data; boundary=----------------------------b0b3d6d23991

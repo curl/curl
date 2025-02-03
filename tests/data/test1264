@@ -28,7 +28,7 @@ HTTP URL with space in host name
 
 # Verify data after the test has been "shot"
 <verify>
-# CURLE_URL_MALFORMAT == 3
+# FETCHE_URL_MALFORMAT == 3
 <errorcode>
 3
 </errorcode>

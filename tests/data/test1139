@@ -16,7 +16,7 @@ none
 </server>
 
 <name>
-Verify that all libcurl options have man pages
+Verify that all libfetch options have man pages
 </name>
 
 <command type="perl">

@@ -43,7 +43,7 @@ mqtt://%HOSTIP:%MQTTPORT/%TESTNUMBER -K %LOGDIR/input%TESTNUMBER
 <strippart>
 s/^(.* 00044d51545404c2003c000c6375726c).*/$1/
 </strippart>
-# 8 is CURLE_WEIRD_SERVER_REPLY
+# 8 is FETCHE_WEIRD_SERVER_REPLY
 <errorcode>
 8
 </errorcode>

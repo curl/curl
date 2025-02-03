@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -31,10 +31,10 @@ testenv/__init__.py                   \
 testenv/caddy.py                      \
 testenv/certs.py                      \
 testenv/client.py                     \
-testenv/curl.py                       \
+testenv/fetch.py                       \
 testenv/env.py                        \
 testenv/httpd.py                      \
-testenv/mod_curltest/mod_curltest.c   \
+testenv/mod_fetchtest/mod_fetchtest.c   \
 testenv/nghttpx.py                    \
 testenv/ports.py                      \
 testenv/vsftpd.py                     \

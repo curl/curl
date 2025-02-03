@@ -5,22 +5,22 @@ Copyright (C) Daniel Stenberg,
 <daniel@haxx.se
   >, et al. # # This software is licensed as described in the file COPYING,
   which # you should have received as part of this distribution. The terms # are
-  also available at https://curl.se/docs/copyright.html. # # You may opt to use,
+  also available at https://fetch.se/docs/copyright.html. # # You may opt to use,
   copy, modify, merge, publish, distribute and/or sell # copies of the Software,
   and permit persons to whom the Software is # furnished to do so, under the
   terms of the COPYING file. # # This software is distributed on an "AS IS"
   basis, WITHOUT WARRANTY OF ANY # KIND, either express or implied. # #
-  SPDX-License-Identifier: curl #
+  SPDX-License-Identifier: fetch #
   ########################################################################### #
-  files used only in some libcurl test programs TESTUTIL = testutil.c testutil.h
+  files used only in some libfetch test programs TESTUTIL = testutil.c testutil.h
   TSTTRACE = testtrace.c testtrace.h WARNLESS = ../../lib/warnless.c
-  ../../lib/warnless.h MULTIBYTE = ../../lib/curl_multibyte.c
-  ../../lib/curl_multibyte.h INET_PTON = ../../lib/inet_pton.c
-  ../../lib/inet_pton.h THREADS = ../../lib/curl_threads.c
-  ../../lib/curl_threads.h # these files are used in every single test program
+  ../../lib/warnless.h MULTIBYTE = ../../lib/fetch_multibyte.c
+  ../../lib/fetch_multibyte.h INET_PTON = ../../lib/inet_pton.c
+  ../../lib/inet_pton.h THREADS = ../../lib/fetch_threads.c
+  ../../lib/fetch_threads.h # these files are used in every single test program
   below TIMEDIFF = ../../lib/timediff.c ../../lib/timediff.h FIRSTFILES =
   first.c first.h SUPPORTFILES = $(TIMEDIFF) $(FIRSTFILES) test.h # These are
-  all libcurl test programs LIBTESTPROGS = libauthretry libntlmconnect libprereq
+  all libfetch test programs LIBTESTPROGS = libauthretry libntlmconnect libprereq
   \ lib500 lib501 lib502 lib503 lib504 lib505 lib506 lib507 lib508 lib509 \
   lib510 lib511 lib512 lib513 lib514 lib515 lib516 lib517 lib518 lib519 \ lib520
   lib521 lib523 lib524 lib525 lib526 lib527 lib529 lib530 lib532 \ lib533 lib536

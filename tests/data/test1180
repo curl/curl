@@ -39,7 +39,7 @@ HTTP GET request with proxy and -H "Proxy-Connection: keep-alive"
 <protocol>
 GET http://%HOSTIP:%HTTPPORT/%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

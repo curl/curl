@@ -30,7 +30,7 @@ SFTP with corrupted known_hosts
 R93Ey5VtBeBblYTRlFXBWJgKFcTKBRJ/O4qBZwbUgt10AHj31i6h8NehfT19tR8wG/YCmj3KtYLHmwdzmW1edEL9G2NdX2KiKYv7/zuly3QvmP0QA0NhWkAz0KdWNM=
 </file>
 <setenv>
-CURL_HOME=%PWD/%LOGDIR/test%TESTNUMBER.dir
+FETCH_HOME=%PWD/%LOGDIR/test%TESTNUMBER.dir
 </setenv>
 </client>
 

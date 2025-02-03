@@ -1,9 +1,9 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
-SPDX-License-Identifier: curl
-Title: testcurl.pl
+SPDX-License-Identifier: fetch
+Title: testfetch.pl
 Section: 1
-Source: testcurl
+Source: testfetch
 See-also:
  - runtests.pl
 Added-in: 7.11.2
@@ -11,30 +11,30 @@ Added-in: 7.11.2
 
 # NAME
 
-testcurl.pl - (automatically) test curl
+testfetch.pl - (automatically) test fetch
 
 # SYNOPSIS
 
-**testcurl.pl [options] [dir] \> output**
+**testfetch.pl [options] [dir] \> output**
 
 # DESCRIPTION
 
-*testcurl* is the master script to use for automatic distributed testing of
-curl from git or daily snapshots. It is written for the purpose of being run
+*testfetch* is the master script to use for automatic distributed testing of
+fetch from git or daily snapshots. It is written for the purpose of being run
 from a crontab job or similar at a regular interval. The output is suitable to
-be mailed to **curl-autocompile@haxx.se** to be dealt with automatically (make
+be mailed to **fetch-autocompile@haxx.se** to be dealt with automatically (make
 sure the subject includes the word "autobuild" as the mail gets silently
 discarded otherwise). The most current build status (with a reasonable
-backlog) is published on the curl site, at https://curl.se/dev/builds.html
+backlog) is published on the fetch site, at https://fetch.se/dev/builds.html
 
 *options* may be omitted. See *--setup* for what happens then.
 
-*dir* is a curl source directory, possibly a daily snapshot one. Using this
-makes *testcurl* skip the *autoreconf* stage and thus it removes the
+*dir* is a fetch source directory, possibly a daily snapshot one. Using this
+makes *testfetch* skip the *autoreconf* stage and thus it removes the
 dependency on automake, autoconf, libtool, GNU m4 and possibly a few other
 things.
 
-*testcurl* runs `autoreconf` (or similar), configure, builds curl and libcurl
+*testfetch* runs `autoreconf` (or similar), configure, builds fetch and libfetch
 in a separate build directory and then runs `make test` to test the fresh
 build.
 
@@ -46,7 +46,7 @@ Configure options passed to configure.
 
 ## `--crosscompile`
 ``
-This is a cross-compile. Makes *testcurl* skip a few things.
+This is a cross-compile. Makes *testfetch* skip a few things.
 
 ## `--desc=[desc]`
 
@@ -86,7 +86,7 @@ by force, and similar.
 ## `--setup=[filename]`
 
 filename to read setup from (deprecated). The old style of providing info. If
-info is missing when *testcurl* is started, it prompts you and then stores the
+info is missing when *testfetch* is started, it prompts you and then stores the
 info in a 'setup' file, which it looks for on each invoke. Use *--name*,
 *--email*, *--configure* and *--desc* instead.
 
@@ -100,16 +100,16 @@ and `borland`.
 First, make a checkout from git (or you write a script that downloads daily
 snapshots automatically):
 
-    $ mkdir curl-testing
-    $ cd curl-testing
-    $ git clone https://github.com/curl/curl.git
+    $ mkdir fetch-testing
+    $ cd fetch-testing
+    $ git clone https://github.com/fetch/fetch.git
 
-With the curl sources checked out, or downloaded, you can start testing right
-away. If you want to use *testcurl* without command line arguments and to have
+With the fetch sources checked out, or downloaded, you can start testing right
+away. If you want to use *testfetch* without command line arguments and to have
 it store and remember the config in its 'setup' file, then start it manually
 now and fill in the answers to the questions it prompts you for:
 
-    $ ./curl/tests/testcurl
+    $ ./fetch/tests/testfetch
 
 Now you are ready to go. If you let the script run, it performs a full cycle
 and spit out lots of output. Mail us that output as described above.
@@ -118,16 +118,16 @@ and spit out lots of output. Mail us that output as described above.
 
 The crontab could include something like this:
 
-    # autobuild curl:
-    0 4 * * * cd curl-testing && ./testit.sh
+    # autobuild fetch:
+    0 4 * * * cd fetch-testing && ./testit.sh
 
 Where `testit.sh` is a shell script that could look similar to this:
 
-    mail="mail -s autobuild curl-autocompile@haxx.se"
+    mail="mail -s autobuild fetch-autocompile@haxx.se"
     name="--name=whoami"
     email="--email=iamme@nowhere"
     desc='"--desc=supermachine Turbo 2000"'
-    testprog="perl ./curl/tests/testcurl.pl $name $email $desc"
+    testprog="perl ./fetch/tests/testfetch.pl $name $email $desc"
     opts1="--configure=--enable-debug"
     opts2="--configure=--enable-ipv6"
 

@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HTTP POST
-CURLOPT_AWS_SIGV4
+FETCHOPT_AWS_SIGV4
 </keywords>
 </info>
 

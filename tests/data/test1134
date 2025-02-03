@@ -49,13 +49,13 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -u user1:password1 --next http://%HOSTIP:%H
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic dXNlcjE6cGFzc3dvcmQx
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 GET /%TESTNUMBER0001 HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
 Authorization: Basic MnVzZXI6cGFzc3dvcmQy
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 [DISCONNECT]

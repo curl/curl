@@ -2,8 +2,8 @@
 <info>
 <keywords>
 FTP
-CURLOPT_NOBODY
-CURLOPT_FILETIME
+FETCHOPT_NOBODY
+FETCHOPT_FILETIME
 </keywords>
 </info>
 

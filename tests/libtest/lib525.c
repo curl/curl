@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -31,14 +31,14 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode res = CURLE_OK;
-  CURL *curl = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCH *fetch = NULL;
   FILE *hd_src = NULL;
   int hd;
   struct_stat file_info;
-  CURLM *m = NULL;
+  FETCHM *m = NULL;
   int running;
 
   start_test_timing();
@@ -73,43 +73,43 @@ CURLcode test(char *URL)
     return TEST_ERR_FSTAT;
   }
 
-  res_global_init(CURL_GLOBAL_ALL);
+  res_global_init(FETCH_GLOBAL_ALL);
   if(res) {
     fclose(hd_src);
     return res;
   }
 
-  easy_init(curl);
+  easy_init(fetch);
 
   /* enable uploading */
-  easy_setopt(curl, CURLOPT_UPLOAD, 1L);
+  easy_setopt(fetch, FETCHOPT_UPLOAD, 1L);
 
   /* specify target */
-  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
 
   /* go verbose */
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
 
   /* use active FTP */
-  easy_setopt(curl, CURLOPT_FTPPORT, "-");
+  easy_setopt(fetch, FETCHOPT_FTPPORT, "-");
 
   /* now specify which file to upload */
-  easy_setopt(curl, CURLOPT_READDATA, hd_src);
+  easy_setopt(fetch, FETCHOPT_READDATA, hd_src);
 
-  /* NOTE: if you want this code to work on Windows with libcurl as a DLL, you
-     MUST also provide a read callback with CURLOPT_READFUNCTION. Failing to
+  /* NOTE: if you want this code to work on Windows with libfetch as a DLL, you
+     MUST also provide a read callback with FETCHOPT_READFUNCTION. Failing to
      do so will give you a crash since a DLL may not use the variable's memory
      when passed in to it from an app like this. */
 
   /* Set the size of the file to upload (optional).  If you give a *_LARGE
      option you MUST make sure that the type of the passed-in argument is a
-     curl_off_t. If you use CURLOPT_INFILESIZE (without _LARGE) you must
+     fetch_off_t. If you use FETCHOPT_INFILESIZE (without _LARGE) you must
      make sure that to pass in a type 'long' argument. */
-  easy_setopt(curl, CURLOPT_INFILESIZE_LARGE, (curl_off_t)file_info.st_size);
+  easy_setopt(fetch, FETCHOPT_INFILESIZE_LARGE, (fetch_off_t)file_info.st_size);
 
   multi_init(m);
 
-  multi_add_handle(m, curl);
+  multi_add_handle(m, fetch);
 
   for(;;) {
     struct timeval interval;
@@ -144,17 +144,17 @@ test_cleanup:
 #ifdef LIB529
   /* test 529 */
   /* proper cleanup sequence - type PA */
-  curl_multi_remove_handle(m, curl);
-  curl_multi_cleanup(m);
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, fetch);
+  fetch_multi_cleanup(m);
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 #else
   /* test 525 */
   /* proper cleanup sequence - type PB */
-  curl_multi_remove_handle(m, curl);
-  curl_easy_cleanup(curl);
-  curl_multi_cleanup(m);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(m, fetch);
+  fetch_easy_cleanup(fetch);
+  fetch_multi_cleanup(m);
+  fetch_global_cleanup();
 #endif
 
   /* close the local file */

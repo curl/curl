@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,16 +18,16 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
-#include "curlcheck.h"
+#include "fetchcheck.h"
 
 #include "vtls/x509asn1.h"
 
-static CURLcode unit_setup(void)
+static FETCHcode unit_setup(void)
 {
-  return CURLE_OK;
+  return FETCHE_OK;
 }
 
 static void unit_stop(void)
@@ -45,41 +45,41 @@ static void unit_stop(void)
 struct test_spec {
   const char *input;
   const char *exp_output;
-  CURLcode exp_result;
+  FETCHcode exp_result;
 };
 
 static struct test_spec test_specs[] = {
-  { "190321134340", "1903-21-13 43:40:00", CURLE_OK },
-  { "", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "0WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "19032113434", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "19032113434WTF", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "190321134340.", NULL, CURLE_BAD_FUNCTION_ARGUMENT },
-  { "190321134340.1", "1903-21-13 43:40:00.1", CURLE_OK },
-  { "19032113434017.0", "1903-21-13 43:40:17", CURLE_OK },
-  { "19032113434017.01", "1903-21-13 43:40:17.01", CURLE_OK },
-  { "19032113434003.001", "1903-21-13 43:40:03.001", CURLE_OK },
-  { "19032113434003.090", "1903-21-13 43:40:03.09", CURLE_OK },
-  { "190321134340Z", "1903-21-13 43:40:00 GMT", CURLE_OK },
-  { "19032113434017.0Z", "1903-21-13 43:40:17 GMT", CURLE_OK },
-  { "19032113434017.01Z", "1903-21-13 43:40:17.01 GMT", CURLE_OK },
-  { "19032113434003.001Z", "1903-21-13 43:40:03.001 GMT", CURLE_OK },
-  { "19032113434003.090Z", "1903-21-13 43:40:03.09 GMT", CURLE_OK },
-  { "190321134340CET", "1903-21-13 43:40:00 CET", CURLE_OK },
-  { "19032113434017.0CET", "1903-21-13 43:40:17 CET", CURLE_OK },
-  { "19032113434017.01CET", "1903-21-13 43:40:17.01 CET", CURLE_OK },
-  { "190321134340+02:30", "1903-21-13 43:40:00 UTC+02:30", CURLE_OK },
-  { "19032113434017.0+02:30", "1903-21-13 43:40:17 UTC+02:30", CURLE_OK },
-  { "19032113434017.01+02:30", "1903-21-13 43:40:17.01 UTC+02:30", CURLE_OK },
-  { "190321134340-3", "1903-21-13 43:40:00 UTC-3", CURLE_OK },
-  { "19032113434017.0-04", "1903-21-13 43:40:17 UTC-04", CURLE_OK },
-  { "19032113434017.01-01:10", "1903-21-13 43:40:17.01 UTC-01:10", CURLE_OK },
+  { "190321134340", "1903-21-13 43:40:00", FETCHE_OK },
+  { "", NULL, FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "WTF", NULL, FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "0WTF", NULL, FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "19032113434", NULL, FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "19032113434WTF", NULL, FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "190321134340.", NULL, FETCHE_BAD_FUNCTION_ARGUMENT },
+  { "190321134340.1", "1903-21-13 43:40:00.1", FETCHE_OK },
+  { "19032113434017.0", "1903-21-13 43:40:17", FETCHE_OK },
+  { "19032113434017.01", "1903-21-13 43:40:17.01", FETCHE_OK },
+  { "19032113434003.001", "1903-21-13 43:40:03.001", FETCHE_OK },
+  { "19032113434003.090", "1903-21-13 43:40:03.09", FETCHE_OK },
+  { "190321134340Z", "1903-21-13 43:40:00 GMT", FETCHE_OK },
+  { "19032113434017.0Z", "1903-21-13 43:40:17 GMT", FETCHE_OK },
+  { "19032113434017.01Z", "1903-21-13 43:40:17.01 GMT", FETCHE_OK },
+  { "19032113434003.001Z", "1903-21-13 43:40:03.001 GMT", FETCHE_OK },
+  { "19032113434003.090Z", "1903-21-13 43:40:03.09 GMT", FETCHE_OK },
+  { "190321134340CET", "1903-21-13 43:40:00 CET", FETCHE_OK },
+  { "19032113434017.0CET", "1903-21-13 43:40:17 CET", FETCHE_OK },
+  { "19032113434017.01CET", "1903-21-13 43:40:17.01 CET", FETCHE_OK },
+  { "190321134340+02:30", "1903-21-13 43:40:00 UTC+02:30", FETCHE_OK },
+  { "19032113434017.0+02:30", "1903-21-13 43:40:17 UTC+02:30", FETCHE_OK },
+  { "19032113434017.01+02:30", "1903-21-13 43:40:17.01 UTC+02:30", FETCHE_OK },
+  { "190321134340-3", "1903-21-13 43:40:00 UTC-3", FETCHE_OK },
+  { "19032113434017.0-04", "1903-21-13 43:40:17 UTC-04", FETCHE_OK },
+  { "19032113434017.01-01:10", "1903-21-13 43:40:17.01 UTC-01:10", FETCHE_OK },
 };
 
 static bool do_test(struct test_spec *spec, size_t i, struct dynbuf *dbuf)
 {
-  CURLcode result;
+  FETCHcode result;
   const char *in = spec->input;
 
   Curl_dyn_reset(dbuf);
@@ -106,8 +106,8 @@ UNITTEST_START
 
   Curl_dyn_init(&dbuf, 32*1024);
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
@@ -118,7 +118,7 @@ UNITTEST_START
   fail_unless(all_ok, "some tests of Curl_x509_GTime2str() fails");
 
   Curl_dyn_free(&dbuf);
-  curl_global_cleanup();
+  fetch_global_cleanup();
 }
 UNITTEST_STOP
 

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -53,11 +53,11 @@ class TestStuttered:
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
         count = 1
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
+               f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=100&chunk_size=100&chunk_delay=10ms'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=1, http_status=200)
 
     # download 50 files in 100 chunks a 100 bytes with 10ms delay between
@@ -69,12 +69,12 @@ class TestStuttered:
             pytest.skip("h3 not supported")
         count = 50
         warmups = 100
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{warmups-1}]'
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count-1}]'\
+               f'/fetchtest/tweak?id=[0-{count-1}]'\
                '&chunks=100&chunk_size=100&chunk_delay=10ms'
-        r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
+        r = fetch.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
         r.check_response(count=warmups+count, http_status=200)
         assert r.total_connects == 1
@@ -91,12 +91,12 @@ class TestStuttered:
             pytest.skip("h3 not supported")
         count = 50
         warmups = 100
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{warmups-1}]'
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
+               f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=1000&chunk_size=10&chunk_delay=100us'
-        r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
+        r = fetch.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
         r.check_response(count=warmups+count, http_status=200)
         assert r.total_connects == 1
@@ -113,12 +113,12 @@ class TestStuttered:
             pytest.skip("h3 not supported")
         count = 50
         warmups = 100
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url1 = f'https://{env.authority_for(env.domain1, proto)}/data.json?[0-{warmups-1}]'
         urln = f'https://{env.authority_for(env.domain1, proto)}' \
-               f'/curltest/tweak?id=[0-{count - 1}]'\
+               f'/fetchtest/tweak?id=[0-{count - 1}]'\
                '&chunks=10000&chunk_size=1&chunk_delay=50us'
-        r = curl.http_download(urls=[url1, urln], alpn_proto=proto,
+        r = fetch.http_download(urls=[url1, urln], alpn_proto=proto,
                                extra_args=['--parallel'])
         r.check_response(count=warmups+count, http_status=200)
         assert r.total_connects == 1

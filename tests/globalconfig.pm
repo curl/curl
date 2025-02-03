@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,7 +20,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 
@@ -38,9 +38,9 @@ BEGIN {
     our @EXPORT = qw(
         $anyway
         $automakestyle
-        $CURL
-        $CURLVERSION
-        $CURLVERNUM
+        $FETCH
+        $FETCHVERSION
+        $FETCHVERNUM
         $DATE
         $has_shared
         $LIBDIR
@@ -64,7 +64,7 @@ BEGIN {
         $TESTDIR
         $torture
         $valgrind
-        $VCURL
+        $VFETCH
         $verbose
         %feature
         %keywords
@@ -86,12 +86,12 @@ our $verbose;         # 1 to show verbose test output
 our $torture;         # 1 to enable torture testing
 our $proxy_address;   # external HTTP proxy address
 our $listonly;        # only list the tests
-our $run_duphandle;   # run curl with --test-duphandle to verify handle duplication
-our $run_event_based; # run curl with --test-event to test the event API
+our $run_duphandle;   # run fetch with --test-duphandle to verify handle duplication
+our $run_event_based; # run fetch with --test-event to test the event API
 our $automakestyle;   # use automake-like test status output format
 our $anyway;          # continue anyway, even if a test fail
-our $CURLVERSION="";  # curl's reported version number
-our $CURLVERNUM="";   # curl's reported version number (without -DEV)
+our $FETCHVERSION="";  # fetch's reported version number
+our $FETCHVERNUM="";   # fetch's reported version number (without -DEV)
 our $randseed = 0;    # random number seed
 
 # paths
@@ -103,9 +103,9 @@ our $LOGDIR="log";  # root of the log directory; this will be different for
                     # each runner in multiprocess mode
 our $LIBDIR="./libtest";
 our $TESTDIR="$srcdir/data";
-our $CURL="../src/curl".exe_ext('TOOL'); # what curl binary to run on the tests
-our $VCURL=$CURL;  # what curl binary to use to verify the servers with
-                   # VCURL is handy to set to the system one when the one you
+our $FETCH="../src/fetch".exe_ext('TOOL'); # what fetch binary to run on the tests
+our $VFETCH=$FETCH;  # what fetch binary to use to verify the servers with
+                   # VFETCH is handy to set to the system one when the one you
                    # just built hangs or crashes and thus prevent verification
 # the path to the script that analyzes the memory debug output file
 our $memanalyze="$perl $srcdir/memanalyze.pl";
@@ -116,8 +116,8 @@ our $dev_null = ($^O eq 'MSWin32' ? 'NUL' : '/dev/null');
 # paths in $LOGDIR
 our $LOCKDIR = "lock";          # root of the server directory with lock files
 our $PIDDIR = "server";         # root of the server directory with PID files
-our $SERVERIN="server.input";   # what curl sent the server
-our $PROXYIN="proxy.input";     # what curl sent the proxy
+our $SERVERIN="server.input";   # what fetch sent the server
+our $PROXYIN="proxy.input";     # what fetch sent the proxy
 our $MEMDUMP="memdump";         # file that the memory debugging creates
 our $SERVERCMD="server.cmd";    # copy server instructions here
 

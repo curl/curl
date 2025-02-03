@@ -1,9 +1,9 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_option
-curl_easy_option_by_name
-curl_easy_option_by_id
+fetch_easy_option
+fetch_easy_option_by_name
+fetch_easy_option_by_id
 </keywords>
 </info>
 
@@ -17,7 +17,7 @@ curl_easy_option_by_id
 none
 </server>
 <name>
-curl_easy_option_by_name() and curl_easy_option_by_id()
+fetch_easy_option_by_name() and fetch_easy_option_by_id()
 </name>
 <tool>
 lib%TESTNUMBER

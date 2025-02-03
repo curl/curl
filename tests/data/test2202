@@ -51,7 +51,7 @@ server CONNACK 2 20020005
 </protocol>
 
 
-# 8 is CURLE_WEIRD_SERVER_REPLY
+# 8 is FETCHE_WEIRD_SERVER_REPLY
 <errorcode>
 8
 </errorcode>

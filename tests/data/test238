@@ -30,7 +30,7 @@ ftp://%HOSTIP:%FTPPORT/%TESTNUMBER
 <strip>
 QUIT
 </strip>
-# 13 = CURLE_FTP_WEIRD_PASV_REPLY
+# 13 = FETCHE_FTP_WEIRD_PASV_REPLY
 <errorcode>
 13
 </errorcode>

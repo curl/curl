@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -40,7 +40,7 @@ log = logging.getLogger(__name__)
 
 
 @pytest.mark.skipif(condition=not Env.has_caddy(), reason="missing caddy")
-@pytest.mark.skipif(condition=not Env.have_ssl_curl(), reason="curl without SSL")
+@pytest.mark.skipif(condition=not Env.have_ssl_fetch(), reason="fetch without SSL")
 class TestCaddy:
 
     @pytest.fixture(autouse=True, scope='class')
@@ -72,39 +72,39 @@ class TestCaddy:
     # download 1 file
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_08_01_download_1(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and not env.have_h3_fetch():
+            pytest.skip("h3 not supported in fetch")
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         url = f'https://{env.domain1}:{caddy.port}/data.json'
-        r = curl.http_download(urls=[url], alpn_proto=proto)
+        r = fetch.http_download(urls=[url], alpn_proto=proto)
         r.check_response(count=1, http_status=200)
 
     # download 1MB files sequentially
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_08_02_download_1mb_sequential(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and not env.have_h3_fetch():
+            pytest.skip("h3 not supported in fetch")
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 50
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 1MB files parallel
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_08_03_download_1mb_parallel(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and not env.have_h3_fetch():
+            pytest.skip("h3 not supported in fetch")
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 20
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data1.data?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+        r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
         r.check_response(count=count, http_status=200)
@@ -119,14 +119,14 @@ class TestCaddy:
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_08_04a_download_10mb_sequential(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and not env.have_h3_fetch():
+            pytest.skip("h3 not supported in fetch")
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 40
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data5.data?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 10MB files sequentially
@@ -134,14 +134,14 @@ class TestCaddy:
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     @pytest.mark.parametrize("proto", ['h2', 'h3'])
     def test_08_04b_download_10mb_sequential(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and not env.have_h3_fetch():
+            pytest.skip("h3 not supported in fetch")
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
         count = 20
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto)
+        r = fetch.http_download(urls=[urln], alpn_proto=proto)
         r.check_response(count=count, http_status=200, connect_count=1)
 
     # download 10MB files parallel
@@ -149,17 +149,17 @@ class TestCaddy:
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     @pytest.mark.skipif(condition=Env().ci_run, reason="not suitable for CI runs")
     def test_08_05_download_1mb_parallel(self, env: Env, caddy: Caddy, proto):
-        if proto == 'h3' and not env.have_h3_curl():
-            pytest.skip("h3 not supported in curl")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and not env.have_h3_fetch():
+            pytest.skip("h3 not supported in fetch")
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 itself crashes")
-        if proto == 'http/1.1' and env.curl_uses_lib('mbedtls'):
+        if proto == 'http/1.1' and env.fetch_uses_lib('mbedtls'):
             pytest.skip("mbedtls 3.6.0 fails on 50 connections with: "\
                 "ssl_handshake returned: (-0x7F00) SSL - Memory allocation failed")
         count = 50
-        curl = CurlClient(env=env)
+        fetch = CurlClient(env=env)
         urln = f'https://{env.domain1}:{caddy.port}/data10.data?[0-{count-1}]'
-        r = curl.http_download(urls=[urln], alpn_proto=proto, extra_args=[
+        r = fetch.http_download(urls=[urln], alpn_proto=proto, extra_args=[
             '--parallel'
         ])
         r.check_response(count=count, http_status=200)
@@ -174,18 +174,18 @@ class TestCaddy:
     def test_08_06_post_parallel(self, env: Env, httpd, caddy, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1
         count = 20
         data = '0123456789'
-        curl = CurlClient(env=env)
-        url = f'https://{env.domain2}:{caddy.port}/curltest/echo?id=[0-{count-1}]'
-        r = curl.http_upload(urls=[url], data=data, alpn_proto=proto,
+        fetch = CurlClient(env=env)
+        url = f'https://{env.domain2}:{caddy.port}/fetchtest/echo?id=[0-{count-1}]'
+        r = fetch.http_upload(urls=[url], data=data, alpn_proto=proto,
                              extra_args=['--parallel'])
         r.check_stats(count=count, http_status=200, exitcode=0)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            respdata = open(fetch.response_file(i)).readlines()
             assert respdata == [data]
 
     # put large file, check that they length were echoed
@@ -193,23 +193,23 @@ class TestCaddy:
     def test_08_07_put_large(self, env: Env, httpd, caddy, proto):
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")
-        if proto == 'h3' and env.curl_uses_lib('msh3'):
+        if proto == 'h3' and env.fetch_uses_lib('msh3'):
             pytest.skip("msh3 stalls here")
         # limit since we use a separate connection in h1<
         count = 1
         fdata = os.path.join(env.gen_dir, 'data-10m')
-        curl = CurlClient(env=env)
-        url = f'https://{env.domain2}:{caddy.port}/curltest/put?id=[0-{count-1}]'
-        r = curl.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
+        fetch = CurlClient(env=env)
+        url = f'https://{env.domain2}:{caddy.port}/fetchtest/put?id=[0-{count-1}]'
+        r = fetch.http_put(urls=[url], fdata=fdata, alpn_proto=proto)
         exp_data = [f'{os.path.getsize(fdata)}']
         r.check_response(count=count, http_status=200)
         for i in range(count):
-            respdata = open(curl.response_file(i)).readlines()
+            respdata = open(fetch.response_file(i)).readlines()
             assert respdata == exp_data
 
     @pytest.mark.parametrize("proto", ['http/1.1', 'h2', 'h3'])
     def test_08_08_earlydata(self, env: Env, httpd, caddy, proto):
-        if not env.curl_uses_lib('gnutls'):
+        if not env.fetch_uses_lib('gnutls'):
             pytest.skip('TLS earlydata only implemented in GnuTLS')
         if proto == 'h3' and not env.have_h3():
             pytest.skip("h3 not supported")

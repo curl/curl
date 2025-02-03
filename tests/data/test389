@@ -38,7 +38,7 @@ local-http
 *.localhost is a local host
 </name>
 <command>
--4 http://curlmachine.localhost:%HTTPPORT/%TESTNUMBER
+-4 http://fetchmachine.localhost:%HTTPPORT/%TESTNUMBER
 </command>
 # Ensure that we're running on localhost
 </client>
@@ -48,8 +48,8 @@ local-http
 <verify>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
-Host: curlmachine.localhost:%HTTPPORT
-User-Agent: curl/%VERSION
+Host: fetchmachine.localhost:%HTTPPORT
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

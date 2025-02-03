@@ -1,7 +1,7 @@
 <testcase>
 <info>
 <keywords>
-curl_easy_escape
+fetch_easy_escape
 </keywords>
 </info>
 # Server-side
@@ -15,7 +15,7 @@ none
 lib%TESTNUMBER
 </tool>
 <name>
-curl_easy_escape
+fetch_easy_escape
 </name>
 <command>
 -

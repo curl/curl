@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -29,13 +29,13 @@
 # verify that each option mention in there that should have its own manpage
 # actually does.
 #
-# In addition, make sure that every current option to curl_easy_setopt,
-# curl_easy_getinfo and curl_multi_setopt are also mentioned in their
+# In addition, make sure that every current option to fetch_easy_setopt,
+# fetch_easy_getinfo and fetch_multi_setopt are also mentioned in their
 # corresponding main (index) manpage.
 #
-# src/tool_getparam.c lists all options curl can parse
-# docs/curl.1 documents all command line options
-# src/tool_listhelp.c outputs all options with curl -h
+# src/tool_getparam.c lists all options fetch can parse
+# docs/fetch.1 documents all command line options
+# src/tool_listhelp.c outputs all options with fetch -h
 # - make sure they're all in sync
 #
 # Output all deviances to stderr.
@@ -46,24 +46,24 @@ use warnings;
 # we may get the dir roots pointed out
 my $root=$ARGV[0] || ".";
 my $buildroot=$ARGV[1] || ".";
-my $syms = "$root/docs/libcurl/symbols-in-versions";
-my $curlh = "$root/include/curl/curl.h";
+my $syms = "$root/docs/libfetch/symbols-in-versions";
+my $fetchh = "$root/include/fetch/fetch.h";
 my $errors=0;
 
-# the prepopulated alias list is the CURLINFO_* defines that are used for the
+# the prepopulated alias list is the FETCHINFO_* defines that are used for the
 # debug function callback and the fact that they use the same prefix as the
-# curl_easy_getinfo options was a mistake.
+# fetch_easy_getinfo options was a mistake.
 my %alias = (
-    'CURLINFO_DATA_IN' => 'none',
-    'CURLINFO_DATA_OUT' => 'none',
-    'CURLINFO_END' => 'none',
-    'CURLINFO_HEADER_IN' => 'none',
-    'CURLINFO_HEADER_OUT' => 'none',
-    'CURLINFO_LASTONE' => 'none',
-    'CURLINFO_NONE' => 'none',
-    'CURLINFO_SSL_DATA_IN' => 'none',
-    'CURLINFO_SSL_DATA_OUT' => 'none',
-    'CURLINFO_TEXT' => 'none'
+    'FETCHINFO_DATA_IN' => 'none',
+    'FETCHINFO_DATA_OUT' => 'none',
+    'FETCHINFO_END' => 'none',
+    'FETCHINFO_HEADER_IN' => 'none',
+    'FETCHINFO_HEADER_OUT' => 'none',
+    'FETCHINFO_LASTONE' => 'none',
+    'FETCHINFO_NONE' => 'none',
+    'FETCHINFO_SSL_DATA_IN' => 'none',
+    'FETCHINFO_SSL_DATA_OUT' => 'none',
+    'FETCHINFO_TEXT' => 'none'
     );
 
 sub scanmdpage {
@@ -103,24 +103,24 @@ sub scanmdpage {
 my $r;
 
 # check for define aliases
-open($r, "<", "$curlh") ||
-    die "no curl.h";
+open($r, "<", "$fetchh") ||
+    die "no fetch.h";
 while(<$r>) {
-    if(/^\#define (CURL(OPT|INFO|MOPT)_\w+) (.*)/) {
+    if(/^\#define (FETCH(OPT|INFO|MOPT)_\w+) (.*)/) {
         $alias{$1}=$3;
     }
 }
 close($r);
 
-my @curlopt;
-my @curlinfo;
-my @curlmopt;
+my @fetchopt;
+my @fetchinfo;
+my @fetchmopt;
 open($r, "<", "$syms") ||
     die "no input file";
 while(<$r>) {
     chomp;
     my $l= $_;
-    if($l =~ /(CURL(OPT|INFO|MOPT)_\w+) *([0-9.]*) *([0-9.-]*) *([0-9.]*)/) {
+    if($l =~ /(FETCH(OPT|INFO|MOPT)_\w+) *([0-9.]*) *([0-9.-]*) *([0-9.]*)/) {
         my ($opt, $type, $add, $dep, $rem) = ($1, $2, $3, $4, $5);
 
         if($alias{$opt}) {
@@ -132,15 +132,15 @@ while(<$r>) {
         }
         else {
             if($type eq "OPT") {
-                push @curlopt, $opt,
+                push @fetchopt, $opt,
             }
             elsif($type eq "INFO") {
-                push @curlinfo, $opt,
+                push @fetchinfo, $opt,
             }
             elsif($type eq "MOPT") {
-                push @curlmopt, $opt,
+                push @fetchmopt, $opt,
             }
-            if(! -f "$root/docs/libcurl/opts/$opt.md") {
+            if(! -f "$root/docs/libfetch/opts/$opt.md") {
                 print STDERR "Missing $opt.md\n";
                 $errors++;
             }
@@ -149,9 +149,9 @@ while(<$r>) {
 }
 close($r);
 
-scanmdpage("$root/docs/libcurl/curl_easy_setopt.md", @curlopt);
-scanmdpage("$root/docs/libcurl/curl_easy_getinfo.md", @curlinfo);
-scanmdpage("$root/docs/libcurl/curl_multi_setopt.md", @curlmopt);
+scanmdpage("$root/docs/libfetch/fetch_easy_setopt.md", @fetchopt);
+scanmdpage("$root/docs/libfetch/fetch_easy_getinfo.md", @fetchinfo);
+scanmdpage("$root/docs/libfetch/fetch_multi_setopt.md", @fetchmopt);
 
 # using this hash array, we can skip specific options
 my %opts = (
@@ -164,7 +164,7 @@ my %opts = (
     '--no-progress-meter' => 1,
     '--no-clobber' => 1,
 
-    # pretend these options without -no exist in curl.1 and tool_listhelp.c
+    # pretend these options without -no exist in fetch.1 and tool_listhelp.c
     '--alpn' => 6,
     '--npn' => 6,
     '--eprt' => 6,
@@ -175,7 +175,7 @@ my %opts = (
     '--progress-meter' => 6,
     '--clobber' => 6,
 
-    # deprecated options do not need to be in tool_help.c nor curl.1
+    # deprecated options do not need to be in tool_help.c nor fetch.1
     '--krb4' => 6,
     '--ftp-ssl' => 6,
     '--ftp-ssl-reqd' => 6,
@@ -189,7 +189,7 @@ my %opts = (
 
 
 #########################################################################
-# parse the curl code that parses the command line arguments!
+# parse the fetch code that parses the command line arguments!
 open($r, "<", "$root/src/tool_getparam.c") ||
     die "no input file";
 my $list;
@@ -231,10 +231,10 @@ while(<$r>) {
 close($r);
 
 #########################################################################
-# parse the curl.1 manpage, extract all documented command line options
+# parse the fetch.1 manpage, extract all documented command line options
 # The manpage may or may not be rebuilt, so check both possible locations
-open($r, "<", "$buildroot/docs/cmdline-opts/curl.1") || open($r, "<", "$root/docs/cmdline-opts/curl.1") ||
-    die "failed getting curl.1";
+open($r, "<", "$buildroot/docs/cmdline-opts/fetch.1") || open($r, "<", "$root/docs/cmdline-opts/fetch.1") ||
+    die "failed getting fetch.1";
 my @manpage; # store all parsed parameters
 while(<$r>) {
     chomp;
@@ -261,7 +261,7 @@ close($r);
 
 
 #########################################################################
-# parse the curl code that outputs the curl -h list
+# parse the fetch code that outputs the fetch -h list
 open($r, "<", "$root/src/tool_listhelp.c") ||
     die "no input file";
 my @toolhelp; # store all parsed parameters
@@ -306,10 +306,10 @@ foreach my $o (keys %opts) {
             $missing=" tool_getparam.c";
         }
         if($where & 2) {
-            $exists.= " curl.1";
+            $exists.= " fetch.1";
         }
         else {
-            $missing.= " curl.1";
+            $missing.= " fetch.1";
         }
         if($where & 4) {
             $exists .= " tool_listhelp.c";

@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,13 +18,13 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /*
- * See https://github.com/curl/curl/issues/3371
+ * See https://github.com/fetch/fetch/issues/3371
  *
- * This test case checks whether curl_multi_remove_handle() cancels
+ * This test case checks whether fetch_multi_remove_handle() cancels
  * asynchronous DNS resolvers without blocking where possible.  Obviously, it
  * only tests whichever resolver cURL is actually built with.
  */
@@ -41,29 +41,29 @@
 
 #include <sys/stat.h>
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   int stillRunning;
-  CURLM *multiHandle = NULL;
-  CURL *curl = NULL;
-  CURLcode res = CURLE_OK;
-  CURLMcode mres;
+  FETCHM *multiHandle = NULL;
+  FETCH *fetch = NULL;
+  FETCHcode res = FETCHE_OK;
+  FETCHMcode mres;
   int timeout;
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   multi_init(multiHandle);
 
-  easy_init(curl);
+  easy_init(fetch);
 
-  easy_setopt(curl, CURLOPT_VERBOSE, 1L);
-  easy_setopt(curl, CURLOPT_URL, URL);
+  easy_setopt(fetch, FETCHOPT_VERBOSE, 1L);
+  easy_setopt(fetch, FETCHOPT_URL, URL);
 
   /* Set a DNS server that hopefully will not respond when using c-ares. */
-  if(curl_easy_setopt(curl, CURLOPT_DNS_SERVERS, "0.0.0.0") == CURLE_OK)
+  if(fetch_easy_setopt(fetch, FETCHOPT_DNS_SERVERS, "0.0.0.0") == FETCHE_OK)
     /* Since we could set the DNS server, presume we are working with a
        resolver that can be cancelled (i.e. c-ares).  Thus,
-       curl_multi_remove_handle() should not block even when the resolver
+       fetch_multi_remove_handle() should not block even when the resolver
        request is outstanding.  So, set a request timeout _longer_ than the
        test hang timeout so we will fail if the handle removal call incorrectly
        blocks. */
@@ -72,7 +72,7 @@ CURLcode test(char *URL)
     /* If we can't set the DNS server, presume that we are configured to use a
        resolver that can't be cancelled (i.e. the threaded resolver or the
        non-threaded blocking resolver).  So, we just test that the
-       curl_multi_remove_handle() call does finish well within our test
+       fetch_multi_remove_handle() call does finish well within our test
        timeout.
 
        But, it is very unlikely that the resolver request will take any time at
@@ -80,34 +80,34 @@ CURLcode test(char *URL)
        non-responsive DNS server.  At least we exercise the flow.
        */
     fprintf(stderr,
-            "CURLOPT_DNS_SERVERS not supported; "
-            "assuming curl_multi_remove_handle() will block\n");
+            "FETCHOPT_DNS_SERVERS not supported; "
+            "assuming fetch_multi_remove_handle() will block\n");
     timeout = TEST_HANG_TIMEOUT / 2;
   }
 
   /* Setting a timeout on the request should ensure that even if we have to
-     wait for the resolver during curl_multi_remove_handle(), it won't take
+     wait for the resolver during fetch_multi_remove_handle(), it won't take
      longer than this, because the resolver request inherits its timeout from
      this. */
-  easy_setopt(curl, CURLOPT_TIMEOUT_MS, timeout);
+  easy_setopt(fetch, FETCHOPT_TIMEOUT_MS, timeout);
 
-  multi_add_handle(multiHandle, curl);
+  multi_add_handle(multiHandle, fetch);
 
   /* This should move the handle from INIT => CONNECT => WAITRESOLVE. */
-  fprintf(stderr, "curl_multi_perform()...\n");
+  fprintf(stderr, "fetch_multi_perform()...\n");
   multi_perform(multiHandle, &stillRunning);
-  fprintf(stderr, "curl_multi_perform() succeeded\n");
+  fprintf(stderr, "fetch_multi_perform() succeeded\n");
 
   /* Start measuring how long it takes to remove the handle. */
-  fprintf(stderr, "curl_multi_remove_handle()...\n");
+  fprintf(stderr, "fetch_multi_remove_handle()...\n");
   start_test_timing();
-  mres = curl_multi_remove_handle(multiHandle, curl);
+  mres = fetch_multi_remove_handle(multiHandle, fetch);
   if(mres) {
-    fprintf(stderr, "curl_multi_remove_handle() failed, with code %d\n", mres);
+    fprintf(stderr, "fetch_multi_remove_handle() failed, with code %d\n", mres);
     res = TEST_ERR_MULTI;
     goto test_cleanup;
   }
-  fprintf(stderr, "curl_multi_remove_handle() succeeded\n");
+  fprintf(stderr, "fetch_multi_remove_handle() succeeded\n");
 
   /* Fail the test if it took too long to remove.  This happens after the fact,
      and says "it seems that it would have run forever", which isn't true, but
@@ -115,9 +115,9 @@ CURLcode test(char *URL)
   abort_on_test_timeout();
 
 test_cleanup:
-  curl_easy_cleanup(curl);
-  curl_multi_cleanup(multiHandle);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_multi_cleanup(multiHandle);
+  fetch_global_cleanup();
 
   return res;
 }

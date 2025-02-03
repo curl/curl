@@ -3,7 +3,7 @@
 <keywords>
 HTTP
 HSTS
-CURLOPT_HSTSREADFUNCTION
+FETCHOPT_HSTSREADFUNCTION
 </keywords>
 </info>
 
@@ -35,8 +35,8 @@ http://%HOSTIP:%NOLISTENPORT/not-there/%TESTNUMBER
 
 # Verify data after the test has been "shot"
 <verify>
-# 7 CURLE_COULDNT_CONNECT (expected since there's nothing listening there)
-# 42 CURLE_ABORTED_BY_CALLBACK
+# 7 FETCHE_COULDNT_CONNECT (expected since there's nothing listening there)
+# 42 FETCHE_ABORTED_BY_CALLBACK
 <errorcode>
 42
 </errorcode>

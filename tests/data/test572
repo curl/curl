@@ -12,7 +12,7 @@ GET_PARAMETER
 <reply>
 <data1>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: getparams-test
 CSeq: 1
 
@@ -20,7 +20,7 @@ CSeq: 1
 
 <data2>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: getparams-test
 Content-Type: text/parameters
 Content-Length: 32
@@ -33,7 +33,7 @@ speed=ludicrous
 
 <data3>
 RTSP/1.0 204 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: getparams-test
 Cseq: 3
 
@@ -41,7 +41,7 @@ Cseq: 3
 
 <data4>
 RTSP/1.0 200 Okie Dokie
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: getparams-test
 Cseq: 4
 Content-Length: 37
@@ -51,7 +51,7 @@ jitter: 0.314
 </data4>
 <data5>
 RTSP/1.0 200 OK
-Server: RTSPD/libcurl-test
+Server: RTSPD/libfetch-test
 Session: getparams-test
 CSeq: 5
 Curl-private: swsclose

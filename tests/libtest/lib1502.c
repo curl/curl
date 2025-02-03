@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 /*
@@ -26,7 +26,7 @@
  * only #ifdefs controlling the cleanup sequence.
  *
  * Test case 1502 converted from bug report #3575448, identifying a memory
- * leak in the CURLOPT_RESOLVE handling with the multi interface.
+ * leak in the FETCHOPT_RESOLVE handling with the multi interface.
  */
 
 #include "test.h"
@@ -39,20 +39,20 @@
 
 #define TEST_HANG_TIMEOUT 60 * 1000
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *easy = NULL;
-  CURL *dup;
-  CURLM *multi = NULL;
+  FETCH *easy = NULL;
+  FETCH *dup;
+  FETCHM *multi = NULL;
   int still_running;
-  CURLcode res = CURLE_OK;
+  FETCHcode res = FETCHE_OK;
 
   char redirect[160];
 
   /* DNS cache injection */
-  struct curl_slist *dns_cache_list;
+  struct fetch_slist *dns_cache_list;
 
-  res_global_init(CURL_GLOBAL_ALL);
+  res_global_init(FETCH_GLOBAL_ALL);
   if(res) {
     return res;
   }
@@ -62,29 +62,29 @@ CURLcode test(char *URL)
 
   start_test_timing();
 
-  dns_cache_list = curl_slist_append(NULL, redirect);
+  dns_cache_list = fetch_slist_append(NULL, redirect);
   if(!dns_cache_list) {
-    fprintf(stderr, "curl_slist_append() failed\n");
-    curl_global_cleanup();
+    fprintf(stderr, "fetch_slist_append() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   easy_init(easy);
 
-  easy_setopt(easy, CURLOPT_URL, URL);
-  easy_setopt(easy, CURLOPT_HEADER, 1L);
-  easy_setopt(easy, CURLOPT_RESOLVE, dns_cache_list);
+  easy_setopt(easy, FETCHOPT_URL, URL);
+  easy_setopt(easy, FETCHOPT_HEADER, 1L);
+  easy_setopt(easy, FETCHOPT_RESOLVE, dns_cache_list);
 
-  dup = curl_easy_duphandle(easy);
+  dup = fetch_easy_duphandle(easy);
   if(dup) {
-    curl_easy_cleanup(easy);
+    fetch_easy_cleanup(easy);
     easy = dup;
   }
   else {
-    curl_slist_free_all(dns_cache_list);
-    curl_easy_cleanup(easy);
-    curl_global_cleanup();
-    return CURLE_OUT_OF_MEMORY;
+    fetch_slist_free_all(dns_cache_list);
+    fetch_easy_cleanup(easy);
+    fetch_global_cleanup();
+    return FETCHE_OUT_OF_MEMORY;
   }
 
   multi_init(multi);
@@ -125,35 +125,35 @@ test_cleanup:
 
 #ifdef LIB1502
   /* undocumented cleanup sequence - type UA */
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi);
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
 #endif
 
 #ifdef LIB1503
   /* proper cleanup sequence - type PA */
-  curl_multi_remove_handle(multi, easy);
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(multi, easy);
+  fetch_multi_cleanup(multi);
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
 #endif
 
 #ifdef LIB1504
   /* undocumented cleanup sequence - type UB */
-  curl_easy_cleanup(easy);
-  curl_multi_cleanup(multi);
-  curl_global_cleanup();
+  fetch_easy_cleanup(easy);
+  fetch_multi_cleanup(multi);
+  fetch_global_cleanup();
 #endif
 
 #ifdef LIB1505
   /* proper cleanup sequence - type PB */
-  curl_multi_remove_handle(multi, easy);
-  curl_easy_cleanup(easy);
-  curl_multi_cleanup(multi);
-  curl_global_cleanup();
+  fetch_multi_remove_handle(multi, easy);
+  fetch_easy_cleanup(easy);
+  fetch_multi_cleanup(multi);
+  fetch_global_cleanup();
 #endif
 
-  curl_slist_free_all(dns_cache_list);
+  fetch_slist_free_all(dns_cache_list);
 
   return res;
 }

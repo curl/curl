@@ -12,7 +12,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -21,7 +21,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 # Prepare a directory with known files and clean up afterwards
@@ -53,7 +53,7 @@ if ($ARGV[0] eq "prepare")
 
     open(FILE, ">plainfile.txt") || errout "$!";
     binmode FILE;
-    print FILE "Test file to support curl test suite\n";
+    print FILE "Test file to support fetch test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT filesystem.
@@ -62,7 +62,7 @@ if ($ARGV[0] eq "prepare")
 
     open(FILE, ">rofile.txt") || errout "$!";
     binmode FILE;
-    print FILE "Read-only test file to support curl test suite\n";
+    print FILE "Read-only test file to support fetch test suite\n";
     close(FILE);
     # The mtime is specifically chosen to be an even number so that it can be
     # represented exactly on a FAT filesystem.

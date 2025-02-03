@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -142,7 +142,7 @@ static const struct dcheck dates[] = {
   {"Thu, 31-Dec-1969 23:59:58 GMT", -2 },
   {"Thu, 31-Dec-1969 23:59:59 GMT", 0 }, /* avoids -1 ! */
 #if SIZEOF_TIME_T > 4
-  {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t) CURL_OFF_TU_C(2362034977) },
+  {"Sun, 06 Nov 2044 08:49:37 GMT", (time_t) FETCH_OFF_TU_C(2362034977) },
   {"Sun, 06 Nov 3144 08:49:37 GMT", 37074617377 },
 #ifndef HAVE_TIME_T_UNSIGNED
 #if 0
@@ -162,7 +162,7 @@ static const struct dcheck dates[] = {
   { NULL, 0 }
 };
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
   int i;
   int error = 0;
@@ -170,7 +170,7 @@ CURLcode test(char *URL)
   (void)URL; /* not used */
 
   for(i = 0; dates[i].input; i++) {
-    time_t out = curl_getdate(dates[i].input, NULL);
+    time_t out = fetch_getdate(dates[i].input, NULL);
     if(out != dates[i].output) {
       printf("WRONGLY %s => %ld (instead of %ld)\n",
              dates[i].input, (long)out, (long)dates[i].output);
@@ -178,5 +178,5 @@ CURLcode test(char *URL)
     }
   }
 
-  return error == 0 ? CURLE_OK : TEST_ERR_FAILURE;
+  return error == 0 ? FETCHE_OK : TEST_ERR_FAILURE;
 }

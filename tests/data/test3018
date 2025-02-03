@@ -57,7 +57,7 @@ server SUBACK 3 9003000100
 server PUBLISH c 300c00043330313868656c6c6f0a
 </protocol>
 
-# 63 is CURLE_FILESIZE_EXCEEDED
+# 63 is FETCHE_FILESIZE_EXCEEDED
 <errorcode>
 63
 </errorcode>

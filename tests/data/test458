@@ -33,7 +33,7 @@ http
 </server>
 <setenv>
 FUNVALUE=contents%TESTNUMBER
-VALUE2=curl
+VALUE2=fetch
 BLANK=
 </setenv>
 <name>
@@ -54,7 +54,7 @@ http://%HOSTIP:%HTTPPORT/%TESTNUMBER -K %LOGDIR/cmd
 <protocol crlf="yes">
 GET /%TESTNUMBER HTTP/1.1
 Host: %HOSTIP:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

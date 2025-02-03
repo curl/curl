@@ -6,7 +6,7 @@ HTTP GET
 HTTP CONNECT
 HTTP proxy
 proxytunnel
-CURLOPT_CONNECT_TO
+FETCHOPT_CONNECT_TO
 SOCKS5
 </keywords>
 </info>
@@ -65,14 +65,14 @@ http://www.example.com.%TESTNUMBER/%TESTNUMBER --connect-to ::connect.example.co
 <proxy>
 CONNECT connect.example.com.%TESTNUMBER:%HTTPPORT HTTP/1.1
 Host: connect.example.com.%TESTNUMBER:%HTTPPORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
 <protocol>
 GET /%TESTNUMBER HTTP/1.1
 Host: www.example.com.%TESTNUMBER
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 
 </protocol>

@@ -62,13 +62,13 @@ http://åäö.se/%TESTNUMBER -x %HOSTIP:%HTTPPORT -w "%{num_connects}\n%{num_red
 <protocol>
 GET http://xn--4cab6c.se/%TESTNUMBER HTTP/1.1
 Host: xn--4cab6c.se
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 
 GET http://xn--4cab6c.se/%TESTNUMBER0001 HTTP/1.1
 Host: xn--4cab6c.se
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Accept: */*
 Proxy-Connection: Keep-Alive
 

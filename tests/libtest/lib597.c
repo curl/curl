@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -37,33 +37,33 @@
  *
  * The test case originated for verifying CONNECT_ONLY option shall not
  * block after protocol connect is done, but it returns the message
- * with function curl_multi_info_read().
+ * with function fetch_multi_info_read().
  */
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *easy = NULL;
-  CURLM *multi = NULL;
-  CURLcode res = CURLE_OK;
+  FETCH *easy = NULL;
+  FETCHM *multi = NULL;
+  FETCHcode res = FETCHE_OK;
   int running;
   int msgs_left;
-  CURLMsg *msg;
+  FETCHMsg *msg;
 
   start_test_timing();
 
-  global_init(CURL_GLOBAL_ALL);
+  global_init(FETCH_GLOBAL_ALL);
 
   easy_init(easy);
 
   multi_init(multi);
 
   /* go verbose */
-  easy_setopt(easy, CURLOPT_VERBOSE, 1L);
+  easy_setopt(easy, FETCHOPT_VERBOSE, 1L);
 
   /* specify target */
-  easy_setopt(easy, CURLOPT_URL, URL);
+  easy_setopt(easy, FETCHOPT_URL, URL);
 
-  easy_setopt(easy, CURLOPT_CONNECT_ONLY, 1L);
+  easy_setopt(easy, FETCHOPT_CONNECT_ONLY, 1L);
 
   multi_add_handle(multi, easy);
 
@@ -115,7 +115,7 @@ CURLcode test(char *URL)
     abort_on_test_timeout();
   }
 
-  msg = curl_multi_info_read(multi, &msgs_left);
+  msg = fetch_multi_info_read(multi, &msgs_left);
   if(msg)
     res = msg->data.result;
 
@@ -125,9 +125,9 @@ test_cleanup:
 
   /* undocumented cleanup sequence - type UA */
 
-  curl_multi_cleanup(multi);
-  curl_easy_cleanup(easy);
-  curl_global_cleanup();
+  fetch_multi_cleanup(multi);
+  fetch_easy_cleanup(easy);
+  fetch_global_cleanup();
 
   return res;
 }

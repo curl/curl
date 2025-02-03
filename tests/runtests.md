@@ -1,6 +1,6 @@
 ---
 c: Copyright (C) Daniel Stenberg, <daniel.se>, et al.
-SPDX-License-Identifier: curl
+SPDX-License-Identifier: fetch
 Title: runtests.pl
 Section: 1
 Source: runtests
@@ -19,8 +19,8 @@ runtests.pl - run one or more test cases
 
 # DESCRIPTION
 
-*runtests.pl* runs one, several or all the existing test cases in curl's
-test suite. It is often called from the root Makefile of the curl package with
+*runtests.pl* runs one, several or all the existing test cases in fetch's
+test suite. It is often called from the root Makefile of the fetch package with
 'make test'.
 
 # TESTS
@@ -57,7 +57,7 @@ like this:
     --pd---e-v- OK (45  out of 1427, remaining: 16:08, took 6.188s, duration: 00:31)
 
 the first line contains the test number and a description. On the second line,
-the characters at the beginning are flags indicating which aspects of curl's
+the characters at the beginning are flags indicating which aspects of fetch's
 behavior were checked by the test:
 
     s stdout
@@ -83,9 +83,9 @@ test run.
 Continue running the rest of the test cases even if one test fails. By
 default, the test script stops as soon as an error is detected.
 
-## `-ac \<curl\>`
+## `-ac \<fetch\>`
 
-Provide a path to a curl binary to talk to APIs (currently only CI test APIs).
+Provide a path to a fetch binary to talk to APIs (currently only CI test APIs).
 
 ## `-am`
 
@@ -96,10 +96,10 @@ Display test results in automake style output (`PASS/FAIL: [number] [name]`).
 Run tests via bundled test binaries. Bundled test binaries contain all tests,
 and the test name passed as the first argument selects which test run.
 
-## `-c\<curl\>`
+## `-c\<fetch\>`
 
-Provide a path to a custom curl binary to run the tests with. Default is the
-curl executable in the build tree.
+Provide a path to a custom fetch binary to run the tests with. Default is the
+fetch executable in the build tree.
 
 ## `-d`
 
@@ -120,8 +120,8 @@ the reason why matching tests should be skipped. The exclusion types are
 
 ## `-e` or `--test-event`
 
-Run the test event-based (if possible). This makes runtests invoke curl with
---test-event option. This option only works if both curl and libcurl were
+Run the test event-based (if possible). This makes runtests invoke fetch with
+--test-event option. This option only works if both fetch and libfetch were
 built debug-enabled.
 
 ## `-f`
@@ -131,14 +131,14 @@ Force the test to run even if mentioned in DISABLED.
 ## `-g`
 
 Run the given test(s) with gdb. This is best used on a single test case and
-curl built --disable-shared. This then fires up gdb with command line set to
+fetch built --disable-shared. This then fires up gdb with command line set to
 run the specified test case. Simply (set a break-point and) type 'run' to
 start.
 
 ## `-gl`
 
 Run the given test(s) with lldb. This is best used on a single test case and
-curl built --disable-shared. This then fires up lldb with command line set to
+fetch built --disable-shared. This then fires up lldb with command line set to
 run the specified test case. Simply (set a break-point and) type 'run' to
 start.
 
@@ -169,7 +169,7 @@ detected. Useful for debugging.
 
 Load and execute the specified file which should contain perl code. This
 option allows one to change *runtests.pl* behavior by overwriting functions
-and variables and is useful when testing external proxies using curl's
+and variables and is useful when testing external proxies using fetch's
 regression test suite.
 
 ## `-l`
@@ -195,7 +195,7 @@ see which variables are available.
 
 Use the specified HTTP proxy when executing tests, even if the tests
 themselves do not specify a proxy. This option allows one to test external
-proxies using curl's regression test suite.
+proxies using fetch's regression test suite.
 
 ## `-p`
 
@@ -241,7 +241,7 @@ Shorter output. Speaks less than default.
 
 When using *--shallow* or *-R* that randomize certain aspects of the behavior,
 this option can set the initial seed. If not set, the random seed is set based
-on the currently set local year and month and the first line of the "curl -V"
+on the currently set local year and month and the first line of the "fetch -V"
 output.
 
 ## `--shallow=[num]`
@@ -265,13 +265,13 @@ with *-g*.
 
 ## `--test-duphandle`
 
-Passes the `--test-duphandle` option to curl when invoked. This command line
-option only exists in debug builds and runs curl normally, but duplicates the
+Passes the `--test-duphandle` option to fetch when invoked. This command line
+option only exists in debug builds and runs fetch normally, but duplicates the
 easy handle before the transfer and use the duplicate instead of the original
 handle. This verifies that the duplicate works exactly as good as the original
 handle.
 
-Because of how the curl tool uses a share object to store and keep some data,
+Because of how the fetch tool uses a share object to store and keep some data,
 not everything is however perfectly copied in the duplicate. In particular
 HSTS data is not. A specific test case can be set to avoid using
 `--test-duphandle` by disabling it on a per test basis.
@@ -286,17 +286,17 @@ Enable verbose output. Speaks more than by default. If used in conjunction
 with parallel testing, it is difficult to associate the logs with the specific
 test being run.
 
-## `-vc \<curl\>`
+## `-vc \<fetch\>`
 
-Provide a path to a custom curl binary to run when verifying that the servers
-running are indeed our test servers. Default is the curl executable in the
+Provide a path to a custom fetch binary to run when verifying that the servers
+running are indeed our test servers. Default is the fetch executable in the
 build tree.
 
 # RUNNING TESTS
 
 Many tests have conditions that must be met before the test case can run fine.
-They could depend on built-in features in libcurl or features present in the
-operating system or even in third-party libraries that curl may or may not
+They could depend on built-in features in libfetch or features present in the
+operating system or even in third-party libraries that fetch may or may not
 use.
 
 The test script checks most of these by itself to determine when it is safe to

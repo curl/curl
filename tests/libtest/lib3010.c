@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,50 +18,50 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
 
 #include "memdebug.h"
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURLcode ret = CURLE_OK;
-  CURL *curl = NULL;
-  curl_off_t retry_after;
+  FETCHcode ret = FETCHE_OK;
+  FETCH *fetch = NULL;
+  fetch_off_t retry_after;
   char *follow_url = NULL;
 
-  curl_global_init(CURL_GLOBAL_ALL);
-  curl = curl_easy_init();
+  fetch_global_init(FETCH_GLOBAL_ALL);
+  fetch = fetch_easy_init();
 
-  if(curl) {
-    curl_easy_setopt(curl, CURLOPT_URL, URL);
-    ret = curl_easy_perform(curl);
+  if(fetch) {
+    fetch_easy_setopt(fetch, FETCHOPT_URL, URL);
+    ret = fetch_easy_perform(fetch);
     if(ret) {
-      fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-          __FILE__, __LINE__, ret, curl_easy_strerror(ret));
+      fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
+          __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
       goto test_cleanup;
     }
-    curl_easy_getinfo(curl, CURLINFO_REDIRECT_URL, &follow_url);
-    curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
-    printf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
-    curl_easy_setopt(curl, CURLOPT_URL, follow_url);
-    ret = curl_easy_perform(curl);
+    fetch_easy_getinfo(fetch, FETCHINFO_REDIRECT_URL, &follow_url);
+    fetch_easy_getinfo(fetch, FETCHINFO_RETRY_AFTER, &retry_after);
+    printf("Retry-After %" FETCH_FORMAT_FETCH_OFF_T "\n", retry_after);
+    fetch_easy_setopt(fetch, FETCHOPT_URL, follow_url);
+    ret = fetch_easy_perform(fetch);
     if(ret) {
-      fprintf(stderr, "%s:%d curl_easy_perform() failed with code %d (%s)\n",
-          __FILE__, __LINE__, ret, curl_easy_strerror(ret));
+      fprintf(stderr, "%s:%d fetch_easy_perform() failed with code %d (%s)\n",
+          __FILE__, __LINE__, ret, fetch_easy_strerror(ret));
       goto test_cleanup;
     }
 
-    curl_easy_reset(curl);
-    curl_easy_getinfo(curl, CURLINFO_RETRY_AFTER, &retry_after);
-    printf("Retry-After %" CURL_FORMAT_CURL_OFF_T "\n", retry_after);
+    fetch_easy_reset(fetch);
+    fetch_easy_getinfo(fetch, FETCHINFO_RETRY_AFTER, &retry_after);
+    printf("Retry-After %" FETCH_FORMAT_FETCH_OFF_T "\n", retry_after);
   }
 
 test_cleanup:
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return ret;
 }

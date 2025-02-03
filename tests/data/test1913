@@ -2,7 +2,7 @@
 <info>
 <keywords>
 FTP
-CURLOPT_NOBODY
+FETCHOPT_NOBODY
 </keywords>
 </info>
 

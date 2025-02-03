@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,7 +18,7 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 #include "test.h"
@@ -29,7 +29,7 @@
  * Verify correct order of certificates in the chain by comparing the
  * subject and issuer attributes of each certificate.
  */
-static bool is_chain_in_order(struct curl_certinfo *cert_info)
+static bool is_chain_in_order(struct fetch_certinfo *cert_info)
 {
   char *last_issuer = NULL;
   int cert;
@@ -40,7 +40,7 @@ static bool is_chain_in_order(struct curl_certinfo *cert_info)
 
   /* Enumerate each certificate in the chain */
   for(cert = 0; cert < cert_info->num_of_certs; cert++) {
-    struct curl_slist *slist = cert_info->certinfo[cert];
+    struct fetch_slist *slist = cert_info->certinfo[cert];
     char *issuer = NULL;
     char *subject = NULL;
 
@@ -88,42 +88,42 @@ static size_t wrfu(void *ptr,  size_t  size,  size_t  nmemb,  void *stream)
   return size * nmemb;
 }
 
-CURLcode test(char *URL)
+FETCHcode test(char *URL)
 {
-  CURL *curl;
-  CURLcode res = CURLE_OK;
+  FETCH *fetch;
+  FETCHcode res = FETCHE_OK;
 
-  if(curl_global_init(CURL_GLOBAL_ALL) != CURLE_OK) {
-    fprintf(stderr, "curl_global_init() failed\n");
+  if(fetch_global_init(FETCH_GLOBAL_ALL) != FETCHE_OK) {
+    fprintf(stderr, "fetch_global_init() failed\n");
     return TEST_ERR_MAJOR_BAD;
   }
 
-  curl = curl_easy_init();
-  if(!curl) {
-    fprintf(stderr, "curl_easy_init() failed\n");
-    curl_global_cleanup();
+  fetch = fetch_easy_init();
+  if(!fetch) {
+    fprintf(stderr, "fetch_easy_init() failed\n");
+    fetch_global_cleanup();
     return TEST_ERR_MAJOR_BAD;
   }
 
   /* Set the HTTPS url to retrieve. */
-  test_setopt(curl, CURLOPT_URL, URL);
+  test_setopt(fetch, FETCHOPT_URL, URL);
 
   /* Capture certificate information */
-  test_setopt(curl, CURLOPT_CERTINFO, 1L);
+  test_setopt(fetch, FETCHOPT_CERTINFO, 1L);
 
   /* Ignore output */
-  test_setopt(curl, CURLOPT_WRITEFUNCTION, wrfu);
+  test_setopt(fetch, FETCHOPT_WRITEFUNCTION, wrfu);
 
   /* No peer verify */
-  test_setopt(curl, CURLOPT_SSL_VERIFYPEER, 0L);
-  test_setopt(curl, CURLOPT_SSL_VERIFYHOST, 0L);
+  test_setopt(fetch, FETCHOPT_SSL_VERIFYPEER, 0L);
+  test_setopt(fetch, FETCHOPT_SSL_VERIFYHOST, 0L);
 
   /* Perform the request, res will get the return code */
-  res = curl_easy_perform(curl);
-  if(!res || res == CURLE_GOT_NOTHING) {
-    struct curl_certinfo *cert_info = NULL;
+  res = fetch_easy_perform(fetch);
+  if(!res || res == FETCHE_GOT_NOTHING) {
+    struct fetch_certinfo *cert_info = NULL;
     /* Get the certificate information */
-    res = curl_easy_getinfo(curl, CURLINFO_CERTINFO, &cert_info);
+    res = fetch_easy_getinfo(fetch, FETCHINFO_CERTINFO, &cert_info);
     if(!res) {
       /* Check to see if the certificate chain is ordered correctly */
       if(!is_chain_in_order(cert_info))
@@ -134,8 +134,8 @@ CURLcode test(char *URL)
 test_cleanup:
 
   /* always cleanup */
-  curl_easy_cleanup(curl);
-  curl_global_cleanup();
+  fetch_easy_cleanup(fetch);
+  fetch_global_cleanup();
 
   return res;
 }

@@ -13,7 +13,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -22,7 +22,7 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 #
@@ -36,7 +36,7 @@ import time
 from typing import List, Union, Optional
 import copy
 
-from .curl import CurlClient, ExecResult
+from .fetch import CurlClient, ExecResult
 from .env import Env
 
 
@@ -61,7 +61,7 @@ class Httpd:
         '/usr/libexec/apache2/',     # macos
     ]
 
-    MOD_CURLTEST = None
+    MOD_FETCHTEST = None
 
     def __init__(self, env: Env, proxy_auth: bool = False):
         self.env = env
@@ -93,7 +93,7 @@ class Httpd:
             raise Exception(f'apache modules dir does not exist: {self._mods_dir}')
         self._process = None
         self._rmf(self._error_log)
-        self._init_curltest()
+        self._init_fetchtest()
 
     @property
     def docs_dir(self):
@@ -182,10 +182,10 @@ class Httpd:
         return self.reload()
 
     def wait_dead(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir)
+        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir)
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
+            r = fetch.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
             if r.exit_code != 0:
                 return True
             time.sleep(.1)
@@ -193,11 +193,11 @@ class Httpd:
         return False
 
     def wait_live(self, timeout: timedelta):
-        curl = CurlClient(env=self.env, run_dir=self._tmp_dir,
+        fetch = CurlClient(env=self.env, run_dir=self._tmp_dir,
                           timeout=timeout.total_seconds())
         try_until = datetime.now() + timeout
         while datetime.now() < try_until:
-            r = curl.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
+            r = fetch.http_get(url=f'http://{self.env.domain1}:{self.env.http_port}/')
             if r.exit_code == 0:
                 return True
             time.sleep(.1)
@@ -253,8 +253,8 @@ class Httpd:
             for m in self.MODULES:
                 if os.path.exists(os.path.join(self._mods_dir, f'mod_{m}.so')):
                     fd.write(f'LoadModule {m}_module   "{self._mods_dir}/mod_{m}.so"\n')
-            if Httpd.MOD_CURLTEST is not None:
-                fd.write(f'LoadModule curltest_module   "{Httpd.MOD_CURLTEST}"\n')
+            if Httpd.MOD_FETCHTEST is not None:
+                fd.write(f'LoadModule fetchtest_module   "{Httpd.MOD_FETCHTEST}"\n')
             conf = [   # base server config
                 f'ServerRoot "{self._apache_dir}"',
                 'DefaultRuntimeDir logs',
@@ -282,7 +282,7 @@ class Httpd:
                 '    Protocols h2c http/1.1',
                 '    H2Direct on',
             ])
-            conf.extend(self._curltest_conf(domain1))
+            conf.extend(self._fetchtest_conf(domain1))
             conf.extend([
                 '</VirtualHost>',
                 '',
@@ -297,7 +297,7 @@ class Httpd:
                 f'    SSLCertificateKeyFile {creds1.pkey_file}',
                 f'    DocumentRoot "{self._docs_dir}"',
             ])
-            conf.extend(self._curltest_conf(domain1))
+            conf.extend(self._fetchtest_conf(domain1))
             if domain1 in self._extra_configs:
                 conf.extend(self._extra_configs[domain1])
             conf.extend([
@@ -315,7 +315,7 @@ class Httpd:
                 f'    DocumentRoot "{self._docs_dir}"',
                 '    SetOutputFilter BROTLI_COMPRESS',
             ])
-            conf.extend(self._curltest_conf(domain1))
+            conf.extend(self._fetchtest_conf(domain1))
             if domain1 in self._extra_configs:
                 conf.extend(self._extra_configs[domain1])
             conf.extend([
@@ -329,7 +329,7 @@ class Httpd:
                 f'    DocumentRoot "{self._docs_dir}"',
                 '    Protocols h2c http/1.1',
             ])
-            conf.extend(self._curltest_conf(domain2))
+            conf.extend(self._fetchtest_conf(domain2))
             conf.extend([
                 '</VirtualHost>',
                 '',
@@ -343,7 +343,7 @@ class Httpd:
                 f'    SSLCertificateKeyFile {creds2.pkey_file}',
                 f'    DocumentRoot "{self._docs_dir}/two"',
             ])
-            conf.extend(self._curltest_conf(domain2))
+            conf.extend(self._fetchtest_conf(domain2))
             if domain2 in self._extra_configs:
                 conf.extend(self._extra_configs[domain2])
             conf.extend([
@@ -359,7 +359,7 @@ class Httpd:
                 f'    SSLCertificateKeyFile {exp_creds.pkey_file}',
                 f'    DocumentRoot "{self._docs_dir}/expired"',
             ])
-            conf.extend(self._curltest_conf(exp_domain))
+            conf.extend(self._fetchtest_conf(exp_domain))
             if exp_domain in self._extra_configs:
                 conf.extend(self._extra_configs[exp_domain])
             conf.extend([
@@ -433,34 +433,34 @@ class Httpd:
             return 'debug'
         return 'info'
 
-    def _curltest_conf(self, servername) -> List[str]:
+    def _fetchtest_conf(self, servername) -> List[str]:
         lines = []
-        if Httpd.MOD_CURLTEST is not None:
+        if Httpd.MOD_FETCHTEST is not None:
             lines.extend([
                 '    Redirect 302 /data.json.302 /data.json',
-                '    Redirect 301 /curltest/echo301 /curltest/echo',
-                '    Redirect 302 /curltest/echo302 /curltest/echo',
-                '    Redirect 303 /curltest/echo303 /curltest/echo',
-                '    Redirect 307 /curltest/echo307 /curltest/echo',
-                '    <Location /curltest/sslinfo>',
+                '    Redirect 301 /fetchtest/echo301 /fetchtest/echo',
+                '    Redirect 302 /fetchtest/echo302 /fetchtest/echo',
+                '    Redirect 303 /fetchtest/echo303 /fetchtest/echo',
+                '    Redirect 307 /fetchtest/echo307 /fetchtest/echo',
+                '    <Location /fetchtest/sslinfo>',
                 '      SSLOptions StdEnvVars',
-                '      SetHandler curltest-sslinfo',
+                '      SetHandler fetchtest-sslinfo',
                 '    </Location>',
-                '    <Location /curltest/echo>',
-                '      SetHandler curltest-echo',
+                '    <Location /fetchtest/echo>',
+                '      SetHandler fetchtest-echo',
                 '    </Location>',
-                '    <Location /curltest/put>',
-                '      SetHandler curltest-put',
+                '    <Location /fetchtest/put>',
+                '      SetHandler fetchtest-put',
                 '    </Location>',
-                '    <Location /curltest/tweak>',
-                '      SetHandler curltest-tweak',
+                '    <Location /fetchtest/tweak>',
+                '      SetHandler fetchtest-tweak',
                 '    </Location>',
-                '    Redirect 302 /tweak /curltest/tweak',
-                '    <Location /curltest/1_1>',
-                '      SetHandler curltest-1_1-required',
+                '    Redirect 302 /tweak /fetchtest/tweak',
+                '    <Location /fetchtest/1_1>',
+                '      SetHandler fetchtest-1_1-required',
                 '    </Location>',
-                '    <Location /curltest/shutdown_unclean>',
-                '      SetHandler curltest-tweak',
+                '    <Location /fetchtest/shutdown_unclean>',
+                '      SetHandler fetchtest-tweak',
                 '      SetEnv force-response-1.0 1',
                 '    </Location>',
                 '    SetEnvIf Request_URI "/shutdown_unclean" ssl-unclean=1',
@@ -479,16 +479,16 @@ class Httpd:
             ])
         return lines
 
-    def _init_curltest(self):
-        if Httpd.MOD_CURLTEST is not None:
+    def _init_fetchtest(self):
+        if Httpd.MOD_FETCHTEST is not None:
             return
         local_dir = os.path.dirname(inspect.getfile(Httpd))
-        p = subprocess.run([self.env.apxs, '-c', 'mod_curltest.c'],
+        p = subprocess.run([self.env.apxs, '-c', 'mod_fetchtest.c'],
                            capture_output=True,
-                           cwd=os.path.join(local_dir, 'mod_curltest'))
+                           cwd=os.path.join(local_dir, 'mod_fetchtest'))
         rv = p.returncode
         if rv != 0:
-            log.error(f"compiling mod_curltest failed: {p.stderr}")
-            raise Exception(f"compiling mod_curltest failed: {p.stderr}")
-        Httpd.MOD_CURLTEST = os.path.join(
-            local_dir, 'mod_curltest/.libs/mod_curltest.so')
+            log.error(f"compiling mod_fetchtest failed: {p.stderr}")
+            raise Exception(f"compiling mod_fetchtest failed: {p.stderr}")
+        Httpd.MOD_FETCHTEST = os.path.join(
+            local_dir, 'mod_fetchtest/.libs/mod_fetchtest.so')

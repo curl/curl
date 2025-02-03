@@ -9,7 +9,7 @@
  *
  * This software is licensed as described in the file COPYING, which
  * you should have received as part of this distribution. The terms
- * are also available at https://curl.se/docs/copyright.html.
+ * are also available at https://fetch.se/docs/copyright.html.
  *
  * You may opt to use, copy, modify, merge, publish, distribute and/or sell
  * copies of the Software, and permit persons to whom the Software is
@@ -18,84 +18,84 @@
  * This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
  * KIND, either express or implied.
  *
- * SPDX-License-Identifier: curl
+ * SPDX-License-Identifier: fetch
  *
  ***************************************************************************/
 
 /*
  * The purpose of this tool is to figure out which, if any, features that are
  * disabled which should otherwise exist and work. These aren't visible in
- * regular curl -V output.
+ * regular fetch -V output.
  *
- * Disabled protocols are visible in curl_version_info() and are not included
+ * Disabled protocols are visible in fetch_version_info() and are not included
  * in this table.
  */
 
-#include "curl_setup.h"
+#include "fetch_setup.h"
 #include "multihandle.h" /* for ENABLE_WAKEUP */
 #include "tool_xattr.h" /* for USE_XATTR */
-#include "curl_sha512_256.h" /* for CURL_HAVE_SHA512_256 */
+#include "fetch_sha512_256.h" /* for FETCH_HAVE_SHA512_256 */
 #include <stdio.h>
 
 static const char *disabled[]={
-#ifdef CURL_DISABLE_BINDLOCAL
+#ifdef FETCH_DISABLE_BINDLOCAL
   "bindlocal",
 #endif
-#ifdef CURL_DISABLE_COOKIES
+#ifdef FETCH_DISABLE_COOKIES
   "cookies",
 #endif
-#ifdef CURL_DISABLE_BASIC_AUTH
+#ifdef FETCH_DISABLE_BASIC_AUTH
   "basic-auth",
 #endif
-#ifdef CURL_DISABLE_BEARER_AUTH
+#ifdef FETCH_DISABLE_BEARER_AUTH
   "bearer-auth",
 #endif
-#ifdef CURL_DISABLE_DIGEST_AUTH
+#ifdef FETCH_DISABLE_DIGEST_AUTH
   "digest-auth",
 #endif
-#ifdef CURL_DISABLE_NEGOTIATE_AUTH
+#ifdef FETCH_DISABLE_NEGOTIATE_AUTH
   "negotiate-auth",
 #endif
-#ifdef CURL_DISABLE_AWS
+#ifdef FETCH_DISABLE_AWS
   "aws",
 #endif
-#ifdef CURL_DISABLE_DOH
+#ifdef FETCH_DISABLE_DOH
   "DoH",
 #endif
-#ifdef CURL_DISABLE_HTTP_AUTH
+#ifdef FETCH_DISABLE_HTTP_AUTH
   "HTTP-auth",
 #endif
-#ifdef CURL_DISABLE_MIME
+#ifdef FETCH_DISABLE_MIME
   "Mime",
 #endif
-#ifdef CURL_DISABLE_NETRC
+#ifdef FETCH_DISABLE_NETRC
   "netrc",
 #endif
-#ifdef CURL_DISABLE_PARSEDATE
+#ifdef FETCH_DISABLE_PARSEDATE
   "parsedate",
 #endif
-#ifdef CURL_DISABLE_PROXY
+#ifdef FETCH_DISABLE_PROXY
   "proxy",
 #endif
-#ifdef CURL_DISABLE_SHUFFLE_DNS
+#ifdef FETCH_DISABLE_SHUFFLE_DNS
   "shuffle-dns",
 #endif
-#ifdef CURL_DISABLE_TYPECHECK
+#ifdef FETCH_DISABLE_TYPECHECK
   "typecheck",
 #endif
-#ifdef CURL_DISABLE_VERBOSE_STRINGS
+#ifdef FETCH_DISABLE_VERBOSE_STRINGS
   "verbose-strings",
 #endif
 #ifndef ENABLE_WAKEUP
   "wakeup",
 #endif
-#ifdef CURL_DISABLE_HEADERS_API
+#ifdef FETCH_DISABLE_HEADERS_API
   "headers-api",
 #endif
 #ifndef USE_XATTR
   "xattr",
 #endif
-#ifdef CURL_DISABLE_FORM_API
+#ifdef FETCH_DISABLE_FORM_API
   "form-api",
 #endif
 #if (SIZEOF_TIME_T < 5)
@@ -104,15 +104,15 @@ static const char *disabled[]={
 #if (SIZEOF_SIZE_T < 5)
   "large-size",
 #endif
-#ifndef CURL_HAVE_SHA512_256
+#ifndef FETCH_HAVE_SHA512_256
   "sha512-256",
 #endif
 #ifdef _WIN32
-#if defined(CURL_WINDOWS_UWP) || \
-  defined(CURL_DISABLE_CA_SEARCH) || defined(CURL_CA_SEARCH_SAFE)
+#if defined(FETCH_WINDOWS_UWP) || \
+  defined(FETCH_DISABLE_CA_SEARCH) || defined(FETCH_CA_SEARCH_SAFE)
   "win32-ca-searchpath",
 #endif
-#ifndef CURL_CA_SEARCH_SAFE
+#ifndef FETCH_CA_SEARCH_SAFE
   "win32-ca-search-safe",
 #endif
 #endif

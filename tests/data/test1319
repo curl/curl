@@ -73,7 +73,7 @@ QUIT
 <proxy>
 CONNECT pop.%TESTNUMBER:%POP3PORT HTTP/1.1
 Host: pop.%TESTNUMBER:%POP3PORT
-User-Agent: curl/%VERSION
+User-Agent: fetch/%VERSION
 Proxy-Connection: Keep-Alive
 
 </proxy>
