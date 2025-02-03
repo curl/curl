@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,13 +20,13 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 # File containing various utilities
 
 # Return number of arguments that evaluate to true
-function(curl_count_true _output_count_var)
+function(fetch_count_true _output_count_var)
   set(_list_len 0)
   foreach(_option_var IN LISTS ARGN)
     if(${_option_var})
@@ -37,7 +37,7 @@ function(curl_count_true _output_count_var)
 endfunction()
 
 # Dump all defined variables with their values
-function(curl_dumpvars)
+function(fetch_dumpvars)
   message("::group::CMake Variable Dump")
   get_cmake_property(_vars VARIABLES)
   foreach(_var IN ITEMS ${_vars})

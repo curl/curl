@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,14 +20,14 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 include(CheckCCompilerFlag)
 
 set(_picky "")
 
-if(CURL_WERROR AND
+if(FETCH_WERROR AND
    ((CMAKE_COMPILER_IS_GNUCC AND
      NOT DOS AND  # Watt-32 headers use the '#include_next' GCC extension
      NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 5.0 AND

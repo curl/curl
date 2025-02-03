@@ -11,7 +11,7 @@
 #
 # This software is licensed as described in the file COPYING, which
 # you should have received as part of this distribution. The terms
-# are also available at https://curl.se/docs/copyright.html.
+# are also available at https://fetch.se/docs/copyright.html.
 #
 # You may opt to use, copy, modify, merge, publish, distribute and/or sell
 # copies of the Software, and permit persons to whom the Software is
@@ -20,14 +20,14 @@
 # This software is distributed on an "AS IS" basis, WITHOUT WARRANTY OF ANY
 # KIND, either express or implied.
 #
-# SPDX-License-Identifier: curl
+# SPDX-License-Identifier: fetch
 #
 ###########################################################################
 include(CheckCSourceCompiles)
 include(CheckCSourceRuns)
 include(CheckTypeSize)
 
-macro(curl_add_header_include _check _header)
+macro(fetch_add_header_include _check _header)
   if(${_check})
     set(_source_epilogue "${_source_epilogue}
       #include <${_header}>")
@@ -53,8 +53,8 @@ endif()
 
 if(NOT WIN32)
   set(_source_epilogue "#undef inline")
-  curl_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
-  curl_add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
+  fetch_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
+  fetch_add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
@@ -65,7 +65,7 @@ if(NOT WIN32)
 endif()
 
 set(_source_epilogue "#undef inline")
-curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
+fetch_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
 check_c_source_compiles("${_source_epilogue}
   #include <time.h>
   int main(void)
@@ -100,9 +100,9 @@ endif()
 
 if(NOT DEFINED HAVE_GETADDRINFO_THREADSAFE)
   set(_source_epilogue "#undef inline")
-  curl_add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
-  curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
-  curl_add_header_include(HAVE_NETDB_H "netdb.h")
+  fetch_add_header_include(HAVE_SYS_SOCKET_H "sys/socket.h")
+  fetch_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
+  fetch_add_header_include(HAVE_NETDB_H "netdb.h")
   check_c_source_compiles("${_source_epilogue}
     int main(void)
     {
@@ -143,8 +143,8 @@ endif()
 
 if(NOT WIN32 AND NOT DEFINED HAVE_CLOCK_GETTIME_MONOTONIC_RAW)
   set(_source_epilogue "#undef inline")
-  curl_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
-  curl_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
+  fetch_add_header_include(HAVE_SYS_TYPES_H "sys/types.h")
+  fetch_add_header_include(HAVE_SYS_TIME_H "sys/time.h")
   check_c_source_compiles("${_source_epilogue}
     #include <time.h>
     int main(void)
